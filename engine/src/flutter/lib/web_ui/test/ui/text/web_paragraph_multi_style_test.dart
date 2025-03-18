@@ -1,14 +1,14 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../../../lib/src/engine/web_paragraph/layout.dart';
-import '../../../lib/src/engine/web_paragraph/paragraph.dart';
 import '../../canvaskit/common.dart';
 import '../../common/test_initialization.dart';
 import '../utils.dart';
@@ -40,6 +40,6 @@ Future<void> testMain() async {
     expect(paragraph.text, 'Arial, 30px;Roboto, 40px;Arial, 50px;');
     expect(paragraph.styledTextRanges.length, 3);
 
-    paragraph.layout(ui.ParagraphConstraints(width: double.infinity));
+    paragraph.layout(const ui.ParagraphConstraints(width: double.infinity));
   });
 }

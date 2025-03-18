@@ -7,8 +7,8 @@ import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
-import '../dom.dart';
 import '../canvaskit/canvaskit_api.dart';
+import '../dom.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'paragraph.dart';
@@ -42,31 +42,31 @@ class TextLayout {
   }
 
   void performLayout(double width) {
-    this.lines.clear();
-    this.runs.clear();
-    this.codeUnitFlags.clear();
+    lines.clear();
+    runs.clear();
+    codeUnitFlags.clear();
 
-    this.extractClusterTexts();
+    extractClusterTexts();
 
-    this.extractRuns();
+    extractRuns();
 
-    this.printClusters();
+    printClusters();
 
-    this.extractUnicodeInfo();
+    extractUnicodeInfo();
 
-    this.wrapText(paragraph.text, width);
+    wrapText(paragraph.text!, width);
 
-    this.reorderVisuals();
+    reorderVisuals();
   }
 
   void extractUnicodeInfo() {
-    // TODO: Switch to SkUnicode.CodePointFlags API in CanvasKit
+    // TODO(jlavrova): Switch to SkUnicode.CodePointFlags API in CanvasKit
     // Fill out the entire flag list
-    for (int i = 0; i <= paragraph.text.length; ++i) {
+    for (int i = 0; i <= paragraph.text!.length; ++i) {
       codeUnitFlags.add(CodeUnitFlags(CodeUnitFlags.kNoCodeUnitFlag));
     }
     // Get the information from the browser
-    final engine.SegmentationResult result = engine.segmentText(paragraph.text);
+    final engine.SegmentationResult result = engine.segmentText(paragraph.text!);
 
     // Fill out grapheme flags
     for (final grapheme in result.graphemes) {
@@ -86,20 +86,20 @@ class TextLayout {
       }
     }
     // Add whitespaces
-    for (int i = 0; i < paragraph.text.length; ++i) {
-      codeUnitFlags[i].whitespace = UnicodeProperties.isWhitespace(paragraph.text.codeUnitAt(i));
+    for (int i = 0; i < paragraph.text!.length; ++i) {
+      codeUnitFlags[i].whitespace = UnicodeProperties.isWhitespace(paragraph.text!.codeUnitAt(i));
     }
   }
 
   void extractClusterTexts() {
     // Get all the cluster text information in one call
-    textMetrics = textContext.measureText(paragraph.text);
+    textMetrics = textContext.measureText(paragraph.text!);
     for (final WebTextCluster cluster in textMetrics!.getTextClusters()) {
       final List<DomRectReadOnly> rects = textMetrics!.getSelectionRects(
         cluster.begin,
         cluster.end,
       );
-      this.textClusters.add(ExtendedTextCluster(cluster, rects.first));
+      textClusters.add(ExtendedTextCluster(cluster, rects.first));
     }
     //textContext.font = '50px arial';
     //this.textMetrics = textContext.measureText(paragraph.text) as DomTextMetrics;
@@ -107,37 +107,45 @@ class TextLayout {
   }
 
   void extractRuns() {
-    // TODO: Implement bidi (via SkUnicode.Bidi API in CanvasKit)
-    final Int32List regions = canvasKit.Bidi.getBidiRegions(paragraph.text, paragraph.paragraphStyle.textDirection);
+    // TODO(jlavrova): Implement bidi (via SkUnicode.Bidi API in CanvasKit)
+    final Int32List? regions = canvasKit.Bidi.getBidiRegions(
+      paragraph.text!,
+      paragraph.paragraphStyle.textDirection,
+    );
+    String str = 'Bidi:\n';
+    for (final region in regions!) {
+      str += ' $region';
+    }
+    WebParagraphDebug.log(str);
 
-    for (final styledTextRange in this.paragraph.styledTextRanges) {
-      // TODO: Text range is not adjusted to Text Cluster range edges; we need to adjust it later
-      ClusterRange clusterRange = ClusterRange(
+    for (final styledTextRange in paragraph.styledTextRanges) {
+      // TODO(jlavrova): Text range is not adjusted to Text Cluster range edges; we need to adjust it later
+      final ClusterRange clusterRange = ClusterRange(
         start: styledTextRange.textRange.start,
         end: styledTextRange.textRange.end,
       );
-      TextRun run = TextRun(this, clusterRange, styledTextRange.textStyle.toString());
+      final TextRun run = TextRun(this, clusterRange, styledTextRange.textStyle.toString());
       runs.add(run);
     }
   }
 
   void printClusters() {
     if (WebParagraphDebug.logging) {
-      WebParagraphDebug.log('Text Clusters: ${this.textClusters.length}');
-      for (final TextRun run in this.runs) {
-        String runText = this.paragraph.text.substring(
+      WebParagraphDebug.log('Text Clusters: ${textClusters.length}');
+      for (final TextRun run in runs) {
+        final String runText = paragraph.text!.substring(
           run.clusterRange.start,
           run.clusterRange.end,
         );
         WebParagraphDebug.log('');
         WebParagraphDebug.log(
-          'Run[${run.clusterRange.start}:${run.clusterRange.end}): ${run.originalFont.toString()} "${runText}"',
+          'Run[${run.clusterRange.start}:${run.clusterRange.end}): ${run.originalFont} "$runText"',
         );
         for (var i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
-          final ExtendedTextCluster cluster = this.textClusters[i];
-          String clusterText = this.paragraph.text.substring(cluster.start, cluster.end);
+          final ExtendedTextCluster cluster = textClusters[i];
+          final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
           WebParagraphDebug.log(
-            '[${cluster.start}:${cluster.end}) ${cluster.size.width} * ${cluster.size.height} "${clusterText}"',
+            '[${cluster.start}:${cluster.end}) ${cluster.size.width} * ${cluster.size.height} "$clusterText"',
           );
         }
       }
@@ -150,16 +158,17 @@ class TextLayout {
   }
 
   void reorderVisuals() {
-    // TODO: Use bidi API to reorder visual runs for all lines
+    // TODO(jlavrova): Use bidi API to reorder visual runs for all lines
     // (maybe breaking these runs by lines in addition)
   }
 }
 
 class ExtendedTextCluster {
   ExtendedTextCluster(this.cluster, this.size) {
-    start = this.cluster.begin;
-    end = this.cluster.end;
+    start = cluster.begin;
+    end = cluster.end;
   }
+
   WebTextCluster cluster;
   int start = 0;
   int end = 0;

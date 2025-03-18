@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
@@ -10,13 +9,12 @@ import '../dom.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
-import 'paint.dart';
 import 'paragraph.dart';
 
 /// Wraps the text by a given width.
 class TextWrapper {
   TextWrapper(this._text, this._layout) {
-    this.startNewLine(0, 0.0);
+    startNewLine(0, 0.0);
   }
 
   final String _text;
@@ -33,21 +31,21 @@ class TextWrapper {
       0.0; // English: contains all the letters that didn't make the whole word yet
 
   bool isWhitespace(ExtendedTextCluster cluster) {
-    return this._layout.hasFlag(
+    return _layout.hasFlag(
       ui.TextRange(start: cluster.start, end: cluster.end),
       CodeUnitFlags.kPartOfWhiteSpaceBreak,
     );
   }
 
   bool isSoftLineBreak(ExtendedTextCluster cluster) {
-    return this._layout.hasFlag(
+    return _layout.hasFlag(
       ui.TextRange(start: cluster.start, end: cluster.end),
       CodeUnitFlags.kSoftLineBreakBefore,
     );
   }
 
   bool isHardLineBreak(ExtendedTextCluster cluster) {
-    return this._layout.hasFlag(
+    return _layout.hasFlag(
       ui.TextRange(start: cluster.start, end: cluster.end),
       CodeUnitFlags.kHardLineBreakBefore,
     );
@@ -64,11 +62,11 @@ class TextWrapper {
   void breakLines(double width) {
     // "words":[startLine:whitespaces.start) whitespaces:[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
 
-    this.startNewLine(0, 0.0);
+    startNewLine(0, 0.0);
 
     bool hardLineBreak = false;
     for (int index = 0; index < _layout.textClusters.length; index++) {
-      final ExtendedTextCluster cluster = this._layout.textClusters[index];
+      final ExtendedTextCluster cluster = _layout.textClusters[index];
       /*
       final DomRectReadOnly box = this._layout.textMetrics!.getActualBoundingBox(
         cluster.begin,
@@ -92,7 +90,7 @@ class TextWrapper {
           _whitespaces.start = index;
           _whitespaces.end = index;
         }
-        this._layout.lines.add(
+        _layout.lines.add(
           TextLine(
             _layout,
             ClusterRange(start: _startLine, end: _whitespaces.start),
@@ -103,7 +101,7 @@ class TextWrapper {
           ),
         );
         // Start a new line
-        this.startNewLine(index, 0.0);
+        startNewLine(index, 0.0);
       } else if (isSoftLineBreak(cluster) && index != _startLine) {
         // Mark the potential line break and then continue with the current cluster as usual
         if (_whitespaces.start == _startLine) {
@@ -127,7 +125,7 @@ class TextWrapper {
       if (isWhitespace(cluster)) {
         if (_whitespaces.end < index) {
           // Start a new (empty) whitespace sequence
-          _widthText += (_widthWhitespaces + _widthLetters);
+          _widthText += _widthWhitespaces + _widthLetters;
           _widthLetters = 0.0;
           _whitespaces = ClusterRange(start: index, end: index);
           _widthWhitespaces = 0.0;
@@ -171,7 +169,7 @@ class TextWrapper {
         }
 
         // Add the line
-        this._layout.lines.add(
+        _layout.lines.add(
           TextLine(
             _layout,
             ClusterRange(start: _startLine, end: _whitespaces.start),
@@ -183,7 +181,7 @@ class TextWrapper {
         );
 
         // Start a new line but keep the clusters sequence
-        this.startNewLine(_whitespaces.end, _widthLetters);
+        startNewLine(_whitespaces.end, _widthLetters);
       }
 
       // This is just a regular cluster, keep track of it
@@ -202,7 +200,7 @@ class TextWrapper {
       _widthText += _widthLetters;
     }
 
-    this._layout.lines.add(
+    _layout.lines.add(
       TextLine(
         _layout,
         ClusterRange(start: _startLine, end: _whitespaces.start),
@@ -220,18 +218,18 @@ class TextWrapper {
         start: _layout.textClusters.length,
         end: _layout.textClusters.length,
       );
-      this._layout.lines.add(TextLine(_layout, emptyText, 0.0, emptyText, 0.0, false));
+      _layout.lines.add(TextLine(_layout, emptyText, 0.0, emptyText, 0.0, false));
     }
 
     if (WebParagraphDebug.logging) {
-      for (int i = 0; i < this._layout.lines.length; ++i) {
-        final TextLine line = this._layout.lines[i];
+      for (int i = 0; i < _layout.lines.length; ++i) {
+        final TextLine line = _layout.lines[i];
         final String text = _text.substring(line.clusterRange.start, line.clusterRange.end);
         final String whitespaces =
             !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.width}' : 'no';
         final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
         WebParagraphDebug.log(
-          '${i}: "${text}" [${line.clusterRange.start}:${line.clusterRange.end}) ${width} ${hardLineBreak} (${whitespaces} trailing whitespaces)',
+          '$i: "$text" [${line.clusterRange.start}:${line.clusterRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
         );
       }
     }

@@ -36,13 +36,14 @@ class CodeUnitFlags {
   int get value => _value;
   int _value;
 
+  @override
   String toString() {
-    final String whitespaces = this.isWhitespace ? 'whitespace ' : '';
-    final String grapheme = this.isGraphemeStart ? 'grapheme ' : '';
-    final String softBreak = this.isSoftLineBreak ? 'softBreak ' : '';
-    final String hardBreak = this.isHardLineBreak ? 'hardBreak ' : '';
-    final String word = this.isWordBreak ? 'word ' : '';
-    return '${whitespaces}${grapheme}${softBreak}${hardBreak}${word}';
+    final String whitespaces = isWhitespace ? 'whitespace ' : '';
+    final String grapheme = isGraphemeStart ? 'grapheme ' : '';
+    final String softBreak = isSoftLineBreak ? 'softBreak ' : '';
+    final String hardBreak = isHardLineBreak ? 'hardBreak ' : '';
+    final String word = isWordBreak ? 'word ' : '';
+    return '$whitespaces$grapheme$softBreak$hardBreak$word';
   }
 
   static const int kNoCodeUnitFlag = 0 << 0;

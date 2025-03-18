@@ -2755,14 +2755,25 @@ extension SkPictureExtension on SkPicture {
 @staticInterop
 class BidiNamespace {}
 
-extension BidiExtention on BidiNamespace {
+extension BidiNamespaceExtention on BidiNamespace {
   @JS('getBidiRegions')
   external JSInt32Array _getBidiRegions(JSString text, SkTextDirection dir);
+
   Int32List getBidiRegions(String text, ui.TextDirection dir) =>
       _getBidiRegions(text.toJS, toSkTextDirection(dir)).toDart;
 
+  Int32List? getBidiRegions1(String text, ui.TextDirection dir) {
+    if (!js_util.hasProperty(this, 'getBidiRegions')) {
+      return null;
+    }
+    final Object o1 = text.toJS as Object;
+    final Object o2 = toSkTextDirection(dir);
+    return (js_util.callMethod(this, 'getBidiRegions', <Object>[o1, o2]) as JSInt32Array).toDart;
+  }
+
   @JS('reorderVisual')
   external JSInt32Array _reorderVisual(JSUint8Array visuals);
+
   Int32List reorderVisual(Uint8List visuals) => _reorderVisual(visuals.toJS).toDart;
 }
 

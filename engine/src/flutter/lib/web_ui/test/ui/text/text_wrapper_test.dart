@@ -3,15 +3,11 @@
 // found in the LICENSE file.
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/web_paragraph/layout.dart';
+import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
-import 'package:web_engine_tester/golden_tester.dart';
 
-import '../../../lib/src/engine/web_paragraph/layout.dart';
-import '../../../lib/src/engine/web_paragraph/paragraph.dart';
-import '../../canvaskit/common.dart';
 import '../../common/test_initialization.dart';
-import '../utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -29,7 +25,7 @@ Future<void> testMain() async {
         'World   domination   is such   an ugly   phrase - I   prefer to   call it   world   optimisation.   ',
       );
       final WebParagraph paragraph = builder.build();
-      paragraph.layout(ParagraphConstraints(width: 250));
+      paragraph.layout(const ParagraphConstraints(width: 250));
       final List<TextLine> lines = paragraph.lines;
       expect(lines.length, 10);
       for (int i = 0; i < 10; i++) {
@@ -48,7 +44,7 @@ Future<void> testMain() async {
       'World domination is   such an ugly phrase   - I prefer to call it   world optimisation.   ',
     );
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: 500));
+    paragraph.layout(const ParagraphConstraints(width: 500));
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
     for (int i = 0; i < 4; i++) {
@@ -60,7 +56,7 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('     ');
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: double.infinity));
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 1);
     expect(lines[0].whitespacesRange.width(), 5);
@@ -71,7 +67,7 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('abcdefghijklmnopqrstuvwxyz');
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: 250));
+    paragraph.layout(const ParagraphConstraints(width: 250));
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 3);
     int length = 0;
@@ -87,7 +83,7 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('   abcdefghijklmnopqrstuvwxyz');
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: 250));
+    paragraph.layout(const ParagraphConstraints(width: 250));
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 3);
@@ -106,7 +102,7 @@ Future<void> testMain() async {
       'World\ndomination\nis\nsuch\nan\nugly\nphrase\n-\nI\nprefer\nto\ncall\nit\nworld\noptimisation.',
     );
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: 10000));
+    paragraph.layout(const ParagraphConstraints(width: 10000));
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 15);
@@ -126,7 +122,7 @@ Future<void> testMain() async {
     builder.addText('abcd   \nefghijklmnopqrstuvwxyz');
 
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: 10000));
+    paragraph.layout(const ParagraphConstraints(width: 10000));
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 2);
@@ -142,11 +138,11 @@ Future<void> testMain() async {
     builder.addText('\n\n\n');
 
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: 10000));
+    paragraph.layout(const ParagraphConstraints(width: 10000));
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
-    int length = 0;
+    const int length = 0;
     for (int i = 0; i < 4; i++) {
       expect(lines[i].whitespacesRange.width(), i != 3 ? 1 : 0);
       expect(lines[i].clusterRange.width(), 0);

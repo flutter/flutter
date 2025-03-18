@@ -8,6 +8,6 @@ class WebParagraphDebug {
   }
 
   static void error(String arg) {
-    print('ERROR: ${arg}');
+    print('ERROR: $arg');
   }
 }

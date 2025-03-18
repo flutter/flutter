@@ -5,7 +5,6 @@ import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/src/engine/util.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../dom.dart';
 import 'debug.dart';
@@ -16,21 +15,12 @@ import 'paint.dart';
 @immutable
 class WebParagraphStyle implements ui.ParagraphStyle {
   WebParagraphStyle({
-    ui.TextAlign? textAlign,
     ui.TextDirection? textDirection,
-    int? maxLines,
     String? fontFamily,
     double? fontSize,
-    double? height,
-    ui.TextHeightBehavior? textHeightBehavior,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    ui.StrutStyle? strutStyle,
-    String? ellipsis,
-    ui.Locale? locale,
   }) :
     _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize),
-    _textDirection = textDirection == null ? ui.TextDirection.ltr : textDirection!;
+    _textDirection = textDirection ?? ui.TextDirection.ltr;
 
   final WebTextStyle _defaultTextStyle;
   final ui.TextDirection _textDirection;
@@ -77,7 +67,7 @@ class WebTextStyle implements ui.TextStyle {
     return WebTextStyle._(originalFontFamily: fontFamily, fontSize: fontSize);
   }
 
-  WebTextStyle._({required this.originalFontFamily, required this.fontSize});
+  const WebTextStyle._({required this.originalFontFamily, required this.fontSize});
 
   final String? originalFontFamily;
   final double? fontSize;
@@ -147,7 +137,7 @@ class ClusterRange {
 
 class StyledTextRange {
   StyledTextRange(int start, int end, this.textStyle) {
-    this.textRange = ClusterRange(start: start, end: end);
+    textRange = ClusterRange(start: start, end: end);
   }
 
   ClusterRange textRange = ClusterRange(start: 0, end: 0);
@@ -155,17 +145,7 @@ class StyledTextRange {
 }
 
 class WebStrutStyle implements ui.StrutStyle {
-  WebStrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    double? leading,
-    ui.FontWeight? fontWeight,
-    ui.FontStyle? fontStyle,
-    bool? forceStrutHeight,
-  });
+  WebStrutStyle();
 
   @override
   bool operator ==(Object other) {
@@ -183,54 +163,54 @@ class WebStrutStyle implements ui.StrutStyle {
 
 /// The Web implementation of [ui.Paragraph].
 class WebParagraph implements ui.Paragraph {
-  WebParagraph(this._paragraphStyle, this._styledTextRanges, this._text) {}
+  WebParagraph(this._paragraphStyle, this._styledTextRanges, this._text);
 
   /// The constraints from the last time we laid the paragraph out.
   ///
   /// This is used to resurrect the paragraph if the initial paragraph
   /// is deleted.
-  double _lastLayoutConstraints = double.negativeInfinity;
+  final double _lastLayoutConstraints = double.negativeInfinity;
 
   WebParagraphStyle get paragraphStyle => _paragraphStyle;
-  WebParagraphStyle _paragraphStyle;
+  final WebParagraphStyle _paragraphStyle;
 
   List<StyledTextRange> get styledTextRanges => _styledTextRanges;
-  List<StyledTextRange> _styledTextRanges;
+  final List<StyledTextRange> _styledTextRanges;
 
-  String get text => _text;
-  String _text = '';
+  String? get text => _text;
+  final String? _text;
 
   @override
   double get alphabeticBaseline => _alphabeticBaseline;
-  double _alphabeticBaseline = 0;
+  final double _alphabeticBaseline = 0;
 
   @override
   bool get didExceedMaxLines => _didExceedMaxLines;
-  bool _didExceedMaxLines = false;
+  final bool _didExceedMaxLines = false;
 
   @override
   double get height => _height;
-  double _height = 0;
+  final double _height = 0;
 
   @override
   double get ideographicBaseline => _ideographicBaseline;
-  double _ideographicBaseline = 0;
+  final double _ideographicBaseline = 0;
 
   @override
   double get longestLine => _longestLine;
-  double _longestLine = 0;
+  final double _longestLine = 0;
 
   @override
   double get maxIntrinsicWidth => _maxIntrinsicWidth;
-  double _maxIntrinsicWidth = 0;
+  final double _maxIntrinsicWidth = 0;
 
   @override
   double get minIntrinsicWidth => _minIntrinsicWidth;
-  double _minIntrinsicWidth = 0;
+  final double _minIntrinsicWidth = 0;
 
   @override
   double get width => _width;
-  double _width = 0;
+  final double _width = 0;
 
   List<TextLine> get lines => _layout.lines;
 
@@ -250,7 +230,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextPosition getPositionForOffset(ui.Offset offset) {
-    return ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream);
+    return const ui.TextPosition(offset: 0, affinity: ui.TextAffinity.upstream);
   }
 
   @override
@@ -265,7 +245,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getWordBoundary(ui.TextPosition position) {
-    return ui.TextRange(start: 0, end: 0);
+    return const ui.TextRange(start: 0, end: 0);
   }
 
   @override
@@ -297,7 +277,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    return ui.TextRange(start: 0, end: 0);
+    return const ui.TextRange(start: 0, end: 0);
   }
 
   @override
@@ -405,29 +385,29 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   @override
   void addText(String text) {
     this.text += text;
-    this.finishStyledTextRange();
+    finishStyledTextRange();
   }
 
   @override
   WebParagraph build() {
     // We only keep the default style if there is nothing else
-    if (this.textStylesList.length > 1) {
-      this.textStylesList.removeAt(0);
+    if (textStylesList.length > 1) {
+      textStylesList.removeAt(0);
     } else {
-      this.textStylesList.first.textRange.end = this.text.length;
+      textStylesList.first.textRange.end = text.length;
     }
-    this.finishStyledTextRange();
+    finishStyledTextRange();
 
     final WebParagraph builtParagraph = WebParagraph(
-      this.paragraphStyle,
-      this.textStylesList,
-      this.text,
+      paragraphStyle,
+      textStylesList,
+      text,
     );
-    WebParagraphDebug.log('WebParagraphBuilder.build(): "${this.text}" ${textStylesList.length}');
+    WebParagraphDebug.log('WebParagraphBuilder.build(): "$text" ${textStylesList.length}');
     final int start = textStylesList.length == 1 ? 0 : 1;
     for (var i = 0; i < textStylesList.length; ++i) {
       WebParagraphDebug.log(
-        '${i}: [${textStylesList[i].textRange.start}:${textStylesList[i].textRange.end})',
+        '$i: [${textStylesList[i].textRange.start}:${textStylesList[i].textRange.end})',
       );
     }
     return builtParagraph;
@@ -442,8 +422,8 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   @override
   void pop() {
     if (textStylesStack.length > 1) {
-      this.textStylesStack.removeLast();
-      this.startStyledTextRange();
+      textStylesStack.removeLast();
+      startStyledTextRange();
     } else {
       // In this case we use paragraph style and skip Pop operation
       WebParagraphDebug.error('Cannot perform pop operation: empty style list');
@@ -453,26 +433,26 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
   @override
   void pushStyle(ui.TextStyle textStyle) {
     textStylesStack.add(textStyle as WebTextStyle);
-    final last = this.textStylesList.last;
-    if (last.textRange.end == text.length && last.textStyle == (textStyle as WebTextStyle)) {
+    final last = textStylesList.last;
+    if (last.textRange.end == text.length && last.textStyle == textStyle) {
       // Just continue with the same style
       return;
     }
-    this.startStyledTextRange();
+    startStyledTextRange();
   }
 
   void startStyledTextRange() {
-    this.finishStyledTextRange();
-    textStylesList.add(StyledTextRange(text.length, text.length, this.textStylesStack.last));
+    finishStyledTextRange();
+    textStylesList.add(StyledTextRange(text.length, text.length, textStylesStack.last));
   }
 
   void finishStyledTextRange() {
     // Remove all text styles without text
-    while (this.textStylesList.length > 1 &&
-        this.textStylesList.last.textRange.start == text.length) {
-      this.textStylesList.removeLast();
+    while (textStylesList.length > 1 &&
+        textStylesList.last.textRange.start == text.length) {
+      textStylesList.removeLast();
     }
     // Update the first one found with text
-    this.textStylesList.last.textRange.end = this.text.length;
+    textStylesList.last.textRange.end = text.length;
   }
 }

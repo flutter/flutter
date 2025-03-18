@@ -39,7 +39,8 @@ wasm_toolchain("canvaskit_chromium") {
     # In Chromium browsers, we can use the browser's APIs to get the necessary
     # ICU data.
     skia_use_icu = false
-    skia_use_client_icu = true
+    skia_use_client_icu = false
+    skia_use_bidi = true
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
 
     # TODO(mdebbar): Set these to false once all image decoding can be done

@@ -3,14 +3,12 @@
 // found in the LICENSE file.
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine.dart' as engine;
+import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart';
 import 'package:web_engine_tester/golden_tester.dart';
 
-import '../../../lib/src/engine/web_paragraph/paragraph.dart';
-import '../../canvaskit/common.dart';
 import '../../common/test_initialization.dart';
-import '../utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -21,9 +19,9 @@ Future<void> testMain() async {
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
 
   test('Draw WebParagraph on Canvas2D', () async {
-    final DomCanvasElement canvas = createDomCanvasElement(width: 500, height: 500);
-    domDocument.body!.append(canvas);
-    final DomCanvasRenderingContext2D context = canvas.context2D;
+    final engine.DomCanvasElement canvas = engine.createDomCanvasElement(width: 500, height: 500);
+    engine.domDocument.body!.append(canvas);
+    final engine.DomCanvasRenderingContext2D context = canvas.context2D;
 
     context.fillStyle = 'red';
     context.fillRect(0, 0, 200, 200);
@@ -32,8 +30,8 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: double.infinity));
-    paragraph.paintOnCanvas2D(canvas, Offset(0, 100));
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    paragraph.paintOnCanvas2D(canvas, const Offset(0, 100));
 
     context.fillStyle = 'blue';
     context.fillRect(250, 0, 100, 200);
@@ -54,8 +52,8 @@ Future<void> testMain() async {
     final WebParagraphBuilder builder = WebParagraphBuilder(ahemStyle);
     builder.addText('Lorem ipsum dolor sit');
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(ParagraphConstraints(width: double.infinity));
-    paragraph.paintOnCanvasKit(canvas as CanvasKitCanvas, Offset(0, 100));
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 100));
 
     canvas.drawRect(const Rect.fromLTWH(250, 0, 100, 200), bluePaint);
     await matchGoldenFile('web_paragraph_canvas.png', region: region);
