@@ -1098,9 +1098,7 @@ class DataTable extends StatelessWidget {
         final Border? border =
             showBottomBorder
                 ? Border(bottom: borderSide)
-                : index == 0
-                ? null
-                : Border(top: borderSide);
+                : null ;
         return TableRow(
           key: index == 0 ? _headingRowKey : rows[index - 1].key,
           decoration: BoxDecoration(
