@@ -46,16 +46,21 @@ enum class SemanticsAction : int32_t {
   kScrollToOffset = 1 << 23,
 };
 
-const int kVerticalScrollSemanticsActions =
+constexpr int kVerticalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollUp) |
     static_cast<int32_t>(SemanticsAction::kScrollDown);
 
-const int kHorizontalScrollSemanticsActions =
+constexpr int kHorizontalScrollSemanticsActions =
     static_cast<int32_t>(SemanticsAction::kScrollLeft) |
     static_cast<int32_t>(SemanticsAction::kScrollRight);
 
-const int kScrollableSemanticsActions =
+constexpr int kScrollableSemanticsActions =
     kVerticalScrollSemanticsActions | kHorizontalScrollSemanticsActions;
+
+/// The following actions are not user-initiated.
+constexpr int kSystemActions =
+    static_cast<int32_t>(SemanticsAction::kDidGainAccessibilityFocus) |
+    static_cast<int32_t>(SemanticsAction::kDidLoseAccessibilityFocus);
 
 /// C/C++ representation of `SemanticsRole` defined in
 /// `lib/ui/semantics.dart`.
@@ -88,6 +93,9 @@ enum class SemanticsRole : int32_t {
   kLoadingSpinner = 21,
   kProgressBar = 22,
   kHotKey = 23,
+  kRadioGroup = 24,
+  kStatus = 25,
+  kAlert = 26,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in
@@ -126,6 +134,8 @@ enum class SemanticsFlags : int32_t {
   kHasExpandedState = 1 << 26,
   kIsExpanded = 1 << 27,
   kHasSelectedState = 1 << 28,
+  kHasRequiredState = 1 << 29,
+  kIsRequired = 1 << 30,
 };
 
 const int kScrollableSemanticsFlags =

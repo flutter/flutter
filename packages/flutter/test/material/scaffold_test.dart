@@ -2695,7 +2695,7 @@ void main() {
         builder: (BuildContext context, StateSetter stateSetter) {
           setState = stateSetter;
           return MaterialApp(
-            theme: themeIsLight ? ThemeData.light() : ThemeData.dark(),
+            theme: themeIsLight ? ThemeData() : ThemeData.dark(),
             home: Scaffold(
               bottomSheet:
                   defaultBottomSheet == null
