@@ -63,6 +63,13 @@ class FlutterPluginUtilsTest {
         assertEquals(0, result)
     }
 
+    // formatPlatformString
+    @Test
+    fun `formatPlatformString returns correct string`() {
+        val result = FlutterPluginUtils.formatPlatformString("android-arm64")
+        assertEquals("arm64_v8a", result)
+    }
+
     // shouldShrinkResources
     @Test
     fun `shouldShrinkResources returns true by default`() {

@@ -85,6 +85,10 @@ object FlutterPluginUtils {
         return firstVersion.size.compareTo(secondVersion.size)
     }
 
+    @JvmStatic
+    @JvmName("formatPlatformString")
+    fun formatPlatformString(platform: String): String = FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]!!.replace("-", "_")
+
     // ----------------- Methods that interact primarily with the Gradle project. -----------------
 
     @JvmStatic
