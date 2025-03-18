@@ -176,7 +176,7 @@ over water meant for the whole central valley of California? The story will shoc
 final ThemeData _fortnightlyTheme = _buildFortnightlyTheme();
 
 ThemeData _buildFortnightlyTheme() {
-  final ThemeData base = ThemeData.light();
+  final ThemeData base = ThemeData();
   return base.copyWith(
     primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
     scaffoldBackgroundColor: Colors.white,

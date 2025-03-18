@@ -213,7 +213,7 @@ Finder findTooltipContainer(String tooltipText) {
 void main() {
   testWidgets('M3 Chip defaults', (WidgetTester tester) async {
     late TextTheme textTheme;
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
 
     Widget buildFrame(ThemeData theme) {
@@ -2503,7 +2503,7 @@ void main() {
     Widget buildChip() {
       return wrapForChip(
         child: Theme(
-          data: ThemeData.light().copyWith(
+          data: ThemeData(
             chipTheme: const ChipThemeData(
               labelStyle: TextStyle(height: 4), // inherit: true
             ),
@@ -3953,7 +3953,7 @@ void main() {
           body: Focus(
             focusNode: focusNode,
             child: ChipTheme(
-              data: ThemeData.light().chipTheme.copyWith(side: defaultBorderSide),
+              data: ThemeData().chipTheme.copyWith(side: defaultBorderSide),
               child: ChoiceChip(
                 label: const Text('Chip'),
                 selected: selected,
@@ -4068,7 +4068,7 @@ void main() {
           body: Focus(
             focusNode: focusNode,
             child: ChipTheme(
-              data: ThemeData.light().chipTheme.copyWith(side: defaultBorderSide),
+              data: ThemeData().chipTheme.copyWith(side: defaultBorderSide),
               child: ChoiceChip(
                 label: const Text('Chip'),
                 selected: selected,
@@ -4283,7 +4283,7 @@ void main() {
       return MaterialApp(
         theme: ThemeData(
           useMaterial3: false,
-          chipTheme: ThemeData.light().chipTheme.copyWith(shape: themeShape, side: themeBorderSide),
+          chipTheme: ThemeData().chipTheme.copyWith(shape: themeShape, side: themeBorderSide),
         ),
         home: Scaffold(
           body: ChoiceChip(
@@ -4343,7 +4343,7 @@ void main() {
     Widget chipWidget({bool enabled = true, bool selected = false}) {
       return MaterialApp(
         theme: ThemeData(
-          chipTheme: ThemeData.light().chipTheme.copyWith(shape: themeShape, side: themeBorderSide),
+          chipTheme: ThemeData().chipTheme.copyWith(shape: themeShape, side: themeBorderSide),
         ),
         home: Scaffold(
           body: ChoiceChip(

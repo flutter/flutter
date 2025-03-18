@@ -13,7 +13,6 @@
 using SkwasmObject = __externref_t;
 
 extern "C" {
-extern bool skwasm_isSingleThreaded();
 extern void skwasm_setAssociatedObjectOnThread(unsigned long threadId,
                                                void* pointer,
                                                SkwasmObject object);
