@@ -177,6 +177,16 @@ void DlPath::WillRenderSkPath() const {
   return *this;
 }
 
+bool DlPath::IsLine(DlPoint* start, DlPoint* end) const {
+  SkPoint sk_points[2];
+  if (GetSkPath().isLine(sk_points)) {
+    *start = ToDlPoint(sk_points[0]);
+    *end = ToDlPoint(sk_points[1]);
+    return true;
+  }
+  return false;
+}
+
 bool DlPath::IsRect(DlRect* rect, bool* is_closed) const {
   return GetSkPath().isRect(ToSkRect(rect), is_closed);
 }
