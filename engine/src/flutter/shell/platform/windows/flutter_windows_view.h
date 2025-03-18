@@ -125,13 +125,6 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate {
   // This completes a view resize if one is pending.
   virtual void OnFramePresented();
 
-  // Sets the cursor that should be used when the mouse is over the Flutter
-  // content. See mouse_cursor.dart for the values and meanings of cursor_name.
-  void UpdateFlutterCursor(const std::string& cursor_name);
-
-  // Sets the cursor directly from a cursor handle.
-  void SetFlutterCursor(HCURSOR cursor);
-
   // |WindowBindingHandlerDelegate|
   bool OnWindowSizeChanged(size_t width, size_t height) override;
 
