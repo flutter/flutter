@@ -1188,6 +1188,10 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
 
   static const RSuperellipse zero = RSuperellipse._raw();
 
+  RSuperellipse computed() {
+    return this;
+  }
+
   bool contains(Offset point) {
     // Web doesn't support RSuperellipse, but falls back to RRect in all use
     // cases. Therefore this `contains` is implemented as RRect. Once Web

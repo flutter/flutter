@@ -1094,7 +1094,7 @@ class Radius {
 }
 
 // The common base class for `RRect` and `RSuperellipse`.
-abstract base class _RRectLike<T extends _RRectLike<T>> {
+mixin _RRectLike<T extends _RRectLike<T>> {
   // Implemented by a subclass to return an object constructed with the given
   // parameters.
   //
@@ -2102,8 +2102,10 @@ class RSuperellipse with _RRectLike<RSuperellipse> {
     );
   }
 
-  bool contains(Offset offset) {
-    return computed().contains(offset);
+  /// Whether the point specified by the given offset (which is assumed to be
+  /// relative to the origin) lies inside the rounded superellipse.
+  bool contains(Offset point) {
+    return computed().contains(point);
   }
 
   /// A rounded rectangle with all the values set to zero.
@@ -2283,8 +2285,8 @@ class _ComputedRSuperellipse extends NativeFieldWrapperClass1
   }
 
   @override
-  bool contains(Offset offset) {
-    return _contains(offset.dx, offset.dy);
+  bool contains(Offset point) {
+    return _contains(point.dx, point.dy);
   }
 
   @Native<Bool Function(Pointer<Void>, Double, Double)>(symbol: 'RSuperellipse::contains')
@@ -2312,7 +2314,6 @@ class _ComputedRSuperellipse extends NativeFieldWrapperClass1
   static const int _kBottomRightY = 9;
   static const int _kBottomLeftX = 10;
   static const int _kBottomLeftY = 11;
-  static const int _kValueSize = 12;
 }
 
 /// A transform consisting of a translation, a rotation, and a uniform scale.
