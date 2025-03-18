@@ -1633,7 +1633,8 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.anchorPoint,
     super.traversalEdgeBehavior,
     AnimationStyle? animationStyle,
-  }) : _animationStyle = animationStyle, super(
+  }) : _animationStyle = animationStyle,
+       super(
          pageBuilder: (
            BuildContext buildContext,
            Animation<double> animation,
@@ -1657,7 +1658,11 @@ class DialogRoute<T> extends RawDialogRoute<T> {
   void _setAnimation(Animation<double> animation) {
     if (_curvedAnimation?.parent != animation) {
       _curvedAnimation?.dispose();
-      _curvedAnimation = CurvedAnimation(parent: animation, curve: _animationStyle?.curve ?? Curves.easeOut, reverseCurve: _animationStyle?.reverseCurve ?? Curves.easeOut);
+      _curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: _animationStyle?.curve ?? Curves.easeOut,
+        reverseCurve: _animationStyle?.reverseCurve ?? Curves.easeOut,
+      );
     }
   }
 
