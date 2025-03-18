@@ -4011,6 +4011,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
+    debugPrint('hello from RenderObject.showOnScreen $this');
+    // debugPrint('\n${StackTrace.current.toString()}\n');
     parent?.showOnScreen(
       descendant: descendant ?? this,
       rect: rect,
@@ -4934,7 +4936,11 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     return _blocksPreviousSibling!;
   }
 
-  bool shouldDrop(SemanticsNode node) => node.isInvisible;
+  // bool shouldDrop(SemanticsNode node) => node.isInvisible && !configProvider.effective.forceIncludeSemantics;
+  bool shouldDrop(SemanticsNode node) {
+    // debugPrint('should drop logs: node: $node, config provider force include? : ${configProvider.effective.forceIncludeSemantics}');
+    return node.isInvisible && !configProvider.effective.forceIncludeSemantics;
+  }
 
   void markNeedsBuild() {
     built = false;
@@ -5356,7 +5362,8 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     }
 
     final SemanticsNode node = cachedSemanticsNode!;
-    children.removeWhere(shouldDrop);
+    // debugPrint('before drop forceinclude?: ${configProvider.effective.forceIncludeSemantics}');
+    // children.removeWhere(shouldDrop);//
     if (configProvider.effective.isSemanticBoundary) {
       renderObject.assembleSemanticsNode(node, configProvider.effective, children);
     } else {
@@ -5467,7 +5474,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         configProvider.original.isHidden ||
         (!(parentData?.mergeIntoParent ?? false) && nodeGeometry.hidden);
     node
-      ..rect = nodeGeometry.rect
+      ..rect = nodeGeometry.rect//
       ..transform = nodeGeometry.transform
       ..parentSemanticsClipRect = nodeGeometry.semanticsClipRect
       ..parentPaintClipRect = nodeGeometry.paintClipRect;
