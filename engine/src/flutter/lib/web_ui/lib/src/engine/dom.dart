@@ -449,6 +449,12 @@ extension type DomNode._(JSObject _) implements DomEventTarget, JSObject {
   external DomNode? get parentNode;
   external DomNode? get nextSibling;
   external DomNode insertBefore(DomNode newNode, DomNode? referenceNode);
+  void remove() {
+    if (parentNode != null) {
+      final DomNode parent = parentNode!;
+      parent.removeChild(this);
+    }
+  }
 
   external DomNode removeChild(DomNode child);
 
@@ -558,6 +564,8 @@ extension type DomElement._(JSObject _) implements JSObject, DomNode {
   Iterable<DomElement> querySelectorAll(String selectors) =>
       createDomListWrapper<DomElement>(_querySelectorAll(selectors.toJS));
 
+  // TODO(srujzs): Adding @redeclare here is leading to some build failures.
+  // ignore: annotate_redeclares
   external void remove();
 
   @JS('setAttribute')
