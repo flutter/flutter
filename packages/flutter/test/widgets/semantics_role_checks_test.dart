@@ -442,7 +442,7 @@ void main() {
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
       final FlutterError error = exception! as FlutterError;
-      expect(error.message, 'a menu item checkbox must have be checkable');
+      expect(error.message, 'a menu item checkbox must be checkable');
     });
 
     testWidgets('failure case, no menu or menuBar as its ancestor', (WidgetTester tester) async {
@@ -515,7 +515,7 @@ void main() {
       final Object? exception = tester.takeException();
       expect(exception, isFlutterError);
       final FlutterError error = exception! as FlutterError;
-      expect(error.message, 'a menu item radio must have be checkable');
+      expect(error.message, 'a menu item radio must be checkable');
     });
 
     testWidgets('failure case, no menu or menuBar as its ancestor', (WidgetTester tester) async {

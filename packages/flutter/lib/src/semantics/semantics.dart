@@ -273,7 +273,7 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
-      return FlutterError('a menu item checkbox must have be checkable');
+      return FlutterError('a menu item checkbox must be checkable');
     }
 
     SemanticsNode? currentNode = node;
@@ -290,7 +290,7 @@ sealed class _DebugSemanticsRoleChecks {
   static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
-      return FlutterError('a menu item radio must have be checkable');
+      return FlutterError('a menu item radio must be checkable');
     }
 
     SemanticsNode? currentNode = node;
