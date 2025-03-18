@@ -2613,9 +2613,6 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
   RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> createRenderObject(
     BuildContext context,
   ) => _RenderLayoutBuilder();
-
-  @override
-  bool updateShouldRebuild(_OverlayChildLayoutBuilder oldWidget) => oldWidget.builder != builder;
 }
 
 // A RenderBox that:
@@ -2709,14 +2706,10 @@ class _RenderLayoutBuilder extends RenderProxyBox
   int? _callbackId;
   @override
   void performLayout() {
-    late OverlayChildLayoutInfo newLayoutInfo;
     // The invokeLayoutCallback allows arbitrary access to the sizes of
     // RenderBoxes the we know that have finished doing layout.
-    invokeLayoutCallback((_) => newLayoutInfo = _computeNewLayoutInfo());
-    if (newLayoutInfo != _layoutInfo) {
-      _layoutInfo = newLayoutInfo;
-      rebuildIfNecessary();
-    }
+    invokeLayoutCallback((_) => _layoutInfo = _computeNewLayoutInfo());
+    rebuildIfNecessary();
     assert(_callbackId == null);
     _callbackId ??= SchedulerBinding.instance.scheduleFrameCallback(
       _frameCallback,
