@@ -218,11 +218,17 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
 
       for (auto& sampler : samplers) {
         if (sampler == nullptr) {
-          return nullptr;
+          VALIDATION_LOG << "Runtime effect sampler is null";
+          auto contents = std::make_shared<SolidColorContents>();
+          contents->SetColor(Color::BlackTransparent());
+          return contents;
         }
         auto* image = sampler->asImage();
         if (!sampler->asImage()) {
-          return nullptr;
+          VALIDATION_LOG << "Runtime effect sampler is not an image";
+          auto contents = std::make_shared<SolidColorContents>();
+          contents->SetColor(Color::BlackTransparent());
+          return contents;
         }
         FML_DCHECK(image->image()->impeller_texture());
         texture_inputs.push_back({
