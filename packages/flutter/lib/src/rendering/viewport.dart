@@ -698,7 +698,9 @@ abstract class RenderViewportBase<
 
       updateOutOfBandData(growthDirection, childLayoutGeometry);
 
-      debugPrint('after child $child laid out transform: ${MatrixUtils.transformRect(child.getTransformTo(this), child.paintBounds)}, original: ${child.paintBounds} \n');
+      debugPrint(
+        'after child $child laid out transform: ${MatrixUtils.transformRect(child.getTransformTo(this), child.paintBounds)}, original: ${child.paintBounds} \n',
+      );
 
       // move on to the next child
       child = advance(child);
@@ -1725,7 +1727,9 @@ class RenderViewport
       layoutOffset,
       growthDirection,
     );
-    debugPrint('updatingChildLayoutOffset for $child, offset: ${childParentData.paintOffset}');
+    debugPrint(
+      'updatingChildLayoutOffset for $child, offset: ${childParentData.paintOffset}',
+    );
   }
 
   @override
