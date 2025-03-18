@@ -90,7 +90,7 @@ void main() {
           writeHelperLibrary(root, 'version1', assets.keys.toList());
 
           final ProcessTestResult result = await runFlutter(
-            <String>['run', '-v', '-d', device, '--$mode'],
+            <String>['run', '-d', device, '--$mode'],
             root.path,
             <Transition>[
               Barrier.contains('Launching lib/main.dart on'),
@@ -194,7 +194,7 @@ void main() {
         writeHelperLibrary(root, 'version1', assets.keys.toList());
 
         final ProcessTestResult result = await runFlutter(
-          <String>['build', '-v', target],
+          <String>['build', target],
           root.path,
           <Transition>[Barrier.contains('Built build/$target')],
           debug: true,
@@ -258,7 +258,7 @@ void main() {
         });
 
         final ProcessTestResult result = await runFlutter(
-          <String>['build', '-v', target],
+          <String>['build', target],
           root.path,
           <Transition>[
             Barrier.contains(
