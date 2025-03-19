@@ -256,28 +256,6 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.all(this.&addFlutterDependencies)
     }
 
-    // Add a task that can be called on Flutter projects that prints the available build variants
-    // in Gradle.
-    //
-    // This task prints variants in this format:
-    //
-    // BuildVariant: debug
-    // BuildVariant: release
-    // BuildVariant: profile
-    //
-    // Format of the output of this task is used by `AndroidProject.getBuildVariants`.
-    private static void addTaskForPrintBuildVariants(Project project) {
-        // Warning: The name of this task is used by `AndroidProject.getBuildVariants`.
-        project.tasks.register("printBuildVariants") {
-            description "Prints out all build variants for this Android project"
-            doLast {
-                project.android.applicationVariants.all { variant ->
-                    println "BuildVariant: ${variant.name}"
-                }
-            }
-        }
-    }
-
     // Add a task that can be called on Flutter projects that outputs app link related project
     // settings into a json file.
     //
@@ -739,7 +717,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         FlutterPluginUtils.addTaskForJavaVersion(project)
         if (isFlutterAppProject()) {
-            addTaskForPrintBuildVariants(project)
+            FlutterPluginUtils.addTaskForPrintBuildVariants(project)
             addTasksForOutputsAppLinkSettings(project)
         }
         List<String> targetPlatforms = FlutterPluginUtils.getTargetPlatforms(project)

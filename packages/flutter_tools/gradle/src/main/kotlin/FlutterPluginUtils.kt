@@ -1,7 +1,7 @@
 package com.flutter.gradle
 
+import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.builder.model.BuildType
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -572,8 +572,7 @@ object FlutterPluginUtils {
         flutterSdkRootPath: String
     ) {
         // If the project is already configuring a native build, we don't need to do anything.
-        val gradleProjectAndroidExtension =
-            gradleProject.extensions.getByType(BaseAppModuleExtension::class.java)
+        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
         val forcingNotRequired: Boolean =
             gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null
         if (forcingNotRequired) {
@@ -614,6 +613,33 @@ object FlutterPluginUtils {
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
             doLast {
                 println(JavaVersion.current())
+            }
+        }
+    }
+
+    // Add a task that can be called on Flutter projects that prints the available build variants
+    // in Gradle.
+    //
+    // This task prints variants in this format:
+    //
+    // BuildVariant: debug
+    // BuildVariant: release
+    // BuildVariant: profile
+    //
+    // Format of the output of this task is used by `AndroidProject.getBuildVariants`.
+    @JvmStatic
+    @JvmName("addTaskForPrintBuildVariants")
+    internal fun addTaskForPrintBuildVariants(project: Project) {
+        // Groovy was dynamically getting a different subtype here than our Kotlin getAndroidExtension method.
+        // TODO(gmackall): We should take another pass at the different types we are using in our conversion of
+        //                 the groovy `flutter.android` lines.
+        val androidExtension = project.extensions.getByType(AbstractAppExtension::class.java)
+        project.tasks.register("printBuildVariants") {
+            description = "Prints out all build variants for this Android project"
+            doLast {
+                androidExtension.applicationVariants.forEach { variant ->
+                    println("BuildVariant: ${variant.name}")
+                }
             }
         }
     }
