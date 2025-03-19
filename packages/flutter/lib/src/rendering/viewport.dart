@@ -726,7 +726,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  Rect describeSemanticsClip(RenderSliver? child) {
+  Rect? describeSemanticsClip(RenderSliver? child) {
+    if (child != null && child!.forceIncludeSemantics) {
+      return Rect.largest;
+    }
     if (_calculatedCacheExtent == null) {
       return semanticBounds;
     }
