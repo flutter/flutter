@@ -350,7 +350,7 @@ TEST(ContextVKTest, BatchSubmitCommandBuffersOnNonArm) {
   auto functions = GetMockVulkanFunctions(context->GetDevice());
   EXPECT_FALSE(std::find(functions->begin(), functions->end(),
                          "vkAllocateCommandBuffers") != functions->end());
-  EXPECT_TRUE(std::find(functions->begin(), functions->end(),
+  EXPECT_FALSE(std::find(functions->begin(), functions->end(),
                         "vkCreateFence") != functions->end());
 }
 
