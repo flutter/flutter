@@ -152,7 +152,7 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
 
 FlutterEngineResult FlutterEngineSendSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterDispatchSemanticsActionInfo* info) {
+    const FlutterSendSemanticsActionInfo* info) {
   return kSuccess;
 }
 

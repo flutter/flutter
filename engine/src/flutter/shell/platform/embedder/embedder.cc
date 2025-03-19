@@ -3189,8 +3189,8 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length) {
-  FlutterDispatchSemanticsActionInfo info{
-      .struct_size = sizeof(FlutterDispatchSemanticsActionInfo),
+  FlutterSendSemanticsActionInfo info{
+      .struct_size = sizeof(FlutterSendSemanticsActionInfo),
       .view_id = kFlutterImplicitViewId,
       .node_id = node_id,
       .action = action,
@@ -3201,7 +3201,7 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 
 FlutterEngineResult FlutterEngineSendSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterDispatchSemanticsActionInfo* info) {
+    const FlutterSendSemanticsActionInfo* info) {
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }

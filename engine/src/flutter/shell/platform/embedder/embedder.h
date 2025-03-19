@@ -2649,7 +2649,7 @@ typedef struct {
 
 typedef struct {
   /// The size of this struct. Must be
-  /// sizeof(FlutterDispatchSemanticsActionInfo).
+  /// sizeof(FlutterSendSemanticsActionInfo).
   size_t struct_size;
 
   /// The ID of the view that includes the node.
@@ -2666,7 +2666,7 @@ typedef struct {
 
   /// The data length.
   size_t data_length;
-} FlutterDispatchSemanticsActionInfo;
+} FlutterSendSemanticsActionInfo;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
@@ -3136,7 +3136,7 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineSendSemanticsAction(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterDispatchSemanticsActionInfo* info);
+    const FlutterSendSemanticsActionInfo* info);
 
 //------------------------------------------------------------------------------
 /// @brief      Notify the engine that a vsync event occurred. A baton passed to
@@ -3527,7 +3527,7 @@ typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     size_t data_length);
 typedef FlutterEngineResult (*FlutterEngineSendSemanticsActionFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
-    const FlutterDispatchSemanticsActionInfo* info);
+    const FlutterSendSemanticsActionInfo* info);
 typedef FlutterEngineResult (*FlutterEngineOnVsyncFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     intptr_t baton,

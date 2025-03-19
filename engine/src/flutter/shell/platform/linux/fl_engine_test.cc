@@ -182,7 +182,7 @@ TEST(FlEngineTest, DispatchSemanticsAction) {
   bool called = false;
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
-      ([&called](auto engine, const FlutterDispatchSemanticsActionInfo* info) {
+      ([&called](auto engine, const FlutterSendSemanticsActionInfo* info) {
         EXPECT_EQ(info->view_id, static_cast<int64_t>(456));
         EXPECT_EQ(info->node_id, static_cast<uint64_t>(42));
         EXPECT_EQ(info->action, kFlutterSemanticsActionTap);

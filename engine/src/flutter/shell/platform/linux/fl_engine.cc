@@ -1218,8 +1218,8 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
         g_bytes_get_data(data, &action_data_length));
   }
 
-  FlutterDispatchSemanticsActionInfo info;
-  info.struct_size = sizeof(FlutterDispatchSemanticsActionInfo);
+  FlutterSendSemanticsActionInfo info;
+  info.struct_size = sizeof(FlutterSendSemanticsActionInfo);
   info.view_id = view_id;
   info.node_id = node_id;
   info.action = action;

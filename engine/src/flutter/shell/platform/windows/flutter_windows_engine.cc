@@ -935,8 +935,8 @@ bool FlutterWindowsEngine::DispatchSemanticsAction(
     uint64_t target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
-  FlutterDispatchSemanticsActionInfo info{
-      .struct_size = sizeof(FlutterDispatchSemanticsActionInfo),
+  FlutterSendSemanticsActionInfo info{
+      .struct_size = sizeof(FlutterSendSemanticsActionInfo),
       .view_id = view_id,
       .node_id = target,
       .action = action,

@@ -156,7 +156,7 @@ TEST(FlAccessibleTextFieldTest, PerformAction) {
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
       ([&action_datas](auto engine,
-                       const FlutterDispatchSemanticsActionInfo* info) {
+                       const FlutterSendSemanticsActionInfo* info) {
         g_ptr_array_add(action_datas,
                         decode_semantic_data(info->data, info->data_length));
         return kSuccess;
@@ -247,7 +247,7 @@ TEST(FlAccessibleTextFieldTest, SetCaretOffset) {
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
       ([&base, &extent](auto engine,
-                        const FlutterDispatchSemanticsActionInfo* info) {
+                        const FlutterSendSemanticsActionInfo* info) {
         EXPECT_EQ(info->action, kFlutterSemanticsActionSetSelection);
         g_autoptr(FlValue) value =
             decode_semantic_data(info->data, info->data_length);
@@ -330,7 +330,7 @@ TEST(FlAccessibleTextFieldTest, AddSelection) {
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
       ([&base, &extent](auto engine,
-                        const FlutterDispatchSemanticsActionInfo* info) {
+                        const FlutterSendSemanticsActionInfo* info) {
         EXPECT_EQ(info->action, kFlutterSemanticsActionSetSelection);
         g_autoptr(FlValue) value =
             decode_semantic_data(info->data, info->data_length);
@@ -370,7 +370,7 @@ TEST(FlAccessibleTextFieldTest, RemoveSelection) {
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
       ([&base, &extent](auto engine,
-                        const FlutterDispatchSemanticsActionInfo* info) {
+                        const FlutterSendSemanticsActionInfo* info) {
         EXPECT_EQ(info->action, kFlutterSemanticsActionSetSelection);
         g_autoptr(FlValue) value =
             decode_semantic_data(info->data, info->data_length);
@@ -416,7 +416,7 @@ TEST(FlAccessibleTextFieldTest, SetSelection) {
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
       ([&base, &extent](auto engine,
-                        const FlutterDispatchSemanticsActionInfo* info) {
+                        const FlutterSendSemanticsActionInfo* info) {
         EXPECT_EQ(info->action, kFlutterSemanticsActionSetSelection);
         g_autoptr(FlValue) value =
             decode_semantic_data(info->data, info->data_length);
@@ -456,7 +456,7 @@ TEST(FlAccessibleTextFieldTest, SetTextContents) {
 
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
-      ([&text](auto engine, const FlutterDispatchSemanticsActionInfo* info) {
+      ([&text](auto engine, const FlutterSendSemanticsActionInfo* info) {
         EXPECT_EQ(info->action, kFlutterSemanticsActionSetText);
         g_autoptr(FlValue) value =
             decode_semantic_data(info->data, info->data_length);
@@ -488,7 +488,7 @@ TEST(FlAccessibleTextFieldTest, InsertDeleteText) {
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
       ([&text, &base, &extent](auto engine,
-                               const FlutterDispatchSemanticsActionInfo* info) {
+                               const FlutterSendSemanticsActionInfo* info) {
         EXPECT_THAT(info->action,
                     ::testing::AnyOf(kFlutterSemanticsActionSetText,
                                      kFlutterSemanticsActionSetSelection));
@@ -541,7 +541,7 @@ TEST(FlAccessibleTextFieldTest, CopyCutPasteText) {
   fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
       ([&act, &base, &extent](auto engine,
-                              const FlutterDispatchSemanticsActionInfo* info) {
+                              const FlutterSendSemanticsActionInfo* info) {
         EXPECT_THAT(info->action,
                     ::testing::AnyOf(kFlutterSemanticsActionCut,
                                      kFlutterSemanticsActionCopy,

@@ -281,7 +281,7 @@ TEST(AccessibilityBridgeWindows, DispatchAccessibilityAction) {
   modifier.embedder_api().SendSemanticsAction = MOCK_ENGINE_PROC(
       SendSemanticsAction,
       ([&actual_action](FLUTTER_API_SYMBOL(FlutterEngine) engine,
-                        const FlutterDispatchSemanticsActionInfo* info) {
+                        const FlutterSendSemanticsActionInfo* info) {
         actual_action = info->action;
         return kSuccess;
       }));
