@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "impeller/base/flags.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_target.h"
@@ -20,8 +19,6 @@ struct Picture;
 class AiksContext {
  public:
   /// Construct a new AiksContext.
-  ///
-  /// @param settings
   ///
   /// @param context              The Impeller context that Aiks should use for
   ///                             allocating resources and executing device
