@@ -262,16 +262,6 @@ ContentContext::ContentContext(
     std::shared_ptr<Context> context,
     std::shared_ptr<TypographerContext> typographer_context,
     std::shared_ptr<RenderTargetAllocator> render_target_allocator)
-    : ContentContext({},
-                     std::move(context),
-                     std::move(typographer_context),
-                     std::move(render_target_allocator)) {}
-
-ContentContext::ContentContext(
-    const Flags& settings,
-    std::shared_ptr<Context> context,
-    std::shared_ptr<TypographerContext> typographer_context,
-    std::shared_ptr<RenderTargetAllocator> render_target_allocator)
     : context_(std::move(context)),
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
@@ -281,8 +271,7 @@ ContentContext::ContentContext(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
       host_buffer_(HostBuffer::Create(context_->GetResourceAllocator(),
-                                      context_->GetIdleWaiter())),
-      settings_(settings) {
+                                      context_->GetIdleWaiter())) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -396,7 +385,7 @@ ContentContext::ContentContext(
       }
       clip_pipeline_descriptor->SetColorAttachmentDescriptors(
           std::move(clip_color_attachments));
-      if (settings.lazy_shader_mode) {
+      if (GetContext()->GetFlags().lazy_shader_mode) {
         clip_pipelines_.SetDefaultDescriptor(clip_pipeline_descriptor);
         clip_pipelines_.SetDefault(options, nullptr);
       } else {
@@ -688,7 +677,7 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
 }
 
 void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
-  if (settings_.lazy_shader_mode) {
+  if (GetContext()->GetFlags().lazy_shader_mode) {
     return;
   }
   GetContext()->InitializeCommonlyUsedShadersIfNeeded();

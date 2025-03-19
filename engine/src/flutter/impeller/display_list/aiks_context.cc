@@ -19,7 +19,7 @@ AiksContext::AiksContext(
   }
 
   content_context_ = std::make_unique<ContentContext>(
-      settings, context_, std::move(typographer_context),
+      context_, std::move(typographer_context),
       render_target_allocator.has_value() ? render_target_allocator.value()
                                           : nullptr);
   if (!content_context_->IsValid()) {

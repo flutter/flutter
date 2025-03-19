@@ -13,7 +13,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/status_or.h"
-#include "impeller/base/flags.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
@@ -295,12 +294,6 @@ class RenderTargetCache;
 class ContentContext {
  public:
   explicit ContentContext(
-      const Flags& settings,
-      std::shared_ptr<Context> context,
-      std::shared_ptr<TypographerContext> typographer_context,
-      std::shared_ptr<RenderTargetAllocator> render_target_allocator = nullptr);
-
-  explicit ContentContext(
       std::shared_ptr<Context> context,
       std::shared_ptr<TypographerContext> typographer_context,
       std::shared_ptr<RenderTargetAllocator> render_target_allocator = nullptr);
@@ -549,7 +542,7 @@ class ContentContext {
       }
       options.ApplyToPipelineDescriptor(*desc);
       desc_ = desc;
-      if (context.settings_.lazy_shader_mode) {
+      if (context.GetContext()->GetFlags().lazy_shader_mode) {
         SetDefault(options, nullptr);
       } else {
         SetDefault(options,
@@ -755,7 +748,6 @@ class ContentContext {
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
-  const Flags settings_;
   bool wireframe_ = false;
 
   ContentContext(const ContentContext&) = delete;
