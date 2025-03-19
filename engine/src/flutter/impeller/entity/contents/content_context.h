@@ -531,23 +531,22 @@ class ContentContext {
       desc_ = std::move(desc);
     }
 
-    void CreateDefault(const ContentContext& context,
+    void CreateDefault(const Context& context,
                        const ContentContextOptions& options,
                        const std::vector<Scalar>& constants = {}) {
       auto desc = PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(
-          *context.context_, constants);
+          context, constants);
       if (!desc.has_value()) {
         VALIDATION_LOG << "Failed to create default pipeline.";
         return;
       }
       options.ApplyToPipelineDescriptor(*desc);
       desc_ = desc;
-      if (context.GetContext()->GetFlags().lazy_shader_mode) {
+      if (context.GetFlags().lazy_shader_mode) {
         SetDefault(options, nullptr);
       } else {
-        SetDefault(options,
-                   std::make_unique<PipelineHandleT>(*context.context_, desc_,
-                                                     /*async=*/true));
+        SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
+                                                              /*async=*/true));
       }
     }
 
