@@ -192,7 +192,7 @@ class ListTileThemeData with Diagnosticable {
       visualDensity: visualDensity ?? this.visualDensity,
       titleAlignment: titleAlignment ?? this.titleAlignment,
       controlAffinity: controlAffinity ?? this.controlAffinity,
-      isThreeLine: isThreeLine,
+      isThreeLine: isThreeLine ?? this.isThreeLine,
     );
   }
 
