@@ -213,7 +213,6 @@ class SemanticScrollable extends SemanticRole {
         ..width = '${rect.width.round()}px'
         ..height = '${canonicalNeutralScrollPosition}px';
 
-      // element.scrollTop = canonicalNeutralScrollPosition.toDouble();
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollTop.toInt();
       semanticsObject
