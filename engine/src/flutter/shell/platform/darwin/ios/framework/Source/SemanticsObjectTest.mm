@@ -9,6 +9,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjectTestMocks.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/TextInputSemanticsObject.h"
@@ -26,6 +27,23 @@ const float kFloatCompareEpsilon = 0.001;
 
 @interface TextInputSemanticsObject (Test)
 - (UIView<UITextInput>*)textInputSurrogate;
+@end
+
+@interface FakeFlutterViewDelegate : NSObject <FlutterViewEngineDelegate>
+@end
+
+@implementation FakeFlutterViewDelegate
+
+@synthesize platformViewsController = _platformViewsController;
+
+- (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
+                                  asBase64Encoded:(BOOL)base64Encode {
+  return {};
+}
+
+- (void)flutterViewAccessibilityDidCall {
+}
+
 @end
 
 @interface SemanticsObjectTest : XCTestCase
@@ -1315,5 +1333,25 @@ const float kFloatCompareEpsilon = 0.001;
   [scrollable accessibilityBridgeDidFinishUpdate];
 
   XCTAssertEqual(bridge->observations.size(), (size_t)0);
+}
+
+- (void)testFlutterViewFocusItemInRectDoesNotCrashWithSemanticsObjectDeallocated {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+
+  FakeFlutterViewDelegate* fakeDelegate = [FakeFlutterViewDelegate new];
+  FlutterView* view = [[FlutterView alloc] initWithDelegate:fakeDelegate
+                                                     opaque:NO
+                                            enableWideGamut:NO];
+  SemanticsObjectContainer* container;
+  @autoreleasepool {
+    container = [[SemanticsObjectContainer alloc]
+        initWithSemanticsObject:[[SemanticsObject alloc] initWithBridge:bridge uid:123]
+                         bridge:bridge];
+  }
+  view.accessibilityElements = @[ container ];
+
+  [view focusItemsInRect:CGRectNull];  // This call should not crash.
 }
 @end
