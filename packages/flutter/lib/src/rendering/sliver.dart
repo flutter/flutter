@@ -2018,6 +2018,16 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
   RenderSliverToBoxAdapter({super.child});
 
   @override
+  Rect get semanticBounds {
+    switch (constraints.axis) {
+      case Axis.horizontal:
+        return Rect.fromLTWH(0.0, 0.0, geometry!.maxPaintExtent, constraints.crossAxisExtent);
+      case Axis.vertical:
+        return Rect.fromLTWH(0.0, 0.0, constraints.crossAxisExtent, geometry!.maxPaintExtent);
+    }
+  }
+
+  @override
   void performLayout() {
     debugPrint('hi from RenderSliverToBox perform layout force include semantics? $forceIncludeSemantics');
     if (child == null) {
@@ -2050,6 +2060,6 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
     // paintBounds don't seem to be ready until geometry has been set because it uses the geometry + constraints.
     debugPrint('sliver geometry $geometry');
     setChildParentData(child!, constraints, geometry!);
-    debugPrint('hi from RenderSliverToBox perform layout $paintBounds');
+    debugPrint('hi from RenderSliverToBox perform layout $paintBounds, semanitcs bonds $semanticBounds, renderbox bounds ${child?.semanticBounds}');
   }
 }

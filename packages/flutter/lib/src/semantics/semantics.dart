@@ -4161,7 +4161,6 @@ class SemanticsOwner extends ChangeNotifier {
       if (invisibleNodes.isEmpty) {
         return true;
       }
-      return true;
 
       List<DiagnosticsNode> nodeToMessage(SemanticsNode invisibleNode) {
         final SemanticsNode? parent = invisibleNode.parent;

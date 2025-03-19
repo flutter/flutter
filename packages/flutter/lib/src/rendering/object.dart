@@ -5035,11 +5035,12 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
     return _blocksPreviousSibling!;
   }
 
+  bool shouldDrop(SemanticsNode node) => node.isInvisible;
   // bool shouldDrop(SemanticsNode node) => node.isInvisible && !configProvider.effective.forceIncludeSemantics;
-  bool shouldDrop(SemanticsNode node) {
-    // debugPrint('should drop logs: node: $node, config provider force include? : ${configProvider.effective.forceIncludeSemantics}');
-    return node.isInvisible && !configProvider.effective.forceIncludeSemantics;
-  }
+  // bool shouldDrop(SemanticsNode node) {
+  //   // debugPrint('should drop logs: node: $node, config provider force include? : ${configProvider.effective.forceIncludeSemantics}');
+  //   return node.isInvisible && !configProvider.effective.forceIncludeSemantics;
+  // }
 
   void markNeedsBuild() {
     built = false;
@@ -5462,7 +5463,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
 
     final SemanticsNode node = cachedSemanticsNode!;
     // debugPrint('before drop forceinclude?: ${configProvider.effective.forceIncludeSemantics}');
-    // children.removeWhere(shouldDrop);//
+    children.removeWhere(shouldDrop);//
     if (configProvider.effective.isSemanticBoundary) {
       renderObject.assembleSemanticsNode(node, configProvider.effective, children);
     } else {
@@ -5602,6 +5603,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
           parent: this,
           child: fragment.owner,
         );
+        debugPrint('in _updateSiblingNodesGeometries raw semantic bounds: ${fragment.owner.renderObject.semanticBounds}');
         final Rect rectInFragmentOwnerCoordinates =
             parentGeometry.semanticsClipRect?.intersect(
               fragment.owner.renderObject.semanticBounds,
@@ -5963,18 +5965,21 @@ final class _SemanticsGeometry {
         }
       }
     }
-
     Rect rect =
         semanticsClipRect?.intersect(child.renderObject.semanticBounds) ??
         child.renderObject.semanticBounds;
+    debugPrint('common case for node: ${child.cachedSemanticsNode} with parent: ${parent.cachedSemanticsNode}, bounds ${child.renderObject.semanticBounds}, renderobject: ${child.renderObject}, clipped rect: ${rect}');
     bool isRectHidden = false;
     if (paintClipRect != null) {
       final Rect paintRect = paintClipRect.intersect(rect);
       isRectHidden = paintRect.isEmpty && !rect.isEmpty;
       if (!isRectHidden) {
+        debugPrint('still common case rect is visible so set rect to paintRect');
         rect = paintRect;
       }
+      debugPrint('still common case but paintClip not null $rect');
     }
+    /// So we have the correct raw semantic bounds, but then it gets clipped by semanticsClipRect, and then further clipped by paintClipRect.
 
     return _SemanticsGeometry(
       transform: transform,
