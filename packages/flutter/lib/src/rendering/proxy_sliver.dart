@@ -477,10 +477,4 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
 class RenderSliverForceIncludeSemantics extends RenderProxySliver {
   @override
   bool get forceIncludeSemantics => true;
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.forceIncludeSemantics = true;
-  }
 }

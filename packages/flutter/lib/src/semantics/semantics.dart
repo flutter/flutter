@@ -3476,7 +3476,6 @@ class SemanticsNode with DiagnosticableTreeMixin {
     } else {
       final int childCount = _children!.length;
       final List<SemanticsNode> sortedChildren = _childrenInTraversalOrder();
-      // debugPrint('\nsorted children in traversal order $sortedChildren\n');
       childrenInTraversalOrder = Int32List(childCount);
       for (int i = 0; i < childCount; i += 1) {
         childrenInTraversalOrder[i] = sortedChildren[i].id;
@@ -3550,16 +3549,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     List<SemanticsNode>? childrenInDefaultOrder;
-    late final bool withAlgorithm;
     if (inheritedTextDirection != null) {
       childrenInDefaultOrder = _childrenInDefaultOrder(_children!, inheritedTextDirection);
-      withAlgorithm = true;
     } else {
       // In the absence of text direction default to paint order.
       childrenInDefaultOrder = _children;
-      withAlgorithm = false;
     }
-    // debugPrint('\nchildren in default order, with algorithm? $withAlgorithm, $childrenInDefaultOrder\n');
 
     // List.sort does not guarantee stable sort order. Therefore, children are
     // first partitioned into groups that have compatible sort keys, i.e. keys
@@ -4277,17 +4272,14 @@ class SemanticsOwner extends ChangeNotifier {
   /// If the given `action` requires arguments they need to be passed in via
   /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [Object? args]) {
-    debugPrint('SemanticsOwner.performAction - action: $action, id: $id');
     final SemanticsActionHandler? handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
-      debugPrint('handing action');
       handler(args);
       return;
     }
 
     // Default actions if no [handler] was provided.
     if (action == SemanticsAction.showOnScreen && _nodes[id]?._showOnScreen != null) {
-      debugPrint('doing default handler');
       _nodes[id]!._showOnScreen!();
     }
   }
@@ -4366,12 +4358,6 @@ class SemanticsOwner extends ChangeNotifier {
 /// semantics tree.
 class SemanticsConfiguration {
   // SEMANTIC BOUNDARY BEHAVIOR
-
-  bool get forceIncludeSemantics => _forceIncludeSemantics;
-  bool _forceIncludeSemantics = false;
-  set forceIncludeSemantics(bool value) {
-    _forceIncludeSemantics = value;
-  }
 
   /// Whether the [RenderObject] owner of this configuration wants to own its
   /// own [SemanticsNode].
