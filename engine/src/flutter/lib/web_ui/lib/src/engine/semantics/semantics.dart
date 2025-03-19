@@ -1995,6 +1995,10 @@ class SemanticsObject {
 
     // Reparent element.
     if (previousElement != element) {
+      if (_currentChildrenInRenderOrder != null)
+        for (final child in _currentChildrenInRenderOrder!) {
+          element.append(child.element);
+        }
       final DomElement? parent = previousElement?.parent;
       if (parent != null) {
         parent.insertBefore(element, previousElement);
