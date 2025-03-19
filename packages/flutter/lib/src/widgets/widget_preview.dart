@@ -20,28 +20,28 @@ import 'framework.dart';
 ///
 /// ```dart
 /// @Preview(name: 'Top-level preview')
-/// Widget preview() => Text('Foo');
+/// Widget preview() => const Text('Foo');
 ///
 /// @Preview(name: 'Builder preview')
 /// WidgetBuilder builderPreview() {
 ///   return (BuildContext context) {
-///     return Text('Builder');
+///     return const Text('Builder');
 ///   };
 /// }
 ///
 /// class MyWidget extends StatelessWidget {
 ///   @Preview(name: 'Constructor preview')
-///   MyWidget.preview();
+///   const MyWidget.preview();
 ///
 ///   @Preview(name: 'Factory constructor preview')
-///   MyWidget.factoryPreview() => MyWidget.preview();
+///   factory MyWidget.factoryPreview() => MyWidget.preview();
 ///
 ///   @Preview(name: 'Static preview')
-///   static Widget previewStatic() => Text('Static');
+///   static Widget previewStatic() => const Text('Static');
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Text('MyWidget');
+///     return const Text('MyWidget');
 ///   }
 /// }
 /// ```
