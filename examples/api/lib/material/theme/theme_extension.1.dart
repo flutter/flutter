@@ -58,9 +58,9 @@ class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.light().copyWith(
-        extensions: <ThemeExtension<dynamic>>[
-          const MyColors(brandColor: Color(0xFF1E88E5), danger: Color(0xFFE53935)),
+      theme: ThemeData(
+        extensions: const <ThemeExtension<dynamic>>[
+          MyColors(brandColor: Color(0xFF1E88E5), danger: Color(0xFFE53935)),
         ],
       ),
       darkTheme: ThemeData.dark().copyWith(

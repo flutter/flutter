@@ -35,9 +35,9 @@ class GenSnapshot {
   final Artifacts _artifacts;
   final ProcessUtils _processUtils;
 
-  String getSnapshotterPath(SnapshotType snapshotType) {
+  String getSnapshotterPath(SnapshotType snapshotType, Artifact artifact) {
     return _artifacts.getArtifactPath(
-      Artifact.genSnapshot,
+      artifact,
       platform: snapshotType.platform,
       mode: snapshotType.mode,
     );
@@ -63,15 +63,19 @@ class GenSnapshot {
     assert(snapshotType.platform != TargetPlatform.ios || darwinArch != null);
     final List<String> args = <String>[...additionalArgs];
 
-    String snapshotterPath = getSnapshotterPath(snapshotType);
-
     // iOS and macOS have separate gen_snapshot binaries for each target
     // architecture (iOS: armv7, arm64; macOS: x86_64, arm64). Select the right
     // one for the target architecture in question.
+    Artifact genSnapshotArtifact;
     if (snapshotType.platform == TargetPlatform.ios ||
         snapshotType.platform == TargetPlatform.darwin) {
-      snapshotterPath += '_${darwinArch!.dartName}';
+      genSnapshotArtifact =
+          darwinArch == DarwinArch.arm64 ? Artifact.genSnapshotArm64 : Artifact.genSnapshotX64;
+    } else {
+      genSnapshotArtifact = Artifact.genSnapshot;
     }
+
+    final String snapshotterPath = getSnapshotterPath(snapshotType, genSnapshotArtifact);
 
     return _processUtils.stream(<String>[
       snapshotterPath,
