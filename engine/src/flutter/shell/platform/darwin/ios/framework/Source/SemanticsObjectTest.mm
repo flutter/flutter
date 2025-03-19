@@ -1340,7 +1340,7 @@ const float kFloatCompareEpsilon = 0.001;
       new flutter::testing::MockAccessibilityBridge());
   fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
 
-  FakeFlutterViewDelegate* fakeDelegate = [FakeFlutterViewDelegate new];
+  FakeFlutterViewDelegate* fakeDelegate = [[FakeFlutterViewDelegate alloc] init];
   FlutterView* view = [[FlutterView alloc] initWithDelegate:fakeDelegate
                                                      opaque:NO
                                             enableWideGamut:NO];
