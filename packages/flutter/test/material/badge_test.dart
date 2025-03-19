@@ -12,7 +12,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Builder(
@@ -53,7 +52,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Align(
@@ -91,7 +89,6 @@ void main() {
 
     Widget buildFrame(int count) {
       return MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Builder(
@@ -141,7 +138,7 @@ void main() {
   });
 
   testWidgets('Small Badge defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -173,7 +170,7 @@ void main() {
   });
 
   testWidgets('Small Badge RTL defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -207,7 +204,7 @@ void main() {
   });
 
   testWidgets('Large Badge textStyle and colors', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const Color green = Color(0xff00ff00);
     const Color black = Color(0xff000000);
 
@@ -235,9 +232,8 @@ void main() {
 
   testWidgets('isLabelVisible', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
-        home: const Align(
+      const MaterialApp(
+        home: Align(
           alignment: Alignment.topLeft,
           child: Badge(label: Text('0'), isLabelVisible: false, child: Icon(Icons.add)),
         ),
@@ -258,7 +254,6 @@ void main() {
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Badge(
@@ -356,7 +351,6 @@ void main() {
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Badge(
@@ -426,7 +420,6 @@ void main() {
 
     Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
       return MaterialApp(
-        theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Badge(
