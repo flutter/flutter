@@ -31,7 +31,8 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     SampleCount sample_count,
     LoadAction load_action,
     StoreAction store_action,
-    vk::ImageLayout current_layout) {
+    vk::ImageLayout current_layout,
+    bool is_swapchain) {
   vk::AttachmentDescription desc;
   desc.format = ToVKImageFormat(format);
   desc.samples = ToVKSampleCount(sample_count);
@@ -45,6 +46,9 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     desc.initialLayout = vk::ImageLayout::eUndefined;
   }
   desc.finalLayout = vk::ImageLayout::eGeneral;
+  if (sample_count == SampleCount::kCount1 && !is_swapchain) {
+    desc.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+  }
 
   const bool performs_resolves = StoreActionPerformsResolve(store_action);
   if (index == 0u) {
@@ -53,6 +57,9 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     if (performs_resolves) {
       desc.storeOp = ToVKAttachmentStoreOp(store_action, true);
       desc.samples = vk::SampleCountFlagBits::e1;
+      if (!is_swapchain) {
+        desc.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+      }
       color0_resolve_ = desc;
     } else {
       color0_resolve_ = std::nullopt;
@@ -162,7 +169,7 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
 
   if (depth_stencil_.has_value()) {
     depth_stencil_ref.attachment = attachments_index;
-    depth_stencil_ref.layout = vk::ImageLayout::eGeneral;
+    depth_stencil_ref.layout = vk::ImageLayout::eDepthStencilAttachmentOptimal;
     attachments.at(attachments_index++) = depth_stencil_.value();
   }
 
@@ -176,20 +183,42 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
 
   subpass0.setPDepthStencilAttachment(&depth_stencil_ref);
 
-  vk::SubpassDependency self_dep;
-  self_dep.srcSubpass = 0u;  // first subpass
-  self_dep.dstSubpass = 0u;  // to itself
-  self_dep.srcStageMask = kSelfDependencySrcStageMask;
-  self_dep.srcAccessMask = kSelfDependencySrcAccessMask;
-  self_dep.dstStageMask = kSelfDependencyDstStageMask;
-  self_dep.dstAccessMask = kSelfDependencyDstAccessMask;
-  self_dep.dependencyFlags = kSelfDependencyFlags;
+  vk::SubpassDependency deps[3];
+  // Incoming
+  deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
+  deps[0].dstSubpass = 0u;
+  deps[0].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                         vk::PipelineStageFlagBits::eFragmentShader |
+                         vk::PipelineStageFlagBits::eTransfer;
+  deps[0].srcAccessMask = vk::AccessFlagBits::eShaderRead |
+                          vk::AccessFlagBits::eTransferRead |
+                          vk::AccessFlagBits::eColorAttachmentWrite;
+  deps[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+  deps[0].dependencyFlags = kSelfDependencyFlags;
+
+  deps[1].srcSubpass = 0u;  // first subpass
+  deps[1].dstSubpass = 0u;  // to itself
+  deps[1].srcStageMask = kSelfDependencySrcStageMask;
+  deps[1].srcAccessMask = kSelfDependencySrcAccessMask;
+  deps[1].dstStageMask = kSelfDependencyDstStageMask;
+  deps[1].dstAccessMask = kSelfDependencyDstAccessMask;
+  deps[1].dependencyFlags = kSelfDependencyFlags;
+
+  // Outgoing
+  deps[2].srcSubpass = 0u;  // first subpass
+  deps[2].dstSubpass = VK_SUBPASS_EXTERNAL;
+  deps[2].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
+  deps[2].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
+  deps[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
+  deps[2].dstAccessMask = vk::AccessFlagBits::eShaderRead;
+  deps[2].dependencyFlags = kSelfDependencyFlags;
 
   vk::RenderPassCreateInfo render_pass_desc;
   render_pass_desc.setPAttachments(attachments.data());
   render_pass_desc.setAttachmentCount(attachments_index);
   render_pass_desc.setSubpasses(subpass0);
-  render_pass_desc.setDependencies(self_dep);
+  render_pass_desc.setDependencies(deps);
 
   auto [result, pass] = device.createRenderPassUnique(render_pass_desc);
   if (result != vk::Result::eSuccess) {
