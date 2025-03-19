@@ -1403,7 +1403,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
         onFocusChange: (bool value) {
           statesController.update(WidgetState.focused, value);
         },
-
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         canRequestFocus: widget.isEnabled,
