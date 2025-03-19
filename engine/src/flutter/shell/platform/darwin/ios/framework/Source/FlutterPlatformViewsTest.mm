@@ -4644,6 +4644,26 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssertEqual(pool.size(), 1u);
 }
 
+- (void)testLayerUpdateViewStateWithNilFlutterViewShouldNotCrash {
+  // Create an IOSContext.
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  XCTAssertTrue(engine.platformView != nullptr);
+  auto ios_context = engine.platformView->GetIosContext();
+
+  auto pool = flutter::OverlayLayerPool{};
+
+  // Add layers to the pool.
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm, 1);
+  XCTAssertEqual(pool.size(), 1u);
+
+  auto layer = pool.GetNextLayer();
+
+  layer->UpdateViewState(nil, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
+  // Should not update the view state (e.g. overlay_view_wrapper's frame) when FlutterView is nil.
+  XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
+}
+
 - (void)testFlutterPlatformViewControllerSubmitFramePreservingFrameDamage {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
