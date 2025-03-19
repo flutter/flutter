@@ -2664,6 +2664,7 @@ class _NavigationBarComponentsTransition {
     required RenderBox fromNavBarBox,
     required GlobalKey toKey,
     required RenderBox toNavBarBox,
+    Curve curve = const Interval(0.0, 1.0),
     required Widget child,
   }) {
     final RenderBox fromBox = fromKey.currentContext!.findRenderObject()! as RenderBox;
@@ -2708,7 +2709,9 @@ class _NavigationBarComponentsTransition {
 
     return _FixedSizeSlidingTransition(
       isLTR: isLTR,
-      offsetAnimation: animation.drive(anchorMovementInTransitionBox),
+      offsetAnimation: animation
+          .drive(CurveTween(curve: curve))
+          .drive(anchorMovementInTransitionBox),
       size: fromBox.size,
       child: child,
     );
@@ -2857,6 +2860,7 @@ class _NavigationBarComponentsTransition {
         fromNavBarBox: bottomNavBarBox,
         toKey: topComponents.backLabelKey,
         toNavBarBox: topNavBarBox,
+        curve: Interval(0.0, animation.status == AnimationStatus.forward ? 0.7 : 1.0),
         child: FadeTransition(
           opacity: fadeOutBy(0.6),
           child: Align(
@@ -2994,10 +2998,20 @@ class _NavigationBarComponentsTransition {
 
     Widget child = topBackChevron.child;
     // Values eyeballed from an iPhone 15 simulator running iOS 17.5.
-    const Curve forwardCurve = Interval(0.0, 0.4);
-    const Curve backwardCurve = Interval(0.6, 1.0);
-    final Curve effectiveCurve =
-        animation.status == AnimationStatus.forward ? forwardCurve : backwardCurve;
+    const Curve forwardScaleCurve = Interval(0.0, 0.2);
+    const Curve backwardScaleCurve = Interval(0.8, 1.0);
+    const Curve forwardPositionCurve = Interval(0.0, 0.5);
+    const Curve backwardPositionCurve = Interval(0.5, 1.0);
+    final Curve effectiveScaleCurve;
+    final Curve effectivePositionCurve;
+
+    if (animation.status == AnimationStatus.forward) {
+      effectiveScaleCurve = forwardScaleCurve;
+      effectivePositionCurve = forwardPositionCurve;
+    } else {
+      effectiveScaleCurve = backwardScaleCurve;
+      effectivePositionCurve = backwardPositionCurve;
+    }
 
     // If it's the first page with a back chevron, shrink and shift in slightly
     // from the right.
@@ -3006,7 +3020,7 @@ class _NavigationBarComponentsTransition {
           topComponents.backChevronKey.currentContext!.findRenderObject()! as RenderBox;
       from = to.shift(Offset(forwardDirection * topBackChevronBox.size.width * 2.0, 0.0));
       child = ScaleTransition(
-        scale: routeAnimation.drive(CurveTween(curve: effectiveCurve)),
+        scale: routeAnimation.drive(CurveTween(curve: effectiveScaleCurve)),
         child: child,
       );
     }
@@ -3014,20 +3028,15 @@ class _NavigationBarComponentsTransition {
     final RelativeRectTween positionTween = RelativeRectTween(begin: from, end: to);
 
     return PositionedTransition(
-      rect: routeAnimation.drive(CurveTween(curve: effectiveCurve)).drive(positionTween),
+      rect: routeAnimation.drive(CurveTween(curve: effectivePositionCurve)).drive(positionTween),
       child: FadeTransition(
         opacity: routeAnimation.drive(
           CurveTween(
-            curve: switch ((
-              bottomBackChevron != null,
-              animation.status == AnimationStatus.forward,
-            )) {
-              (true, true) || (true, false) => const Interval(0.4, 1.0),
-              (false, true) => forwardCurve,
-              // Fades faster going from the first page with a back chevron to
-              // its previous page.
-              (false, false) => const Interval(0.9, 1.0),
-            },
+            curve: Interval(
+              // Fades faster going back from the first page with a back chevron.
+              bottomBackChevron == null && animation.status != AnimationStatus.forward ? 0.9 : 0.4,
+              1.0,
+            ),
           ),
         ),
         child: DefaultTextStyle(style: topBackButtonTextStyle, child: child),
@@ -3067,6 +3076,7 @@ class _NavigationBarComponentsTransition {
         fromNavBarBox: bottomNavBarBox,
         toKey: topComponents.backLabelKey,
         toNavBarBox: topNavBarBox,
+        curve: Interval(0.0, animation.status == AnimationStatus.forward ? 0.7 : 1.0),
         child: FadeTransition(
           opacity: midClickOpacity ?? fadeInFrom(0.4),
           child: DefaultTextStyleTransition(

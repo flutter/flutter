@@ -691,12 +691,12 @@ void main() {
       findsOneWidget,
     );
     // Come in from the right and fade in.
-    checkOpacity(tester, backChevron, 0.25);
-    expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(79.98, epsilon: 0.01));
-    expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(18.25, epsilon: 0.01));
+    checkOpacity(tester, backChevron, 0.0);
+    expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(80.54, epsilon: 0.01));
+    expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(14.5, epsilon: 0.01));
 
     await tester.pump(const Duration(milliseconds: 200));
-    checkOpacity(tester, backChevron, 1.0);
+    checkOpacity(tester, backChevron, 0.167);
     expect(tester.getTopLeft(backChevron).dx, moreOrLessEquals(14.0, epsilon: 0.01));
     expect(tester.getTopLeft(backChevron).dy, moreOrLessEquals(7.0, epsilon: 0.01));
   });
@@ -737,12 +737,12 @@ void main() {
     );
 
     // Come in from the right and fade in.
-    checkOpacity(tester, backChevron, 0.25);
-    expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(713.62, epsilon: 0.01));
-    expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(18.25, epsilon: 0.01));
+    checkOpacity(tester, backChevron, 0.0);
+    expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(706.66, epsilon: 0.01));
+    expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(14.5, epsilon: 0.01));
 
     await tester.pump(const Duration(milliseconds: 200));
-    checkOpacity(tester, backChevron, 1.0);
+    checkOpacity(tester, backChevron, 0.167);
     expect(tester.getTopRight(backChevron).dx, moreOrLessEquals(760.41, epsilon: 0.01));
     expect(tester.getTopRight(backChevron).dy, moreOrLessEquals(7.0, epsilon: 0.01));
   });
@@ -938,12 +938,20 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.0);
 
     expect(
-      tester.getTopLeft(flying(tester, find.text('Page 1')).first),
-      const Offset(16.9155227761479522997, 52.73951627314091),
+      tester.getTopLeft(flying(tester, find.text('Page 1')).first).dx,
+      moreOrLessEquals(17.3, epsilon: 0.01),
     );
     expect(
-      tester.getTopLeft(flying(tester, find.text('Page 1')).last),
-      const Offset(16.9155227761479522997, 52.73951627314091),
+      tester.getTopLeft(flying(tester, find.text('Page 1')).first).dy,
+      moreOrLessEquals(52.2, epsilon: 0.01),
+    );
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 1')).last).dx,
+      moreOrLessEquals(17.3, epsilon: 0.01),
+    );
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 1')).last).dy,
+      moreOrLessEquals(52.2, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
@@ -951,12 +959,20 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.4604858811944723);
 
     expect(
-      tester.getTopLeft(flying(tester, find.text('Page 1')).first),
-      const Offset(43.6029094262710827934, 22.49655644595623),
+      tester.getTopLeft(flying(tester, find.text('Page 1')).first).dx,
+      moreOrLessEquals(51.6, epsilon: 0.01),
     );
     expect(
-      tester.getTopLeft(flying(tester, find.text('Page 1')).last),
-      const Offset(43.6029094262710827934, 22.49655644595623),
+      tester.getTopLeft(flying(tester, find.text('Page 1')).first).dy,
+      moreOrLessEquals(11.5, epsilon: 0.01),
+    );
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 1')).last).dx,
+      moreOrLessEquals(51.6, epsilon: 0.01),
+    );
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Page 1')).last).dy,
+      moreOrLessEquals(11.5, epsilon: 0.01),
     );
   });
 
@@ -1049,24 +1065,40 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('A title too long to fit')), 0.9280824661254883);
     checkOpacity(tester, flying(tester, find.text('Back')), 0.0);
     expect(
-      tester.getTopLeft(flying(tester, find.text('A title too long to fit'))),
-      const Offset(16.9155227761479522997, 52.73951627314091),
+      tester.getTopLeft(flying(tester, find.text('A title too long to fit'))).dx,
+      moreOrLessEquals(17.3, epsilon: 0.01),
     );
     expect(
-      tester.getTopLeft(flying(tester, find.text('Back'))),
-      const Offset(16.9155227761479522997, 52.73951627314091),
+      tester.getTopLeft(flying(tester, find.text('A title too long to fit'))).dy,
+      moreOrLessEquals(52.2, epsilon: 0.01),
+    );
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Back'))).dx,
+      moreOrLessEquals(17.3, epsilon: 0.01),
+    );
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Back'))).dy,
+      moreOrLessEquals(52.2, epsilon: 0.01),
     );
 
     await tester.pump(const Duration(milliseconds: 200));
     checkOpacity(tester, flying(tester, find.text('A title too long to fit')), 0.0);
     checkOpacity(tester, flying(tester, find.text('Back')), 0.4604858811944723);
     expect(
-      tester.getTopLeft(flying(tester, find.text('A title too long to fit'))),
-      const Offset(43.6029094262710827934, 22.49655644595623),
+      tester.getTopLeft(flying(tester, find.text('A title too long to fit'))).dx,
+      moreOrLessEquals(51.6, epsilon: 0.01),
     );
     expect(
-      tester.getTopLeft(flying(tester, find.text('Back'))),
-      const Offset(43.6029094262710827934, 22.49655644595623),
+      tester.getTopLeft(flying(tester, find.text('A title too long to fit'))).dy,
+      moreOrLessEquals(11.5, epsilon: 0.01),
+    );
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Back'))).dx,
+      moreOrLessEquals(51.6, epsilon: 0.01),
+    );
+    expect(
+      tester.getTopLeft(flying(tester, find.text('Back'))).dy,
+      moreOrLessEquals(11.5, epsilon: 0.01),
     );
   });
 
