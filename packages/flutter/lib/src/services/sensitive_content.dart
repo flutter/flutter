@@ -98,13 +98,14 @@ class SensitiveContentService {
 
   /// Sets content sensitivity level of the app window (Android `View`) that contains the app's widget
   /// tree to the level specified by [contentSensitivity] via a call to the native embedder.
-  void setContentSensitivity(ContentSensitivity contentSensitivity) {
+  Future<void> setContentSensitivity(ContentSensitivity contentSensitivity) async {
     try {
-      sensitiveContentChannel.invokeMethod<void>(
+      await sensitiveContentChannel.invokeMethod<void>(
         'SensitiveContent.setContentSensitivity',
         contentSensitivity.name,
       );
     } catch (e) {
+      print('CAMILLE: set failed for $contentSensitivity');
       // Content sensitivity failed to be set.
       throw FlutterError('Content sensitivity $contentSensitivity failed to be set: $e');
     }

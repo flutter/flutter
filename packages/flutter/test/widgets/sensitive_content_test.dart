@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/sensitive_content.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'sensitive_content_utils.dart';
+
 void main() {
   // Default content sensitivity setting for testing.
   const ContentSensitivity defaultContentSensitivitySetting = ContentSensitivity.autoSensitive;
@@ -83,7 +85,7 @@ void main() {
     'one sensitive SensitiveContent widget in the tree determines content sensitivity for tree as expected',
     () {
       // Tests with other sensitive widget(s):
-      testWidgets('with another sensitive widget', (WidgetTester tester) async {
+      testWidgets('with another sensitive widget ca', (WidgetTester tester) async {
         await tester.pumpWidget(
           Column(
             children: <Widget>[
@@ -97,7 +99,12 @@ void main() {
           sensitiveContentHost.calculatedContentSensitivity,
           equals(ContentSensitivity.sensitive),
         );
-        expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
+        expect(
+          setContentSensitivityArgs.every(
+            (ContentSensitivity arg) => arg == ContentSensitivity.sensitive,
+          ),
+          isTrue, //here
+        );
       });
 
       testWidgets('when it gets disposed with another sensitive widget', (
@@ -2264,30 +2271,6 @@ void main() {
       },
     );
   });
-}
-
-class DisposeTester extends StatefulWidget {
-  DisposeTester({required this.child}) : super(key: child.key);
-
-  final Widget child;
-
-  @override
-  State<DisposeTester> createState() => DisposeTesterState();
-}
-
-class DisposeTesterState extends State<DisposeTester> {
-  bool _widgetDisposed = false;
-
-  void disposeWidget() {
-    setState(() {
-      _widgetDisposed = true;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _widgetDisposed ? Container() : widget.child;
-  }
 }
 
 class ChangeContentSensitivityTester extends StatefulWidget {

@@ -10,34 +10,22 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   // The state of content sensitivity in the app.
   final SensitiveContentHost sensitiveContentHost = SensitiveContentHost.instance;
-
-  setUp(() {
-    // Mock calls to the sensitive content method channel with calls `getContentSensitivity` returning
-    // the unknown value.
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.sensitiveContent,
-      (MethodCall methodCall) async {
-        if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-          // The enum name for ContentSensitivity._unknown.
-          return '_unknown';
-        } else if (methodCall.method == 'SensitiveContent.isSupported') {
-          return true;
-        }
-        return null;
-      },
-    );
-  });
-
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.sensitiveContent,
-      null,
-    );
-  });
-
   testWidgets(
     'when SensitiveContentService.getContentSensitivity returns ContentSensitivity.unknown, the fallback ContentSensitivity is notSensitive',
     (WidgetTester tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.sensitiveContent,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
+            // The enum name for ContentSensitivity._unknown.
+            return '_unknown';
+          } else if (methodCall.method == 'SensitiveContent.isSupported') {
+            return true;
+          }
+          return null;
+        },
+      );
+
       await tester.pumpWidget(
         SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
       );
