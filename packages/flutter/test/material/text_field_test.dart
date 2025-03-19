@@ -8945,55 +8945,71 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('InputDecoration errorText semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = _textEditingController();
-    final Key key = UniqueKey();
+  for (final bool isAndroid in <bool>[true, false]) {
+    testWidgets(
+        'InputDecoration errorText semantics (isAndroid=$isAndroid)', (
+        WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride =
+      isAndroid ? TargetPlatform.android : TargetPlatform.iOS;
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final TextEditingController controller = _textEditingController();
+      final Key key = UniqueKey();
 
-    await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-            errorText: 'oh no!',
+      await tester.pumpWidget(
+        overlay(
+          child: TextField(
+            key: key,
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: 'label',
+              hintText: 'hint',
+              errorText: 'oh no!',
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              label: 'label',
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-              ],
-              inputType: ui.SemanticsInputType.text,
-              currentValueLength: 0,
-              children: <TestSemantics>[
-                TestSemantics(label: 'oh no!', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                label: 'label',
+                textDirection: TextDirection.ltr,
+                actions: <SemanticsAction>[
+                  SemanticsAction.tap,
+                  SemanticsAction.focus
+                ],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isTextField,
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isEnabled,
+                ],
+                inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,children: <TestSemantics>[
+                    TestSemantics(
+                      label: 'oh no!',
+                      textDirection: TextDirection.ltr,
+                      flags: <SemanticsFlag>[
+                        if (isAndroid)
+                          SemanticsFlag.isLiveRegion
+                      ],
+                    )
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+          ignoreRect: true,
+          ignoreId: true,
         ),
-        ignoreTransform: true,
-        ignoreRect: true,
-        ignoreId: true,
-      ),
-    );
+      );
 
-    semantics.dispose();
-  });
+      semantics.dispose();
+      debugDefaultTargetPlatformOverride = null;
+    });
+  }
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
