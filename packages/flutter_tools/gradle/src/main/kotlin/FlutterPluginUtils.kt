@@ -632,6 +632,7 @@ object FlutterPluginUtils {
             } else {
                 pluginList
             }
+        println("hi gray, list is $pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency")
 
         if (!isFlutterAppProject(project) || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.isEmpty()) {
             addApiDependencies(project, buildType.name, "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
@@ -640,6 +641,7 @@ object FlutterPluginUtils {
             platforms.forEach { platform ->
                 val arch: String = formatPlatformString(platform)
                 // Add the `libflutter.so` dependency.
+
                 addApiDependencies(
                     project,
                     buildType.name,
@@ -657,7 +659,7 @@ object FlutterPluginUtils {
      * its `path` (String), or its `dependencies` (List<String>).
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
-    private fun getPluginListWithoutDevDependencies(
+    fun getPluginListWithoutDevDependencies(
         project: Project,
         pluginList: List<Map<String?, Any?>>
     ): List<Map<String?, Any?>> {
