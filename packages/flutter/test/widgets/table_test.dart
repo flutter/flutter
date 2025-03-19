@@ -719,23 +719,23 @@ void main() {
       equalsIgnoringHashCodes(
         'Table-[GlobalKey#00000](dependencies: [Directionality, MediaQuery], renderObject: RenderTable#00000)\n'
         '├Text("A", dependencies: [MediaQuery])\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "A", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "A", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("B", dependencies: [MediaQuery])\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "B", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "B", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("C", dependencies: [MediaQuery])\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "C", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "C", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("D", dependencies: [MediaQuery])\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "D", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "D", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("EEE", dependencies: [MediaQuery])\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "EEE", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "EEE", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("F", dependencies: [MediaQuery])\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "F", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "F", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("G", dependencies: [MediaQuery])\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "G", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "G", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("H", dependencies: [MediaQuery])\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "H", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "H", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '└Text("III", dependencies: [MediaQuery])\n'
-        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n',
+        ' └RichText(softWrap: wrapping at box width, textScaler: SystemTextScaler @ 1.0x, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n',
       ),
     );
   });
