@@ -135,9 +135,10 @@ class ScaleStartDetails {
   /// Could be null if triggered from proxied events such as accessibility.
   final Duration? sourceTimeStamp;
 
-  /// The kind of the device that initiated the event. If multiple pointers are
-  /// touching the screen, the kind of the pointer device that first initiated
-  /// the event is used.
+  /// The kind of the device that initiated the event.
+  ///
+  /// If multiple pointers are touching the screen, the kind of the pointer
+  /// device that first initiated the event is used.
   final PointerDeviceKind? kind;
 
   @override
