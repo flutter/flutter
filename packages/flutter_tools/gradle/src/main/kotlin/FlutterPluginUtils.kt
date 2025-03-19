@@ -1,8 +1,10 @@
 package com.flutter.gradle
 
+import com.android.build.gradle.BaseExtension
 import com.android.builder.model.BuildType
 import groovy.lang.Closure
 import org.gradle.api.GradleException
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
@@ -15,7 +17,9 @@ import java.util.Properties
  * A collection of static utility functions used by the Flutter Gradle Plugin.
  */
 object FlutterPluginUtils {
-    // Gradle properties.
+    // Gradle properties. These must correspond to the values used in
+    // flutter/packages/flutter_tools/lib/src/android/gradle.dart, and therefore it is not
+    // recommended to use these const values in tests.
     internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
     internal const val PROP_LOCAL_ENGINE_REPO = "localEngineRepo"
@@ -23,6 +27,7 @@ object FlutterPluginUtils {
     internal const val PROP_IS_FAST_START = "fast-start"
     internal const val PROP_TARGET = "target"
     internal const val PROP_LOCAL_ENGINE_BUILD_MODE = "local-engine-build-mode"
+    internal const val PROP_TARGET_PLATFORM = "target-platform"
 
     // ----------------- Methods for string manipulation and comparison. -----------------
 
@@ -387,5 +392,52 @@ object FlutterPluginUtils {
         // Don't configure dependencies for a build mode that the local engine
         // doesn't support.
         return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
+    }
+
+    @JvmStatic
+    @JvmName("getCompileSdkFromProject")
+    internal fun getCompileSdkFromProject(project: Project): String {
+        // Common supertype of the android extension types.
+        // but maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
+        val androidExtension = project.extensions.findByType(BaseExtension::class.java)
+        return androidExtension!!.compileSdkVersion!!.substring(8)
+    }
+
+    @JvmStatic
+    @JvmName("getTargetPlatforms")
+    internal fun getTargetPlatforms(project: Project): List<String> {
+        if (!project.hasProperty(PROP_TARGET_PLATFORM)) {
+            return FlutterPluginConstants.DEFAULT_PLATFORMS
+        }
+        val platformsString = project.property(PROP_TARGET_PLATFORM) as String
+        return platformsString.split(",").map { platform ->
+            if (!FlutterPluginConstants.PLATFORM_ARCH_MAP.containsKey(platform)) {
+                throw GradleException("Invalid platform: $platform")
+            }
+            platform
+        }
+    }
+
+//    private fun getApplicationVariants(project: Project)  {
+//        project.
+//    }
+
+    // ------------------ Task adders (a subset of the above category)
+
+    // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
+    //
+    // Format of the output of this task can be used in debugging what version of Java Gradle is using.
+    // Not recommended for use in time sensitive commands like `flutter run` or `flutter build` as
+    // Gradle is slower than we want. Particularly in light of https://github.com/flutter/flutter/issues/119196.
+    @JvmStatic
+    @JvmName("addTaskForJavaVersion")
+    internal fun addTaskForJavaVersion(project: Project) {
+        project.tasks.register("javaVersion") {
+            description = "Print the current java version used by gradle. see: " +
+                "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
+            doLast {
+                println(JavaVersion.current())
+            }
+        }
     }
 }

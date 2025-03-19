@@ -162,7 +162,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        getTargetPlatforms().each { targetArch ->
+        FlutterPluginUtils.getTargetPlatforms(project).each { targetArch ->
             String abiValue = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
             project.android {
                 if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
@@ -254,22 +254,6 @@ class FlutterPlugin implements Plugin<Project> {
             localEngineHost = engineHostOut.name
         }
         project.android.buildTypes.all(this.&addFlutterDependencies)
-    }
-
-    // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
-    //
-    // Format of the output of this task can be used in debugging what version of Java Gradle is using.
-    // Not recommended for use in time sensitive commands like `flutter run` or `flutter build` as
-    // Gradle is slower than we want. Particularly in light of https://github.com/flutter/flutter/issues/119196.
-    private static void addTaskForJavaVersion(Project project) {
-        // Warning: the name of this task is used by other code. Change with caution.
-        project.tasks.register("javaVersion") {
-            description "Print the current java version used by gradle. "
-                "see: https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
-            doLast {
-                println(JavaVersion.current())
-            }
-        }
     }
 
     // Add a task that can be called on Flutter projects that prints the available build variants
@@ -436,7 +420,7 @@ class FlutterPlugin implements Plugin<Project> {
             FlutterPluginUtils.addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
-        List<String> platforms = getTargetPlatforms().collect()
+        List<String> platforms = FlutterPluginUtils.getTargetPlatforms(project).collect()
         platforms.each { platform ->
             String arch = FlutterPluginUtils.formatPlatformString(platform)
             // Add the `libflutter.so` dependency.
@@ -569,7 +553,7 @@ class FlutterPlugin implements Plugin<Project> {
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
             if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${getCompileSdkFromProject(pluginProject)} or higher.")
+                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${FlutterPluginUtils.getCompileSdkFromProject(pluginProject)} or higher.")
                 project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
             }
 
@@ -613,8 +597,8 @@ class FlutterPlugin implements Plugin<Project> {
             // Default to int max if using a preview version to skip the sdk check.
             int projectCompileSdkVersion = Integer.MAX_VALUE
             // Stable versions use ints, legacy preview uses string.
-            if (getCompileSdkFromProject(project).isInteger()) {
-                projectCompileSdkVersion = getCompileSdkFromProject(project) as int
+            if (FlutterPluginUtils.getCompileSdkFromProject(project).isInteger()) {
+                projectCompileSdkVersion = FlutterPluginUtils.getCompileSdkFromProject(project) as int
             }
             int maxPluginCompileSdkVersion = projectCompileSdkVersion
             String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
@@ -634,8 +618,8 @@ class FlutterPlugin implements Plugin<Project> {
                     // Default to int min if using a preview version to skip the sdk check.
                     int pluginCompileSdkVersion = Integer.MIN_VALUE
                     // Stable versions use ints, legacy preview uses string.
-                    if (getCompileSdkFromProject(pluginProject).isInteger()) {
-                        pluginCompileSdkVersion = getCompileSdkFromProject(pluginProject) as int
+                    if (FlutterPluginUtils.getCompileSdkFromProject(pluginProject).isInteger()) {
+                        pluginCompileSdkVersion = FlutterPluginUtils.getCompileSdkFromProject(pluginProject) as int
                     }
 
                     maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
@@ -687,14 +671,6 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-    }
-
-    /**
-     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
-     * or string version.
-     */
-    private static String getCompileSdkFromProject(Project gradleProject) {
-        return gradleProject.android.compileSdkVersion.substring(8)
     }
 
     /**
@@ -791,19 +767,6 @@ class FlutterPlugin implements Plugin<Project> {
         return project.findProperty(name) ?: localProperties?.getProperty(name, defaultValue)
     }
 
-    private List<String> getTargetPlatforms() {
-        final String propTargetPlatform = "target-platform"
-        if (!project.hasProperty(propTargetPlatform)) {
-            return FlutterPluginConstants.DEFAULT_PLATFORMS
-        }
-        return project.property(propTargetPlatform).split(",").collect {
-            if (!FlutterPluginConstants.PLATFORM_ARCH_MAP[it]) {
-                throw new GradleException("Invalid platform: $it.")
-            }
-            return it
-        }
-    }
-
     private boolean isFlutterAppProject() {
         return project.android.hasProperty("applicationVariants")
     }
@@ -882,12 +845,12 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty(propValidateDeferredComponents)) {
             validateDeferredComponentsValue = project.property(propValidateDeferredComponents).toBoolean()
         }
-        addTaskForJavaVersion(project)
+        FlutterPluginUtils.addTaskForJavaVersion(project)
         if (isFlutterAppProject()) {
             addTaskForPrintBuildVariants(project)
             addTasksForOutputsAppLinkSettings(project)
         }
-        List<String> targetPlatforms = getTargetPlatforms()
+        List<String> targetPlatforms = FlutterPluginUtils.getTargetPlatforms(project)
         def addFlutterDeps = { variant ->
             if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
                 variant.outputs.each { output ->
