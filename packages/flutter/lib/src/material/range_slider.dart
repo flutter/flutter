@@ -1539,8 +1539,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       overlayEndRect = Rect.fromCircle(center: _endThumbCenter, radius: overlaySize.width / 2.0);
     }
 
-    // If [Slider.year2023] is false, the thumb uses handle thumb shape and gapped track shape.
-    // The handle width and track gap are adjusted when the thumb is pressed.
+    // If [RangeSlider.year2023] is false, the thumbs uses handle thumb shape and gapped track shape.
+    // The handle width and track gaps are adjusted when the thumb is pressed.
     double? thumbWidth = _sliderTheme.thumbSize?.resolve(<MaterialState>{})?.width;
     final double? thumbHeight = _sliderTheme.thumbSize?.resolve(<MaterialState>{})?.height;
     double? trackGap = _sliderTheme.trackGap;
@@ -1549,9 +1549,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     final double delta;
     if (_active && thumbWidth != null && pressedThumbWidth != null && trackGap != null) {
       delta = thumbWidth - pressedThumbWidth;
-      if (thumbWidth > 0.0) {
-        thumbWidth = pressedThumbWidth;
-      }
+      thumbWidth = pressedThumbWidth;
       if (trackGap > 0.0) {
         trackGap = trackGap - delta / 2;
       }
@@ -2123,7 +2121,7 @@ class _RangeSliderDefaultsM3 extends SliderThemeData {
   Color? get thumbColor => _colors.primary;
 
   @override
-  ui.Color? get overlappingShapeStrokeColor => _colors.surface;
+  Color? get overlappingShapeStrokeColor => _colors.surface;
 
   @override
   Color? get disabledThumbColor => _colors.onSurface.withOpacity(0.38);

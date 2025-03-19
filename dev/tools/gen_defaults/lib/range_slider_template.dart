@@ -52,7 +52,7 @@ class _${blockName}DefaultsM3 extends SliderThemeData {
   Color? get thumbColor => ${componentColor('$tokenGroup.handle')};
 
   @override
-  ui.Color? get overlappingShapeStrokeColor => _colors.surface;
+  Color? get overlappingShapeStrokeColor => _colors.surface;
 
   @override
   Color? get disabledThumbColor => ${componentColor('$tokenGroup.disabled.handle')};
