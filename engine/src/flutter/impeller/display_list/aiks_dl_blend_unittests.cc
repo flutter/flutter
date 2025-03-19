@@ -650,8 +650,39 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
   return builder.Build();
 }
 
-#define BLEND_MODE_TEST(blend_mode)                                           \
-  TEST_P(AiksTest, BlendMode##blend_mode) {                                   \
+#define FOR_EACH_TESTABLE_BLEND_MODE(V) \
+  V(Clear, Clear)                       \
+  V(Src, Source)                        \
+  V(Dst, Destination)                   \
+  V(SrcOver, SourceOver)                \
+  V(DstOver, DestinationOver)           \
+  V(SrcIn, SourceIn)                    \
+  V(DstIn, DestinationIn)               \
+  V(SrcOut, SourceOut)                  \
+  V(DstOut, DestinationOut)             \
+  V(SrcATop, SourceATop)                \
+  V(DstATop, DestinationATop)           \
+  V(Xor, Xor)                           \
+  V(Plus, Plus)                         \
+  V(Modulate, Modulate)                 \
+  V(Screen, Screen)                     \
+  V(Overlay, Overlay)                   \
+  V(Darken, Darken)                     \
+  V(Lighten, Lighten)                   \
+  V(ColorDodge, ColorDodge)             \
+  V(ColorBurn, ColorBurn)               \
+  V(HardLight, HardLight)               \
+  V(SoftLight, SoftLight)               \
+  V(Difference, Difference)             \
+  V(Exclusion, Exclusion)               \
+  V(Multiply, Multiply)                 \
+  V(Hue, Hue)                           \
+  V(Saturation, Saturation)             \
+  V(Color, Color)                       \
+  V(Luminosity, Luminosity)
+
+#define BLEND_MODE_TEST(blend_mode, test_name)                                \
+  TEST_P(AiksTest, BlendMode##test_name) {                                    \
     auto src_image =                                                          \
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_src.png")); \
     auto dst_image =                                                          \
@@ -662,10 +693,10 @@ static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
     };                                                                        \
     OpenPlaygroundHere(callback);                                             \
   }
-IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
+FOR_EACH_TESTABLE_BLEND_MODE(BLEND_MODE_TEST)
 
-#define BLEND_MODE_SRC_ALPHA_TEST(blend_mode)                                 \
-  TEST_P(AiksTest, BlendModeSrcAlpha##blend_mode) {                           \
+#define BLEND_MODE_SRC_ALPHA_TEST(blend_mode, test_name)                      \
+  TEST_P(AiksTest, BlendModeSrcAlpha##test_name) {                            \
     auto src_image =                                                          \
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_src.png")); \
     auto dst_image =                                                          \
@@ -676,7 +707,9 @@ IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
     };                                                                        \
     OpenPlaygroundHere(callback);                                             \
   }
-IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_SRC_ALPHA_TEST)
+FOR_EACH_TESTABLE_BLEND_MODE(BLEND_MODE_SRC_ALPHA_TEST)
+
+#undef FOR_EACH_TESTABLE_BLEND_MODE
 
 TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
   auto modes = GetBlendModeSelection();

@@ -5,8 +5,6 @@
 #ifndef FLUTTER_DISPLAY_LIST_DL_BLEND_MODE_H_
 #define FLUTTER_DISPLAY_LIST_DL_BLEND_MODE_H_
 
-#include <stdint.h>
-
 #include "flutter/impeller/geometry/color.h"
 
 namespace flutter {
