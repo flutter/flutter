@@ -139,6 +139,7 @@ class RefPtr final {
     if (old_ptr) {
       old_ptr->Release();
     }
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     return *this;
   }
 
