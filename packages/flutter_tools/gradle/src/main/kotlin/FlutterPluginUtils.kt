@@ -626,7 +626,6 @@ object FlutterPluginUtils {
         val pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency: List<Map<String?, Any?>> =
             if (flutterBuildMode == "release") {
                 getPluginListWithoutDevDependencies(
-                    project,
                     pluginList
                 )
             } else {
