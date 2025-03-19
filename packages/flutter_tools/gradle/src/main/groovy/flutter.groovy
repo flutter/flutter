@@ -256,14 +256,6 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.all(this.&addFlutterDependencies)
     }
 
-    private static Properties readPropertiesIfExist(File propertiesFile) {
-        Properties result = new Properties()
-        if (propertiesFile.exists()) {
-            propertiesFile.withReader("UTF-8") { reader -> result.load(reader) }
-        }
-        return result
-    }
-
     // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
     //
     // Format of the output of this task can be used in debugging what version of Java Gradle is using.
@@ -794,7 +786,7 @@ class FlutterPlugin implements Plugin<Project> {
 
     private String resolveProperty(String name, String defaultValue) {
         if (localProperties == null) {
-            localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
+            localProperties = FlutterPluginUtils.readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
         return project.findProperty(name) ?: localProperties?.getProperty(name, defaultValue)
     }

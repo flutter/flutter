@@ -8,6 +8,8 @@ import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
 import java.io.File
+import java.nio.charset.StandardCharsets
+import java.util.Properties
 
 /**
  * A collection of static utility functions used by the Flutter Gradle Plugin.
@@ -88,6 +90,21 @@ object FlutterPluginUtils {
     @JvmStatic
     @JvmName("formatPlatformString")
     fun formatPlatformString(platform: String): String = FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]!!.replace("-", "_")
+
+    @JvmStatic
+    @JvmName("readPropertiesIfExist")
+    internal fun readPropertiesIfExist(propertiesFile: File): Properties {
+        val result = Properties()
+        if (propertiesFile.exists()) {
+            propertiesFile
+                .reader(StandardCharsets.UTF_8)
+                .use { reader ->
+                    // Use Kotlin's reader with UTF-8 and 'use' for auto-closing
+                    result.load(reader)
+                }
+        }
+        return result
+    }
 
     // ----------------- Methods that interact primarily with the Gradle project. -----------------
 
