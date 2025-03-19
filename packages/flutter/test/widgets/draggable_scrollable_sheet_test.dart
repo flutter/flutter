@@ -1892,4 +1892,27 @@ void main() {
     expect(receivedNotification!.shouldCloseOnMinExtent, isFalse);
     controller.dispose();
   });
+
+  testWidgets("DraggableScrollableSheet's extent value is rounded after snap animation", (
+    WidgetTester tester
+  ) async {
+    double? lastExtent;
+
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        snap: true,
+        onDraggableScrollableNotification: (DraggableScrollableNotification notification) {
+          lastExtent = notification.extent;
+          return false;
+        },
+      ),
+    );
+
+    await tester.fling(find.text('Item 1'), const Offset(0, 10), 1);
+    while (tester.binding.hasScheduledFrame) {
+      await tester.pump(const Duration(milliseconds: 16)); // Advance one frame
+    }
+    expect(lastExtent, .25);
+  });
 }
