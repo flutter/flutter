@@ -93,6 +93,7 @@ enum class BlendMode : uint8_t {
   kLuminosity,
 
   kLastMode = kLuminosity,
+  kDefaultMode = kSrcOver,
 };
 
 const char* BlendModeToString(BlendMode blend_mode);
