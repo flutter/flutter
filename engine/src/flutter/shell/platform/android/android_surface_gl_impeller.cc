@@ -11,9 +11,8 @@
 namespace flutter {
 
 AndroidSurfaceGLImpeller::AndroidSurfaceGLImpeller(
-    const std::shared_ptr<AndroidContextGLImpeller>& android_context,
-    const impeller::AiksContext::Settings& settings)
-    : android_context_(android_context), settings_(settings) {
+    const std::shared_ptr<AndroidContextGLImpeller>& android_context)
+    : android_context_(android_context) {
   offscreen_surface_ = android_context_->CreateOffscreenSurface();
 
   if (!offscreen_surface_) {
@@ -39,7 +38,6 @@ std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateGPUSurface(
   auto surface = std::make_unique<GPUSurfaceGLImpeller>(
       this,                                    // delegate
       android_context_->GetImpellerContext(),  // context
-      settings_,                               // settings
       true                                     // render to surface
   );
   if (!surface->IsValid()) {
@@ -100,7 +98,6 @@ std::unique_ptr<Surface> AndroidSurfaceGLImpeller::CreateSnapshotSurface() {
   return std::make_unique<GPUSurfaceGLImpeller>(
       this,                                    // delegate
       android_context_->GetImpellerContext(),  // context
-      settings_,                               // settings
       true                                     // render to surface
   );
 }

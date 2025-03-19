@@ -74,17 +74,13 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
       return std::make_unique<AndroidSurfaceSoftware>();
     case AndroidRenderingAPI::kImpellerOpenGLES:
       return std::make_unique<AndroidSurfaceGLImpeller>(
-          std::static_pointer_cast<AndroidContextGLImpeller>(android_context_),
-          impeller::AiksContext::Settings{.lazy_shader_mode =
-                                              lazy_shader_mode_});
+          std::static_pointer_cast<AndroidContextGLImpeller>(android_context_));
     case AndroidRenderingAPI::kSkiaOpenGLES:
       return std::make_unique<AndroidSurfaceGLSkia>(
           std::static_pointer_cast<AndroidContextGLSkia>(android_context_));
     case AndroidRenderingAPI::kImpellerVulkan:
       return std::make_unique<AndroidSurfaceVKImpeller>(
-          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_),
-          impeller::AiksContext::Settings{.lazy_shader_mode =
-                                              lazy_shader_mode_});
+          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_));
   }
   FML_UNREACHABLE();
 }
