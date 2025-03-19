@@ -16,25 +16,28 @@ FLUTTER_ASSERT_ARC
 
 @implementation FlutterSharedApplicationTest
 
-- (void)testIsAvailableWhenNSExtensionInBundle {
+- (void)testWhenNSExtensionInBundle {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
     @"NSExtensionPointIdentifier" : @"com.apple.share-services"
   });
+  XCTAssertTrue([FlutterSharedApplication isAppExtension]);
   XCTAssertFalse([FlutterSharedApplication isAvailable]);
   [mockBundle stopMocking];
 }
 
-- (void)testIsAvailableWhenNSExtensionEmptyInBundle {
+- (void)testWhenNSExtensionEmptyInBundle {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"])
       .andReturn([[NSDictionary alloc] init]);
+  XCTAssertTrue([FlutterSharedApplication isAppExtension]);
   XCTAssertFalse([FlutterSharedApplication isAvailable]);
   [mockBundle stopMocking];
 }
 
-- (void)testIsAvailableWhenNSExtensionNotInBundle {
+- (void)testWhenNSExtensionNotInBundle {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  XCTAssertFalse([FlutterSharedApplication isAppExtension]);
   XCTAssertTrue([FlutterSharedApplication isAvailable]);
   [mockBundle stopMocking];
 }
