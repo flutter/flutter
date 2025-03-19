@@ -7,6 +7,8 @@
 
 namespace impeller {
 struct Flags {
+  /// Whether to defer PSO construction until first use. Usage Will introduce
+  /// raster jank.
   bool lazy_shader_mode = false;
 };
 }  // namespace impeller
