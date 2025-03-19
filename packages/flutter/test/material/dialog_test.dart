@@ -2682,6 +2682,39 @@ void main() {
     expect(find.text('Dialog2'), findsOneWidget);
   });
 
+  testWidgets('Applies AnimationStyle to showAdaptiveDialog', (WidgetTester tester) async {
+    const AnimationStyle animationStyle = AnimationStyle(
+      duration: Duration(seconds: 1),
+      curve: Curves.easeInOut,
+    );
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(child: Center(child: ElevatedButton(onPressed: null, child: Text('Go')))),
+      ),
+    );
+    final BuildContext context = tester.element(find.text('Go'));
+    showAdaptiveDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: 100.0,
+          height: 100.0,
+          alignment: Alignment.center,
+          child: const Text('Dialog1'),
+        );
+      },
+      animationStyle: animationStyle,
+    );
+
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsOneWidget);
+
+    await tester.tapAt(const Offset(10.0, 10.0));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsNothing);
+  });
+
   testWidgets('Uses open focus traversal when overridden', (WidgetTester tester) async {
     final FocusNode okNode = FocusNode();
     addTearDown(okNode.dispose);
