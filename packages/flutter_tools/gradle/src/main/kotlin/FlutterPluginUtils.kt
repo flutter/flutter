@@ -659,10 +659,8 @@ object FlutterPluginUtils {
      * its `path` (String), or its `dependencies` (List<String>).
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
-    fun getPluginListWithoutDevDependencies(
-        project: Project,
-        pluginList: List<Map<String?, Any?>>
-    ): List<Map<String?, Any?>> {
+    @JvmStatic
+    fun getPluginListWithoutDevDependencies(pluginList: List<Map<String?, Any?>>): List<Map<String?, Any?>> {
         val pluginListWithoutDevDependencies = mutableListOf<Map<String?, Any?>>()
         pluginList.forEach { pluginObject ->
             if (!(pluginObject["dev_dependency"] as Boolean)) {
