@@ -312,7 +312,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    // debugPrint('${childrenInPaintOrder.toList()}, ${childrenInPaintOrder.length}');
     childrenInPaintOrder
         .where(
           (RenderSliver sliver) =>
@@ -595,10 +594,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     );
     double maxPaintOffset = layoutOffset + overlap;
     double precedingScrollExtent = 0.0;
-    debugPrint('Renderviewport bounds $paintBounds');
 
     while (child != null) {
-      debugPrint('laying out $child');
       final double sliverScrollOffset = scrollOffset <= 0.0 ? 0.0 : scrollOffset;
       // If the scrollOffset is too small we adjust the paddedOrigin because it
       // doesn't make sense to ask a sliver for content before its scroll
@@ -666,10 +663,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       }
 
       updateOutOfBandData(growthDirection, childLayoutGeometry);
-
-      debugPrint(
-        'after child $child laid out transform: ${MatrixUtils.transformRect(child.getTransformTo(this), child.paintBounds)}, original: ${child.paintBounds} \n',
-      );
 
       // move on to the next child
       child = advance(child);
@@ -782,7 +775,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   void _paintContents(PaintingContext context, Offset offset) {
     for (final RenderSliver child in childrenInPaintOrder) {
-      // debugPrint('painting $child');
       if (child.geometry!.visible) {
         context.paintChild(child, offset + paintOffsetOf(child));
       }
@@ -1627,7 +1619,6 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   ) {
     final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.paintOffset = computeAbsolutePaintOffset(child, layoutOffset, growthDirection);
-    debugPrint('updatingChildLayoutOffset for $child, offset: ${childParentData.paintOffset}');
   }
 
   @override

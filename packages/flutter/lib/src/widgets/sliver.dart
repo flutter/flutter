@@ -1773,7 +1773,7 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
 }
 
 class SliverForceIncludeSemantics extends SingleChildRenderObjectWidget {
-  const SliverForceIncludeSemantics({super.key, Widget? sliver}) : super(child: sliver);
+  const SliverForceIncludeSemantics({super.key, required Widget sliver}) : super(child: sliver);
 
   @override
   RenderSliverForceIncludeSemantics createRenderObject(BuildContext context) =>
