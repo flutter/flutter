@@ -1384,7 +1384,6 @@ targets:
       - DEPS
 
   - name: Linux tool_integration_tests_6_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
