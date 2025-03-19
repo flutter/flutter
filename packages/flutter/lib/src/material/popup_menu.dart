@@ -1644,21 +1644,18 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       return Semantics(expanded: _isMenuExpanded, child: child);
     }
 
-    return MergeSemantics(
-      child: Semantics(
-        expanded: _isMenuExpanded,
-        child: IconButton(
-          key: StandardComponentType.moreButton.key,
-          icon: widget.icon ?? Icon(Icons.adaptive.more),
-          padding: widget.padding,
-          splashRadius: widget.splashRadius,
-          iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
-          color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
-          tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
-          onPressed: widget.enabled ? showButtonMenu : null,
-          enableFeedback: enableFeedback,
-          style: widget.style,
-        ),
+    return Semantics(
+      child: IconButton(
+        key: StandardComponentType.moreButton.key,
+        icon: Semantics(expanded: _isMenuExpanded, child: widget.icon ?? Icon(Icons.adaptive.more)),
+        padding: widget.padding,
+        splashRadius: widget.splashRadius,
+        iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
+        color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
+        tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+        onPressed: widget.enabled ? showButtonMenu : null,
+        enableFeedback: enableFeedback,
+        style: widget.style,
       ),
     );
   }
