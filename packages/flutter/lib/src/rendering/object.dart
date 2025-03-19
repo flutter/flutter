@@ -5467,9 +5467,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
         configProvider.original.isHidden ||
         (!(parentData?.mergeIntoParent ?? false) && nodeGeometry.hidden);
     node
-      ..rect =
-          nodeGeometry
-              .rect //
+      ..rect = nodeGeometry.rect
       ..transform = nodeGeometry.transform
       ..parentSemanticsClipRect = nodeGeometry.semanticsClipRect
       ..parentPaintClipRect = nodeGeometry.paintClipRect;
@@ -5859,6 +5857,7 @@ final class _SemanticsGeometry {
         }
       }
     }
+
     Rect rect =
         semanticsClipRect?.intersect(child.renderObject.semanticBounds) ??
         child.renderObject.semanticBounds;
