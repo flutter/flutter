@@ -140,7 +140,7 @@ final class _ClampedTextScaler implements TextScaler {
     if (identical(this, other)) {
       return true;
     }
-    assert(minScale< maxScale );
+    assert(minScale < maxScale);
     return other is _ClampedTextScaler &&
         minScale == other.minScale &&
         maxScale == other.maxScale &&
