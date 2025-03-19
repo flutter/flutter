@@ -598,8 +598,77 @@ object FlutterPluginUtils {
     @JvmName("isFlutterAppProject")
     internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) != null
 
-//    @JvmStatic
-//    @JvmName("addFlutterDependencies")
+    /**
+     * Adds the dependencies required by the Flutter project.
+     * This includes:
+     *    1. The embedding
+     *    2. libflutter.so
+     */
+    @JvmStatic
+    @JvmName("addFlutterDependencies")
+    internal fun addFlutterDependencies(
+        project: Project,
+        buildType: BuildType,
+        pluginList: List<Map<String?, Any?>>,
+        engineVersion: String
+    ) {
+        val flutterBuildMode: String = buildModeFor(buildType)
+        if (!supportsBuildMode(project, flutterBuildMode)) {
+            return
+        }
+        // The embedding is set as an API dependency in a Flutter plugin.
+        // Therefore, don't make the app project depend on the embedding if there are Flutter
+        // plugin dependencies. In release mode, dev dependencies are stripped, so we do not
+        // consider those in the check.
+        // This prevents duplicated classes when using custom build types. That is, a custom build
+        // type like profile is used, and the plugin and app projects have API dependencies on the
+        // embedding.
+        val pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency: List<Map<String?, Any?>> =
+            if (flutterBuildMode == "release") {
+                getPluginListWithoutDevDependencies(
+                    project,
+                    pluginList
+                )
+            } else {
+                pluginList
+            }
+
+        if (!isFlutterAppProject(project) || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.isEmpty()) {
+            addApiDependencies(project, buildType.name, "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
+        } else {
+            val platforms: List<String> = getTargetPlatforms(project)
+            platforms.forEach { platform ->
+                val arch: String = formatPlatformString(platform)
+                // Add the `libflutter.so` dependency.
+                addApiDependencies(
+                    project,
+                    buildType.name,
+                    "io.flutter:${arch}_$flutterBuildMode:$engineVersion"
+                )
+            }
+        }
+    }
+
+    /**
+     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
+     * Android project excluding dev dependencies.
+     *
+     * The map value contains either the plugins `name` (String),
+     * its `path` (String), or its `dependencies` (List<String>).
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     */
+    private fun getPluginListWithoutDevDependencies(
+        project: Project,
+        pluginList: List<Map<String?, Any?>>
+    ): List<Map<String?, Any?>> {
+        val pluginListWithoutDevDependencies = mutableListOf<Map<String?, Any?>>()
+        pluginList.forEach { pluginObject ->
+            if (!(pluginObject["dev_dependency"] as Boolean)) {
+                pluginListWithoutDevDependencies.add(pluginObject)
+            }
+        }
+        return pluginListWithoutDevDependencies
+    }
 
 //    private fun getApplicationVariants(project: Project)  {
 //        project.

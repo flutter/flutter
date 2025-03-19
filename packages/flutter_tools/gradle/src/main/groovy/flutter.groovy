@@ -382,29 +382,7 @@ class FlutterPlugin implements Plugin<Project> {
      *    2. libflutter.so
      */
     void addFlutterDependencies(BuildType buildType) {
-        String flutterBuildMode = FlutterPluginUtils.buildModeFor(buildType)
-        if (!FlutterPluginUtils.supportsBuildMode(project, flutterBuildMode)) {
-            return
-        }
-        // The embedding is set as an API dependency in a Flutter plugin.
-        // Therefore, don't make the app project depend on the embedding if there are Flutter
-        // plugin dependencies. In release mode, dev dependencies are stripped, so we do not
-        // consider those in the check.
-        // This prevents duplicated classes when using custom build types. That is, a custom build
-        // type like profile is used, and the plugin and app projects have API dependencies on the
-        // embedding.
-        List<Map<String, Object>> pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency = flutterBuildMode == "release" ? getPluginListWithoutDevDependencies(project) : getPluginList(project);
-        if (!FlutterPluginUtils.isFlutterAppProject(project) || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.size() == 0) {
-            FlutterPluginUtils.addApiDependencies(project, buildType.name,
-                    "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
-        }
-        List<String> platforms = FlutterPluginUtils.getTargetPlatforms(project).collect()
-        platforms.each { platform ->
-            String arch = FlutterPluginUtils.formatPlatformString(platform)
-            // Add the `libflutter.so` dependency.
-            FlutterPluginUtils.addApiDependencies(project, buildType.name,
-                    "io.flutter:${arch}_$flutterBuildMode:$engineVersion")
-        }
+        FlutterPluginUtils.addFlutterDependencies(project, buildType, getPluginList(project), engineVersion)
     }
 
     /**
@@ -591,25 +569,6 @@ class FlutterPlugin implements Plugin<Project> {
             pluginList = project.ext.nativePluginLoader.getPlugins(FlutterPluginUtils.getFlutterSourceDirectory(project))
         }
         return pluginList
-    }
-
-    // can't do because of dependency on getPluginList, which we can't do
-    /**
-     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
-     * Android project excluding dev dependencies.
-     *
-     * The map value contains either the plugins `name` (String),
-     * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
-     */
-    private List<Map<String, Object>> getPluginListWithoutDevDependencies(Project project) {
-        List<Map<String, Object>> pluginListWithoutDevDependencies = []
-        for (Map<String, Object> plugin in getPluginList(project)) {
-            if (!plugin.dev_dependency) {
-                pluginListWithoutDevDependencies += plugin
-            }
-        }
-        return pluginListWithoutDevDependencies
     }
 
     // can't tdo because of nativePluginLoader dependency
