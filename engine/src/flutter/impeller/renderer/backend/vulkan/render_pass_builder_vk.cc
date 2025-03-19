@@ -9,6 +9,16 @@
 
 namespace impeller {
 
+namespace {
+// Compute the final layout for a given image state.
+vk::ImageLayout ComputeFinalLayout(bool is_swapchain, SampleCount count) {
+  if (is_swapchain || count != SampleCount::kCount1) {
+    return vk::ImageLayout::eGeneral;
+  }
+  return vk::ImageLayout::eShaderReadOnlyOptimal;
+}
+}  // namespace
+
 constexpr auto kSelfDependencySrcStageMask =
     vk::PipelineStageFlagBits::eColorAttachmentOutput;
 constexpr auto kSelfDependencySrcAccessMask =
@@ -45,10 +55,7 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
   } else {
     desc.initialLayout = vk::ImageLayout::eUndefined;
   }
-  desc.finalLayout = vk::ImageLayout::eGeneral;
-  if (sample_count == SampleCount::kCount1 && !is_swapchain) {
-    desc.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-  }
+  desc.finalLayout = ComputeFinalLayout(is_swapchain, sample_count);
 
   const bool performs_resolves = StoreActionPerformsResolve(store_action);
   if (index == 0u) {
@@ -57,9 +64,7 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     if (performs_resolves) {
       desc.storeOp = ToVKAttachmentStoreOp(store_action, true);
       desc.samples = vk::SampleCountFlagBits::e1;
-      if (!is_swapchain) {
-        desc.finalLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
-      }
+      desc.finalLayout = ComputeFinalLayout(is_swapchain, SampleCount::kCount1);
       color0_resolve_ = desc;
     } else {
       color0_resolve_ = std::nullopt;
@@ -69,6 +74,7 @@ RenderPassBuilderVK& RenderPassBuilderVK::SetColorAttachment(
     if (performs_resolves) {
       desc.storeOp = ToVKAttachmentStoreOp(store_action, true);
       desc.samples = vk::SampleCountFlagBits::e1;
+      desc.finalLayout = ComputeFinalLayout(is_swapchain, SampleCount::kCount1);
       resolves_[index] = desc;
     } else {
       resolves_.erase(index);
@@ -134,14 +140,14 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   if (color0_.has_value()) {
     vk::AttachmentReference color_ref;
     color_ref.attachment = attachments_index;
-    color_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
+    color_ref.layout = vk::ImageLayout::eGeneral;
     color_refs.at(color_index++) = color_ref;
     attachments.at(attachments_index++) = color0_.value();
 
     if (color0_resolve_.has_value()) {
       vk::AttachmentReference resolve_ref;
       resolve_ref.attachment = attachments_index;
-      resolve_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
+      resolve_ref.layout = vk::ImageLayout::eGeneral;
       resolve_refs.at(resolve_index++) = resolve_ref;
       attachments.at(attachments_index++) = color0_resolve_.value();
     } else {
@@ -152,14 +158,14 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   for (const auto& color : colors_) {
     vk::AttachmentReference color_ref;
     color_ref.attachment = attachments_index;
-    color_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
+    color_ref.layout = vk::ImageLayout::eGeneral;
     color_refs.at(color_index++) = color_ref;
     attachments.at(attachments_index++) = color.second;
 
     if (auto found = resolves_.find(color.first); found != resolves_.end()) {
       vk::AttachmentReference resolve_ref;
       resolve_ref.attachment = attachments_index;
-      resolve_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
+      resolve_ref.layout = vk::ImageLayout::eGeneral;
       resolve_refs.at(resolve_index++) = resolve_ref;
       attachments.at(attachments_index++) = found->second;
     } else {
