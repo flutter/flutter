@@ -405,7 +405,11 @@ abstract class ScrollView extends StatelessWidget {
   /// [AxisDirection.right].
   @protected
   AxisDirection getDirection(BuildContext context) {
-    return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
+    return getAxisDirectionFromAxisReverseAndDirectionality(
+      context,
+      scrollDirection,
+      reverse,
+    );
   }
 
   /// Build the list of widgets to place inside the viewport.
@@ -479,10 +483,13 @@ abstract class ScrollView extends StatelessWidget {
 
     final bool effectivePrimary =
         primary ??
-        controller == null && PrimaryScrollController.shouldInherit(context, scrollDirection);
+        controller == null &&
+            PrimaryScrollController.shouldInherit(context, scrollDirection);
 
     final ScrollController? scrollController =
-        effectivePrimary ? PrimaryScrollController.maybeOf(context) : controller;
+        effectivePrimary
+            ? PrimaryScrollController.maybeOf(context)
+            : controller;
 
     final Scrollable scrollable = Scrollable(
       dragStartBehavior: dragStartBehavior,
@@ -527,7 +534,14 @@ abstract class ScrollView extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('scrollDirection', scrollDirection));
-    properties.add(FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
+    properties.add(
+      FlagProperty(
+        'reverse',
+        value: reverse,
+        ifTrue: 'reversed',
+        showName: true,
+      ),
+    );
     properties.add(
       DiagnosticsProperty<ScrollController>(
         'controller',
@@ -537,13 +551,28 @@ abstract class ScrollView extends StatelessWidget {
       ),
     );
     properties.add(
-      FlagProperty('primary', value: primary, ifTrue: 'using primary controller', showName: true),
+      FlagProperty(
+        'primary',
+        value: primary,
+        ifTrue: 'using primary controller',
+        showName: true,
+      ),
     );
     properties.add(
-      DiagnosticsProperty<ScrollPhysics>('physics', physics, showName: false, defaultValue: null),
+      DiagnosticsProperty<ScrollPhysics>(
+        'physics',
+        physics,
+        showName: false,
+        defaultValue: null,
+      ),
     );
     properties.add(
-      FlagProperty('shrinkWrap', value: shrinkWrap, ifTrue: 'shrink-wrapping', showName: true),
+      FlagProperty(
+        'shrinkWrap',
+        value: shrinkWrap,
+        ifTrue: 'shrink-wrapping',
+        showName: true,
+      ),
     );
   }
 }
@@ -852,14 +881,10 @@ abstract class BoxScrollView extends ScrollView {
       final MediaQueryData? mediaQuery = MediaQuery.maybeOf(context);
       if (mediaQuery != null) {
         // Automatically pad sliver with padding from MediaQuery.
-        final EdgeInsets mediaQueryHorizontalPadding = mediaQuery.padding.copyWith(
-          top: 0.0,
-          bottom: 0.0,
-        );
-        final EdgeInsets mediaQueryVerticalPadding = mediaQuery.padding.copyWith(
-          left: 0.0,
-          right: 0.0,
-        );
+        final EdgeInsets mediaQueryHorizontalPadding = mediaQuery.padding
+            .copyWith(top: 0.0, bottom: 0.0);
+        final EdgeInsets mediaQueryVerticalPadding = mediaQuery.padding
+            .copyWith(left: 0.0, right: 0.0);
         // Consume the main axis padding with SliverPadding.
         effectivePadding =
             scrollDirection == Axis.vertical
@@ -891,7 +916,13 @@ abstract class BoxScrollView extends ScrollView {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<EdgeInsetsGeometry>(
+        'padding',
+        padding,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -1594,14 +1625,20 @@ class ListView extends BoxScrollView {
   @override
   Widget buildChildLayout(BuildContext context) {
     if (itemExtent != null) {
-      return SliverFixedExtentList(delegate: childrenDelegate, itemExtent: itemExtent!);
+      return SliverFixedExtentList(
+        delegate: childrenDelegate,
+        itemExtent: itemExtent!,
+      );
     } else if (itemExtentBuilder != null) {
       return SliverVariedExtentList(
         delegate: childrenDelegate,
         itemExtentBuilder: itemExtentBuilder!,
       );
     } else if (prototypeItem != null) {
-      return SliverPrototypeExtentList(delegate: childrenDelegate, prototypeItem: prototypeItem!);
+      return SliverPrototypeExtentList(
+        delegate: childrenDelegate,
+        prototypeItem: prototypeItem!,
+      );
     }
     return SliverList(delegate: childrenDelegate);
   }
@@ -1609,7 +1646,9 @@ class ListView extends BoxScrollView {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
+    properties.add(
+      DoubleProperty('itemExtent', itemExtent, defaultValue: null),
+    );
   }
 
   // Helper method to compute the actual child count for the separated constructor.
