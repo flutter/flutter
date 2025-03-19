@@ -307,6 +307,13 @@ class FlutterWindowsEngine {
     return windows_proc_table_;
   }
 
+  // Sets the cursor that should be used when the mouse is over the Flutter
+  // content. See mouse_cursor.dart for the values and meanings of cursor_name.
+  void UpdateFlutterCursor(const std::string& cursor_name) const;
+
+  // Sets the cursor directly from a cursor handle.
+  void SetFlutterCursor(HCURSOR cursor) const;
+
  protected:
   // Creates the keyboard key handler.
   //
@@ -341,14 +348,19 @@ class FlutterWindowsEngine {
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;
 
+  // Maps a Flutter cursor name to an HCURSOR.
+  //
+  // Returns the arrow cursor for unknown constants.
+  //
+  // This map must be kept in sync with Flutter framework's
+  // services/mouse_cursor.dart.
+  HCURSOR GetCursorByName(const std::string& cursor_name) const;
+
   // Sends system locales to the engine.
   //
   // Should be called just after the engine is run, and after any relevant
   // system changes.
   void SendSystemLocales();
-
-  // Sends the current lifecycle state to the framework.
-  void SetLifecycleState(flutter::AppLifecycleState state);
 
   // Create the keyboard & text input sub-systems.
   //

@@ -94,6 +94,8 @@ enum class SemanticsRole : int32_t {
   kProgressBar = 22,
   kHotKey = 23,
   kRadioGroup = 24,
+  kStatus = 25,
+  kAlert = 26,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in
@@ -132,6 +134,8 @@ enum class SemanticsFlags : int32_t {
   kHasExpandedState = 1 << 26,
   kIsExpanded = 1 << 27,
   kHasSelectedState = 1 << 28,
+  kHasRequiredState = 1 << 29,
+  kIsRequired = 1 << 30,
 };
 
 const int kScrollableSemanticsFlags =

@@ -137,6 +137,13 @@ static impeller::SamplerDescriptor ToSamplerDescriptor(
   return desc;
 }
 
+static std::optional<const Rect> ToOptRect(const flutter::DlRect* rect) {
+  if (rect == nullptr) {
+    return std::nullopt;
+  }
+  return *rect;
+}
+
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::setAntiAlias(bool aa) {
   AUTO_DEPTH_WATCHER(0u);
@@ -506,8 +513,8 @@ void DlDispatcherBase::clipPath(const DlPath& path,
   } else {
     SkRRect rrect;
     if (path.IsSkRRect(&rrect) && rrect.isSimple()) {
-      RoundRectGeometry geom(skia_conversions::ToRect(rrect.rect()),
-                             skia_conversions::ToSize(rrect.getSimpleRadii()));
+      RoundRectGeometry geom(flutter::ToDlRect(rrect.rect()),
+                             flutter::ToDlSize(rrect.getSimpleRadii()));
       GetCanvas().ClipGeometry(geom, clip_op);
     } else {
       FillPathGeometry geom(path.GetPath());
@@ -820,7 +827,7 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                       static_cast<size_t>(count),                       //
                       skia_conversions::ToBlendMode(mode),              //
                       skia_conversions::ToSamplerDescriptor(sampling),  //
-                      skia_conversions::ToRect(cull_rect)               //
+                      ToOptRect(cull_rect)                              //
       );
   auto atlas_contents = std::make_shared<AtlasContents>();
   atlas_contents->SetGeometry(&geometry);
@@ -854,10 +861,10 @@ void DlDispatcherBase::drawDisplayList(
   if (opacity < SK_Scalar1) {
     Paint save_paint;
     save_paint.color = Color(0, 0, 0, opacity);
-    GetCanvas().SaveLayer(
-        save_paint, skia_conversions::ToRect(display_list->bounds()), nullptr,
-        ContentBoundsPromise::kContainsContents, display_list->total_depth(),
-        display_list->can_apply_group_opacity());
+    GetCanvas().SaveLayer(save_paint, display_list->GetBounds(), nullptr,
+                          ContentBoundsPromise::kContainsContents,
+                          display_list->total_depth(),
+                          display_list->can_apply_group_opacity());
   } else {
     // The display list may alter the clip, which must be restored to the
     // current clip at the end of playback.

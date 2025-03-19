@@ -258,14 +258,12 @@ executable("flutter_linux_unittests") {
     "testing/fl_test_gtk_logs.h",
     "testing/mock_engine.cc",
     "testing/mock_epoxy.cc",
-    "testing/mock_im_context.cc",
-    "testing/mock_keymap.cc",
+    "testing/mock_gtk.cc",
     "testing/mock_plugin_registrar.cc",
     "testing/mock_renderer.cc",
     "testing/mock_settings.cc",
     "testing/mock_signal_handler.cc",
     "testing/mock_texture_registrar.cc",
-    "testing/mock_window.cc",
   ]
 
   public_configs = [ "//flutter:config" ]

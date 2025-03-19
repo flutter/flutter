@@ -110,6 +110,9 @@ void runSemanticsTests() {
   group('accessibility builder', () {
     _testEngineAccessibilityBuilder();
   });
+  group('alert', () {
+    _testAlerts();
+  });
   group('group', () {
     _testGroup();
   });
@@ -129,8 +132,14 @@ void runSemanticsTests() {
   group('table', () {
     _testTables();
   });
+  group('list', () {
+    _testLists();
+  });
   group('controlsNodes', () {
     _testControlsNodes();
+  });
+  group('requirable', () {
+    _testRequirable();
   });
 }
 
@@ -294,6 +303,50 @@ void _testEngineAccessibilityBuilder() {
     builder.reduceMotion = true;
     features = builder.build();
     expect(features.reduceMotion, isTrue);
+  });
+}
+
+void _testAlerts() {
+  test('nodes with alert role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.alert,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.alert);
+    expect(object.element.getAttribute('role'), 'alert');
+  });
+
+  test('nodes with status role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.status,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.status);
+    expect(object.element.getAttribute('role'), 'status');
   });
 }
 
@@ -4041,6 +4094,52 @@ void _testTables() {
   semantics().semanticsEnabled = false;
 }
 
+void _testLists() {
+  test('nodes with list role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.list,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.list);
+    expect(object.element.getAttribute('role'), 'list');
+  });
+
+  test('nodes with list item role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.listItem,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.listItem);
+    expect(object.element.getAttribute('role'), 'listitem');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
 void _testControlsNodes() {
   test('can have multiple controlled nodes', () {
     semantics()
@@ -4130,6 +4229,99 @@ void _testControlsNodes() {
   });
 
   semantics().semanticsEnabled = false;
+}
+
+void _testRequirable() {
+  test('renders and updates non-requirable, required, and unrequired nodes', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, isSelectable: false, rect: const ui.Rect.fromLTRB(0, 0, 100, 20)),
+        tester.updateNode(
+          id: 2,
+          hasRequiredState: true,
+          isRequired: false,
+          rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+        ),
+        tester.updateNode(
+          id: 3,
+          hasRequiredState: true,
+          isRequired: true,
+          rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem aria-required="false"></sem>
+    <sem aria-required="true"></sem>
+  </sem-c>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final notRequirable1 = owner().debugSemanticsTree![1]!.element;
+    expect(notRequirable1.getAttribute('aria-required'), isNull);
+
+    // Flip the values and check that that ARIA attribute is updated.
+    tester.updateNode(
+      id: 2,
+      hasRequiredState: true,
+      isRequired: true,
+      rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+    );
+    tester.updateNode(
+      id: 3,
+      hasRequiredState: true,
+      isRequired: false,
+      rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem aria-required="true"></sem>
+    <sem aria-required="false"></sem>
+  </sem-c>
+</sem>
+''');
+
+    // Remove the ARIA attribute
+    tester.updateNode(id: 2, hasRequiredState: false, rect: const ui.Rect.fromLTRB(0, 20, 100, 40));
+    tester.updateNode(id: 3, hasRequiredState: false, rect: const ui.Rect.fromLTRB(0, 40, 100, 60));
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+  <sem-c>
+    <sem></sem>
+    <sem></sem>
+    <sem></sem>
+  </sem-c>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final notRequirable2 = owner().debugSemanticsTree![2]!.element;
+    expect(notRequirable2.getAttribute('aria-required'), isNull);
+
+    final notRequirable3 = owner().debugSemanticsTree![3]!.element;
+    expect(notRequirable3.getAttribute('aria-required'), isNull);
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that

@@ -7,7 +7,7 @@
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
-#include "flutter/shell/platform/linux/testing/mock_window.h"
+#include "flutter/shell/platform/linux/testing/mock_gtk.h"
 
 #include "gtest/gtest.h"
 

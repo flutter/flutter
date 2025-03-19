@@ -8,6 +8,7 @@
 
 #import <OCMock/OCMock.h>
 
+#include "flutter/common/constants.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
@@ -224,15 +225,27 @@ TEST_F(FlutterViewControllerTest, ReparentsPluginWhenAccessibilityDisabled) {
   window.contentView = viewController.view;
   NSView* dummyView = [[NSView alloc] initWithFrame:CGRectZero];
   [viewController.view addSubview:dummyView];
+
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(flutter::kFlutterImplicitViewId),
+  };
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(1), setClientConfig ]];
+  FlutterResult result = ^(id result) {
+  };
+  [engine.textInputPlugin handleMethodCall:methodCall result:result];
+
   // Attaches FlutterTextInputPlugin to the view;
-  [dummyView addSubview:viewController.textInputPlugin];
+  [dummyView addSubview:engine.textInputPlugin];
   // Makes sure the textInputPlugin can be the first responder.
-  EXPECT_TRUE([window makeFirstResponder:viewController.textInputPlugin]);
-  EXPECT_EQ([window firstResponder], viewController.textInputPlugin);
-  EXPECT_FALSE(viewController.textInputPlugin.superview == viewController.view);
+
+  EXPECT_TRUE([window makeFirstResponder:engine.textInputPlugin]);
+  EXPECT_EQ([window firstResponder], engine.textInputPlugin);
+  EXPECT_FALSE(engine.textInputPlugin.superview == viewController.view);
   [viewController onAccessibilityStatusChanged:NO];
   // FlutterView becomes child of view controller
-  EXPECT_TRUE(viewController.textInputPlugin.superview == viewController.view);
+  EXPECT_TRUE(viewController.engine.textInputPlugin.superview == viewController.view);
 }
 
 TEST_F(FlutterViewControllerTest, CanSetMouseTrackingModeBeforeViewLoaded) {
@@ -464,11 +477,24 @@ TEST_F(FlutterViewControllerTest, testViewControllerIsReleased) {
                                                      defer:NO];
   window.contentView = viewController.view;
 
-  [viewController.view addSubview:viewController.textInputPlugin];
+  NSDictionary* setClientConfig = @{
+    @"viewId" : @(flutter::kFlutterImplicitViewId),
+  };
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(1), setClientConfig ]];
+  FlutterResult result = ^(id result) {
+  };
+  [viewController.engine.textInputPlugin handleMethodCall:methodCall result:result];
+
+  [viewController.engine.textInputPlugin
+      handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.show" arguments:@[]]
+                result:^(id){
+                }];
 
   // Make the textInputPlugin first responder. This should still result in
   // view controller reporting the key event.
-  [window makeFirstResponder:viewController.textInputPlugin];
+  [window makeFirstResponder:viewController.engine.textInputPlugin];
 
   [viewController.view performKeyEquivalent:event];
 
