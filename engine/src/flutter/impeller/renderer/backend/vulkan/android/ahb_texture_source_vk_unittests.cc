@@ -34,7 +34,6 @@ std::shared_ptr<Context> CreateContext() {
   settings.enable_gpu_tracing = false;
   settings.enable_surface_control = false;
 
-  // TODO(gaaclarke): This looks like a good place to forward the flags.
   return ContextVK::Create(impeller::Flags{}, std::move(settings));
 }
 
