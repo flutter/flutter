@@ -1281,6 +1281,9 @@ std::shared_ptr<Texture> DisplayListToTexture(
             kDefaultColorAttachmentConfig  // color_attachment_config
     );
   }
+  if (!target.IsValid()) {
+    return nullptr;
+  }
 
   SkIRect sk_cull_rect = SkIRect::MakeWH(size.width, size.height);
   impeller::FirstPassDispatcher collector(
