@@ -56,19 +56,19 @@ base class Preview {
   /// If not provided, no name will be associated with the preview.
   final String? name;
 
-  /// Artificial width constraint to be applied to the [child].
+  /// Artificial width constraint to be applied to the previewed widget.
   ///
   /// If not provided, the previewed widget will attempt to set its own width
   /// constraints and may result in an unbounded constraint error.
   final double? width;
 
-  /// Artificial height constraint to be applied to the [child].
+  /// Artificial height constraint to be applied to the previewed widget.
   ///
   /// If not provided, the previewed widget will attempt to set its own height
   /// constraints and may result in an unbounded constraint error.
   final double? height;
 
-  /// Applies font scaling to text within the [child].
+  /// Applies font scaling to text within the previewed widget.
   ///
   /// If not provided, the default text scaling factor provided by [MediaQuery]
   /// will be used.
