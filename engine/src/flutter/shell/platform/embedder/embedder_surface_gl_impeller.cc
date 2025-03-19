@@ -180,7 +180,6 @@ std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
   return std::make_unique<GPUSurfaceGLImpeller>(
       this,                               // GPU surface GL delegate
       impeller_context_,                  // Impeller context
-      impeller::AiksContext::Settings{},  // settings
       !external_view_embedder_            // render to surface
   );
 }
