@@ -379,84 +379,87 @@ void runTests() {
     expect(find.byType(PlatformViewLink), findsOneWidget);
   });
 
-  group('ImgElementPlatformView create html element with the right object-fit, height and width', () {
-    testWidgets('BoxFit.contain set "cover" as object-fit', (WidgetTester tester) async {
-      final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
-        tester,
-        fit: BoxFit.contain,
-        fakePlatformViewRegistry: fakePlatformViewRegistry,
-      );
-      expect(element.style.objectFit, 'cover');
-      expect(element.style.height, '100%');
-      expect(element.style.width, '100%');
-    });
+  group(
+    'ImgElementPlatformView create html element with the right object-fit, height and width',
+    () {
+      testWidgets('BoxFit.contain set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.contain,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
 
-    testWidgets('BoxFit.cover set "cover" as object-fit', (WidgetTester tester) async {
-      final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
-        tester,
-        fit: BoxFit.cover,
-        fakePlatformViewRegistry: fakePlatformViewRegistry,
-      );
-      expect(element.style.objectFit, 'cover');
-      expect(element.style.height, '100%');
-      expect(element.style.width, '100%');
-    });
+      testWidgets('BoxFit.cover set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.cover,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
 
-    testWidgets('BoxFit.fitWidth set "cover" as object-fit', (WidgetTester tester) async {
-      final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
-        tester,
-        fit: BoxFit.fitWidth,
-        fakePlatformViewRegistry: fakePlatformViewRegistry,
-      );
-      expect(element.style.objectFit, 'cover');
-      expect(element.style.height, '100%');
-      expect(element.style.width, '100%');
-    });
+      testWidgets('BoxFit.fitWidth set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.fitWidth,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
 
-    testWidgets('BoxFit.fitHeight set "cover" as object-fit', (WidgetTester tester) async {
-      final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
-        tester,
-        fit: BoxFit.fitHeight,
-        fakePlatformViewRegistry: fakePlatformViewRegistry,
-      );
-      expect(element.style.objectFit, 'cover');
-      expect(element.style.height, '100%');
-      expect(element.style.width, '100%');
-    });
+      testWidgets('BoxFit.fitHeight set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.fitHeight,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
 
-    testWidgets('BoxFit.scaleDown set "cover" as object-fit', (WidgetTester tester) async {
-      final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
-        tester,
-        fit: BoxFit.scaleDown,
-        fakePlatformViewRegistry: fakePlatformViewRegistry,
-      );
-      expect(element.style.objectFit, 'cover');
-      expect(element.style.height, '100%');
-      expect(element.style.width, '100%');
-    });
+      testWidgets('BoxFit.scaleDown set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.scaleDown,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'cover');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
 
-    testWidgets('BoxFit.fill set "cover" as object-fit', (WidgetTester tester) async {
-      final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
-        tester,
-        fit: BoxFit.fill,
-        fakePlatformViewRegistry: fakePlatformViewRegistry,
-      );
-      expect(element.style.objectFit, 'fill');
-      expect(element.style.height, '100%');
-      expect(element.style.width, '100%');
-    });
+      testWidgets('BoxFit.fill set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.fill,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'fill');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
 
-    testWidgets('BoxFit.none set "cover" as object-fit', (WidgetTester tester) async {
-      final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
-        tester,
-        fit: BoxFit.none,
-        fakePlatformViewRegistry: fakePlatformViewRegistry,
-      );
-      expect(element.style.objectFit, 'none');
-      expect(element.style.height, '100%');
-      expect(element.style.width, '100%');
-    });
-  });
+      testWidgets('BoxFit.none set "cover" as object-fit', (WidgetTester tester) async {
+        final web.HTMLElement element = await _pumpImageAndGetHtmlElement(
+          tester,
+          fit: BoxFit.none,
+          fakePlatformViewRegistry: fakePlatformViewRegistry,
+        );
+        expect(element.style.objectFit, 'none');
+        expect(element.style.height, '100%');
+        expect(element.style.width, '100%');
+      });
+    },
+  );
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
