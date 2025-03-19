@@ -11,6 +11,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -230,7 +231,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(shortcuts: _webShortcuts, child: child);
     }
-    return child;
+    return Semantics(role: SemanticsRole.menuItem, child: child);
   }
 }
 
@@ -332,6 +333,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           getSelectedItemOffset: () => route.getItemOffset(route.selectedIndex),
         ),
         child: Semantics(
+          role: SemanticsRole.menu,
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
@@ -1303,6 +1305,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   late Map<Type, Action<Intent>> _actionMap;
   bool _isHovering = false;
   bool _hasPrimaryFocus = false;
+  bool _isMenuExpanded = false;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -1346,6 +1349,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
+    _isMenuExpanded = false;
     _dropdownRoute = null;
     _lastOrientation = null;
   }
@@ -1443,6 +1447,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     });
 
     widget.onTap?.call();
+    _isMenuExpanded = true;
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1671,6 +1676,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
     return Semantics(
       button: !childHasButtonSemantic,
+      expanded: _isMenuExpanded,
       child: Actions(actions: _actionMap, child: result),
     );
   }
