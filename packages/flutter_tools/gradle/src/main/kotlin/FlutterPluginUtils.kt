@@ -1,6 +1,7 @@
 package com.flutter.gradle
 
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.internal.dsl.BaseAppModuleExtension
 import com.android.builder.model.BuildType
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -419,6 +420,70 @@ object FlutterPluginUtils {
         }
     }
 
+    private fun printPluginCompileSdkWarnings(
+        maxPluginCompileSdkVersion: Int,
+        projectCompileSdkVersion: Int,
+        logger: Logger,
+        pluginsWithHigherSdkVersion: List<Pair<String, String>>,
+        projectDirectory: File
+    ) {
+        logger.error(
+            "Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:"
+        )
+        for (pluginToCompileSdkVersion in pluginsWithHigherSdkVersion) {
+            logger.error(
+                "- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}"
+            )
+        }
+        val buildGradleFile =
+            getBuildGradleFileFromProjectDir(
+                projectDirectory,
+                logger
+            )
+        logger.error(
+            """
+            Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
+            Add the following to ${buildGradleFile.path}:
+
+                android {
+                    compileSdk = $maxPluginCompileSdkVersion
+                    ...
+                }
+            """.trimIndent()
+        )
+    }
+
+    private fun printPluginNdkWarnings(
+        maxPluginNdkVersion: String,
+        projectNdkVersion: String,
+        logger: Logger,
+        pluginsWithDifferentNdkVersion: List<Pair<String, String>>,
+        projectDirectory: File
+    ) {
+        logger.error(
+            "Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:"
+        )
+        for (pluginToNdkVersion in pluginsWithDifferentNdkVersion) {
+            logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
+        }
+        val buildGradleFile =
+            getBuildGradleFileFromProjectDir(
+                projectDirectory,
+                logger
+            )
+        logger.error(
+            """
+            Fix this issue by using the highest Android NDK version (they are backward compatible).
+            Add the following to ${buildGradleFile.path}:
+
+                android {
+                    ndkVersion = "$maxPluginNdkVersion"
+                    ...
+                }
+            """.trimIndent()
+        )
+    }
+
     /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
     @JvmStatic
     @JvmName("detectLowCompileSdkVersionOrNdkVersion")
@@ -477,53 +542,21 @@ object FlutterPluginUtils {
                     numProcessedPlugins--
                     if (numProcessedPlugins == 0) {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            project.logger.error(
-                                "Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:"
-                            )
-                            for (pluginToCompileSdkVersion in pluginsWithHigherSdkVersion) {
-                                project.logger.error(
-                                    "- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}"
-                                )
-                            }
-                            val buildGradleFile =
-                                getBuildGradleFileFromProjectDir(
-                                    project.projectDir,
-                                    project.logger
-                                )
-                            project.logger.error(
-                                """
-                                Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
-                                Add the following to ${buildGradleFile.path}:
-
-                                    android {
-                                        compileSdk = $maxPluginCompileSdkVersion
-                                        ...
-                                    }
-                                """.trimIndent()
+                            printPluginCompileSdkWarnings(
+                                maxPluginCompileSdkVersion = maxPluginCompileSdkVersion,
+                                projectCompileSdkVersion = projectCompileSdkVersion,
+                                logger = project.logger,
+                                pluginsWithHigherSdkVersion = pluginsWithHigherSdkVersion,
+                                projectDirectory = project.projectDir
                             )
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
-                            project.logger.error(
-                                "Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:"
-                            )
-                            for (pluginToNdkVersion in pluginsWithDifferentNdkVersion) {
-                                project.logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
-                            }
-                            val buildGradleFile =
-                                getBuildGradleFileFromProjectDir(
-                                    project.projectDir,
-                                    project.logger
-                                )
-                            project.logger.error(
-                                """
-                                Fix this issue by using the highest Android NDK version (they are backward compatible).
-                                Add the following to ${buildGradleFile.path}:
-
-                                    android {
-                                        ndkVersion = "$maxPluginNdkVersion"
-                                        ...
-                                    }
-                                """.trimIndent()
+                            printPluginNdkWarnings(
+                                maxPluginNdkVersion = maxPluginNdkVersion,
+                                projectNdkVersion = projectNdkVersion,
+                                logger = project.logger,
+                                pluginsWithDifferentNdkVersion = pluginsWithDifferentNdkVersion,
+                                projectDirectory = project.projectDir
                             )
                         }
                     }
@@ -539,31 +572,27 @@ object FlutterPluginUtils {
         flutterSdkRootPath: String
     ) {
         // If the project is already configuring a native build, we don't need to do anything.
-        val gradleProjectAndroidExtension = getAndroidExtension(gradleProject)
-        val forcingNotRequired: Boolean = gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null
+        val gradleProjectAndroidExtension =
+            gradleProject.extensions.getByType(BaseAppModuleExtension::class.java)
+        val forcingNotRequired: Boolean =
+            gradleProjectAndroidExtension.externalNativeBuild.cmake.path != null
         if (forcingNotRequired) {
             return
         }
 
         // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
-        gradleProjectAndroidExtension.externalNativeBuild {
-            cmake {
-                // Respect the existing configuration if it exists - the NDK will already be
-                // downloaded in this case.
-                path("$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt")
-            }
-        }
 
-        gradleProjectAndroidExtension.defaultConfig {
-            externalNativeBuild {
-                cmake {
-                    // CMake will print warnings when you try to build an empty project.
-                    // These arguments silence the warnings - our project is intentionally
-                    // empty.
-                    arguments("-Wno-dev", "--no-warn-unused-cli")
-                }
-            }
-        }
+        gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
+            // Respect the existing configuration if it exists - the NDK will already be
+            // downloaded in this case.
+            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+        )
+
+        // CMake will print warnings when you try to build an empty project.
+        // These arguments silence the warnings - our project is intentionally
+        // empty.
+        gradleProjectAndroidExtension.defaultConfig.externalNativeBuild.cmake
+            .arguments("-Wno-dev", "--no-warn-unused-cli")
     }
 
 //    private fun getApplicationVariants(project: Project)  {
