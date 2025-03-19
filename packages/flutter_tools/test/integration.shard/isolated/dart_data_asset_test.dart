@@ -93,7 +93,7 @@ void main() {
             <String>['run', '-v', '-d', device, '--$mode'],
             root.path,
             <Transition>[
-              Barrier.contains('Launching lib/main.dart on'),
+              Barrier.contains('Launching lib${Platform.pathSeparator}main.dart on'),
               Multiple.contains(
                 <Pattern>[
                   // The flutter tool will print it's ready to accept keys (e.g.
