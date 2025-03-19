@@ -3,7 +3,11 @@ package com.flutter.gradle
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import org.gradle.api.Action
 import org.gradle.api.GradleException
+import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.logging.LoggingManager
 import org.gradle.process.ExecSpec
 import org.gradle.process.ProcessForkOptions
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -48,13 +52,11 @@ class BaseFlutterTaskHelperTest {
         val baseFlutterTask = mockk<BaseFlutterTask>()
         every { baseFlutterTask.sourceDir } returns null
 
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-
         val gradleException =
-            assertFailsWith<GradleException> { helper.checkPreConditions() }
+            assertFailsWith<GradleException> { BaseFlutterTaskHelper.checkPreConditions(baseFlutterTask) }
         assert(
             gradleException.message ==
-                helper.gradleErrorMessage
+                BaseFlutterTaskHelper.getGradleErrorMessage(baseFlutterTask)
         )
     }
 
@@ -64,13 +66,11 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
         every { baseFlutterTask.sourceDir!!.isDirectory } returns false
 
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-
         val gradleException =
-            assertFailsWith<GradleException> { helper.checkPreConditions() }
+            assertFailsWith<GradleException> { BaseFlutterTaskHelper.checkPreConditions(baseFlutterTask) }
         assert(
             gradleException.message ==
-                helper.gradleErrorMessage
+                BaseFlutterTaskHelper.getGradleErrorMessage(baseFlutterTask)
         )
     }
 
@@ -86,8 +86,7 @@ class BaseFlutterTaskHelperTest {
         // There is already an intermediate directory, so there is no need to create it.
         every { baseFlutterTask.intermediateDir!!.mkdirs() } returns false
 
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-        assertDoesNotThrow { helper.checkPreConditions() }
+        assertDoesNotThrow { BaseFlutterTaskHelper.checkPreConditions(baseFlutterTask) }
     }
 
     @Test
@@ -100,8 +99,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
         every { baseFlutterTask.buildMode } returns buildModeString
 
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-        val ruleNamesList = helper.generateRuleNames(baseFlutterTask)
+        val ruleNamesList = BaseFlutterTaskHelper.generateRuleNames(baseFlutterTask)
 
         assertEquals(ruleNamesList, listOf("debug_android_application"))
     }
@@ -118,8 +116,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.deferredComponents } returns true
         every { baseFlutterTask.targetPlatformValues } returns BaseFlutterTaskPropertiesTest.targetPlatformValuesList
 
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-        val ruleNamesList = helper.generateRuleNames(baseFlutterTask)
+        val ruleNamesList = BaseFlutterTaskHelper.generateRuleNames(baseFlutterTask)
 
         assertEquals(
             ruleNamesList,
@@ -142,8 +139,7 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.deferredComponents } returns false
         every { baseFlutterTask.targetPlatformValues } returns BaseFlutterTaskPropertiesTest.targetPlatformValuesList
 
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-        val ruleNamesList = helper.generateRuleNames(baseFlutterTask)
+        val ruleNamesList = BaseFlutterTaskHelper.generateRuleNames(baseFlutterTask)
 
         assertEquals(
             ruleNamesList,
@@ -166,8 +162,7 @@ class BaseFlutterTaskHelperTest {
         // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
         // before creating a BaseFlutterTaskHelper object.
         every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-        val execSpecActionFromTask = helper.createExecSpecActionFromTask()
+        val execSpecActionFromTask = BaseFlutterTaskHelper.createExecSpecActionFromTask(baseFlutterTask)
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns BaseFlutterTaskPropertiesTest.flutterExecutableTest
@@ -216,7 +211,7 @@ class BaseFlutterTaskHelperTest {
         every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
 
         // Generate rule names for verification and can only be generated after buildMode is mocked.
-        val ruleNamesList: List<String> = helper.generateRuleNames(baseFlutterTask)
+        val ruleNamesList: List<String> = BaseFlutterTaskHelper.generateRuleNames(baseFlutterTask)
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.kotlin.dsl/-kotlin-script/exec.html?query=abstract%20fun%20exec(configuration:%20Action%3CExecSpec%3E):%20ExecResult
@@ -267,8 +262,7 @@ class BaseFlutterTaskHelperTest {
         // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
         // before creating a BaseFlutterTaskHelper object.
         every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-        val execSpecActionFromTask = helper.createExecSpecActionFromTask()
+        val execSpecActionFromTask = BaseFlutterTaskHelper.createExecSpecActionFromTask(baseFlutterTask)
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns BaseFlutterTaskPropertiesTest.flutterExecutableTest
@@ -317,7 +311,7 @@ class BaseFlutterTaskHelperTest {
         every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
 
         // Generate rule names for verification and can only be generated after buildMode is mocked.
-        val ruleNamesList: List<String> = helper.generateRuleNames(baseFlutterTask)
+        val ruleNamesList: List<String> = BaseFlutterTaskHelper.generateRuleNames(baseFlutterTask)
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.kotlin.dsl/-kotlin-script/exec.html?query=abstract%20fun%20exec(configuration:%20Action%3CExecSpec%3E):%20ExecResult
@@ -353,8 +347,7 @@ class BaseFlutterTaskHelperTest {
         // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
         // before creating a BaseFlutterTaskHelper object.
         every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-        val execSpecActionFromTask = helper.createExecSpecActionFromTask()
+        val execSpecActionFromTask = BaseFlutterTaskHelper.createExecSpecActionFromTask(baseFlutterTask)
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns BaseFlutterTaskPropertiesTest.flutterExecutableTest
@@ -402,7 +395,7 @@ class BaseFlutterTaskHelperTest {
         every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
 
         // Generate rule names for verification and can only be generated after buildMode is mocked.
-        val ruleNamesList: List<String> = helper.generateRuleNames(baseFlutterTask)
+        val ruleNamesList: List<String> = BaseFlutterTaskHelper.generateRuleNames(baseFlutterTask)
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.kotlin.dsl/-kotlin-script/exec.html?query=abstract%20fun%20exec(configuration:%20Action%3CExecSpec%3E):%20ExecResult
@@ -453,8 +446,7 @@ class BaseFlutterTaskHelperTest {
         // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
         // before creating a BaseFlutterTaskHelper object.
         every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
-        val helper = BaseFlutterTaskHelper(baseFlutterTask)
-        val execSpecActionFromTask = helper.createExecSpecActionFromTask()
+        val execSpecActionFromTask = BaseFlutterTaskHelper.createExecSpecActionFromTask(baseFlutterTask)
 
         // Mock return values of properties.
         every { baseFlutterTask.flutterExecutable } returns BaseFlutterTaskPropertiesTest.flutterExecutableTest
@@ -503,7 +495,7 @@ class BaseFlutterTaskHelperTest {
         every { mockExecSpec.args(any<List<String>>()) } returns mockExecSpec
 
         // Generate rule names for verification and can only be generated after buildMode is mocked.
-        val ruleNamesList: List<String> = helper.generateRuleNames(baseFlutterTask)
+        val ruleNamesList: List<String> = BaseFlutterTaskHelper.generateRuleNames(baseFlutterTask)
 
         // The exec function will be deprecated in gradle 8.11 and will be removed in gradle 9.0
         // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.kotlin.dsl/-kotlin-script/exec.html?query=abstract%20fun%20exec(configuration:%20Action%3CExecSpec%3E):%20ExecResult
@@ -540,5 +532,47 @@ class BaseFlutterTaskHelperTest {
         verify { mockExecSpec.args("-dAndroidArchs=${BaseFlutterTaskPropertiesTest.TARGET_PLATFORM_VALUES_JOINED_LIST}") }
         verify { mockExecSpec.args("-dMinSdkVersion=${BaseFlutterTaskPropertiesTest.MIN_SDK_VERSION_TEST}") }
         verify { mockExecSpec.args(ruleNamesList) }
+    }
+
+    @Test
+    fun `buildBundle calls the correct methods`() {
+        val baseFlutterTask = mockk<BaseFlutterTask>()
+        val mockLoggingManager = mockk<LoggingManager>()
+        val mockFile = mockk<File>()
+        val mockProject = mockk<Project>()
+
+        // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
+        // before creating a BaseFlutterTaskHelper object.
+        every { baseFlutterTask.sourceDir } returns mockFile
+        every { mockFile.isDirectory } returns true
+        every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
+        every { baseFlutterTask.logging } returns mockLoggingManager
+        every { mockLoggingManager.captureStandardError(any()) } returns mockLoggingManager
+        every { baseFlutterTask.project } returns mockProject
+        every { mockProject.exec(any<Action<ExecSpec>>()) } returns mockk()
+
+        BaseFlutterTaskHelper.buildBundle(baseFlutterTask)
+    }
+
+    @Test
+    fun `getDependencyFiles returns a FileCollection of dependency file(s)`() {
+        val baseFlutterTask = mockk<BaseFlutterTask>()
+        val project = mockk<Project>()
+        val configFileCollection = mockk<ConfigurableFileCollection>()
+        every { baseFlutterTask.sourceDir } returns BaseFlutterTaskPropertiesTest.sourceDirTest
+
+        every { baseFlutterTask.project } returns project
+        every { baseFlutterTask.intermediateDir } returns BaseFlutterTaskPropertiesTest.intermediateDirFileTest
+
+        val projectIntermediary = baseFlutterTask.project
+        val interDirFile = baseFlutterTask.intermediateDir
+
+        every { projectIntermediary.files() } returns configFileCollection
+        every { projectIntermediary.files("$interDirFile/flutter_build.d") } returns configFileCollection
+        every { configFileCollection.plus(configFileCollection) } returns configFileCollection
+
+        BaseFlutterTaskHelper.getDependenciesFiles(baseFlutterTask)
+        verify { projectIntermediary.files() }
+        verify { projectIntermediary.files("${BaseFlutterTaskPropertiesTest.intermediateDirFileTest}/flutter_build.d") }
     }
 }

@@ -11,10 +11,11 @@ import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.BaseApplicationNameHandler
-import com.flutter.gradle.BaseFlutterTask
 import com.flutter.gradle.Deeplink
 import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.FlutterExtension
+import com.flutter.gradle.FlutterPluginConstants
+import com.flutter.gradle.FlutterTask
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.IntentFilterCheck
 import com.flutter.gradle.VersionUtils
@@ -29,63 +30,13 @@ import org.gradle.api.Project
 import org.gradle.api.Plugin
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
-import org.gradle.api.file.CopySpec
-import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Copy
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFiles
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
 
 
 class FlutterPlugin implements Plugin<Project> {
-
-    private static final String DEFAULT_MAVEN_HOST = "https://storage.googleapis.com"
-
-    /** The platforms that can be passed to the `--Ptarget-platform` flag. */
-    private static final String PLATFORM_ARM32  = "android-arm"
-    private static final String PLATFORM_ARM64  = "android-arm64"
-    private static final String PLATFORM_X86    = "android-x86"
-    private static final String PLATFORM_X86_64 = "android-x64"
-
-    /** The ABI architectures supported by Flutter. */
-    private static final String ARCH_ARM32      = "armeabi-v7a"
-    private static final String ARCH_ARM64      = "arm64-v8a"
-    private static final String ARCH_X86        = "x86"
-    private static final String ARCH_X86_64     = "x86_64"
-
-    private static final String INTERMEDIATES_DIR = "intermediates"
-
-    /** Maps platforms to ABI architectures. */
-    private static final Map PLATFORM_ARCH_MAP = [
-        (PLATFORM_ARM32)    : ARCH_ARM32,
-        (PLATFORM_ARM64)    : ARCH_ARM64,
-        (PLATFORM_X86)      : ARCH_X86,
-        (PLATFORM_X86_64)   : ARCH_X86_64,
-    ]
-
-    /**
-     * The version code that gives each ABI a value.
-     * For each APK variant, use the following versions to override the version of the Universal APK.
-     * Otherwise, the Play Store will complain that the APK variants have the same version.
-     */
-    private static final Map<String, Integer> ABI_VERSION = [
-        (ARCH_ARM32)        : 1,
-        (ARCH_ARM64)        : 2,
-        (ARCH_X86)          : 3,
-        (ARCH_X86_64)       : 4,
-    ]
-
-    /** When split is enabled, multiple APKs are generated per each ABI. */
-    private static final List DEFAULT_PLATFORMS = [
-        PLATFORM_ARM32,
-        PLATFORM_ARM64,
-        PLATFORM_X86_64,
-    ]
 
     private final static String propLocalEngineRepo = "local-engine-repo"
     private final static String propProcessResourcesProvider = "processResourcesProvider"
@@ -156,7 +107,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         // Configure the Maven repository.
-        String hostedRepository = System.getenv("FLUTTER_STORAGE_BASE_URL") ?: DEFAULT_MAVEN_HOST
+        String hostedRepository = System.getenv(FlutterPluginConstants.FLUTTER_STORAGE_BASE_URL) ?: FlutterPluginConstants.DEFAULT_MAVEN_HOST
         String repository = FlutterPluginUtils.shouldProjectUseLocalEngine(project)
             ? project.property(propLocalEngineRepo)
             : "$hostedRepository/${engineRealm}download.flutter.io"
@@ -212,7 +163,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         getTargetPlatforms().each { targetArch ->
-            String abiValue = PLATFORM_ARCH_MAP[targetArch]
+            String abiValue = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
             project.android {
                 if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
                     splits {
@@ -495,7 +446,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         List<String> platforms = getTargetPlatforms().collect()
         platforms.each { platform ->
-            String arch = PLATFORM_ARCH_MAP[platform].replace("-", "_")
+            String arch = FlutterPluginUtils.formatPlatformString(platform)
             // Add the `libflutter.so` dependency.
             FlutterPluginUtils.addApiDependencies(project, buildType.name,
                     "io.flutter:${arch}_$flutterBuildMode:$engineVersion")
@@ -851,10 +802,10 @@ class FlutterPlugin implements Plugin<Project> {
     private List<String> getTargetPlatforms() {
         final String propTargetPlatform = "target-platform"
         if (!project.hasProperty(propTargetPlatform)) {
-            return DEFAULT_PLATFORMS
+            return FlutterPluginConstants.DEFAULT_PLATFORMS
         }
         return project.property(propTargetPlatform).split(",").collect {
-            if (!PLATFORM_ARCH_MAP[it]) {
+            if (!FlutterPluginConstants.PLATFORM_ARCH_MAP[it]) {
                 throw new GradleException("Invalid platform: $it.")
             }
             return it
@@ -952,7 +903,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // for only the output APK, not for the variant itself. Skipping this step simply
                     // causes Gradle to use the value of variant.versionCode for the APK.
                     // For more, see https://developer.android.com/studio/build/configure-apk-splits
-                    Integer abiVersionCode = ABI_VERSION[output.getFilter(OutputFile.ABI)]
+                    Integer abiVersionCode = FlutterPluginConstants.ABI_VERSION[output.getFilter(OutputFile.ABI)]
                     if (abiVersionCode != null) {
                         output.versionCodeOverride =
                             abiVersionCode * 1000 + variant.versionCode
@@ -1002,7 +953,7 @@ class FlutterPlugin implements Plugin<Project> {
                 trackWidgetCreation(trackWidgetCreationValue)
                 targetPlatformValues = targetPlatforms
                 sourceDir(FlutterPluginUtils.getFlutterSourceDirectory(project))
-                intermediateDir(project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/")))
+                intermediateDir(project.file(project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/")))
                 frontendServerStarterPath(frontendServerStarterPathValue)
                 extraFrontEndOptions(extraFrontEndOptionsValue)
                 extraGenSnapshotOptions(extraGenSnapshotOptionsValue)
@@ -1017,13 +968,13 @@ class FlutterPlugin implements Plugin<Project> {
                 flavor(flavorValue)
             }
             Task compileTask = compileTaskProvider.get()
-            File libJar = project.file(project.layout.buildDirectory.dir("$INTERMEDIATES_DIR/flutter/${variant.name}/libs.jar"))
+            File libJar = project.file(project.layout.buildDirectory.dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/${variant.name}/libs.jar"))
             TaskProvider<Jar> packJniLibsTaskProvider = project.tasks.register("packJniLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", Jar) {
                 destinationDirectory = libJar.parentFile
                 archiveFileName = libJar.name
                 dependsOn(compileTask)
                 targetPlatforms.each { targetPlatform ->
-                    String abi = PLATFORM_ARCH_MAP[targetPlatform]
+                    String abi = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetPlatform]
                     from("${compileTask.intermediateDir}/${abi}") {
                         include("*.so")
                         // Move `app.so` to `lib/<abi>/libapp.so`
@@ -1210,76 +1161,5 @@ class FlutterPlugin implements Plugin<Project> {
         }
         configurePlugins(project)
         detectLowCompileSdkVersionOrNdkVersion()
-    }
-}
-
-class FlutterTask extends BaseFlutterTask {
-
-    @OutputDirectory
-    File getOutputDirectory() {
-        return intermediateDir
-    }
-
-    @Internal
-    String getAssetsDirectory() {
-        return "${outputDirectory}/flutter_assets"
-    }
-
-    @Internal
-    CopySpec getAssets() {
-        return project.copySpec {
-            from("${intermediateDir}")
-            include("flutter_assets/**") // the working dir and its files
-        }
-    }
-
-    @Internal
-    CopySpec getSnapshots() {
-        return project.copySpec {
-            from("${intermediateDir}")
-
-            if (buildMode == "release" || buildMode == "profile") {
-                targetPlatformValues.each {
-                    include("${PLATFORM_ARCH_MAP[targetArch]}/app.so")
-                }
-            }
-        }
-    }
-
-    FileCollection readDependencies(File dependenciesFile, Boolean inputs) {
-        if (dependenciesFile.exists()) {
-            // Dependencies file has Makefile syntax:
-            //   <target> <files>: <source> <files> <separated> <by> <non-escaped space>
-            String depText = dependenciesFile.text
-            // So we split list of files by non-escaped(by backslash) space,
-            def matcher = depText.split(": ")[inputs ? 1 : 0] =~ /(\\ |\S)+/
-            // then we replace all escaped spaces with regular spaces
-            def depList = matcher.collect{ it[0].replaceAll("\\\\ ", " ") }
-            return project.files(depList)
-        }
-        return project.files()
-    }
-
-    @InputFiles
-    FileCollection getSourceFiles() {
-        FileCollection sources = project.files()
-        for (File depfile in getDependenciesFiles()) {
-            sources += readDependencies(depfile, true)
-        }
-        return sources + project.files("pubspec.yaml")
-    }
-
-    @OutputFiles
-    FileCollection getOutputFiles() {
-        FileCollection sources = project.files()
-        for (File depfile in getDependenciesFiles()) {
-            sources += readDependencies(depfile, false)
-        }
-        return sources
-    }
-
-    @TaskAction
-    void build() {
-        buildBundle()
     }
 }
