@@ -1519,6 +1519,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// See [showButtonMenu] for a way to programmatically open the popup menu
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
+  bool _isMenuExpanded = false;
   RelativeRect _positionBuilder(BuildContext _, BoxConstraints constraints) {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
@@ -1566,6 +1567,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     // Only show the menu if there is something to show
     if (items.isNotEmpty) {
       widget.onOpened?.call();
+      _isMenuExpanded = true;
       showMenu<T?>(
         context: context,
         elevation: widget.elevation ?? popupMenuTheme.elevation,
@@ -1592,6 +1594,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           return null;
         }
         widget.onSelected?.call(newValue);
+        _isMenuExpanded = false;
       });
     }
   }
@@ -1638,20 +1641,25 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
           child: child,
         );
       }
-      return child;
+      return Semantics(expanded: _isMenuExpanded, child: child);
     }
 
-    return IconButton(
-      key: StandardComponentType.moreButton.key,
-      icon: widget.icon ?? Icon(Icons.adaptive.more),
-      padding: widget.padding,
-      splashRadius: widget.splashRadius,
-      iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
-      color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
-      tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
-      onPressed: widget.enabled ? showButtonMenu : null,
-      enableFeedback: enableFeedback,
-      style: widget.style,
+    return MergeSemantics(
+      child: Semantics(
+        expanded: _isMenuExpanded,
+        child: IconButton(
+          key: StandardComponentType.moreButton.key,
+          icon: widget.icon ?? Icon(Icons.adaptive.more),
+          padding: widget.padding,
+          splashRadius: widget.splashRadius,
+          iconSize: widget.iconSize ?? popupMenuTheme.iconSize ?? iconTheme.size,
+          color: widget.iconColor ?? popupMenuTheme.iconColor ?? iconTheme.color,
+          tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
+          onPressed: widget.enabled ? showButtonMenu : null,
+          enableFeedback: enableFeedback,
+          style: widget.style,
+        ),
+      ),
     );
   }
 }
