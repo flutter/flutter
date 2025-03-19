@@ -476,6 +476,10 @@ static void realize_cb(FlView* self) {
   fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
                              FL_RENDERABLE(self));
 
+  // Flutter engine will need to make the context current from raster thread
+  // during initialization.
+  fl_renderer_clear_current(FL_RENDERER(self->renderer));
+
   if (!fl_engine_start(self->engine, &error)) {
     g_warning("Failed to start Flutter engine: %s", error->message);
     return;
@@ -489,6 +493,10 @@ static void realize_cb(FlView* self) {
   fl_socket_accessible_embed(
       FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
       atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+}
+
+static void secondary_realize_cb(FlView* self) {
+  setup_cursor(self);
 }
 
 static gboolean render_cb(FlView* self, GdkGLContext* context) {
@@ -776,7 +784,8 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
 
   self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
 
-  setup_cursor(self);
+  g_signal_connect_swapped(self->gl_area, "realize",
+                           G_CALLBACK(secondary_realize_cb), self);
 
   return self;
 }

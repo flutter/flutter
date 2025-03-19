@@ -713,6 +713,8 @@ Matcher matchesSemantics({
   bool hasImplicitScrolling = false,
   bool hasExpandedState = false,
   bool isExpanded = false,
+  bool hasRequiredState = false,
+  bool isRequired = false,
   // Actions //
   bool hasTapAction = false,
   bool hasFocusAction = false,
@@ -793,6 +795,8 @@ Matcher matchesSemantics({
     hasImplicitScrolling: hasImplicitScrolling,
     hasExpandedState: hasExpandedState,
     isExpanded: isExpanded,
+    hasRequiredState: hasRequiredState,
+    isRequired: isRequired,
     // Actions
     hasTapAction: hasTapAction,
     hasFocusAction: hasFocusAction,
@@ -901,6 +905,8 @@ Matcher containsSemantics({
   bool? hasImplicitScrolling,
   bool? hasExpandedState,
   bool? isExpanded,
+  bool? hasRequiredState,
+  bool? isRequired,
   // Actions
   bool? hasTapAction,
   bool? hasFocusAction,
@@ -981,6 +987,8 @@ Matcher containsSemantics({
     hasImplicitScrolling: hasImplicitScrolling,
     hasExpandedState: hasExpandedState,
     isExpanded: isExpanded,
+    hasRequiredState: hasRequiredState,
+    isRequired: isRequired,
     // Actions
     hasTapAction: hasTapAction,
     hasFocusAction: hasFocusAction,
@@ -2407,6 +2415,8 @@ class _MatchesSemanticsData extends Matcher {
     required bool? hasImplicitScrolling,
     required bool? hasExpandedState,
     required bool? isExpanded,
+    required bool? hasRequiredState,
+    required bool? isRequired,
     // Actions
     required bool? hasTapAction,
     required bool? hasFocusAction,
@@ -2466,6 +2476,8 @@ class _MatchesSemanticsData extends Matcher {
          if (isSlider != null) SemanticsFlag.isSlider: isSlider,
          if (hasExpandedState != null) SemanticsFlag.hasExpandedState: hasExpandedState,
          if (isExpanded != null) SemanticsFlag.isExpanded: isExpanded,
+         if (hasRequiredState != null) SemanticsFlag.hasRequiredState: hasRequiredState,
+         if (isRequired != null) SemanticsFlag.isRequired: isRequired,
        },
        actions = <SemanticsAction, bool>{
          if (hasTapAction != null) SemanticsAction.tap: hasTapAction,

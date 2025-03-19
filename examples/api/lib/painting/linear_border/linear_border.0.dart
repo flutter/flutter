@@ -15,9 +15,8 @@ class ExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(useMaterial3: true),
-      home: const Directionality(
+    return const MaterialApp(
+      home: Directionality(
         // TRY THIS: Switch to TextDirection.rtl to see how the borders change.
         textDirection: TextDirection.ltr,
         child: Home(),
