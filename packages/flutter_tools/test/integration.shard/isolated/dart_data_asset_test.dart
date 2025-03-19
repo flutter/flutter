@@ -195,7 +195,7 @@ void main() {
         final ProcessTestResult result = await runFlutter(
           <String>['build', '-v', target],
           root.path,
-          <Transition>[Barrier.contains('Built build/$target')],
+          <Transition>[Barrier.contains('Built build${Platform.pathSeparator}$target')],
         );
         if (result.exitCode != 0) {
           throw Exception(
