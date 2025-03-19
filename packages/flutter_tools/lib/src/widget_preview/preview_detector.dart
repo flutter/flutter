@@ -9,7 +9,9 @@ import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
+import 'package:meta/meta.dart';
 import 'package:watcher/watcher.dart';
 
 import '../base/file_system.dart';
@@ -25,7 +27,7 @@ import 'preview_code_generator.dart';
 typedef PreviewPath = ({String path, Uri uri});
 
 /// Represents a set of previews for a given file.
-typedef PreviewMapping = Map<PreviewPath, List<String>>;
+typedef PreviewMapping = Map<PreviewPath, List<PreviewDetails>>;
 
 extension on Token {
   /// Convenience getter to identify tokens for private fields and functions.
@@ -50,6 +52,162 @@ extension on ParsedUnitResult {
   PreviewPath toPreviewPath() => (path: path, uri: uri);
 }
 
+/// Contains details related to a single preview instance.
+final class PreviewDetails {
+  PreviewDetails({required this.functionName, required this.isBuilder});
+
+  @visibleForTesting
+  PreviewDetails.test({
+    required this.functionName,
+    required this.isBuilder,
+    String? name,
+    String? width,
+    String? height,
+    String? textScaleFactor,
+    String? wrapper,
+    String? wrapperLibraryUri = '',
+  }) : _name = name,
+       _width = width,
+       _height = height,
+       _textScaleFactor = textScaleFactor,
+       _wrapper = wrapper,
+       _wrapperLibraryUri = wrapperLibraryUri;
+
+  @visibleForTesting
+  PreviewDetails copyWith({
+    String? functionName,
+    bool? isBuilder,
+    String? name,
+    String? width,
+    String? height,
+    String? textScaleFactor,
+    String? wrapper,
+    String? wrapperLibraryUri,
+  }) {
+    return PreviewDetails.test(
+      functionName: functionName ?? this.functionName,
+      isBuilder: isBuilder ?? this.isBuilder,
+      name: name ?? this.name,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      textScaleFactor: textScaleFactor ?? this.textScaleFactor,
+      wrapper: wrapper ?? this.wrapper,
+      wrapperLibraryUri: wrapperLibraryUri ?? this.wrapperLibraryUri,
+    );
+  }
+
+  static const String kName = 'name';
+  static const String kWidth = 'width';
+  static const String kHeight = 'height';
+  static const String kTextScaleFactor = 'textScaleFactor';
+  static const String kWrapper = 'wrapper';
+  static const String kWrapperLibraryUri = 'wrapperLibraryUrl';
+
+  /// The name of the function returning the preview.
+  final String functionName;
+
+  /// Set to `true` if the preview function is returning a [WidgetBuilder]
+  /// instead of a [Widget].
+  final bool isBuilder;
+
+  /// A description to be displayed alongside the preview.
+  ///
+  /// If not provided, no name will be associated with the preview.
+  String? get name => _name;
+  String? _name;
+
+  /// Artificial width constraint to be applied to the [child].
+  ///
+  /// If not provided, the previewed widget will attempt to set its own width
+  /// constraints and may result in an unbounded constraint error.
+  String? get width => _width;
+  String? _width;
+
+  /// Artificial height constraint to be applied to the [child].
+  ///
+  /// If not provided, the previewed widget will attempt to set its own height
+  /// constraints and may result in an unbounded constraint error.
+  String? get height => _height;
+  String? _height;
+
+  /// Applies font scaling to text within the [child].
+  ///
+  /// If not provided, the default text scaling factor provided by [MediaQuery]
+  /// will be used.
+  String? get textScaleFactor => _textScaleFactor;
+  String? _textScaleFactor;
+
+  /// The name of a tear-off used to wrap the [Widget] returned by the preview
+  /// function defined by [functionName].
+  ///
+  /// If not provided, the [Widget] returned by [functionName] will be used by
+  /// the previewer directly.
+  String? get wrapper => _wrapper;
+  String? _wrapper;
+
+  /// The URI for the library containing the declaration of [wrapper].
+  String? get wrapperLibraryUri => _wrapperLibraryUri;
+  String? _wrapperLibraryUri;
+
+  bool get hasWrapper => _wrapper != null;
+
+  void _setField({required NamedExpression node}) {
+    final String key = node.name.label.name;
+    final Expression expression = node.expression;
+    final String source = expression.toSource();
+    switch (key) {
+      case kName:
+        _name = source;
+      case kWidth:
+        _width = source;
+      case kHeight:
+        _height = source;
+      case kTextScaleFactor:
+        _textScaleFactor = source;
+      case kWrapper:
+        _wrapper = source;
+        _wrapperLibraryUri = (node.expression as SimpleIdentifier).element!.library2!.identifier;
+      default:
+        throw StateError('Unknown Preview field "$name": $source');
+    }
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (identical(other, this)) {
+      return true;
+    }
+    return other.runtimeType == runtimeType &&
+        other is PreviewDetails &&
+        other.functionName == functionName &&
+        other.isBuilder == isBuilder &&
+        other.height == height &&
+        other.width == width &&
+        other.textScaleFactor == textScaleFactor &&
+        other.wrapper == wrapper &&
+        other.wrapperLibraryUri == wrapperLibraryUri;
+  }
+
+  @override
+  String toString() =>
+      'PreviewDetails(function: $functionName isBuilder: $isBuilder $kName: $name '
+      '$kWidth: $width $kHeight: $height $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
+      '$kWrapperLibraryUri: $wrapperLibraryUri)';
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(<Object?>[
+    functionName,
+    isBuilder,
+    height,
+    width,
+    textScaleFactor,
+    wrapper,
+    wrapperLibraryUri,
+  ]);
+}
+
 class PreviewDetector {
   PreviewDetector({
     required this.fs,
@@ -70,7 +228,7 @@ class PreviewDetector {
   /// the initial [PreviewMapping] for the project.
   Future<PreviewMapping> initialize(Directory projectRoot) async {
     // Find the initial set of previews.
-    _pathToPreviews = findPreviewFunctions(projectRoot);
+    _pathToPreviews = await findPreviewFunctions(projectRoot);
 
     final Watcher watcher = Watcher(projectRoot.path);
     _fileWatcher = watcher.events.listen((WatchEvent event) async {
@@ -87,7 +245,7 @@ class PreviewDetector {
         return;
       }
       logger.printStatus('Detected change in $eventPath.');
-      final PreviewMapping filePreviewsMapping = findPreviewFunctions(
+      final PreviewMapping filePreviewsMapping = await findPreviewFunctions(
         fs.file(Uri.file(event.path)),
       );
       final bool hasExistingPreviews =
@@ -102,13 +260,13 @@ class PreviewDetector {
       }
       if (filePreviewsMapping.isNotEmpty) {
         // The set of previews has changed, but there are still previews in the file.
-        final MapEntry<PreviewPath, List<String>>(
+        final MapEntry<PreviewPath, List<PreviewDetails>>(
           key: PreviewPath location,
-          value: List<String> filePreviews,
+          value: List<PreviewDetails> filePreviews,
         ) = filePreviewsMapping.entries.first;
         logger.printStatus('Updated previews for ${location.uri}: $filePreviews');
         if (filePreviews.isNotEmpty) {
-          final List<String>? currentPreviewsForFile = _pathToPreviews[location];
+          final List<PreviewDetails>? currentPreviewsForFile = _pathToPreviews[location];
           if (filePreviews != currentPreviewsForFile) {
             _pathToPreviews[location] = filePreviews;
           }
@@ -131,7 +289,7 @@ class PreviewDetector {
   }
 
   /// Search for functions annotated with `@Preview` in the current project.
-  PreviewMapping findPreviewFunctions(FileSystemEntity entity) {
+  Future<PreviewMapping> findPreviewFunctions(FileSystemEntity entity) async {
     final AnalysisContextCollection collection = AnalysisContextCollection(
       includedPaths: <String>[entity.absolute.path],
       resourceProvider: PhysicalResourceProvider.INSTANCE,
@@ -146,30 +304,17 @@ class PreviewDetector {
         if (!filePath.isDartFile) {
           continue;
         }
-
-        final SomeParsedLibraryResult lib = context.currentSession.getParsedLibrary(filePath);
-        if (lib is ParsedLibraryResult) {
-          for (final ParsedUnitResult libUnit in lib.units) {
-            final List<String> previewEntries = previews[libUnit.toPreviewPath()] ?? <String>[];
-            for (final CompilationUnitMember entity in libUnit.unit.declarations) {
-              if (entity is FunctionDeclaration && !entity.name.isPrivate) {
-                bool foundPreview = false;
-                for (final Annotation annotation in entity.metadata) {
-                  if (annotation.isPreview) {
-                    // What happens if the annotation is applied multiple times?
-                    foundPreview = true;
-                    break;
-                  }
-                }
-                if (foundPreview) {
-                  logger.printStatus('Found preview at:');
-                  logger.printStatus('File path: ${libUnit.uri}');
-                  logger.printStatus('Preview function: ${entity.name}');
-                  logger.printStatus('');
-                  previewEntries.add(entity.name.toString());
-                }
-              }
-            }
+        final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(
+          filePath,
+        );
+        // TODO(bkonyi): ensure this can handle part files.
+        if (lib is ResolvedLibraryResult) {
+          for (final ResolvedUnitResult libUnit in lib.units) {
+            final List<PreviewDetails> previewEntries =
+                previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
+            final PreviewVisitor visitor = PreviewVisitor();
+            libUnit.unit.visitChildren(visitor);
+            previewEntries.addAll(visitor.previewEntries);
             if (previewEntries.isNotEmpty) {
               previews[libUnit.toPreviewPath()] = previewEntries;
             }
@@ -181,9 +326,97 @@ class PreviewDetector {
     }
     final int previewCount = previews.values.fold<int>(
       0,
-      (int count, List<String> value) => count + value.length,
+      (int count, List<PreviewDetails> value) => count + value.length,
     );
     logger.printStatus('Found $previewCount ${pluralize('preview', previewCount)}.');
     return previews;
+  }
+}
+
+/// Visitor which detects previews and extracts [PreviewDetails] for later code
+/// generation.
+// TODO(bkonyi): this visitor needs better error detection to identify invalid
+// previews and report them to the previewer without causing the entire
+// environment to shutdown or fail to render valid previews.
+class PreviewVisitor extends RecursiveAstVisitor<void> {
+  final List<PreviewDetails> previewEntries = <PreviewDetails>[];
+
+  FunctionDeclaration? _currentFunction;
+  ConstructorDeclaration? _currentConstructor;
+  MethodDeclaration? _currentMethod;
+  PreviewDetails? _currentPreview;
+
+  /// Handles previews defined on top-level functions.
+  @override
+  void visitFunctionDeclaration(FunctionDeclaration node) {
+    assert(_currentFunction == null);
+    if (node.name.isPrivate) {
+      return;
+    }
+
+    final TypeAnnotation? returnType = node.returnType;
+    if (returnType == null || returnType.question != null) {
+      return;
+    }
+    _scopedVisitChildren(node, (FunctionDeclaration? node) => _currentFunction = node);
+  }
+
+  /// Handles previews defined on constructors.
+  @override
+  void visitConstructorDeclaration(ConstructorDeclaration node) {
+    _scopedVisitChildren(node, (ConstructorDeclaration? node) => _currentConstructor = node);
+  }
+
+  /// Handles previews defined on static methods within classes.
+  @override
+  void visitMethodDeclaration(MethodDeclaration node) {
+    if (!node.isStatic) {
+      return;
+    }
+    _scopedVisitChildren(node, (MethodDeclaration? node) => _currentMethod = node);
+  }
+
+  @override
+  void visitAnnotation(Annotation node) {
+    if (!node.isPreview) {
+      return;
+    }
+    assert(_currentFunction != null || _currentConstructor != null || _currentMethod != null);
+    if (_currentFunction != null) {
+      final NamedType returnType = _currentFunction!.returnType! as NamedType;
+      _currentPreview = PreviewDetails(
+        functionName: _currentFunction!.name.toString(),
+        isBuilder: returnType.name2.value() == 'WidgetBuilder',
+      );
+    } else if (_currentConstructor != null) {
+      final SimpleIdentifier returnType = _currentConstructor!.returnType as SimpleIdentifier;
+      final Token? name = _currentConstructor!.name;
+      _currentPreview = PreviewDetails(
+        functionName: '$returnType${name == null ? '' : '.$name'}',
+        isBuilder: false,
+      );
+    } else if (_currentMethod != null) {
+      final NamedType returnType = _currentMethod!.returnType! as NamedType;
+      final ClassDeclaration parentClass = _currentMethod!.parent! as ClassDeclaration;
+      _currentPreview = PreviewDetails(
+        functionName: '${parentClass.name}.${_currentMethod!.name}',
+        isBuilder: returnType.name2.value() == 'WidgetBuilder',
+      );
+    }
+    node.visitChildren(this);
+    previewEntries.add(_currentPreview!);
+    _currentPreview = null;
+  }
+
+  @override
+  void visitNamedExpression(NamedExpression node) {
+    // Extracts named properties from the @Preview annotation.
+    _currentPreview?._setField(node: node);
+  }
+
+  void _scopedVisitChildren<T extends AstNode>(T node, void Function(T?) setter) {
+    setter(node);
+    node.visitChildren(this);
+    setter(null);
   }
 }

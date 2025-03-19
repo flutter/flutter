@@ -2,46 +2,36 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'media_query.dart';
-library;
+import 'package:flutter/widgets.dart';
 
-import 'framework.dart';
-
-/// Annotation used to mark functions that return a widget preview.
+/// Wraps a [Widget], initializing various state and properties to allow for
+/// previewing of the [Widget] in the widget previewer.
 ///
-/// NOTE: this interface is not stable and **will change**.
-///
-/// {@tool snippet}
-///
-/// Functions annotated with `@Preview()` must return a `WidgetPreview`
-/// and be public, top-level functions.
-///
-/// ```dart
-/// @Preview()
-/// WidgetPreview widgetPreview() {
-///   return const WidgetPreview(name: 'Preview 1', child: Text('Foo'));
-/// }
-/// ```
-/// {@end-tool}
+/// WARNING: This interface is not stable and **will change**.
 ///
 /// See also:
 ///
-///  * [WidgetPreview], a data class used to specify widget previews.
+///  * [Preview], an annotation class used to mark functions returning widget
+///    previews.
 // TODO(bkonyi): link to actual documentation when available.
-base class Preview {
-  /// Annotation used to mark functions that return widget previews.
-  const Preview({
+class WidgetPreview {
+  /// Wraps [child] in a [WidgetPreview] instance that applies some set of
+  /// properties.
+  const WidgetPreview({
+    required this.child,
     this.name,
     this.width,
     this.height,
     this.textScaleFactor,
-    this.wrapper,
   });
 
   /// A description to be displayed alongside the preview.
   ///
   /// If not provided, no name will be associated with the preview.
   final String? name;
+
+  /// The [Widget] to be rendered in the preview.
+  final Widget child;
 
   /// Artificial width constraint to be applied to the [child].
   ///
@@ -60,11 +50,4 @@ base class Preview {
   /// If not provided, the default text scaling factor provided by [MediaQuery]
   /// will be used.
   final double? textScaleFactor;
-
-  /// Wraps the previewed [Widget] in a [Widget] tree.
-  ///
-  /// This function can be used to perform dependency injection or setup
-  /// additional scaffolding needed to correctly render the preview.
-  // TODO(bkonyi): provide an example.
-  final Widget Function(Widget)? wrapper;
 }
