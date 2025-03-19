@@ -37,7 +37,7 @@ TEST_P(RendererTest, CachesRenderPassAndFramebuffer) {
   EXPECT_NE(texture_vk.GetCachedRenderPass(), nullptr);
 
   render_pass->EncodeCommands();
-  GetContext()->GetCommandQueue()->Submit({buffer});
+  EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer}).ok());
 
   // Can be reused without error.
   auto buffer_2 = GetContext()->CreateCommandBuffer();
@@ -71,7 +71,7 @@ TEST_P(RendererTest, CachesRenderPassAndFramebufferNonMSAA) {
   EXPECT_NE(texture_vk.GetCachedRenderPass(), nullptr);
 
   render_pass->EncodeCommands();
-  GetContext()->GetCommandQueue()->Submit({buffer});
+  EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer}).ok());
 
   // Can be reused without error.
   auto buffer_2 = GetContext()->CreateCommandBuffer();
