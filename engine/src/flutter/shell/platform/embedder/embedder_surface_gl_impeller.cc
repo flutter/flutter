@@ -81,7 +81,8 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   }
 
   impeller_context_ = impeller::ContextGLES::Create(
-      std::move(gl), shader_mappings, /*enable_gpu_tracing=*/false);
+      impeller::Flags {} std::move(gl), shader_mappings,
+      /*enable_gpu_tracing=*/false);
 
   if (!impeller_context_) {
     FML_LOG(ERROR) << "Could not create Impeller context.";
