@@ -2012,5 +2012,5 @@ final class SystemTextScaler extends TextScaler {
   int get hashCode => textScaleFactor.hashCode;
 
   @override
-  String toString() => 'SystemTextScaler @ ${textScaleFactor}x';
+  String toString() => 'SystemTextScaler (${textScaleFactor == 1.0 ? "no scaling" : "${textScaleFactor}x"})';
 }
