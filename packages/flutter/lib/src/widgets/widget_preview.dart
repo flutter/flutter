@@ -13,30 +13,43 @@ import 'framework.dart';
 ///
 /// {@tool snippet}
 ///
-/// Functions annotated with `@Preview()` must return a `WidgetPreview`
-/// and be public, top-level functions.
+/// Functions annotated with `@Preview()` must return a `Widget` or
+/// `WidgetBuilder` and be public. This annotation can only be applied
+/// to top-level functions, static methods defined within a class, and
+/// public `Widget` constructors and factories with no required arguments.
 ///
 /// ```dart
-/// @Preview()
-/// WidgetPreview widgetPreview() {
-///   return const WidgetPreview(name: 'Preview 1', child: Text('Foo'));
+/// @Preview(name: 'Top-level preview')
+/// Widget preview() => Text('Foo');
+///
+/// @Preview(name: 'Builder preview')
+/// WidgetBuilder builderPreview() {
+///   return (BuildContext context) {
+///     return Text('Builder');
+///   };
+/// }
+///
+/// class MyWidget extends StatelessWidget {
+///   @Preview(name: 'Constructor preview')
+///   MyWidget.preview();
+///
+///   @Preview(name: 'Factory constructor preview')
+///   MyWidget.factoryPreview() => MyWidget.preview();
+///
+///   @Preview(name: 'Static preview')
+///   static Widget previewStatic() => Text('Static');
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Text('MyWidget');
+///   }
 /// }
 /// ```
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [WidgetPreview], a data class used to specify widget previews.
 // TODO(bkonyi): link to actual documentation when available.
 base class Preview {
   /// Annotation used to mark functions that return widget previews.
-  const Preview({
-    this.name,
-    this.width,
-    this.height,
-    this.textScaleFactor,
-    this.wrapper,
-  });
+  const Preview({this.name, this.width, this.height, this.textScaleFactor, this.wrapper});
 
   /// A description to be displayed alongside the preview.
   ///

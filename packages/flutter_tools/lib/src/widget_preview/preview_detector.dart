@@ -210,12 +210,14 @@ final class PreviewDetails {
 
 class PreviewDetector {
   PreviewDetector({
+    required this.projectRoot,
     required this.fs,
     required this.logger,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
   });
 
+  final Directory projectRoot;
   final FileSystem fs;
   final Logger logger;
   final void Function(PreviewMapping) onChangeDetected;
@@ -223,6 +225,11 @@ class PreviewDetector {
 
   StreamSubscription<WatchEvent>? _fileWatcher;
   late final PreviewMapping _pathToPreviews;
+
+  late final AnalysisContextCollection collection = AnalysisContextCollection(
+    includedPaths: <String>[projectRoot.absolute.path],
+    resourceProvider: PhysicalResourceProvider.INSTANCE,
+  );
 
   /// Starts listening for changes to Dart sources under [projectRoot] and returns
   /// the initial [PreviewMapping] for the project.
@@ -286,22 +293,19 @@ class PreviewDetector {
 
   Future<void> dispose() async {
     await _fileWatcher?.cancel();
+    await collection.dispose();
   }
 
   /// Search for functions annotated with `@Preview` in the current project.
   Future<PreviewMapping> findPreviewFunctions(FileSystemEntity entity) async {
-    final AnalysisContextCollection collection = AnalysisContextCollection(
-      includedPaths: <String>[entity.absolute.path],
-      resourceProvider: PhysicalResourceProvider.INSTANCE,
-    );
-
     final PreviewMapping previews = PreviewMapping();
     for (final AnalysisContext context in collection.contexts) {
-      logger.printStatus('Finding previews in ${context.contextRoot.root.path}...');
+      logger.printStatus('Finding previews in ${entity.path}...');
 
       for (final String filePath in context.contextRoot.analyzedFiles()) {
         logger.printTrace('Checking file: $filePath');
-        if (!filePath.isDartFile) {
+        if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
+          logger.printTrace('Skipping $filePath');
           continue;
         }
         final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(

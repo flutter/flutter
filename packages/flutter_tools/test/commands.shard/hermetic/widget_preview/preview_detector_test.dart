@@ -70,6 +70,7 @@ void main() {
       projectRoot = createBasicProjectStructure(fs);
       logger = BufferLogger.test();
       previewDetector = PreviewDetector(
+        projectRoot: projectRoot,
         logger: logger,
         fs: fs,
         onChangeDetected: onChangeDetectedRoot,

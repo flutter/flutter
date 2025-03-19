@@ -181,6 +181,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   late final FlutterProject rootProject = getRootProject();
 
   late final PreviewDetector _previewDetector = PreviewDetector(
+    projectRoot: rootProject.directory,
     logger: logger,
     fs: fs,
     onChangeDetected: onChangeDetected,
