@@ -848,6 +848,44 @@ FlutterWindowsView* FlutterWindowsEngine::GetViewFromTopLevelWindow(
   return nullptr;
 }
 
+HCURSOR FlutterWindowsEngine::GetCursorByName(
+    const std::string& cursor_name) const {
+  static auto* cursors = new std::map<std::string, const wchar_t*>{
+      {"allScroll", IDC_SIZEALL},
+      {"basic", IDC_ARROW},
+      {"click", IDC_HAND},
+      {"forbidden", IDC_NO},
+      {"help", IDC_HELP},
+      {"move", IDC_SIZEALL},
+      {"none", nullptr},
+      {"noDrop", IDC_NO},
+      {"precise", IDC_CROSS},
+      {"progress", IDC_APPSTARTING},
+      {"text", IDC_IBEAM},
+      {"resizeColumn", IDC_SIZEWE},
+      {"resizeDown", IDC_SIZENS},
+      {"resizeDownLeft", IDC_SIZENESW},
+      {"resizeDownRight", IDC_SIZENWSE},
+      {"resizeLeft", IDC_SIZEWE},
+      {"resizeLeftRight", IDC_SIZEWE},
+      {"resizeRight", IDC_SIZEWE},
+      {"resizeRow", IDC_SIZENS},
+      {"resizeUp", IDC_SIZENS},
+      {"resizeUpDown", IDC_SIZENS},
+      {"resizeUpLeft", IDC_SIZENWSE},
+      {"resizeUpRight", IDC_SIZENESW},
+      {"resizeUpLeftDownRight", IDC_SIZENWSE},
+      {"resizeUpRightDownLeft", IDC_SIZENESW},
+      {"wait", IDC_WAIT},
+  };
+  const wchar_t* idc_name = IDC_ARROW;
+  auto it = cursors->find(cursor_name);
+  if (it != cursors->end()) {
+    idc_name = it->second;
+  }
+  return windows_proc_table_->LoadCursor(nullptr, idc_name);
+}
+
 void FlutterWindowsEngine::SendSystemLocales() {
   std::vector<LanguageInfo> languages =
       GetPreferredLanguageInfo(*windows_proc_table_);
@@ -1040,6 +1078,15 @@ std::optional<LRESULT> FlutterWindowsEngine::ProcessExternalWindowMessage(
                                                      lparam);
   }
   return std::nullopt;
+}
+
+void FlutterWindowsEngine::UpdateFlutterCursor(
+    const std::string& cursor_name) const {
+  SetFlutterCursor(GetCursorByName(cursor_name));
+}
+
+void FlutterWindowsEngine::SetFlutterCursor(HCURSOR cursor) const {
+  windows_proc_table_->SetCursor(cursor);
 }
 
 void FlutterWindowsEngine::OnChannelUpdate(std::string name, bool listening) {
