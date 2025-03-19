@@ -174,7 +174,6 @@ void main() {
                 ),
               Barrier.contains('Application finished.'),
             ],
-            debug: true,
           );
           if (result.exitCode != 0) {
             throw Exception(
@@ -197,7 +196,6 @@ void main() {
           <String>['build', '-v', target],
           root.path,
           <Transition>[Barrier.contains('Built build/$target')],
-          debug: true,
         );
         if (result.exitCode != 0) {
           throw Exception(
@@ -265,7 +263,6 @@ void main() {
               'Conflicting assets: The asset "asset: packages/data_asset_dependency/id1.txt" was declared in the pubspec and the hook',
             ),
           ],
-          debug: true,
         );
         expect(result.exitCode, isNonZero);
       });
