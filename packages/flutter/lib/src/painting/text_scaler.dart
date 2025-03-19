@@ -149,4 +149,7 @@ final class _ClampedTextScaler implements TextScaler {
   @override
   int get hashCode =>
       minScale == maxScale ? minScale.hashCode : Object.hash(scaler, minScale, maxScale);
+
+  @override
+  String toString() => '$scaler clamped [$minScale, $maxScale]';
 }
