@@ -596,7 +596,10 @@ object FlutterPluginUtils {
 
     @JvmStatic
     @JvmName("isFlutterAppProject")
-    internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) == null
+    internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) != null
+
+//    @JvmStatic
+//    @JvmName("addFlutterDependencies")
 
 //    private fun getApplicationVariants(project: Project)  {
 //        project.
