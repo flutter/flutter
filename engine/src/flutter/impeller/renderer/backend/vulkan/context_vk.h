@@ -98,7 +98,8 @@ class ContextVK final : public Context,
   /// Visible for testing.
   static size_t ChooseThreadCountForWorkers(size_t hardware_concurrency);
 
-  static std::shared_ptr<ContextVK> Create(Settings settings);
+  static std::shared_ptr<ContextVK> Create(const Flags& flags,
+                                           Settings settings);
 
   uint64_t GetHash() const { return hash_; }
 
@@ -300,7 +301,7 @@ class ContextVK final : public Context,
 
   bool is_valid_ = false;
 
-  ContextVK();
+  ContextVK(const Flags& flags);
 
   void Setup(Settings settings);
 
