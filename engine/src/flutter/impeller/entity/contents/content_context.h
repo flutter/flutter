@@ -582,7 +582,6 @@ class ContentContext {
     size_t GetPipelineCount() const { return pipelines_.size(); }
 
    private:
-    std::weak_ptr<Context> context_;
     std::optional<PipelineDescriptor> desc_;
     std::optional<ContentContextOptions> default_options_;
     std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>>
