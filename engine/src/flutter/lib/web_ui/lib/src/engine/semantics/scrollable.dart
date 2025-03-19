@@ -81,9 +81,6 @@ class SemanticScrollable extends SemanticRole {
       final double? scrollOffset = semanticsObject.scrollPosition;
       final double newScrollOffset = scrollOffset! + scrollDelta;
 
-      print(
-        'engine - 1. current scroll offset $scrollOffset, newOffset: $newScrollOffset, delta $scrollDelta, dom scroll position: $_domScrollPosition, effective scroll position: $_effectiveNeutralScrollPosition',
-      );
       _previousDomScrollPosition = _domScrollPosition;
       _neutralizeDomScrollPosition();
       semanticsObject.recomputePositionAndSize();
@@ -94,21 +91,15 @@ class SemanticScrollable extends SemanticRole {
       offsets[0] = 0.0;
       offsets[1] = newScrollOffset;
       final ByteData? message = const StandardMessageCodec().encodeMessage(offsets);
+
       if (doScrollForward) {
         if (semanticsObject.isVerticalScrollContainer) {
-          print('engine - scroll up action will be invoked for semanticsID: $semanticsId');
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
             viewId,
             semanticsId,
             ui.SemanticsAction.scrollToOffset,
             message,
           );
-          // EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-          //   viewId,
-          //   semanticsId,
-          //   ui.SemanticsAction.scrollUp,
-          //   null,
-          // );
         } else {
           assert(semanticsObject.isHorizontalScrollContainer);
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -120,19 +111,12 @@ class SemanticScrollable extends SemanticRole {
         }
       } else {
         if (semanticsObject.isVerticalScrollContainer) {
-          print('engine - scrolldown action will be invoked for semanticsID: $semanticsId');
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
             viewId,
             semanticsId,
             ui.SemanticsAction.scrollToOffset,
             message,
           );
-          // EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-          //   viewId,
-          //   semanticsId,
-          //   ui.SemanticsAction.scrollDown,
-          //   message,
-          // );
         } else {
           assert(semanticsObject.isHorizontalScrollContainer);
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -243,7 +227,6 @@ class SemanticScrollable extends SemanticRole {
       // element.scrollTop = canonicalNeutralScrollPosition.toDouble();
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollTop.toInt();
-      // print('_neutralizeDomScrollPosition: dom scroll position: ${_domScrollPosition}, effective scroll position: ${_effectiveNeutralScrollPosition}');
       semanticsObject
         ..verticalScrollAdjustment = _effectiveNeutralScrollPosition.toDouble()
         ..horizontalScrollAdjustment = 0.0;
