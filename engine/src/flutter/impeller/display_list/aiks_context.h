@@ -32,8 +32,7 @@ class AiksContext {
   ///                             errors.
   /// @param render_target_allocator Injects a render target allocator or
   ///                                allocates its own if none is supplied.
-  AiksContext(const Flags& settings,
-              std::shared_ptr<Context> context,
+  AiksContext(std::shared_ptr<Context> context,
               std::shared_ptr<TypographerContext> typographer_context,
               std::optional<std::shared_ptr<RenderTargetAllocator>>
                   render_target_allocator = std::nullopt);

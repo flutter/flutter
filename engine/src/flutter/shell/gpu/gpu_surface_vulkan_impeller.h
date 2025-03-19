@@ -19,8 +19,7 @@ namespace flutter {
 class GPUSurfaceVulkanImpeller final : public Surface {
  public:
   explicit GPUSurfaceVulkanImpeller(GPUSurfaceVulkanDelegate* delegate,
-                                    std::shared_ptr<impeller::Context> context,
-                                    const impeller::Flags& settings);
+                                    std::shared_ptr<impeller::Context> context);
 
   // |Surface|
   ~GPUSurfaceVulkanImpeller() override;

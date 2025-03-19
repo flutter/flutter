@@ -365,7 +365,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestTextureResolutionImpeller) {
 
   // Set up the surface.
   auto device = ::MTLCreateSystemDefaultDevice();
-  impeller::AiksContext aiks_context({}, CreateImpellerContext(), nullptr);
+  impeller::AiksContext aiks_context(CreateImpellerContext(), nullptr);
 
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
 
@@ -419,7 +419,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureImpeller) 
   // Set up the surface.
   FlutterDarwinContextMetalSkia* darwinContextMetal =
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
-  impeller::AiksContext aiks_context({}, CreateImpellerContext(), nullptr);
+  impeller::AiksContext aiks_context(CreateImpellerContext(), nullptr);
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
 
   // Create a texture.
@@ -470,7 +470,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVAImpell
   // Set up the surface.
   FlutterDarwinContextMetalSkia* darwinContextMetal =
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
-  impeller::AiksContext aiks_context({}, CreateImpellerContext(), nullptr);
+  impeller::AiksContext aiks_context(CreateImpellerContext(), nullptr);
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
 
   // Create a texture.
@@ -520,7 +520,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA2Impel
   // Set up the surface.
   FlutterDarwinContextMetalSkia* darwinContextMetal =
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
-  impeller::AiksContext aiks_context({}, CreateImpellerContext(), nullptr);
+  impeller::AiksContext aiks_context(CreateImpellerContext(), nullptr);
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
 
   // Create a texture.
@@ -570,7 +570,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateUnsupportedExternalTextur
   // Set up the surface.
   FlutterDarwinContextMetalSkia* darwinContextMetal =
       [[FlutterDarwinContextMetalSkia alloc] initWithDefaultMTLDevice];
-  impeller::AiksContext aiks_context({}, CreateImpellerContext(), nullptr);
+  impeller::AiksContext aiks_context(CreateImpellerContext(), nullptr);
   SkImageInfo info = SkImageInfo::MakeN32Premul(width, height);
 
   // Create a texture.

@@ -34,7 +34,7 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
     return true;
   }
 
-  AiksContext context({}, GetContext(), TypographerContextSkia::Make());
+  AiksContext context(GetContext(), TypographerContextSkia::Make());
   if (!context.IsValid()) {
     return false;
   }

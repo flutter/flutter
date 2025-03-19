@@ -8,7 +8,6 @@
 namespace impeller {
 
 AiksContext::AiksContext(
-    const Flags& settings,
     std::shared_ptr<Context> context,
     std::shared_ptr<TypographerContext> typographer_context,
     std::optional<std::shared_ptr<RenderTargetAllocator>>

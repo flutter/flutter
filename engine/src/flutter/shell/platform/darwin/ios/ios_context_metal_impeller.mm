@@ -19,8 +19,7 @@ IOSContextMetalImpeller::IOSContextMetalImpeller(
           [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch]) {
   if (darwin_context_metal_impeller_.context) {
     aiks_context_ = std::make_shared<impeller::AiksContext>(
-        impeller::Flags{}, darwin_context_metal_impeller_.context,
-        impeller::TypographerContextSkia::Make());
+        darwin_context_metal_impeller_.context, impeller::TypographerContextSkia::Make());
   }
 }
 

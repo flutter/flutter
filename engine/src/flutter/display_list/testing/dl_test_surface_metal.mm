@@ -93,8 +93,8 @@ void DlMetalSurfaceProvider::InitScreenShotter() const {
   if (!snapshotter_) {
     snapshotter_.reset(new MetalScreenshotter(/*enable_wide_gamut=*/false));
     auto typographer = impeller::TypographerContextSkia::Make();
-    aiks_context_.reset(new impeller::AiksContext(
-        impeller::Flags{}, snapshotter_->GetPlayground().GetContext(), typographer));
+    aiks_context_.reset(
+        new impeller::AiksContext(snapshotter_->GetPlayground().GetContext(), typographer));
   }
 }
 

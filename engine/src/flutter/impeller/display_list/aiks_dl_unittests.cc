@@ -873,7 +873,7 @@ TEST_P(AiksTest, DispatcherDoesNotCullPerspectiveTransformedChildDisplayLists) {
                        flutter::DlPaint(flutter::DlColor::kRed()));
   auto display_list = sub_builder.Build();
 
-  AiksContext context({}, GetContext(), nullptr);
+  AiksContext context(GetContext(), nullptr);
   RenderTarget render_target =
       context.GetContentContext().GetRenderTargetCache()->CreateOffscreen(
           *context.GetContext(), {2400, 1800}, 1);
@@ -939,7 +939,7 @@ TEST_P(AiksTest, CanPictureConvertToImage) {
   recorder_canvas.DrawRect(DlRect::MakeXYWH(200.0, 200.0, 600, 600), paint);
 
   DisplayListBuilder canvas;
-  AiksContext renderer({}, GetContext(), nullptr);
+  AiksContext renderer(GetContext(), nullptr);
   paint.setColor(DlColor::kTransparent());
   canvas.DrawPaint(paint);
 
@@ -961,7 +961,7 @@ TEST_P(AiksTest, CanEmptyPictureConvertToImage) {
   DisplayListBuilder recorder_builder;
 
   DisplayListBuilder builder;
-  AiksContext renderer({}, GetContext(), nullptr);
+  AiksContext renderer(GetContext(), nullptr);
 
   DlPaint paint;
   paint.setColor(DlColor::kTransparent());
@@ -1046,7 +1046,7 @@ TEST_P(AiksTest, ToImageFromImage) {
 
   builder.DrawPath(path, DlPaint().setColor(DlColor::kRed()));
 
-  AiksContext renderer({}, GetContext(), nullptr);
+  AiksContext renderer(GetContext(), nullptr);
   auto texture =
       DisplayListToTexture(builder.Build(), ISize(100, 100), renderer);
 
@@ -1112,7 +1112,7 @@ TEST_P(AiksTest, DisplayListToTextureAllocationFailure) {
   ScopedValidationDisable disable_validations;
   DisplayListBuilder builder;
 
-  AiksContext aiks_context({}, GetContext(), nullptr);
+  AiksContext aiks_context(GetContext(), nullptr);
   // Use intentionally invalid dimensions that would trigger an allocation
   // failure.
   auto texture =
@@ -1132,7 +1132,7 @@ TEST_P(AiksTest, DisplayListToTextureWithMipGenerationOnGLES) {
   builder.SaveLayer(std::nullopt, nullptr, filter.get());
   builder.Restore();
 
-  AiksContext aiks_context({}, GetContext(), nullptr);
+  AiksContext aiks_context(GetContext(), nullptr);
   // Use intentionally invalid dimensions that would trigger an allocation
   // failure.
   auto texture =
