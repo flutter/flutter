@@ -12,6 +12,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
+#include "impeller/geometry/color.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "vulkan/vulkan_enums.hpp"
 
@@ -87,6 +88,44 @@ constexpr vk::BlendOp ToVKBlendOp(BlendOperation op) {
   FML_UNREACHABLE();
 }
 
+constexpr vk::BlendOp ToVKBlendOp(BlendMode mode) {
+  switch (mode) {
+    case BlendMode::kScreen:
+      return vk::BlendOp::eScreenEXT;
+    case BlendMode::kOverlay:
+      return vk::BlendOp::eOverlayEXT;
+    case BlendMode::kDarken:
+      return vk::BlendOp::eDarkenEXT;
+    case BlendMode::kLighten:
+      return vk::BlendOp::eLightenEXT;
+    case BlendMode::kColorDodge:
+      return vk::BlendOp::eColordodgeEXT;
+    case BlendMode::kColorBurn:
+      return vk::BlendOp::eColorburnEXT;
+    case BlendMode::kHardLight:
+      return vk::BlendOp::eHardlightEXT;
+    case BlendMode::kSoftLight:
+      return vk::BlendOp::eSoftlightEXT;
+    case BlendMode::kDifference:
+      return vk::BlendOp::eDifferenceEXT;
+    case BlendMode::kExclusion:
+      return vk::BlendOp::eExclusionEXT;
+    case BlendMode::kMultiply:
+      return vk::BlendOp::eMultiplyEXT;
+    case BlendMode::kHue:
+      return vk::BlendOp::eHslHueEXT;
+    case BlendMode::kSaturation:
+      return vk::BlendOp::eHslSaturationEXT;
+    case BlendMode::kColor:
+      return vk::BlendOp::eHslColorEXT;
+    case BlendMode::kLuminosity:
+      return vk::BlendOp::eHslLuminosityEXT;
+    default:
+      return vk::BlendOp::eScreenEXT;
+  }
+  FML_UNREACHABLE();
+}
+
 constexpr vk::ColorComponentFlags ToVKColorComponentFlags(ColorWriteMask type) {
   vk::ColorComponentFlags mask;
 
@@ -115,15 +154,27 @@ ToVKPipelineColorBlendAttachmentState(const ColorAttachmentDescriptor& desc) {
 
   res.setBlendEnable(desc.blending_enabled);
 
-  res.setSrcColorBlendFactor(ToVKBlendFactor(desc.src_color_blend_factor));
-  res.setColorBlendOp(ToVKBlendOp(desc.color_blend_op));
-  res.setDstColorBlendFactor(ToVKBlendFactor(desc.dst_color_blend_factor));
+  if (desc.advanced_blend_op.has_value()) {
+    res.setSrcColorBlendFactor(ToVKBlendFactor(desc.src_color_blend_factor));
+    res.setDstColorBlendFactor(ToVKBlendFactor(desc.dst_color_blend_factor));
+    res.setSrcAlphaBlendFactor(ToVKBlendFactor(desc.src_alpha_blend_factor));
+    res.setDstAlphaBlendFactor(ToVKBlendFactor(desc.dst_alpha_blend_factor));
 
-  res.setSrcAlphaBlendFactor(ToVKBlendFactor(desc.src_alpha_blend_factor));
-  res.setAlphaBlendOp(ToVKBlendOp(desc.alpha_blend_op));
-  res.setDstAlphaBlendFactor(ToVKBlendFactor(desc.dst_alpha_blend_factor));
+    res.setColorBlendOp(ToVKBlendOp(desc.advanced_blend_op.value()));
+    res.setAlphaBlendOp(ToVKBlendOp(desc.advanced_blend_op.value()));
 
-  res.setColorWriteMask(ToVKColorComponentFlags(desc.write_mask));
+    res.setColorWriteMask(ToVKColorComponentFlags(desc.write_mask));
+  } else {
+    res.setSrcColorBlendFactor(ToVKBlendFactor(desc.src_color_blend_factor));
+    res.setColorBlendOp(ToVKBlendOp(desc.color_blend_op));
+    res.setDstColorBlendFactor(ToVKBlendFactor(desc.dst_color_blend_factor));
+
+    res.setSrcAlphaBlendFactor(ToVKBlendFactor(desc.src_alpha_blend_factor));
+    res.setAlphaBlendOp(ToVKBlendOp(desc.alpha_blend_op));
+    res.setDstAlphaBlendFactor(ToVKBlendFactor(desc.dst_alpha_blend_factor));
+
+    res.setColorWriteMask(ToVKColorComponentFlags(desc.write_mask));
+  }
 
   return res;
 }

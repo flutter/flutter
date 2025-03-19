@@ -116,6 +116,10 @@ class Capabilities {
   /// Note that this may be smaller than the maximum allocatable texture size.
   virtual ISize GetMaximumRenderPassAttachmentSize() const = 0;
 
+  /// @brief Whether advanced blend operations (screen and greater) are natively
+  ///        supported by the renderer without using specialized shaders.
+  virtual bool SupportsAdvancedBlendOperations() const { return false; }
+
   /// @brief Whether the XR formats are supported on this device.
   ///
   /// This is only ever true for iOS and macOS devices. We may need
