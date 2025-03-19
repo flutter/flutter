@@ -164,14 +164,14 @@ Future<DartHookResult> runFlutterSpecificHooks({
   }
 
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
-  final List<Architecture>? architectures =
+  final List<Architecture> architectures =
       isWeb
-          ? null
+          ? <Architecture>[]
           : (flutterTester
               ? <Architecture>[Architecture.current]
               : _architecturesForOS(targetPlatform, targetOS!, environmentDefines));
   final DartHookResult result =
-      architectures?.isEmpty ?? false
+      architectures.isEmpty && !isWeb
           ? DartHookResult.empty()
           : await _runDartHooks(
             environmentDefines: environmentDefines,
@@ -183,6 +183,7 @@ Future<DartHookResult> runFlutterSpecificHooks({
             linkingEnabled: _nativeAssetsLinkingEnabled(buildMode),
             fileSystem: fileSystem,
             targetOS: targetOS,
+            isWeb: isWeb,
           );
   return result;
 }
@@ -635,19 +636,18 @@ Future<void> _copyNativeCodeAssetsForOS(
 Future<DartHookResult> _runDartHooks({
   required Map<String, String> environmentDefines,
   required FlutterNativeAssetsBuildRunner buildRunner,
-  required List<Architecture>? architectures,
+  required List<Architecture> architectures,
   required Uri projectUri,
   required FileSystem fileSystem,
   required OS? targetOS,
   required bool linkingEnabled,
   required bool codeAssetSupport,
   required bool dataAssetSupport,
+  //TODO(mosum): Remove this parameter as soon as OS and Arch have web values.
+  required bool isWeb,
 }) async {
   final DateTime buildStart = DateTime.now();
-
-  // For native builds we have valid architectures.
-  // For web builds we use `null` as the single architecture.
-  final bool isWeb = architectures == null;
+  assert(targetOS != null || isWeb);
 
   final String targetString =
       isWeb
@@ -655,39 +655,33 @@ Future<DartHookResult> _runDartHooks({
           : '$targetOS ${architectures.length == 1 ? architectures.single : architectures}';
 
   globals.logger.printTrace('Building native assets for $targetString.');
-  final List<EncodedAsset> assets = <EncodedAsset>[];
-  final Set<Uri> dependencies = <Uri>{};
-
-  final EnvironmentType? environmentType;
-  if (targetOS == OS.iOS) {
-    final String? sdkRoot = environmentDefines[kSdkRoot];
-    if (sdkRoot == null) {
-      throw MissingDefineException(kSdkRoot, 'native_assets');
-    }
-    environmentType = xcode.environmentTypeFromSdkroot(sdkRoot, fileSystem);
-  } else {
-    environmentType = null;
-  }
 
   final CCompilerConfig? cCompilerConfig =
       targetOS == OS.android
           ? await buildRunner.ndkCCompilerConfig
           : await buildRunner.cCompilerConfig;
 
-  final String? codesignIdentity = environmentDefines[kCodesignIdentity];
-  assert(codesignIdentity == null || targetOS == OS.iOS || targetOS == OS.macOS);
+  void setupCode(HookConfigBuilder builder, Architecture architecture) {
+    final String? codesignIdentity = environmentDefines[kCodesignIdentity];
+    assert(codesignIdentity == null || targetOS == OS.iOS || targetOS == OS.macOS);
+    builder.setupCode(
+      targetArchitecture: architecture,
+      linkModePreference: LinkModePreference.dynamic,
+      cCompiler: cCompilerConfig,
+      targetOS: targetOS!,
+      android:
+          targetOS == OS.android
+              ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi(environmentDefines))
+              : null,
+      iOS: _getIOSConfig(targetOS, environmentDefines, fileSystem),
+      macOS: targetOS == OS.macOS ? MacOSCodeConfig(targetVersion: targetMacOSVersion) : null,
+    );
+  }
 
-  final AndroidCodeConfig? androidConfig =
-      targetOS == OS.android
-          ? AndroidCodeConfig(targetNdkApi: targetAndroidNdkApi(environmentDefines))
-          : null;
-  final IOSCodeConfig? iosConfig =
-      targetOS == OS.iOS
-          ? IOSCodeConfig(targetVersion: targetIOSVersion, targetSdk: getIOSSdk(environmentType!))
-          : null;
-  final MacOSCodeConfig? macOSConfig =
-      targetOS == OS.macOS ? MacOSCodeConfig(targetVersion: targetMacOSVersion) : null;
-  for (final Architecture? architecture in architectures ?? <Architecture?>[null]) {
+  final List<EncodedAsset> assets = <EncodedAsset>[];
+  final Set<Uri> dependencies = <Uri>{};
+  //TODO(mosum): Replace `null` as a placeholder for the web architecture with a "real" value.
+  for (final Architecture? architecture in <Architecture?>[...architectures, if (isWeb) null]) {
     assert(!(codeAssetSupport && architecture == null));
     final BuildResult? buildResult = await buildRunner.build(
       buildAssetTypes: <String>[
@@ -696,16 +690,8 @@ Future<DartHookResult> _runDartHooks({
       ],
       inputCreator: () {
         final BuildInputBuilder buildInputBuilder = BuildInputBuilder();
-        if (targetOS != null) {
-          buildInputBuilder.config.setupCode(
-            targetArchitecture: architecture,
-            linkModePreference: LinkModePreference.dynamic,
-            cCompiler: cCompilerConfig,
-            targetOS: targetOS,
-            android: androidConfig,
-            iOS: iosConfig,
-            macOS: macOSConfig,
-          );
+        if (!isWeb) {
+          setupCode(buildInputBuilder.config, architecture!);
         }
         return buildInputBuilder;
       },
@@ -741,16 +727,8 @@ Future<DartHookResult> _runDartHooks({
       ],
       inputCreator: () {
         final LinkInputBuilder linkInputBuilder = LinkInputBuilder();
-        if (targetOS != null) {
-          linkInputBuilder.config.setupCode(
-            targetArchitecture: architecture,
-            linkModePreference: LinkModePreference.dynamic,
-            cCompiler: cCompilerConfig,
-            targetOS: targetOS,
-            android: androidConfig,
-            iOS: iosConfig,
-            macOS: macOSConfig,
-          );
+        if (!isWeb) {
+          setupCode(linkInputBuilder.config, architecture!);
         }
         return linkInputBuilder;
       },
@@ -798,6 +776,30 @@ Future<DartHookResult> _runDartHooks({
     dataAssets: dataAssets,
     dependencies: dependencies.toList(),
   );
+}
+
+IOSCodeConfig? _getIOSConfig(
+  OS? targetOS,
+  Map<String, String> environmentDefines,
+  FileSystem fileSystem,
+) {
+  final IOSCodeConfig? iosConfig;
+  final EnvironmentType? environmentType;
+  if (targetOS == OS.iOS) {
+    final String? sdkRoot = environmentDefines[kSdkRoot];
+    if (sdkRoot == null) {
+      throw MissingDefineException(kSdkRoot, 'native_assets');
+    }
+    environmentType = xcode.environmentTypeFromSdkroot(sdkRoot, fileSystem);
+    iosConfig = IOSCodeConfig(
+      targetVersion: targetIOSVersion,
+      targetSdk: getIOSSdk(environmentType!),
+    );
+  } else {
+    environmentType = null;
+    iosConfig = null;
+  }
+  return iosConfig;
 }
 
 List<Architecture> _architecturesForOS(
