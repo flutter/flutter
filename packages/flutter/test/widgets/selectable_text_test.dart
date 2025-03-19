@@ -5582,6 +5582,7 @@ void main() {
         });
 
         final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
         await tester.pumpWidget(
           MaterialApp(home: Material(child: TextField(controller: controller))),
         );

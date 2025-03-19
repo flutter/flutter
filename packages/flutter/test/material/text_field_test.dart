@@ -16160,9 +16160,8 @@ void main() {
           updateMediaQueryFromView(tester);
         });
 
-        final TextEditingController controller = TextEditingController(text: 'one two three');
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(controller: controller))),
+          MaterialApp(home: Material(child: TextField(controller: _textEditingController(text: 'one two three')))),
         );
 
         // No context menu shown.

@@ -536,6 +536,7 @@ void main() {
         });
 
         final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
         await tester.pumpWidget(CupertinoApp(home: CupertinoTextField(controller: controller)));
 
         // No context menu shown.
