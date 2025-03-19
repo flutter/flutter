@@ -215,12 +215,12 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_)
         .SetLayoutWithoutEncoding(
-            is_swapchain ? vk::ImageLayout::eColorAttachmentOptimal
+            is_swapchain ? vk::ImageLayout::eGeneral
                          : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
   if (color_image_vk_) {
     TextureVK::Cast(*color_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eColorAttachmentOptimal);
+        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
   }
 
   // Set the initial viewport.

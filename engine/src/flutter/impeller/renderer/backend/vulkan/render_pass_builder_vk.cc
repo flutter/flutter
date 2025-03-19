@@ -134,14 +134,14 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   if (color0_.has_value()) {
     vk::AttachmentReference color_ref;
     color_ref.attachment = attachments_index;
-    color_ref.layout = vk::ImageLayout::eGeneral;
+    color_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
     color_refs.at(color_index++) = color_ref;
     attachments.at(attachments_index++) = color0_.value();
 
     if (color0_resolve_.has_value()) {
       vk::AttachmentReference resolve_ref;
       resolve_ref.attachment = attachments_index;
-      resolve_ref.layout = vk::ImageLayout::eGeneral;
+      resolve_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
       resolve_refs.at(resolve_index++) = resolve_ref;
       attachments.at(attachments_index++) = color0_resolve_.value();
     } else {
@@ -152,14 +152,14 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   for (const auto& color : colors_) {
     vk::AttachmentReference color_ref;
     color_ref.attachment = attachments_index;
-    color_ref.layout = vk::ImageLayout::eGeneral;
+    color_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
     color_refs.at(color_index++) = color_ref;
     attachments.at(attachments_index++) = color.second;
 
     if (auto found = resolves_.find(color.first); found != resolves_.end()) {
       vk::AttachmentReference resolve_ref;
       resolve_ref.attachment = attachments_index;
-      resolve_ref.layout = vk::ImageLayout::eGeneral;
+      resolve_ref.layout = vk::ImageLayout::eColorAttachmentOptimal;
       resolve_refs.at(resolve_index++) = resolve_ref;
       attachments.at(attachments_index++) = found->second;
     } else {
@@ -184,7 +184,10 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   subpass0.setPDepthStencilAttachment(&depth_stencil_ref);
 
   vk::SubpassDependency deps[3];
-  // Incoming
+  // Incoming dependency. If the attachments were previously used
+  // as attachments for a render pass, or sampled from/transfered to,
+  // then these operations must complete before we resolve anything
+  // to the onscreen.
   deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
   deps[0].dstSubpass = 0u;
   deps[0].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
@@ -197,6 +200,8 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
   deps[0].dependencyFlags = kSelfDependencyFlags;
 
+  // Self dependency for reading back the framebuffer, necessary for
+  // programmable blend support / framebuffer fetch.
   deps[1].srcSubpass = 0u;  // first subpass
   deps[1].dstSubpass = 0u;  // to itself
   deps[1].srcStageMask = kSelfDependencySrcStageMask;
@@ -205,13 +210,16 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   deps[1].dstAccessMask = kSelfDependencyDstAccessMask;
   deps[1].dependencyFlags = kSelfDependencyFlags;
 
-  // Outgoing
+  // Outgoing dependency. The resolve step or color attachment must complete
+  // before we can sample from the image, or use it as a blit src.
   deps[2].srcSubpass = 0u;  // first subpass
   deps[2].dstSubpass = VK_SUBPASS_EXTERNAL;
   deps[2].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
   deps[2].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-  deps[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
-  deps[2].dstAccessMask = vk::AccessFlagBits::eShaderRead;
+  deps[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader |
+                         vk::PipelineStageFlagBits::eTransfer;
+  deps[2].dstAccessMask =
+      vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferRead;
   deps[2].dependencyFlags = kSelfDependencyFlags;
 
   vk::RenderPassCreateInfo render_pass_desc;
