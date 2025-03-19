@@ -18,7 +18,7 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_FALSE(paint.isInvertColors());
   EXPECT_EQ(paint.getColor(), DlPaint::kDefaultColor);
   EXPECT_EQ(paint.getAlpha(), 0xFF);
-  EXPECT_EQ(paint.getBlendMode(), DlBlendMode::kDefaultMode);
+  EXPECT_EQ(paint.getBlendMode(), DlBlendMode::kSrcOver);
   EXPECT_EQ(paint.getDrawStyle(), DlDrawStyle::kDefaultStyle);
   EXPECT_EQ(paint.getStrokeCap(), DlStrokeCap::kDefaultCap);
   EXPECT_EQ(paint.getStrokeJoin(), DlStrokeJoin::kDefaultJoin);
@@ -31,7 +31,6 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_TRUE(paint.isDefault());
   EXPECT_EQ(paint, DlPaint::kDefault);
 
-  EXPECT_EQ(DlBlendMode::kDefaultMode, DlBlendMode::kSrcOver);
   EXPECT_EQ(DlDrawStyle::kDefaultStyle, DlDrawStyle::kFill);
   EXPECT_EQ(DlStrokeCap::kDefaultCap, DlStrokeCap::kButt);
   EXPECT_EQ(DlStrokeJoin::kDefaultJoin, DlStrokeJoin::kMiter);

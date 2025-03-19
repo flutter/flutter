@@ -59,13 +59,5 @@ TEST(SkiaConversionsTest, ToColor) {
   ASSERT_TRUE(ScalarNearlyEqual(converted_color.blue, 0x20 * (1.0f / 255)));
 }
 
-TEST(SkiaConversionsTest, BlendMode) {
-  for (auto i = 0; i < static_cast<int>(flutter::DlBlendMode::kLastMode); i++) {
-    EXPECT_EQ(
-        skia_conversions::ToBlendMode(static_cast<flutter::DlBlendMode>(i)),
-        static_cast<BlendMode>(i));
-  }
-}
-
 }  // namespace testing
 }  // namespace impeller

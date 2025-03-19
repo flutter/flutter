@@ -9,7 +9,7 @@
 namespace flutter {
 
 DlPaint::DlPaint(DlColor color)
-    : blend_mode_(static_cast<unsigned>(DlBlendMode::kDefaultMode)),
+    : blend_mode_(static_cast<unsigned>(DlBlendMode::kSrcOver)),
       draw_style_(static_cast<unsigned>(DlDrawStyle::kDefaultStyle)),
       stroke_cap_(static_cast<unsigned>(DlStrokeCap::kDefaultCap)),
       stroke_join_(static_cast<unsigned>(DlStrokeJoin::kDefaultJoin)),
