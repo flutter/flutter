@@ -143,6 +143,8 @@ class OverflowWidgetTextEditingController extends TextEditingController {
 // Trigger MediaQuery to update itself based on the View, which is not
 // recreated between tests. This is necessary when changing something on
 // TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
+// TODO(justinmc): This hack can be removed if
+// https://github.com/flutter/flutter/issues/165519 is fixed.
 void updateMediaQueryFromView(WidgetTester tester) {
   expect(find.byType(MediaQuery), findsOneWidget);
   final WidgetsBindingObserver widgetsBindingObserver =
