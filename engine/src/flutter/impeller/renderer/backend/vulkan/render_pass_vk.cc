@@ -189,6 +189,7 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
                          vk::AccessFlagBits::eTransferRead |
                          vk::AccessFlagBits::eColorAttachmentWrite;
     barrier.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                        vk::PipelineStageFlagBits::eFragmentShader |
                         vk::PipelineStageFlagBits::eTransfer;
     barrier.dst_access = vk::AccessFlagBits::eColorAttachmentWrite;
     barrier.dst_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
