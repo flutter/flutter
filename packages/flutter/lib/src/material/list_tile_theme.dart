@@ -382,6 +382,7 @@ class ListTileTheme extends InheritedTheme {
     double? minVerticalPadding,
     double? minLeadingWidth,
     ListTileControlAffinity? controlAffinity,
+    bool? isThreeLine,
     required super.child,
   }) : assert(
          data == null ||
@@ -415,7 +416,8 @@ class ListTileTheme extends InheritedTheme {
        _horizontalTitleGap = horizontalTitleGap,
        _minVerticalPadding = minVerticalPadding,
        _minLeadingWidth = minLeadingWidth,
-       _controlAffinity = controlAffinity;
+       _controlAffinity = controlAffinity,
+       _isThreeLine = isThreeLine;
 
   final ListTileThemeData? _data;
   final bool? _dense;
@@ -433,6 +435,7 @@ class ListTileTheme extends InheritedTheme {
   final bool? _enableFeedback;
   final MaterialStateProperty<MouseCursor?>? _mouseCursor;
   final ListTileControlAffinity? _controlAffinity;
+  final bool? _isThreeLine;
 
   /// The configuration of this theme.
   ListTileThemeData get data {
@@ -453,6 +456,7 @@ class ListTileTheme extends InheritedTheme {
           minVerticalPadding: _minVerticalPadding,
           minLeadingWidth: _minLeadingWidth,
           controlAffinity: _controlAffinity,
+          isThreeLine: _isThreeLine,
         );
   }
 
@@ -541,6 +545,13 @@ class ListTileTheme extends InheritedTheme {
   /// [ListTileThemeData.controlAffinity] property instead.
   ListTileControlAffinity? get controlAffinity =>
       _data != null ? _data.controlAffinity : _controlAffinity;
+
+  /// Overrides the default value of [CheckboxListTile.isThreeLine]
+  /// or [SwitchListTile.isThreeLine] or [RadioListTile.isThreeLine]
+  ///
+  /// This property is obsolete: please use the
+  /// [ListTileThemeData.isThreeLine] property instead.
+  bool? get isThreeLine => _data != null ? _data.isThreeLine : _isThreeLine;
 
   /// The [data] property of the closest instance of this class that
   /// encloses the given context.
@@ -639,6 +650,7 @@ class ListTileTheme extends InheritedTheme {
         horizontalTitleGap: horizontalTitleGap,
         minVerticalPadding: minVerticalPadding,
         minLeadingWidth: minLeadingWidth,
+        isThreeLine: isThreeLine,
       ),
       child: child,
     );
