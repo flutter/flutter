@@ -549,7 +549,7 @@ ContentContext::ContentContext(
 #endif  // IMPELLER_ENABLE_OPENGLES
 
   is_valid_ = true;
-  // InitializeCommonlyUsedShadersIfNeeded();
+  InitializeCommonlyUsedShadersIfNeeded();
 }
 
 ContentContext::~ContentContext() = default;
