@@ -10,7 +10,7 @@ import 'semantics.dart';
 ///
 /// Uses aria tab role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticTab extends SemanticRole {
   SemanticTab(SemanticsObject semanticsObject)
     : super.withBasics(
@@ -29,7 +29,7 @@ class SemanticTab extends SemanticRole {
 ///
 /// Uses aria tabpanel role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticTabPanel extends SemanticRole {
   SemanticTabPanel(SemanticsObject semanticsObject)
     : super.withBasics(
@@ -48,7 +48,7 @@ class SemanticTabPanel extends SemanticRole {
 ///
 /// Uses aria tablist role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticTabList extends SemanticRole {
   SemanticTabList(SemanticsObject semanticsObject)
     : super.withBasics(

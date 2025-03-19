@@ -7,9 +7,6 @@
 #include <optional>
 
 #include "impeller/base/validation.h"
-#include "impeller/renderer/backend/vulkan/resource_manager_vk.h"
-#include "vulkan/vulkan_enums.hpp"
-#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 
@@ -29,43 +26,19 @@ static const constexpr DescriptorPoolSize kDefaultBindingSize =
         .subpass_bindings = 4u  // Subpass Bindings
     };
 
-// Holds the command pool in a background thread, recyling it when not in use.
-class BackgroundDescriptorPoolVK final {
- public:
-  BackgroundDescriptorPoolVK(BackgroundDescriptorPoolVK&&) = default;
-
-  explicit BackgroundDescriptorPoolVK(
-      vk::UniqueDescriptorPool&& pool,
-      std::weak_ptr<DescriptorPoolRecyclerVK> recycler)
-      : pool_(std::move(pool)), recycler_(std::move(recycler)) {}
-
-  ~BackgroundDescriptorPoolVK() {
-    auto const recycler = recycler_.lock();
-
-    // Not only does this prevent recycling when the context is being destroyed,
-    // but it also prevents the destructor from effectively being called twice;
-    // once for the original BackgroundCommandPoolVK() and once for the moved
-    // BackgroundCommandPoolVK().
-    if (!recycler) {
-      return;
-    }
-
-    recycler->Reclaim(std::move(pool_));
-  }
-
- private:
-  BackgroundDescriptorPoolVK(const BackgroundDescriptorPoolVK&) = delete;
-
-  BackgroundDescriptorPoolVK& operator=(const BackgroundDescriptorPoolVK&) =
-      delete;
-
-  vk::UniqueDescriptorPool pool_;
-  uint32_t allocated_capacity_;
-  std::weak_ptr<DescriptorPoolRecyclerVK> recycler_;
-};
-
 DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context)
     : context_(std::move(context)) {}
+
+void DescriptorPoolVK::Destroy() {
+  pools_.clear();
+}
+
+DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context,
+                                   DescriptorCacheMap descriptor_sets,
+                                   std::vector<vk::UniqueDescriptorPool> pools)
+    : context_(std::move(context)),
+      descriptor_sets_(std::move(descriptor_sets)),
+      pools_(std::move(pools)) {}
 
 DescriptorPoolVK::~DescriptorPoolVK() {
   if (pools_.empty()) {
@@ -81,19 +54,21 @@ DescriptorPoolVK::~DescriptorPoolVK() {
     return;
   }
 
-  for (auto i = 0u; i < pools_.size(); i++) {
-    auto reset_pool_when_dropped =
-        BackgroundDescriptorPoolVK(std::move(pools_[i]), recycler);
-
-    UniqueResourceVKT<BackgroundDescriptorPoolVK> pool(
-        context->GetResourceManager(), std::move(reset_pool_when_dropped));
-  }
-  pools_.clear();
+  recycler->Reclaim(std::move(descriptor_sets_), std::move(pools_));
 }
 
 fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
+    PipelineKey pipeline_key,
     const ContextVK& context_vk) {
+  DescriptorCacheMap::iterator existing = descriptor_sets_.find(pipeline_key);
+  if (existing != descriptor_sets_.end() && !existing->second.unused.empty()) {
+    auto descriptor_set = existing->second.unused.back();
+    existing->second.unused.pop_back();
+    existing->second.used.push_back(descriptor_set);
+    return descriptor_set;
+  }
+
   if (pools_.empty()) {
     CreateNewPool(context_vk);
   }
@@ -111,6 +86,9 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
     set_info.setDescriptorPool(pools_.back().get());
     result = context_vk.GetDevice().allocateDescriptorSets(&set_info, &set);
   }
+  auto lookup_result =
+      descriptor_sets_.try_emplace(pipeline_key, DescriptorCache{});
+  lookup_result.first->second.used.push_back(set);
 
   if (result != vk::Result::eSuccess) {
     VALIDATION_LOG << "Could not allocate descriptor sets: "
@@ -130,30 +108,35 @@ fml::Status DescriptorPoolVK::CreateNewPool(const ContextVK& context_vk) {
   return fml::Status();
 }
 
-void DescriptorPoolRecyclerVK::Reclaim(vk::UniqueDescriptorPool&& pool) {
+void DescriptorPoolRecyclerVK::Reclaim(
+    DescriptorCacheMap descriptor_sets,
+    std::vector<vk::UniqueDescriptorPool> pools) {
   // Reset the pool on a background thread.
   auto strong_context = context_.lock();
   if (!strong_context) {
     return;
   }
-  auto device = strong_context->GetDevice();
-  device.resetDescriptorPool(pool.get());
 
-  // Move the pool to the recycled list.
-  Lock recycled_lock(recycled_mutex_);
-
-  if (recycled_.size() < kMaxRecycledPools) {
-    recycled_.push_back(std::move(pool));
-    return;
+  for (auto& [_, cache] : descriptor_sets) {
+    cache.unused.insert(cache.unused.end(), cache.used.begin(),
+                        cache.used.end());
+    cache.used.clear();
   }
+
+  // Move the pool to the recycled list. If more than 32 pool are
+  // cached then delete the newest entry.
+  Lock recycled_lock(recycled_mutex_);
+  while (recycled_.size() >= kMaxRecycledPools) {
+    auto& back_entry = recycled_.back();
+    back_entry->Destroy();
+    recycled_.pop_back();
+  }
+  recycled_.push_back(std::make_shared<DescriptorPoolVK>(
+      context_, std::move(descriptor_sets), std::move(pools)));
 }
 
 vk::UniqueDescriptorPool DescriptorPoolRecyclerVK::Get() {
   // Recycle a pool with a matching minumum capcity if it is available.
-  auto recycled_pool = Reuse();
-  if (recycled_pool.has_value()) {
-    return std::move(recycled_pool.value());
-  }
   return Create();
 }
 
@@ -187,15 +170,17 @@ vk::UniqueDescriptorPool DescriptorPoolRecyclerVK::Create() {
   return std::move(pool);
 }
 
-std::optional<vk::UniqueDescriptorPool> DescriptorPoolRecyclerVK::Reuse() {
-  Lock lock(recycled_mutex_);
-  if (recycled_.empty()) {
-    return std::nullopt;
+std::shared_ptr<DescriptorPoolVK>
+DescriptorPoolRecyclerVK::GetDescriptorPool() {
+  {
+    Lock recycled_lock(recycled_mutex_);
+    if (!recycled_.empty()) {
+      auto result = recycled_.back();
+      recycled_.pop_back();
+      return result;
+    }
   }
-
-  auto recycled = std::move(recycled_[recycled_.size() - 1]);
-  recycled_.pop_back();
-  return recycled;
+  return std::make_shared<DescriptorPoolVK>(context_);
 }
 
 }  // namespace impeller

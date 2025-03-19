@@ -1820,7 +1820,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
@@ -1966,7 +1965,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
@@ -2110,7 +2108,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
@@ -2168,7 +2165,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
@@ -2211,7 +2207,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             stateSetter = setState;
@@ -3081,6 +3076,7 @@ void main() {
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
       (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
     );
+
     const Rect indicatorRect = Rect.fromLTRB(12.0, 0.0, 68.0, 32.0);
     const Rect includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
@@ -3106,7 +3102,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(12.0, 72.0, 68.0, 104.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(12.0, 0.0, 68.0, 32.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3168,7 +3164,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(12.0, 58.0, 68.0, 90.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(12.0, 6.0, 68.0, 38.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3234,7 +3230,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(30.0, 96.0, 86.0, 128.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(30.0, 24.0, 86.0, 56.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3299,7 +3295,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(0.0, 58.0, 50.0, 90.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(0.0, 6.0, 50.0, 38.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3366,7 +3362,7 @@ void main() {
         )
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
-          rrect: RRect.fromLTRBR(140.0, 96.0, 196.0, 128.0, const Radius.circular(16)),
+          rrect: RRect.fromLTRBR(140.0, 24.0, 196.0, 56.0, const Radius.circular(16)),
           color: const Color(0xffe8def8),
         ),
     );
@@ -3406,13 +3402,11 @@ void main() {
     );
 
     // Default values from M3 specification.
+    const double railMinWidth = 80.0;
     const double indicatorHeight = 32.0;
     const double destinationWidth = 72.0;
     const double destinationHorizontalPadding = 8.0;
     const double indicatorWidth = destinationWidth - 2 * destinationHorizontalPadding; // 56.0
-    const double verticalSpacer = 8.0;
-    const double verticalIconLabelSpacing = 4.0;
-    const double verticalDestinationSpacing = 12.0;
 
     // The navigation rail width is larger than default because of the first destination long label.
     final double railWidth = tester.getSize(find.byType(NavigationRail)).width;
@@ -3423,13 +3417,7 @@ void main() {
     final Rect indicatorRect = Rect.fromLTRB(indicatorLeft, 0.0, indicatorRight, indicatorHeight);
     final Rect includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
-
-    // Compute the vertical position for the selected destination (the one with 'bookmark' icon).
-    const double labelHeight = 16; // fontSize is 12 and height is 1.3.
-    const double destinationHeight =
-        indicatorHeight + verticalIconLabelSpacing + labelHeight + verticalDestinationSpacing;
-    const double secondDestinationVerticalOffset = verticalSpacer + destinationHeight;
-    const double secondIndicatorVerticalOffset = secondDestinationVerticalOffset;
+    const double indicatorHorizontalPadding = (railMinWidth - indicatorWidth) / 2; // 12.0
 
     expect(
       inkFeatures,
@@ -3453,10 +3441,10 @@ void main() {
         ..rect(rect: indicatorRect, color: const Color(0x0a6750a4))
         ..rrect(
           rrect: RRect.fromLTRBR(
-            indicatorLeft,
-            secondIndicatorVerticalOffset,
-            indicatorRight,
-            secondIndicatorVerticalOffset + indicatorHeight,
+            indicatorHorizontalPadding,
+            0.0,
+            indicatorHorizontalPadding + indicatorWidth,
+            indicatorHeight,
             const Radius.circular(16),
           ),
           color: const Color(0xffe8def8),
@@ -3509,9 +3497,6 @@ void main() {
     const double destinationWidth = 72.0;
     const double destinationHorizontalPadding = 8.0;
     const double indicatorWidth = destinationWidth - 2 * destinationHorizontalPadding; // 56.0
-    const double verticalSpacer = 8.0;
-    const double verticalIconLabelSpacing = 4.0;
-    const double verticalDestinationSpacing = 12.0;
 
     // The navigation rail width is the default one because labels are short.
     final double railWidth = tester.getSize(find.byType(NavigationRail)).width;
@@ -3531,13 +3516,8 @@ void main() {
     final Rect includedRect = indicatorRect;
     final Rect excludedRect = includedRect.inflate(10);
 
-    // Compute the vertical position for the selected destination (the one with 'bookmark' icon).
-    const double labelHeight = 16; // fontSize is 12 and height is 1.3.
-    const double destinationHeight =
-        iconSize + verticalIconLabelSpacing + labelHeight + verticalDestinationSpacing;
-    const double secondDestinationVerticalOffset = verticalSpacer + destinationHeight;
-    const double indicatorOffset = (iconSize - indicatorHeight) / 2;
-    const double secondIndicatorVerticalOffset = secondDestinationVerticalOffset + indicatorOffset;
+    // Icon height is greater than indicator height so the indicator has a vertical offset.
+    const double secondIndicatorVerticalOffset = (iconSize - indicatorHeight) / 2;
 
     expect(
       inkFeatures,
@@ -3616,7 +3596,6 @@ void main() {
     const double destinationWidth = 72.0;
     const double destinationHorizontalPadding = 8.0;
     const double indicatorWidth = destinationWidth - 2 * destinationHorizontalPadding; // 56.0
-    const double verticalSpacer = 8.0;
     const double verticalDestinationSpacingM3 = 12.0;
 
     // The navigation rail width is the default one because labels are short.
@@ -3636,11 +3615,7 @@ void main() {
     final Rect excludedRect = includedRect.inflate(10);
 
     // Compute the vertical position for the selected destination (the one with 'bookmark' icon).
-    const double destinationHeight = indicatorHeight + verticalDestinationSpacingM3;
-    const double secondDestinationVerticalOffset = verticalSpacer + destinationHeight;
-    const double secondIndicatorVerticalOffset =
-        secondDestinationVerticalOffset + verticalDestinationSpacingM3 / 2;
-    const double secondDestinationHorizontalOffset = 800 - railMinExtendedWidth; // RTL.
+    const double secondIndicatorVerticalOffset = verticalDestinationSpacingM3 / 2;
 
     expect(
       inkFeatures,
@@ -3666,9 +3641,9 @@ void main() {
         // Indicator for the selected destination (the one with 'bookmark' icon).
         ..rrect(
           rrect: RRect.fromLTRBR(
-            secondDestinationHorizontalOffset + indicatorLeft,
+            indicatorLeft,
             secondIndicatorVerticalOffset,
-            secondDestinationHorizontalOffset + indicatorRight,
+            indicatorRight,
             secondIndicatorVerticalOffset + indicatorHeight,
             const Radius.circular(16),
           ),
@@ -3724,7 +3699,7 @@ void main() {
   testWidgets('Navigation destination updates indicator color and shape', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const Color color = Color(0xff0000ff);
     const ShapeBorder shape = RoundedRectangleBorder();
 
@@ -6175,8 +6150,8 @@ Widget _buildWidget(Widget child, {bool useMaterial3 = true, bool isRTL = false}
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Container>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
+          .firstWidget<Ink>(
+            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;

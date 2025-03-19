@@ -46,7 +46,7 @@ enum NavigationBarBottomMode {
 const double _kNavBarPersistentHeight = kMinInteractiveDimensionCupertino;
 
 /// Size increase from expanding the navigation bar into an iOS-11-style large title
-/// form in a [CustomScrollView].
+/// configuration in a [CustomScrollView].
 const double _kNavBarLargeTitleHeightExtension = 52.0;
 
 /// Number of logical pixels scrolled down before the title text is transferred
