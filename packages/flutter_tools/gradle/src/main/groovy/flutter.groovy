@@ -72,7 +72,7 @@ class FlutterPlugin implements Plugin<Project> {
         this.project = project
 
         Project rootProject = project.rootProject
-        if (isFlutterAppProject()) {
+        if (FlutterPluginUtils.isFlutterAppProject(project)) {
             rootProject.tasks.register("generateLockfiles") {
                 doLast {
                     rootProject.subprojects.each { subproject ->
@@ -394,7 +394,7 @@ class FlutterPlugin implements Plugin<Project> {
         // type like profile is used, and the plugin and app projects have API dependencies on the
         // embedding.
         List<Map<String, Object>> pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency = flutterBuildMode == "release" ? getPluginListWithoutDevDependencies(project) : getPluginList(project);
-        if (!isFlutterAppProject() || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.size() == 0) {
+        if (!FlutterPluginUtils.isFlutterAppProject(project) || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.size() == 0) {
             FlutterPluginUtils.addApiDependencies(project, buildType.name,
                     "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
         }
@@ -637,10 +637,6 @@ class FlutterPlugin implements Plugin<Project> {
         return project.findProperty(name) ?: localProperties?.getProperty(name, defaultValue)
     }
 
-    private boolean isFlutterAppProject() {
-        return project.android.hasProperty("applicationVariants")
-    }
-
     private void addFlutterTasks(Project project) {
         if (project.state.failure) {
             return
@@ -716,7 +712,7 @@ class FlutterPlugin implements Plugin<Project> {
             validateDeferredComponentsValue = project.property(propValidateDeferredComponents).toBoolean()
         }
         FlutterPluginUtils.addTaskForJavaVersion(project)
-        if (isFlutterAppProject()) {
+        if (FlutterPluginUtils.isFlutterAppProject(project)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(project)
             addTasksForOutputsAppLinkSettings(project)
         }
@@ -883,7 +879,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-        if (isFlutterAppProject()) {
+        if (FlutterPluginUtils.isFlutterAppProject(project)) {
             AbstractAppExtension android = (AbstractAppExtension) project.extensions.findByName("android")
             android.applicationVariants.configureEach { variant ->
                 Task assembleTask = variant.assembleProvider.get()

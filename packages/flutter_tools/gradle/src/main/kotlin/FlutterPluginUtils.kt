@@ -594,6 +594,10 @@ object FlutterPluginUtils {
             .arguments("-Wno-dev", "--no-warn-unused-cli")
     }
 
+    @JvmStatic
+    @JvmName("isFlutterAppProject")
+    internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) == null
+
 //    private fun getApplicationVariants(project: Project)  {
 //        project.
 //    }
