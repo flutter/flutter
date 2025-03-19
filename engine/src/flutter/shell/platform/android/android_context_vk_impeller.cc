@@ -49,8 +49,11 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   settings.enable_gpu_tracing = p_settings.enable_gpu_tracing;
   settings.enable_surface_control = p_settings.enable_surface_control;
 
-  auto context =
-      impeller::ContextVK::Create(impeller::Flags{}, std::move(settings));
+  auto context = impeller::ContextVK::Create(
+      impeller::Flags{
+          .lazy_shader_mode = p_settings.enable_lazy_shader_mode,
+      },
+      std::move(settings));
 
   if (!p_settings.quiet) {
     if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
