@@ -919,6 +919,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     // is the raster thread.
     raster_task();
   }
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 // |PlatformView::Delegate|
