@@ -393,7 +393,7 @@ class ListTile extends StatelessWidget {
     this.title,
     this.subtitle,
     this.trailing,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.visualDensity,
     this.shape,
@@ -425,7 +425,7 @@ class ListTile extends StatelessWidget {
     this.minTileHeight,
     this.titleAlignment,
     this.internalAddSemanticForOnTap = true,
-  }) : assert(!isThreeLine || subtitle != null);
+  }): assert(isThreeLine != true || subtitle != null);
 
   /// A widget to display before the title.
   ///
@@ -482,7 +482,7 @@ class ListTile extends StatelessWidget {
   ///
   /// When using a [Text] widget for [title] and [subtitle], you can enforce
   /// line limits using [Text.maxLines].
-  final bool isThreeLine;
+  final bool? isThreeLine;
 
   /// {@template flutter.material.ListTile.dense}
   /// Whether this list tile is part of a vertically dense list.
@@ -987,7 +987,7 @@ class ListTile extends StatelessWidget {
                   trailing: trailingIcon,
                   isDense: _isDenseLayout(theme, tileTheme),
                   visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
-                  isThreeLine: isThreeLine,
+                  isThreeLine: isThreeLine ?? tileTheme.isThreeLine ?? theme.listTileTheme.isThreeLine ?? false,
                   textDirection: textDirection,
                   titleBaselineType:
                       titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
