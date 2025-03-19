@@ -11,7 +11,7 @@ void main() {
   // The state of content sensitivity in the app.
   final SensitiveContentHost sensitiveContentHost = SensitiveContentHost.instance;
   testWidgets(
-    'when SensitiveContentService.getContentSensitivity returns ContentSensitivity.unknown, the fallback ContentSensitivity is notSensitive',
+    'when SensitiveContentService.getContentSensitivity returns ContentSensitivity.unknown, FlutterError is thrown and the fallback ContentSensitivity is notSensitive',
     (WidgetTester tester) async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.sensitiveContent,
@@ -27,9 +27,9 @@ void main() {
       );
 
       await tester.pumpWidget(
-        SensitiveContent(sensitivity: ContentSensitivity.sensitive, child: Container()),
+        SensitiveContent(sensitivity: ContentSensitivity.notSensitive, child: Container()),
       );
-      await tester.pumpWidget(Container());
+      expect(tester.takeException(), isA<FlutterError>());
 
       expect(
         sensitiveContentHost.calculatedContentSensitivity,
