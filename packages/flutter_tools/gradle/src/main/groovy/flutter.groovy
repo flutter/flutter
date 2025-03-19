@@ -135,7 +135,7 @@ class FlutterPlugin implements Plugin<Project> {
         extension.flutterVersionName = localProperties.getProperty("flutter.versionName", "1.0")
 
         this.addFlutterTasks(project)
-        forceNdkDownload(project, flutterRootPath)
+        FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -561,118 +561,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
-        // If the project is already configuring a native build, we don't need to do anything.
-        Boolean forcingNotRequired = gradleProject.android.externalNativeBuild.cmake.path != null
-        if (forcingNotRequired) {
-            return
-        }
-
-        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
-        gradleProject.android {
-            externalNativeBuild {
-                cmake {
-                    // Respect the existing configuration if it exists - the NDK will already be
-                    // downloaded in this case.
-                    path = flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
-                }
-            }
-
-            defaultConfig {
-                externalNativeBuild {
-                    cmake {
-                        // CMake will print warnings when you try to build an empty project.
-                        // These arguments silence the warnings - our project is intentionally
-                        // empty.
-                        arguments("-Wno-dev", "--no-warn-unused-cli")
-                    }
-                }
-            }
-        }
-    }
-
-    /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
-    private void detectLowCompileSdkVersionOrNdkVersion() {
-        project.afterEvaluate {
-            // Default to int max if using a preview version to skip the sdk check.
-            int projectCompileSdkVersion = Integer.MAX_VALUE
-            // Stable versions use ints, legacy preview uses string.
-            if (FlutterPluginUtils.getCompileSdkFromProject(project).isInteger()) {
-                projectCompileSdkVersion = FlutterPluginUtils.getCompileSdkFromProject(project) as int
-            }
-            int maxPluginCompileSdkVersion = projectCompileSdkVersion
-            String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
-            String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
-            String maxPluginNdkVersion = projectNdkVersion
-            int numProcessedPlugins = getPluginList(project).size()
-            List<Tuple2<String, String>> pluginsWithHigherSdkVersion = []
-            List<Tuple2<String, String>> pluginsWithDifferentNdkVersion = []
-
-            getPluginList(project).each { pluginObject ->
-                assert(pluginObject.name instanceof String)
-                Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-                if (pluginProject == null) {
-                    return
-                }
-                pluginProject.afterEvaluate {
-                    // Default to int min if using a preview version to skip the sdk check.
-                    int pluginCompileSdkVersion = Integer.MIN_VALUE
-                    // Stable versions use ints, legacy preview uses string.
-                    if (FlutterPluginUtils.getCompileSdkFromProject(pluginProject).isInteger()) {
-                        pluginCompileSdkVersion = FlutterPluginUtils.getCompileSdkFromProject(pluginProject) as int
-                    }
-
-                    maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
-                    if (pluginCompileSdkVersion > projectCompileSdkVersion) {
-                        pluginsWithHigherSdkVersion.add(new Tuple(pluginProject.name, pluginCompileSdkVersion))
-                    }
-
-                    String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
-                    maxPluginNdkVersion = VersionUtils.mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
-                    if (pluginNdkVersion != projectNdkVersion) {
-                        pluginsWithDifferentNdkVersion.add(new Tuple(pluginProject.name, pluginNdkVersion))
-                    }
-
-                    numProcessedPlugins--
-                    if (numProcessedPlugins == 0) {
-                        if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:")
-                            for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
-                                project.logger.error("- ${pluginToCompileSdkVersion.v1} compiles against Android SDK ${pluginToCompileSdkVersion.v2}")
-                            }
-                            File buildGradleFile = FlutterPluginUtils.getBuildGradleFileFromProjectDir(project.projectDir, project.logger)
-                            project.logger.error("""\
-                                Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
-                                Add the following to ${buildGradleFile.path}:
-
-                                    android {
-                                        compileSdk = ${maxPluginCompileSdkVersion}
-                                        ...
-                                    }
-                                """.stripIndent())
-                        }
-                        if (maxPluginNdkVersion != projectNdkVersion) {
-                            project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:")
-                            for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
-                                project.logger.error("- ${pluginToNdkVersion.v1} requires Android NDK ${pluginToNdkVersion.v2}")
-                            }
-                            File buildGradleFile = FlutterPluginUtils.getBuildGradleFileFromProjectDir(project.projectDir, project.logger)
-                            project.logger.error("""\
-                                Fix this issue by using the highest Android NDK version (they are backward compatible).
-                                Add the following to ${buildGradleFile.path}:
-
-                                    android {
-                                        ndkVersion = \"${maxPluginNdkVersion}\"
-                                        ...
-                                    }
-                                """.stripIndent())
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * Add the dependencies on other plugin projects to the plugin project.
      * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
@@ -712,6 +600,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    // can't do because of dependency on nativePluginLoader
     /**
      * Gets the list of plugins (as map) that support the Android platform.
      *
@@ -726,6 +615,7 @@ class FlutterPlugin implements Plugin<Project> {
         return pluginList
     }
 
+    // can't do because of dependency on getPluginList, which we can't do
     /**
      * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
      * Android project excluding dev dependencies.
@@ -744,6 +634,7 @@ class FlutterPlugin implements Plugin<Project> {
         return pluginListWithoutDevDependencies
     }
 
+    // can't tdo because of nativePluginLoader dependency
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
@@ -760,6 +651,7 @@ class FlutterPlugin implements Plugin<Project> {
         return pluginDependencies
     }
 
+    //cant do because of state caching, until I get to the point I'm converting the core FGP
     private String resolveProperty(String name, String defaultValue) {
         if (localProperties == null) {
             localProperties = FlutterPluginUtils.readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
@@ -1065,7 +957,7 @@ class FlutterPlugin implements Plugin<Project> {
             String nativeAssetsDir = "${project.layout.buildDirectory.get()}/../native_assets/android/jniLibs/lib/"
             android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             configurePlugins(project)
-            detectLowCompileSdkVersionOrNdkVersion()
+            FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, getPluginList(project))
             return
         }
         // Flutter host module project (Add-to-app).
@@ -1115,6 +1007,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         configurePlugins(project)
-        detectLowCompileSdkVersionOrNdkVersion()
+        FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, getPluginList(project))
     }
 }
