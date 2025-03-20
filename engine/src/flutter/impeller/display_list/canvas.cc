@@ -463,7 +463,8 @@ void Canvas::DrawLine(const Point& p0,
   auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke_width,
                                                  paint.stroke_cap);
 
-  if (!paint.color_filter && !paint.invert_colors && !paint.image_filter &&
+  if (renderer_.GetContext()->GetFlags().antialiased_lines &&
+      !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
       !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
     auto contents = LineContents::Make(std::move(geometry), paint.color);
     entity.SetContents(std::move(contents));
