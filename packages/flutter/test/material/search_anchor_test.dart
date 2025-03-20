@@ -3915,7 +3915,7 @@ void main() {
   testWidgets('SearchAnchor viewOnOpen is called when the search view is opened', (
     WidgetTester tester,
   ) async {
-    String searchViewState = 'IDLE';
+    String searchViewState = 'Idle';
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -3967,7 +3967,7 @@ void main() {
   testWidgets('SearchAnchor.bar onOpen is called when the search view is opened', (
     WidgetTester tester,
   ) async {
-    String searchViewState = 'IDLE';
+    String searchViewState = 'Idle';
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
