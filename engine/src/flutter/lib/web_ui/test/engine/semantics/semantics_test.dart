@@ -138,6 +138,9 @@ void runSemanticsTests() {
   group('controlsNodes', () {
     _testControlsNodes();
   });
+  group('menu', () {
+    _testMenus();
+  });
   group('requirable', () {
     _testRequirable();
   });
@@ -4089,6 +4092,310 @@ void _testTables() {
     final SemanticsObject object = pumpSemantics();
     expect(object.semanticRole?.kind, EngineSemanticsRole.columnHeader);
     expect(object.element.getAttribute('role'), 'columnheader');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testMenus() {
+  test('nodes with menu role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menu,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menu);
+    expect(object.element.getAttribute('role'), 'menu');
+  });
+
+  test('menu can have non-immidiate menu item nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menu,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(
+      object.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
+  });
+
+  test('nested menus have correct menu item nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menu,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(
+              id: 4,
+              role: ui.SemanticsRole.menuItem,
+              isExpandable: true,
+              isExpanded: true,
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(
+                  id: 5,
+                  role: ui.SemanticsRole.menu,
+                  children: <SemanticsNodeUpdate>[
+                    tester.updateNode(
+                      id: 6,
+                      children: <SemanticsNodeUpdate>[
+                        tester.updateNode(id: 7, role: ui.SemanticsRole.menuItem),
+                        tester.updateNode(id: 8, role: ui.SemanticsRole.menuItem),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject object0 = tester.getSemanticsObject(0);
+    expect(
+      object0.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
+    final SemanticsObject object1 = tester.getSemanticsObject(5);
+    expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
+  });
+
+  test('menu bar can have non-immidiate menu item nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menuBar,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(
+      object.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
+  });
+
+  test('menu bar and its submenu have correct menu item nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menuBar,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(
+              id: 4,
+              role: ui.SemanticsRole.menuItem,
+              isExpandable: true,
+              isExpanded: true,
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(
+                  id: 5,
+                  role: ui.SemanticsRole.menu,
+                  children: <SemanticsNodeUpdate>[
+                    tester.updateNode(
+                      id: 6,
+                      children: <SemanticsNodeUpdate>[
+                        tester.updateNode(id: 7, role: ui.SemanticsRole.menuItem),
+                        tester.updateNode(id: 8, role: ui.SemanticsRole.menuItem),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject object0 = tester.getSemanticsObject(0);
+    expect(
+      object0.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
+    final SemanticsObject object1 = tester.getSemanticsObject(5);
+    expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
+  });
+
+  test('nodes with menuitem role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItem,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItem);
+    expect(object.element.getAttribute('role'), 'menuitem');
+  });
+
+  test('nodes with menuitem role and hasPopup attribute', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics(bool isExpandable) {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItem,
+        isExpandable: isExpandable,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object0 = pumpSemantics(true);
+    expect(object0.semanticRole?.kind, EngineSemanticsRole.menuItem);
+    expect(object0.element.getAttribute('role'), 'menuitem');
+    expect(object0.element.getAttribute('aria-haspopup'), 'menu');
+
+    final SemanticsObject object1 = pumpSemantics(false);
+    expect(object1.element.getAttribute('role'), 'menuitem');
+    expect(object1.element.getAttribute('aria-haspopup'), isNull);
+  });
+
+  test('nodes with menubar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuBar);
+    expect(object.element.getAttribute('role'), 'menubar');
+  });
+
+  test('nodes with menuitemcheckbox role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItemCheckbox,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItemCheckbox);
+    expect(object.element.getAttribute('role'), 'menuitemcheckbox');
+  });
+
+  test('nodes with menuitemRadio role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItemRadio,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItemRadio);
+    expect(object.element.getAttribute('role'), 'menuitemradio');
   });
 
   semantics().semanticsEnabled = false;
