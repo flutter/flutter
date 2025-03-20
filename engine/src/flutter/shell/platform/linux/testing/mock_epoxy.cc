@@ -427,7 +427,9 @@ void _glDeleteShader(GLuint shader) {}
 
 void _glDeleteTextures(GLsizei n, const GLuint* textures) {}
 
-void _glEGLImageTargetTexture2DOES(GLenum target, EGLImage image) {}
+void _glEGLImageTargetTexture2DOES(GLenum target, EGLImage image) {
+  mock->glEGLImageTargetTexture2DOES(target, image);
+}
 
 static void _glFramebufferRenderbuffer(GLenum target,
                                        GLenum attachment,

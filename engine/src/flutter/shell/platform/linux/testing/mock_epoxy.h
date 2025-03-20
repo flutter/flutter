@@ -38,6 +38,9 @@ class MockEpoxy {
                GLint dstY1,
                GLbitfield mask,
                GLenum filter));
+  MOCK_METHOD(void,
+              glEGLImageTargetTexture2DOES,
+              (GLenum target, EGLImage image));
   MOCK_METHOD(const GLubyte*, glGetString, (GLenum pname));
 };
 
