@@ -2180,9 +2180,10 @@ class SemanticsObject {
   void updateChildrenPositionAndSize() {
     final Set<SemanticsObject> dirtyNodes = <SemanticsObject>{};
     recomputeChildrenAdjustment(dirtyNodes);
-    dirtyNodes.forEach((node) {
+
+    for (final node in dirtyNodes) {
       node.recomputePositionAndSize();
-    });
+    }
   }
 
   /// Clears the transform on a semantic element as if an identity transform is
@@ -2865,7 +2866,9 @@ class EngineSemanticsOwner {
       object._dirtyFields = 0;
     }
 
-    nodesWithDirtyPositionsAndSizes.forEach((node) => node.recomputePositionAndSize());
+    for (final node in nodesWithDirtyPositionsAndSizes) {
+      node.recomputePositionAndSize();
+    }
 
     final SemanticsObject root = _semanticsTree[0]!;
     if (_rootSemanticsElement == null) {
