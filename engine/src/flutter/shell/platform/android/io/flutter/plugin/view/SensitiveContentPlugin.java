@@ -112,8 +112,8 @@ public class SensitiveContentPlugin
    */
   @Override
   public boolean isSupported() {
-    @ChecksSdkIntAtLeast(api = API_LEVELS.API_35)
-    return Build.VERSION.SDK_INT >= API_LEVELS.API_35;
+    boolean isSupported = Build.VERSION.SDK_INT >= API_LEVELS.API_35;
+    return isSupported;
   }
 
   /**
