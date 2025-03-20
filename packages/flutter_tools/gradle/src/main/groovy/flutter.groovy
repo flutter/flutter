@@ -395,7 +395,9 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configurePlugins(Project project) {
         configureLegacyPluginEachProjects(project)
-        getPluginList(project).each(this.&configurePluginProject)
+        getPluginList(project).each {
+            FlutterPluginUtils.configurePluginProject(project, it, engineVersion)
+        }
         getPluginList(project).each {
             FlutterPluginUtils.configurePluginDependencies(project, it)
         }
@@ -451,110 +453,10 @@ class FlutterPlugin implements Plugin<Project> {
             } else if (FlutterPluginUtils.pluginSupportsAndroidPlatform(pluginProject)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
-                configurePluginProject(it)
+                FlutterPluginUtils.configurePluginProject(project, it, engineVersion)
             /* groovylint-disable-next-line EmptyElseBlock */
             } else {
             // Plugin has no or an empty `android` folder. No action required.
-            }
-        }
-    }
-
-    /** Adds the plugin project dependency to the app project. */
-    private void configurePluginProject(Map<String, Object> pluginObject) {
-        assert(pluginObject.name instanceof String)
-        Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        if (pluginProject == null) {
-            return
-        }
-        // Apply the "flutter" Gradle extension to plugins so that they can use it's vended
-        // compile/target/min sdk values.
-        pluginProject.extensions.create("flutter", FlutterExtension)
-
-        // Add plugin dependency to the app project. We only want to add dependency
-        // for dev dependencies in non-release builds.
-        project.afterEvaluate {
-            project.android.buildTypes.all { buildType ->
-                if (!pluginObject.dev_dependency || buildType.name != 'release') {
-                    project.dependencies.add("${buildType.name}Api", pluginProject)
-                }
-            }
-        }
-
-        Closure addEmbeddingDependencyToPlugin = { BuildType buildType ->
-            String flutterBuildMode = FlutterPluginUtils.buildModeFor(buildType)
-            // In AGP 3.5, the embedding must be added as an API implementation,
-            // so java8 features are desugared against the runtime classpath.
-            // For more, see https://github.com/flutter/flutter/issues/40126
-            if (!FlutterPluginUtils.supportsBuildMode(project, flutterBuildMode)) {
-                return
-            }
-            if (!pluginProject.hasProperty("android")) {
-                return
-            }
-            // Copy build types from the app to the plugin.
-            // This allows to build apps with plugins and custom build types or flavors.
-            pluginProject.android.buildTypes {
-                "${buildType.name}" {}
-            }
-            // The embedding is API dependency of the plugin, so the AGP is able to desugar
-            // default method implementations when the interface is implemented by a plugin.
-            //
-            // See https://issuetracker.google.com/139821726, and
-            // https://github.com/flutter/flutter/issues/72185 for more details.
-            FlutterPluginUtils.addApiDependencies(
-              pluginProject,
-              buildType.name,
-              "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
-            )
-        }
-
-        // Wait until the Android plugin loaded.
-        pluginProject.afterEvaluate {
-            // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
-            if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${FlutterPluginUtils.getCompileSdkFromProject(pluginProject)} or higher.")
-                project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
-            }
-
-            project.android.buildTypes.all(addEmbeddingDependencyToPlugin)
-        }
-    }
-
-    /**
-     * Add the dependencies on other plugin projects to the plugin project.
-     * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
-     * making the Gradle plugin project A depend on the Gradle plugin project B.
-     */
-    private void configurePluginDependencies(Map<String, Object> pluginObject) {
-        assert(pluginObject.name instanceof String)
-        Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        if (pluginProject == null) {
-            return
-        }
-
-        project.android.buildTypes.each { buildType ->
-            String flutterBuildMode = FlutterPluginUtils.buildModeFor(buildType)
-            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
-                // This plugin is a dev dependency will not be included in the
-                // release build, so no need to add its dependencies.
-                return
-            }
-            def dependencies = pluginObject.dependencies
-            assert(dependencies instanceof List<String>)
-            dependencies.each { pluginDependencyName ->
-                if (pluginDependencyName.empty) {
-                    return
-                }
-                Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-                if (dependencyProject == null) {
-                    return
-                }
-                // Wait for the Android plugin to load and add the dependency to the plugin project.
-                pluginProject.afterEvaluate {
-                    pluginProject.dependencies {
-                        implementation(dependencyProject)
-                    }
-                }
             }
         }
     }
