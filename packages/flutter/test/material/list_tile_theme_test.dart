@@ -1111,7 +1111,7 @@ void main() {
     expect(theme.isThreeLine, false);
   });
 
-  testWidgets('ListTileTheme isThreeLine', (WidgetTester tester) async {
+  testWidgets('ListTileThemeData isThreeLine', (WidgetTester tester) async {
     const double height = 300;
     const double avatarTop = 130.0;
     const double placeholderTop = 138.0;
@@ -1185,6 +1185,117 @@ void main() {
                 subtitle: Text('A'),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getRect(find.byType(ListTile).at(0)),
+      const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+    );
+    expect(
+      tester.getRect(find.byType(CircleAvatar).at(0)),
+      const Rect.fromLTWH(16.0, 8.0, 40.0, 40.0),
+    );
+    expect(
+      tester.getRect(find.byType(Placeholder).at(0)),
+      const Rect.fromLTWH(800.0 - 24.0 - 24.0, 8.0, 24.0, 24.0),
+    );
+    expect(
+      tester.getRect(find.byType(ListTile).at(1)),
+      const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+    );
+    expect(
+      tester.getRect(find.byType(CircleAvatar).at(1)),
+      const Rect.fromLTWH(16.0, height + 8.0, 40.0, 40.0),
+    );
+    expect(
+      tester.getRect(find.byType(Placeholder).at(1)),
+      const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0, 24.0, 24.0),
+    );
+  });
+
+  testWidgets('ListTileTheme isThreeLine', (WidgetTester tester) async {
+    const double height = 300;
+    const double avatarTop = 130.0;
+    const double placeholderTop = 138.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(listTileTheme: const ListTileThemeData(isThreeLine: true)),
+        home: Material(
+          child: ListTileTheme(
+            isThreeLine: false,
+            child: ListView(
+              children: const <Widget>[
+                ListTile(
+                  leading: CircleAvatar(),
+                  trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                  title: Text('A'),
+                  subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                ),
+                ListTile(
+                  leading: CircleAvatar(),
+                  trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                  title: Text('A'),
+                  subtitle: Text('A'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getRect(find.byType(ListTile).at(0)),
+      const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+    );
+    expect(
+      tester.getRect(find.byType(CircleAvatar).at(0)),
+      const Rect.fromLTWH(16.0, avatarTop, 40.0, 40.0),
+    );
+    expect(
+      tester.getRect(find.byType(Placeholder).at(0)),
+      const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop, 24.0, 24.0),
+    );
+    expect(
+      tester.getRect(find.byType(ListTile).at(1)),
+      const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+    );
+    expect(
+      tester.getRect(find.byType(CircleAvatar).at(1)),
+      const Rect.fromLTWH(16.0, height + 16.0, 40.0, 40.0),
+    );
+    expect(
+      tester.getRect(find.byType(Placeholder).at(1)),
+      const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 24.0, 24.0, 24.0),
+    );
+
+    // THREE-LINE
+    await tester.pumpWidget(
+      MaterialApp(
+        key: UniqueKey(),
+        home: Material(
+          child: ListTileTheme(
+            isThreeLine: true,
+            child: ListView(
+              children: const <Widget>[
+                ListTile(
+                  leading: CircleAvatar(),
+                  trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                  title: Text('A'),
+                  subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                ),
+                ListTile(
+                  leading: CircleAvatar(),
+                  trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                  title: Text('A'),
+                  subtitle: Text('A'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
