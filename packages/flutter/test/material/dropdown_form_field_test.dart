@@ -1295,7 +1295,7 @@ void main() {
     expect(tester.getRect(findSelectedValue), contentRectForUnalignedDropdown);
   });
 
-  testWidgets('isValid returns false when forceErrorText is set and will change error display', (
+  testWidgets('isValid returns false when forceErrorText is set and changes error display', (
     WidgetTester tester,
   ) async {
     final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
