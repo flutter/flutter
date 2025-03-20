@@ -120,6 +120,8 @@ void main() {
 
         await expectLater(find.byType(childWidget.runtimeType), findsOne);
         expect(find.byType(SizedBox), findsNothing);
+
+        // Ensure setContentSensitivity was not called more than once upon re-registration.
         expect(setContentSensitivityCall, 2);
       });
     },
