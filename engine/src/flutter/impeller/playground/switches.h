@@ -8,8 +8,8 @@
 #include <chrono>
 #include <optional>
 
-#include "impeller/base/flags.h"
 #include "flutter/fml/command_line.h"
+#include "impeller/base/flags.h"
 
 namespace impeller {
 

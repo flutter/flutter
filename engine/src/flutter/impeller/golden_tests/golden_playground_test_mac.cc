@@ -173,6 +173,10 @@ void GoldenPlaygroundTest::SetUp() {
       if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "Vulkan doesn't support wide gamut golden tests.";
       }
+      if (switches.flags.antialiased_lines) {
+        GTEST_SKIP()
+            << "Vulkan doesn't support antialiased lines golden tests.";
+      }
       const std::unique_ptr<PlaygroundImpl>& playground =
           GetSharedVulkanPlayground(/*enable_validations=*/true);
       pimpl_->screenshotter =
@@ -182,6 +186,10 @@ void GoldenPlaygroundTest::SetUp() {
     case PlaygroundBackend::kOpenGLES: {
       if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "OpenGLES doesn't support wide gamut golden tests.";
+      }
+      if (switches.flags.antialiased_lines) {
+        GTEST_SKIP()
+            << "OpenGLES doesn't support antialiased lines golden tests.";
       }
       FML_CHECK(::glfwInit() == GLFW_TRUE);
       PlaygroundSwitches playground_switches;
