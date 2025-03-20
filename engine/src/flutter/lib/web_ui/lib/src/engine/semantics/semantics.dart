@@ -1650,12 +1650,6 @@ class SemanticsObject {
     // Apply updates to the DOM.
     _updateRole();
 
-    // All properties that affect positioning and sizing are checked together
-    // any one of them triggers position and size recomputation.
-    if (isRectDirty || isTransformDirty || isScrollPositionDirty) {
-      recomputePositionAndSize();
-    }
-
     if (semanticRole!.acceptsPointerEvents) {
       element.style.pointerEvents = 'all';
     } else {
@@ -1995,10 +1989,11 @@ class SemanticsObject {
 
     // Reparent element.
     if (previousElement != element) {
-      if (_currentChildrenInRenderOrder != null)
+      if (_currentChildrenInRenderOrder != null) {
         for (final child in _currentChildrenInRenderOrder!) {
           element.append(child.element);
         }
+      }
       final DomElement? parent = previousElement?.parent;
       if (parent != null) {
         parent.insertBefore(element, previousElement);
@@ -2111,8 +2106,29 @@ class SemanticsObject {
   double verticalAdjustmentFromParent = 0.0;
   double horizontalAdjustmentFromParent = 0.0;
 
-  /// Computes the size and position of [element] and, if this element
-  /// [hasChildren], computes the parent adjustment for each child.
+  /// If this element [hasChildren], computes the parent adjustment for each child.
+  void recomputeChildrenAdjustment(Set<SemanticsObject> dirtyNodes) {
+    if (!hasChildren) {
+      return;
+    }
+    // If this node has children, we need to compensate for the parent's rect and
+    // pass down the scroll adjustments.
+    final double translateX = -_rect!.left + horizontalScrollAdjustment;
+    final double translateY = -_rect!.top + verticalScrollAdjustment;
+
+    for (final childIndex in _childrenInTraversalOrder!) {
+      final child = owner._semanticsTree[childIndex]!;
+
+      if (child.horizontalAdjustmentFromParent != translateX ||
+          child.verticalAdjustmentFromParent != translateY) {
+        child.horizontalAdjustmentFromParent = translateX;
+        child.verticalAdjustmentFromParent = translateY;
+        dirtyNodes.add(child);
+      }
+    }
+  }
+
+  /// Computes the size and position of [element]
   void recomputePositionAndSize() {
     element.style
       ..width = '${_rect!.width}px'
@@ -2122,22 +2138,6 @@ class SemanticsObject {
     final Float32List? transform = _transform;
     final bool hasIdentityTransform =
         transform == null || isIdentityFloat32ListTransform(transform);
-
-    // If this node has children, we need to compensate for the parent's rect and
-    // pass down the scroll adjustments.
-    if (hasChildren) {
-      final double translateX = -_rect!.left + horizontalScrollAdjustment;
-      final double translateY = -_rect!.top + verticalScrollAdjustment;
-
-      for (final childIndex in _childrenInTraversalOrder!) {
-        final child = owner._semanticsTree[childIndex];
-        if (child == null) {
-          continue;
-        }
-        child.horizontalAdjustmentFromParent = translateX;
-        child.verticalAdjustmentFromParent = translateY;
-      }
-    }
 
     if (hasZeroRectOffset &&
         hasIdentityTransform &&
@@ -2178,13 +2178,11 @@ class SemanticsObject {
 
   /// Computes the size and position of children.
   void updateChildrenPositionAndSize() {
-    for (final childIndex in _childrenInTraversalOrder!) {
-      final child = owner._semanticsTree[childIndex];
-      if (child == null) {
-        continue;
-      }
-      child.recomputePositionAndSize();
-    }
+    final Set<SemanticsObject> dirtyNodes = <SemanticsObject>{};
+    recomputeChildrenAdjustment(dirtyNodes);
+    dirtyNodes.forEach((node) {
+      node.recomputePositionAndSize();
+    });
   }
 
   /// Clears the transform on a semantic element as if an identity transform is
@@ -2848,16 +2846,26 @@ class EngineSemanticsOwner {
       object.updateSelf(nodeUpdate);
     }
 
+    final Set<SemanticsObject> nodesWithDirtyPositionsAndSizes = <SemanticsObject>{};
     // Second, fix the tree structure. This is moved out into its own loop,
     // because each object's own information must be updated first.
     for (final SemanticsNodeUpdate nodeUpdate in nodeUpdates) {
       final SemanticsObject object = _semanticsTree[nodeUpdate.id]!;
       object.updateChildren();
-      object._dirtyFields = 0;
 
-      object.recomputePositionAndSize();
-      object.updateChildrenPositionAndSize();
+      if (object.isRectDirty ||
+          object.isTransformDirty ||
+          object.isScrollPositionDirty ||
+          object.isChildrenInTraversalOrderDirty) {
+        nodesWithDirtyPositionsAndSizes.add(object);
+
+        object.recomputeChildrenAdjustment(nodesWithDirtyPositionsAndSizes);
+      }
+
+      object._dirtyFields = 0;
     }
+
+    nodesWithDirtyPositionsAndSizes.forEach((node) => node.recomputePositionAndSize());
 
     final SemanticsObject root = _semanticsTree[0]!;
     if (_rootSemanticsElement == null) {
