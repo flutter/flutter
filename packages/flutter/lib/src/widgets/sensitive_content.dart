@@ -26,6 +26,18 @@ class _ContentSensitivitySetting {
   /// The number of [SensitiveContent] widgets that have sensitivity [ContentSensitivity.notSensitive].
   int _notSensitiveWigetCount = 0;
 
+  void _reportUnknownContentSensitivityDetected(ContentSensitivity sensitivity) {
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: FlutterError(
+          'Removing a SensitiveContent widget with ContentSensitivity $sensitivity is unsupported by _ContentSensitivitySetting',
+        ),
+        library: 'widget library',
+        stack: StackTrace.current,
+      ),
+    );
+  }
+
   /// Increases the count of [SensitiveContent] widgets with [sensitivity] set.
   void addWidgetWithContentSensitivity(ContentSensitivity sensitivity) {
     switch (sensitivity) {
@@ -40,9 +52,7 @@ class _ContentSensitivitySetting {
       // developers using it as a SensitiveContent sensitivity.
       // ignore: no_default_cases
       default:
-        throw FlutterError(
-          'Adding a SensitiveContent widget with ContentSensitivity $sensitivity is unsupported by _ContentSensitivitySetting',
-        );
+        _reportUnknownContentSensitivityDetected(sensitivity);
     }
   }
 
@@ -76,9 +86,7 @@ class _ContentSensitivitySetting {
       // developers using it as a SensitiveContent sensitivity.
       // ignore: no_default_cases
       default:
-        throw FlutterError(
-          'Removing a SensitiveContent widget with ContentSensitivity $sensitivity is unsupported by _ContentSensitivitySetting',
-        );
+        _reportUnknownContentSensitivityDetected(sensitivity);
     }
   }
 
