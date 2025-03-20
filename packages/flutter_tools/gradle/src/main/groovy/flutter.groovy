@@ -5,6 +5,7 @@
 
 import com.android.build.OutputFile
 import com.android.build.gradle.AbstractAppExtension
+import com.android.tools.r8.P
 import com.flutter.gradle.AppLinkSettings
 import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.PackageAndroidArtifact
@@ -395,7 +396,9 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePlugins(Project project) {
         configureLegacyPluginEachProjects(project)
         getPluginList(project).each(this.&configurePluginProject)
-        getPluginList(project).each(this.&configurePluginDependencies)
+        getPluginList(project).each {
+            FlutterPluginUtils.configurePluginDependencies(project, it)
+        }
     }
 
     // TODO(54566, 48918): Can remove once the issues are resolved.

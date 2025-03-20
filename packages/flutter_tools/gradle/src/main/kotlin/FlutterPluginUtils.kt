@@ -216,8 +216,6 @@ object FlutterPluginUtils {
             )?.toString()
             ?.toBoolean() ?: false
 
-//   TODO(gmackall): @JvmStatic internal fun getCompileSdkFromProject(project: Project): String {}
-
     /**
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
      *
@@ -656,7 +654,8 @@ object FlutterPluginUtils {
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
     @JvmStatic
-    fun getPluginListWithoutDevDependencies(pluginList: List<Map<String?, Any?>>): List<Map<String?, Any?>> {
+    @JvmName("getPluginListWithoutDevDependencies")
+    internal fun getPluginListWithoutDevDependencies(pluginList: List<Map<String?, Any?>>): List<Map<String?, Any?>> {
         val pluginListWithoutDevDependencies = mutableListOf<Map<String?, Any?>>()
         pluginList.forEach { pluginObject ->
             if (!(pluginObject["dev_dependency"] as Boolean)) {
@@ -666,9 +665,44 @@ object FlutterPluginUtils {
         return pluginListWithoutDevDependencies
     }
 
-//    private fun getApplicationVariants(project: Project)  {
-//        project.
-//    }
+    /**
+     * Add the dependencies on other plugin projects to the plugin project.
+     * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
+     * making the Gradle plugin project A depend on the Gradle plugin project B.
+     */
+    @JvmStatic
+    @JvmName("configurePluginDependencies")
+    internal fun configurePluginDependencies(
+        project: Project,
+        pluginObject: Map<String?, Any?>
+    ) {
+        val pluginName: String =
+            requireNotNull(pluginObject["name"] as? String) {
+                "Missing valid \"name\" property for plugin object: $pluginObject"
+            }
+        val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
+
+        getAndroidExtension(project).buildTypes.forEach { buildType ->
+            val flutterBuildMode: String = buildModeFor(buildType)
+            if (flutterBuildMode == "release" && (pluginObject.get("dev_dependency") as? Boolean == true)) {
+                // This plugin is a dev dependency will not be included in the
+                // release build, so no need to add its dependencies.
+                return@forEach
+            }
+            val dependencies = requireNotNull(pluginObject["dependencies"] as? List<*>)
+            dependencies.forEach innerForEach@{ pluginDependencyName ->
+                check(pluginDependencyName is String)
+                if (pluginDependencyName.isEmpty()) {
+                    return@innerForEach
+                }
+
+                val dependencyProject = project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
+                pluginProject.afterEvaluate {
+                    pluginProject.dependencies.add("implementation", dependencyProject)
+                }
+            }
+        }
+    }
 
     // ------------------ Task adders (a subset of the above category)
 
