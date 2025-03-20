@@ -302,40 +302,43 @@ class PreviewDetector {
   /// Search for functions annotated with `@Preview` in the current project.
   Future<PreviewMapping> findPreviewFunctions(FileSystemEntity entity) async {
     final PreviewMapping previews = PreviewMapping();
-    final AnalysisContext context = collection.contextFor(entity.path);
-    logger.printStatus('Finding previews in ${entity.path}...');
+    // TODO(bkonyi): this can probably be replaced by a call to collection.contextFor(...),
+    // but we need to figure out the right path format for Windows.
+    for (final AnalysisContext context in collection.contexts) {
+      logger.printStatus('Finding previews in ${entity.path}...');
 
-    // If we're processing a single file, it means the file watcher detected a
-    // change in a Dart source. We need to notify the analyzer that this file
-    // has changed so it can reanalyze the file.
-    if (entity is File) {
-      context.changeFile(entity.path);
-      await context.applyPendingFileChanges();
-    }
-
-    for (final String filePath in context.contextRoot.analyzedFiles()) {
-      logger.printTrace('Checking file: $filePath');
-      if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
-        logger.printTrace('Skipping $filePath');
-        continue;
+      // If we're processing a single file, it means the file watcher detected a
+      // change in a Dart source. We need to notify the analyzer that this file
+      // has changed so it can reanalyze the file.
+      if (entity is File) {
+        context.changeFile(entity.path);
+        await context.applyPendingFileChanges();
       }
-      final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(
-        filePath,
-      );
-      // TODO(bkonyi): ensure this can handle part files.
-      if (lib is ResolvedLibraryResult) {
-        for (final ResolvedUnitResult libUnit in lib.units) {
-          final List<PreviewDetails> previewEntries =
-              previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
-          final PreviewVisitor visitor = PreviewVisitor();
-          libUnit.unit.visitChildren(visitor);
-          previewEntries.addAll(visitor.previewEntries);
-          if (previewEntries.isNotEmpty) {
-            previews[libUnit.toPreviewPath()] = previewEntries;
-          }
+
+      for (final String filePath in context.contextRoot.analyzedFiles()) {
+        logger.printTrace('Checking file: $filePath');
+        if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
+          logger.printTrace('Skipping $filePath');
+          continue;
         }
-      } else {
-        logger.printWarning('Unknown library type at $filePath: $lib');
+        final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(
+          filePath,
+        );
+        // TODO(bkonyi): ensure this can handle part files.
+        if (lib is ResolvedLibraryResult) {
+          for (final ResolvedUnitResult libUnit in lib.units) {
+            final List<PreviewDetails> previewEntries =
+                previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
+            final PreviewVisitor visitor = PreviewVisitor();
+            libUnit.unit.visitChildren(visitor);
+            previewEntries.addAll(visitor.previewEntries);
+            if (previewEntries.isNotEmpty) {
+              previews[libUnit.toPreviewPath()] = previewEntries;
+            }
+          }
+        } else {
+          logger.printWarning('Unknown library type at $filePath: $lib');
+        }
       }
     }
     final int previewCount = previews.values.fold<int>(
