@@ -32,6 +32,9 @@ typedef PreviewMapping = Map<PreviewPath, List<PreviewDetails>>;
 extension on Token {
   /// Convenience getter to identify tokens for private fields and functions.
   bool get isPrivate => toString().startsWith('_');
+
+  /// Convenience getter to identify WidgetBuilder types.
+  bool get isWidgetBuilder => toString() == 'WidgetBuilder';
 }
 
 extension on Annotation {
@@ -233,7 +236,7 @@ class PreviewDetector {
 
   /// Starts listening for changes to Dart sources under [projectRoot] and returns
   /// the initial [PreviewMapping] for the project.
-  Future<PreviewMapping> initialize(Directory projectRoot) async {
+  Future<PreviewMapping> initialize() async {
     // Find the initial set of previews.
     _pathToPreviews = await findPreviewFunctions(projectRoot);
 
@@ -299,33 +302,40 @@ class PreviewDetector {
   /// Search for functions annotated with `@Preview` in the current project.
   Future<PreviewMapping> findPreviewFunctions(FileSystemEntity entity) async {
     final PreviewMapping previews = PreviewMapping();
-    for (final AnalysisContext context in collection.contexts) {
-      logger.printStatus('Finding previews in ${entity.path}...');
+    final AnalysisContext context = collection.contextFor(entity.path);
+    logger.printStatus('Finding previews in ${entity.path}...');
 
-      for (final String filePath in context.contextRoot.analyzedFiles()) {
-        logger.printTrace('Checking file: $filePath');
-        if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
-          logger.printTrace('Skipping $filePath');
-          continue;
-        }
-        final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(
-          filePath,
-        );
-        // TODO(bkonyi): ensure this can handle part files.
-        if (lib is ResolvedLibraryResult) {
-          for (final ResolvedUnitResult libUnit in lib.units) {
-            final List<PreviewDetails> previewEntries =
-                previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
-            final PreviewVisitor visitor = PreviewVisitor();
-            libUnit.unit.visitChildren(visitor);
-            previewEntries.addAll(visitor.previewEntries);
-            if (previewEntries.isNotEmpty) {
-              previews[libUnit.toPreviewPath()] = previewEntries;
-            }
+    // If we're processing a single file, it means the file watcher detected a
+    // change in a Dart source. We need to notify the analyzer that this file
+    // has changed so it can reanalyze the file.
+    if (entity is File) {
+      context.changeFile(entity.path);
+      await context.applyPendingFileChanges();
+    }
+
+    for (final String filePath in context.contextRoot.analyzedFiles()) {
+      logger.printTrace('Checking file: $filePath');
+      if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
+        logger.printTrace('Skipping $filePath');
+        continue;
+      }
+      final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(
+        filePath,
+      );
+      // TODO(bkonyi): ensure this can handle part files.
+      if (lib is ResolvedLibraryResult) {
+        for (final ResolvedUnitResult libUnit in lib.units) {
+          final List<PreviewDetails> previewEntries =
+              previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
+          final PreviewVisitor visitor = PreviewVisitor();
+          libUnit.unit.visitChildren(visitor);
+          previewEntries.addAll(visitor.previewEntries);
+          if (previewEntries.isNotEmpty) {
+            previews[libUnit.toPreviewPath()] = previewEntries;
           }
-        } else {
-          logger.printWarning('Unknown library type at $filePath: $lib');
         }
+      } else {
+        logger.printWarning('Unknown library type at $filePath: $lib');
       }
     }
     final int previewCount = previews.values.fold<int>(
@@ -390,7 +400,7 @@ class PreviewVisitor extends RecursiveAstVisitor<void> {
       final NamedType returnType = _currentFunction!.returnType! as NamedType;
       _currentPreview = PreviewDetails(
         functionName: _currentFunction!.name.toString(),
-        isBuilder: returnType.name2.value() == 'WidgetBuilder',
+        isBuilder: returnType.name2.isWidgetBuilder,
       );
     } else if (_currentConstructor != null) {
       final SimpleIdentifier returnType = _currentConstructor!.returnType as SimpleIdentifier;
@@ -404,7 +414,7 @@ class PreviewVisitor extends RecursiveAstVisitor<void> {
       final ClassDeclaration parentClass = _currentMethod!.parent! as ClassDeclaration;
       _currentPreview = PreviewDetails(
         functionName: '${parentClass.name}.${_currentMethod!.name}',
-        isBuilder: returnType.name2.value() == 'WidgetBuilder',
+        isBuilder: returnType.name2.isWidgetBuilder,
       );
     }
     node.visitChildren(this);

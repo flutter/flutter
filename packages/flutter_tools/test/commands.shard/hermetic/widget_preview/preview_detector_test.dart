@@ -117,6 +117,11 @@ void main() {
           name: 'Constructor preview',
         ),
         PreviewDetails.test(
+          functionName: 'MyWidget.factoryPreview',
+          isBuilder: false,
+          name: 'Factory constructor preview',
+        ),
+        PreviewDetails.test(
           functionName: 'MyWidget.previewStatic',
           isBuilder: false,
           name: 'Static preview',
@@ -143,7 +148,7 @@ void main() {
         completer.complete();
       };
       // Initialize the file watcher.
-      final PreviewMapping initialPreviews = await previewDetector.initialize(projectRoot);
+      final PreviewMapping initialPreviews = await previewDetector.initialize();
       expect(stripNonDeterministicFields(initialPreviews), expectedInitialMapping);
 
       // Update the file without an existing preview to include a preview and ensure it triggers
@@ -164,6 +169,62 @@ void main() {
       await completer.future;
     });
 
+    testUsingContext('can detect previews in newly added files', () async {
+      final List<PreviewDetails> expectedPreviewDetails = <PreviewDetails>[
+        PreviewDetails.test(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
+        PreviewDetails.test(
+          functionName: 'builderPreview',
+          isBuilder: true,
+          name: 'Builder preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'attributesPreview',
+          isBuilder: false,
+          name: 'Attributes preview',
+          width: '100.0',
+          height: '100',
+          textScaleFactor: '2',
+          wrapper: 'testWrapper',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.preview',
+          isBuilder: false,
+          name: 'Constructor preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.factoryPreview',
+          isBuilder: false,
+          name: 'Factory constructor preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.previewStatic',
+          isBuilder: false,
+          name: 'Static preview',
+        ),
+      ];
+
+      // The initial mapping should be empty as there's no files containing previews.
+      final PreviewMapping expectedInitialMapping = <PreviewPath, List<PreviewDetails>>{};
+
+      final Completer<void> completer = Completer<void>();
+      late final PreviewPath previewContainingFilePath;
+      onChangeDetected = (PreviewMapping updated) {
+        // The new previews in baz.dart should be included in the preview mapping.
+        expect(stripNonDeterministicFields(updated), <PreviewPath, List<PreviewDetails>>{
+          previewContainingFilePath: expectedPreviewDetails,
+        });
+        completer.complete();
+      };
+
+      // Initialize the file watcher.
+      final PreviewMapping initialPreviews = await previewDetector.initialize();
+      expect(stripNonDeterministicFields(initialPreviews), expectedInitialMapping);
+
+      // Create baz.dart, which contains previews.
+      previewContainingFilePath = addPreviewContainingFile(projectRoot, <String>['baz.dart']);
+      await completer.future;
+    });
+
     testUsingContext('can detect changes in the pubspec.yaml', () async {
       // Create an initial pubspec.
       populatePubspec(projectRoot, 'abc');
@@ -173,7 +234,7 @@ void main() {
         completer.complete();
       };
       // Initialize the file watcher.
-      final PreviewMapping initialPreviews = await previewDetector.initialize(projectRoot);
+      final PreviewMapping initialPreviews = await previewDetector.initialize();
       expect(initialPreviews, isEmpty);
 
       // Change the contents of the pubspec and verify the callback is invoked.
@@ -220,6 +281,9 @@ Widget attributesPreview() {
 class MyWidget extends StatelessWidget {
   @Preview(name: 'Constructor preview')
   MyWidget.preview();
+
+  @Preview(name: 'Factory constructor preview')
+  MyWidget.factoryPreview() => MyWidget.preview();
 
   @Preview(name: 'Static preview')
   static Widget previewStatic() => Text('Static');

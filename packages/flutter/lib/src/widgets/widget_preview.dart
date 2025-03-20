@@ -31,10 +31,10 @@ import 'framework.dart';
 ///
 /// class MyWidget extends StatelessWidget {
 ///   @Preview(name: 'Constructor preview')
-///   const MyWidget.preview();
+///   const MyWidget.preview({super.key});
 ///
 ///   @Preview(name: 'Factory constructor preview')
-///   factory MyWidget.factoryPreview() => MyWidget.preview();
+///   factory MyWidget.factoryPreview() => const MyWidget.preview();
 ///
 ///   @Preview(name: 'Static preview')
 ///   static Widget previewStatic() => const Text('Static');

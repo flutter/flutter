@@ -261,7 +261,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await _populatePreviewPubspec(rootProject: rootProject);
     }
 
-    final PreviewMapping initialPreviews = await _previewDetector.initialize(rootProject.directory);
+    final PreviewMapping initialPreviews = await _previewDetector.initialize();
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(initialPreviews);
 
     if (boolArg(kLaunchPreviewer)) {
