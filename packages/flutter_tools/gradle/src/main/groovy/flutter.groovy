@@ -461,7 +461,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // can't do because of dependency on nativePluginLoader
     /**
      * Gets the list of plugins (as map) that support the Android platform.
      *
@@ -476,7 +475,6 @@ class FlutterPlugin implements Plugin<Project> {
         return pluginList
     }
 
-    // can't tdo because of nativePluginLoader dependency
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
@@ -493,7 +491,6 @@ class FlutterPlugin implements Plugin<Project> {
         return pluginDependencies
     }
 
-    //cant do because of state caching, until I get to the point I'm converting the core FGP
     private String resolveProperty(String name, String defaultValue) {
         if (localProperties == null) {
             localProperties = FlutterPluginUtils.readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
