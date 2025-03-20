@@ -1112,7 +1112,6 @@ void main() {
   });
 
   testWidgets('ListTileTheme isThreeLine', (WidgetTester tester) async {
-
     const double height = 300;
     const double avatarTop = 130.0;
     const double placeholderTop = 138.0;
@@ -1168,9 +1167,7 @@ void main() {
     // THREE-LINE
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          listTileTheme: const ListTileThemeData(isThreeLine: true),
-        ),
+        theme: ThemeData(listTileTheme: const ListTileThemeData(isThreeLine: true)),
         home: Material(
           child: ListView(
             key: UniqueKey(),

@@ -140,8 +140,7 @@ class ListTileThemeData with Diagnosticable {
   /// or [ExpansionTile.controlAffinity] or [SwitchListTile.controlAffinity] or [RadioListTile.controlAffinity].
   final ListTileControlAffinity? controlAffinity;
 
-  /// If specified, overrides the default value of [CheckboxListTile.isThreeLine]
-  /// or [ExpansionTile.isThreeLine] or [SwitchListTile.isThreeLine] or [RadioListTile.isThreeLine].
+  /// If specified, overrides the default value of [ListTile.isThreeLine]
   final bool? isThreeLine;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -398,7 +397,8 @@ class ListTileTheme extends InheritedTheme {
                      horizontalTitleGap ??
                      minVerticalPadding ??
                      minLeadingWidth ??
-                     controlAffinity) ==
+                     controlAffinity ??
+                     isThreeLine) ==
                  null,
        ),
        _data = data,
