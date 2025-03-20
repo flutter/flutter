@@ -6,13 +6,14 @@
 
 #include "dart_api.h"
 #include "flutter/lib/gpu/formats.h"
+#include "fml/make_copyable.h"
 #include "fml/mapping.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/range.h"
+#include "lib/ui/ui_dart_state.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
-#include "tonic/converter/dart_converter.h"
 
 namespace flutter {
 namespace gpu {
@@ -29,7 +30,8 @@ std::shared_ptr<impeller::DeviceBuffer> DeviceBuffer::GetBuffer() {
   return device_buffer_;
 }
 
-bool DeviceBuffer::Overwrite(const tonic::DartByteData& source_bytes,
+bool DeviceBuffer::Overwrite(flutter::gpu::Context& gpu_context,
+                             const tonic::DartByteData& source_bytes,
                              size_t destination_offset_in_bytes) {
   if (!device_buffer_->CopyHostBuffer(
           reinterpret_cast<const uint8_t*>(source_bytes.data()),
@@ -99,10 +101,23 @@ bool InternalFlutterGpu_DeviceBuffer_InitializeWithHostData(
 
 bool InternalFlutterGpu_DeviceBuffer_Overwrite(
     flutter::gpu::DeviceBuffer* device_buffer,
+    flutter::gpu::Context* gpu_context,
     Dart_Handle source_byte_data,
     int destination_offset_in_bytes) {
-  return device_buffer->Overwrite(tonic::DartByteData(source_byte_data),
-                                  destination_offset_in_bytes);
+//  auto dart_state = flutter::UIDartState::Current();
+//  auto& task_runners = dart_state->GetTaskRunners();
+//
+//  task_runners.GetRasterTaskRunner()->PostTask(
+//      fml::MakeCopyable([gpu_context, device_buffer, source_byte_data,
+//                         destination_offset_in_bytes]() mutable {
+        if (!device_buffer->Overwrite(*gpu_context,
+                                      tonic::DartByteData(source_byte_data),
+                                      destination_offset_in_bytes)) {
+          FML_LOG(ERROR) << "Failed to set device buffer contents.";
+          return false;
+        }
+//      }));
+  return true;
 }
 
 bool InternalFlutterGpu_DeviceBuffer_Flush(

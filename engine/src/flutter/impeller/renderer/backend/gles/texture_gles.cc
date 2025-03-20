@@ -87,12 +87,12 @@ struct TexImage2DData {
         type = GL_UNSIGNED_BYTE;
         break;
       case PixelFormat::kR32G32B32A32Float:
-        internal_format = GL_RGBA;
+        internal_format = GL_RGBA32F;
         external_format = GL_RGBA;
         type = GL_FLOAT;
         break;
       case PixelFormat::kR16G16B16A16Float:
-        internal_format = GL_RGBA;
+        internal_format = GL_RGBA16F;
         external_format = GL_RGBA;
         type = GL_HALF_FLOAT;
         break;
@@ -200,7 +200,7 @@ TextureGLES::TextureGLES(std::shared_ptr<ReactorGLES> reactor,
           reactor_->GetProcTable().GetCapabilities())),
       handle_(external_handle.has_value()
                   ? external_handle.value()
-                  : reactor_->CreateUntrackedHandle(ToHandleType(type_))),
+                  : reactor_->CreateHandle(ToHandleType(type_))),
       is_wrapped_(fbo.has_value() || external_handle.has_value()),
       wrapped_fbo_(fbo) {
   // Ensure the texture descriptor itself is valid.

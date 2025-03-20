@@ -39,18 +39,21 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
     GpuContext gpuContext,
     StorageMode storageMode,
     int sizeInBytes,
-  ) : storageMode = storageMode,
+  ) : gpuContext = gpuContext,
+      storageMode = storageMode,
       sizeInBytes = sizeInBytes {
     _valid = _initialize(gpuContext, storageMode.index, sizeInBytes);
   }
 
   /// Creates a new host visible DeviceBuffer with data copied from the host.
   DeviceBuffer._initializeWithHostData(GpuContext gpuContext, ByteData data)
-    : storageMode = StorageMode.hostVisible,
+    : gpuContext = gpuContext,
+      storageMode = StorageMode.hostVisible,
       sizeInBytes = data.lengthInBytes {
     _valid = _initializeWithHostData(gpuContext, data);
   }
 
+  final GpuContext gpuContext;
   final StorageMode storageMode;
   final int sizeInBytes;
 
@@ -140,13 +143,17 @@ base class DeviceBuffer extends NativeFieldWrapperClass1 {
     if (destinationOffsetInBytes < 0) {
       throw Exception('destinationOffsetInBytes must be positive');
     }
-    return _overwrite(sourceBytes, destinationOffsetInBytes);
+    return _overwrite(gpuContext, sourceBytes, destinationOffsetInBytes);
   }
 
-  @Native<Bool Function(Pointer<Void>, Handle, Int)>(
+  @Native<Bool Function(Pointer<Void>, Pointer<Void>, Handle, Int)>(
     symbol: 'InternalFlutterGpu_DeviceBuffer_Overwrite',
   )
-  external bool _overwrite(ByteData bytes, int destinationOffsetInBytes);
+  external bool _overwrite(
+    GpuContext gpuContext,
+    ByteData bytes,
+    int destinationOffsetInBytes,
+  );
 
   /// Flush the contents of the [DeviceBuffer] to the GPU.
   ///
