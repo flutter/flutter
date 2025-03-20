@@ -1,7 +1,9 @@
 package com.flutter.gradle
 
 import com.android.build.gradle.AbstractAppExtension
+import com.android.build.gradle.BaseExtension
 import com.android.builder.model.BuildType
+import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -16,6 +18,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
+import java.util.Properties
+import kotlin.io.path.createDirectory
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -460,11 +464,231 @@ class FlutterPluginUtilsTest {
 
     // TODO(gmackall): fill out everything below this, or reject if tests not worth:
 
-    // readPropertiesIfExist TODO
+    // readPropertiesIfExist
+    @Test
+    fun `readPropertiesIfExist returns empty Properties when file does not exist`(
+        @TempDir tempDir: Path
+    ) {
+        val propertiesFile = tempDir.resolve("file_that_doesnt_exist.properties")
+        val result = FlutterPluginUtils.readPropertiesIfExist(propertiesFile.toFile())
+        assertEquals(Properties(), result)
+    }
 
-    // getCompileSdkFromProject TODO
+    @Test
+    fun `readPropertiesIfExist returns Properties when file exists`(
+        @TempDir tempDir: Path
+    ) {
+        val propertiesFile = tempDir.resolve("file_that_exists.properties").toFile()
+        propertiesFile.writeText(
+            """
+            sdk.dir=/Users/mackall/Library/Android/sdk
+            flutter.sdk=/Users/mackall/development/flutter/flutter
+            flutter.buildMode=release
+            flutter.versionName=1.0.0
+            flutter.versionCode=1
+            """.trimIndent()
+        )
 
-    // detectLowCompileSdkVersionOrNdkVersion TODO
+        val result = FlutterPluginUtils.readPropertiesIfExist(propertiesFile)
+        assertEquals(5, result.size)
+        assertEquals("/Users/mackall/Library/Android/sdk", result["sdk.dir"])
+        assertEquals("/Users/mackall/development/flutter/flutter", result["flutter.sdk"])
+        assertEquals("release", result["flutter.buildMode"])
+        assertEquals("1.0.0", result["flutter.versionName"])
+        assertEquals("1", result["flutter.versionCode"])
+    }
+
+    // getCompileSdkFromProject
+    @Test
+    fun `getCompileSdkFromProject returns the compileSdk from the project`() {
+        val project = mockk<Project>()
+        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        val result = FlutterPluginUtils.getCompileSdkFromProject(project)
+        assertEquals("35", result)
+    }
+
+    // detectLowCompileSdkVersionOrNdkVersion
+    @Test
+    fun `detectLowCompileSdkVersionOrNdkVersion logs no warnings when no plugins have higher sdk or ndk`(
+        @TempDir tempDir: Path
+    ) {
+        val projectDir = tempDir.resolve("app").toFile()
+
+        val project = mockk<Project>()
+        val mockLogger = mockk<Logger>()
+        every { project.logger } returns mockLogger
+        every { project.projectDir } returns projectDir
+        val cameraPluginProject = mockk<Project>()
+        val projectActionSlot = slot<Action<Project>>()
+        val cameraPluginProjectActionSlot = slot<Action<Project>>()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        every { project.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "26.3.11579264"
+        every { project.rootProject.findProject(":${cameraDependency["name"]}") } returns cameraPluginProject
+        every { cameraPluginProject.afterEvaluate(capture(cameraPluginProjectActionSlot)) } returns Unit
+        every { cameraPluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        every { cameraPluginProject.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "26.3.11579264"
+
+        FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, listOf(cameraDependency))
+
+        verify { project.afterEvaluate(capture(projectActionSlot)) }
+        projectActionSlot.captured.execute(project)
+        verify { cameraPluginProject.afterEvaluate(capture(cameraPluginProjectActionSlot)) }
+        cameraPluginProjectActionSlot.captured.execute(cameraPluginProject)
+
+        verify { mockLogger wasNot called }
+    }
+
+    @Test
+    fun `detectLowCompileSdkVersionOrNdkVersion logs warnings when plugins have higher sdk and ndk`(
+        @TempDir tempDir: Path
+    ) {
+        val buildGradleFile =
+            tempDir
+                .resolve("app")
+                .createDirectory()
+                .resolve("build.gradle")
+                .toFile()
+        buildGradleFile.createNewFile()
+        val projectDir = tempDir.resolve("app").toFile()
+
+        val project = mockk<Project>()
+        val mockLogger = mockk<Logger>()
+        every { project.logger } returns mockLogger
+        every { mockLogger.error(any()) } returns Unit
+        every { project.projectDir } returns projectDir
+        val cameraPluginProject = mockk<Project>()
+        val flutterPluginAndroidLifecycleDependencyPluginProject = mockk<Project>()
+        val projectActionSlot = slot<Action<Project>>()
+        val cameraPluginProjectActionSlot = slot<Action<Project>>()
+        val flutterPluginAndroidLifecycleDependencyPluginProjectActionSlot = slot<Action<Project>>()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-33"
+        every { project.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "24.3.11579264"
+        every { project.rootProject.findProject(":${cameraDependency["name"]}") } returns cameraPluginProject
+        every { project.rootProject.findProject(":${flutterPluginAndroidLifecycleDependency["name"]}") } returns
+            flutterPluginAndroidLifecycleDependencyPluginProject
+        every { cameraPluginProject.afterEvaluate(capture(cameraPluginProjectActionSlot)) } returns Unit
+        every { cameraPluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        every { cameraPluginProject.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "26.3.11579264"
+        every {
+            flutterPluginAndroidLifecycleDependencyPluginProject.afterEvaluate(
+                capture(
+                    flutterPluginAndroidLifecycleDependencyPluginProjectActionSlot
+                )
+            )
+        } returns Unit
+        every {
+            flutterPluginAndroidLifecycleDependencyPluginProject.extensions
+                .findByType(
+                    BaseExtension::class.java
+                )!!
+                .compileSdkVersion
+        } returns "android-34"
+        every {
+            flutterPluginAndroidLifecycleDependencyPluginProject.extensions
+                .findByType(
+                    BaseExtension::class.java
+                )!!
+                .ndkVersion
+        } returns "25.3.11579264"
+
+        val dependencyList: List<Map<String?, Any?>> =
+            listOf(cameraDependency, flutterPluginAndroidLifecycleDependency)
+        FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
+            project,
+            dependencyList
+        )
+
+        verify { project.afterEvaluate(capture(projectActionSlot)) }
+        projectActionSlot.captured.execute(project)
+        verify { cameraPluginProject.afterEvaluate(capture(cameraPluginProjectActionSlot)) }
+        cameraPluginProjectActionSlot.captured.execute(cameraPluginProject)
+        verify {
+            flutterPluginAndroidLifecycleDependencyPluginProject.afterEvaluate(
+                capture(
+                    flutterPluginAndroidLifecycleDependencyPluginProjectActionSlot
+                )
+            )
+        }
+        flutterPluginAndroidLifecycleDependencyPluginProjectActionSlot.captured.execute(
+            flutterPluginAndroidLifecycleDependencyPluginProject
+        )
+
+        verify {
+            mockLogger.error(
+                "Your project is configured to compile against Android SDK 33, but the " +
+                    "following plugin(s) require to be compiled against a higher Android SDK version:"
+            )
+        }
+        verify {
+            mockLogger.error(
+                "- ${cameraDependency["name"]} compiles against Android SDK 35"
+            )
+        }
+        verify {
+            mockLogger.error(
+                "- ${flutterPluginAndroidLifecycleDependency["name"]} compiles against Android SDK 34"
+            )
+        }
+        verify {
+            mockLogger.error(
+                """
+                Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
+                Add the following to ${buildGradleFile.path}:
+
+                    android {
+                        compileSdk = 35
+                        ...
+                    }
+                """.trimIndent()
+            )
+        }
+        verify {
+            mockLogger.error(
+                "Your project is configured with Android NDK 24.3.11579264, but the following plugin(s) depend on a different Android NDK version:"
+            )
+        }
+        verify {
+            mockLogger.error(
+                "- ${cameraDependency["name"]} requires Android NDK 26.3.11579264"
+            )
+        }
+        verify {
+            mockLogger.error(
+                "- ${flutterPluginAndroidLifecycleDependency["name"]} requires Android NDK 25.3.11579264"
+            )
+        }
+        verify {
+            mockLogger.error(
+                """
+                Fix this issue by using the highest Android NDK version (they are backward compatible).
+                Add the following to ${buildGradleFile.path}:
+
+                    android {
+                        ndkVersion = "26.3.11579264"
+                        ...
+                    }
+                """.trimIndent()
+            )
+        }
+    }
+
+    @Test
+    fun `detectLowCompileSdkVersionOrNdkVersion throws IllegalArgumentException when plugin has no name`() {
+        val project = mockk<Project>()
+        val projectActionSlot = slot<Action<Project>>()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        every { project.extensions.findByType(BaseExtension::class.java)!!.ndkVersion } returns "26.3.11579264"
+
+        val pluginWithoutName: MutableMap<String?, Any?> = cameraDependency.toMutableMap()
+        pluginWithoutName.remove("name")
+
+        FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, listOf(pluginWithoutName))
+        verify { project.afterEvaluate(capture(projectActionSlot)) }
+        assertThrows<IllegalArgumentException> { projectActionSlot.captured.execute(project) }
+    }
 
     // forceNdkDownload TODO
     @Test
@@ -682,28 +906,34 @@ class FlutterPluginUtilsTest {
                 Pair("dev_dependency", true)
             )
 
+        val cameraDependency: Map<String?, Any?> =
+            mapOf(
+                Pair("name", "camera_android_camerax"),
+                Pair(
+                    "path",
+                    "/Users/mackall/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
+                ),
+                Pair("native_build", true),
+                Pair("dependencies", emptyList<String>()),
+                Pair("dev_dependency", false)
+            )
+
+        val flutterPluginAndroidLifecycleDependency: Map<String?, Any?> =
+            mapOf(
+                Pair("name", "flutter_plugin_android_lifecycle"),
+                Pair(
+                    "path",
+                    "/Users/mackall/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
+                ),
+                Pair("native_build", true),
+                Pair("dependencies", emptyList<String>()),
+                Pair("dev_dependency", false)
+            )
+
         val pluginListWithoutDevDependency: List<Map<String?, Any?>> =
             listOf(
-                mapOf(
-                    Pair("name", "camera_android_camerax"),
-                    Pair(
-                        "path",
-                        "/Users/mackall/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
-                    ),
-                    Pair("native_build", true),
-                    Pair("dependencies", emptyList<String>()),
-                    Pair("dev_dependency", false)
-                ),
-                mapOf(
-                    Pair("name", "flutter_plugin_android_lifecycle"),
-                    Pair(
-                        "path",
-                        "/Users/mackall/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
-                    ),
-                    Pair("native_build", true),
-                    Pair("dependencies", emptyList<String>()),
-                    Pair("dev_dependency", false)
-                ),
+                cameraDependency,
+                flutterPluginAndroidLifecycleDependency,
                 mapOf(
                     Pair("name", "in_app_purchase_android"),
                     Pair(
@@ -718,26 +948,8 @@ class FlutterPluginUtilsTest {
 
         val pluginListWithDevDependency: List<Map<String?, Any?>> =
             listOf(
-                mapOf(
-                    Pair("name", "camera_android_camerax"),
-                    Pair(
-                        "path",
-                        "/Users/mackall/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
-                    ),
-                    Pair("native_build", true),
-                    Pair("dependencies", emptyList<String>()),
-                    Pair("dev_dependency", false)
-                ),
-                mapOf(
-                    Pair("name", "flutter_plugin_android_lifecycle"),
-                    Pair(
-                        "path",
-                        "/Users/mackall/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
-                    ),
-                    Pair("native_build", true),
-                    Pair("dependencies", emptyList<String>()),
-                    Pair("dev_dependency", false)
-                ),
+                cameraDependency,
+                flutterPluginAndroidLifecycleDependency,
                 devDependency,
                 mapOf(
                     Pair("name", "in_app_purchase_android"),

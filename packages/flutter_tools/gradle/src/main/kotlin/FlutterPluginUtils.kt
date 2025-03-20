@@ -418,7 +418,7 @@ object FlutterPluginUtils {
         }
     }
 
-    private fun printPluginCompileSdkWarnings(
+    private fun logPluginCompileSdkWarnings(
         maxPluginCompileSdkVersion: Int,
         projectCompileSdkVersion: Int,
         logger: Logger,
@@ -451,7 +451,7 @@ object FlutterPluginUtils {
         )
     }
 
-    private fun printPluginNdkWarnings(
+    private fun logPluginNdkWarnings(
         maxPluginNdkVersion: String,
         projectNdkVersion: String,
         logger: Logger,
@@ -539,7 +539,7 @@ object FlutterPluginUtils {
                     numProcessedPlugins--
                     if (numProcessedPlugins == 0) {
                         if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            printPluginCompileSdkWarnings(
+                            logPluginCompileSdkWarnings(
                                 maxPluginCompileSdkVersion = maxPluginCompileSdkVersion,
                                 projectCompileSdkVersion = projectCompileSdkVersion,
                                 logger = project.logger,
@@ -548,7 +548,7 @@ object FlutterPluginUtils {
                             )
                         }
                         if (maxPluginNdkVersion != projectNdkVersion) {
-                            printPluginNdkWarnings(
+                            logPluginNdkWarnings(
                                 maxPluginNdkVersion = maxPluginNdkVersion,
                                 projectNdkVersion = projectNdkVersion,
                                 logger = project.logger,
