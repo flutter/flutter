@@ -687,8 +687,7 @@ class Rasterizer final : public SnapshotDelegate,
     }
     if (auto context = impeller_context_.lock()) {
       return std::make_shared<impeller::AiksContext>(
-          impeller::AiksContext::Settings{}, context,
-          impeller::TypographerContextSkia::Make());
+          context, impeller::TypographerContextSkia::Make());
     }
 #endif
     return nullptr;

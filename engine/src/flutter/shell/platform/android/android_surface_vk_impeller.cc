@@ -20,16 +20,14 @@
 namespace flutter {
 
 AndroidSurfaceVKImpeller::AndroidSurfaceVKImpeller(
-    const std::shared_ptr<AndroidContextVKImpeller>& android_context,
-    const impeller::AiksContext::Settings& settings)
-    : settings_(settings) {
+    const std::shared_ptr<AndroidContextVKImpeller>& android_context) {
   is_valid_ = android_context->IsValid();
 
   auto& context_vk =
       impeller::ContextVK::Cast(*android_context->GetImpellerContext());
   surface_context_vk_ = context_vk.CreateSurfaceContext();
-  eager_gpu_surface_ = std::make_unique<GPUSurfaceVulkanImpeller>(
-      nullptr, surface_context_vk_, settings_);
+  eager_gpu_surface_ =
+      std::make_unique<GPUSurfaceVulkanImpeller>(nullptr, surface_context_vk_);
 }
 
 AndroidSurfaceVKImpeller::~AndroidSurfaceVKImpeller() = default;
@@ -61,8 +59,7 @@ std::unique_ptr<Surface> AndroidSurfaceVKImpeller::CreateGPUSurface(
   }
 
   std::unique_ptr<GPUSurfaceVulkanImpeller> gpu_surface =
-      std::make_unique<GPUSurfaceVulkanImpeller>(nullptr, surface_context_vk_,
-                                                 settings_);
+      std::make_unique<GPUSurfaceVulkanImpeller>(nullptr, surface_context_vk_);
 
   if (!gpu_surface->IsValid()) {
     return nullptr;

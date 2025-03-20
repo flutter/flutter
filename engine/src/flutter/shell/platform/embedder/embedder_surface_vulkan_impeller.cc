@@ -71,7 +71,8 @@ EmbedderSurfaceVulkanImpeller::EmbedderSurfaceVulkanImpeller(
   }
   settings.embedder_data = data;
 
-  context_ = impeller::ContextVK::Create(std::move(settings));
+  context_ =
+      impeller::ContextVK::Create(impeller::Flags{}, std::move(settings));
   if (!context_) {
     FML_LOG(ERROR) << "Failed to initialize Vulkan Context.";
     return;
@@ -113,8 +114,7 @@ bool EmbedderSurfaceVulkanImpeller::IsValid() const {
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceVulkanImpeller::CreateGPUSurface() {
-  return std::make_unique<GPUSurfaceVulkanImpeller>(
-      this, context_, impeller::AiksContext::Settings{});
+  return std::make_unique<GPUSurfaceVulkanImpeller>(this, context_);
 }
 
 // |EmbedderSurface|

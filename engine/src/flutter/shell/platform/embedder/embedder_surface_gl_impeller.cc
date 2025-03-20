@@ -81,7 +81,8 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   }
 
   impeller_context_ = impeller::ContextGLES::Create(
-      std::move(gl), shader_mappings, /*enable_gpu_tracing=*/false);
+      impeller::Flags{}, std::move(gl), shader_mappings,
+      /*enable_gpu_tracing=*/false);
 
   if (!impeller_context_) {
     FML_LOG(ERROR) << "Could not create Impeller context.";
@@ -177,10 +178,9 @@ std::unique_ptr<Surface> EmbedderSurfaceGLImpeller::CreateGPUSurface() {
   GLContextMakeCurrent();
 
   return std::make_unique<GPUSurfaceGLImpeller>(
-      this,                               // GPU surface GL delegate
-      impeller_context_,                  // Impeller context
-      impeller::AiksContext::Settings{},  // settings
-      !external_view_embedder_            // render to surface
+      this,                     // GPU surface GL delegate
+      impeller_context_,        // Impeller context
+      !external_view_embedder_  // render to surface
   );
 }
 

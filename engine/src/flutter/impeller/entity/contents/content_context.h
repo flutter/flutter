@@ -293,16 +293,6 @@ class RenderTargetCache;
 
 class ContentContext {
  public:
-  struct Settings {
-    bool lazy_shader_mode = false;
-  };
-
-  explicit ContentContext(
-      const Settings& settings,
-      std::shared_ptr<Context> context,
-      std::shared_ptr<TypographerContext> typographer_context,
-      std::shared_ptr<RenderTargetAllocator> render_target_allocator = nullptr);
-
   explicit ContentContext(
       std::shared_ptr<Context> context,
       std::shared_ptr<TypographerContext> typographer_context,
@@ -541,23 +531,22 @@ class ContentContext {
       desc_ = std::move(desc);
     }
 
-    void CreateDefault(const ContentContext& context,
+    void CreateDefault(const Context& context,
                        const ContentContextOptions& options,
                        const std::vector<Scalar>& constants = {}) {
       auto desc = PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(
-          *context.context_, constants);
+          context, constants);
       if (!desc.has_value()) {
         VALIDATION_LOG << "Failed to create default pipeline.";
         return;
       }
       options.ApplyToPipelineDescriptor(*desc);
       desc_ = desc;
-      if (context.settings_.lazy_shader_mode) {
+      if (context.GetFlags().lazy_shader_mode) {
         SetDefault(options, nullptr);
       } else {
-        SetDefault(options,
-                   std::make_unique<PipelineHandleT>(*context.context_, desc_,
-                                                     /*async=*/true));
+        SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
+                                                              /*async=*/true));
       }
     }
 
@@ -593,7 +582,6 @@ class ContentContext {
     size_t GetPipelineCount() const { return pipelines_.size(); }
 
    private:
-    std::weak_ptr<Context> context_;
     std::optional<PipelineDescriptor> desc_;
     std::optional<ContentContextOptions> default_options_;
     std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>>
@@ -758,7 +746,6 @@ class ContentContext {
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
-  const Settings settings_;
   bool wireframe_ = false;
 
   ContentContext(const ContentContext&) = delete;

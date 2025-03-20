@@ -637,7 +637,7 @@ TEST_P(AiksTest, DifferenceClipsMustRenderIdenticallyAcrossBackends) {
 }
 
 TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
-  AiksContext aiks_context({}, GetContext(),
+  AiksContext aiks_context(GetContext(),
                            std::make_shared<TypographerContextSkia>());
 
   // Verifies that TextContents only use the scale/transform that is
