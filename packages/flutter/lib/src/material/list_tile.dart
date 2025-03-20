@@ -425,7 +425,7 @@ class ListTile extends StatelessWidget {
     this.minTileHeight,
     this.titleAlignment,
     this.internalAddSemanticForOnTap = true,
-  }): assert(isThreeLine != true || subtitle != null);
+  }) : assert(isThreeLine != true || subtitle != null);
 
   /// A widget to display before the title.
   ///
@@ -987,7 +987,11 @@ class ListTile extends StatelessWidget {
                   trailing: trailingIcon,
                   isDense: _isDenseLayout(theme, tileTheme),
                   visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
-                  isThreeLine: isThreeLine ?? tileTheme.isThreeLine ?? theme.listTileTheme.isThreeLine ?? false,
+                  isThreeLine:
+                      isThreeLine ??
+                      tileTheme.isThreeLine ??
+                      theme.listTileTheme.isThreeLine ??
+                      false,
                   textDirection: textDirection,
                   titleBaselineType:
                       titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
