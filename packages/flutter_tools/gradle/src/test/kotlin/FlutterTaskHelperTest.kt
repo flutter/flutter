@@ -1,17 +1,23 @@
 package com.flutter.gradle
 
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.gradle.AbstractAppExtension
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
+import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.TaskContainer
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
+import kotlin.io.path.pathString
 import kotlin.test.Test
 
 class FlutterTaskHelperTest {
@@ -171,4 +177,50 @@ class FlutterTaskHelperTest {
 
         verify(exactly = 0) { project.files("pubspec.yaml") }
     }
+
+    @Test
+    fun addTasksForOutputsAppLinkSettingsNoAndroid(@TempDir tempDir: Path) {
+        val mockProject = mockk<Project>()
+        val mockLogger = mockk<Logger>()
+        every { mockProject.logger } returns mockLogger
+        every { mockLogger.info(any()) } returns Unit
+        every { mockProject.extensions.findByName("android") } returns null
+
+        FlutterTaskHelper.addTasksForOutputsAppLinkSettings(mockProject)
+        // Consider matching on part of the error.
+        verify(exactly = 1) { mockLogger.info(any()) }
+    }
+
+//    @Test
+//    fun addTasksForOutputsAppLinkSettingsNoAndroid(@TempDir tempDir: Path) {
+//        val mockProject = mockk<Project>()
+//        val mockLogger = mockk<Logger>()
+//        every { mockProject.logger } returns mockLogger
+//        every { mockLogger.info(any()) } returns Unit
+//        every { mockProject.property("outputPath") } returns tempDir.pathString
+//        // Consider breaking out into a test helper.
+//        every { mockProject.tasks } returns mockk<TaskContainer> {
+//            val registerTaskSlot = slot<Action<Task>>()
+//            every { register(any(), capture(registerTaskSlot)) } answers registerAnswer@{
+//                registerTaskSlot.captured.execute(
+//                    mockk {
+//                        val doLastActionSlot = slot<Action<Task>>()
+//                        every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
+//                            doLastActionSlot.captured.execute(mockk())
+//                            return@doLastAnswer mockk()
+//                        }
+//                    })
+//                return@registerAnswer mockk()
+//            }
+//
+//            every { named(any<String>()) } returns mockk {
+//                every { configure(any<Action<Task>>()) } returns mockk()
+//            }
+//        }
+//        val mockAbstractAppExtension = mockk<AbstractAppExtension>()
+//        every { mockProject.extensions.findByName("android") } returns mockAbstractAppExtension
+//
+//        FlutterTaskHelper.addTasksForOutputsAppLinkSettings(mockProject)
+//        verify(exactly = 1) { mockLogger.info(any()) }
+//    }
 }

@@ -39,7 +39,6 @@ import org.gradle.internal.os.OperatingSystem
 class FlutterPlugin implements Plugin<Project> {
 
     private final static String propLocalEngineRepo = "local-engine-repo"
-    private final static String propProcessResourcesProvider = "processResourcesProvider"
 
     /**
      * The name prefix for flutter builds. This is used to identify gradle tasks
@@ -328,14 +327,14 @@ class FlutterPlugin implements Plugin<Project> {
                 variant.outputs.configureEach { output ->
                     // Deeplinks are defined in AndroidManifest.xml and is only available after
                     // `processResourcesProvider`.
-                    Object processResources = output.hasProperty(propProcessResourcesProvider) ?
+                    Object processResources = output.hasProperty(FlutterPluginConstants.propProcessResourcesProvider) ?
                             output.processResourcesProvider.get() : output.processResources
                     dependsOn processResources.name
                 }
                 doLast {
                     AppLinkSettings appLinkSettings = new AppLinkSettings(variant.applicationId)
                     variant.outputs.configureEach { output ->
-                        Object processResources = output.hasProperty(propProcessResourcesProvider) ?
+                        Object processResources = output.hasProperty(FlutterPluginConstants.propProcessResourcesProvider) ?
                                 output.processResourcesProvider.get() : output.processResources
                         Node manifest = new XmlParser().parse(processResources.manifestFile)
                         manifest.application.activity.each { activity ->
@@ -1036,7 +1035,7 @@ class FlutterPlugin implements Plugin<Project> {
             Task copyFlutterAssetsTask = copyFlutterAssetsTaskProvider.get()
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
-                def processResources = variantOutput.hasProperty(propProcessResourcesProvider) ?
+                def processResources = variantOutput.hasProperty(FlutterPluginConstants.propProcessResourcesProvider) ?
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
             }
@@ -1067,7 +1066,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
                 Task copyFlutterAssetsTask = addFlutterDeps(variant)
                 BaseVariantOutput variantOutput = variant.outputs.first()
-                ProcessAndroidResources processResources = variantOutput.hasProperty(propProcessResourcesProvider) ?
+                ProcessAndroidResources processResources = variantOutput.hasProperty(FlutterPluginConstants.propProcessResourcesProvider) ?
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
 
