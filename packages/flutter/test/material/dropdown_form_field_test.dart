@@ -1347,7 +1347,7 @@ void main() {
     expect(fieldKey2.currentState!.hasError, isTrue);
   });
 
-  testWidgets('forceErrorText will override InputDecoration.error when both are provided', (
+  testWidgets('forceErrorText overrides InputDecoration.error when both are provided', (
     WidgetTester tester,
   ) async {
     const String forceErrorText = 'Forcing error';
