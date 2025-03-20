@@ -205,15 +205,16 @@ class FlutterTaskHelperTest {
         val testVariants: DomainObjectSet<ApplicationVariant> = mockk<DomainObjectSet<ApplicationVariant>>()
         val variant1 = mockk<ApplicationVariant>()
         every {variant1.name} returns "one"
-//        val variant2 = mockk<ApplicationVariant>()
-//        every {variant2.name} returns "two"
-        val actionSlot = slot<Action<ApplicationVariant>>()
+        val variant2 = mockk<ApplicationVariant>()
+        every {variant2.name} returns "two"
+        val variants = mutableListOf(variant1, variant2)
         // Capture the "action" that needs to be run for each variant.
+        val actionSlot = slot<Action<ApplicationVariant>>()
         every { testVariants.configureEach(capture(actionSlot)) } answers {
-            // Execution the action for each variant.
-            // TODO turn in to a loop.
-            actionSlot.captured.execute(variant1)
-//            actionSlot.captured.execute(variant2)
+            // Execute the action for each variant.
+            variants.forEach { variant ->
+                actionSlot.captured.execute(variant)
+            }
         }
         every { mockAbstractAppExtension.applicationVariants } returns testVariants
 
@@ -249,8 +250,10 @@ class FlutterTaskHelperTest {
 
         verify(exactly = 0) { mockLogger.info(any()) }
         assert(descriptionSlot.captured.contains("stores app links settings for the given build variant"))
-        assertEquals(1, registerTaskList.size)
-        assertEquals("output${FlutterPluginUtils.capitalize(variant1.name)}AppLinkSettings", registerTaskList[0].name)
+        assertEquals(variants.size, registerTaskList.size)
+        for (i in 0 until variants.size) {
+            assertEquals("output${FlutterPluginUtils.capitalize(variants[i].name)}AppLinkSettings", registerTaskList[i].name)
+        }
     }
 
 }
