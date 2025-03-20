@@ -2488,9 +2488,7 @@ void main() {
     expect(widths.indexOf(largestWidth), equals(1));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
-  testWidgets('showTimeSeparator is only supported in time or dateAndTime mode', (
-    WidgetTester tester,
-  ) async {
+  test('showTimeSeparator is only supported in time or dateAndTime mode', () async {
     expect(
       () => CupertinoDatePicker(
         mode: CupertinoDatePickerMode.time,
@@ -2534,7 +2532,11 @@ void main() {
         ),
       ),
     );
+  });
 
+  testWidgets('Time separator widget should be rendered when flag is set to true', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -2553,14 +2555,14 @@ void main() {
     );
   });
 
-  testWidgets('Testing cupertino date picker with date mode should not display time separator', (
+  testWidgets('Time separator widget should not be rendered when flag is set to false', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoDatePicker(
-            mode: CupertinoDatePickerMode.date,
+            mode: CupertinoDatePickerMode.time,
             onDateTimeChanged: (DateTime _) {},
           ),
         ),
