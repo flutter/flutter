@@ -2553,6 +2553,26 @@ void main() {
     );
   });
 
+  testWidgets('Testing cupertino date picker with date mode should not display time separator', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.date,
+            onDateTimeChanged: (DateTime _) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byWidgetPredicate((Widget widget) => widget is Text && widget.data == ':'),
+      findsNothing,
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/161773
   testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
