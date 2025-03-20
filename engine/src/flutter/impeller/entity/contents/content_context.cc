@@ -216,7 +216,6 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
 
   desc.SetPrimitiveType(primitive_type);
-
   desc.SetPolygonMode(wireframe ? PolygonMode::kLine : PolygonMode::kFill);
 }
 
@@ -283,11 +282,13 @@ ContentContext::ContentContext(
     desc.format = PixelFormat::kR8G8B8A8UNormInt;
     desc.size = ISize{1, 1};
     empty_texture_ = GetContext()->GetResourceAllocator()->CreateTexture(desc);
-    auto data = Color::BlackTransparent().ToR8G8B8A8();
-    auto cmd_buffer = GetContext()->CreateCommandBuffer();
-    auto blit_pass = cmd_buffer->CreateBlitPass();
-    auto& host_buffer = GetTransientsBuffer();
-    auto buffer_view = host_buffer.Emplace(data);
+
+    std::array<uint8_t, 4> data = Color::BlackTransparent().ToR8G8B8A8();
+    std::shared_ptr<CommandBuffer> cmd_buffer =
+        GetContext()->CreateCommandBuffer();
+    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+    HostBuffer& host_buffer = GetTransientsBuffer();
+    BufferView buffer_view = host_buffer.Emplace(data);
     blit_pass->AddCopy(buffer_view, empty_texture_);
 
     if (!blit_pass->EncodeCommands() || !GetContext()
@@ -383,9 +384,14 @@ ContentContext::ContentContext(
     }
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
-    clip_pipelines_.SetDefault(
-        options,
-        std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
+    if (GetContext()->GetFlags().lazy_shader_mode) {
+      clip_pipelines_.SetDefaultDescriptor(clip_pipeline_descriptor);
+      clip_pipelines_.SetDefault(options, nullptr);
+    } else {
+      clip_pipelines_.SetDefault(
+          options,
+          std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
+    }
     texture_downsample_pipelines_.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
@@ -671,7 +677,9 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
 }
 
 void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
-  TRACE_EVENT0("flutter", "InitializeCommonlyUsedShadersIfNeeded");
+  if (GetContext()->GetFlags().lazy_shader_mode) {
+    return;
+  }
   GetContext()->InitializeCommonlyUsedShadersIfNeeded();
 }
 

@@ -134,7 +134,7 @@ std::shared_ptr<Context> PlaygroundImplGLES::GetContext() const {
   }
 
   auto context = ContextGLES::Create(
-      std::move(gl), ShaderLibraryMappingsForPlayground(), true);
+      Flags{}, std::move(gl), ShaderLibraryMappingsForPlayground(), true);
   if (!context) {
     FML_LOG(ERROR) << "Could not create context.";
     return nullptr;
