@@ -1691,6 +1691,7 @@ Future<void> a11y_main_multi_view() async {
     );
   }
 
+  PlatformDispatcher.instance.setSemanticsTreeEnabled(true);
   for (final view in PlatformDispatcher.instance.views) {
     view.updateSemantics(createForView(view).build());
   }
