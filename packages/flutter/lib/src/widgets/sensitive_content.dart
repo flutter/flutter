@@ -327,7 +327,8 @@ class SensitiveContent extends StatefulWidget {
 }
 
 class _SensitiveContentState extends State<SensitiveContent> {
-  Future<void>? _sensitiveContentRegistrationFuture;
+  Future<void> _sensitiveContentRegistrationFuture = Future<void>.value();
+  Future<void> _sensitiveContentUnregistrationFuture = Future<void>.value();
 
   @override
   void initState() {
@@ -341,14 +342,6 @@ class _SensitiveContentState extends State<SensitiveContent> {
     super.dispose();
   }
 
-  Future<void> _reregisterWidget({
-    required ContentSensitivity newContentSensitivity,
-    required ContentSensitivity oldContentSensitivity,
-  }) async {
-    await SensitiveContentHost.register(newContentSensitivity);
-    await SensitiveContentHost.unregister(oldContentSensitivity);
-  }
-
   @override
   void didUpdateWidget(SensitiveContent oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -358,16 +351,17 @@ class _SensitiveContentState extends State<SensitiveContent> {
     }
 
     // Re-register SensitiveContent widget if the sensitivity changed.
-    _sensitiveContentRegistrationFuture = _reregisterWidget(
-      newContentSensitivity: widget.sensitivity,
-      oldContentSensitivity: oldWidget.sensitivity,
-    );
+    _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivity);
+    _sensitiveContentUnregistrationFuture = SensitiveContentHost.unregister(oldWidget.sensitivity);
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
-      future: _sensitiveContentRegistrationFuture,
+      future: Future.wait(<Future<void>>[
+        _sensitiveContentRegistrationFuture,
+        _sensitiveContentUnregistrationFuture,
+      ]),
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return widget.child;
