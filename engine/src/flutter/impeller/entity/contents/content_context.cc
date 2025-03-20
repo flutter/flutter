@@ -30,7 +30,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   if (blend_mode > Entity::kLastPipelineBlendMode) {
     VALIDATION_LOG << "Cannot use blend mode " << static_cast<int>(blend_mode)
                    << " as a pipeline blend.";
-    pipeline_blend = BlendMode::kSourceOver;
+    pipeline_blend = BlendMode::kSrcOver;
   }
 
   desc.SetSampleCount(sample_count);
@@ -57,63 +57,63 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         color0.src_color_blend_factor = BlendFactor::kZero;
       }
       break;
-    case BlendMode::kSource:
+    case BlendMode::kSrc:
       color0.blending_enabled = false;
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kOne;
       color0.src_color_blend_factor = BlendFactor::kOne;
       break;
-    case BlendMode::kDestination:
+    case BlendMode::kDst:
       color0.dst_alpha_blend_factor = BlendFactor::kOne;
       color0.dst_color_blend_factor = BlendFactor::kOne;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       color0.write_mask = ColorWriteMaskBits::kNone;
       break;
-    case BlendMode::kSourceOver:
+    case BlendMode::kSrcOver:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kOne;
       color0.src_color_blend_factor = BlendFactor::kOne;
       break;
-    case BlendMode::kDestinationOver:
+    case BlendMode::kDstOver:
       color0.dst_alpha_blend_factor = BlendFactor::kOne;
       color0.dst_color_blend_factor = BlendFactor::kOne;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       break;
-    case BlendMode::kSourceIn:
+    case BlendMode::kSrcIn:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kDestinationAlpha;
       break;
-    case BlendMode::kDestinationIn:
+    case BlendMode::kDstIn:
       color0.dst_alpha_blend_factor = BlendFactor::kSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
-    case BlendMode::kSourceOut:
+    case BlendMode::kSrcOut:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       break;
-    case BlendMode::kDestinationOut:
+    case BlendMode::kDstOut:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
-    case BlendMode::kSourceATop:
+    case BlendMode::kSrcATop:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kDestinationAlpha;
       break;
-    case BlendMode::kDestinationATop:
+    case BlendMode::kDstATop:
       color0.dst_alpha_blend_factor = BlendFactor::kSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
@@ -852,25 +852,25 @@ PipelineRef ContentContext::GetPorterDuffPipeline(
   switch (mode) {
     case BlendMode::kClear:
       return GetClearBlendPipeline(opts);
-    case BlendMode::kSource:
+    case BlendMode::kSrc:
       return GetSourceBlendPipeline(opts);
-    case BlendMode::kDestination:
+    case BlendMode::kDst:
       return GetDestinationBlendPipeline(opts);
-    case BlendMode::kSourceOver:
+    case BlendMode::kSrcOver:
       return GetSourceOverBlendPipeline(opts);
-    case BlendMode::kDestinationOver:
+    case BlendMode::kDstOver:
       return GetDestinationOverBlendPipeline(opts);
-    case BlendMode::kSourceIn:
+    case BlendMode::kSrcIn:
       return GetSourceInBlendPipeline(opts);
-    case BlendMode::kDestinationIn:
+    case BlendMode::kDstIn:
       return GetDestinationInBlendPipeline(opts);
-    case BlendMode::kSourceOut:
+    case BlendMode::kSrcOut:
       return GetSourceOutBlendPipeline(opts);
-    case BlendMode::kDestinationOut:
+    case BlendMode::kDstOut:
       return GetDestinationOutBlendPipeline(opts);
-    case BlendMode::kSourceATop:
+    case BlendMode::kSrcATop:
       return GetSourceATopBlendPipeline(opts);
-    case BlendMode::kDestinationATop:
+    case BlendMode::kDstATop:
       return GetDestinationATopBlendPipeline(opts);
     case BlendMode::kXor:
       return GetXorBlendPipeline(opts);

@@ -251,7 +251,7 @@ void DlDispatcherBase::setInvertColors(bool invert) {
 void DlDispatcherBase::setBlendMode(flutter::DlBlendMode dl_mode) {
   AUTO_DEPTH_WATCHER(0u);
 
-  paint_.blend_mode = skia_conversions::ToBlendMode(dl_mode);
+  paint_.blend_mode = dl_mode;
 }
 
 static FilterContents::BlurStyle ToBlurStyle(flutter::DlBlurStyle blur_style) {
@@ -530,7 +530,7 @@ void DlDispatcherBase::drawColor(flutter::DlColor color,
 
   Paint paint;
   paint.color = skia_conversions::ToColor(color);
-  paint.blend_mode = skia_conversions::ToBlendMode(dl_mode);
+  paint.blend_mode = dl_mode;
   GetCanvas().DrawPaint(paint);
 }
 
@@ -825,7 +825,7 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                       tex,                                              //
                       colors,                                           //
                       static_cast<size_t>(count),                       //
-                      skia_conversions::ToBlendMode(mode),              //
+                      mode,                                             //
                       skia_conversions::ToSamplerDescriptor(sampling),  //
                       ToOptRect(cull_rect)                              //
       );
@@ -992,8 +992,7 @@ static bool RequiresReadbackForBlends(
     const ContentContext& renderer,
     flutter::DlBlendMode max_root_blend_mode) {
   return !renderer.GetDeviceCapabilities().SupportsFramebufferFetch() &&
-         skia_conversions::ToBlendMode(max_root_blend_mode) >
-             Entity::kLastPipelineBlendMode;
+         max_root_blend_mode > Entity::kLastPipelineBlendMode;
 }
 
 CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
@@ -1020,8 +1019,8 @@ void CanvasDlDispatcher::drawVertices(
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawVertices(
-      std::make_shared<DlVerticesGeometry>(vertices, renderer_),
-      skia_conversions::ToBlendMode(dl_mode), paint_);
+      std::make_shared<DlVerticesGeometry>(vertices, renderer_), dl_mode,
+      paint_);
 }
 
 void CanvasDlDispatcher::SetBackdropData(

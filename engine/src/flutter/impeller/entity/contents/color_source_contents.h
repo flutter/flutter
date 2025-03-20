@@ -158,7 +158,7 @@ class ColorSourceContents : public Contents {
       pass.SetVertexBuffer(std::move(stencil_geometry_result.vertex_buffer));
       options.primitive_type = stencil_geometry_result.type;
 
-      options.blend_mode = BlendMode::kDestination;
+      options.blend_mode = BlendMode::kDst;
       switch (stencil_geometry_result.mode) {
         case GeometryResult::Mode::kNonZero:
           pass.SetCommandLabel("Stencil preparation (NonZero)");
@@ -220,7 +220,7 @@ class ColorSourceContents : public Contents {
     // Enable depth writing for all opaque entities in order to allow
     // reordering. Opaque entities are coerced to source blending by
     // `EntityPass::AddEntity`.
-    options.depth_write_enabled = options.blend_mode == BlendMode::kSource;
+    options.depth_write_enabled = options.blend_mode == BlendMode::kSrc;
 
     // Take the pre-populated vertex shader uniform struct and set managed
     // values.
@@ -232,7 +232,7 @@ class ColorSourceContents : public Contents {
     // the stencil buffer (happens below in this method). This can be skipped
     // for draws that are fully opaque or use src blend mode.
     if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw &&
-        options.blend_mode != BlendMode::kSource) {
+        options.blend_mode != BlendMode::kSrc) {
       options.stencil_mode =
           ContentContextOptions::StencilMode::kOverdrawPreventionIncrement;
     }
@@ -259,7 +259,7 @@ class ColorSourceContents : public Contents {
     // was incremented by 1 in order to self-clip. So simply append a clip
     // restore to clean it up.
     if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw &&
-        options.blend_mode != BlendMode::kSource) {
+        options.blend_mode != BlendMode::kSrc) {
       return RenderClipRestore(renderer, pass, entity.GetClipDepth(),
                                GetCoverage(entity));
     }

@@ -63,7 +63,7 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
   };
 
   auto options = OptionsFromPass(pass);
-  options.blend_mode = BlendMode::kSource;
+  options.blend_mode = BlendMode::kSrc;
   options.primitive_type = PrimitiveType::kTriangleStrip;
 
   pass.SetCommandLabel("Framebuffer Advanced Blend Filter");

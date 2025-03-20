@@ -91,7 +91,7 @@ void expectRenderCoverageEqual(const std::optional<Entity>& result,
                                const Rect& expected) {
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
-    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSourceOver);
+    EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
     std::optional<Rect> result_coverage = result.value().GetCoverage();
     EXPECT_TRUE(result_coverage.has_value());
     EXPECT_TRUE(contents_coverage.has_value());

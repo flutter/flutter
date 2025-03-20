@@ -96,15 +96,14 @@ void VerticesSimpleBlendContents::SetLazyTextureCoverage(Rect rect) {
 bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
                                          const Entity& entity,
                                          RenderPass& pass) const {
-  FML_DCHECK(texture_ || lazy_texture_ ||
-             blend_mode_ == BlendMode::kDestination);
+  FML_DCHECK(texture_ || lazy_texture_ || blend_mode_ == BlendMode::kDst);
   BlendMode blend_mode = blend_mode_;
   if (!geometry_->HasVertexColors()) {
-    blend_mode = BlendMode::kSource;
+    blend_mode = BlendMode::kSrc;
   }
 
   std::shared_ptr<Texture> texture;
-  if (blend_mode != BlendMode::kDestination) {
+  if (blend_mode != BlendMode::kDst) {
     if (!texture_) {
       texture = lazy_texture_(renderer);
     } else {
@@ -152,7 +151,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
     auto options = OptionsFromPassAndEntity(pass, entity);
     options.primitive_type = geometry_result.type;
     auto inverted_blend_mode =
-        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSource);
+        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc);
     pass.SetPipeline(
         renderer.GetPorterDuffPipeline(inverted_blend_mode, options));
 
