@@ -1,12 +1,13 @@
 package com.flutter.gradle
 
-import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.gradle.AbstractAppExtension
+import com.android.build.gradle.api.ApplicationVariant
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
+import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
@@ -19,6 +20,7 @@ import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.pathString
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class FlutterTaskHelperTest {
     @Test
@@ -191,36 +193,64 @@ class FlutterTaskHelperTest {
         verify(exactly = 1) { mockLogger.info(any()) }
     }
 
-//    @Test
-//    fun addTasksForOutputsAppLinkSettingsNoAndroid(@TempDir tempDir: Path) {
-//        val mockProject = mockk<Project>()
-//        val mockLogger = mockk<Logger>()
-//        every { mockProject.logger } returns mockLogger
-//        every { mockLogger.info(any()) } returns Unit
-//        every { mockProject.property("outputPath") } returns tempDir.pathString
-//        // Consider breaking out into a test helper.
-//        every { mockProject.tasks } returns mockk<TaskContainer> {
-//            val registerTaskSlot = slot<Action<Task>>()
-//            every { register(any(), capture(registerTaskSlot)) } answers registerAnswer@{
-//                registerTaskSlot.captured.execute(
-//                    mockk {
-//                        val doLastActionSlot = slot<Action<Task>>()
-//                        every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
-//                            doLastActionSlot.captured.execute(mockk())
-//                            return@doLastAnswer mockk()
-//                        }
-//                    })
-//                return@registerAnswer mockk()
-//            }
-//
-//            every { named(any<String>()) } returns mockk {
-//                every { configure(any<Action<Task>>()) } returns mockk()
-//            }
-//        }
-//        val mockAbstractAppExtension = mockk<AbstractAppExtension>()
-//        every { mockProject.extensions.findByName("android") } returns mockAbstractAppExtension
-//
-//        FlutterTaskHelper.addTasksForOutputsAppLinkSettings(mockProject)
-//        verify(exactly = 1) { mockLogger.info(any()) }
-//    }
+    @Test
+    fun addTasksForOutputsAppLinkSettingsActual(@TempDir tempDir: Path) {
+        val mockProject = mockk<Project>()
+        val mockLogger = mockk<Logger>()
+        every { mockProject.logger } returns mockLogger
+        every { mockLogger.info(any()) } returns Unit
+        val mockAbstractAppExtension = mockk<AbstractAppExtension>()
+        every { mockProject.extensions.findByName("android") } returns mockAbstractAppExtension
+
+        val testVariants: DomainObjectSet<ApplicationVariant> = mockk<DomainObjectSet<ApplicationVariant>>()
+        val variant1 = mockk<ApplicationVariant>()
+        every {variant1.name} returns "one"
+//        val variant2 = mockk<ApplicationVariant>()
+//        every {variant2.name} returns "two"
+        val actionSlot = slot<Action<ApplicationVariant>>()
+        // Capture the "action" that needs to be run for each variant.
+        every { testVariants.configureEach(capture(actionSlot)) } answers {
+            // Execution the action for each variant.
+            // TODO turn in to a loop.
+            actionSlot.captured.execute(variant1)
+//            actionSlot.captured.execute(variant2)
+        }
+        every { mockAbstractAppExtension.applicationVariants } returns testVariants
+
+        // Consider breaking out into a test helper.
+        val descriptionSlot = slot<String>()
+        val registerTaskSlot = slot<Action<Task>>()
+        val registerTaskList :MutableList<Task> = mutableListOf()
+        every { mockProject.tasks } returns mockk<TaskContainer> {
+            val registerTaskNameSlot = slot<String>()
+            every { register(capture(registerTaskNameSlot), capture(registerTaskSlot)) } answers registerAnswer@{
+                val mockRegisterTask = mockk<Task> {
+                    every { name } returns registerTaskNameSlot.captured
+                    every { description = capture(descriptionSlot) } returns Unit
+                    val doLastActionSlot = slot<Action<Task>>()
+                    every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
+                        doLastActionSlot.captured.execute(mockk())
+                        return@doLastAnswer mockk()
+                    }
+                }
+                registerTaskList.add(mockRegisterTask)
+                registerTaskSlot.captured.execute(mockRegisterTask)
+                return@registerAnswer mockk()
+            }
+
+            every { named(any<String>()) } returns mockk {
+                every { configure(any<Action<Task>>()) } returns mockk()
+            }
+        }
+
+        every { mockProject.property("outputPath") } returns tempDir.pathString
+
+        FlutterTaskHelper.addTasksForOutputsAppLinkSettings(mockProject)
+
+        verify(exactly = 0) { mockLogger.info(any()) }
+        assert(descriptionSlot.captured.contains("stores app links settings for the given build variant"))
+        assertEquals(1, registerTaskList.size)
+        assertEquals("output${FlutterPluginUtils.capitalize(variant1.name)}AppLinkSettings", registerTaskList[0].name)
+    }
+
 }
