@@ -16,7 +16,7 @@ object FlutterPluginUtils {
     // Gradle properties.
     internal const val PROP_SHOULD_SHRINK_RESOURCES = "shrink"
     internal const val PROP_SPLIT_PER_ABI = "split-per-abi"
-    internal const val PROP_LOCAL_ENGINE_REPO = "localEngineRepo"
+    internal const val PROP_LOCAL_ENGINE_REPO = "local-engine-repo"
     internal const val PROP_IS_VERBOSE = "verbose"
     internal const val PROP_IS_FAST_START = "fast-start"
     internal const val PROP_TARGET = "target"
@@ -84,6 +84,10 @@ object FlutterPluginUtils {
         // If we got this far then all the common indices are identical, so whichever version is longer must be more recent
         return firstVersion.size.compareTo(secondVersion.size)
     }
+
+    @JvmStatic
+    @JvmName("formatPlatformString")
+    fun formatPlatformString(platform: String): String = FlutterPluginConstants.PLATFORM_ARCH_MAP[platform]!!.replace("-", "_")
 
     // ----------------- Methods that interact primarily with the Gradle project. -----------------
 
@@ -153,7 +157,7 @@ object FlutterPluginUtils {
         if (buildGradle.exists() && buildGradleKts.exists()) {
             logger.error(
                 """
-                Both build.gradle and build.gradle.kts exist, so 
+                Both build.gradle and build.gradle.kts exist, so
                 build.gradle.kts is ignored. This is likely a mistake.
                 """.trimIndent()
             )
