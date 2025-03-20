@@ -721,7 +721,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   Rect? describeSemanticsClip(RenderSliver? child) {
     if (child != null && child.ensureSemantics) {
-      // TODO(Renzo-Olivares): returning null here did not work, investigate why.
+      // TODO(Renzo-Olivares): returning null still resulted in a clipped rect, investigate why.
       return Rect.largest;
     }
     if (_calculatedCacheExtent == null) {
