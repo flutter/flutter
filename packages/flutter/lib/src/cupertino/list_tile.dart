@@ -398,14 +398,20 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
 class CupertinoListTileChevron extends StatelessWidget {
   /// Creates a typical widget used to denote that a `CupertinoListTile` is a
   /// button with action.
-  const CupertinoListTileChevron({super.key});
+  const CupertinoListTileChevron({super.key, this.color});
+
+  /// The color of the chevron.
+  ///
+  /// If null, defaults to [CupertinoColors.systemGrey2] resolved from the
+  /// ambient [BuildContext].
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Icon(
       CupertinoIcons.right_chevron,
       size: CupertinoTheme.of(context).textTheme.textStyle.fontSize,
-      color: CupertinoColors.systemGrey2.resolveFrom(context),
+      color: color ?? CupertinoColors.systemGrey2.resolveFrom(context),
     );
   }
 }
