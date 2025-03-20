@@ -105,7 +105,6 @@ class SensitiveContentService {
         contentSensitivity.name,
       );
     } catch (e) {
-      print('CAMILLE: set failed for $contentSensitivity');
       // Content sensitivity failed to be set.
       throw FlutterError('Content sensitivity $contentSensitivity failed to be set: $e');
     }
