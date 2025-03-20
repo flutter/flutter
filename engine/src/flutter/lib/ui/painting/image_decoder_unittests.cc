@@ -35,6 +35,7 @@
 
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 namespace impeller {
 
@@ -1020,4 +1021,5 @@ TEST_F(ImageDecoderFixtureTest, NullCheckBuffer) {
 }  // namespace testing
 }  // namespace flutter
 
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)

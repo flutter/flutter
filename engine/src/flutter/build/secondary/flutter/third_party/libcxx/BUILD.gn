@@ -15,17 +15,24 @@ source_set("libcxx") {
   sources = [
     "src/algorithm.cpp",
     "src/any.cpp",
+    "src/atomic.cpp",
+    "src/barrier.cpp",
     "src/bind.cpp",
+    "src/call_once.cpp",
     "src/charconv.cpp",
     "src/chrono.cpp",
     "src/condition_variable.cpp",
     "src/condition_variable_destructor.cpp",
-    "src/debug.cpp",
+    "src/error_category.cpp",
     "src/exception.cpp",
+    "src/filesystem/directory_entry.cpp",
     "src/filesystem/directory_iterator.cpp",
-    "src/filesystem/filesystem_common.h",
+    "src/filesystem/filesystem_clock.cpp",
+    "src/filesystem/filesystem_error.cpp",
     "src/filesystem/int128_builtins.cpp",
     "src/filesystem/operations.cpp",
+    "src/filesystem/path.cpp",
+    "src/fstream.cpp",
     "src/functional.cpp",
     "src/future.cpp",
     "src/hash.cpp",
@@ -34,11 +41,17 @@ source_set("libcxx") {
     "src/iostream.cpp",
     "src/locale.cpp",
     "src/memory.cpp",
+    "src/memory_resource.cpp",
     "src/mutex.cpp",
     "src/mutex_destructor.cpp",
     "src/new.cpp",
+    "src/new_handler.cpp",
+    "src/new_helpers.cpp",
     "src/optional.cpp",
+    "src/ostream.cpp",
+    "src/print.cpp",
     "src/random.cpp",
+    "src/random_shuffle.cpp",
     "src/regex.cpp",
     "src/ryu/d2fixed.cpp",
     "src/ryu/d2s.cpp",
@@ -50,13 +63,16 @@ source_set("libcxx") {
     "src/system_error.cpp",
     "src/thread.cpp",
     "src/typeinfo.cpp",
-    "src/utility.cpp",
     "src/valarray.cpp",
     "src/variant.cpp",
     "src/vector.cpp",
+    "src/verbose_abort.cpp",
   ]
 
-  deps = [ "//flutter/third_party/libcxxabi" ]
+  deps = [
+    "//flutter/third_party/libcxxabi",
+    "//flutter/third_party/llvm_libc"
+  ]
 
   # TODO(goderbauer): remove when all sources build with LTO for android_arm64 and android_x64.
   if (is_android && (current_cpu == "arm64" || current_cpu == "x64")) {
