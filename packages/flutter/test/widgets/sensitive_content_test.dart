@@ -112,11 +112,7 @@ void main() {
         expect(shrinkBox.height, 0);
 
         setContentSensitivityCompleter.complete();
-
-        // Delay added to ensure that the SensitiveContent widget re-registration completes.
-        await Future<void>.delayed(const Duration(milliseconds: 500), () async {
-          await tester.pumpAndSettle();
-        });
+        await tester.pumpAndSettle();
 
         await expectLater(find.byType(childWidget.runtimeType), findsOne);
         expect(find.byType(SizedBox), findsNothing);

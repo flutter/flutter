@@ -130,11 +130,7 @@ void main() {
           find.byKey(scKey),
         );
         scDiposeTesterState.disposeWidget();
-
-        // Delay added to ensure that the SensitiveContent widget unregister completes.
-        await Future<void>.delayed(const Duration(milliseconds: 100), () async {
-          await tester.pump();
-        });
+        await tester.pump();
 
         expect(tester.takeException(), isA<FlutterError>());
         expect(
