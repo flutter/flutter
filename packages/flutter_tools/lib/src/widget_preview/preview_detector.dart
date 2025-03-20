@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:analyzer/dart/analysis/analysis_context.dart';
 import 'package:analyzer/dart/analysis/analysis_context_collection.dart';
@@ -227,6 +228,7 @@ class PreviewDetector {
   final void Function() onPubspecChangeDetected;
 
   StreamSubscription<WatchEvent>? _fileWatcher;
+  final PreviewDetectorMutex _mutex = PreviewDetectorMutex();
   late final PreviewMapping _pathToPreviews;
 
   late final AnalysisContextCollection collection = AnalysisContextCollection(
@@ -295,57 +297,65 @@ class PreviewDetector {
   }
 
   Future<void> dispose() async {
-    await _fileWatcher?.cancel();
-    await collection.dispose();
+    // Guard disposal behind a mutex to make sure the analyzer has finished
+    // processing the latest file updates to avoid throwing an exception.
+    await _mutex.runGuarded(() async {
+      await _fileWatcher?.cancel();
+      await collection.dispose();
+    });
   }
 
   /// Search for functions annotated with `@Preview` in the current project.
   Future<PreviewMapping> findPreviewFunctions(FileSystemEntity entity) async {
     final PreviewMapping previews = PreviewMapping();
-    // TODO(bkonyi): this can probably be replaced by a call to collection.contextFor(...),
-    // but we need to figure out the right path format for Windows.
-    for (final AnalysisContext context in collection.contexts) {
-      logger.printStatus('Finding previews in ${entity.path}...');
+    // Only process one FileSystemEntity at a time to prevent weirdness caused by interleaving of
+    // asynchronous analyzer operations.
+    await _mutex.runGuarded(() async {
+      // TODO(bkonyi): this can probably be replaced by a call to collection.contextFor(...),
+      // but we need to figure out the right path format for Windows.
+      for (final AnalysisContext context in collection.contexts) {
+        logger.printStatus('Finding previews in ${entity.path}...');
 
-      // If we're processing a single file, it means the file watcher detected a
-      // change in a Dart source. We need to notify the analyzer that this file
-      // has changed so it can reanalyze the file.
-      if (entity is File) {
-        context.changeFile(entity.path);
-        await context.applyPendingFileChanges();
-      }
-
-      for (final String filePath in context.contextRoot.analyzedFiles()) {
-        logger.printTrace('Checking file: $filePath');
-        if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
-          logger.printTrace('Skipping $filePath');
-          continue;
+        // If we're processing a single file, it means the file watcher detected a
+        // change in a Dart source. We need to notify the analyzer that this file
+        // has changed so it can reanalyze the file.
+        if (entity is File) {
+          context.changeFile(entity.path);
+          await context.applyPendingFileChanges();
         }
-        final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(
-          filePath,
-        );
-        // TODO(bkonyi): ensure this can handle part files.
-        if (lib is ResolvedLibraryResult) {
-          for (final ResolvedUnitResult libUnit in lib.units) {
-            final List<PreviewDetails> previewEntries =
-                previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
-            final PreviewVisitor visitor = PreviewVisitor();
-            libUnit.unit.visitChildren(visitor);
-            previewEntries.addAll(visitor.previewEntries);
-            if (previewEntries.isNotEmpty) {
-              previews[libUnit.toPreviewPath()] = previewEntries;
-            }
+
+        for (final String filePath in context.contextRoot.analyzedFiles()) {
+          logger.printTrace('Checking file: $filePath');
+          if (!filePath.isDartFile || !filePath.startsWith(entity.path)) {
+            logger.printTrace('Skipping $filePath');
+            continue;
           }
-        } else {
-          logger.printWarning('Unknown library type at $filePath: $lib');
+          final SomeResolvedLibraryResult lib = await context.currentSession.getResolvedLibrary(
+            filePath,
+          );
+          // TODO(bkonyi): ensure this can handle part files.
+          if (lib is ResolvedLibraryResult) {
+            for (final ResolvedUnitResult libUnit in lib.units) {
+              final List<PreviewDetails> previewEntries =
+                  previews[libUnit.toPreviewPath()] ?? <PreviewDetails>[];
+              final PreviewVisitor visitor = PreviewVisitor();
+              libUnit.unit.visitChildren(visitor);
+              previewEntries.addAll(visitor.previewEntries);
+              if (previewEntries.isNotEmpty) {
+                previews[libUnit.toPreviewPath()] = previewEntries;
+              }
+            }
+          } else {
+            logger.printWarning('Unknown library type at $filePath: $lib');
+          }
         }
       }
-    }
-    final int previewCount = previews.values.fold<int>(
-      0,
-      (int count, List<PreviewDetails> value) => count + value.length,
-    );
-    logger.printStatus('Found $previewCount ${pluralize('preview', previewCount)}.');
+      final int previewCount = previews.values.fold<int>(
+        0,
+        (int count, List<PreviewDetails> value) => count + value.length,
+      );
+      logger.printStatus('Found $previewCount ${pluralize('preview', previewCount)}.');
+    });
     return previews;
   }
 }
@@ -436,4 +446,53 @@ class PreviewVisitor extends RecursiveAstVisitor<void> {
     node.visitChildren(this);
     setter(null);
   }
+}
+
+/// Used to protect state accessed in blocks containing calls to
+/// asynchronous methods which can possibly be interleaved, resulting
+/// corruption of state.
+/// 
+/// Originally from DDS:
+/// https://github.com/dart-lang/sdk/blob/3fe58da3cfe2c03fb9ee691a7a4709082fad3e73/pkg/dds/lib/src/utils/mutex.dart
+class PreviewDetectorMutex {
+  /// Executes a block of code containing asynchronous calls atomically.
+  ///
+  /// If no other asynchronous context is currently executing within
+  /// [criticalSection], it will immediately be called. Otherwise, the
+  /// caller will be suspended and entered into a queue to be resumed once the
+  /// lock is released.
+  Future<T> runGuarded<T>(FutureOr<T> Function() criticalSection) async {
+    try {
+      await _acquireLock();
+      return await criticalSection();
+    } finally {
+      _releaseLock();
+    }
+  }
+
+  Future<void> _acquireLock() async {
+    if (!_locked) {
+      _locked = true;
+      return;
+    }
+
+    final Completer<void> request = Completer<void>();
+    _outstandingRequests.add(request);
+    await request.future;
+  }
+
+  void _releaseLock() {
+    if (_outstandingRequests.isNotEmpty) {
+      final Completer<void> request = _outstandingRequests.removeFirst();
+      request.complete();
+      return;
+    }
+    // Only release the lock if no other requests are pending to prevent races
+    // between the next request from the queue to be handled and incoming
+    // requests.
+    _locked = false;
+  }
+
+  bool _locked = false;
+  final Queue<Completer<void>> _outstandingRequests = Queue<Completer<void>>();
 }

@@ -209,6 +209,9 @@ void main() {
       final Completer<void> completer = Completer<void>();
       late final PreviewPath previewContainingFilePath;
       onChangeDetected = (PreviewMapping updated) {
+        if (completer.isCompleted) {
+          return;
+        }
         // The new previews in baz.dart should be included in the preview mapping.
         expect(stripNonDeterministicFields(updated), <PreviewPath, List<PreviewDetails>>{
           previewContainingFilePath: expectedPreviewDetails,
