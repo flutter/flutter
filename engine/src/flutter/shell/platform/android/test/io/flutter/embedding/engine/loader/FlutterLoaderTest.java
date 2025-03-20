@@ -320,7 +320,7 @@ public class FlutterLoaderTest {
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
     FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
     Bundle metaData = new Bundle();
-    metaData.putString("io.flutter.embedding.android.ImpellerShaderMode", "test");
+    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderInitialization", true);
     ctx.getApplicationInfo().metaData = metaData;
 
     FlutterLoader.Settings settings = new FlutterLoader.Settings();
@@ -329,7 +329,7 @@ public class FlutterLoaderTest {
     flutterLoader.ensureInitializationComplete(ctx, null);
     shadowOf(getMainLooper()).idle();
 
-    final String shaderModeArg = "--impeller-shader-mode=test";
+    final String shaderModeArg = "--impeller-lazy-shader-mode";
     ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
     verify(mockFlutterJNI, times(1))
         .init(

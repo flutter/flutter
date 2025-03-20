@@ -300,9 +300,10 @@ DEF_SWITCH(DisableMergedPlatformUIThread,
 DEF_SWITCH(EnableAndroidSurfaceControl,
            "enable-surface-control",
            "Enable the SurfaceControl backed swapchain when supported.")
-DEF_SWITCH(ImpellerShaderMode,
-           "impeller-shader-mode",
-           "Controls shader initialization strategy for the Impeller backend.")
+DEF_SWITCH(ImpellerLazyShaderMode,
+           "impeller-lazy-shader-mode",
+           "Whether to defer initialization of all required PSOs for the "
+           "Impeller backend. Defaults to false.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

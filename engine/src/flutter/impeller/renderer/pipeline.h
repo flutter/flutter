@@ -90,6 +90,14 @@ using PipelineRef = raw_ptr<Pipeline<PipelineDescriptor>>;
 extern template class Pipeline<PipelineDescriptor>;
 extern template class Pipeline<ComputePipelineDescriptor>;
 
+/// @brief Create a pipeline for the given descriptor.
+///
+/// If `async` is true, the compilation is performed on a worker thread. The
+/// returned future will complete once that work is done. If `async` is false,
+/// the work is done on the current thread.
+///
+/// It is more performant to set async to false than to spawn a
+/// worker and immediately block on the future completion.
 PipelineFuture<PipelineDescriptor> CreatePipelineFuture(
     const Context& context,
     std::optional<PipelineDescriptor> desc,

@@ -848,7 +848,7 @@ void _addVulkanGPUTracingToManifest(String testDirectory) {
 ///   android:value="lazy" />
 void _addLazyShaderMode(String testDirectory) {
   final List<(String, String)> keyPairs = <(String, String)>[
-    ('io.flutter.embedding.android.ImpellerShaderMode', 'lazy'),
+    ('io.flutter.embedding.android.ImpellerLazyShaderInitialization', 'true'),
   ];
   _addMetadataToManifest(testDirectory, keyPairs);
 }
