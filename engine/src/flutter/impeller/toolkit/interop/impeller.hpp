@@ -73,6 +73,7 @@ struct Proc {
   PROC(ImpellerDisplayListBuilderDrawOval)                  \
   PROC(ImpellerDisplayListBuilderDrawPaint)                 \
   PROC(ImpellerDisplayListBuilderDrawParagraph)             \
+  PROC(ImpellerDisplayListBuilderDrawShadow)                \
   PROC(ImpellerDisplayListBuilderDrawPath)                  \
   PROC(ImpellerDisplayListBuilderDrawRect)                  \
   PROC(ImpellerDisplayListBuilderDrawRoundedRect)           \
@@ -1342,6 +1343,20 @@ class DisplayListBuilder final
                                     const ImpellerPoint& point) {
     gGlobalProcTable.ImpellerDisplayListBuilderDrawParagraph(
         Get(), paragraph.Get(), &point);
+    return *this;
+  }
+
+  //----------------------------------------------------------------------------
+  /// @see      ImpellerDisplayListBuilderDrawShadow
+  ///
+  DisplayListBuilder& DrawShadow(const Path& path,
+                                 const ImpellerColor& shadow_color,
+                                 float elevation,
+                                 bool occluder_is_transparent,
+                                 float device_pixel_ratio) {
+    gGlobalProcTable.ImpellerDisplayListBuilderDrawShadow(
+        Get(), path.Get(), &shadow_color, elevation, occluder_is_transparent,
+        device_pixel_ratio);
     return *this;
   }
 
