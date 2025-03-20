@@ -66,5 +66,6 @@ leak:egl::*
 # False positives in libfontconfig. http://crbug.com/39050
 leak:libfontconfig
 
-# False (?) positives in gtk
+# False (?) positives in gdk
 leak:gdk_display_get_default
+leak:gdk_window_get_display
