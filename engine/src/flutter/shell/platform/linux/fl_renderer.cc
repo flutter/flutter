@@ -693,9 +693,9 @@ void fl_renderer_setup(FlRenderer* self) {
        epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 
   EGLDisplay egl_display = eglGetCurrentDisplay();
+  // EGLImage
   if (egl_display != nullptr) {
     gboolean has_egl_image =
-        epoxy_egl_version(egl_display) >= 15 ||
         epoxy_has_egl_extension(egl_display, "EGL_KHR_image_base") ||
         epoxy_has_egl_extension(egl_display, "EGL_KHR_image");
     priv->has_egl_image =
