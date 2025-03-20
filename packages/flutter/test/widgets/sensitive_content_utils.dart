@@ -6,7 +6,7 @@ import 'package:flutter/src/services/sensitive_content.dart' show ContentSensiti
 import 'package:flutter/src/widgets/sensitive_content.dart' show SensitiveContent;
 import 'package:flutter/widgets.dart';
 
-/// Widget to test disposing a [SensitiveContent] widget
+/// Widget to test disposing a [SensitiveContent] widget.
 class DisposeTester extends StatefulWidget {
   DisposeTester({required this.child}) : super(key: child.key);
 
@@ -33,8 +33,8 @@ class DisposeTesterState extends State<DisposeTester> {
 
 /// Widget to test changing the `sensitivity` of a [SensitiveContent] widget.
 ///
-/// Contains option [child] parameter that can be useful for testing finding
-/// a particular widget; otherwise, the child is a [Container].
+/// Contains optional [child] parameter that can be used to test finding
+/// a particular widget; otherwise, the child widget is a [Container].
 class ChangeContentSensitivityTester extends StatefulWidget {
   const ChangeContentSensitivityTester({
     super.key,

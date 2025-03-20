@@ -12,7 +12,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'sensitive_content_utils.dart';
 
 void main() {
-  // Default content sensitivity setting for testing.
   const ContentSensitivity defaultContentSensitivitySetting = ContentSensitivity.autoSensitive;
 
   Completer<void> setContentSensitivityCompleter = Completer<void>();
@@ -77,7 +76,7 @@ void main() {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall++;
             // Make second call to update content sensitivity awaits the Future for test.
-            if (setContentSensitivityCall == 2) {
+            if (setContentSensitivityCall == 2 && methodCall.arguments == 'autoSensitive') {
               return setContentSensitivityCompleter.future;
             }
             return Future<void>.value();

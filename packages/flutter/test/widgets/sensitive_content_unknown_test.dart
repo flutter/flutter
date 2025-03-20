@@ -8,7 +8,6 @@ import 'package:flutter/src/widgets/sensitive_content.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // The state of content sensitivity in the app.
   final SensitiveContentHost sensitiveContentHost = SensitiveContentHost.instance;
   testWidgets(
     'when SensitiveContentService.getContentSensitivity returns ContentSensitivity.unknown, FlutterError is thrown and the fallback ContentSensitivity is notSensitive',
