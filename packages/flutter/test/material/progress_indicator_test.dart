@@ -376,7 +376,12 @@ void main() {
 
       expect(
         tester.getSemantics(find.byType(CircularProgressIndicator)),
-        matchesSemantics(value: '0%', textDirection: TextDirection.ltr),
+        matchesSemantics(
+          value: '0.0%',
+          hasEnabledState: true,
+          isEnabled: true,
+          textDirection: TextDirection.ltr,
+        ),
       );
       handle.dispose();
     },
