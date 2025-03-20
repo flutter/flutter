@@ -69,3 +69,5 @@ leak:libfontconfig
 # False (?) positives in gdk
 leak:gdk_display_get_default
 leak:gdk_window_get_display
+leak:gdk_display_get_monitor
+leak:fl_event_channel_new
