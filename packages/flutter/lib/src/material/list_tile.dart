@@ -1025,7 +1025,6 @@ class ListTile extends StatelessWidget {
         ifTrue: 'THREE_LINE',
         ifFalse: 'TWO_LINE',
         showName: true,
-        defaultValue: false,
       ),
     );
     properties.add(

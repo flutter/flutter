@@ -1167,22 +1167,22 @@ void main() {
     // THREE-LINE
     await tester.pumpWidget(
       MaterialApp(
+        key: UniqueKey(),
         theme: ThemeData(listTileTheme: const ListTileThemeData(isThreeLine: true)),
         home: Material(
           child: ListView(
-            key: UniqueKey(),
             children: const <Widget>[
               ListTile(
                 leading: CircleAvatar(),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('B'),
+                title: Text('A'),
                 subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
               ),
               ListTile(
                 leading: CircleAvatar(),
                 trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('B'),
-                subtitle: Text('B'),
+                title: Text('A'),
+                subtitle: Text('A'),
               ),
             ],
           ),
