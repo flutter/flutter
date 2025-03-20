@@ -611,6 +611,10 @@ object FlutterPluginUtils {
     ) {
         val flutterBuildMode: String = buildModeFor(buildType)
         if (!supportsBuildMode(project, flutterBuildMode)) {
+            project.logger.quiet(
+                "Project does not support Flutter build mode: $flutterBuildMode, " +
+                    "skipping adding flutter dependencies"
+            )
             return
         }
         // The embedding is set as an API dependency in a Flutter plugin.
@@ -656,17 +660,8 @@ object FlutterPluginUtils {
      * its `path` (String), or its `dependencies` (List<String>).
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
-    @JvmStatic
-    @JvmName("getPluginListWithoutDevDependencies")
-    internal fun getPluginListWithoutDevDependencies(pluginList: List<Map<String?, Any?>>): List<Map<String?, Any?>> {
-        val pluginListWithoutDevDependencies = mutableListOf<Map<String?, Any?>>()
-        pluginList.forEach { pluginObject ->
-            if (!(pluginObject["dev_dependency"] as Boolean)) {
-                pluginListWithoutDevDependencies.add(pluginObject)
-            }
-        }
-        return pluginListWithoutDevDependencies
-    }
+    private fun getPluginListWithoutDevDependencies(pluginList: List<Map<String?, Any?>>): List<Map<String?, Any?>> =
+        pluginList.filter { pluginObject -> pluginObject["dev_dependency"] == false }
 
     /**
      * Add the dependencies on other plugin projects to the plugin project.

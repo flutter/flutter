@@ -1,9 +1,12 @@
 package com.flutter.gradle
 
+import com.android.build.gradle.AbstractAppExtension
 import com.android.builder.model.BuildType
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -139,7 +142,8 @@ class FlutterPluginUtilsTest {
         val settingsGradle = File(projectDir.parent.toFile(), "settings.gradle")
         settingsGradle.createNewFile()
 
-        val result = FlutterPluginUtils.getSettingsGradleFileFromProjectDir(projectDir.toFile(), mockk())
+        val result =
+            FlutterPluginUtils.getSettingsGradleFileFromProjectDir(projectDir.toFile(), mockk())
         assertEquals(settingsGradle, result)
     }
 
@@ -158,7 +162,8 @@ class FlutterPluginUtilsTest {
         val mockLogger = mockk<Logger>()
         every { mockLogger.error(any()) } returns Unit
 
-        val result = FlutterPluginUtils.getSettingsGradleFileFromProjectDir(projectDir.toFile(), mockLogger)
+        val result =
+            FlutterPluginUtils.getSettingsGradleFileFromProjectDir(projectDir.toFile(), mockLogger)
         assertEquals(groovySettingsGradle, result)
         verify { mockLogger.error(any()) }
     }
@@ -174,7 +179,8 @@ class FlutterPluginUtilsTest {
         val buildGradle = File(projectDir.parent.resolve("app").toFile(), "build.gradle")
         buildGradle.createNewFile()
 
-        val result = FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDir.toFile(), mockk())
+        val result =
+            FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDir.toFile(), mockk())
         assertEquals(buildGradle, result)
     }
 
@@ -193,7 +199,8 @@ class FlutterPluginUtilsTest {
         val mockLogger = mockk<Logger>()
         every { mockLogger.error(any()) } returns Unit
 
-        val result = FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDir.toFile(), mockLogger)
+        val result =
+            FlutterPluginUtils.getBuildGradleFileFromProjectDir(projectDir.toFile(), mockLogger)
         assertEquals(groovyBuildGradle, result)
         verify { mockLogger.error(any()) }
     }
@@ -359,7 +366,11 @@ class FlutterPluginUtilsTest {
         val variantName = "debug"
         val dependency = mockk<Any>()
 
-        every { project.configurations.named("api") } throws UnknownTaskException("message", mockk())
+        every { project.configurations.named("api") } throws
+            UnknownTaskException(
+                "message",
+                mockk()
+            )
         every { project.dependencies.add(any(), any()) } returns mockk()
 
         FlutterPluginUtils.addApiDependencies(project, variantName, dependency)
@@ -447,12 +458,297 @@ class FlutterPluginUtilsTest {
         assertContains(gradleException.message!!, "android-invalid")
     }
 
-    // detectLowCompileSdkVersionOrNdkVersion
-    // TODO(gmackall): I don't want to do this right now ):
+    // TODO(gmackall): fill out everything below this, or reject if tests not worth:
 
-    // forceNdkDownload
+    // readPropertiesIfExist TODO
+
+    // getCompileSdkFromProject TODO
+
+    // detectLowCompileSdkVersionOrNdkVersion TODO
+
+    // forceNdkDownload TODO
     @Test
     fun `forceNdkDownload skips projects which are already configuring a native build`() {
         val project = mockk<Project>()
+    }
+
+    // isFlutterAppProject skipped as it is a wrapper for a single getter that we would have to mock
+
+    // addFlutterDependencies
+    @Test
+    fun `addFlutterDependencies returns early if buildMode is not supported`() {
+        val project = mockk<Project>()
+        val buildType: BuildType = mockk<BuildType>()
+        every { buildType.name } returns "debug"
+        every { buildType.isDebuggable } returns true
+        every { project.hasProperty("local-engine-repo") } returns true
+        every { project.hasProperty("local-engine-build-mode") } returns true
+        every { project.property("local-engine-build-mode") } returns "release"
+        every { project.logger.quiet(any()) } returns Unit
+
+        FlutterPluginUtils.addFlutterDependencies(
+            project = project,
+            buildType = buildType,
+            pluginList = pluginListWithoutDevDependency,
+            engineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
+        )
+
+        verify(exactly = 1) {
+            project.logger.quiet(
+                "Project does not support Flutter build mode: debug, " +
+                    "skipping adding flutter dependencies"
+            )
+        }
+    }
+
+    @Test
+    fun `addFlutterDependencies adds libflutter dependency but not embedding dependency when is a flutter app`() {
+        val project = mockk<Project>()
+        val buildType: BuildType = mockk<BuildType>()
+        val engineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
+        every { buildType.name } returns "debug"
+        every { buildType.isDebuggable } returns true
+        every { project.hasProperty("local-engine-repo") } returns false
+        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk<AbstractAppExtension>()
+        every { project.hasProperty("target-platform") } returns false
+        every { project.configurations.named("api") } returns mockk()
+        every { project.dependencies.add(any(), any()) } returns mockk()
+
+        FlutterPluginUtils.addFlutterDependencies(
+            project = project,
+            buildType = buildType,
+            pluginList = pluginListWithoutDevDependency,
+            engineVersion = engineVersion
+        )
+
+        verify(exactly = 3) { project.dependencies.add(any(), any()) }
+        verify {
+            project.dependencies.add(
+                "debugApi",
+                "io.flutter:armeabi_v7a_debug:$engineVersion"
+            )
+        }
+        verify { project.dependencies.add("debugApi", "io.flutter:arm64_v8a_debug:$engineVersion") }
+        verify { project.dependencies.add("debugApi", "io.flutter:x86_64_debug:$engineVersion") }
+    }
+
+    @Test
+    fun `addFlutterDependencies adds libflutter and embedding dep when only dep is dev dep in release mode`() {
+        val project = mockk<Project>()
+        val buildType: BuildType = mockk<BuildType>()
+        val engineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
+        every { buildType.name } returns "release"
+        every { buildType.isDebuggable } returns false
+        every { project.hasProperty("local-engine-repo") } returns false
+        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk<AbstractAppExtension>()
+        every { project.hasProperty("target-platform") } returns false
+        every { project.configurations.named("api") } returns mockk()
+        every { project.dependencies.add(any(), any()) } returns mockk()
+
+        val pluginListWithSingleDevDependency = listOf(devDependency)
+
+        FlutterPluginUtils.addFlutterDependencies(
+            project = project,
+            buildType = buildType,
+            pluginList = pluginListWithSingleDevDependency,
+            engineVersion = engineVersion
+        )
+
+        verify(exactly = 4) { project.dependencies.add(any(), any()) }
+        verify {
+            project.dependencies.add(
+                "releaseApi",
+                "io.flutter:flutter_embedding_release:$engineVersion"
+            )
+        }
+        verify {
+            project.dependencies.add(
+                "releaseApi",
+                "io.flutter:armeabi_v7a_release:$engineVersion"
+            )
+        }
+        verify {
+            project.dependencies.add(
+                "releaseApi",
+                "io.flutter:arm64_v8a_release:$engineVersion"
+            )
+        }
+        verify {
+            project.dependencies.add(
+                "releaseApi",
+                "io.flutter:x86_64_release:$engineVersion"
+            )
+        }
+    }
+
+    @Test
+    fun `addFlutterDependencies adds libflutter dep but not embedding dep when only dep is dev dep in debug mode`() {
+        val project = mockk<Project>()
+        val buildType: BuildType = mockk<BuildType>()
+        val engineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
+        every { buildType.name } returns "debug"
+        every { buildType.isDebuggable } returns true
+        every { project.hasProperty("local-engine-repo") } returns false
+        every { project.extensions.findByType(AbstractAppExtension::class.java) } returns mockk<AbstractAppExtension>()
+        every { project.hasProperty("target-platform") } returns false
+        every { project.configurations.named("api") } returns mockk()
+        every { project.dependencies.add(any(), any()) } returns mockk()
+
+        val pluginListWithSingleDevDependency = listOf(devDependency)
+
+        FlutterPluginUtils.addFlutterDependencies(
+            project = project,
+            buildType = buildType,
+            pluginList = pluginListWithSingleDevDependency,
+            engineVersion = engineVersion
+        )
+
+        verify(exactly = 3) { project.dependencies.add(any(), any()) }
+        verify {
+            project.dependencies.add(
+                "debugApi",
+                "io.flutter:armeabi_v7a_debug:$engineVersion"
+            )
+        }
+        verify {
+            project.dependencies.add(
+                "debugApi",
+                "io.flutter:arm64_v8a_debug:$engineVersion"
+            )
+        }
+        verify {
+            project.dependencies.add(
+                "debugApi",
+                "io.flutter:x86_64_debug:$engineVersion"
+            )
+        }
+    }
+
+    // configurePluginDependencies TODO
+
+    // configurePluginProject TODO
+
+    // addTaskForJavaVersion
+    @Test
+    fun `addTaskForJavaVersion adds task for Java version`() {
+        val project = mockk<Project>()
+        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
+        val captureSlot = slot<Action<Task>>()
+        FlutterPluginUtils.addTaskForJavaVersion(project)
+        verify { project.tasks.register("javaVersion", capture(captureSlot)) }
+
+        val mockTask = mockk<Task>()
+        every { mockTask.description = any() } returns Unit
+        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
+        captureSlot.captured.execute(mockTask)
+        verify {
+            mockTask.description = "Print the current java version used by gradle. see: " +
+                "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
+        }
+    }
+
+    // addTaskForPrintBuildVariants
+    @Test
+    fun `addTaskForPrintBuildVariants adds task for printing build variants`() {
+        val project = mockk<Project>()
+        every { project.extensions.getByType(AbstractAppExtension::class.java) } returns mockk()
+        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
+        val captureSlot = slot<Action<Task>>()
+
+        FlutterPluginUtils.addTaskForPrintBuildVariants(project)
+
+        verify { project.tasks.register("printBuildVariants", capture(captureSlot)) }
+        val mockTask = mockk<Task>()
+        every { mockTask.description = any() } returns Unit
+        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
+
+        captureSlot.captured.execute(mockTask)
+
+        verify {
+            mockTask.description = "Prints out all build variants for this Android project"
+        }
+    }
+
+    companion object {
+        val devDependency: Map<String?, Any?> =
+            mapOf(
+                Pair("name", "grays_fun_dev_dependency"),
+                Pair(
+                    "path",
+                    "/Users/mackall/.pub-cache/hosted/pub.dev/grays_fun_dev_dependency-1.1.1/"
+                ),
+                Pair("native_build", true),
+                Pair("dependencies", emptyList<String>()),
+                Pair("dev_dependency", true)
+            )
+
+        val pluginListWithoutDevDependency: List<Map<String?, Any?>> =
+            listOf(
+                mapOf(
+                    Pair("name", "camera_android_camerax"),
+                    Pair(
+                        "path",
+                        "/Users/mackall/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
+                    ),
+                    Pair("native_build", true),
+                    Pair("dependencies", emptyList<String>()),
+                    Pair("dev_dependency", false)
+                ),
+                mapOf(
+                    Pair("name", "flutter_plugin_android_lifecycle"),
+                    Pair(
+                        "path",
+                        "/Users/mackall/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
+                    ),
+                    Pair("native_build", true),
+                    Pair("dependencies", emptyList<String>()),
+                    Pair("dev_dependency", false)
+                ),
+                mapOf(
+                    Pair("name", "in_app_purchase_android"),
+                    Pair(
+                        "path",
+                        "/Users/mackall/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
+                    ),
+                    Pair("native_build", true),
+                    Pair("dependencies", emptyList<String>()),
+                    Pair("dev_dependency", false)
+                )
+            )
+
+        val pluginListWithDevDependency: List<Map<String?, Any?>> =
+            listOf(
+                mapOf(
+                    Pair("name", "camera_android_camerax"),
+                    Pair(
+                        "path",
+                        "/Users/mackall/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
+                    ),
+                    Pair("native_build", true),
+                    Pair("dependencies", emptyList<String>()),
+                    Pair("dev_dependency", false)
+                ),
+                mapOf(
+                    Pair("name", "flutter_plugin_android_lifecycle"),
+                    Pair(
+                        "path",
+                        "/Users/mackall/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
+                    ),
+                    Pair("native_build", true),
+                    Pair("dependencies", emptyList<String>()),
+                    Pair("dev_dependency", false)
+                ),
+                devDependency,
+                mapOf(
+                    Pair("name", "in_app_purchase_android"),
+                    Pair(
+                        "path",
+                        "/Users/mackall/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
+                    ),
+                    Pair("native_build", true),
+                    Pair("dependencies", emptyList<String>()),
+                    Pair("dev_dependency", false)
+                )
+            )
     }
 }
