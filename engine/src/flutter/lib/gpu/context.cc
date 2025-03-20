@@ -45,7 +45,11 @@ std::shared_ptr<impeller::Context> Context::GetDefaultContext(
   if (!dart_state->IsFlutterGPUEnabled()) {
     out_error =
         "Flutter GPU requires must be enabled via the Flutter GPU manifest "
-        "setting.";
+        "setting. This can be done either via command line argument "
+        "--enable-flutter-gpu or "
+        "by adding the FLTEnableFlutterGPU key set to true on iOS or "
+        "io.flutter.embedding.android.EnableFlutterGPU metadata key to true on "
+        "Android.";
     return nullptr;
   }
   // Grab the Impeller context from the IO manager.

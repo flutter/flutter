@@ -239,6 +239,20 @@ FLUTTER_ASSERT_ARC
   [mockMainBundle stopMocking];
 }
 
+- (void)testEnableFlutterGPUCommandLineArgument {
+  id mockMainBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockMainBundle objectForInfoDictionaryKey:@"FLTEnableFlutterGPU"]).andReturn(@"YES");
+  id mockProcessInfo = OCMPartialMock([NSProcessInfo processInfo]);
+  NSArray* arguments = @[ @"process_name" ];
+  OCMStub([mockProcessInfo arguments]).andReturn(arguments);
+
+  auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
+
+  XCTAssertEqual(settings.dart_flags.size(), 1u);
+  XCTAssertEqual(settings.dart_flags[0], "--enable-flutter-gpu");
+  [mockMainBundle stopMocking];
+}
+
 - (void)testEnableTraceSystraceSettingIsCorrectlyParsed {
   NSBundle* mainBundle = [NSBundle mainBundle];
   NSNumber* enableTraceSystrace = [mainBundle objectForInfoDictionaryKey:@"FLTTraceSystrace"];
