@@ -14,10 +14,12 @@ frag_info;
 uniform sampler2D curve;
 
 highp in vec2 v_position;
-highp flat in vec3 v_e0;
-highp flat in vec3 v_e1;
-highp flat in vec3 v_e2;
-highp flat in vec3 v_e3;
+// These should be `flat` but that doesn't work in our glsl compiler. It
+// shouldn't make any visual difference.
+highp in vec3 v_e0;
+highp in vec3 v_e1;
+highp in vec3 v_e2;
+highp in vec3 v_e3;
 
 out vec4 frag_color;
 
