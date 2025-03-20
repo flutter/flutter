@@ -44,6 +44,7 @@ namespace flutter {
 namespace {
 
 static constexpr int kMinAPILevelHCPP = 34;
+static constexpr int64_t kImplicitViewId = 0;
 
 AndroidContext::ContextSettings CreateContextSettings(
     const Settings& p_settings) {
@@ -265,13 +266,15 @@ void PlatformViewAndroid::OnPreEngineRestart() const {
 }
 
 void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
-                                                  jint id,
+                                                  jint node_id,
                                                   jint action,
                                                   jobject args,
                                                   jint args_position) {
+  // TODO(team-android): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
   if (env->IsSameObject(args, NULL)) {
     PlatformView::DispatchSemanticsAction(
-        id, static_cast<flutter::SemanticsAction>(action),
+        kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),
         fml::MallocMapping());
     return;
   }
@@ -280,12 +283,13 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
   auto args_vector = fml::MallocMapping::Copy(args_data, args_position);
 
   PlatformView::DispatchSemanticsAction(
-      id, static_cast<flutter::SemanticsAction>(action),
+      kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),
       std::move(args_vector));
 }
 
 // |PlatformView|
 void PlatformViewAndroid::UpdateSemantics(
+    int64_t view_id,
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
   platform_view_android_delegate_.UpdateSemantics(update, actions);

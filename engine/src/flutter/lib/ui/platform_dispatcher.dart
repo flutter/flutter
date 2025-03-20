@@ -939,10 +939,12 @@ class PlatformDispatcher {
     call `updateSemantics`.
   ''')
   void updateSemantics(SemanticsUpdate update) =>
-      _updateSemantics(update as _NativeSemanticsUpdate);
+      _updateSemantics(_implicitViewId!, update as _NativeSemanticsUpdate);
 
-  @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::UpdateSemantics')
-  external static void _updateSemantics(_NativeSemanticsUpdate update);
+  @Native<Void Function(Int64, Pointer<Void>)>(
+    symbol: 'PlatformConfigurationNativeApi::UpdateSemantics',
+  )
+  external static void _updateSemantics(int viewId, _NativeSemanticsUpdate update);
 
   /// The system-reported default locale of the device.
   ///
@@ -1332,14 +1334,14 @@ class PlatformDispatcher {
   }
 
   // Called from the engine, via hooks.dart
-  void _dispatchSemanticsAction(int nodeId, int action, ByteData? args) {
+  void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args) {
     _invoke1<SemanticsActionEvent>(
       onSemanticsActionEvent,
       _onSemanticsActionEventZone,
       SemanticsActionEvent(
         type: SemanticsAction.fromIndex(action)!,
         nodeId: nodeId,
-        viewId: 0, // TODO(goderbauer): Wire up the real view ID.
+        viewId: viewId,
         arguments: args,
       ),
     );

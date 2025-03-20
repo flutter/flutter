@@ -615,7 +615,10 @@ static void fl_accessible_text_field_init(FlAccessibleTextField* self) {
                           self, G_CONNECT_SWAPPED);
 }
 
-FlAccessibleNode* fl_accessible_text_field_new(FlEngine* engine, int32_t id) {
+FlAccessibleNode* fl_accessible_text_field_new(FlEngine* engine,
+                                               FlutterViewId view_id,
+                                               int32_t id) {
   return FL_ACCESSIBLE_NODE(g_object_new(fl_accessible_text_field_get_type(),
-                                         "engine", engine, "id", id, nullptr));
+                                         "engine", engine, "view-id", view_id,
+                                         "node-id", id, nullptr));
 }

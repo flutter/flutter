@@ -163,7 +163,8 @@ void AccessibilityBridgeWindows::DispatchAccessibilityAction(
     AccessibilityNodeId target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
-  view_->GetEngine()->DispatchSemanticsAction(target, action, std::move(data));
+  view_->GetEngine()->DispatchSemanticsAction(view_->view_id(), target, action,
+                                              std::move(data));
 }
 
 std::shared_ptr<FlutterPlatformNodeDelegate>

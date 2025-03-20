@@ -414,12 +414,14 @@ gboolean fl_engine_send_key_event_finish(FlEngine* engine,
 /**
  * fl_engine_dispatch_semantics_action:
  * @engine: an #FlEngine.
- * @id: the semantics action identifier.
+ * @view_id: the view that the event occured on.
+ * @node_id: the semantics action identifier.
  * @action: the action being dispatched.
  * @data: (allow-none): data associated with the action.
  */
 void fl_engine_dispatch_semantics_action(FlEngine* engine,
-                                         uint64_t id,
+                                         FlutterViewId view_id,
+                                         uint64_t node_id,
                                          FlutterSemanticsAction action,
                                          GBytes* data);
 

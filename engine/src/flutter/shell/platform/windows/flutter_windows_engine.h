@@ -237,7 +237,8 @@ class FlutterWindowsEngine {
   void OnVsync(intptr_t baton);
 
   // Dispatches a semantics action to the specified semantics node.
-  bool DispatchSemanticsAction(uint64_t id,
+  bool DispatchSemanticsAction(FlutterViewId view_id,
+                               uint64_t node_id,
                                FlutterSemanticsAction action,
                                fml::MallocMapping data);
 

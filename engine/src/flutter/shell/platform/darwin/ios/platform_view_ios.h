@@ -103,7 +103,8 @@ class PlatformViewIOS final : public PlatformView {
   void SetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView|
-  void UpdateSemantics(flutter::SemanticsNodeUpdates update,
+  void UpdateSemantics(int64_t view_id,
+                       flutter::SemanticsNodeUpdates update,
                        flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|

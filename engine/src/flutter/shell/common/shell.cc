@@ -1107,7 +1107,8 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
 }
 
 // |PlatformView::Delegate|
-void Shell::OnPlatformViewDispatchSemanticsAction(int32_t node_id,
+void Shell::OnPlatformViewDispatchSemanticsAction(int64_t view_id,
+                                                  int32_t node_id,
                                                   SemanticsAction action,
                                                   fml::MallocMapping args) {
   FML_DCHECK(is_set_up_);
@@ -1115,10 +1116,11 @@ void Shell::OnPlatformViewDispatchSemanticsAction(int32_t node_id,
 
   fml::TaskRunner::RunNowAndFlushMessages(
       task_runners_.GetUITaskRunner(),
-      fml::MakeCopyable([engine = engine_->GetWeakPtr(), node_id, action,
-                         args = std::move(args)]() mutable {
+      fml::MakeCopyable([engine = engine_->GetWeakPtr(), view_id, node_id,
+                         action, args = std::move(args)]() mutable {
         if (engine) {
-          engine->DispatchSemanticsAction(node_id, action, std::move(args));
+          engine->DispatchSemanticsAction(view_id, node_id, action,
+                                          std::move(args));
         }
       }));
 }
@@ -1315,7 +1317,8 @@ void Shell::OnAnimatorDrawLastLayerTrees(
 }
 
 // |Engine::Delegate|
-void Shell::OnEngineUpdateSemantics(SemanticsNodeUpdates update,
+void Shell::OnEngineUpdateSemantics(int64_t view_id,
+                                    SemanticsNodeUpdates update,
                                     CustomAccessibilityActionUpdates actions) {
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
@@ -1323,9 +1326,9 @@ void Shell::OnEngineUpdateSemantics(SemanticsNodeUpdates update,
   task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
       task_runners_.GetPlatformTaskRunner(),
       [view = platform_view_->GetWeakPtr(), update = std::move(update),
-       actions = std::move(actions)] {
+       actions = std::move(actions), view_id = view_id] {
         if (view) {
-          view->UpdateSemantics(update, actions);
+          view->UpdateSemantics(view_id, update, actions);
         }
       });
 }

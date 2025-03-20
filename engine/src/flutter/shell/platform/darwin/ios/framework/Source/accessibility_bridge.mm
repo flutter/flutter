@@ -12,6 +12,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/TextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
+#include "flutter/common/constants.h"
+
 #pragma GCC diagnostic error "-Wundeclared-selector"
 
 FLUTTER_ASSERT_ARC
@@ -235,14 +237,20 @@ void AccessibilityBridge::UpdateSemantics(
   }
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, flutter::SemanticsAction action) {
-  platform_view_->DispatchSemanticsAction(uid, action, {});
+void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
+                                                  flutter::SemanticsAction action) {
+  // TODO(team-ios): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action, {});
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid,
+void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   flutter::SemanticsAction action,
                                                   fml::MallocMapping args) {
-  platform_view_->DispatchSemanticsAction(uid, action, std::move(args));
+  // TODO(team-ios): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action,
+                                          std::move(args));
 }
 
 static void ReplaceSemanticsObject(SemanticsObject* oldObject,

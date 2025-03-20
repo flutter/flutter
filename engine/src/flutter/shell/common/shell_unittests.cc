@@ -143,7 +143,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
   MOCK_METHOD(void,
               OnPlatformViewDispatchSemanticsAction,
-              (int32_t id, SemanticsAction action, fml::MallocMapping args),
+              (int64_t view_id,
+               int32_t id,
+               SemanticsAction action,
+               fml::MallocMapping args),
               (override));
 
   MOCK_METHOD(void,
@@ -4341,7 +4344,7 @@ TEST_F(ShellTest, SemanticsActionsFlushMessageLoop) {
       CREATE_NATIVE_ENTRY([&](auto args) { latch.CountDown(); }));
 
   task_runners.GetPlatformTaskRunner()->PostTask([&] {
-    SendSemanticsAction(shell.get(), 0, SemanticsAction::kTap,
+    SendSemanticsAction(shell.get(), 456, 0, SemanticsAction::kTap,
                         fml::MallocMapping(nullptr, 0));
   });
   latch.Wait();
