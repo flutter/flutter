@@ -121,6 +121,7 @@ void main() {
 
         await expectLater(find.byType(childWidget.runtimeType), findsOne);
         expect(find.byType(SizedBox), findsNothing);
+        expect(setContentSensitivityCall, 2);
       });
     },
   );
