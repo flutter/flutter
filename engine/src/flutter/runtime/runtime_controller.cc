@@ -447,6 +447,7 @@ void RuntimeController::CheckIfAllViewsRendered() {
   }
 }
 
+// |PlatformConfigurationClient|
 void RuntimeController::UpdateSemantics(int64_t view_id,
                                         SemanticsUpdate* update) {
   if (semantics_tree_enabled_) {
