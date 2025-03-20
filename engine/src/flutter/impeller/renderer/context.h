@@ -249,7 +249,7 @@ class Context {
   const Flags& GetFlags() const { return flags_; }
 
  protected:
-  Context(const Flags& flags);
+  explicit Context(const Flags& flags);
 
   Flags flags_;
   std::vector<std::function<void()>> per_frame_task_;
