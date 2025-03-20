@@ -604,11 +604,15 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     super.supportedDevices,
     super.allowedButtonsFilter,
   }) : assert(
-         preAcceptSlopTolerance == _unsetTouchSlop || preAcceptSlopTolerance == null || preAcceptSlopTolerance >= 0,
+         preAcceptSlopTolerance == _unsetTouchSlop ||
+         preAcceptSlopTolerance == null ||
+         preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be unspecified, positive, or null',
        ),
        assert(
-         postAcceptSlopTolerance == _unsetTouchSlop || postAcceptSlopTolerance == null || postAcceptSlopTolerance >= 0,
+         postAcceptSlopTolerance == _unsetTouchSlop ||
+         postAcceptSlopTolerance == null ||
+         postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be unspecified, positive, or null',
        );
 
@@ -639,10 +643,14 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   final double? postAcceptSlopTolerance;
 
   double? get _preAcceptSlopTolerance =>
-    preAcceptSlopTolerance == _unsetTouchSlop ? _defaultTouchSlop : preAcceptSlopTolerance;
+      preAcceptSlopTolerance == _unsetTouchSlop
+          ? _defaultTouchSlop
+          : preAcceptSlopTolerance;
 
   double? get _postAcceptSlopTolerance =>
-    postAcceptSlopTolerance == _unsetTouchSlop ? _defaultTouchSlop : postAcceptSlopTolerance;
+      postAcceptSlopTolerance == _unsetTouchSlop
+          ? _defaultTouchSlop
+          : postAcceptSlopTolerance;
 
   double get _defaultTouchSlop => gestureSettings?.touchSlop ?? kTouchSlop;
 
