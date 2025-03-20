@@ -577,10 +577,7 @@ object FlutterPluginUtils {
         }
 
         // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
-
         gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
-            // Respect the existing configuration if it exists - the NDK will already be
-            // downloaded in this case.
             "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
         )
 
