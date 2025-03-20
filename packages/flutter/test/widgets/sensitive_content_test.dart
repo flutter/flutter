@@ -52,7 +52,9 @@ void main() {
 
       setContentSensitivityCompleter.complete();
 
-      await tester.pumpAndSettle();
+      // Two pumps to complete registration, then re-build SensitiveContent widget.
+      await tester.pump();
+      await tester.pump();
 
       expect(find.byWidget(childWidget), findsOne);
       expect(find.byType(SizedBox), findsNothing);
@@ -111,7 +113,9 @@ void main() {
 
       setContentSensitivityCompleter.complete();
 
-      await tester.pumpAndSettle();
+      // Two pumps to complete re-registration, then re-build SensitiveContent widget.
+      await tester.pump();
+      await tester.pump();
 
       expect(find.byType(childWidget.runtimeType), findsOne);
       expect(find.byType(SizedBox), findsNothing);
