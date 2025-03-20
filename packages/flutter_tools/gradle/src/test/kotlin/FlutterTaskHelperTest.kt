@@ -2,11 +2,14 @@ package com.flutter.gradle
 
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.api.BaseVariantOutput
+import com.android.build.gradle.tasks.ProcessAndroidResources
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
+import org.gradle.api.DomainObjectCollection
 import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -18,7 +21,6 @@ import org.gradle.api.tasks.TaskContainer
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
-import kotlin.io.path.pathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -228,6 +230,7 @@ class FlutterTaskHelperTest {
                 val mockRegisterTask = mockk<Task> {
                     every { name } returns registerTaskNameSlot.captured
                     every { description = capture(descriptionSlot) } returns Unit
+                    every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
                     val doLastActionSlot = slot<Action<Task>>()
                     every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
                         doLastActionSlot.captured.execute(mockk())
@@ -243,8 +246,19 @@ class FlutterTaskHelperTest {
                 every { configure(any<Action<Task>>()) } returns mockk()
             }
         }
+        variants.forEach { variant ->
+            val testOutputs: DomainObjectCollection<BaseVariantOutput> = mockk<DomainObjectCollection<BaseVariantOutput>>()
+            val baseVariantSlot = slot<Action<BaseVariantOutput>>()
+            val baseVariantOutput = mockk<BaseVariantOutput>()
+            every {baseVariantOutput.processResources} returns mockk<ProcessAndroidResources>()
+            every { testOutputs.configureEach(capture(baseVariantSlot)) } answers {
+                // Execute the action for each output.
+                baseVariantSlot.captured.execute(baseVariantOutput)
+            }
+            every { variant.outputs } returns testOutputs
+        }
 
-        every { mockProject.property("outputPath") } returns tempDir.pathString
+//        every { mockProject.property("outputPath") } returns tempDir.pathString
 
         FlutterTaskHelper.addTasksForOutputsAppLinkSettings(mockProject)
 
@@ -253,6 +267,7 @@ class FlutterTaskHelperTest {
         assertEquals(variants.size, registerTaskList.size)
         for (i in 0 until variants.size) {
             assertEquals("output${FlutterPluginUtils.capitalize(variants[i].name)}AppLinkSettings", registerTaskList[i].name)
+            verify(exactly = 1){ registerTaskList[i].dependsOn(any<ProcessAndroidResources>()) }
         }
     }
 
