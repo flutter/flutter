@@ -119,7 +119,6 @@ void main() {
           await tester.pumpAndSettle();
         });
 
-        debugDumpApp();
         await expectLater(find.byType(childWidget.runtimeType), findsOne);
         expect(find.byType(SizedBox), findsNothing);
       });

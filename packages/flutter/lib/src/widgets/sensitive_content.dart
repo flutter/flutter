@@ -133,13 +133,6 @@ class SensitiveContentHost {
   }
 
   Future<void> _register(ContentSensitivity desiredSensitivity) async {
-    print('--------------------------------------------REGISTER $desiredSensitivity');
-    print(
-      '---------------REGISTER $desiredSensitivity:::::::: _fallbackContentSensitivitySetting 1 $_fallbackContentSensitivitySetting',
-    );
-    print(
-      '---------------REGISTER $desiredSensitivity:::::::: desiredSensitivity $desiredSensitivity',
-    );
     _contentSenstivityIsSupported ??= await _sensitiveContentService.isSupported();
     if (!_contentSenstivityIsSupported!) {
       // Setting content sensitivity is not supported on this device.
@@ -167,23 +160,17 @@ class SensitiveContentHost {
       }
     }
 
-    late ContentSensitivity contentSensitivityToSet;
-    ContentSensitivity? before =
+    final ContentSensitivity? contentSensitivityBasedOnWidgetCountsBeforeRegister =
         _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts ??
-        _fallbackContentSensitivitySetting; //maybe modify for calcultaed
+        _fallbackContentSensitivitySetting;
 
     // Update SensitiveContent widget count for those with desiredSensitivity.
     _contentSensitivitySetting.addWidgetWithContentSensitivity(desiredSensitivity);
 
-    print(
-      '---------------REGISTER $desiredSensitivity:::::::: _contentSensitivitySetting: ${_contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts}, before: $before',
-    );
-
     // Verify that desiredSensitivity should be set in order for sensitive
     // content to remain obscured.
-    if (before == _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts) {
-      // todo if new is less sensitive than calculated, override and try to set calculated (no before). if not, check this?
-      print('-----------------------------------END REGISTER: $desiredSensitivity');
+    if (contentSensitivityBasedOnWidgetCountsBeforeRegister ==
+        _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts) {
       return;
     }
 
@@ -191,15 +178,8 @@ class SensitiveContentHost {
     // sensitivity on the platform side fails, then we do not update the current content
     // sensitivity.
     try {
-      print(
-        '---------------REGISTER $desiredSensitivity:::::::: start calling setContentSensitivity',
-      );
-
       await _sensitiveContentService.setContentSensitivity(
         _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts!,
-      );
-      print(
-        '---------------REGISTER $desiredSensitivity:::::::: done calling setContentSensitivity',
       );
     } catch (e) {
       // If setting content sensitivity fails, log error to user.
@@ -212,7 +192,6 @@ class SensitiveContentHost {
       );
       return;
     }
-    print('-----------------------------------END REGISTER: $desiredSensitivity');
   }
 
   /// Unregisters a [SensitiveContent] widget from the [_ContentSensitivitySetting] tracking
@@ -222,10 +201,6 @@ class SensitiveContentHost {
   }
 
   Future<void> _unregister(ContentSensitivity widgetSensitivity) async {
-    print('--------------------------------------------UNREGISTER $widgetSensitivity');
-    print(
-      '-------------------UNREGISTER $widgetSensitivity::::::: _contentSensitivitySetting ${_contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts}',
-    );
     assert(
       _contentSenstivityIsSupported != null,
       'SensitiveContentHost.register must be called before SensitiveContentHost.unregister',
@@ -236,15 +211,11 @@ class SensitiveContentHost {
       return;
     }
 
-    final ContentSensitivity before =
+    final ContentSensitivity contentSensitivityBasedOnWidgetCountsBeforeUnregister =
         _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts!;
 
     // Update SensitiveContent widget count for those with desiredSensitivity.
     _contentSensitivitySetting.removeWidgetWithContentSensitivity(widgetSensitivity);
-
-    print(
-      '-------------------UNREGISTER $widgetSensitivity::::::: before: $before, now ${_contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts}, _contentSensitivitySetting.hasWidgets: ${_contentSensitivitySetting.hasWidgets}',
-    );
 
     if (!_contentSensitivitySetting.hasWidgets) {
       // Restore default content sensitivity setting if there are no more SensitiveContent
@@ -252,12 +223,11 @@ class SensitiveContentHost {
       // then we do not update the current content sensitivity. The null check is safe
       // because _fallbackContentSensitivitySetting cannot be null if `register` has been
       // called at least once, and it must be called before `unregister` is called.
-      if (before == _fallbackContentSensitivitySetting) {
+      if (contentSensitivityBasedOnWidgetCountsBeforeUnregister ==
+          _fallbackContentSensitivitySetting) {
         return;
       }
-      print(
-        '-------------------UNREGISTER $widgetSensitivity::::::: before: _fallbackContentSensitivitySetting $_fallbackContentSensitivitySetting',
-      );
+
       try {
         await _sensitiveContentService.setContentSensitivity(_fallbackContentSensitivitySetting!);
       } catch (e) {
@@ -281,21 +251,11 @@ class SensitiveContentHost {
     // as there are still SensitiveContent widgets in the tree.
     final ContentSensitivity contentSensitivityToRestore =
         _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts!;
-    print('-------------------UNREGISTER $widgetSensitivity::::::: $contentSensitivityToRestore');
-    if (contentSensitivityToRestore != before) {
+    if (contentSensitivityToRestore != contentSensitivityBasedOnWidgetCountsBeforeUnregister) {
       // Set content sensitivity as contentSensitivityToRestore.
       try {
-        print(
-          '-------------------UNREGISTER $widgetSensitivity::::::: start calling setContentSensitivity',
-        );
         await _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
-        print(
-          '-------------------UNREGISTER $widgetSensitivity::::::: end calling setContentSensitivity',
-        );
       } catch (e) {
-        print(
-          '-------------------UNREGISTER $widgetSensitivity::::::: caught error calling setContentSensitivity',
-        );
         // If setting content sensitivity fails, log error to user.
         FlutterError.reportError(
           FlutterErrorDetails(
@@ -373,7 +333,6 @@ class _SensitiveContentState extends State<SensitiveContent> {
   @override
   void dispose() {
     SensitiveContentHost.unregister(widget.sensitivity);
-    print('dispose done');
     super.dispose();
   }
 
@@ -406,12 +365,8 @@ class _SensitiveContentState extends State<SensitiveContent> {
       future: _sensitiveContentRegistrationFuture,
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          print(
-            '#################################### CAMILLE: building widget.child: ${widget.child}',
-          );
           return widget.child;
         }
-        print('#################################### CAMILLE: building SizedBox.shrink');
         return const SizedBox.shrink();
       },
     );
