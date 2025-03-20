@@ -1046,7 +1046,7 @@ abstract class MenuControllerDecorator extends MenuController {
   /// Called when [MenuController.close] is invoked by the attached
   /// [menuController]. Implementations should begin animating the menu closed.
   ///
-  /// Once the menu has finished animating open, [markMenuClosed] should be
+  /// Once the menu has finished animating closed, [markMenuClosed] should be
   /// called to set the [MenuController.animationStatus] to
   /// [AnimationStatus.dismissed]. [markMenuClosed] will also remove the menu
   /// overlay from the widget tree.
