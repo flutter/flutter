@@ -2099,6 +2099,30 @@ void ImpellerDisplayListBuilderDrawParagraph(
     const ImpellerPoint* IMPELLER_NONNULL point);
 
 //------------------------------------------------------------------------------
+/// @brief      Draw a shadow for a Path given a material elevation. If the
+///             occluding object is not opaque, additional hints (via the
+///             `occluder_is_transparent` argument) must be provided to render
+///             the shadow correctly.
+///
+/// @param[in]  builder    The builder.
+/// @param[in]  path       The shadow path.
+/// @param[in]  color      The shadow color.
+/// @param[in]  elevation  The material elevation.
+/// @param[in]  occluder_is_transparent
+///                        If the object casting the shadow is transparent.
+/// @param[in]  device_pixel_ratio
+///                        The device pixel ratio.
+///
+IMPELLER_EXPORT
+void ImpellerDisplayListBuilderDrawShadow(
+    ImpellerDisplayListBuilder IMPELLER_NONNULL builder,
+    ImpellerPath IMPELLER_NONNULL path,
+    const ImpellerColor* IMPELLER_NONNULL color,
+    float elevation,
+    bool occluder_is_transparent,
+    float device_pixel_ratio);
+
+//------------------------------------------------------------------------------
 // Display List Builder: Drawing Textures
 //------------------------------------------------------------------------------
 
