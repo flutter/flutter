@@ -886,7 +886,7 @@ class PlatformViewNoClip implements PlatformViewClip {
 }
 
 class PlatformViewRectClip implements PlatformViewClip {
-  PlatformViewRectClip(this.rect);
+  const PlatformViewRectClip(this.rect);
 
   final ui.Rect rect;
 
