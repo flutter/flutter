@@ -301,7 +301,7 @@ class ContextVK final : public Context,
 
   bool is_valid_ = false;
 
-  ContextVK(const Flags& flags);
+  explicit ContextVK(const Flags& flags);
 
   void Setup(Settings settings);
 
