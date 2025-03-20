@@ -252,7 +252,6 @@ struct ContentContextOptions {
   PixelFormat color_attachment_pixel_format = PixelFormat::kUnknown;
   bool has_depth_stencil_attachments = true;
   bool depth_write_enabled = false;
-  bool wireframe = false;
   bool is_for_rrect_blur_clear = false;
 
   constexpr uint64_t ToKey() const {
@@ -264,10 +263,10 @@ struct ContentContextOptions {
     static_assert(sizeof(primitive_type) == 1);
     static_assert(sizeof(color_attachment_pixel_format) == 1);
 
-    return (is_for_rrect_blur_clear ? 1llu : 0llu) << 0 |
-           (wireframe ? 1llu : 0llu) << 1 |
-           (has_depth_stencil_attachments ? 1llu : 0llu) << 2 |
-           (depth_write_enabled ? 1llu : 0llu) << 3 |
+    return (is_for_rrect_blur_clear ? 1llu : 0llu) << 0 |        //
+           (0) << 1 |                                            //
+           (has_depth_stencil_attachments ? 1llu : 0llu) << 2 |  //
+           (depth_write_enabled ? 1llu : 0llu) << 3 |            //
            // enums
            static_cast<uint64_t>(color_attachment_pixel_format) << 8 |
            static_cast<uint64_t>(primitive_type) << 16 |
@@ -393,8 +392,6 @@ class ContentContext {
   std::shared_ptr<Context> GetContext() const;
 
   const Capabilities& GetDeviceCapabilities() const;
-
-  void SetWireframe(bool wireframe);
 
   using SubpassCallback =
       std::function<bool(const ContentContext&, RenderPass&)>;
@@ -680,10 +677,6 @@ class ContentContext {
       return nullptr;
     }
 
-    if (wireframe_) {
-      opts.wireframe = true;
-    }
-
     if (RenderPipelineHandleT* found = container.Get(opts)) {
       return found;
     }
@@ -717,7 +710,6 @@ class ContentContext {
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
-  bool wireframe_ = false;
 
   ContentContext(const ContentContext&) = delete;
 

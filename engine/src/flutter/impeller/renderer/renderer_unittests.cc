@@ -81,12 +81,7 @@ TEST_P(RendererTest, CanCreateBoxPrimitive) {
   auto host_buffer = HostBuffer::Create(context->GetResourceAllocator(),
                                         context->GetIdleWaiter());
   SinglePassCallback callback = [&](RenderPass& pass) {
-    ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    static bool wireframe;
-    ImGui::Checkbox("Wireframe", &wireframe);
-    ImGui::End();
-
-    desc->SetPolygonMode(wireframe ? PolygonMode::kLine : PolygonMode::kFill);
+    desc->SetPolygonMode(PolygonMode::kFill);
     auto pipeline = context->GetPipelineLibrary()->GetPipeline(desc).Get();
 
     assert(pipeline && pipeline->IsValid());

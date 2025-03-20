@@ -431,15 +431,6 @@ CapabilitiesVK::GetEnabledDeviceFeatures(
 
   PhysicalDeviceFeatures required_chain;
 
-  // Base features.
-  {
-    auto& required = required_chain.get().features;
-    const auto& supported = supported_chain.get().features;
-
-    // We require this for enabling wireframes in the playground. But its not
-    // necessarily a big deal if we don't have this feature.
-    required.fillModeNonSolid = supported.fillModeNonSolid;
-  }
   // VK_KHR_sampler_ycbcr_conversion features.
   if (IsExtensionInList(
           enabled_extensions.value(),
