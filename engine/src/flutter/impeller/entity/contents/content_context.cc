@@ -384,9 +384,14 @@ ContentContext::ContentContext(
     }
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
-    clip_pipelines_.SetDefault(
-        options,
-        std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
+    if (GetContext()->GetFlags().lazy_shader_mode) {
+      clip_pipelines_.SetDefaultDescriptor(clip_pipeline_descriptor);
+      clip_pipelines_.SetDefault(options, nullptr);
+    } else {
+      clip_pipelines_.SetDefault(
+          options,
+          std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
+    }
     texture_downsample_pipelines_.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
