@@ -70,10 +70,6 @@ class EngineScene implements ui.Scene {
     }
     return recorder.endRecording().toImageSync(width, height);
   }
-
-  Map<String, Object> get debugJsonDescription {
-    return {'rootLayer': rootLayer.debugJsonDescription};
-  }
 }
 
 sealed class OcclusionMapNode {
@@ -268,6 +264,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
       }
       sliceIndex--;
     }
+    sliceIndex = 0;
     final SceneSlice slice = sceneSlices[sliceIndex];
     slice.platformViewOcclusionMap.addRect(globalPlatformViewRect);
     return sliceIndex;

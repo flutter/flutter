@@ -463,13 +463,6 @@ class SkwasmRenderer implements Renderer {
       imageCreateFromTextureSource(textureSource as JSObject, width, height, surface.handle),
     );
   }
-
-  @override
-  void dumpDebugInfo() {
-    for (final view in _sceneViews.values) {
-      view.dumpDebugInfo();
-    }
-  }
 }
 
 class SkwasmPictureRenderer implements PictureRenderer {

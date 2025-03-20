@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
@@ -54,9 +53,6 @@ class EngineSceneView {
   _SceneRender? _currentRender;
   _SceneRender? _nextRender;
 
-  // Only populated in debug mode.
-  _SceneRender? _previousRender;
-
   Future<void> renderScene(EngineScene scene, FrameTimingRecorder? recorder) {
     if (_currentRender != null) {
       // If a scene is already queued up, drop it and queue this one up instead
@@ -75,7 +71,7 @@ class EngineSceneView {
   Future<void> _kickRenderLoop() async {
     final _SceneRender current = _currentRender!;
     await _renderScene(current.scene, current.recorder);
-    _renderComplete(current);
+    current.done();
     _currentRender = _nextRender;
     _nextRender = null;
     if (_currentRender == null) {
@@ -196,37 +192,6 @@ class EngineSceneView {
       } else {
         sceneElement.insertBefore(container.container, currentElement);
       }
-    }
-  }
-
-  void _renderComplete(_SceneRender render) {
-    render.done();
-    if (kDebugMode) {
-      _previousRender = render;
-    }
-  }
-
-  String _generateDebugFilename() {
-    final now = DateTime.now();
-    final String y = now.year.toString().padLeft(4, '0');
-    final String mo = now.month.toString().padLeft(2, '0');
-    final String d = now.day.toString().padLeft(2, '0');
-    final String h = now.hour.toString().padLeft(2, '0');
-    final String mi = now.minute.toString().padLeft(2, '0');
-    final String s = now.second.toString().padLeft(2, '0');
-    return 'flutter-scene-$y-$mo-$d-$h-$mi-$s.json';
-  }
-
-  void dumpDebugInfo() {
-    if (kDebugMode && _previousRender != null) {
-      final Map<String, Object?> debugJson = _previousRender!.scene.debugJsonDescription;
-      final String jsonString = jsonEncode(debugJson);
-      final blob = createDomBlob([jsonString], {'type': 'application/json'});
-      final url = domWindow.URL.createObjectURL(blob);
-      final element = domDocument.createElement('a');
-      element.setAttribute('href', url);
-      element.setAttribute('download', _generateDebugFilename());
-      element.click();
     }
   }
 }
