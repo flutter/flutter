@@ -52,26 +52,26 @@ std::optional<BlendMode> InvertPorterDuffBlend(BlendMode blend_mode) {
   switch (blend_mode) {
     case BlendMode::kClear:
       return BlendMode::kClear;
-    case BlendMode::kSource:
-      return BlendMode::kDestination;
-    case BlendMode::kDestination:
-      return BlendMode::kSource;
-    case BlendMode::kSourceOver:
-      return BlendMode::kDestinationOver;
-    case BlendMode::kDestinationOver:
-      return BlendMode::kSourceOver;
-    case BlendMode::kSourceIn:
-      return BlendMode::kDestinationIn;
-    case BlendMode::kDestinationIn:
-      return BlendMode::kSourceIn;
-    case BlendMode::kSourceOut:
-      return BlendMode::kDestinationOut;
-    case BlendMode::kDestinationOut:
-      return BlendMode::kSourceOut;
-    case BlendMode::kSourceATop:
-      return BlendMode::kDestinationATop;
-    case BlendMode::kDestinationATop:
-      return BlendMode::kSourceATop;
+    case BlendMode::kSrc:
+      return BlendMode::kDst;
+    case BlendMode::kDst:
+      return BlendMode::kSrc;
+    case BlendMode::kSrcOver:
+      return BlendMode::kDstOver;
+    case BlendMode::kDstOver:
+      return BlendMode::kSrcOver;
+    case BlendMode::kSrcIn:
+      return BlendMode::kDstIn;
+    case BlendMode::kDstIn:
+      return BlendMode::kSrcIn;
+    case BlendMode::kSrcOut:
+      return BlendMode::kDstOut;
+    case BlendMode::kDstOut:
+      return BlendMode::kSrcOut;
+    case BlendMode::kSrcATop:
+      return BlendMode::kDstATop;
+    case BlendMode::kDstATop:
+      return BlendMode::kSrcATop;
     case BlendMode::kXor:
       return BlendMode::kXor;
     case BlendMode::kPlus:
@@ -84,7 +84,7 @@ std::optional<BlendMode> InvertPorterDuffBlend(BlendMode blend_mode) {
 }
 
 BlendFilterContents::BlendFilterContents() {
-  SetBlendMode(BlendMode::kSourceOver);
+  SetBlendMode(BlendMode::kSrcOver);
 }
 
 BlendFilterContents::~BlendFilterContents() = default;
@@ -187,7 +187,7 @@ static std::optional<Entity> AdvancedBlend(
 
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;
-    options.blend_mode = BlendMode::kSource;
+    options.blend_mode = BlendMode::kSrc;
     PipelineRef pipeline = std::invoke(pipeline_proc, renderer, options);
 
 #ifdef IMPELLER_DEBUG
@@ -440,7 +440,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     return std::nullopt;
   }
 
-  if (blend_mode == BlendMode::kDestination) {
+  if (blend_mode == BlendMode::kDst) {
     return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode());
   }
 
@@ -603,7 +603,7 @@ static std::optional<Entity> PipelineBlend(
     };
 
     // Draw the first texture using kSource.
-    options.blend_mode = BlendMode::kSource;
+    options.blend_mode = BlendMode::kSrc;
     pass.SetPipeline(renderer.GetTexturePipeline(options));
     if (!add_blend_command(dst_snapshot)) {
       return true;
@@ -769,7 +769,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       };
 
       auto options = OptionsFromPass(pass);
-      options.blend_mode = BlendMode::kSource;
+      options.blend_mode = BlendMode::kSrc;
       options.primitive_type = PrimitiveType::kTriangleStrip;
 
       pass.SetCommandLabel("Framebuffer Advanced Blend Filter");
@@ -978,7 +978,7 @@ std::optional<Entity> BlendFilterContents::RenderFilter(
 
   if (inputs.size() == 1 && !foreground_color_.has_value()) {
     // Nothing to blend.
-    return PipelineBlend(inputs, renderer, entity, coverage, BlendMode::kSource,
+    return PipelineBlend(inputs, renderer, entity, coverage, BlendMode::kSrc,
                          std::nullopt, GetAbsorbOpacity(), GetAlpha());
   }
 
