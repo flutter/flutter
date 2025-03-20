@@ -629,7 +629,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// Drifting past the allowed slop amount causes the gesture to be rejected.
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to touch slop from [gestureSettings] (18 logical pixels).
+  /// Defaults to 18 logical pixels.
   final double? preAcceptSlopTolerance;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
@@ -639,7 +639,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// and signaling subsequent callbacks.
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
-  /// Defaults to touch slop from [gestureSettings] (18 logical pixels).
+  /// Defaults to 18 logical pixels.
   final double? postAcceptSlopTolerance;
 
   double? get _preAcceptSlopTolerance =>
