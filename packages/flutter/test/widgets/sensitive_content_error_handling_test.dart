@@ -123,21 +123,19 @@ void main() {
         },
       );
 
-      await tester.runAsync(() async {
-        await tester.pumpWidget(Column(children: <Widget>[sc, asc]));
+      await tester.pumpWidget(Column(children: <Widget>[sc, asc]));
 
-        final DisposeTesterState scDiposeTesterState = tester.firstState<DisposeTesterState>(
-          find.byKey(scKey),
-        );
-        scDiposeTesterState.disposeWidget();
-        await tester.pump();
+      final DisposeTesterState scDiposeTesterState = tester.firstState<DisposeTesterState>(
+        find.byKey(scKey),
+      );
+      scDiposeTesterState.disposeWidget();
+      await tester.pump();
 
-        expect(tester.takeException(), isA<FlutterError>());
-        expect(
-          sensitiveContentHost.calculatedContentSensitivity,
-          equals(ContentSensitivity.autoSensitive),
-        );
-      });
+      expect(tester.takeException(), isA<FlutterError>());
+      expect(
+        sensitiveContentHost.calculatedContentSensitivity,
+        equals(ContentSensitivity.autoSensitive),
+      );
     },
   );
 }
