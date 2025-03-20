@@ -691,6 +691,10 @@ DarwinArch getDarwinArchForName(String arch) {
   };
 }
 
+List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) =>
+    defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
+    <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
   return switch (platform) {
     TargetPlatform.ios when darwinArch != null => 'ios-${darwinArch.name}',

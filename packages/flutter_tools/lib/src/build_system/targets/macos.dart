@@ -260,9 +260,7 @@ class DebugMacOSFramework extends Target {
       environment.fileSystem.path.join(environment.buildDir.path, 'App.framework', 'App'),
     );
 
-    final Iterable<DarwinArch> darwinArchs =
-        environment.defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName) ??
-        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+    final Iterable<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
 
     final Iterable<String> darwinArchArguments = darwinArchs.expand(
       (DarwinArch arch) => <String>['-arch', arch.name],
@@ -338,9 +336,7 @@ class CompileMacOSFramework extends Target {
       kExtraGenSnapshotOptions,
     );
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
-    final List<DarwinArch> darwinArchs =
-        environment.defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
-        <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+    final List<DarwinArch> darwinArchs = getDarwinArchsFromEnv(environment.defines);
     if (targetPlatform != TargetPlatform.darwin) {
       throw Exception('compile_macos_framework is only supported for darwin TargetPlatform.');
     }
