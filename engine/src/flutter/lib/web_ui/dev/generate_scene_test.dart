@@ -236,6 +236,8 @@ int main(List<String> args) {
   final sceneJson = jsonDecode(fileString) as Map<String, Object?>;
   final rootLayer = sceneJson['rootLayer']! as Map<String, Object?>;
   print('''
+// This file was generated from a JSON file using the `web_ui/dev/generate_scene_test.dart`.
+
 import 'dart:typed_data';
 import 'package:ui/ui.dart' as ui;
 
