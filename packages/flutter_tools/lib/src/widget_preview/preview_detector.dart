@@ -308,8 +308,8 @@ class PreviewDetector {
   /// Search for functions annotated with `@Preview` in the current project.
   Future<PreviewMapping> findPreviewFunctions(FileSystemEntity entity) async {
     final PreviewMapping previews = PreviewMapping();
-    // Only process one FileSystemEntity at a time to prevent weirdness caused by interleaving of
-    // asynchronous analyzer operations.
+    // Only process one FileSystemEntity at a time so we don't invalidate an AnalysisSession that's
+    // in use when we call context.changeFile(...).
     await _mutex.runGuarded(() async {
       // TODO(bkonyi): this can probably be replaced by a call to collection.contextFor(...),
       // but we need to figure out the right path format for Windows.
@@ -448,10 +448,9 @@ class PreviewVisitor extends RecursiveAstVisitor<void> {
   }
 }
 
-/// Used to protect state accessed in blocks containing calls to
-/// asynchronous methods which can possibly be interleaved, resulting
-/// corruption of state.
-/// 
+/// Used to protect global state accessed in blocks containing calls to
+/// asynchronous methods.
+///
 /// Originally from DDS:
 /// https://github.com/dart-lang/sdk/blob/3fe58da3cfe2c03fb9ee691a7a4709082fad3e73/pkg/dds/lib/src/utils/mutex.dart
 class PreviewDetectorMutex {
