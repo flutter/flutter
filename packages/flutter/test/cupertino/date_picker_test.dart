@@ -2542,17 +2542,14 @@ void main() {
         home: Center(
           child: CupertinoDatePicker(
             mode: CupertinoDatePickerMode.time,
-            onDateTimeChanged: (DateTime _) {},
+            onDateTimeChanged: (DateTime dateTime) {},
             showTimeSeparator: true,
           ),
         ),
       ),
     );
 
-    expect(
-      find.byWidgetPredicate((Widget widget) => widget is Text && widget.data == ':'),
-      findsOneWidget,
-    );
+    expect(find.text(':'), findsOneWidget);
   });
 
   testWidgets('Time separator widget should not be rendered when flag is set to false', (
@@ -2569,10 +2566,7 @@ void main() {
       ),
     );
 
-    expect(
-      find.byWidgetPredicate((Widget widget) => widget is Text && widget.data == ':'),
-      findsNothing,
-    );
+    expect(find.text(':'), findsNothing);
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/161773
