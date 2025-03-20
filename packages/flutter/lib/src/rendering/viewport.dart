@@ -317,7 +317,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
           (RenderSliver sliver) =>
               sliver.geometry!.visible ||
               sliver.geometry!.cacheExtent > 0.0 ||
-              sliver.forceIncludeSemantics,
+              sliver.ensureSemantics,
         )
         .forEach(visitor);
   }
@@ -720,7 +720,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   Rect? describeSemanticsClip(RenderSliver? child) {
-    if (child != null && child.forceIncludeSemantics) {
+    if (child != null && child.ensureSemantics) {
       return Rect.largest;
     }
     if (_calculatedCacheExtent == null) {
