@@ -151,6 +151,12 @@ void runSemanticsTests() {
   group('landmarks', () {
     _testLandmarks();
   });
+  group('progressBar', () {
+    _testProgressBar();
+  });
+  group('loadingSpinner', () {
+    _testLoadingSpinner();
+  });
 }
 
 void _testSemanticRole() {
@@ -3528,11 +3534,10 @@ void _testPlatformView() {
 
     ui_web.platformViewRegistry.registerViewFactory(
       'test-platform-view',
-      (int viewId) =>
-          createDomHTMLDivElement()
-            ..id = 'view-0'
-            ..style.width = '100%'
-            ..style.height = '100%',
+      (int viewId) => createDomHTMLDivElement()
+        ..id = 'view-0'
+        ..style.width = '100%'
+        ..style.height = '100%',
     );
     await createPlatformView(0, 'test-platform-view');
 
@@ -5394,6 +5399,55 @@ void _testLandmarks() {
     expect(object.semanticRole?.kind, EngineSemanticsRole.region);
     expect(object.element.getAttribute('role'), 'region');
     expect(object.element.getAttribute('aria-label'), 'Header 1');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testProgressBar() {
+  test('nodes with progress bar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.progressBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
+    expect(object.element.getAttribute('role'), 'progressbar');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testLoadingSpinner() {
+  test('nodes with loading spinner role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.loadingSpinner,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
   });
 
   semantics().semanticsEnabled = false;
