@@ -168,6 +168,9 @@ class Selectable extends SemanticBehavior {
 /// (i.e. [SemanticsObject.isChecked] and [SemanticsObject.isMixed] are
 /// false). If the node is not checkable (i.e. [SemanticsObject.isCheckable]
 /// is false), then `aria-checked` is unset.
+///
+///
+/// This behavior is typically used for a checkbox or a radio button.
 class Checkable extends SemanticBehavior {
   Checkable(super.semanticsObject, super.owner);
 
