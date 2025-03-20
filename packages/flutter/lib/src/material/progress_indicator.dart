@@ -8,6 +8,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -523,14 +524,20 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator>
     final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null) {
-      return _buildIndicator(context, _controller.value, textDirection);
+      return Semantics(
+        role: SemanticsRole.progressBar,
+        child: _buildIndicator(context, _controller.value, textDirection),
+      );
     }
 
-    return AnimatedBuilder(
-      animation: _controller.view,
-      builder: (BuildContext context, Widget? child) {
-        return _buildIndicator(context, _controller.value, textDirection);
-      },
+    return Semantics(
+      role: SemanticsRole.loadingSpinner,
+      child: AnimatedBuilder(
+        animation: _controller.view,
+        builder: (BuildContext context, Widget? child) {
+          return _buildIndicator(context, _controller.value, textDirection);
+        },
+      ),
     );
   }
 }
@@ -1004,28 +1011,36 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
 
   @override
   Widget build(BuildContext context) {
-    switch (widget._indicatorType) {
-      case _ActivityIndicatorType.material:
-        if (widget.value != null) {
-          return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
-        }
-        return _buildAnimation();
-      case _ActivityIndicatorType.adaptive:
-        final ThemeData theme = Theme.of(context);
-        switch (theme.platform) {
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            return _buildCupertinoIndicator(context);
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            if (widget.value != null) {
-              return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
-            }
-            return _buildAnimation();
-        }
-    }
+    return Semantics(
+      value: widget.value != null ? '${(widget.value ?? 0) * 100}%' : null,
+      role: widget.value != null ? SemanticsRole.progressBar : SemanticsRole.loadingSpinner,
+      child: Builder(
+        builder: (BuildContext context) {
+          switch (widget._indicatorType) {
+            case _ActivityIndicatorType.material:
+              if (widget.value != null) {
+                return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+              }
+              return _buildAnimation();
+            case _ActivityIndicatorType.adaptive:
+              final ThemeData theme = Theme.of(context);
+              switch (theme.platform) {
+                case TargetPlatform.iOS:
+                case TargetPlatform.macOS:
+                  return _buildCupertinoIndicator(context);
+                case TargetPlatform.android:
+                case TargetPlatform.fuchsia:
+                case TargetPlatform.linux:
+                case TargetPlatform.windows:
+                  if (widget.value != null) {
+                    return _buildMaterialIndicator(context, 0.0, 0.0, 0, 0.0);
+                  }
+                  return _buildAnimation();
+              }
+          }
+        },
+      ),
+    );
   }
 }
 
