@@ -13,7 +13,7 @@ library;
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show FlutterView, FontWeight, Offset, Rect, Size, TextAlign, TextDirection;
+import 'dart:ui' show FlutterView, FontWeight, Locale, Offset, Rect, Size, TextAlign, TextDirection;
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
@@ -530,6 +530,7 @@ class TextInputConfiguration {
     this.enableIMEPersonalizedLearning = true,
     this.allowedMimeTypes = const <String>[],
     this.enableDeltaModel = false,
+    this.hintLocales = const <Locale>[],
   }) : smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -683,6 +684,22 @@ class TextInputConfiguration {
   /// {@macro flutter.widgets.contentInsertionConfiguration.allowedMimeTypes}
   final List<String> allowedMimeTypes;
 
+  /// {@template flutter.services.TextInputConfiguration.hintLocales}
+  /// List of the languages that the user is supposed to switch to.
+  /// This special "hint" can be used mainly for, but not limited to,
+  /// multilingual users who want IMEs to switch language based on editor's context.
+  /// Pass an empty list to express the intention that a specific hint should not be set.
+  ///
+  /// Defaults to null.
+  ///
+  /// This setting is only honored on Android devices.
+  ///
+  /// See also:
+  ///
+  ///  * <https://developer.android.com/reference/android/view/inputmethod/EditorInfo#hintLocales>
+  /// {@endtemplate}
+  final List<Locale>? hintLocales;
+
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
@@ -703,6 +720,7 @@ class TextInputConfiguration {
     List<String>? allowedMimeTypes,
     AutofillConfiguration? autofillConfiguration,
     bool? enableDeltaModel,
+    List<Locale>? hintLocales,
   }) {
     return TextInputConfiguration(
       viewId: viewId ?? this.viewId,
@@ -723,6 +741,7 @@ class TextInputConfiguration {
       allowedMimeTypes: allowedMimeTypes ?? this.allowedMimeTypes,
       autofillConfiguration: autofillConfiguration ?? this.autofillConfiguration,
       enableDeltaModel: enableDeltaModel ?? this.enableDeltaModel,
+      hintLocales: hintLocales ?? this.hintLocales,
     );
   }
 
@@ -772,6 +791,7 @@ class TextInputConfiguration {
       'contentCommitMimeTypes': allowedMimeTypes,
       if (autofill != null) 'autofill': autofill,
       'enableDeltaModel': enableDeltaModel,
+      'hintLocales': hintLocales?.map((Locale locale) => locale.toLanguageTag()).toList(),
     };
   }
 
@@ -800,7 +820,8 @@ class TextInputConfiguration {
         other.autofillConfiguration == autofillConfiguration &&
         other.enableIMEPersonalizedLearning == enableIMEPersonalizedLearning &&
         listEquals(other.allowedMimeTypes, allowedMimeTypes) &&
-        other.enableDeltaModel == enableDeltaModel;
+        other.enableDeltaModel == enableDeltaModel &&
+        other.hintLocales == hintLocales;
   }
 
   @override
@@ -823,6 +844,7 @@ class TextInputConfiguration {
       enableIMEPersonalizedLearning,
       Object.hashAll(allowedMimeTypes),
       enableDeltaModel,
+      hintLocales,
     );
   }
 
@@ -846,6 +868,7 @@ class TextInputConfiguration {
       'enableIMEPersonalizedLearning: $enableIMEPersonalizedLearning',
       'allowedMimeTypes: $allowedMimeTypes',
       'enableDeltaModel: $enableDeltaModel',
+      if (hintLocales != null) 'hintLocales: $hintLocales',
     ];
     return 'TextInputConfiguration(${description.join(', ')})';
   }
