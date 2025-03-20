@@ -114,7 +114,7 @@ void main() {
         setContentSensitivityCompleter.complete();
 
         // Delay added to ensure that the SensitiveContent widget re-registration completes.
-        await Future<void>.delayed(const Duration(milliseconds: 100), () async {
+        await Future<void>.delayed(const Duration(milliseconds: 500), () async {
           await tester.pumpAndSettle();
         });
 
