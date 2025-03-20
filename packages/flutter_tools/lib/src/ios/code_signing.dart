@@ -483,8 +483,8 @@ class XcodeCodeSigningSettings {
       _logger.printError('Failed to decode ${provisioningProfileFile.basename}');
       return null;
     }
-    final Map<String, Object> contents = _plistParser.parseFile(decodedProfile.path);
     try {
+      final Map<String, Object> contents = _plistParser.parseFile(decodedProfile.path);
       return _ProvisioningProfile.fromPlist(
         provisioningProfileFile.path,
         contents,
@@ -907,7 +907,7 @@ class _ProvisioningProfile {
     final List<File> certificateFiles = <File>[];
     if (data case {'DeveloperCertificates': final List<Object?> values}) {
       for (int i = 0; i < values.length; i++) {
-        final Object? obj = values[0];
+        final Object? obj = values[i];
         if (obj != null && obj is List<int>) {
           final File certFile = fileSystem.systemTempDirectory
               .childDirectory('provisioning_profile_certificates')
