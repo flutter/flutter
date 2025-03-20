@@ -581,6 +581,7 @@ enum GestureRecognizerState {
   defunct,
 }
 
+// -1 is used as a sentinel value to indicate no touch slop was specified.
 const double _unsetTouchSlop = -1.0;
 
 /// A base class for gesture recognizers that track a single primary pointer.
@@ -643,7 +644,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   double? get _postAcceptSlopTolerance =>
     postAcceptSlopTolerance == _unsetTouchSlop ? _defaultTouchSlop : postAcceptSlopTolerance;
 
-  double get _defaultTouchSlop => gestureSettings.touchSlop ?? kTouchSlop;
+  double get _defaultTouchSlop => gestureSettings?.touchSlop ?? kTouchSlop;
 
   /// The current state of the recognizer.
   ///
