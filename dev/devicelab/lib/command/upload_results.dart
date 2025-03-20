@@ -53,15 +53,15 @@ class UploadResultsCommand extends Command<void> {
   @override
   Future<void> run() async {
     final String? resultsPath = argResults!['results-file'] as String?;
-    final String? serviceAccountTokenFile = argResults!['service-account-token-file'] as String?;
-    final String? testFlakyStatus = argResults!['test-flaky'] as String?;
-    final String? gitBranch = argResults!['git-branch'] as String?;
-    final String? builderName = argResults!['luci-builder'] as String?;
-    final String? testStatus = argResults!['test-status'] as String?;
+    // final String? serviceAccountTokenFile = argResults!['service-account-token-file'] as String?;
+    // final String? testFlakyStatus = argResults!['test-flaky'] as String?;
+    // final String? gitBranch = argResults!['git-branch'] as String?;
+    // final String? builderName = argResults!['luci-builder'] as String?;
+    // final String? testStatus = argResults!['test-status'] as String?;
     final String? commitTime = argResults!['commit-time'] as String?;
     final String? taskName = argResults!['task-name'] as String?;
     final String? benchmarkTags = argResults!['benchmark-tags'] as String?;
-    final String? builderBucket = argResults!['builder-bucket'] as String?;
+    // final String? builderBucket = argResults!['builder-bucket'] as String?;
 
     // Upload metrics to skia perf from test runner when `resultsPath` is specified.
     if (resultsPath != null) {
