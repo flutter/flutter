@@ -2746,6 +2746,8 @@ public class TextInputPluginTest {
   }
 
   @Test
+  @TargetApi(API_LEVELS.API_24)
+  @Config(sdk = API_LEVELS.API_24)
   public void inputConnection_hintLocalesIsSetInEditorInfo() {
     View testView = new View(ctx);
     DartExecutor dartExecutor = mock(DartExecutor.class);

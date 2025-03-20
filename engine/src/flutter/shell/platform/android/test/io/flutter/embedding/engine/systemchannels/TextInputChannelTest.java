@@ -43,6 +43,8 @@ public class TextInputChannelTest {
   }
 
   @Test
+  @TargetApi(API_LEVELS.API_24)
+  @Config(sdk = API_LEVELS.API_24)
   public void configurationFromJsonParsesHintLocales() throws JSONException, NoSuchFieldException {
     JSONObject arguments = new JSONObject();
 
