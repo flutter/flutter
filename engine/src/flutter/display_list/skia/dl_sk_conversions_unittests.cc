@@ -141,8 +141,6 @@ TEST(DisplayListSkConversions, ToSkSamplingOptions) {
   FUNC(kSaturation)                    \
   FUNC(kColor)                         \
   FUNC(kLuminosity)                    \
-  FUNC(kLastCoeffMode)                 \
-  FUNC(kLastSeparableMode)             \
   FUNC(kLastMode)
 
 TEST(DisplayListSkConversions, ToSkBlendMode){
