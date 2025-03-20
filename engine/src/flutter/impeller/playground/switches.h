@@ -8,6 +8,7 @@
 #include <chrono>
 #include <optional>
 
+#include "impeller/base/flags.h"
 #include "flutter/fml/command_line.h"
 
 namespace impeller {
@@ -33,6 +34,8 @@ struct PlaygroundSwitches {
   bool use_angle = false;
 
   bool enable_wide_gamut = false;
+
+  Flags flags;
 
   PlaygroundSwitches();
 
