@@ -293,6 +293,9 @@ sealed class _DebugSemanticsRoleChecks {
     if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
       return FlutterError('a menu item checkbox must be checkable');
     }
+
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
       if (currentNode?.parent?.role == SemanticsRole.menu ||
           currentNode?.parent?.role == SemanticsRole.menuBar) {
         return null;
