@@ -11,7 +11,7 @@ dependencies:
   # For detailed instructions, refer to:
   # https://github.com/flutter/flutter/blob/main/docs/infra/Updating-dependencies-in-Flutter.md
   archive: 3.6.1
-  args: 2.6.0
+  args: 2.7.0
   dds: 5.0.0
   dwds: 24.3.7
   code_builder: 4.10.1
@@ -27,7 +27,7 @@ dependencies:
   meta: 1.16.0
   multicast_dns: 0.3.2+8
   mustache_template: 2.0.0
-  package_config: 2.1.1
+  package_config: 2.2.0
   process: 5.0.3
   fake_async: 1.3.3
   stack_trace: 1.12.1
@@ -44,7 +44,7 @@ dependencies:
   stream_channel: 2.1.4
   shelf_web_socket: 2.0.1
   shelf_static: 1.1.3
-  pub_semver: 2.1.5
+  pub_semver: 2.2.0
   pool: 1.5.1
   path: 1.9.1
   mime: 2.0.0
@@ -122,4 +122,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 776d
+# PUBSPEC CHECKSUM: 3a6a
