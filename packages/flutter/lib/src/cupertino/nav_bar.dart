@@ -2520,6 +2520,8 @@ class _NavigationBarTransition extends StatelessWidget {
         );
 
     final List<Widget> children = <Widget>[
+      if (componentsTransition.bottomNavBarBackground != null)
+        componentsTransition.bottomNavBarBackground!,
       if (componentsTransition.bottomBackChevron != null) componentsTransition.bottomBackChevron!,
       if (componentsTransition.bottomBackLabel != null) componentsTransition.bottomBackLabel!,
       if (componentsTransition.bottomLeading != null) componentsTransition.bottomLeading!,
@@ -2528,6 +2530,8 @@ class _NavigationBarTransition extends StatelessWidget {
       if (componentsTransition.bottomTrailing != null) componentsTransition.bottomTrailing!,
       if (componentsTransition.bottomNavBarBottom != null) componentsTransition.bottomNavBarBottom!,
       // Draw top components on top of the bottom components.
+      if (componentsTransition.topNavBarBackground != null)
+        componentsTransition.topNavBarBackground!,
       if (componentsTransition.topLeading != null) componentsTransition.topLeading!,
       if (componentsTransition.topBackChevron != null) componentsTransition.topBackChevron!,
       if (componentsTransition.topBackLabel != null) componentsTransition.topBackLabel!,
@@ -2594,6 +2598,10 @@ class _NavigationBarComponentsTransition {
        topHasUserMiddle = topNavBar.hasUserMiddle,
        bottomLargeExpanded = bottomNavBar.largeExpanded,
        topLargeExpanded = topNavBar.largeExpanded,
+       bottomBackgroundColor = bottomNavBar.backgroundColor,
+       topBackgroundColor = topNavBar.backgroundColor,
+       bottomBorder = bottomNavBar.border,
+       topBorder = topNavBar.border,
        userGestureInProgress =
            topNavBar.userGestureInProgress || bottomNavBar.userGestureInProgress,
        transitionBox =
@@ -2626,6 +2634,11 @@ class _NavigationBarComponentsTransition {
   final bool bottomLargeExpanded;
   final bool topLargeExpanded;
   final bool userGestureInProgress;
+
+  final Color? bottomBackgroundColor;
+  final Color? topBackgroundColor;
+  final Border? bottomBorder;
+  final Border? topBorder;
 
   // This is the outer box in which all the components will be fitted. The
   // sizing component of RelativeRects will be based on this rect's size.
@@ -2730,6 +2743,41 @@ class _NavigationBarComponentsTransition {
     // The hero animation is a CurvedAnimation.
     assert(animation is CurvedAnimation);
     return (animation as CurvedAnimation).parent;
+  }
+
+  Widget? get bottomNavBarBackground {
+    if (bottomBackgroundColor == null) {
+      return null;
+    }
+    final Curve animationCurve =
+        animation.status == AnimationStatus.forward
+            ? Curves.fastEaseInToSlowEaseOut
+            : Curves.fastEaseInToSlowEaseOut.flipped;
+
+    final Animation<double> pageTransitionAnimation = routeAnimation.drive(
+      CurveTween(curve: userGestureInProgress ? Curves.linear : animationCurve),
+    );
+
+    final RelativeRect from = positionInTransitionBox(
+      bottomComponents.navBarBoxKey,
+      from: bottomNavBarBox,
+    );
+
+    final RelativeRectTween positionTween = RelativeRectTween(
+      end: from.shift(Offset(forwardDirection * -bottomNavBarBox.size.width, 0.0)),
+      begin: from,
+    );
+
+    return PositionedTransition(
+      rect: pageTransitionAnimation.drive(positionTween),
+      child: _wrapWithBackground(
+        // Don't update the system status bar color mid-flight.
+        updateSystemUiOverlay: false,
+        backgroundColor: bottomBackgroundColor!,
+        border: topBorder,
+        child: SizedBox(height: bottomNavBarBox.size.height, width: double.infinity),
+      ),
+    );
   }
 
   Widget? get bottomLeading {
@@ -2964,6 +3012,38 @@ class _NavigationBarComponentsTransition {
               : animation.drive(CurveTween(curve: animationCurve)).drive(positionTween),
 
       child: child,
+    );
+  }
+
+  Widget? get topNavBarBackground {
+    if (topBackgroundColor == null) {
+      return null;
+    }
+    final Curve animationCurve =
+        animation.status == AnimationStatus.forward
+            ? Curves.fastEaseInToSlowEaseOut
+            : Curves.fastEaseInToSlowEaseOut.flipped;
+
+    final Animation<double> pageTransitionAnimation = routeAnimation.drive(
+      CurveTween(curve: userGestureInProgress ? Curves.linear : animationCurve),
+    );
+
+    final RelativeRect to = positionInTransitionBox(topComponents.navBarBoxKey, from: topNavBarBox);
+
+    final RelativeRectTween positionTween = RelativeRectTween(
+      begin: to.shift(Offset(forwardDirection * topNavBarBox.size.width, 0.0)),
+      end: to,
+    );
+
+    return PositionedTransition(
+      rect: pageTransitionAnimation.drive(positionTween),
+      child: _wrapWithBackground(
+        // Don't update the system status bar color mid-flight.
+        updateSystemUiOverlay: false,
+        backgroundColor: topBackgroundColor!,
+        border: topBorder,
+        child: SizedBox(height: topNavBarBox.size.height, width: double.infinity),
+      ),
     );
   }
 

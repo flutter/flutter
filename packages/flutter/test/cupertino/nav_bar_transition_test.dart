@@ -107,6 +107,16 @@ Finder flying(WidgetTester tester, Finder finder) {
   return find.descendant(of: lastOverlayFinder, matching: finder);
 }
 
+void checkBackgroundBoxOffset(WidgetTester tester, int boxIndex, Offset offset) {
+  final Widget transitionBackgroundBox =
+      tester.widget<Stack>(flying(tester, find.byType(Stack))).children[boxIndex];
+  final Offset testOffset = tester.getBottomRight(
+    find.descendant(of: find.byWidget(transitionBackgroundBox), matching: find.byType(SizedBox)),
+  );
+  expect(testOffset.dx, moreOrLessEquals(offset.dx, epsilon: 0.01));
+  expect(testOffset.dy, moreOrLessEquals(offset.dy, epsilon: 0.01));
+}
+
 void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
   expect(
     tester
@@ -566,6 +576,59 @@ void main() {
     expect(find.text('Tab 1 Page 1', skipOffstage: false), findsOneWidget);
     // Never navigated to tab 1 page 2.
     expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('Bottom nav bar transition background box', (WidgetTester tester) async {
+    await startTransitionBetween(
+      tester,
+      fromTitle: 'Page 1',
+      to: const CupertinoNavigationBar(),
+      toTitle: 'Page 2',
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+    // The top nav bar background box is the first component in the stack.
+    checkBackgroundBoxOffset(tester, 0, const Offset(609.14, 44.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    checkBackgroundBoxOffset(tester, 0, const Offset(362.91, 44.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    checkBackgroundBoxOffset(tester, 0, const Offset(192.14, 44.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    checkBackgroundBoxOffset(tester, 0, const Offset(95.30, 44.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    checkBackgroundBoxOffset(tester, 0, const Offset(46.12, 44.0));
+  });
+
+  testWidgets('Top nav bar transition background box', (WidgetTester tester) async {
+    await startTransitionBetween(
+      tester,
+      // Only the large title and background box are in the bottom nav bar.
+      from: const CupertinoNavigationBar(automaticallyImplyLeading: false),
+      to: const CupertinoNavigationBar(),
+      fromTitle: 'Page 1',
+      toTitle: 'Page 2',
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+    // The component stack only contains the bottom box background (at index 0)
+    // and the large title (at index 1).
+    checkBackgroundBoxOffset(tester, 2, const Offset(1409.14, 44.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    checkBackgroundBoxOffset(tester, 2, const Offset(1162.91, 44.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    checkBackgroundBoxOffset(tester, 2, const Offset(992.14, 44.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    checkBackgroundBoxOffset(tester, 2, const Offset(895.30, 44.0));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    checkBackgroundBoxOffset(tester, 2, const Offset(846.12, 44.0));
   });
 
   testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
