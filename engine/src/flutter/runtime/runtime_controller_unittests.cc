@@ -28,7 +28,8 @@ class MockRuntimeDelegate : public RuntimeDelegate {
               std::unique_ptr<flutter::LayerTree> layer_tree,
               float device_pixel_ratio) override {}
 
-  void UpdateSemantics(SemanticsNodeUpdates update,
+  void UpdateSemantics(int64_t view_id,
+                       SemanticsNodeUpdates update,
                        CustomAccessibilityActionUpdates actions) override {
     this->updates.push_back(update);
     this->actions.push_back(actions);
@@ -89,13 +90,13 @@ class RuntimeControllerTester {
   void CanUpdateSemanticsWhenSetSemanticsTreeEnabled(SemanticsUpdate* update) {
     ASSERT_TRUE(delegate_.updates.empty());
     ASSERT_TRUE(delegate_.actions.empty());
-    runtime_controller_.UpdateSemantics(update);
+    runtime_controller_.UpdateSemantics(0, update);
     // Semantics tree is not yet enabled.
     ASSERT_TRUE(delegate_.updates.empty());
     ASSERT_TRUE(delegate_.actions.empty());
 
     runtime_controller_.SetSemanticsTreeEnabled(true);
-    runtime_controller_.UpdateSemantics(update);
+    runtime_controller_.UpdateSemantics(0, update);
     ASSERT_FALSE(delegate_.updates.empty());
     ASSERT_FALSE(delegate_.actions.empty());
   }
