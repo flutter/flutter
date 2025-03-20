@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'sensitive_content_utils.dart';
 
 void main() {
-  // The state of content sensitivity in the app.
   final SensitiveContentHost sensitiveContentHost = SensitiveContentHost.instance;
 
   tearDown(() {
@@ -29,7 +28,7 @@ void main() {
         (MethodCall methodCall) async {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
-            if (setContentSensitivityCall == 1) {
+            if (setContentSensitivityCall == 1 && methodCall.arguments == 'sensitive') {
               // In the first call to set content sensitivity, throw exception to test
               // SensitiveContentHost.register behavior.
               throw Exception('test exception');
@@ -64,7 +63,7 @@ void main() {
         (MethodCall methodCall) async {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
-            if (setContentSensitivityCall == 2) {
+            if (setContentSensitivityCall == 2 && methodCall.arguments == 'autoSensitive') {
               // In the second call to set content sensitivity, throw exception to test
               // SensitiveContentHost.unregister behavior.
               throw Exception('test exception');
@@ -110,7 +109,7 @@ void main() {
         (MethodCall methodCall) async {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
-            if (setContentSensitivityCall == 2) {
+            if (setContentSensitivityCall == 2 && methodCall.arguments == 'autoSensitive') {
               // In the second call to set content sensitivity, throw exception to test
               // SensitiveContentHost.unregister behavior.
               throw Exception('test exception');
@@ -134,7 +133,7 @@ void main() {
 
         // Delay added to ensure that the SensitiveContent widget unregister completes.
         await Future<void>.delayed(const Duration(milliseconds: 100), () async {
-          await tester.pumpAndSettle();
+          await tester.pump();
         });
 
         expect(tester.takeException(), isA<FlutterError>());
