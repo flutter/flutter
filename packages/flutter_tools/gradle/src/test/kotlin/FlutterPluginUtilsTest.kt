@@ -14,6 +14,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -414,5 +415,44 @@ class FlutterPluginUtilsTest {
 
         val result = FlutterPluginUtils.supportsBuildMode(project, "release")
         assertEquals(false, result)
+    }
+
+    // getTargetPlatforms
+    @Test
+    fun `getTargetPlatforms the default if property is not set`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns false
+        val result = FlutterPluginUtils.getTargetPlatforms(project)
+        assertEquals(listOf("android-arm", "android-arm64", "android-x64"), result)
+    }
+
+    @Test
+    fun `getTargetPlatforms the value if property is set`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns true
+        every { project.property(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns "android-arm64,android-arm"
+        val result = FlutterPluginUtils.getTargetPlatforms(project)
+        assertEquals(listOf("android-arm64", "android-arm"), result)
+    }
+
+    @Test
+    fun `getTargetPlatforms throws GradleException if property is set to invalid value`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns true
+        every { project.property(FlutterPluginUtils.PROP_TARGET_PLATFORM) } returns "android-invalid"
+        val gradleException: GradleException =
+            assertThrows<GradleException> {
+                FlutterPluginUtils.getTargetPlatforms(project)
+            }
+        assertContains(gradleException.message!!, "android-invalid")
+    }
+
+    // detectLowCompileSdkVersionOrNdkVersion
+    // TODO(gmackall): I don't want to do this right now ):
+
+    // forceNdkDownload
+    @Test
+    fun `forceNdkDownload skips projects which are already configuring a native build`() {
+        val project = mockk<Project>()
     }
 }

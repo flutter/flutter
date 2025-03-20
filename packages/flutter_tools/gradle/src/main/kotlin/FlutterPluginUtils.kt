@@ -508,9 +508,8 @@ object FlutterPluginUtils {
             pluginList.forEach { pluginObject ->
                 val pluginName: String =
                     requireNotNull(
-                        pluginObject["name"] as? String,
-                        { "Missing valid \"name\" property for plugin object: $pluginObject" }
-                    )
+                        pluginObject["name"] as? String
+                    ) { "Missing valid \"name\" property for plugin object: $pluginObject" }
                 val pluginProject: Project =
                     project.rootProject.findProject(":$pluginName") ?: return@forEach
                 pluginProject.afterEvaluate {
@@ -688,7 +687,7 @@ object FlutterPluginUtils {
 
         getAndroidExtension(project).buildTypes.forEach { buildType ->
             val flutterBuildMode: String = buildModeFor(buildType)
-            if (flutterBuildMode == "release" && (pluginObject.get("dev_dependency") as? Boolean == true)) {
+            if (flutterBuildMode == "release" && (pluginObject["dev_dependency"] as? Boolean == true)) {
                 // This plugin is a dev dependency will not be included in the
                 // release build, so no need to add its dependencies.
                 return@forEach
@@ -738,8 +737,11 @@ object FlutterPluginUtils {
         // Wait until the Android plugin loaded.
         pluginProject.afterEvaluate {
             // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
-            val projectCompileSdkVersion: Int = getCompileSdkFromProject(project).toInt()
-            val pluginCompileSdkVersion: Int = getCompileSdkFromProject(pluginProject).toInt()
+            val projectCompileSdkVersion: String = getCompileSdkFromProject(project)
+            val pluginCompileSdkVersion: String = getCompileSdkFromProject(pluginProject)
+            // TODO(gmackall): This is doing a string comparison, which is odd and also can be wrong
+            //                 when comparing preview versions (against non preview, and also in the
+            //                 case of alphabet reset which happened with "Baklava".
             if (pluginCompileSdkVersion > projectCompileSdkVersion) {
                 project.logger.quiet("Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher.")
                 project.logger.quiet(
