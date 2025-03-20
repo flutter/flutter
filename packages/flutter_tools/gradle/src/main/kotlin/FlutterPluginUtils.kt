@@ -631,22 +631,19 @@ object FlutterPluginUtils {
             } else {
                 pluginList
             }
-        println("hi gray, list is $pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency")
 
         if (!isFlutterAppProject(project) || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.isEmpty()) {
             addApiDependencies(project, buildType.name, "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
-        } else {
-            val platforms: List<String> = getTargetPlatforms(project)
-            platforms.forEach { platform ->
-                val arch: String = formatPlatformString(platform)
-                // Add the `libflutter.so` dependency.
-
-                addApiDependencies(
-                    project,
-                    buildType.name,
-                    "io.flutter:${arch}_$flutterBuildMode:$engineVersion"
-                )
-            }
+        }
+        val platforms: List<String> = getTargetPlatforms(project)
+        platforms.forEach { platform ->
+            val arch: String = formatPlatformString(platform)
+            // Add the `libflutter.so` dependency.
+            addApiDependencies(
+                project,
+                buildType.name,
+                "io.flutter:${arch}_$flutterBuildMode:$engineVersion"
+            )
         }
     }
 

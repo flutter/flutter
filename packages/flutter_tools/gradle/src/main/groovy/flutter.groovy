@@ -381,45 +381,8 @@ class FlutterPlugin implements Plugin<Project> {
      *    1. The embedding
      *    2. libflutter.so
      */
-//    void addFlutterDependencies(BuildType buildType) {
-//        FlutterPluginUtils.addFlutterDependencies(project, buildType, getPluginList(project), engineVersion)
-//    }
-
     void addFlutterDependencies(BuildType buildType) {
-        String flutterBuildMode = FlutterPluginUtils.buildModeFor(buildType)
-        if (!FlutterPluginUtils.supportsBuildMode(project, flutterBuildMode)) {
-            return
-        }
-        // The embedding is set as an API dependency in a Flutter plugin.
-        // Therefore, don't make the app project depend on the embedding if there are Flutter
-        // plugin dependencies. In release mode, dev dependencies are stripped, so we do not
-        // consider those in the check.
-        // This prevents duplicated classes when using custom build types. That is, a custom build
-        // type like profile is used, and the plugin and app projects have API dependencies on the
-        // embedding.
-        List<Map<String, Object>> pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency = flutterBuildMode == "release" ? FlutterPluginUtils.getPluginListWithoutDevDependencies(getPluginList(project)) : getPluginList(project);
-        if (!FlutterPluginUtils.isFlutterAppProject(project) || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.size() == 0) {
-            FlutterPluginUtils.addApiDependencies(project, buildType.name,
-                    "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
-        }
-        List<String> platforms = FlutterPluginUtils.getTargetPlatforms(project).collect()
-        platforms.each { platform ->
-            String arch = FlutterPluginUtils.formatPlatformString(platform)
-            // Add the `libflutter.so` dependency.
-            FlutterPluginUtils.addApiDependencies(project, buildType.name,
-                    "io.flutter:${arch}_$flutterBuildMode:$engineVersion")
-        }
-    }
-    private List<Map<String, Object>> getPluginListWithoutDevDependencies(Project project) {
-        List<Map<String, Object>> pluginListWithoutDevDependencies = []
-        for (Map<String, Object> plugin in getPluginList(project)) {
-            if (!plugin.dev_dependency) {
-                pluginListWithoutDevDependencies += plugin
-            } else {
-                println("HI GRAY, FOUND DEV DEPENDENCY " + plugin.toString())
-            }
-        }
-        return pluginListWithoutDevDependencies
+        FlutterPluginUtils.addFlutterDependencies(project, buildType, getPluginList(project), engineVersion)
     }
 
     /**
