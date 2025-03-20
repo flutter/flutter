@@ -76,7 +76,6 @@ class SemanticScrollable extends SemanticRole {
       if (!EngineSemantics.instance.shouldAcceptBrowserGesture('scroll')) {
         return;
       }
-      final bool doScrollForward = _domScrollPosition > _effectiveNeutralScrollPosition;
       final double scrollDelta = (_domScrollPosition - _previousDomScrollPosition).toDouble();
       final double? scrollOffset = semanticsObject.scrollPosition;
       final double newScrollOffset = scrollOffset! + scrollDelta;
@@ -92,41 +91,12 @@ class SemanticScrollable extends SemanticRole {
       offsets[1] = newScrollOffset;
       final ByteData? message = const StandardMessageCodec().encodeMessage(offsets);
 
-      if (doScrollForward) {
-        if (semanticsObject.isVerticalScrollContainer) {
-          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-            viewId,
-            semanticsId,
-            ui.SemanticsAction.scrollToOffset,
-            message,
-          );
-        } else {
-          assert(semanticsObject.isHorizontalScrollContainer);
-          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-            viewId,
-            semanticsId,
-            ui.SemanticsAction.scrollLeft,
-            null,
-          );
-        }
-      } else {
-        if (semanticsObject.isVerticalScrollContainer) {
-          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-            viewId,
-            semanticsId,
-            ui.SemanticsAction.scrollToOffset,
-            message,
-          );
-        } else {
-          assert(semanticsObject.isHorizontalScrollContainer);
-          EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-            viewId,
-            semanticsId,
-            ui.SemanticsAction.scrollRight,
-            null,
-          );
-        }
-      }
+      EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+        viewId,
+        semanticsId,
+        ui.SemanticsAction.scrollToOffset,
+        message,
+      );
     }
   }
 
