@@ -19,6 +19,7 @@ library;
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -299,11 +300,13 @@ class _OverlayEntryWidget extends StatefulWidget {
     required this.entry,
     required this.overlayState,
     this.tickerEnabled = true,
+    this.visible = true,
   });
 
   final OverlayEntry entry;
   final OverlayState overlayState;
   final bool tickerEnabled;
+  final bool visible;
 
   @override
   _OverlayEntryWidgetState createState() => _OverlayEntryWidgetState();
@@ -421,7 +424,11 @@ class _OverlayEntryWidgetState extends State<_OverlayEntryWidget> {
       child: _RenderTheaterMarker(
         theater: _theater,
         overlayEntryWidgetState: this,
-        child: widget.entry.builder(context),
+        // This is added to track visibility in subtree.
+        child: Visibility.maintain(
+          visible: widget.visible,
+          child: widget.entry.builder(context),
+        ),
       ),
     );
   }
@@ -882,6 +889,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
             overlayState: this,
             entry: entry,
             tickerEnabled: false,
+            visible: false,
           ),
         );
       }
@@ -1425,6 +1433,8 @@ class _RenderTheater extends RenderBox
 
     // Equivalent to BoxConstraints used by RenderStack for StackFit.expand.
     final BoxConstraints nonPositionedChildConstraints = BoxConstraints.tight(size);
+    // In contrast to an offstage widget, the offstage children are not laid out at all.
+    // We should either layout them, or disallow unlayouted widgets, to paint.
     for (final RenderBox child in _childrenInPaintOrder()) {
       if (child != sizeDeterminingChild) {
         layoutChild(child, nonPositionedChildConstraints);
