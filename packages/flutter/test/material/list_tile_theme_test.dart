@@ -1111,64 +1111,19 @@ void main() {
     expect(theme.isThreeLine, false);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/165453
   testWidgets('ListTileThemeData isThreeLine', (WidgetTester tester) async {
     const double height = 300;
     const double avatarTop = 130.0;
     const double placeholderTop = 138.0;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: ListView(
-            children: const <Widget>[
-              ListTile(
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
-              ),
-              ListTile(
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(
-      tester.getRect(find.byType(ListTile).at(0)),
-      const Rect.fromLTWH(0.0, 0.0, 800.0, height),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(0)),
-      const Rect.fromLTWH(16.0, avatarTop, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(0)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop, 24.0, 24.0),
-    );
-    expect(
-      tester.getRect(find.byType(ListTile).at(1)),
-      const Rect.fromLTWH(0.0, height, 800.0, 72.0),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(1)),
-      const Rect.fromLTWH(16.0, height + 16.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(1)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 24.0, 24.0, 24.0),
-    );
-
-    // THREE-LINE
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildFrame({bool? isThreeLine}) {
+      return MaterialApp(
         key: UniqueKey(),
-        theme: ThemeData(listTileTheme: const ListTileThemeData(isThreeLine: true)),
+        theme:
+            isThreeLine != null
+                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: isThreeLine))
+                : null,
         home: Material(
           child: ListView(
             children: const <Widget>[
@@ -1187,35 +1142,74 @@ void main() {
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    expect(
-      tester.getRect(find.byType(ListTile).at(0)),
-      const Rect.fromLTWH(0.0, 0.0, 800.0, height),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(0)),
-      const Rect.fromLTWH(16.0, 8.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(0)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, 8.0, 24.0, 24.0),
-    );
-    expect(
-      tester.getRect(find.byType(ListTile).at(1)),
-      const Rect.fromLTWH(0.0, height, 800.0, 88.0),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(1)),
-      const Rect.fromLTWH(16.0, height + 8.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(1)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0, 24.0, 24.0),
-    );
+    void testTowLine() {
+      expect(
+        tester.getRect(find.byType(ListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(0)),
+        const Rect.fromLTWH(16.0, avatarTop, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(0)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop, 24.0, 24.0),
+      );
+      expect(
+        tester.getRect(find.byType(ListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(1)),
+        const Rect.fromLTWH(16.0, height + 16.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(1)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 24.0, 24.0, 24.0),
+      );
+    }
+
+    void testThreeLine() {
+      expect(
+        tester.getRect(find.byType(ListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(0)),
+        const Rect.fromLTWH(16.0, 8.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(0)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, 8.0, 24.0, 24.0),
+      );
+      expect(
+        tester.getRect(find.byType(ListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(1)),
+        const Rect.fromLTWH(16.0, height + 8.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(1)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0, 24.0, 24.0),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    testTowLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: false));
+    testTowLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    testThreeLine();
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/165453
   testWidgets('ListTileTheme isThreeLine', (WidgetTester tester) async {
     const double height = 300;
     const double avatarTop = 130.0;

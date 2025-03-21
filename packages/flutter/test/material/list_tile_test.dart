@@ -4362,214 +4362,135 @@ void main() {
     });
   });
 
-
-  testWidgets('ListTile isThreeLine ', (WidgetTester tester,) async {
+  // Regression test for https://github.com/flutter/flutter/issues/165453
+  testWidgets('ListTile isThreeLine ', (WidgetTester tester) async {
     const double height = 300;
     const double avatarTop = 130.0;
     const double placeholderTop = 138.0;
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: ListView(
-            children: const <Widget>[
-              ListTile(
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
-              ),
-              ListTile(
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-
-    expect(
-      tester.getRect(find.byType(ListTile).at(0)),
-      const Rect.fromLTWH(0.0, 0.0, 800.0, height),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(0)),
-      const Rect.fromLTWH(16.0, avatarTop, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(0)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop, 24.0, 24.0),
-    );
-    expect(
-      tester.getRect(find.byType(ListTile).at(1)),
-      const Rect.fromLTWH(0.0, height, 800.0, 72.0),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(1)),
-      const Rect.fromLTWH(16.0, height + 16.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(1)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 24.0, 24.0, 24.0),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
+    Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
+      return MaterialApp(
         key: UniqueKey(),
-        theme: ThemeData(listTileTheme: const ListTileThemeData(isThreeLine: false)),
+        theme:
+            themeDataIsThreeLine != null
+                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+                : null,
         home: Material(
-          child: ListView(
-            children: const <Widget>[
-              ListTile(
-                isThreeLine: true,
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
-              ),
-              ListTile(
-                isThreeLine: true,
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A'),
-              ),
-            ],
+          child: ListTileTheme(
+            isThreeLine: themeIsThreeLine,
+            child: ListView(
+              children: <Widget>[
+                ListTile(
+                  isThreeLine: isThreeLine,
+                  leading: const CircleAvatar(),
+                  trailing: const SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                  title: const Text('A'),
+                  subtitle: const Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
+                ),
+                ListTile(
+                  isThreeLine: isThreeLine,
+                  leading: const CircleAvatar(),
+                  trailing: const SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
+                  title: const Text('A'),
+                  subtitle: const Text('A'),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    expect(
-      tester.getRect(find.byType(ListTile).at(0)),
-      const Rect.fromLTWH(0.0, 0.0, 800.0, height),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(0)),
-      const Rect.fromLTWH(16.0, 8.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(0)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, 8.0, 24.0, 24.0),
-    );
-    expect(
-      tester.getRect(find.byType(ListTile).at(1)),
-      const Rect.fromLTWH(0.0, height, 800.0, 88.0),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(1)),
-      const Rect.fromLTWH(16.0, height + 8.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(1)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0, 24.0, 24.0),
-    );
+    void testTowLine() {
+      expect(
+        tester.getRect(find.byType(ListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(0)),
+        const Rect.fromLTWH(16.0, avatarTop, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(0)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop, 24.0, 24.0),
+      );
+      expect(
+        tester.getRect(find.byType(ListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 72.0),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(1)),
+        const Rect.fromLTWH(16.0, height + 16.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(1)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 24.0, 24.0, 24.0),
+      );
+    }
 
+    void testThreeLine() {
+      expect(
+        tester.getRect(find.byType(ListTile).at(0)),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, height),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(0)),
+        const Rect.fromLTWH(16.0, 8.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(0)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, 8.0, 24.0, 24.0),
+      );
+      expect(
+        tester.getRect(find.byType(ListTile).at(1)),
+        const Rect.fromLTWH(0.0, height, 800.0, 88.0),
+      );
+      expect(
+        tester.getRect(find.byType(CircleAvatar).at(1)),
+        const Rect.fromLTWH(16.0, height + 8.0, 40.0, 40.0),
+      );
+      expect(
+        tester.getRect(find.byType(Placeholder).at(1)),
+        const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0, 24.0, 24.0),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    testTowLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
+    testThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
+    testThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
+    testTowLine();
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true));
+    testThreeLine();
+
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
+    testTowLine();
+
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
+    testTowLine();
 
     await tester.pumpWidget(
-      MaterialApp(
-        key: UniqueKey(),
-        theme: ThemeData(listTileTheme: const ListTileThemeData(isThreeLine: true)),
-        home: Material(
-          child: ListView(
-            children: const <Widget>[
-              ListTile(
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
-              ),
-              ListTile(
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
     );
+    testTowLine();
 
-    expect(
-      tester.getRect(find.byType(ListTile).at(0)),
-      const Rect.fromLTWH(0.0, 0.0, 800.0, height),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(0)),
-      const Rect.fromLTWH(16.0, 8.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(0)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, 8.0, 24.0, 24.0),
-    );
-    expect(
-      tester.getRect(find.byType(ListTile).at(1)),
-      const Rect.fromLTWH(0.0, height, 800.0, 88.0),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(1)),
-      const Rect.fromLTWH(16.0, height + 8.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(1)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0, 24.0, 24.0),
-    );
+    await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
+    testThreeLine();
 
+    await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
+    testThreeLine();
 
     await tester.pumpWidget(
-      MaterialApp(
-        key: UniqueKey(),
-        theme: ThemeData(listTileTheme: const ListTileThemeData(isThreeLine: true)),
-        home: Material(
-          child: ListView(
-            children: const <Widget>[
-              ListTile(
-                isThreeLine: false,
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A\nB\nC\nD\nE\nF\nG\nH\nI\nJ\nK\nL\nM'),
-              ),
-              ListTile(
-                isThreeLine: false,
-                leading: CircleAvatar(),
-                trailing: SizedBox(height: 24.0, width: 24.0, child: Placeholder()),
-                title: Text('A'),
-                subtitle: Text('A'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
     );
-    expect(
-      tester.getRect(find.byType(ListTile).at(0)),
-      const Rect.fromLTWH(0.0, 0.0, 800.0, height),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(0)),
-      const Rect.fromLTWH(16.0, avatarTop, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(0)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, placeholderTop, 24.0, 24.0),
-    );
-    expect(
-      tester.getRect(find.byType(ListTile).at(1)),
-      const Rect.fromLTWH(0.0, height, 800.0, 72.0),
-    );
-    expect(
-      tester.getRect(find.byType(CircleAvatar).at(1)),
-      const Rect.fromLTWH(16.0, height + 16.0, 40.0, 40.0),
-    );
-    expect(
-      tester.getRect(find.byType(Placeholder).at(1)),
-      const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 24.0, 24.0, 24.0),
-    );
+    testThreeLine();
   });
 }
 

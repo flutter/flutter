@@ -546,13 +546,6 @@ class ListTileTheme extends InheritedTheme {
   ListTileControlAffinity? get controlAffinity =>
       _data != null ? _data.controlAffinity : _controlAffinity;
 
-  /// Overrides the default value of [CheckboxListTile.isThreeLine]
-  /// or [SwitchListTile.isThreeLine] or [RadioListTile.isThreeLine]
-  ///
-  /// This property is obsolete: please use the
-  /// [ListTileThemeData.isThreeLine] property instead.
-  bool? get isThreeLine => _data != null ? _data.isThreeLine : _isThreeLine;
-
   /// The [data] property of the closest instance of this class that
   /// encloses the given context.
   ///
@@ -650,7 +643,7 @@ class ListTileTheme extends InheritedTheme {
         horizontalTitleGap: horizontalTitleGap,
         minVerticalPadding: minVerticalPadding,
         minLeadingWidth: minLeadingWidth,
-        isThreeLine: isThreeLine,
+        isThreeLine: _data != null ? _data.isThreeLine : _isThreeLine,
       ),
       child: child,
     );
