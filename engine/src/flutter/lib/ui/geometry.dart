@@ -1980,7 +1980,6 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     super.brRadiusY = 0.0,
     super.blRadiusX = 0.0,
     super.blRadiusY = 0.0,
-    this.precomputedParam = null,
   });
 
   @override
@@ -2012,37 +2011,8 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     brRadiusY: brRadiusY,
   );
 
-  final _RSuperellipseParam? precomputedParam;
-
-  /// Returns an [RSuperellipse] instance with the same parameters that can
-  /// cache intermediate values.
-  ///
-  /// All shape-related calculations (such as [contains]) are
-  /// performed by delegating to computed instances. Consider reusing computed
-  /// instances for better performance.
-  ///
-  /// If this object is already computed, this method returns itself instead of
-  /// creating a new instance.
-  RSuperellipse precomputed() {
-    return RSuperellipse._raw(
-      top: top,
-      left: left,
-      right: right,
-      bottom: bottom,
-      tlRadiusX: tlRadiusX,
-      tlRadiusY: tlRadiusY,
-      trRadiusX: trRadiusX,
-      trRadiusY: trRadiusY,
-      blRadiusX: blRadiusX,
-      blRadiusY: blRadiusY,
-      brRadiusX: brRadiusX,
-      brRadiusY: brRadiusY,
-      precomputedParam: _RSuperellipseParam(this),
-    );
-  }
-
   _RSuperellipseParam _param() {
-    return precomputedParam ?? _RSuperellipseParam(this);
+    return _RSuperellipseParam(this);
   }
 
   /// Whether the point specified by the given offset (which is assumed to be

@@ -68,10 +68,7 @@ void RSuperellipse::Create(Dart_Handle wrapper,
 
 RSuperellipse::RSuperellipse(flutter::DlRect bounds,
                              impeller::RoundingRadii radii)
-    : bounds_(bounds),
-      radii_(radii),
-      param_(impeller::RoundSuperellipseParam::MakeBoundsRadii(bounds, radii)) {
-}
+    : bounds_(bounds), radii_(radii) {}
 
 RSuperellipse::~RSuperellipse() = default;
 
@@ -79,9 +76,12 @@ flutter::DlRoundSuperellipse RSuperellipse::rsuperellipse() const {
   return flutter::DlRoundSuperellipse::MakeRectRadii(bounds_, radii_);
 }
 
+impeller::RoundSuperellipseParam RSuperellipse::param() const {
+  return impeller::RoundSuperellipseParam::MakeBoundsRadii(bounds_, radii_);
+}
+
 bool RSuperellipse::contains(double x, double y) {
-  return param_.Contains(
-      DlPoint(SafeNarrow(x), SafeNarrow(y)));
+  return param().Contains(DlPoint(SafeNarrow(x), SafeNarrow(y)));
 }
 
 }  // namespace flutter
