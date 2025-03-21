@@ -1725,33 +1725,33 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
-  /// IMPORTANT: This offset is applied AFTER any [alignment] transformation.
-  /// Since [alignment] defaults to [Alignment.center], the origin offset will be
-  /// relative to the center of the widget, not the top-left corner, unless
-  /// alignment is explicitly modified.
+  /// This offset is applied after any [alignment] transformation.
+  /// In this example, the origin appears to be offset from the center of the,
+  /// widget, since [alignment] defaults to [Alignment.center].
   ///
-  /// Example of unexpected behavior with default alignment:
   /// ```dart
   /// Transform.rotate(
   ///   angle: math.pi,
-  ///   origin: const Offset(100, 100), // Offset from center, not top-left
-  ///   child: const Text("I am rotating off of the center"),
+  ///   origin: const Offset(100, 100), 
+  ///   child: const Text('I am rotating off of the center'),
   /// )
   /// ```
   ///
-  /// To make origin truly relative to top-left corner:
+  /// In this example, the origin does appear to be offset relative to the
+  /// top-left corner.
+  ///
   /// ```dart
   /// Transform.rotate(
   ///   angle: math.pi,
-  ///   alignment: Alignment.topLeft, // Must set this first
-  ///   origin: const Offset(100, 100), // Now correctly offset from top-left
-  ///   child: const Text("I am rotating correctly from the center"),
+  ///   alignment: Alignment.topLeft, // Now the alignment is explicitly set to topLeft.
+  ///   origin: const Offset(100, 100), 
+  ///   child: const Text('I am rotating correctly from the center'),
   /// )
   /// ```
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
-  /// translation. While this property is provided for convenience, care must be
-  /// taken to account for its interaction with the default center alignment.
+  /// translation. This property is provided just for convenience.
+    
   final Offset? origin;
 
   /// The alignment of the origin, relative to the size of the box.
