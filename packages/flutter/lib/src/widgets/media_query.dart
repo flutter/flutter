@@ -2003,9 +2003,15 @@ final class SystemTextScaler extends TextScaler {
     if (identical(this, other)) {
       return true;
     }
-    // The system's text scale factor is used for the equality check because the
-    // `scale` function's output monotonically increases with the text scale factor.
-    return other is SystemTextScaler && textScaleFactor == other.textScaleFactor;
+    return switch (other) {
+      // The system's text scale factor is used for the equality check because the
+      // `scale` function's output monotonically increases with the text scale factor.
+      SystemTextScaler(:final double textScaleFactor) => this.textScaleFactor == textScaleFactor,
+      // When textScaleFactor is 1.0, the two TextScalers are extensionally
+      // equivalent.
+      TextScaler.noScaling => textScaleFactor == 1.0,
+      _ => false,
+    };
   }
 
   @override
