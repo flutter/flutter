@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
+import '../ios/code_signing.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
 
@@ -28,10 +29,17 @@ class ConfigCommand extends FlutterCommand {
           'and "--${FlutterGlobalOptions.kDisableAnalyticsFlag}" top level flags.)',
     );
     argParser.addFlag(
-      'clear-ios-signing-cert',
+      'clear-ios-signing-settings',
+      negatable: false,
+      aliases: <String>['clear-ios-signing-cert'],
+      help:
+          'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
+    );
+    argParser.addFlag(
+      'select-ios-signing-settings',
       negatable: false,
       help:
-          'Clear the saved development certificate choice used to sign apps for iOS device deployment.',
+          'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
     );
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption(
@@ -153,8 +161,23 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('jdk-dir', stringArg('jdk-dir')!);
     }
 
-    if (argResults!.wasParsed('clear-ios-signing-cert')) {
-      _updateConfig('ios-signing-cert', '');
+    if (argResults!.wasParsed('clear-ios-signing-settings')) {
+      XcodeCodeSigningSettings.resetSettings(globals.config, globals.logger);
+    }
+
+    if (argResults!.wasParsed('select-ios-signing-settings')) {
+      final XcodeCodeSigningSettings settings = XcodeCodeSigningSettings(
+        config: globals.config,
+        logger: globals.logger,
+        platform: globals.platform,
+        processUtils: globals.processUtils,
+        fileSystem: globals.fs,
+        fileSystemUtils: globals.fsUtils,
+        terminal: globals.terminal,
+        plistParser: globals.plistParser,
+      );
+
+      await settings.selectSettings();
     }
 
     if (argResults!.wasParsed('build-dir')) {
