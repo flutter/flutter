@@ -382,6 +382,61 @@ void main() {
     );
   });
 
+  testWidgets('Should announce error text when validateGranularly is called', (
+      WidgetTester tester,
+      ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    const String validString = 'Valid string';
+    String? validator(String? s) => s == validString ? null : 'error';
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: ListView(
+                    children: <Widget>[
+                      TextFormField(
+                        initialValue: validString,
+                        validator: validator,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                      TextFormField(
+                        initialValue: '',
+                        validator: validator,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+    expect(find.text('error'), findsNothing);
+
+    formKey.currentState!.validateGranularly();
+
+    await tester.pump();
+    expect(find.text('error'), findsOneWidget);
+
+    final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
+    expect(announcement.message, 'error');
+    expect(announcement.textDirection, TextDirection.ltr);
+    expect(announcement.assertiveness, Assertiveness.assertive);
+    debugDefaultTargetPlatformOverride = null;
+  });
+
   testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
