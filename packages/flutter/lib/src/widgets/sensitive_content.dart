@@ -26,11 +26,11 @@ class _ContentSensitivitySetting {
   /// The number of [SensitiveContent] widgets that have sensitivity [ContentSensitivity.notSensitive].
   int _notSensitiveWigetCount = 0;
 
-  void _reportUnknownContentSensitivityDetected(ContentSensitivity sensitivity) {
+  static void _reportUnknownContentSensitivityDetected(ContentSensitivity sensitivity) {
     FlutterError.reportError(
       FlutterErrorDetails(
         exception: FlutterError(
-          'Removing a SensitiveContent widget with ContentSensitivity $sensitivity is unsupported by _ContentSensitivitySetting',
+          'SensitiveContent widgets with ContentSensitivity $sensitivity is unsupported by _ContentSensitivitySetting',
         ),
         library: 'widget library',
         stack: StackTrace.current,
@@ -56,7 +56,7 @@ class _ContentSensitivitySetting {
     }
   }
 
-  String _getNegativeWidgetCountErrorMessage(ContentSensitivity sensitivity, int count) {
+  static String _getNegativeWidgetCountErrorMessage(ContentSensitivity sensitivity, int count) {
     return 'A negative amount ($count) of $sensitivity SensitiveContent widgets have been detected, which is not expected. Please file an issue.';
   }
 
@@ -168,7 +168,7 @@ class SensitiveContentHost {
               'Unknown content sensitivity set in the Android embedding or by default: $e}',
             ),
             library: 'widget library',
-            stack: StackTrace.current,
+            stack: e.stackTrace,
           ),
         );
       }
@@ -197,12 +197,12 @@ class SensitiveContentHost {
       await _sensitiveContentService.setContentSensitivity(
         _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts!,
       );
-    } catch (e) {
+    } on FlutterError catch (e) {
       FlutterError.reportError(
         FlutterErrorDetails(
-          exception: FlutterError('Attempted to set $desiredSensitivity sensitivity failed: $e}'),
+          exception: FlutterError('Attempt to set $desiredSensitivity sensitivity failed: $e}'),
           library: 'widget library',
-          stack: StackTrace.current,
+          stack: e.stackTrace,
         ),
       );
     }
@@ -245,14 +245,14 @@ class SensitiveContentHost {
 
       try {
         await _sensitiveContentService.setContentSensitivity(_fallbackContentSensitivitySetting!);
-      } catch (e) {
+      } on FlutterError catch (e) {
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: FlutterError(
               'Attempted to set $_fallbackContentSensitivitySetting sensitivity failed: $e}',
             ),
             library: 'widget library',
-            stack: StackTrace.current,
+            stack: e.stackTrace,
           ),
         );
       }
@@ -268,14 +268,14 @@ class SensitiveContentHost {
       // Set content sensitivity as contentSensitivityToRestore.
       try {
         await _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
-      } catch (e) {
+      } on FlutterError catch (e) {
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: FlutterError(
               'Attempted to set $_fallbackContentSensitivitySetting sensitivity failed: $e}',
             ),
             library: 'widget library',
-            stack: StackTrace.current,
+            stack: e.stackTrace,
           ),
         );
       }
