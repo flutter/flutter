@@ -10,13 +10,14 @@ namespace impeller {
 
 std::shared_ptr<Texture> CreateTexture(
     const TextureDescriptor& texture_descriptor,
-    const std::vector<uint8_t> data,
+    const std::vector<uint8_t>& data,
     const std::shared_ptr<impeller::Context>& context,
     std::string_view debug_label) {
   std::shared_ptr<Texture> texture =
       context->GetResourceAllocator()->CreateTexture(texture_descriptor);
 
-  auto data_mapping = std::make_shared<fml::DataMapping>(data);
+  auto data_mapping =
+      std::make_shared<fml::NonOwnedMapping>(data.data(), data.size());
   std::shared_ptr<DeviceBuffer> buffer =
       context->GetResourceAllocator()->CreateBufferWithCopy(*data_mapping);
 

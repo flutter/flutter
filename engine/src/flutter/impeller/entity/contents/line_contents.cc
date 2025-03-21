@@ -72,7 +72,7 @@ std::shared_ptr<Texture> CreateCurveTexture(
   std::vector<uint8_t> curve_data;
   curve_data.reserve(kCurveResolution);
   for (int i = 0; i < kCurveResolution; ++i) {
-    double norm = (double(i) + 1.0) / 32.0;
+    double norm = (static_cast<double>(i) + 1.0) / 32.0;
     double loc = norm * (kSampleRadius + width / 2.0);
     double den = kSampleRadius * 2.0 + 1.0;
     curve_data.push_back(DoubleToUint8(loc / den));
@@ -178,7 +178,7 @@ bool LineContents::Render(const ContentContext& renderer,
         return true;
       },
       /*force_stencil=*/false,
-      /*create_geometry_callback=*/CreateGeometry);
+      /*create_geom_callback=*/CreateGeometry);
 }
 
 std::optional<Rect> LineContents::GetCoverage(const Entity& entity) const {

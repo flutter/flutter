@@ -14,7 +14,7 @@ namespace impeller {
 
 std::shared_ptr<Texture> CreateTexture(
     const TextureDescriptor& texture_descriptor,
-    const std::vector<uint8_t> data,
+    const std::vector<uint8_t>& data,
     const std::shared_ptr<impeller::Context>& context,
     std::string_view debug_label);
 
