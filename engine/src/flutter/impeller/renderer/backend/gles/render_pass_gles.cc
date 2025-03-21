@@ -482,15 +482,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     //--------------------------------------------------------------------------
     /// Determine the primitive type.
     ///
-    // GLES doesn't support setting the fill mode, so override the primitive
-    // with GL_LINE_STRIP to somewhat emulate PolygonMode::kLine. This isn't
-    // correct; full triangle outlines won't be drawn and disconnected
-    // geometry may appear connected. However this can still be useful for
-    // wireframe debug views.
-    GLenum mode =
-        pipeline.GetDescriptor().GetPolygonMode() == PolygonMode::kLine
-            ? GL_LINE_STRIP
-            : ToMode(pipeline.GetDescriptor().GetPrimitiveType());
+    GLenum mode = ToMode(pipeline.GetDescriptor().GetPrimitiveType());
 
     //--------------------------------------------------------------------------
     /// Finally! Invoke the draw call.
