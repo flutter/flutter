@@ -846,6 +846,7 @@ class ThemeData with Diagnosticable {
 
   factory ThemeData._highContrast({
     required bool useMaterial3,
+    required Color seedColor,
     required ColorScheme colorScheme,
     required TextTheme textTheme,
     SystemColorPalette? systemColors,
@@ -855,11 +856,13 @@ class ThemeData with Diagnosticable {
             ? ThemeData.from(
               useMaterial3: useMaterial3,
               colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF6750A4),
+                seedColor: seedColor,
                 brightness: colorScheme.brightness,
                 contrastLevel: 1.0,
-                primary: colorScheme.primary,
-                onPrimary: colorScheme.onPrimary,
+
+                // QUESTION: Should we omit primary and onPrimary?
+                // primary: colorScheme.primary,
+                // onPrimary: colorScheme.onPrimary,
                 secondary: colorScheme.secondary,
                 onSecondary: colorScheme.onSecondary,
                 surface: colorScheme.surface,
@@ -867,7 +870,8 @@ class ThemeData with Diagnosticable {
                 error: colorScheme.error,
                 onError: colorScheme.onError,
               ),
-              // textTheme: textTheme, ???
+              // QUESTION: Should we omit textTheme and ask users to do `ThemeData.localize`?
+              textTheme: textTheme,
             )
             : ThemeData.from(
               useMaterial3: useMaterial3,
@@ -882,31 +886,31 @@ class ThemeData with Diagnosticable {
     return theme.copyWith(
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          foregroundColor: systemColors.buttonText?.value,
-          backgroundColor: systemColors.buttonFace?.value,
+          foregroundColor: systemColors.buttonText.value,
+          backgroundColor: systemColors.buttonFace.value,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: systemColors.buttonText?.value,
-          backgroundColor: systemColors.buttonFace?.value,
+          foregroundColor: systemColors.buttonText.value,
+          backgroundColor: systemColors.buttonFace.value,
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: systemColors.buttonText?.value,
-          backgroundColor: systemColors.buttonFace?.value,
+          foregroundColor: systemColors.buttonText.value,
+          backgroundColor: systemColors.buttonFace.value,
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          foregroundColor: systemColors.buttonText?.value,
-          backgroundColor: systemColors.buttonFace?.value,
+          foregroundColor: systemColors.buttonText.value,
+          backgroundColor: systemColors.buttonFace.value,
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: systemColors.buttonFace?.value,
-        foregroundColor: systemColors.buttonText?.value,
+        backgroundColor: systemColors.buttonFace.value,
+        foregroundColor: systemColors.buttonText.value,
       ),
     );
   }
@@ -914,6 +918,7 @@ class ThemeData with Diagnosticable {
   factory ThemeData.highContrastLight({bool useMaterial3 = true}) {
     return ThemeData._highContrast(
       useMaterial3: useMaterial3,
+      seedColor: const Color(0xFF6750A4),
       colorScheme: ColorScheme.highContrastLight(),
       textTheme: Typography.highContrastLight,
       systemColors: SystemColor.platformProvidesSystemColors ? SystemColor.light : null,
@@ -923,6 +928,7 @@ class ThemeData with Diagnosticable {
   factory ThemeData.highContrastDark({bool useMaterial3 = true}) {
     return ThemeData._highContrast(
       useMaterial3: useMaterial3,
+      seedColor: const Color(0xFFD0BCFF),
       colorScheme: ColorScheme.highContrastDark(),
       textTheme: Typography.highContrastDark,
       systemColors: SystemColor.platformProvidesSystemColors ? SystemColor.dark : null,
