@@ -16,13 +16,6 @@ import 'package:ui/ui.dart' as ui;
 /// to the framework where it applies the value to its scrollable and we receive a
 /// [ui.SemanticsUpdate] containing the new [SemanticsObject.scrollPosition] and
 /// child positions.
-///
-/// "scrollTop" or "scrollLeft" is always reset to an arbitrarily chosen non-
-/// zero "neutral" scroll position value. This is done so we have a
-/// predictable range of DOM scroll position values. When the amount of
-/// contents is less than the size of the viewport the browser snaps
-/// "scrollTop" back to zero. If there is more content than available in the
-/// viewport "scrollTop" may take positive values.
 class SemanticScrollable extends SemanticRole {
   SemanticScrollable(SemanticsObject semanticsObject)
     : super.withBasics(
