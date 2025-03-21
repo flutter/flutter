@@ -29,6 +29,7 @@ import '../widgets/editable_text_utils.dart';
 import '../widgets/feedback_tester.dart';
 import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
+import '../widgets/semantic_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
 
@@ -8945,12 +8946,13 @@ void main() {
     semantics.dispose();
   });
 
-  for (final bool isAndroid in <bool>[true, false]) {
-    testWidgets(
-        'InputDecoration errorText semantics (isAndroid=$isAndroid)', (
-        WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride =
-      isAndroid ? TargetPlatform.android : TargetPlatform.iOS;
+  for (final bool isAnnounceSupported in <bool>[true, false]) {
+    testWidgets('InputDecoration errorText semantics (isAnnounceSupported=$isAnnounceSupported)', (
+      WidgetTester tester,
+    ) async {
+      final MockSemanticsService mockSemanticsService = MockSemanticsService();
+      mockSemanticsService.mockIsAnnounceSupported = isAnnounceSupported;
+
       final SemanticsTester semantics = SemanticsTester(tester);
       final TextEditingController controller = _textEditingController();
       final Key key = UniqueKey();
@@ -8960,7 +8962,8 @@ void main() {
           child: TextField(
             key: key,
             controller: controller,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
+              semanticsService: mockSemanticsService,
               labelText: 'label',
               hintText: 'hint',
               errorText: 'oh no!',
@@ -8977,10 +8980,7 @@ void main() {
               TestSemantics.rootChild(
                 label: 'label',
                 textDirection: TextDirection.ltr,
-                actions: <SemanticsAction>[
-                  SemanticsAction.tap,
-                  SemanticsAction.focus
-                ],
+                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
                 flags: <SemanticsFlag>[
                   SemanticsFlag.isTextField,
                   SemanticsFlag.hasEnabledState,
@@ -8988,14 +8988,11 @@ void main() {
                 ],
                 inputType: ui.SemanticsInputType.text,
               currentValueLength: 0,children: <TestSemantics>[
-                    TestSemantics(
-                      label: 'oh no!',
-                      textDirection: TextDirection.ltr,
-                      flags: <SemanticsFlag>[
-                        if (isAndroid)
-                          SemanticsFlag.isLiveRegion
-                      ],
-                    )
+                  TestSemantics(
+                    label: 'oh no!',
+                    textDirection: TextDirection.ltr,
+                    flags: <SemanticsFlag>[if (!isAnnounceSupported) SemanticsFlag.isLiveRegion],
+                  ),
                 ],
               ),
             ],
