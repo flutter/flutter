@@ -395,11 +395,11 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configurePlugins(Project project) {
         configureLegacyPluginEachProjects(project)
-        getPluginList(project).each {
-            FlutterPluginUtils.configurePluginProject(project, it, engineVersion)
+        getPluginList(project).each { Map<String, Object> plugin ->
+            FlutterPluginUtils.configurePluginProject(project, plugin, engineVersion)
         }
-        getPluginList(project).each {
-            FlutterPluginUtils.configurePluginDependencies(project, it)
+        getPluginList(project).each {Map<String, Object> plugin ->
+            FlutterPluginUtils.configurePluginDependencies(project, plugin)
         }
     }
 
