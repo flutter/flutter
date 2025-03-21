@@ -24,6 +24,14 @@ class Point {
     return x_ == other.x_ && y_ == other.y_;
   }
 
+  Point operator+(const Point& other) const {
+    return Point(x_ + other.x_, y_ + other.y_);
+  }
+
+  Point operator-(const Point& other) const {
+    return Point(x_ - other.x_, y_ - other.y_);
+  }
+
  private:
   double x_ = 0.0;
   double y_ = 0.0;
@@ -45,10 +53,32 @@ class Size {
   bool operator==(const Size& other) const {
     return width_ == other.width_ && height_ == other.height_;
   }
+  bool operator!=(const Size& other) const { return !(*this == other); }
 
  private:
   double width_ = 0.0;
   double height_ = 0.0;
+};
+
+// A displacement in Cartesian space.
+class Offset {
+ public:
+  Offset() = default;
+  Offset(double dx, double dy) : dx_(dx), dy_(dy) {}
+  Offset(const Offset&) = default;
+  Offset& operator=(const Offset&) = default;
+
+  double dx() const { return dx_; }
+  double dy() const { return dy_; }
+
+  bool operator==(const Offset& other) const {
+    return dx_ == other.dx_ && dy_ == other.dy_;
+  }
+  bool operator!=(const Offset& other) const { return !(*this == other); }
+
+ private:
+  double dx_ = 0.0;
+  double dy_ = 0.0;
 };
 
 // A rectangle with position in Cartesian space specified relative to a
@@ -68,6 +98,15 @@ class Rect {
   double height() const { return size_.height(); }
   Point origin() const { return origin_; }
   Size size() const { return size_; }
+  // Checks if this rectangle fully contains |rect|.
+  // Note: An empty rectangle can still contain other empty rectangles,
+  // which are treated as points or lines of thickness zero
+  bool contains(Rect const& rect) const {
+    return rect.left() >= origin_.x() &&
+           rect.left() + rect.width() <= origin_.x() + size_.width() &&
+           rect.top() >= origin_.y() &&
+           rect.top() + rect.height() <= origin_.y() + size_.height();
+  }
 
   bool operator==(const Rect& other) const {
     return origin_ == other.origin_ && size_ == other.size_;

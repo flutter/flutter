@@ -2189,6 +2189,119 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
                             receiver.TakePath());
         break;
       }
+      case MutatorType::kClipRSE: {
+        const DlRoundRect& rrect = (*iter)->GetRSEApproximation();
+        const DlRect& rect = rrect.GetBounds();
+        const DlRoundingRadii& radii = rrect.GetRadii();
+        SkScalar radiis[8] = {
+            radii.top_left.width,     radii.top_left.height,
+            radii.top_right.width,    radii.top_right.height,
+            radii.bottom_right.width, radii.bottom_right.height,
+            radii.bottom_left.width,  radii.bottom_left.height,
+        };
+        fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
+            env, env->NewFloatArray(8));
+        env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
+        env->CallVoidMethod(mutatorsStack,
+                            g_mutators_stack_push_cliprrect_method,
+                            static_cast<int>(rect.GetLeft()),    //
+                            static_cast<int>(rect.GetTop()),     //
+                            static_cast<int>(rect.GetRight()),   //
+                            static_cast<int>(rect.GetBottom()),  //
+                            radiisArray.obj());
+        break;
+      }
+      case MutatorType::kOpacity: {
+        float opacity = (*iter)->GetAlphaFloat();
+        env->CallVoidMethod(mutatorsStack, g_mutators_stack_push_opacity_method,
+                            opacity);
+        break;
+      }
+      case MutatorType::kClipPath: {
+        auto& dlPath = (*iter)->GetPath();
+        // The layer mutator mechanism should have already caught and
+        // redirected these simplified path cases, which is important because
+        // the conics they generate (in the case of oval and rrect) will
+        // not match the results of an impeller path conversion very closely.
+        FML_DCHECK(!dlPath.IsRect());
+        FML_DCHECK(!dlPath.IsOval());
+        FML_DCHECK(!dlPath.IsRoundRect());
+
+        // Define and populate an Android Path with data from the DlPath
+        jobject androidPath =
+            env->NewObject(path_class->obj(), path_constructor);
+
+        bool subpath_needs_close = false;
+        std::optional<flutter::DlPoint> pending_moveto;
+
+        auto resolve_moveto = [&env, &pending_moveto, &androidPath]() {
+          if (pending_moveto.has_value()) {
+            env->CallVoidMethod(androidPath, path_move_to_method,
+                                pending_moveto->x, pending_moveto->y);
+            pending_moveto.reset();
+          }
+        };
+
+        auto& path = dlPath.GetPath();
+        for (auto it = path.begin(), end = path.end(); it != end; ++it) {
+          switch (it.type()) {
+            case impeller::Path::ComponentType::kContour: {
+              const impeller::ContourComponent* contour = it.contour();
+              FML_DCHECK(contour != nullptr);
+              if (subpath_needs_close) {
+                env->CallVoidMethod(androidPath, path_close_method);
+              }
+              pending_moveto = contour->destination;
+              subpath_needs_close = contour->IsClosed();
+              break;
+            }
+            case impeller::Path::ComponentType::kLinear: {
+              const impeller::LinearPathComponent* linear = it.linear();
+              FML_DCHECK(linear != nullptr);
+              resolve_moveto();
+              env->CallVoidMethod(androidPath, path_line_to_method,
+                                  linear->p2.x, linear->p2.y);
+              break;
+            }
+            case impeller::Path::ComponentType::kQuadratic: {
+              const impeller::QuadraticPathComponent* quadratic =
+                  it.quadratic();
+              FML_DCHECK(quadratic != nullptr);
+              resolve_moveto();
+              env->CallVoidMethod(androidPath, path_quad_to_method,
+                                  quadratic->cp.x, quadratic->cp.y,
+                                  quadratic->p2.x, quadratic->p2.y);
+              break;
+            }
+            case impeller::Path::ComponentType::kConic: {
+              const impeller::ConicPathComponent* conic = it.conic();
+              FML_DCHECK(conic != nullptr);
+              resolve_moveto();
+              FML_DCHECK(path_conic_to_method != nullptr);
+              env->CallVoidMethod(androidPath, path_conic_to_method,
+                                  conic->cp.x, conic->cp.y,  //
+                                  conic->p2.x, conic->p2.y, conic->weight);
+              break;
+            }
+            case impeller::Path::ComponentType::kCubic: {
+              const impeller::CubicPathComponent* cubic = it.cubic();
+              FML_DCHECK(cubic != nullptr);
+              resolve_moveto();
+              env->CallVoidMethod(androidPath, path_cubic_to_method,
+                                  cubic->cp1.x, cubic->cp1.y,  //
+                                  cubic->cp2.x, cubic->cp2.y,  //
+                                  cubic->p2.x, cubic->p2.y);
+              break;
+            }
+          }
+        }
+        if (subpath_needs_close) {
+          env->CallVoidMethod(androidPath, path_close_method);
+        }
+
+        env->CallVoidMethod(mutatorsStack,
+                            g_mutators_stack_push_clippath_method, androidPath);
+      }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
       case MutatorType::kBackdropFilter:
