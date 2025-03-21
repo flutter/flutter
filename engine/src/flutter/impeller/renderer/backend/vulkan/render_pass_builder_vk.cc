@@ -196,6 +196,11 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   // to the onscreen.
   deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
   deps[0].dstSubpass = 0u;
+  // If this render pass is performed using the onscreen attachment, then we
+  // know that the previous stage does not include sampling - only color
+  // attachment. According to various vulkan documentation, the correct access
+  // flag bits for this stage with a queue submit in-between is `{}` as the
+  // access is not otherwise expressable.
   if (is_swapchain_) {
     deps[0].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
     deps[0].srcAccessMask = {};
