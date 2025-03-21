@@ -10,10 +10,11 @@ import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
-import 'cocoon.dart';
 import 'devices.dart';
 import 'task_result.dart';
 import 'utils.dart';
+
+const int retryNumber = 2;
 
 /// Run a list of tasks.
 ///
@@ -49,7 +50,7 @@ Future<void> runTasks(
   for (final String taskName in taskNames) {
     TaskResult result = TaskResult.success(null);
     int failureCount = 0;
-    while (failureCount <= Cocoon.retryNumber) {
+    while (failureCount <= retryNumber) {
       result = await rerunTask(
         taskName,
         deviceId: deviceId,
@@ -135,16 +136,6 @@ Future<TaskResult> rerunTask(
   print('Task result:');
   print(const JsonEncoder.withIndent('  ').convert(result));
   section('Finished task "$taskName"');
-
-  if (resultsPath != null) {
-    final Cocoon cocoon = Cocoon();
-    await cocoon.writeTaskResultToFile(
-      builderName: luciBuilder,
-      gitBranch: gitBranch,
-      result: result,
-      resultsPath: resultsPath,
-    );
-  }
   return result;
 }
 
