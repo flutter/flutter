@@ -141,14 +141,6 @@ Future<DartHookResult> runFlutterSpecificHooks({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.name.split('_').first);
-  final Directory buildDir = fileSystem.directory(buildUri);
-  if (!await buildDir.exists()) {
-    // Ensure the folder exists so the native build system can copy it even
-    // if there's no native assets.
-    await buildDir.create(recursive: true);
-  }
-
   if (!await _hookRunRequired(buildRunner)) {
     return DartHookResult.empty();
   }
@@ -176,6 +168,15 @@ Future<DartHookResult> runFlutterSpecificHooks({
     targetPlatform == TargetPlatform.tester,
   );
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
+
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.name.split('_').first);
+  final Directory buildDir = fileSystem.directory(buildUri);
+  if (!await buildDir.exists()) {
+    // Ensure the folder exists so the native build system can copy it even
+    // if there's no native assets.
+    await buildDir.create(recursive: true);
+  }
+
   return _runDartHooks(
     buildRunner: buildRunner,
     projectUri: projectUri,
@@ -727,14 +728,15 @@ Future<DartHookResult> _runDartHooks({
   );
 }
 
+/// Validate only using the [validators] for the [buildAssetTypes].
 Future<List<String>> _validate(
   List<String> buildAssetTypes,
-  Map<String, Future<List<String>> Function()> map,
+  Map<String, Future<List<String>> Function()> validators,
 ) async =>
     (await buildAssetTypes
-            .map((String e) => map[e])
+            .map((String e) => validators[e])
             .nonNulls
-            .map((Future<List<String>> Function() e) => e.call())
+            .map((Future<List<String>> Function() validator) => validator.call())
             .wait)
         .expand((List<String> element) => element)
         .toList();
