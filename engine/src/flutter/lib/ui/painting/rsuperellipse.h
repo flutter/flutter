@@ -23,66 +23,29 @@ class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
                      double top,
                      double right,
                      double bottom,
-                     double tlRadiusX,
-                     double tlRadiusY,
-                     double trRadiusX,
-                     double trRadiusY,
-                     double brRadiusX,
-                     double brRadiusY,
-                     double blRadiusX,
-                     double blRadiusY) {
-    UIDartState::ThrowIfUIOperationsProhibited();
-    auto res = fml::MakeRefCounted<RSuperellipse>(
-        left, top, right, bottom, tlRadiusX, tlRadiusY, trRadiusX, trRadiusY,
-        brRadiusX, brRadiusY, blRadiusX, blRadiusY);
-    res->AssociateWithDartWrapper(wrapper);
-  }
+                     double tl_radius_x,
+                     double tl_radius_y,
+                     double tr_radius_x,
+                     double tr_radius_y,
+                     double br_radius_x,
+                     double br_radius_y,
+                     double bl_radius_x,
+                     double bl_radius_y);
 
   ~RSuperellipse() override;
 
-  double getValue(int index) const;
   bool contains(double x, double y);
   flutter::DlRoundSuperellipse rsuperellipse() const;
 
  private:
-  // Index for the value vector. This list should be kept in sync with the same
-  // list in RSuperellipse in geometry.dart.
-  enum {
-    kLeft = 0,
-    kTop,
-    kRight,
-    kBottom,
-    kTopLeftX,
-    kTopLeftY,
-    kTopRightX,
-    kTopRightY,
-    kBottomRightX,
-    kBottomRightY,
-    kBottomLeftX,
-    kBottomLeftY,
-    kValueCount
-  };
-
-  RSuperellipse(double left,
-                double top,
-                double right,
-                double bottom,
-                double tlRadiusX,
-                double tlRadiusY,
-                double trRadiusX,
-                double trRadiusY,
-                double brRadiusX,
-                double brRadiusY,
-                double blRadiusX,
-                double blRadiusY);
+  RSuperellipse(flutter::DlRect bounds, impeller::RoundingRadii radii);
 
   flutter::DlScalar scalar_value(int index) const;
-  flutter::DlRect bounds() const;
-  impeller::RoundingRadii radii() const;
   const impeller::RoundSuperellipseParam& param();
 
-  std::array<double, kValueCount> values_;
-  std::optional<impeller::RoundSuperellipseParam> cached_param_;
+  flutter::DlRect bounds_;
+  impeller::RoundingRadii radii_;
+  impeller::RoundSuperellipseParam param_;
 };
 
 }  // namespace flutter
