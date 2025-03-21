@@ -91,7 +91,7 @@ sk_sp<DlImage> DlMetalSurfaceProvider::MakeImpellerImage(const sk_sp<DisplayList
 
 void DlMetalSurfaceProvider::InitScreenShotter() const {
   if (!snapshotter_) {
-    PlaygroundSwitches switches;
+    impeller::PlaygroundSwitches switches;
     switches.enable_wide_gamut = false;
     snapshotter_.reset(new MetalScreenshotter(switches));
     auto typographer = impeller::TypographerContextSkia::Make();
