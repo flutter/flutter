@@ -2194,6 +2194,126 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
+    test('Supports composition changes with shift arrow selection in Japanese IME', () {
+      final HybridTextEditing testTextEditing = HybridTextEditing();
+      final GlobalTextEditingStrategySpy editingStrategy = GlobalTextEditingStrategySpy(
+        testTextEditing,
+      );
+
+      showKeyboard(inputType: 'text');
+      editingStrategy.composingText = 'へんかん';
+      sendFrameworkMessage(
+        codec.encodeMethodCall(
+          const MethodCall('TextInput.setEditingState', <String, dynamic>{
+            'text': 'へんかん',
+            'selectionBase': 4,
+            'selectionExtent': 4,
+            'composingBase': 0,
+            'composingExtent': 4,
+          }),
+        ),
+      );
+      checkInputEditingState(textEditing!.strategy.domElement, 'へんかん', 4, 4);
+
+      // text composition is started
+      sendFrameworkMessage(
+        codec.encodeMethodCall(
+          const MethodCall('TextInput.setEditingState', <String, dynamic>{
+            'text': '変換',
+            'selectionBase': 0,
+            'selectionExtent': 2,
+            'composingBase': 0,
+            'composingExtent': 2,
+          }),
+        ),
+      );
+      checkInputEditingState(textEditing!.strategy.domElement, '変換', 0, 2);
+
+      // shift + ←
+      sendFrameworkMessage(
+        codec.encodeMethodCall(
+          const MethodCall('TextInput.setEditingState', <String, dynamic>{
+            'text': '変化ん',
+            'selectionBase': 0,
+            'selectionExtent': 2,
+            'composingBase': -1,
+            'composingExtent': -1,
+          }),
+        ),
+      );
+      checkInputEditingState(textEditing!.strategy.domElement, '変化ん', 0, 2);
+
+      // shift + ←
+      sendFrameworkMessage(
+        codec.encodeMethodCall(
+          const MethodCall('TextInput.setEditingState', <String, dynamic>{
+            'text': '変かん',
+            'selectionBase': 0,
+            'selectionExtent': 1,
+            'composingBase': -1,
+            'composingExtent': -1,
+          }),
+        ),
+      );
+      checkInputEditingState(textEditing!.strategy.domElement, '変かん', 0, 1);
+
+      // shift + ←
+      sendFrameworkMessage(
+        codec.encodeMethodCall(
+          const MethodCall('TextInput.setEditingState', <String, dynamic>{
+            'text': 'へんかん',
+            'selectionBase': 0,
+            'selectionExtent': 1,
+            'composingBase': -1,
+            'composingExtent': -1,
+          }),
+        ),
+      );
+      checkInputEditingState(textEditing!.strategy.domElement, 'へんかん', 0, 1);
+
+      // shift + →
+      sendFrameworkMessage(
+        codec.encodeMethodCall(
+          const MethodCall('TextInput.setEditingState', <String, dynamic>{
+            'text': '変かん',
+            'selectionBase': 0,
+            'selectionExtent': 1,
+            'composingBase': -1,
+            'composingExtent': -1,
+          }),
+        ),
+      );
+      checkInputEditingState(textEditing!.strategy.domElement, '変かん', 0, 1);
+
+      // shift + →
+      sendFrameworkMessage(
+        codec.encodeMethodCall(
+          const MethodCall('TextInput.setEditingState', <String, dynamic>{
+            'text': '変化ん',
+            'selectionBase': 0,
+            'selectionExtent': 2,
+            'composingBase': -1,
+            'composingExtent': -1,
+          }),
+        ),
+      );
+      checkInputEditingState(textEditing!.strategy.domElement, '変化ん', 0, 2);
+
+      // shift + →
+      sendFrameworkMessage(
+        codec.encodeMethodCall(
+          const MethodCall('TextInput.setEditingState', <String, dynamic>{
+            'text': '変換',
+            'selectionBase': 0,
+            'selectionExtent': 2,
+            'composingBase': 0,
+            'composingExtent': 2,
+          }),
+        ),
+      );
+      checkInputEditingState(textEditing!.strategy.domElement, '変換', 0, 2);
+    });
+
     test('Supports deletion at inverted selection', () async {
       final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
         123,
