@@ -16161,7 +16161,11 @@ void main() {
         });
 
         await tester.pumpWidget(
-          MaterialApp(home: Material(child: TextField(controller: _textEditingController(text: 'one two three')))),
+          MaterialApp(
+            home: Material(
+              child: TextField(controller: _textEditingController(text: 'one two three')),
+            ),
+          ),
         );
 
         // No context menu shown.
