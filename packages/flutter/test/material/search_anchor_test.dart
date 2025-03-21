@@ -51,7 +51,7 @@ void main() {
   }
 
   testWidgets('SearchBar defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
 
     await tester.pumpWidget(
@@ -1013,9 +1013,8 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: const Center(
+      const MaterialApp(
+        home: Center(
           child: Material(child: SearchBar(constraints: BoxConstraints.tightFor(height: 35.0))),
         ),
       ),
@@ -1030,7 +1029,7 @@ void main() {
   });
 
   testWidgets('The search view defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     await tester.pumpWidget(
       MaterialApp(
@@ -2796,10 +2795,7 @@ void main() {
       disabledBorder: UnderlineInputBorder(),
       constraints: BoxConstraints(maxWidth: 300),
     );
-    final ThemeData theme = ThemeData(
-      useMaterial3: true,
-      inputDecorationTheme: inputDecorationTheme,
-    );
+    final ThemeData theme = ThemeData(inputDecorationTheme: inputDecorationTheme);
 
     void checkDecorationInSearchBar(WidgetTester tester) {
       final Finder textField = findTextField();
@@ -3914,6 +3910,102 @@ void main() {
     expect(name, 'Pedro');
 
     // No exception.
+  });
+
+  testWidgets('SearchAnchor viewOnOpen is called when the search view is opened', (
+    WidgetTester tester,
+  ) async {
+    String searchViewState = 'Idle';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor(
+              viewOnClose: () {
+                searchViewState = 'Closed';
+              },
+              viewOnOpen: () {
+                searchViewState = 'Opened';
+              },
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
+    expect(searchViewState, 'Opened');
+
+    // Pop search view route.
+    await tester.tap(find.backButton());
+    await tester.pump();
+    expect(searchViewState, 'Closed');
+  });
+
+  testWidgets('SearchAnchor.bar onOpen is called when the search view is opened', (
+    WidgetTester tester,
+  ) async {
+    String searchViewState = 'Idle';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor.bar(
+              onClose: () {
+                searchViewState = 'Closed';
+              },
+              onOpen: () {
+                searchViewState = 'Opened';
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
+    expect(searchViewState, 'Opened');
+
+    // Pop search view route.
+    await tester.tap(find.backButton());
+    await tester.pump();
+    expect(searchViewState, 'Closed');
   });
 }
 

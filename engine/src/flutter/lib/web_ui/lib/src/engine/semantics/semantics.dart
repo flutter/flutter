@@ -21,6 +21,7 @@ import '../window.dart';
 import 'accessibility.dart';
 import 'alert.dart';
 import 'checkable.dart';
+import 'disable.dart';
 import 'expandable.dart';
 import 'focusable.dart';
 import 'header.dart';
@@ -31,7 +32,9 @@ import 'label_and_value.dart';
 import 'link.dart';
 import 'list.dart';
 import 'live_region.dart';
+import 'menus.dart';
 import 'platform_view.dart';
+import 'requirable.dart';
 import 'route.dart';
 import 'scrollable.dart';
 import 'semantics_helper.dart';
@@ -463,6 +466,21 @@ enum EngineSemanticsRole {
   ///
   /// Provides a label or a value.
   generic,
+
+  /// A visible list of items or a widget that can be made to open and close.
+  menu,
+
+  /// A horizontally displayed [menu] that remains visible.
+  menuBar,
+
+  /// An option in a set of choices contained by a [menu] or [menuBar].
+  menuItem,
+
+  /// An option with a checkbox in a set of choices contained by a [menu] or [menuBar].
+  menuItemCheckbox,
+
+  /// An option with a radio button in a set of choices contained by a [menu] or [menuBar].
+  menuItemRadio,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -485,6 +503,7 @@ abstract class SemanticRole {
     addLabelAndValue(preferredRepresentation: preferredLabelRepresentation);
     addSelectableBehavior();
     addExpandableBehavior();
+    addRequirableBehavior();
   }
 
   /// Initializes a blank role for a [semanticsObject].
@@ -636,6 +655,14 @@ abstract class SemanticRole {
     );
   }
 
+  void addCheckedBehavior() {
+    addSemanticBehavior(Checkable(semanticsObject, this));
+  }
+
+  void addDisabledBehavior() {
+    addSemanticBehavior(CanDisable(semanticsObject, this));
+  }
+
   /// Adds generic functionality for handling taps and clicks.
   void addTappable() {
     addSemanticBehavior(Tappable(semanticsObject, this));
@@ -653,6 +680,10 @@ abstract class SemanticRole {
 
   void addExpandableBehavior() {
     addSemanticBehavior(Expandable(semanticsObject, this));
+  }
+
+  void addRequirableBehavior() {
+    addSemanticBehavior(Requirable(semanticsObject, this));
   }
 
   /// Adds a semantic behavior to this role.
@@ -1416,6 +1447,9 @@ class SemanticsObject {
   /// This field is only meaningful if [hasEnabledState] is true.
   bool get isEnabled => hasFlag(ui.SemanticsFlag.isEnabled);
 
+  /// Whether this object can be in one of "expanded" or "collapsed" state.
+  bool get hasExpandedState => hasFlag(ui.SemanticsFlag.hasExpandedState);
+
   /// Whether this object represents a vertically scrollable area.
   bool get isVerticalScrollContainer =>
       hasAction(ui.SemanticsAction.scrollDown) || hasAction(ui.SemanticsAction.scrollUp);
@@ -1862,6 +1896,16 @@ class SemanticsObject {
         return EngineSemanticsRole.columnHeader;
       case ui.SemanticsRole.radioGroup:
         return EngineSemanticsRole.radioGroup;
+      case ui.SemanticsRole.menu:
+        return EngineSemanticsRole.menu;
+      case ui.SemanticsRole.menuBar:
+        return EngineSemanticsRole.menuBar;
+      case ui.SemanticsRole.menuItem:
+        return EngineSemanticsRole.menuItem;
+      case ui.SemanticsRole.menuItemCheckbox:
+        return EngineSemanticsRole.menuItemCheckbox;
+      case ui.SemanticsRole.menuItemRadio:
+        return EngineSemanticsRole.menuItemRadio;
       case ui.SemanticsRole.alert:
         return EngineSemanticsRole.alert;
       case ui.SemanticsRole.status:
@@ -1876,9 +1920,6 @@ class SemanticsObject {
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:
-      case ui.SemanticsRole.menuBar:
-      case ui.SemanticsRole.menu:
-      case ui.SemanticsRole.menuItem:
       case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
@@ -1942,6 +1983,11 @@ class SemanticsObject {
       EngineSemanticsRole.cell => SemanticCell(this),
       EngineSemanticsRole.row => SemanticRow(this),
       EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
+      EngineSemanticsRole.menu => SemanticMenu(this),
+      EngineSemanticsRole.menuBar => SemanticMenuBar(this),
+      EngineSemanticsRole.menuItem => SemanticMenuItem(this),
+      EngineSemanticsRole.menuItemCheckbox => SemanticMenuItemCheckbox(this),
+      EngineSemanticsRole.menuItemRadio => SemanticMenuItemRadio(this),
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.generic => GenericRole(this),
@@ -2025,6 +2071,14 @@ class SemanticsObject {
   bool get isCheckable =>
       hasFlag(ui.SemanticsFlag.hasCheckedState) || hasFlag(ui.SemanticsFlag.hasToggledState);
 
+  /// If true, this node represents something that can be in a "checked" or
+  /// state, such as checkboxes, radios, and switches.
+  bool get isChecked => hasFlag(ui.SemanticsFlag.isChecked);
+
+  /// If true, this node represents something that can be in a "mixed" or
+  /// state, such as checkboxes.
+  bool get isMixed => hasFlag(ui.SemanticsFlag.isCheckStateMixed);
+
   /// If true, this node represents something that can be annotated as
   /// "selected", such as a tab, or an item in a list.
   ///
@@ -2043,6 +2097,22 @@ class SemanticsObject {
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
   bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+
+  /// If true, this node represents something that currently requires user input
+  /// before a form can be submitted.
+  ///
+  /// Requirability is managed by `aria-required` and is compatible with
+  /// multiple ARIA roles (checkbox, combobox, gridcell, listbox, radiogroup,
+  /// spinbutton, textbox, tree, etc). It is therefore mapped onto the
+  /// [Requirable] behavior.
+  ///
+  /// See also:
+  ///
+  ///   * [isRequired], which indicates whether the is currently required.
+  bool get isRequirable => hasFlag(ui.SemanticsFlag.hasRequiredState);
+
+  /// If [isRequirable] is true, indicates whether the node is required.
+  bool get isRequired => hasFlag(ui.SemanticsFlag.isRequired);
 
   /// If true, this node represents something that can be annotated as
   /// "expanded", such as a expansion tile or drop down menu
@@ -2631,6 +2701,8 @@ class EngineSemanticsOwner {
   SemanticsUpdatePhase get phase => _phase;
   SemanticsUpdatePhase _phase = SemanticsUpdatePhase.idle;
 
+  /// The current semantics tree.
+  Map<int, SemanticsObject> get semanticsTree => _semanticsTree;
   final Map<int, SemanticsObject> _semanticsTree = <int, SemanticsObject>{};
   final Map<String, int> identifiersToIds = <String, int>{};
 
