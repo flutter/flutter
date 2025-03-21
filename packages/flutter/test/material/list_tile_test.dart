@@ -4377,7 +4377,8 @@ void main() {
                 : null,
         home: Material(
           child: ListTileTheme(
-            isThreeLine: themeIsThreeLine,
+            data:
+                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
             child: ListView(
               children: <Widget>[
                 ListTile(

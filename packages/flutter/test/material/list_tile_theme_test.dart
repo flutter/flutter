@@ -174,7 +174,6 @@ void main() {
             minLeadingWidth: 400,
             enableFeedback: true,
             mouseCursor: MaterialStateMouseCursor.clickable,
-            isThreeLine: true,
             child: Center(
               child: Builder(
                 builder: (BuildContext context) {
@@ -202,7 +201,6 @@ void main() {
     expect(theme.minLeadingWidth, 400);
     expect(theme.enableFeedback, true);
     expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
-    expect(theme.isThreeLine, true);
   });
 
   testWidgets('ListTileTheme', (WidgetTester tester) async {
@@ -1220,7 +1218,7 @@ void main() {
         theme: ThemeData(listTileTheme: const ListTileThemeData(isThreeLine: true)),
         home: Material(
           child: ListTileTheme(
-            isThreeLine: false,
+            data: const ListTileThemeData(isThreeLine: false),
             child: ListView(
               children: const <Widget>[
                 ListTile(
@@ -1273,7 +1271,7 @@ void main() {
         key: UniqueKey(),
         home: Material(
           child: ListTileTheme(
-            isThreeLine: true,
+            data: const ListTileThemeData(isThreeLine: true),
             child: ListView(
               children: const <Widget>[
                 ListTile(
