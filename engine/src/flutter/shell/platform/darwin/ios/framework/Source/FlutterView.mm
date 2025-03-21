@@ -224,11 +224,9 @@ static void PrintWideGamutWarningOnce() {
 - (NSArray<id<UIFocusItem>>*)focusItemsInRect:(CGRect)rect {
   NSObject* rootAccessibilityElement =
       [self.accessibilityElements count] > 0 ? self.accessibilityElements[0] : nil;
-  if (![rootAccessibilityElement isKindOfClass:[SemanticsObjectContainer class]]) {
-    return nil;
-  }
-  id<UIFocusItem> rootSemanticsNode = [rootAccessibilityElement accessibilityElementAtIndex:0];
-  return rootSemanticsNode ? @[ rootSemanticsNode ] : nil;
+  return [rootAccessibilityElement isKindOfClass:[SemanticsObjectContainer class]]
+             ? @[ [rootAccessibilityElement accessibilityElementAtIndex:0] ]
+             : nil;
 }
 
 - (NSArray<id<UIFocusEnvironment>>*)preferredFocusEnvironments {
