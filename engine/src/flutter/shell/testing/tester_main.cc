@@ -35,7 +35,6 @@
 
 #if ALLOW_IMPELLER
 #include <vulkan/vulkan.h>                                        // nogncheck
-#include "impeller/display_list/aiks_context.h"                   // nogncheck
 #include "impeller/entity/vk/entity_shaders_vk.h"                 // nogncheck
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"      // nogncheck
 #include "impeller/entity/vk/modern_shaders_vk.h"                 // nogncheck
@@ -75,10 +74,7 @@ bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
   context_settings.cache_directory = fml::paths::GetCachesDirectory();
   context_settings.enable_validation = enable_validation;
 
-  context = impeller::ContextVK::Create(
-      // Enable lazy shader mode for faster test execution as most tests
-      // will never render anything at all.
-      impeller::Flags{.lazy_shader_mode = true}, std::move(context_settings));
+  context = impeller::ContextVK::Create(std::move(context_settings));
   if (!context || !context->IsValid()) {
     VALIDATION_LOG << "Could not create Vulkan context.";
     return false;
