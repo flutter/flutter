@@ -95,7 +95,13 @@ FLUTTER_ASSERT_ARC
     if (_isWideGamutEnabled && self.isWideGamutSupported) {
       fml::CFRef<CGColorSpaceRef> srgb(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = srgb;
-      layer.pixelFormat = MTLPixelFormatBGR10_XR;
+      // If the flutter layer is opaque, then use an alpha-less format for the onscreen
+      // texture. This will reduce wide gamut memory usage by 50%, and Impeller will
+      // still correctly use alpha for MSAA textures and any offscreen save layer usage.
+      // For non-wide gamut formats there is no point in removing the alpha channel as
+      // the textures must align to 32 bits (32 -> 24 = 32) whereas wide gamut is (40 -> 32 = 32)
+      // instead of 64.
+      layer.pixelFormat = layer.opaque ? MTLPixelFormatBGR10_XR : MTLPixelFormatBGRA10_XR;
     }
   }
 
