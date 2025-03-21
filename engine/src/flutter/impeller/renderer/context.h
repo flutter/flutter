@@ -9,7 +9,6 @@
 #include <string>
 
 #include "fml/closure.h"
-#include "impeller/base/flags.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/capabilities.h"
@@ -246,12 +245,9 @@ class Context {
   /// @brief Submit the command buffer that renders to the onscreen surface.
   virtual bool SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer);
 
-  const Flags& GetFlags() const { return flags_; }
-
  protected:
-  explicit Context(const Flags& flags);
+  Context();
 
-  Flags flags_;
   std::vector<std::function<void()>> per_frame_task_;
 
  private:

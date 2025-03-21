@@ -10,7 +10,7 @@ namespace impeller {
 
 Context::~Context() = default;
 
-Context::Context(const Flags& flags) : flags_(flags) {}
+Context::Context() = default;
 
 bool Context::UpdateOffscreenLayerPixelFormat(PixelFormat format) {
   return false;
