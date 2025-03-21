@@ -264,7 +264,7 @@ struct ContentContextOptions {
     static_assert(sizeof(color_attachment_pixel_format) == 1);
 
     return (is_for_rrect_blur_clear ? 1llu : 0llu) << 0 |        //
-           (0) << 1 |                                            //
+           (0) << 1 |                                            // Unused, previously wireframe.
            (has_depth_stencil_attachments ? 1llu : 0llu) << 2 |  //
            (depth_write_enabled ? 1llu : 0llu) << 3 |            //
            // enums
