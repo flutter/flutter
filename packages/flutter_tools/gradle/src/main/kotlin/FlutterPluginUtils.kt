@@ -612,6 +612,9 @@ object FlutterPluginUtils {
      * This includes:
      *    1. The embedding
      *    2. libflutter.so
+     *
+     * Should only be called on the main gradle [Project] for this application
+     * of the [FlutterPlugin].
      */
     @JvmStatic
     @JvmName("addFlutterDependencies")
