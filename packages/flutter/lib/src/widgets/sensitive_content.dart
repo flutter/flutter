@@ -115,6 +115,12 @@ class _ContentSensitivitySetting {
 
 /// Host of the current content sensitivity for the widget tree that contains
 /// some number [SensitiveContent] widgets.
+///
+/// This is not ready for production.
+// TODO(camsim99): Fix `SensitiveContent` implementation to prevent revealing sensitive
+// content during media projection. Then, export this file to make the widget available
+// for use. See https://github.com/flutter/flutter/issues/160050 and
+// https://github.com/flutter/flutter/issues/164820.
 @visibleForTesting
 class SensitiveContentHost {
   SensitiveContentHost._();
@@ -328,7 +334,6 @@ class SensitiveContent extends StatefulWidget {
 
 class _SensitiveContentState extends State<SensitiveContent> {
   Future<void> _sensitiveContentRegistrationFuture = Future<void>.value();
-  Future<void> _sensitiveContentUnregistrationFuture = Future<void>.value();
 
   @override
   void initState() {
@@ -342,6 +347,14 @@ class _SensitiveContentState extends State<SensitiveContent> {
     super.dispose();
   }
 
+  Future<void> _reregisterWidget(
+    ContentSensitivity oldSensitivity,
+    ContentSensitivity newSensitivty,
+  ) async {
+    SensitiveContentHost.register(newSensitivty);
+    SensitiveContentHost.unregister(oldSensitivity);
+  }
+
   @override
   void didUpdateWidget(SensitiveContent oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -351,17 +364,16 @@ class _SensitiveContentState extends State<SensitiveContent> {
     }
 
     // Re-register SensitiveContent widget if the sensitivity changed.
-    _sensitiveContentRegistrationFuture = SensitiveContentHost.register(widget.sensitivity);
-    _sensitiveContentUnregistrationFuture = SensitiveContentHost.unregister(oldWidget.sensitivity);
+    _sensitiveContentRegistrationFuture = _reregisterWidget(
+      oldWidget.sensitivity,
+      widget.sensitivity,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
-      future: Future.wait(<Future<void>>[
-        _sensitiveContentRegistrationFuture,
-        _sensitiveContentUnregistrationFuture,
-      ]),
+      future: _sensitiveContentRegistrationFuture,
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return widget.child;
