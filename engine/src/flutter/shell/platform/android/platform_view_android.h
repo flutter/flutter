@@ -26,8 +26,7 @@ namespace flutter {
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
   AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
-                            bool enable_impeller,
-                            bool lazy_shader_mode);
+                            bool enable_impeller);
 
   ~AndroidSurfaceFactoryImpl() override;
 
@@ -36,7 +35,6 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  private:
   const std::shared_ptr<AndroidContext>& android_context_;
   const bool enable_impeller_;
-  const bool lazy_shader_mode_;
 };
 
 class PlatformViewAndroid final : public PlatformView {
