@@ -180,7 +180,6 @@ void main() {
     expect(data.devicePixelRatio, tester.view.devicePixelRatio);
     expect(data.textScaler, TextScaler.linear(platformData.textScaleFactor));
     expect(data.platformBrightness, platformData.platformBrightness);
-
     expect(
       data.padding,
       EdgeInsets.fromViewPadding(tester.view.padding, tester.view.devicePixelRatio),
