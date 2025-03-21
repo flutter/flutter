@@ -851,7 +851,7 @@ object FlutterPluginUtils {
     }
 }
 
-data class PluginVersionPair(
+private data class PluginVersionPair(
     val name: String,
     val version: String
 )
