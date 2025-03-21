@@ -52,7 +52,7 @@ Map<CodeAsset, KernelAsset> assetTargetLocationsMacOS(
     idToPath[asset.id] = path;
     result[asset] = KernelAsset(
       id: asset.id,
-      target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+      target: Target.fromArchitectureAndOS(asset.architecture, asset.os),
       path: path,
     );
   }
@@ -91,7 +91,7 @@ KernelAsset _targetLocationMacOS(
   }
   return KernelAsset(
     id: asset.id,
-    target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+    target: Target.fromArchitectureAndOS(asset.architecture, asset.os),
     path: kernelAssetPath,
   );
 }
