@@ -41,7 +41,7 @@ class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
   ~RSuperellipse() override;
 
   double getValue(int index) const;
-  bool contains(double x, double y) const;
+  bool contains(double x, double y);
   flutter::DlRoundSuperellipse rsuperellipse() const;
 
  private:
@@ -79,10 +79,10 @@ class RSuperellipse : public RefCountedDartWrappable<RSuperellipse> {
   flutter::DlScalar scalar_value(int index) const;
   flutter::DlRect bounds() const;
   impeller::RoundingRadii radii() const;
-  const impeller::RoundSuperellipseParam& param() const;
+  const impeller::RoundSuperellipseParam& param();
 
   std::array<double, kValueCount> values_;
-  mutable std::optional<impeller::RoundSuperellipseParam> cached_param_;
+  std::optional<impeller::RoundSuperellipseParam> cached_param_;
 };
 
 }  // namespace flutter

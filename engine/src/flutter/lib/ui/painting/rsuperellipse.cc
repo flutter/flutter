@@ -55,7 +55,7 @@ double RSuperellipse::getValue(int index) const {
   return values_[index];
 }
 
-bool RSuperellipse::contains(double x, double y) const {
+bool RSuperellipse::contains(double x, double y) {
   return param().Contains(
       DlPoint(static_cast<DlScalar>(x), static_cast<DlScalar>(y)));
 }
@@ -89,7 +89,7 @@ impeller::RoundingRadii RSuperellipse::radii() const {
   };
 }
 
-const impeller::RoundSuperellipseParam& RSuperellipse::param() const {
+const impeller::RoundSuperellipseParam& RSuperellipse::param() {
   if (!cached_param_.has_value()) {
     cached_param_ =
         impeller::RoundSuperellipseParam::MakeBoundsRadii(bounds(), radii());
