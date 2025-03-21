@@ -466,8 +466,6 @@ class FlutterPluginUtilsTest {
         assertContains(gradleException.message!!, "android-invalid")
     }
 
-    // TODO(gmackall): fill out everything below this, or reject if tests not worth:
-
     // readPropertiesIfExist
     @Test
     fun `readPropertiesIfExist returns empty Properties when file does not exist`(
@@ -485,8 +483,8 @@ class FlutterPluginUtilsTest {
         val propertiesFile = tempDir.resolve("file_that_exists.properties").toFile()
         propertiesFile.writeText(
             """
-            sdk.dir=/Users/mackall/Library/Android/sdk
-            flutter.sdk=/Users/mackall/development/flutter/flutter
+            sdk.dir=/Users/someuser/Library/Android/sdk
+            flutter.sdk=/Users/someuser/development/flutter/flutter
             flutter.buildMode=release
             flutter.versionName=1.0.0
             flutter.versionCode=1
@@ -495,8 +493,8 @@ class FlutterPluginUtilsTest {
 
         val result = FlutterPluginUtils.readPropertiesIfExist(propertiesFile)
         assertEquals(5, result.size)
-        assertEquals("/Users/mackall/Library/Android/sdk", result["sdk.dir"])
-        assertEquals("/Users/mackall/development/flutter/flutter", result["flutter.sdk"])
+        assertEquals("/Users/someuser/Library/Android/sdk", result["sdk.dir"])
+        assertEquals("/Users/someuser/development/flutter/flutter", result["flutter.sdk"])
         assertEquals("release", result["flutter.buildMode"])
         assertEquals("1.0.0", result["flutter.versionName"])
         assertEquals("1", result["flutter.versionCode"])
@@ -1119,7 +1117,7 @@ class FlutterPluginUtilsTest {
                 Pair("name", "grays_fun_dev_dependency"),
                 Pair(
                     "path",
-                    "/Users/mackall/.pub-cache/hosted/pub.dev/grays_fun_dev_dependency-1.1.1/"
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/grays_fun_dev_dependency-1.1.1/"
                 ),
                 Pair("native_build", true),
                 Pair("dependencies", emptyList<String>()),
@@ -1131,7 +1129,7 @@ class FlutterPluginUtilsTest {
                 Pair("name", "camera_android_camerax"),
                 Pair(
                     "path",
-                    "/Users/mackall/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
                 ),
                 Pair("native_build", true),
                 Pair("dependencies", emptyList<String>()),
@@ -1143,7 +1141,7 @@ class FlutterPluginUtilsTest {
                 Pair("name", "flutter_plugin_android_lifecycle"),
                 Pair(
                     "path",
-                    "/Users/mackall/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
                 ),
                 Pair("native_build", true),
                 Pair("dependencies", emptyList<String>()),
@@ -1158,7 +1156,7 @@ class FlutterPluginUtilsTest {
                     Pair("name", "in_app_purchase_android"),
                     Pair(
                         "path",
-                        "/Users/mackall/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
+                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
                     ),
                     Pair("native_build", true),
                     Pair("dependencies", emptyList<String>()),
@@ -1175,7 +1173,7 @@ class FlutterPluginUtilsTest {
                     Pair("name", "in_app_purchase_android"),
                     Pair(
                         "path",
-                        "/Users/mackall/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
+                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
                     ),
                     Pair("native_build", true),
                     Pair("dependencies", emptyList<String>()),

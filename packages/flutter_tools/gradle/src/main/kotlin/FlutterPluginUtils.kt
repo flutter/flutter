@@ -399,10 +399,21 @@ object FlutterPluginUtils {
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
+    /**
+     * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
+     * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
+     * e.g. `android-UpsideDownCake`.
+     */
     @JvmStatic
     @JvmName("getCompileSdkFromProject")
     internal fun getCompileSdkFromProject(project: Project): String = getAndroidExtension(project).compileSdkVersion!!.substring(8)
 
+    /**
+     * Returns:
+     *  The default platforms if the `target-platform` property is not set.
+     *  The requested platforms after verifying they are supported by the Flutter plugin, otherwise.
+     * Throws a GradleException if any of the requested platforms are not supported.
+     */
     @JvmStatic
     @JvmName("getTargetPlatforms")
     internal fun getTargetPlatforms(project: Project): List<String> {
@@ -562,6 +573,10 @@ object FlutterPluginUtils {
         }
     }
 
+    /**
+     * Forces the project to download the NDK by configuring properties that makes AGP think the
+     * project actually requires the NDK.
+     */
     @JvmStatic
     @JvmName("forceNdkDownload")
     internal fun forceNdkDownload(
@@ -593,7 +608,7 @@ object FlutterPluginUtils {
     internal fun isFlutterAppProject(project: Project): Boolean = project.extensions.findByType(AbstractAppExtension::class.java) != null
 
     /**
-     * Adds the dependencies required by the Flutter project.
+     * Ensures that the dependencies required by the Flutter project are available.
      * This includes:
      *    1. The embedding
      *    2. libflutter.so
@@ -700,6 +715,14 @@ object FlutterPluginUtils {
         }
     }
 
+    /**
+     * Performs configuration related to the plugin's Gradle [Project], including
+     * 1. Adding the plugin itself as a dependency to the main project.
+     * 2. Adding the main project's build types to the plugin's build types.
+     * 3. Adding a dependency on the Flutter embedding to the plugin.
+     *
+     * Should only be called on plugins that support the Android platform.
+     */
     @JvmStatic
     @JvmName("configurePluginProject")
     internal fun configurePluginProject(
@@ -754,6 +777,8 @@ object FlutterPluginUtils {
         engineVersion: String
     ) {
         val flutterBuildMode: String = buildModeFor(buildType)
+        // TODO(gmackall): this should be safe to remove, as the minimum required AGP is well above
+        //                 3.5. We should try to remove it.
         // In AGP 3.5, the embedding must be added as an API implementation,
         // so java8 features are desugared against the runtime classpath.
         // For more, see https://github.com/flutter/flutter/issues/40126
