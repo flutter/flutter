@@ -40,7 +40,7 @@ namespace impeller {
 
 class TestImpellerContext : public impeller::Context {
  public:
-  TestImpellerContext() = default;
+  TestImpellerContext() : impeller::Context(impeller::Flags{}) {}
 
   BackendType GetBackendType() const override { return BackendType::kMetal; }
 

@@ -578,16 +578,16 @@ TEST(GeometryTest, QuaternionVectorMultiply) {
 }
 
 TEST(GeometryTest, CanGenerateMipCounts) {
-  ASSERT_EQ((Size{128, 128}.MipCount()), 6u);
-  ASSERT_EQ((Size{128, 256}.MipCount()), 7u);
-  ASSERT_EQ((Size{128, 130}.MipCount()), 7u);
-  ASSERT_EQ((Size{128, 257}.MipCount()), 8u);
-  ASSERT_EQ((Size{257, 128}.MipCount()), 8u);
-  ASSERT_EQ((Size{128, 0}.MipCount()), 1u);
-  ASSERT_EQ((Size{128, -25}.MipCount()), 1u);
-  ASSERT_EQ((Size{-128, 25}.MipCount()), 1u);
-  ASSERT_EQ((Size{1, 1}.MipCount()), 1u);
-  ASSERT_EQ((Size{0, 0}.MipCount()), 1u);
+  EXPECT_EQ((Size{128, 128}.MipCount()), 7u);
+  EXPECT_EQ((Size{128, 256}.MipCount()), 7u);
+  EXPECT_EQ((Size{128, 130}.MipCount()), 7u);
+  EXPECT_EQ((Size{128, 257}.MipCount()), 7u);
+  EXPECT_EQ((Size{257, 128}.MipCount()), 7u);
+  EXPECT_EQ((Size{128, 0}.MipCount()), 1u);
+  EXPECT_EQ((Size{128, -25}.MipCount()), 1u);
+  EXPECT_EQ((Size{-128, 25}.MipCount()), 1u);
+  EXPECT_EQ((Size{1, 1}.MipCount()), 1u);
+  EXPECT_EQ((Size{0, 0}.MipCount()), 1u);
 }
 
 TEST(GeometryTest, CanConvertTTypesExplicitly) {
@@ -1565,16 +1565,16 @@ const std::map<BlendMode, Color> ColorBlendTestData::kExpectedResults[sizeof(
     ColorBlendTestData::kSourceColors)] = {
     {
         {BlendMode::kClear, {0, 0, 0, 0}},
-        {BlendMode::kSource, {1, 1, 1, 0.75}},
-        {BlendMode::kDestination, {0.392157, 0.584314, 0.929412, 0.75}},
-        {BlendMode::kSourceOver, {0.878431, 0.916863, 0.985882, 0.9375}},
-        {BlendMode::kDestinationOver, {0.513726, 0.667451, 0.943529, 0.9375}},
-        {BlendMode::kSourceIn, {1, 1, 1, 0.5625}},
-        {BlendMode::kDestinationIn, {0.392157, 0.584314, 0.929412, 0.5625}},
-        {BlendMode::kSourceOut, {1, 1, 1, 0.1875}},
-        {BlendMode::kDestinationOut, {0.392157, 0.584314, 0.929412, 0.1875}},
-        {BlendMode::kSourceATop, {0.848039, 0.896078, 0.982353, 0.75}},
-        {BlendMode::kDestinationATop, {0.544118, 0.688235, 0.947059, 0.75}},
+        {BlendMode::kSrc, {1, 1, 1, 0.75}},
+        {BlendMode::kDst, {0.392157, 0.584314, 0.929412, 0.75}},
+        {BlendMode::kSrcOver, {0.878431, 0.916863, 0.985882, 0.9375}},
+        {BlendMode::kDstOver, {0.513726, 0.667451, 0.943529, 0.9375}},
+        {BlendMode::kSrcIn, {1, 1, 1, 0.5625}},
+        {BlendMode::kDstIn, {0.392157, 0.584314, 0.929412, 0.5625}},
+        {BlendMode::kSrcOut, {1, 1, 1, 0.1875}},
+        {BlendMode::kDstOut, {0.392157, 0.584314, 0.929412, 0.1875}},
+        {BlendMode::kSrcATop, {0.848039, 0.896078, 0.982353, 0.75}},
+        {BlendMode::kDstATop, {0.544118, 0.688235, 0.947059, 0.75}},
         {BlendMode::kXor, {0.696078, 0.792157, 0.964706, 0.375}},
         {BlendMode::kPlus, {1, 1, 1, 1}},
         {BlendMode::kModulate, {0.392157, 0.584314, 0.929412, 0.5625}},
@@ -1596,16 +1596,16 @@ const std::map<BlendMode, Color> ColorBlendTestData::kExpectedResults[sizeof(
     },
     {
         {BlendMode::kClear, {0, 0, 0, 0}},
-        {BlendMode::kSource, {0.196078, 0.803922, 0.196078, 0.75}},
-        {BlendMode::kDestination, {0.392157, 0.584314, 0.929412, 0.75}},
-        {BlendMode::kSourceOver, {0.235294, 0.76, 0.342745, 0.9375}},
-        {BlendMode::kDestinationOver, {0.352941, 0.628235, 0.782745, 0.9375}},
-        {BlendMode::kSourceIn, {0.196078, 0.803922, 0.196078, 0.5625}},
-        {BlendMode::kDestinationIn, {0.392157, 0.584314, 0.929412, 0.5625}},
-        {BlendMode::kSourceOut, {0.196078, 0.803922, 0.196078, 0.1875}},
-        {BlendMode::kDestinationOut, {0.392157, 0.584314, 0.929412, 0.1875}},
-        {BlendMode::kSourceATop, {0.245098, 0.74902, 0.379412, 0.75}},
-        {BlendMode::kDestinationATop, {0.343137, 0.639216, 0.746078, 0.75}},
+        {BlendMode::kSrc, {0.196078, 0.803922, 0.196078, 0.75}},
+        {BlendMode::kDst, {0.392157, 0.584314, 0.929412, 0.75}},
+        {BlendMode::kSrcOver, {0.235294, 0.76, 0.342745, 0.9375}},
+        {BlendMode::kDstOver, {0.352941, 0.628235, 0.782745, 0.9375}},
+        {BlendMode::kSrcIn, {0.196078, 0.803922, 0.196078, 0.5625}},
+        {BlendMode::kDstIn, {0.392157, 0.584314, 0.929412, 0.5625}},
+        {BlendMode::kSrcOut, {0.196078, 0.803922, 0.196078, 0.1875}},
+        {BlendMode::kDstOut, {0.392157, 0.584314, 0.929412, 0.1875}},
+        {BlendMode::kSrcATop, {0.245098, 0.74902, 0.379412, 0.75}},
+        {BlendMode::kDstATop, {0.343137, 0.639216, 0.746078, 0.75}},
         {BlendMode::kXor, {0.294118, 0.694118, 0.562745, 0.375}},
         {BlendMode::kPlus, {0.441176, 1, 0.844118, 1}},
         {BlendMode::kModulate, {0.0768935, 0.469742, 0.182238, 0.5625}},
@@ -1627,16 +1627,16 @@ const std::map<BlendMode, Color> ColorBlendTestData::kExpectedResults[sizeof(
     },
     {
         {BlendMode::kClear, {0, 0, 0, 0}},
-        {BlendMode::kSource, {0, 0, 0, 0.75}},
-        {BlendMode::kDestination, {0.392157, 0.584314, 0.929412, 0.75}},
-        {BlendMode::kSourceOver, {0.0784314, 0.116863, 0.185882, 0.9375}},
-        {BlendMode::kDestinationOver, {0.313726, 0.467451, 0.743529, 0.9375}},
-        {BlendMode::kSourceIn, {0, 0, 0, 0.5625}},
-        {BlendMode::kDestinationIn, {0.392157, 0.584314, 0.929412, 0.5625}},
-        {BlendMode::kSourceOut, {0, 0, 0, 0.1875}},
-        {BlendMode::kDestinationOut, {0.392157, 0.584314, 0.929412, 0.1875}},
-        {BlendMode::kSourceATop, {0.0980392, 0.146078, 0.232353, 0.75}},
-        {BlendMode::kDestinationATop, {0.294118, 0.438235, 0.697059, 0.75}},
+        {BlendMode::kSrc, {0, 0, 0, 0.75}},
+        {BlendMode::kDst, {0.392157, 0.584314, 0.929412, 0.75}},
+        {BlendMode::kSrcOver, {0.0784314, 0.116863, 0.185882, 0.9375}},
+        {BlendMode::kDstOver, {0.313726, 0.467451, 0.743529, 0.9375}},
+        {BlendMode::kSrcIn, {0, 0, 0, 0.5625}},
+        {BlendMode::kDstIn, {0.392157, 0.584314, 0.929412, 0.5625}},
+        {BlendMode::kSrcOut, {0, 0, 0, 0.1875}},
+        {BlendMode::kDstOut, {0.392157, 0.584314, 0.929412, 0.1875}},
+        {BlendMode::kSrcATop, {0.0980392, 0.146078, 0.232353, 0.75}},
+        {BlendMode::kDstATop, {0.294118, 0.438235, 0.697059, 0.75}},
         {BlendMode::kXor, {0.196078, 0.292157, 0.464706, 0.375}},
         {BlendMode::kPlus, {0.294118, 0.438235, 0.697059, 1}},
         {BlendMode::kModulate, {0, 0, 0, 0.5625}},
@@ -1708,7 +1708,7 @@ TEST(GeometryTest, ColorBlendReturnsExpectedResults) {
 
 TEST(GeometryTest, BlendModeToString) {
   using BlendT = std::underlying_type_t<BlendMode>;
-  for (BlendT i = 0; i <= static_cast<BlendT>(BlendMode::kLast); i++) {
+  for (BlendT i = 0; i <= static_cast<BlendT>(BlendMode::kLastMode); i++) {
     auto mode = static_cast<BlendMode>(i);
     auto result = BlendModeToString(mode);
     switch (mode) { IMPELLER_FOR_EACH_BLEND_MODE(_BLEND_MODE_NAME_CHECK) }
