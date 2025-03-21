@@ -63,6 +63,14 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   Color? get backgroundColor => ${componentColor("md.comp.date-picker.modal.container")};
 
   @override
+  Color? get subHeaderForegroundColor => ${componentColor("md.comp.date-picker.modal.sub.header.foreground")}.withOpacity(0.60);
+
+  @override
+  TextStyle? get toggleButtonTextStyle => ${textStyle("md.comp.date-picker.modal.toggle.button")}?.apply(
+    color: subHeaderForegroundColor,
+  );
+
+  @override
   ButtonStyle get cancelButtonStyle {
     return TextButton.styleFrom();
   }
