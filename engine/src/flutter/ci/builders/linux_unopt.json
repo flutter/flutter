@@ -16,7 +16,6 @@
                 "debug",
                 "--unoptimized",
                 "--prebuilt-dart-sdk",
-                "--asan",
                 "--dart-debug",
                 "--rbe",
                 "--no-goma"
