@@ -25,7 +25,6 @@ class AndroidContext {
     bool enable_validation = false;
     bool enable_gpu_tracing = false;
     bool enable_surface_control = false;
-    bool enable_lazy_shader_mode = false;
     bool quiet = false;
   };
 
