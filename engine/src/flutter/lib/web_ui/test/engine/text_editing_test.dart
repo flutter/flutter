@@ -2195,10 +2195,7 @@ Future<void> testMain() async {
     });
 
     test('Supports composition changes with shift arrow selection in Japanese IME', () {
-      final HybridTextEditing testTextEditing = HybridTextEditing();
-      final GlobalTextEditingStrategySpy editingStrategy = GlobalTextEditingStrategySpy(
-        testTextEditing,
-      );
+      final DefaultTextEditingStrategy editingStrategy = DefaultTextEditingStrategy(textEditing);
 
       showKeyboard(inputType: 'text');
       editingStrategy.composingText = 'へんかん';
