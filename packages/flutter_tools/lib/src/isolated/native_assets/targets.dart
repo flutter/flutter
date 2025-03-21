@@ -1,5 +1,6 @@
 import 'package:file/file.dart' show FileSystem;
 import 'package:native_assets_cli/code_assets_builder.dart';
+
 import '../../base/common.dart' show throwToolExit;
 import '../../build_info.dart';
 import '../../build_system/exceptions.dart' show MissingDefineException;
@@ -17,6 +18,18 @@ sealed class TargetCls {
   BuildInputBuilder buildInputCreator();
   LinkInputBuilder linkInputCreator();
   List<String> buildAssetTypes(List<String> supportedAssetTypes) => supportedAssetTypes;
+
+  Future<ValidationErrors> validator<T extends Function>(
+    List<String> supportedAssetTypes,
+    Future<List<String>> Function(T) validate,
+    Map<String, T> validators,
+  ) async {
+    return (await buildAssetTypes(
+          supportedAssetTypes,
+        ).map((String e) => validators[e]).nonNulls.map(validate).wait)
+        .expand((List<String> element) => element)
+        .toList();
+  }
 }
 
 final class WebTargetCls extends TargetCls {

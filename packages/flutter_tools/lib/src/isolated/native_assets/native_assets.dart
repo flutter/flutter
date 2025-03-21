@@ -653,19 +653,24 @@ Future<DartHookResult> _runDartHooks({
       buildAssetTypes: buildAssetTypes,
       inputCreator: target.buildInputCreator,
       inputValidator:
-          (BuildInput config) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetBuildInput(config),
-            if (dataAssetSupport) ...await validateDataAssetBuildInput(config),
-          ],
+          (BuildInput input) async => target.validator(
+            supportedAssetTypes,
+            (Future<List<String>> Function(BuildInput) validate) => validate(input),
+            inputValidators,
+          ),
       buildValidator:
-          (BuildInput config, BuildOutput output) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetBuildOutput(config, output),
-            if (dataAssetSupport) ...await validateDataAssetBuildOutput(config, output),
-          ],
+          (BuildInput input, BuildOutput output) async => target.validator(
+            supportedAssetTypes,
+            (Future<List<String>> Function(BuildInput, BuildOutput) validate) =>
+                validate(input, output),
+            buildValidators,
+          ),
       applicationAssetValidator:
-          (List<EncodedAsset> assets) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetInApplication(assets),
-          ],
+          (List<EncodedAsset> assets) async => target.validator(
+            supportedAssetTypes,
+            (Future<List<String>> Function(List<EncodedAsset>) validate) => validate(assets),
+            applicationAssetValidators,
+          ),
       workingDirectory: projectUri,
       linkingEnabled: linkingEnabled,
     );
@@ -691,9 +696,11 @@ Future<DartHookResult> _runDartHooks({
             if (dataAssetSupport) ...await validateDataAssetLinkOutput(config, output),
           ],
       applicationAssetValidator:
-          (List<EncodedAsset> assets) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetInApplication(assets),
-          ],
+          (List<EncodedAsset> assets) async => target.validator(
+            supportedAssetTypes,
+            (Future<List<String>> Function(List<EncodedAsset>) validate) => validate(assets),
+            applicationAssetValidators,
+          ),
       workingDirectory: projectUri,
       buildResult: buildResult,
     );
@@ -725,6 +732,25 @@ Future<DartHookResult> _runDartHooks({
     dependencies: dependencies.toList(),
   );
 }
+
+Map<String, Future<ValidationErrors> Function(BuildInput config)> inputValidators =
+    <String, Future<ValidationErrors> Function(BuildInput config)>{
+      CodeAsset.type: (BuildInput config) => validateCodeAssetBuildInput(config),
+      DataAsset.type: (BuildInput config) => validateDataAssetBuildInput(config),
+    };
+
+Map<String, Future<ValidationErrors> Function(BuildInput, BuildOutput)> buildValidators =
+    <String, Future<ValidationErrors> Function(BuildInput, BuildOutput)>{
+      CodeAsset.type:
+          (BuildInput input, BuildOutput output) => validateCodeAssetBuildOutput(input, output),
+      DataAsset.type:
+          (BuildInput input, BuildOutput output) => validateDataAssetBuildOutput(input, output),
+    };
+
+Map<String, Future<ValidationErrors> Function(List<EncodedAsset>)> applicationAssetValidators =
+    <String, Future<ValidationErrors> Function(List<EncodedAsset>)>{
+      CodeAsset.type: (List<EncodedAsset> assets) => validateCodeAssetInApplication(assets),
+    };
 
 Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   Uri buildUri,
