@@ -888,24 +888,40 @@ class ThemeData with Diagnosticable {
         style: ElevatedButton.styleFrom(
           foregroundColor: systemColors.buttonText.value,
           backgroundColor: systemColors.buttonFace.value,
+          side:
+              systemColors.buttonBorder.value == null
+                  ? null
+                  : BorderSide(color: systemColors.buttonBorder.value!),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: systemColors.buttonText.value,
           backgroundColor: systemColors.buttonFace.value,
+          side:
+              systemColors.buttonBorder.value == null
+                  ? null
+                  : BorderSide(color: systemColors.buttonBorder.value!),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: systemColors.buttonText.value,
           backgroundColor: systemColors.buttonFace.value,
+          side:
+              systemColors.buttonBorder.value == null
+                  ? null
+                  : BorderSide(color: systemColors.buttonBorder.value!),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           foregroundColor: systemColors.buttonText.value,
           backgroundColor: systemColors.buttonFace.value,
+          side:
+              systemColors.buttonBorder.value == null
+                  ? null
+                  : BorderSide(color: systemColors.buttonBorder.value!),
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
