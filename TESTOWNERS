@@ -45,7 +45,6 @@
 /dev/devicelab/bin/tasks/flutter_gallery__image_cache_memory.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__memory_nav.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__start_up.dart @jtmcdole @flutter/engine
-/dev/devicelab/bin/tasks/flutter_gallery_lazy__start_up.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__start_up_delayed.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf.dart @jtmcdole @flutter/engine
 /dev/devicelab/bin/tasks/flutter_gallery__transition_perf_e2e.dart @jtmcdole @flutter/engine

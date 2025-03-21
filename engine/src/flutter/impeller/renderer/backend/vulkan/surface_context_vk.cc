@@ -14,7 +14,7 @@
 namespace impeller {
 
 SurfaceContextVK::SurfaceContextVK(const std::shared_ptr<ContextVK>& parent)
-    : Context(parent->GetFlags()), parent_(parent) {}
+    : parent_(parent) {}
 
 SurfaceContextVK::~SurfaceContextVK() = default;
 

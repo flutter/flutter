@@ -955,8 +955,7 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   g_format_properties_callback = format_properties_callback_;
   g_physical_device_properties_callback = physical_properties_callback_;
   settings.embedder_data = embedder_data_;
-  std::shared_ptr<ContextVK> result =
-      ContextVK::Create(Flags{}, std::move(settings));
+  std::shared_ptr<ContextVK> result = ContextVK::Create(std::move(settings));
   return result;
 }
 

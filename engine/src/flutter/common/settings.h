@@ -228,9 +228,6 @@ struct Settings {
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;
 
-  // Whether to lazily initialize impeller PSO state.
-  bool impeller_enable_lazy_shader_mode = false;
-
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;
 

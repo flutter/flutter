@@ -23,15 +23,13 @@ Pipeline<T>::~Pipeline() = default;
 
 PipelineFuture<PipelineDescriptor> CreatePipelineFuture(
     const Context& context,
-    std::optional<PipelineDescriptor> desc,
-    bool async) {
+    std::optional<PipelineDescriptor> desc) {
   if (!context.IsValid()) {
     return {desc, RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(
                       nullptr)};
   }
 
-  return context.GetPipelineLibrary()->GetPipeline(std::move(desc),
-                                                   /*async=*/async);
+  return context.GetPipelineLibrary()->GetPipeline(std::move(desc));
 }
 
 PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
