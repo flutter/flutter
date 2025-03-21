@@ -65,6 +65,10 @@ abstract class TextScaler {
     assert(minScaleFactor.isFinite);
     assert(minScaleFactor >= 0);
 
+    if (minScaleFactor == 0 && maxScaleFactor == double.infinity) {
+      return this;
+    }
+
     return minScaleFactor == maxScaleFactor
         ? TextScaler.linear(minScaleFactor)
         : _ClampedTextScaler(this, minScaleFactor, maxScaleFactor);
@@ -150,4 +154,7 @@ final class _ClampedTextScaler implements TextScaler {
   @override
   int get hashCode =>
       minScale == maxScale ? minScale.hashCode : Object.hash(scaler, minScale, maxScale);
+
+  @override
+  String toString() => '$scaler clamped [$minScale, $maxScale]';
 }
