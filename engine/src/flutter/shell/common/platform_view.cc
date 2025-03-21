@@ -35,10 +35,11 @@ void PlatformView::DispatchPointerDataPacket(
   delegate_.OnPlatformViewDispatchPointerDataPacket(std::move(packet));
 }
 
-void PlatformView::DispatchSemanticsAction(int32_t node_id,
+void PlatformView::DispatchSemanticsAction(int64_t view_id,
+                                           int32_t node_id,
                                            SemanticsAction action,
                                            fml::MallocMapping args) {
-  delegate_.OnPlatformViewDispatchSemanticsAction(node_id, action,
+  delegate_.OnPlatformViewDispatchSemanticsAction(view_id, node_id, action,
                                                   std::move(args));
 }
 
@@ -124,6 +125,7 @@ fml::WeakPtr<PlatformView> PlatformView::GetWeakPtr() const {
 }
 
 void PlatformView::UpdateSemantics(
+    int64_t view_id,
     SemanticsNodeUpdates update,  // NOLINT(performance-unnecessary-value-param)
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     CustomAccessibilityActionUpdates actions) {}
