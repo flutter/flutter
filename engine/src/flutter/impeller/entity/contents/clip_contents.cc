@@ -79,7 +79,7 @@ bool ClipContents::Render(const ContentContext& renderer,
   info.depth = GetShaderClipDepth(clip_depth);
 
   auto options = OptionsFromPass(pass);
-  options.blend_mode = BlendMode::kDestination;
+  options.blend_mode = BlendMode::kDst;
 
   pass.SetStencilReference(0);
 
@@ -157,7 +157,7 @@ bool RenderClipRestore(const ContentContext& renderer,
 
   pass.SetCommandLabel("Restore Clip");
   auto options = OptionsFromPass(pass);
-  options.blend_mode = BlendMode::kDestination;
+  options.blend_mode = BlendMode::kDst;
   options.stencil_mode =
       ContentContextOptions::StencilMode::kOverdrawPreventionRestore;
   options.primitive_type = PrimitiveType::kTriangleStrip;

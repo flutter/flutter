@@ -147,6 +147,7 @@ class SearchAnchor extends StatefulWidget {
     this.viewOnChanged,
     this.viewOnSubmitted,
     this.viewOnClose,
+    this.viewOnOpen,
     required this.builder,
     required this.suggestionsBuilder,
     this.textInputAction,
@@ -173,6 +174,7 @@ class SearchAnchor extends StatefulWidget {
     ValueChanged<String>? onSubmitted,
     ValueChanged<String>? onChanged,
     VoidCallback? onClose,
+    VoidCallback? onOpen,
     MaterialStateProperty<double?>? barElevation,
     MaterialStateProperty<Color?>? barBackgroundColor,
     MaterialStateProperty<Color?>? barOverlayColor,
@@ -375,6 +377,9 @@ class SearchAnchor extends StatefulWidget {
   /// Called when the search view is closed.
   final VoidCallback? viewOnClose;
 
+  /// Called when the search view is opened.
+  final VoidCallback? viewOnOpen;
+
   /// Called to create a widget which can open a search view route when it is tapped.
   ///
   /// The widget returned by this builder is faded out when it is tapped.
@@ -465,6 +470,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
       viewOnChanged: widget.viewOnChanged,
       viewOnSubmitted: widget.viewOnSubmitted,
       viewOnClose: widget.viewOnClose,
+      viewOnOpen: widget.viewOnOpen,
       viewLeading: widget.viewLeading,
       viewTrailing: widget.viewTrailing,
       viewHintText: widget.viewHintText,
@@ -544,6 +550,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     this.viewOnChanged,
     this.viewOnSubmitted,
     this.viewOnClose,
+    this.viewOnOpen,
     this.toggleVisibility,
     this.textDirection,
     this.viewBuilder,
@@ -576,6 +583,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   final ValueChanged<String>? viewOnChanged;
   final ValueChanged<String>? viewOnSubmitted;
   final VoidCallback? viewOnClose;
+  final VoidCallback? viewOnOpen;
   final ValueGetter<bool>? toggleVisibility;
   final TextDirection? textDirection;
   final ViewBuilder? viewBuilder;
@@ -641,6 +649,7 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     updateViewConfig(anchorKey.currentContext!);
     updateTweens(anchorKey.currentContext!);
     toggleVisibility?.call();
+    viewOnOpen?.call();
     return super.didPush();
   }
 
@@ -1193,6 +1202,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     ValueChanged<String>? onChanged,
     ValueChanged<String>? onSubmitted,
     VoidCallback? onClose,
+    VoidCallback? onOpen,
     required super.suggestionsBuilder,
     super.textInputAction,
     super.keyboardType,
@@ -1207,6 +1217,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
          viewOnSubmitted: onSubmitted,
          viewOnChanged: onChanged,
          viewOnClose: onClose,
+         viewOnOpen: onOpen,
          builder: (BuildContext context, SearchController controller) {
            return SearchBar(
              constraints: constraints,
@@ -1247,6 +1258,9 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
 /// A [SearchController] is used to control a menu after it has been created,
 /// with methods such as [openView] and [closeView]. It can also control the text in the
 /// input field.
+///
+/// To observe open/close state changes of search view, provide
+/// [SearchAnchor.viewOnOpen] and/or [SearchAnchor.viewOnClose] callbacks.
 ///
 /// See also:
 ///

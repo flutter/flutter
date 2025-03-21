@@ -85,7 +85,7 @@ static void ApplyFramebufferBlend(Entity& entity) {
   contents->SetChildContents(src_contents);
   contents->SetBlendMode(entity.GetBlendMode());
   entity.SetContents(std::move(contents));
-  entity.SetBlendMode(BlendMode::kSource);
+  entity.SetBlendMode(BlendMode::kSrc);
 }
 
 /// @brief Create the subpass restore contents, appling any filters or opacity
@@ -374,8 +374,7 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
            FilterContents::BlurStyle::kNormal &&
        paint.image_filter) ||
       (paint.mask_blur_descriptor->style == FilterContents::BlurStyle::kSolid &&
-       (!rrect_color.IsOpaque() ||
-        paint.blend_mode != BlendMode::kSourceOver))) {
+       (!rrect_color.IsOpaque() || paint.blend_mode != BlendMode::kSrcOver))) {
     Rect render_bounds = rect;
     if (paint.mask_blur_descriptor->style !=
         FilterContents::BlurStyle::kInner) {
@@ -766,7 +765,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   // of Skia's SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER flag, which
   // is enabled when the Flutter engine builds Skia.
   if (!paint.color_source) {
-    blend_mode = BlendMode::kDestination;
+    blend_mode = BlendMode::kDst;
   }
 
   Entity entity;
@@ -780,7 +779,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   }
 
   // If the blend mode is destination don't bother to bind or create a texture.
-  if (blend_mode == BlendMode::kDestination) {
+  if (blend_mode == BlendMode::kDst) {
     auto contents = std::make_shared<VerticesSimpleBlendContents>();
     contents->SetBlendMode(blend_mode);
     contents->SetAlpha(paint.color.alpha);
@@ -1326,7 +1325,7 @@ bool Canvas::Restore() {
             element_entity.GetBlendMode(), inputs);
         contents->SetCoverageHint(element_entity.GetCoverage());
         element_entity.SetContents(std::move(contents));
-        element_entity.SetBlendMode(BlendMode::kSource);
+        element_entity.SetBlendMode(BlendMode::kSrc);
       }
     }
 
@@ -1489,9 +1488,9 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       Matrix::MakeTranslation(Vector3(-GetGlobalPassPosition())) *
       entity.GetTransform());
   entity.SetInheritedOpacity(transform_stack_.back().distributed_opacity);
-  if (entity.GetBlendMode() == BlendMode::kSourceOver &&
+  if (entity.GetBlendMode() == BlendMode::kSrcOver &&
       entity.GetContents()->IsOpaque(entity.GetTransform())) {
-    entity.SetBlendMode(BlendMode::kSource);
+    entity.SetBlendMode(BlendMode::kSrc);
   }
 
   // If the entity covers the current render target and is a solid color, then
@@ -1558,7 +1557,7 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       auto contents =
           ColorFilterContents::MakeBlend(entity.GetBlendMode(), inputs);
       entity.SetContents(std::move(contents));
-      entity.SetBlendMode(BlendMode::kSource);
+      entity.SetBlendMode(BlendMode::kSrc);
     }
   }
 
@@ -1678,7 +1677,7 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
 
   Entity msaa_backdrop_entity;
   msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
-  msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
+  msaa_backdrop_entity.SetBlendMode(BlendMode::kSrc);
   msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
   if (!msaa_backdrop_entity.Render(renderer_, current_render_pass)) {
     VALIDATION_LOG << "Failed to render MSAA backdrop entity.";
@@ -1739,7 +1738,7 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
 
       Entity entity;
       entity.SetContents(contents);
-      entity.SetBlendMode(BlendMode::kSource);
+      entity.SetBlendMode(BlendMode::kSrc);
 
       if (!entity.Render(renderer_, *render_pass)) {
         VALIDATION_LOG << "Failed to render EntityPass root blit.";

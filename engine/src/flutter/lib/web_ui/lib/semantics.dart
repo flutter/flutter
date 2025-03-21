@@ -283,6 +283,8 @@ enum SemanticsRole {
   menuBar,
   menu,
   menuItem,
+  menuItemCheckbox,
+  menuItemRadio,
   list,
   listItem,
   form,

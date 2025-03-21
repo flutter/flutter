@@ -4390,18 +4390,6 @@ TEST_F(DisplayListRendering, MatrixColorFilterOpacityCommuteCheck) {
   FUNC(kColor)                         \
   FUNC(kLuminosity)
 
-// This function serves both to enhance error output below and to double
-// check that the macro supplies all modes (otherwise it won't compile)
-static std::string BlendModeToString(DlBlendMode mode) {
-  switch (mode) {
-#define MODE_CASE(m)   \
-  case DlBlendMode::m: \
-    return #m;
-    FOR_EACH_BLEND_MODE_ENUM(MODE_CASE)
-#undef MODE_CASE
-  }
-}
-
 TEST_F(DisplayListRendering, BlendColorFilterModifyTransparencyCheck) {
   auto test_mode_color = [](DlBlendMode mode, DlColor color) {
     std::stringstream desc_str;
