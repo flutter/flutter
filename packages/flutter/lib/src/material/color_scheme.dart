@@ -734,6 +734,8 @@ class ColorScheme with Diagnosticable {
   /// from a single seed color based on the Material 3 color system. To create a
   /// high-contrast color scheme, set `contrastLevel` to 1.0.
   ///
+  /// System colors, when available, are used as fallback for the secondary and surface colors.
+  ///
   /// {@tool snippet}
   /// This example demonstrates how to create a color scheme similar to [ColorScheme.highContrastLight]
   /// using the [ColorScheme.fromSeed] constructor:
@@ -869,6 +871,8 @@ class ColorScheme with Diagnosticable {
   /// Override the `brightness` property of [ColorScheme.fromSeed] to create a
   /// dark color scheme. To create a high-contrast color scheme, set
   /// `contrastLevel` to 1.0.
+  ///
+  /// System colors, when available, are used as fallback for the secondary and surface colors.
   ///
   /// {@tool snippet}
   /// This example demonstrates how to create a color scheme similar to [ColorScheme.highContrastDark]

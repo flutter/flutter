@@ -382,8 +382,14 @@ class Typography with Diagnosticable {
     );
   }
 
+  /// A high contrast text theme based on light system colors.
+  ///
+  /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static TextTheme highContrastLight = _systemColors(ui.Brightness.light);
 
+  /// A high contrast text theme based on dark system colors.
+  ///
+  /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   static TextTheme highContrastDark = _systemColors(ui.Brightness.dark);
 
   static TextTheme _systemColors(ui.Brightness brightness) {

@@ -915,6 +915,28 @@ class ThemeData with Diagnosticable {
     );
   }
 
+  /// Create a high contrast light theme based on a combination of:
+  ///
+  /// - A purple primary color that matches the baseline [Material 2](https://material.io/design/color/the-color-system.html#color-theme-creation)
+  ///   or [Material 3](https://m3.material.io/styles/color/static/baseline) color scheme.
+  /// - System colors, if available.
+  ///
+  /// This example demonstrates how to use the high contrast themes with [MaterialApp]:
+  ///
+  /// ```dart
+  /// MaterialApp(
+  ///   theme: ThemeData.light(),
+  ///   darkTheme: ThemeData.dark(),
+  ///   highContrastTheme: ThemeData.highContrastLight(),
+  ///   highContrastDarkTheme: ThemeData.highContrastDark(),
+  ///
+  ///   home: Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Home'),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
   factory ThemeData.highContrastLight({bool useMaterial3 = true}) {
     return ThemeData._highContrast(
       useMaterial3: useMaterial3,
@@ -925,6 +947,28 @@ class ThemeData with Diagnosticable {
     );
   }
 
+  /// Create a high contrast dark theme based on a combination of:
+  ///
+  /// - A purple primary color that matches the baseline [Material 2](https://material.io/design/color/the-color-system.html#color-theme-creation)
+  ///   or [Material 3](https://m3.material.io/styles/color/static/baseline) color scheme.
+  /// - System colors, if available.
+  ///
+  /// This example demonstrates how to use the high contrast themes with [MaterialApp]:
+  ///
+  /// ```dart
+  /// MaterialApp(
+  ///   theme: ThemeData.light(),
+  ///   darkTheme: ThemeData.dark(),
+  ///   highContrastTheme: ThemeData.highContrastLight(),
+  ///   highContrastDarkTheme: ThemeData.highContrastDark(),
+  ///
+  ///   home: Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Home'),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
   factory ThemeData.highContrastDark({bool useMaterial3 = true}) {
     return ThemeData._highContrast(
       useMaterial3: useMaterial3,
