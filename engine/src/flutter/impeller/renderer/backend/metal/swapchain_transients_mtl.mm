@@ -53,7 +53,6 @@ std::shared_ptr<Texture> SwapchainTransientsMTL::GetMSAATexture() {
     desc.size = size_;
     desc.sample_count = SampleCount::kCount4;
     if (format_ == PixelFormat::kB10G10R10XR) {
-      FML_LOG(ERROR) << "Set to alpha value:";
       desc.format = PixelFormat::kB10G10R10A10XR;
     } else {
       desc.format = format_;

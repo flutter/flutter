@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 #import "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
-#include "impeller/core/formats.h"
 
+#include "flutter/impeller/core/formats.h"
 #include "flutter/impeller/renderer/backend/metal/formats_mtl.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"

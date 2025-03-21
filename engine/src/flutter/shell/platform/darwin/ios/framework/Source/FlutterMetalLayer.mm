@@ -276,7 +276,6 @@ extern CFTimeInterval display_link_target;
     pixelFormat = kCVPixelFormatType_40ARGBLEWideGamut;
     bytesPerElement = 8;
   } else if (self.pixelFormat == MTLPixelFormatBGR10_XR) {
-    FML_LOG(ERROR) << "bytesPerElement: 4";
     pixelFormat = kCVPixelFormatType_30RGBLEPackedWideGamut;
     bytesPerElement = 4;
   } else {
