@@ -82,7 +82,7 @@ void main() {
     'one sensitive SensitiveContent widget in the tree determines content sensitivity for tree as expected',
     () {
       // Tests with other sensitive widget(s):
-      testWidgets('with another sensitive widget ca', (WidgetTester tester) async {
+      testWidgets('with another sensitive widget', (WidgetTester tester) async {
         await tester.pumpWidget(
           Column(
             children: <Widget>[
@@ -100,7 +100,7 @@ void main() {
           setContentSensitivityArgs.every(
             (ContentSensitivity arg) => arg == ContentSensitivity.sensitive,
           ),
-          isTrue, //here
+          isTrue,
         );
       });
 
@@ -213,7 +213,7 @@ void main() {
         expect(setContentSensitivityArgs, <ContentSensitivity>[ContentSensitivity.sensitive]);
       });
 
-      testWidgets('when it gets disposed with one auto sensitive widget cs', (
+      testWidgets('when it gets disposed with one auto sensitive widget', (
         WidgetTester tester,
       ) async {
         const Key sc1Key = Key('sc1');
@@ -814,7 +814,7 @@ void main() {
     'one auto-sensitive (with no sensitive SensitiveContent widgets in the tree) determines content sensitivity for tree as expected',
     () {
       // Tests with other auto sensitive widget(s):
-      testWidgets('with another auto sensitive widget cs', (WidgetTester tester) async {
+      testWidgets('with another auto sensitive widget', (WidgetTester tester) async {
         final SensitiveContent asc1 = SensitiveContent(
           sensitivity: ContentSensitivity.autoSensitive,
           child: Container(),
