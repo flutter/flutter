@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 
-import '../framework/cocoon.dart';
 import '../framework/metrics_center.dart';
 
 class UploadResultsCommand extends Command<void> {
