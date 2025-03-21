@@ -3435,7 +3435,6 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
-../../../fuchsia/sdk/linux/fidl/fuchsia.gnss.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.magma/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adc/meta.json
@@ -3498,6 +3497,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.lightsensor/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/meta.json
