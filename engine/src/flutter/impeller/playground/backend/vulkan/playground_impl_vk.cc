@@ -96,7 +96,7 @@ PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
   context_settings.fatal_missing_validations =
       switches_.enable_vulkan_validation;
 
-  auto context_vk = ContextVK::Create(Flags{}, std::move(context_settings));
+  auto context_vk = ContextVK::Create(std::move(context_settings));
   if (!context_vk || !context_vk->IsValid()) {
     VALIDATION_LOG << "Could not create Vulkan context in the playground.";
     return;
