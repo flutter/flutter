@@ -6,13 +6,15 @@
 // so it can be versioned with the Flutter SDK.
 
 import java.nio.file.Paths
+import com.flutter.gradle.NativePluginLoader
 
 File pathToThisDirectory = buildscript.sourceFile.parentFile
 apply from: Paths.get(pathToThisDirectory.absolutePath, "src", "main", "groovy", "native_plugin_loader.groovy")
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 
-List<Map<String, Object>> nativePlugins = nativePluginLoader.getPlugins(moduleProjectRoot)
+def nativePluginLoader = new NativePluginLoader()
+List<Map<String, Object>> nativePlugins = NativePluginLoader.getPlugins(moduleProjectRoot)
 nativePlugins.each { androidPlugin ->
     def pluginDirectory = new File(androidPlugin.path as String, 'android')
     assert pluginDirectory.exists()
