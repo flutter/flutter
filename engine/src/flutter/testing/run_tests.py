@@ -983,8 +983,6 @@ def build_dart_host_test_list():
       os.path.join('flutter', 'tools', 'pkg', 'engine_repo_tools'),
       os.path.join('flutter', 'tools', 'pkg', 'git_repo_tools'),
   ]
-  if not is_asan(build_dir):
-    dart_host_tests += [os.path.join('flutter', 'tools', 'path_ops', 'dart')]
 
   return dart_host_tests
 
