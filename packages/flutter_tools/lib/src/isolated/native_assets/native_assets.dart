@@ -180,7 +180,6 @@ Future<DartHookResult> runFlutterSpecificHooks({
     buildRunner: buildRunner,
     projectUri: projectUri,
     linkingEnabled: linkingEnabled,
-    fileSystem: fileSystem,
     targets: targets,
   );
 }
@@ -634,7 +633,6 @@ Future<DartHookResult> _runDartHooks({
   required FlutterNativeAssetsBuildRunner buildRunner,
   required List<TargetCls> targets,
   required Uri projectUri,
-  required FileSystem fileSystem,
   required bool linkingEnabled,
 }) async {
   final DateTime buildStart = DateTime.now();
