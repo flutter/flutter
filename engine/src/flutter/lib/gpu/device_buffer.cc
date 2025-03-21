@@ -104,19 +104,19 @@ bool InternalFlutterGpu_DeviceBuffer_Overwrite(
     flutter::gpu::Context* gpu_context,
     Dart_Handle source_byte_data,
     int destination_offset_in_bytes) {
-//  auto dart_state = flutter::UIDartState::Current();
-//  auto& task_runners = dart_state->GetTaskRunners();
-//
-//  task_runners.GetRasterTaskRunner()->PostTask(
-//      fml::MakeCopyable([gpu_context, device_buffer, source_byte_data,
-//                         destination_offset_in_bytes]() mutable {
-        if (!device_buffer->Overwrite(*gpu_context,
-                                      tonic::DartByteData(source_byte_data),
-                                      destination_offset_in_bytes)) {
-          FML_LOG(ERROR) << "Failed to set device buffer contents.";
-          return false;
-        }
-//      }));
+  //  auto dart_state = flutter::UIDartState::Current();
+  //  auto& task_runners = dart_state->GetTaskRunners();
+  //
+  //  task_runners.GetRasterTaskRunner()->PostTask(
+  //      fml::MakeCopyable([gpu_context, device_buffer, source_byte_data,
+  //                         destination_offset_in_bytes]() mutable {
+  if (!device_buffer->Overwrite(*gpu_context,
+                                tonic::DartByteData(source_byte_data),
+                                destination_offset_in_bytes)) {
+    FML_LOG(ERROR) << "Failed to set device buffer contents.";
+    return false;
+  }
+  //      }));
   return true;
 }
 
