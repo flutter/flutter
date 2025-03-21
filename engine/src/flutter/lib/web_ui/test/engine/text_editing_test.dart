@@ -2194,121 +2194,25 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
-    test('Supports composition changes with shift arrow selection in Japanese IME', () {
-      final DefaultTextEditingStrategy editingStrategy = DefaultTextEditingStrategy(textEditing);
-
+    test('Do not update composingBase and composingExtent while composing Text', () {
       showKeyboard(inputType: 'text');
-      editingStrategy.composingText = 'へんかん';
+      // 'text' is input as a composing target
+      editingStrategy!.composingText = 'test';
       sendFrameworkMessage(
         codec.encodeMethodCall(
           const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': 'へんかん',
+            'text': 'test',
             'selectionBase': 4,
-            'selectionExtent': 4,
-            'composingBase': 0,
-            'composingExtent': 4,
+            'selectionExtent': 0,
           }),
         ),
       );
-      checkInputEditingState(textEditing!.strategy.domElement, 'へんかん', 4, 4);
 
-      // text composition is started
-      sendFrameworkMessage(
-        codec.encodeMethodCall(
-          const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': '変換',
-            'selectionBase': 0,
-            'selectionExtent': 2,
-            'composingBase': 0,
-            'composingExtent': 2,
-          }),
-        ),
-      );
-      checkInputEditingState(textEditing!.strategy.domElement, '変換', 0, 2);
+      // 'text' is composed as Japanese, and baseOffset and extentOffset are updated
+      final EditingState editingState = EditingState(text: 'test', baseOffset: 0, extentOffset: 1);
+      editingStrategy!.setEditingState(editingState);
 
-      // shift + ←
-      sendFrameworkMessage(
-        codec.encodeMethodCall(
-          const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': '変化ん',
-            'selectionBase': 0,
-            'selectionExtent': 2,
-            'composingBase': -1,
-            'composingExtent': -1,
-          }),
-        ),
-      );
-      checkInputEditingState(textEditing!.strategy.domElement, '変化ん', 0, 2);
-
-      // shift + ←
-      sendFrameworkMessage(
-        codec.encodeMethodCall(
-          const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': '変かん',
-            'selectionBase': 0,
-            'selectionExtent': 1,
-            'composingBase': -1,
-            'composingExtent': -1,
-          }),
-        ),
-      );
-      checkInputEditingState(textEditing!.strategy.domElement, '変かん', 0, 1);
-
-      // shift + ←
-      sendFrameworkMessage(
-        codec.encodeMethodCall(
-          const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': 'へんかん',
-            'selectionBase': 0,
-            'selectionExtent': 1,
-            'composingBase': -1,
-            'composingExtent': -1,
-          }),
-        ),
-      );
-      checkInputEditingState(textEditing!.strategy.domElement, 'へんかん', 0, 1);
-
-      // shift + →
-      sendFrameworkMessage(
-        codec.encodeMethodCall(
-          const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': '変かん',
-            'selectionBase': 0,
-            'selectionExtent': 1,
-            'composingBase': -1,
-            'composingExtent': -1,
-          }),
-        ),
-      );
-      checkInputEditingState(textEditing!.strategy.domElement, '変かん', 0, 1);
-
-      // shift + →
-      sendFrameworkMessage(
-        codec.encodeMethodCall(
-          const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': '変化ん',
-            'selectionBase': 0,
-            'selectionExtent': 2,
-            'composingBase': -1,
-            'composingExtent': -1,
-          }),
-        ),
-      );
-      checkInputEditingState(textEditing!.strategy.domElement, '変化ん', 0, 2);
-
-      // shift + →
-      sendFrameworkMessage(
-        codec.encodeMethodCall(
-          const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': '変換',
-            'selectionBase': 0,
-            'selectionExtent': 2,
-            'composingBase': 0,
-            'composingExtent': 2,
-          }),
-        ),
-      );
-      checkInputEditingState(textEditing!.strategy.domElement, '変換', 0, 2);
+      checkInputEditingState(textEditing!.strategy.domElement, 'test', 0, 4);
     });
 
     test('Supports deletion at inverted selection', () async {
