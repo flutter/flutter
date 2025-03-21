@@ -68,7 +68,8 @@ class EmbedderEngine {
 
   bool SetAccessibilityFeatures(int32_t flags);
 
-  bool DispatchSemanticsAction(int node_id,
+  bool DispatchSemanticsAction(int64_t view_id,
+                               int node_id,
                                flutter::SemanticsAction action,
                                fml::MallocMapping args);
 
