@@ -433,7 +433,7 @@ object FlutterPluginUtils {
         maxPluginCompileSdkVersion: Int,
         projectCompileSdkVersion: Int,
         logger: Logger,
-        pluginsWithHigherSdkVersion: List<Pair<String, String>>,
+        pluginsWithHigherSdkVersion: List<PluginVersionPair>,
         projectDirectory: File
     ) {
         logger.error(
@@ -441,7 +441,7 @@ object FlutterPluginUtils {
         )
         for (pluginToCompileSdkVersion in pluginsWithHigherSdkVersion) {
             logger.error(
-                "- ${pluginToCompileSdkVersion.first} compiles against Android SDK ${pluginToCompileSdkVersion.second}"
+                "- ${pluginToCompileSdkVersion.name} compiles against Android SDK ${pluginToCompileSdkVersion.version}"
             )
         }
         val buildGradleFile =
@@ -466,14 +466,14 @@ object FlutterPluginUtils {
         maxPluginNdkVersion: String,
         projectNdkVersion: String,
         logger: Logger,
-        pluginsWithDifferentNdkVersion: List<Pair<String, String>>,
+        pluginsWithDifferentNdkVersion: List<PluginVersionPair>,
         projectDirectory: File
     ) {
         logger.error(
             "Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:"
         )
         for (pluginToNdkVersion in pluginsWithDifferentNdkVersion) {
-            logger.error("- ${pluginToNdkVersion.first} requires Android NDK ${pluginToNdkVersion.second}")
+            logger.error("- ${pluginToNdkVersion.name} requires Android NDK ${pluginToNdkVersion.version}")
         }
         val buildGradleFile =
             getBuildGradleFileFromProjectDir(
@@ -514,8 +514,8 @@ object FlutterPluginUtils {
                 getAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
-            val pluginsWithHigherSdkVersion = mutableListOf<Pair<String, String>>()
-            val pluginsWithDifferentNdkVersion = mutableListOf<Pair<String, String>>()
+            val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
+            val pluginsWithDifferentNdkVersion = mutableListOf<PluginVersionPair>()
             pluginList.forEach { pluginObject ->
                 val pluginName: String =
                     requireNotNull(
@@ -530,7 +530,7 @@ object FlutterPluginUtils {
                         maxOf(maxPluginCompileSdkVersion, pluginCompileSdkVersion)
                     if (pluginCompileSdkVersion > projectCompileSdkVersion) {
                         pluginsWithHigherSdkVersion.add(
-                            Pair(
+                            PluginVersionPair(
                                 pluginName,
                                 pluginCompileSdkVersion.toString()
                             )
@@ -544,7 +544,7 @@ object FlutterPluginUtils {
                             maxPluginNdkVersion
                         )
                     if (pluginNdkVersion != projectNdkVersion) {
-                        pluginsWithDifferentNdkVersion.add(Pair(pluginName, pluginNdkVersion))
+                        pluginsWithDifferentNdkVersion.add(PluginVersionPair(pluginName, pluginNdkVersion))
                     }
 
                     numProcessedPlugins--
@@ -850,3 +850,8 @@ object FlutterPluginUtils {
         }
     }
 }
+
+data class PluginVersionPair(
+    val name: String,
+    val version: String
+)
