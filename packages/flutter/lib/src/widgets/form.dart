@@ -72,6 +72,7 @@ class Form extends StatefulWidget {
     )
     this.onWillPop,
     this.onChanged,
+    this.semanticsService = const DefaultSemanticsService(),
     AutovalidateMode? autovalidateMode,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled,
        assert(
@@ -216,6 +217,9 @@ class Form extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.FormField.autovalidateMode}
   final AutovalidateMode autovalidateMode;
+
+  /// The semantic service to use when triggering announcements.
+  final SemanticsService semanticsService;
 
   void _callPopInvoked(bool didPop, Object? result) {
     if (onPopInvokedWithResult != null) {
@@ -369,7 +373,7 @@ class FormState extends State<Form> {
       }
     }
 
-    if (errorMessage.isNotEmpty && defaultTargetPlatform != TargetPlatform.android) {
+    if (errorMessage.isNotEmpty && widget.semanticsService.isAnnounceSupported()) {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(
