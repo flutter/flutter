@@ -97,29 +97,18 @@ class SensitiveContentService {
   /// Sets content sensitivity level of the app window (Android `View`) that contains the app's widget
   /// tree to the level specified by [contentSensitivity] via a call to the native embedder.
   Future<void> setContentSensitivity(ContentSensitivity contentSensitivity) async {
-    try {
-      await sensitiveContentChannel.invokeMethod<void>(
-        'SensitiveContent.setContentSensitivity',
-        contentSensitivity.name,
-      );
-    } catch (e) {
-      // Content sensitivity failed to be set.
-      throw FlutterError('Content sensitivity $contentSensitivity failed to be set: $e');
-    }
+    await sensitiveContentChannel.invokeMethod<void>(
+      'SensitiveContent.setContentSensitivity',
+      contentSensitivity.name,
+    );
   }
 
   /// Gets content sensitivity level of the app window (Android `View`) that contains
   /// the app's widget tree.
   Future<ContentSensitivity> getContentSensitivity() async {
-    String? result;
-    try {
-      result = await sensitiveContentChannel.invokeMethod<String>(
-        'SensitiveContent.getContentSensitivity',
-      );
-    } catch (e) {
-      // Content sensitivity failed to be retrieved.
-      throw FlutterError('Failed to retrieve content sensitivity: $e');
-    }
+    final String? result = await sensitiveContentChannel.invokeMethod<String>(
+      'SensitiveContent.getContentSensitivity',
+    );
 
     final ContentSensitivity contentSensitivity = ContentSensitivity.values.firstWhere(
       (ContentSensitivity cs) => cs.name == result && cs != ContentSensitivity._unknown,

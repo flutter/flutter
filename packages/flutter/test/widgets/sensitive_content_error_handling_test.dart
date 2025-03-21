@@ -29,9 +29,9 @@ void main() {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
             if (setContentSensitivityCall == 1 && methodCall.arguments == 'sensitive') {
-              // In the first call to set content sensitivity, throw exception to test
+              // In the first call to set content sensitivity, throw platform exception to test
               // SensitiveContentHost.register behavior.
-              throw Exception('test exception');
+              throw PlatformException(code: 'test exception');
             }
           } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
             return 'autoSensitive';
@@ -64,9 +64,9 @@ void main() {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
             if (setContentSensitivityCall == 2 && methodCall.arguments == 'autoSensitive') {
-              // In the second call to set content sensitivity, throw exception to test
+              // In the second call to set content sensitivity, throw platform exception to test
               // SensitiveContentHost.unregister behavior.
-              throw Exception('test exception');
+              throw PlatformException(code: 'test exception');
             }
           } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
             return 'autoSensitive';
@@ -110,9 +110,9 @@ void main() {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
             if (setContentSensitivityCall == 2 && methodCall.arguments == 'autoSensitive') {
-              // In the second call to set content sensitivity, throw exception to test
+              // In the second call to set content sensitivity, throw platform exception to test
               // SensitiveContentHost.unregister behavior.
-              throw Exception('test exception');
+              throw PlatformException(code: 'test exception');
             }
           } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
             return 'autoSensitive';

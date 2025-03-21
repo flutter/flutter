@@ -4,7 +4,8 @@
 
 import 'dart:math' show max;
 
-import 'package:flutter/services.dart' show ContentSensitivity, SensitiveContentService;
+import 'package:flutter/services.dart'
+    show ContentSensitivity, PlatformException, SensitiveContentService;
 
 import '../foundation/assertions.dart' show FlutterErrorDetails;
 import 'async.dart' show AsyncSnapshot, ConnectionState, FutureBuilder;
@@ -197,12 +198,12 @@ class SensitiveContentHost {
       await _sensitiveContentService.setContentSensitivity(
         _contentSensitivitySetting.contentSensitivityBasedOnWidgetCounts!,
       );
-    } on FlutterError catch (e) {
+    } on PlatformException catch (e) {
       FlutterError.reportError(
         FlutterErrorDetails(
           exception: FlutterError('Attempt to set $desiredSensitivity sensitivity failed: $e}'),
           library: 'widget library',
-          stack: e.stackTrace,
+          stack: e.stacktrace == null ? StackTrace.current : StackTrace.fromString(e.stacktrace!),
         ),
       );
     }
@@ -245,14 +246,14 @@ class SensitiveContentHost {
 
       try {
         await _sensitiveContentService.setContentSensitivity(_fallbackContentSensitivitySetting!);
-      } on FlutterError catch (e) {
+      } on PlatformException catch (e) {
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: FlutterError(
               'Attempted to set $_fallbackContentSensitivitySetting sensitivity failed: $e}',
             ),
             library: 'widget library',
-            stack: e.stackTrace,
+            stack: e.stacktrace == null ? StackTrace.current : StackTrace.fromString(e.stacktrace!),
           ),
         );
       }
@@ -268,14 +269,14 @@ class SensitiveContentHost {
       // Set content sensitivity as contentSensitivityToRestore.
       try {
         await _sensitiveContentService.setContentSensitivity(contentSensitivityToRestore);
-      } on FlutterError catch (e) {
+      } on PlatformException catch (e) {
         FlutterError.reportError(
           FlutterErrorDetails(
             exception: FlutterError(
               'Attempted to set $_fallbackContentSensitivitySetting sensitivity failed: $e}',
             ),
             library: 'widget library',
-            stack: e.stackTrace,
+            stack: e.stacktrace == null ? StackTrace.current : StackTrace.fromString(e.stacktrace!),
           ),
         );
       }
