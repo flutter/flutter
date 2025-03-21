@@ -1,7 +1,31 @@
 import 'package:file/file.dart' show FileSystem;
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/code_assets_builder.dart'
+    show
+        AndroidCodeConfig,
+        Architecture,
+        BuildInputBuilder,
+        CCompilerConfig,
+        CodeAsset,
+        CodeAssetBuildInputBuilder,
+        HookConfigBuilder,
+        IOSCodeConfig,
+        LinkInputBuilder,
+        LinkModePreference,
+        MacOSCodeConfig,
+        OS;
 import '../../base/common.dart' show throwToolExit;
-import '../../build_info.dart';
+import '../../build_info.dart'
+    show
+        AndroidArch,
+        DarwinArch,
+        EnvironmentType,
+        TargetPlatform,
+        getAndroidArchForName,
+        getDarwinArchsFromEnv,
+        getIOSArchForName,
+        kAndroidArchs,
+        kIosArchs,
+        kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import 'android/native_assets.dart' show getNativeAndroidArchitecture, targetAndroidNdkApi;
@@ -10,30 +34,33 @@ import 'macos/native_assets.dart' show getNativeMacOSArchitecture, targetMacOSVe
 import 'native_assets.dart' show FlutterNativeAssetsBuildRunner, getNativeOSFromTargetPlatform;
 
 sealed class TargetCls {
-  TargetCls({required this.platform});
+  const TargetCls({required this.platform, required this.supportedAssetTypes});
 
   final TargetPlatform platform;
+  final List<String> supportedAssetTypes;
 
-  BuildInputBuilder buildInputCreator();
-  LinkInputBuilder linkInputCreator();
-  List<String> buildAssetTypes(List<String> supportedAssetTypes) => supportedAssetTypes;
+  BuildInputBuilder buildInputCreator() => BuildInputBuilder();
+  LinkInputBuilder linkInputCreator() => LinkInputBuilder();
+
+  List<String> get buildAssetTypes => supportedAssetTypes;
 }
 
 final class WebTargetCls extends TargetCls {
-  WebTargetCls({required super.platform});
+  WebTargetCls({required super.supportedAssetTypes})
+    : super(platform: TargetPlatform.web_javascript);
 
   @override
-  BuildInputBuilder buildInputCreator() => BuildInputBuilder();
-  @override
-  LinkInputBuilder linkInputCreator() => LinkInputBuilder();
-
-  @override
-  List<String> buildAssetTypes(List<String> supportedAssetTypes) =>
+  List<String> get buildAssetTypes =>
       supportedAssetTypes.where((String element) => element != CodeAsset.type).toList();
 }
 
 final class CodeTargetCls extends TargetCls {
-  CodeTargetCls({required super.platform, required this.architecture});
+  CodeTargetCls({
+    required super.platform,
+    required super.supportedAssetTypes,
+    required this.architecture,
+  });
+
   final Architecture architecture;
 
   late final CCompilerConfig? cCompilerConfigSync;
@@ -52,85 +79,26 @@ final class CodeTargetCls extends TargetCls {
 
   @override
   BuildInputBuilder buildInputCreator() {
-    final BuildInputBuilder buildInputBuilder = BuildInputBuilder();
+    final BuildInputBuilder buildInputBuilder = super.buildInputCreator();
     setupCode(buildInputBuilder.config, architecture);
     return buildInputBuilder;
   }
 
   @override
   LinkInputBuilder linkInputCreator() {
-    final LinkInputBuilder linkInputBuilder = LinkInputBuilder();
+    final LinkInputBuilder linkInputBuilder = super.linkInputCreator();
     setupCode(linkInputBuilder.config, architecture);
     return linkInputBuilder;
   }
 }
 
-List<TargetCls> targetsForPlatform(
-  TargetPlatform targetPlatform,
-  Map<String, String> environmentDefines,
-  FileSystem fileSystem,
-) {
-  switch (targetPlatform) {
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
-      return <TargetCls>[
-        CodeTargetCls(
-          platform: targetPlatform,
-          architecture: _getNativeArchitecture(targetPlatform),
-        ),
-      ];
-    case TargetPlatform.darwin:
-      return getDarwinArchsFromEnv(environmentDefines)
-          .map(getNativeMacOSArchitecture)
-          .map((Architecture arch) => MacOSTargetCls(platform: targetPlatform, architecture: arch))
-          .toList();
-    case TargetPlatform.android:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-      final String? androidArchsEnvironment = environmentDefines[kAndroidArchs];
-      final List<AndroidArch> androidArchs = _androidArchs(targetPlatform, androidArchsEnvironment);
-      return androidArchs
-          .map(getNativeAndroidArchitecture)
-          .map((Architecture e) => CodeTargetCls(platform: targetPlatform, architecture: e))
-          .toList();
-    case TargetPlatform.ios:
-      final List<DarwinArch> iosArchs =
-          _emptyToNull(environmentDefines[kIosArchs])?.split(' ').map(getIOSArchForName).toList() ??
-          <DarwinArch>[DarwinArch.arm64];
-      return iosArchs
-          .map(getNativeIOSArchitecture)
-          .map(
-            (Architecture arch) => IOSTargetCls(
-              environmentDefines: environmentDefines,
-              fileSystem: fileSystem,
-              platform: targetPlatform,
-              architecture: arch,
-            ),
-          )
-          .toList();
-    case TargetPlatform.web_javascript:
-      return <TargetCls>[WebTargetCls(platform: targetPlatform)];
-    case TargetPlatform.tester:
-      return <TargetCls>[
-        CodeTargetCls(platform: targetPlatform, architecture: Architecture.current),
-      ];
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-      throw UnsupportedError('');
-  }
-}
-
 final class IOSTargetCls extends CodeTargetCls {
   IOSTargetCls({
+    required super.supportedAssetTypes,
+    required super.architecture,
     required this.environmentDefines,
     required this.fileSystem,
-    required super.platform,
-    required super.architecture,
-  });
+  }) : super(platform: TargetPlatform.ios);
 
   final Map<String, String> environmentDefines;
   final FileSystem fileSystem;
@@ -157,7 +125,8 @@ final class IOSTargetCls extends CodeTargetCls {
 }
 
 final class MacOSTargetCls extends CodeTargetCls {
-  MacOSTargetCls({required super.platform, required super.architecture});
+  MacOSTargetCls({required super.supportedAssetTypes, required super.architecture})
+    : super(platform: TargetPlatform.darwin);
 
   @override
   void setupCode(HookConfigBuilder builder, Architecture architecture) {
@@ -176,6 +145,7 @@ final class AndroidTargetCls extends CodeTargetCls {
     required super.platform,
     required super.architecture,
     required Map<String, String> environmentDefines,
+    required super.supportedAssetTypes,
   }) : _androidCodeConfig = AndroidCodeConfig(
          targetNdkApi: targetAndroidNdkApi(environmentDefines),
        );
@@ -198,26 +168,83 @@ final class AndroidTargetCls extends CodeTargetCls {
   }
 }
 
-Architecture _getNativeArchitecture(TargetPlatform targetPlatform) {
+final class TesterTargetCls extends CodeTargetCls {
+  TesterTargetCls({required super.supportedAssetTypes})
+    : super(architecture: Architecture.current, platform: TargetPlatform.tester);
+}
+
+List<TargetCls> targetsForPlatform(
+  TargetPlatform targetPlatform,
+  Map<String, String> environmentDefines,
+  FileSystem fileSystem,
+  List<String> supportedAssetTypes,
+) {
   switch (targetPlatform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
-      return Architecture.x64;
+      return <TargetCls>[
+        CodeTargetCls(
+          platform: targetPlatform,
+          architecture: Architecture.x64,
+          supportedAssetTypes: supportedAssetTypes,
+        ),
+      ];
     case TargetPlatform.linux_arm64:
     case TargetPlatform.windows_arm64:
-      return Architecture.arm64;
-    case TargetPlatform.android:
-    case TargetPlatform.ios:
+      return <TargetCls>[
+        CodeTargetCls(
+          platform: targetPlatform,
+          architecture: Architecture.arm64,
+          supportedAssetTypes: supportedAssetTypes,
+        ),
+      ];
     case TargetPlatform.darwin:
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
-    case TargetPlatform.tester:
-    case TargetPlatform.web_javascript:
+      return getDarwinArchsFromEnv(environmentDefines)
+          .map(getNativeMacOSArchitecture)
+          .map(
+            (Architecture arch) =>
+                MacOSTargetCls(architecture: arch, supportedAssetTypes: supportedAssetTypes),
+          )
+          .toList();
+    case TargetPlatform.android:
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      throw Exception('Unknown targetPlatform: $targetPlatform.');
+      final String? androidArchsEnvironment = environmentDefines[kAndroidArchs];
+      final List<AndroidArch> androidArchs = _androidArchs(targetPlatform, androidArchsEnvironment);
+      return androidArchs
+          .map(getNativeAndroidArchitecture)
+          .map(
+            (Architecture e) => CodeTargetCls(
+              platform: targetPlatform,
+              architecture: e,
+              supportedAssetTypes: supportedAssetTypes,
+            ),
+          )
+          .toList();
+    case TargetPlatform.ios:
+      final List<DarwinArch> iosArchs =
+          _emptyToNull(environmentDefines[kIosArchs])?.split(' ').map(getIOSArchForName).toList() ??
+          <DarwinArch>[DarwinArch.arm64];
+      return iosArchs
+          .map(getNativeIOSArchitecture)
+          .map(
+            (Architecture arch) => IOSTargetCls(
+              environmentDefines: environmentDefines,
+              fileSystem: fileSystem,
+              architecture: arch,
+              supportedAssetTypes: supportedAssetTypes,
+            ),
+          )
+          .toList();
+    case TargetPlatform.web_javascript:
+      return <TargetCls>[WebTargetCls(supportedAssetTypes: supportedAssetTypes)];
+    case TargetPlatform.tester:
+      return <TargetCls>[TesterTargetCls(supportedAssetTypes: supportedAssetTypes)];
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
+      throw UnsupportedError('No targets defined for target platform $targetPlatform.');
   }
 }
 

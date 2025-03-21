@@ -153,10 +153,15 @@ Future<DartHookResult> runFlutterSpecificHooks({
     return DartHookResult.empty();
   }
 
+  final List<String> supportedAssetTypes = <String>[
+    if (featureFlags.isNativeAssetsEnabled) CodeAsset.type,
+    if (featureFlags.isDartDataAssetsEnabled) DataAsset.type,
+  ];
   final List<TargetCls> targets = targetsForPlatform(
     targetPlatform,
     environmentDefines,
     fileSystem,
+    supportedAssetTypes,
   );
 
   // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
@@ -173,10 +178,6 @@ Future<DartHookResult> runFlutterSpecificHooks({
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
   return _runDartHooks(
     buildRunner: buildRunner,
-    supportedAssetTypes: <String>[
-      if (featureFlags.isNativeAssetsEnabled) CodeAsset.type,
-      if (featureFlags.isDartDataAssetsEnabled) DataAsset.type,
-    ],
     projectUri: projectUri,
     linkingEnabled: linkingEnabled,
     fileSystem: fileSystem,
@@ -635,7 +636,6 @@ Future<DartHookResult> _runDartHooks({
   required Uri projectUri,
   required FileSystem fileSystem,
   required bool linkingEnabled,
-  required List<String> supportedAssetTypes,
 }) async {
   final DateTime buildStart = DateTime.now();
 
@@ -646,26 +646,26 @@ Future<DartHookResult> _runDartHooks({
   final List<EncodedAsset> assets = <EncodedAsset>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final TargetCls target in targets) {
-    final List<String> buildAssetTypes = target.buildAssetTypes(supportedAssetTypes);
-    final bool codeAssetSupport = buildAssetTypes.contains(CodeAsset.type);
-    final bool dataAssetSupport = buildAssetTypes.contains(DataAsset.type);
     final BuildResult? buildResult = await buildRunner.build(
-      buildAssetTypes: buildAssetTypes,
+      buildAssetTypes: target.buildAssetTypes,
       inputCreator: target.buildInputCreator,
       inputValidator:
-          (BuildInput config) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetBuildInput(config),
-            if (dataAssetSupport) ...await validateDataAssetBuildInput(config),
-          ],
+          (BuildInput config) async =>
+              _validate(target.buildAssetTypes, <String, Future<ValidationErrors> Function()>{
+                CodeAsset.type: () => validateCodeAssetBuildInput(config),
+                DataAsset.type: () => validateDataAssetBuildInput(config),
+              }),
       buildValidator:
-          (BuildInput config, BuildOutput output) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetBuildOutput(config, output),
-            if (dataAssetSupport) ...await validateDataAssetBuildOutput(config, output),
-          ],
+          (BuildInput config, BuildOutput output) async =>
+              _validate(target.buildAssetTypes, <String, Future<ValidationErrors> Function()>{
+                CodeAsset.type: () => validateCodeAssetBuildOutput(config, output),
+                DataAsset.type: () => validateDataAssetBuildOutput(config, output),
+              }),
       applicationAssetValidator:
-          (List<EncodedAsset> assets) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetInApplication(assets),
-          ],
+          (List<EncodedAsset> assets) async =>
+              _validate(target.buildAssetTypes, <String, Future<ValidationErrors> Function()>{
+                CodeAsset.type: () => validateCodeAssetInApplication(assets),
+              }),
       workingDirectory: projectUri,
       linkingEnabled: linkingEnabled,
     );
@@ -678,22 +678,25 @@ Future<DartHookResult> _runDartHooks({
       continue;
     }
     final LinkResult? linkResult = await buildRunner.link(
-      buildAssetTypes: buildAssetTypes,
+      buildAssetTypes: target.buildAssetTypes,
       inputCreator: target.linkInputCreator,
       inputValidator:
-          (LinkInput config) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetLinkInput(config),
-            if (dataAssetSupport) ...await validateDataAssetLinkInput(config),
-          ],
+          (LinkInput config) async =>
+              _validate(target.buildAssetTypes, <String, Future<ValidationErrors> Function()>{
+                CodeAsset.type: () => validateCodeAssetLinkInput(config),
+                DataAsset.type: () => validateDataAssetLinkInput(config),
+              }),
       linkValidator:
-          (LinkInput config, LinkOutput output) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetLinkOutput(config, output),
-            if (dataAssetSupport) ...await validateDataAssetLinkOutput(config, output),
-          ],
+          (LinkInput config, LinkOutput output) async =>
+              _validate(target.buildAssetTypes, <String, Future<ValidationErrors> Function()>{
+                CodeAsset.type: () => validateCodeAssetLinkOutput(config, output),
+                DataAsset.type: () => validateDataAssetLinkOutput(config, output),
+              }),
       applicationAssetValidator:
-          (List<EncodedAsset> assets) async => <String>[
-            if (codeAssetSupport) ...await validateCodeAssetInApplication(assets),
-          ],
+          (List<EncodedAsset> assets) async =>
+              _validate(target.buildAssetTypes, <String, Future<ValidationErrors> Function()>{
+                CodeAsset.type: () => validateCodeAssetInApplication(assets),
+              }),
       workingDirectory: projectUri,
       buildResult: buildResult,
     );
@@ -725,6 +728,18 @@ Future<DartHookResult> _runDartHooks({
     dependencies: dependencies.toList(),
   );
 }
+
+Future<List<String>> _validate(
+  List<String> buildAssetTypes,
+  Map<String, Future<List<String>> Function()> map,
+) async =>
+    (await buildAssetTypes
+            .map((String e) => map[e])
+            .nonNulls
+            .map((Future<List<String>> Function() e) => e.call())
+            .wait)
+        .expand((List<String> element) => element)
+        .toList();
 
 Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   Uri buildUri,
