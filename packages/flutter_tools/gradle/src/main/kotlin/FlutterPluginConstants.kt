@@ -18,6 +18,7 @@ object FlutterPluginConstants {
     const val INTERMEDIATES_DIR = "intermediates"
     const val FLUTTER_STORAGE_BASE_URL = "FLUTTER_STORAGE_BASE_URL"
     const val DEFAULT_MAVEN_HOST = "https://storage.googleapis.com"
+    const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG = "https://flutter.dev/to/review-gradle-config"
 
     /** Maps platforms to ABI architectures. */
     @JvmStatic val PLATFORM_ARCH_MAP =
