@@ -47,6 +47,7 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     CGImageRef cgImage = [cicontext createCGImage:flipped
                                          fromRect:[ciImage extent]];
 
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     return std::unique_ptr<MetalScreenshot>(new MetalScreenshot(cgImage));
   }
 }

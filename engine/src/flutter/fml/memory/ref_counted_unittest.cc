@@ -11,6 +11,8 @@
 #include "flutter/fml/macros.h"
 #include "gtest/gtest.h"
 
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
+
 #if defined(__clang__)
 #define ALLOW_PESSIMIZING_MOVE(code_line)                                   \
   _Pragma("clang diagnostic push")                                          \
@@ -641,3 +643,5 @@ TEST(RefCountedTest, DebugChecks) {
 
 }  // namespace
 }  // namespace fml
+
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
