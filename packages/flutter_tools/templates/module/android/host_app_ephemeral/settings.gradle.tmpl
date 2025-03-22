@@ -27,6 +27,7 @@ plugins {
 
 include ':app'
 include ':flutter'
+project(":flutter").projectDir = new File(flutterProjectRoot, ".android/Flutter")
 
 rootProject.name = 'android_generated'
 //setBinding(new Binding([gradle: this]))
