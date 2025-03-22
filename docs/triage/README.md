@@ -263,11 +263,7 @@ In addition, consider these issues that fall under another team's triage, but ar
 
 ### Infrastructure team (`team-infra`)
 
-- [P0 list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-infra+label%3AP0+sort%3Aupdated-asc)
-- [Cocoon PRs](https://github.com/flutter/cocoon/pulls)
-- [GoB CLs](https://flutter-review.googlesource.com/q/status:open+-is:wip)
-- [Incoming issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-infra%2Cfyi-infra+-label%3Atriaged-infra+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc)
-- [Latest updated issue list](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-infra%2Cfyi-infra+sort%3Aupdated-desc)
+See the [Flutter Infra Team Triage](./Infra-Triage.md) page.
 
 ### iOS and macOS platform team (`team-ios` and `team-macos`)
 

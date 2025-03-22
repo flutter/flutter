@@ -181,4 +181,17 @@ void DisplayListBuilder::DrawParagraph(const Paragraph& paragraph,
   handle->Paint(&builder_, point.x, point.y);
 }
 
+void DisplayListBuilder::DrawShadow(const Path& path,
+                                    const flutter::DlColor& color,
+                                    float elevation,
+                                    bool occluder_is_transparent,
+                                    float device_pixel_ratio) {
+  builder_.DrawShadow(flutter::DlPath(path.GetPath()),  // path
+                      color,                            // shadow color
+                      elevation,                        // elevation
+                      occluder_is_transparent,          // occluder transparency
+                      device_pixel_ratio                // dpr
+  );
+}
+
 }  // namespace impeller::interop

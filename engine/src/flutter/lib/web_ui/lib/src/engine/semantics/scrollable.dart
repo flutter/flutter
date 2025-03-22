@@ -70,6 +70,7 @@ class SemanticScrollable extends SemanticRole {
       final bool doScrollForward = _domScrollPosition > _effectiveNeutralScrollPosition;
       _neutralizeDomScrollPosition();
       semanticsObject.recomputePositionAndSize();
+      semanticsObject.updateChildrenPositionAndSize();
 
       final int semanticsId = semanticsObject.id;
       if (doScrollForward) {
@@ -131,6 +132,7 @@ class SemanticScrollable extends SemanticRole {
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
       _neutralizeDomScrollPosition();
       semanticsObject.recomputePositionAndSize();
+      semanticsObject.updateChildrenPositionAndSize();
     });
 
     if (_scrollListener == null) {
@@ -203,8 +205,8 @@ class SemanticScrollable extends SemanticRole {
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollTop.toInt();
       semanticsObject
-        ..verticalContainerAdjustment = _effectiveNeutralScrollPosition.toDouble()
-        ..horizontalContainerAdjustment = 0.0;
+        ..verticalScrollAdjustment = _effectiveNeutralScrollPosition.toDouble()
+        ..horizontalScrollAdjustment = 0.0;
     } else {
       // Place the _scrollOverflowElement at the end of the content and
       // make sure that when we neutralize the scrolling position,
@@ -219,8 +221,8 @@ class SemanticScrollable extends SemanticRole {
       // Read back because the effective value depends on the amount of content.
       _effectiveNeutralScrollPosition = element.scrollLeft.toInt();
       semanticsObject
-        ..verticalContainerAdjustment = 0.0
-        ..horizontalContainerAdjustment = _effectiveNeutralScrollPosition.toDouble();
+        ..verticalScrollAdjustment = 0.0
+        ..horizontalScrollAdjustment = _effectiveNeutralScrollPosition.toDouble();
     }
   }
 
@@ -233,21 +235,21 @@ class SemanticScrollable extends SemanticRole {
         // Note that on Android overflow:hidden also works. However, we prefer
         // "scroll" because it works both on Android and iOS.
         if (semanticsObject.isVerticalScrollContainer) {
+          // This will reset both `overflow-x` and `overflow-y`.
+          element.style.removeProperty('overflow');
           element.style.overflowY = 'scroll';
-        } else {
-          assert(semanticsObject.isHorizontalScrollContainer);
+        } else if (semanticsObject.isHorizontalScrollContainer) {
+          // This will reset both `overflow-x` and `overflow-y`.
+          element.style.removeProperty('overflow');
           element.style.overflowX = 'scroll';
+        } else {
+          element.style.overflow = 'hidden';
         }
       case GestureMode.pointerEvents:
         // We use "hidden" instead of "scroll" so that the browser does
         // not "steal" pointer events. Flutter gesture recognizers need
         // all pointer events in order to recognize gestures correctly.
-        if (semanticsObject.isVerticalScrollContainer) {
-          element.style.overflowY = 'hidden';
-        } else {
-          assert(semanticsObject.isHorizontalScrollContainer);
-          element.style.overflowX = 'hidden';
-        }
+        element.style.overflow = 'hidden';
     }
   }
 

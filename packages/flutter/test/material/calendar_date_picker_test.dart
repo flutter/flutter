@@ -481,7 +481,6 @@ void main() {
     testWidgets('Material3 - currentDate is highlighted', (WidgetTester tester) async {
       await tester.pumpWidget(
         calendarDatePicker(
-          useMaterial3: true,
           initialDate: DateTime(2016, DateTime.january, 15),
           currentDate: DateTime(2016, 1, 2),
         ),
@@ -519,7 +518,6 @@ void main() {
     ) async {
       await tester.pumpWidget(
         calendarDatePicker(
-          useMaterial3: true,
           firstDate: DateTime(2016, 1, 3),
           lastDate: DateTime(2016, 1, 31),
           currentDate: DateTime(2016, 1, 2), // not between first and last
@@ -1493,4 +1491,79 @@ void main() {
       expect(selectedYear, equals(DateTime(2018, DateTime.june)));
     });
   });
+
+  group('Calendar Delegate', () {
+    testWidgets('Defaults to Gregorian calendar system', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: CalendarDatePicker(
+              initialDate: DateTime(2025, DateTime.february, 26),
+              firstDate: DateTime(2025, DateTime.february),
+              lastDate: DateTime(2025, DateTime.may),
+              onDateChanged: (DateTime value) {},
+            ),
+          ),
+        ),
+      );
+
+      final CalendarDatePicker calendarPicker = tester.widget(find.byType(CalendarDatePicker));
+      expect(calendarPicker.calendarDelegate, isA<GregorianCalendarDelegate>());
+
+      final Finder datePickerModeToggleButton = find.descendant(
+        of: find.byType(InkWell),
+        matching: find.text('February 2025'),
+      );
+      await tester.tap(datePickerModeToggleButton);
+      await tester.pumpAndSettle();
+
+      final YearPicker yearPicker = tester.widget(find.byType(YearPicker));
+      expect(yearPicker.calendarDelegate, isA<GregorianCalendarDelegate>());
+    });
+
+    testWidgets('Using custom calendar delegate implementation', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Material(
+            child: CalendarDatePicker(
+              initialDate: DateTime(2025, DateTime.february, 26),
+              firstDate: DateTime(2025, DateTime.february),
+              lastDate: DateTime(2025, DateTime.may),
+              onDateChanged: (DateTime value) {},
+              calendarDelegate: const TestCalendarDelegate(),
+            ),
+          ),
+        ),
+      );
+
+      final CalendarDatePicker calendarPicker = tester.widget(find.byType(CalendarDatePicker));
+      expect(calendarPicker.calendarDelegate, isA<TestCalendarDelegate>());
+
+      final Finder datePickerModeToggleButton = find.descendant(
+        of: find.byType(InkWell),
+        matching: find.text('February 2025'),
+      );
+      await tester.tap(datePickerModeToggleButton);
+      await tester.pumpAndSettle();
+
+      final YearPicker yearPicker = tester.widget(find.byType(YearPicker));
+      expect(yearPicker.calendarDelegate, isA<TestCalendarDelegate>());
+    });
+  });
+}
+
+class TestCalendarDelegate extends GregorianCalendarDelegate {
+  const TestCalendarDelegate();
+
+  @override
+  int getDaysInMonth(int year, int month) {
+    return month.isEven ? 21 : 28;
+  }
+
+  @override
+  int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    return 1;
+  }
 }

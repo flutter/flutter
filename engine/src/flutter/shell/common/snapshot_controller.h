@@ -24,6 +24,7 @@ class SnapshotController {
    public:
     virtual ~Delegate() = default;
     virtual const std::unique_ptr<Surface>& GetSurface() const = 0;
+    virtual bool IsAiksContextInitialized() const = 0;
     virtual std::shared_ptr<impeller::AiksContext> GetAiksContext() const = 0;
     virtual const std::unique_ptr<SnapshotSurfaceProducer>&
     GetSnapshotSurfaceProducer() const = 0;

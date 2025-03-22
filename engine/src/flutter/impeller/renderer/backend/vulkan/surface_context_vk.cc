@@ -14,7 +14,7 @@
 namespace impeller {
 
 SurfaceContextVK::SurfaceContextVK(const std::shared_ptr<ContextVK>& parent)
-    : parent_(parent) {}
+    : Context(parent->GetFlags()), parent_(parent) {}
 
 SurfaceContextVK::~SurfaceContextVK() = default;
 
@@ -70,6 +70,13 @@ void SurfaceContextVK::Shutdown() {
 bool SurfaceContextVK::SetWindowSurface(vk::UniqueSurfaceKHR surface,
                                         const ISize& size) {
   return SetSwapchain(SwapchainVK::Create(parent_, std::move(surface), size));
+}
+
+void SurfaceContextVK::TeardownSwapchain() {
+  // When background the application, tear down the swapchain to release memory
+  // from the images. When returning to the foreground, SetWindowSurface will be
+  // called which will re-create the swapchain.
+  swapchain_.reset();
 }
 
 bool SurfaceContextVK::SetSwapchain(std::shared_ptr<SwapchainVK> swapchain) {

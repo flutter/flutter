@@ -261,6 +261,11 @@ class FakeWebDevice extends Fake implements Device {
   }
 
   @override
+  Future<String> get sdkNameAndVersion async {
+    return 'Flutter Tools';
+  }
+
+  @override
   Future<LaunchResult> startApp(
     ApplicationPackage? package, {
     String? mainPath,

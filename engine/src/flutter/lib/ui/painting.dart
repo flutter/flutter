@@ -263,7 +263,7 @@ class Color {
   ///
   /// A value of 0 means this color is fully transparent. A value of 255 means
   /// this color is fully opaque.
-  @Deprecated('Use .a.')
+  @Deprecated('Use (*.a * 255.0).round() & 0xff')
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
@@ -274,15 +274,15 @@ class Color {
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
-  @Deprecated('Use .r.')
+  @Deprecated('Use (*.r * 255.0).round() & 0xff')
   int get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
-  @Deprecated('Use .g.')
+  @Deprecated('Use (*.g * 255.0).round() & 0xff')
   int get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
-  @Deprecated('Use .b.')
+  @Deprecated('Use (*.b * 255.0).round() & 0xff')
   int get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color with the provided components updated.
@@ -5280,6 +5280,7 @@ base class FragmentShader extends Shader {
   /// results will be undefined.
   void setImageSampler(int index, Image image) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
+    assert(!image.debugDisposed, 'Image has been disposed');
     _setImageSampler(index, image._image);
   }
 

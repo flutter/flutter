@@ -315,7 +315,7 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithEmptySize) {
     Paint paint;
     paint.color_source = gradient.get();
     canvas.DrawVertices(std::make_shared<DlVerticesGeometry>(vertices, context),
-                        BlendMode::kSourceOver, paint);
+                        BlendMode::kSrcOver, paint);
 
     canvas.EndReplay();
     return true;
@@ -364,7 +364,7 @@ TEST_P(AiksTest, DrawVerticesWithEmptyTextureCoordinates) {
     Paint paint;
     paint.color_source = color_source.get();
     canvas.DrawVertices(std::make_shared<DlVerticesGeometry>(vertices, context),
-                        BlendMode::kSourceOver, paint);
+                        BlendMode::kSrcOver, paint);
 
     canvas.EndReplay();
     return true;

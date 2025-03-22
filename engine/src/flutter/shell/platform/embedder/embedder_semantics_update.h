@@ -47,7 +47,8 @@ class EmbedderSemanticsUpdate {
 // and the temporary embedder-specific objects are automatically cleaned up.
 class EmbedderSemanticsUpdate2 {
  public:
-  EmbedderSemanticsUpdate2(const SemanticsNodeUpdates& nodes,
+  EmbedderSemanticsUpdate2(int64_t view_id,
+                           const SemanticsNodeUpdates& nodes,
                            const CustomAccessibilityActionUpdates& actions);
 
   ~EmbedderSemanticsUpdate2();

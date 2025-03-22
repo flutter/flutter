@@ -234,6 +234,7 @@ void sendSemanticsUpdate() {
     additionalActions: additionalActions,
     headingLevel: 0,
     linkUrl: '',
+    controlsNodes: null,
   );
   _semanticsUpdate(builder.build());
 }
@@ -287,6 +288,7 @@ void sendSemanticsUpdateWithRole() {
     headingLevel: 0,
     linkUrl: '',
     role: SemanticsRole.tab,
+    controlsNodes: null,
   );
   _semanticsUpdate(builder.build());
 }
@@ -1058,8 +1060,9 @@ void hooksTests() async {
       };
     });
 
-    _callHook('_dispatchSemanticsAction', 3, 1234, 4, null);
+    _callHook('_dispatchSemanticsAction', 4, 456, 1234, 4, null);
     expectIdentical(runZone, innerZone);
+    expectEquals(action.viewId, 456);
     expectEquals(action.nodeId, 1234);
     expectEquals(action.type.index, 4);
   });

@@ -154,23 +154,13 @@ abstract interface class FlutterNativeAssetsBuildRunner {
 
   /// Runs all [packagesWithNativeAssets] `build.dart`.
   Future<BuildResult?> build({
-    required List<String> buildAssetTypes,
-    required BuildInputValidator inputValidator,
-    required BuildInputCreator inputCreator,
-    required BuildValidator buildValidator,
-    required ApplicationAssetValidator applicationAssetValidator,
-    required Uri workingDirectory,
+    required List<ProtocolExtension> extensions,
     required bool linkingEnabled,
   });
 
   /// Runs all [packagesWithNativeAssets] `link.dart`.
   Future<LinkResult?> link({
-    required List<String> buildAssetTypes,
-    required LinkInputValidator inputValidator,
-    required LinkInputCreator inputCreator,
-    required LinkValidator linkValidator,
-    required ApplicationAssetValidator applicationAssetValidator,
-    required Uri workingDirectory,
+    required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
   });
 
@@ -246,42 +236,18 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
 
   @override
   Future<BuildResult?> build({
-    required List<String> buildAssetTypes,
-    required BuildInputValidator inputValidator,
-    required BuildInputCreator inputCreator,
-    required BuildValidator buildValidator,
-    required ApplicationAssetValidator applicationAssetValidator,
-    required Uri workingDirectory,
+    required List<ProtocolExtension> extensions,
     required bool linkingEnabled,
   }) {
-    return _buildRunner.build(
-      buildAssetTypes: buildAssetTypes,
-      inputCreator: inputCreator,
-      inputValidator: inputValidator,
-      buildValidator: buildValidator,
-      applicationAssetValidator: applicationAssetValidator,
-      linkingEnabled: linkingEnabled,
-    );
+    return _buildRunner.build(linkingEnabled: linkingEnabled, extensions: extensions);
   }
 
   @override
   Future<LinkResult?> link({
-    required List<String> buildAssetTypes,
-    required LinkInputValidator inputValidator,
-    required LinkInputCreator inputCreator,
-    required LinkValidator linkValidator,
-    required ApplicationAssetValidator applicationAssetValidator,
-    required Uri workingDirectory,
+    required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
   }) {
-    return _buildRunner.link(
-      buildAssetTypes: buildAssetTypes,
-      inputCreator: inputCreator,
-      inputValidator: inputValidator,
-      linkValidator: linkValidator,
-      applicationAssetValidator: applicationAssetValidator,
-      buildResult: buildResult,
-    );
+    return _buildRunner.link(extensions: extensions, buildResult: buildResult);
   }
 
   @override
@@ -451,7 +417,7 @@ KernelAsset _targetLocationSingleArchitecture(CodeAsset asset, Uri? absolutePath
   }
   return KernelAsset(
     id: asset.id,
-    target: Target.fromArchitectureAndOS(asset.architecture!, asset.os),
+    target: Target.fromArchitectureAndOS(asset.architecture, asset.os),
     path: kernelAssetPath,
   );
 }
@@ -601,30 +567,17 @@ Future<DartBuildResult> _runDartBuild({
       targetOS == OS.macOS ? MacOSCodeConfig(targetVersion: targetMacOSVersion) : null;
   for (final Architecture architecture in architectures) {
     final BuildResult? buildResult = await buildRunner.build(
-      buildAssetTypes: <String>[CodeAsset.type],
-      inputCreator:
-          () =>
-              BuildInputBuilder()
-                ..config.setupCode(
-                  targetArchitecture: architecture,
-                  linkModePreference: LinkModePreference.dynamic,
-                  cCompiler: cCompilerConfig,
-                  targetOS: targetOS!,
-                  android: androidConfig,
-                  iOS: iosConfig,
-                  macOS: macOSConfig,
-                ),
-      inputValidator:
-          (BuildInput config) async => <String>[...await validateCodeAssetBuildInput(config)],
-      buildValidator:
-          (BuildInput config, BuildOutput output) async => <String>[
-            ...await validateCodeAssetBuildOutput(config, output),
-          ],
-      applicationAssetValidator:
-          (List<EncodedAsset> assets) async => <String>[
-            ...await validateCodeAssetInApplication(assets),
-          ],
-      workingDirectory: projectUri,
+      extensions: <ProtocolExtension>[
+        CodeAssetExtension(
+          targetArchitecture: architecture,
+          linkModePreference: LinkModePreference.dynamic,
+          cCompiler: cCompilerConfig,
+          targetOS: targetOS!,
+          android: androidConfig,
+          iOS: iosConfig,
+          macOS: macOSConfig,
+        ),
+      ],
       linkingEnabled: linkingEnabled,
     );
     if (buildResult == null) {
@@ -635,30 +588,17 @@ Future<DartBuildResult> _runDartBuild({
       assets.addAll(buildResult.encodedAssets);
     } else {
       final LinkResult? linkResult = await buildRunner.link(
-        buildAssetTypes: <String>[CodeAsset.type],
-        inputCreator:
-            () =>
-                LinkInputBuilder()
-                  ..config.setupCode(
-                    targetArchitecture: architecture,
-                    linkModePreference: LinkModePreference.dynamic,
-                    cCompiler: cCompilerConfig,
-                    targetOS: targetOS!,
-                    android: androidConfig,
-                    iOS: iosConfig,
-                    macOS: macOSConfig,
-                  ),
-        inputValidator:
-            (LinkInput config) async => <String>[...await validateCodeAssetLinkInput(config)],
-        linkValidator:
-            (LinkInput config, LinkOutput output) async => <String>[
-              ...await validateCodeAssetLinkOutput(config, output),
-            ],
-        applicationAssetValidator:
-            (List<EncodedAsset> assets) async => <String>[
-              ...await validateCodeAssetInApplication(assets),
-            ],
-        workingDirectory: projectUri,
+        extensions: <ProtocolExtension>[
+          CodeAssetExtension(
+            targetArchitecture: architecture,
+            linkModePreference: LinkModePreference.dynamic,
+            cCompiler: cCompilerConfig,
+            targetOS: targetOS,
+            android: androidConfig,
+            iOS: iosConfig,
+            macOS: macOSConfig,
+          ),
+        ],
         buildResult: buildResult,
       );
       if (linkResult == null) {
