@@ -293,9 +293,7 @@ generated_file("_embedder_yaml") {
 action("sky_engine") {
   package_name = "sky_engine"
   pkg_directory = rebase_path("$root_gen_dir/dart-pkg")
-  package_root = rebase_path("$root_gen_dir/dart-pkg/packages")
   stamp_file = "$root_gen_dir/dart-pkg/${package_name}.stamp"
-  entries_file = "$root_gen_dir/dart-pkg/${package_name}.entries"
 
   sources = [
     "LICENSE",
@@ -322,12 +320,7 @@ action("sky_engine") {
     "$service_isolate_dir/vmservice_server.dart",
   ]
 
-  outputs = [
-    "$root_gen_dir/dart-pkg/${package_name}",
-    "$root_gen_dir/dart-pkg/${package_name}/pubspec.yaml",
-    "$root_gen_dir/dart-pkg/packages/${package_name}",
-    stamp_file,
-  ]
+  outputs = [ stamp_file ]
 
   script = rebase_path("//flutter/build/dart/tools/dart_pkg.py", ".", "//")
 
@@ -340,12 +333,8 @@ action("sky_engine") {
            rebase_path(dart_sdk_root),
            "--pkg-directory",
            pkg_directory,
-           "--package-root",
-           package_root,
            "--stamp-file",
            rebase_path(stamp_file),
-           "--entries-file",
-           rebase_path(entries_file),
            "--package-sources",
          ] + rebase_path(sources) + [ "--sdk-ext-directories" ] +
          rebase_path(sdk_ext_directory) + [ "--sdk-ext-files" ] +
