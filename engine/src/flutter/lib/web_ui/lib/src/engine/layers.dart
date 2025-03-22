@@ -777,7 +777,7 @@ class PlatformViewStyling {
   final PlatformViewClip clip;
 
   ui.Rect mapLocalToGlobal(ui.Rect rect) {
-    return position.mapLocalToGlobal(rect.intersect(clip.outerRect));
+    return position.mapLocalToGlobal(rect).intersect(clip.outerRect);
   }
 
   static PlatformViewStyling combine(PlatformViewStyling outer, PlatformViewStyling inner) {
@@ -886,7 +886,7 @@ class PlatformViewNoClip implements PlatformViewClip {
 }
 
 class PlatformViewRectClip implements PlatformViewClip {
-  PlatformViewRectClip(this.rect);
+  const PlatformViewRectClip(this.rect);
 
   final ui.Rect rect;
 
