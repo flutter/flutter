@@ -37,7 +37,7 @@ const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 /// from the nearest ancestor [CupertinoTheme] or if none exists, derived from the
 /// Material [data] for the [Theme]. The values in the Material derived [CupertinoThemeData]
 /// are overridable through [ThemeData.cupertinoOverrideTheme]. The values from an
-/// inherited [CupertinoThemeData] can be overriden by wrapping the desired subtree
+/// inherited [CupertinoThemeData] can be overridden by wrapping the desired subtree
 /// with a [CupertinoTheme].
 ///
 /// See also:
