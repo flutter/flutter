@@ -1731,6 +1731,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     super.onSaved,
     super.validator,
     super.errorBuilder,
+    super.forceErrorText,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
     bool? enableFeedback,
