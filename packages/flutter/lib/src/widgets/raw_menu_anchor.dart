@@ -590,6 +590,21 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   Widget buildAnchor(BuildContext context) {
+    final OverlayPortal? overlayPortal =
+        widget.child == null
+            ? null
+            : useRootOverlay
+            ? OverlayPortal.targetsRootOverlay(
+              controller: _overlayController,
+              overlayChildBuilder: _buildOverlay,
+              child: widget.child,
+            )
+            : OverlayPortal(
+              controller: _overlayController,
+              overlayChildBuilder: _buildOverlay,
+              child: widget.child,
+            );
+
     final Widget child = Shortcuts(
       includeSemantics: false,
       shortcuts: _kMenuTraversalShortcuts,
@@ -600,27 +615,30 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
         child: Builder(
           key: _anchorKey,
           builder: (BuildContext context) {
-            return widget.builder?.call(context, menuController, widget.child) ??
-                widget.child ??
+            return widget.builder?.call(context, menuController, overlayPortal ?? widget.child) ??
+                overlayPortal ??
                 const SizedBox();
           },
         ),
       ),
     );
 
-    if (useRootOverlay) {
-      return OverlayPortal.targetsRootOverlay(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
-    } else {
-      return OverlayPortal(
-        controller: _overlayController,
-        overlayChildBuilder: _buildOverlay,
-        child: child,
-      );
+    if (widget.child == null) {
+      if (useRootOverlay) {
+        return OverlayPortal.targetsRootOverlay(
+          controller: _overlayController,
+          overlayChildBuilder: _buildOverlay,
+          child: child,
+        );
+      } else {
+        return OverlayPortal(
+          controller: _overlayController,
+          overlayChildBuilder: _buildOverlay,
+          child: child,
+        );
+      }
     }
+    return child;
   }
 
   @override
