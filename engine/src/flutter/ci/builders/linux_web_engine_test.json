@@ -179,7 +179,7 @@
         },
         {
           "dependency": "chrome_and_driver",
-          "version": "125.0.6422.141"
+          "version": "134.0.6998.165"
         }
       ],
       "tasks": [
@@ -340,7 +340,7 @@
         },
         {
           "dependency": "firefox",
-          "version": "version:132.0"
+          "version": "version:136.0"
         }
       ],
       "tasks": [
