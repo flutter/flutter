@@ -319,6 +319,70 @@ void main() {
       },
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
+
+    testWidgets(
+      'Dismiss dialog by tapping outside after FadeForwardsPageTransitionsBuilder delegated transition',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+                },
+              ),
+            ),
+            home: Builder(
+              builder: (BuildContext context) {
+                return TextButton(
+                  key: const Key('open_dialog'),
+                  onPressed: () async {
+                    await showDialog<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: TextButton(
+                            key: const Key('open_page'),
+                            onPressed: () {
+                              Navigator.of(
+                                context,
+                              ).push(MaterialPageRoute<void>(builder: (_) => const Text('Page')));
+                            },
+                            child: const Text('Open Page'),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            ),
+          ),
+        );
+
+        // Open the dialog.
+        await tester.tap(find.byKey(const Key('open_dialog')));
+        await tester.pumpAndSettle();
+        expect(find.byType(AlertDialog), findsOneWidget);
+
+        // From the dialog, open the page.
+        await tester.tap(find.byKey(const Key('open_page')));
+        await tester.pumpAndSettle();
+        expect(find.text('Page'), findsOneWidget);
+
+        // Close the page.
+        Navigator.pop(tester.element(find.text('Page')));
+        await tester.pumpAndSettle();
+        expect(find.byType(AlertDialog), findsOneWidget);
+
+        // Dismiss the dialog by tapping outside.
+        await tester.tapAt(const Offset(1, 1));
+        await tester.pumpAndSettle();
+        expect(find.byType(AlertDialog), findsNothing);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.android),
+    );
   });
 
   testWidgets(
