@@ -2011,14 +2011,14 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     brRadiusY: brRadiusY,
   );
 
-  _RSuperellipseParam _param() {
-    return _RSuperellipseParam(this);
+  _NativeRSuperellipse _native() {
+    return _NativeRSuperellipse(this);
   }
 
   /// Whether the point specified by the given offset (which is assumed to be
   /// relative to the origin) lies inside the rounded superellipse.
   bool contains(Offset point) {
-    return _param().contains(point);
+    return _native().contains(point);
   }
 
   /// A rounded rectangle with all the values set to zero.
@@ -2055,10 +2055,8 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   }
 }
 
-// A handle that stores intermediate values of a `RSuperellipse` and implements
-// computations.
-class _RSuperellipseParam extends NativeFieldWrapperClass1 {
-  _RSuperellipseParam(RSuperellipse rsuperellipse) {
+class _NativeRSuperellipse extends NativeFieldWrapperClass1 {
+  _NativeRSuperellipse(RSuperellipse rsuperellipse) {
     _constructor(
       rsuperellipse.left,
       rsuperellipse.top,

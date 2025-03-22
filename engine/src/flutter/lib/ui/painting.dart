@@ -6759,14 +6759,14 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint) {
     assert(_rsuperellipseIsValid(rsuperellipse));
-    _drawRSuperellipse(rsuperellipse._param(), paint._objects, paint._data);
+    _drawRSuperellipse(rsuperellipse._native(), paint._objects, paint._data);
   }
 
   @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle, Handle)>(
     symbol: 'Canvas::drawRSuperellipse',
   )
   external void _drawRSuperellipse(
-    _RSuperellipseParam rsuperellipse,
+    _NativeRSuperellipse rsuperellipse,
     List<Object?>? paintObjects,
     ByteData paintData,
   );
