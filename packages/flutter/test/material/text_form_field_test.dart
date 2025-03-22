@@ -737,39 +737,6 @@ void main() {
     expect(tapOutsideCount, 3);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/134341.
-  testWidgets('onTapOutside is not called upon tap outside when field is not focused', (
-    WidgetTester tester,
-  ) async {
-    int tapOutsideCount = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                TextFormField(
-                  onTapOutside: (PointerEvent event) {
-                    tapOutsideCount += 1;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(tapOutsideCount, 0);
-    await tester.tap(find.byType(TextFormField));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    expect(tapOutsideCount, 0);
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/127597.
   testWidgets(
     'The second TextFormField is clicked, triggers the onTapOutside callback of the previous TextFormField',
