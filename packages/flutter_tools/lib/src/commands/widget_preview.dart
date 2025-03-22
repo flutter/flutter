@@ -181,6 +181,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   late final FlutterProject rootProject = getRootProject();
 
   late final PreviewDetector _previewDetector = PreviewDetector(
+    projectRoot: rootProject.directory,
     logger: logger,
     fs: fs,
     onChangeDetected: onChangeDetected,
@@ -260,7 +261,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       await _populatePreviewPubspec(rootProject: rootProject);
     }
 
-    final PreviewMapping initialPreviews = await _previewDetector.initialize(rootProject.directory);
+    final PreviewMapping initialPreviews = await _previewDetector.initialize();
     _previewCodeGenerator.populatePreviewsInGeneratedPreviewScaffold(initialPreviews);
 
     if (boolArg(kLaunchPreviewer)) {
