@@ -239,7 +239,7 @@ class ClipRSuperellipseLayer with PictureEngineLayer implements ui.ClipRSuperell
 class ClipRSuperellipseOperation implements LayerOperation {
   const ClipRSuperellipseOperation(this.rse, this.clip);
 
-  final ui.RSuperellipse rse;
+  final ui.RSuperellipse rsuperellipse;
   final ui.Clip clip;
 
   @override

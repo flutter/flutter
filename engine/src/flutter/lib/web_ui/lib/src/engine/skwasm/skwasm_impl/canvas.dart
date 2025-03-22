@@ -135,7 +135,7 @@ class SkwasmCanvas implements SceneCanvas {
   }
 
   @override
-  void clipRSuperellipse(ui.RSuperellipse rse, {bool doAntiAlias = true}) {
+  void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
     // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
     // back to RRect.  https://github.com/flutter/flutter/issues/163718
     clipRRect(rse.toApproximateRRect(), doAntiAlias: doAntiAlias);
@@ -184,7 +184,7 @@ class SkwasmCanvas implements SceneCanvas {
   }
 
   @override
-  void drawRSuperellipse(ui.RSuperellipse rse, ui.Paint paint) {
+  void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
     // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
     // back to RRect.  https://github.com/flutter/flutter/issues/163718
     drawRRect(rse.toApproximateRRect(), paint);
