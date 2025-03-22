@@ -1864,6 +1864,36 @@ void main() {
     final ThemeData licensePageTheme = Theme.of(tester.element(find.text('Powered by Flutter')));
     expect(theme.colorScheme.primary, licensePageTheme.colorScheme.primary);
   });
+
+  testWidgets('_PackageListTile applies theme to text', (WidgetTester tester) async {
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['Test Package'], 'Test License'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.dark(),
+        home: const Scaffold(body: LicensePage()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final Finder packageTile = find.text('Test Package');
+    expect(packageTile, findsOneWidget);
+
+    final Text titleWidget = tester.widget(packageTile);
+    expect(titleWidget.style?.color, isNot(Colors.black));
+    expect(titleWidget.style, ThemeData.dark().textTheme.bodyLarge);
+
+    final Finder subtitleFinder = find.text('1 license.');
+    expect(subtitleFinder, findsOneWidget);
+
+    final Text subtitleWidget = tester.widget(subtitleFinder);
+    expect(subtitleWidget.style?.color, isNot(Colors.black));
+    expect(subtitleWidget.style, ThemeData.dark().textTheme.bodyMedium);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {
