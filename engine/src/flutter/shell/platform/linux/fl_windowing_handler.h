@@ -7,6 +7,7 @@
 
 #include <gtk/gtk.h>
 
+#include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_view.h"
 
@@ -41,6 +42,18 @@ struct _FlWindowingHandlerClass {
  * Returns: a new #FlWindowingHandler
  */
 FlWindowingHandler* fl_windowing_handler_new(FlEngine* engine);
+
+/**
+ * fl_windowing_handler_get_window:
+ * @handler: an #FlWindowingHandler.
+ * @view_id: view to lookup window for.
+ *
+ * Gets the window used for a view.
+ *
+ * Returns: a #GtkWindow or %NULL if no window for this view.
+ */
+GtkWindow* fl_windowing_handler_get_window(FlWindowingHandler* handler,
+                                           FlutterViewId view_id);
 
 G_END_DECLS
 
