@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 
-import '../framework/cocoon.dart';
 import '../framework/metrics_center.dart';
 
 class UploadResultsCommand extends Command<void> {
@@ -53,8 +52,8 @@ class UploadResultsCommand extends Command<void> {
   @override
   Future<void> run() async {
     final String? resultsPath = argResults!['results-file'] as String?;
-    final String? serviceAccountTokenFile = argResults!['service-account-token-file'] as String?;
-    final String? testFlakyStatus = argResults!['test-flaky'] as String?;
+    // final String? serviceAccountTokenFile = argResults!['service-account-token-file'] as String?;
+    // final String? testFlakyStatus = argResults!['test-flaky'] as String?;
     final String? gitBranch = argResults!['git-branch'] as String?;
     final String? builderName = argResults!['luci-builder'] as String?;
     final String? testStatus = argResults!['test-status'] as String?;
@@ -69,14 +68,17 @@ class UploadResultsCommand extends Command<void> {
       print('Successfully uploaded metrics to skia perf');
     }
 
-    final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
-    return cocoon.sendTaskStatus(
-      resultsPath: resultsPath,
-      isTestFlaky: testFlakyStatus == 'True',
-      gitBranch: gitBranch,
-      builderName: builderName,
-      testStatus: testStatus,
-      builderBucket: builderBucket,
+    print(
+      'Intentionally skipping /api/update-task-status ($gitBranch/$builderName/$testStatus/$builderBucket) because yjbanov@ said so',
     );
+    // final Cocoon cocoon = Cocoon(serviceAccountTokenPath: serviceAccountTokenFile);
+    // return cocoon.sendTaskStatus(
+    //   resultsPath: resultsPath,
+    //   isTestFlaky: testFlakyStatus == 'True',
+    //   gitBranch: gitBranch,
+    //   builderName: builderName,
+    //   testStatus: testStatus,
+    //   builderBucket: builderBucket,
+    // );
   }
 }
