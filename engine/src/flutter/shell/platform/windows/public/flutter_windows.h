@@ -92,6 +92,12 @@ typedef struct {
   // GPU choice preference
   FlutterDesktopGpuPreference gpu_preference;
 
+  /// Whether to enable the Impeller rendering engine.
+  ///
+  /// When not provided, this value is treated as false. In a future release,
+  /// this setting will become a no-op when the Skia backend is fully removed.
+  bool enable_impeller;
+
   // Policy for the thread that runs UI isolate.
   FlutterDesktopUIThreadPolicy ui_thread_policy;
 } FlutterDesktopEngineProperties;
