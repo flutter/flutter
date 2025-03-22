@@ -1313,7 +1313,7 @@ void main() {
                   child: ListView(
                     children: <Widget>[
                       DropdownButtonFormField<String>(
-                        key: fieldKey1,           
+                        key: fieldKey1,
                         items:
                             menuItems.map((String value) {
                               return DropdownMenuItem<String>(value: value, child: Text(value));
