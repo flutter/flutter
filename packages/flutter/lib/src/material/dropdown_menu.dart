@@ -545,6 +545,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   bool _menuHasEnabledItem = false;
   TextEditingController? _localTextEditingController;
   final FocusNode _internalFocudeNode = FocusNode();
+  Object? _lastLocalTextEditingValueObject;
 
   @override
   void initState() {
@@ -566,6 +567,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         text: filteredEntries[index].label,
         selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
       );
+      _lastLocalTextEditingValueObject = _localTextEditingController?.value;
     }
     refreshLeadingPadding();
   }
@@ -618,7 +620,40 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           text: filteredEntries[index].label,
           selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
         );
+        _lastLocalTextEditingValueObject = _localTextEditingController?.value;
       }
+    } else {
+      final bool handledByExternalController =
+          !identical(_lastLocalTextEditingValueObject, _localTextEditingController?.value);
+      if (!handledByExternalController &&
+          oldWidget.dropdownMenuEntries != widget.dropdownMenuEntries) {
+        final T oldSelectionValue =
+            oldWidget.dropdownMenuEntries
+                .firstWhere(
+                  (DropdownMenuEntry<T> entry) => entry.label == _localTextEditingController?.text,
+                )
+                .value;
+        _rematchSelection(oldSelectionValue);
+      }
+    }
+  }
+
+  void _rematchSelection(T selectionValue) {
+    final int index = filteredEntries.indexWhere(
+      (DropdownMenuEntry<T> entry) => entry.value == selectionValue,
+    );
+    if (index != -1) {
+      final bool outdatedSelectionLabel =
+          _localTextEditingController?.text != filteredEntries[index].label;
+      if (outdatedSelectionLabel) {
+        _localTextEditingController?.value = TextEditingValue(
+          text: filteredEntries[index].label,
+          selection: TextSelection.collapsed(offset: filteredEntries[index].label.length),
+        );
+        _lastLocalTextEditingValueObject = _localTextEditingController?.value;
+      }
+    } else {
+      _lastLocalTextEditingValueObject = null;
     }
   }
 
@@ -821,6 +856,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                       text: entry.label,
                       selection: TextSelection.collapsed(offset: entry.label.length),
                     );
+                    _lastLocalTextEditingValueObject = _localTextEditingController?.value;
                     currentHighlight = widget.enableSearch ? i : null;
                     widget.onSelected?.call(entry.value);
                     _enableFilter = false;
@@ -904,6 +940,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           text: entry.label,
           selection: TextSelection.collapsed(offset: entry.label.length),
         );
+        _lastLocalTextEditingValueObject = _localTextEditingController?.value;
         widget.onSelected?.call(entry.value);
       }
     } else {
