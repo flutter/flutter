@@ -26,6 +26,12 @@ TEST(Size, ClampsDimensionsPositive) {
   EXPECT_DOUBLE_EQ(0.0, size.height());
 }
 
+TEST(Offset, SetsDisplacement) {
+  Offset offset(-30.0, 42.0);
+  EXPECT_DOUBLE_EQ(-30.0, offset.dx());
+  EXPECT_DOUBLE_EQ(42.0, offset.dy());
+}
+
 TEST(Rect, SetsOriginAndSize) {
   Point origin(-30.0, 42.0);
   Size size(20.0, 22.0);
