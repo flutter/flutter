@@ -1009,8 +1009,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   late CurvedAnimation enableAnimation;
   late CurvedAnimation selectionFade;
 
-  late final WidgetStatesController statesController =
-      WidgetStatesController()..addListener(() => setState(() {}));
+  final WidgetStatesController statesController = WidgetStatesController();
 
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
@@ -1028,8 +1027,10 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   void initState() {
     assert(widget.onSelected == null || widget.onPressed == null);
     super.initState();
-    statesController.update(WidgetState.disabled, !widget.isEnabled);
-    statesController.update(WidgetState.selected, widget.selected);
+    statesController
+      ..update(WidgetState.disabled, !widget.isEnabled)
+      ..update(WidgetState.selected, widget.selected)
+      ..addListener(() => setState(() {}));
     selectController = AnimationController(
       duration: widget.chipAnimationStyle?.selectAnimation?.duration ?? _kSelectDuration,
       reverseDuration: widget.chipAnimationStyle?.selectAnimation?.reverseDuration,
