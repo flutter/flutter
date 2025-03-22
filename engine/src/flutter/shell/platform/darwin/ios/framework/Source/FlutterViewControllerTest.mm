@@ -781,6 +781,8 @@ extern NSNotificationName const FlutterViewControllerWillDealloc;
 }
 
 - (void)testStopKeyBoardAnimationWhenReceivedWillHideNotificationAfterWillShowNotification {
+  // see: https://github.com/flutter/flutter/issues/112281
+
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   [engine runWithEntrypoint:nil];
   FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engine
