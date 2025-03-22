@@ -2111,7 +2111,10 @@ class _RSuperellipseParam extends NativeFieldWrapperClass1 {
     return _contains(point.dx, point.dy);
   }
 
-  @Native<Bool Function(Pointer<Void>, Double, Double)>(symbol: 'RSuperellipse::contains')
+  @Native<Bool Function(Pointer<Void>, Double, Double)>(
+    symbol: 'RSuperellipse::contains',
+    isLeaf: true,
+  )
   external bool _contains(double x, double y);
 }
 
