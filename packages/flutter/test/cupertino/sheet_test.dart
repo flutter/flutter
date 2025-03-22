@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/navigator_utils.dart';
@@ -1076,5 +1077,44 @@ void main() {
       await gesture.up();
       await tester.pumpAndSettle();
     });
+  });
+
+  testWidgets('CupertinoSheetTransition handles SystemUiOverlayStyle changes', (
+    WidgetTester tester,
+  ) async {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
+    final Animation<double> secondaryAnimation = Tween<double>(
+      begin: 1,
+      end: 0,
+    ).animate(controller);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AnimatedBuilder(
+          animation: controller,
+          builder: (BuildContext context, Widget? child) {
+            return CupertinoSheetTransition.delegateTransition(
+              context,
+              controller,
+              secondaryAnimation,
+              false,
+              const SizedBox(),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
+
+    controller.forward();
+    await tester.pumpAndSettle();
+
+    expect(SystemChrome.latestStyle, SystemUiOverlayStyle.light);
   });
 }
