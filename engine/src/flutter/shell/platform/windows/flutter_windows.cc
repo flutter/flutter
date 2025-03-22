@@ -269,6 +269,21 @@ IDXGIAdapter* FlutterDesktopViewGetGraphicsAdapter(FlutterDesktopViewRef view) {
   return nullptr;
 }
 
+FlutterID3D11DeviceRef FlutterDesktopPluginViewGetID3D11Device(
+    FlutterDesktopViewRef view) {
+  auto egl_manager = ViewFromHandle(view)->GetEngine()->egl_manager();
+  if (egl_manager) {
+    Microsoft::WRL::ComPtr<ID3D11Device> d3d_device;
+    if (egl_manager->GetDevice(d3d_device.GetAddressOf())) {
+      // Since we pass this to C (which can't use smart pointers), we need to
+      // AddRef the device, later on the caller will need to Release it.
+      d3d_device->AddRef();
+      return reinterpret_cast<FlutterID3D11DeviceRef>(d3d_device.Detach());
+    }
+  }
+  return nullptr;
+}
+
 bool FlutterDesktopEngineProcessExternalWindowMessage(
     FlutterDesktopEngineRef engine,
     HWND hwnd,
