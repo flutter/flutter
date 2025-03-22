@@ -32,6 +32,13 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
           'Run the build in watch mode so it rebuilds whenever a change is '
           'made. Disabled by default.',
     );
+    argParser.addMultiOption(
+      'watch-dir',
+      abbr: 'd',
+      help: 'Watch the specified directory for changes.',
+      defaultsTo: ['lib'],
+      valueHelp: 'lib, flutter_js, skwasm',
+    );
     argParser.addFlag(
       'host',
       help:
@@ -68,6 +75,8 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 
   bool get isWatchMode => boolArg('watch');
 
+  List<String> get watchDirs => argResults?['watch-dir'] as List<String>;
+
   bool get host => boolArg('host');
 
   List<String> get targets => argResults?.rest ?? <String>[];
@@ -93,7 +102,6 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
     if (embedDwarf && runtimeMode != RuntimeMode.debug) {
       throw ToolExit('Embedding DWARF data requires debug runtime mode.');
     }
-    final FilePath libPath = FilePath.fromWebUi('lib');
     final List<PipelineStep> steps = <PipelineStep>[
       GnPipelineStep(host: host, runtimeMode: runtimeMode, embedDwarf: embedDwarf),
       NinjaPipelineStep(
@@ -107,13 +115,23 @@ class BuildCommand extends Command<bool> with ArgUtils<bool> {
 
     if (isWatchMode) {
       print('Initial build done!');
-      print('Watching directory: ${libPath.relativeToCwd}/');
-      await PipelineWatcher(
-        dir: libPath.absolute,
-        pipeline: buildPipeline,
-        // Ignore font files that are copied whenever tests run.
-        ignore: (WatchEvent event) => event.path.endsWith('.ttf'),
-      ).start();
+      final Iterable<Future<void>> watchers = watchDirs
+          .map((dir) {
+            final FilePath watchPath = FilePath.fromWebUi(dir);
+            print('Watching directory: ${watchPath.relativeToCwd}/');
+            return watchPath;
+          })
+          .map(
+            (FilePath watchPath) =>
+                PipelineWatcher(
+                  dir: watchPath.absolute,
+                  pipeline: buildPipeline,
+                  // Ignore font files that are copied whenever tests run.
+                  ignore: (WatchEvent event) => event.path.endsWith('.ttf'),
+                ).start(),
+          );
+
+      await Future.wait(watchers);
     }
     return true;
   }
