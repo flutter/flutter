@@ -392,7 +392,7 @@ class EngineSceneBuilder implements ui.SceneBuilder {
     ui.ClipRSuperellipseEngineLayer? oldLayer,
   }) {
     return pushLayer<ClipRSuperellipseLayer>(
-      ClipRSuperellipseLayer(ClipRSuperellipseOperation(rse, clipBehavior)),
+      ClipRSuperellipseLayer(ClipRSuperellipseOperation(rsuperellipse, clipBehavior)),
     );
   }
 

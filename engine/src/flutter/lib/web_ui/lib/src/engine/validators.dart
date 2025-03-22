@@ -24,7 +24,10 @@ bool rrectIsValid(ui.RRect rrect) {
 
 bool rsuperellipseIsValid(ui.RSuperellipse rsuperellipse) {
   assert(
-    !(rse.left.isNaN || rse.right.isNaN || rse.top.isNaN || rse.bottom.isNaN),
+    !(rsuperellipse.left.isNaN ||
+        rsuperellipse.right.isNaN ||
+        rsuperellipse.top.isNaN ||
+        rsuperellipse.bottom.isNaN),
     'RSuperellipse argument contained a NaN value.',
   );
   return true;
