@@ -16073,8 +16073,8 @@ void main() {
       skip: !kIsWeb, // [intended]
     );
 
-    testWidgets('when highlightAllOnFocus is turned off', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/120631.
+    testWidgets('when setCustomSelectionOnFocus is set', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/163399.
       controller.text = 'Text';
 
       await tester.pumpWidget(
@@ -16086,7 +16086,7 @@ void main() {
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
-            highlightAllOnFocus: false,
+            setCustomSelectionOnFocus: () => controller.selection,
           ),
         ),
       );

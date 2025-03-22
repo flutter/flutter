@@ -87,6 +87,9 @@ typedef SelectionChangedCallback =
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
+// Signature for a function that determines the selection when focus is given
+typedef SetCustomSelectionOnFocus = TextSelection Function();
+
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
 ///
@@ -882,7 +885,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
-    this.highlightAllOnFocus = true,
+    this.setCustomSelectionOnFocus,
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
@@ -1793,14 +1796,13 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   bool get selectionEnabled => enableInteractiveSelection;
 
-  /// {@template flutter.widgets.editableText.highlightAllOnFocus}
-  /// Whether or not this field should highlight all text when gaining focus on
-  /// web or desktop
+  /// {@template flutter.widgets.editableText.setCustomSelectionOnFocus}
+  /// Set a custom text selection when focus is given
   ///
-  /// By default this will highlight the text field on web and desktop, and can
-  /// only be turned off on those two platforms
+  /// If null, all text will be selected on web and desktop. Everything else will
+  /// leave text selection as it was before.
   /// {@endtemplate}
-  final bool highlightAllOnFocus;
+  final SetCustomSelectionOnFocus? setCustomSelectionOnFocus;
 
   /// {@template flutter.widgets.editableText.autofillHints}
   /// A list of strings that helps the autofill service identify the type of this
@@ -4612,7 +4614,8 @@ class EditableTextState extends State<EditableText>
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
-      final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
+      final TextSelection? updatedSelection =
+          widget.setCustomSelectionOnFocus?.call() ?? _adjustedSelectionWhenFocused();
       if (updatedSelection != null) {
         _handleSelectionChanged(updatedSelection, null);
       }
@@ -4632,7 +4635,6 @@ class EditableTextState extends State<EditableText>
       TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
     };
     final bool shouldSelectAll =
-        widget.highlightAllOnFocus &&
         widget.selectionEnabled &&
         (kIsWeb || isDesktop) &&
         !_isMultiline &&
