@@ -3518,6 +3518,50 @@ FLUTTER_ASSERT_ARC
   textInputPlugin.cachedFirstResponder = nil;
 }
 
+- (void)testAutocorrectionTypeIsFieldPasswordRelated {
+  NSMutableDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ @"hint1" ],
+    @"editingValue" : @{@"text" : @""},
+  }
+            forKey:@"autofill"];
+  FlutterMethodCall* autofillCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(123), config ]];
+  [textInputPlugin handleMethodCall:autofillCall
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssertEqual(textInputPlugin.activeView.autocorrectionType, UITextAutocorrectionTypeDefault);
+  XCTAssertEqual(textInputPlugin.activeView.spellCheckingType, UITextSpellCheckingTypeDefault);
+
+  [config setValue:@"YES" forKey:@"obscureText"];
+  FlutterMethodCall* obscureTextCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(123), config ]];
+  [textInputPlugin handleMethodCall:obscureTextCall
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssertEqual(textInputPlugin.activeView.autocorrectionType, UITextAutocorrectionTypeNo);
+  XCTAssertEqual(textInputPlugin.activeView.spellCheckingType, UITextSpellCheckingTypeNo);
+
+  [config removeObjectForKey:@"obscureText"];
+  [config setValue:@{
+    @"uniqueIdentifier" : @"field1",
+    @"hints" : @[ UITextContentTypePassword ],
+    @"editingValue" : @{@"text" : @""},
+  }
+            forKey:@"autofill"];
+  FlutterMethodCall* passwordCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
+                                        arguments:@[ @(123), config ]];
+  [textInputPlugin handleMethodCall:passwordCall
+                             result:^(id _Nullable result){
+                             }];
+  XCTAssertEqual(textInputPlugin.activeView.autocorrectionType, UITextAutocorrectionTypeNo);
+  XCTAssertEqual(textInputPlugin.activeView.spellCheckingType, UITextSpellCheckingTypeNo);
+}
+
 - (void)testInteractiveKeyboardDidResignFirstResponderDelegateisCalledAfterDismissedKeyboard {
   NSSet<UIScene*>* scenes = UIApplication.sharedApplication.connectedScenes;
   XCTAssertEqual(scenes.count, 1UL, @"There must only be 1 scene for test");
