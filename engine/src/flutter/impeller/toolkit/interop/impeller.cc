@@ -1151,6 +1151,21 @@ void ImpellerDisplayListBuilderDrawParagraph(ImpellerDisplayListBuilder builder,
 }
 
 IMPELLER_EXTERN_C
+void ImpellerDisplayListBuilderDrawShadow(ImpellerDisplayListBuilder builder,
+                                          ImpellerPath path,
+                                          const ImpellerColor* color,
+                                          float elevation,
+                                          bool occluder_is_transparent,
+                                          float device_pixel_ratio) {
+  GetPeer(builder)->DrawShadow(*GetPeer(path),             //
+                               ToDisplayListType(*color),  //
+                               elevation,                  //
+                               occluder_is_transparent,    //
+                               device_pixel_ratio          //
+  );
+}
+
+IMPELLER_EXTERN_C
 ImpellerParagraphBuilder ImpellerParagraphBuilderNew(
     ImpellerTypographyContext context) {
   auto builder =
@@ -1264,7 +1279,7 @@ ImpellerTypographyContext ImpellerTypographyContextNew() {
     VALIDATION_LOG << "Could not create typography context.";
     return nullptr;
   }
-  return Create<TypographyContext>().Leak();
+  return context.Leak();
 }
 
 IMPELLER_EXTERN_C

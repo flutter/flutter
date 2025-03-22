@@ -357,15 +357,7 @@ class _ScreenshotContainerLayer extends OffsetLayer {
 /// a screenshot.
 class _ScreenshotData {
   _ScreenshotData({required this.target}) : containerLayer = _ScreenshotContainerLayer() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/widgets.dart',
-        className: '$_ScreenshotData',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', '_ScreenshotData', this));
   }
 
   /// Target to take a screenshot of.
@@ -407,9 +399,7 @@ class _ScreenshotData {
   /// Releases allocated resources.
   @mustCallSuper
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     containerLayer.dispose();
   }
 }
@@ -2078,7 +2068,7 @@ mixin WidgetInspectorService {
       }
       final Object? value = node.value;
       if (value is Element) {
-        final RenderObject? renderObject = value.renderObject;
+        final RenderObject? renderObject = _renderObjectOrNull(value);
         if (renderObject is RenderParagraph) {
           additionalPropertiesJson['textPreview'] = renderObject.text.toPlainText();
         }
@@ -2170,7 +2160,7 @@ mixin WidgetInspectorService {
       return null;
     }
     final RenderObject? renderObject =
-        object is Element ? object.renderObject : (object as RenderObject?);
+        object is Element ? _renderObjectOrNull(object) : (object as RenderObject?);
     if (renderObject == null || !renderObject.attached) {
       return null;
     }
@@ -2234,7 +2224,7 @@ mixin WidgetInspectorService {
           InspectorSerializationDelegate delegate,
         ) {
           final Object? value = node.value;
-          final RenderObject? renderObject = value is Element ? value.renderObject : null;
+          final RenderObject? renderObject = value is Element ? _renderObjectOrNull(value) : null;
           if (renderObject == null) {
             return const <String, Object>{};
           }
@@ -2330,7 +2320,7 @@ mixin WidgetInspectorService {
     final Object? object = toObject(id);
     bool succeed = false;
     if (object != null && object is Element) {
-      final RenderObject? render = object.renderObject;
+      final RenderObject? render = _renderObjectOrNull(object);
       final ParentData? parentData = render?.parentData;
       if (parentData is FlexParentData) {
         parentData.fit = flexFit;
@@ -2348,7 +2338,7 @@ mixin WidgetInspectorService {
     final dynamic object = toObject(id);
     bool succeed = false;
     if (object != null && object is Element) {
-      final RenderObject? render = object.renderObject;
+      final RenderObject? render = _renderObjectOrNull(object);
       final ParentData? parentData = render?.parentData;
       if (parentData is FlexParentData) {
         parentData.flex = factor;
@@ -2372,7 +2362,7 @@ mixin WidgetInspectorService {
     final Object? object = toObject(id);
     bool succeed = false;
     if (object != null && object is Element) {
-      final RenderObject? render = object.renderObject;
+      final RenderObject? render = _renderObjectOrNull(object);
       if (render is RenderFlex) {
         render.mainAxisAlignment = mainAxisAlignment;
         render.crossAxisAlignment = crossAxisAlignment;
@@ -2553,6 +2543,12 @@ mixin WidgetInspectorService {
     _clearStats();
     _resetErrorCount();
   }
+
+  /// Safely get the render object of an [Element].
+  ///
+  /// If the element is not yet mounted, the result will be null.
+  RenderObject? _renderObjectOrNull(Element element) =>
+      element.mounted ? element.renderObject : null;
 }
 
 /// Accumulator for a count associated with a specific source location.

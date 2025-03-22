@@ -32,6 +32,7 @@ import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
+import '../web/web_constants.dart';
 import 'test_compiler.dart';
 import 'test_golden_comparator.dart';
 import 'test_time_recorder.dart';
@@ -57,10 +58,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
       file.openRead(),
       headers: <String, String>{
         if (contentType != null) 'Content-Type': contentType,
-        if (needsCrossOriginIsolated) ...<String, String>{
-          'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'credentialless',
-        },
+        if (needsCrossOriginIsolated) ...kMultiThreadedHeaders,
       },
     );
   };
@@ -71,7 +69,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     this._server,
     this._config,
     this._root, {
-    this.nullAssertions,
     required this.updateGoldens,
     required this.buildInfo,
     required this.webMemoryFS,
@@ -143,7 +140,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Logger _logger;
   final Artifacts? _artifacts;
   final bool updateGoldens;
-  final bool? nullAssertions;
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
@@ -166,7 +162,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     String root, {
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
-    bool nullAssertions = false,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
     required BuildInfo buildInfo,
@@ -217,7 +212,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       logger: logger,
-      nullAssertions: nullAssertions,
       processManager: processManager,
       webRenderer: webRenderer,
       useWasm: useWasm,
@@ -334,7 +328,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (request.url.path.endsWith('main.dart.bootstrap.js')) {
       return shelf.Response.ok(
         generateMainModule(
-          nullAssertions: nullAssertions!,
           nativeNullAssertions: true,
           bootstrapModule: 'main.dart.bootstrap',
           entrypoint: '/main.dart.js',
@@ -551,10 +544,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       ''',
         headers: <String, String>{
           'Content-Type': 'text/html',
-          if (webRenderer == WebRendererMode.skwasm) ...<String, String>{
-            'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'credentialless',
-          },
+          if (webRenderer == WebRendererMode.skwasm) ...kMultiThreadedHeaders,
         },
       );
     }
