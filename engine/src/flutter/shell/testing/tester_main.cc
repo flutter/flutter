@@ -74,11 +74,11 @@ bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
   context_settings.shader_libraries_data = ShaderLibraryMappings();
   context_settings.cache_directory = fml::paths::GetCachesDirectory();
   context_settings.enable_validation = enable_validation;
+  // Enable lazy shader mode for faster test execution as most tests
+  // will never render anything at all.
+  context_settings.flags.lazy_shader_mode = true;
 
-  context = impeller::ContextVK::Create(
-      // Enable lazy shader mode for faster test execution as most tests
-      // will never render anything at all.
-      impeller::Flags{.lazy_shader_mode = true}, std::move(context_settings));
+  context = impeller::ContextVK::Create(std::move(context_settings));
   if (!context || !context->IsValid()) {
     VALIDATION_LOG << "Could not create Vulkan context.";
     return false;

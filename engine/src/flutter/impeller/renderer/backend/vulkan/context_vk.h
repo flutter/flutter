@@ -85,6 +85,7 @@ class ContextVK final : public Context,
     bool enable_surface_control = false;
     /// If validations are requested but cannot be enabled, log a fatal error.
     bool fatal_missing_validations = false;
+    Flags flags;
 
     std::optional<EmbedderData> embedder_data;
 
@@ -98,8 +99,7 @@ class ContextVK final : public Context,
   /// Visible for testing.
   static size_t ChooseThreadCountForWorkers(size_t hardware_concurrency);
 
-  static std::shared_ptr<ContextVK> Create(const Flags& flags,
-                                           Settings settings);
+  static std::shared_ptr<ContextVK> Create(Settings settings);
 
   uint64_t GetHash() const { return hash_; }
 

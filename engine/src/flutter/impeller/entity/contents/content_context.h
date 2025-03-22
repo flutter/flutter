@@ -41,6 +41,8 @@
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
 #include "impeller/entity/gradient_fill.vert.h"
+#include "impeller/entity/line.frag.h"
+#include "impeller/entity/line.vert.h"
 #include "impeller/entity/linear_gradient_fill.frag.h"
 #include "impeller/entity/linear_to_srgb_filter.frag.h"
 #include "impeller/entity/morphology_filter.frag.h"
@@ -147,6 +149,7 @@ using FramebufferBlendScreenPipeline = FramebufferBlendPipelineHandle;
 using FramebufferBlendSoftLightPipeline = FramebufferBlendPipelineHandle;
 using GaussianBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, GaussianFragmentShader>;
 using GlyphAtlasPipeline = RenderPipelineHandle<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
+using LinePipeline = RenderPipelineHandle<LineVertexShader, LineFragmentShader>;
 using LinearGradientFillPipeline = GradientPipelineHandle<LinearGradientFillFragmentShader>;
 using LinearGradientSSBOFillPipeline = GradientPipelineHandle<LinearGradientSsboFillFragmentShader>;
 using LinearGradientUniformFillPipeline = GradientPipelineHandle<LinearGradientUniformFillFragmentShader>;
@@ -352,6 +355,7 @@ class ContentContext {
   PipelineRef GetFramebufferBlendSoftLightPipeline(ContentContextOptions opts) const;
   PipelineRef GetGaussianBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetGlyphAtlasPipeline(ContentContextOptions opts) const;
+  PipelineRef GetLinePipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientSSBOFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientUniformFillPipeline(ContentContextOptions opts) const;
@@ -645,6 +649,7 @@ class ContentContext {
   mutable Variants<FramebufferBlendSoftLightPipeline> framebuffer_blend_softlight_pipelines_;
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
+  mutable Variants<LinePipeline> line_pipelines_;
   mutable Variants<LinearGradientFillPipeline> linear_gradient_fill_pipelines_;
   mutable Variants<LinearGradientSSBOFillPipeline> linear_gradient_ssbo_fill_pipelines_;
   mutable Variants<LinearGradientUniformFillPipeline> linear_gradient_uniform_fill_pipelines_;

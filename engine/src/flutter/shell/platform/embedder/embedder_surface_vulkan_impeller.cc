@@ -71,8 +71,7 @@ EmbedderSurfaceVulkanImpeller::EmbedderSurfaceVulkanImpeller(
   }
   settings.embedder_data = data;
 
-  context_ =
-      impeller::ContextVK::Create(impeller::Flags{}, std::move(settings));
+  context_ = impeller::ContextVK::Create(std::move(settings));
   if (!context_) {
     FML_LOG(ERROR) << "Failed to initialize Vulkan Context.";
     return;

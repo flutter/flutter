@@ -13,10 +13,8 @@
 namespace impeller {
 namespace testing {
 
-MetalScreenshotter::MetalScreenshotter(bool enable_wide_gamut) {
+MetalScreenshotter::MetalScreenshotter(const PlaygroundSwitches& switches) {
   FML_CHECK(::glfwInit() == GLFW_TRUE);
-  PlaygroundSwitches switches;
-  switches.enable_wide_gamut = enable_wide_gamut;
   playground_ = PlaygroundImpl::Create(PlaygroundBackend::kMetal, switches);
 }
 
