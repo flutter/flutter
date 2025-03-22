@@ -981,6 +981,13 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         super.goBallistic(velocity);
         ballisticController.stop();
       } else if (ballisticController.isCompleted) {
+        // Round the extent value after the snap animation completes to
+        // prevent the sheet from failing to close when it reaches minSize.
+        const double scale = 1 / precisionErrorTolerance;
+        extent.updateSize(
+          (extent.currentSize * scale).roundToDouble() / scale,
+          context.notificationContext!,
+        );
         super.goBallistic(0);
       }
     }
