@@ -916,8 +916,15 @@ class EditingState {
   bool get isValid => baseOffset! >= 0 && extentOffset! >= 0;
 
   @override
-  int get hashCode =>
-      Object.hash(text, baseOffset, extentOffset, composingBaseOffset, composingExtentOffset);
+  int get hashCode => Object.hash(
+    text,
+    minOffset,
+    maxOffset,
+    baseOffset,
+    extentOffset,
+    composingBaseOffset,
+    composingExtentOffset,
+  );
 
   @override
   bool operator ==(Object other) {
@@ -929,6 +936,8 @@ class EditingState {
     }
     return other is EditingState &&
         other.text == text &&
+        other.baseOffset == baseOffset &&
+        other.extentOffset == extentOffset &&
         other.minOffset == minOffset &&
         other.maxOffset == maxOffset &&
         other.composingBaseOffset == composingBaseOffset &&
@@ -1156,6 +1165,9 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       // Refocus on the elements after applying the geometry.
       focusedFormElement!.focusWithoutScroll();
       moveFocusToActiveDomElement();
+    } else {
+      placeForm();
+      lastEditingState?.applyToDomElement(domElement);
     }
   }
 }
