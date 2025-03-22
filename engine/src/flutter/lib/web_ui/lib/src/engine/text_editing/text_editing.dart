@@ -1147,8 +1147,8 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
   @override
   void placeElement() {
     geometry?.applyToDomElement(activeDomElement);
+    placeForm();
     if (hasAutofillGroup) {
-      placeForm();
       // Set the last editing state if it exists, this is critical for a
       // users ongoing work to continue uninterrupted when there is an update to
       // the transform.
@@ -1166,7 +1166,6 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       focusedFormElement!.focusWithoutScroll();
       moveFocusToActiveDomElement();
     } else {
-      placeForm();
       lastEditingState?.applyToDomElement(domElement);
     }
   }
