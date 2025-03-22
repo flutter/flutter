@@ -891,8 +891,11 @@ class _PackageListTile extends StatelessWidget {
     return Ink(
       color: isSelected ? Theme.of(context).highlightColor : Theme.of(context).cardColor,
       child: ListTile(
-        title: Text(packageName),
-        subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
+        title: Text(packageName, style: Theme.of(context).textTheme.bodyLarge),
+        subtitle: Text(
+          MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
         selected: isSelected,
         onTap: onTap,
       ),
