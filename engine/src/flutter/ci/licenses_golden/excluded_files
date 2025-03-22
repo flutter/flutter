@@ -1438,6 +1438,8 @@
 ../../../flutter/third_party/dart/codereview.settings
 ../../../flutter/third_party/dart/docs
 ../../../flutter/third_party/dart/pkg
+../../../flutter/third_party/dart/pubspec.lock
+../../../flutter/third_party/dart/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/.clang-tidy
 ../../../flutter/third_party/dart/runtime/.gitignore
 ../../../flutter/third_party/dart/runtime/CPPLINT.cfg
