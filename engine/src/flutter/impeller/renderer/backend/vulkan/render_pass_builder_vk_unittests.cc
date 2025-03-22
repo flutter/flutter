@@ -48,7 +48,7 @@ TEST(RenderPassBuilder, RenderPassWithLoadOpUsesCurrentLayout) {
   vk::AttachmentDescription color = maybe_color.value();
 
   EXPECT_EQ(color.initialLayout, vk::ImageLayout::eColorAttachmentOptimal);
-  EXPECT_EQ(color.finalLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(color.finalLayout, vk::ImageLayout::eShaderReadOnlyOptimal);
   EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eLoad);
   EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eStore);
 }
@@ -77,7 +77,7 @@ TEST(RenderPassBuilder, CreatesRenderPassWithCombinedDepthStencil) {
   vk::AttachmentDescription color = maybe_color.value();
 
   EXPECT_EQ(color.initialLayout, vk::ImageLayout::eUndefined);
-  EXPECT_EQ(color.finalLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(color.finalLayout, vk::ImageLayout::eShaderReadOnlyOptimal);
   EXPECT_EQ(color.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(color.storeOp, vk::AttachmentStoreOp::eStore);
 
@@ -165,7 +165,7 @@ TEST(RenderPassBuilder, CreatesMSAAResolveWithCorrectStore) {
 
   // MSAA Resolve Texture.
   EXPECT_EQ(resolve.initialLayout, vk::ImageLayout::eUndefined);
-  EXPECT_EQ(resolve.finalLayout, vk::ImageLayout::eGeneral);
+  EXPECT_EQ(resolve.finalLayout, vk::ImageLayout::eShaderReadOnlyOptimal);
   EXPECT_EQ(resolve.loadOp, vk::AttachmentLoadOp::eClear);
   EXPECT_EQ(resolve.storeOp, vk::AttachmentStoreOp::eStore);
 }
