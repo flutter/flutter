@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/ios_surface_metal_impeller.h"
 
+#include "flutter/impeller/core/formats.h"
 #include "flutter/impeller/renderer/backend/metal/formats_mtl.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
@@ -43,8 +44,12 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 
 // |IOSSurface|
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface() {
-  impeller_context_->UpdateOffscreenLayerPixelFormat(
-      impeller::FromMTLPixelFormat(layer_.pixelFormat));
+  // Convert alpha-less onscreen format to alpha including format.
+  impeller::PixelFormat pixel_format = impeller::FromMTLPixelFormat(layer_.pixelFormat);
+  if (pixel_format == impeller::PixelFormat::kB10G10R10XR) {
+    pixel_format = impeller::PixelFormat::kB10G10R10A10XR;
+  }
+  impeller_context_->UpdateOffscreenLayerPixelFormat(pixel_format);
   return std::make_unique<GPUSurfaceMetalImpeller>(this,          //
                                                    aiks_context_  //
   );
