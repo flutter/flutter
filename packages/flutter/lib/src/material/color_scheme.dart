@@ -734,6 +734,8 @@ class ColorScheme with Diagnosticable {
   /// from a single seed color based on the Material 3 color system. To create a
   /// high-contrast color scheme, set `contrastLevel` to 1.0.
   ///
+  /// System colors, when available, are used as fallback for the secondary and surface colors.
+  ///
   /// {@tool snippet}
   /// This example demonstrates how to create a color scheme similar to [ColorScheme.highContrastLight]
   /// using the [ColorScheme.fromSeed] constructor:
@@ -749,7 +751,7 @@ class ColorScheme with Diagnosticable {
   /// ),
   /// ```
   /// {@end-tool}
-  const ColorScheme.highContrastLight({
+  ColorScheme.highContrastLight({
     this.brightness = Brightness.light,
     this.primary = const Color(0xff0000ba),
     this.onPrimary = Colors.white,
@@ -759,8 +761,8 @@ class ColorScheme with Diagnosticable {
     Color? primaryFixedDim,
     Color? onPrimaryFixed,
     Color? onPrimaryFixedVariant,
-    this.secondary = const Color(0xff66fff9),
-    this.onSecondary = Colors.black,
+    Color? secondary,
+    Color? onSecondary,
     Color? secondaryContainer,
     Color? onSecondaryContainer,
     Color? secondaryFixed,
@@ -779,8 +781,8 @@ class ColorScheme with Diagnosticable {
     this.onError = Colors.white,
     Color? errorContainer,
     Color? onErrorContainer,
-    this.surface = Colors.white,
-    this.onSurface = Colors.black,
+    Color? surface,
+    Color? onSurface,
     Color? surfaceDim,
     Color? surfaceBright,
     Color? surfaceContainerLowest,
@@ -818,6 +820,8 @@ class ColorScheme with Diagnosticable {
        _primaryFixedDim = primaryFixedDim,
        _onPrimaryFixed = onPrimaryFixed,
        _onPrimaryFixedVariant = onPrimaryFixedVariant,
+       secondary = secondary ?? _lightSystemPalette?.accentColor.value ?? const Color(0xff66fff9),
+       onSecondary = onSecondary ?? _lightSystemPalette?.accentColorText.value ?? Colors.black,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
        _secondaryFixed = secondaryFixed,
@@ -834,6 +838,8 @@ class ColorScheme with Diagnosticable {
        _onTertiaryFixedVariant = onTertiaryFixedVariant,
        _errorContainer = errorContainer,
        _onErrorContainer = onErrorContainer,
+       surface = surface ?? _lightSystemPalette?.canvas.value ?? Colors.white,
+       onSurface = onSurface ?? _lightSystemPalette?.canvasText.value ?? Colors.black,
        _surfaceDim = surfaceDim,
        _surfaceBright = surfaceBright,
        _surfaceContainerLowest = surfaceContainerLowest,
@@ -866,6 +872,8 @@ class ColorScheme with Diagnosticable {
   /// dark color scheme. To create a high-contrast color scheme, set
   /// `contrastLevel` to 1.0.
   ///
+  /// System colors, when available, are used as fallback for the secondary and surface colors.
+  ///
   /// {@tool snippet}
   /// This example demonstrates how to create a color scheme similar to [ColorScheme.highContrastDark]
   /// using the [ColorScheme.fromSeed] constructor:
@@ -884,7 +892,7 @@ class ColorScheme with Diagnosticable {
   /// ),
   /// ```
   /// {@end-tool}
-  const ColorScheme.highContrastDark({
+  ColorScheme.highContrastDark({
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffefb7ff),
     this.onPrimary = Colors.black,
@@ -894,8 +902,8 @@ class ColorScheme with Diagnosticable {
     Color? primaryFixedDim,
     Color? onPrimaryFixed,
     Color? onPrimaryFixedVariant,
-    this.secondary = const Color(0xff66fff9),
-    this.onSecondary = Colors.black,
+    Color? secondary,
+    Color? onSecondary,
     Color? secondaryContainer,
     Color? onSecondaryContainer,
     Color? secondaryFixed,
@@ -914,8 +922,8 @@ class ColorScheme with Diagnosticable {
     this.onError = Colors.black,
     Color? errorContainer,
     Color? onErrorContainer,
-    this.surface = const Color(0xff121212),
-    this.onSurface = Colors.white,
+    Color? surface,
+    Color? onSurface,
     Color? surfaceDim,
     Color? surfaceBright,
     Color? surfaceContainerLowest,
@@ -953,6 +961,8 @@ class ColorScheme with Diagnosticable {
        _primaryFixedDim = primaryFixedDim,
        _onPrimaryFixed = onPrimaryFixed,
        _onPrimaryFixedVariant = onPrimaryFixedVariant,
+       secondary = secondary ?? _darkSystemPalette?.accentColor.value ?? const Color(0xff66fff9),
+       onSecondary = onSecondary ?? _darkSystemPalette?.accentColorText.value ?? Colors.black,
        _secondaryContainer = secondaryContainer,
        _onSecondaryContainer = onSecondaryContainer,
        _secondaryFixed = secondaryFixed,
@@ -969,6 +979,8 @@ class ColorScheme with Diagnosticable {
        _onTertiaryFixedVariant = onTertiaryFixedVariant,
        _errorContainer = errorContainer,
        _onErrorContainer = onErrorContainer,
+       surface = surface ?? _darkSystemPalette?.canvas.value ?? const Color(0xff121212),
+       onSurface = onSurface ?? _darkSystemPalette?.canvasText.value ?? Colors.white,
        _surfaceDim = surfaceDim,
        _surfaceBright = surfaceBright,
        _surfaceContainerLowest = surfaceContainerLowest,
@@ -1028,6 +1040,12 @@ class ColorScheme with Diagnosticable {
       onBackground: primaryIsDark ? Colors.white : Colors.black,
     );
   }
+
+  static ui.SystemColorPalette? get _lightSystemPalette =>
+      ui.SystemColor.platformProvidesSystemColors ? ui.SystemColor.light : null;
+
+  static ui.SystemColorPalette? get _darkSystemPalette =>
+      ui.SystemColor.platformProvidesSystemColors ? ui.SystemColor.dark : null;
 
   static Brightness _brightnessFor(Color color) => ThemeData.estimateBrightnessForColor(color);
 

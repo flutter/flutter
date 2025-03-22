@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'dart:ui' show Color, lerpDouble;
+import 'dart:ui' show Color, SystemColor, SystemColorPalette, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -32,8 +32,10 @@ import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'drawer_theme.dart';
 import 'dropdown_menu_theme.dart';
+import 'elevated_button.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
+import 'filled_button.dart';
 import 'filled_button_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'icon_button_theme.dart';
@@ -50,6 +52,7 @@ import 'menu_theme.dart';
 import 'navigation_bar_theme.dart';
 import 'navigation_drawer_theme.dart';
 import 'navigation_rail_theme.dart';
+import 'outlined_button.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
@@ -63,6 +66,7 @@ import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'switch_theme.dart';
 import 'tab_bar_theme.dart';
+import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'text_selection_theme.dart';
 import 'text_theme.dart';
@@ -839,6 +843,157 @@ class ThemeData with Diagnosticable {
   /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.dark({bool? useMaterial3}) =>
       ThemeData(brightness: Brightness.dark, useMaterial3: useMaterial3);
+
+  factory ThemeData._highContrast({
+    required bool useMaterial3,
+    required Color seedColor,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+    SystemColorPalette? systemColors,
+  }) {
+    final ThemeData theme =
+        useMaterial3
+            ? ThemeData.from(
+              useMaterial3: useMaterial3,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: seedColor,
+                brightness: colorScheme.brightness,
+                contrastLevel: 1.0,
+
+                // QUESTION: Should we omit primary and onPrimary?
+                // primary: colorScheme.primary,
+                // onPrimary: colorScheme.onPrimary,
+                secondary: colorScheme.secondary,
+                onSecondary: colorScheme.onSecondary,
+                surface: colorScheme.surface,
+                onSurface: colorScheme.onSurface,
+                error: colorScheme.error,
+                onError: colorScheme.onError,
+              ),
+              // QUESTION: Should we omit textTheme and ask users to do `ThemeData.localize`?
+              textTheme: textTheme,
+            )
+            : ThemeData.from(
+              useMaterial3: useMaterial3,
+              colorScheme: colorScheme,
+              textTheme: textTheme,
+            );
+
+    if (systemColors == null) {
+      return theme;
+    }
+
+    return theme.copyWith(
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          foregroundColor: systemColors.buttonText.value,
+          backgroundColor: systemColors.buttonFace.value,
+          side:
+              systemColors.buttonBorder.value == null
+                  ? null
+                  : BorderSide(color: systemColors.buttonBorder.value!),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: systemColors.buttonText.value,
+          backgroundColor: systemColors.buttonFace.value,
+          side:
+              systemColors.buttonBorder.value == null
+                  ? null
+                  : BorderSide(color: systemColors.buttonBorder.value!),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: systemColors.buttonText.value,
+          backgroundColor: systemColors.buttonFace.value,
+          side:
+              systemColors.buttonBorder.value == null
+                  ? null
+                  : BorderSide(color: systemColors.buttonBorder.value!),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          foregroundColor: systemColors.buttonText.value,
+          backgroundColor: systemColors.buttonFace.value,
+          side:
+              systemColors.buttonBorder.value == null
+                  ? null
+                  : BorderSide(color: systemColors.buttonBorder.value!),
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: systemColors.buttonFace.value,
+        foregroundColor: systemColors.buttonText.value,
+      ),
+    );
+  }
+
+  /// Create a high contrast light theme based on a combination of:
+  ///
+  /// - A purple primary color that matches the baseline [Material 2](https://material.io/design/color/the-color-system.html#color-theme-creation)
+  ///   or [Material 3](https://m3.material.io/styles/color/static/baseline) color scheme.
+  /// - System colors, if available.
+  ///
+  /// This example demonstrates how to use the high contrast themes with [MaterialApp]:
+  ///
+  /// ```dart
+  /// MaterialApp(
+  ///   theme: ThemeData.light(),
+  ///   darkTheme: ThemeData.dark(),
+  ///   highContrastTheme: ThemeData.highContrastLight(),
+  ///   highContrastDarkTheme: ThemeData.highContrastDark(),
+  ///
+  ///   home: Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Home'),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  factory ThemeData.highContrastLight({bool useMaterial3 = true}) {
+    return ThemeData._highContrast(
+      useMaterial3: useMaterial3,
+      seedColor: const Color(0xFF6750A4),
+      colorScheme: ColorScheme.highContrastLight(),
+      textTheme: Typography.highContrastLight,
+      systemColors: SystemColor.platformProvidesSystemColors ? SystemColor.light : null,
+    );
+  }
+
+  /// Create a high contrast dark theme based on a combination of:
+  ///
+  /// - A purple primary color that matches the baseline [Material 2](https://material.io/design/color/the-color-system.html#color-theme-creation)
+  ///   or [Material 3](https://m3.material.io/styles/color/static/baseline) color scheme.
+  /// - System colors, if available.
+  ///
+  /// This example demonstrates how to use the high contrast themes with [MaterialApp]:
+  ///
+  /// ```dart
+  /// MaterialApp(
+  ///   theme: ThemeData.light(),
+  ///   darkTheme: ThemeData.dark(),
+  ///   highContrastTheme: ThemeData.highContrastLight(),
+  ///   highContrastDarkTheme: ThemeData.highContrastDark(),
+  ///
+  ///   home: Scaffold(
+  ///     appBar: AppBar(
+  ///       title: const Text('Home'),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  factory ThemeData.highContrastDark({bool useMaterial3 = true}) {
+    return ThemeData._highContrast(
+      useMaterial3: useMaterial3,
+      seedColor: const Color(0xFFD0BCFF),
+      colorScheme: ColorScheme.highContrastDark(),
+      textTheme: Typography.highContrastDark,
+      systemColors: SystemColor.platformProvidesSystemColors ? SystemColor.dark : null,
+    );
+  }
 
   /// The default color theme. Same as [ThemeData.light].
   ///
