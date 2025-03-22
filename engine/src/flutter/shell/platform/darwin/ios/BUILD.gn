@@ -43,11 +43,9 @@ source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc
   cflags_objcc = flutter_cflags_objcc
+  cflags_objcc += [ "-fapplication-extension" ]
 
   defines = [ "FLUTTER_FRAMEWORK=1" ]
-  if (darwin_extension_safe) {
-    defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
-  }
   public_configs = [
     ":ios_gpu_configuration_config",
     "//flutter:config",
@@ -88,6 +86,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterRestorationPlugin.mm",
     "framework/Source/FlutterSemanticsScrollView.h",
     "framework/Source/FlutterSemanticsScrollView.mm",
+    "framework/Source/FlutterSharedApplication.h",
+    "framework/Source/FlutterSharedApplication.mm",
     "framework/Source/FlutterSpellCheckPlugin.h",
     "framework/Source/FlutterSpellCheckPlugin.mm",
     "framework/Source/FlutterTextInputDelegate.h",
@@ -225,6 +225,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/FlutterPlatformViewsTest.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
     "framework/Source/FlutterRestorationPluginTest.mm",
+    "framework/Source/FlutterSharedApplicationTest.mm",
     "framework/Source/FlutterSpellCheckPluginTest.mm",
     "framework/Source/FlutterTextInputPluginTest.mm",
     "framework/Source/FlutterTextureRegistryRelayTest.mm",
@@ -262,10 +263,6 @@ shared_library("ios_test_flutter") {
     ":ios_gpu_configuration_config",
     "//flutter:config",
   ]
-
-  if (darwin_extension_safe) {
-    defines = [ "APPLICATION_EXTENSION_API_ONLY=1" ]
-  }
 }
 
 shared_library("create_flutter_framework_dylib") {
@@ -273,11 +270,11 @@ shared_library("create_flutter_framework_dylib") {
 
   output_name = "Flutter"
 
-  ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
-
-  if (darwin_extension_safe) {
-    ldflags += [ "-fapplication-extension" ]
-  }
+  cflags_objcc = [ "-fapplication-extension" ]
+  ldflags = [
+    "-Wl,-install_name,@rpath/Flutter.framework/Flutter",
+    "-fapplication-extension",
+  ]
 
   public = _flutter_framework_headers
 
@@ -379,6 +376,12 @@ shared_library("copy_and_verify_framework_module") {
     "-F$framework_search_path",
     "-fapplication-extension",
   ]
+  ldflags = [
+    "-F$framework_search_path",
+    "-fapplication-extension",
+    "-Xlinker",
+    "-fatal_warnings",
+  ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
   deps = [
@@ -387,17 +390,6 @@ shared_library("copy_and_verify_framework_module") {
     ":copy_framework_module_map",
     ":copy_framework_privacy_manifest",
   ]
-
-  if (darwin_extension_safe) {
-    ldflags = [
-      "-F$framework_search_path",
-      "-fapplication-extension",
-      "-Xlinker",
-      "-fatal_warnings",
-    ]
-    deps += [ ":copy_dylib" ]
-    frameworks = [ "Flutter.framework" ]
-  }
 }
 
 group("universal_flutter_framework") {

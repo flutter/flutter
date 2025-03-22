@@ -15,9 +15,9 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
-
 FLUTTER_ASSERT_ARC
 
 @interface FlutterEngineSpy : FlutterEngine
@@ -381,7 +381,7 @@ FLUTTER_ASSERT_ARC
   OCMVerify(times(2), [mockEngine updateDisplays]);
 }
 
-- (void)testLifeCycleNotificationDidEnterBackground {
+- (void)testLifeCycleNotificationDidEnterBackgroundForApplication {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
@@ -396,11 +396,7 @@ FLUTTER_ASSERT_ARC
   id mockEngine = OCMPartialMock(engine);
   [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
   [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
-#if APPLICATION_EXTENSION_API_ONLY
-  OCMVerify(times(1), [mockEngine sceneDidEnterBackground:[OCMArg any]]);
-#else
   OCMVerify(times(1), [mockEngine applicationDidEnterBackground:[OCMArg any]]);
-#endif
   XCTAssertTrue(engine.isGpuDisabled);
   bool switch_value = false;
   [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
@@ -410,7 +406,37 @@ FLUTTER_ASSERT_ARC
   XCTAssertTrue(switch_value);
 }
 
-- (void)testLifeCycleNotificationWillEnterForeground {
+- (void)testLifeCycleNotificationDidEnterBackgroundForScene {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneDidEnterBackgroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationDidEnterBackgroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockEngine = OCMPartialMock(engine);
+  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
+  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
+  OCMVerify(times(1), [mockEngine sceneDidEnterBackground:[OCMArg any]]);
+  XCTAssertTrue(engine.isGpuDisabled);
+  bool switch_value = false;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { switch_value = true; }).SetIfFalse([&] {
+        switch_value = false;
+      }));
+  XCTAssertTrue(switch_value);
+  [mockBundle stopMocking];
+}
+
+- (void)testLifeCycleNotificationWillEnterForegroundForApplication {
   FlutterDartProject* project = [[FlutterDartProject alloc] init];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];
@@ -425,11 +451,7 @@ FLUTTER_ASSERT_ARC
   id mockEngine = OCMPartialMock(engine);
   [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
   [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
-#if APPLICATION_EXTENSION_API_ONLY
-  OCMVerify(times(1), [mockEngine sceneWillEnterForeground:[OCMArg any]]);
-#else
   OCMVerify(times(1), [mockEngine applicationWillEnterForeground:[OCMArg any]]);
-#endif
   XCTAssertFalse(engine.isGpuDisabled);
   bool switch_value = true;
   [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
@@ -437,6 +459,36 @@ FLUTTER_ASSERT_ARC
         switch_value = false;
       }));
   XCTAssertFalse(switch_value);
+}
+
+- (void)testLifeCycleNotificationWillEnterForegroundForScene {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  FlutterDartProject* project = [[FlutterDartProject alloc] init];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
+  [engine run];
+  NSNotification* sceneNotification =
+      [NSNotification notificationWithName:UISceneWillEnterForegroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  NSNotification* applicationNotification =
+      [NSNotification notificationWithName:UIApplicationWillEnterForegroundNotification
+                                    object:nil
+                                  userInfo:nil];
+  id mockEngine = OCMPartialMock(engine);
+  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
+  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
+  OCMVerify(times(1), [mockEngine sceneWillEnterForeground:[OCMArg any]]);
+  XCTAssertFalse(engine.isGpuDisabled);
+  bool switch_value = true;
+  [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { switch_value = true; }).SetIfFalse([&] {
+        switch_value = false;
+      }));
+  XCTAssertFalse(switch_value);
+  [mockBundle stopMocking];
 }
 
 - (void)testSpawnsShareGpuContext {
