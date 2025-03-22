@@ -2078,18 +2078,18 @@ class _RSuperellipseParam extends NativeFieldWrapperClass1 {
   @Native<
     Void Function(
       Handle,
-      Float,
-      Float,
-      Float,
-      Float,
-      Float,
-      Float,
-      Float,
-      Float,
-      Float,
-      Float,
-      Float,
-      Float,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
     )
   >(symbol: 'RSuperellipse::Create')
   external void _constructor(
