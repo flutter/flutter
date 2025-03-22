@@ -1809,22 +1809,15 @@ class RRect extends _RRectLike<RRect> {
 ///
 /// A rounded superellipse (not to be confused with a standard superellipse) is
 /// a shape formed by replacing the four curved corners of a superellipse with
-/// circular arcs. A superellipse follows the formula x^n + y^n = a^n, and while
-/// n > 2 gives it rounded corners, they tend to be too sharp and pronounced.
-/// Replacing them with circular arcs makes the shape feel softer and more
-/// natural.
+/// circular arcs. A (standard) superellipse follows the formula x^n + y^n =
+/// a^n, and while n > 2 gives it rounded corners, they tend to be too sharp and
+/// pronounced.  Replacing them with circular arcs makes the shape feel softer
+/// and more natural.
 ///
 /// Visually, a rounded superellipse looks similar to a typical rounded rectangle
 /// ([RRect]) but with smoother transitions between the straight edges and
 /// corners. It closely matches the `RoundedRectangle` shape in SwiftUI with the
 /// `.continuous` corner style.
-///
-/// The [RSuperellipse] class is `const`-constructible, making it efficiently
-/// comparable. However, this also means that computations must start from
-/// scratch each time they are performed. The [computed] method returns an
-/// instance that can cache intermediate values, improving performance. For
-/// efficiency, it is recommended to reuse and cache these instances whenever
-/// possible.
 class RSuperellipse extends _RRectLike<RSuperellipse> {
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
   /// and the same radii along its horizontal axis and its vertical axis.
