@@ -54,7 +54,8 @@ static std::shared_ptr<impeller::ContextMTL> CreateImpellerContext() {
                                              impeller_framebuffer_blend_shaders_length),
   };
   auto sync_switch = std::make_shared<fml::SyncSwitch>(false);
-  return impeller::ContextMTL::Create(shader_mappings, sync_switch, "Impeller Library");
+  return impeller::ContextMTL::Create(impeller::Flags{}, shader_mappings, sync_switch,
+                                      "Impeller Library");
 }
 
 TEST(GPUSurfaceMetalImpeller, InvalidImpellerContextCreatesCausesSurfaceToBeInvalid) {

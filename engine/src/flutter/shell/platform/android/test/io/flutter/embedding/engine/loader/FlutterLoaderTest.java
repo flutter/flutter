@@ -316,6 +316,35 @@ public class FlutterLoaderTest {
   }
 
   @Test
+  public void itSetsShaderInitModeFromMetaData() {
+    FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
+    FlutterLoader flutterLoader = new FlutterLoader(mockFlutterJNI);
+    Bundle metaData = new Bundle();
+    metaData.putBoolean("io.flutter.embedding.android.ImpellerLazyShaderInitialization", true);
+    ctx.getApplicationInfo().metaData = metaData;
+
+    FlutterLoader.Settings settings = new FlutterLoader.Settings();
+    assertFalse(flutterLoader.initialized());
+    flutterLoader.startInitialization(ctx, settings);
+    flutterLoader.ensureInitializationComplete(ctx, null);
+    shadowOf(getMainLooper()).idle();
+
+    final String shaderModeArg = "--impeller-lazy-shader-mode";
+    ArgumentCaptor<String[]> shellArgsCaptor = ArgumentCaptor.forClass(String[].class);
+    verify(mockFlutterJNI, times(1))
+        .init(
+            eq(ctx),
+            shellArgsCaptor.capture(),
+            anyString(),
+            anyString(),
+            anyString(),
+            anyLong(),
+            anyInt());
+    List<String> arguments = Arrays.asList(shellArgsCaptor.getValue());
+    assertTrue(arguments.contains(shaderModeArg));
+  }
+
+  @Test
   @TargetApi(API_LEVELS.API_23)
   @Config(sdk = API_LEVELS.API_23)
   public void itReportsFpsToVsyncWaiterAndroidM() {

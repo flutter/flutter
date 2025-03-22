@@ -27,8 +27,8 @@ ScopedObject<Context> ContextGLES::Create(
           impeller_framebuffer_blend_shaders_gles_data,
           impeller_framebuffer_blend_shaders_gles_length),
   };
-  auto impeller_context = impeller::ContextGLES::Create(std::move(proc_table),
-                                                        shader_mappings, false);
+  auto impeller_context = impeller::ContextGLES::Create(
+      Flags{}, std::move(proc_table), shader_mappings, false);
   if (!impeller_context) {
     VALIDATION_LOG << "Could not create Impeller context.";
     return {};

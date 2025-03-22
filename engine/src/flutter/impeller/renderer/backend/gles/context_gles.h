@@ -25,6 +25,7 @@ class ContextGLES final : public Context,
                           public std::enable_shared_from_this<ContextGLES> {
  public:
   static std::shared_ptr<ContextGLES> Create(
+      const Flags& flags,
       std::unique_ptr<ProcTableGLES> gl,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
       bool enable_gpu_tracing);
@@ -60,6 +61,7 @@ class ContextGLES final : public Context,
   bool is_valid_ = false;
 
   ContextGLES(
+      const Flags& flags,
       std::unique_ptr<ProcTableGLES> gl,
       const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries,
       bool enable_gpu_tracing);

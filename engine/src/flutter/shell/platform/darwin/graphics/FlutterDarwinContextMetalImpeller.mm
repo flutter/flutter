@@ -25,8 +25,8 @@ static std::shared_ptr<impeller::ContextMTL> CreateImpellerContext(
       std::make_shared<fml::NonOwnedMapping>(impeller_framebuffer_blend_shaders_data,
                                              impeller_framebuffer_blend_shaders_length),
   };
-  return impeller::ContextMTL::Create(shader_mappings, is_gpu_disabled_sync_switch,
-                                      "Impeller Library");
+  return impeller::ContextMTL::Create(impeller::Flags{}, shader_mappings,
+                                      is_gpu_disabled_sync_switch, "Impeller Library");
 }
 
 @implementation FlutterDarwinContextMetalImpeller
