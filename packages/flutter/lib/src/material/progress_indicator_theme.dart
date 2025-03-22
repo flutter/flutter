@@ -308,7 +308,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
 /// )
 /// ```
 /// {@end-tool}
-class ProgressIndicatorTheme extends InheritedTheme {
+class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData, Object?> {
   /// Creates a theme that controls the configurations for [ProgressIndicator]
   /// widgets.
   const ProgressIndicatorTheme({super.key, required this.data, required super.child});
@@ -337,4 +337,19 @@ class ProgressIndicatorTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ProgressIndicatorTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ProgressIndicatorTheme oldWidget,
+    Set<ThemeSelector<ProgressIndicatorThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ProgressIndicatorThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

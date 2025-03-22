@@ -90,7 +90,7 @@ class FilledButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [FilledButton]'s defaults.
 ///  * [ThemeData.filledButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [FilledButton]s below the overall [Theme].
-class FilledButtonTheme extends InheritedTheme {
+class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData, Object?> {
   /// Create a [FilledButtonTheme].
   const FilledButtonTheme({super.key, required this.data, required super.child});
 
@@ -120,4 +120,19 @@ class FilledButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(FilledButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    FilledButtonTheme oldWidget,
+    Set<ThemeSelector<FilledButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<FilledButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

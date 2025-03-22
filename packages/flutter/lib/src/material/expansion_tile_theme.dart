@@ -254,7 +254,7 @@ class ExpansionTileThemeData with Diagnosticable {
 ///  * [ExpansionTileThemeData], which is used to configure this theme.
 ///  * [ThemeData.expansionTileTheme], which can be used to override the default
 ///    [ExpansionTileTheme] for [ExpansionTile]s below the overall [Theme].
-class ExpansionTileTheme extends InheritedTheme {
+class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData, Object?> {
   /// Applies the given theme [data] to [child].
   const ExpansionTileTheme({super.key, required this.data, required super.child});
 
@@ -285,4 +285,19 @@ class ExpansionTileTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ExpansionTileTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ExpansionTileTheme oldWidget,
+    Set<ThemeSelector<ExpansionTileThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ExpansionTileThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
