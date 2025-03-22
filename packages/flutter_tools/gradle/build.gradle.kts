@@ -41,6 +41,10 @@ gradlePlugin {
             id = "dev.flutter.flutter-plugin-loader"
             implementationClass = "com.flutter.gradle.FlutterAppPluginLoaderPlugin"
         }
+        create("flutterModulePluginLoaderPlugin") {
+            id = "dev.flutter.flutter-module-plugin-loader"
+            implementationClass = "com.flutter.gradle.FlutterModulePluginLoaderPlugin"
+        }
     }
 }
 

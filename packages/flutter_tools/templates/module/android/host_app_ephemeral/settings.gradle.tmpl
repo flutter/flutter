@@ -19,7 +19,8 @@ pluginManagement {
 }
 
 plugins {
-    id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    //id "dev.flutter.flutter-plugin-loader" version "1.0.0"
+    id "dev.flutter.flutter-module-plugin-loader" version "1.0.0"
     id "com.android.library" version "{{agpVersionForModule}}" apply false
     id "org.jetbrains.kotlin.android" version "{{kotlinVersion}}" apply false
 }
@@ -27,5 +28,5 @@ plugins {
 include ':app'
 
 rootProject.name = 'android_generated'
-setBinding(new Binding([gradle: this]))
-evaluate(new File(settingsDir, 'include_flutter.groovy'))
+//setBinding(new Binding([gradle: this]))
+//evaluate(new File(settingsDir, 'include_flutter.groovy'))
