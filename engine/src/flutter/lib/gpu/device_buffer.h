@@ -25,7 +25,8 @@ class DeviceBuffer : public RefCountedDartWrappable<DeviceBuffer> {
 
   std::shared_ptr<impeller::DeviceBuffer> GetBuffer();
 
-  bool Overwrite(const tonic::DartByteData& source_bytes,
+  bool Overwrite(flutter::gpu::Context& gpu_context,
+                 const tonic::DartByteData& source_bytes,
                  size_t destination_offset_in_bytes);
 
  private:
@@ -59,6 +60,7 @@ extern bool InternalFlutterGpu_DeviceBuffer_InitializeWithHostData(
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_DeviceBuffer_Overwrite(
     flutter::gpu::DeviceBuffer* wrapper,
+    flutter::gpu::Context* gpu_context,
     Dart_Handle source_byte_data,
     int destination_offset_in_bytes);
 
