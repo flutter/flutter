@@ -55,6 +55,7 @@ class UIDartState : public tonic::DartState {
             bool deterministic_rendering_enabled,
             std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
             bool enable_impeller,
+            bool enable_flutter_gpu,
             impeller::RuntimeStageBackend runtime_stage_backend);
 
     /// The task runners used by the shell hosting this runtime controller. This
@@ -100,6 +101,9 @@ class UIDartState : public tonic::DartState {
 
     /// Whether Impeller is enabled or not.
     bool enable_impeller = false;
+
+    /// Whether flutter_gpu is enabled or not.
+    bool enable_flutter_gpu = false;
 
     /// The expected backend for runtime stage shaders.
     impeller::RuntimeStageBackend runtime_stage_backend;
@@ -169,6 +173,9 @@ class UIDartState : public tonic::DartState {
 
   /// Whether Impeller is enabled for this application.
   bool IsImpellerEnabled() const;
+
+  /// Whether Flutter GPU is enabled for this application.
+  bool IsFlutterGPUEnabled() const;
 
   /// The expected type for runtime stage shaders.
   impeller::RuntimeStageBackend GetRuntimeStageBackend() const;

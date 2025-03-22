@@ -103,6 +103,7 @@ Engine::Engine(Delegate& delegate,
               .skia_deterministic_rendering_on_cpu,  // deterministic rendering
           vm.GetConcurrentWorkerTaskRunner(),        // concurrent task runner
           settings_.enable_impeller,                 // enable impeller
+          settings_.enable_flutter_gpu,              // enable impeller
           runtime_stage_type,                        // runtime stage type
       });
 }
