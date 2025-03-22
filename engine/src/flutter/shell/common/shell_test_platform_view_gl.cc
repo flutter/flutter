@@ -61,7 +61,7 @@ ShellTestPlatformViewGL::ShellTestPlatformViewGL(
       return;
     }
     impeller_context_ = impeller::ContextGLES::Create(
-        std::move(gl), ShaderLibraryMappings(), true);
+        impeller::Flags{}, std::move(gl), ShaderLibraryMappings(), true);
   }
 }
 
