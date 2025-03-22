@@ -327,6 +327,10 @@ class DisplayListOpFlags : DisplayListFlags {
       kBasePaintFlags |       //
       kBaseStrokeOrFillFlags  //
   };
+  static constexpr DisplayListAttributeFlags kDrawDRSuperellipseFlags{
+      kBasePaintFlags |       //
+      kBaseStrokeOrFillFlags  //
+  };
   static constexpr DisplayListAttributeFlags kDrawPathFlags{
       kBasePaintFlags |         //
       kBaseStrokeOrFillFlags |  //

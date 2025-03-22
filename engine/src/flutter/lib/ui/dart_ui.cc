@@ -146,6 +146,7 @@ typedef CanvasPath Path;
   V(Canvas, drawColor)                           \
   V(Canvas, drawDRRect)                          \
   V(Canvas, drawRSuperellipse)                   \
+  V(Canvas, drawDRSuperellipse)                  \
   V(Canvas, drawImage)                           \
   V(Canvas, drawImageNine)                       \
   V(Canvas, drawImageRect)                       \

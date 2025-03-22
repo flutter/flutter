@@ -109,6 +109,9 @@ class DlSkCanvasAdapter final : public virtual DlCanvas {
                          const DlPaint& paint) override;
   void DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
                              const DlPaint& paint) override;
+  void DrawDiffRoundSuperellipse(const DlRoundSuperellipse& outer,
+                                 const DlRoundSuperellipse& inner,
+                                 const DlPaint& paint) override;
   void DrawPath(const DlPath& path, const DlPaint& paint) override;
   void DrawArc(const DlRect& bounds,
                DlScalar start,

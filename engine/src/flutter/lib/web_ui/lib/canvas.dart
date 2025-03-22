@@ -77,8 +77,9 @@ abstract class Canvas {
   void drawPaint(Paint paint);
   void drawRect(Rect rect, Paint paint);
   void drawRRect(RRect rrect, Paint paint);
-  void drawRSuperellipse(RSuperellipse rse, Paint paint);
   void drawDRRect(RRect outer, RRect inner, Paint paint);
+  void drawRSuperellipse(RSuperellipse rse, Paint paint);
+  void drawDRSuperellipse(RSuperellipse outer, RSuperellipse inner, Paint paint);
   void drawOval(Rect rect, Paint paint);
   void drawCircle(Offset c, double radius, Paint paint);
   void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint);
