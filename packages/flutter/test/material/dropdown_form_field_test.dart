@@ -1364,9 +1364,7 @@ void main() {
                 child: Form(
                   child: DropdownButtonFormField<String>(
                     items:
-                       menuItems.map<DropdownMenuItem<String>>((
-                          String value,
-                        ) {
+                        menuItems.map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(value: value, child: Text(value));
                         }).toList(),
                     decoration: const InputDecoration(errorText: decorationErrorText),
