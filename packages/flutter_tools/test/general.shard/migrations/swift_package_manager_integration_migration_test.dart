@@ -12,10 +12,18 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/migrations/swift_package_manager_integration_migration.dart';
 
 import 'package:flutter_tools/src/project.dart';
+import 'package:meta/meta.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fakes.dart';
+
+/// An override for the return value of [_runnerNativeTargetIdentifier].
+///
+/// This is used in tests that need a different PBXNativeTarget identifier
+/// than the default for the Runner target.
+@visibleForTesting
+String? runnerNativeTargetIdentifierOverride;
 
 const List<SupportedPlatform> supportedPlatforms = <SupportedPlatform>[
   SupportedPlatform.ios,
@@ -26,6 +34,19 @@ void main() {
   final TestFeatureFlags swiftPackageManagerFullyEnabledFlags = TestFeatureFlags(
     isSwiftPackageManagerEnabled: true,
   );
+
+  test('runnerNativeTargetIdentifierOverride works', () {
+    for (final SupportedPlatform supportedPlatform in supportedPlatforms) {
+      runnerNativeTargetIdentifierOverride = null;
+      final String overrideValue = _alternateRunnerNativeTargetIdentifier(supportedPlatform);
+
+      expect(_runnerNativeTargetIdentifier(supportedPlatform), isNot(overrideValue));
+      runnerNativeTargetIdentifierOverride = overrideValue;
+      expect(_runnerNativeTargetIdentifier(supportedPlatform), overrideValue);
+    }
+
+    runnerNativeTargetIdentifierOverride = null;
+  });
 
   group('Flutter Package Migration', () {
     testWithoutContext('skips if swift package manager is off', () async {
@@ -632,6 +653,58 @@ void main() {
               );
             },
           );
+
+          testWithoutContext(
+            'successfully updates scheme with BlueprintIdentifier that is different from the default',
+            () async {
+              final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+              final BufferLogger testLogger = BufferLogger.test();
+              final FakeXcodeProject project = FakeXcodeProject(
+                platform: platform.name,
+                fileSystem: memoryFileSystem,
+                logger: testLogger,
+              );
+
+              final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(
+                platform,
+              );
+
+              // Ensure that a non-default identifier works.
+              expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
+              runnerNativeTargetIdentifierOverride = nativeTargetIdentifier;
+
+              // Create the Scheme file with a different BlueprintIdentifier
+              // to simulate that it is made for a different target.
+              _createProjectFiles(project, platform, createSchemeFile: false);
+              project.xcodeProjectSchemeFile().createSync(recursive: true);
+              project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
+
+              final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+                _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              ]);
+
+              final SwiftPackageManagerIntegrationMigration projectMigration =
+                  SwiftPackageManagerIntegrationMigration(
+                    project,
+                    platform,
+                    BuildInfo.debug,
+                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                    logger: testLogger,
+                    fileSystem: memoryFileSystem,
+                    plistParser: plistParser,
+                    features: swiftPackageManagerFullyEnabledFlags,
+                  );
+
+              await projectMigration.migrate();
+              expect(
+                project.xcodeProjectSchemeFile().readAsStringSync(),
+                _validBuildActions(platform, hasFrameworkScript: true),
+              );
+
+              runnerNativeTargetIdentifierOverride = null;
+            },
+          );
         });
       }
     });
@@ -669,6 +742,130 @@ void main() {
             );
         await projectMigration.migrate();
         expect(testLogger.traceText, contains('project.pbxproj already migrated. Skipping...'));
+      });
+
+      testWithoutContext('skips PBXNativeTarget migration if all targets are migrated', () async {
+        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+        final BufferLogger testLogger = BufferLogger.test();
+        const SupportedPlatform platform = SupportedPlatform.ios;
+        final FakeXcodeProject project = FakeXcodeProject(
+          platform: platform.name,
+          fileSystem: memoryFileSystem,
+          logger: testLogger,
+        );
+
+        _createProjectFiles(project, platform, createSchemeFile: false);
+        project.xcodeProjectSchemeFile().createSync(recursive: true);
+        project.xcodeProjectSchemeFile().writeAsStringSync(
+          _validBuildActions(platform, hasFrameworkScript: true),
+        );
+
+        // Replace the PBXNativeTarget section with the migrated variant, so that the migration skips it.
+        final List<String> pbxprojSections = _allSectionsUnmigrated(platform);
+        pbxprojSections[_nativeTargetSectionIndex] = migratedNativeTargetSection(platform);
+
+        project.xcodeProjectInfoFile.writeAsStringSync(_projectSettings(pbxprojSections));
+
+        final List<String> settingsAsJsonBeforeMigration = <String>[
+          ..._allSectionsUnmigratedAsJson(platform),
+        ];
+        settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
+            migratedNativeTargetSectionAsJson(platform);
+        settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
+
+        final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+          _plutilOutput(settingsAsJsonBeforeMigration),
+          _plutilOutput(_allSectionsMigratedAsJson(platform)),
+        ]);
+
+        final SwiftPackageManagerIntegrationMigration projectMigration =
+            SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              logger: testLogger,
+              fileSystem: memoryFileSystem,
+              plistParser: plistParser,
+              features: swiftPackageManagerFullyEnabledFlags,
+            );
+
+        await projectMigration.migrate();
+
+        expect(testLogger.traceText, contains('PBXNativeTargets already migrated. Skipping...'));
+      });
+
+      testWithoutContext('skips PBXNativeTarget migration for already migrated target', () async {
+        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+        final BufferLogger testLogger = BufferLogger.test();
+        const SupportedPlatform platform = SupportedPlatform.ios;
+        final FakeXcodeProject project = FakeXcodeProject(
+          platform: platform.name,
+          fileSystem: memoryFileSystem,
+          logger: testLogger,
+        );
+
+        _createProjectFiles(project, platform, createSchemeFile: false);
+        project.xcodeProjectSchemeFile().createSync(recursive: true);
+        project.xcodeProjectSchemeFile().writeAsStringSync(
+          _validBuildActions(platform, hasFrameworkScript: true),
+        );
+
+        // Replace the PBXNativeTarget section with a two target variant,
+        // where the default Runner target is migrated, but the second target is not.
+        final List<String> pbxprojSections = _allSectionsUnmigrated(platform);
+        pbxprojSections[_nativeTargetSectionIndex] = migratedRunnerWithUnmigratedOtherTargetSection(
+          platform,
+        );
+
+        project.xcodeProjectInfoFile.writeAsStringSync(_projectSettings(pbxprojSections));
+
+        final List<String> settingsAsJsonBeforeMigration = <String>[
+          ..._allSectionsUnmigratedAsJson(platform),
+        ];
+
+        settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
+            migratedRunnerWithUnmigratedOtherTargetSectionAsJson(platform);
+
+        settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
+
+        final List<String> settingsAsJsonAfterMigration = <String>[
+          ..._allSectionsMigratedAsJson(platform),
+        ];
+        settingsAsJsonAfterMigration[_nativeTargetSectionIndex] =
+            migratedRunnerAndMigratedOtherTargetSectionAsJson(platform);
+
+        final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+          _plutilOutput(settingsAsJsonBeforeMigration),
+          _plutilOutput(settingsAsJsonAfterMigration),
+        ]);
+
+        final SwiftPackageManagerIntegrationMigration projectMigration =
+            SwiftPackageManagerIntegrationMigration(
+              project,
+              platform,
+              BuildInfo.debug,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+              logger: testLogger,
+              fileSystem: memoryFileSystem,
+              plistParser: plistParser,
+              features: swiftPackageManagerFullyEnabledFlags,
+            );
+
+        await projectMigration.migrate();
+
+        expect(
+          testLogger.traceText,
+          isNot(contains('PBXNativeTargets already migrated. Skipping...')),
+        );
+        expect(
+          testLogger.traceText,
+          contains('PBXNativeTarget "Runner" already migrated. Skipping...'),
+        );
+        expect(
+          testLogger.traceText,
+          isNot(contains('PBXNativeTarget "OtherTarget" already migrated. Skipping...')),
+        );
       });
 
       group('fails if parsing project.pbxproj', () {
@@ -1450,7 +1647,9 @@ void main() {
                   );
               await expectLater(
                 () => projectMigration.migrate(),
-                throwsToolExit(message: 'Unable to find parsed PBXNativeTarget for Runner target'),
+                throwsToolExit(
+                  message: 'Unable to find parsed PBXNativeTargets for Runner project',
+                ),
               );
             });
 
@@ -1495,7 +1694,9 @@ void main() {
                     );
                 await expectLater(
                   () => projectMigration.migrate(),
-                  throwsToolExit(message: 'Unable to find PBXNativeTarget for Runner target'),
+                  throwsToolExit(
+                    message: 'Unable to find PBXNativeTarget "Runner" for Runner project',
+                  ),
                 );
               },
             );
@@ -1545,7 +1746,9 @@ void main() {
                     );
                 await expectLater(
                   () => projectMigration.migrate(),
-                  throwsToolExit(message: 'Unable to find PBXNativeTarget for Runner target'),
+                  throwsToolExit(
+                    message: 'Unable to find PBXNativeTarget "Runner" for Runner project',
+                  ),
                 );
               },
             );
@@ -1729,6 +1932,80 @@ void main() {
                   _projectSettings(expectedSettings),
                 );
                 expect(plistParser.hasRemainingExpectations, isFalse);
+              },
+            );
+
+            testWithoutContext(
+              'successfully migrated when application product PBXNativeTarget has different identifier from default',
+              () async {
+                final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+                final BufferLogger testLogger = BufferLogger.test();
+                final FakeXcodeProject project = FakeXcodeProject(
+                  platform: platform.name,
+                  fileSystem: memoryFileSystem,
+                  logger: testLogger,
+                );
+
+                final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(
+                  platform,
+                );
+
+                // Ensure that a non-default identifier works.
+                expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
+                runnerNativeTargetIdentifierOverride = nativeTargetIdentifier;
+
+                // Create the Scheme file with a different BlueprintIdentifier
+                // to simulate that it is made for a different target.
+                _createProjectFiles(project, platform, createSchemeFile: false);
+                project.xcodeProjectSchemeFile().createSync(recursive: true);
+                project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
+
+                final List<String> settingsBeforeMigration = <String>[
+                  ..._allSectionsUnmigrated(platform),
+                ];
+                settingsBeforeMigration[_nativeTargetSectionIndex] = unmigratedNativeTargetSection(
+                  platform,
+                );
+                project.xcodeProjectInfoFile.writeAsStringSync(
+                  _projectSettings(settingsBeforeMigration),
+                );
+
+                final List<String> settingsAsJsonBeforeMigration = <String>[
+                  ..._allSectionsUnmigratedAsJson(platform),
+                ];
+                final List<String> expectedSettings = <String>[..._allSectionsMigrated(platform)];
+
+                expectedSettings[_nativeTargetSectionIndex] = migratedNativeTargetSection(platform);
+
+                final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+                  _plutilOutput(settingsAsJsonBeforeMigration),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
+                ]);
+
+                final SwiftPackageManagerIntegrationMigration projectMigration =
+                    SwiftPackageManagerIntegrationMigration(
+                      project,
+                      platform,
+                      BuildInfo.debug,
+                      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                      logger: testLogger,
+                      fileSystem: memoryFileSystem,
+                      plistParser: plistParser,
+                      features: swiftPackageManagerFullyEnabledFlags,
+                    );
+                await projectMigration.migrate();
+
+                expect(testLogger.errorText, isEmpty);
+                expect(
+                  testLogger.traceText.contains('PBXNativeTarget already migrated. Skipping...'),
+                  isFalse,
+                );
+                expect(
+                  project.xcodeProjectInfoFile.readAsStringSync(),
+                  _projectSettings(expectedSettings),
+                );
+                expect(plistParser.hasRemainingExpectations, isFalse);
+                runnerNativeTargetIdentifierOverride = null;
               },
             );
           });
@@ -2536,7 +2813,7 @@ void main() {
             );
             expect(
               testLogger.errorText,
-              contains('PBXNativeTarget was not migrated or was migrated incorrectly.'),
+              contains('Some PBXNativeTargets were not migrated or were migrated incorrectly.'),
             );
             expect(
               testLogger.errorText,
@@ -2813,10 +3090,25 @@ String _runnerFrameworksBuildPhaseIdentifier(SupportedPlatform platform) {
       : '33CC10EA2044A3C60003C045';
 }
 
+/// Get the default identifier for the Runner PBXNativeTarget.
 String _runnerNativeTargetIdentifier(SupportedPlatform platform) {
+  if (runnerNativeTargetIdentifierOverride != null) {
+    return runnerNativeTargetIdentifierOverride!;
+  }
+
   return platform == SupportedPlatform.ios
       ? '97C146ED1CF9000F007C117D'
       : '33CC10EC2044A3C60003C045';
+}
+
+/// Get an identifier for a PBXNativeTarget that is different from the default Runner identifier.
+///
+/// The value returned by this method was generated by XCode,
+/// by duplicating the default Runner target for iOS and MacOS.
+String _alternateRunnerNativeTargetIdentifier(SupportedPlatform platform) {
+  return platform == SupportedPlatform.ios
+      ? '430ACF912D82C20700EB9716'
+      : '433CD29E2D82FFA9000230C8';
 }
 
 String _projectIdentifier(SupportedPlatform platform) {
@@ -2980,15 +3272,16 @@ String migratedNativeTargetSection(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
   bool withOtherDependency = false,
+  String? otherNativeTarget,
 }) {
+  final StringBuffer builder = StringBuffer();
   final List<String> packageDependencies = <String>[
     '			packageProductDependencies = (',
     '				78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,',
     if (withOtherDependency) '				010101010101010101010101 /* SomeOtherPackage */,',
     '			);',
   ];
-  return <String>[
-    '/* Begin PBXNativeTarget section */',
+  final String runnerTarget = <String>[
     '		${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
     if (missingPackageProductDependencies) ...packageDependencies,
     '			isa = PBXNativeTarget;',
@@ -3011,8 +3304,50 @@ String migratedNativeTargetSection(
     '			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;',
     '			productType = "com.apple.product-type.application";',
     '		};',
-    '/* End PBXNativeTarget section */',
   ].join('\n');
+
+  builder.writeln('/* Begin PBXNativeTarget section */');
+
+  builder.writeln(runnerTarget);
+
+  if (otherNativeTarget != null) {
+    builder.writeln(otherNativeTarget);
+  }
+
+  builder.write('/* End PBXNativeTarget section */');
+
+  return builder.toString();
+}
+
+/// A variant of [migratedNativeTargetSection]
+/// that includes an additional PBXNativeTarget, "OtherTarget", that is not migrated.
+String migratedRunnerWithUnmigratedOtherTargetSection(SupportedPlatform platform) {
+  final String otherTarget = <String>[
+    '   354BE72C2A385E0200F71CEE /* OtherTarget */ = {',
+    '     isa = PBXNativeTarget;',
+    '     buildConfigurationList = 354BE73C2A385E0200F71CEE /* Build configuration list for PBXNativeTarget "OtherTarget" */;',
+    '     buildPhases = (',
+    '       354BE72E2A385E0200F71CEE /* Run Script */,',
+    '       354BE72F2A385E0200F71CEE /* Sources */,',
+    '       354BE7322A385E0200F71CEE /* Frameworks */,',
+    '       354BE7342A385E0200F71CEE /* Resources */,',
+    '       35EC537E2A4038C200CBDB83 /* Embed Frameworks */,',
+    '       354BE73A2A385E0200F71CEE /* Thin Binary */,',
+    '     );',
+    '     buildRules = (',
+    '     );',
+    '     dependencies = (',
+    '     );',
+    '     name = OtherTarget;',
+    '     packageProductDependencies = (',
+    '     );',
+    '     productName = OtherTarget;',
+    '     productReference = 354BE7402A385E0200F71CEE /* OtherTarget.app */;',
+    '     productType = "com.apple.product-type.application";',
+    '   };',
+  ].join('\n');
+
+  return migratedNativeTargetSection(platform, otherNativeTarget: otherTarget);
 }
 
 String unmigratedNativeTargetSectionAsJson(
@@ -3076,12 +3411,78 @@ String migratedNativeTargetSectionAsJson(SupportedPlatform platform) {
     }''';
 }
 
+/// A variant of [migratedNativeTargetSectionAsJson]
+/// that includes an additional PBXNativeTarget, "OtherTarget", that is not migrated.
+String migratedRunnerWithUnmigratedOtherTargetSectionAsJson(SupportedPlatform platform) {
+  return '''
+${migratedNativeTargetSectionAsJson(platform)},
+    "354BE72C2A385E0200F71CEE" : {
+      "buildConfigurationList" : "354BE73C2A385E0200F71CEE",
+      "buildPhases" : [
+        "354BE72E2A385E0200F71CEE",
+        "354BE72F2A385E0200F71CEE",
+        "354BE7322A385E0200F71CEE",
+        "354BE7342A385E0200F71CEE",
+        "35EC537E2A4038C200CBDB83",
+        "354BE73A2A385E0200F71CEE"
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+
+      ],
+      "isa" : "PBXNativeTarget",
+      "name" : "OtherTarget",
+      "packageProductDependencies" : [
+
+      ],
+      "productName" : "OtherTarget",
+      "productReference" : "354BE7402A385E0200F71CEE",
+      "productType" : "com.apple.product-type.application"
+    }''';
+}
+
+/// A variant of [migratedRunnerWithUnmigratedOtherTargetSectionAsJson]
+/// with both targets migrated.
+String migratedRunnerAndMigratedOtherTargetSectionAsJson(SupportedPlatform platform) {
+  return '''
+${migratedNativeTargetSectionAsJson(platform)},
+    "354BE72C2A385E0200F71CEE" : {
+      "buildConfigurationList" : "354BE73C2A385E0200F71CEE",
+      "buildPhases" : [
+        "354BE72E2A385E0200F71CEE",
+        "354BE72F2A385E0200F71CEE",
+        "354BE7322A385E0200F71CEE",
+        "354BE7342A385E0200F71CEE",
+        "35EC537E2A4038C200CBDB83",
+        "354BE73A2A385E0200F71CEE"
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+
+      ],
+      "isa" : "PBXNativeTarget",
+      "name" : "OtherTarget",
+      "packageProductDependencies" : [
+        "78A3181F2AECB46A00862997"
+      ],
+      "productName" : "OtherTarget",
+      "productReference" : "354BE7402A385E0200F71CEE",
+      "productType" : "com.apple.product-type.application"
+    }''';
+}
+
 // PBXProject
 String unmigratedProjectSection(
   SupportedPlatform platform, {
   bool missingPackageReferences = false,
   bool withOtherReference = false,
 }) {
+  final String nativeTargetIdentifier = _runnerNativeTargetIdentifier(platform);
+
   return <String>[
     '/* Begin PBXProject section */',
     '		${_projectIdentifier(platform)} /* Project object */ = {',
@@ -3093,9 +3494,9 @@ String unmigratedProjectSection(
     '				TargetAttributes = {',
     '					331C8080294A63A400263BE5 = {',
     '						CreatedOnToolsVersion = 14.0;',
-    '						TestTargetID = ${_runnerNativeTargetIdentifier(platform)};',
+    '						TestTargetID = $nativeTargetIdentifier;',
     '					};',
-    '					${_runnerNativeTargetIdentifier(platform)} = {',
+    '					$nativeTargetIdentifier = {',
     '						CreatedOnToolsVersion = 7.3.1;',
     '						LastSwiftMigration = 1100;',
     '					};',
@@ -3120,7 +3521,7 @@ String unmigratedProjectSection(
     '			projectDirPath = "";',
     '			projectRoot = "";',
     '			targets = (',
-    '				${_runnerNativeTargetIdentifier(platform)} /* Runner */,',
+    '				$nativeTargetIdentifier /* Runner */,',
     '				331C8080294A63A400263BE5 /* RunnerTests */,',
     '			);',
     '		};',
@@ -3133,6 +3534,8 @@ String migratedProjectSection(
   bool missingPackageReferences = false,
   bool withOtherReference = false,
 }) {
+  final String nativeTargetIdentifier = _runnerNativeTargetIdentifier(platform);
+
   final List<String> packageDependencies = <String>[
     '			packageReferences = (',
     '				781AD8BC2B33823900A9FFBB /* XCLocalSwiftPackageReference "Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage" */,',
@@ -3152,9 +3555,9 @@ String migratedProjectSection(
     '				TargetAttributes = {',
     '					331C8080294A63A400263BE5 = {',
     '						CreatedOnToolsVersion = 14.0;',
-    '						TestTargetID = ${_runnerNativeTargetIdentifier(platform)};',
+    '						TestTargetID = $nativeTargetIdentifier;',
     '					};',
-    '					${_runnerNativeTargetIdentifier(platform)} = {',
+    '					$nativeTargetIdentifier = {',
     '						CreatedOnToolsVersion = 7.3.1;',
     '						LastSwiftMigration = 1100;',
     '					};',
@@ -3174,7 +3577,7 @@ String migratedProjectSection(
     '			projectDirPath = "";',
     '			projectRoot = "";',
     '			targets = (',
-    '				${_runnerNativeTargetIdentifier(platform)} /* Runner */,',
+    '				$nativeTargetIdentifier /* Runner */,',
     '				331C8080294A63A400263BE5 /* RunnerTests */,',
     '			);',
     '		};',
@@ -3186,6 +3589,8 @@ String unmigratedProjectSectionAsJson(
   SupportedPlatform platform, {
   bool missingPackageReferences = false,
 }) {
+  final String nativeTargetIdentifier = _runnerNativeTargetIdentifier(platform);
+
   return <String>[
     '    "${_projectIdentifier(platform)}" : {',
     '      "attributes" : {',
@@ -3193,13 +3598,13 @@ String unmigratedProjectSectionAsJson(
     '        "LastUpgradeCheck" : "1510",',
     '        "ORGANIZATIONNAME" : "",',
     '        "TargetAttributes" : {',
-    '          "${_runnerNativeTargetIdentifier(platform)}" : {',
+    '          "$nativeTargetIdentifier" : {',
     '            "CreatedOnToolsVersion" : "7.3.1",',
     '            "LastSwiftMigration" : "1100"',
     '          },',
     '          "331C8080294A63A400263BE5" : {',
     '            "CreatedOnToolsVersion" : "14.0",',
-    '            "TestTargetID" : "${_runnerNativeTargetIdentifier(platform)}"',
+    '            "TestTargetID" : "$nativeTargetIdentifier"',
     '          }',
     '        }',
     '      },',
@@ -3218,7 +3623,7 @@ String unmigratedProjectSectionAsJson(
     '      "projectDirPath" : "",',
     '      "projectRoot" : "",',
     '      "targets" : [',
-    '        "${_runnerNativeTargetIdentifier(platform)}",',
+    '        "$nativeTargetIdentifier",',
     '        "331C8080294A63A400263BE5"',
     '      ]',
     '    }',
@@ -3226,6 +3631,8 @@ String unmigratedProjectSectionAsJson(
 }
 
 String migratedProjectSectionAsJson(SupportedPlatform platform) {
+  final String nativeTargetIdentifier = _runnerNativeTargetIdentifier(platform);
+
   return '''
     "${_projectIdentifier(platform)}" : {
       "attributes" : {
@@ -3233,13 +3640,13 @@ String migratedProjectSectionAsJson(SupportedPlatform platform) {
         "LastUpgradeCheck" : "1510",
         "ORGANIZATIONNAME" : "",
         "TargetAttributes" : {
-          "${_runnerNativeTargetIdentifier(platform)}" : {
+          "$nativeTargetIdentifier" : {
             "CreatedOnToolsVersion" : "7.3.1",
             "LastSwiftMigration" : "1100"
           },
           "331C8080294A63A400263BE5" : {
             "CreatedOnToolsVersion" : "14.0",
-            "TestTargetID" : "${_runnerNativeTargetIdentifier(platform)}"
+            "TestTargetID" : "$nativeTargetIdentifier"
           }
         }
       },
@@ -3260,7 +3667,7 @@ String migratedProjectSectionAsJson(SupportedPlatform platform) {
       "projectDirPath" : "",
       "projectRoot" : "",
       "targets" : [
-        "${_runnerNativeTargetIdentifier(platform)}",
+        "$nativeTargetIdentifier",
         "331C8080294A63A400263BE5"
       ]
     }''';
@@ -3427,8 +3834,13 @@ class FakeXcodeProject extends Fake implements IosProject {
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
-    return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+    if (!xcodeProjectInfoFile.existsSync()) {
+      return false;
+    }
+
+    return xcodeProjectInfoFile.readAsStringSync().contains(
+      '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
+    );
   }
 
   @override
