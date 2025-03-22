@@ -95,7 +95,7 @@ OpenGL core profile renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)
 OpenGL core profile version: 4.6 (Core Profile) Mesa 24.2.8-1ubuntu1~24.10.1
 OpenGL core profile shading language version: 4.60
 OpenGL core profile extensions:
-    GL_ARB_blend_func_extended, GL_EXT_framebuffer_blit
+    GL_ARB_blend_func_extended, GL_EXT_framebuffer_blit, GL_OES_EGL_image
 ''';
     }
     if (es) {
@@ -105,7 +105,7 @@ OpenGL ES profile renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)
 OpenGL ES profile version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1
 OpenGL ES profile shading language version: OpenGL ES GLSL ES 3.20
 OpenGL ES profile extensions:
-    GL_EXT_EGL_image_storage, GL_EXT_texture_format_BGRA8888
+    GL_EXT_EGL_image_storage, GL_EXT_texture_format_BGRA8888, GL_OES_EGL_image, GL_OES_EGL_image_external
 ''';
     }
     stdout += '''
@@ -133,7 +133,7 @@ OpenGL core profile renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)
 OpenGL core profile version: 4.6 (Core Profile) Mesa 24.2.8-1ubuntu1~24.10.1
 OpenGL core profile shading language version: 4.60
 OpenGL core profile extensions:
-    GL_ARB_blend_func_extended, GL_EXT_framebuffer_blit
+    GL_ARB_blend_func_extended, GL_EXT_framebuffer_blit, GL_OES_EGL_image
 ''';
     }
     if (es) {
@@ -143,7 +143,7 @@ OpenGL ES profile renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)
 OpenGL ES profile version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1
 OpenGL ES profile shading language version: OpenGL ES GLSL ES 3.20
 OpenGL ES profile extensions:
-    GL_EXT_EGL_image_storage, GL_EXT_texture_format_BGRA8888
+    GL_EXT_EGL_image_storage, GL_EXT_texture_format_BGRA8888, GL_OES_EGL_image, GL_OES_EGL_image_external
 ''';
     }
     stdout += '''
@@ -220,8 +220,10 @@ void main() {
         ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
         ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
         ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-        ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-        ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+        ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+        ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+        ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+        ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
       ]);
     },
   );
@@ -254,8 +256,10 @@ void main() {
       ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -287,8 +291,10 @@ void main() {
       ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -320,8 +326,10 @@ void main() {
       ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -353,8 +361,10 @@ void main() {
       ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -412,8 +422,10 @@ void main() {
       const ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       const ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       const ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      const ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      const ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -447,8 +459,10 @@ void main() {
       const ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       const ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       const ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      const ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      const ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -482,8 +496,10 @@ void main() {
       const ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       const ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       const ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      const ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      const ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -517,8 +533,10 @@ void main() {
       const ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       const ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       const ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      const ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      const ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -552,8 +570,10 @@ void main() {
       const ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       const ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       const ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      const ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      const ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -587,8 +607,10 @@ void main() {
       const ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       const ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       const ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      const ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      const ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -673,8 +695,10 @@ void main() {
       const ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       const ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       const ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
-      const ValidationMessage('GL_EXT_framebuffer_blit: yes'),
-      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      const ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
+      const ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11, ES/Wayland, ES/X11)'),
+      const ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 
@@ -751,8 +775,10 @@ void main() {
       ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2) (Wayland)'),
       ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1 (Wayland)'),
       ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20 (Wayland)'),
-      ValidationMessage('GL_EXT_framebuffer_blit: yes (Wayland)'),
-      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (Wayland)'),
+      ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland)'),
+      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland)'),
+      ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, ES/Wayland)'),
+      ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland)'),
     ]);
   });
 
@@ -785,8 +811,10 @@ void main() {
       ValidationMessage('OpenGL ES renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2) (X11)'),
       ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1 (X11)'),
       ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20 (X11)'),
-      ValidationMessage('GL_EXT_framebuffer_blit: yes (X11)'),
-      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (X11)'),
+      ValidationMessage('GL_EXT_framebuffer_blit: yes (core/X11)'),
+      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image: yes (core/X11, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image_external: yes (ES/X11)'),
     ]);
   });
 
@@ -814,8 +842,10 @@ void main() {
       ValidationMessage('OpenGL core renderer: Mesa Intel(R) UHD Graphics 620 (KBL GT2)'),
       ValidationMessage('OpenGL core version: 4.6 (Core Profile) Mesa 24.2.8-1ubuntu1~24.10.1'),
       ValidationMessage('OpenGL core shading language version: 4.60'),
-      ValidationMessage('GL_EXT_framebuffer_blit: yes'),
+      ValidationMessage('GL_EXT_framebuffer_blit: yes (core/Wayland, core/X11)'),
       ValidationMessage('GL_EXT_texture_format_BGRA8888: no'),
+      ValidationMessage('GL_OES_EGL_image: yes (core/Wayland, core/X11)'),
+      ValidationMessage('GL_OES_EGL_image_external: no'),
     ]);
   });
 
@@ -844,7 +874,9 @@ void main() {
       ValidationMessage('OpenGL ES version: OpenGL ES 3.2 Mesa 24.2.8-1ubuntu1~24.10.1'),
       ValidationMessage('OpenGL ES shading language version: OpenGL ES GLSL ES 3.20'),
       ValidationMessage('GL_EXT_framebuffer_blit: no'),
-      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes'),
+      ValidationMessage('GL_EXT_texture_format_BGRA8888: yes (ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image: yes (ES/Wayland, ES/X11)'),
+      ValidationMessage('GL_OES_EGL_image_external: yes (ES/Wayland, ES/X11)'),
     ]);
   });
 }
