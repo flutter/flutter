@@ -342,4 +342,7 @@ void main() {
       MaterialStateUnderlineInputBorder.resolveWith(
         (states) => const UnderlineInputBorder(),
       );
+
+  // Changes made in https://github.com/flutter/flutter/pull/162223
+  const SliderThemeData(showValueIndicator: ShowValueIndicator.onDrag);
 }
