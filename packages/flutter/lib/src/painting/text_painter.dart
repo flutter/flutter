@@ -584,14 +584,12 @@ class _LineCaretMetrics {
 /// return to step 1.
 ///
 /// > [!IMPORTANT]
-/// > The default text color differs between web and non-web platforms, to be
-/// > inverse to the default canvas background color. On non-web platforms, the
-/// > default text color is white on black. On the web, it is black on white.
+/// > The default text style color is white on non-web platforms and black on
+/// > the web.
 /// > 
 /// > The differences in text color may be visible even if the background color
-/// > of the canvas is no longer visible, leading to potentially unexpected
-/// > color differences. If developing across both platforms, always set the
-/// > text color explicitly.
+/// > of the canvas is no longer visible. If developing across both platforms,
+/// > always set the text color explicitly.
 class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
