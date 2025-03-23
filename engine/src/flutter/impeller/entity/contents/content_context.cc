@@ -30,7 +30,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   if (blend_mode > Entity::kLastPipelineBlendMode) {
     VALIDATION_LOG << "Cannot use blend mode " << static_cast<int>(blend_mode)
                    << " as a pipeline blend.";
-    pipeline_blend = BlendMode::kSourceOver;
+    pipeline_blend = BlendMode::kSrcOver;
   }
 
   desc.SetSampleCount(sample_count);
@@ -57,63 +57,63 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
         color0.src_color_blend_factor = BlendFactor::kZero;
       }
       break;
-    case BlendMode::kSource:
+    case BlendMode::kSrc:
       color0.blending_enabled = false;
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kOne;
       color0.src_color_blend_factor = BlendFactor::kOne;
       break;
-    case BlendMode::kDestination:
+    case BlendMode::kDst:
       color0.dst_alpha_blend_factor = BlendFactor::kOne;
       color0.dst_color_blend_factor = BlendFactor::kOne;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       color0.write_mask = ColorWriteMaskBits::kNone;
       break;
-    case BlendMode::kSourceOver:
+    case BlendMode::kSrcOver:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kOne;
       color0.src_color_blend_factor = BlendFactor::kOne;
       break;
-    case BlendMode::kDestinationOver:
+    case BlendMode::kDstOver:
       color0.dst_alpha_blend_factor = BlendFactor::kOne;
       color0.dst_color_blend_factor = BlendFactor::kOne;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       break;
-    case BlendMode::kSourceIn:
+    case BlendMode::kSrcIn:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kDestinationAlpha;
       break;
-    case BlendMode::kDestinationIn:
+    case BlendMode::kDstIn:
       color0.dst_alpha_blend_factor = BlendFactor::kSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
-    case BlendMode::kSourceOut:
+    case BlendMode::kSrcOut:
       color0.dst_alpha_blend_factor = BlendFactor::kZero;
       color0.dst_color_blend_factor = BlendFactor::kZero;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
       break;
-    case BlendMode::kDestinationOut:
+    case BlendMode::kDstOut:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kZero;
       color0.src_color_blend_factor = BlendFactor::kZero;
       break;
-    case BlendMode::kSourceATop:
+    case BlendMode::kSrcATop:
       color0.dst_alpha_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kOneMinusSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kDestinationAlpha;
       color0.src_color_blend_factor = BlendFactor::kDestinationAlpha;
       break;
-    case BlendMode::kDestinationATop:
+    case BlendMode::kDstATop:
       color0.dst_alpha_blend_factor = BlendFactor::kSourceAlpha;
       color0.dst_color_blend_factor = BlendFactor::kSourceAlpha;
       color0.src_alpha_blend_factor = BlendFactor::kOneMinusDestinationAlpha;
@@ -216,7 +216,6 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
 
   desc.SetPrimitiveType(primitive_type);
-
   desc.SetPolygonMode(wireframe ? PolygonMode::kLine : PolygonMode::kFill);
 }
 
@@ -283,11 +282,13 @@ ContentContext::ContentContext(
     desc.format = PixelFormat::kR8G8B8A8UNormInt;
     desc.size = ISize{1, 1};
     empty_texture_ = GetContext()->GetResourceAllocator()->CreateTexture(desc);
-    auto data = Color::BlackTransparent().ToR8G8B8A8();
-    auto cmd_buffer = GetContext()->CreateCommandBuffer();
-    auto blit_pass = cmd_buffer->CreateBlitPass();
-    auto& host_buffer = GetTransientsBuffer();
-    auto buffer_view = host_buffer.Emplace(data);
+
+    std::array<uint8_t, 4> data = Color::BlackTransparent().ToR8G8B8A8();
+    std::shared_ptr<CommandBuffer> cmd_buffer =
+        GetContext()->CreateCommandBuffer();
+    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+    HostBuffer& host_buffer = GetTransientsBuffer();
+    BufferView buffer_view = host_buffer.Emplace(data);
     blit_pass->AddCopy(buffer_view, empty_texture_);
 
     if (!blit_pass->EncodeCommands() || !GetContext()
@@ -383,9 +384,14 @@ ContentContext::ContentContext(
     }
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
-    clip_pipelines_.SetDefault(
-        options,
-        std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
+    if (GetContext()->GetFlags().lazy_shader_mode) {
+      clip_pipelines_.SetDefaultDescriptor(clip_pipeline_descriptor);
+      clip_pipelines_.SetDefault(options, nullptr);
+    } else {
+      clip_pipelines_.SetDefault(
+          options,
+          std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
+    }
     texture_downsample_pipelines_.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
     rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
@@ -671,7 +677,9 @@ void ContentContext::ClearCachedRuntimeEffectPipeline(
 }
 
 void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
-  TRACE_EVENT0("flutter", "InitializeCommonlyUsedShadersIfNeeded");
+  if (GetContext()->GetFlags().lazy_shader_mode) {
+    return;
+  }
   GetContext()->InitializeCommonlyUsedShadersIfNeeded();
 }
 
@@ -852,25 +860,25 @@ PipelineRef ContentContext::GetPorterDuffPipeline(
   switch (mode) {
     case BlendMode::kClear:
       return GetClearBlendPipeline(opts);
-    case BlendMode::kSource:
+    case BlendMode::kSrc:
       return GetSourceBlendPipeline(opts);
-    case BlendMode::kDestination:
+    case BlendMode::kDst:
       return GetDestinationBlendPipeline(opts);
-    case BlendMode::kSourceOver:
+    case BlendMode::kSrcOver:
       return GetSourceOverBlendPipeline(opts);
-    case BlendMode::kDestinationOver:
+    case BlendMode::kDstOver:
       return GetDestinationOverBlendPipeline(opts);
-    case BlendMode::kSourceIn:
+    case BlendMode::kSrcIn:
       return GetSourceInBlendPipeline(opts);
-    case BlendMode::kDestinationIn:
+    case BlendMode::kDstIn:
       return GetDestinationInBlendPipeline(opts);
-    case BlendMode::kSourceOut:
+    case BlendMode::kSrcOut:
       return GetSourceOutBlendPipeline(opts);
-    case BlendMode::kDestinationOut:
+    case BlendMode::kDstOut:
       return GetDestinationOutBlendPipeline(opts);
-    case BlendMode::kSourceATop:
+    case BlendMode::kSrcATop:
       return GetSourceATopBlendPipeline(opts);
-    case BlendMode::kDestinationATop:
+    case BlendMode::kDstATop:
       return GetDestinationATopBlendPipeline(opts);
     case BlendMode::kXor:
       return GetXorBlendPipeline(opts);
