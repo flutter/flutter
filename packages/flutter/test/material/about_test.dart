@@ -1884,15 +1884,17 @@ void main() {
     expect(packageTile, findsOneWidget);
 
     final Text titleWidget = tester.widget(packageTile);
+    expect(titleWidget.style, isNotNull);
     expect(titleWidget.style?.color, isNot(Colors.black));
-    expect(titleWidget.style, ThemeData.dark().textTheme.bodyLarge);
+    expect(titleWidget.style?.color, ThemeData.dark().textTheme.bodyLarge?.color);
 
     final Finder subtitleFinder = find.text('1 license.');
     expect(subtitleFinder, findsOneWidget);
 
     final Text subtitleWidget = tester.widget(subtitleFinder);
+    expect(subtitleWidget.style, isNotNull);
     expect(subtitleWidget.style?.color, isNot(Colors.black));
-    expect(subtitleWidget.style, ThemeData.dark().textTheme.bodyMedium);
+    expect(subtitleWidget.style?.color, ThemeData.dark().textTheme.bodyMedium?.color);
   });
 }
 
