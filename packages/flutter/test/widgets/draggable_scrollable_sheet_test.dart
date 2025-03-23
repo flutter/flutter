@@ -1909,10 +1909,11 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('Item 1'), const Offset(0, 10), 1);
-    while (tester.binding.hasScheduledFrame) {
-      await tester.pump(const Duration(milliseconds: 16)); // Advance one frame
-    }
+    await tester.fling(find.text('Item 1'), const Offset(0, 100), 2000);
+    await tester.pumpFrames(
+      tester.widget(find.byType(Directionality)),
+      const Duration(milliseconds: 500),
+    );
     expect(lastExtent, .25);
   });
 }
