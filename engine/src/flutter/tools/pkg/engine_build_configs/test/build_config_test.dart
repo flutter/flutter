@@ -84,7 +84,7 @@ int main() {
     final TestTask globalTestTask = globalTest.tasks[0];
     expect(globalTestTask.name, equals('global test task'));
     expect(globalTestTask.script, equals('global/test/script.py'));
-    expect(globalTestTask.language, equals('<undef>'));
+    expect(globalTestTask.language, equals(''));
   });
 
   test('BuildConfig flags invalid input', () {

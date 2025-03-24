@@ -520,7 +520,7 @@ final class GlobalTest extends BuildConfigBase {
   factory GlobalTest.fromJson(Map<String, Object?> map) {
     final List<String> errors = <String>[];
     final String? name = stringOfJson(map, 'name', errors);
-    final String? recipe = stringOfJson(map, 'recipe', errors);
+    final String? recipe = stringOfJson(map, 'recipe', errors, defaultValue: undef);
     final List<String>? droneDimensions = stringListOfJson(map, 'drone_dimensions', errors);
     final List<String>? dependencies = stringListOfJson(map, 'dependencies', errors);
     final List<TestDependency>? testDependencies = objListOfJson(
@@ -640,14 +640,10 @@ final class TestTask extends BuildConfigBase {
     final String? script = stringOfJson(map, 'script', errors);
     final int? maxAttempts = intOfJson(map, 'max_attempts', fallback: 1, errors);
     final List<String>? parameters = stringListOfJson(map, 'parameters', errors);
-    if (name == null ||
-        language == null ||
-        script == null ||
-        maxAttempts == null ||
-        parameters == null) {
+    if (name == null || script == null || maxAttempts == null || parameters == null) {
       return TestTask._invalid(errors);
     }
-    return TestTask._(name, language, script, maxAttempts, parameters);
+    return TestTask._(name, language ?? '', script, maxAttempts, parameters);
   }
 
   TestTask._invalid(super.error)
