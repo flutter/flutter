@@ -810,7 +810,7 @@ final class BuildTestRunner extends Runner {
 
   @override
   Future<bool> run(RunnerEventHandler eventHandler) async {
-    final String interpreter = test.language != null ? _interpreter(test.language!) : "";
+    final String interpreter = _interpreter(test.language);
     final List<String> command = <String>[
       if (interpreter.isNotEmpty) interpreter,
       test.script,

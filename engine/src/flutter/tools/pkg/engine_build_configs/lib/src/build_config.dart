@@ -234,7 +234,7 @@ final class Build extends BuildConfigBase {
     }
     return Build._(
       name,
-      description ?? "",
+      description ?? '',
       gn,
       ninja,
       tests,
@@ -375,7 +375,7 @@ final class BuildTest extends BuildConfigBase {
     if (name == null || script == null || parameters == null || contexts == null) {
       return BuildTest._invalid(errors);
     }
-    return BuildTest._(name, language ?? "", script, parameters, contexts);
+    return BuildTest._(name, language ?? '', script, parameters, contexts);
   }
 
   BuildTest._(this.name, this.language, this.script, this.parameters, this.contexts) : super(null);
@@ -433,7 +433,7 @@ final class BuildTask extends BuildConfigBase {
     if (name == null || scripts == null || parameters == null) {
       return BuildTask._invalid(errors);
     }
-    return BuildTask._(name, language ?? "", scripts, parameters);
+    return BuildTask._(name, language ?? '', scripts, parameters);
   }
 
   BuildTask._invalid(super.errors)

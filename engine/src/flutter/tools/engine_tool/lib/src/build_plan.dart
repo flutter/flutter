@@ -208,7 +208,6 @@ final class BuildPlan {
     // Add --run-tests.
     parser.addFlag(
       _flagRunTests,
-      defaultsTo: false,
       help: () {
         var runTestsHelp = 'Run tests (tests will not run by default).';
         if (environment.verbose) {
