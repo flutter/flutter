@@ -83,6 +83,7 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition {
+    print('justin get delegatedtransition.');
     return _delegatedTransition;
   }
 
@@ -93,6 +94,7 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
     bool allowSnapshotting,
     Widget? child,
   ) {
+    print('justin get delegatedtransition.');
     final ModalRoute<Object?>? route = ModalRoute.of(context);
     if (child == null || route is! PageRoute) {
       return child;
@@ -377,6 +379,8 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
   }
 }
 
+// TODO(justinmc): This one needs some work if we keep it. See the animations at
+// the link below.
 /// Android's predictive back page transition for full screen surfaces.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
 class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
@@ -588,7 +592,7 @@ class _PredictiveBackPageSharedElementTransitionState
     );
   }
 
-  double calcXShift() {
+  double _calcXShift() {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double xShift = (screenWidth / divisionFactor) - margin;
 
@@ -598,8 +602,9 @@ class _PredictiveBackPageSharedElementTransitionState
     ).animate(widget.animation).value;
   }
 
-  double calcCommitXShift() {
+  double _calcCommitXShift() {
     final double screenWidth = MediaQuery.of(context).size.width;
+    /*
     return Tween<double>(begin: 0.0, end: screenWidth * extraShiftDistance)
         .animate(
           CurvedAnimation(
@@ -608,6 +613,17 @@ class _PredictiveBackPageSharedElementTransitionState
           ),
         )
         .value;
+    */
+    final double out =
+        Tween<double>(begin: 0.0, end: screenWidth * extraShiftDistance)
+            .animate(
+              CurvedAnimation(
+                parent: commitController,
+                curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
+              ),
+            )
+            .value;
+    return out;
   }
 
   double calcYShift() {
@@ -644,7 +660,8 @@ class _PredictiveBackPageSharedElementTransitionState
 
   double calcOpacity() {
     if (widget.isDelegatedTransition) {
-      return 1;
+      print('justin calcopacity for delegatedtransition.');
+      return 0.7;
     }
 
     return Tween<double>(
@@ -656,8 +673,8 @@ class _PredictiveBackPageSharedElementTransitionState
   Widget _animatedBuilder(BuildContext context, Widget? child) {
     final double xShift =
         widget.phase == _PredictiveBackPhase.commit
-            ? this.xShift + calcCommitXShift()
-            : this.xShift = calcXShift();
+            ? this.xShift + _calcCommitXShift()
+            : this.xShift = _calcXShift();
     final double yShift =
         widget.phase == _PredictiveBackPhase.commit ? this.yShift : this.yShift = calcYShift();
     final double scale =

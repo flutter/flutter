@@ -48,6 +48,13 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     assert(opaque);
   }
 
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition {
+    print('justin MaterialPageRoute delegatedTranstiion');
+    // TODO(justinmc): The transition seems to not be able to use delegatedTranstiion. Why not? This gets called but the returned delegatedTransition does not get called.
+    return MaterialRouteTransitionMixin._delegatedTransition;
+  }
+
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
@@ -141,6 +148,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     bool allowSnapshotting,
     Widget? child,
   ) {
+    print('justin material route _delegatedTransition.');
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     final TargetPlatform platform = Theme.of(context).platform;
     final DelegatedTransitionBuilder? themeDelegatedTransition = theme.delegatedTransition(
