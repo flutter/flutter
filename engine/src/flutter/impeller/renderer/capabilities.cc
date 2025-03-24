@@ -253,6 +253,7 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsExtendedRangeFormats(
 }
 
 std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(  //
       supports_offscreen_msaa_,                                           //
       supports_ssbo_,                                                     //
