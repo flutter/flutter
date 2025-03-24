@@ -6,6 +6,7 @@
 
 #include <gmodule.h>
 
+#include <cmath>
 #include "gtest/gtest.h"
 
 TEST(FlDartProjectTest, Null) {

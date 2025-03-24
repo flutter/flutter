@@ -74,6 +74,7 @@ std::unique_ptr<Surface> SurfaceGLES::WrapFBO(
   gl_context.GetGPUTracer()->RecordRasterThread();
 #endif  // IMPELLER_DEBUG
 
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   return std::unique_ptr<SurfaceGLES>(
       new SurfaceGLES(std::move(swap_callback), render_target_desc));
 }

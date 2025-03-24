@@ -503,6 +503,7 @@ std::unique_ptr<PipelineVK> PipelineVK::Create(
     return nullptr;
   }
 
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   auto pipeline_vk = std::unique_ptr<PipelineVK>(new PipelineVK(
       device_holder,                       //
       library,                             //
