@@ -222,7 +222,12 @@ void main() {
   ///
   /// The remote points at itself (`testRoot.root.path`) for ease of testing.
   void setupRemote({required String remote, String? rootPath}) {
-    run('git', <String>['remote', 'add', remote, rootPath ?? testRoot.root.path], workingPath: rootPath);
+    run('git', <String>[
+      'remote',
+      'add',
+      remote,
+      rootPath ?? testRoot.root.path,
+    ], workingPath: rootPath);
     run('git', <String>['fetch', remote], workingPath: rootPath);
   }
 
@@ -245,7 +250,9 @@ void main() {
       setupRemote(remote: 'upstream', rootPath: externalGit.path);
 
       externalHead =
-          (run('git', <String>['rev-parse', 'HEAD'], workingPath: externalGit.path).stdout as String).trim();
+          (run('git', <String>['rev-parse', 'HEAD'], workingPath: externalGit.path).stdout
+                  as String)
+              .trim();
     });
 
     test('un-sets environment variables', () {
