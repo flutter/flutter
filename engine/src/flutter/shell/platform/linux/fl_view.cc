@@ -222,11 +222,8 @@ static void view_added_cb(GObject* object,
 }
 
 // Called when the engine updates accessibility.
-static void update_semantics_cb(FlEngine* engine,
-                                const FlutterSemanticsUpdate2* update,
-                                gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
-
+static void update_semantics_cb(FlView* self,
+                                const FlutterSemanticsUpdate2* update) {
   // A semantics update is routed to a particular view.
   if (update->view_id != self->view_id) {
     return;
