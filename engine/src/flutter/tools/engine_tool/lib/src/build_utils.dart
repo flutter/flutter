@@ -80,6 +80,7 @@ Future<int> runBuild(
   Environment environment,
   Build build, {
   required bool enableRbe,
+  bool runTests = false,
   List<String> extraGnArgs = const <String>[],
   List<Label> targets = const <Label>[],
   int concurrency = 0,
@@ -97,7 +98,7 @@ Future<int> runBuild(
     rbeConfig: rbeConfig,
     concurrency: concurrency,
     extraGnArgs: gnArgs,
-    runTests: false,
+    runTests: runTests,
     extraNinjaArgs: <String>[
       ...targets.map((Label label) => label.toNinjaLabel()),
       // If the environment is verbose, pass the verbose flag to ninja.

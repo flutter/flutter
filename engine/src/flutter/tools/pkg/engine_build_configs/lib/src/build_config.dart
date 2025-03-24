@@ -230,7 +230,6 @@ final class Build extends BuildConfigBase {
         generators == null ||
         droneDimensions == null ||
         gclientVariables == null) {
-
       return Build._invalid(errors);
     }
     return Build._(
@@ -373,10 +372,7 @@ final class BuildTest extends BuildConfigBase {
     final String? script = stringOfJson(map, 'script', errors);
     final List<String>? parameters = stringListOfJson(map, 'parameters', errors);
     final List<String>? contexts = stringListOfJson(map, 'contexts', errors);
-    if (name == null ||
-        script == null ||
-        parameters == null ||
-        contexts == null) {
+    if (name == null || script == null || parameters == null || contexts == null) {
       return BuildTest._invalid(errors);
     }
     return BuildTest._(name, language ?? "", script, parameters, contexts);

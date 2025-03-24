@@ -76,6 +76,7 @@ et build //flutter/fml:fml_benchmarks  # Build a specific target in `//flutter/f
       concurrency: plan.concurrency ?? 0,
       extraGnArgs: plan.toGnArgs(),
       targets: allTargets.toList(),
+      runTests: plan.runTests,
       enableRbe: plan.useRbe,
       rbeConfig: plan.toRbeConfig(),
     );
