@@ -2488,6 +2488,87 @@ void main() {
     expect(widths.indexOf(largestWidth), equals(1));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
 
+  test('showTimeSeparator is only supported in time or dateAndTime mode', () async {
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.time,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeparator: true,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}, showTimeSeparator: true),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeparator: true,
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains('showTimeSeparator is only supported in time or dateAndTime modes'),
+        ),
+      ),
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeparator: true,
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains('showTimeSeparator is only supported in time or dateAndTime modes'),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Time separator widget should be rendered when flag is set to true', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            onDateTimeChanged: (DateTime dateTime) {},
+            showTimeSeparator: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(':'), findsOneWidget);
+  });
+
+  testWidgets('Time separator widget should not be rendered when flag is set to false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            onDateTimeChanged: (DateTime _) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(':'), findsNothing);
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/161773
   testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {
     await tester.pumpWidget(
