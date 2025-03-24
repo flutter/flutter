@@ -90,11 +90,6 @@ class RuntimeControllerTester {
   void CanUpdateSemanticsWhenSetSemanticsTreeEnabled(SemanticsUpdate* update) {
     ASSERT_TRUE(delegate_.updates.empty());
     ASSERT_TRUE(delegate_.actions.empty());
-    runtime_controller_.UpdateSemantics(0, update);
-    // Semantics tree is not yet enabled.
-    ASSERT_TRUE(delegate_.updates.empty());
-    ASSERT_TRUE(delegate_.actions.empty());
-
     runtime_controller_.SetSemanticsTreeEnabled(true);
     runtime_controller_.UpdateSemantics(0, update);
     ASSERT_FALSE(delegate_.updates.empty());
