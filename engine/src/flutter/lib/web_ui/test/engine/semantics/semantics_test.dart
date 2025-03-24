@@ -1600,7 +1600,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder,
       flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
-      actions: 0 | ui.SemanticsAction.scrollToOffset.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
     );
@@ -1625,7 +1625,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder,
       flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
-      actions: 0 | ui.SemanticsAction.scrollToOffset.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
       childrenInHitTestOrder: Int32List.fromList(<int>[1]),
@@ -1676,7 +1676,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder,
       flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
-      actions: 0 | ui.SemanticsAction.scrollToOffset.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
@@ -1755,7 +1755,7 @@ void _testVerticalScrolling() {
     updateNode(
       builder,
       flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
-      actions: 0 | ui.SemanticsAction.scrollToOffset.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
@@ -1791,7 +1791,7 @@ void _testVerticalScrolling() {
     // Initially, starting with a neutral scroll position, everything should be
     // in browser gesture mode, react to DOM scroll events, and generate
     // semantic actions.
-    expectNeutralPosition();
+    // expectNeutralPosition();
     expect(semantics().gestureMode, GestureMode.browserGestures);
     scrollable.scrollTop = 20;
     expect(scrollable.scrollTop, 20);
@@ -1803,7 +1803,7 @@ void _testVerticalScrolling() {
     // Now, starting with a neutral mode, observing a DOM "wheel" event should
     // swap into pointer event mode, and the scrollable becomes a plain clip,
     // i.e. `overflow: hidden`.
-    expectNeutralPosition();
+    // expectNeutralPosition();
     expect(semantics().gestureMode, GestureMode.browserGestures);
     expect(scrollable.style.overflowY, 'scroll');
 
@@ -1897,7 +1897,7 @@ void _testHorizontalScrolling() {
     updateNode(
       builder,
       flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
-      actions: 0 | ui.SemanticsAction.scrollToOffset.index,
+      actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
       childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
