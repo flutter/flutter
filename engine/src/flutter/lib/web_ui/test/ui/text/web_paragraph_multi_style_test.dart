@@ -4,14 +4,10 @@
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/web_paragraph/paragraph.dart';
 import 'package:ui/ui.dart' as ui;
-import 'package:web_engine_tester/golden_tester.dart';
 
-import '../../canvaskit/common.dart';
 import '../../common/test_initialization.dart';
-import '../utils.dart';
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);

@@ -34,7 +34,7 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges.last.textStyle, paragraphStyle.getTextStyle());
     expect(
       paragraph.styledTextRanges.last.textRange,
-      ClusterRange(start: 0, end: paragraph.text.length),
+      ClusterRange(start: 0, end: paragraph.text!.length),
     );
   });
 
@@ -67,7 +67,7 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges.first.textStyle, textStyle1);
     expect(
       paragraph.styledTextRanges.first.textRange,
-      ClusterRange(start: 0, end: paragraph.text.length),
+      ClusterRange(start: 0, end: paragraph.text!.length),
     );
   });
 
@@ -89,7 +89,7 @@ Future<void> testMain() async {
     expect(paragraph.styledTextRanges[0].textStyle, textStyle3);
     expect(
       paragraph.styledTextRanges[0].textRange,
-      ClusterRange(start: 0, end: paragraph.text.length),
+      ClusterRange(start: 0, end: paragraph.text!.length),
     );
   });
 

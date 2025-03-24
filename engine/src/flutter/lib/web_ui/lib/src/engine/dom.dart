@@ -4246,17 +4246,22 @@ extension WebTextClusterExtension on WebTextCluster {
 extension WebTextMetricsExtension on DomTextMetrics {
   @JS('getTextClusters')
   external JSArray<JSAny?> _getTextClusters();
-
   List<WebTextCluster> getTextClusters() => _getTextClusters().toDart.cast<WebTextCluster>();
 
   @JS('getActualBoundingBox')
   external DomRectReadOnly _getActualBoundingBox(int begin, int end);
-
   DomRectReadOnly getActualBoundingBox(int begin, int end) => _getActualBoundingBox(begin, end);
+
+  @JS('fontBoundingBoxAscent')
+  external double get _fontBoundingBoxAscent;
+  double get fontBoundingBoxAscent => _fontBoundingBoxAscent;
+
+  @JS('fontBoundingBoxDescent')
+  external double get _fontBoundingBoxDescent;
+  double get fontBoundingBoxDescent => _fontBoundingBoxDescent;
 
   @JS('getSelectionRects')
   external JSArray<JSAny> _getSelectionRects(int begin, int end);
-
   List<DomRectReadOnly> getSelectionRects(int begin, int end) =>
       _getSelectionRects(begin, end).toDart.cast<DomRectReadOnly>();
 }

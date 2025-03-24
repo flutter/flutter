@@ -77,10 +77,9 @@ class TextWrapper {
         cluster.end,
       );
       */
-      // TODO: This is a temporary simplification, needs to be addressed later
-      double widthCluster = cluster.size.width;
+      // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
+      double widthCluster = cluster.bounds.width;
       hardLineBreak = isHardLineBreak(cluster);
-      final softLineBreak = isSoftLineBreak(cluster);
 
       if (hardLineBreak) {
         // Break the line and then continue with the current cluster as usual
@@ -90,15 +89,12 @@ class TextWrapper {
           _whitespaces.start = index;
           _whitespaces.end = index;
         }
-        _layout.lines.add(
-          TextLine(
-            _layout,
-            ClusterRange(start: _startLine, end: _whitespaces.start),
-            _widthText,
-            ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
-            _widthWhitespaces,
-            hardLineBreak,
-          ),
+        _layout.addLine(
+          ClusterRange(start: _startLine, end: _whitespaces.start),
+          _widthText,
+          ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
+          _widthWhitespaces,
+          hardLineBreak,
         );
         // Start a new line
         startNewLine(index, 0.0);
@@ -169,15 +165,12 @@ class TextWrapper {
         }
 
         // Add the line
-        _layout.lines.add(
-          TextLine(
-            _layout,
-            ClusterRange(start: _startLine, end: _whitespaces.start),
-            _widthText,
-            ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
-            _widthWhitespaces,
-            hardLineBreak,
-          ),
+        _layout.addLine(
+          ClusterRange(start: _startLine, end: _whitespaces.start),
+          _widthText,
+          ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
+          _widthWhitespaces,
+          hardLineBreak,
         );
 
         // Start a new line but keep the clusters sequence
@@ -200,36 +193,33 @@ class TextWrapper {
       _widthText += _widthLetters;
     }
 
-    _layout.lines.add(
-      TextLine(
-        _layout,
-        ClusterRange(start: _startLine, end: _whitespaces.start),
-        _widthText,
-        ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
-        _widthWhitespaces,
-        hardLineBreak,
-      ),
+    _layout.addLine(
+      ClusterRange(start: _startLine, end: _whitespaces.start),
+      _widthText,
+      ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
+      _widthWhitespaces,
+      hardLineBreak,
     );
 
     if (hardLineBreak) {
-      // TODO: Discuss with Mouad
+      // TODO(jlavrova): Discuss with Mouad
       // Flutter wants to have another (empty) line if \n is the last codepoint in the text
       final emptyText = ClusterRange(
         start: _layout.textClusters.length,
         end: _layout.textClusters.length,
       );
-      _layout.lines.add(TextLine(_layout, emptyText, 0.0, emptyText, 0.0, false));
+      _layout.addLine(emptyText, 0.0, emptyText, 0.0, false);
     }
 
     if (WebParagraphDebug.logging) {
       for (int i = 0; i < _layout.lines.length; ++i) {
         final TextLine line = _layout.lines[i];
-        final String text = _text.substring(line.clusterRange.start, line.clusterRange.end);
+        final String text = _text.substring(line.textRange.start, line.textRange.end);
         final String whitespaces =
             !line.whitespacesRange.isEmpty ? '${line.whitespacesRange.width}' : 'no';
         final String hardLineBreak = line.hardLineBreak ? 'hardlineBreak' : '';
         WebParagraphDebug.log(
-          '$i: "$text" [${line.clusterRange.start}:${line.clusterRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
+          '$i: "$text" [${line.textRange.start}:${line.textRange.end}) $width $hardLineBreak ($whitespaces trailing whitespaces)',
         );
       }
     }

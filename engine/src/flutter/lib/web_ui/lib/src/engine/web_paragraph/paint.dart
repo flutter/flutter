@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/src/engine.dart' as engine;
+import 'package:ui/src/engine/web_paragraph/debug.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
@@ -27,9 +28,8 @@ class TextPaint {
     double x,
     double y,
   ) {
-    for (int i = line.clusterRange.start; i < line.clusterRange.end; i++) {
+    for (int i = line.textRange.start; i < line.textRange.end; i++) {
       final clusterText = layout.textClusters[i];
-      final String text = paragraph.text!.substring(clusterText.start, clusterText.end);
       final DomCanvasRenderingContext2D context = canvas.context2D;
       context.font = '50px arial';
       context.fillStyle = 'black';
@@ -44,23 +44,29 @@ class TextPaint {
     double x,
     double y,
   ) {
-    for (int i = line.clusterRange.start; i < line.clusterRange.end; i++) {
+    // TODO(jlavrova): We need to traverse clusters in the order of visual bidi runs
+    // (by line, then by reordered visual runs)
+    WebParagraphDebug.log(
+      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.bounds.width}x${line.bounds.height}',
+    );
+    for (int i = line.textRange.start; i < line.textRange.end; i++) {
       final clusterText = layout.textClusters[i];
-      paintCluster(canvas, clusterText, x, y);
+      paintCluster(
+        canvas,
+        clusterText,
+        ui.Offset(-line.bounds.left, line.bounds.top + line.fontBoundingBoxAscent),
+        ui.Offset(x, y),
+      );
     }
   }
 
   void paintCluster(
     engine.CanvasKitCanvas canvas,
     ExtendedTextCluster webTextCluster,
-    double x,
-    double y,
+    ui.Offset clusterOffset,
+    ui.Offset lineOffset,
   ) {
-    final String text = paragraph.text!.substring(webTextCluster.start, webTextCluster.end);
-
-    textContext.font = '50px arial';
-    textContext.fillStyle = 'black';
-    textContext.fillTextCluster(webTextCluster.cluster, x, y);
+    textContext.fillTextCluster(webTextCluster.cluster, clusterOffset.dx, clusterOffset.dy);
 
     final engine.DomImageBitmap bitmap = textCanvas.transferToImageBitmap();
 
@@ -73,12 +79,21 @@ class TextPaint {
       skImage,
       imageSource: engine.ImageBitmapImageSource(bitmap),
     );
-    canvas.drawImage(ckImage, ui.Offset(x, y), ui.Paint()..filterQuality = ui.FilterQuality.none);
+    final ui.Rect clusterRect = webTextCluster.bounds.translate(clusterOffset.dx, clusterOffset.dy);
+    canvas.drawImageRect(
+      ckImage,
+      clusterRect,
+      clusterRect.translate(lineOffset.dx, lineOffset.dy),
+      ui.Paint()..filterQuality = ui.FilterQuality.none,
+    );
+    WebParagraphDebug.log(
+      '[${webTextCluster.start}:${webTextCluster.end}) ${webTextCluster.bounds.left},${webTextCluster.bounds.top},${clusterRect.width}${clusterRect.height} => ${clusterOffset.dx},${clusterOffset.dy}',
+    );
   }
 
   void printTextCluster(ExtendedTextCluster webTextCluster) {
     final String text = paragraph.text!.substring(webTextCluster.start, webTextCluster.end);
-    final DomRectReadOnly box = webTextCluster.size;
+    final ui.Rect box = webTextCluster.bounds;
     print(
       '[${webTextCluster.start}:${webTextCluster.end}) = "$text", ${box.width}, ${box.height}\n',
     );

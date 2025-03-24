@@ -2753,28 +2753,48 @@ extension SkPictureExtension on SkPicture {
 @JS()
 @anonymous
 @staticInterop
+class BidiRegion {}
+
+extension BidiRegionExtension on BidiRegion {
+  @JS('start')
+  external JSNumber get _start;
+  int get start => _start.toDartInt;
+  @JS('end')
+  external JSNumber get _end;
+  int get end => _end.toDartInt;
+  @JS('level')
+  external JSNumber get _level;
+  int get level => _level.toDartInt;
+}
+
+@JS()
+@anonymous
+@staticInterop
+class BidiIndex {}
+
+extension BidiIndexExtension on BidiIndex {
+  @JS('index')
+  external JSNumber get _index;
+  int get index => _index.toDartInt;
+}
+
+@JS()
+@anonymous
+@staticInterop
 class BidiNamespace {}
 
 extension BidiNamespaceExtention on BidiNamespace {
   @JS('getBidiRegions')
-  external JSInt32Array _getBidiRegions(JSString text, SkTextDirection dir);
+  external JSArray<JSAny?> _getBidiRegions(JSString text, SkTextDirection dir);
 
-  Int32List getBidiRegions(String text, ui.TextDirection dir) =>
-      _getBidiRegions(text.toJS, toSkTextDirection(dir)).toDart;
-
-  Int32List? getBidiRegions1(String text, ui.TextDirection dir) {
-    if (!js_util.hasProperty(this, 'getBidiRegions')) {
-      return null;
-    }
-    final Object o1 = text.toJS as Object;
-    final Object o2 = toSkTextDirection(dir);
-    return (js_util.callMethod(this, 'getBidiRegions', <Object>[o1, o2]) as JSInt32Array).toDart;
-  }
+  List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
+      _getBidiRegions(text.toJS, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
 
   @JS('reorderVisual')
-  external JSInt32Array _reorderVisual(JSUint8Array visuals);
+  external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
 
-  Int32List reorderVisual(Uint8List visuals) => _reorderVisual(visuals.toJS).toDart;
+  List<BidiIndex> reorderVisual(Uint8List visuals) =>
+      _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
 }
 
 @JS()

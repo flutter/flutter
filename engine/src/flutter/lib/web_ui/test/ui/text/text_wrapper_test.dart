@@ -30,9 +30,9 @@ Future<void> testMain() async {
       expect(lines.length, 10);
       for (int i = 0; i < 10; i++) {
         if (i == 8) {
-          expect(lines[i].whitespacesRange.isEmpty(), true);
+          expect(lines[i].whitespacesRange.isEmpty, true);
         } else {
-          expect(lines[i].whitespacesRange.width(), 3);
+          expect(lines[i].whitespacesRange.width, 3);
         }
       }
     },
@@ -48,7 +48,7 @@ Future<void> testMain() async {
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
     for (int i = 0; i < 4; i++) {
-      expect(lines[i].whitespacesRange.width(), 3);
+      expect(lines[i].whitespacesRange.width, 3);
     }
   });
   test('Text wrapper, 1 line, 5 whitespaces and nothing else', () {
@@ -59,8 +59,8 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: double.infinity));
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 1);
-    expect(lines[0].whitespacesRange.width(), 5);
-    expect(lines[0].clusterRange.width(), 0);
+    expect(lines[0].whitespacesRange.width, 5);
+    expect(lines[0].textRange.width, 0);
   });
   test('Text wrapper, 3 lines, one very long word', () {
     final WebParagraphStyle ahemStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
@@ -72,10 +72,10 @@ Future<void> testMain() async {
     expect(lines.length, 3);
     int length = 0;
     for (int i = 0; i < 3; i++) {
-      expect(lines[i].whitespacesRange.width(), 0);
-      length += lines[i].clusterRange.width();
+      expect(lines[i].whitespacesRange.width, 0);
+      length += lines[i].textRange.width;
     }
-    expect(length, paragraph.text.length);
+    expect(length, paragraph.text!.length);
   });
 
   test('Text wrapper, leading spaces', () {
@@ -89,10 +89,10 @@ Future<void> testMain() async {
     expect(lines.length, 3);
     int length = 0;
     for (int i = 0; i < 3; i++) {
-      expect(lines[i].whitespacesRange.width(), 0);
-      length += lines[i].clusterRange.width();
+      expect(lines[i].whitespacesRange.width, 0);
+      length += lines[i].textRange.width;
     }
-    expect(length, paragraph.text.length);
+    expect(length, paragraph.text!.length);
   });
 
   test('Text wrapper, 14 hard line breaks', () {
@@ -108,12 +108,12 @@ Future<void> testMain() async {
     expect(lines.length, 15);
     int length = 0;
     for (int i = 0; i < 15; i++) {
-      expect(lines[i].whitespacesRange.width(), i != 14 ? 1 : 0);
+      expect(lines[i].whitespacesRange.width, i != 14 ? 1 : 0);
       expect(lines[i].hardLineBreak, i != 14);
-      length += lines[i].clusterRange.width();
-      length += lines[i].whitespacesRange.width();
+      length += lines[i].textRange.width;
+      length += lines[i].whitespacesRange.width;
     }
-    expect(length, paragraph.text.length);
+    expect(length, paragraph.text!.length);
   });
 
   test('Text wrapper, 1 hard line break with 3 trailing spaces before', () {
@@ -126,9 +126,9 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 2);
-    expect(lines[0].whitespacesRange.width(), 3 + 1);
+    expect(lines[0].whitespacesRange.width, 3 + 1);
     expect(lines[0].hardLineBreak, true);
-    expect(lines[1].whitespacesRange.width(), 0);
+    expect(lines[1].whitespacesRange.width, 0);
     expect(lines[1].hardLineBreak, false);
   });
 
@@ -142,10 +142,9 @@ Future<void> testMain() async {
 
     final List<TextLine> lines = paragraph.lines;
     expect(lines.length, 4);
-    const int length = 0;
     for (int i = 0; i < 4; i++) {
-      expect(lines[i].whitespacesRange.width(), i != 3 ? 1 : 0);
-      expect(lines[i].clusterRange.width(), 0);
+      expect(lines[i].whitespacesRange.width, i != 3 ? 1 : 0);
+      expect(lines[i].textRange.width, 0);
       expect(lines[i].hardLineBreak, i != 3);
     }
   });

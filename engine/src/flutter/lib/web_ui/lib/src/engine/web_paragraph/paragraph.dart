@@ -14,13 +14,9 @@ import 'paint.dart';
 /// The web implementation of  [ui.ParagraphStyle]
 @immutable
 class WebParagraphStyle implements ui.ParagraphStyle {
-  WebParagraphStyle({
-    ui.TextDirection? textDirection,
-    String? fontFamily,
-    double? fontSize,
-  }) :
-    _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize),
-    _textDirection = textDirection ?? ui.TextDirection.ltr;
+  WebParagraphStyle({ui.TextDirection? textDirection, String? fontFamily, double? fontSize})
+    : _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize),
+      _textDirection = textDirection ?? ui.TextDirection.ltr;
 
   final WebTextStyle _defaultTextStyle;
   final ui.TextDirection _textDirection;
@@ -53,7 +49,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     assert(() {
       result =
           'WebParagraphStyle('
-          'defaultTextStyle: ${_defaultTextStyle ?? "unspecified"}'
+          'defaultTextStyle: $_defaultTextStyle'
           ')';
       return true;
     }());
@@ -63,14 +59,19 @@ class WebParagraphStyle implements ui.ParagraphStyle {
 
 @immutable
 class WebTextStyle implements ui.TextStyle {
-  factory WebTextStyle({String? fontFamily, double? fontSize}) {
-    return WebTextStyle._(originalFontFamily: fontFamily, fontSize: fontSize);
+  factory WebTextStyle({String? fontFamily, double? fontSize, ui.Color? color}) {
+    return WebTextStyle._(originalFontFamily: fontFamily, fontSize: fontSize, color: color);
   }
 
-  const WebTextStyle._({required this.originalFontFamily, required this.fontSize});
+  const WebTextStyle._({
+    required this.originalFontFamily,
+    required this.fontSize,
+    required this.color,
+  });
 
   final String? originalFontFamily;
   final double? fontSize;
+  final ui.Color? color;
 
   /// Merges this text style with [other] and returns the new text style.
   ///
@@ -80,6 +81,7 @@ class WebTextStyle implements ui.TextStyle {
     return WebTextStyle._(
       originalFontFamily: other.originalFontFamily ?? originalFontFamily,
       fontSize: other.fontSize ?? fontSize,
+      color: other.color ?? color,
     );
   }
 
@@ -90,12 +92,13 @@ class WebTextStyle implements ui.TextStyle {
     }
     return other is WebTextStyle &&
         other.originalFontFamily == originalFontFamily &&
-        other.fontSize == fontSize;
+        other.fontSize == fontSize &&
+        other.color == color;
   }
 
   @override
   int get hashCode {
-    return Object.hash(originalFontFamily, fontSize);
+    return Object.hash(originalFontFamily, fontSize, color);
   }
 
   @override
@@ -107,6 +110,7 @@ class WebTextStyle implements ui.TextStyle {
           'WebTextStyle('
           'fontFamily: ${originalFontFamily ?? ""} '
           'fontSize: ${fontSize != null ? fontSize.toStringAsFixed(1) : ""}px '
+          'color: ${color != null ? color.toString() : ""}'
           ')';
       return true;
     }());
@@ -123,6 +127,11 @@ class ClusterRange {
       return true;
     }
     return other is ClusterRange && other.start == start && other.end == end;
+  }
+
+  @override
+  int get hashCode {
+    return Object.hash(start, end);
   }
 
   int get width => end - start;
@@ -164,12 +173,6 @@ class WebStrutStyle implements ui.StrutStyle {
 /// The Web implementation of [ui.Paragraph].
 class WebParagraph implements ui.Paragraph {
   WebParagraph(this._paragraphStyle, this._styledTextRanges, this._text);
-
-  /// The constraints from the last time we laid the paragraph out.
-  ///
-  /// This is used to resurrect the paragraph if the initial paragraph
-  /// is deleted.
-  final double _lastLayoutConstraints = double.negativeInfinity;
 
   WebParagraphStyle get paragraphStyle => _paragraphStyle;
   final WebParagraphStyle _paragraphStyle;
@@ -323,6 +326,10 @@ class WebParagraph implements ui.Paragraph {
     throw StateError('Paragraph.debugDisposed is only available when asserts are enabled.');
   }
 
+  TextLayout getLayout() {
+    return _layout;
+  }
+
   late final TextLayout _layout = TextLayout(this);
   late final TextPaint _paint = TextPaint(this);
 }
@@ -398,13 +405,8 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
     }
     finishStyledTextRange();
 
-    final WebParagraph builtParagraph = WebParagraph(
-      paragraphStyle,
-      textStylesList,
-      text,
-    );
+    final WebParagraph builtParagraph = WebParagraph(paragraphStyle, textStylesList, text);
     WebParagraphDebug.log('WebParagraphBuilder.build(): "$text" ${textStylesList.length}');
-    final int start = textStylesList.length == 1 ? 0 : 1;
     for (var i = 0; i < textStylesList.length; ++i) {
       WebParagraphDebug.log(
         '$i: [${textStylesList[i].textRange.start}:${textStylesList[i].textRange.end})',
@@ -448,8 +450,7 @@ class WebParagraphBuilder implements ui.ParagraphBuilder {
 
   void finishStyledTextRange() {
     // Remove all text styles without text
-    while (textStylesList.length > 1 &&
-        textStylesList.last.textRange.start == text.length) {
+    while (textStylesList.length > 1 && textStylesList.last.textRange.start == text.length) {
       textStylesList.removeLast();
     }
     // Update the first one found with text
