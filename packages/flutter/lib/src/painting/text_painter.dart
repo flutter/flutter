@@ -602,7 +602,7 @@ class TextPainter {
       'This feature was deprecated after v3.12.0-2.0.pre.',
     )
     double textScaleFactor = 1.0,
-    TextScaler textScaler = TextScaler.noScaling,
+    TextScaler textScaler = const _UnspecifiedTextScaler(),
     int? maxLines,
     String? ellipsis,
     Locale? locale,
@@ -612,14 +612,16 @@ class TextPainter {
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
-         textScaleFactor == 1.0 || identical(textScaler, TextScaler.noScaling),
+         textScaleFactor == 1.0 || identical(textScaler, const _UnspecifiedTextScaler()),
          'Use textScaler instead.',
        ),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
        _textScaler =
-           textScaler == TextScaler.noScaling ? TextScaler.linear(textScaleFactor) : textScaler,
+           textScaler == const _UnspecifiedTextScaler()
+               ? TextScaler.linear(textScaleFactor)
+               : textScaler,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
        _locale = locale,
@@ -1783,4 +1785,13 @@ class TextPainter {
     _layoutCache = null;
     _text = null;
   }
+}
+
+class _UnspecifiedTextScaler extends TextScaler {
+  const _UnspecifiedTextScaler();
+  @override
+  Never get textScaleFactor => throw UnimplementedError();
+
+  @override
+  Never scale(double fontSize) => throw UnimplementedError();
 }
