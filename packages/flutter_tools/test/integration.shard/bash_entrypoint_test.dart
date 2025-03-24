@@ -94,7 +94,7 @@ echo downloaded dart sdk
 ''');
       makeExecutable(updateDartSdk);
 
-      final File udpateEngine = tempDir
+      final File updateEngine = tempDir
         .childDirectory('bin')
         .childDirectory('internal')
         .childFile('update_engine_version.sh')..writeAsStringSync('''
@@ -102,7 +102,7 @@ echo downloaded dart sdk
 
 echo engine version
 ''');
-      makeExecutable(udpateEngine);
+      makeExecutable(updateEngine);
 
       // create a fake dart runtime
       final File dartBin = (tempDir
@@ -130,7 +130,7 @@ echo executed dart binary
     } finally {
       tryToDelete(tempDir);
     }
-  }, skip: true); // [intended] https://github.com/flutter/flutter/issues/160689
+  }, skip: platform.isWindows); // [intended] Windows does not use the bash entrypoint);
 }
 
 // A test Dart app that will run until it receives SIGTERM
