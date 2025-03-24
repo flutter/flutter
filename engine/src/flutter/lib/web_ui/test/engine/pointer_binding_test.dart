@@ -2557,10 +2557,9 @@ void testMain() {
       Listener.register(
         event: 'custom-event',
         target: eventTarget,
-        handler:
-            (event) {
-              timesHandled++;
-            }.toJS,
+        handler: (event) {
+          timesHandled++;
+        },
       );
       eventTarget.dispatchEvent(expected);
       expect(timesHandled, 1, reason: 'The handler ran multiple times for a single event.');

@@ -115,10 +115,6 @@ extension type DomWindow._(JSObject _) implements DomEventTarget, JSObject {
   // ignore: non_constant_identifier_names
   external DomURL get URL;
 
-  @JS('dispatchEvent')
-  external JSBoolean _dispatchEvent(DomEvent event);
-  bool dispatchEvent(DomEvent event) => _dispatchEvent(event).toDart;
-
   @JS('matchMedia')
   external DomMediaQueryList _matchMedia(JSString? query);
   DomMediaQueryList matchMedia(String? query) => _matchMedia(query?.toJS);
@@ -318,8 +314,6 @@ extension type DomHTMLDocument._(JSObject _) implements JSObject, DomDocument {
   external _DomList _getElementsByTagName(JSString tag);
   Iterable<DomElement> getElementsByTagName(String tag) =>
       createDomListWrapper<DomElement>(_getElementsByTagName(tag.toJS));
-
-  external DomElement? get activeElement;
 
   @JS('getElementById')
   external DomElement? _getElementById(JSString id);
@@ -539,7 +533,6 @@ extension type DomElement._(JSObject _) implements JSObject, DomNode {
   String get tagName => _tagName.toDart;
 
   external DomCSSStyleDeclaration get style;
-  external void append(DomNode node);
 
   @JS('getAttribute')
   external JSString? _getAttribute(JSString attributeName);
@@ -564,8 +557,6 @@ extension type DomElement._(JSObject _) implements JSObject, DomNode {
   external _DomList _querySelectorAll(JSString selectors);
   Iterable<DomElement> querySelectorAll(String selectors) =>
       createDomListWrapper<DomElement>(_querySelectorAll(selectors.toJS));
-
-  external void remove();
 
   @JS('setAttribute')
   external void _setAttribute(JSString name, JSAny value);
@@ -651,21 +642,11 @@ extension type DomElement._(JSObject _) implements JSObject, DomNode {
   external JSBoolean _hasAttribute(JSString name);
   bool hasAttribute(String name) => _hasAttribute(name.toJS).toDart;
 
-  @JS('childNodes')
-  external _DomList get _childNodes;
-  Iterable<DomNode> get childNodes => createDomListWrapper<DomElement>(_childNodes);
-
   @JS('attachShadow')
   external DomShadowRoot _attachShadow(JSAny initDict);
   DomShadowRoot attachShadow(Map<Object?, Object?> initDict) => _attachShadow(initDict.toJSAnyDeep);
 
   external DomShadowRoot? get shadowRoot;
-
-  void clearChildren() {
-    while (firstChild != null) {
-      removeChild(firstChild!);
-    }
-  }
 
   external void setPointerCapture(num? pointerId);
 }
@@ -821,10 +802,6 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
 }
 
 extension type DomHTMLElement._(JSObject _) implements JSObject, DomElement {
-  @JS('offsetWidth')
-  external JSNumber get _offsetWidth;
-  double get offsetWidth => _offsetWidth.toDartDouble;
-
   @JS('offsetLeft')
   external JSNumber get _offsetLeft;
   double get offsetLeft => _offsetLeft.toDartDouble;
@@ -1020,10 +997,6 @@ extension type DomCanvasElement._(JSObject _) implements JSObject, DomHTMLElemen
   @JS('height')
   external set _height(JSNumber? value);
   set height(double? value) => _height = value?.toJS;
-
-  @JS('isConnected')
-  external JSBoolean? get _isConnected;
-  bool? get isConnected => _isConnected?.toDart;
 
   @JS('toDataURL')
   external JSString _toDataURL(JSString type);
