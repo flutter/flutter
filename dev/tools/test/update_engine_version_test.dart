@@ -29,13 +29,13 @@ void main() {
     }
   }
 
-  io.ProcessResult run(String executable, List<String> args) {
+  io.ProcessResult run(String executable, List<String> args, {String? workingPath}) {
     print('Running "$executable ${args.join(" ")}"');
     final io.ProcessResult result = io.Process.runSync(
       executable,
       args,
       environment: environment,
-      workingDirectory: testRoot.root.absolute.path,
+      workingDirectory: workingPath ?? testRoot.root.absolute.path,
       includeParentEnvironment: false,
     );
     if (result.exitCode != 0) {
@@ -92,10 +92,67 @@ void main() {
     run('git', <String>['commit', '-m', 'tracking engine.version']);
   }
 
-  void setupRemote({required String remote}) {
-    run('git', <String>['remote', 'add', remote, testRoot.root.path]);
-    run('git', <String>['fetch', remote]);
+  void setupRemote({required String remote, String? rootPath}) {
+    run('git', <String>[
+      'remote',
+      'add',
+      remote,
+      rootPath ?? testRoot.root.path,
+    ], workingPath: rootPath);
+    run('git', <String>['fetch', remote], workingPath: rootPath);
   }
+
+  void initGitRepoWithBlankInitialCommit({String? workingPath}) {
+    run('git', <String>['init', '--initial-branch', 'master'], workingPath: workingPath);
+    run('git', <String>[
+      'config',
+      '--local',
+      'user.email',
+      'test@example.com',
+    ], workingPath: workingPath);
+    run('git', <String>['config', '--local', 'user.name', 'Test User'], workingPath: workingPath);
+    run('git', <String>['add', '.'], workingPath: workingPath);
+    run('git', <String>[
+      'commit',
+      '--allow-empty',
+      '-m',
+      'Initial commit',
+    ], workingPath: workingPath);
+  }
+
+  group('GIT_DIR', () {
+    late Directory externalGit;
+    late String externalHead;
+    setUp(() {
+      externalGit = localFs.systemTempDirectory.createTempSync('GIT_DIR_test.');
+      initGitRepoWithBlankInitialCommit(workingPath: externalGit.path);
+      setupRemote(remote: 'upstream', rootPath: externalGit.path);
+
+      externalHead =
+          (run('git', <String>['rev-parse', 'HEAD'], workingPath: externalGit.path).stdout
+                  as String)
+              .trim();
+    });
+
+    test('un-sets environment variables', () {
+      // Needs to happen before GIT_DIR is set
+      initGitRepoWithBlankInitialCommit();
+      setupRemote(remote: 'upstream');
+
+      environment['GIT_DIR'] = '${externalGit.path}/.git';
+      environment['GIT_INDEX_FILE'] = '${externalGit.path}/.git/index';
+      environment['GIT_WORK_TREE'] = externalGit.path;
+
+      runUpdateEngineVersion();
+
+      final String engineStamp = testRoot.binInternalEngineVersion.readAsStringSync().trim();
+      expect(engineStamp, isNot(equals(externalHead)));
+    });
+
+    tearDown(() {
+      externalGit.deleteSync(recursive: true);
+    });
+  });
 
   group('if FLUTTER_PREBUILT_ENGINE_VERSION is set', () {
     setUp(() {

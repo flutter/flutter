@@ -17,6 +17,11 @@
 
 set -e
 
+# When called from a submodule hook; these will override `git -C dir`
+unset GIT_DIR
+unset GIT_INDEX_FILE
+unset GIT_WORK_TREE
+
 # Allow overriding the intended engine version via FLUTTER_PREBUILT_ENGINE_VERSION.
 #
 # This is for systems, such as Github Actions, where we know ahead of time the
