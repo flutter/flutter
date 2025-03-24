@@ -24,6 +24,104 @@
 
 namespace impeller {
 
+struct ContentContext::Pipelines {
+  // These are mutable because while the prototypes are created eagerly, any
+  // variants requested from that are lazily created and cached in the variants
+  // map.
+  // clang-format off
+  mutable Variants<BlendColorBurnPipeline> blend_colorburn_pipelines_;
+  mutable Variants<BlendColorDodgePipeline> blend_colordodge_pipelines_;
+  mutable Variants<BlendColorPipeline> blend_color_pipelines_;
+  mutable Variants<BlendDarkenPipeline> blend_darken_pipelines_;
+  mutable Variants<BlendDifferencePipeline> blend_difference_pipelines_;
+  mutable Variants<BlendExclusionPipeline> blend_exclusion_pipelines_;
+  mutable Variants<BlendHardLightPipeline> blend_hardlight_pipelines_;
+  mutable Variants<BlendHuePipeline> blend_hue_pipelines_;
+  mutable Variants<BlendLightenPipeline> blend_lighten_pipelines_;
+  mutable Variants<BlendLuminosityPipeline> blend_luminosity_pipelines_;
+  mutable Variants<BlendMultiplyPipeline> blend_multiply_pipelines_;
+  mutable Variants<BlendOverlayPipeline> blend_overlay_pipelines_;
+  mutable Variants<BlendSaturationPipeline> blend_saturation_pipelines_;
+  mutable Variants<BlendScreenPipeline> blend_screen_pipelines_;
+  mutable Variants<BlendSoftLightPipeline> blend_softlight_pipelines_;
+  mutable Variants<BorderMaskBlurPipeline> border_mask_blur_pipelines_;
+  mutable Variants<ClipPipeline> clip_pipelines_;
+  mutable Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter_pipelines_;
+  mutable Variants<ConicalGradientFillConicalPipeline> conical_gradient_fill_pipelines_;
+  mutable Variants<ConicalGradientFillRadialPipeline> conical_gradient_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientFillStripPipeline> conical_gradient_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientFillStripRadialPipeline> conical_gradient_fill_strip_and_radial_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline> conical_gradient_ssbo_fill_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline> conical_gradient_ssbo_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline> conical_gradient_ssbo_fill_strip_and_radial_pipelines_;
+  mutable Variants<ConicalGradientSSBOFillPipeline> conical_gradient_ssbo_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientUniformFillConicalPipeline> conical_gradient_uniform_fill_pipelines_;
+  mutable Variants<ConicalGradientUniformFillRadialPipeline> conical_gradient_uniform_fill_radial_pipelines_;
+  mutable Variants<ConicalGradientUniformFillStripPipeline> conical_gradient_uniform_fill_strip_pipelines_;
+  mutable Variants<ConicalGradientUniformFillStripRadialPipeline> conical_gradient_uniform_fill_strip_and_radial_pipelines_;
+  mutable Variants<FastGradientPipeline> fast_gradient_pipelines_;
+  mutable Variants<FramebufferBlendColorBurnPipeline> framebuffer_blend_colorburn_pipelines_;
+  mutable Variants<FramebufferBlendColorDodgePipeline> framebuffer_blend_colordodge_pipelines_;
+  mutable Variants<FramebufferBlendColorPipeline> framebuffer_blend_color_pipelines_;
+  mutable Variants<FramebufferBlendDarkenPipeline> framebuffer_blend_darken_pipelines_;
+  mutable Variants<FramebufferBlendDifferencePipeline> framebuffer_blend_difference_pipelines_;
+  mutable Variants<FramebufferBlendExclusionPipeline> framebuffer_blend_exclusion_pipelines_;
+  mutable Variants<FramebufferBlendHardLightPipeline> framebuffer_blend_hardlight_pipelines_;
+  mutable Variants<FramebufferBlendHuePipeline> framebuffer_blend_hue_pipelines_;
+  mutable Variants<FramebufferBlendLightenPipeline> framebuffer_blend_lighten_pipelines_;
+  mutable Variants<FramebufferBlendLuminosityPipeline> framebuffer_blend_luminosity_pipelines_;
+  mutable Variants<FramebufferBlendMultiplyPipeline> framebuffer_blend_multiply_pipelines_;
+  mutable Variants<FramebufferBlendOverlayPipeline> framebuffer_blend_overlay_pipelines_;
+  mutable Variants<FramebufferBlendSaturationPipeline> framebuffer_blend_saturation_pipelines_;
+  mutable Variants<FramebufferBlendScreenPipeline> framebuffer_blend_screen_pipelines_;
+  mutable Variants<FramebufferBlendSoftLightPipeline> framebuffer_blend_softlight_pipelines_;
+  mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
+  mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
+  mutable Variants<LinePipeline> line_pipelines_;
+  mutable Variants<LinearGradientFillPipeline> linear_gradient_fill_pipelines_;
+  mutable Variants<LinearGradientSSBOFillPipeline> linear_gradient_ssbo_fill_pipelines_;
+  mutable Variants<LinearGradientUniformFillPipeline> linear_gradient_uniform_fill_pipelines_;
+  mutable Variants<LinearToSrgbFilterPipeline> linear_to_srgb_filter_pipelines_;
+  mutable Variants<MorphologyFilterPipeline> morphology_filter_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> clear_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_a_top_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_in_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_out_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> destination_over_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> modulate_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> plus_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> screen_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_a_top_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_in_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_out_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> source_over_blend_pipelines_;
+  mutable Variants<PorterDuffBlendPipeline> xor_blend_pipelines_;
+  mutable Variants<RadialGradientFillPipeline> radial_gradient_fill_pipelines_;
+  mutable Variants<RadialGradientSSBOFillPipeline> radial_gradient_ssbo_fill_pipelines_;
+  mutable Variants<RadialGradientUniformFillPipeline> radial_gradient_uniform_fill_pipelines_;
+  mutable Variants<RRectBlurPipeline> rrect_blur_pipelines_;
+  mutable Variants<SolidFillPipeline> solid_fill_pipelines_;
+  mutable Variants<SrgbToLinearFilterPipeline> srgb_to_linear_filter_pipelines_;
+  mutable Variants<SweepGradientFillPipeline> sweep_gradient_fill_pipelines_;
+  mutable Variants<SweepGradientSSBOFillPipeline> sweep_gradient_ssbo_fill_pipelines_;
+  mutable Variants<SweepGradientUniformFillPipeline> sweep_gradient_uniform_fill_pipelines_;
+  mutable Variants<TextureDownsamplePipeline> texture_downsample_pipelines_;
+  mutable Variants<TexturePipeline> texture_pipelines_;
+  mutable Variants<TextureStrictSrcPipeline> texture_strict_src_pipelines_;
+  mutable Variants<TiledTexturePipeline> tiled_texture_pipelines_;
+  mutable Variants<VerticesUberShader> vertices_uber_shader_;
+  mutable Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter_pipelines_;
+
+  #ifdef IMPELLER_ENABLE_OPENGLES
+  mutable Variants<TiledTextureExternalPipeline> tiled_texture_external_pipelines_;
+  mutable Variants<TextureDownsampleGlesPipeline> texture_downsample_gles_pipelines_;
+  mutable Variants<TiledTextureUvExternalPipeline> tiled_texture_uv_external_pipelines_;
+#endif  // IMPELLER_ENABLE_OPENGLES
+  // clang-format on
+};
+
 void ContentContextOptions::ApplyToPipelineDescriptor(
     PipelineDescriptor& desc) const {
   auto pipeline_blend = blend_mode;
@@ -265,6 +363,7 @@ ContentContext::ContentContext(
     : context_(std::move(context)),
       lazy_glyph_atlas_(
           std::make_shared<LazyGlyphAtlas>(std::move(typographer_context))),
+      pipelines_(new Pipelines()),
       tessellator_(std::make_shared<Tessellator>()),
       render_target_cache_(render_target_allocator == nullptr
                                ? std::make_shared<RenderTargetCache>(
@@ -321,49 +420,61 @@ ContentContext::ContentContext(
   // rendered without the pipelines being ready. Put pipelines that are more
   // likely to be used first.
   {
-    glyph_atlas_pipelines_.CreateDefault(
+    pipelines_->glyph_atlas_pipelines_.CreateDefault(
         *context_, options,
         {static_cast<Scalar>(
             GetContext()->GetCapabilities()->GetDefaultGlyphAtlasFormat() ==
             PixelFormat::kA8UNormInt)});
-    solid_fill_pipelines_.CreateDefault(*context_, options);
-    texture_pipelines_.CreateDefault(*context_, options);
-    fast_gradient_pipelines_.CreateDefault(*context_, options);
-    line_pipelines_.CreateDefault(*context_, options);
+    pipelines_->solid_fill_pipelines_.CreateDefault(*context_, options);
+    pipelines_->texture_pipelines_.CreateDefault(*context_, options);
+    pipelines_->fast_gradient_pipelines_.CreateDefault(*context_, options);
+    pipelines_->line_pipelines_.CreateDefault(*context_, options);
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
-      linear_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options);
-      radial_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options);
-      conical_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options,
-                                                          {3.0});
-      conical_gradient_ssbo_fill_radial_pipelines_.CreateDefault(
+      pipelines_->linear_gradient_ssbo_fill_pipelines_.CreateDefault(*context_,
+                                                                     options);
+      pipelines_->radial_gradient_ssbo_fill_pipelines_.CreateDefault(*context_,
+                                                                     options);
+      pipelines_->conical_gradient_ssbo_fill_pipelines_.CreateDefault(
+          *context_, options, {3.0});
+      pipelines_->conical_gradient_ssbo_fill_radial_pipelines_.CreateDefault(
           *context_, options, {1.0});
-      conical_gradient_ssbo_fill_strip_pipelines_.CreateDefault(*context_,
-                                                                options, {2.0});
-      conical_gradient_ssbo_fill_strip_and_radial_pipelines_.CreateDefault(
-          *context_, options, {0.0});
-      sweep_gradient_ssbo_fill_pipelines_.CreateDefault(*context_, options);
-    } else {
-      linear_gradient_uniform_fill_pipelines_.CreateDefault(*context_, options);
-      radial_gradient_uniform_fill_pipelines_.CreateDefault(*context_, options);
-      conical_gradient_uniform_fill_pipelines_.CreateDefault(*context_,
-                                                             options);
-      conical_gradient_uniform_fill_radial_pipelines_.CreateDefault(*context_,
+      pipelines_->conical_gradient_ssbo_fill_strip_pipelines_.CreateDefault(
+          *context_, options, {2.0});
+      pipelines_->conical_gradient_ssbo_fill_strip_and_radial_pipelines_
+          .CreateDefault(*context_, options, {0.0});
+      pipelines_->sweep_gradient_ssbo_fill_pipelines_.CreateDefault(*context_,
                                                                     options);
-      conical_gradient_uniform_fill_strip_pipelines_.CreateDefault(*context_,
-                                                                   options);
-      conical_gradient_uniform_fill_strip_and_radial_pipelines_.CreateDefault(
+    } else {
+      pipelines_->linear_gradient_uniform_fill_pipelines_.CreateDefault(
           *context_, options);
-      sweep_gradient_uniform_fill_pipelines_.CreateDefault(*context_, options);
+      pipelines_->radial_gradient_uniform_fill_pipelines_.CreateDefault(
+          *context_, options);
+      pipelines_->conical_gradient_uniform_fill_pipelines_.CreateDefault(
+          *context_, options);
+      pipelines_->conical_gradient_uniform_fill_radial_pipelines_.CreateDefault(
+          *context_, options);
+      pipelines_->conical_gradient_uniform_fill_strip_pipelines_.CreateDefault(
+          *context_, options);
+      pipelines_->conical_gradient_uniform_fill_strip_and_radial_pipelines_
+          .CreateDefault(*context_, options);
+      pipelines_->sweep_gradient_uniform_fill_pipelines_.CreateDefault(
+          *context_, options);
 
-      linear_gradient_fill_pipelines_.CreateDefault(*context_, options);
-      radial_gradient_fill_pipelines_.CreateDefault(*context_, options);
-      conical_gradient_fill_pipelines_.CreateDefault(*context_, options);
-      conical_gradient_fill_radial_pipelines_.CreateDefault(*context_, options);
-      conical_gradient_fill_strip_pipelines_.CreateDefault(*context_, options);
-      conical_gradient_fill_strip_and_radial_pipelines_.CreateDefault(*context_,
-                                                                      options);
-      sweep_gradient_fill_pipelines_.CreateDefault(*context_, options);
+      pipelines_->linear_gradient_fill_pipelines_.CreateDefault(*context_,
+                                                                options);
+      pipelines_->radial_gradient_fill_pipelines_.CreateDefault(*context_,
+                                                                options);
+      pipelines_->conical_gradient_fill_pipelines_.CreateDefault(*context_,
+                                                                 options);
+      pipelines_->conical_gradient_fill_radial_pipelines_.CreateDefault(
+          *context_, options);
+      pipelines_->conical_gradient_fill_strip_pipelines_.CreateDefault(
+          *context_, options);
+      pipelines_->conical_gradient_fill_strip_and_radial_pipelines_
+          .CreateDefault(*context_, options);
+      pipelines_->sweep_gradient_fill_pipelines_.CreateDefault(*context_,
+                                                               options);
     }
 
     /// Setup default clip pipeline.
@@ -386,171 +497,178 @@ ContentContext::ContentContext(
     clip_pipeline_descriptor->SetColorAttachmentDescriptors(
         std::move(clip_color_attachments));
     if (GetContext()->GetFlags().lazy_shader_mode) {
-      clip_pipelines_.SetDefaultDescriptor(clip_pipeline_descriptor);
-      clip_pipelines_.SetDefault(options, nullptr);
+      pipelines_->clip_pipelines_.SetDefaultDescriptor(
+          clip_pipeline_descriptor);
+      pipelines_->clip_pipelines_.SetDefault(options, nullptr);
     } else {
-      clip_pipelines_.SetDefault(
+      pipelines_->clip_pipelines_.SetDefault(
           options,
           std::make_unique<ClipPipeline>(*context_, clip_pipeline_descriptor));
     }
-    texture_downsample_pipelines_.CreateDefault(
+    pipelines_->texture_downsample_pipelines_.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil);
-    rrect_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
-    texture_strict_src_pipelines_.CreateDefault(*context_, options);
-    tiled_texture_pipelines_.CreateDefault(*context_, options,
-                                           {supports_decal});
-    gaussian_blur_pipelines_.CreateDefault(
+    pipelines_->rrect_blur_pipelines_.CreateDefault(*context_,
+                                                    options_trianglestrip);
+    pipelines_->texture_strict_src_pipelines_.CreateDefault(*context_, options);
+    pipelines_->tiled_texture_pipelines_.CreateDefault(*context_, options,
+                                                       {supports_decal});
+    pipelines_->gaussian_blur_pipelines_.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil, {supports_decal});
-    border_mask_blur_pipelines_.CreateDefault(*context_, options_trianglestrip);
-    color_matrix_color_filter_pipelines_.CreateDefault(*context_,
-                                                       options_trianglestrip);
-    vertices_uber_shader_.CreateDefault(*context_, options, {supports_decal});
+    pipelines_->border_mask_blur_pipelines_.CreateDefault(
+        *context_, options_trianglestrip);
+    pipelines_->color_matrix_color_filter_pipelines_.CreateDefault(
+        *context_, options_trianglestrip);
+    pipelines_->vertices_uber_shader_.CreateDefault(*context_, options,
+                                                    {supports_decal});
 
     const std::array<std::vector<Scalar>, 15> porter_duff_constants =
         GetPorterDuffSpecConstants(supports_decal);
-    clear_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                         porter_duff_constants[0]);
-    source_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                          porter_duff_constants[1]);
-    destination_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                               porter_duff_constants[2]);
-    source_over_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                               porter_duff_constants[3]);
-    destination_over_blend_pipelines_.CreateDefault(
+    pipelines_->clear_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[0]);
+    pipelines_->source_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[1]);
+    pipelines_->destination_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[2]);
+    pipelines_->source_over_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[3]);
+    pipelines_->destination_over_blend_pipelines_.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[4]);
-    source_in_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                             porter_duff_constants[5]);
-    destination_in_blend_pipelines_.CreateDefault(
+    pipelines_->source_in_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[5]);
+    pipelines_->destination_in_blend_pipelines_.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[6]);
-    source_out_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                              porter_duff_constants[7]);
-    destination_out_blend_pipelines_.CreateDefault(
+    pipelines_->source_out_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[7]);
+    pipelines_->destination_out_blend_pipelines_.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[8]);
-    source_a_top_blend_pipelines_.CreateDefault(
+    pipelines_->source_a_top_blend_pipelines_.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[9]);
-    destination_a_top_blend_pipelines_.CreateDefault(
+    pipelines_->destination_a_top_blend_pipelines_.CreateDefault(
         *context_, options_trianglestrip, porter_duff_constants[10]);
-    xor_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                       porter_duff_constants[11]);
-    plus_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                        porter_duff_constants[12]);
-    modulate_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                            porter_duff_constants[13]);
-    screen_blend_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                          porter_duff_constants[14]);
+    pipelines_->xor_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[11]);
+    pipelines_->plus_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[12]);
+    pipelines_->modulate_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[13]);
+    pipelines_->screen_blend_pipelines_.CreateDefault(
+        *context_, options_trianglestrip, porter_duff_constants[14]);
   }
 
   if (context_->GetCapabilities()->SupportsFramebufferFetch()) {
-    framebuffer_blend_color_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_color_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});
-    framebuffer_blend_colorburn_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_colorburn_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kColorBurn), supports_decal});
-    framebuffer_blend_colordodge_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_colordodge_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kColorDodge), supports_decal});
-    framebuffer_blend_darken_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_darken_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kDarken), supports_decal});
-    framebuffer_blend_difference_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_difference_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kDifference), supports_decal});
-    framebuffer_blend_exclusion_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_exclusion_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kExclusion), supports_decal});
-    framebuffer_blend_hardlight_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_hardlight_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kHardLight), supports_decal});
-    framebuffer_blend_hue_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_hue_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kHue), supports_decal});
-    framebuffer_blend_lighten_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_lighten_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kLighten), supports_decal});
-    framebuffer_blend_luminosity_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_luminosity_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kLuminosity), supports_decal});
-    framebuffer_blend_multiply_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_multiply_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kMultiply), supports_decal});
-    framebuffer_blend_overlay_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_overlay_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kOverlay), supports_decal});
-    framebuffer_blend_saturation_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_saturation_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kSaturation), supports_decal});
-    framebuffer_blend_screen_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_screen_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kScreen), supports_decal});
-    framebuffer_blend_softlight_pipelines_.CreateDefault(
+    pipelines_->framebuffer_blend_softlight_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
   } else {
-    blend_color_pipelines_.CreateDefault(
+    pipelines_->blend_color_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kColor), supports_decal});
-    blend_colorburn_pipelines_.CreateDefault(
+    pipelines_->blend_colorburn_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kColorBurn), supports_decal});
-    blend_colordodge_pipelines_.CreateDefault(
+    pipelines_->blend_colordodge_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kColorDodge), supports_decal});
-    blend_darken_pipelines_.CreateDefault(
+    pipelines_->blend_darken_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kDarken), supports_decal});
-    blend_difference_pipelines_.CreateDefault(
+    pipelines_->blend_difference_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kDifference), supports_decal});
-    blend_exclusion_pipelines_.CreateDefault(
+    pipelines_->blend_exclusion_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kExclusion), supports_decal});
-    blend_hardlight_pipelines_.CreateDefault(
+    pipelines_->blend_hardlight_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kHardLight), supports_decal});
-    blend_hue_pipelines_.CreateDefault(
+    pipelines_->blend_hue_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kHue), supports_decal});
-    blend_lighten_pipelines_.CreateDefault(
+    pipelines_->blend_lighten_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kLighten), supports_decal});
-    blend_luminosity_pipelines_.CreateDefault(
+    pipelines_->blend_luminosity_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kLuminosity), supports_decal});
-    blend_multiply_pipelines_.CreateDefault(
+    pipelines_->blend_multiply_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kMultiply), supports_decal});
-    blend_overlay_pipelines_.CreateDefault(
+    pipelines_->blend_overlay_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kOverlay), supports_decal});
-    blend_saturation_pipelines_.CreateDefault(
+    pipelines_->blend_saturation_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kSaturation), supports_decal});
-    blend_screen_pipelines_.CreateDefault(
+    pipelines_->blend_screen_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kScreen), supports_decal});
-    blend_softlight_pipelines_.CreateDefault(
+    pipelines_->blend_softlight_pipelines_.CreateDefault(
         *context_, options_trianglestrip,
         {static_cast<Scalar>(BlendSelectValues::kSoftLight), supports_decal});
   }
 
-  morphology_filter_pipelines_.CreateDefault(*context_, options_trianglestrip,
-                                             {supports_decal});
-  linear_to_srgb_filter_pipelines_.CreateDefault(*context_,
-                                                 options_trianglestrip);
-  srgb_to_linear_filter_pipelines_.CreateDefault(*context_,
-                                                 options_trianglestrip);
-  yuv_to_rgb_filter_pipelines_.CreateDefault(*context_, options_trianglestrip);
+  pipelines_->morphology_filter_pipelines_.CreateDefault(
+      *context_, options_trianglestrip, {supports_decal});
+  pipelines_->linear_to_srgb_filter_pipelines_.CreateDefault(
+      *context_, options_trianglestrip);
+  pipelines_->srgb_to_linear_filter_pipelines_.CreateDefault(
+      *context_, options_trianglestrip);
+  pipelines_->yuv_to_rgb_filter_pipelines_.CreateDefault(*context_,
+                                                         options_trianglestrip);
 
 #if defined(IMPELLER_ENABLE_OPENGLES)
   if (GetContext()->GetBackendType() == Context::BackendType::kOpenGLES) {
 #if !defined(FML_OS_MACOSX)
     // GLES only shader that is unsupported on macOS.
-    tiled_texture_external_pipelines_.CreateDefault(*context_, options);
-    tiled_texture_uv_external_pipelines_.CreateDefault(*context_, options);
+    pipelines_->tiled_texture_external_pipelines_.CreateDefault(*context_,
+                                                                options);
+    pipelines_->tiled_texture_uv_external_pipelines_.CreateDefault(*context_,
+                                                                   options);
 #endif  // !defined(FML_OS_MACOSX)
-    texture_downsample_gles_pipelines_.CreateDefault(*context_,
-                                                     options_trianglestrip);
+    pipelines_->texture_downsample_gles_pipelines_.CreateDefault(
+        *context_, options_trianglestrip);
   }
 #endif  // IMPELLER_ENABLE_OPENGLES
 
@@ -686,39 +804,39 @@ void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
 
 PipelineRef ContentContext::GetFastGradientPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(fast_gradient_pipelines_, opts);
+  return GetPipeline(pipelines_->fast_gradient_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetLinearGradientFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(linear_gradient_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->linear_gradient_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetLinearGradientUniformFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(linear_gradient_uniform_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->linear_gradient_uniform_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetRadialGradientUniformFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(radial_gradient_uniform_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->radial_gradient_uniform_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSweepGradientUniformFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(sweep_gradient_uniform_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->sweep_gradient_uniform_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetLinearGradientSSBOFillPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-  return GetPipeline(linear_gradient_ssbo_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->linear_gradient_ssbo_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetRadialGradientSSBOFillPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-  return GetPipeline(radial_gradient_ssbo_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->radial_gradient_ssbo_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetConicalGradientUniformFillPipeline(
@@ -726,14 +844,18 @@ PipelineRef ContentContext::GetConicalGradientUniformFillPipeline(
     ConicalKind kind) const {
   switch (kind) {
     case ConicalKind::kConical:
-      return GetPipeline(conical_gradient_uniform_fill_pipelines_, opts);
+      return GetPipeline(pipelines_->conical_gradient_uniform_fill_pipelines_,
+                         opts);
     case ConicalKind::kRadial:
-      return GetPipeline(conical_gradient_uniform_fill_radial_pipelines_, opts);
+      return GetPipeline(
+          pipelines_->conical_gradient_uniform_fill_radial_pipelines_, opts);
     case ConicalKind::kStrip:
-      return GetPipeline(conical_gradient_uniform_fill_strip_pipelines_, opts);
+      return GetPipeline(
+          pipelines_->conical_gradient_uniform_fill_strip_pipelines_, opts);
     case ConicalKind::kStripAndRadial:
       return GetPipeline(
-          conical_gradient_uniform_fill_strip_and_radial_pipelines_, opts);
+          pipelines_->conical_gradient_uniform_fill_strip_and_radial_pipelines_,
+          opts);
   }
 }
 
@@ -743,26 +865,30 @@ PipelineRef ContentContext::GetConicalGradientSSBOFillPipeline(
   FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
   switch (kind) {
     case ConicalKind::kConical:
-      return GetPipeline(conical_gradient_ssbo_fill_pipelines_, opts);
-    case ConicalKind::kRadial:
-      return GetPipeline(conical_gradient_ssbo_fill_radial_pipelines_, opts);
-    case ConicalKind::kStrip:
-      return GetPipeline(conical_gradient_ssbo_fill_strip_pipelines_, opts);
-    case ConicalKind::kStripAndRadial:
-      return GetPipeline(conical_gradient_ssbo_fill_strip_and_radial_pipelines_,
+      return GetPipeline(pipelines_->conical_gradient_ssbo_fill_pipelines_,
                          opts);
+    case ConicalKind::kRadial:
+      return GetPipeline(
+          pipelines_->conical_gradient_ssbo_fill_radial_pipelines_, opts);
+    case ConicalKind::kStrip:
+      return GetPipeline(
+          pipelines_->conical_gradient_ssbo_fill_strip_pipelines_, opts);
+    case ConicalKind::kStripAndRadial:
+      return GetPipeline(
+          pipelines_->conical_gradient_ssbo_fill_strip_and_radial_pipelines_,
+          opts);
   }
 }
 
 PipelineRef ContentContext::GetSweepGradientSSBOFillPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-  return GetPipeline(sweep_gradient_ssbo_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->sweep_gradient_ssbo_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetRadialGradientFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(radial_gradient_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->radial_gradient_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetConicalGradientFillPipeline(
@@ -770,89 +896,91 @@ PipelineRef ContentContext::GetConicalGradientFillPipeline(
     ConicalKind kind) const {
   switch (kind) {
     case ConicalKind::kConical:
-      return GetPipeline(conical_gradient_fill_pipelines_, opts);
+      return GetPipeline(pipelines_->conical_gradient_fill_pipelines_, opts);
     case ConicalKind::kRadial:
-      return GetPipeline(conical_gradient_fill_radial_pipelines_, opts);
-    case ConicalKind::kStrip:
-      return GetPipeline(conical_gradient_fill_strip_pipelines_, opts);
-    case ConicalKind::kStripAndRadial:
-      return GetPipeline(conical_gradient_fill_strip_and_radial_pipelines_,
+      return GetPipeline(pipelines_->conical_gradient_fill_radial_pipelines_,
                          opts);
+    case ConicalKind::kStrip:
+      return GetPipeline(pipelines_->conical_gradient_fill_strip_pipelines_,
+                         opts);
+    case ConicalKind::kStripAndRadial:
+      return GetPipeline(
+          pipelines_->conical_gradient_fill_strip_and_radial_pipelines_, opts);
   }
 }
 
 PipelineRef ContentContext::GetRRectBlurPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(rrect_blur_pipelines_, opts);
+  return GetPipeline(pipelines_->rrect_blur_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSweepGradientFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(sweep_gradient_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->sweep_gradient_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSolidFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(solid_fill_pipelines_, opts);
+  return GetPipeline(pipelines_->solid_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTexturePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(texture_pipelines_, opts);
+  return GetPipeline(pipelines_->texture_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTextureStrictSrcPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(texture_strict_src_pipelines_, opts);
+  return GetPipeline(pipelines_->texture_strict_src_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTiledTexturePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(tiled_texture_pipelines_, opts);
+  return GetPipeline(pipelines_->tiled_texture_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetGaussianBlurPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(gaussian_blur_pipelines_, opts);
+  return GetPipeline(pipelines_->gaussian_blur_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBorderMaskBlurPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(border_mask_blur_pipelines_, opts);
+  return GetPipeline(pipelines_->border_mask_blur_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetMorphologyFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(morphology_filter_pipelines_, opts);
+  return GetPipeline(pipelines_->morphology_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetColorMatrixColorFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(color_matrix_color_filter_pipelines_, opts);
+  return GetPipeline(pipelines_->color_matrix_color_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetLinearToSrgbFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(linear_to_srgb_filter_pipelines_, opts);
+  return GetPipeline(pipelines_->linear_to_srgb_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSrgbToLinearFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(srgb_to_linear_filter_pipelines_, opts);
+  return GetPipeline(pipelines_->srgb_to_linear_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetClipPipeline(ContentContextOptions opts) const {
-  return GetPipeline(clip_pipelines_, opts);
+  return GetPipeline(pipelines_->clip_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetGlyphAtlasPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(glyph_atlas_pipelines_, opts);
+  return GetPipeline(pipelines_->glyph_atlas_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetYUVToRGBFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(yuv_to_rgb_filter_pipelines_, opts);
+  return GetPipeline(pipelines_->yuv_to_rgb_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetPorterDuffPipeline(
@@ -912,274 +1040,274 @@ PipelineRef ContentContext::GetPorterDuffPipeline(
 
 PipelineRef ContentContext::GetClearBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(clear_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->clear_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(source_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->source_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(destination_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->destination_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceOverBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(source_over_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->source_over_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationOverBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(destination_over_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->destination_over_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceInBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(source_in_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->source_in_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationInBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(destination_in_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->destination_in_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceOutBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(source_out_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->source_out_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationOutBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(destination_out_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->destination_out_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceATopBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(source_a_top_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->source_a_top_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationATopBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(destination_a_top_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->destination_a_top_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetXorBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(xor_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->xor_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetPlusBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(plus_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->plus_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetModulateBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(modulate_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->modulate_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetScreenBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(screen_blend_pipelines_, opts);
+  return GetPipeline(pipelines_->screen_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_color_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_color_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorBurnPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_colorburn_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_colorburn_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorDodgePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_colordodge_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_colordodge_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendDarkenPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_darken_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_darken_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendDifferencePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_difference_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_difference_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendExclusionPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_exclusion_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_exclusion_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendHardLightPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_hardlight_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_hardlight_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendHuePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_hue_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_hue_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendLightenPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_lighten_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_lighten_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendLuminosityPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_luminosity_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_luminosity_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendMultiplyPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_multiply_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_multiply_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendOverlayPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_overlay_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_overlay_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendSaturationPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_saturation_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_saturation_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendScreenPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_screen_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_screen_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendSoftLightPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(blend_softlight_pipelines_, opts);
+  return GetPipeline(pipelines_->blend_softlight_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDownsamplePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(texture_downsample_pipelines_, opts);
+  return GetPipeline(pipelines_->texture_downsample_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendColorPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_color_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_color_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendColorBurnPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_colorburn_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_colorburn_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendColorDodgePipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_colordodge_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_colordodge_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendDarkenPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_darken_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_darken_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendDifferencePipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_difference_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_difference_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendExclusionPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_exclusion_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_exclusion_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendHardLightPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_hardlight_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_hardlight_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendHuePipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_hue_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_hue_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendLightenPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_lighten_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_lighten_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendLuminosityPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_luminosity_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_luminosity_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendMultiplyPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_multiply_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_multiply_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendOverlayPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_overlay_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_overlay_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendSaturationPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_saturation_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_saturation_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendScreenPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_screen_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_screen_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(framebuffer_blend_softlight_pipelines_, opts);
+  return GetPipeline(pipelines_->framebuffer_blend_softlight_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDrawVerticesUberShader(
     ContentContextOptions opts) const {
-  return GetPipeline(vertices_uber_shader_, opts);
+  return GetPipeline(pipelines_->vertices_uber_shader_, opts);
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
-  return GetPipeline(line_pipelines_, opts);
+  return GetPipeline(pipelines_->line_pipelines_, opts);
 }
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(texture_downsample_gles_pipelines_, opts);
+  return GetPipeline(pipelines_->texture_downsample_gles_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTiledTextureExternalPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
-  return GetPipeline(tiled_texture_external_pipelines_, opts);
+  return GetPipeline(pipelines_->tiled_texture_external_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTiledTextureUvExternalPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
-  return GetPipeline(tiled_texture_uv_external_pipelines_, opts);
+  return GetPipeline(pipelines_->tiled_texture_uv_external_pipelines_, opts);
 }
 #endif  // IMPELLER_ENABLE_OPENGLES
 
