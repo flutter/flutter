@@ -28,6 +28,16 @@ assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
 gradle.pluginManagement{
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 }
+
+gradle.getGradle().projectsLoaded {g ->
+  g.rootProject.afterEvaluate { p ->
+    p.subprojects { sp ->
+      if (sp.name != 'flutter') {
+        sp.evaluationDependsOn(':flutter')
+      }
+    }
+  }
+}
 //gradle.apply from: "$flutterSdkPath/packages/flutter_tools/gradle/src/main/groovy/module_plugin_loader.groovy"
 
 
