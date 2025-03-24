@@ -55,7 +55,7 @@ class FlutterModulePluginLoaderPlugin : Plugin<Settings> {
                     if (nativePlugins.filter { plugin -> plugin["name"] == name }.isNotEmpty()) {
                         // todo gmackall this path is wrong
                         val androidPluginBuildOutputDir =
-                            File(flutterProjectRoot.path + File.separator + "plugins_build_output" + File.separator + name)
+                            File(altroot + File.separator + "plugins_build_output" + File.separator + name)
                         if (!androidPluginBuildOutputDir.exists()) {
                             androidPluginBuildOutputDir.mkdirs()
                         }
