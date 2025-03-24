@@ -23,6 +23,11 @@ void OverlayLayer::UpdateViewState(UIView* flutter_view,
                                    SkRect rect,
                                    int64_t view_id,
                                    int64_t overlay_id) {
+  // There can be a race where UpdateViewState() is called when flutter_view is nil when app is
+  // backgrounded.
+  if (!flutter_view) {
+    return;
+  }
   auto screenScale = ((FlutterView*)flutter_view).screen.scale;
   // Set the size of the overlay view wrapper.
   // This wrapper view masks the overlay view.
