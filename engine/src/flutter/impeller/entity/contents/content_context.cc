@@ -41,6 +41,13 @@ namespace {
 ///    contains.
 template <class PipelineHandleT>
 class Variants {
+  static_assert(
+      ShaderStageCompatibilityChecker<
+          typename PipelineHandleT::VertexShader,
+          typename PipelineHandleT::FragmentShader>::Check(),
+      "The output slots for the fragment shader don't have matches in the "
+      "vertex shader's output slots. This will result in a linker error.");
+
  public:
   Variants() = default;
 
