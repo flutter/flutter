@@ -24,6 +24,7 @@ import org.gradle.api.UnknownTaskException
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.tasks.TaskProvider
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -1305,16 +1306,20 @@ class FlutterPluginUtilsTest {
             val testOutputs: DomainObjectCollection<BaseVariantOutput> = mockk<DomainObjectCollection<BaseVariantOutput>>()
             val baseVariantSlot = slot<Action<BaseVariantOutput>>()
             val baseVariantOutput = mockk<BaseVariantOutput>()
-            val mockProcessResources = mockk<ProcessAndroidResources>()
             // Create a real file in a temp directory.
             val manifest =
                 tempDir
                     .resolve("${tempDir.toAbsolutePath()}/AndroidManifest.xml")
                     .toFile()
             manifest.writeText(manifestText)
-
+            val mockProcessResourcesProvider = mockk<TaskProvider<ProcessAndroidResources>>()
+            val mockProcessResources = mockk<ProcessAndroidResources>()
+            every {  mockProcessResourcesProvider.hint(ProcessAndroidResources::class).get() } returns mockProcessResources
+            every { baseVariantOutput.processResourcesProvider } returns mockProcessResourcesProvider
+            // Fallback processing.
             every { mockProcessResources.manifestFile } returns manifest
-            every { baseVariantOutput.processResources } returns mockProcessResources
+
+
             every { testOutputs.configureEach(capture(baseVariantSlot)) } answers {
                 // Execute the action for each output.
                 baseVariantSlot.captured.execute(baseVariantOutput)

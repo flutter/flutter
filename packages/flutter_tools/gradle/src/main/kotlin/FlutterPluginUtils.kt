@@ -282,7 +282,7 @@ object FlutterPluginUtils {
     private fun getFlutterExtensionOrNull(project: Project): FlutterExtension? = project.extensions.findByType(FlutterExtension::class.java)
 
     // Should this use find by type and AbstractAppExtension instead?
-    internal fun getAndroidExtensionOrNull(project: Project): AbstractAppExtension? =
+    private fun getAndroidExtensionOrNull(project: Project): AbstractAppExtension? =
         project.extensions.findByName("android") as? AbstractAppExtension
 
     /**
@@ -859,11 +859,9 @@ object FlutterPluginUtils {
     }
 
     private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources {
-        // Semantic change, baseVariant does not have a hasProperty method but that
-        // is what the groovy code was checking.
-        // val processResources = project.hasProperty(FlutterPluginConstants.PROP_PROCESS_RESOURCES_PROVIDER) ?
-        // baseVariantOutput.processResourcesProvider.get() : baseVariantOutput.processResources
-        return baseVariantOutput.processResources
+        // Semantic change from flutter.groovy source, baseVariant does not have a hasProperty
+        // method but that is what the groovy code was checking.
+        return baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
     }
 
     /**
