@@ -334,7 +334,7 @@ TEST(RasterCache, DeviceRectRoundOutForDisplayList) {
   size_t threshold = 1;
   flutter::RasterCache cache(threshold);
 
-  SkRect logical_rect = SkRect::MakeLTRB(28, 0, 354.56731, 310.288);
+  DlRect logical_rect = DlRect::MakeLTRB(28, 0, 354.56731, 310.288);
   DisplayListBuilder builder(logical_rect);
   builder.DrawRect(logical_rect, DlPaint(DlColor::kRed()));
   sk_sp<DisplayList> display_list = builder.Build();

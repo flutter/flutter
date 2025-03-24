@@ -7,7 +7,6 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.h"
-#include "flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalSkia.h"
 #include "flutter/shell/platform/darwin/ios/ios_context.h"
 #include "impeller/display_list/aiks_context.h"
 
@@ -22,6 +21,7 @@ namespace flutter {
 class IOSContextMetalImpeller final : public IOSContext {
  public:
   explicit IOSContextMetalImpeller(
+      const Settings& settings,
       const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
 
   ~IOSContextMetalImpeller();

@@ -9,6 +9,7 @@
 
 #include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/common/graphics/texture.h"
+#include "flutter/common/settings.h"
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/synchronization/sync_switch.h"
@@ -39,7 +40,7 @@ class IOSContext {
  public:
   //----------------------------------------------------------------------------
   /// @brief      Create an iOS context object capable of creating the on-screen
-  ///             and off-screen GPU context for use by Skia.
+  ///             and off-screen GPU context for use by Impeller.
   ///
   ///             In case the engine does not support the specified client
   ///             rendering API, this a `nullptr` may be returned.
@@ -54,7 +55,8 @@ class IOSContext {
   static std::unique_ptr<IOSContext> Create(
       IOSRenderingAPI api,
       IOSRenderingBackend backend,
-      const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch);
+      const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
+      const Settings& settings);
 
   //----------------------------------------------------------------------------
   /// @brief      Collects the context object. This must happen on the thread on

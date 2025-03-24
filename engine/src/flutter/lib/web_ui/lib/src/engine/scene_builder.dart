@@ -264,7 +264,6 @@ class EngineSceneBuilder implements ui.SceneBuilder {
       }
       sliceIndex--;
     }
-    sliceIndex = 0;
     final SceneSlice slice = sceneSlices[sliceIndex];
     slice.platformViewOcclusionMap.addRect(globalPlatformViewRect);
     return sliceIndex;

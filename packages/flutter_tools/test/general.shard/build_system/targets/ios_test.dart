@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -20,6 +22,7 @@ import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -208,11 +211,8 @@ void main() {
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
       // Project info
-      fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -390,11 +390,8 @@ void main() {
       // Project info
       fileSystem
           .file('pubspec.yaml')
-          .writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+          .writeAsStringSync('name: my_app\nflutter:\n  shaders:\n    - shader.glsl');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -474,11 +471,9 @@ void main() {
       environment.defines[kXcodeAction] = 'build';
 
       // Project info
-      fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -1159,6 +1154,101 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+
+  group('DebugIosLLDBInit', () {
+    testUsingContext(
+      'prints warning if missing LLDB Init File in all schemes',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '18.4.1';
+
+        final StringBuffer buffer = await capturedConsolePrint(() async {
+          await const DebugIosLLDBInit().build(environment);
+        });
+        expect(
+          buffer.toString(),
+          contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+
+    testUsingContext(
+      'skips if targetting simulator',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '18.4.1';
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+
+    testUsingContext(
+      'skips if iOS version is less than 18.4',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '18.3.1';
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+
+    testUsingContext(
+      'does not throw error if there is an LLDB Init File in any scheme',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        fileSystem
+            .directory(projectPath)
+            .childDirectory('MyProject.xcodeproj')
+            .childDirectory('xcshareddata')
+            .childDirectory('xcschemes')
+            .childFile('MyProject.xcscheme')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'customLLDBInitFile = "some/path/.lldbinit"');
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+  });
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
@@ -1173,4 +1263,21 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
     return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
   }
+}
+
+/// Capture console print events into a string buffer.
+Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
+  final StringBuffer buffer = StringBuffer();
+  await runZoned<Future<void>>(
+    () async {
+      // Service the event loop.
+      await body();
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+        buffer.writeln(line);
+      },
+    ),
+  );
+  return buffer;
 }

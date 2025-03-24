@@ -632,3 +632,19 @@ void testDispatchEvents() {
     notifyNative();
   };
 }
+
+@pragma('vm:entry-point')
+void testSendViewFocusEvent() {
+  PlatformDispatcher.instance.onViewFocusChange = (ViewFocusEvent event) {
+    notifyMessage('${event.viewId} ${event.state} ${event.direction}');
+  };
+  notifyNative();
+}
+
+@pragma('vm:external-name', 'ReportEngineId')
+external void _reportEngineId(int? identifier);
+
+@pragma('vm:entry-point')
+void providesEngineId() {
+  _reportEngineId(PlatformDispatcher.instance.engineId);
+}
