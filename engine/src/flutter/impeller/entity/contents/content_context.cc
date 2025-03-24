@@ -12,6 +12,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
