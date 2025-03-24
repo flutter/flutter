@@ -1894,7 +1894,7 @@ void main() {
   });
 
   testWidgets('Ensures DraggableScrollableSheet snaps exactly to minChildSize', (
-    WidgetTester tester
+    WidgetTester tester,
   ) async {
     double? lastExtent;
 
