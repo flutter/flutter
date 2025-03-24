@@ -40,10 +40,9 @@ final class TestBuilderConfig {
       'name': name,
       'description': description,
       'ninja': <String, Object?>{
-        if (targetDir case final targetDir?) ...{
-          'config': targetDir,
-          'targets': ['ninja_target'],
-        },
+        // Tests assume we always have a ninja config, so let's make sure we have one
+        'config': targetDir ?? "test",
+        'targets': ['ninja_target'],
       },
       'tests': _testTask(testTask),
       'generators': _generatorTask(generatorTask),
