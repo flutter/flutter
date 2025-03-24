@@ -1724,8 +1724,29 @@ void _testVerticalScrolling() {
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
     expect(capturedEvent.arguments, isNotNull);
+    final Float64List expectedOffset = Float64List(2);
+    expectedOffset[0] = 0.0;
+    expectedOffset[1] = 20.0;
+    Float64List message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
     // Engine semantics returns scroll top back to neutral.
     expect(scrollable.scrollTop, 20);
+
+    // Update scrollPosition to scrollTop value.
+    final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder2,
+      scrollPosition: 20.0,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+    owner().updateSemantics(builder2.build());
 
     capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollTop = 5;
@@ -1735,6 +1756,12 @@ void _testVerticalScrolling() {
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
     expect(capturedEvent.arguments, isNotNull);
+    expectedOffset[0] = 0.0;
+    expectedOffset[1] = 5.0;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
     // Engine semantics returns scroll top back to neutral.
     expect(scrollable.scrollTop, 5);
   });
@@ -1944,8 +1971,29 @@ void _testHorizontalScrolling() {
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
     expect(capturedEvent.arguments, isNotNull);
+    final Float64List expectedOffset = Float64List(2);
+    expectedOffset[0] = 20.0;
+    expectedOffset[1] = 0.0;
+    Float64List message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
     // Engine semantics returns scroll position back to neutral.
     expect(scrollable.scrollLeft, 20);
+
+    // Update scrollPosition to scrollLeft value.
+    final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder2,
+      scrollPosition: 20.0,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+    owner().updateSemantics(builder2.build());
 
     capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollLeft = 5;
@@ -1955,6 +2003,12 @@ void _testHorizontalScrolling() {
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
     expect(capturedEvent.arguments, isNotNull);
+    expectedOffset[0] = 5.0;
+    expectedOffset[1] = 0.0;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
     // Engine semantics returns scroll top back to neutral.
     expect(scrollable.scrollLeft, 5);
   });
