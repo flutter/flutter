@@ -725,7 +725,6 @@ class RuntimeController : public PlatformConfigurationClient,
   std::shared_ptr<PlatformIsolateManager> platform_isolate_manager_ =
       std::shared_ptr<PlatformIsolateManager>(new PlatformIsolateManager());
   bool has_flushed_runtime_state_ = false;
-  bool semantics_tree_enabled_ = false;
 
   // Callbacks when `AddView` was called before the Dart isolate is launched.
   //
