@@ -119,6 +119,8 @@ object FlutterTaskHelper {
      *  }
      * The output file is parsed and used by devtool.
      */
+    // Integration test for AppLinkSettings task defined in
+    // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
     internal fun addTasksForOutputsAppLinkSettings(project: Project) {
         val android = FlutterPluginUtils.getAndroidExtensionOrNull(project)
         if (android == null) {
@@ -138,14 +140,16 @@ object FlutterTaskHelper {
                     dependsOn(findProcessResources(baseVariantOutput))
                 }
                 doLast {
-                    // Do not like that we are configuring the same object before a doLast and in a doLast.
+                    // We are configuring the same object before a doLast and in a doLast.
+                    // without a clear reason why. That is not good.
                     variant.outputs.configureEach {
                         val baseVariantOutput = this
 
                         val appLinkSettings = AppLinkSettings(variant.applicationId)
                         // TODO use import groovy.xml.XmlParser instead.
+                        // It is not namespace aware because it makes querying nodes cumbersome.
                         val manifest: Node =
-                            XmlParser().parse(findProcessResources(baseVariantOutput).manifestFile)
+                            XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
                         // The new import would use getProperty like
                         // manifest.getProperty("application").let { applicationNode -> ...
                         val applicationNode: Node? = manifest.children().find { node ->
@@ -166,9 +170,9 @@ object FlutterTaskHelper {
                                     metaDataItems.forEach { metaDataItem ->
                                         if (metaDataItem is Node) {
                                             val nameAttribute: Boolean =
-                                                (metaDataItem.attribute("android:name") as Node?)?.value() == "flutter_deeplinking_enabled"
+                                                metaDataItem.attribute("android:name") == "flutter_deeplinking_enabled"
                                             val valueAttribute: Boolean =
-                                                (metaDataItem.attribute("android:value") as Node?)?.value() == "true"
+                                                metaDataItem.attribute("android:value") == "true"
                                             if (nameAttribute && valueAttribute) {
                                                 appLinkSettings.deeplinkingFlagEnabled = true
                                             }
@@ -185,7 +189,7 @@ object FlutterTaskHelper {
                                             val hosts: MutableSet<String?> = mutableSetOf()
                                             val paths: MutableSet<String?> = mutableSetOf()
                                             val intentFilterCheck = IntentFilterCheck()
-                                            if ((appLinkIntent.attribute("android:autoVerify") as Node?)?.value() == "true") {
+                                            if (appLinkIntent.attribute("android:autoVerify") == "true") {
                                                 intentFilterCheck.hasAutoVerify = true
                                             }
 
@@ -197,7 +201,7 @@ object FlutterTaskHelper {
                                             // and we keep looping.
                                             actionItems.forEach { action ->
                                                 if (action is Node) {
-                                                    if ((action.attribute("android:name") as Node?)?.value() == "android.intent.action.VIEW") {
+                                                    if (action.attribute("android:name") == "android.intent.action.VIEW") {
                                                         intentFilterCheck.hasActionView = true
                                                     }
                                                 }
@@ -208,10 +212,10 @@ object FlutterTaskHelper {
                                                 }
                                             categoryItems.forEach { category ->
                                                 if (category is Node) {
-                                                    if ((category.attribute("android:name") as Node?)?.value() == "android.intent.category.DEFAULT") {
+                                                    if (category.attribute("android:name") == "android.intent.category.DEFAULT") {
                                                         intentFilterCheck.hasDefaultCategory = true
                                                     }
-                                                    if ((category.attribute("android:name") as Node?)?.value() == "android.intent.category.BROWSABLE") {
+                                                    if (category.attribute("android:name") == "android.intent.category.BROWSABLE") {
                                                         intentFilterCheck.hasBrowsableCategory =
                                                             true
                                                     }
@@ -224,25 +228,23 @@ object FlutterTaskHelper {
                                             dataItems.forEach { data ->
                                                 if (data is Node) {
                                                     data.attributes().forEach { entry ->
-                                                        if (entry.key is QName) {
-                                                            when ((entry.key as QName).localPart) {
-                                                                "scheme" -> schemes.add(entry.value.toString())
-                                                                "host" -> hosts.add(entry.value.toString())
-                                                                // All path patterns add to paths.
-                                                                "pathAdvancedPattern" -> paths.add(
-                                                                    entry.value.toString()
-                                                                )
+                                                        when ((entry.key)) {
+                                                            "android:scheme" -> schemes.add(entry.value.toString())
+                                                            "android:host" -> hosts.add(entry.value.toString())
+                                                            // All path patterns add to paths.
+                                                            "android:pathAdvancedPattern" -> paths.add(
+                                                                entry.value.toString()
+                                                            )
 
-                                                                "pathPattern" -> paths.add(entry.value.toString())
-                                                                "path" -> paths.add(entry.value.toString())
-                                                                "pathPrefix" -> paths.add(entry.value.toString() + ".*")
-                                                                "pathSuffix" -> paths.add(".*" + entry.value.toString())
-                                                            }
+                                                            "android:pathPattern" -> paths.add(entry.value.toString())
+                                                            "android:path" -> paths.add(entry.value.toString())
+                                                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
+                                                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
                                                         }
                                                     }
                                                 }
                                             }
-                                            if (!hosts.isEmpty() || !paths.isEmpty()) {
+                                            if (hosts.isNotEmpty() || paths.isNotEmpty()) {
                                                 if (schemes.isEmpty()) {
                                                     schemes.add(null)
                                                 }
