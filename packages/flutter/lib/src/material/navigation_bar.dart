@@ -10,7 +10,6 @@ library;
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -303,6 +302,7 @@ class NavigationBar extends StatelessWidget {
                     child: MergeSemantics(
                       child: Semantics(
                         role: SemanticsRole.tab,
+                        selected: i == selectedIndex,
                         child: _SelectableAnimatedBuilder(
                           duration: animationDuration ?? const Duration(milliseconds: 500),
                           isSelected: i == selectedIndex,
@@ -319,7 +319,7 @@ class NavigationBar extends StatelessWidget {
                               onTap: _handleTap(i),
                               labelTextStyle: labelTextStyle,
                               labelPadding: labelPadding,
-                              child: _NavigationBarDestinationSemantics(child: destinations[i]),
+                              child: destinations[i],
                             );
                           },
                         ),
@@ -593,9 +593,8 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
 
-    return Semantics(
+    return _NavigationBarDestinationSemantics(
       enabled: widget.enabled,
-      button: true,
       child: _NavigationBarDestinationTooltip(
         message: widget.tooltip ?? widget.label,
         child: _IndicatorInkWell(
@@ -998,7 +997,10 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
 class _NavigationBarDestinationSemantics extends StatelessWidget {
   /// Adds the appropriate semantics for navigation bar destinations to the
   /// [child].
-  const _NavigationBarDestinationSemantics({required this.child});
+  const _NavigationBarDestinationSemantics({required this.enabled, required this.child});
+
+  /// Whether this widget is enabled.
+  final bool enabled;
 
   /// The widget that should receive the destination semantics.
   final Widget child;
@@ -1012,23 +1014,17 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
     return _StatusTransitionWidgetBuilder(
       animation: destinationInfo.selectedAnimation,
       builder: (BuildContext context, Widget? child) {
-        return Semantics(
-          selected: destinationInfo.selectedAnimation.isForwardOrCompleted,
-          child: child,
-        );
+        return Semantics(enabled: enabled, container: true, button: true, child: child);
       },
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
           child,
           Semantics(
-            label:
-                kIsWeb
-                    ? null
-                    : localizations.tabLabel(
-                      tabIndex: destinationInfo.index + 1,
-                      tabCount: destinationInfo.totalNumberOfDestinations,
-                    ),
+            label: localizations.tabLabel(
+              tabIndex: destinationInfo.index + 1,
+              tabCount: destinationInfo.totalNumberOfDestinations,
+            ),
           ),
         ],
       ),
@@ -1434,11 +1430,11 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // dart format off
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)
-    : super(
-        height: 80.0,
-        elevation: 3.0,
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      );
+      : super(
+    height: 80.0,
+    elevation: 3.0,
+    labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+  );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -1459,8 +1455,8 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.disabled)
-          ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
+            ? _colors.onSurfaceVariant.withOpacity(0.38)
+            : states.contains(MaterialState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );
@@ -1476,13 +1472,13 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override
   MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-    final TextStyle style = _textTheme.labelMedium!;
+      final TextStyle style = _textTheme.labelMedium!;
       return style.apply(
-        color: states.contains(MaterialState.disabled)
-          ? _colors.onSurfaceVariant.withOpacity(0.38)
-          : states.contains(MaterialState.selected)
-            ? _colors.onSurface
-            : _colors.onSurfaceVariant
+          color: states.contains(MaterialState.disabled)
+              ? _colors.onSurfaceVariant.withOpacity(0.38)
+              : states.contains(MaterialState.selected)
+              ? _colors.onSurface
+              : _colors.onSurfaceVariant
       );
     });
   }
