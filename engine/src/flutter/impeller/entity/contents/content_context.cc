@@ -24,6 +24,162 @@
 
 namespace impeller {
 
+namespace {
+
+/// Holds multiple Pipelines associated with the same PipelineHandle types.
+///
+/// For example, it may have multiple
+/// RenderPipelineHandle<SolidFillVertexShader, SolidFillFragmentShader>
+/// instances for different blend modes. From them you can access the
+/// Pipeline.
+///
+/// See also:
+///  - impeller::ContentContextOptions - options from which variants are
+///    created.
+///  - impeller::Pipeline::CreateVariant
+///  - impeller::RenderPipelineHandle<> - The type of objects this typically
+///    contains.
+template <class PipelineHandleT>
+class Variants {
+ public:
+  Variants() = default;
+
+  void Set(const ContentContextOptions& options,
+           std::unique_ptr<PipelineHandleT> pipeline) {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return;
+      }
+    }
+    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+  }
+
+  void SetDefault(const ContentContextOptions& options,
+                  std::unique_ptr<PipelineHandleT> pipeline) {
+    default_options_ = options;
+    if (pipeline) {
+      Set(options, std::move(pipeline));
+    }
+  }
+
+  void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
+    desc_ = std::move(desc);
+  }
+
+  void CreateDefault(const Context& context,
+                     const ContentContextOptions& options,
+                     const std::vector<Scalar>& constants = {}) {
+    auto desc = PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(
+        context, constants);
+    if (!desc.has_value()) {
+      VALIDATION_LOG << "Failed to create default pipeline.";
+      return;
+    }
+    options.ApplyToPipelineDescriptor(*desc);
+    desc_ = desc;
+    if (context.GetFlags().lazy_shader_mode) {
+      SetDefault(options, nullptr);
+    } else {
+      SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
+                                                            /*async=*/true));
+    }
+  }
+
+  PipelineHandleT* Get(const ContentContextOptions& options) const {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return pipeline.get();
+      }
+    }
+    return nullptr;
+  }
+
+  bool IsDefault(const ContentContextOptions& opts) {
+    return default_options_.has_value() &&
+           opts.ToKey() == default_options_.value().ToKey();
+  }
+
+  PipelineHandleT* GetDefault(const Context& context) {
+    if (!default_options_.has_value()) {
+      return nullptr;
+    }
+    PipelineHandleT* result = Get(default_options_.value());
+    if (result != nullptr) {
+      return result;
+    }
+    SetDefault(default_options_.value(), std::make_unique<PipelineHandleT>(
+                                             context, desc_, /*async=*/false));
+    return Get(default_options_.value());
+  }
+
+  size_t GetPipelineCount() const { return pipelines_.size(); }
+
+ private:
+  std::optional<PipelineDescriptor> desc_;
+  std::optional<ContentContextOptions> default_options_;
+  std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>> pipelines_;
+
+  Variants(const Variants&) = delete;
+
+  Variants& operator=(const Variants&) = delete;
+};
+
+template <class RenderPipelineHandleT>
+RenderPipelineHandleT* CreateIfNeeded(
+    const ContentContext* context,
+    Variants<RenderPipelineHandleT>& container,
+    ContentContextOptions opts) {
+  if (!context->IsValid()) {
+    return nullptr;
+  }
+
+  if (RenderPipelineHandleT* found = container.Get(opts)) {
+    return found;
+  }
+
+  RenderPipelineHandleT* default_handle =
+      container.GetDefault(*context->GetContext());
+  if (container.IsDefault(opts)) {
+    return default_handle;
+  }
+
+  // The default must always be initialized in the constructor.
+  FML_CHECK(default_handle != nullptr);
+
+  const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline =
+      default_handle->WaitAndGet();
+  if (!pipeline) {
+    return nullptr;
+  }
+
+  auto variant_future = pipeline->CreateVariant(
+      /*async=*/false, [&opts, variants_count = container.GetPipelineCount()](
+                           PipelineDescriptor& desc) {
+        opts.ApplyToPipelineDescriptor(desc);
+        desc.SetLabel(
+            SPrintF("%s V#%zu", desc.GetLabel().data(), variants_count));
+      });
+  std::unique_ptr<RenderPipelineHandleT> variant =
+      std::make_unique<RenderPipelineHandleT>(std::move(variant_future));
+  container.Set(opts, std::move(variant));
+  return container.Get(opts);
+}
+
+template <class TypedPipeline>
+PipelineRef GetPipeline(const ContentContext* context,
+                        Variants<TypedPipeline>& container,
+                        ContentContextOptions opts) {
+  TypedPipeline* pipeline = CreateIfNeeded(context, container, opts);
+  if (!pipeline) {
+    return raw_ptr<Pipeline<PipelineDescriptor>>();
+  }
+  return raw_ptr(pipeline->WaitAndGet());
+}
+
+}  // namespace
+
 struct ContentContext::Pipelines {
   // These are mutable because while the prototypes are created eagerly, any
   // variants requested from that are lazily created and cached in the variants
@@ -804,39 +960,44 @@ void ContentContext::InitializeCommonlyUsedShadersIfNeeded() const {
 
 PipelineRef ContentContext::GetFastGradientPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->fast_gradient_pipelines_, opts);
+  return GetPipeline(this, pipelines_->fast_gradient_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetLinearGradientFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->linear_gradient_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->linear_gradient_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetLinearGradientUniformFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->linear_gradient_uniform_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->linear_gradient_uniform_fill_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetRadialGradientUniformFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->radial_gradient_uniform_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->radial_gradient_uniform_fill_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetSweepGradientUniformFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->sweep_gradient_uniform_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->sweep_gradient_uniform_fill_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetLinearGradientSSBOFillPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-  return GetPipeline(pipelines_->linear_gradient_ssbo_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->linear_gradient_ssbo_fill_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetRadialGradientSSBOFillPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-  return GetPipeline(pipelines_->radial_gradient_ssbo_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->radial_gradient_ssbo_fill_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetConicalGradientUniformFillPipeline(
@@ -844,16 +1005,19 @@ PipelineRef ContentContext::GetConicalGradientUniformFillPipeline(
     ConicalKind kind) const {
   switch (kind) {
     case ConicalKind::kConical:
-      return GetPipeline(pipelines_->conical_gradient_uniform_fill_pipelines_,
-                         opts);
+      return GetPipeline(
+          this, pipelines_->conical_gradient_uniform_fill_pipelines_, opts);
     case ConicalKind::kRadial:
       return GetPipeline(
-          pipelines_->conical_gradient_uniform_fill_radial_pipelines_, opts);
+          this, pipelines_->conical_gradient_uniform_fill_radial_pipelines_,
+          opts);
     case ConicalKind::kStrip:
       return GetPipeline(
-          pipelines_->conical_gradient_uniform_fill_strip_pipelines_, opts);
+          this, pipelines_->conical_gradient_uniform_fill_strip_pipelines_,
+          opts);
     case ConicalKind::kStripAndRadial:
       return GetPipeline(
+          this,
           pipelines_->conical_gradient_uniform_fill_strip_and_radial_pipelines_,
           opts);
   }
@@ -865,16 +1029,17 @@ PipelineRef ContentContext::GetConicalGradientSSBOFillPipeline(
   FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
   switch (kind) {
     case ConicalKind::kConical:
-      return GetPipeline(pipelines_->conical_gradient_ssbo_fill_pipelines_,
-                         opts);
+      return GetPipeline(
+          this, pipelines_->conical_gradient_ssbo_fill_pipelines_, opts);
     case ConicalKind::kRadial:
       return GetPipeline(
-          pipelines_->conical_gradient_ssbo_fill_radial_pipelines_, opts);
+          this, pipelines_->conical_gradient_ssbo_fill_radial_pipelines_, opts);
     case ConicalKind::kStrip:
       return GetPipeline(
-          pipelines_->conical_gradient_ssbo_fill_strip_pipelines_, opts);
+          this, pipelines_->conical_gradient_ssbo_fill_strip_pipelines_, opts);
     case ConicalKind::kStripAndRadial:
       return GetPipeline(
+          this,
           pipelines_->conical_gradient_ssbo_fill_strip_and_radial_pipelines_,
           opts);
   }
@@ -883,12 +1048,13 @@ PipelineRef ContentContext::GetConicalGradientSSBOFillPipeline(
 PipelineRef ContentContext::GetSweepGradientSSBOFillPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsSSBO());
-  return GetPipeline(pipelines_->sweep_gradient_ssbo_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->sweep_gradient_ssbo_fill_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetRadialGradientFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->radial_gradient_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->radial_gradient_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetConicalGradientFillPipeline(
@@ -896,91 +1062,94 @@ PipelineRef ContentContext::GetConicalGradientFillPipeline(
     ConicalKind kind) const {
   switch (kind) {
     case ConicalKind::kConical:
-      return GetPipeline(pipelines_->conical_gradient_fill_pipelines_, opts);
+      return GetPipeline(this, pipelines_->conical_gradient_fill_pipelines_,
+                         opts);
     case ConicalKind::kRadial:
-      return GetPipeline(pipelines_->conical_gradient_fill_radial_pipelines_,
-                         opts);
+      return GetPipeline(
+          this, pipelines_->conical_gradient_fill_radial_pipelines_, opts);
     case ConicalKind::kStrip:
-      return GetPipeline(pipelines_->conical_gradient_fill_strip_pipelines_,
-                         opts);
+      return GetPipeline(
+          this, pipelines_->conical_gradient_fill_strip_pipelines_, opts);
     case ConicalKind::kStripAndRadial:
       return GetPipeline(
-          pipelines_->conical_gradient_fill_strip_and_radial_pipelines_, opts);
+          this, pipelines_->conical_gradient_fill_strip_and_radial_pipelines_,
+          opts);
   }
 }
 
 PipelineRef ContentContext::GetRRectBlurPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->rrect_blur_pipelines_, opts);
+  return GetPipeline(this, pipelines_->rrect_blur_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSweepGradientFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->sweep_gradient_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->sweep_gradient_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSolidFillPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->solid_fill_pipelines_, opts);
+  return GetPipeline(this, pipelines_->solid_fill_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTexturePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->texture_pipelines_, opts);
+  return GetPipeline(this, pipelines_->texture_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTextureStrictSrcPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->texture_strict_src_pipelines_, opts);
+  return GetPipeline(this, pipelines_->texture_strict_src_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTiledTexturePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->tiled_texture_pipelines_, opts);
+  return GetPipeline(this, pipelines_->tiled_texture_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetGaussianBlurPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->gaussian_blur_pipelines_, opts);
+  return GetPipeline(this, pipelines_->gaussian_blur_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBorderMaskBlurPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->border_mask_blur_pipelines_, opts);
+  return GetPipeline(this, pipelines_->border_mask_blur_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetMorphologyFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->morphology_filter_pipelines_, opts);
+  return GetPipeline(this, pipelines_->morphology_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetColorMatrixColorFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->color_matrix_color_filter_pipelines_, opts);
+  return GetPipeline(this, pipelines_->color_matrix_color_filter_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetLinearToSrgbFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->linear_to_srgb_filter_pipelines_, opts);
+  return GetPipeline(this, pipelines_->linear_to_srgb_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSrgbToLinearFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->srgb_to_linear_filter_pipelines_, opts);
+  return GetPipeline(this, pipelines_->srgb_to_linear_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetClipPipeline(ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->clip_pipelines_, opts);
+  return GetPipeline(this, pipelines_->clip_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetGlyphAtlasPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->glyph_atlas_pipelines_, opts);
+  return GetPipeline(this, pipelines_->glyph_atlas_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetYUVToRGBFilterPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->yuv_to_rgb_filter_pipelines_, opts);
+  return GetPipeline(this, pipelines_->yuv_to_rgb_filter_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetPorterDuffPipeline(
@@ -1040,274 +1209,291 @@ PipelineRef ContentContext::GetPorterDuffPipeline(
 
 PipelineRef ContentContext::GetClearBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->clear_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->clear_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->source_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->source_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->destination_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->destination_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceOverBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->source_over_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->source_over_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationOverBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->destination_over_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->destination_over_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceInBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->source_in_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->source_in_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationInBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->destination_in_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->destination_in_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceOutBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->source_out_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->source_out_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationOutBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->destination_out_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->destination_out_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetSourceATopBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->source_a_top_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->source_a_top_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDestinationATopBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->destination_a_top_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->destination_a_top_blend_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetXorBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->xor_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->xor_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetPlusBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->plus_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->plus_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetModulateBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->modulate_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->modulate_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetScreenBlendPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->screen_blend_pipelines_, opts);
+  return GetPipeline(this, pipelines_->screen_blend_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_color_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_color_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorBurnPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_colorburn_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_colorburn_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendColorDodgePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_colordodge_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_colordodge_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendDarkenPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_darken_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_darken_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendDifferencePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_difference_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_difference_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendExclusionPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_exclusion_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_exclusion_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendHardLightPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_hardlight_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_hardlight_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendHuePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_hue_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_hue_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendLightenPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_lighten_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_lighten_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendLuminosityPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_luminosity_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_luminosity_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendMultiplyPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_multiply_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_multiply_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendOverlayPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_overlay_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_overlay_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendSaturationPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_saturation_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_saturation_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendScreenPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_screen_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_screen_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetBlendSoftLightPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->blend_softlight_pipelines_, opts);
+  return GetPipeline(this, pipelines_->blend_softlight_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetDownsamplePipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->texture_downsample_pipelines_, opts);
+  return GetPipeline(this, pipelines_->texture_downsample_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendColorPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_color_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_color_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendColorBurnPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_colorburn_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_colorburn_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendColorDodgePipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_colordodge_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_colordodge_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendDarkenPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_darken_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_darken_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendDifferencePipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_difference_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_difference_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendExclusionPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_exclusion_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_exclusion_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendHardLightPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_hardlight_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_hardlight_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendHuePipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_hue_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_hue_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendLightenPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_lighten_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_lighten_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendLuminosityPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_luminosity_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_luminosity_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendMultiplyPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_multiply_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_multiply_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendOverlayPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_overlay_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_overlay_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendSaturationPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_saturation_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_saturation_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendScreenPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_screen_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_screen_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetDeviceCapabilities().SupportsFramebufferFetch());
-  return GetPipeline(pipelines_->framebuffer_blend_softlight_pipelines_, opts);
+  return GetPipeline(this, pipelines_->framebuffer_blend_softlight_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetDrawVerticesUberShader(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->vertices_uber_shader_, opts);
+  return GetPipeline(this, pipelines_->vertices_uber_shader_, opts);
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->line_pipelines_, opts);
+  return GetPipeline(this, pipelines_->line_pipelines_, opts);
 }
 
 #ifdef IMPELLER_ENABLE_OPENGLES
 PipelineRef ContentContext::GetDownsampleTextureGlesPipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(pipelines_->texture_downsample_gles_pipelines_, opts);
+  return GetPipeline(this, pipelines_->texture_downsample_gles_pipelines_,
+                     opts);
 }
 
 PipelineRef ContentContext::GetTiledTextureExternalPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
-  return GetPipeline(pipelines_->tiled_texture_external_pipelines_, opts);
+  return GetPipeline(this, pipelines_->tiled_texture_external_pipelines_, opts);
 }
 
 PipelineRef ContentContext::GetTiledTextureUvExternalPipeline(
     ContentContextOptions opts) const {
   FML_DCHECK(GetContext()->GetBackendType() == Context::BackendType::kOpenGLES);
-  return GetPipeline(pipelines_->tiled_texture_uv_external_pipelines_, opts);
+  return GetPipeline(this, pipelines_->tiled_texture_uv_external_pipelines_,
+                     opts);
 }
 #endif  // IMPELLER_ENABLE_OPENGLES
 
