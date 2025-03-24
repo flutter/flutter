@@ -752,6 +752,15 @@ class _DefaultPub implements Pub {
   /// For more information, see:
   ///   * [generateLocalizations], `in lib/src/localizations/gen_l10n.dart`
   Future<void> _updatePackageConfig(FlutterProject project, File packageConfigFile) async {
+    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
+      packageConfigFile,
+      logger: _logger,
+    );
+
+    packageConfigFile.parent
+        .childFile('package_config_subset')
+        .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
+
     // If we aren't generating localizations, short-circuit.
     if (!project.manifest.generateLocalizations) {
       return;
@@ -769,15 +778,6 @@ class _DefaultPub implements Pub {
         '--explicit-package-dependencies is set.',
       );
     }
-
-    final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-      packageConfigFile,
-      logger: _logger,
-    );
-
-    packageConfigFile.parent
-        .childFile('package_config_subset')
-        .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
 
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;
