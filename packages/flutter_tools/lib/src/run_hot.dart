@@ -675,6 +675,14 @@ class HotRunner extends ResidentRunner {
         );
       }
 
+      // Wait for the UI isolates to have their breakpoints removed and exception pause mode
+      // cleared while also ensuring the isolate's are no longer paused. If we don't clear
+      // the exception pause mode before we start killing child isolates, it's possible that
+      // any UI isolate waiting on a result from a child isolate could throw an unhandled
+      // exception and re-pause the isolate, causing hot restart to hang.
+      await Future.wait(operations);
+      operations.clear();
+
       // The engine handles killing and recreating isolates that it has spawned
       // ("uiIsolates"). The isolates that were spawned from these uiIsolates
       // will not be restarted, and so they must be manually killed.
