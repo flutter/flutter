@@ -494,7 +494,6 @@ class ContentContext {
                              RuntimeEffectPipelineKey::Equal>
       runtime_effect_pipelines_;
 
-
   struct Pipelines;
   std::unique_ptr<Pipelines> pipelines_;
 
