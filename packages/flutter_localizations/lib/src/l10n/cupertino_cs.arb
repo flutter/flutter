@@ -28,7 +28,7 @@
   "cutButtonLabel": "Vyjmout",
   "copyButtonLabel": "Kopírovat",
   "pasteButtonLabel": "Vložit",
-  "clearButtonLabel": "Clear",
+  "clearButtonLabel": "Vymazat",
   "selectAllButtonLabel": "Vybrat vše",
   "tabSemanticsLabel": "Karta $tabIndex z $tabCount",
   "modalBarrierDismissLabel": "Zavřít",
@@ -37,5 +37,7 @@
   "menuDismissLabel": "Zavřít nabídku",
   "lookUpButtonLabel": "Vyhledat",
   "searchWebButtonLabel": "Vyhledávat na webu",
-  "shareButtonLabel": "Sdílet…"
+  "shareButtonLabel": "Sdílet…",
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

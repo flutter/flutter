@@ -33,21 +33,17 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
-          child: CupertinoTextSelectionToolbarButton(
-            child: const Text('Tap me'),
-            onPressed: () { },
-          ),
+          child: CupertinoTextSelectionToolbarButton(child: const Text('Tap me'), onPressed: () {}),
         ),
       ),
     );
 
     // Original with transparent background.
-    DecoratedBox decoratedBox = tester.widget(find.descendant(
-      of: find.byType(CupertinoButton),
-      matching: find.byType(DecoratedBox),
-    ));
+    DecoratedBox decoratedBox = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(DecoratedBox)),
+    );
     BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
-    expect(boxDecoration.color, const Color(0x00000000));
+    expect(boxDecoration.color, CupertinoColors.transparent);
 
     // Make a "down" gesture on the button.
     final Offset center = tester.getCenter(find.byType(CupertinoTextSelectionToolbarButton));
@@ -55,10 +51,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // When pressed, the background darkens.
-    decoratedBox = tester.widget(find.descendant(
-      of: find.byType(CupertinoTextSelectionToolbarButton),
-      matching: find.byType(DecoratedBox),
-    ));
+    decoratedBox = tester.widget(
+      find.descendant(
+        of: find.byType(CupertinoTextSelectionToolbarButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
     boxDecoration = decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.color!.value, const Color(0x10000000).value);
 
@@ -67,22 +65,20 @@ void main() {
     await tester.pumpAndSettle();
 
     // Color is back to transparent.
-    decoratedBox = tester.widget(find.descendant(
-      of: find.byType(CupertinoTextSelectionToolbarButton),
-      matching: find.byType(DecoratedBox),
-    ));
+    decoratedBox = tester.widget(
+      find.descendant(
+        of: find.byType(CupertinoTextSelectionToolbarButton),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
     boxDecoration = decoratedBox.decoration as BoxDecoration;
-    expect(boxDecoration.color, const Color(0x00000000));
+    expect(boxDecoration.color, CupertinoColors.transparent);
   });
 
   testWidgets('passing null to onPressed disables the button', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
-        home: Center(
-          child: CupertinoTextSelectionToolbarButton(
-            child: Text('Tap me'),
-          ),
-        ),
+        home: Center(child: CupertinoTextSelectionToolbarButton(child: Text('Tap me'))),
       ),
     );
 

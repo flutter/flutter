@@ -78,7 +78,7 @@ const List<String> assets = <String>[
 
 // Measures the time it takes to load a fixed number of assets into an
 // immutable buffer to later be decoded by skia.
-Future<void> main() async {
+Future<void> execute() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   final Stopwatch watch = Stopwatch();
@@ -86,8 +86,7 @@ Future<void> main() async {
     watch.start();
     for (int i = 0; i < 10; i += 1) {
       await Future.wait(<Future<ui.ImmutableBuffer>>[
-        for (final String asset in assets)
-          rootBundle.loadBuffer(asset)
+        for (final String asset in assets) rootBundle.loadBuffer(asset),
       ]);
     }
     watch.stop();

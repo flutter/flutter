@@ -9,11 +9,7 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 import '../constants.dart';
 
-enum CustomTextDirection {
-  localeBased,
-  ltr,
-  rtl,
-}
+enum CustomTextDirection { localeBased, ltr, rtl }
 
 // See http://en.wikipedia.org/wiki/Right-to-left
 const List<String> rtlLanguages = <String>[
@@ -45,8 +41,8 @@ class GalleryOptions {
     required this.timeDilation,
     required this.platform,
     required this.isTestMode,
-  })  : _textScaleFactor = textScaleFactor ?? 1.0,
-        _locale = locale;
+  }) : _textScaleFactor = textScaleFactor ?? 1.0,
+       _locale = locale;
 
   final ThemeMode themeMode;
   final double _textScaleFactor;
@@ -82,9 +78,7 @@ class GalleryOptions {
         if (language == null) {
           return null;
         }
-        return rtlLanguages.contains(language)
-            ? TextDirection.rtl
-            : TextDirection.ltr;
+        return rtlLanguages.contains(language) ? TextDirection.rtl : TextDirection.ltr;
       case CustomTextDirection.rtl:
         return TextDirection.rtl;
       case CustomTextDirection.ltr:
@@ -96,22 +90,15 @@ class GalleryOptions {
   /// In other words, if the theme is dark, returns light; if the theme is
   /// light, returns dark.
   SystemUiOverlayStyle resolvedSystemUiOverlayStyle() {
-    Brightness brightness;
-    switch (themeMode) {
-      case ThemeMode.light:
-        brightness = Brightness.light;
-      case ThemeMode.dark:
-        brightness = Brightness.dark;
-      case ThemeMode.system:
-        brightness =
-            WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    }
-
-    final SystemUiOverlayStyle overlayStyle = brightness == Brightness.dark
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark;
-
-    return overlayStyle;
+    final Brightness brightness = switch (themeMode) {
+      ThemeMode.light => Brightness.light,
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.system => WidgetsBinding.instance.platformDispatcher.platformBrightness,
+    };
+    return switch (brightness) {
+      Brightness.light => SystemUiOverlayStyle.dark,
+      Brightness.dark => SystemUiOverlayStyle.light,
+    };
   }
 
   GalleryOptions copyWith({
@@ -147,14 +134,14 @@ class GalleryOptions {
 
   @override
   int get hashCode => Object.hash(
-        themeMode,
-        _textScaleFactor,
-        customTextDirection,
-        locale,
-        timeDilation,
-        platform,
-        isTestMode,
-      );
+    themeMode,
+    _textScaleFactor,
+    customTextDirection,
+    locale,
+    timeDilation,
+    platform,
+    isTestMode,
+  );
 
   static GalleryOptions of(BuildContext context) {
     final _ModelBindingScope scope =
@@ -171,10 +158,7 @@ class GalleryOptions {
 
 // Applies text GalleryOptions to a widget
 class ApplyTextOptions extends StatelessWidget {
-  const ApplyTextOptions({
-    super.key,
-    required this.child,
-  });
+  const ApplyTextOptions({super.key, required this.child});
 
   final Widget child;
 
@@ -193,10 +177,7 @@ class ApplyTextOptions extends StatelessWidget {
     );
     return textDirection == null
         ? widget
-        : Directionality(
-            textDirection: textDirection,
-            child: widget,
-          );
+        : Directionality(textDirection: textDirection, child: widget);
   }
 }
 
@@ -204,10 +185,7 @@ class ApplyTextOptions extends StatelessWidget {
 // See https://medium.com/flutter/managing-flutter-application-state-with-inheritedwidgets-1140452befe1
 
 class _ModelBindingScope extends InheritedWidget {
-  const _ModelBindingScope({
-    required this.modelBindingState,
-    required super.child,
-  });
+  const _ModelBindingScope({required this.modelBindingState, required super.child});
 
   final _ModelBindingState modelBindingState;
 
@@ -216,11 +194,7 @@ class _ModelBindingScope extends InheritedWidget {
 }
 
 class ModelBinding extends StatefulWidget {
-  const ModelBinding({
-    super.key,
-    required this.initialModel,
-    required this.child,
-  });
+  const ModelBinding({super.key, required this.initialModel, required this.child});
 
   final GalleryOptions initialModel;
   final Widget child;
@@ -274,9 +248,6 @@ class _ModelBindingState extends State<ModelBinding> {
 
   @override
   Widget build(BuildContext context) {
-    return _ModelBindingScope(
-      modelBindingState: this,
-      child: widget.child,
-    );
+    return _ModelBindingScope(modelBindingState: this, child: widget.child);
   }
 }

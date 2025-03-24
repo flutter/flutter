@@ -46,7 +46,7 @@ class WaterfallNotchedRectangle extends NotchedShape {
     // A detailed explanation and the derivation of the formulas below is
     // available at: https://goo.gl/Ufzrqn
 
-    // s1, s2 are the two knobs controlling the behavior of the bezzier curve.
+    // s1, s2 are the two knobs controlling the behavior of the bezier curve.
     const double s1 = 21.0;
     const double s2 = 6.0;
 
@@ -83,11 +83,7 @@ class WaterfallNotchedRectangle extends NotchedShape {
       ..moveTo(host.left, host.top)
       ..lineTo(p[0]!.dx, p[0]!.dy)
       ..quadraticBezierTo(p[1]!.dx, p[1]!.dy, p[2]!.dx, p[2]!.dy)
-      ..arcToPoint(
-        p[3]!,
-        radius: Radius.circular(notchRadius),
-        clockwise: false,
-      )
+      ..arcToPoint(p[3]!, radius: Radius.circular(notchRadius), clockwise: false)
       ..quadraticBezierTo(p[4]!.dx, p[4]!.dy, p[5]!.dx, p[5]!.dy)
       ..lineTo(host.right, host.top)
       ..lineTo(host.right, host.bottom)

@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.ordinalForms].
+/// Flutter code sample for [FontFeature.ordinalForms].
 
 void main() => runApp(const ExampleApp());
 
@@ -31,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       '1st, 2nd, 3rd, 4th...',
       style: TextStyle(
         fontFamily: 'Piazzolla',
-        fontFeatures: <FontFeature>[
-          FontFeature.ordinalForms(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.ordinalForms()],
       ),
     );
   }

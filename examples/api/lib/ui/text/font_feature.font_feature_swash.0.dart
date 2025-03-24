@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.swash].
+/// Flutter code sample for [FontFeature.swash].
 
 void main() => runApp(const ExampleApp());
 
@@ -31,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       'Queer & Romantic',
       style: TextStyle(
         fontFamily: 'BioRhyme Expanded',
-        fontFeatures: <FontFeature>[
-          FontFeature.swash(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.swash()],
       ),
     );
   }

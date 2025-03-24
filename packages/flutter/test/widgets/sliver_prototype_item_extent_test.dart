@@ -4,10 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
 class TestItem extends StatelessWidget {
-  const TestItem({ super.key, required this.item, this.width, this.height });
+  const TestItem({super.key, required this.item, this.width, this.height});
   final int item;
   final double? width;
   final double? height;
@@ -22,7 +21,13 @@ class TestItem extends StatelessWidget {
   }
 }
 
-Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirection, Key? prototypeKey }) {
+Widget buildFrame({
+  int? count,
+  double? width,
+  double? height,
+  Axis? scrollDirection,
+  Key? prototypeKey,
+}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: CustomScrollView(
@@ -41,10 +46,7 @@ Widget buildFrame({ int? count, double? width, double? height, Axis? scrollDirec
 }
 
 void main() {
-  testWidgets('SliverPrototypeExtentList.builder test',
-    // TODO(polina-c): remove when fixed https://github.com/flutter/flutter/issues/145600 [leak-tracking-opt-in]
-    experimentalLeakTesting: LeakTesting.settings.withTracked(classes: const <String>['CurvedAnimation']),
-   (WidgetTester tester) async {
+  testWidgets('SliverPrototypeExtentList.builder test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -81,7 +83,17 @@ void main() {
             slivers: <Widget>[
               SliverPrototypeExtentList.list(
                 prototypeItem: const TestItem(item: -1, height: 100.0),
-                children: <int>[0, 1, 2, 3, 4, 5, 6, 7].map((int index) => TestItem(item: index)).toList(),
+                children:
+                    <int>[
+                      0,
+                      1,
+                      2,
+                      3,
+                      4,
+                      5,
+                      6,
+                      7,
+                    ].map((int index) => TestItem(item: index)).toList(),
               ),
             ],
           ),
@@ -177,10 +189,13 @@ void main() {
     }
   });
 
-  testWidgets('SliverPrototypeExtentList first item is also the prototype', (WidgetTester tester) async {
-    final List<Widget> items = List<Widget>.generate(10, (int index) {
-      return TestItem(key: ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
-    }).toList();
+  testWidgets('SliverPrototypeExtentList first item is also the prototype', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> items =
+        List<Widget>.generate(10, (int index) {
+          return TestItem(key: ValueKey<int>(index), item: index, height: index == 0 ? 60.0 : null);
+        }).toList();
 
     await tester.pumpWidget(
       Directionality(
@@ -207,7 +222,9 @@ void main() {
     }
   });
 
-  testWidgets('SliverPrototypeExtentList prototypeItem paint transform is zero.', (WidgetTester tester) async {
+  testWidgets('SliverPrototypeExtentList prototypeItem paint transform is zero.', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/67117
     // This test ensures that the SliverPrototypeExtentList does not cause an
     // assertion error when calculating the paint transform of its prototypeItem.

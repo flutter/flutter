@@ -17,57 +17,34 @@ class MailboxBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
     final bool isTablet = isDisplaySmallDesktop(context);
-    final double startPadding = isTablet
-        ? 60.0
-        : isDesktop
+    final double startPadding =
+        isTablet
+            ? 60.0
+            : isDesktop
             ? 120.0
             : 4.0;
-    final double endPadding = isTablet
-        ? 30.0
-        : isDesktop
+    final double endPadding =
+        isTablet
+            ? 30.0
+            : isDesktop
             ? 60.0
             : 4.0;
 
     return Consumer<EmailStore>(
       builder: (BuildContext context, EmailStore model, Widget? child) {
         final MailboxPageType destination = model.selectedMailboxPage;
-        final String destinationString = destination
-            .toString()
-            .substring(destination.toString().indexOf('.') + 1);
-        late List<Email> emails;
+        final String destinationString = destination.toString().substring(
+          destination.toString().indexOf('.') + 1,
+        );
 
-        switch (destination) {
-          case MailboxPageType.inbox:
-            {
-              emails = model.inboxEmails;
-              break;
-            }
-          case MailboxPageType.sent:
-            {
-              emails = model.outboxEmails;
-              break;
-            }
-          case MailboxPageType.starred:
-            {
-              emails = model.starredEmails;
-              break;
-            }
-          case MailboxPageType.trash:
-            {
-              emails = model.trashEmails;
-              break;
-            }
-          case MailboxPageType.spam:
-            {
-              emails = model.spamEmails;
-              break;
-            }
-          case MailboxPageType.drafts:
-            {
-              emails = model.draftEmails;
-              break;
-            }
-        }
+        final List<Email> emails = switch (destination) {
+          MailboxPageType.inbox => model.inboxEmails,
+          MailboxPageType.sent => model.outboxEmails,
+          MailboxPageType.starred => model.starredEmails,
+          MailboxPageType.trash => model.trashEmails,
+          MailboxPageType.spam => model.spamEmails,
+          MailboxPageType.drafts => model.draftEmails,
+        };
 
         return SafeArea(
           bottom: false,
@@ -75,39 +52,40 @@ class MailboxBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Expanded(
-                child: emails.isEmpty
-                    ? Center(child: Text('Empty in $destinationString'))
-                    : ListView.separated(
-                        itemCount: emails.length,
-                        padding: EdgeInsetsDirectional.only(
-                          start: startPadding,
-                          end: endPadding,
-                          top: isDesktop ? 28 : 0,
-                          bottom: kToolbarHeight,
+                child:
+                    emails.isEmpty
+                        ? Center(child: Text('Empty in $destinationString'))
+                        : ListView.separated(
+                          itemCount: emails.length,
+                          padding: EdgeInsetsDirectional.only(
+                            start: startPadding,
+                            end: endPadding,
+                            top: isDesktop ? 28 : 0,
+                            bottom: kToolbarHeight,
+                          ),
+                          primary: false,
+                          separatorBuilder:
+                              (BuildContext context, int index) => const SizedBox(height: 4),
+                          itemBuilder: (BuildContext context, int index) {
+                            final Email email = emails[index];
+                            return MailPreviewCard(
+                              id: email.id,
+                              email: email,
+                              isStarred: model.isEmailStarred(email.id),
+                              onDelete: () => model.deleteEmail(email.id),
+                              onStar: () {
+                                final int emailId = email.id;
+                                if (model.isEmailStarred(emailId)) {
+                                  model.unstarEmail(emailId);
+                                } else {
+                                  model.starEmail(emailId);
+                                }
+                              },
+                              onStarredMailbox:
+                                  model.selectedMailboxPage == MailboxPageType.starred,
+                            );
+                          },
                         ),
-                        primary: false,
-                        separatorBuilder: (BuildContext context, int index) =>
-                            const SizedBox(height: 4),
-                        itemBuilder: (BuildContext context, int index) {
-                          final Email email = emails[index];
-                          return MailPreviewCard(
-                            id: email.id,
-                            email: email,
-                            isStarred: model.isEmailStarred(email.id),
-                            onDelete: () => model.deleteEmail(email.id),
-                            onStar: () {
-                              final int emailId = email.id;
-                              if (model.isEmailStarred(emailId)) {
-                                model.unstarEmail(emailId);
-                              } else {
-                                model.starEmail(emailId);
-                              }
-                            },
-                            onStarredMailbox: model.selectedMailboxPage ==
-                                MailboxPageType.starred,
-                          );
-                        },
-                      ),
               ),
               if (isDesktop) ...<Widget>[
                 Padding(
@@ -118,17 +96,14 @@ class MailboxBody extends StatelessWidget {
                         key: const ValueKey<String>('ReplySearch'),
                         icon: const Icon(Icons.search),
                         onPressed: () {
-                          Provider.of<EmailStore>(
-                            context,
-                            listen: false,
-                          ).onSearchPage = true;
+                          Provider.of<EmailStore>(context, listen: false).onSearchPage = true;
                         },
                       ),
                       SizedBox(width: isTablet ? 30 : 60),
                     ],
                   ),
                 ),
-              ]
+              ],
             ],
           ),
         );

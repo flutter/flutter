@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
+import 'no_op_codec.dart';
 
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
@@ -37,11 +38,16 @@ void main() {
       caughtError.complete(false);
     };
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-    stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      caughtError.complete(false);
-    }, onError: (dynamic error, StackTrace? stackTrace) {
-      caughtError.complete(true);
-    }));
+    stream.addListener(
+      ImageStreamListener(
+        (ImageInfo info, bool syncCall) {
+          caughtError.complete(false);
+        },
+        onError: (dynamic error, StackTrace? stackTrace) {
+          caughtError.complete(true);
+        },
+      ),
+    );
     expect(await caughtError.future, true);
   });
 
@@ -87,23 +93,31 @@ void main() {
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.loadBuffer(provider, (ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
-      return Future<Codec>.value(FakeCodec());
-    }), isA<MultiFrameImageStreamCompleter>());
+    expect(
+      provider.loadBuffer(provider, (
+        ImmutableBuffer buffer, {
+        int? cacheWidth,
+        int? cacheHeight,
+        bool? allowUpscaling,
+      }) async {
+        return Future<Codec>.value(createNoOpCodec());
+      }),
+      isA<MultiFrameImageStreamCompleter>(),
+    );
 
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
-    return FakeCodec();
-  }
-
   test('File image sets tag', () async {
     final MemoryFileSystem fs = MemoryFileSystem();
-    final File file = fs.file('/blue.png')..createSync(recursive: true)..writeAsBytesSync(kBlueSquarePng);
+    final File file =
+        fs.file('/blue.png')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(kBlueSquarePng);
     final FileImage provider = FileImage(file);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer =
+        provider.loadBuffer(provider, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, file.path);
   });
@@ -112,7 +126,8 @@ void main() {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final MemoryImage provider = MemoryImage(bytes);
 
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(provider, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer =
+        provider.loadBuffer(provider, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)})');
   });
@@ -121,7 +136,8 @@ void main() {
     const String asset = 'images/blue.png';
     final ExactAssetImage provider = ExactAssetImage(asset, bundle: _TestAssetBundle());
     final AssetBundleImageKey key = await provider.obtainKey(ImageConfiguration.empty);
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(key, decoder) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer =
+        provider.loadBuffer(key, noOpDecoderBufferCallback) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, asset);
   });
@@ -129,10 +145,12 @@ void main() {
   test('Resize image sets tag', () async {
     final Uint8List bytes = Uint8List.fromList(kBlueSquarePng);
     final ResizeImage provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
-    final MultiFrameImageStreamCompleter completer = provider.loadBuffer(
-      await provider.obtainKey(ImageConfiguration.empty),
-      decoder,
-    ) as MultiFrameImageStreamCompleter;
+    final MultiFrameImageStreamCompleter completer =
+        provider.loadBuffer(
+              await provider.obtainKey(ImageConfiguration.empty),
+              noOpDecoderBufferCallback,
+            )
+            as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });
@@ -152,8 +170,14 @@ void main() {
     expect(imageCache.statusForKey(provider).pending, true);
     expect(imageCache.pendingImageCount, 1);
 
-    expect(await error.future, isException
-      .having((Exception exception) => exception.toString(), 'toString', contains('Invalid image data')));
+    expect(
+      await error.future,
+      isException.having(
+        (Exception exception) => exception.toString(),
+        'toString',
+        contains('Invalid image data'),
+      ),
+    );
 
     // Invalid images are marked as pending so that we do not attempt to reload them.
     expect(imageCache.statusForKey(provider).untracked, false);
@@ -162,25 +186,15 @@ void main() {
 
   test('ImageProvider toStrings', () async {
     expect(const NetworkImage('test', scale: 1.21).toString(), 'NetworkImage("test", scale: 1.2)');
-    expect(const ExactAssetImage('test', scale: 1.21).toString(), 'ExactAssetImage(name: "test", scale: 1.2, bundle: null)');
-    expect(MemoryImage(Uint8List(0), scale: 1.21).toString(), equalsIgnoringHashCodes('MemoryImage(Uint8List#00000, scale: 1.2)'));
+    expect(
+      const ExactAssetImage('test', scale: 1.21).toString(),
+      'ExactAssetImage(name: "test", scale: 1.2, bundle: null)',
+    );
+    expect(
+      MemoryImage(Uint8List(0), scale: 1.21).toString(),
+      equalsIgnoringHashCodes('MemoryImage(Uint8List#00000, scale: 1.2)'),
+    );
   });
-}
-
-class FakeCodec implements Codec {
-  @override
-  void dispose() {}
-
-  @override
-  int get frameCount => throw UnimplementedError();
-
-  @override
-  Future<FrameInfo> getNextFrame() {
-    throw UnimplementedError();
-  }
-
-  @override
-  int get repetitionCount => throw UnimplementedError();
 }
 
 class _TestAssetBundle extends CachingAssetBundle {

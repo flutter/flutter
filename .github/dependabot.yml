@@ -3,38 +3,22 @@
 
 version: 2
 updates:
-  - package-ecosystem: "bundler"
-    directory: "/dev/ci/mac"
-    schedule:
-      interval: "weekly"
-    reviewers:
-      - "christopherfujino"
-      - "jmagman"
-      - "keyonghan"
-      - "yusuf-goog"
-    labels:
-      - "team"
-      - "team-infra"
-      - "autosubmit"
-  - package-ecosystem: "docker"
-    directory: "/dev/ci/docker_linux"
-    schedule:
-      interval: "weekly"
-    reviewers:
-      - "keyonghan"
-      - "yusuf-goog"
-      - "christopherfujino"
-    labels:
-      - "team"
-      - "team-infra"
-      - "autosubmit"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+    groups:
+      all-github-actions:
+        patterns: [ "*" ]
     reviewers:
-      - "godofredoc"
+      - "christopherfujino"
+      - "jmagman"
     labels:
       - "team"
       - "team-infra"
       - "autosubmit"
+    # Updating patch versions for "github-actions" is too chatty.
+    # See https://github.com/flutter/flutter/issues/158350.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]

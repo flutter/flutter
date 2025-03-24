@@ -4,6 +4,7 @@
 
 import '../../base/file_system.dart';
 import '../../convert.dart';
+import '../../features.dart';
 import '../../localizations/gen_l10n.dart';
 import '../../localizations/localizations_utils.dart';
 import '../build_system.dart';
@@ -22,7 +23,9 @@ class GenerateLocalizationsTarget extends Target {
   @override
   List<Source> get inputs => <Source>[
     // This is added as a convenience for developing the tool.
-    const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/localizations.dart'),
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/localizations.dart',
+    ),
   ];
 
   @override
@@ -56,6 +59,7 @@ class GenerateLocalizationsTarget extends Target {
       file: configFile,
       logger: environment.logger,
       defaultArbDir: defaultArbDir,
+      defaultSyntheticPackage: !featureFlags.isExplicitPackageDependenciesEnabled,
     );
     await generateLocalizations(
       logger: environment.logger,
@@ -67,9 +71,9 @@ class GenerateLocalizationsTarget extends Target {
       processManager: environment.processManager,
     );
 
-    final Map<String, Object?> dependencies = json.decode(
-      environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync()
-    ) as Map<String, Object?>;
+    final Map<String, Object?> dependencies =
+        json.decode(environment.buildDir.childFile(_kDependenciesFileName).readAsStringSync())
+            as Map<String, Object?>;
     final List<Object?>? inputs = dependencies['inputs'] as List<Object?>?;
     final List<Object?>? outputs = dependencies['outputs'] as List<Object?>?;
     final Depfile depfile = Depfile(

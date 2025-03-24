@@ -30,12 +30,14 @@ class SliverGridDelegateWithFixedCrossAxisCountExample extends StatelessWidget {
     return GridView(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
-        childAspectRatio: 0.5,
+        childAspectRatio: 2,
       ),
       children: List<Widget>.generate(20, (int i) {
-        return Builder(builder: (BuildContext context) {
-          return Text('$i');
-        });
+        return Builder(
+          builder: (BuildContext context) {
+            return Text('$i');
+          },
+        );
       }),
     );
   }

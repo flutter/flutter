@@ -27,15 +27,25 @@ if (flutterVersionName == null) {
 }
 
 android {
-    compileSdk flutter.compileSdkVersion
+    namespace = "com.example.tracing_tests"
+    compileSdk = flutter.compileSdkVersion
+
+    // Flutter's CI installs the NDK at a non-standard path.
+    // This non-standard structure is initially created by
+    // https://github.com/flutter/engine/blob/3.27.0/tools/android_sdk/create_cipd_packages.sh.
+    String systemNdkPath = System.getenv("ANDROID_NDK_PATH")
+    if (systemNdkPath != null) {
+        ndkVersion = flutter.ndkVersion
+        ndkPath = systemNdkPath
+    }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     sourceSets {
@@ -45,10 +55,10 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.tracing_tests"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
-        versionCode flutterVersionCode.toInteger()
-        versionName flutterVersionName
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
     }
 
     buildTypes {

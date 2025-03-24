@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_buttons.dart';
+/// @docImport 'animated_icons.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'list_tile.dart';
+library;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -42,6 +48,10 @@ import 'theme.dart';
 /// route created by this method is pushed to the nearest navigator to the
 /// given `context`. It can not be `null`.
 ///
+/// The `maintainState` argument is used to determine if the route should remain
+/// in memory when it is inactive (see [ModalRoute.maintainState] for more details].
+/// By default, `maintainState` is `false`.
+///
 /// The transition to the search page triggered by this method looks best if the
 /// screen triggering the transition contains an [AppBar] at the top and the
 /// transition is called from an [IconButton] that's part of [AppBar.actions].
@@ -62,12 +72,14 @@ Future<T?> showSearch<T>({
   required SearchDelegate<T> delegate,
   String? query = '',
   bool useRootNavigator = false,
+  bool maintainState = false,
 }) {
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
-  return Navigator.of(context, rootNavigator: useRootNavigator).push(_SearchPageRoute<T>(
-    delegate: delegate,
-  ));
+  return Navigator.of(
+    context,
+    rootNavigator: useRootNavigator,
+  ).push(_SearchPageRoute<T>(delegate: delegate, maintainState: maintainState));
 }
 
 /// Delegate for [showSearch] to define the content of the search page.
@@ -143,6 +155,8 @@ abstract class SearchDelegate<T> {
     this.searchFieldDecorationTheme,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
+    this.autocorrect = true,
+    this.enableSuggestions = true,
   }) : assert(searchFieldStyle == null || searchFieldDecorationTheme == null);
 
   /// Suggestions shown in the body of the search page while the user types a
@@ -247,15 +261,18 @@ abstract class SearchDelegate<T> {
     final ColorScheme colorScheme = theme.colorScheme;
     return theme.copyWith(
       appBarTheme: AppBarTheme(
-        systemOverlayStyle: colorScheme.brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
-        backgroundColor: colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
+        systemOverlayStyle:
+            colorScheme.brightness == Brightness.dark
+                ? SystemUiOverlayStyle.light
+                : SystemUiOverlayStyle.dark,
+        backgroundColor:
+            colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
         iconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
         titleTextStyle: theme.textTheme.titleLarge,
         toolbarTextStyle: theme.textTheme.bodyMedium,
       ),
-      inputDecorationTheme: searchFieldDecorationTheme ??
+      inputDecorationTheme:
+          searchFieldDecorationTheme ??
           InputDecorationTheme(
             hintStyle: searchFieldStyle ?? theme.inputDecorationTheme.hintStyle,
             border: InputBorder.none,
@@ -275,10 +292,10 @@ abstract class SearchDelegate<T> {
   ///
   /// Setting the query string programmatically moves the cursor to the end of the text field.
   set query(String value) {
-    _queryTextController.text = value;
-    if (_queryTextController.text.isNotEmpty) {
-      _queryTextController.selection = TextSelection.fromPosition(TextPosition(offset: _queryTextController.text.length));
-    }
+    _queryTextController.value = TextEditingValue(
+      text: value,
+      selection: TextSelection.collapsed(offset: value.length),
+    );
   }
 
   /// Transition from the suggestions returned by [buildSuggestions] to the
@@ -353,6 +370,12 @@ abstract class SearchDelegate<T> {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
+  /// {@macro flutter.widgets.editableText.autocorrect}
+  final bool autocorrect;
+
+  /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
+  final bool enableSuggestions;
+
   /// The text input action configuring the soft keyboard to a particular action
   /// button.
   ///
@@ -409,9 +432,7 @@ enum _SearchBody {
 }
 
 class _SearchPageRoute<T> extends PageRoute<T> {
-  _SearchPageRoute({
-    required this.delegate,
-  }) {
+  _SearchPageRoute({required this.delegate, required this.maintainState}) {
     assert(
       delegate._route == null,
       'The ${delegate.runtimeType} instance is currently used by another active '
@@ -424,6 +445,9 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   final SearchDelegate<T> delegate;
 
   @override
+  final bool maintainState;
+
+  @override
   Color? get barrierColor => null;
 
   @override
@@ -433,19 +457,13 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  bool get maintainState => false;
-
-  @override
   Widget buildTransitions(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return FadeTransition(
-      opacity: animation,
-      child: child,
-    );
+    return FadeTransition(opacity: animation, child: child);
   }
 
   @override
@@ -461,10 +479,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return _SearchPage<T>(
-      delegate: delegate,
-      animation: animation,
-    );
+    return _SearchPage<T>(delegate: delegate, animation: animation);
   }
 
   @override
@@ -477,10 +492,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 }
 
 class _SearchPage<T> extends StatefulWidget {
-  const _SearchPage({
-    required this.delegate,
-    required this.animation,
-  });
+  const _SearchPage({required this.delegate, required this.animation});
 
   final SearchDelegate<T> delegate;
   final Animation<double> animation;
@@ -515,7 +527,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
-    if (status != AnimationStatus.completed) {
+    if (!status.isCompleted) {
       return;
     }
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
@@ -559,8 +571,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = widget.delegate.searchFieldLabel
-      ?? MaterialLocalizations.of(context).searchFieldLabel;
+    final String searchFieldLabel =
+        widget.delegate.searchFieldLabel ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget? body;
     switch (widget.delegate._currentBody) {
       case _SearchBody.suggestions:
@@ -606,6 +618,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               focusNode: focusNode,
               style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
               textInputAction: widget.delegate.textInputAction,
+              autocorrect: widget.delegate.autocorrect,
+              enableSuggestions: widget.delegate.enableSuggestions,
               keyboardType: widget.delegate.keyboardType,
               onSubmitted: (String _) => widget.delegate.showResults(context),
               decoration: InputDecoration(hintText: searchFieldLabel),
@@ -614,10 +628,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             actions: widget.delegate.buildActions(context),
             bottom: widget.delegate.buildBottom(context),
           ),
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: body,
-          ),
+          body: AnimatedSwitcher(duration: const Duration(milliseconds: 300), child: body),
         ),
       ),
     );

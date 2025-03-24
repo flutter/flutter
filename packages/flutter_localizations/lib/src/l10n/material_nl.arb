@@ -144,7 +144,7 @@
   "menuDismissLabel": "Menu sluiten",
   "lookUpButtonLabel": "Opzoeken",
   "searchWebButtonLabel": "Op internet zoeken",
-  "shareButtonLabel": "Delen...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Delen",
+  "clearButtonTooltip": "Tekst wissen",
+  "selectedDateLabel": "Geselecteerd"
 }

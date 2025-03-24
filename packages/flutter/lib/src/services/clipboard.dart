@@ -13,7 +13,7 @@ import 'system_channels.dart';
 @immutable
 class ClipboardData {
   /// Creates data for the system clipboard.
-  const ClipboardData({ required String this.text });
+  const ClipboardData({required String this.text});
 
   /// Plain text variant of this clipboard data.
   // This is nullable as other clipboard data variants, like images, may be
@@ -33,12 +33,9 @@ abstract final class Clipboard {
 
   /// Stores the given clipboard data on the clipboard.
   static Future<void> setData(ClipboardData data) async {
-    await SystemChannels.platform.invokeMethod<void>(
-      'Clipboard.setData',
-      <String, dynamic>{
-        'text': data.text,
-      },
-    );
+    await SystemChannels.platform.invokeMethod<void>('Clipboard.setData', <String, dynamic>{
+      'text': data.text,
+    });
   }
 
   /// Retrieves data from the clipboard that matches the given format.
@@ -59,8 +56,8 @@ abstract final class Clipboard {
     return ClipboardData(text: result['text'] as String);
   }
 
-  /// Returns a future that resolves to true iff the clipboard contains string
-  /// data.
+  /// Returns a future that resolves to true, if (and only if)
+  /// the clipboard contains string data.
   ///
   /// See also:
   ///   * [The iOS hasStrings method](https://developer.apple.com/documentation/uikit/uipasteboard/1829416-hasstrings?language=objc).

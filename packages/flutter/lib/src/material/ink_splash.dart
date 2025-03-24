@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'button_style.dart';
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'ink_highlight.dart';
+/// @docImport 'ink_ripple.dart';
+/// @docImport 'theme.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
@@ -15,7 +22,11 @@ const Duration _kSplashFadeDuration = Duration(milliseconds: 200);
 const double _kSplashInitialSize = 0.0; // logical pixels
 const double _kSplashConfirmedVelocity = 1.0; // logical pixels per millisecond
 
-RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
+RectCallback? _getClipCallback(
+  RenderBox referenceBox,
+  bool containedInkWell,
+  RectCallback? rectCallback,
+) {
   if (rectCallback != null) {
     assert(containedInkWell);
     return rectCallback;
@@ -26,7 +37,12 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback, Offset position) {
+double _getTargetRadius(
+  RenderBox referenceBox,
+  bool containedInkWell,
+  RectCallback? rectCallback,
+  Offset position,
+) {
   if (containedInkWell) {
     final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
     return _getSplashRadiusForPositionInSize(size, position);
@@ -127,25 +143,24 @@ class InkSplash extends InteractiveInkFeature {
     super.onRemoved,
   }) : _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
-       _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position!),
+       _targetRadius =
+           radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position!),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
        _textDirection = textDirection,
        super(controller: controller, color: color) {
-    _radiusController = AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..forward();
-    _radius = _radiusController.drive(Tween<double>(
-      begin: _kSplashInitialSize,
-      end: _targetRadius,
-    ));
-    _alphaController = AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..addStatusListener(_handleAlphaStatusChanged);
-    _alpha = _alphaController!.drive(IntTween(
-      begin: color.alpha,
-      end: 0,
-    ));
+    _radiusController =
+        AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
+          ..addListener(controller.markNeedsPaint)
+          ..forward();
+    _radius = _radiusController.drive(
+      Tween<double>(begin: _kSplashInitialSize, end: _targetRadius),
+    );
+    _alphaController =
+        AnimationController(duration: _kSplashFadeDuration, vsync: controller.vsync)
+          ..addListener(controller.markNeedsPaint)
+          ..addStatusListener(_handleAlphaStatusChanged);
+    _alpha = _alphaController!.drive(IntTween(begin: color.alpha, end: 0));
 
     controller.addInkFeature(this);
   }
@@ -182,7 +197,7 @@ class InkSplash extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
+    if (status.isCompleted) {
       dispose();
     }
   }

@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.numerators].
+/// Flutter code sample for [FontFeature.numerators].
 
 void main() => runApp(const ExampleApp());
 
@@ -32,9 +32,7 @@ class ExampleWidget extends StatelessWidget {
       'Fractions: 1/2 2/3 3/4 4/5',
       style: TextStyle(
         fontFamily: 'Piazzolla',
-        fontFeatures: <FontFeature>[
-          FontFeature.numerators(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.numerators()],
       ),
     );
   }

@@ -31,8 +31,7 @@ class ShrineApp extends StatefulWidget {
   State<ShrineApp> createState() => _ShrineAppState();
 }
 
-class _ShrineAppState extends State<ShrineApp>
-    with TickerProviderStateMixin, RestorationMixin {
+class _ShrineAppState extends State<ShrineApp> with TickerProviderStateMixin, RestorationMixin {
   // Controller to coordinate both the opening/closing of backdrop and sliding
   // of expanding bottom sheet
   late AnimationController _controller;
@@ -52,10 +51,7 @@ class _ShrineAppState extends State<ShrineApp>
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_model, 'app_state_model');
     registerForRestoration(_tabIndex, 'tab_index');
-    registerForRestoration(
-      _expandingTabIndex,
-      'expanding_tab_index',
-    );
+    registerForRestoration(_expandingTabIndex, 'expanding_tab_index');
     _controller.value = _tabIndex.value;
     _expandingController.value = _expandingTabIndex.value;
   }
@@ -71,8 +67,7 @@ class _ShrineAppState extends State<ShrineApp>
     // Save state restoration animation values only when the cart page
     // fully opens or closes.
     _controller.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed ||
-          status == AnimationStatus.dismissed) {
+      if (!status.isAnimating) {
         _tabIndex.value = _controller.value;
       }
     });
@@ -83,8 +78,7 @@ class _ShrineAppState extends State<ShrineApp>
     // Save state restoration animation values only when the menu page
     // fully opens or closes.
     _expandingController.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed ||
-          status == AnimationStatus.dismissed) {
+      if (!status.isAnimating) {
         _expandingTabIndex.value = _expandingController.value;
       }
     });
@@ -110,17 +104,12 @@ class _ShrineAppState extends State<ShrineApp>
   }
 
   Widget desktopBackdrop() {
-    return const DesktopBackdrop(
-      frontLayer: ProductPage(),
-      backLayer: CategoryMenuPage(),
-    );
+    return const DesktopBackdrop(frontLayer: ProductPage(), backLayer: CategoryMenuPage());
   }
 
   // Closes the bottom sheet if it is open.
   Future<bool> _onWillPop() async {
-    final AnimationStatus status = _expandingController.status;
-    if (status == AnimationStatus.completed ||
-        status == AnimationStatus.forward) {
+    if (_expandingController.isForwardOrCompleted) {
       await _expandingController.reverse();
       return false;
     }
@@ -136,16 +125,15 @@ class _ShrineAppState extends State<ShrineApp>
         menuController: _controller,
         cartController: _expandingController,
         child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) => HomePage(
-            backdrop: isDisplayDesktop(context)
-                ? desktopBackdrop()
-                : mobileBackdrop(),
-            scrim: Scrim(controller: _expandingController),
-            expandingBottomSheet: ExpandingBottomSheet(
-              hideController: _controller,
-              expandingController: _expandingController,
-            ),
-          ),
+          builder:
+              (BuildContext context, BoxConstraints constraints) => HomePage(
+                backdrop: isDisplayDesktop(context) ? desktopBackdrop() : mobileBackdrop(),
+                scrim: Scrim(controller: _expandingController),
+                expandingBottomSheet: ExpandingBottomSheet(
+                  hideController: _controller,
+                  expandingController: _expandingController,
+                ),
+              ),
         ),
       ),
     );
@@ -160,8 +148,7 @@ class _ShrineAppState extends State<ShrineApp>
           // ScrollBehavior. This overrides that. All vertical scrollables in
           // the gallery need to be audited before enabling this feature,
           // see https://github.com/flutter/gallery/issues/541
-          scrollBehavior:
-              const MaterialScrollBehavior().copyWith(scrollbars: false),
+          scrollBehavior: const MaterialScrollBehavior().copyWith(scrollbars: false),
           restorationScopeId: 'shrineApp',
           title: 'Shrine',
           debugShowCheckedModeBanner: false,
@@ -170,9 +157,7 @@ class _ShrineAppState extends State<ShrineApp>
             ShrineApp.loginRoute: (BuildContext context) => const LoginPage(),
             ShrineApp.homeRoute: (BuildContext context) => home,
           },
-          theme: shrineTheme.copyWith(
-            platform: GalleryOptions.of(context).platform,
-          ),
+          theme: shrineTheme.copyWith(platform: GalleryOptions.of(context).platform),
           // L10n settings.
           localizationsDelegates: GalleryLocalizations.localizationsDelegates,
           supportedLocales: GalleryLocalizations.supportedLocales,

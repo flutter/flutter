@@ -4,7 +4,7 @@ Script that generates component theme data defaults based on token data.
 
 ## Usage
 Run this program from the root of the git repository:
-```
+```sh
 dart dev/tools/gen_defaults/bin/gen_defaults.dart [-v]
 ```
 

@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/widgets.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'simulation.dart';
@@ -65,12 +68,8 @@ class GravitySimulation extends Simulation {
   /// that must be used for the velocity and acceleration arguments: L/T and
   /// L/T² respectively. The same units of velocity are used for the velocity
   /// obtained from [dx].
-  GravitySimulation(
-    double acceleration,
-    double distance,
-    double endDistance,
-    double velocity,
-  ) : assert(endDistance >= 0),
+  GravitySimulation(double acceleration, double distance, double endDistance, double velocity)
+    : assert(endDistance >= 0),
       _a = acceleration,
       _x = distance,
       _v = velocity,
@@ -91,5 +90,6 @@ class GravitySimulation extends Simulation {
   bool isDone(double time) => x(time).abs() >= _end;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'GravitySimulation')}(g: ${_a.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)}, xₘₐₓ: ±${_end.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'GravitySimulation')}(g: ${_a.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)}, xₘₐₓ: ±${_end.toStringAsFixed(1)})';
 }

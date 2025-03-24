@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'app.dart';
+/// @docImport 'color_scheme.dart';
+/// @docImport 'text_theme.dart';
+library;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
@@ -27,6 +32,14 @@ const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 /// The [Theme] widget implies an [IconTheme] widget, set to the value of the
 /// [ThemeData.iconTheme] of the [data] for the [Theme].
 ///
+/// To interact seamlessly with descendant Cupertino widgets, the [Theme] widget
+/// provides a [CupertinoTheme] for its descendants with a [CupertinoThemeData] inherited
+/// from the nearest ancestor [CupertinoTheme] or if none exists, derived from the
+/// Material [data] for the [Theme]. The values in the Material derived [CupertinoThemeData]
+/// are overridable through [ThemeData.cupertinoOverrideTheme]. The values from an
+/// inherited [CupertinoThemeData] can be overriden by wrapping the desired subtree
+/// with a [CupertinoTheme].
+///
 /// See also:
 ///
 ///  * [ThemeData], which describes the actual configuration of a theme.
@@ -36,11 +49,7 @@ const Duration kThemeAnimationDuration = Duration(milliseconds: 200);
 ///    the [MaterialApp.theme] argument.
 class Theme extends StatelessWidget {
   /// Applies the given theme [data] to [child].
-  const Theme({
-    super.key,
-    required this.data,
-    required this.child,
-  });
+  const Theme({super.key, required this.data, required this.child});
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -101,11 +110,32 @@ class Theme extends StatelessWidget {
   ///   );
   /// }
   /// ```
+  ///
+  /// See also:
+  ///
+  /// * [ColorScheme.of], a convenience method that returns [ThemeData.colorScheme]
+  ///   from the closest [Theme] ancestor. (equivalent to `Theme.of(context).colorScheme`).
+  /// * [TextTheme.of], a convenience method that returns [ThemeData.textTheme]
+  ///   from the closest [Theme] ancestor. (equivalent to `Theme.of(context).textTheme`).
+  /// * [IconTheme.of], that returns [ThemeData.iconTheme] from the closest [Theme] or
+  ///   [IconThemeData.fallback] if there is no [IconTheme] ancestor.
   static ThemeData of(BuildContext context) {
-    final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
-    final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
+    final _InheritedTheme? inheritedTheme =
+        context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
+    final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(
+      context,
+      MaterialLocalizations,
+    );
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
-    final ThemeData theme = inheritedTheme?.theme.data ?? _kFallbackTheme;
+    final InheritedCupertinoTheme? inheritedCupertinoTheme =
+        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    final ThemeData theme =
+        inheritedTheme?.theme.data ??
+        (inheritedCupertinoTheme != null
+            ? CupertinoBasedMaterialThemeData(
+              themeData: inheritedCupertinoTheme.theme.data,
+            ).materialTheme
+            : _kFallbackTheme);
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
@@ -124,17 +154,22 @@ class Theme extends StatelessWidget {
     );
   }
 
+  CupertinoThemeData _inheritedCupertinoThemeData(BuildContext context) {
+    final InheritedCupertinoTheme? inheritedTheme =
+        context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
+    return (inheritedTheme?.theme.data ?? MaterialBasedCupertinoThemeData(materialTheme: data))
+        .resolveFrom(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return _InheritedTheme(
       theme: this,
       child: CupertinoTheme(
-        // We're using a MaterialBasedCupertinoThemeData here instead of a
-        // CupertinoThemeData because it defers some properties to the Material
-        // ThemeData.
-        data: MaterialBasedCupertinoThemeData(
-          materialTheme: data,
-        ),
+        // If a CupertinoThemeData doesn't exist, we're using a
+        // MaterialBasedCupertinoThemeData here instead of a CupertinoThemeData
+        // because it defers some properties to the Material ThemeData.
+        data: _inheritedCupertinoThemeData(context),
         child: _wrapsWidgetThemes(context, child),
       ),
     );
@@ -148,10 +183,7 @@ class Theme extends StatelessWidget {
 }
 
 class _InheritedTheme extends InheritedTheme {
-  const _InheritedTheme({
-    required this.theme,
-    required super.child,
-  });
+  const _InheritedTheme({required this.theme, required super.child});
 
   final Theme theme;
 
@@ -176,7 +208,7 @@ class ThemeDataTween extends Tween<ThemeData> {
   /// The [begin] and [end] properties must be non-null before the tween is
   /// first used, but the arguments can be null if the values are going to be
   /// filled in later.
-  ThemeDataTween({ super.begin, super.end });
+  ThemeDataTween({super.begin, super.end});
 
   @override
   ThemeData lerp(double t) => ThemeData.lerp(begin!, end!, t);
@@ -226,20 +258,21 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _data = visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value as ThemeData))! as ThemeDataTween;
+    _data =
+        visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value as ThemeData))!
+            as ThemeDataTween;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: _data!.evaluate(animation),
-      child: widget.child,
-    );
+    return Theme(data: _data!.evaluate(animation), child: widget.child);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<ThemeDataTween>('data', _data, showName: false, defaultValue: null));
+    description.add(
+      DiagnosticsProperty<ThemeDataTween>('data', _data, showName: false, defaultValue: null),
+    );
   }
 }

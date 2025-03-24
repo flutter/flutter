@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Contents of this file should be generated automatically by
-// dev/tools/bin/generate_gradle_lockfiles.dart, but currently are not.
-// See #141540.
+// This file is auto generated.
+// To update all the settings.gradle files in the Flutter repo,
+// See dev/tools/bin/generate_gradle_lockfiles.dart.
 
 pluginManagement {
     val flutterSdkPath =
@@ -34,8 +34,8 @@ buildscript {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "7.4.2" apply false
-    id("org.jetbrains.kotlin.android") version "1.7.10" apply false
+    id("com.android.application") version "8.7.0" apply false
+    id("org.jetbrains.kotlin.android") version "1.8.22" apply false
 }
 
 include(":app")

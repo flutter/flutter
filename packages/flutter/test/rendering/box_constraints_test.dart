@@ -23,12 +23,7 @@ void main() {
     );
     BoxConstraints copy = constraints.copyWith();
     expect(copy, equals(constraints));
-    copy = constraints.copyWith(
-      minWidth: 13.0,
-      maxWidth: 17.0,
-      minHeight: 111.0,
-      maxHeight: 117.0,
-    );
+    copy = constraints.copyWith(minWidth: 13.0, maxWidth: 17.0, minHeight: 111.0, maxHeight: 117.0);
     expect(copy.minWidth, 13.0);
     expect(copy.maxWidth, 17.0);
     expect(copy.minHeight, 111.0);
@@ -80,12 +75,12 @@ void main() {
     expect(copy.maxWidth, moreOrLessEquals(3.5));
     expect(copy.minHeight, moreOrLessEquals(5.5));
     expect(copy.maxHeight, moreOrLessEquals(8.5));
-    copy = BoxConstraints.lerp(const BoxConstraints(
-      minWidth: 13.0,
-      maxWidth: 17.0,
-      minHeight: 111.0,
-      maxHeight: 117.0,
-    ), constraints, 0.2)!;
+    copy =
+        BoxConstraints.lerp(
+          const BoxConstraints(minWidth: 13.0, maxWidth: 17.0, minHeight: 111.0, maxHeight: 117.0),
+          constraints,
+          0.2,
+        )!;
     expect(copy.minWidth, moreOrLessEquals(11.0));
     expect(copy.maxWidth, moreOrLessEquals(15.0));
     expect(copy.minHeight, moreOrLessEquals(91.0));
@@ -182,4 +177,17 @@ void main() {
     expect(constraints, const BoxConstraints(minWidth: 1, maxWidth: 2, minHeight: 3, maxHeight: 4));
   });
 
+  test('BoxConstraints.constrainSizeAndAttemptToPreserveAspectRatio can handle empty size', () {
+    const BoxConstraints constraints = BoxConstraints(
+      minWidth: 10.0,
+      maxWidth: 20.0,
+      minHeight: 10.0,
+      maxHeight: 20.0,
+    );
+    const Size unconstrainedSize = Size(15.0, 0.0);
+    final Size constrainedSize = constraints.constrainSizeAndAttemptToPreserveAspectRatio(
+      unconstrainedSize,
+    );
+    expect(constrainedSize, const Size(15.0, 10.0));
+  });
 }

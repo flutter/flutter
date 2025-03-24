@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'action_chip.dart';
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'filter_chip.dart';
+/// @docImport 'material.dart';
+library;
+
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
@@ -124,6 +131,8 @@ class InputChip extends StatelessWidget
     this.avatarBorder = const CircleBorder(),
     this.avatarBoxConstraints,
     this.deleteIconBoxConstraints,
+    this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
@@ -199,15 +208,18 @@ class InputChip extends StatelessWidget
   final BoxConstraints? avatarBoxConstraints;
   @override
   final BoxConstraints? deleteIconBoxConstraints;
+  @override
+  final ChipAnimationStyle? chipAnimationStyle;
+  @override
+  final MouseCursor? mouseCursor;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _InputChipDefaultsM3(context, isEnabled, selected)
-      : null;
-    final Widget? resolvedDeleteIcon = deleteIcon
-      ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
+    final ChipThemeData? defaults =
+        Theme.of(context).useMaterial3 ? _InputChipDefaultsM3(context, isEnabled, selected) : null;
+    final Widget? resolvedDeleteIcon =
+        deleteIcon ?? (Theme.of(context).useMaterial3 ? const Icon(Icons.clear, size: 18) : null);
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -246,6 +258,8 @@ class InputChip extends StatelessWidget
       iconTheme: iconTheme,
       avatarBoxConstraints: avatarBoxConstraints,
       deleteIconBoxConstraints: deleteIconBoxConstraints,
+      chipAnimationStyle: chipAnimationStyle,
+      mouseCursor: mouseCursor,
     );
   }
 }
@@ -257,6 +271,7 @@ class InputChip extends StatelessWidget
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _InputChipDefaultsM3 extends ChipThemeData {
   _InputChipDefaultsM3(this.context, this.isEnabled, this.isSelected)
     : super(
@@ -318,7 +333,7 @@ class _InputChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => !isSelected
     ? isEnabled
-      ? BorderSide(color: _colors.outline)
+      ? BorderSide(color: _colors.outlineVariant)
       : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
@@ -354,5 +369,6 @@ class _InputChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - InputChip

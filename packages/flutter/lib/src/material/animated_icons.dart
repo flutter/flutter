@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 /// Flutter widgets implementing Material Design animated icons.
+/// @docImport 'package:flutter/semantics.dart';
+///
+/// @docImport 'icons.dart';
+/// @docImport 'theme.dart';
 library material_animated_icons;
 
 import 'dart:math' as math show pi;

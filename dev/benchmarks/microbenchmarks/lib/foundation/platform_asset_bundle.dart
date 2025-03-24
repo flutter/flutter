@@ -10,9 +10,8 @@ import '../common.dart';
 const int _kBatchSize = 100;
 const int _kNumIterations = 100;
 
-void main() async {
-  assert(false,
-      "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
+Future<void> execute() async {
+  assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   WidgetsFlutterBinding.ensureInitialized();
   final Stopwatch watch = Stopwatch();
@@ -27,7 +26,10 @@ void main() async {
       // We don't load images like this. PlatformAssetBundle is used for
       // other assets (like Rive animations). We are using an image because it's
       // conveniently sized and available for the test.
-      tally += (await bundle.load('packages/flutter_gallery_assets/places/india_pondicherry_salt_farm.png')).lengthInBytes;
+      tally +=
+          (await bundle.load(
+            'packages/flutter_gallery_assets/places/india_pondicherry_salt_farm.png',
+          )).lengthInBytes;
     }
     watch.stop();
     values.add(watch.elapsedMicroseconds.toDouble() / _kBatchSize);

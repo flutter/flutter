@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'box_border.dart';
+/// @docImport 'box_decoration.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
@@ -144,9 +151,9 @@ abstract class Decoration with Diagnosticable {
     if (t == 1.0) {
       return b;
     }
-    return b.lerpFrom(a, t)
-        ?? a.lerpTo(b, t)
-        ?? (t < 0.5 ? (a.lerpTo(null, t * 2.0) ?? a) : (b.lerpFrom(null, (t - 0.5) * 2.0) ?? b));
+    return b.lerpFrom(a, t) ??
+        a.lerpTo(b, t) ??
+        (t < 0.5 ? (a.lerpTo(null, t * 2.0) ?? a) : (b.lerpFrom(null, (t - 0.5) * 2.0) ?? b));
   }
 
   /// Tests whether the given point, on a rectangle of a given size,
@@ -164,7 +171,7 @@ abstract class Decoration with Diagnosticable {
   /// is what [Container] uses), the `textDirection` parameter will be populated
   /// based on the ambient [Directionality] (by way of the [RenderDecoratedBox]
   /// renderer).
-  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) => true;
+  bool hitTest(Size size, Offset position, {TextDirection? textDirection}) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.
   ///
@@ -172,7 +179,7 @@ abstract class Decoration with Diagnosticable {
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
   @factory
-  BoxPainter createBoxPainter([ VoidCallback onChanged ]);
+  BoxPainter createBoxPainter([VoidCallback onChanged]);
 
   /// Returns a closed [Path] that describes the outer edge of this decoration.
   ///
@@ -185,7 +192,9 @@ abstract class Decoration with Diagnosticable {
   ///  * [Container.clipBehavior], which, if set, uses this method to determine
   ///    the clip path to use.
   Path getClipPath(Rect rect, TextDirection textDirection) {
-    throw UnsupportedError('${objectRuntimeType(this, 'This Decoration subclass')} does not expect to be used for clipping.');
+    throw UnsupportedError(
+      '${objectRuntimeType(this, 'This Decoration subclass')} does not expect to be used for clipping.',
+    );
   }
 }
 
@@ -243,5 +252,5 @@ abstract class BoxPainter {
   /// The [onChanged] callback will not be invoked after this method has been
   /// called.
   @mustCallSuper
-  void dispose() { }
+  void dispose() {}
 }

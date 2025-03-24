@@ -2,6 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:developer';
+/// @docImport 'dart:ui';
+///
+/// @docImport 'package:flutter_test/flutter_test.dart';
+///
+/// @docImport 'borders.dart';
+/// @docImport 'box_decoration.dart';
+/// @docImport 'box_shadow.dart';
+/// @docImport 'image_provider.dart';
+/// @docImport 'shader_warm_up.dart';
+/// @docImport 'shape_decoration.dart';
+library;
+
 import 'dart:io';
 import 'dart:ui' show Image, Picture, Size;
 
@@ -80,21 +93,15 @@ class ImageSizeInfo {
   int _sizeToBytes(Size size) {
     // Assume 4 bytes per pixel and that mipmapping will be used, which adds
     // 4/3.
-    return (size.width * size.height * 4 * (4/3)).toInt();
+    return (size.width * size.height * 4 * (4 / 3)).toInt();
   }
 
   /// Returns a JSON encodable representation of this object.
   Map<String, Object?> toJson() {
     return <String, Object?>{
       'source': source,
-      'displaySize': <String, Object?>{
-        'width': displaySize.width,
-        'height': displaySize.height,
-      },
-      'imageSize': <String, Object?>{
-        'width': imageSize.width,
-        'height': imageSize.height,
-      },
+      'displaySize': <String, Object?>{'width': displaySize.width, 'height': displaySize.height},
+      'imageSize': <String, Object?>{'width': imageSize.width, 'height': imageSize.height},
       'displaySizeInBytes': displaySizeInBytes,
       'decodedSizeInBytes': decodedSizeInBytes,
     };
@@ -105,10 +112,10 @@ class ImageSizeInfo {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ImageSizeInfo
-        && other.source == source
-        && other.imageSize == imageSize
-        && other.displaySize == displaySize;
+    return other is ImageSizeInfo &&
+        other.source == source &&
+        other.imageSize == imageSize &&
+        other.displaySize == displaySize;
   }
 
   @override
@@ -186,7 +193,7 @@ int debugImageOverheadAllowance = _imageOverheadAllowanceDefault;
 /// The `debugDisableShadowsOverride` argument can be provided to override
 /// the expected value for [debugDisableShadows]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
+bool debugAssertAllPaintingVarsUnset(String reason, {bool debugDisableShadowsOverride = false}) {
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||

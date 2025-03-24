@@ -144,7 +144,7 @@
   "menuDismissLabel": "ਮੀਨੂ ਖਾਰਜ ਕਰੋ",
   "lookUpButtonLabel": "ਖੋਜੋ",
   "searchWebButtonLabel": "ਵੈੱਬ 'ਤੇ ਖੋਜੋ",
-  "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "ਸਾਂਝਾ ਕਰੋ",
+  "clearButtonTooltip": "ਲਿਖਤ ਕਲੀਅਰ ਕਰੋ",
+  "selectedDateLabel": "ਚੁਣਿਆ ਗਿਆ"
 }

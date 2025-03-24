@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show
-  debugPaintBaselinesEnabled,
-  debugPaintLayerBordersEnabled,
-  debugPaintPointersEnabled,
-  debugPaintSizeEnabled,
-  debugRepaintRainbowEnabled;
+import 'package:flutter/rendering.dart'
+    show
+        debugPaintBaselinesEnabled,
+        debugPaintLayerBordersEnabled,
+        debugPaintPointersEnabled,
+        debugPaintSizeEnabled,
+        debugRepaintRainbowEnabled;
 
 import 'i18n/stock_strings.dart';
 import 'stock_data.dart';
@@ -47,20 +48,14 @@ class StocksAppState extends State<StocksApp> {
   }
 
   ThemeData get theme {
-    switch (_configuration.stockMode) {
-      case StockMode.optimistic:
-        return ThemeData(
-          useMaterial3: false,
-          brightness: Brightness.light,
-          primarySwatch: Colors.purple,
-        );
-      case StockMode.pessimistic:
-        return ThemeData(
-          useMaterial3: false,
-          brightness: Brightness.dark,
-          primarySwatch: Colors.purple,
-        );
-    }
+    return ThemeData(
+      useMaterial3: false,
+      brightness: switch (_configuration.stockMode) {
+        StockMode.optimistic => Brightness.light,
+        StockMode.pessimistic => Brightness.dark,
+      },
+      primarySwatch: Colors.purple,
+    );
   }
 
   Route<dynamic>? _getRoute(RouteSettings settings) {
@@ -94,8 +89,8 @@ class StocksAppState extends State<StocksApp> {
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
-         '/':         (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
-         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater),
+        '/': (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
+        '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater),
       },
       onGenerateRoute: _getRoute,
     );

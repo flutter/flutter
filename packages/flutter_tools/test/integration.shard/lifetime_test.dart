@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Tags(<String>['flutter-test-driver'])
+library;
+
 import 'package:file/file.dart';
 
 import '../src/common.dart';
@@ -36,9 +39,12 @@ void main() {
     expect(flutter.hasExited, equals(false));
   });
 
-  testWithoutContext('flutter run does not terminate when a debugger is attached and pause-on-exceptions', () async {
-    await flutter.run(withDebugger: true, pauseOnExceptions: true);
-    await Future<void>.delayed(requiredLifespan);
-    expect(flutter.hasExited, equals(false));
-  });
+  testWithoutContext(
+    'flutter run does not terminate when a debugger is attached and pause-on-exceptions',
+    () async {
+      await flutter.run(withDebugger: true, pauseOnExceptions: true);
+      await Future<void>.delayed(requiredLifespan);
+      expect(flutter.hasExited, equals(false));
+    },
+  );
 }

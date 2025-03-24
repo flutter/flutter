@@ -28,20 +28,16 @@ class Timeline {
 class TimelineEvent {
   /// Creates a timeline event given JSON-encoded event data.
   TimelineEvent(this.json)
-      : name = json['name'] as String?,
-        category = json['cat'] as String?,
-        phase = json['ph'] as String?,
-        processId = json['pid'] as int?,
-        threadId = json['tid'] as int?,
-        duration = json['dur'] != null
-            ? Duration(microseconds: json['dur'] as int)
-            : null,
-        threadDuration = json['tdur'] != null
-            ? Duration(microseconds: json['tdur'] as int)
-            : null,
-        timestampMicros = json['ts'] as int?,
-        threadTimestampMicros = json['tts'] as int?,
-        arguments = json['args'] as Map<String, dynamic>?;
+    : name = json['name'] as String?,
+      category = json['cat'] as String?,
+      phase = json['ph'] as String?,
+      processId = json['pid'] as int?,
+      threadId = json['tid'] as int?,
+      duration = json['dur'] != null ? Duration(microseconds: json['dur'] as int) : null,
+      threadDuration = json['tdur'] != null ? Duration(microseconds: json['tdur'] as int) : null,
+      timestampMicros = json['ts'] as int?,
+      threadTimestampMicros = json['tts'] as int?,
+      arguments = json['args'] as Map<String, dynamic>?;
 
   /// The original event JSON.
   final Map<String, dynamic> json;
@@ -112,25 +108,18 @@ List<TimelineEvent>? _parseEvents(Map<String, dynamic> json) {
   }
 
   final List<TimelineEvent> timelineEvents =
-      Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
-          .map<TimelineEvent>(
-              (Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
+      jsonEvents
+          .cast<Map<String, dynamic>>()
+          .map<TimelineEvent>((Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
           .toList();
 
   timelineEvents.sort((TimelineEvent e1, TimelineEvent e2) {
-    final int? ts1 = e1.timestampMicros;
-    final int? ts2 = e2.timestampMicros;
-    if (ts1 == null) {
-      if (ts2 == null) {
-        return 0;
-      } else {
-        return -1;
-      }
-    } else if (ts2 == null) {
-      return 1;
-    } else {
-      return ts1.compareTo(ts2);
-    }
+    return switch ((e1.timestampMicros, e2.timestampMicros)) {
+      (null, null) => 0,
+      (_, null) => 1,
+      (null, _) => -1,
+      (final int ts1, final int ts2) => ts1.compareTo(ts2),
+    };
   });
 
   return timelineEvents;

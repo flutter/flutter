@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
+
 import 'framework.dart';
 import 'platform_view.dart';
 
@@ -14,6 +16,7 @@ extension HtmlElementViewImpl on HtmlElementView {
     required String tagName,
     bool isVisible = true,
     ElementCreatedCallback? onElementCreated,
+    required PlatformViewHitTestBehavior hitTestBehavior,
   }) {
     throw UnimplementedError('HtmlElementView is only available on Flutter Web');
   }

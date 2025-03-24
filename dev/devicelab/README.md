@@ -28,7 +28,7 @@ DeviceLab tests are run against physical devices in Flutter's lab (the
 
 Tasks specify the type of device they are to run on (`linux_android`, `mac_ios`,
 `mac_android`, `windows_android`, etc). When a device in the lab is free, it
-will pickup tasks that need to be completed.
+will pick up tasks that need to be completed.
 
 1. If the task succeeds, the test runner reports the success and uploads its
 performance metrics to Flutter's infrastructure. Not all tasks record
@@ -56,9 +56,16 @@ You can find where your Android SDK is using `flutter doctor -v`.
 
 ### Warnings
 
-Running the devicelab will do things to your environment.
+Running DeviceLab tests locally will do things to your environment.
 
-Notably, it will start and stop Gradle, for instance.
+Notably:
+
+- It will automatically start and stop Gradle on your machine
+- It will automatically reboot your target Android or iOS device after a certain amount of tests before running any additional tests on it. See the `checkForRebootRequired()` in `flutter/dev/devicelab/lib/framework/framework.dart` and `device.reboot()` in `flutter/dev/devicelab/lib/framework/devices.dart` for more.
+
+### Running tests in `test/...`
+
+`dart test test/{NAME_OF_TEST}`
 
 ### Running specific tests
 
@@ -76,6 +83,14 @@ To run multiple tests, repeat option `-t` (`--task`) multiple times:
 
 ```sh
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -t test1 -t test2 -t test3
+```
+
+### Running tests without automatic retries
+
+By default, DeviceLab tests have an automatic retry logic built in. Any failing tests will be retried 2 additional times. This can be skipped by specifying the `--exit` option:
+
+```sh
+../../bin/cache/dart-sdk/bin/dart bin/test_runner.dart test --exit -t {NAME_OF_TEST}
 ```
 
 ### Running tests against a local engine build
@@ -217,7 +232,7 @@ _TASK_- the name of your test that also matches the name of the
   file in `bin/tasks` without the `.dart` extension.
 
 1. Add target to
-   [.ci.yaml](https://github.com/flutter/flutter/blob/master/.ci.yaml)
+   [.ci.yaml](https://github.com/flutter/flutter/blob/main/.ci.yaml)
    * Mirror an existing one that has the recipe `devicelab_drone`
 
 If your test needs to run on multiple operating systems, create a separate
@@ -237,7 +252,7 @@ and the test will run based on the artifact against a testbed with a device.
 
 Steps:
 
-1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/master/dev/devicelab/lib/tasks/build_test_task.dart)
+1. Update the task class to extend [`BuildTestTask`](https://github.com/flutter/flutter/blob/main/dev/devicelab/lib/tasks/build_test_task.dart)
    - Override function `getBuildArgs`
    - Override function `getTestArgs`
    - Override function `parseTaskResult`

@@ -37,11 +37,13 @@ class _InternalNoTransientCallbacksCondition implements WaitCondition {
   /// Creates an [_InternalNoTransientCallbacksCondition] instance.
   const _InternalNoTransientCallbacksCondition();
 
-  /// Factory constructor to parse an [InternalNoTransientCallbacksCondition]
+  /// Factory constructor to parse an [_InternalNoTransientCallbacksCondition]
   /// instance from the given [SerializableWaitCondition] instance.
   factory _InternalNoTransientCallbacksCondition.deserialize(SerializableWaitCondition condition) {
     if (condition.conditionName != 'NoTransientCallbacksCondition') {
-      throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+      throw SerializationException(
+        'Error occurred during deserializing from the given condition: ${condition.serialize()}',
+      );
     }
     return const _InternalNoTransientCallbacksCondition();
   }
@@ -63,11 +65,13 @@ class _InternalNoPendingFrameCondition implements WaitCondition {
   /// Creates an [_InternalNoPendingFrameCondition] instance.
   const _InternalNoPendingFrameCondition();
 
-  /// Factory constructor to parse an [InternalNoPendingFrameCondition] instance
+  /// Factory constructor to parse an [_InternalNoPendingFrameCondition] instance
   /// from the given [SerializableWaitCondition] instance.
   factory _InternalNoPendingFrameCondition.deserialize(SerializableWaitCondition condition) {
     if (condition.conditionName != 'NoPendingFrameCondition') {
-      throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+      throw SerializationException(
+        'Error occurred during deserializing from the given condition: ${condition.serialize()}',
+      );
     }
     return const _InternalNoPendingFrameCondition();
   }
@@ -89,11 +93,13 @@ class _InternalFirstFrameRasterizedCondition implements WaitCondition {
   /// Creates an [_InternalFirstFrameRasterizedCondition] instance.
   const _InternalFirstFrameRasterizedCondition();
 
-  /// Factory constructor to parse an [InternalNoPendingFrameCondition] instance
+  /// Factory constructor to parse an [_InternalFirstFrameRasterizedCondition] instance
   /// from the given [SerializableWaitCondition] instance.
   factory _InternalFirstFrameRasterizedCondition.deserialize(SerializableWaitCondition condition) {
     if (condition.conditionName != 'FirstFrameRasterizedCondition') {
-      throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+      throw SerializationException(
+        'Error occurred during deserializing from the given condition: ${condition.serialize()}',
+      );
     }
     return const _InternalFirstFrameRasterizedCondition();
   }
@@ -115,22 +121,28 @@ class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
 
   /// Factory constructor to parse an [_InternalNoPendingPlatformMessagesCondition] instance
   /// from the given [SerializableWaitCondition] instance.
-  factory _InternalNoPendingPlatformMessagesCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalNoPendingPlatformMessagesCondition.deserialize(
+    SerializableWaitCondition condition,
+  ) {
     if (condition.conditionName != 'NoPendingPlatformMessagesCondition') {
-      throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+      throw SerializationException(
+        'Error occurred during deserializing from the given condition: ${condition.serialize()}',
+      );
     }
     return const _InternalNoPendingPlatformMessagesCondition();
   }
 
   @override
   bool get condition {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger =
+        ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     return binaryMessenger.pendingMessageCount == 0;
   }
 
   @override
   Future<void> wait() async {
-    final TestDefaultBinaryMessenger binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
+    final TestDefaultBinaryMessenger binaryMessenger =
+        ServicesBinding.instance.defaultBinaryMessenger as TestDefaultBinaryMessenger;
     while (!condition) {
       await binaryMessenger.platformMessagesFinished;
     }
@@ -148,10 +160,13 @@ class _InternalCombinedCondition implements WaitCondition {
   /// the given [SerializableWaitCondition] instance.
   factory _InternalCombinedCondition.deserialize(SerializableWaitCondition condition) {
     if (condition.conditionName != 'CombinedCondition') {
-      throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
+      throw SerializationException(
+        'Error occurred during deserializing from the given condition: ${condition.serialize()}',
+      );
     }
     final CombinedCondition combinedCondition = condition as CombinedCondition;
-    final List<WaitCondition> conditions = combinedCondition.conditions.map(deserializeCondition).toList();
+    final List<WaitCondition> conditions =
+        combinedCondition.conditions.map(deserializeCondition).toList();
     return _InternalCombinedCondition(conditions);
   }
 
@@ -177,18 +192,21 @@ class _InternalCombinedCondition implements WaitCondition {
 /// Parses a [WaitCondition] or its subclass from the given serializable [waitCondition].
 WaitCondition deserializeCondition(SerializableWaitCondition waitCondition) {
   final String conditionName = waitCondition.conditionName;
-  switch (conditionName) {
-    case 'NoTransientCallbacksCondition':
-      return _InternalNoTransientCallbacksCondition.deserialize(waitCondition);
-    case 'NoPendingFrameCondition':
-      return _InternalNoPendingFrameCondition.deserialize(waitCondition);
-    case 'FirstFrameRasterizedCondition':
-      return _InternalFirstFrameRasterizedCondition.deserialize(waitCondition);
-    case 'NoPendingPlatformMessagesCondition':
-      return _InternalNoPendingPlatformMessagesCondition.deserialize(waitCondition);
-    case 'CombinedCondition':
-      return _InternalCombinedCondition.deserialize(waitCondition);
-  }
-  throw SerializationException(
-      'Unsupported wait condition $conditionName in ${waitCondition.serialize()}');
+  return switch (conditionName) {
+    'NoTransientCallbacksCondition' => _InternalNoTransientCallbacksCondition.deserialize(
+      waitCondition,
+    ),
+    'NoPendingFrameCondition' => _InternalNoPendingFrameCondition.deserialize(waitCondition),
+    'FirstFrameRasterizedCondition' => _InternalFirstFrameRasterizedCondition.deserialize(
+      waitCondition,
+    ),
+    'NoPendingPlatformMessagesCondition' => _InternalNoPendingPlatformMessagesCondition.deserialize(
+      waitCondition,
+    ),
+    'CombinedCondition' => _InternalCombinedCondition.deserialize(waitCondition),
+    _ =>
+      throw SerializationException(
+        'Unsupported wait condition $conditionName in ${waitCondition.serialize()}',
+      ),
+  };
 }

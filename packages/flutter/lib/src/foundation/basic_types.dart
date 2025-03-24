@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+library;
+
 import 'dart:collection';
 
 // COMMON SIGNATURES
@@ -179,13 +182,24 @@ class CachingIterable<E> extends IterableBase<E> {
   }
 
   @override
-  List<E> toList({ bool growable = true }) {
+  E elementAt(int index) {
+    RangeError.checkNotNegative(index, 'index');
+    while (_results.length <= index) {
+      if (!_fillNext()) {
+        throw IndexError.withLength(index, _results.length, indexable: this, name: 'index');
+      }
+    }
+    return _results[index];
+  }
+
+  @override
+  List<E> toList({bool growable = true}) {
     _precacheEntireList();
     return List<E>.of(_results, growable: growable);
   }
 
   void _precacheEntireList() {
-    while (_fillNext()) { }
+    while (_fillNext()) {}
   }
 
   bool _fillNext() {

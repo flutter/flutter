@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'app.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -12,8 +17,9 @@ import 'framework.dart';
 
 const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
 const double _kHeight = 12.0; // height of banner
-const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
+const double _kBottomOffset = _kOffset + math.sqrt1_2 * _kHeight;
 const Rect _kRect = Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
+const BoxShadow _kShadow = BoxShadow(color: Color(0x7F000000), blurRadius: 6.0);
 
 const Color _kColor = Color(0xA0B71C1C);
 const TextStyle _kTextStyle = TextStyle(
@@ -22,8 +28,6 @@ const TextStyle _kTextStyle = TextStyle(
   fontWeight: FontWeight.w900,
   height: 1.0,
 );
-
-const String _flutterWidgetsLibrary = 'package:flutter/widgets.dart';
 
 /// Where to show a [Banner].
 ///
@@ -63,16 +67,9 @@ class BannerPainter extends CustomPainter {
     required this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
+    this.shadow = _kShadow,
   }) : super(repaint: PaintingBinding.instance.systemFonts) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterWidgetsLibrary,
-        className: '$BannerPainter',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('widgets', 'BannerPainter', this));
   }
 
   /// The message to show in the banner.
@@ -115,10 +112,12 @@ class BannerPainter extends CustomPainter {
   /// Defaults to bold, white text.
   final TextStyle textStyle;
 
-  static const BoxShadow _shadow = BoxShadow(
-    color: Color(0x7F000000),
-    blurRadius: 6.0,
-  );
+  /// The shadow properties for the banner.
+  ///
+  /// Use a [BoxShadow] object to define the shadow's color, blur radius,
+  /// and spread radius. These properties can be used to create different
+  /// shadow effects.
+  final BoxShadow shadow;
 
   bool _prepared = false;
   TextPainter? _textPainter;
@@ -129,19 +128,14 @@ class BannerPainter extends CustomPainter {
   ///
   /// After calling this method, this object is no longer usable.
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _textPainter?.dispose();
     _textPainter = null;
   }
 
   void _prepare() {
-    _paintShadow = _shadow.toPaint();
-    _paintBanner = Paint()
-      ..color = color;
+    _paintShadow = shadow.toPaint();
+    _paintBanner = Paint()..color = color;
     _textPainter?.dispose();
     _textPainter = TextPainter(
       text: TextSpan(style: textStyle, text: message),
@@ -163,15 +157,18 @@ class BannerPainter extends CustomPainter {
       ..drawRect(_kRect, _paintBanner);
     const double width = _kOffset * 2.0;
     _textPainter!.layout(minWidth: width, maxWidth: width);
-    _textPainter!.paint(canvas, _kRect.topLeft + Offset(0.0, (_kRect.height - _textPainter!.height) / 2.0));
+    _textPainter!.paint(
+      canvas,
+      _kRect.topLeft + Offset(0.0, (_kRect.height - _textPainter!.height) / 2.0),
+    );
   }
 
   @override
   bool shouldRepaint(BannerPainter oldDelegate) {
-    return message != oldDelegate.message
-        || location != oldDelegate.location
-        || color != oldDelegate.color
-        || textStyle != oldDelegate.textStyle;
+    return message != oldDelegate.message ||
+        location != oldDelegate.location ||
+        color != oldDelegate.color ||
+        textStyle != oldDelegate.textStyle;
   }
 
   @override
@@ -179,31 +176,33 @@ class BannerPainter extends CustomPainter {
 
   double _translationX(double width) {
     return switch ((layoutDirection, location)) {
-      (TextDirection.rtl, BannerLocation.topStart)    => width,
-      (TextDirection.ltr, BannerLocation.topStart)    => 0.0,
-      (TextDirection.rtl, BannerLocation.topEnd)      => 0.0,
-      (TextDirection.ltr, BannerLocation.topEnd)      => width,
+      (TextDirection.rtl, BannerLocation.topStart) => width,
+      (TextDirection.ltr, BannerLocation.topStart) => 0.0,
+      (TextDirection.rtl, BannerLocation.topEnd) => 0.0,
+      (TextDirection.ltr, BannerLocation.topEnd) => width,
       (TextDirection.rtl, BannerLocation.bottomStart) => width - _kBottomOffset,
       (TextDirection.ltr, BannerLocation.bottomStart) => _kBottomOffset,
-      (TextDirection.rtl, BannerLocation.bottomEnd)   => _kBottomOffset,
-      (TextDirection.ltr, BannerLocation.bottomEnd)   => width - _kBottomOffset,
+      (TextDirection.rtl, BannerLocation.bottomEnd) => _kBottomOffset,
+      (TextDirection.ltr, BannerLocation.bottomEnd) => width - _kBottomOffset,
     };
   }
 
   double _translationY(double height) {
     return switch (location) {
       BannerLocation.bottomStart || BannerLocation.bottomEnd => height - _kBottomOffset,
-      BannerLocation.topStart    || BannerLocation.topEnd    => 0.0,
+      BannerLocation.topStart || BannerLocation.topEnd => 0.0,
     };
   }
 
   double get _rotation {
-    return math.pi / 4.0 * switch ((layoutDirection, location)) {
-      (TextDirection.rtl, BannerLocation.topStart || BannerLocation.bottomEnd) => 1,
-      (TextDirection.ltr, BannerLocation.topStart || BannerLocation.bottomEnd) => -1,
-      (TextDirection.rtl, BannerLocation.bottomStart || BannerLocation.topEnd) => -1,
-      (TextDirection.ltr, BannerLocation.bottomStart || BannerLocation.topEnd) => 1,
-    };
+    return math.pi /
+        4.0 *
+        switch ((layoutDirection, location)) {
+          (TextDirection.rtl, BannerLocation.topStart || BannerLocation.bottomEnd) => 1,
+          (TextDirection.ltr, BannerLocation.topStart || BannerLocation.bottomEnd) => -1,
+          (TextDirection.rtl, BannerLocation.bottomStart || BannerLocation.topEnd) => -1,
+          (TextDirection.ltr, BannerLocation.bottomStart || BannerLocation.topEnd) => 1,
+        };
   }
 }
 
@@ -227,6 +226,7 @@ class Banner extends StatefulWidget {
     this.layoutDirection,
     this.color = _kColor,
     this.textStyle = _kTextStyle,
+    this.shadow = _kShadow,
   });
 
   /// The widget to show behind the banner.
@@ -273,6 +273,13 @@ class Banner extends StatefulWidget {
   /// The style of the text shown on the banner.
   final TextStyle textStyle;
 
+  /// The shadow properties for the banner.
+  ///
+  /// Use a [BoxShadow] object to define the shadow's color, blur radius,
+  /// and spread radius. These properties can be used to create different
+  /// shadow effects.
+  final BoxShadow shadow;
+
   @override
   State<Banner> createState() => _BannerState();
 }
@@ -288,7 +295,10 @@ class _BannerState extends State<Banner> {
 
   @override
   Widget build(BuildContext context) {
-    assert((widget.textDirection != null && widget.layoutDirection != null) || debugCheckHasDirectionality(context));
+    assert(
+      (widget.textDirection != null && widget.layoutDirection != null) ||
+          debugCheckHasDirectionality(context),
+    );
 
     _painter?.dispose();
     _painter = BannerPainter(
@@ -298,21 +308,23 @@ class _BannerState extends State<Banner> {
       layoutDirection: widget.layoutDirection ?? Directionality.of(context),
       color: widget.color,
       textStyle: widget.textStyle,
+      shadow: widget.shadow,
     );
 
-    return CustomPaint(
-      foregroundPainter: _painter,
-      child: widget.child,
-    );
+    return CustomPaint(foregroundPainter: _painter, child: widget.child);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('message', widget.message, showName: false));
-    properties.add(EnumProperty<TextDirection>('textDirection', widget.textDirection, defaultValue: null));
+    properties.add(
+      EnumProperty<TextDirection>('textDirection', widget.textDirection, defaultValue: null),
+    );
     properties.add(EnumProperty<BannerLocation>('location', widget.location));
-    properties.add(EnumProperty<TextDirection>('layoutDirection', widget.layoutDirection, defaultValue: null));
+    properties.add(
+      EnumProperty<TextDirection>('layoutDirection', widget.layoutDirection, defaultValue: null),
+    );
     properties.add(ColorProperty('color', widget.color, showName: false));
     widget.textStyle.debugFillProperties(properties, prefix: 'text ');
   }
@@ -324,10 +336,7 @@ class _BannerState extends State<Banner> {
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
   /// Creates a const debug mode banner.
-  const CheckedModeBanner({
-    super.key,
-    required this.child,
-  });
+  const CheckedModeBanner({super.key, required this.child});
 
   /// The widget to show behind the banner.
   ///

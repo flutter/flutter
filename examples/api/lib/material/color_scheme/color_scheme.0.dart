@@ -20,7 +20,16 @@ class ColorSchemeExample extends StatefulWidget {
 class _ColorSchemeExampleState extends State<ColorSchemeExample> {
   Color selectedColor = ColorSeed.baseColor.color;
   Brightness selectedBrightness = Brightness.light;
+  double selectedContrast = 0.0;
   static const List<DynamicSchemeVariant> schemeVariants = DynamicSchemeVariant.values;
+
+  void updateTheme(Brightness brightness, Color color, double contrastLevel) {
+    setState(() {
+      selectedBrightness = brightness;
+      selectedColor = color;
+      selectedContrast = contrastLevel;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,86 +39,146 @@ class _ColorSchemeExampleState extends State<ColorSchemeExample> {
         colorScheme: ColorScheme.fromSeed(
           seedColor: selectedColor,
           brightness: selectedBrightness,
-        )
+          contrastLevel: selectedContrast,
+        ),
       ),
-      home: Builder(
-        builder: (BuildContext context) => Scaffold(
-          appBar: AppBar(
-            title: const Text('ColorScheme'),
-            actions: <Widget>[
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('ColorScheme'),
+          actions: <Widget>[
+            SettingsButton(
+              selectedColor: selectedColor,
+              selectedBrightness: selectedBrightness,
+              selectedContrast: selectedContrast,
+              updateTheme: updateTheme,
+            ),
+          ],
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children:
+                        List<Widget>.generate(schemeVariants.length, (int index) {
+                          return ColorSchemeVariantColumn(
+                            selectedColor: selectedColor,
+                            brightness: selectedBrightness,
+                            schemeVariant: schemeVariants[index],
+                            contrastLevel: selectedContrast,
+                          );
+                        }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Settings extends StatefulWidget {
+  const Settings({
+    super.key,
+    required this.updateTheme,
+    required this.selectedBrightness,
+    required this.selectedContrast,
+    required this.selectedColor,
+  });
+
+  final Brightness selectedBrightness;
+  final double selectedContrast;
+  final Color selectedColor;
+
+  final void Function(Brightness, Color, double) updateTheme;
+
+  @override
+  State<Settings> createState() => _SettingsState();
+}
+
+class _SettingsState extends State<Settings> {
+  late Brightness selectedBrightness = widget.selectedBrightness;
+  late Color selectedColor = widget.selectedColor;
+  late double selectedContrast = widget.selectedContrast;
+
+  @override
+  Widget build(BuildContext context) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: selectedColor,
+          contrastLevel: selectedContrast,
+          brightness: selectedBrightness,
+        ),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 200),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: ListView(
+            children: <Widget>[
+              Center(child: Text('Settings', style: Theme.of(context).textTheme.titleLarge)),
               Row(
                 children: <Widget>[
-                  const Text('Color Seed'),
-                  MenuAnchor(
-                    builder: (BuildContext context, MenuController controller, Widget? widget) {
-                      return IconButton(
-                        icon: Icon(Icons.circle, color: selectedColor),
-                        onPressed: () {
-                          setState(() {
-                            if (!controller.isOpen) {
-                              controller.open();
-                            }
-                          });
-                        },
-                      );
+                  const Text('Brightness: '),
+                  Switch(
+                    value: selectedBrightness == Brightness.light,
+                    onChanged: (bool value) {
+                      setState(() {
+                        selectedBrightness = value ? Brightness.light : Brightness.dark;
+                      });
+                      widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
                     },
-                    menuChildren: List<Widget>.generate(ColorSeed.values.length, (int index) {
-                      final Color itemColor = ColorSeed.values[index].color;
-                      return MenuItemButton(
-                        leadingIcon: selectedColor == ColorSeed.values[index].color
-                          ? Icon(Icons.circle, color: itemColor)
-                          : Icon(Icons.circle_outlined, color: itemColor),
-                        onPressed: () {
-                          setState(() {
-                            selectedColor = itemColor;
-                          });
-                        },
-                        child: Text(ColorSeed.values[index].label),
-                      );
-                    }),
+                  ),
+                ],
+              ),
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
+                  const Text('Seed color: '),
+                  ...List<Widget>.generate(ColorSeed.values.length, (int index) {
+                    final Color itemColor = ColorSeed.values[index].color;
+                    return IconButton(
+                      icon:
+                          selectedColor == ColorSeed.values[index].color
+                              ? Icon(Icons.circle, color: itemColor)
+                              : Icon(Icons.circle_outlined, color: itemColor),
+                      onPressed: () {
+                        setState(() {
+                          selectedColor = itemColor;
+                        });
+                        widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
+                      },
+                    );
+                  }),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  const Text('Contrast level: '),
+                  Expanded(
+                    child: Slider(
+                      divisions: 4,
+                      label: selectedContrast.toString(),
+                      min: -1,
+                      value: selectedContrast,
+                      onChanged: (double value) {
+                        setState(() {
+                          selectedContrast = value;
+                        });
+                        widget.updateTheme(selectedBrightness, selectedColor, selectedContrast);
+                      },
+                    ),
                   ),
                 ],
               ),
             ],
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Row(
-                      children: <Widget>[
-                        const Text('Brightness'),
-                        const SizedBox(width: 10),
-                        Switch(
-                          value: selectedBrightness == Brightness.light,
-                          onChanged: (bool value) {
-                            setState(() {
-                              selectedBrightness = value ? Brightness.light : Brightness.dark;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: List<Widget>.generate(schemeVariants.length, (int index) {
-                        return ColorSchemeVariantColumn(
-                          selectedColor: selectedColor,
-                          brightness: selectedBrightness,
-                          schemeVariant: schemeVariants[index],
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
       ),
@@ -122,11 +191,13 @@ class ColorSchemeVariantColumn extends StatelessWidget {
     super.key,
     this.schemeVariant = DynamicSchemeVariant.tonalSpot,
     this.brightness = Brightness.light,
+    this.contrastLevel = 0.0,
     required this.selectedColor,
   });
 
   final DynamicSchemeVariant schemeVariant;
   final Brightness brightness;
+  final double contrastLevel;
   final Color selectedColor;
 
   @override
@@ -138,7 +209,9 @@ class ColorSchemeVariantColumn extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 15),
             child: Text(
-              schemeVariant.name == 'tonalSpot' ? '${schemeVariant.name} (Default)' : schemeVariant.name,
+              schemeVariant.name == 'tonalSpot'
+                  ? '${schemeVariant.name} (Default)'
+                  : schemeVariant.name,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -148,12 +221,13 @@ class ColorSchemeVariantColumn extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(
                 seedColor: selectedColor,
                 brightness: brightness,
+                contrastLevel: contrastLevel,
                 dynamicSchemeVariant: schemeVariant,
               ),
             ),
           ),
         ],
-      )
+      ),
     );
   }
 }
@@ -167,57 +241,73 @@ class ColorSchemeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        ColorGroup(children: <ColorChip>[
-          ColorChip('primary', colorScheme.primary, colorScheme.onPrimary),
-          ColorChip('onPrimary', colorScheme.onPrimary, colorScheme.primary),
-          ColorChip('primaryContainer', colorScheme.primaryContainer, colorScheme.onPrimaryContainer),
-          ColorChip(
-            'onPrimaryContainer',
-            colorScheme.onPrimaryContainer,
-            colorScheme.primaryContainer,
-          ),
-        ]),
+        ColorGroup(
+          children: <ColorChip>[
+            ColorChip('primary', colorScheme.primary, colorScheme.onPrimary),
+            ColorChip('onPrimary', colorScheme.onPrimary, colorScheme.primary),
+            ColorChip(
+              'primaryContainer',
+              colorScheme.primaryContainer,
+              colorScheme.onPrimaryContainer,
+            ),
+            ColorChip(
+              'onPrimaryContainer',
+              colorScheme.onPrimaryContainer,
+              colorScheme.primaryContainer,
+            ),
+          ],
+        ),
         divider,
-        ColorGroup(children: <ColorChip>[
-          ColorChip('primaryFixed', colorScheme.primaryFixed, colorScheme.onPrimaryFixed),
-          ColorChip('onPrimaryFixed', colorScheme.onPrimaryFixed, colorScheme.primaryFixed),
-          ColorChip('primaryFixedDim', colorScheme.primaryFixedDim, colorScheme.onPrimaryFixedVariant),
-          ColorChip(
-            'onPrimaryFixedVariant',
-            colorScheme.onPrimaryFixedVariant,
-            colorScheme.primaryFixedDim,
-          ),
-        ]),
+        ColorGroup(
+          children: <ColorChip>[
+            ColorChip('primaryFixed', colorScheme.primaryFixed, colorScheme.onPrimaryFixed),
+            ColorChip('onPrimaryFixed', colorScheme.onPrimaryFixed, colorScheme.primaryFixed),
+            ColorChip(
+              'primaryFixedDim',
+              colorScheme.primaryFixedDim,
+              colorScheme.onPrimaryFixedVariant,
+            ),
+            ColorChip(
+              'onPrimaryFixedVariant',
+              colorScheme.onPrimaryFixedVariant,
+              colorScheme.primaryFixedDim,
+            ),
+          ],
+        ),
         divider,
-        ColorGroup(children: <ColorChip>[
-          ColorChip('secondary', colorScheme.secondary, colorScheme.onSecondary),
-          ColorChip('onSecondary', colorScheme.onSecondary, colorScheme.secondary),
-          ColorChip(
-            'secondaryContainer',
-            colorScheme.secondaryContainer,
-            colorScheme.onSecondaryContainer,
-          ),
-          ColorChip(
-            'onSecondaryContainer',
-            colorScheme.onSecondaryContainer,
-            colorScheme.secondaryContainer,
-          ),
-        ]),
+        ColorGroup(
+          children: <ColorChip>[
+            ColorChip('secondary', colorScheme.secondary, colorScheme.onSecondary),
+            ColorChip('onSecondary', colorScheme.onSecondary, colorScheme.secondary),
+            ColorChip(
+              'secondaryContainer',
+              colorScheme.secondaryContainer,
+              colorScheme.onSecondaryContainer,
+            ),
+            ColorChip(
+              'onSecondaryContainer',
+              colorScheme.onSecondaryContainer,
+              colorScheme.secondaryContainer,
+            ),
+          ],
+        ),
         divider,
-        ColorGroup(children: <ColorChip>[
-          ColorChip('secondaryFixed', colorScheme.secondaryFixed, colorScheme.onSecondaryFixed),
-          ColorChip('onSecondaryFixed', colorScheme.onSecondaryFixed, colorScheme.secondaryFixed),
-          ColorChip(
-            'secondaryFixedDim',
-            colorScheme.secondaryFixedDim,
-            colorScheme.onSecondaryFixedVariant,
-          ),
-          ColorChip(
-            'onSecondaryFixedVariant',
-            colorScheme.onSecondaryFixedVariant,
-            colorScheme.secondaryFixedDim,
-          ),
-        ]),
+        ColorGroup(
+          children: <ColorChip>[
+            ColorChip('secondaryFixed', colorScheme.secondaryFixed, colorScheme.onSecondaryFixed),
+            ColorChip('onSecondaryFixed', colorScheme.onSecondaryFixed, colorScheme.secondaryFixed),
+            ColorChip(
+              'secondaryFixedDim',
+              colorScheme.secondaryFixedDim,
+              colorScheme.onSecondaryFixedVariant,
+            ),
+            ColorChip(
+              'onSecondaryFixedVariant',
+              colorScheme.onSecondaryFixedVariant,
+              colorScheme.secondaryFixedDim,
+            ),
+          ],
+        ),
         divider,
         ColorGroup(
           children: <ColorChip>[
@@ -236,16 +326,22 @@ class ColorSchemeView extends StatelessWidget {
           ],
         ),
         divider,
-        ColorGroup(children: <ColorChip>[
-          ColorChip('tertiaryFixed', colorScheme.tertiaryFixed, colorScheme.onTertiaryFixed),
-          ColorChip('onTertiaryFixed', colorScheme.onTertiaryFixed, colorScheme.tertiaryFixed),
-          ColorChip('tertiaryFixedDim', colorScheme.tertiaryFixedDim, colorScheme.onTertiaryFixedVariant),
-          ColorChip(
-            'onTertiaryFixedVariant',
-            colorScheme.onTertiaryFixedVariant,
-            colorScheme.tertiaryFixedDim,
-          ),
-        ]),
+        ColorGroup(
+          children: <ColorChip>[
+            ColorChip('tertiaryFixed', colorScheme.tertiaryFixed, colorScheme.onTertiaryFixed),
+            ColorChip('onTertiaryFixed', colorScheme.onTertiaryFixed, colorScheme.tertiaryFixed),
+            ColorChip(
+              'tertiaryFixedDim',
+              colorScheme.tertiaryFixedDim,
+              colorScheme.onTertiaryFixedVariant,
+            ),
+            ColorChip(
+              'onTertiaryFixedVariant',
+              colorScheme.onTertiaryFixedVariant,
+              colorScheme.tertiaryFixedDim,
+            ),
+          ],
+        ),
         divider,
         ColorGroup(
           children: <ColorChip>[
@@ -261,11 +357,27 @@ class ColorSchemeView extends StatelessWidget {
             ColorChip('surfaceDim', colorScheme.surfaceDim, colorScheme.onSurface),
             ColorChip('surface', colorScheme.surface, colorScheme.onSurface),
             ColorChip('surfaceBright', colorScheme.surfaceBright, colorScheme.onSurface),
-            ColorChip('surfaceContainerLowest', colorScheme.surfaceContainerLowest, colorScheme.onSurface),
-            ColorChip('surfaceContainerLow', colorScheme.surfaceContainerLow, colorScheme.onSurface),
+            ColorChip(
+              'surfaceContainerLowest',
+              colorScheme.surfaceContainerLowest,
+              colorScheme.onSurface,
+            ),
+            ColorChip(
+              'surfaceContainerLow',
+              colorScheme.surfaceContainerLow,
+              colorScheme.onSurface,
+            ),
             ColorChip('surfaceContainer', colorScheme.surfaceContainer, colorScheme.onSurface),
-            ColorChip('surfaceContainerHigh', colorScheme.surfaceContainerHigh, colorScheme.onSurface),
-            ColorChip('surfaceContainerHighest', colorScheme.surfaceContainerHighest, colorScheme.onSurface),
+            ColorChip(
+              'surfaceContainerHigh',
+              colorScheme.surfaceContainerHigh,
+              colorScheme.onSurface,
+            ),
+            ColorChip(
+              'surfaceContainerHighest',
+              colorScheme.surfaceContainerHighest,
+              colorScheme.onSurface,
+            ),
             ColorChip('onSurface', colorScheme.onSurface, colorScheme.surface),
             ColorChip(
               'onSurfaceVariant',
@@ -322,9 +434,7 @@ class ColorChip extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
-          children: <Expanded>[
-            Expanded(child: Text(label, style: TextStyle(color: labelColor))),
-          ],
+          children: <Expanded>[Expanded(child: Text(label, style: TextStyle(color: labelColor)))],
         ),
       ),
     );
@@ -341,11 +451,48 @@ enum ColorSeed {
   orange('Orange', Colors.orange),
   deepOrange('Deep Orange', Colors.deepOrange),
   pink('Pink', Colors.pink),
-  brightBlue('Bright Blue',  Color(0xFF0000FF)),
-  brightGreen('Bright Green',  Color(0xFF00FF00)),
-  brightRed('Bright Red',  Color(0xFFFF0000));
+  brightBlue('Bright Blue', Color(0xFF0000FF)),
+  brightGreen('Bright Green', Color(0xFF00FF00)),
+  brightRed('Bright Red', Color(0xFFFF0000));
 
   const ColorSeed(this.label, this.color);
   final String label;
   final Color color;
+}
+
+class SettingsButton extends StatelessWidget {
+  const SettingsButton({
+    super.key,
+    required this.updateTheme,
+    required this.selectedBrightness,
+    required this.selectedContrast,
+    required this.selectedColor,
+  });
+
+  final Brightness selectedBrightness;
+  final double selectedContrast;
+  final Color selectedColor;
+
+  final void Function(Brightness, Color, double) updateTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.settings),
+      onPressed: () {
+        showModalBottomSheet<void>(
+          barrierColor: Colors.transparent,
+          context: context,
+          builder: (BuildContext context) {
+            return Settings(
+              selectedColor: selectedColor,
+              selectedBrightness: selectedBrightness,
+              selectedContrast: selectedContrast,
+              updateTheme: updateTheme,
+            );
+          },
+        );
+      },
+    );
+  }
 }

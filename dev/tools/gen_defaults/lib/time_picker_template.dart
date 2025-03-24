@@ -5,9 +5,12 @@
 import 'template.dart';
 
 class TimePickerTemplate extends TokenTemplate {
-  const TimePickerTemplate(super.blockName, super.fileName, super.tokens, {
+  const TimePickerTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   static const String tokenGroup = 'md.comp.time-picker';
@@ -331,7 +334,7 @@ class _${blockName}DefaultsM3 extends _TimePickerDefaults {
       // TODO(rami-a): Remove this workaround once
       // https://github.com/flutter/flutter/issues/54104
       // is fixed.
-      errorStyle: const TextStyle(fontSize: 0, height: 0),
+      errorStyle: const TextStyle(fontSize: 0),
     );
   }
 

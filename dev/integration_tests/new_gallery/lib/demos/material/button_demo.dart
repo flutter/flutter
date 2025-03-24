@@ -13,42 +13,26 @@ class ButtonDemo extends StatelessWidget {
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (type) {
-      case ButtonDemoType.text:
-        return localizations.demoTextButtonTitle;
-      case ButtonDemoType.elevated:
-        return localizations.demoElevatedButtonTitle;
-      case ButtonDemoType.outlined:
-        return localizations.demoOutlinedButtonTitle;
-      case ButtonDemoType.toggle:
-        return localizations.demoToggleButtonTitle;
-      case ButtonDemoType.floating:
-        return localizations.demoFloatingButtonTitle;
-    }
+    return switch (type) {
+      ButtonDemoType.text => localizations.demoTextButtonTitle,
+      ButtonDemoType.elevated => localizations.demoElevatedButtonTitle,
+      ButtonDemoType.outlined => localizations.demoOutlinedButtonTitle,
+      ButtonDemoType.toggle => localizations.demoToggleButtonTitle,
+      ButtonDemoType.floating => localizations.demoFloatingButtonTitle,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget? buttons;
-    switch (type) {
-      case ButtonDemoType.text:
-        buttons = _TextButtonDemo();
-      case ButtonDemoType.elevated:
-        buttons = _ElevatedButtonDemo();
-      case ButtonDemoType.outlined:
-        buttons = _OutlinedButtonDemo();
-      case ButtonDemoType.toggle:
-        buttons = _ToggleButtonsDemo();
-      case ButtonDemoType.floating:
-        buttons = _FloatingActionButtonDemo();
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(_title(context)),
-      ),
-      body: buttons,
+      appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title(context))),
+      body: switch (type) {
+        ButtonDemoType.text => _TextButtonDemo(),
+        ButtonDemoType.elevated => _ElevatedButtonDemo(),
+        ButtonDemoType.outlined => _OutlinedButtonDemo(),
+        ButtonDemoType.toggle => _ToggleButtonsDemo(),
+        ButtonDemoType.floating => _FloatingActionButtonDemo(),
+      },
     );
   }
 }
@@ -65,10 +49,7 @@ class _TextButtonDemo extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            TextButton(
-              onPressed: () {},
-              child: Text(localizations.buttonText),
-            ),
+            TextButton(onPressed: () {}, child: Text(localizations.buttonText)),
             const SizedBox(width: 12),
             TextButton.icon(
               icon: const Icon(Icons.add, size: 18),
@@ -82,10 +63,7 @@ class _TextButtonDemo extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            TextButton(
-              onPressed: null,
-              child: Text(localizations.buttonText),
-            ),
+            TextButton(onPressed: null, child: Text(localizations.buttonText)),
             const SizedBox(width: 12),
             TextButton.icon(
               icon: const Icon(Icons.add, size: 18),
@@ -113,10 +91,7 @@ class _ElevatedButtonDemo extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: () {},
-              child: Text(localizations.buttonText),
-            ),
+            ElevatedButton(onPressed: () {}, child: Text(localizations.buttonText)),
             const SizedBox(width: 12),
             ElevatedButton.icon(
               icon: const Icon(Icons.add, size: 18),
@@ -130,10 +105,7 @@ class _ElevatedButtonDemo extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: null,
-              child: Text(localizations.buttonText),
-            ),
+            ElevatedButton(onPressed: null, child: Text(localizations.buttonText)),
             const SizedBox(width: 12),
             ElevatedButton.icon(
               icon: const Icon(Icons.add, size: 18),
@@ -161,10 +133,7 @@ class _OutlinedButtonDemo extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            OutlinedButton(
-              onPressed: () {},
-              child: Text(localizations.buttonText),
-            ),
+            OutlinedButton(onPressed: () {}, child: Text(localizations.buttonText)),
             const SizedBox(width: 12),
             OutlinedButton.icon(
               icon: const Icon(Icons.add, size: 18),
@@ -178,10 +147,7 @@ class _OutlinedButtonDemo extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            OutlinedButton(
-              onPressed: null,
-              child: Text(localizations.buttonText),
-            ),
+            OutlinedButton(onPressed: null, child: Text(localizations.buttonText)),
             const SizedBox(width: 12),
             OutlinedButton.icon(
               icon: const Icon(Icons.add, size: 18),
@@ -204,8 +170,7 @@ class _ToggleButtonsDemo extends StatefulWidget {
   _ToggleButtonsDemoState createState() => _ToggleButtonsDemoState();
 }
 
-class _ToggleButtonsDemoState extends State<_ToggleButtonsDemo>
-    with RestorationMixin {
+class _ToggleButtonsDemoState extends State<_ToggleButtonsDemo> with RestorationMixin {
   final List<RestorableBool> isSelected = <RestorableBool>[
     RestorableBool(false),
     RestorableBool(true),

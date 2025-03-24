@@ -7,47 +7,30 @@ import '../../gallery_localizations.dart';
 import 'material_demo_types.dart';
 
 class ChipDemo extends StatelessWidget {
-  const ChipDemo({
-    super.key,
-    required this.type,
-  });
+  const ChipDemo({super.key, required this.type});
 
   final ChipDemoType type;
 
   String _title(BuildContext context) {
     final GalleryLocalizations localizations = GalleryLocalizations.of(context)!;
-    switch (type) {
-      case ChipDemoType.action:
-        return localizations.demoActionChipTitle;
-      case ChipDemoType.choice:
-        return localizations.demoChoiceChipTitle;
-      case ChipDemoType.filter:
-        return localizations.demoFilterChipTitle;
-      case ChipDemoType.input:
-        return localizations.demoInputChipTitle;
-    }
+    return switch (type) {
+      ChipDemoType.action => localizations.demoActionChipTitle,
+      ChipDemoType.choice => localizations.demoChoiceChipTitle,
+      ChipDemoType.filter => localizations.demoFilterChipTitle,
+      ChipDemoType.input => localizations.demoInputChipTitle,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget? buttons;
-    switch (type) {
-      case ChipDemoType.action:
-        buttons = _ActionChipDemo();
-      case ChipDemoType.choice:
-        buttons = _ChoiceChipDemo();
-      case ChipDemoType.filter:
-        buttons = _FilterChipDemo();
-      case ChipDemoType.input:
-        buttons = _InputChipDemo();
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text(_title(context)),
-      ),
-      body: buttons,
+      appBar: AppBar(automaticallyImplyLeading: false, title: Text(_title(context))),
+      body: switch (type) {
+        ChipDemoType.action => _ActionChipDemo(),
+        ChipDemoType.choice => _ChoiceChipDemo(),
+        ChipDemoType.filter => _FilterChipDemo(),
+        ChipDemoType.input => _InputChipDemo(),
+      },
     );
   }
 }
@@ -60,10 +43,7 @@ class _ActionChipDemo extends StatelessWidget {
     return Center(
       child: ActionChip(
         onPressed: () {},
-        avatar: const Icon(
-          Icons.brightness_5,
-          color: Colors.black54,
-        ),
+        avatar: const Icon(Icons.brightness_5, color: Colors.black54),
         label: Text(GalleryLocalizations.of(context)!.chipTurnOnLights),
       ),
     );
@@ -79,8 +59,7 @@ class _ChoiceChipDemo extends StatefulWidget {
   _ChoiceChipDemoState createState() => _ChoiceChipDemoState();
 }
 
-class _ChoiceChipDemoState extends State<_ChoiceChipDemo>
-    with RestorationMixin {
+class _ChoiceChipDemoState extends State<_ChoiceChipDemo> with RestorationMixin {
   final RestorableIntN _indexSelected = RestorableIntN(null);
 
   @override
@@ -141,20 +120,14 @@ class _ChoiceChipDemoState extends State<_ChoiceChipDemo>
           // Disabled chips
           Wrap(
             children: <Widget>[
-              ChoiceChip(
-                label: Text(localizations.chipSmall),
-                selected: _indexSelected.value == 0,
-              ),
+              ChoiceChip(label: Text(localizations.chipSmall), selected: _indexSelected.value == 0),
               const SizedBox(width: 8),
               ChoiceChip(
                 label: Text(localizations.chipMedium),
                 selected: _indexSelected.value == 1,
               ),
               const SizedBox(width: 8),
-              ChoiceChip(
-                label: Text(localizations.chipLarge),
-                selected: _indexSelected.value == 2,
-              ),
+              ChoiceChip(label: Text(localizations.chipLarge), selected: _indexSelected.value == 2),
             ],
           ),
         ],
@@ -172,8 +145,7 @@ class _FilterChipDemo extends StatefulWidget {
   _FilterChipDemoState createState() => _FilterChipDemoState();
 }
 
-class _FilterChipDemoState extends State<_FilterChipDemo>
-    with RestorationMixin {
+class _FilterChipDemoState extends State<_FilterChipDemo> with RestorationMixin {
   final RestorableBool isSelectedElevator = RestorableBool(false);
   final RestorableBool isSelectedWasher = RestorableBool(false);
   final RestorableBool isSelectedFireplace = RestorableBool(false);
@@ -278,22 +250,14 @@ class _InputChipDemo extends StatelessWidget {
           InputChip(
             onPressed: () {},
             onDeleted: () {},
-            avatar: const Icon(
-              Icons.directions_bike,
-              size: 20,
-              color: Colors.black54,
-            ),
+            avatar: const Icon(Icons.directions_bike, size: 20, color: Colors.black54),
             deleteIconColor: Colors.black54,
             label: Text(GalleryLocalizations.of(context)!.chipBiking),
           ),
           const SizedBox(height: 12),
           // Disabled chip
           InputChip(
-            avatar: const Icon(
-              Icons.directions_bike,
-              size: 20,
-              color: Colors.black54,
-            ),
+            avatar: const Icon(Icons.directions_bike, size: 20, color: Colors.black54),
             deleteIconColor: Colors.black54,
             label: Text(GalleryLocalizations.of(context)!.chipBiking),
           ),

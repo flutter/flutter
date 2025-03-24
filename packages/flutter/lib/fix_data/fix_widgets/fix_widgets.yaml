@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # For details regarding the *Flutter Fix* feature, see
-# https://flutter.dev/docs/development/tools/flutter-fix
+# https://flutter.dev/to/flutter-fix
 
 # Please add new fixes to the top of the file, separated by one blank line
 # from other fixes. In a comment, include a link to the PR where the change
@@ -23,7 +23,7 @@
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
 version: 1
 transforms:
-  # Changes made in TBD
+  # Changes made in https://github.com/flutter/flutter/pull/139260
   - title: "Migrate to focusNode.enclosingScope!"
     date: 2023-11-29
     element:
@@ -104,7 +104,7 @@ transforms:
   - title: "Remove 'vsync'"
     date: 2023-01-30
     element:
-      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       constructor: ''
       inClass: 'AnimatedSize'
     changes:
@@ -115,7 +115,7 @@ transforms:
   - title: "Migrate to 'boldTextOf'"
     date: 2022-10-28
     element:
-      uris: ['widgets.dart', 'material.dart', 'cupertino.dart']
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'boldTextOverride'
       inClass: 'MediaQuery'
     changes:
@@ -847,7 +847,7 @@ transforms:
       - kind: 'rename'
         newName: 'insertRenderObjectChild'
 
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:
@@ -855,10 +855,10 @@ transforms:
       field: 'clipToSize'
       inClass: 'ListWheelViewport'
     changes:
-    - kind: 'rename'
-      newName: 'clipBehavior'
+      - kind: 'rename'
+        newName: 'clipBehavior'
 
-  # Changes made in https://flutter.dev/docs/release/breaking-changes/clip-behavior
+  # Changes made in https://docs.flutter.dev/release/breaking-changes/clip-behavior
   - title: "Migrate to 'clipBehavior'"
     date: 2020-08-20
     element:
@@ -866,28 +866,28 @@ transforms:
       constructor: ''
       inClass: 'ListWheelViewport'
     oneOf:
-    - if: "clipToSize == 'true'"
-      changes:
-      - kind: 'addParameter'
-        index: 13
-        name: 'clipBehavior'
-        style: optional_named
-        argumentValue:
-          expression: 'Clip.hardEdge'
-          requiredIf: "clipToSize == 'true'"
-      - kind: 'removeParameter'
-        name: 'clipToSize'
-    - if: "clipToSize == 'false'"
-      changes:
-      - kind: 'addParameter'
-        index: 13
-        name: 'clipBehavior'
-        style: optional_named
-        argumentValue:
-          expression: 'Clip.none'
-          requiredIf: "clipToSize == 'false'"
-      - kind: 'removeParameter'
-        name: 'clipToSize'
+      - if: "clipToSize == 'true'"
+        changes:
+          - kind: 'addParameter'
+            index: 13
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.hardEdge'
+              requiredIf: "clipToSize == 'true'"
+          - kind: 'removeParameter'
+            name: 'clipToSize'
+      - if: "clipToSize == 'false'"
+        changes:
+          - kind: 'addParameter'
+            index: 13
+            name: 'clipBehavior'
+            style: optional_named
+            argumentValue:
+              expression: 'Clip.none'
+              requiredIf: "clipToSize == 'false'"
+          - kind: 'removeParameter'
+            name: 'clipToSize'
     variables:
       clipToSize:
         kind: 'fragment'
@@ -938,7 +938,18 @@ transforms:
       method: 'buildViewportChrome'
       inClass: 'ScrollBehavior'
     changes:
-    - kind: 'rename'
-      newName: 'buildOverscrollIndicator'
+      - kind: 'rename'
+        newName: 'buildOverscrollIndicator'
+
+  # Changes made in https://github.com/flutter/flutter/pull/157725
+  - title: "Migrate to 'markForComplete'"
+    date: 2025-02-10
+    element:
+      uris: [ 'widgets.dart' ]
+      method: 'markForRemove'
+      inClass: 'RouteTransitionRecord'
+    changes:
+      - kind: 'rename'
+        newName: 'markForComplete'
 
 # Before adding a new fix: read instructions at the top of this file.

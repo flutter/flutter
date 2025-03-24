@@ -5,9 +5,12 @@
 import 'template.dart';
 
 class InputDecoratorTemplate extends TokenTemplate {
-  const InputDecoratorTemplate(super.blockName, super.fileName, super.tokens, {
+  const InputDecoratorTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
-    super.textThemePrefix = '_textTheme.'
+    super.textThemePrefix = '_textTheme.',
   });
 
   @override
@@ -34,9 +37,9 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   @override
   TextStyle? get hintStyle => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
-      return TextStyle(color: Theme.of(context).disabledColor);
+      return TextStyle(color: ${componentColor('md.comp.filled-text-field.disabled.supporting-text')});
     }
-    return TextStyle(color: Theme.of(context).hintColor);
+    return TextStyle(color: ${componentColor('md.comp.filled-text-field.supporting-text')});
   });
 
   @override
@@ -54,7 +57,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     }
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
-        return ${mergedBorder('md.comp.filled-text-field.error.focus.active-indicator','md.comp.filled-text-field.focus.active-indicator')};
+        return ${mergedBorder('md.comp.filled-text-field.error.focus.active-indicator', 'md.comp.filled-text-field.focus.active-indicator')};
       }
       if (states.contains(MaterialState.hovered)) {
         return ${border('md.comp.filled-text-field.error.hover.active-indicator')};
@@ -77,7 +80,7 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     }
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.focused)) {
-        return ${mergedBorder('md.comp.outlined-text-field.error.focus.outline','md.comp.outlined-text-field.focus.outline')};
+        return ${mergedBorder('md.comp.outlined-text-field.error.focus.outline', 'md.comp.outlined-text-field.focus.outline')};
       }
       if (states.contains(MaterialState.hovered)) {
         return ${border('md.comp.outlined-text-field.error.hover.outline')};
@@ -97,10 +100,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
   Color? get iconColor => ${componentColor("md.comp.filled-text-field.leading-icon")};
 
   @override
-  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {${componentColor('md.comp.filled-text-field.error.leading-icon') == componentColor('md.comp.filled-text-field.leading-icon') ? '' : '''
+  Color? get prefixIconColor => MaterialStateColor.resolveWith((Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return ${componentColor('md.comp.filled-text-field.disabled.leading-icon')};
-    }
+    }${componentColor('md.comp.filled-text-field.error.leading-icon') == componentColor('md.comp.filled-text-field.leading-icon') ? '' : '''
     if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.filled-text-field.error.hover.leading-icon')};
@@ -124,10 +127,10 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
     if (states.contains(MaterialState.disabled)) {
       return ${componentColor('md.comp.filled-text-field.disabled.trailing-icon')};
     }
-    if (states.contains(MaterialState.error)) {${componentColor('md.comp.filled-text-field.error.trailing-icon') == componentColor('md.comp.filled-text-field.error.focus.trailing-icon') ? '' : '''
+    if (states.contains(MaterialState.error)) {
       if (states.contains(MaterialState.hovered)) {
         return ${componentColor('md.comp.filled-text-field.error.hover.trailing-icon')};
-      }
+      }${componentColor('md.comp.filled-text-field.error.trailing-icon') == componentColor('md.comp.filled-text-field.error.focus.trailing-icon') ? '' : '''
       if (states.contains(MaterialState.focused)) {
         return ${componentColor('md.comp.filled-text-field.error.focus.trailing-icon')};
       }'''}
@@ -221,15 +224,17 @@ class _${blockName}DefaultsM3 extends InputDecorationTheme {
 
   /// Generate a [BorderSide] for the given components.
   String mergedBorder(String componentToken1, String componentToken2) {
-    final String borderColor = componentColor(componentToken1)!= 'null'
-        ? componentColor(componentToken1)
-        : componentColor(componentToken2);
-    final double width = (
-        getToken('$componentToken1.width', optional: true) ??
-        getToken('$componentToken1.height', optional: true) ??
-        getToken('$componentToken2.width', optional: true) ??
-        getToken('$componentToken2.height', optional: true) ??
-        1.0) as double;
+    final String borderColor =
+        componentColor(componentToken1) != 'null'
+            ? componentColor(componentToken1)
+            : componentColor(componentToken2);
+    final double width =
+        (getToken('$componentToken1.width', optional: true) ??
+                getToken('$componentToken1.height', optional: true) ??
+                getToken('$componentToken2.width', optional: true) ??
+                getToken('$componentToken2.height', optional: true) ??
+                1.0)
+            as double;
     return 'BorderSide(color: $borderColor${width != 1.0 ? ", width: $width" : ""})';
   }
 }

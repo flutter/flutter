@@ -27,5 +27,7 @@
   "lookUpButtonLabel": "აიხედეთ ზემოთ",
   "searchWebButtonLabel": "ვებში ძიება",
   "shareButtonLabel": "გაზიარება...",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "გასუფთავება",
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

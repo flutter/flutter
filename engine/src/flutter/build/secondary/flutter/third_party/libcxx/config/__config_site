@@ -1,0 +1,43 @@
+#ifndef _LIBCPP_CONFIG_SITE
+#define _LIBCPP_CONFIG_SITE
+
+#define _LIBCPP_ABI_VERSION 1
+#define _LIBCPP_ABI_NAMESPACE _fl
+
+#define _LIBCPP_REMOVE_TRANSITIVE_INCLUDES
+
+// This is a workaround for BoringSSL, which is compiled in C11 mode
+// and includes stdatomic.h.  Defining this macro will cause stdatomic.h
+// to redirect to the next version of that header in the include path.
+#if !defined(__cplusplus) && defined(__clang__)
+#define _LIBCPP_COMPILER_CLANG_BASED
+#endif
+
+#if defined(__APPLE__)
+#define _LIBCPP_PSTL_BACKEND_LIBDISPATCH 1
+#else
+#define _LIBCPP_PSTL_BACKEND_STD_THREAD 1
+#endif
+
+#define _LIBCPP_HARDENING_MODE_DEFAULT _LIBCPP_HARDENING_MODE_NONE
+
+#define _LIBCPP_HAS_FILESYSTEM 1
+#define _LIBCPP_HAS_LOCALIZATION 1
+#define _LIBCPP_HAS_MONOTONIC_CLOCK 1
+#define _LIBCPP_HAS_RANDOM_DEVICE 1
+#define _LIBCPP_HAS_THREADS 1
+#define _LIBCPP_HAS_VENDOR_AVAILABILITY_ANNOTATIONS 0
+#define _LIBCPP_HAS_UNICODE 1
+#define _LIBCPP_HAS_WIDE_CHARACTERS 1
+
+#ifdef _WIN32
+#define _LIBCPP_HAS_THREAD_API_PTHREAD 0
+#define _LIBCPP_HAS_THREAD_API_EXTERNAL 0
+#define _LIBCPP_HAS_THREAD_API_WIN32 1
+#else
+#define _LIBCPP_HAS_THREAD_API_PTHREAD 1
+#define _LIBCPP_HAS_THREAD_API_EXTERNAL 0
+#define _LIBCPP_HAS_THREAD_API_WIN32 0
+#endif
+
+#endif // _LIBCPP_CONFIG_SITE

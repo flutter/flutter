@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ink_decoration.dart';
+/// @docImport 'ink_splash.dart';
+/// @docImport 'ink_well.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'ink_well.dart' show InteractiveInkFeature;
@@ -54,14 +59,12 @@ class InkHighlight extends InteractiveInkFeature {
 
        _textDirection = textDirection,
        _rectCallback = rectCallback {
-    _alphaController = AnimationController(duration: fadeDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..addStatusListener(_handleAlphaStatusChanged)
-      ..forward();
-    _alpha = _alphaController.drive(IntTween(
-      begin: 0,
-      end: color.alpha,
-    ));
+    _alphaController =
+        AnimationController(duration: fadeDuration, vsync: controller.vsync)
+          ..addListener(controller.markNeedsPaint)
+          ..addStatusListener(_handleAlphaStatusChanged)
+          ..forward();
+    _alpha = _alphaController.drive(IntTween(begin: 0, end: color.alpha));
 
     controller.addInkFeature(this);
   }
@@ -92,7 +95,7 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   void _handleAlphaStatusChanged(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed && !_active) {
+    if (status.isDismissed && !_active) {
       dispose();
     }
   }
@@ -115,8 +118,10 @@ class InkHighlight extends InteractiveInkFeature {
         if (_borderRadius != BorderRadius.zero) {
           final RRect clipRRect = RRect.fromRectAndCorners(
             rect,
-            topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
-            bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+            topLeft: _borderRadius.topLeft,
+            topRight: _borderRadius.topRight,
+            bottomLeft: _borderRadius.bottomLeft,
+            bottomRight: _borderRadius.bottomRight,
           );
           canvas.drawRRect(clipRRect, paint);
         } else {

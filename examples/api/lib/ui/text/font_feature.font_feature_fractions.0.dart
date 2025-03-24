@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.fractions].
+/// Flutter code sample for [FontFeature.fractions].
 
 void main() => runApp(const ExampleApp());
 
@@ -31,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       'Fractions: 1/2 2/3 3/4 4/5',
       style: TextStyle(
         fontFamily: 'Ubuntu Mono',
-        fontFeatures: <FontFeature>[
-          FontFeature.fractions(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.fractions()],
       ),
     );
   }

@@ -14,7 +14,6 @@ class LabelExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecoration.label Sample')),
         body: const LabelExample(),
@@ -34,17 +33,8 @@ class LabelExample extends StatelessWidget {
           label: Text.rich(
             TextSpan(
               children: <InlineSpan>[
-                WidgetSpan(
-                  child: Text(
-                    'Username',
-                  ),
-                ),
-                WidgetSpan(
-                  child: Text(
-                    '*',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
+                WidgetSpan(child: Text('Username')),
+                WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
               ],
             ),
           ),

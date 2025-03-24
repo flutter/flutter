@@ -37,19 +37,12 @@ class TestStepResult {
   });
 
   factory TestStepResult.fromSnapshot(AsyncSnapshot<TestStepResult> snapshot) {
-    switch (snapshot.connectionState) {
-      case ConnectionState.none:
-        return const TestStepResult('Not started', nothing, TestStatus.ok);
-      case ConnectionState.waiting:
-        return const TestStepResult('Executing', nothing, TestStatus.pending);
-      case ConnectionState.done:
-        if (snapshot.hasData) {
-          return snapshot.data!;
-        }
-        return snapshot.error! as TestStepResult;
-      case ConnectionState.active:
-        throw 'Unsupported state ${snapshot.connectionState}';
-    }
+    return switch (snapshot.connectionState) {
+      ConnectionState.none => const TestStepResult('Not started', nothing, TestStatus.ok),
+      ConnectionState.waiting => const TestStepResult('Executing', nothing, TestStatus.pending),
+      ConnectionState.done => snapshot.data ?? snapshot.error! as TestStepResult,
+      ConnectionState.active => throw 'Unsupported state: ConnectionState.active',
+    };
   }
 
   final String name;
@@ -82,8 +75,7 @@ class TestStepResult {
         const Text(' '),
         Text(
           status.name,
-          key: ValueKey<String>(
-              status == TestStatus.pending ? 'nostatus' : 'status'),
+          key: ValueKey<String>(status == TestStatus.pending ? 'nostatus' : 'status'),
           style: bold,
         ),
       ],
@@ -135,9 +127,7 @@ Future<TestStepResult> resultOfHandshake(
 
 String _toString(dynamic message) {
   if (message is ByteData) {
-    return message.buffer
-        .asUint8List(message.offsetInBytes, message.lengthInBytes)
-        .toString();
+    return message.buffer.asUint8List(message.offsetInBytes, message.lengthInBytes).toString();
   } else {
     return '$message';
   }

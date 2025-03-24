@@ -1,6 +1,8 @@
 {
+  "clearButtonTooltip": "Clear text",
+  "selectedDateLabel": "Selected",
   "searchWebButtonLabel": "Search Web",
-  "shareButtonLabel": "Share...",
+  "shareButtonLabel": "Share",
   "scanTextButtonLabel": "Scan text",
   "lookUpButtonLabel": "Look up",
   "menuDismissLabel": "Dismiss menu",

@@ -4,8 +4,10 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/semantics.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -25,7 +27,8 @@ class TableCellParentData extends BoxParentData {
   int? y;
 
   @override
-  String toString() => '${super.toString()}; ${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}';
+  String toString() =>
+      '${super.toString()}; ${verticalAlignment == null ? "default vertical alignment" : "$verticalAlignment"}';
 }
 
 /// Base class to describe how wide a column in a [RenderTable] should be.
@@ -98,7 +101,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   /// there is any room left over when laying out the table. If `flex` is
   /// null (the default), the table will not distribute any extra space to the
   /// column.
-  const IntrinsicColumnWidth({ double? flex }) : _flex = flex;
+  const IntrinsicColumnWidth({double? flex}) : _flex = flex;
 
   @override
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
@@ -124,7 +127,8 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   double? flex(Iterable<RenderBox> cells) => _flex;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'IntrinsicColumnWidth')}(flex: ${_flex?.toStringAsFixed(1)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'IntrinsicColumnWidth')}(flex: ${_flex?.toStringAsFixed(1)})';
 }
 
 /// Sizes the column to a specific number of pixels.
@@ -148,7 +152,8 @@ class FixedColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'FixedColumnWidth')}(${debugFormatDouble(value)})';
+  String toString() =>
+      '${objectRuntimeType(this, 'FixedColumnWidth')}(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column to a fraction of the table's constraints' maxWidth.
@@ -350,7 +355,7 @@ enum TableCellVerticalAlignment {
   fill,
 
   /// Cells with this alignment are sized to be the same height as the tallest cell in the row.
-  intrinsicHeight
+  intrinsicHeight,
 }
 
 /// A table where the columns and rows are sized to fit the contents of the cells.
@@ -472,7 +477,8 @@ class RenderTable extends RenderBox {
   /// This property can never return null. If it is set to null, and the existing
   /// map is not empty, then the value is replaced by an empty map. (If it is set
   /// to null while the current value is an empty map, the value is not changed.)
-  Map<int, TableColumnWidth>? get columnWidths => Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
+  Map<int, TableColumnWidth>? get columnWidths =>
+      Map<int, TableColumnWidth>.unmodifiable(_columnWidths);
   Map<int, TableColumnWidth> _columnWidths;
   set columnWidths(Map<int, TableColumnWidth>? value) {
     if (_columnWidths == value) {
@@ -535,7 +541,8 @@ class RenderTable extends RenderBox {
   /// Row decorations fill the horizontal and vertical extent of each row in
   /// the table, unlike decorations for individual cells, which might not fill
   /// either.
-  List<Decoration> get rowDecorations => List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
+  List<Decoration?> get rowDecorations =>
+      List<Decoration?>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
   // _rowDecorations and _rowDecorationPainters need to be in sync. They have to
   // either both be null or have same length.
   List<Decoration?>? _rowDecorations;
@@ -550,7 +557,8 @@ class RenderTable extends RenderBox {
         painter?.dispose();
       }
     }
-    _rowDecorationPainters = _rowDecorations != null ? List<BoxPainter?>.filled(_rowDecorations!.length, null) : null;
+    _rowDecorationPainters =
+        _rowDecorations != null ? List<BoxPainter?>.filled(_rowDecorations!.length, null) : null;
   }
 
   /// The settings to pass to the [rowDecorations] when painting, so that they
@@ -595,6 +603,195 @@ class RenderTable extends RenderBox {
     }
   }
 
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.role = SemanticsRole.table;
+    config.isSemanticBoundary = true;
+    config.explicitChildNodes = true;
+  }
+
+  final Map<int, _Index> _idToIndexMap = <int, _Index>{};
+  final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
+  final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
+
+  /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
+  ///
+  /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
+  /// And if a cell has mutiple semantics node or has a different semantic role, we create
+  /// a new semantics node to wrap it.
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    final List<SemanticsNode> rows = <SemanticsNode>[];
+
+    final List<List<List<SemanticsNode>>> rawCells = List<List<List<SemanticsNode>>>.generate(
+      _rows,
+      (int rowIndex) =>
+          List<List<SemanticsNode>>.generate(_columns, (int columnIndex) => <SemanticsNode>[]),
+    );
+
+    Rect rectWithOffset(SemanticsNode node) {
+      final Offset offset =
+          (node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null) ??
+          Offset.zero;
+      return node.rect.shift(offset);
+    }
+
+    int findRowIndex(double top) {
+      for (int i = _rowTops.length - 1; i >= 0; i--) {
+        if (_rowTops[i] <= top) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    int findColumnIndex(double left) {
+      if (_columnLefts == null) {
+        return -1;
+      }
+      for (int i = _columnLefts!.length - 1; i >= 0; i--) {
+        if (_columnLefts!.elementAt(i) <= left) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    void shiftTransform(SemanticsNode node, double dx, double dy) {
+      final Matrix4? previousTransform = node.transform;
+      final Offset offset =
+          (previousTransform != null ? MatrixUtils.getAsTranslation(previousTransform) : null) ??
+          Offset.zero;
+      final Matrix4 newTransform = Matrix4.translationValues(offset.dx + dx, offset.dy + dy, 0);
+      node.transform = newTransform;
+    }
+
+    for (final SemanticsNode child in children) {
+      if (_idToIndexMap.containsKey(child.id)) {
+        final _Index index = _idToIndexMap[child.id]!;
+        final int y = index.y;
+        final int x = index.x;
+        if (y < _rows && x < _columns) {
+          rawCells[y][x].add(child);
+        }
+      } else {
+        final Rect rect = rectWithOffset(child);
+        final int y = findRowIndex(rect.top);
+        final int x = findColumnIndex(rect.left);
+        if (y != -1 && x != -1) {
+          rawCells[y][x].add(child);
+        }
+      }
+    }
+
+    for (int y = 0; y < _rows; y++) {
+      final Rect rowBox = getRowBox(y);
+      // Skip row if it's empty
+      if (rowBox.height == 0) {
+        continue;
+      }
+
+      final SemanticsNode newRow =
+          _cachedRows[y] ??
+          (_cachedRows[y] = SemanticsNode(
+            showOnScreen: () {
+              showOnScreen(descendant: this, rect: rowBox);
+            },
+          ));
+
+      // The list of cells of this Row.
+      final List<SemanticsNode> cells = <SemanticsNode>[];
+
+      for (int x = 0; x < columns; x++) {
+        final List<SemanticsNode> rawChildrens = rawCells[y][x];
+        if (rawChildrens.isEmpty) {
+          continue;
+        }
+
+        // If the cell has multiple children or the only child is not a cell or columnHeader,
+        // create a new semantic node with role cell to wrap it.
+        // This can happen when the cell has a different semantic role, or the cell doesn't have a semantic
+        // role because user is not using the `TableCell` widget.
+        final bool addCellWrapper =
+            rawChildrens.length > 1 ||
+            (rawChildrens.single.role != SemanticsRole.cell &&
+                rawChildrens.single.role != SemanticsRole.columnHeader);
+
+        final SemanticsNode cell =
+            addCellWrapper
+                ? (_cachedCells[_Index(y, x)] ??
+                    (_cachedCells[_Index(y, x)] =
+                        SemanticsNode()..updateWith(
+                          config: SemanticsConfiguration()..role = SemanticsRole.cell,
+                          childrenInInversePaintOrder: rawChildrens,
+                        )))
+                : rawChildrens.single;
+
+        final double cellWidth =
+            x == _columns - 1
+                ? rowBox.width - _columnLefts!.elementAt(x)
+                : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
+
+        // Skip cell if it's invisible
+        if (cellWidth <= 0.0) {
+          continue;
+        }
+        // Add wrapper transform
+        if (addCellWrapper) {
+          cell
+            ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
+            ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+        }
+        for (final SemanticsNode child in rawChildrens) {
+          _idToIndexMap[child.id] = _Index(y, x);
+
+          // Shift child transform.
+          final Rect localRect = rectWithOffset(child);
+          // The rect should satisfy 0 <= localRect.top < localRect.bottom <= rowBox.height
+          final double dy = localRect.top >= rowBox.height ? -_rowTops.elementAt(y) : 0.0;
+
+          // if addCellWrapper is true, the rect is relative to the cell
+          // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
+          // if addCellWrapper is false, the rect is relative to the raw
+          // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
+          final double dx =
+              addCellWrapper
+                  ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
+                  : (localRect.right <= _columnLefts!.elementAt(x)
+                      ? _columnLefts!.elementAt(x)
+                      : 0.0);
+
+          if (dx != 0 || dy != 0) {
+            shiftTransform(child, dx, dy);
+          }
+        }
+
+        cell.indexInParent = x;
+        cells.add(cell);
+      }
+
+      newRow
+        ..updateWith(
+          config:
+              SemanticsConfiguration()
+                ..indexInParent = y
+                ..role = SemanticsRole.row,
+          childrenInInversePaintOrder: cells,
+        )
+        ..transform = Matrix4.translationValues(rowBox.left, rowBox.top, 0)
+        ..rect = Rect.fromLTWH(0, 0, rowBox.width, rowBox.height);
+
+      rows.add(newRow);
+    }
+
+    node.updateWith(config: config, childrenInInversePaintOrder: rows);
+  }
+
   /// Replaces the children of this table with the given cells.
   ///
   /// The cells are divided into the specified number of columns before
@@ -635,7 +832,8 @@ class RenderTable extends RenderBox {
       for (int x = 0; x < _columns; x += 1) {
         final int xyOld = x + y * _columns;
         final int xyNew = x + y * columns;
-        if (_children[xyOld] != null && (x >= columns || xyNew >= cells.length || _children[xyOld] != cells[xyNew])) {
+        if (_children[xyOld] != null &&
+            (x >= columns || xyNew >= cells.length || _children[xyOld] != cells[xyNew])) {
           lostChildren.add(_children[xyOld]!);
         }
       }
@@ -646,7 +844,8 @@ class RenderTable extends RenderBox {
       for (int x = 0; x < columns; x += 1) {
         final int xyNew = x + y * columns;
         final int xyOld = x + y * _columns;
-        if (cells[xyNew] != null && (x >= _columns || y >= _rows || _children[xyOld] != cells[xyNew])) {
+        if (cells[xyNew] != null &&
+            (x >= _columns || y >= _rows || _children[xyOld] != cells[xyNew])) {
           if (!lostChildren.remove(cells[xyNew])) {
             adoptChild(cells[xyNew]!);
           }
@@ -753,6 +952,12 @@ class RenderTable extends RenderBox {
     }
   }
 
+  @protected
+  @override
+  void redepthChildren() {
+    visitChildren(redepthChild);
+  }
+
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_children.length == rows * columns);
@@ -806,7 +1011,8 @@ class RenderTable extends RenderBox {
   double? _baselineDistance;
   @override
   double? computeDistanceToActualBaseline(TextBaseline baseline) {
-    // returns the baseline of the first cell that has a baseline in the first row
+    // returns the baseline offset of the cell in the first row with
+    // the lowest baseline, and uses `TableCellVerticalAlignment.baseline`.
     assert(!debugNeedsLayout);
     return _baselineDistance;
   }
@@ -861,19 +1067,26 @@ class RenderTable extends RenderBox {
     final List<double> minWidths = List<double>.filled(columns, 0.0);
     final List<double?> flexes = List<double?>.filled(columns, null);
     double tableWidth = 0.0; // running tally of the sum of widths[x] for all x
-    double unflexedTableWidth = 0.0; // sum of the maxIntrinsicWidths of any column that has null flex
+    double unflexedTableWidth =
+        0.0; // sum of the maxIntrinsicWidths of any column that has null flex
     double totalFlex = 0.0;
     for (int x = 0; x < columns; x += 1) {
       final TableColumnWidth columnWidth = _columnWidths[x] ?? defaultColumnWidth;
       final Iterable<RenderBox> columnCells = column(x);
       // apply ideal width (maxIntrinsicWidth)
-      final double maxIntrinsicWidth = columnWidth.maxIntrinsicWidth(columnCells, constraints.maxWidth);
+      final double maxIntrinsicWidth = columnWidth.maxIntrinsicWidth(
+        columnCells,
+        constraints.maxWidth,
+      );
       assert(maxIntrinsicWidth.isFinite);
       assert(maxIntrinsicWidth >= 0.0);
       widths[x] = maxIntrinsicWidth;
       tableWidth += maxIntrinsicWidth;
       // collect min width information while we're at it
-      final double minIntrinsicWidth = columnWidth.minIntrinsicWidth(columnCells, constraints.maxWidth);
+      final double minIntrinsicWidth = columnWidth.minIntrinsicWidth(
+        columnCells,
+        constraints.maxWidth,
+      );
       assert(minIntrinsicWidth.isFinite);
       assert(minIntrinsicWidth >= 0.0);
       minWidths[x] = minIntrinsicWidth;
@@ -922,7 +1135,6 @@ class RenderTable extends RenderBox {
         assert(tableWidth + precisionErrorTolerance >= targetWidth);
       }
     } // step 2 and 3 are mutually exclusive
-
     // 3. if there were no flex columns, then grow the table to the
     //    minWidth.
     else if (tableWidth < minWidthConstraint) {
@@ -1027,6 +1239,37 @@ class RenderTable extends RenderBox {
   }
 
   @override
+  double? computeDryBaseline(covariant BoxConstraints constraints, TextBaseline baseline) {
+    if (rows * columns == 0) {
+      return null;
+    }
+    final List<double> widths = _computeColumnWidths(constraints);
+    double? baselineOffset;
+    for (int col = 0; col < columns; col += 1) {
+      final RenderBox? child = _children[col];
+      final BoxConstraints childConstraints = BoxConstraints.tightFor(width: widths[col]);
+      if (child == null) {
+        continue;
+      }
+      final TableCellParentData childParentData = child.parentData! as TableCellParentData;
+      final double? childBaseline = switch (childParentData.verticalAlignment ??
+          defaultVerticalAlignment) {
+        TableCellVerticalAlignment.baseline => child.getDryBaseline(childConstraints, baseline),
+        TableCellVerticalAlignment.baseline ||
+        TableCellVerticalAlignment.top ||
+        TableCellVerticalAlignment.middle ||
+        TableCellVerticalAlignment.bottom ||
+        TableCellVerticalAlignment.fill ||
+        TableCellVerticalAlignment.intrinsicHeight => null,
+      };
+      if (childBaseline != null && (baselineOffset == null || baselineOffset < childBaseline)) {
+        baselineOffset = childBaseline;
+      }
+    }
+    return baselineOffset;
+  }
+
+  @override
   @protected
   Size computeDryLayout(covariant BoxConstraints constraints) {
     if (rows * columns == 0) {
@@ -1044,9 +1287,12 @@ class RenderTable extends RenderBox {
           final TableCellParentData childParentData = child.parentData! as TableCellParentData;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
-              assert(debugCannotComputeDryLayout(
-                reason: 'TableCellVerticalAlignment.baseline requires a full layout for baseline metrics to be available.',
-              ));
+              assert(
+                debugCannotComputeDryLayout(
+                  reason:
+                      'TableCellVerticalAlignment.baseline requires a full layout for baseline metrics to be available.',
+                ),
+              );
               return Size.zero;
             case TableCellVerticalAlignment.top:
             case TableCellVerticalAlignment.middle:
@@ -1083,14 +1329,14 @@ class RenderTable extends RenderBox {
       case TextDirection.rtl:
         positions[columns - 1] = 0.0;
         for (int x = columns - 2; x >= 0; x -= 1) {
-          positions[x] = positions[x+1] + widths[x+1];
+          positions[x] = positions[x + 1] + widths[x + 1];
         }
         _columnLefts = positions.reversed;
         _tableWidth = positions.first + widths.first;
       case TextDirection.ltr:
         positions[0] = 0.0;
         for (int x = 1; x < columns; x += 1) {
-          positions[x] = positions[x-1] + widths[x-1];
+          positions[x] = positions[x - 1] + widths[x - 1];
         }
         _columnLefts = positions;
         _tableWidth = positions.last + widths.last;
@@ -1115,12 +1361,21 @@ class RenderTable extends RenderBox {
           childParentData.y = y;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
-              assert(textBaseline != null, 'An explicit textBaseline is required when using baseline alignment.');
+              assert(
+                textBaseline != null,
+                'An explicit textBaseline is required when using baseline alignment.',
+              );
               child.layout(BoxConstraints.tightFor(width: widths[x]), parentUsesSize: true);
-              final double? childBaseline = child.getDistanceToBaseline(textBaseline!, onlyReal: true);
+              final double? childBaseline = child.getDistanceToBaseline(
+                textBaseline!,
+                onlyReal: true,
+              );
               if (childBaseline != null) {
                 beforeBaselineDistance = math.max(beforeBaselineDistance, childBaseline);
-                afterBaselineDistance = math.max(afterBaselineDistance, child.size.height - childBaseline);
+                afterBaselineDistance = math.max(
+                  afterBaselineDistance,
+                  child.size.height - childBaseline,
+                );
                 baselines[x] = childBaseline;
                 haveBaseline = true;
               } else {
@@ -1151,11 +1406,17 @@ class RenderTable extends RenderBox {
           final TableCellParentData childParentData = child.parentData! as TableCellParentData;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
-              childParentData.offset = Offset(positions[x], rowTop + beforeBaselineDistance - baselines[x]);
+              childParentData.offset = Offset(
+                positions[x],
+                rowTop + beforeBaselineDistance - baselines[x],
+              );
             case TableCellVerticalAlignment.top:
               childParentData.offset = Offset(positions[x], rowTop);
             case TableCellVerticalAlignment.middle:
-              childParentData.offset = Offset(positions[x], rowTop + (rowHeight - child.size.height) / 2.0);
+              childParentData.offset = Offset(
+                positions[x],
+                rowTop + (rowHeight - child.size.height) / 2.0,
+              );
             case TableCellVerticalAlignment.bottom:
               childParentData.offset = Offset(positions[x], rowTop + rowHeight - child.size.height);
             case TableCellVerticalAlignment.fill:
@@ -1173,7 +1434,7 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox? child = _children[index];
@@ -1201,7 +1462,12 @@ class RenderTable extends RenderBox {
     if (rows * columns == 0) {
       if (border != null) {
         final Rect borderRect = Rect.fromLTWH(offset.dx, offset.dy, _tableWidth, 0.0);
-        border!.paint(context.canvas, borderRect, rows: const <double>[], columns: const <double>[]);
+        border!.paint(
+          context.canvas,
+          borderRect,
+          rows: const <double>[],
+          columns: const <double>[],
+        );
       }
       return;
     }
@@ -1218,7 +1484,7 @@ class RenderTable extends RenderBox {
           _rowDecorationPainters![y]!.paint(
             canvas,
             Offset(offset.dx, offset.dy + _rowTops[y]),
-            configuration.copyWith(size: Size(size.width, _rowTops[y+1] - _rowTops[y])),
+            configuration.copyWith(size: Size(size.width, _rowTops[y + 1] - _rowTops[y])),
           );
         }
       }
@@ -1247,11 +1513,27 @@ class RenderTable extends RenderBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
-    properties.add(DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    properties.add(DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
+    properties.add(
+      DiagnosticsProperty<Map<int, TableColumnWidth>>(
+        'specified column widths',
+        _columnWidths,
+        level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth),
+    );
     properties.add(MessageProperty('table size', '$columns\u00D7$rows'));
-    properties.add(IterableProperty<String>('column offsets', _columnLefts?.map(debugFormatDouble), ifNull: 'unknown'));
-    properties.add(IterableProperty<String>('row offsets', _rowTops.map(debugFormatDouble), ifNull: 'unknown'));
+    properties.add(
+      IterableProperty<String>(
+        'column offsets',
+        _columnLefts?.map(debugFormatDouble),
+        ifNull: 'unknown',
+      ),
+    );
+    properties.add(
+      IterableProperty<String>('row offsets', _rowTops.map(debugFormatDouble), ifNull: 'unknown'),
+    );
   }
 
   @override
@@ -1266,7 +1548,19 @@ class RenderTable extends RenderBox {
           if (_children[x + y * columns] case final RenderBox child)
             child.toDiagnosticsNode(name: 'child ($x, $y)')
           else
-            DiagnosticsProperty<Object>('child ($x, $y)', null, ifNull: 'is null', showSeparator: false),
+            DiagnosticsProperty<Object>(
+              'child ($x, $y)',
+              null,
+              ifNull: 'is null',
+              showSeparator: false,
+            ),
     ];
   }
+}
+
+/// Index for a cell.
+class _Index {
+  _Index(this.y, this.x);
+  int y;
+  int x;
 }

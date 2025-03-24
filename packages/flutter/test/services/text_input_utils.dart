@@ -22,10 +22,12 @@ class FakeTextChannel implements MethodChannel {
   MethodCodec get codec => const JSONMethodCodec();
 
   @override
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
+  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) =>
+      throw UnimplementedError();
 
   @override
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) =>
+      throw UnimplementedError();
 
   @override
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
@@ -67,8 +69,8 @@ class FakeTextChannel implements MethodChannel {
 
 class FakeScribbleElement implements ScribbleClient {
   FakeScribbleElement({required String elementIdentifier, Rect bounds = Rect.zero})
-      : _elementIdentifier = elementIdentifier,
-        _bounds = bounds;
+    : _elementIdentifier = elementIdentifier,
+      _bounds = bounds;
 
   final String _elementIdentifier;
   final Rect _bounds;
@@ -88,5 +90,83 @@ class FakeScribbleElement implements ScribbleClient {
   @override
   void onScribbleFocus(Offset offset) {
     latestMethodCall = 'onScribbleFocus';
+  }
+}
+
+class FakeTextInputClient with TextInputClient {
+  FakeTextInputClient(this.currentTextEditingValue);
+
+  String latestMethodCall = '';
+  final List<String> performedSelectors = <String>[];
+  late Map<String, dynamic>? latestPrivateCommandData;
+
+  @override
+  TextEditingValue currentTextEditingValue;
+
+  @override
+  AutofillScope? get currentAutofillScope => null;
+
+  @override
+  void performAction(TextInputAction action) {
+    latestMethodCall = 'performAction';
+  }
+
+  @override
+  void performPrivateCommand(String action, Map<String, dynamic>? data) {
+    latestMethodCall = 'performPrivateCommand';
+    latestPrivateCommandData = data;
+  }
+
+  @override
+  void insertContent(KeyboardInsertedContent content) {
+    latestMethodCall = 'commitContent';
+  }
+
+  @override
+  void updateEditingValue(TextEditingValue value) {
+    latestMethodCall = 'updateEditingValue';
+  }
+
+  @override
+  void updateFloatingCursor(RawFloatingCursorPoint point) {
+    latestMethodCall = 'updateFloatingCursor';
+  }
+
+  @override
+  void connectionClosed() {
+    latestMethodCall = 'connectionClosed';
+  }
+
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {
+    latestMethodCall = 'showAutocorrectionPromptRect';
+  }
+
+  @override
+  void showToolbar() {
+    latestMethodCall = 'showToolbar';
+  }
+
+  TextInputConfiguration get configuration => const TextInputConfiguration();
+
+  @override
+  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+    latestMethodCall = 'didChangeInputControl';
+  }
+
+  @override
+  void insertTextPlaceholder(Size size) {
+    latestMethodCall = 'insertTextPlaceholder';
+  }
+
+  @override
+  void removeTextPlaceholder() {
+    latestMethodCall = 'removeTextPlaceholder';
+  }
+
+  @override
+  void performSelector(String selectorName) {
+    latestMethodCall = 'performSelector';
+    performedSelectors.add(selectorName);
   }
 }

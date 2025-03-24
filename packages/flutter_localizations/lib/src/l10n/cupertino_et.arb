@@ -27,5 +27,7 @@
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Otsi veebist",
   "shareButtonLabel": "Jaga …",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Kustutamine",
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

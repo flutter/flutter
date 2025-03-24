@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'deferred_widget.dart';
@@ -25,7 +24,7 @@ import 'studies/starter/routes.dart' as starter_app_routes;
 typedef PathWidgetBuilder = Widget Function(BuildContext, String?);
 
 class Path {
-  const Path(this.pattern, this.builder, {this.openInSecondScreen = false});
+  const Path(this.pattern, this.builder);
 
   /// A RegEx string for route matching.
   final String pattern;
@@ -41,9 +40,6 @@ class Path {
   /// )
   /// ```
   final PathWidgetBuilder builder;
-
-  /// If the route should open on the second screen on foldables.
-  final bool openInSecondScreen;
 }
 
 class RouteConfiguration {
@@ -59,67 +55,47 @@ class RouteConfiguration {
     ),
     Path(
       r'^' + rally_routes.homeRoute,
-      (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(rally.loadLibrary,
-            () => rally.RallyApp()), // ignore: prefer_const_constructors
-      ),
-      openInSecondScreen: true,
+      (BuildContext context, String? match) =>
+          StudyWrapper(study: DeferredWidget(rally.loadLibrary, () => rally.RallyApp())),
     ),
     Path(
       r'^' + shrine_routes.homeRoute,
-      (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(shrine.loadLibrary,
-            () => shrine.ShrineApp()), // ignore: prefer_const_constructors
-      ),
-      openInSecondScreen: true,
+      (BuildContext context, String? match) =>
+          StudyWrapper(study: DeferredWidget(shrine.loadLibrary, () => shrine.ShrineApp())),
     ),
     Path(
       r'^' + crane_routes.defaultRoute,
       (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(crane.loadLibrary,
-            () => crane.CraneApp(), // ignore: prefer_const_constructors
-            placeholder: const DeferredLoadingPlaceholder(name: 'Crane')),
+        study: DeferredWidget(
+          crane.loadLibrary,
+          () => crane.CraneApp(),
+          placeholder: const DeferredLoadingPlaceholder(name: 'Crane'),
+        ),
       ),
-      openInSecondScreen: true,
     ),
     Path(
       r'^' + fortnightly_routes.defaultRoute,
       (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(
-            fortnightly.loadLibrary,
-            // ignore: prefer_const_constructors
-            () => fortnightly.FortnightlyApp()),
+        study: DeferredWidget(fortnightly.loadLibrary, () => fortnightly.FortnightlyApp()),
       ),
-      openInSecondScreen: true,
     ),
     Path(
       r'^' + reply_routes.homeRoute,
-      // ignore: prefer_const_constructors
       (BuildContext context, String? match) =>
           const StudyWrapper(study: reply.ReplyApp(), hasBottomNavBar: true),
-      openInSecondScreen: true,
     ),
     Path(
       r'^' + starter_app_routes.defaultRoute,
-      (BuildContext context, String? match) => const StudyWrapper(
-        study: starter_app.StarterApp(),
-      ),
-      openInSecondScreen: true,
+      (BuildContext context, String? match) => const StudyWrapper(study: starter_app.StarterApp()),
     ),
-    Path(
-      r'^/',
-      (BuildContext context, String? match) => const RootPage(),
-    ),
+    Path(r'^/', (BuildContext context, String? match) => const RootPage()),
   ];
 
   /// The route generator callback used when the app is navigated to a named
   /// route. Set it on the [MaterialApp.onGenerateRoute] or
   /// [WidgetsApp.onGenerateRoute] to make use of the [paths] for route
   /// matching.
-  static Route<dynamic>? onGenerateRoute(
-    RouteSettings settings,
-    bool hasHinge,
-  ) {
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     for (final Path path in paths) {
       final RegExp regExpPattern = RegExp(path.pattern);
       if (regExpPattern.hasMatch(settings.name!)) {
@@ -131,17 +107,10 @@ class RouteConfiguration {
             settings: settings,
           );
         }
-        if (path.openInSecondScreen && hasHinge) {
-          return TwoPanePageRoute<void>(
-            builder: (BuildContext context) => path.builder(context, match),
-            settings: settings,
-          );
-        } else {
-          return MaterialPageRoute<void>(
-            builder: (BuildContext context) => path.builder(context, match),
-            settings: settings,
-          );
-        }
+        return MaterialPageRoute<void>(
+          builder: (BuildContext context) => path.builder(context, match),
+          settings: settings,
+        );
       }
     }
 
@@ -151,10 +120,7 @@ class RouteConfiguration {
 }
 
 class NoAnimationMaterialPageRoute<T> extends MaterialPageRoute<T> {
-  NoAnimationMaterialPageRoute({
-    required super.builder,
-    super.settings,
-  });
+  NoAnimationMaterialPageRoute({required super.builder, super.settings});
 
   @override
   Widget buildTransitions(
@@ -168,27 +134,16 @@ class NoAnimationMaterialPageRoute<T> extends MaterialPageRoute<T> {
 }
 
 class TwoPanePageRoute<T> extends OverlayRoute<T> {
-  TwoPanePageRoute({
-    required this.builder,
-    super.settings,
-  });
+  TwoPanePageRoute({required this.builder, super.settings});
 
   final WidgetBuilder builder;
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield OverlayEntry(builder: (BuildContext context) {
-      final Rect? hinge = MediaQuery.of(context).hinge?.bounds;
-      if (hinge == null) {
+    yield OverlayEntry(
+      builder: (BuildContext context) {
         return builder.call(context);
-      } else {
-        return Positioned(
-            top: 0,
-            left: hinge.right,
-            right: 0,
-            bottom: 0,
-            child: builder.call(context));
-      }
-    });
+      },
+    );
   }
 }

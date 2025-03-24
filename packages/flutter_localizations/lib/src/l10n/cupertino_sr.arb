@@ -32,5 +32,7 @@
   "lookUpButtonLabel": "Поглед нагоре",
   "searchWebButtonLabel": "Претражи веб",
   "shareButtonLabel": "Дели…",
-  "clearButtonLabel": "Clear"
+  "clearButtonLabel": "Обриши",
+  "cancelButtonLabel": "Cancel",
+  "backButtonLabel": "Back"
 }

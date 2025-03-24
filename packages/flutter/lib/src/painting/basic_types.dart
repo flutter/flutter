@@ -2,53 +2,60 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+/// @docImport 'package:flutter/rendering.dart';
+///
+/// @docImport 'text_span.dart';
+/// @docImport 'text_style.dart';
+library;
+
 import 'dart:ui' show TextDirection;
 
-export 'dart:ui' show
-  BlendMode,
-  BlurStyle,
-  Canvas,
-  Clip,
-  Color,
-  ColorFilter,
-  FilterQuality,
-  FontFeature,
-  FontStyle,
-  FontVariation,
-  FontWeight,
-  GlyphInfo,
-  ImageShader,
-  Locale,
-  MaskFilter,
-  Offset,
-  Paint,
-  PaintingStyle,
-  Path,
-  PathFillType,
-  PathOperation,
-  RRect,
-  RSTransform,
-  Radius,
-  Rect,
-  Shader,
-  Shadow,
-  Size,
-  StrokeCap,
-  StrokeJoin,
-  TextAffinity,
-  TextAlign,
-  TextBaseline,
-  TextBox,
-  TextDecoration,
-  TextDecorationStyle,
-  TextDirection,
-  TextHeightBehavior,
-  TextLeadingDistribution,
-  TextPosition,
-  TileMode,
-  VertexMode,
-  hashList,
-  hashValues;
+export 'dart:ui'
+    show
+        BlendMode,
+        BlurStyle,
+        Canvas,
+        Clip,
+        Color,
+        ColorFilter,
+        FilterQuality,
+        FontFeature,
+        FontStyle,
+        FontVariation,
+        FontWeight,
+        GlyphInfo,
+        ImageShader,
+        Locale,
+        MaskFilter,
+        Offset,
+        Paint,
+        PaintingStyle,
+        Path,
+        PathFillType,
+        PathOperation,
+        RRect,
+        RSTransform,
+        RSuperellipse,
+        Radius,
+        Rect,
+        Shader,
+        Shadow,
+        Size,
+        StrokeCap,
+        StrokeJoin,
+        TextAffinity,
+        TextAlign,
+        TextBaseline,
+        TextBox,
+        TextDecoration,
+        TextDecorationStyle,
+        TextDirection,
+        TextHeightBehavior,
+        TextLeadingDistribution,
+        TextPosition,
+        TileMode,
+        VertexMode;
 
 export 'package:flutter/foundation.dart' show VoidCallback;
 
@@ -275,7 +282,7 @@ enum AxisDirection {
 /// and [AxisDirection.right].
 Axis axisDirectionToAxis(AxisDirection axisDirection) {
   return switch (axisDirection) {
-    AxisDirection.up   || AxisDirection.down  => Axis.vertical,
+    AxisDirection.up || AxisDirection.down => Axis.vertical,
     AxisDirection.left || AxisDirection.right => Axis.horizontal,
   };
 }
@@ -302,10 +309,10 @@ AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
 ///  * [flipAxis], which does the same thing for [Axis] values.
 AxisDirection flipAxisDirection(AxisDirection axisDirection) {
   return switch (axisDirection) {
-    AxisDirection.up    => AxisDirection.down,
+    AxisDirection.up => AxisDirection.down,
     AxisDirection.right => AxisDirection.left,
-    AxisDirection.down  => AxisDirection.up,
-    AxisDirection.left  => AxisDirection.right,
+    AxisDirection.down => AxisDirection.up,
+    AxisDirection.left => AxisDirection.right,
   };
 }
 
@@ -316,7 +323,7 @@ AxisDirection flipAxisDirection(AxisDirection axisDirection) {
 /// and false for [AxisDirection.down] and [AxisDirection.right].
 bool axisDirectionIsReversed(AxisDirection axisDirection) {
   return switch (axisDirection) {
-    AxisDirection.up   || AxisDirection.left  => true,
+    AxisDirection.up || AxisDirection.left => true,
     AxisDirection.down || AxisDirection.right => false,
   };
 }

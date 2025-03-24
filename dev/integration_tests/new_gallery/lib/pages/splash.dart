@@ -4,11 +4,9 @@
 
 import 'dart:math';
 
-import 'package:dual_screen/dual_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../constants.dart';
-import '../gallery_localizations.dart';
 import '../layout/adaptive.dart';
 import 'home.dart';
 
@@ -16,11 +14,7 @@ const double homePeekDesktop = 210.0;
 const double homePeekMobile = 60.0;
 
 class SplashPageAnimation extends InheritedWidget {
-  const SplashPageAnimation({
-    super.key,
-    required this.isFinished,
-    required super.child,
-  });
+  const SplashPageAnimation({super.key, required this.isFinished, required super.child});
 
   final bool isFinished;
 
@@ -33,10 +27,7 @@ class SplashPageAnimation extends InheritedWidget {
 }
 
 class SplashPage extends StatefulWidget {
-  const SplashPage({
-    super.key,
-    required this.child,
-  });
+  const SplashPage({super.key, required this.child});
 
   final Widget child;
 
@@ -44,8 +35,7 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
-    with SingleTickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late int _effect;
   final Random _random = Random();
@@ -79,11 +69,10 @@ class _SplashPageState extends State<SplashPage>
     // If the number of included effects changes, this number should be changed.
     _effect = _random.nextInt(_effectDurations.length) + 1;
 
-    _controller =
-        AnimationController(duration: splashPageAnimationDuration, vsync: this)
-          ..addListener(() {
-            setState(() {});
-          });
+    _controller = AnimationController(duration: splashPageAnimationDuration, vsync: this)
+      ..addListener(() {
+        setState(() {});
+      });
   }
 
   @override
@@ -92,12 +81,9 @@ class _SplashPageState extends State<SplashPage>
     super.dispose();
   }
 
-  Animation<RelativeRect> _getPanelAnimation(
-    BuildContext context,
-    BoxConstraints constraints,
-  ) {
-    final double height = constraints.biggest.height -
-        (isDisplayDesktop(context) ? homePeekDesktop : homePeekMobile);
+  Animation<RelativeRect> _getPanelAnimation(BuildContext context, BoxConstraints constraints) {
+    final double height =
+        constraints.biggest.height - (isDisplayDesktop(context) ? homePeekDesktop : homePeekMobile);
     return RelativeRectTween(
       begin: RelativeRect.fill,
       end: RelativeRect.fromLTRB(0, height, 0, 0),
@@ -112,7 +98,7 @@ class _SplashPageState extends State<SplashPage>
         return true;
       },
       child: SplashPageAnimation(
-        isFinished: _controller.status == AnimationStatus.dismissed,
+        isFinished: _controller.isDismissed,
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             final Animation<RelativeRect> animation = _getPanelAnimation(context, constraints);
@@ -122,9 +108,7 @@ class _SplashPageState extends State<SplashPage>
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    _controller.reverse();
-                  },
+                  onTap: _controller.reverse,
                   onVerticalDragEnd: (DragEndDetails details) {
                     if (details.velocity.pixelsPerSecond.dy < -200) {
                       _controller.reverse();
@@ -139,46 +123,22 @@ class _SplashPageState extends State<SplashPage>
               frontLayer = Padding(
                 padding: const EdgeInsets.only(top: 136),
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(40),
-                  ),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
                   child: frontLayer,
                 ),
               );
             }
 
-            if (isDisplayFoldable(context)) {
-              return TwoPane(
-                startPane: frontLayer,
-                endPane: GestureDetector(
-                  onTap: () {
-                    if (_isSplashVisible) {
-                      _controller.reverse();
-                    } else {
-                      _controller.forward();
-                    }
-                  },
-                  child: _SplashBackLayer(
-                      isSplashCollapsed: !_isSplashVisible, effect: _effect),
+            return Stack(
+              children: <Widget>[
+                _SplashBackLayer(
+                  isSplashCollapsed: !_isSplashVisible,
+                  effect: _effect,
+                  onTap: _controller.forward,
                 ),
-              );
-            } else {
-              return Stack(
-                children: <Widget>[
-                  _SplashBackLayer(
-                    isSplashCollapsed: !_isSplashVisible,
-                    effect: _effect,
-                    onTap: () {
-                      _controller.forward();
-                    },
-                  ),
-                  PositionedTransition(
-                    rect: animation,
-                    child: frontLayer,
-                  ),
-                ],
-              );
-            }
+                PositionedTransition(rect: animation, child: frontLayer),
+              ],
+            );
           },
         ),
       ),
@@ -187,11 +147,7 @@ class _SplashPageState extends State<SplashPage>
 }
 
 class _SplashBackLayer extends StatelessWidget {
-  const _SplashBackLayer({
-    required this.isSplashCollapsed,
-    required this.effect,
-    this.onTap,
-  });
+  const _SplashBackLayer({required this.isSplashCollapsed, required this.effect, this.onTap});
 
   final bool isSplashCollapsed;
   final int effect;
@@ -214,43 +170,15 @@ class _SplashBackLayer extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: onTap,
-                child: flutterLogo,
-              ),
+              child: GestureDetector(onTap: onTap, child: flutterLogo),
             ),
-          ),
-        );
-      }
-      if (isDisplayFoldable(context)) {
-        child = ColoredBox(
-          color: Theme.of(context).colorScheme.background,
-          child: Stack(
-            children: <Widget>[
-              Center(
-                child: flutterLogo,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 100.0),
-                child: Center(
-                  child: Text(
-                    GalleryLocalizations.of(context)!.splashSelectDemo,
-                  ),
-                ),
-              )
-            ],
           ),
         );
       }
     } else {
       child = Stack(
         children: <Widget>[
-          Center(
-            child: Image.asset(
-              effectAsset,
-              package: 'flutter_gallery_assets',
-            ),
-          ),
+          Center(child: Image.asset(effectAsset, package: 'flutter_gallery_assets')),
           Center(child: flutterLogo),
         ],
       );
@@ -262,11 +190,7 @@ class _SplashBackLayer extends StatelessWidget {
         color: const Color(0xFF030303),
         child: Padding(
           padding: EdgeInsets.only(
-            bottom: isDisplayDesktop(context)
-                ? homePeekDesktop
-                : isDisplayFoldable(context)
-                    ? 0
-                    : homePeekMobile,
+            bottom: isDisplayDesktop(context) ? homePeekDesktop : homePeekMobile,
           ),
           child: child,
         ),

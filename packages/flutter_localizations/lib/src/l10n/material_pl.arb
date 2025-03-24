@@ -150,7 +150,7 @@
   "menuDismissLabel": "Zamknij menu",
   "lookUpButtonLabel": "Sprawdź",
   "searchWebButtonLabel": "Szukaj w internecie",
-  "shareButtonLabel": "Udostępnij…",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "Udostępnij",
+  "clearButtonTooltip": "Wyczyść tekst",
+  "selectedDateLabel": "Wybrano"
 }

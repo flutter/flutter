@@ -11,22 +11,34 @@ void main() => runApp(const AnimatedFractionallySizedBoxExampleApp());
 class AnimatedFractionallySizedBoxExampleApp extends StatelessWidget {
   const AnimatedFractionallySizedBoxExampleApp({super.key});
 
+  static const Duration duration = Duration(seconds: 1);
+  static const Curve curve = Curves.fastOutSlowIn;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedFractionallySizedBox Sample')),
-        body: const AnimatedFractionallySizedBoxExample(),
+        body: const AnimatedFractionallySizedBoxExample(duration: duration, curve: curve),
       ),
     );
   }
 }
 
 class AnimatedFractionallySizedBoxExample extends StatefulWidget {
-  const AnimatedFractionallySizedBoxExample({super.key});
+  const AnimatedFractionallySizedBoxExample({
+    required this.duration,
+    required this.curve,
+    super.key,
+  });
+
+  final Duration duration;
+
+  final Curve curve;
 
   @override
-  State<AnimatedFractionallySizedBoxExample> createState() => _AnimatedFractionallySizedBoxExampleState();
+  State<AnimatedFractionallySizedBoxExample> createState() =>
+      _AnimatedFractionallySizedBoxExampleState();
 }
 
 class _AnimatedFractionallySizedBoxExampleState extends State<AnimatedFractionallySizedBoxExample> {
@@ -50,12 +62,9 @@ class _AnimatedFractionallySizedBoxExampleState extends State<AnimatedFractional
               widthFactor: selected ? 0.25 : 0.75,
               heightFactor: selected ? 0.75 : 0.25,
               alignment: selected ? Alignment.topLeft : Alignment.bottomRight,
-              duration: const Duration(seconds: 1),
-              curve: Curves.fastOutSlowIn,
-              child: const ColoredBox(
-                color: Colors.blue,
-                child: FlutterLogo(size: 75),
-              ),
+              duration: widget.duration,
+              curve: widget.curve,
+              child: const ColoredBox(color: Colors.blue, child: FlutterLogo(size: 75)),
             ),
           ),
         ),

@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.stylisticAlternates].
+/// Flutter code sample for [FontFeature.stylisticAlternates].
 
 void main() => runApp(const ExampleApp());
 
@@ -31,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       r'Agile Game - $100 initial bet',
       style: TextStyle(
         fontFamily: 'Source Code Pro',
-        fontFeatures: <FontFeature>[
-          FontFeature.stylisticAlternates(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.stylisticAlternates()],
       ),
     );
   }
