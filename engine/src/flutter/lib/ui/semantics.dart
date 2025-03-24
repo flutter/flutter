@@ -412,21 +412,44 @@ enum SemanticsRole {
 
   /// A input field with a dropdown list box attached.
   ///
-  /// For example, a [DropDownMenu]
+  /// For example, a [DropdownMenu]
   comboBox,
 
-  /// Contains a list of [menu]s.
+  /// A presentation of [menu] that usually remains visible and is usually
+  /// presented horizontally.
   ///
   /// For example, a [MenuBar].
   menuBar,
 
-  /// A button that opens a dropdown that contains multiple [menuItem]s.
+  /// A permanently visible list of controls or a widget that can be made to
+  /// open and close.
   ///
-  /// For example, a [MenuAnchor] or [DropDownButton].
+  /// For example, a [MenuAnchor] or [DropdownButton].
   menu,
 
-  /// A item in a dropdown created by [menu] or [comboBox].
+  /// An item in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItemCheckbox], a menu item with a checkbox. The [menuItemCheckbox]
+  ///  can also be used within [menu] and [menuBar].
+  /// * [menuItemRadio], a menu item with a radio button. This role is used by
+  /// [menu] or [menuBar] as well.
   menuItem,
+
+  /// An item with a checkbox in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItem] and [menuItemRadio] for menu related roles.
+  menuItemCheckbox,
+
+  /// An item with a radio button in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItem] and [menuItemCheckbox] for menu related roles.
+  menuItemRadio,
 
   /// A container to display multiple [listItem]s in vertical or horizontal
   /// layout.
@@ -462,6 +485,23 @@ enum SemanticsRole {
 
   /// A group of radio buttons.
   radioGroup,
+
+  /// A component to provide advisory information that is not important to
+  /// justify an [alert].
+  ///
+  /// For example, a loading message for a web page.
+  status,
+
+  /// A component to provide important and usually time-sensitive information.
+  ///
+  /// The alert role should only be used for information that requires the
+  /// user's immediate attention, for example:
+  ///
+  /// * An invalid value was entered into a form field.
+  /// * The user's login session is about to expire.
+  /// * The connection to the server was lost so local changes will not be
+  ///   saved.
+  alert,
 }
 
 /// A Boolean value that can be associated with a semantics node.
@@ -511,6 +551,8 @@ class SemanticsFlag {
   static const int _kHasExpandedStateIndex = 1 << 26;
   static const int _kIsExpandedIndex = 1 << 27;
   static const int _kHasSelectedStateIndex = 1 << 28;
+  static const int _kHasRequiredStateIndex = 1 << 29;
+  static const int _kIsRequiredIndex = 1 << 30;
   // READ THIS: if you add a flag here, you MUST update the following:
   //
   // - Add an appropriately named and documented `static const SemanticsFlag`
@@ -823,6 +865,28 @@ class SemanticsFlag {
   ///   * [SemanticsFlag.hasExpandedState], which enables an expanded/collapsed state.
   static const SemanticsFlag isExpanded = SemanticsFlag._(_kIsExpandedIndex, 'isExpanded');
 
+  /// The semantics node has the quality of either being required or not.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.isRequired], which controls whether the node is required.
+  static const SemanticsFlag hasRequiredState = SemanticsFlag._(
+    _kHasRequiredStateIndex,
+    'hasRequiredState',
+  );
+
+  /// Whether a semantics node is required.
+  ///
+  /// If true, user input is required on the semantics node before a form can
+  /// be submitted.
+  ///
+  /// For example, a login form requires its email text field to be non-empty.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.hasRequiredState], which enables a required state state.
+  static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -856,6 +920,8 @@ class SemanticsFlag {
     _kIsCheckStateMixedIndex: isCheckStateMixed,
     _kHasExpandedStateIndex: hasExpandedState,
     _kIsExpandedIndex: isExpanded,
+    _kHasRequiredStateIndex: hasRequiredState,
+    _kIsRequiredIndex: isRequired,
   };
 
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
@@ -1054,7 +1120,7 @@ abstract class SemanticsUpdateBuilder {
   ///
   /// For scrollable nodes `scrollPosition` describes the current scroll
   /// position in logical pixel. `scrollExtentMax` and `scrollExtentMin`
-  /// describe the maximum and minimum in-rage values that `scrollPosition` can
+  /// describe the maximum and minimum in-range values that `scrollPosition` can
   /// be. Both or either may be infinity to indicate unbound scrolling. The
   /// value for `scrollPosition` can (temporarily) be outside this range, for
   /// example during an overscroll. `scrollChildren` is the count of the
@@ -1129,6 +1195,7 @@ abstract class SemanticsUpdateBuilder {
     int headingLevel = 0,
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
+    required List<String>? controlsNodes,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1205,6 +1272,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int headingLevel = 0,
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
+    required List<String>? controlsNodes,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1251,6 +1319,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       headingLevel,
       linkUrl,
       role.index,
+      controlsNodes,
     );
   }
 
@@ -1296,6 +1365,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Handle,
       Int32,
+      Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
@@ -1338,6 +1408,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int headingLevel,
     String linkUrl,
     int role,
+    List<String>? controlsNodes,
   );
 
   @override

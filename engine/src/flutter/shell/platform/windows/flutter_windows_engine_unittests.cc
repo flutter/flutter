@@ -99,6 +99,7 @@ TEST_F(FlutterWindowsEngineTest, RunDoesExpectedInitialization) {
         EXPECT_NE(args->update_semantics_callback2, nullptr);
         EXPECT_EQ(args->update_semantics_node_callback, nullptr);
         EXPECT_EQ(args->update_semantics_custom_action_callback, nullptr);
+        EXPECT_NE(args->view_focus_change_request_callback, nullptr);
 
         args->custom_task_runners->thread_priority_setter(
             FlutterThreadPriority::kRaster);
@@ -481,20 +482,19 @@ TEST_F(FlutterWindowsEngineTest, DispatchSemanticsAction) {
 
   bool called = false;
   std::string message = "Hello";
-  modifier.embedder_api().DispatchSemanticsAction = MOCK_ENGINE_PROC(
-      DispatchSemanticsAction,
-      ([&called, &message](auto engine, auto target, auto action, auto data,
-                           auto data_length) {
+  modifier.embedder_api().SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction, ([&called, &message](auto engine, auto info) {
         called = true;
-        EXPECT_EQ(target, 42);
-        EXPECT_EQ(action, kFlutterSemanticsActionDismiss);
-        EXPECT_EQ(memcmp(data, message.c_str(), message.size()), 0);
-        EXPECT_EQ(data_length, message.size());
+        EXPECT_EQ(info->view_id, 456);
+        EXPECT_EQ(info->node_id, 42);
+        EXPECT_EQ(info->action, kFlutterSemanticsActionDismiss);
+        EXPECT_EQ(memcmp(info->data, message.c_str(), message.size()), 0);
+        EXPECT_EQ(info->data_length, message.size());
         return kSuccess;
       }));
 
   auto data = fml::MallocMapping::Copy(message.c_str(), message.size());
-  engine->DispatchSemanticsAction(42, kFlutterSemanticsActionDismiss,
+  engine->DispatchSemanticsAction(456, 42, kFlutterSemanticsActionDismiss,
                                   std::move(data));
   EXPECT_TRUE(called);
 }
@@ -661,6 +661,7 @@ class MockFlutterWindowsView : public FlutterWindowsView {
               (ui::AXPlatformNodeWin*, ax::mojom::Event),
               (override));
   MOCK_METHOD(HWND, GetWindowHandle, (), (const, override));
+  MOCK_METHOD(bool, Focus, (), (override));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockFlutterWindowsView);
@@ -798,7 +799,6 @@ TEST_F(FlutterWindowsEngineTest, TestExit) {
   modifier.SetImplicitView(&view);
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
   EXPECT_CALL(*handler, Quit)
       .WillOnce([&finished](std::optional<HWND> hwnd,
                             std::optional<WPARAM> wparam,
@@ -835,7 +835,6 @@ TEST_F(FlutterWindowsEngineTest, TestExitCancel) {
   modifier.SetImplicitView(&view);
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
   EXPECT_CALL(*handler, IsLastWindowOfProcess).WillRepeatedly(Return(true));
   EXPECT_CALL(*handler, Quit).Times(0);
   modifier.SetLifecycleManager(std::move(handler));
@@ -883,7 +882,6 @@ TEST_F(FlutterWindowsEngineTest, TestExitSecondCloseMessage) {
   modifier.SetImplicitView(&view);
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
   EXPECT_CALL(*handler, IsLastWindowOfProcess).WillOnce(Return(true));
   EXPECT_CALL(*handler, Quit)
       .WillOnce([handler_ptr = handler.get()](
@@ -943,7 +941,6 @@ TEST_F(FlutterWindowsEngineTest, TestExitCloseMultiWindow) {
   modifier.SetImplicitView(&view);
   modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed));
   EXPECT_CALL(*handler, IsLastWindowOfProcess).WillOnce([&finished]() {
     finished = true;
     return false;
@@ -1021,24 +1018,6 @@ TEST_F(FlutterWindowsEngineTest, ApplicationLifecycleExternalWindow) {
   engine->lifecycle_manager()->ExternalWindowMessage(0, WM_CLOSE, 0, 0);
 }
 
-TEST_F(FlutterWindowsEngineTest, AppStartsInResumedState) {
-  FlutterWindowsEngineBuilder builder{GetContext()};
-
-  auto engine = builder.Build();
-  auto window_binding_handler =
-      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
-  MockFlutterWindowsView view(engine.get(), std::move(window_binding_handler));
-
-  EngineModifier modifier(engine.get());
-  modifier.SetImplicitView(&view);
-  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
-  auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState(AppLifecycleState::kResumed))
-      .Times(1);
-  modifier.SetLifecycleManager(std::move(handler));
-  engine->Run();
-}
-
 TEST_F(FlutterWindowsEngineTest, LifecycleStateTransition) {
   FlutterWindowsEngineBuilder builder{GetContext()};
 
@@ -1054,16 +1033,41 @@ TEST_F(FlutterWindowsEngineTest, LifecycleStateTransition) {
 
   engine->window_proc_delegate_manager()->OnTopLevelWindowProc(
       (HWND)1, WM_SIZE, SIZE_RESTORED, 0);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
+  EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
+            AppLifecycleState::kInactive);
+
+  engine->lifecycle_manager()->OnWindowStateEvent((HWND)1,
+                                                  WindowStateEvent::kFocus);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kResumed);
 
   engine->window_proc_delegate_manager()->OnTopLevelWindowProc(
       (HWND)1, WM_SIZE, SIZE_MINIMIZED, 0);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kHidden);
 
   engine->window_proc_delegate_manager()->OnTopLevelWindowProc(
       (HWND)1, WM_SIZE, SIZE_RESTORED, 0);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kInactive);
 }
@@ -1087,6 +1091,10 @@ TEST_F(FlutterWindowsEngineTest, ExternalWindowMessage) {
                                        TRUE, NULL);
   engine->ProcessExternalWindowMessage(reinterpret_cast<HWND>(1), WM_SHOWWINDOW,
                                        FALSE, NULL);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
 
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kHidden);
@@ -1115,11 +1123,19 @@ TEST_F(FlutterWindowsEngineTest, InnerWindowHidden) {
   view.OnWindowStateEvent(inner, WindowStateEvent::kShow);
   view.OnWindowStateEvent(inner, WindowStateEvent::kFocus);
 
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
             AppLifecycleState::kResumed);
 
   // Hide Flutter window, but not top level window.
   view.OnWindowStateEvent(inner, WindowStateEvent::kHide);
+
+  while (engine->lifecycle_manager()->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
 
   // The top-level window is still visible, so we ought not enter hidden state.
   EXPECT_EQ(engine->lifecycle_manager()->GetLifecycleState(),
@@ -1242,7 +1258,6 @@ TEST_F(FlutterWindowsEngineTest, ChannelListenedTo) {
 
   bool lifecycle_began = false;
   auto handler = std::make_unique<MockWindowsLifecycleManager>(engine.get());
-  EXPECT_CALL(*handler, SetLifecycleState).Times(1);
   handler->begin_processing_callback = [&]() { lifecycle_began = true; };
   modifier.SetLifecycleManager(std::move(handler));
 
@@ -1344,6 +1359,95 @@ TEST_F(FlutterWindowsEngineTest, MergedUIThread) {
     PumpMessage();
   }
   ASSERT_EQ(*ui_thread_id, std::this_thread::get_id());
+}
+
+TEST_F(FlutterWindowsEngineTest, OnViewFocusChangeRequest) {
+  FlutterWindowsEngineBuilder builder{GetContext()};
+  std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
+  auto window_binding_handler =
+      std::make_unique<::testing::NiceMock<MockWindowBindingHandler>>();
+  MockFlutterWindowsView view(engine.get(), std::move(window_binding_handler));
+
+  EngineModifier modifier(engine.get());
+  modifier.SetImplicitView(&view);
+
+  FlutterViewFocusChangeRequest request;
+  request.view_id = kImplicitViewId;
+
+  EXPECT_CALL(view, Focus()).WillOnce(Return(true));
+  modifier.OnViewFocusChangeRequest(&request);
+}
+
+TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder{context};
+  builder.SetDartEntrypoint("sendSemanticsTreeInfo");
+
+  // Setup: a signal for when we have send out all of our semantics updates
+  bool done = false;
+  auto native_entry =
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
+  context.AddNativeFunction("Signal", native_entry);
+
+  // Setup: Create the engine and two views + enable semantics
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  auto window_binding_handler1 =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  auto window_binding_handler2 =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+
+  // The following mocks are required by
+  // FlutterWindowsView::CreateWindowMetricsEvent so that we create a valid
+  // view.
+  EXPECT_CALL(*window_binding_handler1, GetPhysicalWindowBounds)
+      .WillRepeatedly(testing::Return(PhysicalWindowBounds{100, 100}));
+  EXPECT_CALL(*window_binding_handler1, GetDpiScale)
+      .WillRepeatedly(testing::Return(96.0));
+  EXPECT_CALL(*window_binding_handler2, GetPhysicalWindowBounds)
+      .WillRepeatedly(testing::Return(PhysicalWindowBounds{200, 200}));
+  EXPECT_CALL(*window_binding_handler2, GetDpiScale)
+      .WillRepeatedly(testing::Return(96.0));
+
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  EngineModifier modifier{windows_engine};
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+
+  // We want to avoid adding an implicit view as the first view
+  modifier.SetNextViewId(kImplicitViewId + 1);
+
+  auto view1 = windows_engine->CreateView(std::move(window_binding_handler1));
+  auto view2 = windows_engine->CreateView(std::move(window_binding_handler2));
+
+  // Act: UpdateSemanticsEnabled will trigger the semantics updates
+  // to get sent.
+  windows_engine->UpdateSemanticsEnabled(true);
+
+  while (!done) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+
+  auto accessibility_bridge1 = view1->accessibility_bridge().lock();
+  auto accessibility_bridge2 = view2->accessibility_bridge().lock();
+
+  // Expect: that the semantics trees are updated with their
+  // respective nodes.
+  while (
+      !accessibility_bridge1->GetPlatformNodeFromTree(view1->view_id() + 1)) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+
+  while (
+      !accessibility_bridge2->GetPlatformNodeFromTree(view2->view_id() + 1)) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+
+  // Rely on timeout mechanism in CI.
+  auto tree1 = accessibility_bridge1->GetTree();
+  auto tree2 = accessibility_bridge2->GetTree();
+  EXPECT_NE(tree1->GetFromId(view1->view_id() + 1), nullptr);
+  EXPECT_NE(tree2->GetFromId(view2->view_id() + 1), nullptr);
 }
 
 }  // namespace testing
