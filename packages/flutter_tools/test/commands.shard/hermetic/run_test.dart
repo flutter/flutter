@@ -35,6 +35,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -64,34 +65,6 @@ void main() {
               (ToolExit error) => error.exitCode,
               'exitCode',
               anyOf(isNull, 1),
-            ),
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Logger: () => logger,
-      },
-    );
-
-    testUsingContext(
-      'does not support --no-sound-null-safety by default',
-      () async {
-        fileSystem.file('lib/main.dart').createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').createSync();
-        fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
-
-        final TestRunCommandThatOnlyValidates command = TestRunCommandThatOnlyValidates();
-        await expectLater(
-          () => createTestCommandRunner(
-            command,
-          ).run(<String>['run', '--use-application-binary=app/bar/faz', '--no-sound-null-safety']),
-          throwsA(
-            isException.having(
-              (Exception exception) => exception.toString(),
-              'toString',
-              contains('Could not find an option named "no-sound-null-safety"'),
             ),
           ),
         );
@@ -202,15 +175,9 @@ void main() {
         artifacts = Artifacts.test();
         fs = MemoryFileSystem.test();
 
-        fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: flutter_app');
-        fs.currentDirectory.childDirectory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-{
-  "packages": [],
-  "configVersion": 2
-}
-''');
+        fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('name: my_app');
+        writePackageConfigFile(directory: fs.currentDirectory, mainLibName: 'my_app');
+
         final Directory libDir = fs.currentDirectory.childDirectory('lib');
         libDir.createSync();
         final File mainFile = libDir.childFile('main.dart');
@@ -1283,7 +1250,6 @@ void main() {
           '--trace-systrace',
           '--trace-to-file=path/to/trace.binpb',
           '--verbose-system-logs',
-          '--null-assertions',
           '--native-null-assertions',
           '--enable-impeller',
           '--enable-vulkan-validation',
@@ -1306,7 +1272,6 @@ void main() {
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
       expect(options.verboseSystemLogs, true);
-      expect(options.nullAssertions, true);
       expect(options.nativeNullAssertions, true);
       expect(options.traceSystrace, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);

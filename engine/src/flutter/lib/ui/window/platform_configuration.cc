@@ -49,6 +49,8 @@ void PlatformConfiguration::DidCreateIsolate() {
   send_view_focus_event_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_sendViewFocusEvent")));
+  set_engine_id_.Set(tonic::DartState::Current(),
+                     Dart_GetField(library, tonic::ToDart("_setEngineId")));
   update_window_metrics_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_updateWindowMetrics")));
@@ -165,6 +167,20 @@ bool PlatformConfiguration::SendFocusEvent(const ViewFocusEvent& event) {
                                         tonic::ToDart(event.state()),
                                         tonic::ToDart(event.direction()),
                                     }));
+  return true;
+}
+
+bool PlatformConfiguration::SetEngineId(int64_t engine_id) {
+  std::shared_ptr<tonic::DartState> dart_state =
+      set_engine_id_.dart_state().lock();
+  if (!dart_state) {
+    return false;
+  }
+  tonic::DartState::Scope scope(dart_state);
+  tonic::CheckAndHandleError(
+      tonic::DartInvoke(set_engine_id_.Get(), {
+                                                  tonic::ToDart(engine_id),
+                                              }));
   return true;
 }
 
@@ -364,7 +380,8 @@ void PlatformConfiguration::DispatchPointerDataPacket(
       tonic::DartInvoke(dispatch_pointer_data_packet_.Get(), {data_handle}));
 }
 
-void PlatformConfiguration::DispatchSemanticsAction(int32_t node_id,
+void PlatformConfiguration::DispatchSemanticsAction(int64_t view_id,
+                                                    int32_t node_id,
                                                     SemanticsAction action,
                                                     fml::MallocMapping args) {
   std::shared_ptr<tonic::DartState> dart_state =
@@ -383,8 +400,8 @@ void PlatformConfiguration::DispatchSemanticsAction(int32_t node_id,
 
   tonic::CheckAndHandleError(tonic::DartInvoke(
       dispatch_semantics_action_.Get(),
-      {tonic::ToDart(node_id), tonic::ToDart(static_cast<int32_t>(action)),
-       args_handle}));
+      {tonic::ToDart(view_id), tonic::ToDart(node_id),
+       tonic::ToDart(static_cast<int32_t>(action)), args_handle}));
 }
 
 void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime,
@@ -645,10 +662,11 @@ void PlatformConfigurationNativeApi::EndWarmUpFrame() {
   UIDartState::Current()->platform_configuration()->client()->EndWarmUpFrame();
 }
 
-void PlatformConfigurationNativeApi::UpdateSemantics(SemanticsUpdate* update) {
+void PlatformConfigurationNativeApi::UpdateSemantics(int64_t view_id,
+                                                     SemanticsUpdate* update) {
   UIDartState::ThrowIfUIOperationsProhibited();
   UIDartState::Current()->platform_configuration()->client()->UpdateSemantics(
-      update);
+      view_id, update);
 }
 
 Dart_Handle PlatformConfigurationNativeApi::ComputePlatformResolvedLocale(

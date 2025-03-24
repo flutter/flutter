@@ -151,6 +151,7 @@
 ../../../flutter/impeller/display_list/dl_golden_unittests.cc
 ../../../flutter/impeller/display_list/dl_golden_unittests.h
 ../../../flutter/impeller/display_list/dl_unittests.cc
+../../../flutter/impeller/display_list/paint_unittests.cc
 ../../../flutter/impeller/display_list/skia_conversions_unittests.cc
 ../../../flutter/impeller/display_list/testing
 ../../../flutter/impeller/docs
@@ -174,6 +175,7 @@
 ../../../flutter/impeller/geometry/geometry_unittests.cc
 ../../../flutter/impeller/geometry/matrix_unittests.cc
 ../../../flutter/impeller/geometry/path_unittests.cc
+../../../flutter/impeller/geometry/rational_unittests.cc
 ../../../flutter/impeller/geometry/rect_unittests.cc
 ../../../flutter/impeller/geometry/round_rect_unittests.cc
 ../../../flutter/impeller/geometry/round_superellipse_unittests.cc
@@ -192,6 +194,7 @@
 ../../../flutter/impeller/renderer/backend/metal/swapchain_transients_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/metal/texture_mtl_unittests.mm
 ../../../flutter/impeller/renderer/backend/vulkan/allocator_vk_unittests.cc
+../../../flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/command_encoder_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/command_pool_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/context_vk_unittests.cc
@@ -202,7 +205,9 @@
 ../../../flutter/impeller/renderer/backend/vulkan/pipeline_cache_data_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/render_pass_builder_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/render_pass_cache_unittests.cc
+../../../flutter/impeller/renderer/backend/vulkan/render_pass_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/resource_manager_vk_unittests.cc
+../../../flutter/impeller/renderer/backend/vulkan/surface_context_vk_unittests.cc
 ../../../flutter/impeller/renderer/backend/vulkan/swapchain/README.md
 ../../../flutter/impeller/renderer/backend/vulkan/swapchain/khr/README.md
 ../../../flutter/impeller/renderer/backend/vulkan/test
@@ -1070,6 +1075,7 @@
 ../../../flutter/third_party/boringssl/src/gen/README.md
 ../../../flutter/third_party/boringssl/src/gen/sources.bzl
 ../../../flutter/third_party/boringssl/src/gen/sources.cmake
+../../../flutter/third_party/boringssl/src/gen/sources.mk
 ../../../flutter/third_party/boringssl/src/gen/test_support
 ../../../flutter/third_party/boringssl/src/infra/config/README.md
 ../../../flutter/third_party/boringssl/src/pki/README.md
@@ -1130,6 +1136,7 @@
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_cmac_test.json
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_cmac_test.txt
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_eax_test.json
+../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_eax_test.txt
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_gcm_siv_test.json
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_gcm_siv_test.txt
 ../../../flutter/third_party/boringssl/src/third_party/wycheproof_testvectors/aes_gcm_test.json
@@ -1431,6 +1438,8 @@
 ../../../flutter/third_party/dart/codereview.settings
 ../../../flutter/third_party/dart/docs
 ../../../flutter/third_party/dart/pkg
+../../../flutter/third_party/dart/pubspec.lock
+../../../flutter/third_party/dart/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/.clang-tidy
 ../../../flutter/third_party/dart/runtime/.gitignore
 ../../../flutter/third_party/dart/runtime/CPPLINT.cfg
@@ -3028,11 +3037,6 @@
 ../../../flutter/third_party/tonic/filesystem/README.md
 ../../../flutter/third_party/tonic/filesystem/tests
 ../../../flutter/third_party/tonic/tests
-../../../flutter/third_party/txt/.clang-format
-../../../flutter/third_party/txt/.gitattributes
-../../../flutter/third_party/txt/.gitignore
-../../../flutter/third_party/txt/tests
-../../../flutter/third_party/txt/third_party/fonts
 ../../../flutter/third_party/vulkan-deps/.git
 ../../../flutter/third_party/vulkan-deps/.gitattributes
 ../../../flutter/third_party/vulkan-deps/.gitignore
@@ -3320,8 +3324,12 @@
 ../../../flutter/tools/licenses/lib/README
 ../../../flutter/tools/licenses/pubspec.yaml
 ../../../flutter/tools/licenses/test
+../../../flutter/txt/.clang-format
+../../../flutter/txt/.gitattributes
+../../../flutter/txt/.gitignore
+../../../flutter/txt/tests
+../../../flutter/txt/third_party/fonts
 ../../../flutter/web_sdk
-../../../fuchsia/sdk/linux/.build-id
 ../../../fuchsia/sdk/linux/.versions
 ../../../fuchsia/sdk/linux/AUTHORS
 ../../../fuchsia/sdk/linux/NOTICE.fuchsia
@@ -3428,7 +3436,6 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.factory/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
-../../../fuchsia/sdk/linux/fidl/fuchsia.gnss.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.agis/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.gpu.magma/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.adc/meta.json
@@ -3467,6 +3474,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.serial/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.serialimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sharedmemory/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spi.businfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spi/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spiimpl/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.spmi/meta.json
@@ -3490,6 +3498,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.legacymetrics/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.lightsensor/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.location.namedplace/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.location.position/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.location.sensor/meta.json
