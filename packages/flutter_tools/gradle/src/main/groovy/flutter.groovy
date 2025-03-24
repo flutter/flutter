@@ -5,6 +5,7 @@
 
 import com.android.build.OutputFile
 import com.android.build.gradle.AbstractAppExtension
+import com.android.tools.r8.P
 import com.flutter.gradle.AppLinkSettings
 import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.PackageAndroidArtifact
@@ -72,7 +73,7 @@ class FlutterPlugin implements Plugin<Project> {
         this.project = project
 
         Project rootProject = project.rootProject
-        if (isFlutterAppProject()) {
+        if (FlutterPluginUtils.isFlutterAppProject(project)) {
             rootProject.tasks.register("generateLockfiles") {
                 doLast {
                     rootProject.subprojects.each { subproject ->
@@ -135,7 +136,7 @@ class FlutterPlugin implements Plugin<Project> {
         extension.flutterVersionName = localProperties.getProperty("flutter.versionName", "1.0")
 
         this.addFlutterTasks(project)
-        forceNdkDownload(project, flutterRootPath)
+        FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -162,7 +163,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        getTargetPlatforms().each { targetArch ->
+        FlutterPluginUtils.getTargetPlatforms(project).each { targetArch ->
             String abiValue = FlutterPluginConstants.PLATFORM_ARCH_MAP[targetArch]
             project.android {
                 if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
@@ -309,29 +310,7 @@ class FlutterPlugin implements Plugin<Project> {
      *    2. libflutter.so
      */
     void addFlutterDependencies(BuildType buildType) {
-        String flutterBuildMode = FlutterPluginUtils.buildModeFor(buildType)
-        if (!FlutterPluginUtils.supportsBuildMode(project, flutterBuildMode)) {
-            return
-        }
-        // The embedding is set as an API dependency in a Flutter plugin.
-        // Therefore, don't make the app project depend on the embedding if there are Flutter
-        // plugin dependencies. In release mode, dev dependencies are stripped, so we do not
-        // consider those in the check.
-        // This prevents duplicated classes when using custom build types. That is, a custom build
-        // type like profile is used, and the plugin and app projects have API dependencies on the
-        // embedding.
-        List<Map<String, Object>> pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency = flutterBuildMode == "release" ? getPluginListWithoutDevDependencies(project) : getPluginList(project);
-        if (!isFlutterAppProject() || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.size() == 0) {
-            FlutterPluginUtils.addApiDependencies(project, buildType.name,
-                    "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion")
-        }
-        List<String> platforms = getTargetPlatforms().collect()
-        platforms.each { platform ->
-            String arch = FlutterPluginUtils.formatPlatformString(platform)
-            // Add the `libflutter.so` dependency.
-            FlutterPluginUtils.addApiDependencies(project, buildType.name,
-                    "io.flutter:${arch}_$flutterBuildMode:$engineVersion")
-        }
+        FlutterPluginUtils.addFlutterDependencies(project, buildType, getPluginList(project), engineVersion)
     }
 
     /**
@@ -343,8 +322,12 @@ class FlutterPlugin implements Plugin<Project> {
      */
     private void configurePlugins(Project project) {
         configureLegacyPluginEachProjects(project)
-        getPluginList(project).each(this.&configurePluginProject)
-        getPluginList(project).each(this.&configurePluginDependencies)
+        getPluginList(project).each { Map<String, Object> plugin ->
+            FlutterPluginUtils.configurePluginProject(project, plugin, engineVersion)
+        }
+        getPluginList(project).each {Map<String, Object> plugin ->
+            FlutterPluginUtils.configurePluginDependencies(project, plugin)
+        }
     }
 
     // TODO(54566, 48918): Can remove once the issues are resolved.
@@ -397,230 +380,10 @@ class FlutterPlugin implements Plugin<Project> {
             } else if (FlutterPluginUtils.pluginSupportsAndroidPlatform(pluginProject)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
-                configurePluginProject(it)
+                FlutterPluginUtils.configurePluginProject(project, it, engineVersion)
             /* groovylint-disable-next-line EmptyElseBlock */
             } else {
             // Plugin has no or an empty `android` folder. No action required.
-            }
-        }
-    }
-
-    /** Adds the plugin project dependency to the app project. */
-    private void configurePluginProject(Map<String, Object> pluginObject) {
-        assert(pluginObject.name instanceof String)
-        Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        if (pluginProject == null) {
-            return
-        }
-        // Apply the "flutter" Gradle extension to plugins so that they can use it's vended
-        // compile/target/min sdk values.
-        pluginProject.extensions.create("flutter", FlutterExtension)
-
-        // Add plugin dependency to the app project. We only want to add dependency
-        // for dev dependencies in non-release builds.
-        project.afterEvaluate {
-            project.android.buildTypes.all { buildType ->
-                if (!pluginObject.dev_dependency || buildType.name != 'release') {
-                    project.dependencies.add("${buildType.name}Api", pluginProject)
-                }
-            }
-        }
-
-        Closure addEmbeddingDependencyToPlugin = { BuildType buildType ->
-            String flutterBuildMode = FlutterPluginUtils.buildModeFor(buildType)
-            // In AGP 3.5, the embedding must be added as an API implementation,
-            // so java8 features are desugared against the runtime classpath.
-            // For more, see https://github.com/flutter/flutter/issues/40126
-            if (!FlutterPluginUtils.supportsBuildMode(project, flutterBuildMode)) {
-                return
-            }
-            if (!pluginProject.hasProperty("android")) {
-                return
-            }
-            // Copy build types from the app to the plugin.
-            // This allows to build apps with plugins and custom build types or flavors.
-            pluginProject.android.buildTypes {
-                "${buildType.name}" {}
-            }
-            // The embedding is API dependency of the plugin, so the AGP is able to desugar
-            // default method implementations when the interface is implemented by a plugin.
-            //
-            // See https://issuetracker.google.com/139821726, and
-            // https://github.com/flutter/flutter/issues/72185 for more details.
-            FlutterPluginUtils.addApiDependencies(
-              pluginProject,
-              buildType.name,
-              "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
-            )
-        }
-
-        // Wait until the Android plugin loaded.
-        pluginProject.afterEvaluate {
-            // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
-            if (pluginProject.android.compileSdkVersion > project.android.compileSdkVersion) {
-                project.logger.quiet("Warning: The plugin ${pluginObject.name} requires Android SDK version ${getCompileSdkFromProject(pluginProject)} or higher.")
-                project.logger.quiet("For more information about build configuration, see $kWebsiteDeploymentAndroidBuildConfig.")
-            }
-
-            project.android.buildTypes.all(addEmbeddingDependencyToPlugin)
-        }
-    }
-
-    private void forceNdkDownload(Project gradleProject, String flutterSdkRootPath) {
-        // If the project is already configuring a native build, we don't need to do anything.
-        Boolean forcingNotRequired = gradleProject.android.externalNativeBuild.cmake.path != null
-        if (forcingNotRequired) {
-            return
-        }
-
-        // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
-        gradleProject.android {
-            externalNativeBuild {
-                cmake {
-                    // Respect the existing configuration if it exists - the NDK will already be
-                    // downloaded in this case.
-                    path = flutterSdkRootPath + "/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
-                }
-            }
-
-            defaultConfig {
-                externalNativeBuild {
-                    cmake {
-                        // CMake will print warnings when you try to build an empty project.
-                        // These arguments silence the warnings - our project is intentionally
-                        // empty.
-                        arguments("-Wno-dev", "--no-warn-unused-cli")
-                    }
-                }
-            }
-        }
-    }
-
-    /** Prints error message and fix for any plugin compileSdkVersion or ndkVersion that are higher than the project. */
-    private void detectLowCompileSdkVersionOrNdkVersion() {
-        project.afterEvaluate {
-            // Default to int max if using a preview version to skip the sdk check.
-            int projectCompileSdkVersion = Integer.MAX_VALUE
-            // Stable versions use ints, legacy preview uses string.
-            if (getCompileSdkFromProject(project).isInteger()) {
-                projectCompileSdkVersion = getCompileSdkFromProject(project) as int
-            }
-            int maxPluginCompileSdkVersion = projectCompileSdkVersion
-            String ndkVersionIfUnspecified = "21.1.6352462" /* The default for AGP 4.1.0 used in old templates. */
-            String projectNdkVersion = project.android.ndkVersion ?: ndkVersionIfUnspecified
-            String maxPluginNdkVersion = projectNdkVersion
-            int numProcessedPlugins = getPluginList(project).size()
-            List<Tuple2<String, String>> pluginsWithHigherSdkVersion = []
-            List<Tuple2<String, String>> pluginsWithDifferentNdkVersion = []
-
-            getPluginList(project).each { pluginObject ->
-                assert(pluginObject.name instanceof String)
-                Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-                if (pluginProject == null) {
-                    return
-                }
-                pluginProject.afterEvaluate {
-                    // Default to int min if using a preview version to skip the sdk check.
-                    int pluginCompileSdkVersion = Integer.MIN_VALUE
-                    // Stable versions use ints, legacy preview uses string.
-                    if (getCompileSdkFromProject(pluginProject).isInteger()) {
-                        pluginCompileSdkVersion = getCompileSdkFromProject(pluginProject) as int
-                    }
-
-                    maxPluginCompileSdkVersion = Math.max(pluginCompileSdkVersion, maxPluginCompileSdkVersion)
-                    if (pluginCompileSdkVersion > projectCompileSdkVersion) {
-                        pluginsWithHigherSdkVersion.add(new Tuple(pluginProject.name, pluginCompileSdkVersion))
-                    }
-
-                    String pluginNdkVersion = pluginProject.android.ndkVersion ?: ndkVersionIfUnspecified
-                    maxPluginNdkVersion = VersionUtils.mostRecentSemanticVersion(pluginNdkVersion, maxPluginNdkVersion)
-                    if (pluginNdkVersion != projectNdkVersion) {
-                        pluginsWithDifferentNdkVersion.add(new Tuple(pluginProject.name, pluginNdkVersion))
-                    }
-
-                    numProcessedPlugins--
-                    if (numProcessedPlugins == 0) {
-                        if (maxPluginCompileSdkVersion > projectCompileSdkVersion) {
-                            project.logger.error("Your project is configured to compile against Android SDK $projectCompileSdkVersion, but the following plugin(s) require to be compiled against a higher Android SDK version:")
-                            for (Tuple2<String, String> pluginToCompileSdkVersion : pluginsWithHigherSdkVersion) {
-                                project.logger.error("- ${pluginToCompileSdkVersion.v1} compiles against Android SDK ${pluginToCompileSdkVersion.v2}")
-                            }
-                            File buildGradleFile = FlutterPluginUtils.getBuildGradleFileFromProjectDir(project.projectDir, project.logger)
-                            project.logger.error("""\
-                                Fix this issue by compiling against the highest Android SDK version (they are backward compatible).
-                                Add the following to ${buildGradleFile.path}:
-
-                                    android {
-                                        compileSdk = ${maxPluginCompileSdkVersion}
-                                        ...
-                                    }
-                                """.stripIndent())
-                        }
-                        if (maxPluginNdkVersion != projectNdkVersion) {
-                            project.logger.error("Your project is configured with Android NDK $projectNdkVersion, but the following plugin(s) depend on a different Android NDK version:")
-                            for (Tuple2<String, String> pluginToNdkVersion : pluginsWithDifferentNdkVersion) {
-                                project.logger.error("- ${pluginToNdkVersion.v1} requires Android NDK ${pluginToNdkVersion.v2}")
-                            }
-                            File buildGradleFile = FlutterPluginUtils.getBuildGradleFileFromProjectDir(project.projectDir, project.logger)
-                            project.logger.error("""\
-                                Fix this issue by using the highest Android NDK version (they are backward compatible).
-                                Add the following to ${buildGradleFile.path}:
-
-                                    android {
-                                        ndkVersion = \"${maxPluginNdkVersion}\"
-                                        ...
-                                    }
-                                """.stripIndent())
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Returns the portion of the compileSdkVersion string that corresponds to either the numeric
-     * or string version.
-     */
-    private static String getCompileSdkFromProject(Project gradleProject) {
-        return gradleProject.android.compileSdkVersion.substring(8)
-    }
-
-    /**
-     * Add the dependencies on other plugin projects to the plugin project.
-     * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
-     * making the Gradle plugin project A depend on the Gradle plugin project B.
-     */
-    private void configurePluginDependencies(Map<String, Object> pluginObject) {
-        assert(pluginObject.name instanceof String)
-        Project pluginProject = project.rootProject.findProject(":${pluginObject.name}")
-        if (pluginProject == null) {
-            return
-        }
-
-        project.android.buildTypes.each { buildType ->
-            String flutterBuildMode = FlutterPluginUtils.buildModeFor(buildType)
-            if (flutterBuildMode == "release" && pluginObject.dev_dependency) {
-                // This plugin is a dev dependency will not be included in the
-                // release build, so no need to add its dependencies.
-                return
-            }
-            def dependencies = pluginObject.dependencies
-            assert(dependencies instanceof List<String>)
-            dependencies.each { pluginDependencyName ->
-                if (pluginDependencyName.empty) {
-                    return
-                }
-                Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-                if (dependencyProject == null) {
-                    return
-                }
-                // Wait for the Android plugin to load and add the dependency to the plugin project.
-                pluginProject.afterEvaluate {
-                    pluginProject.dependencies {
-                        implementation(dependencyProject)
-                    }
-                }
             }
         }
     }
@@ -637,24 +400,6 @@ class FlutterPlugin implements Plugin<Project> {
             pluginList = project.ext.nativePluginLoader.getPlugins(FlutterPluginUtils.getFlutterSourceDirectory(project))
         }
         return pluginList
-    }
-
-    /**
-     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
-     * Android project excluding dev dependencies.
-     *
-     * The map value contains either the plugins `name` (String),
-     * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
-     */
-    private List<Map<String, Object>> getPluginListWithoutDevDependencies(Project project) {
-        List<Map<String, Object>> pluginListWithoutDevDependencies = []
-        for (Map<String, Object> plugin in getPluginList(project)) {
-            if (!plugin.dev_dependency) {
-                pluginListWithoutDevDependencies += plugin
-            }
-        }
-        return pluginListWithoutDevDependencies
     }
 
     // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
@@ -675,26 +420,9 @@ class FlutterPlugin implements Plugin<Project> {
 
     private String resolveProperty(String name, String defaultValue) {
         if (localProperties == null) {
-            localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
+            localProperties = FlutterPluginUtils.readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
         }
         return project.findProperty(name) ?: localProperties?.getProperty(name, defaultValue)
-    }
-
-    private List<String> getTargetPlatforms() {
-        final String propTargetPlatform = "target-platform"
-        if (!project.hasProperty(propTargetPlatform)) {
-            return FlutterPluginConstants.DEFAULT_PLATFORMS
-        }
-        return project.property(propTargetPlatform).split(",").collect {
-            if (!FlutterPluginConstants.PLATFORM_ARCH_MAP[it]) {
-                throw new GradleException("Invalid platform: $it.")
-            }
-            return it
-        }
-    }
-
-    private boolean isFlutterAppProject() {
-        return project.android.hasProperty("applicationVariants")
     }
 
     private void addFlutterTasks(Project project) {
@@ -771,12 +499,12 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty(propValidateDeferredComponents)) {
             validateDeferredComponentsValue = project.property(propValidateDeferredComponents).toBoolean()
         }
-        addTaskForJavaVersion(project)
-        if (isFlutterAppProject()) {
-            addTaskForPrintBuildVariants(project)
+        FlutterPluginUtils.addTaskForJavaVersion(project)
+        if (FlutterPluginUtils.isFlutterAppProject(project)) {
+            FlutterPluginUtils.addTaskForPrintBuildVariants(project)
             FlutterTaskHelper.addTasksForOutputsAppLinkSettings(project)
         }
-        List<String> targetPlatforms = getTargetPlatforms()
+        List<String> targetPlatforms = FlutterPluginUtils.getTargetPlatforms(project)
         def addFlutterDeps = { variant ->
             if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
                 variant.outputs.each { output ->
@@ -939,7 +667,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             return copyFlutterAssetsTask
         } // end def addFlutterDeps
-        if (isFlutterAppProject()) {
+        if (FlutterPluginUtils.isFlutterAppProject(project)) {
             AbstractAppExtension android = (AbstractAppExtension) project.extensions.findByName("android")
             android.applicationVariants.configureEach { variant ->
                 Task assembleTask = variant.assembleProvider.get()
@@ -991,7 +719,7 @@ class FlutterPlugin implements Plugin<Project> {
             String nativeAssetsDir = "${project.layout.buildDirectory.get()}/../native_assets/android/jniLibs/lib/"
             android.sourceSets.main.jniLibs.srcDir(nativeAssetsDir)
             configurePlugins(project)
-            detectLowCompileSdkVersionOrNdkVersion()
+            FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, getPluginList(project))
             return
         }
         // Flutter host module project (Add-to-app).
@@ -1041,6 +769,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
         configurePlugins(project)
-        detectLowCompileSdkVersionOrNdkVersion()
+        FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, getPluginList(project))
     }
 }
