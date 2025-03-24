@@ -18,6 +18,8 @@
 
 namespace impeller {
 
+using PipelineKey = uint64_t;
+
 class PipelineLibrary;
 template <typename PipelineDescriptor_>
 class Pipeline;
@@ -88,9 +90,18 @@ using PipelineRef = raw_ptr<Pipeline<PipelineDescriptor>>;
 extern template class Pipeline<PipelineDescriptor>;
 extern template class Pipeline<ComputePipelineDescriptor>;
 
+/// @brief Create a pipeline for the given descriptor.
+///
+/// If `async` is true, the compilation is performed on a worker thread. The
+/// returned future will complete once that work is done. If `async` is false,
+/// the work is done on the current thread.
+///
+/// It is more performant to set async to false than to spawn a
+/// worker and immediately block on the future completion.
 PipelineFuture<PipelineDescriptor> CreatePipelineFuture(
     const Context& context,
-    std::optional<PipelineDescriptor> desc);
+    std::optional<PipelineDescriptor> desc,
+    bool async = true);
 
 PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
     const Context& context,
@@ -114,14 +125,17 @@ class RenderPipelineHandle {
   using FragmentShader = FragmentShader_;
   using Builder = PipelineBuilder<VertexShader, FragmentShader>;
 
-  explicit RenderPipelineHandle(const Context& context)
+  explicit RenderPipelineHandle(const Context& context, bool async = true)
       : RenderPipelineHandle(CreatePipelineFuture(
             context,
-            Builder::MakeDefaultPipelineDescriptor(context))) {}
+            Builder::MakeDefaultPipelineDescriptor(context),
+            async)) {}
 
   explicit RenderPipelineHandle(const Context& context,
-                                std::optional<PipelineDescriptor> desc)
-      : RenderPipelineHandle(CreatePipelineFuture(context, desc)) {}
+                                std::optional<PipelineDescriptor> desc,
+                                bool async = true)
+      : RenderPipelineHandle(
+            CreatePipelineFuture(context, desc, /*async=*/async)) {}
 
   explicit RenderPipelineHandle(PipelineFuture<PipelineDescriptor> future)
       : pipeline_future_(std::move(future)) {}
