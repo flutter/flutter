@@ -382,6 +382,47 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  builder.DrawPaint(DlPaint(DlColor(0xff111111)));
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreenYellow());
+  paint.setStrokeWidth(10);
+
+  auto draw = [&builder](DlPaint& paint) {
+    for (auto cap :
+         {DlStrokeCap::kButt, DlStrokeCap::kSquare, DlStrokeCap::kRound}) {
+      paint.setStrokeCap(cap);
+      DlPoint origin = {100, 100};
+      builder.DrawLine(DlPoint(150, 100), DlPoint(250, 100), paint);
+      for (int d = 15; d < 90; d += 15) {
+        Matrix m = Matrix::MakeRotationZ(Degrees(d));
+        Point origin = {100, 100};
+        Point p0 = {50, 0};
+        Point p1 = {150, 0};
+        auto a = origin + m * p0;
+        auto b = origin + m * p1;
+
+        builder.DrawLine(a, b, paint);
+      }
+      builder.DrawLine(DlPoint(100, 150), DlPoint(100, 250), paint);
+      builder.DrawCircle(origin, 35, paint);
+
+      builder.DrawLine(DlPoint(250, 250), DlPoint(250, 250), paint);
+
+      builder.Translate(250, 0);
+    }
+    builder.Translate(-750, 250);
+  };
+
+  draw(paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, DrawRectStrokesRenderCorrectly) {
   DisplayListBuilder builder;
   DlPaint paint;

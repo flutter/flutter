@@ -10,6 +10,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
 #include "impeller/renderer/context.h"
+#include "impeller/renderer/texture_util.h"
 
 namespace impeller {
 
@@ -25,29 +26,9 @@ std::shared_ptr<Texture> CreateGradientTexture(
   texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
   texture_descriptor.format = PixelFormat::kR8G8B8A8UNormInt;
   texture_descriptor.size = {gradient_data.texture_size, 1};
-  auto texture =
-      context->GetResourceAllocator()->CreateTexture(texture_descriptor);
-  if (!texture) {
-    FML_DLOG(ERROR) << "Could not create Impeller texture.";
-    return nullptr;
-  }
 
-  auto data_mapping =
-      std::make_shared<fml::DataMapping>(gradient_data.color_bytes);
-  auto buffer =
-      context->GetResourceAllocator()->CreateBufferWithCopy(*data_mapping);
-
-  auto cmd_buffer = context->CreateCommandBuffer();
-  auto blit_pass = cmd_buffer->CreateBlitPass();
-  blit_pass->AddCopy(DeviceBuffer::AsBufferView(std::move(buffer)), texture);
-
-  if (!blit_pass->EncodeCommands() ||
-      !context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok()) {
-    return nullptr;
-  }
-
-  texture->SetLabel(impeller::SPrintF("Gradient(%p)", texture.get()).c_str());
-  return texture;
+  return CreateTexture(texture_descriptor, gradient_data.color_bytes, context,
+                       "Gradient");
 }
 
 std::vector<StopData> CreateGradientColors(const std::vector<Color>& colors,

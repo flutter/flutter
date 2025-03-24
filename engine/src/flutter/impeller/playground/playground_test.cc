@@ -65,6 +65,9 @@ void PlaygroundTest::SetUp() {
     return;
   }
 
+  switches.flags.antialiased_lines =
+      test_name.find("ExperimentAntialiasLines/") != std::string::npos;
+
   SetupContext(GetParam(), switches);
   SetupWindow();
 }
