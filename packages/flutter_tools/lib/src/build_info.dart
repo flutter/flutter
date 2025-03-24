@@ -39,7 +39,6 @@ class BuildInfo {
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     required this.packageConfigPath,
-    this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.androidSkipBuildDependencyValidation = false,
@@ -55,11 +54,6 @@ class BuildInfo {
        dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
-
-  /// The null safety mode the application should be run in.
-  ///
-  /// If not provided, defaults to [NullSafetyMode.autodetect].
-  final NullSafetyMode nullSafetyMode;
 
   /// Whether the build should subset icon fonts.
   final bool treeShakeIcons;
@@ -972,6 +966,22 @@ const String kBuildName = 'BuildName';
 /// The app flavor to build.
 const String kFlavor = 'Flavor';
 
+/// Environment variable of the flavor to be set in dartDefines to be accessed
+/// by the [appFlavor] service.
+const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
+
+/// The Xcode configuration used to build the project.
+const String kXcodeConfiguration = 'Configuration';
+
+/// The Xcode build setting SRCROOT. Identifies the directory containing the
+/// Xcode target's source files.
+const String kSrcRoot = 'SrcRoot';
+
+/// The Xcode build setting TARGET_DEVICE_OS_VERSION. The iOS version of the
+/// target device. Only available if a specific device is being targeted during
+/// the build.
+const String kTargetDeviceOSVersion = 'TargetDeviceOSVersion';
+
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
 
@@ -1021,15 +1031,6 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
       .map<Object>(_defineDecoder.convert)
       .cast<String>()
       .toList();
-}
-
-/// The null safety runtime mode the app should be built in.
-enum NullSafetyMode {
-  sound,
-  unsound,
-
-  /// The null safety mode was not detected. Only supported for 'flutter test'.
-  autodetect,
 }
 
 /// Indicates the module system DDC is targeting.

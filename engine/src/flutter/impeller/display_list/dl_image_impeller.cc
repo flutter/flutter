@@ -41,7 +41,7 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
   auto yuv_to_rgb_filter_contents = FilterContents::MakeYUVToRGBFilter(
       std::move(y_texture), std::move(uv_texture), yuv_color_space);
   impeller::Entity entity;
-  entity.SetBlendMode(impeller::BlendMode::kSource);
+  entity.SetBlendMode(impeller::BlendMode::kSrc);
   auto snapshot = yuv_to_rgb_filter_contents->RenderToSnapshot(
       aiks_context->GetContentContext(),  // renderer
       entity,                             // entity
@@ -107,6 +107,13 @@ bool DlImageImpeller::isUIThreadSafe() const {
 SkISize DlImageImpeller::dimensions() const {
   const auto size = texture_ ? texture_->GetSize() : ISize{};
   return SkISize::Make(size.width, size.height);
+}
+
+// |DlImage|
+flutter::DlISize DlImageImpeller::GetSize() const {
+  // texture |GetSize()| returns a 64-bit size, but we need a 32-bit size,
+  // so we need to convert to DlISize (the 32-bit variant) either way.
+  return texture_ ? flutter::DlISize(texture_->GetSize()) : flutter::DlISize();
 }
 
 // |DlImage|

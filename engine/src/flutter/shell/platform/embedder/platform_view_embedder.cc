@@ -113,11 +113,12 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;
 
 void PlatformViewEmbedder::UpdateSemantics(
+    int64_t view_id,
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
   if (platform_dispatch_table_.update_semantics_callback != nullptr) {
-    platform_dispatch_table_.update_semantics_callback(std::move(update),
-                                                       std::move(actions));
+    platform_dispatch_table_.update_semantics_callback(
+        view_id, std::move(update), std::move(actions));
   }
 }
 
@@ -204,6 +205,13 @@ void PlatformViewEmbedder::SendChannelUpdate(const std::string& name,
                                              bool listening) {
   if (platform_dispatch_table_.on_channel_update != nullptr) {
     platform_dispatch_table_.on_channel_update(name, listening);
+  }
+}
+
+void PlatformViewEmbedder::RequestViewFocusChange(
+    const ViewFocusChangeRequest& request) {
+  if (platform_dispatch_table_.view_focus_change_request_callback != nullptr) {
+    platform_dispatch_table_.view_focus_change_request_callback(request);
   }
 }
 

@@ -133,6 +133,9 @@ class HotRunner extends ResidentRunner {
 
   String? flavor;
 
+  @override
+  bool get supportsDetach => stopAppDuringCleanup;
+
   Future<void> _calculateTargetPlatform() async {
     if (_targetPlatform != null) {
       return;
@@ -554,7 +557,6 @@ class HotRunner extends ResidentRunner {
       }
       devFS.assetPathsToEvict.clear();
       devFS.shaderPathsToEvict.clear();
-      devFS.scenePathsToEvict.clear();
     }
   }
 
@@ -1156,42 +1158,11 @@ class HotRunner extends ResidentRunner {
     );
   }
 
-  @override
-  void printHelp({required bool details}) {
-    globals.printStatus('Flutter run key commands.');
-    commandHelp.r.print();
-    if (supportsRestart) {
-      commandHelp.R.print();
-    }
-    if (details) {
-      printHelpDetails();
-      commandHelp.hWithDetails.print();
-    } else {
-      commandHelp.hWithoutDetails.print();
-    }
-    if (stopAppDuringCleanup) {
-      commandHelp.d.print();
-    }
-    commandHelp.c.print();
-    commandHelp.q.print();
-    if (debuggingOptions.buildInfo.nullSafetyMode != NullSafetyMode.sound) {
-      globals.printStatus('');
-      globals.printStatus('Running without sound null safety ⚠️', emphasis: true);
-      globals.printStatus(
-        'Dart 3 will only support sound null safety, see https://dart.dev/null-safety',
-      );
-    }
-    globals.printStatus('');
-    printDebuggerList();
-  }
-
   @visibleForTesting
   Future<void> evictDirtyAssets() async {
     final List<Future<void>> futures = <Future<void>>[];
     for (final FlutterDevice? device in flutterDevices) {
-      if (device!.devFS!.assetPathsToEvict.isEmpty &&
-          device.devFS!.shaderPathsToEvict.isEmpty &&
-          device.devFS!.scenePathsToEvict.isEmpty) {
+      if (device!.devFS!.assetPathsToEvict.isEmpty && device.devFS!.shaderPathsToEvict.isEmpty) {
         continue;
       }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
@@ -1241,14 +1212,8 @@ class HotRunner extends ResidentRunner {
           device.vmService!.flutterEvictShader(assetPath, isolateId: views.first.uiIsolate!.id!),
         );
       }
-      for (final String assetPath in device.devFS!.scenePathsToEvict) {
-        futures.add(
-          device.vmService!.flutterEvictScene(assetPath, isolateId: views.first.uiIsolate!.id!),
-        );
-      }
       device.devFS!.assetPathsToEvict.clear();
       device.devFS!.shaderPathsToEvict.clear();
-      device.devFS!.scenePathsToEvict.clear();
     }
     await Future.wait<void>(futures);
   }
@@ -1451,7 +1416,7 @@ Future<ReassembleResult> _defaultReassembleHelper(
         // If the tool identified a change in a single widget, do a fast instead
         // of a full reassemble.
         final Future<void> reassembleWork = device.vmService!.flutterReassemble(
-          isolateId: view.uiIsolate!.id!,
+          isolateId: view.uiIsolate!.id,
         );
         reassembleFutures.add(
           reassembleWork.then(

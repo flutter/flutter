@@ -209,7 +209,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
@@ -360,7 +359,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             argParser.options.containsKey('fast-start') &&
             boolArg('fast-start') &&
             !runningWithPrebuiltApplication,
-        nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
@@ -672,10 +670,6 @@ class RunCommand extends RunCommandBase {
       throwToolExit('--wasm is only supported on the web platform');
     }
 
-    if (webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
-    }
-
     if (webRenderer == WebRendererMode.skwasm && !useWasm) {
       throwToolExit('Skwasm renderer requires --wasm');
     }
@@ -724,6 +718,9 @@ class RunCommand extends RunCommandBase {
         fileSystem: globals.fs,
         analytics: globals.analytics,
         logger: globals.logger,
+        terminal: globals.terminal,
+        platform: globals.platform,
+        outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
       );
     }

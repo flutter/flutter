@@ -36,6 +36,7 @@ import '../src/context.dart';
 import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
+import '../src/package_config.dart';
 import '../src/testbed.dart';
 import 'resident_runner_helpers.dart';
 
@@ -1087,26 +1088,18 @@ void main() {
   }
 }''');
         globals.fs.file('l10n.yaml').createSync();
-        globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+        globals.fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  generate: true''');
 
         // Create necessary files for [DartPluginRegistrantTarget]
-        final File packageConfig = globals.fs
-            .directory('.dart_tool')
-            .childFile('package_config.json');
-        packageConfig.createSync(recursive: true);
-        packageConfig.writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "../../../path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
+        );
+
         // Start from an empty dart_plugin_registrant.dart file.
         globals.fs
             .directory('.dart_tool')
@@ -1141,6 +1134,7 @@ void main() {
 }''');
         globals.fs.file('l10n.yaml').createSync();
         globals.fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
 flutter:
   generate: true
 
@@ -1152,23 +1146,12 @@ dependencies:
 
         // Create necessary files for [DartPluginRegistrantTarget], including a
         // plugin that will trigger generation.
-        final File packageConfig = globals.fs
-            .directory('.dart_tool')
-            .childFile('package_config.json');
-        packageConfig.createSync(recursive: true);
-        packageConfig.writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "../path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
+        );
+
         final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
         final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
         pluginPubspec.createSync(recursive: true);
@@ -1265,15 +1248,15 @@ flutter:
       await residentRunner.run();
 
       final File generatedLocalizationsFile = globals.fs
-          .directory('.dart_tool')
-          .childDirectory('flutter_gen')
-          .childDirectory('gen_l10n')
+          .directory('lib')
+          .childDirectory('l10n')
           .childFile('app_localizations.dart');
-      expect(generatedLocalizationsFile.existsSync(), isTrue);
+      expect(generatedLocalizationsFile, exists);
 
       // Completing this future ensures that the daemon can exit correctly.
       expect(await residentRunner.waitForAppToFinish(), 1);
     }),
+    overrides: <Type, Generator>{FeatureFlags: enableExplicitPackageDependencies},
   );
 
   testUsingContext(
@@ -1390,7 +1373,7 @@ flutter:
             commandHelp.hWithDetails,
             commandHelp.c,
             commandHelp.q,
-            '',
+            '\n',
           ].join('\n'),
         ),
       );
@@ -1425,7 +1408,7 @@ flutter:
             commandHelp.hWithoutDetails,
             commandHelp.c,
             commandHelp.q,
-            '',
+            '\n',
           ].join('\n'),
         ),
       );

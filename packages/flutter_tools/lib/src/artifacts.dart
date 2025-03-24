@@ -16,9 +16,21 @@ import 'build_info.dart';
 import 'cache.dart';
 import 'globals.dart' as globals;
 
+//////////////////////////////////////////////////////////////////////
+//                                                                  //
+//  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
+//                                                                  //
+//  There is a link to this file in //docs/tool/Engine-artfiacts.md //
+//  and it would be very kind of you to update the link, if needed. //
+//                                                                  //
+//////////////////////////////////////////////////////////////////////
+
+/// Defines what engine artifacts are available (not necessarily on each platform).
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
   genSnapshot,
+  genSnapshotArm64,
+  genSnapshotX64,
 
   /// The flutter tester binary.
   flutterTester,
@@ -103,21 +115,14 @@ enum HostArtifact {
 
   /// The precompiled SDKs and sourcemaps for web debug builds with the AMD module system.
   // TODO(markzipan): delete these when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  webPrecompiledAmdSdk,
-  webPrecompiledAmdSdkSourcemaps,
   webPrecompiledAmdCanvaskitSdk,
   webPrecompiledAmdCanvaskitSdkSourcemaps,
-  webPrecompiledAmdCanvaskitAndHtmlSdk,
-  webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps,
 
   /// The precompiled SDKs and sourcemaps for web debug builds with the DDC
-  /// library bundle module system.
-  webPrecompiledDdcLibraryBundleSdk,
-  webPrecompiledDdcLibraryBundleSdkSourcemaps,
+  /// library bundle module system. Only SDKs built with sound null-safety are
+  /// provided here.
   webPrecompiledDdcLibraryBundleCanvaskitSdk,
   webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps,
-  webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdk,
-  webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdkSourcemaps,
 
   iosDeploy,
   idevicesyslog,
@@ -129,8 +134,6 @@ enum HostArtifact {
 
   // The Impeller shader compiler.
   impellerc,
-  // The Impeller Scene 3D model importer.
-  scenec,
   // Impeller's tessellation library.
   libtessellator,
 }
@@ -172,6 +175,10 @@ String? _artifactToFileName(Artifact artifact, Platform hostPlatform, [BuildMode
   switch (artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
+    case Artifact.genSnapshotArm64:
+      return 'gen_snapshot_arm64';
+    case Artifact.genSnapshotX64:
+      return 'gen_snapshot_x64';
     case Artifact.flutterTester:
       return 'flutter_tester$exe';
     case Artifact.flutterFramework:
@@ -263,24 +270,14 @@ String _hostArtifactToFileName(HostArtifact artifact, Platform platform) {
       return 'dart2js_platform.dill';
     case HostArtifact.flutterWebLibrariesJson:
       return 'libraries.json';
-    case HostArtifact.webPrecompiledAmdSdk:
     case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-    case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk:
-    case HostArtifact.webPrecompiledDdcLibraryBundleSdk:
     case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-    case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdk:
       return 'dart_sdk.js';
-    case HostArtifact.webPrecompiledAmdSdkSourcemaps:
     case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
-    case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps:
-    case HostArtifact.webPrecompiledDdcLibraryBundleSdkSourcemaps:
     case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
-    case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdkSourcemaps:
       return 'dart_sdk.js.map';
     case HostArtifact.impellerc:
       return 'impellerc$exe';
-    case HostArtifact.scenec:
-      return 'scenec$exe';
     case HostArtifact.libtessellator:
       return 'libtessellator$dll';
   }
@@ -459,15 +456,6 @@ class CachedArtifacts implements Artifacts {
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledAmdSdk:
-      case HostArtifact.webPrecompiledAmdSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'amd',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
       case HostArtifact.webPrecompiledAmdCanvaskitSdk:
       case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
         final String path = _fileSystem.path.join(
@@ -477,39 +465,12 @@ class CachedArtifacts implements Artifacts {
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'amd-canvaskit-html',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledDdcLibraryBundleSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'ddcLibraryBundle',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
       case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
       case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
           'ddcLibraryBundle-canvaskit',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'ddcLibraryBundle-canvaskit-html',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -531,7 +492,6 @@ class CachedArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
-      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final String engineDir =
@@ -589,6 +549,8 @@ class CachedArtifacts implements Artifacts {
     final String engineDir = _getEngineArtifactsPath(platform, mode)!;
     switch (artifact) {
       case Artifact.genSnapshot:
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
         return _fileSystem.path.join(engineDir, _artifactToFileName(artifact, _platform));
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
@@ -627,6 +589,8 @@ class CachedArtifacts implements Artifacts {
     final String engineDir = _getEngineArtifactsPath(platform, mode)!;
     switch (artifact) {
       case Artifact.genSnapshot:
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
 
         // TODO(cbracken): Build Android gen_snapshot as Arm64 binary to run
@@ -682,6 +646,8 @@ class CachedArtifacts implements Artifacts {
   ) {
     switch (artifact) {
       case Artifact.genSnapshot:
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
       case Artifact.flutterXcframework:
         final String artifactFileName = _artifactToFileName(artifact, _platform)!;
         final String engineDir = _getEngineArtifactsPath(platform, mode)!;
@@ -732,6 +698,9 @@ class CachedArtifacts implements Artifacts {
       case Artifact.genSnapshot:
         final String genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
         return _fileSystem.path.join(root, runtime, 'dart_binaries', genSnapshot);
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
+        throw ArgumentError('$artifact is not available on this platform');
       case Artifact.flutterPatchedSdkPath:
         const String artifactFileName = 'flutter_runner_patched_sdk';
         return _fileSystem.path.join(root, runtime, artifactFileName);
@@ -787,6 +756,8 @@ class CachedArtifacts implements Artifacts {
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode? mode) {
     switch (artifact) {
       case Artifact.genSnapshot:
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
@@ -1162,15 +1133,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledAmdSdk:
-      case HostArtifact.webPrecompiledAmdSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'amd',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
       case HostArtifact.webPrecompiledAmdCanvaskitSdk:
       case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
         final String path = _fileSystem.path.join(
@@ -1180,39 +1142,12 @@ class CachedLocalEngineArtifacts implements Artifacts {
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'amd-canvaskit-html',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledDdcLibraryBundleSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'ddcLibraryBundle',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
       case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
       case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
           'ddcLibraryBundle-canvaskit',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'ddcLibraryBundle-canvaskit-html',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1234,7 +1169,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         return _cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName);
       case HostArtifact.impellerc:
-      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         final String artifactFileName = _hostArtifactToFileName(artifact, _platform);
         final File file = _fileSystem.file(
@@ -1261,7 +1195,9 @@ class CachedLocalEngineArtifacts implements Artifacts {
         isDirectoryArtifact ? null : _artifactToFileName(artifact, _platform, mode);
     switch (artifact) {
       case Artifact.genSnapshot:
-        return _genSnapshotPath();
+      case Artifact.genSnapshotArm64:
+      case Artifact.genSnapshotX64:
+        return _genSnapshotPath(artifact);
       case Artifact.flutterTester:
         return _flutterTesterPath(platform!);
       case Artifact.isolateSnapshotData:
@@ -1427,15 +1363,16 @@ class CachedLocalEngineArtifacts implements Artifacts {
     return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter_web_sdk');
   }
 
-  String _genSnapshotPath() {
+  String _genSnapshotPath(Artifact artifact) {
     const List<String> clangDirs = <String>[
       '.',
+      'universal',
       'clang_x64',
       'clang_x86',
       'clang_i386',
       'clang_arm64',
     ];
-    final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot, _platform)!;
+    final String genSnapshotName = _artifactToFileName(artifact, _platform)!;
     for (final String clangDir in clangDirs) {
       final String genSnapshotPath = _fileSystem.path.join(
         localEngineInfo.targetOutPath,
@@ -1505,6 +1442,8 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
             _artifactToFileName(artifact, _platform, mode),
           );
         case Artifact.genSnapshot:
+        case Artifact.genSnapshotArm64:
+        case Artifact.genSnapshotX64:
         case Artifact.flutterTester:
         case Artifact.flutterFramework:
         case Artifact.flutterFrameworkDsym:
@@ -1569,39 +1508,12 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledAmdSdk:
-      case HostArtifact.webPrecompiledAmdSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'amd',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
       case HostArtifact.webPrecompiledAmdCanvaskitSdk:
       case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
         final String path = _fileSystem.path.join(
           _getFlutterWebSdkPath(),
           'kernel',
           'amd-canvaskit',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'amd-canvaskit-html',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledDdcLibraryBundleSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'ddcLibraryBundle',
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
@@ -1614,22 +1526,12 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
           _hostArtifactToFileName(artifact, _platform),
         );
         return _fileSystem.file(path);
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitAndHtmlSdkSourcemaps:
-        final String path = _fileSystem.path.join(
-          _getFlutterWebSdkPath(),
-          'kernel',
-          'ddcLibraryBundle-canvaskit-html',
-          _hostArtifactToFileName(artifact, _platform),
-        );
-        return _fileSystem.file(path);
       case HostArtifact.iosDeploy:
       case HostArtifact.idevicesyslog:
       case HostArtifact.idevicescreenshot:
       case HostArtifact.iproxy:
       case HostArtifact.skyEnginePath:
       case HostArtifact.impellerc:
-      case HostArtifact.scenec:
       case HostArtifact.libtessellator:
         return _parent.getHostArtifact(artifact);
     }
