@@ -41,7 +41,7 @@ final class TestBuilderConfig {
       'description': description,
       'ninja': <String, Object?>{
         // Tests assume we always have a ninja config, so let's make sure we have one
-        'config': targetDir ?? "test",
+        'config': targetDir ?? 'test',
         'targets': ['ninja_target'],
       },
       'tests': _testTask(testTask),
