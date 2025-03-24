@@ -62,7 +62,6 @@ final class BuilderConfig extends BuildConfigBase {
       errors,
       GlobalTest.fromJson,
     );
-
     // Parse the "generators" field.
     final List<TestTask>? generators;
     if (map['generators'] == null) {
@@ -150,6 +149,8 @@ final class BuilderConfig extends BuildConfigBase {
   }
 }
 
+const undef = '<undef>';
+
 /// A "build" is a dictionary with a gn command, a ninja command, zero or more
 /// generator commands, zero or more local tests, zero or more local generators
 /// and zero or more output artifacts.
@@ -171,7 +172,7 @@ final class BuilderConfig extends BuildConfigBase {
 final class Build extends BuildConfigBase {
   factory Build.fromJson(Map<String, Object?> map) {
     final List<String> errors = <String>[];
-    final String? name = stringOfJson(map, 'name', errors);
+    final String? name = stringOfJson(map, 'name', errors, defaultValue: undef);
     final String? description = stringOfJson(map, 'description', errors);
     final List<String>? gn = stringListOfJson(map, 'gn', errors);
     final List<BuildTest>? tests = objListOfJson(map, 'tests', errors, BuildTest.fromJson);
@@ -529,24 +530,24 @@ final class GlobalTest extends BuildConfigBase {
       TestDependency.fromJson,
     );
     final List<TestTask>? tasks = objListOfJson(map, 'tasks', errors, TestTask.fromJson);
+
     if (name == null ||
         recipe == null ||
         droneDimensions == null ||
         dependencies == null ||
         testDependencies == null ||
         tasks == null) {
-      return GlobalTest._invalid(errors);
+      return GlobalTest._invalid(errors, tasks: tasks ?? []);
     }
     return GlobalTest._(name, recipe, droneDimensions, dependencies, testDependencies, tasks);
   }
 
-  GlobalTest._invalid(super.errors)
+  GlobalTest._invalid(super.errors, {this.tasks = const <TestTask>[]})
     : name = '',
       recipe = '',
       droneDimensions = <String>[],
       dependencies = <String>[],
-      testDependencies = <TestDependency>[],
-      tasks = <TestTask>[];
+      testDependencies = <TestDependency>[];
 
   GlobalTest._(
     this.name,
@@ -781,9 +782,14 @@ List<String>? stringListOfJson(Map<String, Object?> map, String field, List<Stri
   return (map[field]! as List<Object?>).cast<String>();
 }
 
-String? stringOfJson(Map<String, Object?> map, String field, List<String> errors) {
+String? stringOfJson(
+  Map<String, Object?> map,
+  String field,
+  List<String> errors, {
+  String? defaultValue,
+}) {
   if (map[field] == null) {
-    return null;
+    return defaultValue;
   }
   if (map[field]! is! String) {
     appendTypeError(map, field, 'string', errors);
