@@ -8,7 +8,6 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
-import org.jetbrains.kotlin.gradle.internal.AndroidExtensionsExtension
 import java.io.File
 
 /**
@@ -259,7 +258,8 @@ object FlutterPluginUtils {
     private fun getFlutterExtensionOrNull(project: Project): FlutterExtension? = project.extensions.findByType(FlutterExtension::class.java)
 
     // Should this use find by type and AbstractAppExtension instead?
-    internal fun getAndroidExtensionOrNull(project: Project): AbstractAppExtension? = project.extensions.findByName("android") as? AbstractAppExtension
+    internal fun getAndroidExtensionOrNull(project: Project): AbstractAppExtension? =
+        project.extensions.findByName("android") as? AbstractAppExtension
 
     /**
      * Gets the directory that contains the Flutter source code.

@@ -3,8 +3,7 @@ package com.flutter.gradle
 // TODO(gmackall): this should be collapsed back into the core FlutterPlugin once the Groovy to
 //                 kotlin conversion is complete.
 object FlutterPluginConstants {
-
-    /* Strings that define project properties */
+    // Strings that define project properties
     const val PROP_PROCESS_RESOURCES_PROVIDER = "processResourcesProvider"
 
     /** The platforms that can be passed to the `--Ptarget-platform` flag. */

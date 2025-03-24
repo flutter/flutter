@@ -184,7 +184,9 @@ class FlutterTaskHelperTest {
     }
 
     @Test
-    fun addTasksForOutputsAppLinkSettingsNoAndroid(@TempDir tempDir: Path) {
+    fun addTasksForOutputsAppLinkSettingsNoAndroid(
+        @TempDir tempDir: Path
+    ) {
         val mockProject = mockk<Project>()
         val mockLogger = mockk<Logger>()
         every { mockProject.logger } returns mockLogger
@@ -196,45 +198,48 @@ class FlutterTaskHelperTest {
         verify(exactly = 1) { mockLogger.info(any()) }
     }
 
-    val manifestText = """
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-            <!-- Permissions do not break parsing -->
-            <uses-permission android:name="android.permission.INTERNET"/>
+    val manifestText =
+        """
+            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                <!-- Permissions do not break parsing -->
+                <uses-permission android:name="android.permission.INTERNET"/>
 
-            <application android:label="Flutter Task Helper Test" android:icon="@mipmap/ic_launcher">
-                <activity android:name="com.example.FlutterActivity1"
-                          android:exported="true"
-                          android:theme="@android:style/Theme.Black.NoTitleBar">
-                    <intent-filter>
-                        <action android:name="android.intent.action.MAIN"/>
-                        <category android:name="android.intent.category.LAUNCHER"/>
-                    </intent-filter>
-                </activity>
-                <activity android:name="com.example.FlutterActivity2"
-                          android:exported="false"
-                          android:theme="@android:style/Theme.Black.NoTitleBar">
-                    <intent-filter>
-                      <action android:name="android.intent.action.VIEW" />
-                      <category android:name="android.intent.category.DEFAULT" />
-                      <category android:name="android.intent.category.BROWSABLE" />
-                      <data
-                        android:scheme="poc"
-                        android:host="deeplink.flutter.dev"
-                        android:pathPrefix="some.prefix"
-                        />
-                    </intent-filter>
-                    <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
-                </activity>
-                <meta-data
-                    android:name="flutterEmbedding"
-                    android:value="2" />
+                <application android:label="Flutter Task Helper Test" android:icon="@mipmap/ic_launcher">
+                    <activity android:name="com.example.FlutterActivity1"
+                              android:exported="true"
+                              android:theme="@android:style/Theme.Black.NoTitleBar">
+                        <intent-filter>
+                            <action android:name="android.intent.action.MAIN"/>
+                            <category android:name="android.intent.category.LAUNCHER"/>
+                        </intent-filter>
+                    </activity>
+                    <activity android:name="com.example.FlutterActivity2"
+                              android:exported="false"
+                              android:theme="@android:style/Theme.Black.NoTitleBar">
+                        <intent-filter>
+                          <action android:name="android.intent.action.VIEW" />
+                          <category android:name="android.intent.category.DEFAULT" />
+                          <category android:name="android.intent.category.BROWSABLE" />
+                          <data
+                            android:scheme="poc"
+                            android:host="deeplink.flutter.dev"
+                            android:pathPrefix="some.prefix"
+                            />
+                        </intent-filter>
+                        <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
+                    </activity>
+                    <meta-data
+                        android:name="flutterEmbedding"
+                        android:value="2" />
 
-            </application>
-    </manifest>
-    """.trimIndent()
+                </application>
+        </manifest>
+        """.trimIndent()
 
     @Test
-    fun addTasksForOutputsAppLinkSettingsActual(@TempDir tempDir: Path) {
+    fun addTasksForOutputsAppLinkSettingsActual(
+        @TempDir tempDir: Path
+    ) {
         val mockProject = mockk<Project>()
         val mockLogger = mockk<Logger>()
         every { mockProject.logger } returns mockLogger
@@ -245,11 +250,11 @@ class FlutterTaskHelperTest {
 
         val testVariants: DomainObjectSet<ApplicationVariant> = mockk<DomainObjectSet<ApplicationVariant>>()
         val variant1 = mockk<ApplicationVariant>()
-        every {variant1.name} returns "one"
-        every {variant1.applicationId} returns "com.example.FlutterActivity1"
+        every { variant1.name } returns "one"
+        every { variant1.applicationId } returns "com.example.FlutterActivity1"
         val variant2 = mockk<ApplicationVariant>()
-        every {variant2.name} returns "two"
-        every {variant2.applicationId} returns "com.example.FlutterActivity2"
+        every { variant2.name } returns "two"
+        every { variant2.applicationId } returns "com.example.FlutterActivity2"
         val variants = mutableListOf(variant1, variant2)
         // Capture the "action" that needs to be run for each variant.
         val actionSlot = slot<Action<ApplicationVariant>>()
@@ -264,52 +269,57 @@ class FlutterTaskHelperTest {
         // Consider breaking out into a test helper.
         val descriptionSlot = slot<String>()
         val registerTaskSlot = slot<Action<Task>>()
-        val registerTaskList :MutableList<Task> = mutableListOf()
-        every { mockProject.tasks } returns mockk<TaskContainer> {
-            val registerTaskNameSlot = slot<String>()
-            every { register(capture(registerTaskNameSlot), capture(registerTaskSlot)) } answers registerAnswer@{
-                val mockRegisterTask = mockk<Task> {
-                    every { name } returns registerTaskNameSlot.captured
-                    every { description = capture(descriptionSlot) } returns Unit
-                    every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
-                    val doLastActionSlot = slot<Action<Task>>()
-                    every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
-                        // We need to capture the task as well
-                        doLastActionSlot.captured.execute(mockk())
-                        return@doLastAnswer mockk()
-                    }
+        val registerTaskList: MutableList<Task> = mutableListOf()
+        every { mockProject.tasks } returns
+            mockk<TaskContainer> {
+                val registerTaskNameSlot = slot<String>()
+                every { register(capture(registerTaskNameSlot), capture(registerTaskSlot)) } answers registerAnswer@{
+                    val mockRegisterTask =
+                        mockk<Task> {
+                            every { name } returns registerTaskNameSlot.captured
+                            every { description = capture(descriptionSlot) } returns Unit
+                            every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
+                            val doLastActionSlot = slot<Action<Task>>()
+                            every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
+                                // We need to capture the task as well
+                                doLastActionSlot.captured.execute(mockk())
+                                return@doLastAnswer mockk()
+                            }
+                        }
+                    registerTaskList.add(mockRegisterTask)
+                    registerTaskSlot.captured.execute(mockRegisterTask)
+                    return@registerAnswer mockk()
                 }
-                registerTaskList.add(mockRegisterTask)
-                registerTaskSlot.captured.execute(mockRegisterTask)
-                return@registerAnswer mockk()
-            }
 
-            every { named(any<String>()) } returns mockk {
-                every { configure(any<Action<Task>>()) } returns mockk()
+                every { named(any<String>()) } returns
+                    mockk {
+                        every { configure(any<Action<Task>>()) } returns mockk()
+                    }
             }
-        }
         variants.forEach { variant ->
             val testOutputs: DomainObjectCollection<BaseVariantOutput> = mockk<DomainObjectCollection<BaseVariantOutput>>()
             val baseVariantSlot = slot<Action<BaseVariantOutput>>()
             val baseVariantOutput = mockk<BaseVariantOutput>()
             val mockProcessResources = mockk<ProcessAndroidResources>()
             // Create a real file in a temp directory.
-            val manifest = tempDir
-                .resolve("${tempDir.toAbsolutePath()}/AndroidManifest.xml")
-                .toFile()
+            val manifest =
+                tempDir
+                    .resolve("${tempDir.toAbsolutePath()}/AndroidManifest.xml")
+                    .toFile()
             manifest.writeText(manifestText)
 
-            every {mockProcessResources.manifestFile} returns manifest
-            every {baseVariantOutput.processResources} returns mockProcessResources
+            every { mockProcessResources.manifestFile } returns manifest
+            every { baseVariantOutput.processResources } returns mockProcessResources
             every { testOutputs.configureEach(capture(baseVariantSlot)) } answers {
                 // Execute the action for each output.
                 baseVariantSlot.captured.execute(baseVariantOutput)
             }
             every { variant.outputs } returns testOutputs
         }
-        val outputFile = tempDir
-            .resolve("${tempDir.toAbsolutePath()}/app-link-settings-build-variant.json")
-            .toFile()
+        val outputFile =
+            tempDir
+                .resolve("${tempDir.toAbsolutePath()}/app-link-settings-build-variant.json")
+                .toFile()
         every { mockProject.property("outputPath") } returns outputFile
 
         FlutterTaskHelper.addTasksForOutputsAppLinkSettings(mockProject)
@@ -319,21 +329,19 @@ class FlutterTaskHelperTest {
         assertEquals(variants.size, registerTaskList.size)
         for (i in 0 until variants.size) {
             assertEquals("output${FlutterPluginUtils.capitalize(variants[i].name)}AppLinkSettings", registerTaskList[i].name)
-            verify(exactly = 1){ registerTaskList[i].dependsOn(any<ProcessAndroidResources>()) }
+            verify(exactly = 1) { registerTaskList[i].dependsOn(any<ProcessAndroidResources>()) }
         }
         // Output assertions are minimal which ensures code is running but is not exhaustive testing.
         // Integration test for more exhaustive behavior is defined in
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
-        val outputFileText = outputFile.readText();
+        val outputFileText = outputFile.readText()
         // Only variant2 since that one has app links.
-        assertContains(outputFileText, variant2.applicationId,)
+        assertContains(outputFileText, variant2.applicationId)
         // Host.
-        assertContains(outputFileText,"deeplink.flutter.dev")
+        assertContains(outputFileText, "deeplink.flutter.dev")
         // pathPrefix used in variant2 combined with prefix logic.
         assertContains(outputFileText, "some.prefix.*")
         // Deep linking
         assertContains(outputFileText, "deeplinkingFlagEnabled\":true")
-
     }
-
 }

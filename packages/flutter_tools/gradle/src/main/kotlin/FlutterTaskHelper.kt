@@ -1,11 +1,9 @@
 package com.flutter.gradle
 
-
 import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import groovy.util.Node
 import groovy.util.XmlParser
-import groovy.xml.QName
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
@@ -119,9 +117,9 @@ object FlutterTaskHelper {
      *  }
      * The output file is parsed and used by devtool.
      */
-    // Integration test for AppLinkSettings task defined in
-    // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
     internal fun addTasksForOutputsAppLinkSettings(project: Project) {
+        // Integration test for AppLinkSettings task defined in
+        // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
         val android = FlutterPluginUtils.getAndroidExtensionOrNull(project)
         if (android == null) {
             project.logger.info("addTasksForOutputsAppLinkSettings called on project without android extension")
@@ -152,14 +150,16 @@ object FlutterTaskHelper {
                             XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
                         // The new import would use getProperty like
                         // manifest.getProperty("application").let { applicationNode -> ...
-                        val applicationNode: Node? = manifest.children().find { node ->
-                            node is Node && node.name() == "application"
-                        } as Node?
+                        val applicationNode: Node? =
+                            manifest.children().find { node ->
+                                node is Node && node.name() == "application"
+                            } as Node?
 
                         applicationNode?.let { appNode ->
-                            val activities: List<Any?> = appNode.children().filter { item ->
-                                item is Node && item.name() == "activity"
-                            }
+                            val activities: List<Any?> =
+                                appNode.children().filter { item ->
+                                    item is Node && item.name() == "activity"
+                                }
 
                             activities.forEach { activity ->
                                 if (activity is Node) {
@@ -232,9 +232,10 @@ object FlutterTaskHelper {
                                                             "android:scheme" -> schemes.add(entry.value.toString())
                                                             "android:host" -> hosts.add(entry.value.toString())
                                                             // All path patterns add to paths.
-                                                            "android:pathAdvancedPattern" -> paths.add(
-                                                                entry.value.toString()
-                                                            )
+                                                            "android:pathAdvancedPattern" ->
+                                                                paths.add(
+                                                                    entry.value.toString()
+                                                                )
 
                                                             "android:pathPattern" -> paths.add(entry.value.toString())
                                                             "android:path" -> paths.add(entry.value.toString())
@@ -285,4 +286,3 @@ object FlutterTaskHelper {
         }
     }
 }
-
