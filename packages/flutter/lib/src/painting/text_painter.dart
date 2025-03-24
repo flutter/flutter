@@ -583,13 +583,9 @@ class _LineCaretMetrics {
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
 ///
-/// > [!IMPORTANT]
-/// > The default text style color is white on non-web platforms and black on
-/// > the web.
-/// > 
-/// > The differences in text color may be visible even if the background color
-/// > of the canvas is no longer visible. If developing across both platforms,
-/// > always set the text color explicitly.
+/// The default text style color is white on non-web platforms and black on
+/// the web. If developing across both platforms, always set the text color
+/// explicitly.
 class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
