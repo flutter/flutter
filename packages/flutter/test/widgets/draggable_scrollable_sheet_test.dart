@@ -1893,7 +1893,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets("DraggableScrollableSheet's extent value is rounded after snap animation", (
+  testWidgets('Ensures DraggableScrollableSheet snaps exactly to minChildSize', (
     WidgetTester tester
   ) async {
     double? lastExtent;
@@ -1909,6 +1909,7 @@ void main() {
       ),
     );
 
+    // One of the conditions for reproducing the round-off error.
     await tester.fling(find.text('Item 1'), const Offset(0, 100), 2000);
     await tester.pumpFrames(
       tester.widget(find.byType(Directionality)),

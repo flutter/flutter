@@ -15,6 +15,7 @@ library;
 
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
@@ -909,12 +910,16 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     }
   }
 
-  bool get _isAtSnapSize {
-    return extent.snapSizes.any((double snapSize) {
+  /// Checks if the sheet's current size is close to a snap size, returning the
+  /// snap size if so; returns null otherwise.
+  double? get _currentSnapSize {
+    return extent.snapSizes.firstWhereOrNull((double snapSize) {
       return (extent.currentSize - snapSize).abs() <=
           extent.pixelsToSize(physics.toleranceFor(this).distance);
     });
   }
+
+  bool get _isAtSnapSize => _currentSnapSize != null;
 
   bool get _shouldSnap => extent.snap && extent.hasDragged && !_isAtSnapSize;
 
@@ -981,13 +986,13 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         super.goBallistic(velocity);
         ballisticController.stop();
       } else if (ballisticController.isCompleted) {
-        // Round the extent value after the snap animation completes to
-        // prevent the sheet from failing to close when it reaches minSize.
-        const double scale = 1 / precisionErrorTolerance;
-        extent.updateSize(
-          (extent.currentSize * scale).roundToDouble() / scale,
-          context.notificationContext!,
-        );
+        // Update the extent value after the snap animation completes to
+        // avoid rounding errors that could prevent the sheet from closing when
+        // it reaches minSize.
+        final double? snapSize = _currentSnapSize;
+        if (snapSize != null) {
+          extent.updateSize(snapSize, context.notificationContext!);
+        }
         super.goBallistic(0);
       }
     }
