@@ -41,14 +41,15 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-      PageRoute<T> route,
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child,
-      ) {
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
     return _PredictiveBackGestureDetector(
       route: route,
+      // TODO(justinmc): No underscores.
       builder: (BuildContext context, _, __, ___) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
@@ -85,7 +86,13 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
     return _delegatedTransition;
   }
 
-  static Widget? _delegatedTransition(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, bool allowSnapshotting, Widget? child) {
+  static Widget? _delegatedTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) {
     final ModalRoute<Object?>? route = ModalRoute.of(context);
     if (child == null || route is! PageRoute) {
       return child;
@@ -93,7 +100,12 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
 
     return _PredictiveBackGestureListener(
       route: route,
-      builder: (BuildContext context, _PredictiveBackPhase phase, PredictiveBackEvent? startBackEvent, PredictiveBackEvent? currentBackEvent) {
+      builder: (
+        BuildContext context,
+        _PredictiveBackPhase phase,
+        PredictiveBackEvent? startBackEvent,
+        PredictiveBackEvent? currentBackEvent,
+      ) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
@@ -124,7 +136,12 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
   ) {
     return _PredictiveBackGestureDetector(
       route: route,
-      builder: (BuildContext context, _PredictiveBackPhase phase, PredictiveBackEvent? startBackEvent, PredictiveBackEvent? currentBackEvent) {
+      builder: (
+        BuildContext context,
+        _PredictiveBackPhase phase,
+        PredictiveBackEvent? startBackEvent,
+        PredictiveBackEvent? currentBackEvent,
+      ) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
@@ -152,20 +169,18 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
   }
 }
 
-typedef _PredictiveBackGestureDetectorWidgetBuilder = Widget Function(
-  BuildContext context,
-  _PredictiveBackPhase phase,
-  PredictiveBackEvent? startBackEvent,
-  PredictiveBackEvent? currentBackEvent,
-);
+typedef _PredictiveBackGestureDetectorWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      _PredictiveBackPhase phase,
+      PredictiveBackEvent? startBackEvent,
+      PredictiveBackEvent? currentBackEvent,
+    );
 
 enum _PredictiveBackPhase { idle, start, update, commit, cancel }
 
 class _PredictiveBackGestureListener extends StatefulWidget {
-  const _PredictiveBackGestureListener({
-    required this.builder,
-    required this.route,
-  });
+  const _PredictiveBackGestureListener({required this.builder, required this.route});
 
   final _PredictiveBackGestureDetectorWidgetBuilder builder;
   final PageRoute<dynamic> route;
@@ -175,7 +190,7 @@ class _PredictiveBackGestureListener extends StatefulWidget {
 }
 
 class _PredictiveBackGestureListenerState extends State<_PredictiveBackGestureListener>
-    with WidgetsBindingObserver{
+    with WidgetsBindingObserver {
   _PredictiveBackPhase get phase => _phase;
   _PredictiveBackPhase _phase = _PredictiveBackPhase.idle;
   set phase(_PredictiveBackPhase phase) {
@@ -251,23 +266,20 @@ class _PredictiveBackGestureListenerState extends State<_PredictiveBackGestureLi
 
   @override
   Widget build(BuildContext context) {
-    final _PredictiveBackPhase effectivePhase = widget.route.popGestureInProgress ? phase : _PredictiveBackPhase.idle;
+    final _PredictiveBackPhase effectivePhase =
+        widget.route.popGestureInProgress ? phase : _PredictiveBackPhase.idle;
     return widget.builder(context, effectivePhase, startBackEvent, currentBackEvent);
   }
 }
 
 class _PredictiveBackGestureDetector extends StatefulWidget {
-  const _PredictiveBackGestureDetector({
-    required this.route,
-    required this.builder,
-  });
+  const _PredictiveBackGestureDetector({required this.route, required this.builder});
 
   final _PredictiveBackGestureDetectorWidgetBuilder builder;
   final PageRoute<dynamic> route;
 
   @override
-  State<_PredictiveBackGestureDetector> createState() =>
-      _PredictiveBackGestureDetectorState();
+  State<_PredictiveBackGestureDetector> createState() => _PredictiveBackGestureDetectorState();
 }
 
 class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDetector>
@@ -359,7 +371,8 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   Widget build(BuildContext context) {
-    final _PredictiveBackPhase effectivePhase = widget.route.popGestureInProgress ? phase : _PredictiveBackPhase.idle;
+    final _PredictiveBackPhase effectivePhase =
+        widget.route.popGestureInProgress ? phase : _PredictiveBackPhase.idle;
     return widget.builder(context, effectivePhase, startBackEvent, currentBackEvent);
   }
 }
@@ -540,8 +553,7 @@ class _PredictiveBackPageSharedElementTransitionState
       vsync: this,
     );
 
-    mergedAnimations =
-        Listenable.merge(<Listenable>[widget.animation, commitController]);
+    mergedAnimations = Listenable.merge(<Listenable>[widget.animation, commitController]);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
       commitController.forward(from: 0.0);
@@ -552,14 +564,11 @@ class _PredictiveBackPageSharedElementTransitionState
   void didUpdateWidget(_PredictiveBackPageSharedElementTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.phase != oldWidget.phase &&
-        widget.phase == _PredictiveBackPhase.commit) {
+    if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       final int droppedPageBackAnimationTime =
-      ui.lerpDouble(0, 800, widget.animation.value)!.floor();
+          ui.lerpDouble(0, 800, widget.animation.value)!.floor();
 
-      commitController.duration = Duration(
-        milliseconds: droppedPageBackAnimationTime,
-      );
+      commitController.duration = Duration(milliseconds: droppedPageBackAnimationTime);
       commitController.forward(from: 0.0);
     }
   }
@@ -584,9 +593,7 @@ class _PredictiveBackPageSharedElementTransitionState
     final double xShift = (screenWidth / divisionFactor) - margin;
 
     return Tween<double>(
-      begin: widget.currentBackEvent?.swipeEdge == SwipeEdge.right
-          ? -xShift
-          : xShift,
+      begin: widget.currentBackEvent?.swipeEdge == SwipeEdge.right ? -xShift : xShift,
       end: 0.0,
     ).animate(widget.animation).value;
   }
@@ -595,11 +602,11 @@ class _PredictiveBackPageSharedElementTransitionState
     final double screenWidth = MediaQuery.of(context).size.width;
     return Tween<double>(begin: 0.0, end: screenWidth * extraShiftDistance)
         .animate(
-      CurvedAnimation(
-        parent: commitController,
-        curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
-      ),
-    )
+          CurvedAnimation(
+            parent: commitController,
+            curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
+          ),
+        )
         .value;
   }
 
@@ -612,8 +619,8 @@ class _PredictiveBackPageSharedElementTransitionState
     final double yShiftMax = (screenHeight / divisionFactor) - margin;
 
     final double rawYShift = currentTouchY - startTouchY;
-    final double easedYShift = Curves.easeOut
-        .transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
+    final double easedYShift =
+        Curves.easeOut.transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
         rawYShift.sign *
         yShiftMax;
 
@@ -621,19 +628,17 @@ class _PredictiveBackPageSharedElementTransitionState
   }
 
   double calcScale() {
-    return Tween<double>(begin: scalePercentage, end: 1.0)
-        .animate(widget.animation)
-        .value;
+    return Tween<double>(begin: scalePercentage, end: 1.0).animate(widget.animation).value;
   }
 
   double calcCommitScale() {
     return Tween<double>(begin: 0.0, end: extraShiftDistance)
         .animate(
-      CurvedAnimation(
-        parent: commitController,
-        curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
-      ),
-    )
+          CurvedAnimation(
+            parent: commitController,
+            curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
+          ),
+        )
         .value;
   }
 
@@ -642,31 +647,28 @@ class _PredictiveBackPageSharedElementTransitionState
       return 1;
     }
 
-    return Tween<double>(begin: 1.0, end: 0.0)
-        .animate(
-      CurvedAnimation(parent: commitController, curve: Curves.easeOut),
-    )
-        .value;
+    return Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: commitController, curve: Curves.easeOut)).value;
   }
 
   Widget _animatedBuilder(BuildContext context, Widget? child) {
-    final double xShift = widget.phase == _PredictiveBackPhase.commit
-        ? this.xShift + calcCommitXShift()
-        : this.xShift = calcXShift();
-    final double yShift = widget.phase == _PredictiveBackPhase.commit
-        ? this.yShift
-        : this.yShift = calcYShift();
-    final double scale = widget.phase == _PredictiveBackPhase.commit
-        ? this.scale - calcCommitScale()
-        : this.scale = calcScale();
+    final double xShift =
+        widget.phase == _PredictiveBackPhase.commit
+            ? this.xShift + calcCommitXShift()
+            : this.xShift = calcXShift();
+    final double yShift =
+        widget.phase == _PredictiveBackPhase.commit ? this.yShift : this.yShift = calcYShift();
+    final double scale =
+        widget.phase == _PredictiveBackPhase.commit
+            ? this.scale - calcCommitScale()
+            : this.scale = calcScale();
 
     final double opacity = calcOpacity();
 
     final Tween<double> gapTween = Tween<double>(begin: margin, end: 0.0);
-    final Tween<double> borderRadiusTween = Tween<double>(
-      begin: borderRadius,
-      end: 0.0,
-    );
+    final Tween<double> borderRadiusTween = Tween<double>(begin: borderRadius, end: 0.0);
 
     return Transform.scale(
       scale: scale,
@@ -675,9 +677,7 @@ class _PredictiveBackPageSharedElementTransitionState
         child: Opacity(
           opacity: opacity,
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: gapTween.animate(widget.animation).value,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: gapTween.animate(widget.animation).value),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(
                 borderRadiusTween.animate(widget.animation).value,
