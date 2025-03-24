@@ -83,16 +83,29 @@ class SemanticScrollable extends SemanticRole {
 
       final int semanticsId = semanticsObject.id;
       final Float64List offsets = Float64List(2);
-      offsets[0] = 0.0;
-      offsets[1] = newScrollOffset;
-      final ByteData? message = const StandardMessageCodec().encodeMessage(offsets);
 
-      EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
-        viewId,
-        semanticsId,
-        ui.SemanticsAction.scrollToOffset,
-        message,
-      );
+      if (semanticsObject.isVerticalScrollContainer) {
+        offsets[0] = 0.0;
+        offsets[1] = newScrollOffset;
+        final ByteData? message = const StandardMessageCodec().encodeMessage(offsets);
+        EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+          viewId,
+          semanticsId,
+          ui.SemanticsAction.scrollToOffset,
+          message,
+        );
+      } else {
+        assert(semanticsObject.isHorizontalScrollContainer);
+        offsets[0] = newScrollOffset;
+        offsets[1] = 0.0;
+        final ByteData? message = const StandardMessageCodec().encodeMessage(offsets);
+        EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
+          viewId,
+          semanticsId,
+          ui.SemanticsAction.scrollToOffset,
+          message,
+        );
+      }
     }
   }
 
