@@ -9,6 +9,8 @@
 /// @docImport 'text_input.dart';
 library;
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 
 import 'message_codec.dart';
