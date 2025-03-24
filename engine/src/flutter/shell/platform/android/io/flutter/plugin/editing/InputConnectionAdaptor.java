@@ -13,6 +13,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.InputType;
@@ -26,8 +27,10 @@ import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
+import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputContentInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.PreviewableHandwritingGesture;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.view.inputmethod.InputConnectionCompat;
@@ -35,12 +38,15 @@ import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.systemchannels.ScribeChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.common.MethodChannel;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.function.IntConsumer;
 
 public class InputConnectionAdaptor extends BaseInputConnection
     implements ListenableEditingState.EditingStateWatcher {
@@ -275,9 +281,44 @@ public class InputConnectionAdaptor extends BaseInputConnection
     return result;
   }
 
-  // TODO(justinmc): Scribe stylus gestures should be supported here via
-  // performHandwritingGesture.
-  // https://github.com/flutter/flutter/issues/156018
+  @Override
+  public boolean previewHandwritingGesture(
+      PreviewableHandwritingGesture gesture, CancellationSignal cancellationSignal) {
+    System.out.println(
+        "justin previewHandwritingGesture gesture: "  gesture  ", "  cancellationSignal);
+
+    scribeChannel.previewHandwritingGesture(gesture, cancellationSignal);
+    return true;
+  }
+
+  @Override
+  public void performHandwritingGesture(
+      HandwritingGesture gesture, Executor executor, IntConsumer consumer) {
+    System.out.println("justin performHandwritingGesture gesture: "  gesture);
+
+    final MethodChannel.Result result =
+        new MethodChannel.Result() {
+          @Override
+          public void success(Object result) {
+            executor.execute(() -> consumer.accept(HANDWRITING_GESTURE_RESULT_SUCCESS));
+          }
+
+          @Override
+          public void error(String errorCode, String errorMessage, Object errorDetails) {
+            executor.execute(() -> consumer.accept(HANDWRITING_GESTURE_RESULT_FAILED));
+          }
+
+          @Override
+          public void notImplemented() {
+            executor.execute(() -> consumer.accept(HANDWRITING_GESTURE_RESULT_UNSUPPORTED));
+          }
+          // TODO(justinmc): There are a few other HANDWRITING_GESTURE_RESULTs
+          // that may be useful, see
+          // https://developer.android.com/reference/android/view/inputmethod/InputConnection
+        };
+
+    scribeChannel.performHandwritingGesture((HandwritingGesture) gesture, result);
+  }
 
   // Sanitizes the index to ensure the index is within the range of the
   // contents of editable.
