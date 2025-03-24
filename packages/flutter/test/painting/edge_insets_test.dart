@@ -448,24 +448,27 @@ void main() {
   test('EdgeInsetsGeometry factories', () {
     expect(const EdgeInsetsGeometry.all(10), const EdgeInsets.all(10));
     expect(
-      EdgeInsetsGeometry.only(left: 10, top: 20, right: 30, bottom: 40),
+      const EdgeInsetsGeometry.only(left: 10, top: 20, right: 30, bottom: 40),
       const EdgeInsets.only(left: 10, top: 20, right: 30, bottom: 40),
     );
     expect(
-      EdgeInsetsGeometry.directional(start: 10, top: 20, end: 30, bottom: 40),
+      const EdgeInsetsGeometry.directional(start: 10, top: 20, end: 30, bottom: 40),
       const EdgeInsetsDirectional.only(start: 10, top: 20, end: 30, bottom: 40),
     );
     expect(
-      EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 20),
+      const EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 20),
       const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
     );
-    expect(EdgeInsetsGeometry.fromLTRB(10, 20, 30, 40), const EdgeInsets.fromLTRB(10, 20, 30, 40));
+    expect(
+      const EdgeInsetsGeometry.fromLTRB(10, 20, 30, 40),
+      const EdgeInsets.fromLTRB(10, 20, 30, 40),
+    );
     expect(
       EdgeInsetsGeometry.fromViewPadding(ui.ViewPadding.zero, 10),
       EdgeInsets.fromViewPadding(ui.ViewPadding.zero, 10),
     );
     expect(
-      EdgeInsetsGeometry.fromSTEB(10, 20, 20, 40),
+      const EdgeInsetsGeometry.fromSTEB(10, 20, 20, 40),
       const EdgeInsetsDirectional.fromSTEB(10, 20, 20, 40),
     );
     expect(EdgeInsetsGeometry.zero, EdgeInsets.zero);

@@ -627,7 +627,7 @@ void main() {
     const Radius radius10 = Radius.circular(10);
     const Radius radius15 = Radius.circular(15);
     const Radius radius20 = Radius.circular(20);
-    expect(BorderRadiusGeometry.all(radius10), const BorderRadius.all(radius10));
+    expect(const BorderRadiusGeometry.all(radius10), const BorderRadius.all(radius10));
     expect(BorderRadiusGeometry.circular(10), BorderRadius.circular(10));
     expect(
       BorderRadiusGeometry.horizontal(left: radius5, right: radius10),
@@ -652,7 +652,7 @@ void main() {
       );
     }, throwsAssertionError);
     expect(
-      BorderRadiusGeometry.only(
+      const BorderRadiusGeometry.only(
         topLeft: radius5,
         topRight: radius10,
         bottomLeft: radius15,
@@ -666,7 +666,7 @@ void main() {
       ),
     );
     expect(
-      BorderRadiusGeometry.directional(
+      const BorderRadiusGeometry.directional(
         topStart: radius5,
         topEnd: radius10,
         bottomStart: radius15,
@@ -680,7 +680,7 @@ void main() {
       ),
     );
     expect(
-      BorderRadiusGeometry.vertical(top: radius5, bottom: radius10),
+      const BorderRadiusGeometry.vertical(top: radius5, bottom: radius10),
       const BorderRadius.vertical(top: radius5, bottom: radius10),
     );
     expect(BorderRadiusGeometry.zero, BorderRadius.zero);

@@ -27,10 +27,10 @@ abstract class AlignmentGeometry {
   const AlignmentGeometry();
 
   /// Creates an [Alignment].
-  factory AlignmentGeometry.xy(double x, double y) => Alignment(x, y);
+  const factory AlignmentGeometry.xy(double x, double y) = Alignment;
 
   /// Creates a directional alignment, or [AlignmentDirectional].
-  factory AlignmentGeometry.directional(double start, double y) => AlignmentDirectional(start, y);
+  const factory AlignmentGeometry.directional(double start, double y) = AlignmentDirectional;
 
   double get _x;
 

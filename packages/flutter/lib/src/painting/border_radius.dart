@@ -29,12 +29,12 @@ abstract class BorderRadiusGeometry {
   /// Creates a [BorderRadius] where all radii are `radius`.
   // The radius applies equally on all sides, so BorderRadiusDirectional is
   // irrelevant in this case.
-  factory BorderRadiusGeometry.all(Radius radius) => BorderRadius.all(radius);
+  const factory BorderRadiusGeometry.all(Radius radius) = BorderRadius.all;
 
   /// Creates a [BorderRadius] where all radii are [Radius.circular(radius)].
   // The radius applies equally on all sides, so BorderRadiusDirectional is
   // irrelevant in this case.
-  factory BorderRadiusGeometry.circular(double radius) => BorderRadius.circular(radius);
+  factory BorderRadiusGeometry.circular(double radius) = BorderRadius.circular;
 
   /// Creates a horizontally symmetrical border radius.
   ///
@@ -64,40 +64,26 @@ abstract class BorderRadiusGeometry {
   /// Creates a [BorderRadius] with only the given non-zero values.
   ///
   /// The other corners will be right angles.
-  factory BorderRadiusGeometry.only({
-    Radius? topLeft,
-    Radius? topRight,
-    Radius? bottomLeft,
-    Radius? bottomRight,
-  }) => BorderRadius.only(
-    topLeft: topLeft ?? Radius.zero,
-    topRight: topRight ?? Radius.zero,
-    bottomLeft: bottomLeft ?? Radius.zero,
-    bottomRight: bottomRight ?? Radius.zero,
-  );
+  const factory BorderRadiusGeometry.only({
+    Radius topLeft,
+    Radius topRight,
+    Radius bottomLeft,
+    Radius bottomRight,
+  }) = BorderRadius.only;
 
   /// Creates a [BorderRadiusDirectional] with only the given non-zero values.
   ///
   /// The other corners will be right angles.
-  factory BorderRadiusGeometry.directional({
-    Radius? topStart,
-    Radius? topEnd,
-    Radius? bottomStart,
-    Radius? bottomEnd,
-  }) => BorderRadiusDirectional.only(
-    topStart: topStart ?? Radius.zero,
-    topEnd: topEnd ?? Radius.zero,
-    bottomStart: bottomStart ?? Radius.zero,
-    bottomEnd: bottomEnd ?? Radius.zero,
-  );
+  const factory BorderRadiusGeometry.directional({
+    Radius topStart,
+    Radius topEnd,
+    Radius bottomStart,
+    Radius bottomEnd,
+  }) = BorderRadiusDirectional.only;
 
   /// Creates a vertically symmetric [BorderRadius] where the top and bottom
   /// sides of the rectangle have the same radii.
-  factory BorderRadiusGeometry.vertical({Radius top = Radius.zero, Radius bottom = Radius.zero}) {
-    // Directionality does not apply vertically, and so BorderRadiusDirectional
-    // is not needed.
-    return BorderRadius.vertical(top: top, bottom: bottom);
-  }
+  const factory BorderRadiusGeometry.vertical({Radius top, Radius bottom}) = BorderRadius.vertical;
 
   /// A [BorderRadius] with all zero radii.
   static const BorderRadiusGeometry zero = BorderRadius.zero;

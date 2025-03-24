@@ -36,35 +36,24 @@ abstract class EdgeInsetsGeometry {
   const factory EdgeInsetsGeometry.all(double value) = EdgeInsets.all;
 
   /// Creates [EdgeInsets] with only the given values non-zero.
-  factory EdgeInsetsGeometry.only({double? left, double? right, double? top, double? bottom}) =>
-      EdgeInsets.only(
-        left: left ?? 0.0,
-        top: top ?? 0.0,
-        right: right ?? 0.0,
-        bottom: bottom ?? 0.0,
-      );
+  const factory EdgeInsetsGeometry.only({double left, double right, double top, double bottom}) =
+      EdgeInsets.only;
 
   /// Creates [EdgeInsetsDirectional] with only the given values non-zero.
-  factory EdgeInsetsGeometry.directional({
-    double? start,
-    double? end,
-    double? top,
-    double? bottom,
-  }) => EdgeInsetsDirectional.only(
-    start: start ?? 0.0,
-    top: top ?? 0.0,
-    end: end ?? 0.0,
-    bottom: bottom ?? 0.0,
-  );
+  const factory EdgeInsetsGeometry.directional({
+    double start,
+    double end,
+    double top,
+    double bottom,
+  }) = EdgeInsetsDirectional.only;
 
   /// Creates [EdgeInsets] with symmetrical vertical and horizontal offsets.
-  factory EdgeInsetsGeometry.symmetric({double? vertical, double? horizontal}) =>
-      EdgeInsets.symmetric(horizontal: horizontal ?? 0.0, vertical: vertical ?? 0.0);
+  const factory EdgeInsetsGeometry.symmetric({double vertical, double horizontal}) =
+      EdgeInsets.symmetric;
 
   /// Creates [EdgeInsets] from offsets from the left, top, right, and bottom.
-  factory EdgeInsetsGeometry.fromLTRB(double left, double top, double right, double bottom) {
-    return EdgeInsets.fromLTRB(left, top, right, bottom);
-  }
+  const factory EdgeInsetsGeometry.fromLTRB(double left, double top, double right, double bottom) =
+      EdgeInsets.fromLTRB;
 
   /// Creates [EdgeInsets] that match the given view padding.
   ///
@@ -72,15 +61,13 @@ abstract class EdgeInsetsGeometry {
   /// widget, consider using [MediaQuery.paddingOf] to obtain these values
   /// rather than using the value from a [FlutterView] directly, so that you get
   /// notified of changes.
-  factory EdgeInsetsGeometry.fromViewPadding(ui.ViewPadding padding, double devicePixelRatio) {
-    return EdgeInsets.fromViewPadding(padding, devicePixelRatio);
-  }
+  factory EdgeInsetsGeometry.fromViewPadding(ui.ViewPadding padding, double devicePixelRatio) =
+      EdgeInsets.fromViewPadding;
 
   /// Creates [EdgeInsetsDirectional] from offsets from the start, top, end, and
   /// bottom.
-  factory EdgeInsetsGeometry.fromSTEB(double start, double top, double end, double bottom) {
-    return EdgeInsetsDirectional.fromSTEB(start, top, end, bottom);
-  }
+  const factory EdgeInsetsGeometry.fromSTEB(double start, double top, double end, double bottom) =
+      EdgeInsetsDirectional.fromSTEB;
 
   /// An [EdgeInsets] with zero offsets in each direction.
   static const EdgeInsetsGeometry zero = EdgeInsets.zero;

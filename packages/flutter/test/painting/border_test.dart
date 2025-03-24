@@ -493,9 +493,9 @@ void main() {
       const Border(left: side1, top: side2, right: side3, bottom: side4),
     );
     expect(BoxBorder.all(width: 4), Border.all(width: 4));
-    expect(BoxBorder.fromBorderSide(side3), const Border.fromBorderSide(side3));
+    expect(const BoxBorder.fromBorderSide(side3), const Border.fromBorderSide(side3));
     expect(
-      BoxBorder.symmetric(horizontal: side2, vertical: side3),
+      const BoxBorder.symmetric(horizontal: side2, vertical: side3),
       const Border.symmetric(horizontal: side2, vertical: side3),
     );
     expect(

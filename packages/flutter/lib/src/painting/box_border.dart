@@ -80,15 +80,11 @@ abstract class BoxBorder extends ShapeBorder {
   /// A uniform [Border] with all sides the same color and width.
   ///
   /// The sides default to black solid borders, one logical pixel wide.
-  factory BoxBorder.all({
-    Color color = const Color(0xFF000000),
-    double width = 1.0,
-    BorderStyle style = BorderStyle.solid,
-    double strokeAlign = BorderSide.strokeAlignInside,
-  }) => Border.all(color: color, width: width, style: style, strokeAlign: strokeAlign);
+  factory BoxBorder.all({Color color, double width, BorderStyle style, double strokeAlign}) =
+      Border.all;
 
   /// Creates a [Border] whose sides are all the same.
-  factory BoxBorder.fromBorderSide(BorderSide side) => Border.fromBorderSide(side);
+  const factory BoxBorder.fromBorderSide(BorderSide side) = Border.fromBorderSide;
 
   /// Creates a [Border] with symmetrical vertical and horizontal sides.
   ///
@@ -96,10 +92,8 @@ abstract class BoxBorder extends ShapeBorder {
   /// `horizontal` argument applies to the [top] and [bottom] sides.
   ///
   /// All arguments default to [BorderSide.none].
-  factory BoxBorder.symmetric({
-    BorderSide vertical = BorderSide.none,
-    BorderSide horizontal = BorderSide.none,
-  }) => Border.symmetric(vertical: vertical, horizontal: horizontal);
+  const factory BoxBorder.symmetric({BorderSide vertical, BorderSide horizontal}) =
+      Border.symmetric;
 
   /// Creates a [BorderDirectional].
   ///
