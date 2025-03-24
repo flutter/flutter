@@ -1,29 +1,18 @@
 package com.flutter.gradle
 
-import com.android.build.gradle.AbstractAppExtension
-import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.api.BaseVariantOutput
-import com.android.build.gradle.tasks.ProcessAndroidResources
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
-import org.gradle.api.DomainObjectCollection
-import org.gradle.api.DomainObjectSet
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
-import org.gradle.api.logging.Logger
-import org.gradle.api.tasks.TaskContainer
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
-import kotlin.test.assertContains
-import kotlin.test.assertEquals
 
 class FlutterTaskHelperTest {
     @Test

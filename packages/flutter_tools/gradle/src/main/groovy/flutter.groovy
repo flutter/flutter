@@ -5,23 +5,16 @@
 
 import com.android.build.OutputFile
 import com.android.build.gradle.AbstractAppExtension
-import com.android.tools.r8.P
-import com.flutter.gradle.AppLinkSettings
 import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.BaseApplicationNameHandler
-import com.flutter.gradle.Deeplink
 import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginConstants
 import com.flutter.gradle.FlutterTask
-import com.flutter.gradle.FlutterTaskHelper
 import com.flutter.gradle.FlutterPluginUtils
-import com.flutter.gradle.IntentFilterCheck
-import com.flutter.gradle.VersionUtils
-import groovy.xml.QName
 import org.gradle.api.file.Directory
 
 import java.nio.file.Paths
@@ -502,7 +495,7 @@ class FlutterPlugin implements Plugin<Project> {
         FlutterPluginUtils.addTaskForJavaVersion(project)
         if (FlutterPluginUtils.isFlutterAppProject(project)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(project)
-            FlutterTaskHelper.addTasksForOutputsAppLinkSettings(project)
+            FlutterPluginUtils.addTasksForOutputsAppLinkSettings(project)
         }
         List<String> targetPlatforms = FlutterPluginUtils.getTargetPlatforms(project)
         def addFlutterDeps = { variant ->

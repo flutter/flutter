@@ -1188,7 +1188,6 @@ class FlutterPluginUtilsTest {
             )
     }
 
-
     @Test
     fun addTasksForOutputsAppLinkSettingsNoAndroid(
         @TempDir tempDir: Path
@@ -1277,31 +1276,31 @@ class FlutterPluginUtilsTest {
         val registerTaskSlot = slot<Action<Task>>()
         val registerTaskList: MutableList<Task> = mutableListOf()
         every { mockProject.tasks } returns
-                mockk<TaskContainer> {
-                    val registerTaskNameSlot = slot<String>()
-                    every { register(capture(registerTaskNameSlot), capture(registerTaskSlot)) } answers registerAnswer@{
-                        val mockRegisterTask =
-                            mockk<Task> {
-                                every { name } returns registerTaskNameSlot.captured
-                                every { description = capture(descriptionSlot) } returns Unit
-                                every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
-                                val doLastActionSlot = slot<Action<Task>>()
-                                every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
-                                    // We need to capture the task as well
-                                    doLastActionSlot.captured.execute(mockk())
-                                    return@doLastAnswer mockk()
-                                }
+            mockk<TaskContainer> {
+                val registerTaskNameSlot = slot<String>()
+                every { register(capture(registerTaskNameSlot), capture(registerTaskSlot)) } answers registerAnswer@{
+                    val mockRegisterTask =
+                        mockk<Task> {
+                            every { name } returns registerTaskNameSlot.captured
+                            every { description = capture(descriptionSlot) } returns Unit
+                            every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
+                            val doLastActionSlot = slot<Action<Task>>()
+                            every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
+                                // We need to capture the task as well
+                                doLastActionSlot.captured.execute(mockk())
+                                return@doLastAnswer mockk()
                             }
-                        registerTaskList.add(mockRegisterTask)
-                        registerTaskSlot.captured.execute(mockRegisterTask)
-                        return@registerAnswer mockk()
-                    }
-
-                    every { named(any<String>()) } returns
-                            mockk {
-                                every { configure(any<Action<Task>>()) } returns mockk()
-                            }
+                        }
+                    registerTaskList.add(mockRegisterTask)
+                    registerTaskSlot.captured.execute(mockRegisterTask)
+                    return@registerAnswer mockk()
                 }
+
+                every { named(any<String>()) } returns
+                    mockk {
+                        every { configure(any<Action<Task>>()) } returns mockk()
+                    }
+            }
         variants.forEach { variant ->
             val testOutputs: DomainObjectCollection<BaseVariantOutput> = mockk<DomainObjectCollection<BaseVariantOutput>>()
             val baseVariantSlot = slot<Action<BaseVariantOutput>>()
