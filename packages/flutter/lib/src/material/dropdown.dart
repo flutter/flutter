@@ -1618,7 +1618,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       InputDecoration effectiveDecoration = widget._inputDecoration!.copyWith(
         // Override the suffix icon constraints to allow the
         // icon alignment to match the regular dropdown button.
-        suffixIconConstraints: const BoxConstraints(minWidth: 40.0),
+        suffixIconConstraints: const BoxConstraints(minWidth: 24.0),
         suffixIcon: effectiveSuffixIcon,
       );
       if (_hasPrimaryFocus) {
