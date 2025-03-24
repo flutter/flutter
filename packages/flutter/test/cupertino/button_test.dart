@@ -928,7 +928,7 @@ void main() {
     addTearDown(gesture.removePointer);
 
     await gesture.down(tester.getTopLeft(find.byType(CupertinoButton)));
-    await gesture.moveBy(Offset(1, 1));
+    await gesture.moveBy(const Offset(1, 1));
     await gesture.moveBy(Offset(0, -CupertinoButton.tapMoveSlop() - 5));
     await tester.pumpAndSettle();
     expect(opacity.opacity.value, 1.0);
