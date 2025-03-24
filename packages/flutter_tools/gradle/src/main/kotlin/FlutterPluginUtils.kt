@@ -889,7 +889,7 @@ object FlutterPluginUtils {
     internal fun addTasksForOutputsAppLinkSettings(project: Project) {
         // Integration test for AppLinkSettings task defined in
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
-        val android = FlutterPluginUtils.getAndroidExtensionOrNull(project)
+        val android = getAndroidExtensionOrNull(project)
         if (android == null) {
             project.logger.info("addTasksForOutputsAppLinkSettings called on project without android extension")
             return
@@ -914,10 +914,10 @@ object FlutterPluginUtils {
 
                         val appLinkSettings = AppLinkSettings(variant.applicationId)
                         // TODO use import groovy.xml.XmlParser instead.
-                        // It is not namespace aware because it makes querying nodes cumbersome.
+                        // XmlParser is not namespace aware because it makes querying nodes cumbersome.
                         val manifest: Node =
                             XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
-                        // The new import would use getProperty like
+                        // The groovy.xml.XmlParser import would use getProperty like
                         // manifest.getProperty("application").let { applicationNode -> ...
                         val applicationNode: Node? =
                             manifest.children().find { node ->
@@ -966,8 +966,9 @@ object FlutterPluginUtils {
                                                 appLinkIntent.children().filter { item ->
                                                     item is Node && item.name() == "action"
                                                 }
-                                            // Weird that any action item causes intentFilterCheck to always be true
-                                            // and we keep looping.
+                                            // Any action item causes intentFilterCheck to always be true
+                                            // and we keep looping instead of exiting out early.
+                                            // TODO exit out early per intent filter action view.
                                             actionItems.forEach { action ->
                                                 if (action is Node) {
                                                     if (action.attribute("android:name") == "android.intent.action.VIEW") {
@@ -981,9 +982,11 @@ object FlutterPluginUtils {
                                                 }
                                             categoryItems.forEach { category ->
                                                 if (category is Node) {
+                                                    // TODO exit out early per intent filter default category.
                                                     if (category.attribute("android:name") == "android.intent.category.DEFAULT") {
                                                         intentFilterCheck.hasDefaultCategory = true
                                                     }
+                                                    // TODO exit out early per intent filter browsable category.
                                                     if (category.attribute("android:name") == "android.intent.category.BROWSABLE") {
                                                         intentFilterCheck.hasBrowsableCategory =
                                                             true
@@ -1024,7 +1027,7 @@ object FlutterPluginUtils {
                                                 if (paths.isEmpty()) {
                                                     paths.add(".*")
                                                 }
-                                                // Sets are not ordered this is dangerous.
+                                                // Sets are not ordered this could produce a bug.
                                                 schemes.forEach { scheme ->
                                                     hosts.forEach { host ->
                                                         paths.forEach { path ->

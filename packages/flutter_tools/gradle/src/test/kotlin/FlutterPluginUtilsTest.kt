@@ -1314,11 +1314,10 @@ class FlutterPluginUtilsTest {
             manifest.writeText(manifestText)
             val mockProcessResourcesProvider = mockk<TaskProvider<ProcessAndroidResources>>()
             val mockProcessResources = mockk<ProcessAndroidResources>()
-            every {  mockProcessResourcesProvider.hint(ProcessAndroidResources::class).get() } returns mockProcessResources
+            every { mockProcessResourcesProvider.hint(ProcessAndroidResources::class).get() } returns mockProcessResources
             every { baseVariantOutput.processResourcesProvider } returns mockProcessResourcesProvider
             // Fallback processing.
             every { mockProcessResources.manifestFile } returns manifest
-
 
             every { testOutputs.configureEach(capture(baseVariantSlot)) } answers {
                 // Execute the action for each output.

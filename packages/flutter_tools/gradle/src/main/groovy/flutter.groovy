@@ -250,52 +250,6 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.all(this.&addFlutterDependencies)
     }
 
-    private static Properties readPropertiesIfExist(File propertiesFile) {
-        Properties result = new Properties()
-        if (propertiesFile.exists()) {
-            propertiesFile.withReader("UTF-8") { reader -> result.load(reader) }
-        }
-        return result
-    }
-
-    // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
-    //
-    // Format of the output of this task can be used in debugging what version of Java Gradle is using.
-    // Not recommended for use in time sensitive commands like `flutter run` or `flutter build` as
-    // Gradle is slower than we want. Particularly in light of https://github.com/flutter/flutter/issues/119196.
-    private static void addTaskForJavaVersion(Project project) {
-        // Warning: the name of this task is used by other code. Change with caution.
-        project.tasks.register("javaVersion") {
-            description "Print the current java version used by gradle. "
-                "see: https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
-            doLast {
-                println(JavaVersion.current())
-            }
-        }
-    }
-
-    // Add a task that can be called on Flutter projects that prints the available build variants
-    // in Gradle.
-    //
-    // This task prints variants in this format:
-    //
-    // BuildVariant: debug
-    // BuildVariant: release
-    // BuildVariant: profile
-    //
-    // Format of the output of this task is used by `AndroidProject.getBuildVariants`.
-    private static void addTaskForPrintBuildVariants(Project project) {
-        // Warning: The name of this task is used by `AndroidProject.getBuildVariants`.
-        project.tasks.register("printBuildVariants") {
-            description "Prints out all build variants for this Android project"
-            doLast {
-                project.android.applicationVariants.all { variant ->
-                    println "BuildVariant: ${variant.name}"
-                }
-            }
-        }
-    }
-
     /**
      * Adds the dependencies required by the Flutter project.
      * This includes:
