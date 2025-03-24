@@ -1723,7 +1723,7 @@ void _testVerticalScrolling() {
 
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
-    expect(capturedEvent.arguments, isNull);
+    expect(capturedEvent.arguments, isNotNull);
     // Engine semantics returns scroll top back to neutral.
     expect(scrollable.scrollTop, 20);
 
@@ -1734,7 +1734,7 @@ void _testVerticalScrolling() {
     expect(scrollable.scrollTop >= (5 - browserMaxScrollDiff), isTrue);
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
-    expect(capturedEvent.arguments, isNull);
+    expect(capturedEvent.arguments, isNotNull);
     // Engine semantics returns scroll top back to neutral.
     expect(scrollable.scrollTop, 5);
   });
@@ -1943,7 +1943,7 @@ void _testHorizontalScrolling() {
 
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
-    expect(capturedEvent.arguments, isNull);
+    expect(capturedEvent.arguments, isNotNull);
     // Engine semantics returns scroll position back to neutral.
     expect(scrollable.scrollLeft, 20);
 
@@ -1954,7 +1954,7 @@ void _testHorizontalScrolling() {
     expect(scrollable.scrollLeft, 5);
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
-    expect(capturedEvent.arguments, isNull);
+    expect(capturedEvent.arguments, isNotNull);
     // Engine semantics returns scroll top back to neutral.
     expect(scrollable.scrollLeft, 5);
   });
