@@ -1007,7 +1007,7 @@ class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   }
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  _RenderSmartLayoutBuilder createRenderObject(BuildContext context) {
     return _RenderSmartLayoutBuilder(
       offsetPercentage: offsetPercentage,
       onChildWasPainted: onChildWasPainted,
@@ -1025,9 +1025,13 @@ class _SmartLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
 typedef _OnChildWasPaintedCallback = void Function(Offset extraOffset);
 
 class _RenderSmartLayoutBuilder extends RenderProxyBox
+<<<<<<< HEAD
     with
         RenderObjectWithLayoutCallbackMixin,
         RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
+=======
+    with RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> {
+>>>>>>> upstream/master
   _RenderSmartLayoutBuilder({required double offsetPercentage, required this.onChildWasPainted})
     : _offsetPercentage = offsetPercentage;
 
@@ -1067,6 +1071,10 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
       onChildWasPainted(extraOffset);
     }
   }
+
+  @protected
+  @override
+  BoxConstraints get layoutInfo => constraints;
 }
 
 class _LayoutSpy extends LeafRenderObjectWidget {

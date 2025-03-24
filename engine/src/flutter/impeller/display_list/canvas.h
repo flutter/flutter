@@ -201,6 +201,8 @@ class Canvas {
 
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
 
+  void DrawRoundSuperellipse(const RoundSuperellipse& rse, const Paint& paint);
+
   void DrawCircle(const Point& center, Scalar radius, const Paint& paint);
 
   void DrawPoints(const Point points[],
@@ -260,6 +262,10 @@ class Canvas {
   //
   // Visible for testing.
   bool SupportsBlitToOnscreen() const;
+
+  /// For picture snapshots we need addition steps to verify that final mipmaps
+  /// are generated.
+  bool EnsureFinalMipmapGeneration() const;
 
  private:
   ContentContext& renderer_;

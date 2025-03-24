@@ -22,38 +22,6 @@ import 'package:ui/ui.dart';
 /// to disregard.
 const double precisionErrorTolerance = 1e-10;
 
-/// Enumerates all persisted surfaces in the tree rooted at [root].
-///
-/// If [root] is `null` returns all surfaces from the last rendered scene.
-///
-/// Surfaces are returned in a depth-first order.
-Iterable<PersistedSurface> enumerateSurfaces([PersistedSurface? root]) {
-  root ??= SurfaceSceneBuilder.debugLastFrameScene;
-  final List<PersistedSurface> surfaces = <PersistedSurface>[root!];
-
-  root.visitChildren((PersistedSurface surface) {
-    surfaces.addAll(enumerateSurfaces(surface));
-  });
-
-  return surfaces;
-}
-
-/// Enumerates all pictures nested under [root].
-///
-/// If [root] is `null` returns all pictures from the last rendered scene.
-Iterable<PersistedPicture> enumeratePictures([PersistedSurface? root]) {
-  root ??= SurfaceSceneBuilder.debugLastFrameScene;
-  return enumerateSurfaces(root).whereType<PersistedPicture>();
-}
-
-/// Enumerates all offset surfaces nested under [root].
-///
-/// If [root] is `null` returns all pictures from the last rendered scene.
-Iterable<PersistedOffset> enumerateOffsets([PersistedSurface? root]) {
-  root ??= SurfaceSceneBuilder.debugLastFrameScene;
-  return enumerateSurfaces(root).whereType<PersistedOffset>();
-}
-
 /// Computes the distance between two values.
 ///
 /// The distance should be a metric in a metric space (see
@@ -306,7 +274,6 @@ class HtmlPatternMatcher extends Matcher {
   static bool _areTagsEqual(html.Element a, html.Element b) {
     const Map<String, String> synonyms = <String, String>{
       'sem': 'flt-semantics',
-      'sem-c': 'flt-semantics-container',
       'sem-img': 'flt-semantics-img',
       'sem-tf': 'flt-semantics-text-field',
     };
