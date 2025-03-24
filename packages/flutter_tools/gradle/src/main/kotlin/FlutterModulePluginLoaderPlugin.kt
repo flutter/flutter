@@ -36,6 +36,7 @@ class FlutterModulePluginLoaderPlugin : Plugin<Settings> {
         //            settings
         //                .project("$flutterProjectRoot")
         //                .projectDir.parentFile.parentFile
+        println("HI GRYA flutterProjectRoot: $flutterProjectRoot")
         val nativePlugins: List<Map<String, Any>> =
             nativePluginLoader.getPlugins(flutterProjectRoot)
         nativePlugins.forEach { androidPlugin ->
@@ -46,6 +47,8 @@ class FlutterModulePluginLoaderPlugin : Plugin<Settings> {
             settings.project(":$pluginName").projectDir = pluginDirectory
         }
 
+        val altroot = settings.settingsDir.absolutePath
+        println("HI GRAY altroot: $altroot")
         settings.gradle.projectsLoaded {
             rootProject.beforeEvaluate {
                 subprojects {
