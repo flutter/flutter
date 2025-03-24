@@ -9,12 +9,12 @@ import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 import 'package:web_locale_keymap/web_locale_keymap.dart' as locale_keymap;
 
-import 'initialization.dart';
-import 'renderer.dart';
 import 'dom.dart';
+import 'initialization.dart';
 import 'key_map.g.dart';
 import 'platform_dispatcher.dart';
 import 'raw_keyboard.dart';
+import 'renderer.dart';
 import 'semantics.dart';
 
 typedef _VoidCallback = void Function();
