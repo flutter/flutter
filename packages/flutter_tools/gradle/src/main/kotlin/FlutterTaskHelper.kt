@@ -117,6 +117,8 @@ object FlutterTaskHelper {
      *  }
      * The output file is parsed and used by devtool.
      */
+    @JvmStatic
+    @JvmName("addTasksForOutputsAppLinkSettings")
     internal fun addTasksForOutputsAppLinkSettings(project: Project) {
         // Integration test for AppLinkSettings task defined in
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
