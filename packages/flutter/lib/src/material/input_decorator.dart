@@ -692,19 +692,21 @@ class _RenderDecoration extends RenderBox
     required bool expands,
     required bool material3,
     TextAlignVertical? textAlignVertical,
+    double? suffixGap,
   }) : _decoration = decoration,
        _textDirection = textDirection,
        _textBaseline = textBaseline,
        _textAlignVertical = textAlignVertical,
        _isFocused = isFocused,
        _expands = expands,
-       _material3 = material3;
+       _material3 = material3,
+       _suffixGap = suffixGap;
 
   // TODO(bleroux): consider defining this value as a Material token and making it
   // configurable by InputDecorationTheme.
   double get subtextGap => material3 ? 4.0 : 8.0;
   double get prefixToInputGap => material3 ? 4.0 : 0.0;
-  double get inputToSuffixGap => material3 ? 4.0 : 0.0;
+  double get inputToSuffixGap => suffixGap ?? (material3 ? 4.0 : 0.0);
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
@@ -781,6 +783,16 @@ class _RenderDecoration extends RenderBox
       return;
     }
     _textAlignVertical = value;
+    markNeedsLayout();
+  }
+
+  double? get suffixGap => _suffixGap;
+  double? _suffixGap;
+  set suffixGap(double? value) {
+    if (_suffixGap == value) {
+      return;
+    }
+    _suffixGap = value;
     markNeedsLayout();
   }
 
@@ -2756,6 +2768,7 @@ class InputDecoration {
     this.suffixStyle,
     this.suffixIconColor,
     this.suffixIconConstraints,
+    this.suffixIconGap,
     this.counter,
     this.counterText,
     this.counterStyle,
@@ -2867,6 +2880,7 @@ class InputDecoration {
        suffixStyle = null,
        suffixIconColor = null,
        suffixIconConstraints = null,
+       suffixIconGap = null,
        counter = null,
        counterText = null,
        counterStyle = null,
@@ -3521,6 +3535,8 @@ class InputDecoration {
   /// {@end-tool}
   final BoxConstraints? suffixIconConstraints;
 
+  final double? suffixIconGap;
+
   /// Optional text to place below the line as a character count.
   ///
   /// Rendered using [counterStyle]. Uses [helperStyle] if [counterStyle] is
@@ -3836,6 +3852,7 @@ class InputDecoration {
     TextStyle? suffixStyle,
     Color? suffixIconColor,
     BoxConstraints? suffixIconConstraints,
+    double? suffixIconGap,
     Widget? counter,
     String? counterText,
     TextStyle? counterStyle,
@@ -3894,6 +3911,7 @@ class InputDecoration {
       suffixStyle: suffixStyle ?? this.suffixStyle,
       suffixIconColor: suffixIconColor ?? this.suffixIconColor,
       suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
+      suffixIconGap: suffixIconGap ?? this.suffixIconGap,
       counter: counter ?? this.counter,
       counterText: counterText ?? this.counterText,
       counterStyle: counterStyle ?? this.counterStyle,
@@ -3941,6 +3959,7 @@ class InputDecoration {
       suffixStyle: suffixStyle ?? theme.suffixStyle,
       suffixIconColor: suffixIconColor ?? theme.suffixIconColor,
       suffixIconConstraints: suffixIconConstraints ?? theme.suffixIconConstraints,
+      suffixIconGap: suffixIconGap ?? theme.suffixIconGap,
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
@@ -4005,6 +4024,7 @@ class InputDecoration {
         other.suffixText == suffixText &&
         other.suffixStyle == suffixStyle &&
         other.suffixIconConstraints == suffixIconConstraints &&
+        other.suffixIconGap == suffixIconGap &&
         other.counter == counter &&
         other.counterText == counterText &&
         other.counterStyle == counterStyle &&
@@ -4070,6 +4090,7 @@ class InputDecoration {
       suffixText,
       suffixStyle,
       suffixIconConstraints,
+      suffixIconGap,
       counter,
       counterText,
       counterStyle,
@@ -4125,6 +4146,7 @@ class InputDecoration {
       if (suffixText != null) 'suffixText: $suffixText',
       if (suffixStyle != null) 'suffixStyle: $suffixStyle',
       if (suffixIconConstraints != null) 'suffixIconConstraints: $suffixIconConstraints',
+      if (suffixIconGap != null) 'suffixIconGap: $suffixIconGap',
       if (counter != null) 'counter: $counter',
       if (counterText != null) 'counterText: $counterText',
       if (counterStyle != null) 'counterStyle: $counterStyle',
@@ -4181,6 +4203,7 @@ class InputDecorationTheme with Diagnosticable {
     this.suffixStyle,
     this.suffixIconColor,
     this.suffixIconConstraints,
+    this.suffixIconGap,
     this.counterStyle,
     this.filled = false,
     this.fillColor,
@@ -4368,6 +4391,8 @@ class InputDecorationTheme with Diagnosticable {
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   final BoxConstraints? suffixIconConstraints;
+
+  final double? suffixIconGap;
 
   /// The style to use for the [InputDecoration.counterText].
   ///
@@ -4624,6 +4649,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? suffixStyle,
     Color? suffixIconColor,
     BoxConstraints? suffixIconConstraints,
+    double? suffixIconGap,
     TextStyle? counterStyle,
     bool? filled,
     Color? fillColor,
@@ -4661,6 +4687,7 @@ class InputDecorationTheme with Diagnosticable {
       suffixStyle: suffixStyle ?? this.suffixStyle,
       suffixIconColor: suffixIconColor ?? this.suffixIconColor,
       suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
+      suffixIconGap: suffixIconGap ?? this.suffixIconGap,
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
@@ -4709,6 +4736,7 @@ class InputDecorationTheme with Diagnosticable {
       suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
       suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
       suffixIconConstraints: suffixIconConstraints ?? inputDecorationTheme.suffixIconConstraints,
+      suffixIconGap: suffixIconGap ?? inputDecorationTheme.suffixIconGap,
       counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
       fillColor: fillColor ?? inputDecorationTheme.fillColor,
       activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
@@ -4747,6 +4775,7 @@ class InputDecorationTheme with Diagnosticable {
     suffixIconColor,
     suffixIconConstraints,
     Object.hash(
+      suffixIconGap,
       counterStyle,
       filled,
       fillColor,
@@ -4793,6 +4822,7 @@ class InputDecorationTheme with Diagnosticable {
         other.suffixStyle == suffixStyle &&
         other.suffixIconColor == suffixIconColor &&
         other.suffixIconConstraints == suffixIconConstraints &&
+        other.suffixIconGap == suffixIconGap &&
         other.counterStyle == counterStyle &&
         other.floatingLabelBehavior == floatingLabelBehavior &&
         other.floatingLabelAlignment == floatingLabelAlignment &&
@@ -4924,6 +4954,13 @@ class InputDecorationTheme with Diagnosticable {
         'suffixIconConstraints',
         suffixIconConstraints,
         defaultValue: defaultTheme.suffixIconConstraints,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<double?>(
+        'suffixIconGap',
+        suffixIconGap,
+        defaultValue: defaultTheme.suffixIconGap,
       ),
     );
     properties.add(
