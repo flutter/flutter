@@ -87,7 +87,7 @@ typedef SelectionChangedCallback =
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
-// Signature for a function that determines the selection when focus is given
+/// Signature for a function that determines the selection when focus is given
 typedef SetCustomSelectionOnFocus = TextSelection Function();
 
 /// Signature for a widget builder that builds a context menu for the given
