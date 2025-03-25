@@ -771,63 +771,6 @@ void main() {
     expect(appliedTheme.primaryColor, Colors.green);
   });
 
-  testWidgets('MaterialApp uses fallback light high contrast theme when no themes are provided', (
-    WidgetTester tester,
-  ) async {
-    addTearDown(tester.platformDispatcher.clearAllTestValues);
-
-    tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
-    tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
-
-    late ThemeData appliedTheme;
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (BuildContext context) {
-            appliedTheme = Theme.of(context);
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-
-    final ThemeData expectedTheme = ThemeData.highContrastLight();
-    expect(appliedTheme.brightness, expectedTheme.brightness);
-    expect(appliedTheme.primaryColor, expectedTheme.primaryColor);
-    expect(appliedTheme.canvasColor, expectedTheme.canvasColor);
-    expect(appliedTheme.colorScheme, equals(expectedTheme.colorScheme));
-  });
-
-  testWidgets(
-    'MaterialApp uses fallback light high contrast theme when platformBrightness is dark but no themes are provided',
-    (WidgetTester tester) async {
-      addTearDown(tester.platformDispatcher.clearAllTestValues);
-
-      tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
-      tester.platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures.allOn;
-
-      late ThemeData appliedTheme;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (BuildContext context) {
-              appliedTheme = Theme.of(context);
-              return const SizedBox();
-            },
-          ),
-        ),
-      );
-
-      final ThemeData expectedTheme = ThemeData.highContrastLight();
-      expect(appliedTheme.brightness, expectedTheme.brightness);
-      expect(appliedTheme.primaryColor, expectedTheme.primaryColor);
-      expect(appliedTheme.canvasColor, expectedTheme.canvasColor);
-      expect(appliedTheme.colorScheme, equals(expectedTheme.colorScheme));
-    },
-  );
-
   testWidgets('MaterialApp uses dark theme when no high contrast dark theme is provided', (
     WidgetTester tester,
   ) async {

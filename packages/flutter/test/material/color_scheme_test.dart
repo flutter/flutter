@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -134,28 +132,11 @@ void main() {
   });
 
   test('high contrast light scheme matches the spec', () {
-    final Color? systemAccentColor;
-    final Color? systemAccentTextColor;
-    final Color? systemCanvasColor;
-    final Color? systemCanvasTextColor;
-
-    if (ui.SystemColor.platformProvidesSystemColors) {
-      systemAccentColor = ui.SystemColor.dark.accentColor.value;
-      systemAccentTextColor = ui.SystemColor.dark.accentColorText.value;
-      systemCanvasColor = ui.SystemColor.dark.canvas.value;
-      systemCanvasTextColor = ui.SystemColor.dark.canvasText.value;
-    } else {
-      systemAccentColor = null;
-      systemAccentTextColor = null;
-      systemCanvasColor = null;
-      systemCanvasTextColor = null;
-    }
-
     // Colors are based off of the Material Design baseline default theme:
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    final ColorScheme scheme = ColorScheme.highContrastLight();
+    const ColorScheme scheme = ColorScheme.highContrastLight();
     expect(scheme.brightness, Brightness.light);
     expect(scheme.primary, const Color(0xff0000ba));
     expect(scheme.onPrimary, const Color(0xffffffff));
@@ -165,8 +146,8 @@ void main() {
     expect(scheme.primaryFixedDim, scheme.primary);
     expect(scheme.onPrimaryFixed, scheme.onPrimary);
     expect(scheme.onPrimaryFixedVariant, scheme.onPrimary);
-    expect(scheme.secondary, systemAccentColor ?? const Color(0xff66fff9));
-    expect(scheme.onSecondary, systemAccentTextColor ?? const Color(0xff000000));
+    expect(scheme.secondary, const Color(0xff66fff9));
+    expect(scheme.onSecondary, const Color(0xff000000));
     expect(scheme.secondaryContainer, scheme.secondary);
     expect(scheme.onSecondaryContainer, scheme.onSecondary);
     expect(scheme.secondaryFixed, scheme.secondary);
@@ -187,7 +168,7 @@ void main() {
     expect(scheme.onErrorContainer, scheme.onError);
     expect(scheme.background, const Color(0xffffffff));
     expect(scheme.onBackground, const Color(0xff000000));
-    expect(scheme.surface, systemCanvasColor ?? const Color(0xffffffff));
+    expect(scheme.surface, const Color(0xffffffff));
     expect(scheme.surfaceBright, scheme.surface);
     expect(scheme.surfaceDim, scheme.surface);
     expect(scheme.surfaceContainerLowest, scheme.surface);
@@ -195,7 +176,7 @@ void main() {
     expect(scheme.surfaceContainer, scheme.surface);
     expect(scheme.surfaceContainerHigh, scheme.surface);
     expect(scheme.surfaceContainerHighest, scheme.surface);
-    expect(scheme.onSurface, systemCanvasTextColor ?? const Color(0xff000000));
+    expect(scheme.onSurface, const Color(0xff000000));
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
     expect(scheme.outline, scheme.onBackground);
@@ -209,28 +190,11 @@ void main() {
   });
 
   test('high contrast dark scheme matches the spec', () {
-    final Color? systemAccentColor;
-    final Color? systemAccentTextColor;
-    final Color? systemCanvasColor;
-    final Color? systemCanvasTextColor;
-
-    if (ui.SystemColor.platformProvidesSystemColors) {
-      systemAccentColor = ui.SystemColor.dark.accentColor.value;
-      systemAccentTextColor = ui.SystemColor.dark.accentColorText.value;
-      systemCanvasColor = ui.SystemColor.dark.canvas.value;
-      systemCanvasTextColor = ui.SystemColor.dark.canvasText.value;
-    } else {
-      systemAccentColor = null;
-      systemAccentTextColor = null;
-      systemCanvasColor = null;
-      systemCanvasTextColor = null;
-    }
-
     // Colors are based off of the Material Design baseline dark theme:
     // https://material.io/design/color/dark-theme.html#ui-application
     // with the new Material 3 colors defaulting to values from the M2
     // baseline.
-    final ColorScheme scheme = ColorScheme.highContrastDark();
+    const ColorScheme scheme = ColorScheme.highContrastDark();
     expect(scheme.brightness, Brightness.dark);
     expect(scheme.primary, const Color(0xffefb7ff));
     expect(scheme.onPrimary, const Color(0xff000000));
@@ -240,8 +204,8 @@ void main() {
     expect(scheme.primaryFixedDim, scheme.primary);
     expect(scheme.onPrimaryFixed, scheme.onPrimary);
     expect(scheme.onPrimaryFixedVariant, scheme.onPrimary);
-    expect(scheme.secondary, systemAccentColor ?? const Color(0xff66fff9));
-    expect(scheme.onSecondary, systemAccentTextColor ?? const Color(0xff000000));
+    expect(scheme.secondary, const Color(0xff66fff9));
+    expect(scheme.onSecondary, const Color(0xff000000));
     expect(scheme.secondaryContainer, scheme.secondary);
     expect(scheme.onSecondaryContainer, scheme.onSecondary);
     expect(scheme.secondaryFixed, scheme.secondary);
@@ -262,7 +226,7 @@ void main() {
     expect(scheme.onErrorContainer, scheme.onError);
     expect(scheme.background, const Color(0xff121212));
     expect(scheme.onBackground, const Color(0xffffffff));
-    expect(scheme.surface, systemCanvasColor ?? const Color(0xff121212));
+    expect(scheme.surface, const Color(0xff121212));
     expect(scheme.surfaceBright, scheme.surface);
     expect(scheme.surfaceDim, scheme.surface);
     expect(scheme.surfaceContainerLowest, scheme.surface);
@@ -270,7 +234,7 @@ void main() {
     expect(scheme.surfaceContainer, scheme.surface);
     expect(scheme.surfaceContainerHigh, scheme.surface);
     expect(scheme.surfaceContainerHighest, scheme.surface);
-    expect(scheme.onSurface, systemCanvasTextColor ?? const Color(0xffffffff));
+    expect(scheme.onSurface, const Color(0xffffffff));
     expect(scheme.surfaceVariant, scheme.surface);
     expect(scheme.onSurfaceVariant, scheme.onSurface);
     expect(scheme.outline, scheme.onBackground);
