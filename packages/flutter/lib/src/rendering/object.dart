@@ -4140,7 +4140,7 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 /// render subtree during the [RenderObject]'s layout process. When an ancestor
 /// [RenderObject] chooses to skip laying out this [RenderObject] in its
 /// [performLayout] implementation (for example, for performance reasons, an
-/// [Overlay] may skip laying out an offstage [OverEntry] while keep it in the
+/// [Overlay] may skip laying out an offstage [OverlayEntry] while keep it in the
 /// tree), normally the [layoutCallback] will not be invoked because the [layout]
 /// method will not be called. This can be undesirable when the [layoutCallback]
 /// involves rebuilding dirty widgets (most notably, the [LayoutBuilder] widget).
