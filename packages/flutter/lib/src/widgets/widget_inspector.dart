@@ -1610,8 +1610,7 @@ mixin WidgetInspectorService {
   /// Notify attached tools to navigate to an object's source location.
   void _sendInspectEvent(Object? object) {
     inspect(object);
-
-    final _Location? location = _getSelectedSummaryWidgetLocation(null);
+    final _Location? location = _getSelectedWidgetLocation(null);
     if (location != null) {
       postEvent('navigate', <String, Object>{
         'fileUri': location.file, // URI file path of the location.
@@ -2407,8 +2406,8 @@ mixin WidgetInspectorService {
     return _safeJsonEncode(_getSelectedSummaryWidget(null, groupName));
   }
 
-  _Location? _getSelectedSummaryWidgetLocation(String? previousSelectionId) {
-    return _getCreationLocation(_getSelectedSummaryDiagnosticsNode(previousSelectionId)?.value);
+  _Location? _getSelectedWidgetLocation(String? previousSelectionId) {
+    return _getCreationLocation(_getSelectedWidgetDiagnosticsNode(previousSelectionId)?.value);
   }
 
   DiagnosticsNode? _getSelectedSummaryDiagnosticsNode(String? previousSelectionId) {
