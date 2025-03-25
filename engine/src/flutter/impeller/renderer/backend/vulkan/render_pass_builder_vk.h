@@ -28,10 +28,6 @@ class RenderPassBuilderVK {
 
   RenderPassBuilderVK& operator=(const RenderPassBuilderVK&) = delete;
 
-  /// Whether this builder should configure barriers for the onscreen render
-  /// pass.
-  void SetSwapchain(bool value);
-
   RenderPassBuilderVK& SetColorAttachment(
       size_t index,
       PixelFormat format,
@@ -70,7 +66,6 @@ class RenderPassBuilderVK {
   std::optional<vk::AttachmentDescription> GetColor0Resolve() const;
 
  private:
-  bool is_swapchain_ = false;
   std::optional<vk::AttachmentDescription> color0_;
   std::optional<vk::AttachmentDescription> color0_resolve_;
   std::optional<vk::AttachmentDescription> depth_stencil_;
