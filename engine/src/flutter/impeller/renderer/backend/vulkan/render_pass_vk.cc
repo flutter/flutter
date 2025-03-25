@@ -81,7 +81,6 @@ SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const std::shared_ptr<CommandBufferVK>& command_buffer,
     bool is_swapchain) const {
   RenderPassBuilderVK builder;
-  builder.SetSwapchain(is_swapchain);
 
   render_target_.IterateAllColorAttachments([&](size_t bind_point,
                                                 const ColorAttachment&

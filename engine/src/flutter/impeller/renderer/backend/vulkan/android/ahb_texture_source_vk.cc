@@ -56,7 +56,11 @@ vk::UniqueImage CreateVKImageWrapperForAndroidHarwareBuffer(
   }
   if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER) {
     image_usage_flags |= vk::ImageUsageFlagBits::eColorAttachment;
+  }
+  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY) {
+    image_usage_flags |= vk::ImageUsageFlagBits::eColorAttachment;
     image_usage_flags |= vk::ImageUsageFlagBits::eInputAttachment;
+    image_usage_flags |= vk::ImageUsageFlagBits::eTransferDst;
   }
 
   vk::ImageCreateFlags image_create_flags;
@@ -298,7 +302,7 @@ TextureDescriptor ToTextureDescriptor(const AHardwareBuffer_Desc& ahb_desc) {
   desc.mip_count = (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_MIPMAP_COMPLETE)
                        ? ahb_size.MipCount()
                        : 1u;
-  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_GPU_FRAMEBUFFER) {
+  if (ahb_desc.usage & AHARDWAREBUFFER_USAGE_COMPOSER_OVERLAY) {
     desc.usage = TextureUsage::kRenderTarget;
   }
   return desc;
