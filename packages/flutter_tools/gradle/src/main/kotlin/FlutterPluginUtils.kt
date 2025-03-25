@@ -2,6 +2,7 @@ package com.flutter.gradle
 
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
@@ -281,11 +282,6 @@ object FlutterPluginUtils {
 
     private fun getFlutterExtensionOrNull(project: Project): FlutterExtension? = project.extensions.findByType(FlutterExtension::class.java)
 
-    // TODO: https://github.com/flutter/flutter/issues/165882
-    // Use find by type and AbstractAppExtension instead.
-    private fun getAndroidExtensionOrNull(project: Project): AbstractAppExtension? =
-        project.extensions.findByName("android") as? AbstractAppExtension
-
     /**
      * Gets the directory that contains the Flutter source code.
      * This is the directory containing the `android/` directory.
@@ -407,6 +403,11 @@ object FlutterPluginUtils {
         // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
+
+    // TODO: https://github.com/flutter/flutter/issues/165882
+    // Use find by type and AbstractAppExtension instead. Or delete in favor of getAndroidExtension.
+    private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
+        project.extensions.findByName("android") as? AbstractAppExtension
 
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
@@ -859,11 +860,8 @@ object FlutterPluginUtils {
         }
     }
 
-    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources {
-        // Semantic change from flutter.groovy source, baseVariant does not have a hasProperty
-        // method but that is what the groovy code was checking.
-        return baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
-    }
+    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources =
+        baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
 
     /**
      * Adds required tasks for the AppLinkSettings feature.
@@ -890,9 +888,9 @@ object FlutterPluginUtils {
     internal fun addTasksForOutputsAppLinkSettings(project: Project) {
         // Integration test for AppLinkSettings task defined in
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
-        val android = getAndroidExtensionOrNull(project)
+        val android = getAndroidAppExtensionOrNull(project)
         if (android == null) {
-            project.logger.info("addTasksForOutputsAppLinkSettings called on project without android extension")
+            project.logger.info("addTasksForOutputsAppLinkSettings called on project without android extension.")
             return
         }
         android.applicationVariants.configureEach {
@@ -911,146 +909,157 @@ object FlutterPluginUtils {
                     // We are configuring the same object before a doLast and in a doLast.
                     // without a clear reason why. That is not good.
                     variant.outputs.configureEach {
-                        val baseVariantOutput = this
+                        val appLinkSettings = createAppLinkSettings(variant, this)
+                        File(project.property("outputPath").toString()).writeText(
+                            appLinkSettings.toJson().toString()
+                        )
+                    }
+                }
+            }
+        }
+    }
 
-                        val appLinkSettings = AppLinkSettings(variant.applicationId)
-                        // TODO https://github.com/flutter/flutter/issues/165881
-                        // Use import groovy.xml.XmlParser instead.
-                        // XmlParser is not namespace aware because it makes querying nodes cumbersome.
-                        val manifest: Node =
-                            XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
-                        // The groovy.xml.XmlParser import would use getProperty like
-                        // manifest.getProperty("application").let { applicationNode -> ...
-                        val applicationNode: Node? =
-                            manifest.children().find { node ->
-                                node is Node && node.name() == "application"
-                            } as Node?
+    /**
+     * Extracts app deeplink information from the Android manifest file of a variant then returns
+     * an AppLinkSettings object.
+     *
+     * @receiver BaseVariantOutput The output of a specific build variant (e.g., debug, release).
+     * @param variant The application variant being processed.
+     */
+    private fun createAppLinkSettings(
+        variant: ApplicationVariant,
+        baseVariantOutput: BaseVariantOutput
+    ): AppLinkSettings {
+        val appLinkSettings = AppLinkSettings(variant.applicationId)
+        // TODO https://github.com/flutter/flutter/issues/165881
+        // Use import groovy.xml.XmlParser instead.
+        // XmlParser is not namespace aware because it makes querying nodes cumbersome.
+        val manifest: Node =
+            XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
+        // The groovy.xml.XmlParser import would use getProperty like
+        // manifest.getProperty("application").let { applicationNode -> ...
+        val applicationNode: Node? =
+            manifest.children().find { node ->
+                node is Node && node.name() == "application"
+            } as Node?
 
-                        applicationNode?.let { appNode ->
-                            val activities: List<Any?> =
-                                appNode.children().filter { item ->
-                                    item is Node && item.name() == "activity"
+        applicationNode?.let { appNode ->
+            val activities: List<Any?> =
+                appNode.children().filter { item ->
+                    item is Node && item.name() == "activity"
+                }
+
+            activities.forEach { activity ->
+                if (activity is Node) {
+                    val metaDataItems: List<Any?> =
+                        activity.children().filter { metaItem ->
+                            metaItem is Node && metaItem.name() == "meta-data"
+                        }
+                    metaDataItems.forEach { metaDataItem ->
+                        if (metaDataItem is Node) {
+                            val nameAttribute: Boolean =
+                                metaDataItem.attribute("android:name") == "flutter_deeplinking_enabled"
+                            val valueAttribute: Boolean =
+                                metaDataItem.attribute("android:value") == "true"
+                            if (nameAttribute && valueAttribute) {
+                                appLinkSettings.deeplinkingFlagEnabled = true
+                            }
+                        }
+                    }
+                    val intentFilterItems: List<Any?> =
+                        activity.children().filter { filterItem ->
+                            filterItem is Node && filterItem.name() == "intent-filter"
+                        }
+                    intentFilterItems.forEach { appLinkIntent ->
+                        if (appLinkIntent is Node) {
+                            // Print out the host attributes in data tags.
+                            val schemes: MutableSet<String?> = mutableSetOf()
+                            val hosts: MutableSet<String?> = mutableSetOf()
+                            val paths: MutableSet<String?> = mutableSetOf()
+                            val intentFilterCheck = IntentFilterCheck()
+                            if (appLinkIntent.attribute("android:autoVerify") == "true") {
+                                intentFilterCheck.hasAutoVerify = true
+                            }
+
+                            val actionItems: List<Any?> =
+                                appLinkIntent.children().filter { item ->
+                                    item is Node && item.name() == "action"
                                 }
+                            // Any action item causes intentFilterCheck to always be true
+                            // and we keep looping instead of exiting out early.
+                            // TODO exit out early per intent filter action view.
+                            actionItems.forEach { action ->
+                                if (action is Node) {
+                                    if (action.attribute("android:name") == "android.intent.action.VIEW") {
+                                        intentFilterCheck.hasActionView = true
+                                    }
+                                }
+                            }
+                            val categoryItems: List<Any?> =
+                                appLinkIntent.children().filter { item ->
+                                    item is Node && item.name() == "category"
+                                }
+                            categoryItems.forEach { category ->
+                                if (category is Node) {
+                                    // TODO exit out early per intent filter default category.
+                                    if (category.attribute("android:name") == "android.intent.category.DEFAULT") {
+                                        intentFilterCheck.hasDefaultCategory = true
+                                    }
+                                    // TODO exit out early per intent filter browsable category.
+                                    if (category.attribute("android:name") == "android.intent.category.BROWSABLE") {
+                                        intentFilterCheck.hasBrowsableCategory =
+                                            true
+                                    }
+                                }
+                            }
+                            val dataItems: List<Any?> =
+                                appLinkIntent.children().filter { item ->
+                                    item is Node && item.name() == "data"
+                                }
+                            dataItems.forEach { data ->
+                                if (data is Node) {
+                                    data.attributes().forEach { entry ->
+                                        when ((entry.key)) {
+                                            "android:scheme" -> schemes.add(entry.value.toString())
+                                            "android:host" -> hosts.add(entry.value.toString())
+                                            // All path patterns add to paths.
+                                            "android:pathAdvancedPattern" ->
+                                                paths.add(
+                                                    entry.value.toString()
+                                                )
 
-                            activities.forEach { activity ->
-                                if (activity is Node) {
-                                    val metaDataItems: List<Any?> =
-                                        activity.children().filter { metaItem ->
-                                            metaItem is Node && metaItem.name() == "meta-data"
-                                        }
-                                    metaDataItems.forEach { metaDataItem ->
-                                        if (metaDataItem is Node) {
-                                            val nameAttribute: Boolean =
-                                                metaDataItem.attribute("android:name") == "flutter_deeplinking_enabled"
-                                            val valueAttribute: Boolean =
-                                                metaDataItem.attribute("android:value") == "true"
-                                            if (nameAttribute && valueAttribute) {
-                                                appLinkSettings.deeplinkingFlagEnabled = true
-                                            }
+                                            "android:pathPattern" -> paths.add(entry.value.toString())
+                                            "android:path" -> paths.add(entry.value.toString())
+                                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
+                                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
                                         }
                                     }
-                                    val intentFilterItems: List<Any?> =
-                                        activity.children().filter { filterItem ->
-                                            filterItem is Node && filterItem.name() == "intent-filter"
-                                        }
-                                    intentFilterItems.forEach { appLinkIntent ->
-                                        if (appLinkIntent is Node) {
-                                            // Print out the host attributes in data tags.
-                                            val schemes: MutableSet<String?> = mutableSetOf()
-                                            val hosts: MutableSet<String?> = mutableSetOf()
-                                            val paths: MutableSet<String?> = mutableSetOf()
-                                            val intentFilterCheck = IntentFilterCheck()
-                                            if (appLinkIntent.attribute("android:autoVerify") == "true") {
-                                                intentFilterCheck.hasAutoVerify = true
-                                            }
-
-                                            val actionItems: List<Any?> =
-                                                appLinkIntent.children().filter { item ->
-                                                    item is Node && item.name() == "action"
-                                                }
-                                            // Any action item causes intentFilterCheck to always be true
-                                            // and we keep looping instead of exiting out early.
-                                            // TODO exit out early per intent filter action view.
-                                            actionItems.forEach { action ->
-                                                if (action is Node) {
-                                                    if (action.attribute("android:name") == "android.intent.action.VIEW") {
-                                                        intentFilterCheck.hasActionView = true
-                                                    }
-                                                }
-                                            }
-                                            val categoryItems: List<Any?> =
-                                                appLinkIntent.children().filter { item ->
-                                                    item is Node && item.name() == "category"
-                                                }
-                                            categoryItems.forEach { category ->
-                                                if (category is Node) {
-                                                    // TODO exit out early per intent filter default category.
-                                                    if (category.attribute("android:name") == "android.intent.category.DEFAULT") {
-                                                        intentFilterCheck.hasDefaultCategory = true
-                                                    }
-                                                    // TODO exit out early per intent filter browsable category.
-                                                    if (category.attribute("android:name") == "android.intent.category.BROWSABLE") {
-                                                        intentFilterCheck.hasBrowsableCategory =
-                                                            true
-                                                    }
-                                                }
-                                            }
-                                            val dataItems: List<Any?> =
-                                                appLinkIntent.children().filter { item ->
-                                                    item is Node && item.name() == "data"
-                                                }
-                                            dataItems.forEach { data ->
-                                                if (data is Node) {
-                                                    data.attributes().forEach { entry ->
-                                                        when ((entry.key)) {
-                                                            "android:scheme" -> schemes.add(entry.value.toString())
-                                                            "android:host" -> hosts.add(entry.value.toString())
-                                                            // All path patterns add to paths.
-                                                            "android:pathAdvancedPattern" ->
-                                                                paths.add(
-                                                                    entry.value.toString()
-                                                                )
-
-                                                            "android:pathPattern" -> paths.add(entry.value.toString())
-                                                            "android:path" -> paths.add(entry.value.toString())
-                                                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
-                                                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            if (hosts.isNotEmpty() || paths.isNotEmpty()) {
-                                                if (schemes.isEmpty()) {
-                                                    schemes.add(null)
-                                                }
-                                                if (hosts.isEmpty()) {
-                                                    hosts.add(null)
-                                                }
-                                                if (paths.isEmpty()) {
-                                                    paths.add(".*")
-                                                }
-                                                // Sets are not ordered this could produce a bug.
-                                                schemes.forEach { scheme ->
-                                                    hosts.forEach { host ->
-                                                        paths.forEach { path ->
-                                                            appLinkSettings.deeplinks.add(
-                                                                Deeplink(
-                                                                    scheme,
-                                                                    host,
-                                                                    path,
-                                                                    intentFilterCheck
-                                                                )
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
+                                }
+                            }
+                            if (hosts.isNotEmpty() || paths.isNotEmpty()) {
+                                if (schemes.isEmpty()) {
+                                    schemes.add(null)
+                                }
+                                if (hosts.isEmpty()) {
+                                    hosts.add(null)
+                                }
+                                if (paths.isEmpty()) {
+                                    paths.add(".*")
+                                }
+                                // Sets are not ordered this could produce a bug.
+                                schemes.forEach { scheme ->
+                                    hosts.forEach { host ->
+                                        paths.forEach { path ->
+                                            appLinkSettings.deeplinks.add(
+                                                Deeplink(
+                                                    scheme,
+                                                    host,
+                                                    path,
+                                                    intentFilterCheck
+                                                )
+                                            )
                                         }
                                     }
-
-                                    File(project.property("outputPath").toString()).writeText(
-                                        appLinkSettings.toJson().toString()
-                                    )
                                 }
                             }
                         }
@@ -1058,6 +1067,7 @@ object FlutterPluginUtils {
                 }
             }
         }
+        return appLinkSettings
     }
 }
 

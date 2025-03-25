@@ -38,6 +38,116 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class FlutterPluginUtilsTest {
+    companion object {
+        val exampleEngineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
+
+        val devDependency: Map<String?, Any?> =
+            mapOf(
+                Pair("name", "grays_fun_dev_dependency"),
+                Pair(
+                    "path",
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/grays_fun_dev_dependency-1.1.1/"
+                ),
+                Pair("native_build", true),
+                Pair("dependencies", emptyList<String>()),
+                Pair("dev_dependency", true)
+            )
+
+        val cameraDependency: Map<String?, Any?> =
+            mapOf(
+                Pair("name", "camera_android_camerax"),
+                Pair(
+                    "path",
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
+                ),
+                Pair("native_build", true),
+                Pair("dependencies", emptyList<String>()),
+                Pair("dev_dependency", false)
+            )
+
+        val flutterPluginAndroidLifecycleDependency: Map<String?, Any?> =
+            mapOf(
+                Pair("name", "flutter_plugin_android_lifecycle"),
+                Pair(
+                    "path",
+                    "/Users/someuser/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
+                ),
+                Pair("native_build", true),
+                Pair("dependencies", emptyList<String>()),
+                Pair("dev_dependency", false)
+            )
+
+        val pluginListWithoutDevDependency: List<Map<String?, Any?>> =
+            listOf(
+                cameraDependency,
+                flutterPluginAndroidLifecycleDependency,
+                mapOf(
+                    Pair("name", "in_app_purchase_android"),
+                    Pair(
+                        "path",
+                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
+                    ),
+                    Pair("native_build", true),
+                    Pair("dependencies", emptyList<String>()),
+                    Pair("dev_dependency", false)
+                )
+            )
+
+        val pluginListWithDevDependency: List<Map<String?, Any?>> =
+            listOf(
+                cameraDependency,
+                flutterPluginAndroidLifecycleDependency,
+                devDependency,
+                mapOf(
+                    Pair("name", "in_app_purchase_android"),
+                    Pair(
+                        "path",
+                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
+                    ),
+                    Pair("native_build", true),
+                    Pair("dependencies", emptyList<String>()),
+                    Pair("dev_dependency", false)
+                )
+            )
+        val manifestText =
+            """
+                <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+                    <!-- Permissions do not break parsing -->
+                    <uses-permission android:name="android.permission.INTERNET"/>
+
+                    <application android:label="Flutter Task Helper Test" android:icon="@mipmap/ic_launcher">
+                        <activity android:name="com.example.FlutterActivity1"
+                                  android:exported="true"
+                                  android:theme="@android:style/Theme.Black.NoTitleBar">
+                            <intent-filter>
+                                <action android:name="android.intent.action.MAIN"/>
+                                <category android:name="android.intent.category.LAUNCHER"/>
+                            </intent-filter>
+                        </activity>
+                        <activity android:name="com.example.FlutterActivity2"
+                                  android:exported="false"
+                                  android:theme="@android:style/Theme.Black.NoTitleBar">
+                            <intent-filter>
+                              <action android:name="android.intent.action.VIEW" />
+                              <category android:name="android.intent.category.DEFAULT" />
+                              <category android:name="android.intent.category.BROWSABLE" />
+                              <data
+                                android:scheme="poc"
+                                android:host="deeplink.flutter.dev"
+                                android:pathPrefix="some.prefix"
+                                />
+                            </intent-filter>
+                            <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
+                        </activity>
+                        <meta-data
+                            android:name="flutterEmbedding"
+                            android:value="2" />
+
+                    </application>
+            </manifest>
+            """.trimIndent()
+    }
+
     // toCamelCase
     @Test
     fun `toCamelCase converts a list of strings to camel case`() {
@@ -1116,132 +1226,6 @@ class FlutterPluginUtilsTest {
         }
     }
 
-    companion object {
-        val exampleEngineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
-
-        val devDependency: Map<String?, Any?> =
-            mapOf(
-                Pair("name", "grays_fun_dev_dependency"),
-                Pair(
-                    "path",
-                    "/Users/someuser/.pub-cache/hosted/pub.dev/grays_fun_dev_dependency-1.1.1/"
-                ),
-                Pair("native_build", true),
-                Pair("dependencies", emptyList<String>()),
-                Pair("dev_dependency", true)
-            )
-
-        val cameraDependency: Map<String?, Any?> =
-            mapOf(
-                Pair("name", "camera_android_camerax"),
-                Pair(
-                    "path",
-                    "/Users/someuser/.pub-cache/hosted/pub.dev/camera_android_camerax-0.6.14+1/"
-                ),
-                Pair("native_build", true),
-                Pair("dependencies", emptyList<String>()),
-                Pair("dev_dependency", false)
-            )
-
-        val flutterPluginAndroidLifecycleDependency: Map<String?, Any?> =
-            mapOf(
-                Pair("name", "flutter_plugin_android_lifecycle"),
-                Pair(
-                    "path",
-                    "/Users/someuser/.pub-cache/hosted/pub.dev/flutter_plugin_android_lifecycle-2.0.27/"
-                ),
-                Pair("native_build", true),
-                Pair("dependencies", emptyList<String>()),
-                Pair("dev_dependency", false)
-            )
-
-        val pluginListWithoutDevDependency: List<Map<String?, Any?>> =
-            listOf(
-                cameraDependency,
-                flutterPluginAndroidLifecycleDependency,
-                mapOf(
-                    Pair("name", "in_app_purchase_android"),
-                    Pair(
-                        "path",
-                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
-                    ),
-                    Pair("native_build", true),
-                    Pair("dependencies", emptyList<String>()),
-                    Pair("dev_dependency", false)
-                )
-            )
-
-        val pluginListWithDevDependency: List<Map<String?, Any?>> =
-            listOf(
-                cameraDependency,
-                flutterPluginAndroidLifecycleDependency,
-                devDependency,
-                mapOf(
-                    Pair("name", "in_app_purchase_android"),
-                    Pair(
-                        "path",
-                        "/Users/someuser/.pub-cache/hosted/pub.dev/in_app_purchase_android-0.4.0+1/"
-                    ),
-                    Pair("native_build", true),
-                    Pair("dependencies", emptyList<String>()),
-                    Pair("dev_dependency", false)
-                )
-            )
-    }
-
-    @Test
-    fun addTasksForOutputsAppLinkSettingsNoAndroid(
-        @TempDir tempDir: Path
-    ) {
-        val mockProject = mockk<Project>()
-        val mockLogger = mockk<Logger>()
-        every { mockProject.logger } returns mockLogger
-        every { mockLogger.info(any()) } returns Unit
-        every { mockProject.extensions.findByName("android") } returns null
-
-        FlutterPluginUtils.addTasksForOutputsAppLinkSettings(mockProject)
-        // Consider matching on part of the error.
-        verify(exactly = 1) { mockLogger.info(any()) }
-    }
-
-    val manifestText =
-        """
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-                <!-- Permissions do not break parsing -->
-                <uses-permission android:name="android.permission.INTERNET"/>
-
-                <application android:label="Flutter Task Helper Test" android:icon="@mipmap/ic_launcher">
-                    <activity android:name="com.example.FlutterActivity1"
-                              android:exported="true"
-                              android:theme="@android:style/Theme.Black.NoTitleBar">
-                        <intent-filter>
-                            <action android:name="android.intent.action.MAIN"/>
-                            <category android:name="android.intent.category.LAUNCHER"/>
-                        </intent-filter>
-                    </activity>
-                    <activity android:name="com.example.FlutterActivity2"
-                              android:exported="false"
-                              android:theme="@android:style/Theme.Black.NoTitleBar">
-                        <intent-filter>
-                          <action android:name="android.intent.action.VIEW" />
-                          <category android:name="android.intent.category.DEFAULT" />
-                          <category android:name="android.intent.category.BROWSABLE" />
-                          <data
-                            android:scheme="poc"
-                            android:host="deeplink.flutter.dev"
-                            android:pathPrefix="some.prefix"
-                            />
-                        </intent-filter>
-                        <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
-                    </activity>
-                    <meta-data
-                        android:name="flutterEmbedding"
-                        android:value="2" />
-
-                </application>
-        </manifest>
-        """.trimIndent()
-
     @Test
     fun addTasksForOutputsAppLinkSettingsActual(
         @TempDir tempDir: Path
@@ -1272,7 +1256,6 @@ class FlutterPluginUtilsTest {
         }
         every { mockAbstractAppExtension.applicationVariants } returns testVariants
 
-        // Consider breaking out into a test helper.
         val descriptionSlot = slot<String>()
         val registerTaskSlot = slot<Action<Task>>()
         val registerTaskList: MutableList<Task> = mutableListOf()
@@ -1352,5 +1335,19 @@ class FlutterPluginUtilsTest {
         assertContains(outputFileText, "some.prefix.*")
         // Deep linking
         assertContains(outputFileText, "deeplinkingFlagEnabled\":true")
+    }
+
+    @Test
+    fun addTasksForOutputsAppLinkSettingsNoAndroid(
+        @TempDir tempDir: Path
+    ) {
+        val mockProject = mockk<Project>()
+        val mockLogger = mockk<Logger>()
+        every { mockProject.logger } returns mockLogger
+        every { mockLogger.info(any()) } returns Unit
+        every { mockProject.extensions.findByName("android") } returns null
+
+        FlutterPluginUtils.addTasksForOutputsAppLinkSettings(mockProject)
+        verify(exactly = 1) { mockLogger.info("addTasksForOutputsAppLinkSettings called on project without android extension.") }
     }
 }
