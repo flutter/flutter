@@ -912,12 +912,14 @@ void main() {
     expect(opacity.opacity.value, 0.4);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Drag outside button within ListView does not leave the button pressed', (WidgetTester tester) async {
+  testWidgets('Drag outside button within ListView does not leave the button pressed', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      boilerplate(child:
-        ListView(children: <Widget>[
-          CupertinoButton(onPressed: () {}, child: const Text('Tap me'))
-        ]),
+      boilerplate(
+        child: ListView(
+          children: <Widget>[CupertinoButton(onPressed: () {}, child: const Text('Tap me'))],
+        ),
       ),
     );
     final FadeTransition opacity = tester.widget(
