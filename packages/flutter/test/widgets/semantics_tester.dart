@@ -587,6 +587,7 @@ class SemanticsTester {
     int? currentValueLength,
     int? maxValueLength,
     SemanticsNode? ancestor,
+    SemanticsInputType? inputType,
   }) {
     bool checkNode(SemanticsNode node) {
       if (label != null && node.label != label) {
@@ -668,6 +669,9 @@ class SemanticsTester {
         return false;
       }
       if (maxValueLength != null && node.maxValueLength != maxValueLength) {
+        return false;
+      }
+      if (inputType != null && node.inputType != inputType) {
         return false;
       }
       return true;
@@ -950,6 +954,7 @@ class _IncludesNodeWith extends Matcher {
     this.scrollExtentMin,
     this.maxValueLength,
     this.currentValueLength,
+    this.inputType,
   }) : assert(
          label != null ||
              value != null ||
@@ -962,7 +967,8 @@ class _IncludesNodeWith extends Matcher {
              scrollExtentMax != null ||
              scrollExtentMin != null ||
              maxValueLength != null ||
-             currentValueLength != null,
+             currentValueLength != null ||
+             inputType != null,
        );
   final AttributedString? attributedLabel;
   final AttributedString? attributedValue;
@@ -981,6 +987,7 @@ class _IncludesNodeWith extends Matcher {
   final double? scrollExtentMin;
   final int? currentValueLength;
   final int? maxValueLength;
+  final SemanticsInputType? inputType;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -1003,6 +1010,7 @@ class _IncludesNodeWith extends Matcher {
           scrollExtentMin: scrollExtentMin,
           currentValueLength: currentValueLength,
           maxValueLength: maxValueLength,
+          inputType: inputType,
         )
         .isNotEmpty;
   }
@@ -1038,6 +1046,7 @@ class _IncludesNodeWith extends Matcher {
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
       if (currentValueLength != null) 'currentValueLength "$currentValueLength"',
       if (maxValueLength != null) 'maxValueLength "$maxValueLength"',
+      if (inputType != null) 'inputType $inputType',
     ];
     return strings.join(', ');
   }
@@ -1065,6 +1074,7 @@ Matcher includesNodeWith({
   double? scrollExtentMin,
   int? maxValueLength,
   int? currentValueLength,
+  SemanticsInputType? inputType,
 }) {
   return _IncludesNodeWith(
     label: label,
@@ -1084,5 +1094,6 @@ Matcher includesNodeWith({
     scrollExtentMin: scrollExtentMin,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    inputType: inputType,
   );
 }

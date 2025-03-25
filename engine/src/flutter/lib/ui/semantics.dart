@@ -506,6 +506,29 @@ enum SemanticsRole {
   alert,
 }
 
+/// Describe the type of data for an input field.
+///
+/// This is typically used to complement text fields.
+enum SemanticsInputType {
+  /// The default for non text field.
+  none,
+
+  /// Describes a generic text field.
+  text,
+
+  /// Describes a url text field.
+  url,
+
+  /// Describes a text field for phone input.
+  phone,
+
+  /// Describes a text field that act as a search box.
+  search,
+
+  /// Describes a text field for email input.
+  email,
+}
+
 /// A Boolean value that can be associated with a semantics node.
 //
 // When changes are made to this class, the equivalent APIs in
@@ -1232,6 +1255,7 @@ abstract class SemanticsUpdateBuilder {
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    required SemanticsInputType inputType,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1310,6 +1334,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    required SemanticsInputType inputType,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1358,6 +1383,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       role.index,
       controlsNodes,
       validationResult.index,
+      inputType.index,
     );
   }
 
@@ -1449,6 +1475,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int role,
     List<String>? controlsNodes,
     int validationResultIndex,
+    int inputType,
   );
 
   @override
