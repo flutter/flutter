@@ -7,16 +7,15 @@ import 'package:native_assets_cli/code_assets_builder.dart'
     show
         AndroidCodeConfig,
         Architecture,
-        BuildInputBuilder,
         CCompilerConfig,
-        CodeAsset,
-        CodeAssetBuildInputBuilder,
-        HookConfigBuilder,
+        CodeAssetExtension,
         IOSCodeConfig,
-        LinkInputBuilder,
         LinkModePreference,
         MacOSCodeConfig,
-        OS;
+        OS,
+        ProtocolExtension;
+import 'package:native_assets_cli/data_assets_builder.dart';
+
 import '../../base/common.dart' show throwToolExit;
 import '../../build_info.dart'
     show
@@ -35,7 +34,7 @@ import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
 import 'android/native_assets.dart' show getNativeAndroidArchitecture, targetAndroidNdkApi;
 import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, targetIOSVersion;
 import 'macos/native_assets.dart' show getNativeMacOSArchitecture, targetMacOSVersion;
-import 'native_assets.dart' show FlutterNativeAssetsBuildRunner, getNativeOSFromTargetPlatform;
+import 'native_assets.dart' show FlutterNativeAssetsBuildRunner;
 
 /// This is a translation layer between Flutter, which knows only
 /// [TargetPlatform]s, and `dart-lang/native`, which knows only asset types and
@@ -45,8 +44,6 @@ sealed class AssetBuildTarget {
 
   final TargetPlatform platform;
   final List<String> supportedAssetTypes;
-
-  List<String> get buildAssetTypes => supportedAssetTypes;
 
   List<ProtocolExtension> get extensions;
 
@@ -61,19 +58,33 @@ sealed class AssetBuildTarget {
     List<String> supportedAssetTypes,
   ) {
     switch (targetPlatform) {
-      case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
         return <AssetBuildTarget>[
-          CodeAssetTarget(
+          WindowsAssetTarget(
+            platform: targetPlatform,
+            architecture: Architecture.x64,
+            supportedAssetTypes: supportedAssetTypes,
+          ),
+        ];
+      case TargetPlatform.linux_x64:
+        return <AssetBuildTarget>[
+          LinuxAssetTarget(
             platform: targetPlatform,
             architecture: Architecture.x64,
             supportedAssetTypes: supportedAssetTypes,
           ),
         ];
       case TargetPlatform.linux_arm64:
+        return <AssetBuildTarget>[
+          LinuxAssetTarget(
+            platform: targetPlatform,
+            architecture: Architecture.arm64,
+            supportedAssetTypes: supportedAssetTypes,
+          ),
+        ];
       case TargetPlatform.windows_arm64:
         return <AssetBuildTarget>[
-          CodeAssetTarget(
+          WindowsAssetTarget(
             platform: targetPlatform,
             architecture: Architecture.arm64,
             supportedAssetTypes: supportedAssetTypes,
@@ -102,10 +113,11 @@ sealed class AssetBuildTarget {
         return androidArchs
             .map(getNativeAndroidArchitecture)
             .map(
-              (Architecture architecture) => CodeAssetTarget(
+              (Architecture architecture) => AndroidAssetTarget(
                 platform: targetPlatform,
                 architecture: architecture,
                 supportedAssetTypes: supportedAssetTypes,
+                environmentDefines: environmentDefines,
               ),
             )
             .toList();
@@ -144,14 +156,10 @@ final class WebAssetTarget extends AssetBuildTarget {
     : super(platform: TargetPlatform.web_javascript);
 
   @override
-  List<String> get buildAssetTypes =>
-      supportedAssetTypes.where((String element) => element != CodeAsset.type).toList();
-
-  @override
-  List<dynamic> get extensions => [];
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[DataAssetsExtension()];
 }
 
-final class CodeAssetTarget extends AssetBuildTarget {
+sealed class CodeAssetTarget extends AssetBuildTarget {
   CodeAssetTarget({
     required super.platform,
     required super.supportedAssetTypes,
@@ -165,14 +173,39 @@ final class CodeAssetTarget extends AssetBuildTarget {
   Future<void> setCCompilerConfig(FlutterNativeAssetsBuildRunner buildRunner) async =>
       cCompilerConfigSync = await buildRunner.cCompilerConfig;
 
+  CodeAssetExtension codeAssetExtensionFor(OS os) => CodeAssetExtension(
+    targetArchitecture: architecture,
+    linkModePreference: LinkModePreference.dynamic,
+    cCompiler: cCompilerConfigSync,
+    targetOS: os,
+  );
+}
+
+class WindowsAssetTarget extends CodeAssetTarget {
+  WindowsAssetTarget({
+    required super.platform,
+    required super.supportedAssetTypes,
+    required super.architecture,
+  });
+
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    CodeAssetExtension(
-      targetArchitecture: architecture,
-      linkModePreference: LinkModePreference.dynamic,
-      cCompiler: cCompilerConfig,
-      targetOS: targetOS!,
-    ),
+    codeAssetExtensionFor(OS.windows),
+    DataAssetsExtension(),
+  ];
+}
+
+final class LinuxAssetTarget extends CodeAssetTarget {
+  LinuxAssetTarget({
+    required super.platform,
+    required super.supportedAssetTypes,
+    required super.architecture,
+  });
+
+  @override
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[
+    codeAssetExtensionFor(OS.linux),
+    DataAssetsExtension(),
   ];
 }
 
@@ -205,6 +238,7 @@ final class IOSAssetTarget extends CodeAssetTarget {
       targetOS: OS.iOS,
       iOS: _getIOSConfig(environmentDefines, fileSystem),
     ),
+    DataAssetsExtension(),
   ];
 }
 
@@ -221,6 +255,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
       targetOS: OS.macOS,
       macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
     ),
+    DataAssetsExtension(),
   ];
 }
 
@@ -249,12 +284,19 @@ final class AndroidAssetTarget extends CodeAssetTarget {
       targetOS: OS.android,
       android: _androidCodeConfig,
     ),
+    DataAssetsExtension(),
   ];
 }
 
 final class FlutterTesterAssetTarget extends CodeAssetTarget {
   FlutterTesterAssetTarget({required super.supportedAssetTypes})
     : super(architecture: Architecture.current, platform: TargetPlatform.tester);
+
+  @override
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[
+    codeAssetExtensionFor(OS.current),
+    DataAssetsExtension(),
+  ];
 }
 
 List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {

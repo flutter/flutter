@@ -511,27 +511,21 @@ Future<DartHookResult> _runDartHooks({
   final List<EncodedAsset> assets = <EncodedAsset>[];
   final Set<Uri> dependencies = <Uri>{};
   for (final AssetBuildTarget target in targets) {
-    final BuildResult? buildResult = await buildRunner.build(
-      extensions: target.extensions,
-      linkingEnabled: linkingEnabled,
-    );
-    if (buildResult == null) {
-      _throwNativeAssetsBuildFailed();
+    final BuildResult buildResult = await _build(buildRunner, target, linkingEnabled);
+
+    LinkResult? linkResult;
+    if (linkingEnabled) {
+      linkResult = await _link(buildRunner, target, buildResult);
     }
-    dependencies.addAll(buildResult.dependencies);
-    if (!linkingEnabled) {
-      assets.addAll(buildResult.encodedAssets);
-      continue;
-    }
-    final LinkResult? linkResult = await buildRunner.link(
-      extensions: target.extensions,
-      buildResult: buildResult,
-    );
-    if (linkResult == null) {
-      _throwNativeAssetsLinkFailed();
-    }
-    assets.addAll(linkResult.encodedAssets);
-    dependencies.addAll(linkResult.dependencies);
+
+    assets.addAll(<EncodedAsset>[
+      ...buildResult.encodedAssets,
+      if (linkResult != null) ...linkResult.encodedAssets,
+    ]);
+    dependencies.addAll(<Uri>[
+      ...buildResult.dependencies,
+      if (linkResult != null) ...linkResult.dependencies,
+    ]);
   }
 
   final List<CodeAsset> codeAssets =
@@ -546,14 +540,43 @@ Future<DartHookResult> _runDartHooks({
           .toList();
   globals.logger.printTrace('Building native assets for $targetString done.');
 
-  final DateTime buildEnd = DateTime.now();
   return DartHookResult(
     buildStart: buildStart,
-    buildEnd: buildEnd,
+    buildEnd: DateTime.now(),
     codeAssets: codeAssets,
     dataAssets: dataAssets,
     dependencies: dependencies.toList(),
   );
+}
+
+Future<BuildResult> _build(
+  FlutterNativeAssetsBuildRunner buildRunner,
+  AssetBuildTarget target,
+  bool linkingEnabled,
+) async {
+  final BuildResult? buildResult = await buildRunner.build(
+    extensions: target.extensions,
+    linkingEnabled: linkingEnabled,
+  );
+  if (buildResult == null) {
+    _throwNativeAssetsBuildFailed();
+  }
+  return buildResult;
+}
+
+Future<LinkResult> _link(
+  FlutterNativeAssetsBuildRunner buildRunner,
+  AssetBuildTarget target,
+  BuildResult buildResult,
+) async {
+  final LinkResult? linkResult = await buildRunner.link(
+    extensions: target.extensions,
+    buildResult: buildResult,
+  );
+  if (linkResult == null) {
+    _throwNativeAssetsLinkFailed();
+  }
+  return linkResult;
 }
 
 Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
