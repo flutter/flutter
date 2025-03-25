@@ -52,11 +52,7 @@ std::shared_ptr<Texture> SwapchainTransientsMTL::GetMSAATexture() {
     TextureDescriptor desc;
     desc.size = size_;
     desc.sample_count = SampleCount::kCount4;
-    if (format_ == PixelFormat::kB10G10R10XR) {
-      desc.format = PixelFormat::kB10G10R10A10XR;
-    } else {
-      desc.format = format_;
-    }
+    desc.format = format_;
     desc.storage_mode = StorageMode::kDeviceTransient;
     desc.usage = TextureUsage::kRenderTarget;
     desc.type = TextureType::kTexture2DMultisample;
