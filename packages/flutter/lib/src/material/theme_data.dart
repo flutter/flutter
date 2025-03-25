@@ -250,6 +250,11 @@ class ThemeData with Diagnosticable {
   /// a component theme parameter like [sliderTheme], [toggleButtonsTheme],
   /// or [bottomNavigationBarTheme].
   ///
+  /// When [useSystemColors] is true and the platform supports system colors, then the system colors
+  /// will be used to override certain theme colors. The [colorScheme], [textTheme],
+  /// [elevatedButtonTheme], [outlinedButtonTheme], [textButtonTheme], [filledButtonTheme], and
+  /// [floatingActionButtonTheme] are overriden by the system colors.
+  ///
   /// See also:
   ///
   ///  * [ThemeData.from], which creates a ThemeData from a [ColorScheme].
