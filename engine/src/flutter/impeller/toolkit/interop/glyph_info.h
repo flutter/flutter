@@ -20,8 +20,8 @@ class GlyphInfo final
     : public Object<GlyphInfo,
                     IMPELLER_INTERNAL_HANDLE_NAME(ImpellerGlyphInfo)> {
  public:
-  GlyphInfo(skia::textlayout::Paragraph::GlyphInfo info)
-      : info_(std::move(info)) {}
+  explicit GlyphInfo(skia::textlayout::Paragraph::GlyphInfo info)
+      : info_(info) {}
 
   ~GlyphInfo();
 
@@ -30,17 +30,17 @@ class GlyphInfo final
   GlyphInfo& operator=(const GlyphInfo&) = delete;
 
   //----------------------------------------------------------------------------
-  /// @see      ImpellerGlpyhInfoGetGraphemeClusterCodeUnitRangeBegin.
+  /// @see      ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeBegin.
   ///
   size_t GetGraphemeClusterCodeUnitRangeBegin() const;
 
   //----------------------------------------------------------------------------
-  /// @see      ImpellerGlpyhInfoGetGraphemeClusterCodeUnitRangeEnd.
+  /// @see      ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd.
   ///
   size_t GetGraphemeClusterCodeUnitRangeEnd() const;
 
   //----------------------------------------------------------------------------
-  /// @see      ImpellerGlpyhInfoGetGraphemeClusterBounds.
+  /// @see      ImpellerGlyphInfoGetGraphemeClusterBounds.
   ///
   ImpellerRect GetGraphemeClusterBounds() const;
 

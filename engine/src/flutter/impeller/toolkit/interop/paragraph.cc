@@ -62,7 +62,7 @@ ScopedObject<GlyphInfo> Paragraph::GetGlyphInfoAtCodeUnitIndex(
     size_t code_unit_index) const {
   skia::textlayout::Paragraph::GlyphInfo info = {};
   if (paragraph_->GetGlyphInfoAt(code_unit_index, &info)) {
-    return Create<GlyphInfo>(std::move(info));
+    return Create<GlyphInfo>(info);
   }
   return nullptr;
 }
@@ -72,7 +72,7 @@ ScopedObject<GlyphInfo> Paragraph::GetClosestGlyphInfoAtParagraphCoordinates(
     double y) const {
   skia::textlayout::Paragraph::GlyphInfo info = {};
   if (paragraph_->GetClosestGlyphInfoAtCoordinate(x, y, &info)) {
-    return Create<GlyphInfo>(std::move(info));
+    return Create<GlyphInfo>(info);
   }
   return nullptr;
 }

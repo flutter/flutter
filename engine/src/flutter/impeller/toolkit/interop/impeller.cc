@@ -1381,9 +1381,8 @@ double ImpellerLineMetricsGetBaseline(ImpellerLineMetrics metrics,
 }
 
 IMPELLER_EXTERN_C
-bool ImpellerLineMetricsGetIsHardbreak(ImpellerLineMetrics metrics,
-                                       size_t line) {
-  return GetPeer(metrics)->GetIsHardbreak(line);
+bool ImpellerLineMetricsIsHardbreak(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->IsHardbreak(line);
 }
 
 IMPELLER_EXTERN_C

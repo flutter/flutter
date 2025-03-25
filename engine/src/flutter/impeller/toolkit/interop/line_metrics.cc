@@ -32,7 +32,7 @@ double LineMetrics::GetBaseline(size_t line) const {
   return GetLine(line).baseline;
 }
 
-bool LineMetrics::GetIsHardbreak(size_t line) const {
+bool LineMetrics::IsHardbreak(size_t line) const {
   return GetLine(line).hard_break;
 }
 

@@ -2785,7 +2785,7 @@ double ImpellerLineMetricsGetBaseline(
 /// @return     True if the line is a hard break.
 ///
 IMPELLER_EXPORT
-bool ImpellerLineMetricsGetIsHardbreak(
+bool ImpellerLineMetricsIsHardbreak(
     ImpellerLineMetrics IMPELLER_NONNULL metrics,
     size_t line);
 
@@ -2862,7 +2862,7 @@ size_t ImpellerLineMetricsGetCodeUnitEndIndex(
 /// @param[in]  metrics  The metrics.
 /// @param[in]  line     The line index (zero based).
 ///
-/// @return     The  UTF-16 code units end index excluding whitespace.
+/// @return     The UTF-16 code units end index excluding whitespace.
 ///
 IMPELLER_EXPORT
 size_t ImpellerLineMetricsGetCodeUnitEndIndexExcludingWhitespace(
@@ -2944,7 +2944,7 @@ ImpellerRect ImpellerGlyphInfoGetGraphemeClusterBounds(
 //------------------------------------------------------------------------------
 /// @param[in]  glyph_info  The glyph information.
 ///
-/// @return     True if the glpyh represents an ellipsis. False otherwise.
+/// @return     True if the glyph represents an ellipsis. False otherwise.
 ///
 IMPELLER_EXPORT
 bool ImpellerGlyphInfoIsEllipsis(ImpellerGlyphInfo IMPELLER_NONNULL glyph_info);

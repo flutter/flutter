@@ -25,7 +25,7 @@ class LineMetrics final
     : public Object<LineMetrics,
                     IMPELLER_INTERNAL_HANDLE_NAME(ImpellerLineMetrics)> {
  public:
-  LineMetrics(const std::vector<txt::LineMetrics>& metrics);
+  explicit LineMetrics(const std::vector<txt::LineMetrics>& metrics);
 
   ~LineMetrics();
 
@@ -54,9 +54,9 @@ class LineMetrics final
   double GetBaseline(size_t line) const;
 
   //----------------------------------------------------------------------------
-  /// @see      ImpellerLineMetricsGetIsHardbreak.
+  /// @see      ImpellerLineMetricsIsHardbreak.
   ///
-  bool GetIsHardbreak(size_t line) const;
+  bool IsHardbreak(size_t line) const;
 
   //----------------------------------------------------------------------------
   /// @see      ImpellerLineMetricsGetWidth.

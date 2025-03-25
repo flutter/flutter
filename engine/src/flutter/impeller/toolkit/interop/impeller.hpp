@@ -120,7 +120,7 @@ struct Proc {
   PROC(ImpellerLineMetricsGetCodeUnitStartIndex)                  \
   PROC(ImpellerLineMetricsGetDescent)                             \
   PROC(ImpellerLineMetricsGetHeight)                              \
-  PROC(ImpellerLineMetricsGetIsHardbreak)                         \
+  PROC(ImpellerLineMetricsIsHardbreak)                            \
   PROC(ImpellerLineMetricsGetLeft)                                \
   PROC(ImpellerLineMetricsGetUnscaledAscent)                      \
   PROC(ImpellerLineMetricsGetWidth)                               \
@@ -749,10 +749,10 @@ class LineMetrics final
   }
 
   //----------------------------------------------------------------------------
-  /// @see    ImpellerLineMetricsGetIsHardbreak
+  /// @see    ImpellerLineMetricsIsHardbreak
   ///
   bool IsHardbreak(size_t line) const {
-    return gGlobalProcTable.ImpellerLineMetricsGetIsHardbreak(Get(), line);
+    return gGlobalProcTable.ImpellerLineMetricsIsHardbreak(Get(), line);
   }
 
   //----------------------------------------------------------------------------
