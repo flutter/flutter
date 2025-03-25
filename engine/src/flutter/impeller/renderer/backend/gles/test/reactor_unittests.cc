@@ -96,6 +96,34 @@ TEST(ReactorGLES, UntrackedHandle) {
   EXPECT_TRUE(reactor->React());
 }
 
+TEST(ReactorGLES, NameUntrackedHandle) {
+  auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  NiceMock<MockGLESImpl>* raw_mock_gles = mock_gles_impl.get();
+
+  std::shared_ptr<MockGLES> mock_gles =
+      MockGLES::Init(std::move(mock_gles_impl));
+  ProcTableGLES::Resolver resolver = kMockResolverGLES;
+  auto proc_table = std::make_unique<ProcTableGLES>(resolver);
+
+  if (!proc_table->SupportsDebugLabels()) {
+    GTEST_SKIP() << "This device doesn't support labelling.";
+  }
+
+  EXPECT_CALL(*raw_mock_gles, GenTextures(1, _))
+      .WillOnce([](GLsizei size, GLuint* queries) { queries[0] = 1234; });
+  EXPECT_CALL(*raw_mock_gles,
+              ObjectLabelKHR(_, 1234, _, ::testing::StrEq("hello, joe!")))
+      .Times(1);
+  ON_CALL(*raw_mock_gles, IsTexture).WillByDefault(::testing::Return(GL_TRUE));
+
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  HandleGLES handle = reactor->CreateUntrackedHandle(HandleType::kTexture);
+  reactor->SetDebugLabel(handle, "hello, joe!");
+}
+
 TEST(ReactorGLES, PerThreadOperationQueues) {
   auto mock_gles = MockGLES::Init();
   ProcTableGLES::Resolver resolver = kMockResolverGLES;
