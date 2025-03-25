@@ -209,7 +209,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
 
   @override
   void unmount() {
-    renderObject._updateCallback(null);
+    renderObject._callback = null;
     super.unmount();
   }
 
@@ -306,7 +306,7 @@ mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderO
   LayoutCallback<Constraints>? _callback;
 
   /// Change the layout callback.
-  void _updateCallback(LayoutCallback<Constraints>? value) {
+  void _updateCallback(LayoutCallback<Constraints> value) {
     if (value == _callback) {
       return;
     }

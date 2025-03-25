@@ -2608,7 +2608,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert(_relayoutBoundary == null || this is RenderObjectWithLayoutCallbackMixin);
+    assert(_relayoutBoundary == this || this is RenderObjectWithLayoutCallbackMixin);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -4134,8 +4134,7 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 
 /// A mixin for [RenderObject] subclasses with a layout callback. The mixin
 /// guarantees the layout callback will be called even if this [RenderObject]
-/// skips doing layout, unless the [RenderObject] has never been laid out and
-/// does not have valid [constraints].
+/// skips doing layout, unless the [RenderObject] has never been laid out.
 ///
 /// A layout callback is a callback that mutates the [RenderObject]'s render
 /// subtree, invoked within an [invokeLayoutCallback] during the [RenderObject]'s
@@ -4155,14 +4154,14 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 ///  * [LayoutBuilder] and [SliverLayoutBuilder], which use the mixin.
 mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
   // The initial value of this flag must be set to true to prevent the layout
-  // callback from being scheduled when the subtree has never been laid out
-  // (in which case the `constraints` is unknown).
+  // callback from being scheduled when the subtree has never been laid out (in
+  // which case the `constraints` or any other layout information is unknown).
   bool _needsRebuild = true;
 
-  @mustCallSuper
   @override
+  @mustCallSuper
   void performLayout() {
-    invokeLayoutCallback((_) => runLayoutCallback);
+    invokeLayoutCallback((_) => runLayoutCallback());
     _needsRebuild = false;
   }
 
@@ -4170,12 +4169,13 @@ mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
   ///
   /// This method should not be invoked directly. Instead, call
   /// `super.performLayout` in the [performLayout] implementation. This
-  /// implementation will be invoked within [invokeLayoutCallback].
+  /// callback will be invoked within [invokeLayoutCallback].
   @visibleForOverriding
   void runLayoutCallback();
 
   /// Informs the framework that the layout callback has been updated and must
-  /// be invoked again.
+  /// be invoked again in the next [performLayout] call.
+  @mustCallSuper
   void scheduleLayoutCallback() {
     if (_needsRebuild) {
       assert(debugNeedsLayout);

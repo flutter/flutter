@@ -2706,10 +2706,15 @@ class _RenderLayoutBuilder extends RenderProxyBox
     return OverlayChildLayoutInfo._((overlayPortalSize, paintTransform, size));
   }
 
+  @override
+  void runLayoutCallback() {
+    _layoutInfo = _computeNewLayoutInfo();
+    super.runLayoutCallback();
+  }
+
   int? _callbackId;
   @override
   void performLayout() {
-    _layoutInfo = _computeNewLayoutInfo();
     super.performLayout();
     assert(_callbackId == null);
     _callbackId ??= SchedulerBinding.instance.scheduleFrameCallback(
