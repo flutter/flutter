@@ -1703,17 +1703,6 @@ void _testVerticalScrolling() {
 
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
     expect(scrollable, isNotNull);
-
-    // When there's more content than the available size the neutral scrollTop
-    // is greater than 0 with a maximum of 10 or 9.
-    int browserMaxScrollDiff = 0;
-    // The max scroll value varies between `9` and `10` for Safari desktop
-    // browsers.
-    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
-      browserMaxScrollDiff = 1;
-    }
-
     expect(scrollable.scrollTop, 0);
 
     Future<ui.SemanticsActionEvent> capturedEventFuture = captureSemanticsEvent();
@@ -1731,8 +1720,6 @@ void _testVerticalScrolling() {
         const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
             as Float64List;
     expect(message, expectedOffset);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollTop, 20);
 
     // Update scrollPosition to scrollTop value.
     final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
@@ -1752,7 +1739,7 @@ void _testVerticalScrolling() {
     scrollable.scrollTop = 5;
     capturedEvent = await capturedEventFuture;
 
-    expect(scrollable.scrollTop >= (5 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollTop, 5);
     expect(capturedEvent.nodeId, 0);
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
     expect(capturedEvent.arguments, isNotNull);
@@ -1762,8 +1749,6 @@ void _testVerticalScrolling() {
         const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
             as Float64List;
     expect(message, expectedOffset);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollTop, 5);
   });
 
   test('scrollable switches to pointer event mode on a wheel event', () async {
@@ -1810,15 +1795,10 @@ void _testVerticalScrolling() {
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
     expect(scrollable, isNotNull);
 
-    void expectNeutralPosition() {
-      // Browsers disagree on the exact value, but it's always close to 10.
-      expect((scrollable.scrollTop - 10).abs(), lessThan(2));
-    }
-
-    // Initially, starting with a neutral scroll position, everything should be
+    // Initially, starting at "scrollTop" 0, everything should be
     // in browser gesture mode, react to DOM scroll events, and generate
     // semantic actions.
-    // expectNeutralPosition();
+    expect(scrollable.scrollTop, 0);
     expect(semantics().gestureMode, GestureMode.browserGestures);
     scrollable.scrollTop = 20;
     expect(scrollable.scrollTop, 20);
@@ -1827,10 +1807,10 @@ void _testVerticalScrolling() {
     final capturedEvent = actionLog.removeLast();
     expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
 
-    // Now, starting with a neutral mode, observing a DOM "wheel" event should
+    // Now, starting at the "scrollTop" 20 we set, observing a DOM "wheel" event should
     // swap into pointer event mode, and the scrollable becomes a plain clip,
     // i.e. `overflow: hidden`.
-    // expectNeutralPosition();
+    expect(scrollable.scrollTop, 20);
     expect(semantics().gestureMode, GestureMode.browserGestures);
     expect(scrollable.style.overflowY, 'scroll');
 
@@ -1951,16 +1931,6 @@ void _testHorizontalScrolling() {
 
     final DomElement scrollable = findScrollable(owner());
     expect(scrollable, isNotNull);
-
-    // When there's more content than the available size the neutral scrollTop
-    // is greater than 0 with a maximum of 10.
-    int browserMaxScrollDiff = 0;
-    // The max scroll value varies between `9` and `10` for Safari desktop
-    // browsers.
-    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
-      browserMaxScrollDiff = 1;
-    }
     expect(scrollable.scrollLeft, 0);
 
     Future<ui.SemanticsActionEvent> capturedEventFuture = captureSemanticsEvent();
@@ -1978,8 +1948,6 @@ void _testHorizontalScrolling() {
         const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
             as Float64List;
     expect(message, expectedOffset);
-    // Engine semantics returns scroll position back to neutral.
-    expect(scrollable.scrollLeft, 20);
 
     // Update scrollPosition to scrollLeft value.
     final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
@@ -2009,8 +1977,6 @@ void _testHorizontalScrolling() {
         const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
             as Float64List;
     expect(message, expectedOffset);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollLeft, 5);
   });
 }
 
