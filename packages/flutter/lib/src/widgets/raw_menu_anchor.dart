@@ -8,6 +8,7 @@ library;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -585,12 +586,12 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       tapRegionGroupId: root.menuController,
     );
 
-    return widget.overlayBuilder(context, info);
+    return widget.overlayBuilder(anchorContext, info);
   }
 
   @override
   Widget buildAnchor(BuildContext context) {
-    final OverlayPortal? overlayPortal =
+    final Widget? overlayPortal =
         widget.child == null
             ? null
             : useRootOverlay
@@ -615,7 +616,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
         child: Builder(
           key: _anchorKey,
           builder: (BuildContext context) {
-            return widget.builder?.call(context, menuController, overlayPortal ?? widget.child) ??
+            return widget.builder?.call(context, menuController, overlayPortal) ??
                 overlayPortal ??
                 const SizedBox();
           },
