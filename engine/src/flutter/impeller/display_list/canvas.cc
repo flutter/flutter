@@ -24,6 +24,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -459,9 +460,19 @@ void Canvas::DrawLine(const Point& p0,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  LineGeometry geom(p0, p1, paint.stroke_width, paint.stroke_cap);
-  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint,
-                                          /*reuse_depth=*/reuse_depth);
+  auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke_width,
+                                                 paint.stroke_cap);
+
+  if (renderer_.GetContext()->GetFlags().antialiased_lines &&
+      !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
+      !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
+    auto contents = LineContents::Make(std::move(geometry), paint.color);
+    entity.SetContents(std::move(contents));
+    AddRenderEntityToCurrentPass(entity, reuse_depth);
+  } else {
+    AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
+                                            /*reuse_depth=*/reuse_depth);
+  }
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
@@ -1712,12 +1723,20 @@ bool Canvas::SupportsBlitToOnscreen() const {
 }
 
 bool Canvas::BlitToOnscreen(bool is_onscreen) {
-  auto command_buffer = renderer_.GetContext()->CreateCommandBuffer();
+  std::shared_ptr<CommandBuffer> command_buffer =
+      renderer_.GetContext()->CreateCommandBuffer();
   command_buffer->SetLabel("EntityPass Root Command Buffer");
-  auto offscreen_target = render_passes_.back()
-                              .inline_pass_context->GetPassTarget()
-                              .GetRenderTarget();
-  if (SupportsBlitToOnscreen()) {
+  RenderTarget offscreen_target = render_passes_.back()
+                                      .inline_pass_context->GetPassTarget()
+                                      .GetRenderTarget();
+  // If the src and destination format differ (due to wide gamut, alpha-less
+  // format, et cetera), then a draw must always be performed instead of a blit.
+  if (SupportsBlitToOnscreen() &&
+      offscreen_target.GetRenderTargetTexture()
+              ->GetTextureDescriptor()
+              .format == render_target_.GetRenderTargetTexture()
+                             ->GetTextureDescriptor()
+                             .format) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
                        render_target_.GetRenderTargetTexture());

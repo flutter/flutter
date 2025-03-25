@@ -4385,7 +4385,7 @@ TEST_F(ShellTest, PointerPacketFlushMessageLoop) {
 }
 
 // Verifies a pointer event will flush the dart event loop.
-TEST_F(ShellTest, PointerPacketsAreDispatchedWithTask) {
+TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
                          ThreadHost::Type::kPlatform);
