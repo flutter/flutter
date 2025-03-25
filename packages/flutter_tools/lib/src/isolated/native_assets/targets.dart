@@ -15,7 +15,8 @@ import 'package:native_assets_cli/code_assets_builder.dart'
         MacOSCodeConfig,
         OS,
         ProtocolExtension;
-import 'package:native_assets_cli/data_assets_builder.dart';
+import 'package:native_assets_cli/data_assets_builder.dart'
+    show DataAsset, DataAssetsExtension, ProtocolExtension;
 
 import '../../base/common.dart' show throwToolExit;
 import '../../build_info.dart'
