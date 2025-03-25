@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.1.0")
+        classpath("com.android.tools.build:gradle:8.2.1")
     }
 }
 
@@ -51,7 +51,7 @@ android {
         // TODO(egarciad): These dependencies should not be added to release builds.
         // https://github.com/flutter/flutter/issues/56591
         testImplementation("junit:junit:4.13.2")
-        testImplementation("org.mockito:mockito-inline:5.1.0")
+        testImplementation("org.mockito:mockito-core:5.8.0")
 
         api("androidx.test:runner:1.2+")
         api("androidx.test:rules:1.2+")

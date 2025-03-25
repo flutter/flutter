@@ -36,6 +36,15 @@ namespace impeller {
 ///
 class ColorSourceContents : public Contents {
  public:
+  using BindFragmentCallback = std::function<bool(RenderPass& pass)>;
+  using PipelineBuilderCallback =
+      std::function<PipelineRef(ContentContextOptions)>;
+  using CreateGeometryCallback =
+      std::function<GeometryResult(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass,
+                                   const Geometry* geom)>;
+
   ColorSourceContents();
 
   ~ColorSourceContents() override;
@@ -99,41 +108,21 @@ class ColorSourceContents : public Contents {
   // |Contents|
   void SetInheritedOpacity(Scalar opacity) override;
 
- protected:
-  using BindFragmentCallback = std::function<bool(RenderPass& pass)>;
-  using PipelineBuilderCallback =
-      std::function<PipelineRef(ContentContextOptions)>;
-  using CreateGeometryCallback =
-      std::function<GeometryResult(const ContentContext& renderer,
-                                   const Entity& entity,
-                                   RenderPass& pass,
-                                   const Geometry* geom)>;
-
-  static GeometryResult DefaultCreateGeometryCallback(
-      const ContentContext& renderer,
-      const Entity& entity,
-      RenderPass& pass,
-      const Geometry* geom) {
-    return geom->GetPositionBuffer(renderer, entity, pass);
-  }
-
-  /// @brief Whether the entity should be treated as non-opaque due to stroke
-  ///        geometry requiring alpha for coverage.
-  bool AppliesAlphaForStrokeCoverage(const Matrix& transform) const;
-
   template <typename VertexShaderT>
-  bool DrawGeometry(const ContentContext& renderer,
-                    const Entity& entity,
-                    RenderPass& pass,
-                    const PipelineBuilderCallback& pipeline_callback,
-                    typename VertexShaderT::FrameInfo frame_info,
-                    const BindFragmentCallback& bind_fragment_callback,
-                    bool force_stencil = false,
-                    const CreateGeometryCallback& create_geom_callback =
-                        DefaultCreateGeometryCallback) const {
+  static bool DrawGeometry(const Contents* contents,
+                           const Geometry* geometry,
+                           const ContentContext& renderer,
+                           const Entity& entity,
+                           RenderPass& pass,
+                           const PipelineBuilderCallback& pipeline_callback,
+                           typename VertexShaderT::FrameInfo frame_info,
+                           const BindFragmentCallback& bind_fragment_callback,
+                           bool force_stencil = false,
+                           const CreateGeometryCallback& create_geom_callback =
+                               DefaultCreateGeometryCallback) {
     auto options = OptionsFromPassAndEntity(pass, entity);
 
-    GeometryResult::Mode geometry_mode = GetGeometry()->GetResultMode();
+    GeometryResult::Mode geometry_mode = geometry->GetResultMode();
     bool do_cover_draw = false;
     Rect cover_area = {};
 
@@ -151,7 +140,7 @@ class ColorSourceContents : public Contents {
       /// Stencil preparation draw.
 
       GeometryResult stencil_geometry_result =
-          GetGeometry()->GetPositionBuffer(renderer, entity, pass);
+          geometry->GetPositionBuffer(renderer, entity, pass);
       if (stencil_geometry_result.vertex_buffer.vertex_count == 0u) {
         return true;
       }
@@ -194,7 +183,7 @@ class ColorSourceContents : public Contents {
 
       options.blend_mode = entity.GetBlendMode();
       options.stencil_mode = ContentContextOptions::StencilMode::kCoverCompare;
-      std::optional<Rect> maybe_cover_area = GetGeometry()->GetCoverage({});
+      std::optional<Rect> maybe_cover_area = geometry->GetCoverage({});
       if (!maybe_cover_area.has_value()) {
         return true;
       }
@@ -207,8 +196,7 @@ class ColorSourceContents : public Contents {
       RectGeometry geom(cover_area);
       geometry_result = create_geom_callback(renderer, entity, pass, &geom);
     } else {
-      geometry_result =
-          create_geom_callback(renderer, entity, pass, GetGeometry());
+      geometry_result = create_geom_callback(renderer, entity, pass, geometry);
     }
 
     if (geometry_result.vertex_buffer.vertex_count == 0u) {
@@ -261,9 +249,45 @@ class ColorSourceContents : public Contents {
     if (geometry_result.mode == GeometryResult::Mode::kPreventOverdraw &&
         options.blend_mode != BlendMode::kSrc) {
       return RenderClipRestore(renderer, pass, entity.GetClipDepth(),
-                               GetCoverage(entity));
+                               contents->GetCoverage(entity));
     }
     return true;
+  }
+
+ protected:
+  static GeometryResult DefaultCreateGeometryCallback(
+      const ContentContext& renderer,
+      const Entity& entity,
+      RenderPass& pass,
+      const Geometry* geom) {
+    return geom->GetPositionBuffer(renderer, entity, pass);
+  }
+
+  /// @brief Whether the entity should be treated as non-opaque due to stroke
+  ///        geometry requiring alpha for coverage.
+  bool AppliesAlphaForStrokeCoverage(const Matrix& transform) const;
+
+  template <typename VertexShaderT>
+  bool DrawGeometry(const ContentContext& renderer,
+                    const Entity& entity,
+                    RenderPass& pass,
+                    const PipelineBuilderCallback& pipeline_callback,
+                    typename VertexShaderT::FrameInfo frame_info,
+                    const BindFragmentCallback& bind_fragment_callback,
+                    bool force_stencil = false,
+                    const CreateGeometryCallback& create_geom_callback =
+                        DefaultCreateGeometryCallback) const {
+    //
+    return DrawGeometry<VertexShaderT>(this,                    //
+                                       GetGeometry(),           //
+                                       renderer,                //
+                                       entity,                  //
+                                       pass,                    //
+                                       pipeline_callback,       //
+                                       frame_info,              //
+                                       bind_fragment_callback,  //
+                                       force_stencil,           //
+                                       create_geom_callback);
   }
 
  private:
