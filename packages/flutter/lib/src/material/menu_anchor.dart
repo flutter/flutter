@@ -376,7 +376,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
         childFocusNode: widget.childFocusNode,
         overlayBuilder: _buildOverlay,
         builder: widget.builder,
-        child: Semantics(expanded: _menuController.isOpen, child: widget.child),
+        child: widget.child,
       ),
     );
 
@@ -941,7 +941,9 @@ class _MenuItemButtonState extends State<MenuItemButton> {
       child = MouseRegion(onHover: _handlePointerHover, onExit: _handlePointerExit, child: child);
     }
 
-    return Semantics(role: SemanticsRole.menuItem, enabled: widget.enabled, child: child);
+    return MergeSemantics(
+      child: Semantics(role: SemanticsRole.menuItem, enabled: widget.enabled, child: child),
+    );
   }
 
   void _handleFocusChange() {
@@ -1846,6 +1848,7 @@ class _SubmenuButtonState extends State<SubmenuButton> {
           }
 
           child = Semantics(
+            container: true,
             role: SemanticsRole.menuItem,
             expanded: _enabled && controller.isOpen,
             enabled: _enabled,
