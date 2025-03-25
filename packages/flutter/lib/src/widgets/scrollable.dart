@@ -506,6 +506,7 @@ class Scrollable extends StatefulWidget {
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.maybeOf(context);
+    ScrollableState? previousScrollable;
     while (scrollable != null) {
       final List<Future<void>> newFutures;
       (newFutures, scrollable) = scrollable._performEnsureVisible(
@@ -515,11 +516,13 @@ class Scrollable extends StatefulWidget {
         curve: curve,
         alignmentPolicy: alignmentPolicy,
         targetRenderObject: targetRenderObject,
+        previousScrollable: previousScrollable,
       );
       futures.addAll(newFutures);
 
       targetRenderObject ??= context.findRenderObject();
       context = scrollable.context;
+      previousScrollable = scrollable;
       scrollable = Scrollable.maybeOf(context);
     }
 
@@ -1084,6 +1087,7 @@ class ScrollableState extends State<Scrollable>
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    ScrollableState? previousScrollable,
   }) {
     final Future<void> ensureVisibleFuture = position.ensureVisible(
       object,
@@ -1092,6 +1096,7 @@ class ScrollableState extends State<Scrollable>
       curve: curve,
       alignmentPolicy: alignmentPolicy,
       targetRenderObject: targetRenderObject,
+      previousScrollable: previousScrollable,
     );
     return (<Future<void>>[ensureVisibleFuture], this);
   }
@@ -2217,6 +2222,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    ScrollableState? previousScrollable,
   }) {
     assert(
       false,
@@ -2492,6 +2498,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    ScrollableState? previousScrollable,
   }) {
     final List<Future<void>> newFutures = <Future<void>>[
       position.ensureVisible(
@@ -2500,6 +2507,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
+        previousScrollable: previousScrollable,
       ),
       verticalScrollable.position.ensureVisible(
         object,
@@ -2507,6 +2515,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
         duration: duration,
         curve: curve,
         alignmentPolicy: alignmentPolicy,
+        previousScrollable: previousScrollable,
       ),
     ];
 

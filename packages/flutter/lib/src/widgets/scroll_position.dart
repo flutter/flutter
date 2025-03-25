@@ -30,6 +30,7 @@ import 'scroll_context.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
+import 'scrollable.dart';
 
 export 'scroll_activity.dart' show ScrollHoldController;
 
@@ -816,6 +817,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    ScrollableState? previousScrollable,
   }) async {
     assert(object.attached);
     final RenderAbstractViewport? viewport = RenderAbstractViewport.maybeOf(object);

@@ -358,6 +358,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     Curve curve = Curves.ease,
     ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
     RenderObject? targetRenderObject,
+    ScrollableState? previousScrollable,
   }) {
     // Since the _PagePosition is intended to cover the available space within
     // its viewport, stop trying to move the target render object to the center
@@ -369,6 +370,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       duration: duration,
       curve: curve,
       alignmentPolicy: alignmentPolicy,
+      previousScrollable: previousScrollable,
     );
   }
 
