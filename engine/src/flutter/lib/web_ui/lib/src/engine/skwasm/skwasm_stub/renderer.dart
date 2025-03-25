@@ -324,6 +324,11 @@ class SkwasmRenderer implements Renderer {
     required int height,
     required bool transferOwnership,
   }) {
-    throw Exception('Skwasm not implemented on this platform.');
+    throw UnimplementedError('Skwasm not implemented on this platform.');
+  }
+
+  @override
+  void dumpDebugInfo() {
+    throw UnimplementedError('Skwasm not implemented on this platform.');
   }
 }
