@@ -37,6 +37,7 @@ raw_ptr<const Sampler> SamplerLibraryGLES::GetSampler(
     }
   }
 
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   auto sampler = std::unique_ptr<SamplerGLES>(new SamplerGLES(descriptor));
   samplers_.push_back(std::make_pair(p_key, std::move(sampler)));
 
