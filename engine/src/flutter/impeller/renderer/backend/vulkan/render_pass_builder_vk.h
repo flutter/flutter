@@ -28,10 +28,6 @@ class RenderPassBuilderVK {
 
   RenderPassBuilderVK& operator=(const RenderPassBuilderVK&) = delete;
 
-  /// Whether this builder should configure barriers for the onscreen render
-  /// pass.
-  void SetSwapchain(bool value);
-
   RenderPassBuilderVK& SetColorAttachment(
       size_t index,
       PixelFormat format,
