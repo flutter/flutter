@@ -89,10 +89,16 @@ List<String> binariesWithoutEntitlements(String flutterRoot) {
     'artifacts/engine/darwin-x64/libtessellator.dylib',
     'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
     'artifacts/engine/ios-profile/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
     'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
     'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
     'artifacts/engine/ios/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
     'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
     'artifacts/ios-deploy/ios-deploy',
   ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 }
@@ -105,6 +111,8 @@ List<String> unsignedBinaries(String flutterRoot) {
     'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/dSYMs/FlutterMacOS.framework.dSYM/Contents/Resources/DWARF/FlutterMacOS',
     'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
     'artifacts/engine/ios-release/Flutter.xcframework/ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
   ].map((String relativePath) => path.join(flutterRoot, 'bin', 'cache', relativePath)).toList();
 }
 
@@ -115,8 +123,11 @@ List<String> unsignedBinaries(String flutterRoot) {
 List<String> signedXcframeworks(String flutterRoot) {
   return <String>[
     'artifacts/engine/ios-profile/Flutter.xcframework',
+    'artifacts/engine/ios-profile/extension_safe/Flutter.xcframework',
     'artifacts/engine/ios-release/Flutter.xcframework',
+    'artifacts/engine/ios-release/extension_safe/Flutter.xcframework',
     'artifacts/engine/ios/Flutter.xcframework',
+    'artifacts/engine/ios/extension_safe/Flutter.xcframework',
     'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework',
     'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework',
     'artifacts/engine/darwin-x64/FlutterMacOS.xcframework',
