@@ -507,7 +507,7 @@ enum SemanticsRole {
 /// Describe the type of data for an input field.
 ///
 /// This is typically used to complement text fields.
-class SemanticsInputType {
+enum SemanticsInputType {
   /// The default for non text field.
   none,
 
