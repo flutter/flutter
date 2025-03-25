@@ -2000,21 +2000,18 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               expect(objectsInspected, equals(<T>[object]));
             }
 
-            Map<Object, Object?> getNavigateEvent() {
+            void verifyNavigateEvent({
+              required String expectedFileEnding,
+              required int? expectedColumn,
+            }) {
               // Ensure that a navigate event was sent for the element.
               final List<Map<Object, Object?>> navigateEventsPosted = service.dispatchedEvents(
                 'navigate',
                 stream: 'ToolEvent',
               );
               expect(navigateEventsPosted.length, equals(1));
-              return navigateEventsPosted[0];
-            }
+              final Map<Object, Object?> event = navigateEventsPosted[0];
 
-            void verifyNavigateEvent(
-              Map<Object, Object?> event, {
-              required String expectedFileEnding,
-              required int? expectedColumn,
-            }) {
               // Verify the file URI.
               final String file = event['fileUri']! as String;
               expect(file, endsWith(expectedFileEnding));
@@ -2039,9 +2036,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
               // Verify the correct events were dispatched in response.
               verifyDeveloperInspectCalled<Element>(elementA);
-              final Map<Object, Object?> event = getNavigateEvent();
               verifyNavigateEvent(
-                event,
                 expectedFileEnding: 'widget_inspector_test.dart',
                 expectedColumn: 15,
               );
@@ -2057,9 +2052,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
               // Verify the correct events were dispatched in response.
               verifyDeveloperInspectCalled<Element>(richTextElement);
-              final Map<Object, Object?> event = getNavigateEvent();
               verifyNavigateEvent(
-                event,
                 expectedFileEnding: 'text.dart',
                 expectedColumn: null, // Including column is too fragile.
               );
@@ -2076,9 +2069,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
               // Verify the correct events were dispatched in response.
               verifyDeveloperInspectCalled<RenderObject>(elementA.renderObject!);
-              final Map<Object, Object?> event = getNavigateEvent();
               verifyNavigateEvent(
-                event,
                 // The Text widget does not have a render object, the backing
                 // render object is provided by RichText which is defined in
                 // text.dart.
@@ -2096,9 +2087,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
 
               // Verify the correct events were dispatched in response.
               verifyDeveloperInspectCalled<RenderObject>(stackElement.renderObject!);
-              final Map<Object, Object?> event = getNavigateEvent();
               verifyNavigateEvent(
-                event,
                 expectedFileEnding: 'widget_inspector_test.dart',
                 expectedColumn: 18,
               );
