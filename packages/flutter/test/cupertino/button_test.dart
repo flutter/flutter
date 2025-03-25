@@ -912,6 +912,30 @@ void main() {
     expect(opacity.opacity.value, 0.4);
   }, variant: TargetPlatformVariant.all());
 
+  testWidgets('Drag outside button within ListView does not leave the button pressed', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: ListView(
+          children: <Widget>[CupertinoButton(onPressed: () {}, child: const Text('Tap me'))],
+        ),
+      ),
+    );
+    final FadeTransition opacity = tester.widget(
+      find.descendant(of: find.byType(CupertinoButton), matching: find.byType(FadeTransition)),
+    );
+
+    final TestGesture gesture = await tester.createGesture();
+    addTearDown(gesture.removePointer);
+
+    await gesture.down(tester.getTopLeft(find.byType(CupertinoButton)));
+    await gesture.moveBy(const Offset(1, 1));
+    await gesture.moveBy(Offset(0, -CupertinoButton.tapMoveSlop() - 5));
+    await tester.pumpAndSettle();
+    expect(opacity.opacity.value, 1.0);
+  });
+
   testWidgets('onPressed trigger takes into account MoveSlop.', (WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
