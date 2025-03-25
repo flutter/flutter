@@ -719,6 +719,7 @@ class SemanticsData with Diagnosticable {
     required this.linkUrl,
     required this.role,
     required this.controlsNodes,
+    required this.inputType,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -984,6 +985,9 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsProperties.controlsNodes}
   final Set<String>? controlsNodes;
 
+  /// {@macro flutter.semantics.SemanticsNode.inputType}
+  final SemanticsInputType inputType;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -1076,6 +1080,7 @@ class SemanticsData with Diagnosticable {
         other.headingLevel == headingLevel &&
         other.linkUrl == linkUrl &&
         other.role == role &&
+        other.inputType == inputType &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
         setEquals<String>(controlsNodes, other.controlsNodes);
   }
@@ -1112,6 +1117,7 @@ class SemanticsData with Diagnosticable {
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
       role,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
+      inputType,
     ),
   );
 
@@ -1258,6 +1264,9 @@ class SemanticsProperties extends DiagnosticableTree {
     this.textDirection,
     this.sortKey,
     this.tagForChildren,
+    this.role,
+    this.controlsNodes,
+    this.inputType,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -1280,8 +1289,6 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
-    this.role,
-    this.controlsNodes,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -2109,6 +2116,17 @@ class SemanticsProperties extends DiagnosticableTree {
   /// of identifiers including the content's identifier to this property.
   /// {@endtemplate}
   final Set<String>? controlsNodes;
+
+  /// {@template flutter.semantics.SemanticsProperties.inputType}
+  /// The input type for of a editable widget.
+  ///
+  /// This property is only used when the subtree represents a text field.
+  ///
+  /// Assistive technologies use this property to provide better information to
+  /// users. For example, screen reader reads out the input type of text field
+  /// when focused.
+  /// {@endtemplate}
+  final SemanticsInputType? inputType;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3076,6 +3094,18 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Set<String>? get controlsNodes => _controlsNodes;
   Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
 
+  /// {@template flutter.semantics.SemanticsNode.inputType}
+  /// The input type for of a editable node.
+  ///
+  /// This property is only used when this node represents a text field.
+  ///
+  /// Assistive technologies use this property to provide better information to
+  /// users. For example, screen reader reads out the input type of text field
+  /// when focused.
+  /// {@endtemplate}
+  SemanticsInputType get inputType => _inputType;
+  SemanticsInputType _inputType = _kEmptyConfig.inputType;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
@@ -3143,6 +3173,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _linkUrl = config._linkUrl;
     _role = config._role;
     _controlsNodes = config._controlsNodes;
+    _inputType = config._inputType;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -3193,6 +3224,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     Uri? linkUrl = _linkUrl;
     SemanticsRole role = _role;
     Set<String>? controlsNodes = _controlsNodes;
+    SemanticsInputType inputType = _inputType;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3250,6 +3282,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         }
         if (role == SemanticsRole.none) {
           role = node._role;
+        }
+        if (inputType == SemanticsInputType.none) {
+          inputType = node._inputType;
         }
         if (tooltip == '') {
           tooltip = node._tooltip;
@@ -3332,6 +3367,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       linkUrl: linkUrl,
       role: role,
       controlsNodes: controlsNodes,
+      inputType: inputType,
     );
   }
 
@@ -3418,6 +3454,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       linkUrl: data.linkUrl?.toString() ?? '',
       role: data.role,
       controlsNodes: data.controlsNodes?.toList(),
+      inputType: data.inputType,
     );
     _dirty = false;
   }
@@ -5588,6 +5625,15 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.inputType}
+  SemanticsInputType get inputType => _inputType;
+  SemanticsInputType _inputType = SemanticsInputType.none;
+  set inputType(SemanticsInputType? value) {
+    assert(value != null);
+    _inputType = value;
+    _hasBeenAnnotated = true;
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -5760,6 +5806,9 @@ class SemanticsConfiguration {
     if (_role == SemanticsRole.none) {
       _role = child._role;
     }
+    if (_inputType == SemanticsInputType.none) {
+      _role = child._role;
+    }
     _attributedHint = _concatAttributedString(
       thisAttributedString: _attributedHint,
       thisTextDirection: textDirection,
@@ -5820,7 +5869,8 @@ class SemanticsConfiguration {
       .._headingLevel = _headingLevel
       .._linkUrl = _linkUrl
       .._role = _role
-      .._controlsNodes = _controlsNodes;
+      .._controlsNodes = _controlsNodes
+      .._inputType = _inputType;
   }
 }
 

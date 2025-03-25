@@ -7384,6 +7384,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
     ui.SemanticsRole? role,
     Set<String>? controlsNodes,
+    ui.SemanticsInputType? inputType,
   }) : this.fromProperties(
          key: key,
          child: child,
@@ -7461,6 +7462,7 @@ class Semantics extends SingleChildRenderObjectWidget {
                    : null,
            role: role,
            controlsNodes: controlsNodes,
+           inputType: inputType,
          ),
        );
 

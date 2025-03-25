@@ -297,6 +297,16 @@ enum SemanticsRole {
   alert,
 }
 
+// Mirrors engine/src/flutter/lib/ui/semantics.dart
+class SemanticsInputType {
+  none,
+  text,
+  url,
+  phone,
+  search,
+  email,
+}
+
 // When adding a new StringAttributeType, the classes in these file must be
 // updated as well.
 //  * engine/src/flutter/lib/ui/semantics.dart

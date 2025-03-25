@@ -215,7 +215,7 @@ class SemanticTextField extends SemanticRole {
 
   DomHTMLInputElement _createSingleLineField() {
     return createDomHTMLInputElement()
-      ..type = semanticsObject.hasFlag(ui.SemanticsFlag.isObscured) ? 'password' : 'text';
+      ..type = semanticsObject.hasFlag(ui.SemanticsFlag.isObscured) ? 'password' : 'tel';
   }
 
   DomHTMLTextAreaElement _createMultiLineField() {

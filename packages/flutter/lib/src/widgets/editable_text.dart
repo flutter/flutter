@@ -5558,6 +5558,11 @@ class EditableTextState extends State<EditableText>
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
     };
+    final SemanticsInputType inputType;
+    switch(widget.keyboardType) {
+      case TextInputType.phone:
+        inputType = SemanticsInputType.phone;
+    }
 
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
@@ -5649,6 +5654,7 @@ class EditableTextState extends State<EditableText>
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,
                             child: Semantics(
+                              inputType: ,
                               onCopy: _semanticsOnCopy(controls),
                               onCut: _semanticsOnCut(controls),
                               onPaste: _semanticsOnPaste(controls),
