@@ -79,7 +79,7 @@ class LocaleInitialization extends Scenario {
         );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
-    view.platformDispatcher.setSemanticsTreeEnabled(true);
+
     view.updateSemantics(semanticsUpdate);
   }
 
