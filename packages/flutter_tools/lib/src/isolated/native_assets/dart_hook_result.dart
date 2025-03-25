@@ -4,7 +4,7 @@
 
 import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:native_assets_cli/data_assets_builder.dart';
-import '../../asset.dart' show DartDataHookResult, HookAsset;
+import '../../asset.dart' show FlutterHookResult, HookAsset;
 
 /// The assets produced by a Dart hook run and the dependencies of those assets.
 ///
@@ -80,7 +80,7 @@ final class DartHookResult {
       if (code.linkMode is DynamicLoadingBundled) code.file!,
   ];
 
-  DartDataHookResult toDartDataHookResult() {
+  FlutterHookResult get asFlutterResult {
     final List<HookAsset> hookAssets =
         dataAssets
             .map(
@@ -88,10 +88,10 @@ final class DartHookResult {
                   HookAsset(file: asset.file, name: asset.name, package: asset.package),
             )
             .toList();
-    return DartDataHookResult(
-      dataAssets: hookAssets,
-      buildEnd: buildEnd,
+    return FlutterHookResult(
       buildStart: buildStart,
+      buildEnd: buildEnd,
+      dataAssets: hookAssets,
       dependencies: dependencies,
     );
   }

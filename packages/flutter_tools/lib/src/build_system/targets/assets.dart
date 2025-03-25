@@ -51,7 +51,7 @@ Future<Depfile> copyAssets(
         splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
       ).createBundle();
   final int resultCode = await assetBundle.build(
-    dartHookResult: dartHookResult.toDartDataHookResult(),
+    flutterHookResult: dartHookResult.asFlutterResult,
     manifestPath: pubspecFile.path,
     packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
     deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',

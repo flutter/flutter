@@ -10,7 +10,7 @@ class DartBuilderNative extends DartBuilder {
   DartBuilderNative();
 
   @override
-  Future<DartDataHookResult> runDartBuild({
+  Future<FlutterHookResult> runHooks({
     required TargetPlatform targetPlatform,
     required Environment environment,
   }) async {
@@ -36,7 +36,7 @@ class DartBuilderNative extends DartBuilder {
 
     dartDataHookResult = await DartBuild.loadHookResult(
       environment,
-    ).then((DartHookResult value) => value.toDartDataHookResult());
+    ).then((DartHookResult hookResult) => hookResult.asFlutterResult);
     globals.printTrace('runDartBuild() - done');
     return dartDataHookResult!;
   }

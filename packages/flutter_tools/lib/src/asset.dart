@@ -25,7 +25,7 @@ import 'flutter_manifest.dart';
 import 'license_collector.dart';
 import 'project.dart';
 
-class DartDataHookResult {
+class FlutterHookResult {
   List<HookAsset> dataAssets;
 
   /// The timestamp at which we start a build - so the timestamp of the inputs.
@@ -37,10 +37,10 @@ class DartDataHookResult {
 
   final List<Uri> dependencies;
 
-  DartDataHookResult({
-    required this.dataAssets,
+  FlutterHookResult({
     required this.buildStart,
     required this.buildEnd,
+    required this.dataAssets,
     required this.dependencies,
   });
 
@@ -72,6 +72,11 @@ class DartDataHookResult {
     }
     return false;
   }
+
+  @override
+  String toString() {
+    return dataAssets.toString();
+  }
 }
 
 class HookAsset {
@@ -80,6 +85,11 @@ class HookAsset {
   final Uri file;
   final String name;
   final String package;
+
+  @override
+  String toString() {
+    return 'HookAsset(file: $file, name: $name, package: $package)';
+  }
 }
 
 const String defaultManifestPath = 'pubspec.yaml';
@@ -170,7 +180,7 @@ abstract class AssetBundle {
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
-    DartDataHookResult? dartHookResult,
+    FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
     required String packageConfigPath,
     bool deferredComponentsEnabled = false,
@@ -246,7 +256,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
-  DartDataHookResult? _lastHookResult;
+  FlutterHookResult? _lastHookResult;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
@@ -302,7 +312,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   Future<int> build({
-    DartDataHookResult? dartHookResult,
+    FlutterHookResult? flutterHookResult,
     String manifestPath = defaultManifestPath,
     FlutterProject? flutterProject,
     required String packageConfigPath,
@@ -469,8 +479,8 @@ class ManifestAssetBundle implements AssetBundle {
         );
       }
     }
-
-    for (final HookAsset dataAsset in dartHookResult?.dataAssets ?? <HookAsset>[]) {
+    print('XXXXX - Looking at $flutterHookResult');
+    for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
       final Package package = packageConfig[dataAsset.package]!;
       final Uri fileUri = dataAsset.file;
 

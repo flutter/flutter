@@ -1,13 +1,13 @@
-import 'asset.dart' show DartDataHookResult;
+import 'asset.dart' show FlutterHookResult;
 import 'build_info.dart' show TargetPlatform;
 import 'build_system/build_system.dart' show Environment;
 
 abstract class DartBuilder {
   DartBuilder();
 
-  DartDataHookResult? dartDataHookResult;
+  FlutterHookResult? dartDataHookResult;
 
-  Future<DartDataHookResult> runDartBuild({
+  Future<FlutterHookResult> runHooks({
     required TargetPlatform targetPlatform,
     required Environment environment,
   });

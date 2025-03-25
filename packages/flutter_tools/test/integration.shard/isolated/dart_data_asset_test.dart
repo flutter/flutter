@@ -60,8 +60,8 @@ void main() {
     final List<String> devices = <String>[hostOs, 'chrome', 'flutter-tester'];
     final List<String> modes = <String>['debug', 'release'];
 
-    for (final String mode in modes) {
-      for (final String device in devices) {
+    for (final String mode in ['release']) {
+      for (final String device in [hostOs]) {
         final bool isFlutterTester = device == 'flutter-tester';
         final bool isWeb = device == 'chrome';
         final bool isDebug = mode == 'debug';

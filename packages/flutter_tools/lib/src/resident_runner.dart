@@ -1076,8 +1076,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Environment get environment => _environment;
 
-  /// The result of the last dart build. Will be populated in
-  /// [runDartBuild].
+  /// Can dispatch [DartBuilder.runHooks] to get new assets from the hooks.
   final DartBuilder? dartBuilder;
 
   @override
