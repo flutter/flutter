@@ -685,14 +685,16 @@ class TextInputConfiguration {
   final List<String> allowedMimeTypes;
 
   /// {@template flutter.services.TextInputConfiguration.hintLocales}
-  /// List of the languages that the user is supposed to switch to.
+  /// List of the languages that the user is expected to use.
+  ///
   /// This special "hint" can be used mainly for, but not limited to,
   /// multilingual users who want IMEs to switch language based on editor's context.
+  ///
   /// Pass an empty list to express the intention that a specific hint should not be set.
   ///
-  /// Defaults to null.
+  /// Defaults to null, which indicates no preference in keyboard language.
   ///
-  /// This setting is only honored on Android devices.
+  /// This setting is only honored on Android devices running API 24 and above.
   ///
   /// See also:
   ///
