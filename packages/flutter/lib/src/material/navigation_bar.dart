@@ -10,6 +10,7 @@ library;
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'color_scheme.dart';
@@ -1014,20 +1015,23 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
     return _StatusTransitionWidgetBuilder(
       animation: destinationInfo.selectedAnimation,
       builder: (BuildContext context, Widget? child) {
-        return Semantics(enabled: enabled, container: true, button: true, child: child);
+        return Semantics(enabled: enabled, button: true, child: child);
       },
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          child,
-          Semantics(
-            label: localizations.tabLabel(
-              tabIndex: destinationInfo.index + 1,
-              tabCount: destinationInfo.totalNumberOfDestinations,
-            ),
-          ),
-        ],
-      ),
+      child:
+          kIsWeb
+              ? child
+              : Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  child,
+                  Semantics(
+                    label: localizations.tabLabel(
+                      tabIndex: destinationInfo.index + 1,
+                      tabCount: destinationInfo.totalNumberOfDestinations,
+                    ),
+                  ),
+                ],
+              ),
     );
   }
 }
