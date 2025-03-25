@@ -26,12 +26,13 @@ class _MainAppState extends State<MainApp> {
           children: [
             Text('Count is $_count'),
             TextButton(
-                onPressed: () {
-                  setState(() {
-                    _count++;
-                  });
-                },
-                child: Text('Increment')),
+              onPressed: () {
+                setState(() {
+                  _count++;
+                });
+              },
+              child: Text('Increment'),
+            ),
           ],
         ),
       ),
