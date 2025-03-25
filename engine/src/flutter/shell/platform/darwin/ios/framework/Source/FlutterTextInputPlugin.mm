@@ -2681,14 +2681,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   [_keyboardViewContainer addSubview:_keyboardView];
   if (_keyboardViewContainer.superview == nil) {
     UIApplication* flutterApplication = FlutterSharedApplication.application;
-    // if (flutterApplication) {
-    //   [flutterApplication.delegate.window.rootViewController.view
-    //       addSubview:_keyboardViewContainer];
-    // } else {
-    //   [_viewController.viewIfLoaded.window.rootViewController.view
-    //       addSubview:_keyboardViewContainer];
-    // }
-
     UIView* rootView = flutterApplication
                            ? flutterApplication.delegate.window.rootViewController.view
                            : self.viewController.viewIfLoaded.window.rootViewController.view;
