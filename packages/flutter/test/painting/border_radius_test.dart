@@ -621,4 +621,68 @@ void main() {
       borderRadius,
     );
   });
+
+  test('BorderRadiusGeometry factories', () {
+    const Radius radius5 = Radius.circular(5);
+    const Radius radius10 = Radius.circular(10);
+    const Radius radius15 = Radius.circular(15);
+    const Radius radius20 = Radius.circular(20);
+    expect(const BorderRadiusGeometry.all(radius10), const BorderRadius.all(radius10));
+    expect(BorderRadiusGeometry.circular(10), BorderRadius.circular(10));
+    expect(
+      BorderRadiusGeometry.horizontal(left: radius5, right: radius10),
+      const BorderRadius.horizontal(left: radius5, right: radius10),
+    );
+    expect(
+      BorderRadiusGeometry.horizontal(start: radius5, end: radius10),
+      const BorderRadiusDirectional.horizontal(start: radius5, end: radius10),
+    );
+    expect(() {
+      BorderRadiusGeometry.horizontal(start: radius5, left: radius10);
+    }, throwsAssertionError);
+    expect(() {
+      BorderRadiusGeometry.horizontal(end: radius5, right: radius10);
+    }, throwsAssertionError);
+    expect(() {
+      BorderRadiusGeometry.horizontal(
+        end: radius5,
+        right: radius10,
+        start: radius5,
+        left: radius10,
+      );
+    }, throwsAssertionError);
+    expect(
+      const BorderRadiusGeometry.only(
+        topLeft: radius5,
+        topRight: radius10,
+        bottomLeft: radius15,
+        bottomRight: radius20,
+      ),
+      const BorderRadius.only(
+        topLeft: radius5,
+        topRight: radius10,
+        bottomLeft: radius15,
+        bottomRight: radius20,
+      ),
+    );
+    expect(
+      const BorderRadiusGeometry.directional(
+        topStart: radius5,
+        topEnd: radius10,
+        bottomStart: radius15,
+        bottomEnd: radius20,
+      ),
+      const BorderRadiusDirectional.only(
+        topStart: radius5,
+        topEnd: radius10,
+        bottomStart: radius15,
+        bottomEnd: radius20,
+      ),
+    );
+    expect(
+      const BorderRadiusGeometry.vertical(top: radius5, bottom: radius10),
+      const BorderRadius.vertical(top: radius5, bottom: radius10),
+    );
+    expect(BorderRadiusGeometry.zero, BorderRadius.zero);
+  });
 }
