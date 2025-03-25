@@ -394,16 +394,16 @@ FLUTTER_ASSERT_ARC
                                     object:nil
                                   userInfo:nil];
   id mockEngine = OCMPartialMock(engine);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMVerify(times(1), [mockEngine applicationDidEnterBackground:[OCMArg any]]);
   XCTAssertTrue(engine.isGpuDisabled);
-  bool switch_value = false;
+  BOOL gpuDisabled = NO;
   [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
-      fml::SyncSwitch::Handlers().SetIfTrue([&] { switch_value = true; }).SetIfFalse([&] {
-        switch_value = false;
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
       }));
-  XCTAssertTrue(switch_value);
+  XCTAssertTrue(gpuDisabled);
 }
 
 - (void)testLifeCycleNotificationDidEnterBackgroundForScene {
@@ -423,16 +423,16 @@ FLUTTER_ASSERT_ARC
                                     object:nil
                                   userInfo:nil];
   id mockEngine = OCMPartialMock(engine);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMVerify(times(1), [mockEngine sceneDidEnterBackground:[OCMArg any]]);
   XCTAssertTrue(engine.isGpuDisabled);
-  bool switch_value = false;
+  BOOL gpuDisabled = NO;
   [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
-      fml::SyncSwitch::Handlers().SetIfTrue([&] { switch_value = true; }).SetIfFalse([&] {
-        switch_value = false;
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
       }));
-  XCTAssertTrue(switch_value);
+  XCTAssertTrue(gpuDisabled);
   [mockBundle stopMocking];
 }
 
@@ -449,16 +449,16 @@ FLUTTER_ASSERT_ARC
                                     object:nil
                                   userInfo:nil];
   id mockEngine = OCMPartialMock(engine);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMVerify(times(1), [mockEngine applicationWillEnterForeground:[OCMArg any]]);
   XCTAssertFalse(engine.isGpuDisabled);
-  bool switch_value = true;
+  BOOL gpuDisabled = YES;
   [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
-      fml::SyncSwitch::Handlers().SetIfTrue([&] { switch_value = true; }).SetIfFalse([&] {
-        switch_value = false;
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
       }));
-  XCTAssertFalse(switch_value);
+  XCTAssertFalse(gpuDisabled);
 }
 
 - (void)testLifeCycleNotificationWillEnterForegroundForScene {
@@ -478,16 +478,16 @@ FLUTTER_ASSERT_ARC
                                     object:nil
                                   userInfo:nil];
   id mockEngine = OCMPartialMock(engine);
-  [[NSNotificationCenter defaultCenter] postNotification:sceneNotification];
-  [[NSNotificationCenter defaultCenter] postNotification:applicationNotification];
+  [NSNotificationCenter.defaultCenter postNotification:sceneNotification];
+  [NSNotificationCenter.defaultCenter postNotification:applicationNotification];
   OCMVerify(times(1), [mockEngine sceneWillEnterForeground:[OCMArg any]]);
   XCTAssertFalse(engine.isGpuDisabled);
-  bool switch_value = true;
+  BOOL gpuDisabled = YES;
   [engine shell].GetIsGpuDisabledSyncSwitch()->Execute(
-      fml::SyncSwitch::Handlers().SetIfTrue([&] { switch_value = true; }).SetIfFalse([&] {
-        switch_value = false;
+      fml::SyncSwitch::Handlers().SetIfTrue([&] { gpuDisabled = YES; }).SetIfFalse([&] {
+        gpuDisabled = NO;
       }));
-  XCTAssertFalse(switch_value);
+  XCTAssertFalse(gpuDisabled);
   [mockBundle stopMocking];
 }
 

@@ -46,7 +46,7 @@ static const SEL kSelectorsHandledByPlugins[] = {
   if (self = [super init]) {
     std::string cachePath = fml::paths::JoinPaths({getenv("HOME"), kCallbackCacheSubDir});
     [FlutterCallbackCache setCachePath:[NSString stringWithUTF8String:cachePath.c_str()]];
-    if ([FlutterSharedApplication isAvailable]) {
+    if (FlutterSharedApplication.isAvailable) {
       [self addObserverFor:UIApplicationDidEnterBackgroundNotification
                   selector:@selector(handleDidEnterBackground:)];
       [self addObserverFor:UIApplicationWillEnterForegroundNotification

@@ -2658,13 +2658,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)hideKeyboardWithoutAnimationAndAvoidCursorDismissUpdate {
   [UIView setAnimationsEnabled:NO];
-  UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
-  if (flutterApplication != nil) {
-    _cachedFirstResponder = flutterApplication.keyWindow.flutterFirstResponder;
-  } else {
-    _cachedFirstResponder =
-        [_viewController flutterWindowSceneIfViewLoaded].keyWindow.flutterFirstResponder;
-  }
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  _cachedFirstResponder =
+      flutterApplication
+          ? flutterApplication.keyWindow.flutterFirstResponder
+          : self.viewController.flutterWindowSceneIfViewLoaded.keyWindow.flutterFirstResponder;
 
   _activeView.preventCursorDismissWhenResignFirstResponder = YES;
   [_cachedFirstResponder resignFirstResponder];
@@ -2682,14 +2680,19 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   _keyboardView = keyboardSnap;
   [_keyboardViewContainer addSubview:_keyboardView];
   if (_keyboardViewContainer.superview == nil) {
-    UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
-    if (flutterApplication != nil) {
-      [flutterApplication.delegate.window.rootViewController.view
-          addSubview:_keyboardViewContainer];
-    } else {
-      [_viewController.viewIfLoaded.window.rootViewController.view
-          addSubview:_keyboardViewContainer];
-    }
+    UIApplication* flutterApplication = FlutterSharedApplication.application;
+    // if (flutterApplication) {
+    //   [flutterApplication.delegate.window.rootViewController.view
+    //       addSubview:_keyboardViewContainer];
+    // } else {
+    //   [_viewController.viewIfLoaded.window.rootViewController.view
+    //       addSubview:_keyboardViewContainer];
+    // }
+
+    UIView* rootView = flutterApplication
+                           ? flutterApplication.delegate.window.rootViewController.view
+                           : self.viewController.viewIfLoaded.window.rootViewController.view;
+    [rootView addSubview:_keyboardViewContainer];
   }
   _keyboardViewContainer.layer.zPosition = NSIntegerMax;
   _keyboardViewContainer.frame = _keyboardRect;

@@ -389,31 +389,31 @@ FLUTTER_ASSERT_ARC
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
 
-  // Update to hidden.
+  // Update the visibility of the status bar to hidden.
   FlutterPlatformPlugin* plugin = [engine platformPlugin];
 
-  XCTestExpectation* enableSystemUIOverlaysCalled =
+  XCTestExpectation* systemOverlaysBottomExpectation =
       [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
-  FlutterResult resultSet = ^(id result) {
-    [enableSystemUIOverlaysCalled fulfill];
+  FlutterResult systemOverlaysBottomResult = ^(id result) {
+    [systemOverlaysBottomExpectation fulfill];
   };
-  FlutterMethodCall* methodCallSet =
+  FlutterMethodCall* setSystemOverlaysBottomCall =
       [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
                                         arguments:@[ @"SystemUiOverlay.bottom" ]];
-  [plugin handleMethodCall:methodCallSet result:resultSet];
+  [plugin handleMethodCall:setSystemOverlaysBottomCall result:systemOverlaysBottomResult];
   [self waitForExpectationsWithTimeout:1 handler:nil];
   OCMVerify([mockApplication setStatusBarHidden:YES]);
 
-  // Update to shown.
-  XCTestExpectation* enableSystemUIOverlaysCalled2 =
+  // Update the visibility of the status bar to shown.
+  XCTestExpectation* systemOverlaysTopExpectation =
       [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
-  FlutterResult resultSet2 = ^(id result) {
-    [enableSystemUIOverlaysCalled2 fulfill];
+  FlutterResult systemOverlaysTopResult = ^(id result) {
+    [systemOverlaysTopExpectation fulfill];
   };
-  FlutterMethodCall* methodCallSet2 =
+  FlutterMethodCall* setSystemOverlaysTopCall =
       [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
                                         arguments:@[ @"SystemUiOverlay.top" ]];
-  [plugin handleMethodCall:methodCallSet2 result:resultSet2];
+  [plugin handleMethodCall:setSystemOverlaysTopCall result:systemOverlaysTopResult];
   [self waitForExpectationsWithTimeout:1 handler:nil];
   OCMVerify([mockApplication setStatusBarHidden:NO]);
 
@@ -439,31 +439,33 @@ FLUTTER_ASSERT_ARC
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
 
-  // Update to hidden.
+  // Update the visibility of the status bar to hidden does not occur with extensions.
   FlutterPlatformPlugin* plugin = [engine platformPlugin];
 
-  XCTestExpectation* enableSystemUIOverlaysCalled =
+  XCTestExpectation* systemOverlaysBottomExpectation =
       [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
-  FlutterResult resultSet = ^(id result) {
-    [enableSystemUIOverlaysCalled fulfill];
+  FlutterResult systemOverlaysBottomResult = ^(id result) {
+    [systemOverlaysBottomExpectation fulfill];
   };
-  FlutterMethodCall* methodCallSet =
+  FlutterMethodCall* setSystemOverlaysBottomCall =
       [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
                                         arguments:@[ @"SystemUiOverlay.bottom" ]];
-  [plugin handleMethodCall:methodCallSet result:resultSet];
+  [plugin handleMethodCall:setSystemOverlaysBottomCall result:systemOverlaysBottomResult];
   [self waitForExpectationsWithTimeout:1 handler:nil];
+  OCMReject([mockApplication setStatusBarHidden:YES]);
 
-  // Update to shown.
-  XCTestExpectation* enableSystemUIOverlaysCalled2 =
+  // Update the visibility of the status bar to shown does not occur with extensions.
+  XCTestExpectation* systemOverlaysTopExpectation =
       [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
-  FlutterResult resultSet2 = ^(id result) {
-    [enableSystemUIOverlaysCalled2 fulfill];
+  FlutterResult systemOverlaysTopResult = ^(id result) {
+    [systemOverlaysTopExpectation fulfill];
   };
-  FlutterMethodCall* methodCallSet2 =
+  FlutterMethodCall* setSystemOverlaysTopCall =
       [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
                                         arguments:@[ @"SystemUiOverlay.top" ]];
-  [plugin handleMethodCall:methodCallSet2 result:resultSet2];
+  [plugin handleMethodCall:setSystemOverlaysTopCall result:systemOverlaysTopResult];
   [self waitForExpectationsWithTimeout:1 handler:nil];
+  OCMReject([mockApplication setStatusBarHidden:NO]);
 
   [flutterViewController deregisterNotifications];
   [mockApplication stopMocking];

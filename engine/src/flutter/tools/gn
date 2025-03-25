@@ -59,6 +59,9 @@ def get_out_dir(args):
   if args.macos_enable_metal:
     target_dir.append('metal')
 
+  if args.darwin_extension_safe:
+    target_dir.append('extension_safe')
+
   if args.slimpeller:
     target_dir.append('slimpeller')
 
@@ -768,6 +771,9 @@ def to_gn_args(args):
     gn_args['angle_vulkan_loader_dir'] = '//flutter/third_party/vulkan-deps/vulkan-loader/src'
     gn_args['angle_vulkan_tools_dir'] = '//flutter/third_party/vulkan-deps/vulkan-tools/src'
 
+  if args.darwin_extension_safe:
+    gn_args['darwin_extension_safe'] = True
+
   return gn_args
 
 
@@ -1192,6 +1198,13 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Whether the -fstack-protector flag should be passed unconditionally.'
+  )
+
+  parser.add_argument(
+      '--darwin-extension-safe',
+      default=False,
+      action='store_true',
+      help='Whether the produced Flutter.framework is app extension safe. Only for iOS.'
   )
 
   # Verbose output.

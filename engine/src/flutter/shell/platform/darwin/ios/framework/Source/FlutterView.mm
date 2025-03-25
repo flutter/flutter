@@ -56,7 +56,7 @@ FLUTTER_ASSERT_ARC
 
   // Wide Gamut is not supported for iOS Extensions due to memory limitations
   // (see https://github.com/flutter/flutter/issues/165086).
-  if ([FlutterSharedApplication isAppExtension]) {
+  if (FlutterSharedApplication.isAppExtension) {
     return NO;
   }
 

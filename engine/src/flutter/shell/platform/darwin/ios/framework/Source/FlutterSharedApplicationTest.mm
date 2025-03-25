@@ -21,8 +21,8 @@ FLUTTER_ASSERT_ARC
   OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
     @"NSExtensionPointIdentifier" : @"com.apple.share-services"
   });
-  XCTAssertTrue([FlutterSharedApplication isAppExtension]);
-  XCTAssertFalse([FlutterSharedApplication isAvailable]);
+  XCTAssertTrue(FlutterSharedApplication.isAppExtension);
+  XCTAssertFalse(FlutterSharedApplication.isAvailable);
   [mockBundle stopMocking];
 }
 
@@ -30,15 +30,15 @@ FLUTTER_ASSERT_ARC
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
   OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"])
       .andReturn([[NSDictionary alloc] init]);
-  XCTAssertTrue([FlutterSharedApplication isAppExtension]);
-  XCTAssertFalse([FlutterSharedApplication isAvailable]);
+  XCTAssertTrue(FlutterSharedApplication.isAppExtension);
+  XCTAssertFalse(FlutterSharedApplication.isAvailable);
   [mockBundle stopMocking];
 }
 
 - (void)testWhenNSExtensionNotInBundle {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
-  XCTAssertFalse([FlutterSharedApplication isAppExtension]);
-  XCTAssertTrue([FlutterSharedApplication isAvailable]);
+  XCTAssertFalse(FlutterSharedApplication.isAppExtension);
+  XCTAssertTrue(FlutterSharedApplication.isAvailable);
   [mockBundle stopMocking];
 }
 
@@ -48,17 +48,17 @@ FLUTTER_ASSERT_ARC
     @"NSExtensionPointIdentifier" : @"com.apple.share-services"
   });
   id mockApplication = OCMClassMock([UIApplication class]);
-  XCTAssertFalse([FlutterSharedApplication isAvailable]);
+  XCTAssertFalse(FlutterSharedApplication.isAvailable);
   OCMReject([mockApplication sharedApplication]);
-  XCTAssertNil([FlutterSharedApplication uiApplication]);
+  XCTAssertNil(FlutterSharedApplication.application);
   [mockBundle stopMocking];
 }
 
 - (void)testSharedApplicationCalledIfIsAvailableTrue {
   id mockBundle = OCMPartialMock([NSBundle mainBundle]);
   id mockApplication = OCMClassMock([UIApplication class]);
-  XCTAssertTrue([FlutterSharedApplication isAvailable]);
-  XCTAssertNotNil([FlutterSharedApplication uiApplication]);
+  XCTAssertTrue(FlutterSharedApplication.isAvailable);
+  XCTAssertNotNil(FlutterSharedApplication.application);
   OCMVerify([mockApplication sharedApplication]);
   [mockBundle stopMocking];
 }

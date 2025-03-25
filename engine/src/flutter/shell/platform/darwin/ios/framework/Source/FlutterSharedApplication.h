@@ -10,19 +10,19 @@
 @interface FlutterSharedApplication : NSObject
 
 /**
- * Check whether the main bundle is an iOS App Extension.
+ * Returns YES if the main bundle is an iOS App Extension.
  */
-+ (BOOL)isAppExtension;
+@property(class, nonatomic, readonly) BOOL isAppExtension;
 
 /**
- * Check whether the UIApplication is available. UIApplication is not available for App Extensions.
+ * Returns YES if the UIApplication is available. UIApplication is not available for App Extensions.
  */
-+ (BOOL)isAvailable;
+@property(class, nonatomic, readonly) BOOL isAvailable;
 
 /**
  * Returns the `UIApplication.sharedApplication` is available. Otherwise returns nil.
  */
-+ (UIApplication*)uiApplication;
+@property(class, nonatomic, readonly) UIApplication* application;
 
 @end
 

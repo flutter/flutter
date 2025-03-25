@@ -44,8 +44,8 @@ const char* const kOverlayStyleUpdateNotificationKey =
 using namespace flutter;
 
 static void SetStatusBarHiddenForSharedApplication(BOOL hidden) {
-  UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
-  if (flutterApplication != nil) {
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  if (flutterApplication) {
     flutterApplication.statusBarHidden = hidden;
   } else {
     FML_LOG(WARNING) << "Application based status bar styling is not available in app extension.";
@@ -53,8 +53,8 @@ static void SetStatusBarHiddenForSharedApplication(BOOL hidden) {
 }
 
 static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
-  UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
-  if (flutterApplication != nil) {
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  if (flutterApplication) {
     // Note: -[UIApplication setStatusBarStyle] is deprecated in iOS9
     // in favor of delegating to the view controller.
     [flutterApplication setStatusBarStyle:style];
@@ -221,7 +221,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
 }
 
 - (void)searchWeb:(NSString*)searchTerm {
-  UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
   if (flutterApplication == nil) {
     FML_LOG(WARNING) << "SearchWeb.invoke is not availabe in app extension.";
     return;
@@ -382,8 +382,8 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
     [navigationController popViewControllerAnimated:isAnimated];
   } else {
     UIViewController* rootViewController = nil;
-    UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
-    if (flutterApplication != nil) {
+    UIApplication* flutterApplication = FlutterSharedApplication.application;
+    if (flutterApplication) {
       rootViewController = flutterApplication.keyWindow.rootViewController;
     } else {
       if (@available(iOS 15.0, *)) {

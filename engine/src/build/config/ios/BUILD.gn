@@ -5,3 +5,9 @@
 config("sdk") {
   cflags_cc = [ "-stdlib=libc++" ]
 }
+
+config("ios_application_extension") {
+  cflags_objc = [ "-fapplication-extension" ]
+  cflags_objcc = [ "-fapplication-extension" ]
+  ldflags = [ "-fapplication-extension" ]
+}

@@ -76,6 +76,12 @@ def main():
       simulator_arm64_framework
   )
 
+  extension_safe_dst = os.path.join(dst, 'extension_safe')
+  create_extension_safe_framework(
+      args, extension_safe_dst, '%s_extension_safe' % arm64_out_dir,
+      '%s_extension_safe' % simulator_x64_out_dir, '%s_extension_safe' % simulator_arm64_out_dir
+  )
+
   # Copy gen_snapshot binary to destination directory.
   if arm64_out_dir:
     gen_snapshot = os.path.join(arm64_out_dir, 'universal', 'gen_snapshot_arm64')
@@ -86,6 +92,31 @@ def main():
 
   zip_archive(dst, args)
   return 0
+
+
+def create_extension_safe_framework( # pylint: disable=too-many-arguments
+    args, dst, arm64_out_dir, simulator_x64_out_dir, simulator_arm64_out_dir
+):
+  framework = os.path.join(dst, 'Flutter.framework')
+  simulator_framework = os.path.join(dst, 'sim', 'Flutter.framework')
+  arm64_framework = os.path.join(arm64_out_dir, 'Flutter.framework')
+  simulator_x64_framework = os.path.join(simulator_x64_out_dir, 'Flutter.framework')
+  simulator_arm64_framework = os.path.join(simulator_arm64_out_dir, 'Flutter.framework')
+
+  if not os.path.isdir(arm64_framework):
+    print('Cannot find extension safe iOS arm64 Framework at %s' % arm64_framework)
+    return 1
+
+  if not os.path.isdir(simulator_x64_framework):
+    print('Cannot find extension safe iOS x64 simulator Framework at %s' % simulator_x64_framework)
+    return 1
+
+  create_framework(
+      args, dst, framework, arm64_framework, simulator_framework, simulator_x64_framework,
+      simulator_arm64_framework
+  )
+  return 0
+
 
 def create_framework(  # pylint: disable=too-many-arguments
     args, dst, framework, arm64_framework, simulator_framework,
@@ -147,6 +178,8 @@ def zip_archive(dst, args):
   without_entitlements = [
       'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
+      'extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
+      'extension_safe/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
   ]
   without_entitlements_file = os.path.join(dst, 'without_entitlements.txt')
   sky_utils.write_codesign_config(without_entitlements_file, without_entitlements)
@@ -156,6 +189,7 @@ def zip_archive(dst, args):
   if args.dsym:
     unsigned_binaries.extend([
         'Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
+        'extension_safe/Flutter.xcframework/ios-arm64/dSYMs/Flutter.framework.dSYM/Contents/Resources/DWARF/Flutter',
     ])
   unsigned_binaries_file = os.path.join(dst, 'unsigned_binaries.txt')
   sky_utils.write_codesign_config(unsigned_binaries_file, unsigned_binaries)
@@ -167,6 +201,7 @@ def zip_archive(dst, args):
       'entitlements.txt',
       'without_entitlements.txt',
       'unsigned_binaries.txt',
+      'extension_safe/Flutter.xcframework',
   ]
   sky_utils.assert_valid_codesign_config(
       dst, zip_contents, with_entitlements, without_entitlements, unsigned_binaries

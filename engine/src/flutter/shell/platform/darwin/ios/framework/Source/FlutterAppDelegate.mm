@@ -155,7 +155,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 - (BOOL)handleOpenURL:(NSURL*)url
                      options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options
     relayToSystemIfUnhandled:(BOOL)throwBack {
-  UIApplication* flutterApplication = [FlutterSharedApplication uiApplication];
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
   if (flutterApplication == nil) {
     return NO;
   }
