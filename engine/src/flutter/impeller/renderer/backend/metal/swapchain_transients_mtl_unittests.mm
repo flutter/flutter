@@ -74,8 +74,8 @@ TEST_P(SwapchainTransientsMTLTest, CanAllocateSwapchainTextures) {
   transients->SetSizeAndFormat({2, 2}, PixelFormat::kB10G10R10A10XR);
   EXPECT_NE(resolve, transients->GetResolveTexture());
 
-  // Transients converts alpha-less format to have alpha for MSAA.
-  transients->SetSizeAndFormat({2, 2}, PixelFormat::kB10G10R10XR);
+  // Transients don't have alpha for alpha-less onscreen.
+  transients->SetSizeAndFormat({2, 2}, PixelFormat::kB10G10R10A10XR);
 
   EXPECT_EQ(transients->GetMSAATexture()->GetTextureDescriptor().format,
             PixelFormat::kB10G10R10A10XR);
