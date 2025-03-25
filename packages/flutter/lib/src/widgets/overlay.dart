@@ -2707,21 +2707,24 @@ class _RenderLayoutBuilder extends RenderProxyBox
   }
 
   @override
-  void runLayoutCallback() {
+  @visibleForOverriding
+  void layoutCallback() {
     _layoutInfo = _computeNewLayoutInfo();
-    super.runLayoutCallback();
+    super.layoutCallback();
   }
 
   int? _callbackId;
   @override
   void performLayout() {
-    super.performLayout();
+    runLayoutCallback();
+    if (child case final RenderBox child?) {
+      layoutChild(child, constraints);
+    }
     assert(_callbackId == null);
     _callbackId ??= SchedulerBinding.instance.scheduleFrameCallback(
       _frameCallback,
       scheduleNewFrame: false,
     );
-    layoutChild(child!, constraints);
   }
 
   // This RenderObject is a child of _RenderDeferredLayouts which in turn is a

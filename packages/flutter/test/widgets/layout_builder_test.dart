@@ -1027,7 +1027,7 @@ typedef _OnChildWasPaintedCallback = void Function(Offset extraOffset);
 class _RenderSmartLayoutBuilder extends RenderProxyBox
     with
         RenderObjectWithLayoutCallbackMixin,
-    RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> {
+        RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> {
   _RenderSmartLayoutBuilder({required double offsetPercentage, required this.onChildWasPainted})
     : _offsetPercentage = offsetPercentage;
 
@@ -1052,7 +1052,7 @@ class _RenderSmartLayoutBuilder extends RenderProxyBox
 
   @override
   void performLayout() {
-    super.performLayout();
+    runLayoutCallback();
     child?.layout(constraints);
   }
 

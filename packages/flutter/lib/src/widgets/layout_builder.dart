@@ -92,6 +92,10 @@ abstract class AbstractLayoutBuilder<LayoutInfoType> extends RenderObjectWidget 
 ///
 /// The [builder] function is _not_ called during layout if the parent passes
 /// the same constraints repeatedly.
+///
+/// In the event that an ancestor skips the layout of this subtree so the
+/// constraints become outdated, the `builder` rebuilds with the last known
+/// constraints.
 /// {@endtemplate}
 abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints>
     extends AbstractLayoutBuilder<ConstraintType> {
@@ -295,12 +299,11 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
 /// Generic mixin for [RenderObject]s created by an [AbstractLayoutBuilder] with
 /// the the same `LayoutInfoType`.
 ///
-/// Provides a [runLayoutCallback] method that should be called at layout time,
-/// typically in [RenderObject.performLayout]. The method invokes
-/// [AbstractLayoutBuilder]'s builder callback if needed.
+/// Provides a [layoutCallback] implementation which, if needed, invokes
+/// [AbstractLayoutBuilder]'s builder callback.
 ///
 /// Implementers must provide a [layoutInfo] implementation that is safe to
-/// access in [rebuildIfNecessary], which is typically called in [performLayout].
+/// access in [layoutCallback], which is called in [performLayout].
 mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderObject>
     on RenderObjectWithChildMixin<ChildType>, RenderObjectWithLayoutCallbackMixin {
   LayoutCallback<Constraints>? _callback;
@@ -314,18 +317,18 @@ mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderO
     scheduleLayoutCallback();
   }
 
-  /// Invoke the builder callback supplied via [AbstractLayoutBuilder] and
+  /// Invokes the builder callback supplied via [AbstractLayoutBuilder] and
   /// rebuilds the [AbstractLayoutBuilder]'s widget tree, if needed.
   ///
-  /// No work will be done if [layoutInfo] has not changed since the last time
-  /// this method was called, and [AbstractLayoutBuilder.updateShouldRebuild]
+  /// No further work will be done if [layoutInfo] has not changed since the last
+  /// time this method was called, and [AbstractLayoutBuilder.updateShouldRebuild]
   /// returned `false` when the widget was rebuilt.
   ///
   /// This method should typically be called as soon as possible in the class's
   /// [performLayout] implementation, before any layout work is done.
   @visibleForOverriding
   @override
-  void runLayoutCallback() => _callback!(constraints);
+  void layoutCallback() => _callback!(constraints);
 
   /// The information to invoke the [AbstractLayoutBuilder.builder] callback with.
   ///
@@ -432,7 +435,7 @@ class _RenderLayoutBuilder extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    super.performLayout();
+    runLayoutCallback();
     if (child != null) {
       child!.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child!.size);

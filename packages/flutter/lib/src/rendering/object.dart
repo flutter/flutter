@@ -4132,22 +4132,25 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   }
 }
 
-/// A mixin for [RenderObject] subclasses with a layout callback. The mixin
-/// guarantees the layout callback will be called even if this [RenderObject]
-/// skips doing layout, unless the [RenderObject] has never been laid out.
+/// A mixin for managing [RenderObject] with a [layoutCallback], which will be
+/// invoked during this [RenderObject]'s layout process if scheduled using
+/// [scheduleLayoutCallback].
 ///
-/// A layout callback is a callback that mutates the [RenderObject]'s render
-/// subtree, invoked within an [invokeLayoutCallback] during the [RenderObject]'s
-/// layout process. Sometimes such callbacks involve rebuilding dirty widgets,
-/// especially if the widget configuration depends on the layout process (most
-/// notably, the [LayoutBuilder] widget). Unlike render subtrees, typically all
-/// dirty widgets (even the off-screen ones) in a widget tree must be rebuilt.
-/// This mixin makes sure the layout callback will be invoked (such that dirty
-/// [Element]s are rebuilt) even when an ancestor [RenderObject] chose to skip
-/// laying out this [RenderObject].
+/// A layout callback is typically a callback that mutates the [RenderObject]'s
+/// render subtree during the [RenderObject]'s layout process. When an ancestor
+/// [RenderObject] chooses to skip laying out this [RenderObject] in its
+/// [performLayout] implementation (for example, for performance reasons, an
+/// [Overlay] may skip laying out an offstage [OverEntry] while keep it in the
+/// tree), normally the [layoutCallback] will not be invoked because the [layout]
+/// method will not be called. This can be undesirable when the [layoutCallback]
+/// involves rebuilding dirty widgets (most notably, the [LayoutBuilder] widget).
+/// Unlike render subtrees, typically all dirty widgets (even off-screen ones) in
+/// a widget tree must be rebuilt. This mixin makes sure once scheduled, the
+/// [layoutCallback] method will be invoked even if it's skipped by an ancestor
+/// [RenderObject], unless this [RenderObject] has never been laid out.
 ///
 /// Subclasses must not invoke the layout callback directly. Instead, call
-/// `super.performLayout` in the [performLayout] implementation.
+/// [runLayoutCallback] in the [performLayout] implementation.
 ///
 /// See also:
 ///
@@ -4158,23 +4161,29 @@ mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
   // which case the `constraints` or any other layout information is unknown).
   bool _needsRebuild = true;
 
-  @override
-  @mustCallSuper
-  void performLayout() {
-    invokeLayoutCallback((_) => runLayoutCallback());
-    _needsRebuild = false;
-  }
-
   /// The layout callback to be invoked during [performLayout].
   ///
   /// This method should not be invoked directly. Instead, call
-  /// `super.performLayout` in the [performLayout] implementation. This
-  /// callback will be invoked within [invokeLayoutCallback].
+  /// [runLayoutCallback] in the [performLayout] implementation. This callback
+  /// will be invoked using [invokeLayoutCallback].
   @visibleForOverriding
-  void runLayoutCallback();
+  void layoutCallback();
 
-  /// Informs the framework that the layout callback has been updated and must
-  /// be invoked again in the next [performLayout] call.
+  /// Invokes [layoutCallback] with [invokeLayoutCallback].
+  ///
+  /// This method must be called in [performLayout], typically as early as
+  /// possible before any layout work is done, to avoid re-dirtying any child
+  /// [RenderObject]s.
+  @mustCallSuper
+  void runLayoutCallback() {
+    assert(debugDoingThisLayout);
+    invokeLayoutCallback((_) => layoutCallback());
+    _needsRebuild = false;
+  }
+
+  /// Informs the framework that the layout callback has been updated and must be
+  /// invoked again when this [RenderObject] is ready for layout, even when an
+  /// ancestor [RenderObject] chooses to skip laying out this render subtree.
   @mustCallSuper
   void scheduleLayoutCallback() {
     if (_needsRebuild) {
@@ -4183,9 +4192,11 @@ mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
     }
     _needsRebuild = true;
     // This ensures that the layout callback will be run even if an ancestor
-    // chooses to not lay out this subtree (for example, OverlayEntries with
-    // `maintainState` set to true).
+    // chooses to not lay out this subtree (for example, obstructed OverlayEntries
+    // with `maintainState` set to true).
     owner?._nodesNeedingLayout.add(this);
+    // In an active tree, markNeedsLayout is needed to inform the layout boundary
+    // that its child size may change.
     super.markNeedsLayout();
   }
 }
