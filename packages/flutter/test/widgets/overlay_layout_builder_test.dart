@@ -365,7 +365,7 @@ void main() {
 }
 
 class _NullLeaf extends Widget {
-  const _NullLeaf({super.key});
+  const _NullLeaf();
   @override
   Element createElement() => _NullElement(this);
 }
