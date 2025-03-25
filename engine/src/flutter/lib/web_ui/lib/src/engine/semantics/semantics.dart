@@ -246,6 +246,7 @@ class SemanticsNodeUpdate {
     this.linkUrl,
     required this.role,
     required this.controlsNodes,
+    required this.inputType,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -358,6 +359,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final List<String>? controlsNodes;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.SemanticsInputType inputType;
 }
 
 /// Identifies [SemanticRole] implementations.
