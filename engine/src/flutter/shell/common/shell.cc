@@ -919,6 +919,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     // is the raster thread.
     raster_task();
   }
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 // |PlatformView::Delegate|
@@ -1329,6 +1330,20 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
        actions = std::move(actions), view_id = view_id] {
         if (view) {
           view->UpdateSemantics(view_id, update, actions);
+        }
+      });
+}
+
+// |Engine::Delegate|
+void Shell::OnEngineSetSemanticsTreeEnabled(bool enabled) {
+  FML_DCHECK(is_set_up_);
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
+      task_runners_.GetPlatformTaskRunner(),
+      [view = platform_view_->GetWeakPtr(), enabled] {
+        if (view) {
+          view->SetSemanticsTreeEnabled(enabled);
         }
       });
 }
