@@ -129,7 +129,7 @@ ProcTableGLES::ProcTableGLES(  // NOLINT(google-readability-function-size)
 
 #undef IMPELLER_PROC
 
-  if (!description_->HasDebugExtension()) {
+  if (!description_->HasDebugExtension() || !ENABLE_GLES_LABELING) {
     PushDebugGroupKHR.Reset();
     PopDebugGroupKHR.Reset();
     ObjectLabelKHR.Reset();
