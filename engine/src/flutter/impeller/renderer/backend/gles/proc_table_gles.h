@@ -15,7 +15,7 @@
 #include "impeller/renderer/backend/gles/gles.h"
 
 /// Enable to allow GLES to push/pop labels for usage in GPU traces
-#define IMP_ENABLE_GLES_LABELING false
+#define IP_ENABLE_GLES_LABELING false
 
 namespace impeller {
 

@@ -96,6 +96,7 @@ TEST(ReactorGLES, UntrackedHandle) {
   EXPECT_TRUE(reactor->React());
 }
 
+#ifdef IP_ENABLE_GLES_LABELING
 TEST(ReactorGLES, NameUntrackedHandle) {
   auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
 
@@ -122,6 +123,7 @@ TEST(ReactorGLES, NameUntrackedHandle) {
   HandleGLES handle = reactor->CreateUntrackedHandle(HandleType::kTexture);
   reactor->SetDebugLabel(handle, "hello, joe!");
 }
+#endif  // IP_ENABLE_GLES_LABELING
 
 TEST(ReactorGLES, PerThreadOperationQueues) {
   auto mock_gles = MockGLES::Init();
