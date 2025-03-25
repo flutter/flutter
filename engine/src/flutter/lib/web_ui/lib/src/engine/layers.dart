@@ -339,19 +339,19 @@ class ClipRSuperellipseOperation implements LayerOperation {
   Map<String, Object> get debugJsonDescription {
     return <String, Object>{
       'type': 'clipRSuperEllipse',
-      'rse': {
-        'left': rse.left,
-        'top': rse.top,
-        'right': rse.right,
-        'bottom': rse.bottom,
-        'tlRadiusX': rse.tlRadiusX,
-        'tlRadiusY': rse.tlRadiusY,
-        'trRadiusX': rse.trRadiusX,
-        'trRadiusY': rse.trRadiusY,
-        'brRadiusX': rse.brRadiusX,
-        'brRadiusY': rse.brRadiusY,
-        'blRadiusX': rse.blRadiusX,
-        'blRadiusY': rse.blRadiusY,
+      'rsuperellipse': {
+        'left': rsuperellipse.left,
+        'top': rsuperellipse.top,
+        'right': rsuperellipse.right,
+        'bottom': rsuperellipse.bottom,
+        'tlRadiusX': rsuperellipse.tlRadiusX,
+        'tlRadiusY': rsuperellipse.tlRadiusY,
+        'trRadiusX': rsuperellipse.trRadiusX,
+        'trRadiusY': rsuperellipse.trRadiusY,
+        'brRadiusX': rsuperellipse.brRadiusX,
+        'brRadiusY': rsuperellipse.brRadiusY,
+        'blRadiusX': rsuperellipse.blRadiusX,
+        'blRadiusY': rsuperellipse.blRadiusY,
       },
       'clip': clip.name,
     };
