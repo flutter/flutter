@@ -165,6 +165,7 @@ impeller_component("entity") {
     "contents/line_contents.h",
     "contents/linear_gradient_contents.cc",
     "contents/linear_gradient_contents.h",
+    "contents/pipelines.h",
     "contents/radial_gradient_contents.cc",
     "contents/radial_gradient_contents.h",
     "contents/runtime_effect_contents.cc",

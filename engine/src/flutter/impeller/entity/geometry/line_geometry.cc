@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/geometry/line_geometry.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {

@@ -6,6 +6,7 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/constants.h"
