@@ -13,7 +13,6 @@
 
 namespace impeller {
 
-
 class TextShadowCache {
  public:
   TextShadowCache() = default;
@@ -29,11 +28,12 @@ class TextShadowCache {
               RenderPass& pass,
               const std::shared_ptr<FilterContents>& contents,
               int text_key);
+
  private:
-    struct TextShadowCacheData {
-        Entity entity;
-        bool used_this_frame = true;
-    };
+  struct TextShadowCacheData {
+    Entity entity;
+    bool used_this_frame = true;
+  };
 
   std::unordered_map<int, TextShadowCacheData> entries_;
 };
