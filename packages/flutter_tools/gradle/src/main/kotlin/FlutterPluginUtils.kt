@@ -281,7 +281,8 @@ object FlutterPluginUtils {
 
     private fun getFlutterExtensionOrNull(project: Project): FlutterExtension? = project.extensions.findByType(FlutterExtension::class.java)
 
-    // Should this use find by type and AbstractAppExtension instead?
+    // TODO: https://github.com/flutter/flutter/issues/165882
+    // Use find by type and AbstractAppExtension instead.
     private fun getAndroidExtensionOrNull(project: Project): AbstractAppExtension? =
         project.extensions.findByName("android") as? AbstractAppExtension
 
@@ -913,7 +914,8 @@ object FlutterPluginUtils {
                         val baseVariantOutput = this
 
                         val appLinkSettings = AppLinkSettings(variant.applicationId)
-                        // TODO use import groovy.xml.XmlParser instead.
+                        // TODO https://github.com/flutter/flutter/issues/165881
+                        // Use import groovy.xml.XmlParser instead.
                         // XmlParser is not namespace aware because it makes querying nodes cumbersome.
                         val manifest: Node =
                             XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
