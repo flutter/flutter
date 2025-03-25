@@ -23,7 +23,7 @@ class SkwasmTypeface extends SkwasmObjectWrapper<RawTypeface> {
   SkwasmTypeface(SkDataHandle data) : super(typefaceCreate(data), _registry);
 
   static final SkwasmFinalizationRegistry<RawTypeface> _registry =
-      SkwasmFinalizationRegistry<RawTypeface>(typefaceDispose);
+      SkwasmFinalizationRegistry<RawTypeface>((TypefaceHandle handle) => typefaceDispose(handle));
 }
 
 class SkwasmFontCollection implements FlutterFontCollection {

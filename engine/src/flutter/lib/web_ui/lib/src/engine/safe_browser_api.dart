@@ -198,12 +198,9 @@ bool get _isBrowserImageDecoderStable => ui_web.browser.browserEngine == ui_web.
 ///
 ///  * https://www.w3.org/TR/webcodecs/#imagedecoder-interface
 @JS('window.ImageDecoder')
-@staticInterop
-class ImageDecoder {
-  external factory ImageDecoder(ImageDecoderOptions options);
-}
+extension type ImageDecoder._(JSObject _) implements JSObject {
+  external ImageDecoder(ImageDecoderOptions options);
 
-extension ImageDecoderExtension on ImageDecoder {
   external ImageTrackList get tracks;
 
   @JS('complete')
@@ -219,11 +216,8 @@ extension ImageDecoderExtension on ImageDecoder {
 /// See also:
 ///
 ///  * https://www.w3.org/TR/webcodecs/#imagedecoderinit-interface
-@JS()
-@anonymous
-@staticInterop
-class ImageDecoderOptions {
-  external factory ImageDecoderOptions({
+extension type ImageDecoderOptions._(JSObject _) implements JSObject {
+  external ImageDecoderOptions({
     required JSString type,
     required JSAny data,
     required JSString premultiplyAlpha,
@@ -239,12 +233,7 @@ class ImageDecoderOptions {
 /// See also:
 ///
 ///  * https://www.w3.org/TR/webcodecs/#imagedecoderesult-interface
-@JS()
-@anonymous
-@staticInterop
-class DecodeResult {}
-
-extension DecodeResultExtension on DecodeResult {
+extension type DecodeResult(JSObject _) implements JSObject {
   external VideoFrame get image;
 
   @JS('complete')
@@ -257,11 +246,8 @@ extension DecodeResultExtension on DecodeResult {
 /// See also:
 ///
 ///  * https://www.w3.org/TR/webcodecs/#dictdef-imagedecodeoptions
-@JS()
-@anonymous
-@staticInterop
-class DecodeOptions {
-  external factory DecodeOptions({required JSNumber frameIndex});
+extension type DecodeOptions._(JSObject _) implements JSObject {
+  external DecodeOptions({required JSNumber frameIndex});
 }
 
 /// The only frame in a static image, or one of the frames in an animated one.
@@ -271,12 +257,7 @@ class DecodeOptions {
 /// See also:
 ///
 ///  * https://www.w3.org/TR/webcodecs/#videoframe-interface
-@JS()
-@anonymous
-@staticInterop
-class VideoFrame implements DomCanvasImageSource {}
-
-extension VideoFrameExtension on VideoFrame {
+extension type VideoFrame(JSObject _) implements JSObject, DomCanvasImageSource {
   @JS('allocationSize')
   external JSNumber _allocationSize();
   double allocationSize() => _allocationSize().toDartDouble;
@@ -318,12 +299,7 @@ extension VideoFrameExtension on VideoFrame {
 /// See also:
 ///
 ///  * https://www.w3.org/TR/webcodecs/#imagetracklist-interface
-@JS()
-@anonymous
-@staticInterop
-class ImageTrackList {}
-
-extension ImageTrackListExtension on ImageTrackList {
+extension type ImageTrackList(JSObject _) implements JSObject {
   external JSPromise<JSAny?> get ready;
   external ImageTrack? get selectedTrack;
 }
@@ -333,12 +309,7 @@ extension ImageTrackListExtension on ImageTrackList {
 /// See also:
 ///
 ///  * https://www.w3.org/TR/webcodecs/#imagetrack
-@JS()
-@anonymous
-@staticInterop
-class ImageTrack {}
-
-extension ImageTrackExtension on ImageTrack {
+extension type ImageTrack(JSObject _) implements JSObject {
   @JS('repetitionCount')
   external JSNumber get _repetitionCount;
   double get repetitionCount => _repetitionCount.toDartDouble;

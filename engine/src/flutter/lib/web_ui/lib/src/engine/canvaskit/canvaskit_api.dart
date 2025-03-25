@@ -46,12 +46,7 @@ external CanvasKit? get windowFlutterCanvasKit;
 @JS('window.flutterCanvasKitLoaded')
 external JSPromise<JSAny>? get windowFlutterCanvasKitLoaded;
 
-@JS()
-@anonymous
-@staticInterop
-class CanvasKit {}
-
-extension CanvasKitExtension on CanvasKit {
+extension type CanvasKit(JSObject _) implements JSObject {
   external SkBlendModeEnum get BlendMode;
   external SkPaintStyleEnum get PaintStyle;
   external SkStrokeCapEnum get StrokeCap;
@@ -225,11 +220,7 @@ extension CanvasKitExtension on CanvasKit {
       _MakeLazyImageFromTextureSource3(imageBitmap as JSObject, 0.toJS, hasPremultipliedAlpha.toJS);
 }
 
-@JS()
-@staticInterop
-class CanvasKitModule {}
-
-extension CanvasKitModuleExtension on CanvasKitModule {
+extension type CanvasKitModule(JSObject _) implements JSObject {
   @JS('default')
   external JSPromise<JSAny> defaultExport(CanvasKitInitOptions options);
 }
@@ -238,30 +229,22 @@ typedef LocateFileCallback = String Function(String file, String unusedBase);
 
 JSFunction createLocateFileCallback(LocateFileCallback callback) => callback.toJS;
 
-@JS()
-@anonymous
-@staticInterop
-class CanvasKitInitOptions {
-  external factory CanvasKitInitOptions({required JSFunction locateFile});
+extension type CanvasKitInitOptions._(JSObject _) implements JSObject {
+  external CanvasKitInitOptions({required JSFunction locateFile});
 }
 
 @JS('window.flutterCanvasKit.ColorSpace.SRGB')
 external ColorSpace get SkColorSpaceSRGB;
 
-@JS()
-@staticInterop
-class ColorSpace {}
+extension type ColorSpace(JSObject _) implements JSObject {}
 
-@JS()
-@anonymous
-@staticInterop
-class SkWebGLContextOptions {
+extension type SkWebGLContextOptions._(JSObject _) implements JSObject {
   factory SkWebGLContextOptions({
     required double antialias,
     // WebGL version: 1 or 2.
     required double majorVersion,
-  }) => SkWebGLContextOptions._(antialias: antialias.toJS, majorVersion: majorVersion.toJS);
-  external factory SkWebGLContextOptions._({
+  }) => SkWebGLContextOptions.make(antialias: antialias.toJS, majorVersion: majorVersion.toJS);
+  external SkWebGLContextOptions.make({
     required JSNumber antialias,
     // WebGL version: 1 or 2.
     required JSNumber majorVersion,
@@ -269,10 +252,7 @@ class SkWebGLContextOptions {
 }
 
 @JS('window.flutterCanvasKit.Surface')
-@staticInterop
-class SkSurface {}
-
-extension SkSurfaceExtension on SkSurface {
+extension type SkSurface(JSObject _) implements JSObject {
   external SkCanvas getCanvas();
   external JSVoid flush();
 
@@ -288,11 +268,7 @@ extension SkSurfaceExtension on SkSurface {
   external SkImage makeImageSnapshot();
 }
 
-@JS()
-@staticInterop
-class SkGrContext {}
-
-extension SkGrContextExtension on SkGrContext {
+extension type SkGrContext(JSObject _) implements JSObject {
   @JS('setResourceCacheLimitBytes')
   external JSVoid _setResourceCacheLimitBytes(JSNumber limit);
   void setResourceCacheLimitBytes(double limit) => _setResourceCacheLimitBytes(limit.toJS);
@@ -301,21 +277,13 @@ extension SkGrContextExtension on SkGrContext {
   external JSVoid delete();
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkFontSlantEnum {}
-
-extension SkFontSlantEnumExtension on SkFontSlantEnum {
+extension type SkFontSlantEnum(JSObject _) implements JSObject {
   external SkFontSlant get Upright;
   external SkFontSlant get Italic;
 }
 
 @JS('window.flutterCanvasKit.FontSlant')
-@staticInterop
-class SkFontSlant {}
-
-extension SkFontSlantExtension on SkFontSlant {
+extension type SkFontSlant(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -330,12 +298,7 @@ SkFontSlant toSkFontSlant(ui.FontStyle style) {
   return _skFontSlants[style.index];
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkFontWeightEnum {}
-
-extension SkFontWeightEnumExtension on SkFontWeightEnum {
+extension type SkFontWeightEnum(JSObject _) implements JSObject {
   external SkFontWeight get Thin;
   external SkFontWeight get ExtraLight;
   external SkFontWeight get Light;
@@ -347,11 +310,7 @@ extension SkFontWeightEnumExtension on SkFontWeightEnum {
   external SkFontWeight get ExtraBlack;
 }
 
-@JS()
-@staticInterop
-class SkFontWeight {}
-
-extension SkFontWeightExtension on SkFontWeight {
+extension type SkFontWeight(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -373,20 +332,12 @@ SkFontWeight toSkFontWeight(ui.FontWeight weight) {
   return _skFontWeights[weight.index];
 }
 
-@JS()
-@staticInterop
-class SkAffinityEnum {}
-
-extension SkAffinityEnumExtension on SkAffinityEnum {
+extension type SkAffinityEnum(JSObject _) implements JSObject {
   external SkAffinity get Upstream;
   external SkAffinity get Downstream;
 }
 
-@JS()
-@staticInterop
-class SkAffinity {}
-
-extension SkAffinityExtension on SkAffinity {
+extension type SkAffinity(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -401,20 +352,12 @@ SkAffinity toSkAffinity(ui.TextAffinity affinity) {
   return _skAffinitys[affinity.index];
 }
 
-@JS()
-@staticInterop
-class SkTextDirectionEnum {}
-
-extension SkTextDirectionEnumExtension on SkTextDirectionEnum {
+extension type SkTextDirectionEnum(JSObject _) implements JSObject {
   external SkTextDirection get RTL;
   external SkTextDirection get LTR;
 }
 
-@JS()
-@staticInterop
-class SkTextDirection {}
-
-extension SkTextDirectionExtension on SkTextDirection {
+extension type SkTextDirection(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -431,11 +374,7 @@ SkTextDirection toSkTextDirection(ui.TextDirection direction) {
   return _skTextDirections[direction.index];
 }
 
-@JS()
-@staticInterop
-class SkTextAlignEnum {}
-
-extension SkTextAlignEnumExtension on SkTextAlignEnum {
+extension type SkTextAlignEnum(JSObject _) implements JSObject {
   external SkTextAlign get Left;
   external SkTextAlign get Right;
   external SkTextAlign get Center;
@@ -444,11 +383,7 @@ extension SkTextAlignEnumExtension on SkTextAlignEnum {
   external SkTextAlign get End;
 }
 
-@JS()
-@staticInterop
-class SkTextAlign {}
-
-extension SkTextAlignExtension on SkTextAlign {
+extension type SkTextAlign(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -467,22 +402,14 @@ SkTextAlign toSkTextAlign(ui.TextAlign align) {
   return _skTextAligns[align.index];
 }
 
-@JS()
-@staticInterop
-class SkTextHeightBehaviorEnum {}
-
-extension SkTextHeightBehaviorEnumExtension on SkTextHeightBehaviorEnum {
+extension type SkTextHeightBehaviorEnum(JSObject _) implements JSObject {
   external SkTextHeightBehavior get All;
   external SkTextHeightBehavior get DisableFirstAscent;
   external SkTextHeightBehavior get DisableLastDescent;
   external SkTextHeightBehavior get DisableAll;
 }
 
-@JS()
-@staticInterop
-class SkTextHeightBehavior {}
-
-extension SkTextHeightBehaviorExtension on SkTextHeightBehavior {
+extension type SkTextHeightBehavior(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -502,11 +429,7 @@ SkTextHeightBehavior toSkTextHeightBehavior(ui.TextHeightBehavior behavior) {
   return _skTextHeightBehaviors[index];
 }
 
-@JS()
-@staticInterop
-class SkRectHeightStyleEnum {}
-
-extension SkRectHeightStyleEnumExtension on SkRectHeightStyleEnum {
+extension type SkRectHeightStyleEnum(JSObject _) implements JSObject {
   external SkRectHeightStyle get Tight;
   external SkRectHeightStyle get Max;
   external SkRectHeightStyle get IncludeLineSpacingMiddle;
@@ -515,11 +438,7 @@ extension SkRectHeightStyleEnumExtension on SkRectHeightStyleEnum {
   external SkRectHeightStyle get Strut;
 }
 
-@JS()
-@staticInterop
-class SkRectHeightStyle {}
-
-extension SkRectHeightStyleExtension on SkRectHeightStyle {
+extension type SkRectHeightStyle(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -538,20 +457,12 @@ SkRectHeightStyle toSkRectHeightStyle(ui.BoxHeightStyle style) {
   return _skRectHeightStyles[style.index];
 }
 
-@JS()
-@staticInterop
-class SkRectWidthStyleEnum {}
-
-extension SkRectWidthStyleEnumExtension on SkRectWidthStyleEnum {
+extension type SkRectWidthStyleEnum(JSObject _) implements JSObject {
   external SkRectWidthStyle get Tight;
   external SkRectWidthStyle get Max;
 }
 
-@JS()
-@staticInterop
-class SkRectWidthStyle {}
-
-extension SkRectWidthStyleExtension on SkRectWidthStyle {
+extension type SkRectWidthStyle(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -567,21 +478,13 @@ SkRectWidthStyle toSkRectWidthStyle(ui.BoxWidthStyle style) {
   return _skRectWidthStyles[index < 2 ? index : 0];
 }
 
-@JS()
-@staticInterop
-class SkVertexModeEnum {}
-
-extension SkVertexModeEnumExtension on SkVertexModeEnum {
+extension type SkVertexModeEnum(JSObject _) implements JSObject {
   external SkVertexMode get Triangles;
   external SkVertexMode get TrianglesStrip;
   external SkVertexMode get TriangleFan;
 }
 
-@JS()
-@staticInterop
-class SkVertexMode {}
-
-extension SkVertexModeExtension on SkVertexMode {
+extension type SkVertexMode(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -597,21 +500,13 @@ SkVertexMode toSkVertexMode(ui.VertexMode mode) {
   return _skVertexModes[mode.index];
 }
 
-@JS()
-@staticInterop
-class SkPointModeEnum {}
-
-extension SkPointModeEnumExtension on SkPointModeEnum {
+extension type SkPointModeEnum(JSObject _) implements JSObject {
   external SkPointMode get Points;
   external SkPointMode get Lines;
   external SkPointMode get Polygon;
 }
 
-@JS()
-@staticInterop
-class SkPointMode {}
-
-extension SkPointModeExtension on SkPointMode {
+extension type SkPointMode(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -627,20 +522,12 @@ SkPointMode toSkPointMode(ui.PointMode mode) {
   return _skPointModes[mode.index];
 }
 
-@JS()
-@staticInterop
-class SkClipOpEnum {}
-
-extension SkClipOpEnumExtension on SkClipOpEnum {
+extension type SkClipOpEnum(JSObject _) implements JSObject {
   external SkClipOp get Difference;
   external SkClipOp get Intersect;
 }
 
-@JS()
-@staticInterop
-class SkClipOp {}
-
-extension SkClipOpExtension on SkClipOp {
+extension type SkClipOp(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -655,20 +542,12 @@ SkClipOp toSkClipOp(ui.ClipOp clipOp) {
   return _skClipOps[clipOp.index];
 }
 
-@JS()
-@staticInterop
-class SkFillTypeEnum {}
-
-extension SkFillTypeEnumExtension on SkFillTypeEnum {
+extension type SkFillTypeEnum(JSObject _) implements JSObject {
   external SkFillType get Winding;
   external SkFillType get EvenOdd;
 }
 
-@JS()
-@staticInterop
-class SkFillType {}
-
-extension SkFillTypeExtension on SkFillType {
+extension type SkFillType(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -683,11 +562,7 @@ SkFillType toSkFillType(ui.PathFillType fillType) {
   return _skFillTypes[fillType.index];
 }
 
-@JS()
-@staticInterop
-class SkPathOpEnum {}
-
-extension SkPathOpEnumExtension on SkPathOpEnum {
+extension type SkPathOpEnum(JSObject _) implements JSObject {
   external SkPathOp get Difference;
   external SkPathOp get Intersect;
   external SkPathOp get Union;
@@ -695,11 +570,7 @@ extension SkPathOpEnumExtension on SkPathOpEnum {
   external SkPathOp get ReverseDifference;
 }
 
-@JS()
-@staticInterop
-class SkPathOp {}
-
-extension SkPathOpExtension on SkPathOp {
+extension type SkPathOp(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -717,22 +588,14 @@ SkPathOp toSkPathOp(ui.PathOperation pathOp) {
   return _skPathOps[pathOp.index];
 }
 
-@JS()
-@staticInterop
-class SkBlurStyleEnum {}
-
-extension SkBlurStyleEnumExtension on SkBlurStyleEnum {
+extension type SkBlurStyleEnum(JSObject _) implements JSObject {
   external SkBlurStyle get Normal;
   external SkBlurStyle get Solid;
   external SkBlurStyle get Outer;
   external SkBlurStyle get Inner;
 }
 
-@JS()
-@staticInterop
-class SkBlurStyle {}
-
-extension SkBlurStyleExtension on SkBlurStyle {
+extension type SkBlurStyle(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -749,21 +612,13 @@ SkBlurStyle toSkBlurStyle(ui.BlurStyle style) {
   return _skBlurStyles[style.index];
 }
 
-@JS()
-@staticInterop
-class SkStrokeCapEnum {}
-
-extension SkStrokeCapEnumExtension on SkStrokeCapEnum {
+extension type SkStrokeCapEnum(JSObject _) implements JSObject {
   external SkStrokeCap get Butt;
   external SkStrokeCap get Round;
   external SkStrokeCap get Square;
 }
 
-@JS()
-@staticInterop
-class SkStrokeCap {}
-
-extension SkStrokeCapExtension on SkStrokeCap {
+extension type SkStrokeCap(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -779,20 +634,12 @@ SkStrokeCap toSkStrokeCap(ui.StrokeCap strokeCap) {
   return _skStrokeCaps[strokeCap.index];
 }
 
-@JS()
-@staticInterop
-class SkPaintStyleEnum {}
-
-extension SkPaintStyleEnumExtension on SkPaintStyleEnum {
+extension type SkPaintStyleEnum(JSObject _) implements JSObject {
   external SkPaintStyle get Stroke;
   external SkPaintStyle get Fill;
 }
 
-@JS()
-@staticInterop
-class SkPaintStyle {}
-
-extension SkPaintStyleExtension on SkPaintStyle {
+extension type SkPaintStyle(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -807,11 +654,7 @@ SkPaintStyle toSkPaintStyle(ui.PaintingStyle paintStyle) {
   return _skPaintStyles[paintStyle.index];
 }
 
-@JS()
-@staticInterop
-class SkBlendModeEnum {}
-
-extension SkBlendModeEnumExtension on SkBlendModeEnum {
+extension type SkBlendModeEnum(JSObject _) implements JSObject {
   external SkBlendMode get Clear;
   external SkBlendMode get Src;
   external SkBlendMode get Dst;
@@ -843,11 +686,7 @@ extension SkBlendModeEnumExtension on SkBlendModeEnum {
   external SkBlendMode get Luminosity;
 }
 
-@JS()
-@staticInterop
-class SkBlendMode {}
-
-extension SkBlendModeExtension on SkBlendMode {
+extension type SkBlendMode(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -889,21 +728,13 @@ SkBlendMode toSkBlendMode(ui.BlendMode blendMode) {
   return _skBlendModes[blendMode.index];
 }
 
-@JS()
-@staticInterop
-class SkStrokeJoinEnum {}
-
-extension SkStrokeJoinEnumExtension on SkStrokeJoinEnum {
+extension type SkStrokeJoinEnum(JSObject _) implements JSObject {
   external SkStrokeJoin get Miter;
   external SkStrokeJoin get Round;
   external SkStrokeJoin get Bevel;
 }
 
-@JS()
-@staticInterop
-class SkStrokeJoin {}
-
-extension SkStrokeJoinExtension on SkStrokeJoin {
+extension type SkStrokeJoin(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -919,22 +750,14 @@ SkStrokeJoin toSkStrokeJoin(ui.StrokeJoin strokeJoin) {
   return _skStrokeJoins[strokeJoin.index];
 }
 
-@JS()
-@staticInterop
-class SkTileModeEnum {}
-
-extension SkTileModeEnumExtension on SkTileModeEnum {
+extension type SkTileModeEnum(JSObject _) implements JSObject {
   external SkTileMode get Clamp;
   external SkTileMode get Repeat;
   external SkTileMode get Mirror;
   external SkTileMode get Decal;
 }
 
-@JS()
-@staticInterop
-class SkTileMode {}
-
-extension SkTileModeExtension on SkTileMode {
+extension type SkTileMode(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -951,20 +774,12 @@ SkTileMode toSkTileMode(ui.TileMode? mode) {
   return mode == null ? canvasKit.TileMode.Clamp : _skTileModes[mode.index];
 }
 
-@JS()
-@staticInterop
-class SkFilterModeEnum {}
-
-extension SkFilterModeEnumExtension on SkFilterModeEnum {
+extension type SkFilterModeEnum(JSObject _) implements JSObject {
   external SkFilterMode get Nearest;
   external SkFilterMode get Linear;
 }
 
-@JS()
-@staticInterop
-class SkFilterMode {}
-
-extension SkFilterModeExtension on SkFilterMode {
+extension type SkFilterMode(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -976,21 +791,13 @@ SkFilterMode toSkFilterMode(ui.FilterQuality filterQuality) {
       : canvasKit.FilterMode.Linear;
 }
 
-@JS()
-@staticInterop
-class SkMipmapModeEnum {}
-
-extension SkMipmapModeEnumExtension on SkMipmapModeEnum {
+extension type SkMipmapModeEnum(JSObject _) implements JSObject {
   external SkMipmapMode get None;
   external SkMipmapMode get Nearest;
   external SkMipmapMode get Linear;
 }
 
-@JS()
-@staticInterop
-class SkMipmapMode {}
-
-extension SkMipmapModeExtension on SkMipmapMode {
+extension type SkMipmapMode(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -1002,31 +809,19 @@ SkMipmapMode toSkMipmapMode(ui.FilterQuality filterQuality) {
       : canvasKit.MipmapMode.None;
 }
 
-@JS()
-@staticInterop
-class SkAlphaTypeEnum {}
-
-extension SkAlphaTypeEnumExtension on SkAlphaTypeEnum {
+extension type SkAlphaTypeEnum(JSObject _) implements JSObject {
   external SkAlphaType get Opaque;
   external SkAlphaType get Premul;
   external SkAlphaType get Unpremul;
 }
 
-@JS()
-@staticInterop
-class SkAlphaType {}
-
-extension SkAlphaTypeExtension on SkAlphaType {
+extension type SkAlphaType(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
 }
 
-@JS()
-@staticInterop
-class SkColorTypeEnum {}
-
-extension SkColorTypeEnumExtension on SkColorTypeEnum {
+extension type SkColorTypeEnum(JSObject _) implements JSObject {
   external SkColorType get Alpha_8;
   external SkColorType get RGB_565;
   external SkColorType get ARGB_4444;
@@ -1040,22 +835,13 @@ extension SkColorTypeEnumExtension on SkColorTypeEnum {
   external SkColorType get RGBA_F32;
 }
 
-@JS()
-@staticInterop
-class SkColorType {}
-
-extension SkColorTypeExtension on SkColorType {
+extension type SkColorType(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkAnimatedImage {}
-
-extension SkAnimatedImageExtension on SkAnimatedImage {
+extension type SkAnimatedImage(JSObject _) implements JSObject {
   @JS('getFrameCount')
   external JSNumber _getFrameCount();
   double getFrameCount() => _getFrameCount().toDartDouble;
@@ -1094,12 +880,7 @@ extension SkAnimatedImageExtension on SkAnimatedImage {
   bool isDeleted() => _isDeleted().toDart;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkImage {}
-
-extension SkImageExtension on SkImage {
+extension type SkImage(JSObject _) implements JSObject {
   external JSVoid delete();
 
   @JS('width')
@@ -1160,11 +941,7 @@ extension SkImageExtension on SkImage {
   bool isDeleted() => _isDeleted().toDart;
 }
 
-@JS()
-@staticInterop
-class SkShaderNamespace {}
-
-extension SkShaderNamespaceExtension on SkShaderNamespace {
+extension type SkShaderNamespace(JSObject _) implements JSObject {
   @JS('MakeLinearGradient')
   external SkShader _MakeLinearGradient(
     JSFloat32Array from, // 2-element array
@@ -1281,20 +1058,11 @@ extension SkShaderNamespaceExtension on SkShaderNamespace {
   );
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkShader {}
-
-extension SkShaderExtension on SkShader {
+extension type SkShader(JSObject _) implements JSObject {
   external JSVoid delete();
 }
 
-@JS()
-@staticInterop
-class SkMaskFilterNamespace {}
-
-extension SkMaskFilterNamespaceExtension on SkMaskFilterNamespace {
+extension type SkMaskFilterNamespace(JSObject _) implements JSObject {
   // Creates a blur MaskFilter.
   //
   // Returns `null` if [sigma] is 0 or infinite.
@@ -1309,12 +1077,9 @@ extension SkMaskFilterNamespaceExtension on SkMaskFilterNamespace {
 //
 //     external SkPaint SkPaint();
 @JS('window.flutterCanvasKit.Paint')
-@staticInterop
-class SkPaint {
-  external factory SkPaint();
-}
+extension type SkPaint._(JSObject _) implements JSObject {
+  external SkPaint();
 
-extension SkPaintExtension on SkPaint {
   external JSVoid setBlendMode(SkBlendMode blendMode);
   external JSVoid setStyle(SkPaintStyle paintStyle);
 
@@ -1345,23 +1110,14 @@ extension SkPaintExtension on SkPaint {
   external JSVoid delete();
 }
 
-@JS()
-@anonymous
-@staticInterop
-abstract class CkFilterOptions {}
+extension type CkFilterOptions(JSObject _) implements JSObject {}
 
-@JS()
-@anonymous
-@staticInterop
-class _CkCubicFilterOptions extends CkFilterOptions {
-  external factory _CkCubicFilterOptions({required JSNumber B, required JSNumber C});
+extension type _CkCubicFilterOptions._(JSObject _) implements JSObject, CkFilterOptions {
+  external _CkCubicFilterOptions({required JSNumber B, required JSNumber C});
 }
 
-@JS()
-@anonymous
-@staticInterop
-class _CkTransformFilterOptions extends CkFilterOptions {
-  external factory _CkTransformFilterOptions({SkFilterMode filter, SkMipmapMode mipmap});
+extension type _CkTransformFilterOptions._(JSObject _) implements JSObject, CkFilterOptions {
+  external _CkTransformFilterOptions({SkFilterMode filter, SkMipmapMode mipmap});
 }
 
 final Map<ui.FilterQuality, CkFilterOptions> _filterOptions = <ui.FilterQuality, CkFilterOptions>{
@@ -1384,20 +1140,11 @@ CkFilterOptions toSkFilterOptions(ui.FilterQuality filterQuality) {
   return _filterOptions[filterQuality]!;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkMaskFilter {}
-
-extension SkMaskFilterExtension on SkMaskFilter {
+extension type SkMaskFilter(JSObject _) implements JSObject {
   external JSVoid delete();
 }
 
-@JS()
-@staticInterop
-class SkColorFilterNamespace {}
-
-extension SkColorFilterNamespaceExtension on SkColorFilterNamespace {
+extension type SkColorFilterNamespace(JSObject _) implements JSObject {
   @JS('MakeBlend')
   external SkColorFilter? _MakeBlend(JSFloat32Array color, SkBlendMode blendMode);
   SkColorFilter? MakeBlend(Float32List color, SkBlendMode blendMode) =>
@@ -1416,20 +1163,11 @@ extension SkColorFilterNamespaceExtension on SkColorFilterNamespace {
   external SkColorFilter MakeCompose(SkColorFilter? outer, SkColorFilter inner);
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkColorFilter {}
-
-extension SkColorFilterExtension on SkColorFilter {
+extension type SkColorFilter(JSObject _) implements JSObject {
   external JSVoid delete();
 }
 
-@JS()
-@staticInterop
-class SkImageFilterNamespace {}
-
-extension SkImageFilterNamespaceExtension on SkImageFilterNamespace {
+extension type SkImageFilterNamespace(JSObject _) implements JSObject {
   @JS('MakeBlur')
   external SkImageFilter _MakeBlur(
     JSNumber sigmaX,
@@ -1476,12 +1214,7 @@ extension SkImageFilterNamespaceExtension on SkImageFilterNamespace {
   );
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkImageFilter {}
-
-extension SkImageFilterExtension on SkImageFilter {
+extension type SkImageFilter(JSObject _) implements JSObject {
   external JSVoid delete();
 
   @JS('isDeleted')
@@ -1493,11 +1226,7 @@ extension SkImageFilterExtension on SkImageFilter {
   Int32List getOutputBounds(Float32List bounds) => _getOutputBounds(bounds.toJS).toDart;
 }
 
-@JS()
-@staticInterop
-class SkPathNamespace {}
-
-extension SkPathNamespaceExtension on SkPathNamespace {
+extension type SkPathNamespace(JSObject _) implements JSObject {
   /// Creates an [SkPath] using commands obtained from [SkPath.toCmds].
   @JS('MakeFromCmds')
   external SkPath _MakeFromCmds(JSAny pathCommands);
@@ -1589,9 +1318,7 @@ Float32List toSkColorStops(List<double>? colorStops) {
   return skColorStops;
 }
 
-@JS()
-@staticInterop
-abstract class _NativeType {}
+extension type _NativeType(JSObject _) implements JSObject {}
 
 @JS('Float32Array')
 external _NativeType get _nativeFloat32ArrayType;
@@ -1626,20 +1353,14 @@ SkUint32List mallocUint32List(int length) {
 @JS('window.flutterCanvasKit.Free')
 external JSVoid free(MallocObj list);
 
-@JS()
-@staticInterop
-abstract class MallocObj {}
+extension type MallocObj(JSObject _) implements JSObject {}
 
 /// Wraps a [Float32List] backed by WASM memory.
 ///
 /// This wrapper is necessary because the raw [Float32List] will get detached
 /// when WASM grows its memory. Call [toTypedArray] to get a new instance
 /// that's attached to the current WASM memory block.
-@JS()
-@staticInterop
-class SkFloat32List extends MallocObj {}
-
-extension SkFloat32ListExtension on SkFloat32List {
+extension type SkFloat32List(JSObject _) implements JSObject, MallocObj {
   /// The number of objects this pointer refers to.
   @JS('length')
   external JSNumber get _length;
@@ -1666,11 +1387,7 @@ extension SkFloat32ListExtension on SkFloat32List {
 /// This wrapper is necessary because the raw [Uint32List] will get detached
 /// when WASM grows its memory. Call [toTypedArray] to get a new instance
 /// that's attached to the current WASM memory block.
-@JS()
-@staticInterop
-class SkUint32List extends MallocObj {}
-
-extension SkUint32ListExtension on SkUint32List {
+extension type SkUint32List(JSObject _) implements JSObject, MallocObj {
   /// The number of objects this pointer refers to.
   @JS('length')
   external JSNumber get _length;
@@ -1736,13 +1453,10 @@ Float32List toSharedSkColor3(ui.Color color) {
 final SkFloat32List _sharedSkColor3 = mallocFloat32List(4);
 
 @JS('window.flutterCanvasKit.Path')
-@staticInterop
-class SkPath {
-  external factory SkPath();
-  external factory SkPath.from(SkPath other);
-}
+extension type SkPath._(JSObject _) implements JSObject {
+  external SkPath();
+  external SkPath.from(SkPath other);
 
-extension SkPathExtension on SkPath {
   external JSVoid setFillType(SkFillType fillType);
 
   @JS('addArc')
@@ -2010,23 +1724,16 @@ extension SkPathExtension on SkPath {
 }
 
 @JS('window.flutterCanvasKit.ContourMeasureIter')
-@staticInterop
-class SkContourMeasureIter {
+extension type SkContourMeasureIter._(JSObject _) implements JSObject {
   factory SkContourMeasureIter(SkPath path, bool forceClosed, double resScale) =>
-      SkContourMeasureIter._(path, forceClosed.toJS, resScale.toJS);
-  external factory SkContourMeasureIter._(SkPath path, JSBoolean forceClosed, JSNumber resScale);
-}
+      SkContourMeasureIter.make(path, forceClosed.toJS, resScale.toJS);
+  external SkContourMeasureIter.make(SkPath path, JSBoolean forceClosed, JSNumber resScale);
 
-extension SkContourMeasureIterExtension on SkContourMeasureIter {
   external SkContourMeasure? next();
   external JSVoid delete();
 }
 
-@JS()
-@staticInterop
-class SkContourMeasure {}
-
-extension SkContourMeasureExtension on SkContourMeasure {
+extension type SkContourMeasure(JSObject _) implements JSObject {
   @JS('getSegment')
   external SkPath _getSegment(JSNumber start, JSNumber end, JSBoolean startWithMoveTo);
   SkPath getSegment(double start, double end, bool startWithMoveTo) =>
@@ -2146,12 +1853,9 @@ Uint16List toUint16List(List<int> ints) {
 }
 
 @JS('window.flutterCanvasKit.PictureRecorder')
-@staticInterop
-class SkPictureRecorder {
-  external factory SkPictureRecorder();
-}
+extension type SkPictureRecorder._(JSObject _) implements JSObject {
+  external SkPictureRecorder();
 
-extension SkPictureRecorderExtension on SkPictureRecorder {
   @JS('beginRecording')
   external SkCanvas _beginRecording(JSFloat32Array bounds, JSBoolean computeBounds);
   SkCanvas beginRecording(Float32List bounds) => _beginRecording(bounds.toJS, true.toJS);
@@ -2165,12 +1869,7 @@ extension SkPictureRecorderExtension on SkPictureRecorder {
 /// By Skia coding convention raw pointers should always be treated as
 /// "borrowed", i.e. their memory is managed by other objects. In the case of
 /// [SkCanvas] it is managed by [SkPictureRecorder].
-@JS()
-@anonymous
-@staticInterop
-class SkCanvas {}
-
-extension SkCanvasExtension on SkCanvas {
+extension type SkCanvas(JSObject _) implements JSObject {
   @JS('clear')
   external JSVoid _clear(JSFloat32Array color);
   void clear(Float32List color) => _clear(color.toJS);
@@ -2446,12 +2145,7 @@ extension SkCanvasExtension on SkCanvas {
       _drawParagraph(paragraph, x.toJS, y.toJS);
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkPicture {}
-
-extension SkPictureExtension on SkPicture {
+extension type SkPicture(JSObject _) implements JSObject {
   external JSVoid delete();
 
   @JS('cullRect')
@@ -2463,12 +2157,7 @@ extension SkPictureExtension on SkPicture {
   int approximateBytesUsed() => _approximateBytesUsed().toDartInt;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkParagraphBuilderNamespace {}
-
-extension SkParagraphBuilderNamespaceExtension on SkParagraphBuilderNamespace {
+extension type SkParagraphBuilderNamespace(JSObject _) implements JSObject {
   external SkParagraphBuilder MakeFromFontCollection(
     SkParagraphStyle paragraphStyle,
     SkFontCollection? fontCollection,
@@ -2482,12 +2171,7 @@ extension SkParagraphBuilderNamespaceExtension on SkParagraphBuilderNamespace {
   }
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkParagraphBuilder {}
-
-extension SkParagraphBuilderExtension on SkParagraphBuilder {
+extension type SkParagraphBuilder(JSObject _) implements JSObject {
   @JS('addText')
   external JSVoid _addText(JSString text);
   void addText(String text) => _addText(text.toJS);
@@ -2547,19 +2231,11 @@ extension SkParagraphBuilderExtension on SkParagraphBuilder {
   external JSVoid delete();
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkParagraphStyle {}
+extension type SkParagraphStyle(JSObject _) implements JSObject {}
 
-@JS()
-@anonymous
-@staticInterop
-class SkParagraphStyleProperties {
-  external factory SkParagraphStyleProperties();
-}
+extension type SkParagraphStyleProperties._(JSObject _) implements JSObject {
+  external SkParagraphStyleProperties({int dummyArgumentToCreateObjectLiteral});
 
-extension SkParagraphStylePropertiesExtension on SkParagraphStyleProperties {
   external set textAlign(SkTextAlign? value);
   external set textDirection(SkTextDirection? value);
 
@@ -2587,15 +2263,9 @@ extension SkParagraphStylePropertiesExtension on SkParagraphStyleProperties {
   external set applyRoundingHack(bool applyRoundingHack);
 }
 
-@JS()
-@staticInterop
-class SkTextStyle {}
+extension type SkTextStyle(JSObject _) implements JSObject {}
 
-@JS()
-@staticInterop
-class SkTextDecorationStyleEnum {}
-
-extension SkTextDecorationStyleEnumExtension on SkTextDecorationStyleEnum {
+extension type SkTextDecorationStyleEnum(JSObject _) implements JSObject {
   external SkTextDecorationStyle get Solid;
   external SkTextDecorationStyle get Double;
   external SkTextDecorationStyle get Dotted;
@@ -2603,11 +2273,7 @@ extension SkTextDecorationStyleEnumExtension on SkTextDecorationStyleEnum {
   external SkTextDecorationStyle get Wavy;
 }
 
-@JS()
-@staticInterop
-class SkTextDecorationStyle {}
-
-extension SkTextDecorationStyleExtension on SkTextDecorationStyle {
+extension type SkTextDecorationStyle(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -2625,20 +2291,12 @@ SkTextDecorationStyle toSkTextDecorationStyle(ui.TextDecorationStyle style) {
   return _skTextDecorationStyles[style.index];
 }
 
-@JS()
-@staticInterop
-class SkTextBaselineEnum {}
-
-extension SkTextBaselineEnumExtension on SkTextBaselineEnum {
+extension type SkTextBaselineEnum(JSObject _) implements JSObject {
   external SkTextBaseline get Alphabetic;
   external SkTextBaseline get Ideographic;
 }
 
-@JS()
-@staticInterop
-class SkTextBaseline {}
-
-extension SkTextBaselineExtension on SkTextBaseline {
+extension type SkTextBaseline(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -2653,11 +2311,7 @@ SkTextBaseline toSkTextBaseline(ui.TextBaseline baseline) {
   return _skTextBaselines[baseline.index];
 }
 
-@JS()
-@staticInterop
-class SkPlaceholderAlignmentEnum {}
-
-extension SkPlaceholderAlignmentEnumExtension on SkPlaceholderAlignmentEnum {
+extension type SkPlaceholderAlignmentEnum(JSObject _) implements JSObject {
   external SkPlaceholderAlignment get Baseline;
   external SkPlaceholderAlignment get AboveBaseline;
   external SkPlaceholderAlignment get BelowBaseline;
@@ -2666,11 +2320,7 @@ extension SkPlaceholderAlignmentEnumExtension on SkPlaceholderAlignmentEnum {
   external SkPlaceholderAlignment get Middle;
 }
 
-@JS()
-@staticInterop
-class SkPlaceholderAlignment {}
-
-extension SkPlaceholderAlignmentExtension on SkPlaceholderAlignment {
+extension type SkPlaceholderAlignment(JSObject _) implements JSObject {
   @JS('value')
   external JSNumber get _value;
   double get value => _value.toDartDouble;
@@ -2689,14 +2339,9 @@ SkPlaceholderAlignment toSkPlaceholderAlignment(ui.PlaceholderAlignment alignmen
   return _skPlaceholderAlignments[alignment.index];
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkTextStyleProperties {
-  external factory SkTextStyleProperties();
-}
+extension type SkTextStyleProperties._(JSObject _) implements JSObject {
+  external SkTextStyleProperties({int dummyArgumentToCreateObjectLiteral});
 
-extension SkTextStylePropertiesExtension on SkTextStyleProperties {
   @JS('backgroundColor')
   external set _backgroundColor(JSFloat32Array? value);
   set backgroundColor(Float32List? value) => _backgroundColor = value?.toJS;
@@ -2768,14 +2413,9 @@ extension SkTextStylePropertiesExtension on SkTextStyleProperties {
       _fontVariations = (value as List<JSAny>?)?.toJS;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkStrutStyleProperties {
-  external factory SkStrutStyleProperties();
-}
+extension type SkStrutStyleProperties._(JSObject _) implements JSObject {
+  external SkStrutStyleProperties({int dummyArgumentToCreateObjectLiteral});
 
-extension SkStrutStylePropertiesExtension on SkStrutStyleProperties {
   @JS('fontFamilies')
   external set _fontFamilies(JSAny? value);
   set fontFamilies(List<String>? value) => _fontFamilies = value?.toJSAnyShallow;
@@ -2807,26 +2447,16 @@ extension SkStrutStylePropertiesExtension on SkStrutStyleProperties {
   set forceStrutHeight(bool? value) => _forceStrutHeight = value?.toJS;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkFontStyle {
-  external factory SkFontStyle();
-}
+extension type SkFontStyle._(JSObject _) implements JSObject {
+  external SkFontStyle({int dummyArgumentToCreateObjectLiteral});
 
-extension SkFontStyleExtension on SkFontStyle {
   external set weight(SkFontWeight? value);
   external set slant(SkFontSlant? value);
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkTextShadow {
-  external factory SkTextShadow();
-}
+extension type SkTextShadow._(JSObject _) implements JSObject {
+  external SkTextShadow({int dummyArgumentToCreateObjectLiteral});
 
-extension SkTextShadowExtension on SkTextShadow {
   @JS('color')
   external set _color(JSFloat32Array? value);
   set color(Float32List? value) => _color = value?.toJS;
@@ -2840,14 +2470,9 @@ extension SkTextShadowExtension on SkTextShadow {
   set blurRadius(double? value) => _blurRadius = value?.toJS;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkFontFeature {
-  external factory SkFontFeature();
-}
+extension type SkFontFeature._(JSObject _) implements JSObject {
+  external SkFontFeature({int dummyArgumentToCreateObjectLiteral});
 
-extension SkFontFeatureExtension on SkFontFeature {
   @JS('name')
   external set _name(JSString? value);
   set name(String? value) => _name = value?.toJS;
@@ -2857,14 +2482,9 @@ extension SkFontFeatureExtension on SkFontFeature {
   set value(int? v) => _value = v?.toJS;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkFontVariation {
-  external factory SkFontVariation();
-}
+extension type SkFontVariation._(JSObject _) implements JSObject {
+  external SkFontVariation({int dummyArgumentToCreateObjectLiteral});
 
-extension SkFontVariationExtension on SkFontVariation {
   @JS('axis')
   external set _axis(JSString? value);
   set axis(String? value) => _axis = value?.toJS;
@@ -2874,18 +2494,12 @@ extension SkFontVariationExtension on SkFontVariation {
   set value(double? v) => _value = v?.toJS;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkTypeface {}
+extension type SkTypeface(JSObject _) implements JSObject {}
 
 @JS('window.flutterCanvasKit.Font')
-@staticInterop
-class SkFont {
-  external factory SkFont(SkTypeface typeface);
-}
+extension type SkFont._(JSObject _) implements JSObject {
+  external SkFont(SkTypeface typeface);
 
-extension SkFontExtension on SkFont {
   @JS('getGlyphIDs')
   external JSUint16Array _getGlyphIDs(JSString text);
   Uint16List getGlyphIDs(String text) => _getGlyphIDs(text.toJS).toDart;
@@ -2896,12 +2510,7 @@ extension SkFontExtension on SkFont {
       _getGlyphBounds(glyphs.toJSAnyShallow, paint, output?.toJS);
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkFontMgr {}
-
-extension SkFontMgrExtension on SkFontMgr {
+extension type SkFontMgr(JSObject _) implements JSObject {
   @JS('getFamilyName')
   external JSString? _getFamilyName(JSNumber fontId);
   String? getFamilyName(double fontId) => _getFamilyName(fontId.toJS)?.toDart;
@@ -2914,32 +2523,19 @@ extension SkFontMgrExtension on SkFontMgr {
 }
 
 @JS('window.flutterCanvasKit.TypefaceFontProvider')
-@staticInterop
-class TypefaceFontProvider extends SkFontMgr {}
-
-extension TypefaceFontProviderExtension on TypefaceFontProvider {
+extension type TypefaceFontProvider(JSObject _) implements JSObject, SkFontMgr {
   @JS('registerFont')
   external JSVoid _registerFont(JSUint8Array font, JSString family);
   void registerFont(Uint8List font, String family) => _registerFont(font.toJS, family.toJS);
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkFontCollection {}
-
-extension SkFontCollectionExtension on SkFontCollection {
+extension type SkFontCollection(JSObject _) implements JSObject {
   external void enableFontFallback();
   external void setDefaultFontManager(TypefaceFontProvider? fontManager);
   external void delete();
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkLineMetrics {}
-
-extension SkLineMetricsExtension on SkLineMetrics {
+extension type SkLineMetrics(JSObject _) implements JSObject {
   @JS('startIndex')
   external JSNumber get _startIndex;
   double get startIndex => _startIndex.toDartDouble;
@@ -2989,12 +2585,7 @@ extension SkLineMetricsExtension on SkLineMetrics {
   double get lineNumber => _lineNumber.toDartDouble;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkGlyphClusterInfo {}
-
-extension SkGlyphClusterInfoExtension on SkGlyphClusterInfo {
+extension type SkGlyphClusterInfo(JSObject _) implements JSObject {
   @JS('graphemeLayoutBounds')
   external JSArray<JSAny?> get _bounds;
 
@@ -3020,12 +2611,7 @@ extension SkGlyphClusterInfoExtension on SkGlyphClusterInfo {
   }
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkRectWithDirection {}
-
-extension SkRectWithDirectionExtension on SkRectWithDirection {
+extension type SkRectWithDirection(JSObject _) implements JSObject {
   @JS('rect')
   external JSFloat32Array get _rect;
   Float32List get rect => _rect.toDart;
@@ -3037,12 +2623,7 @@ extension SkRectWithDirectionExtension on SkRectWithDirection {
   external SkTextDirection dir;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkParagraph {}
-
-extension SkParagraphExtension on SkParagraph {
+extension type SkParagraph(JSObject _) implements JSObject {
   @JS('getAlphabeticBaseline')
   external JSNumber _getAlphabeticBaseline();
   double getAlphabeticBaseline() => _getAlphabeticBaseline().toDartDouble;
@@ -3141,11 +2722,7 @@ extension SkParagraphExtension on SkParagraph {
   external JSVoid delete();
 }
 
-@JS()
-@staticInterop
-class SkTextPosition {}
-
-extension SkTextPositionExtnsion on SkTextPosition {
+extension type SkTextPosition(JSObject _) implements JSObject {
   external SkAffinity get affinity;
 
   @JS('pos')
@@ -3153,11 +2730,7 @@ extension SkTextPositionExtnsion on SkTextPosition {
   double get pos => _pos.toDartDouble;
 }
 
-@JS()
-@staticInterop
-class SkTextRange {}
-
-extension SkTextRangeExtension on SkTextRange {
+extension type SkTextRange(JSObject _) implements JSObject {
   @JS('start')
   external JSNumber get _start;
   double get start => _start.toDartDouble;
@@ -3167,25 +2740,15 @@ extension SkTextRangeExtension on SkTextRange {
   double get end => _end.toDartDouble;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkVertices {}
-
-extension SkVerticesExtension on SkVertices {
+extension type SkVertices(JSObject _) implements JSObject {
   external JSVoid delete();
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkTonalColors {
+extension type SkTonalColors._(JSObject _) implements JSObject {
   factory SkTonalColors({required Float32List ambient, required Float32List spot}) =>
-      SkTonalColors._(ambient: ambient.toJS, spot: spot.toJS);
-  external factory SkTonalColors._({required JSFloat32Array ambient, required JSFloat32Array spot});
-}
+      SkTonalColors.make(ambient: ambient.toJS, spot: spot.toJS);
+  external SkTonalColors.make({required JSFloat32Array ambient, required JSFloat32Array spot});
 
-extension SkTonalColorsExtension on SkTonalColors {
   @JS('ambient')
   external JSFloat32Array get _ambient;
   Float32List get ambient => _ambient.toDart;
@@ -3195,39 +2758,22 @@ extension SkTonalColorsExtension on SkTonalColors {
   Float32List get spot => _spot.toDart;
 }
 
-@JS()
-@staticInterop
-class SkFontMgrNamespace {}
-
-extension SkFontMgrNamespaceExtension on SkFontMgrNamespace {
+extension type SkFontMgrNamespace(JSObject _) implements JSObject {
   // TODO(yjbanov): can this be made non-null? It returns null in our unit-tests right now.
   @JS('FromData')
   external SkFontMgr? _FromData(JSAny fonts);
   SkFontMgr? FromData(List<Uint8List> fonts) => _FromData(fonts.toJSAnyShallow);
 }
 
-@JS()
-@staticInterop
-class TypefaceFontProviderNamespace {}
-
-extension TypefaceFontProviderNamespaceExtension on TypefaceFontProviderNamespace {
+extension type TypefaceFontProviderNamespace(JSObject _) implements JSObject {
   external TypefaceFontProvider Make();
 }
 
-@JS()
-@staticInterop
-class FontCollectionNamespace {}
-
-extension FontCollectionNamespaceExtension on FontCollectionNamespace {
+extension type FontCollectionNamespace(JSObject _) implements JSObject {
   external SkFontCollection Make();
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkTypefaceFactory {}
-
-extension SkTypefaceFactoryExtension on SkTypefaceFactory {
+extension type SkTypefaceFactory(JSObject _) implements JSObject {
   @JS('MakeFreeTypeFaceFromData')
   external SkTypeface? _MakeFreeTypeFaceFromData(JSArrayBuffer fontData);
   SkTypeface? MakeFreeTypeFaceFromData(ByteBuffer fontData) =>
@@ -3235,12 +2781,7 @@ extension SkTypefaceFactoryExtension on SkTypefaceFactory {
 }
 
 /// Any Skia object that has a `delete` method.
-@JS()
-@anonymous
-@staticInterop
-class SkDeletable {}
-
-extension SkDeletableExtension on SkDeletable {
+extension type SkDeletable(JSObject _) implements JSObject {
   /// Deletes the C++ side object.
   external JSVoid delete();
 
@@ -3255,12 +2796,7 @@ extension SkDeletableExtension on SkDeletable {
   external JsConstructor get constructor;
 }
 
-@JS()
-@anonymous
-@staticInterop
-class JsConstructor {}
-
-extension JsConstructorExtension on JsConstructor {
+extension type JsConstructor(JSObject _) implements JSObject {
   /// The name of the "constructor", typically the function name called with
   /// the `new` keyword, or the ES6 class name.
   ///
@@ -3270,11 +2806,7 @@ extension JsConstructorExtension on JsConstructor {
   String get name => _name.toDart;
 }
 
-@JS()
-@staticInterop
-class SkData {}
-
-extension SkDataExtension on SkData {
+extension type SkData(JSObject _) implements JSObject {
   @JS('size')
   external JSNumber _size();
   double size() => _size().toDartDouble;
@@ -3290,33 +2822,28 @@ extension SkDataExtension on SkData {
   external JSVoid delete();
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkImageInfo {
+extension type SkImageInfo._(JSObject _) implements JSObject {
   factory SkImageInfo({
     required double width,
     required double height,
     required SkColorType colorType,
     required SkAlphaType alphaType,
     required ColorSpace colorSpace,
-  }) => SkImageInfo._(
+  }) => SkImageInfo.make(
     width: width.toJS,
     height: height.toJS,
     colorType: colorType,
     alphaType: alphaType,
     colorSpace: colorSpace,
   );
-  external factory SkImageInfo._({
+  external SkImageInfo.make({
     required JSNumber width,
     required JSNumber height,
     required SkColorType colorType,
     required SkAlphaType alphaType,
     required ColorSpace colorSpace,
   });
-}
 
-extension SkImageInfoExtension on SkImageInfo {
   external SkAlphaType get alphaType;
   external ColorSpace get colorSpace;
   external SkColorType get colorType;
@@ -3350,33 +2877,28 @@ extension SkImageInfoExtension on SkImageInfo {
   SkImageInfo makeWH(double width, double height) => _makeWH(width.toJS, height.toJS);
 }
 
-@JS()
-@anonymous
-@staticInterop
-class SkPartialImageInfo {
+extension type SkPartialImageInfo._(JSObject _) implements JSObject {
   factory SkPartialImageInfo({
     required double width,
     required double height,
     required SkColorType colorType,
     required SkAlphaType alphaType,
     required ColorSpace colorSpace,
-  }) => SkPartialImageInfo._(
+  }) => SkPartialImageInfo.make(
     width: width.toJS,
     height: height.toJS,
     colorType: colorType,
     alphaType: alphaType,
     colorSpace: colorSpace,
   );
-  external factory SkPartialImageInfo._({
+  external SkPartialImageInfo.make({
     required JSNumber width,
     required JSNumber height,
     required SkColorType colorType,
     required SkAlphaType alphaType,
     required ColorSpace colorSpace,
   });
-}
 
-extension SkPartialImageInfoExtension on SkPartialImageInfo {
   external SkAlphaType get alphaType;
   external ColorSpace get colorSpace;
   external SkColorType get colorType;
@@ -3391,15 +2913,7 @@ extension SkPartialImageInfoExtension on SkPartialImageInfo {
 }
 
 @JS('window.flutterCanvasKit.RuntimeEffect')
-@anonymous
-@staticInterop
-class SkRuntimeEffect {}
-
-@JS('window.flutterCanvasKit.RuntimeEffect.Make')
-external SkRuntimeEffect? _MakeRuntimeEffect(JSString program);
-SkRuntimeEffect? MakeRuntimeEffect(String program) => _MakeRuntimeEffect(program.toJS);
-
-extension SkSkRuntimeEffectExtension on SkRuntimeEffect {
+extension type SkRuntimeEffect(JSObject _) implements JSObject {
   @JS('makeShader')
   external SkShader? _makeShader(JSAny uniforms);
   SkShader? makeShader(SkFloat32List uniforms) => _makeShader(uniforms.toJSAnyShallow);
@@ -3409,6 +2923,10 @@ extension SkSkRuntimeEffectExtension on SkRuntimeEffect {
   SkShader? makeShaderWithChildren(SkFloat32List uniforms, List<Object?> children) =>
       _makeShaderWithChildren(uniforms.toJSAnyShallow, children.toJSAnyShallow);
 }
+
+@JS('window.flutterCanvasKit.RuntimeEffect.Make')
+external SkRuntimeEffect? _MakeRuntimeEffect(JSString program);
+SkRuntimeEffect? MakeRuntimeEffect(String program) => _MakeRuntimeEffect(program.toJS);
 
 const String _kFullCanvasKitJsFileName = 'canvaskit.js';
 const String _kChromiumCanvasKitJsFileName = 'chromium/canvaskit.js';

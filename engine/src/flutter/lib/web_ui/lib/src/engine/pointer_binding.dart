@@ -91,7 +91,7 @@ class SafariPointerEventWorkaround {
   void workAroundMissingPointerEvents() {
     // We only need to attach the listener once.
     if (_listener == null) {
-      _listener = createDomEventListener((_) {});
+      _listener = createDomEventListener((DomEvent _) {});
       domDocument.addEventListener('touchstart', _listener);
     }
   }
@@ -471,7 +471,7 @@ class Listener {
       target.addEventListener(event, jsHandler);
     } else {
       final Map<String, Object> eventOptions = <String, Object>{'passive': passive};
-      target.addEventListenerWithOptions(event, jsHandler, eventOptions);
+      target.addEventListener(event, jsHandler, eventOptions.toJSAnyDeep);
     }
 
     final Listener listener = Listener._(event: event, target: target, handler: jsHandler);
@@ -528,9 +528,9 @@ abstract class _BaseAdapter {
   /// instead, because the browser doesn't fire the latter two for DOM elements
   /// when the pointer is outside the window.
   void addEventListener(DomEventTarget target, String eventName, DartDomEventListener handler) {
-    JSVoid loggedHandler(DomEvent event) {
+    void loggedHandler(DomEvent event) {
       if (_debugLogPointerEvents) {
-        if (domInstanceOfString(event, 'PointerEvent')) {
+        if (domInstanceOfString(event as JSObject, 'PointerEvent')) {
           final DomPointerEvent pointerEvent = event as DomPointerEvent;
           final ui.Offset offset = computeEventOffsetToTarget(event, _view);
           print(
@@ -730,7 +730,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
       return;
     }
 
-    assert(domInstanceOfString(event, 'WheelEvent'));
+    assert(domInstanceOfString(event as JSObject, 'WheelEvent'));
     if (_debugLogPointerEvents) {
       print(event.type);
     }

@@ -121,8 +121,6 @@ abstract class BrowserImageDecoder implements ui.Codec {
 
       // Flutter doesn't have an API for progressive loading of images, so we
       // wait until the image is fully decoded.
-      // package:js bindings don't work with getters that return a Promise, which
-      // is why js_util is used instead.
       await promiseToFuture<void>(getJsProperty(webDecoder, 'completed'));
       frameCount = webDecoder.tracks.selectedTrack!.frameCount.toInt();
 
@@ -151,7 +149,7 @@ abstract class BrowserImageDecoder implements ui.Codec {
 
       return webDecoder;
     } catch (error) {
-      if (domInstanceOfString(error, 'DOMException')) {
+      if (error is JSAny && domInstanceOfString(error, 'DOMException')) {
         if ((error as DomException).name == DomException.notSupported) {
           throw ImageCodecException(
             "Image file format ($contentType) is not supported by this browser's ImageDecoder API.\n"

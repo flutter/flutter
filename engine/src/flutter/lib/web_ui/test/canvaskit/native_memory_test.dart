@@ -6,7 +6,6 @@ import 'dart:js_interop';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 
 import 'common.dart';
@@ -252,13 +251,10 @@ class TestSkDeletableMock {
   JsConstructor get constructor => TestJsConstructor(name: 'TestSkDeletable');
 }
 
-@JS()
-@anonymous
-@staticInterop
-class TestSkDeletable implements SkDeletable {
+extension type TestSkDeletable._(SkDeletable _) implements SkDeletable {
   factory TestSkDeletable() {
     final TestSkDeletableMock mock = TestSkDeletableMock();
-    return TestSkDeletable._(
+    return TestSkDeletable._inner(
       isDeleted:
           () {
             return mock.isDeleted();
@@ -271,18 +267,15 @@ class TestSkDeletable implements SkDeletable {
     );
   }
 
-  external factory TestSkDeletable._({
+  external factory TestSkDeletable._inner({
     JSFunction isDeleted,
     JSFunction delete,
     JsConstructor constructor,
   });
 }
 
-@JS()
-@anonymous
-@staticInterop
-class TestJsConstructor implements JsConstructor {
-  external factory TestJsConstructor({String name});
+extension type TestJsConstructor._(JSObject _) implements JsConstructor {
+  external TestJsConstructor({String name});
 }
 
 class TestCountedRefOwner implements StackTraceDebugger {

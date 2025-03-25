@@ -64,7 +64,7 @@ mixin CompositionAwareMixin {
   }
 
   JSVoid _handleCompositionUpdate(DomEvent event) {
-    if (domInstanceOfString(event, 'CompositionEvent')) {
+    if (domInstanceOfString(event as JSObject, 'CompositionEvent')) {
       composingText = (event as DomCompositionEvent).data;
     }
   }

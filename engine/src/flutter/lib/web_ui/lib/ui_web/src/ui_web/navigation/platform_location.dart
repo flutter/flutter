@@ -89,7 +89,10 @@ class BrowserPlatformLocation implements PlatformLocation {
 
   @visibleForTesting
   DomEventListener getOrCreateDomEventListener(EventListener fn) {
-    return _popStateListenersCache.putIfAbsent(fn, () => createDomEventListener(fn));
+    final DomEventListener jsListener = createDomEventListener((DomEvent event) {
+      fn(event);
+    });
+    return _popStateListenersCache.putIfAbsent(fn, () => jsListener);
   }
 
   @override
