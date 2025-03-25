@@ -24,7 +24,7 @@
 namespace impeller::interop::testing {
 
 using InteropPlaygroundTest = PlaygroundTest;
-INSTANTIATE_OPENGLES_PLAYGROUND_SUITE(InteropPlaygroundTest);
+INSTANTIATE_PLAYGROUND_SUITE(InteropPlaygroundTest);
 
 TEST_P(InteropPlaygroundTest, CanCreateContext) {
   auto context = CreateContext();
@@ -43,6 +43,11 @@ TEST_P(InteropPlaygroundTest, CanCreateDisplayListBuilder) {
 }
 
 TEST_P(InteropPlaygroundTest, CanCreateSurface) {
+  if (GetBackend() != PlaygroundBackend::kOpenGLES) {
+    GTEST_SKIP()
+        << "This test checks wrapping FBOs which is an OpenGL ES only call.";
+    return;
+  }
   auto context = CreateContext();
   ASSERT_TRUE(context);
   const auto window_size = GetWindowSize();
@@ -461,6 +466,35 @@ TEST_P(InteropPlaygroundTest, CanRenderTextAlignments) {
 
   auto dl = builder.Build();
 
+  ASSERT_TRUE(
+      OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
+        hpp::Surface window(surface.GetC());
+        window.Draw(dl);
+        return true;
+      }));
+}
+
+TEST_P(InteropPlaygroundTest, CanRenderShadows) {
+  hpp::DisplayListBuilder builder;
+  {
+    builder.DrawRect(ImpellerRect{0, 0, 400, 400},
+                     hpp::Paint{}.SetColor(ImpellerColor{
+                         0.0, 1.0, 0.0, 1.0, kImpellerColorSpaceSRGB}));
+  }
+  ImpellerRect box = {100, 100, 100, 100};
+  {
+    hpp::PathBuilder path_builder;
+    path_builder.AddRect(box);
+    ImpellerColor shadow_color = {0.0, 0.0, 0.0, 1.0, kImpellerColorSpaceSRGB};
+    builder.DrawShadow(path_builder.Build(), shadow_color, 4.0f, false, 1.0f);
+  }
+  {
+    hpp::Paint red_paint;
+    red_paint.SetColor(
+        ImpellerColor{1.0, 0.0, 0.0, 1.0, kImpellerColorSpaceSRGB});
+    builder.DrawRect(box, red_paint);
+  }
+  auto dl = builder.Build();
   ASSERT_TRUE(
       OpenPlaygroundHere([&](const auto& context, const auto& surface) -> bool {
         hpp::Surface window(surface.GetC());

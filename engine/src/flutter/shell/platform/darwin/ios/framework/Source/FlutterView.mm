@@ -51,10 +51,6 @@ FLUTTER_ASSERT_ARC
   return MTLPixelFormatBGRA8Unorm;
 }
 - (BOOL)isWideGamutSupported {
-  if (!self.delegate.isUsingImpeller) {
-    return NO;
-  }
-
   FML_DCHECK(self.screen);
 
   // This predicates the decision on the capabilities of the iOS device's
@@ -82,16 +78,6 @@ FLUTTER_ASSERT_ARC
   return self;
 }
 
-static void PrintWideGamutWarningOnce() {
-  static BOOL did_print = NO;
-  if (did_print) {
-    return;
-  }
-  FML_DLOG(WARNING) << "Rendering wide gamut colors is turned on but isn't "
-                       "supported, downgrading the color gamut to sRGB.";
-  did_print = YES;
-}
-
 - (void)layoutSubviews {
   if ([self.layer isKindOfClass:[CAMetalLayer class]]) {
 // It is a known Apple bug that CAMetalLayer incorrectly reports its supported
@@ -100,37 +86,31 @@ static void PrintWideGamutWarningOnce() {
 #pragma clang diagnostic ignored "-Wunguarded-availability-new"
     CAMetalLayer* layer = (CAMetalLayer*)self.layer;
 #pragma clang diagnostic pop
+
     CGFloat screenScale = self.screen.scale;
     layer.allowsGroupOpacity = YES;
     layer.contentsScale = screenScale;
     layer.rasterizationScale = screenScale;
     layer.framebufferOnly = flutter::Settings::kSurfaceDataAccessible ? NO : YES;
-    BOOL isWideGamutSupported = self.isWideGamutSupported;
-    if (_isWideGamutEnabled && isWideGamutSupported) {
+    if (_isWideGamutEnabled && self.isWideGamutSupported) {
       fml::CFRef<CGColorSpaceRef> srgb(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = srgb;
-      layer.pixelFormat = MTLPixelFormatBGRA10_XR;
-    } else if (_isWideGamutEnabled && !isWideGamutSupported) {
-      PrintWideGamutWarningOnce();
+      // If the flutter layer is opaque, then use an alpha-less format for the onscreen
+      // texture. This will reduce wide gamut memory usage by 50%, and Impeller will
+      // still correctly use alpha for MSAA textures and any offscreen save layer usage.
+      // For non-wide gamut formats there is no point in removing the alpha channel as
+      // the textures must align to 32 bits (32 -> 24 = 32) whereas wide gamut is (40 -> 32 = 32)
+      // instead of 64.
+      layer.pixelFormat = layer.opaque ? MTLPixelFormatBGR10_XR : MTLPixelFormatBGRA10_XR;
     }
   }
 
   [super layoutSubviews];
 }
 
-static BOOL _forceSoftwareRendering;
-
-+ (BOOL)forceSoftwareRendering {
-  return _forceSoftwareRendering;
-}
-
-+ (void)setForceSoftwareRendering:(BOOL)forceSoftwareRendering {
-  _forceSoftwareRendering = forceSoftwareRendering;
-}
-
 + (Class)layerClass {
   return flutter::GetCoreAnimationLayerClassForRenderingAPI(
-      flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering));
+      flutter::GetRenderingAPIForProcess(/*force_software=*/false));
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {

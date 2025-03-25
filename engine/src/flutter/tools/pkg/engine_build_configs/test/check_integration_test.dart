@@ -200,22 +200,6 @@ void main() {
     expect(stderr.toString(), contains('❌ All builder files conform to release_build standards'));
   });
 
-  test('allows a release builder if allow-listed', () {
-    addConfig('windows_host_engine', [
-      {
-        'name': r'ci\host_debug',
-        'archives': <Object?>[
-          {
-            'include_paths': ['out/foo'],
-          },
-        ],
-        'tests': <Object?>[{}],
-      },
-    ], releaseBuild: true);
-
-    run(['--engine-src-path=${tmpFlutterEngineSrc.path}']);
-  });
-
   test('fails if archives.include_paths is empty', () {
     addConfig('linux_engine', [
       {

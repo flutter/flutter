@@ -32,7 +32,6 @@ class BuildWebCommand extends BuildSubCommand {
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addNativeNullAssertions();
 
     //
@@ -96,7 +95,7 @@ class BuildWebCommand extends BuildSubCommand {
       negatable: false,
       help:
           'Passes "--dump-info" to the Javascript compiler which generates '
-          'information about the generated code is a .js.info.json file.',
+          'information about the generated code in main.dart.js.info.json.',
     );
     argParser.addFlag(
       'no-frequency-based-minification',
@@ -169,9 +168,6 @@ class BuildWebCommand extends BuildSubCommand {
     final bool sourceMaps = boolArg('source-maps');
 
     final List<WebCompilerConfig> compilerConfigs;
-    if (webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
-    }
 
     if (useWasm) {
       if (webRenderer != WebRendererMode.getDefault(useWasm: true)) {
@@ -240,14 +236,12 @@ class BuildWebCommand extends BuildSubCommand {
     // valid approaches for setting output directory of build artifacts
     final String? outputDirectoryPath = stringArg('output');
 
-    displayNullSafetyMode(buildInfo);
     final WebBuilder webBuilder = WebBuilder(
       logger: globals.logger,
       processManager: globals.processManager,
       buildSystem: globals.buildSystem,
       fileSystem: globals.fs,
       flutterVersion: globals.flutterVersion,
-      usage: globals.flutterUsage,
       analytics: globals.analytics,
     );
     await webBuilder.buildWeb(

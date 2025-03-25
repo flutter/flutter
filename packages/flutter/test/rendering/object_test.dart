@@ -33,7 +33,7 @@ void main() {
       onSemanticsUpdate: (ui.SemanticsUpdate update) {},
     );
     owner.ensureSemantics();
-    renderObject.attach(owner);
+    owner.rootNode = renderObject;
     renderObject.layout(
       const BoxConstraints.tightForFinite(),
     ); // semantics are only calculated if layout information is up to date.
@@ -56,7 +56,7 @@ void main() {
     expect(onSemanticsUpdateCallCount, 0);
 
     final TestRenderObject renderObject = TestRenderObject();
-    renderObject.attach(owner);
+    owner.rootNode = renderObject;
     renderObject.layout(const BoxConstraints.tightForFinite());
     owner.flushSemantics();
 
@@ -262,6 +262,24 @@ void main() {
         RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)),
         painter,
         oldLayer: oldLayer as ClipRRectLayer?,
+      );
+    });
+  });
+
+  test('PaintingContext.pushClipRSuperellipse reuses the layer', () {
+    _testPaintingContextLayerReuse<ClipRSuperellipseLayer>((
+      PaintingContextCallback painter,
+      PaintingContext context,
+      Offset offset,
+      Layer? oldLayer,
+    ) {
+      return context.pushClipRSuperellipse(
+        true,
+        offset,
+        Rect.zero,
+        RSuperellipse.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)),
+        painter,
+        oldLayer: oldLayer as ClipRSuperellipseLayer?,
       );
     });
   });

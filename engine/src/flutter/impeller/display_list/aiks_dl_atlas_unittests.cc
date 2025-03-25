@@ -16,7 +16,6 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/scalar.h"
-#include "include/core/SkRefCnt.h"
 
 namespace impeller {
 namespace testing {
@@ -182,7 +181,7 @@ TEST_P(AiksTest, DlAtlasGeometryNoBlend) {
 
   DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
                        texture_coordinates.data(), nullptr, transforms.size(),
-                       BlendMode::kSourceOver, {}, std::nullopt);
+                       BlendMode::kSrcOver, {}, std::nullopt);
 
   EXPECT_FALSE(geom.ShouldUseBlend());
   EXPECT_FALSE(geom.ShouldSkip());
@@ -203,10 +202,9 @@ TEST_P(AiksTest, DlAtlasGeometryBlend) {
   for (auto i = 0u; i < texture_coordinates.size(); i++) {
     colors.push_back(DlColor::ARGB(0.5, 1, 1, 1));
   }
-  DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
-                       texture_coordinates.data(), colors.data(),
-                       transforms.size(), BlendMode::kSourceOver, {},
-                       std::nullopt);
+  DlAtlasGeometry geom(
+      atlas->impeller_texture(), transforms.data(), texture_coordinates.data(),
+      colors.data(), transforms.size(), BlendMode::kSrcOver, {}, std::nullopt);
 
   EXPECT_TRUE(geom.ShouldUseBlend());
   EXPECT_FALSE(geom.ShouldSkip());
@@ -229,7 +227,7 @@ TEST_P(AiksTest, DlAtlasGeometryColorButNoBlend) {
   }
   DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
                        texture_coordinates.data(), colors.data(),
-                       transforms.size(), BlendMode::kSource, {}, std::nullopt);
+                       transforms.size(), BlendMode::kSrc, {}, std::nullopt);
 
   // Src blend mode means that colors would be ignored, even if provided.
   EXPECT_FALSE(geom.ShouldUseBlend());

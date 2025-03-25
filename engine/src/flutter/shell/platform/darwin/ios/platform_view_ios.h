@@ -30,7 +30,7 @@ namespace flutter {
  * The shell provides and requests for UI related data and this PlatformView subclass fulfills
  * it with iOS specific capabilities. As an example, the iOS embedding (the `FlutterEngine` and the
  * `FlutterViewController`) sends pointer data to the shell and receives the shell's request for a
- * Skia GrDirectContext and supplies it.
+ * Impeller AiksContext and supplies it.
  *
  * Despite the name "view", this class is unrelated to UIViews on iOS and doesn't have the same
  * lifecycle. It's a long lived bridge owned by the `FlutterEngine` and can be attached and
@@ -88,6 +88,9 @@ class PlatformViewIOS final : public PlatformView {
   void SetSemanticsEnabled(bool enabled) override;
 
   // |PlatformView|
+  void SetSemanticsTreeEnabled(bool enabled) override;
+
+  // |PlatformView|
   void HandlePlatformMessage(std::unique_ptr<flutter::PlatformMessage> message) override;
 
   // |PlatformView|
@@ -97,16 +100,14 @@ class PlatformViewIOS final : public PlatformView {
   std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
 
   // |PlatformView|
-  sk_sp<GrDirectContext> CreateResourceContext() const override;
-
-  // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
 
   // |PlatformView|
   void SetAccessibilityFeatures(int32_t flags) override;
 
   // |PlatformView|
-  void UpdateSemantics(flutter::SemanticsNodeUpdates update,
+  void UpdateSemantics(int64_t view_id,
+                       flutter::SemanticsNodeUpdates update,
                        flutter::CustomAccessibilityActionUpdates actions) override;
 
   // |PlatformView|
@@ -130,6 +131,11 @@ class PlatformViewIOS final : public PlatformView {
     return platform_message_handler_;
   }
 
+  /**
+   * Gets the accessibility bridge created in this platform view.
+   */
+  AccessibilityBridge* GetAccessibilityBridge() { return accessibility_bridge_.get(); }
+
  private:
   /// Smart pointer for use with objective-c observers.
   /// This guarantees we remove the observer.
@@ -145,24 +151,6 @@ class PlatformViewIOS final : public PlatformView {
     id<NSObject> observer_ = nil;
   };
 
-  /// Wrapper that guarantees we communicate clearing Accessibility
-  /// information to Dart.
-  class AccessibilityBridgeManager {
-   public:
-    explicit AccessibilityBridgeManager(const std::function<void(bool)>& set_semantics_enabled);
-    AccessibilityBridgeManager(const std::function<void(bool)>& set_semantics_enabled,
-                               AccessibilityBridge* bridge);
-    explicit operator bool() const noexcept { return static_cast<bool>(accessibility_bridge_); }
-    AccessibilityBridge* get() const noexcept { return accessibility_bridge_.get(); }
-    void Set(std::unique_ptr<AccessibilityBridge> bridge);
-    void Clear();
-
-   private:
-    FML_DISALLOW_COPY_AND_ASSIGN(AccessibilityBridgeManager);
-    std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
-    std::function<void(bool)> set_semantics_enabled_;
-  };
-
   __weak FlutterViewController* owner_controller_;
   // Since the `ios_surface_` is created on the platform thread but
   // used on the raster thread we need to protect it with a mutex.
@@ -170,7 +158,7 @@ class PlatformViewIOS final : public PlatformView {
   std::unique_ptr<IOSSurface> ios_surface_;
   std::shared_ptr<IOSContext> ios_context_;
   __weak FlutterPlatformViewsController* platform_views_controller_;
-  AccessibilityBridgeManager accessibility_bridge_;
+  std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
   ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;

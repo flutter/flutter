@@ -9,9 +9,12 @@
 
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
+#include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
+#include "flutter/shell/platform/linux/fl_text_input_handler.h"
+#include "flutter/shell/platform/linux/fl_windowing_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_dart_project.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 
@@ -48,17 +51,15 @@ typedef gboolean (*FlEnginePlatformMessageHandler)(
     gpointer user_data);
 
 /**
- * FlEngineUpdateSemanticsHandler:
- * @engine: an #FlEngine.
- * @node: semantic node information.
- * @user_data: (closure): data provided when registering this handler.
+ * fl_engine_new_with_binary_messenger:
+ * @binary_messenger: an #FlBinaryMessenger.
  *
- * Function called when semantics node updates are received.
+ * Creates a new engine with a custom binary messenger. Used for testing.
+ *
+ * Returns: a new #FlEngine.
  */
-typedef void (*FlEngineUpdateSemanticsHandler)(
-    FlEngine* engine,
-    const FlutterSemanticsUpdate2* update,
-    gpointer user_data);
+FlEngine* fl_engine_new_with_binary_messenger(
+    FlBinaryMessenger* binary_messenger);
 
 /**
  * fl_engine_new_with_renderer:
@@ -214,22 +215,6 @@ gboolean fl_engine_remove_view_finish(FlEngine* engine,
 void fl_engine_set_platform_message_handler(
     FlEngine* engine,
     FlEnginePlatformMessageHandler handler,
-    gpointer user_data,
-    GDestroyNotify destroy_notify);
-
-/**
- * fl_engine_set_update_semantics_handler:
- * @engine: an #FlEngine.
- * @handler: function to call when a semantics update is received.
- * @user_data: (closure): user data to pass to @handler.
- * @destroy_notify: (allow-none): a function which gets called to free
- * @user_data, or %NULL.
- *
- * Registers the function called when a semantics update is received.
- */
-void fl_engine_set_update_semantics_handler(
-    FlEngine* engine,
-    FlEngineUpdateSemanticsHandler handler,
     gpointer user_data,
     GDestroyNotify destroy_notify);
 
@@ -429,12 +414,14 @@ gboolean fl_engine_send_key_event_finish(FlEngine* engine,
 /**
  * fl_engine_dispatch_semantics_action:
  * @engine: an #FlEngine.
- * @id: the semantics action identifier.
+ * @view_id: the view that the event occured on.
+ * @node_id: the semantics action identifier.
  * @action: the action being dispatched.
  * @data: (allow-none): data associated with the action.
  */
 void fl_engine_dispatch_semantics_action(FlEngine* engine,
-                                         uint64_t id,
+                                         FlutterViewId view_id,
+                                         uint64_t node_id,
                                          FlutterSemanticsAction action,
                                          GBytes* data);
 
@@ -564,14 +551,58 @@ void fl_engine_update_accessibility_features(FlEngine* engine, int32_t flags);
 void fl_engine_request_app_exit(FlEngine* engine);
 
 /**
+ * fl_engine_get_windowing_handler:
+ * @engine: an #FlEngine.
+ *
+ * Gets the windowing handler used by this engine.
+ *
+ * Returns: an #FlWindowingHandler.
+ */
+FlWindowingHandler* fl_engine_get_windowing_handler(FlEngine* engine);
+
+/**
+ * fl_engine_get_keyboard_manager:
+ * @engine: an #FlEngine.
+ *
+ * Gets the keyboard manager used by this engine.
+ *
+ * Returns: an #FlKeyboardManager.
+ */
+FlKeyboardManager* fl_engine_get_keyboard_manager(FlEngine* engine);
+
+/**
+ * fl_engine_get_text_input_handler:
+ * @engine: an #FlEngine.
+ *
+ * Gets the text input handler used by this engine.
+ *
+ * Returns: an #FlTextInputHandler.
+ */
+FlTextInputHandler* fl_engine_get_text_input_handler(FlEngine* engine);
+
+/**
  * fl_engine_get_mouse_cursor_handler:
  * @engine: an #FlEngine.
  *
  * Gets the mouse cursor handler used by this engine.
  *
- * Returns: a #FlMouseCursorHandler.
+ * Returns: an #FlMouseCursorHandler.
  */
 FlMouseCursorHandler* fl_engine_get_mouse_cursor_handler(FlEngine* engine);
+
+/**
+ * fl_engine_for_id:
+ * @handle: an engine identifier obtained through
+ * PlatformDispatcher.instance.engineId.
+ *
+ * Returns Flutter engine associated with the identifier. The identifier
+ * must be valid and for a running engine otherwise the behavior is
+ * undefined.
+ * Must be called from the main thread.
+ *
+ * Returns: a #FlEngine or NULL.
+ */
+FlEngine* fl_engine_for_id(int64_t handle);
 
 G_END_DECLS
 

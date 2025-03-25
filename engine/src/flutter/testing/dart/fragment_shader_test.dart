@@ -91,6 +91,30 @@ void main() async {
     },
   );
 
+  test('FragmentShader setImageSampler asserts if image is disposed', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
+    final Image blueGreenImage = await _createBlueGreenImage();
+    final FragmentShader fragmentShader = program.fragmentShader();
+
+    try {
+      blueGreenImage.dispose();
+      expect(
+        () {
+          fragmentShader.setImageSampler(0, blueGreenImage);
+        },
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            contains('Image has been disposed'),
+          ),
+        ),
+      );
+    } finally {
+      fragmentShader.dispose();
+    }
+  });
+
   test('Disposed FragmentShader on Paint', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();
@@ -415,6 +439,34 @@ void main() async {
     expect(color, const Color(0xFF00FF00));
   });
 
+  // For an explaination of the problem see https://github.com/flutter/flutter/issues/163302 .
+  test('ImageFilter.shader equality checks consider uniform values', () async {
+    if (!impellerEnabled) {
+      print('Skipped for Skia');
+      return;
+    }
+    final FragmentProgram program = await FragmentProgram.fromAsset('filter_shader.frag.iplr');
+    final FragmentShader shader = program.fragmentShader();
+    final ImageFilter filter = ImageFilter.shader(shader);
+
+    // The same shader is equal to itself.
+    expect(filter, filter);
+    expect(identical(filter, filter), true);
+
+    final ImageFilter filter_2 = ImageFilter.shader(shader);
+
+    // The different shader is equal as long as uniforms are identical.
+    expect(filter, filter_2);
+    expect(identical(filter, filter_2), false);
+
+    // Not equal if uniforms change.
+    shader.setFloat(0, 1);
+    final ImageFilter filter_3 = ImageFilter.shader(shader);
+
+    expect(filter, isNot(filter_3));
+    expect(identical(filter, filter_3), false);
+  });
+
   if (impellerEnabled) {
     print('Skipped for Impeller - https://github.com/flutter/flutter/issues/122823');
     return;
@@ -544,6 +596,7 @@ Future<Image> _createBlueGreenImage() async {
   );
   final Codec codec = await descriptor.instantiateCodec();
   final FrameInfo frame = await codec.getNextFrame();
+  codec.dispose();
   return frame.image;
 }
 

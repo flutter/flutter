@@ -103,7 +103,7 @@ static std::optional<QueueIndexVK> PickQueue(const vk::PhysicalDevice& device,
 }
 
 std::shared_ptr<ContextVK> ContextVK::Create(Settings settings) {
-  auto context = std::shared_ptr<ContextVK>(new ContextVK());
+  auto context = std::shared_ptr<ContextVK>(new ContextVK(settings.flags));
   context->Setup(std::move(settings));
   if (!context->IsValid()) {
     return nullptr;
@@ -127,7 +127,8 @@ uint64_t CalculateHash(void* ptr) {
 }
 }  // namespace
 
-ContextVK::ContextVK() : hash_(CalculateHash(this)) {}
+ContextVK::ContextVK(const Flags& flags)
+    : Context(flags), hash_(CalculateHash(this)) {}
 
 ContextVK::~ContextVK() {
   if (device_holder_ && device_holder_->device) {
@@ -144,21 +145,12 @@ void ContextVK::Setup(Settings settings) {
   TRACE_EVENT0("impeller", "ContextVK::Setup");
 
   if (!settings.proc_address_callback) {
+    VALIDATION_LOG << "Missing proc address callback.";
     return;
   }
 
   raster_message_loop_ = fml::ConcurrentMessageLoop::Create(
       ChooseThreadCountForWorkers(std::thread::hardware_concurrency()));
-  raster_message_loop_->PostTaskToAllWorkers([]() {
-    // Currently we only use the worker task pool for small parts of a frame
-    // workload, if this changes this setting may need to be adjusted.
-    fml::RequestAffinity(fml::CpuAffinity::kNotPerformance);
-#ifdef FML_OS_ANDROID
-    if (::setpriority(PRIO_PROCESS, gettid(), -5) != 0) {
-      FML_LOG(ERROR) << "Failed to set Workers task runner priority";
-    }
-#endif  // FML_OS_ANDROID
-  });
 
   auto& dispatcher = VULKAN_HPP_DEFAULT_DISPATCHER;
   dispatcher.init(settings.proc_address_callback);
@@ -545,9 +537,8 @@ std::shared_ptr<CommandBuffer> ContextVK::CreateCommandBuffer() const {
     DescriptorPoolMap::iterator current_pool =
         cached_descriptor_pool_.find(std::this_thread::get_id());
     if (current_pool == cached_descriptor_pool_.end()) {
-      descriptor_pool =
-          (cached_descriptor_pool_[std::this_thread::get_id()] =
-               std::make_shared<DescriptorPoolVK>(weak_from_this()));
+      descriptor_pool = (cached_descriptor_pool_[std::this_thread::get_id()] =
+                             descriptor_pool_recycler_->GetDescriptorPool());
     } else {
       descriptor_pool = current_pool->second;
     }
@@ -731,7 +722,9 @@ const std::unique_ptr<DriverInfoVK>& ContextVK::GetDriverInfo() const {
 }
 
 bool ContextVK::GetShouldEnableSurfaceControlSwapchain() const {
-  return should_enable_surface_control_;
+  return should_enable_surface_control_ &&
+         CapabilitiesVK::Cast(*device_capabilities_)
+             .SupportsExternalSemaphoreExtensions();
 }
 
 RuntimeStageBackend ContextVK::GetRuntimeStageBackend() const {

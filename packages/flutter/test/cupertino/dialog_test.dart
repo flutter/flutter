@@ -711,6 +711,7 @@ void main() {
                             SemanticsFlag.scopesRoute,
                             SemanticsFlag.namesRoute,
                           ],
+                          role: SemanticsRole.alertDialog,
                           label: 'Alert',
                           children: <TestSemantics>[
                             TestSemantics(
@@ -921,17 +922,17 @@ void main() {
     await tester.pumpAndSettle();
 
     // Expect the modal dialog box to take all available height.
-    expect(tester.getSize(find.byType(ClipRRect)), equals(const Size(310.0, 560.0 - 24.0 * 2)));
+    expect(
+      tester.getSize(find.byType(ClipRSuperellipse)),
+      equals(const Size(310.0, 560.0 - 24.0 * 2)),
+    );
 
     // Check sizes/locations of the text. The text is large so these 2 buttons are stacked.
     // Visually the "Cancel" button and "OK" button are the same height when using the
     // regular font. However, when using the test font, "Cancel" becomes 2 lines which
     // is why the height we're verifying for "Cancel" is larger than "OK".
 
-    if (!kIsWeb || isSkiaWeb) {
-      // https://github.com/flutter/flutter/issues/99933
-      expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 132.0)));
-    }
+    expect(tester.getSize(find.text('The Title')), equals(const Size(270.0, 132.0)));
     expect(tester.getTopLeft(find.text('The Title')), equals(const Offset(265.0, 80.0 + 24.0)));
     expect(
       tester.getSize(find.widgetWithText(CupertinoDialogAction, 'Cancel')),
@@ -976,7 +977,7 @@ void main() {
     const double topAndBottomMargin = 40.0;
     const double topAndBottomPadding = 24.0 * 2;
     const double leftAndRightPadding = 40.0 * 2;
-    final Finder modalFinder = find.byType(ClipRRect);
+    final Finder modalFinder = find.byType(ClipRSuperellipse);
     expect(
       tester.getSize(modalFinder),
       equals(
@@ -1083,7 +1084,7 @@ void main() {
       return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
     });
 
-    final Finder modalBoundaryFinder = find.byType(ClipRRect);
+    final Finder modalBoundaryFinder = find.byType(ClipRSuperellipse);
 
     expect(tester.getSize(contentSectionFinder), tester.getSize(modalBoundaryFinder));
 
@@ -1130,7 +1131,7 @@ void main() {
       return element.widget.runtimeType.toString() == '_CupertinoAlertContentSection';
     });
 
-    final Finder modalBoundaryFinder = find.byType(ClipRRect);
+    final Finder modalBoundaryFinder = find.byType(ClipRSuperellipse);
 
     expect(tester.getSize(contentSectionFinder), tester.getSize(modalBoundaryFinder));
   });
@@ -1451,7 +1452,7 @@ void main() {
     // The buttons should be out of the screen
     expect(
       tester.getTopLeft(find.text('Button 0')).dy,
-      greaterThan(tester.getBottomLeft(find.byType(ClipRRect)).dy),
+      greaterThan(tester.getBottomLeft(find.byType(ClipRSuperellipse)).dy),
     );
     await expectLater(
       find.byType(CupertinoAlertDialog),
@@ -1990,6 +1991,50 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       kIsWeb ? SystemMouseCursors.click : SystemMouseCursors.basic,
     );
+  });
+
+  testWidgets('CupertinoAlertDialog divider spans full width and applies color', (
+    WidgetTester tester,
+  ) async {
+    const double kCupertinoDialogWidth = 270.0;
+    const double kDividerThickness = 0.3;
+    const Size expectedSize = Size(kCupertinoDialogWidth, kDividerThickness);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: CupertinoAlertDialog(
+            title: const Text('The Title'),
+            content: const Text('Content'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () {},
+                child: const Text('Cancel'),
+              ),
+              const CupertinoDialogAction(child: Text('OK')),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Finder decoratedBoxFinder = find.byType(DecoratedBox);
+
+    expect(decoratedBoxFinder, findsAny, reason: 'There should exist at least one DecoratedBox');
+
+    final Iterable<Element> elements = decoratedBoxFinder.evaluate().where((
+      Element decoratedBoxElement,
+    ) {
+      final DecoratedBox decoratedBox = decoratedBoxElement.widget as DecoratedBox;
+      return (decoratedBox.decoration is BoxDecoration?) &&
+          (decoratedBox.decoration as BoxDecoration?)?.color ==
+              CupertinoDynamicColor.resolve(CupertinoColors.separator, decoratedBoxElement) &&
+          tester.getSize(find.byWidget(decoratedBox)) == expectedSize;
+    });
+
+    expect(elements.length, 1, reason: 'No DecoratedBox matches the specified criteria.');
   });
 }
 

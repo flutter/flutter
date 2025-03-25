@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/linux/fl_dart_project_private.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 #include "flutter/shell/platform/linux/fl_pixel_buffer_texture_private.h"
 #include "flutter/shell/platform/linux/fl_platform_handler.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
@@ -23,6 +24,7 @@
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
 #include "flutter/shell/platform/linux/fl_texture_gl_private.h"
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
+#include "flutter/shell/platform/linux/fl_windowing_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
 // Unique number associated with platform tasks.
@@ -57,6 +59,18 @@ struct _FlEngine {
   // Implements the flutter/platform channel.
   FlPlatformHandler* platform_handler;
 
+  // Implements the flutter/windowing channel.
+  FlWindowingHandler* windowing_handler;
+
+  // Process keyboard events.
+  FlKeyboardManager* keyboard_manager;
+
+  // Implements the flutter/textinput channel.
+  FlTextInputHandler* text_input_handler;
+
+  // Implements the flutter/keyboard channel.
+  FlKeyboardHandler* keyboard_handler;
+
   // Implements the flutter/mousecursor channel.
   FlMouseCursorHandler* mouse_cursor_handler;
 
@@ -83,11 +97,6 @@ struct _FlEngine {
   FlEnginePlatformMessageHandler platform_message_handler;
   gpointer platform_message_handler_data;
   GDestroyNotify platform_message_handler_destroy_notify;
-
-  // Function to call when a semantic node is received.
-  FlEngineUpdateSemanticsHandler update_semantics_handler;
-  gpointer update_semantics_handler_data;
-  GDestroyNotify update_semantics_handler_destroy_notify;
 };
 
 G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
@@ -95,7 +104,7 @@ G_DEFINE_QUARK(fl_engine_error_quark, fl_engine_error)
 static void fl_engine_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
 
-enum { SIGNAL_ON_PRE_ENGINE_RESTART, LAST_SIGNAL };
+enum { SIGNAL_ON_PRE_ENGINE_RESTART, SIGNAL_UPDATE_SEMANTICS, LAST_SIGNAL };
 
 static guint fl_engine_signals[LAST_SIGNAL];
 
@@ -347,7 +356,7 @@ static void fl_engine_post_task(FlutterTask task,
                                 void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
 
-  fl_task_runner_post_task(self->task_runner, task, target_time_nanos);
+  fl_task_runner_post_flutter_task(self->task_runner, task, target_time_nanos);
 }
 
 // Called when a platform message is received from the engine.
@@ -375,9 +384,25 @@ static void fl_engine_update_semantics_cb(const FlutterSemanticsUpdate2* update,
                                           void* user_data) {
   FlEngine* self = FL_ENGINE(user_data);
 
-  if (self->update_semantics_handler != nullptr) {
-    self->update_semantics_handler(self, update,
-                                   self->update_semantics_handler_data);
+  g_signal_emit(self, fl_engine_signals[SIGNAL_UPDATE_SEMANTICS], 0, update);
+}
+
+static void setup_keyboard(FlEngine* self) {
+  g_clear_object(&self->keyboard_manager);
+  self->keyboard_manager = fl_keyboard_manager_new(self);
+
+  g_clear_object(&self->keyboard_handler);
+  self->keyboard_handler =
+      fl_keyboard_handler_new(self->binary_messenger, self->keyboard_manager);
+
+  GtkWidget* widget =
+      self->text_input_handler != nullptr
+          ? fl_text_input_handler_get_widget(self->text_input_handler)
+          : nullptr;
+  g_clear_object(&self->text_input_handler);
+  self->text_input_handler = fl_text_input_handler_new(self->binary_messenger);
+  if (widget != nullptr) {
+    fl_text_input_handler_set_widget(self->text_input_handler, widget);
   }
 }
 
@@ -388,6 +413,8 @@ static void fl_engine_update_semantics_cb(const FlutterSemanticsUpdate2* update,
 // Flutter CLI.)
 static void fl_engine_on_pre_engine_restart_cb(void* user_data) {
   FlEngine* self = FL_ENGINE(user_data);
+
+  setup_keyboard(self);
 
   g_signal_emit(self, fl_engine_signals[SIGNAL_ON_PRE_ENGINE_RESTART], 0);
 }
@@ -450,11 +477,16 @@ static void fl_engine_dispose(GObject* object) {
   fl_texture_registrar_shutdown(self->texture_registrar);
 
   g_clear_object(&self->project);
+  g_clear_object(&self->display_monitor);
   g_clear_object(&self->renderer);
   g_clear_object(&self->texture_registrar);
   g_clear_object(&self->binary_messenger);
   g_clear_object(&self->settings_handler);
   g_clear_object(&self->platform_handler);
+  g_clear_object(&self->windowing_handler);
+  g_clear_object(&self->keyboard_manager);
+  g_clear_object(&self->text_input_handler);
+  g_clear_object(&self->keyboard_handler);
   g_clear_object(&self->mouse_cursor_handler);
   g_clear_object(&self->task_runner);
 
@@ -464,13 +496,6 @@ static void fl_engine_dispose(GObject* object) {
   }
   self->platform_message_handler_data = nullptr;
   self->platform_message_handler_destroy_notify = nullptr;
-
-  if (self->update_semantics_handler_destroy_notify) {
-    self->update_semantics_handler_destroy_notify(
-        self->update_semantics_handler_data);
-  }
-  self->update_semantics_handler_data = nullptr;
-  self->update_semantics_handler_destroy_notify = nullptr;
 
   G_OBJECT_CLASS(fl_engine_parent_class)->dispose(object);
 }
@@ -490,6 +515,9 @@ static void fl_engine_class_init(FlEngineClass* klass) {
   fl_engine_signals[SIGNAL_ON_PRE_ENGINE_RESTART] = g_signal_new(
       "on-pre-engine-restart", fl_engine_get_type(), G_SIGNAL_RUN_LAST, 0,
       nullptr, nullptr, nullptr, G_TYPE_NONE, 0);
+  fl_engine_signals[SIGNAL_UPDATE_SEMANTICS] = g_signal_new(
+      "update-semantics", fl_engine_get_type(), G_SIGNAL_RUN_LAST, 0, nullptr,
+      nullptr, nullptr, G_TYPE_NONE, 1, G_TYPE_POINTER);
 }
 
 static void fl_engine_init(FlEngine* self) {
@@ -500,30 +528,65 @@ static void fl_engine_init(FlEngine* self) {
     g_warning("Failed get get engine function pointers");
   }
 
+  self->display_monitor =
+      fl_display_monitor_new(self, gdk_display_get_default());
+  self->task_runner = fl_task_runner_new(self);
+
   // Implicit view is 0, so start at 1.
   self->next_view_id = 1;
 
   self->texture_registrar = fl_texture_registrar_new(self);
 }
 
-FlEngine* fl_engine_new_with_renderer(FlDartProject* project,
-                                      FlRenderer* renderer) {
+static FlEngine* fl_engine_new_full(FlDartProject* project,
+                                    FlRenderer* renderer,
+                                    FlBinaryMessenger* binary_messenger) {
   g_return_val_if_fail(FL_IS_DART_PROJECT(project), nullptr);
   g_return_val_if_fail(FL_IS_RENDERER(renderer), nullptr);
 
   FlEngine* self = FL_ENGINE(g_object_new(fl_engine_get_type(), nullptr));
+
   self->project = FL_DART_PROJECT(g_object_ref(project));
   self->renderer = FL_RENDERER(g_object_ref(renderer));
-  self->binary_messenger = fl_binary_messenger_new(self);
+  if (binary_messenger != nullptr) {
+    self->binary_messenger =
+        FL_BINARY_MESSENGER(g_object_ref(binary_messenger));
+  } else {
+    self->binary_messenger = fl_binary_messenger_new(self);
+  }
+  self->keyboard_manager = fl_keyboard_manager_new(self);
+  self->mouse_cursor_handler =
+      fl_mouse_cursor_handler_new(self->binary_messenger);
+  self->windowing_handler = fl_windowing_handler_new(self);
 
   fl_renderer_set_engine(self->renderer, self);
 
   return self;
 }
 
+FlEngine* fl_engine_for_id(int64_t id) {
+  void* engine = reinterpret_cast<void*>(id);
+  g_return_val_if_fail(FL_IS_ENGINE(engine), nullptr);
+  return FL_ENGINE(engine);
+}
+
+FlEngine* fl_engine_new_with_renderer(FlDartProject* project,
+                                      FlRenderer* renderer) {
+  g_return_val_if_fail(FL_IS_DART_PROJECT(project), nullptr);
+  g_return_val_if_fail(FL_IS_RENDERER(renderer), nullptr);
+  return fl_engine_new_full(project, renderer, nullptr);
+}
+
 G_MODULE_EXPORT FlEngine* fl_engine_new(FlDartProject* project) {
   g_autoptr(FlRendererGdk) renderer = fl_renderer_gdk_new();
   return fl_engine_new_with_renderer(project, FL_RENDERER(renderer));
+}
+
+FlEngine* fl_engine_new_with_binary_messenger(
+    FlBinaryMessenger* binary_messenger) {
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlRendererGdk) renderer = fl_renderer_gdk_new();
+  return fl_engine_new_full(project, FL_RENDERER(renderer), binary_messenger);
 }
 
 G_MODULE_EXPORT FlEngine* fl_engine_new_headless(FlDartProject* project) {
@@ -543,8 +606,6 @@ FlDisplayMonitor* fl_engine_get_display_monitor(FlEngine* self) {
 
 gboolean fl_engine_start(FlEngine* self, GError** error) {
   g_return_val_if_fail(FL_IS_ENGINE(self), FALSE);
-
-  self->task_runner = fl_task_runner_new(self);
 
   FlutterRendererConfig config = {};
   config.type = kOpenGL;
@@ -569,7 +630,6 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   FlutterCustomTaskRunners custom_task_runners = {};
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
-  custom_task_runners.render_task_runner = &platform_task_runner;
 
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
@@ -597,6 +657,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
       dart_entrypoint_args != nullptr ? g_strv_length(dart_entrypoint_args) : 0;
   args.dart_entrypoint_argv =
       reinterpret_cast<const char* const*>(dart_entrypoint_args);
+  args.engine_id = reinterpret_cast<int64_t>(self);
 
   FlutterCompositor compositor = {};
   compositor.struct_size = sizeof(FlutterCompositor);
@@ -643,16 +704,14 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   fl_settings_handler_start(self->settings_handler, settings);
 
   self->platform_handler = fl_platform_handler_new(self->binary_messenger);
-  self->mouse_cursor_handler =
-      fl_mouse_cursor_handler_new(self->binary_messenger);
+
+  setup_keyboard(self);
 
   result = self->embedder_api.UpdateSemanticsEnabled(self->engine, TRUE);
   if (result != kSuccess) {
     g_warning("Failed to enable accessibility features on Flutter engine");
   }
 
-  self->display_monitor =
-      fl_display_monitor_new(self, gdk_display_get_default());
   fl_display_monitor_start(self->display_monitor);
 
   return TRUE;
@@ -773,23 +832,6 @@ void fl_engine_set_platform_message_handler(
   self->platform_message_handler = handler;
   self->platform_message_handler_data = user_data;
   self->platform_message_handler_destroy_notify = destroy_notify;
-}
-
-void fl_engine_set_update_semantics_handler(
-    FlEngine* self,
-    FlEngineUpdateSemanticsHandler handler,
-    gpointer user_data,
-    GDestroyNotify destroy_notify) {
-  g_return_if_fail(FL_IS_ENGINE(self));
-
-  if (self->update_semantics_handler_destroy_notify) {
-    self->update_semantics_handler_destroy_notify(
-        self->update_semantics_handler_data);
-  }
-
-  self->update_semantics_handler = handler;
-  self->update_semantics_handler_data = user_data;
-  self->update_semantics_handler_destroy_notify = destroy_notify;
 }
 
 // Note: This function can be called from any thread.
@@ -1159,7 +1201,8 @@ gboolean fl_engine_send_key_event_finish(FlEngine* self,
 }
 
 void fl_engine_dispatch_semantics_action(FlEngine* self,
-                                         uint64_t id,
+                                         FlutterViewId view_id,
+                                         uint64_t node_id,
                                          FlutterSemanticsAction action,
                                          GBytes* data) {
   g_return_if_fail(FL_IS_ENGINE(self));
@@ -1175,8 +1218,14 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
         g_bytes_get_data(data, &action_data_length));
   }
 
-  self->embedder_api.DispatchSemanticsAction(self->engine, id, action,
-                                             action_data, action_data_length);
+  FlutterSendSemanticsActionInfo info;
+  info.struct_size = sizeof(FlutterSendSemanticsActionInfo);
+  info.view_id = view_id;
+  info.node_id = node_id;
+  info.action = action;
+  info.data = action_data;
+  info.data_length = action_data_length;
+  self->embedder_api.SendSemanticsAction(self->engine, &info);
 }
 
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,
@@ -1236,6 +1285,21 @@ void fl_engine_update_accessibility_features(FlEngine* self, int32_t flags) {
 void fl_engine_request_app_exit(FlEngine* self) {
   g_return_if_fail(FL_IS_ENGINE(self));
   fl_platform_handler_request_app_exit(self->platform_handler);
+}
+
+FlWindowingHandler* fl_engine_get_windowing_handler(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+  return self->windowing_handler;
+}
+
+FlKeyboardManager* fl_engine_get_keyboard_manager(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+  return self->keyboard_manager;
+}
+
+FlTextInputHandler* fl_engine_get_text_input_handler(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+  return self->text_input_handler;
 }
 
 FlMouseCursorHandler* fl_engine_get_mouse_cursor_handler(FlEngine* self) {
