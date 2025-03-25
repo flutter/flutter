@@ -35,12 +35,13 @@
 
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 namespace impeller {
 
 class TestImpellerContext : public impeller::Context {
  public:
-  TestImpellerContext() = default;
+  TestImpellerContext() : impeller::Context(impeller::Flags{}) {}
 
   BackendType GetBackendType() const override { return BackendType::kMetal; }
 
@@ -1020,4 +1021,5 @@ TEST_F(ImageDecoderFixtureTest, NullCheckBuffer) {
 }  // namespace testing
 }  // namespace flutter
 
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
