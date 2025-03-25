@@ -391,25 +391,25 @@ void main() {
       expect(
         theme.colorScheme.secondary,
         SystemColor.light.accentColor.value,
-        skip: !SystemColor.light.accentColor.isSupported,
+        skip: !SystemColor.light.accentColor.isSupported, // Color not always supported.
         reason: 'Theme secondary color did not match system accent color',
       );
       expect(
         theme.colorScheme.onSecondary,
         SystemColor.light.accentColorText.value,
-        skip: !SystemColor.light.accentColorText.isSupported,
+        skip: !SystemColor.light.accentColorText.isSupported, // Color not always supported.
         reason: 'Theme onSecondary color did not match system accent color text',
       );
       expect(
         theme.colorScheme.surface,
         SystemColor.light.canvas.value,
-        skip: !SystemColor.light.canvas.isSupported,
+        skip: !SystemColor.light.canvas.isSupported, // Color not always supported.
         reason: 'Theme surface color did not match system canvas color',
       );
       expect(
         theme.colorScheme.onSurface,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'Theme onSurface color did not match system canvas color text',
       );
 
@@ -418,91 +418,91 @@ void main() {
       expect(
         theme.textTheme.displayLarge?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme displayLarge color did not match system text color',
       );
       expect(
         theme.textTheme.displayMedium?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme displayMedium color did not match system text color',
       );
       expect(
         theme.textTheme.displaySmall?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme displaySmall color did not match system text color',
       );
       expect(
         theme.textTheme.headlineLarge?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme headlineLarge color did not match system text color',
       );
       expect(
         theme.textTheme.headlineMedium?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme headlineMedium color did not match system text color',
       );
       expect(
         theme.textTheme.headlineSmall?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme headlineSmall color did not match system text color',
       );
       expect(
         theme.textTheme.titleLarge?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme titleLarge color did not match system text color',
       );
       expect(
         theme.textTheme.titleMedium?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme titleMedium color did not match system text color',
       );
       expect(
         theme.textTheme.titleSmall?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme titleSmall color did not match system text color',
       );
       expect(
         theme.textTheme.bodyLarge?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme bodyLarge color did not match system text color',
       );
       expect(
         theme.textTheme.bodyMedium?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme bodyMedium color did not match system text color',
       );
       expect(
         theme.textTheme.bodySmall?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme bodySmall color did not match system text color',
       );
       expect(
         theme.textTheme.labelLarge?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme labelLarge color did not match system text color',
       );
       expect(
         theme.textTheme.labelMedium?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme labelMedium color did not match system text color',
       );
       expect(
         theme.textTheme.labelSmall?.color,
         SystemColor.light.canvasText.value,
-        skip: !SystemColor.light.canvasText.isSupported,
+        skip: !SystemColor.light.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme labelSmall color did not match system text color',
       );
 
@@ -513,7 +513,7 @@ void main() {
           WidgetState.pressed,
         }),
         SystemColor.light.buttonText.value,
-        skip: !SystemColor.light.buttonText.isSupported,
+        skip: !SystemColor.light.buttonText.isSupported, // Color not always supported.
         reason: 'ElevatedButtonTheme foregroundColor did not match system button text color',
       );
       expect(
@@ -521,20 +521,20 @@ void main() {
           WidgetState.pressed,
         }),
         SystemColor.light.buttonFace.value,
-        skip: !SystemColor.light.buttonFace.isSupported,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
         reason: 'ElevatedButtonTheme backgroundColor did not match system button face color',
       );
 
       expect(
         theme.textButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
         SystemColor.light.buttonText.value,
-        skip: !SystemColor.light.buttonText.isSupported,
+        skip: !SystemColor.light.buttonText.isSupported, // Color not always supported.
         reason: 'TextButtonTheme foregroundColor did not match system button text color',
       );
       expect(
         theme.textButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
         SystemColor.light.buttonFace.value,
-        skip: !SystemColor.light.buttonFace.isSupported,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
         reason: 'TextButtonTheme backgroundColor did not match system button face color',
       );
 
@@ -543,7 +543,7 @@ void main() {
           WidgetState.pressed,
         }),
         SystemColor.light.buttonText.value,
-        skip: !SystemColor.light.buttonText.isSupported,
+        skip: !SystemColor.light.buttonText.isSupported, // Color not always supported.
         reason: 'OutlinedButtonTheme foregroundColor did not match system button text color',
       );
       expect(
@@ -551,26 +551,37 @@ void main() {
           WidgetState.pressed,
         }),
         SystemColor.light.buttonFace.value,
-        skip: !SystemColor.light.buttonFace.isSupported,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
         reason: 'OutlinedButtonTheme backgroundColor did not match system button face color',
       );
 
       expect(
         theme.filledButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
         SystemColor.light.buttonText.value,
-        skip: !SystemColor.light.buttonText.isSupported,
+        skip: !SystemColor.light.buttonText.isSupported, // Color not always supported.
         reason: 'FilledButtonTheme foregroundColor did not match system button text color',
       );
       expect(
         theme.filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
         SystemColor.light.buttonFace.value,
-        skip: !SystemColor.light.buttonFace.isSupported,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
         reason: 'FilledButtonTheme backgroundColor did not match system button face color',
       );
 
-      expect(theme.floatingActionButtonTheme.foregroundColor, SystemColor.light.buttonText.value);
-      expect(theme.floatingActionButtonTheme.backgroundColor, SystemColor.light.buttonFace.value);
+      expect(
+        theme.floatingActionButtonTheme.foregroundColor,
+        SystemColor.light.buttonText.value,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
+        reason: 'FloatingActionButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.floatingActionButtonTheme.backgroundColor,
+        SystemColor.light.buttonFace.value,
+        skip: !SystemColor.light.buttonFace.isSupported, // Color not always supported.
+        reason: 'FloatingActionButtonTheme backgroundColor did not match system button face color',
+      );
     },
+    // Only run this test on platforms that provide system colors.
     skip: !SystemColor.platformProvidesSystemColors,
   );
 
@@ -586,25 +597,25 @@ void main() {
       expect(
         theme.colorScheme.secondary,
         SystemColor.dark.accentColor.value,
-        skip: !SystemColor.dark.accentColor.isSupported,
+        skip: !SystemColor.dark.accentColor.isSupported, // Color not always supported.
         reason: 'Theme secondary color did not match system accent color',
       );
       expect(
         theme.colorScheme.onSecondary,
         SystemColor.dark.accentColorText.value,
-        skip: !SystemColor.dark.accentColorText.isSupported,
+        skip: !SystemColor.dark.accentColorText.isSupported, // Color not always supported.
         reason: 'Theme onSecondary color did not match system accent color text',
       );
       expect(
         theme.colorScheme.surface,
         SystemColor.dark.canvas.value,
-        skip: !SystemColor.dark.canvas.isSupported,
+        skip: !SystemColor.dark.canvas.isSupported, // Color not always supported.
         reason: 'Theme surface color did not match system canvas color',
       );
       expect(
         theme.colorScheme.onSurface,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'Theme onSurface color did not match system canvas color text',
       );
 
@@ -613,91 +624,91 @@ void main() {
       expect(
         theme.textTheme.displayLarge?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme displayLarge color did not match system text color',
       );
       expect(
         theme.textTheme.displayMedium?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme displayMedium color did not match system text color',
       );
       expect(
         theme.textTheme.displaySmall?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme displaySmall color did not match system text color',
       );
       expect(
         theme.textTheme.headlineLarge?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme headlineLarge color did not match system text color',
       );
       expect(
         theme.textTheme.headlineMedium?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme headlineMedium color did not match system text color',
       );
       expect(
         theme.textTheme.headlineSmall?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme headlineSmall color did not match system text color',
       );
       expect(
         theme.textTheme.titleLarge?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme titleLarge color did not match system text color',
       );
       expect(
         theme.textTheme.titleMedium?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme titleMedium color did not match system text color',
       );
       expect(
         theme.textTheme.titleSmall?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme titleSmall color did not match system text color',
       );
       expect(
         theme.textTheme.bodyLarge?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme bodyLarge color did not match system text color',
       );
       expect(
         theme.textTheme.bodyMedium?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme bodyMedium color did not match system text color',
       );
       expect(
         theme.textTheme.bodySmall?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme bodySmall color did not match system text color',
       );
       expect(
         theme.textTheme.labelLarge?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme labelLarge color did not match system text color',
       );
       expect(
         theme.textTheme.labelMedium?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme labelMedium color did not match system text color',
       );
       expect(
         theme.textTheme.labelSmall?.color,
         SystemColor.dark.canvasText.value,
-        skip: !SystemColor.dark.canvasText.isSupported,
+        skip: !SystemColor.dark.canvasText.isSupported, // Color not always supported.
         reason: 'TextTheme labelSmall color did not match system text color',
       );
 
@@ -708,7 +719,7 @@ void main() {
           WidgetState.pressed,
         }),
         SystemColor.dark.buttonText.value,
-        skip: !SystemColor.dark.buttonText.isSupported,
+        skip: !SystemColor.dark.buttonText.isSupported, // Color not always supported.
         reason: 'ElevatedButtonTheme foregroundColor did not match system button text color',
       );
       expect(
@@ -716,20 +727,20 @@ void main() {
           WidgetState.pressed,
         }),
         SystemColor.dark.buttonFace.value,
-        skip: !SystemColor.dark.buttonFace.isSupported,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
         reason: 'ElevatedButtonTheme backgroundColor did not match system button face color',
       );
 
       expect(
         theme.textButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
         SystemColor.dark.buttonText.value,
-        skip: !SystemColor.dark.buttonText.isSupported,
+        skip: !SystemColor.dark.buttonText.isSupported, // Color not always supported.
         reason: 'TextButtonTheme foregroundColor did not match system button text color',
       );
       expect(
         theme.textButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
         SystemColor.dark.buttonFace.value,
-        skip: !SystemColor.dark.buttonFace.isSupported,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
         reason: 'TextButtonTheme backgroundColor did not match system button face color',
       );
 
@@ -738,7 +749,7 @@ void main() {
           WidgetState.pressed,
         }),
         SystemColor.dark.buttonText.value,
-        skip: !SystemColor.dark.buttonText.isSupported,
+        skip: !SystemColor.dark.buttonText.isSupported, // Color not always supported.
         reason: 'OutlinedButtonTheme foregroundColor did not match system button text color',
       );
       expect(
@@ -746,26 +757,37 @@ void main() {
           WidgetState.pressed,
         }),
         SystemColor.dark.buttonFace.value,
-        skip: !SystemColor.dark.buttonFace.isSupported,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
         reason: 'OutlinedButtonTheme backgroundColor did not match system button face color',
       );
 
       expect(
         theme.filledButtonTheme.style?.foregroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
         SystemColor.dark.buttonText.value,
-        skip: !SystemColor.dark.buttonText.isSupported,
+        skip: !SystemColor.dark.buttonText.isSupported, // Color not always supported.
         reason: 'FilledButtonTheme foregroundColor did not match system button text color',
       );
       expect(
         theme.filledButtonTheme.style?.backgroundColor?.resolve(<WidgetState>{WidgetState.pressed}),
         SystemColor.dark.buttonFace.value,
-        skip: !SystemColor.dark.buttonFace.isSupported,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
         reason: 'FilledButtonTheme backgroundColor did not match system button face color',
       );
 
-      expect(theme.floatingActionButtonTheme.foregroundColor, SystemColor.dark.buttonText.value);
-      expect(theme.floatingActionButtonTheme.backgroundColor, SystemColor.dark.buttonFace.value);
+      expect(
+        theme.floatingActionButtonTheme.foregroundColor,
+        SystemColor.dark.buttonText.value,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
+        reason: 'FloatingActionButtonTheme foregroundColor did not match system button text color',
+      );
+      expect(
+        theme.floatingActionButtonTheme.backgroundColor,
+        SystemColor.dark.buttonFace.value,
+        skip: !SystemColor.dark.buttonFace.isSupported, // Color not always supported.
+        reason: 'FloatingActionButtonTheme backgroundColor did not match system button face color',
+      );
     },
+    // Only run this test on platforms that provide system colors.
     skip: !SystemColor.platformProvidesSystemColors,
   );
 
