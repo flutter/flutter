@@ -968,11 +968,11 @@ extension type SkPaint._(JSObject _) implements JSObject {
 
 extension type CkFilterOptions(JSObject _) implements JSObject {}
 
-extension type _CkCubicFilterOptions._(JSObject _) implements JSObject, CkFilterOptions {
+extension type _CkCubicFilterOptions._(JSObject _) implements CkFilterOptions {
   external _CkCubicFilterOptions({required double B, required double C});
 }
 
-extension type _CkTransformFilterOptions._(JSObject _) implements JSObject, CkFilterOptions {
+extension type _CkTransformFilterOptions._(JSObject _) implements CkFilterOptions {
   external _CkTransformFilterOptions({SkFilterMode filter, SkMipmapMode mipmap});
 }
 
@@ -1207,7 +1207,7 @@ extension type MallocObj(JSObject _) implements JSObject {}
 /// This wrapper is necessary because the raw [Float32List] will get detached
 /// when WASM grows its memory. Call [toTypedArray] to get a new instance
 /// that's attached to the current WASM memory block.
-extension type SkFloat32List(JSObject _) implements JSObject, MallocObj {
+extension type SkFloat32List(JSObject _) implements MallocObj {
   /// The number of objects this pointer refers to.
   external double length;
 
@@ -1228,7 +1228,7 @@ extension type SkFloat32List(JSObject _) implements JSObject, MallocObj {
 /// This wrapper is necessary because the raw [Uint32List] will get detached
 /// when WASM grows its memory. Call [toTypedArray] to get a new instance
 /// that's attached to the current WASM memory block.
-extension type SkUint32List(JSObject _) implements JSObject, MallocObj {
+extension type SkUint32List(JSObject _) implements MallocObj {
   /// The number of objects this pointer refers to.
   external double length;
 
@@ -2059,7 +2059,7 @@ extension type SkFontMgr(JSObject _) implements JSObject {
 }
 
 @JS('window.flutterCanvasKit.TypefaceFontProvider')
-extension type TypefaceFontProvider(JSObject _) implements JSObject, SkFontMgr {
+extension type TypefaceFontProvider(JSObject _) implements SkFontMgr {
   @JS('registerFont')
   external void _registerFont(JSUint8Array font, String family);
   void registerFont(Uint8List font, String family) => _registerFont(font.toJS, family);

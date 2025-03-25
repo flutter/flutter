@@ -1392,7 +1392,7 @@ extension type DomTextMetrics._(JSObject _) implements JSObject {
   external double? get width;
 }
 
-@JS('Exception')
+@JS('DOMException')
 extension type DomException._(JSObject _) implements JSObject {
   static const String notSupported = 'NotSupportedError';
 
