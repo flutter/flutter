@@ -52,6 +52,8 @@ final class SurfaceTextureSurfaceProducer
   @Override
   public void release() {
     texture.release();
+    surface.release();
+    surface = null;
     released = true;
   }
 
