@@ -1434,11 +1434,11 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // dart format off
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)
-      : super(
-    height: 80.0,
-    elevation: 3.0,
-    labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-  );
+    : super(
+        height: 80.0,
+        elevation: 3.0,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      );
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
@@ -1459,8 +1459,8 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.disabled)
-            ? _colors.onSurfaceVariant.withOpacity(0.38)
-            : states.contains(MaterialState.selected)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
             ? _colors.onSecondaryContainer
             : _colors.onSurfaceVariant,
       );
@@ -1476,13 +1476,13 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override
   MaterialStateProperty<TextStyle?>? get labelTextStyle {
     return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-      final TextStyle style = _textTheme.labelMedium!;
+    final TextStyle style = _textTheme.labelMedium!;
       return style.apply(
-          color: states.contains(MaterialState.disabled)
-              ? _colors.onSurfaceVariant.withOpacity(0.38)
-              : states.contains(MaterialState.selected)
-              ? _colors.onSurface
-              : _colors.onSurfaceVariant
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
+            ? _colors.onSurface
+            : _colors.onSurfaceVariant
       );
     });
   }
