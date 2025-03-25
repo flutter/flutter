@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/file.dart' show FileSystem;
+import 'package:native_assets_cli/code_assets.dart' show CodeAsset;
 import 'package:native_assets_cli/code_assets_builder.dart'
     show
         AndroidCodeConfig,
@@ -46,6 +47,10 @@ sealed class AssetBuildTarget {
   final List<String> supportedAssetTypes;
 
   List<ProtocolExtension> get extensions;
+
+  List<DataAssetsExtension> get dataAssetExtensions => <DataAssetsExtension>[
+    if (supportedAssetTypes.contains(DataAsset.type)) DataAssetsExtension(),
+  ];
 
   /// Build the list of [AssetBuildTarget]s for a given [TargetPlatform].
   ///
@@ -156,7 +161,7 @@ final class WebAssetTarget extends AssetBuildTarget {
     : super(platform: TargetPlatform.web_javascript);
 
   @override
-  List<ProtocolExtension> get extensions => <ProtocolExtension>[DataAssetsExtension()];
+  List<ProtocolExtension> get extensions => <ProtocolExtension>[...dataAssetExtensions];
 }
 
 sealed class CodeAssetTarget extends AssetBuildTarget {
@@ -173,12 +178,15 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   Future<void> setCCompilerConfig(FlutterNativeAssetsBuildRunner buildRunner) async =>
       cCompilerConfigSync = await buildRunner.cCompilerConfig;
 
-  CodeAssetExtension codeAssetExtensionFor(OS os) => CodeAssetExtension(
-    targetArchitecture: architecture,
-    linkModePreference: LinkModePreference.dynamic,
-    cCompiler: cCompilerConfigSync,
-    targetOS: os,
-  );
+  List<CodeAssetExtension> codeAssetExtensionFor(OS os) => <CodeAssetExtension>[
+    if (supportedAssetTypes.contains(CodeAsset.type))
+      CodeAssetExtension(
+        targetArchitecture: architecture,
+        linkModePreference: LinkModePreference.dynamic,
+        cCompiler: cCompilerConfigSync,
+        targetOS: os,
+      ),
+  ];
 }
 
 class WindowsAssetTarget extends CodeAssetTarget {
@@ -190,8 +198,8 @@ class WindowsAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    codeAssetExtensionFor(OS.windows),
-    DataAssetsExtension(),
+    ...codeAssetExtensionFor(OS.windows),
+    ...dataAssetExtensions,
   ];
 }
 
@@ -204,8 +212,8 @@ final class LinuxAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    codeAssetExtensionFor(OS.linux),
-    DataAssetsExtension(),
+    ...codeAssetExtensionFor(OS.linux),
+    ...dataAssetExtensions,
   ];
 }
 
@@ -231,14 +239,15 @@ final class IOSAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    CodeAssetExtension(
-      targetArchitecture: architecture,
-      linkModePreference: LinkModePreference.dynamic,
-      cCompiler: cCompilerConfigSync,
-      targetOS: OS.iOS,
-      iOS: _getIOSConfig(environmentDefines, fileSystem),
-    ),
-    DataAssetsExtension(),
+    if (supportedAssetTypes.contains(CodeAsset.type))
+      CodeAssetExtension(
+        targetArchitecture: architecture,
+        linkModePreference: LinkModePreference.dynamic,
+        cCompiler: cCompilerConfigSync,
+        targetOS: OS.iOS,
+        iOS: _getIOSConfig(environmentDefines, fileSystem),
+      ),
+    ...dataAssetExtensions,
   ];
 }
 
@@ -248,14 +257,15 @@ final class MacOSAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    CodeAssetExtension(
-      targetArchitecture: architecture,
-      linkModePreference: LinkModePreference.dynamic,
-      cCompiler: cCompilerConfigSync,
-      targetOS: OS.macOS,
-      macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
-    ),
-    DataAssetsExtension(),
+    if (supportedAssetTypes.contains(CodeAsset.type))
+      CodeAssetExtension(
+        targetArchitecture: architecture,
+        linkModePreference: LinkModePreference.dynamic,
+        cCompiler: cCompilerConfigSync,
+        targetOS: OS.macOS,
+        macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
+      ),
+    ...dataAssetExtensions,
   ];
 }
 
@@ -277,14 +287,15 @@ final class AndroidAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    CodeAssetExtension(
-      targetArchitecture: architecture,
-      linkModePreference: LinkModePreference.dynamic,
-      cCompiler: cCompilerConfigSync,
-      targetOS: OS.android,
-      android: _androidCodeConfig,
-    ),
-    DataAssetsExtension(),
+    if (supportedAssetTypes.contains(CodeAsset.type))
+      CodeAssetExtension(
+        targetArchitecture: architecture,
+        linkModePreference: LinkModePreference.dynamic,
+        cCompiler: cCompilerConfigSync,
+        targetOS: OS.android,
+        android: _androidCodeConfig,
+      ),
+    ...dataAssetExtensions,
   ];
 }
 
@@ -294,8 +305,8 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    codeAssetExtensionFor(OS.current),
-    DataAssetsExtension(),
+    ...codeAssetExtensionFor(OS.current),
+    ...dataAssetExtensions,
   ];
 }
 
