@@ -14,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/targets/dart_builder_native.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
@@ -707,6 +708,7 @@ class RunCommand extends RunCommandBase {
         stayResident: stayResident,
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+        dartBuilder: DartBuilderNative(),
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -733,6 +735,7 @@ class RunCommand extends RunCommandBase {
       applicationBinary:
           applicationBinaryPath == null ? null : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
+      dartBuilder: DartBuilderNative(),
     );
   }
 

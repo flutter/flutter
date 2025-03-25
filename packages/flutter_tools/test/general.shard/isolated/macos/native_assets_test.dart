@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
@@ -300,7 +301,7 @@ void main() {
           };
           final TargetPlatform targetPlatform =
               flutterTester ? TargetPlatform.tester : TargetPlatform.darwin;
-          final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+          final DartHookResult dartHookResult = await runFlutterSpecificHooks(
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,
@@ -315,7 +316,7 @@ void main() {
                   : nonFlutterTesterAssetUri;
 
           await installCodeAssets(
-            dartBuildResult: dartBuildResult,
+            dartHookResult: dartHookResult,
             environmentDefines: environmentDefines,
             targetPlatform: targetPlatform,
             projectUri: projectUri,

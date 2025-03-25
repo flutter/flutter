@@ -23,6 +23,7 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/targets/dart_builder_native.dart' show DartBuilderNative;
 import '../cache.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
@@ -123,6 +124,7 @@ class ResidentWebRunner extends ResidentRunner {
            platform: platform,
            outputPreferences: outputPreferences,
          ),
+         dartBuilder: DartBuilderNative(),
        );
 
   final FileSystem _fileSystem;
@@ -706,6 +708,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     if (rebuildBundle) {
       _logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
+        dartHookResult: await dartBuilder?.runDartBuild(
+          targetPlatform: TargetPlatform.web_javascript,
+          environment: environment,
+        ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );
