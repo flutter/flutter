@@ -14,16 +14,11 @@ import shutil
 import subprocess
 import sys
 
-USE_LINKS = sys.platform != 'win32'
-
-DART_ANALYZE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dart_analyze.py')
-
 
 def dart_filter(path):
   if os.path.isdir(path):
     return True
   _, ext = os.path.splitext(path)
-  # .dart includes '.mojom.dart'
   return ext == '.dart'
 
 
@@ -39,21 +34,6 @@ def has_pubspec_yaml(paths):
     if filename == 'pubspec.yaml':
       return True
   return False
-
-
-def link(from_root, to_root):
-  ensure_dir_exists(os.path.dirname(to_root))
-  try:
-    os.unlink(to_root)
-  except OSError as err:
-    if err.errno == errno.ENOENT:
-      pass
-
-  try:
-    os.symlink(from_root, to_root)
-  except OSError as err:
-    if err.errno == errno.EEXIST:
-      pass
 
 
 def copy(from_root, to_root, filter_func=None):
@@ -84,18 +64,6 @@ def copy(from_root, to_root, filter_func=None):
     dirs[:] = list(filter(wrapped_filter, dirs))
 
 
-def copy_or_link(from_root, to_root, filter_func=None):
-  if USE_LINKS:
-    link(from_root, to_root)
-  else:
-    copy(from_root, to_root, filter_func)
-
-
-def link_if_possible(from_root, to_root):
-  if USE_LINKS:
-    link(from_root, to_root)
-
-
 def remove_if_exists(path):
   try:
     os.remove(path)
@@ -118,47 +86,6 @@ def list_files(from_root, filter_func=None):
   return file_list
 
 
-def remove_broken_symlink(path):
-  if not USE_LINKS:
-    return
-  try:
-    link_path = os.readlink(path)
-  except OSError as err:
-    # Path was not a symlink.
-    if err.errno == errno.EINVAL:
-      pass
-  else:
-    if not os.path.exists(link_path):
-      remove_if_exists(path)
-
-
-def remove_broken_symlinks(root_dir):
-  if not USE_LINKS:
-    return
-  for current_dir, _, child_files in os.walk(root_dir):
-    for filename in child_files:
-      path = os.path.join(current_dir, filename)
-      remove_broken_symlink(path)
-
-
-def analyze_entrypoints(dart_sdk, package_root, entrypoints):
-  cmd = ['python', DART_ANALYZE]
-  cmd.append('--dart-sdk')
-  cmd.append(dart_sdk)
-  cmd.append('--entrypoints')
-  cmd.extend(entrypoints)
-  cmd.append('--package-root')
-  cmd.append(package_root)
-  cmd.append('--no-hints')
-  try:
-    subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-  except subprocess.CalledProcessError as err:
-    print('Failed analyzing %s' % entrypoints)
-    print(err.output)
-    return err.returncode
-  return 0
-
-
 def main():
   parser = argparse.ArgumentParser(description='Generate a dart-pkg')
   parser.add_argument(
@@ -177,22 +104,9 @@ def main():
       help='Directory where dart_pkg should go',
       required=True
   )
-  parser.add_argument(
-      '--package-root', metavar='package_root', help='packages/ directory', required=True
-  )
   parser.add_argument('--stamp-file', metavar='stamp_file', help='timestamp file', required=True)
   parser.add_argument(
-      '--entries-file', metavar='entries_file', help='script entries file', required=True
-  )
-  parser.add_argument(
       '--package-sources', metavar='package_sources', help='Package sources', nargs='+'
-  )
-  parser.add_argument(
-      '--package-entrypoints',
-      metavar='package_entrypoints',
-      help='Package entry points for analyzer',
-      nargs='*',
-      default=[]
   )
   parser.add_argument(
       '--sdk-ext-directories',
@@ -249,14 +163,7 @@ def main():
   for source in args.package_sources:
     relative_source = os.path.relpath(source, common_source_prefix)
     target = os.path.join(target_dir, relative_source)
-    copy_or_link(source, target)
-
-  entrypoint_targets = []
-  for source in args.package_entrypoints:
-    relative_source = os.path.relpath(source, common_source_prefix)
-    target = os.path.join(target_dir, relative_source)
-    copy_or_link(source, target)
-    entrypoint_targets.append(target)
+    copy(source, target)
 
   # Copy sdk-ext sources into pkg directory
   sdk_ext_dir = os.path.join(target_dir, 'sdk_ext')
@@ -266,30 +173,13 @@ def main():
     for source in sdk_ext_sources:
       relative_source = os.path.relpath(source, common_prefix)
       target = os.path.join(sdk_ext_dir, relative_source)
-      copy_or_link(source, target)
+      copy(source, target)
 
   common_source_prefix = os.path.dirname(os.path.commonprefix(args.sdk_ext_files))
   for source in args.sdk_ext_files:
     relative_source = os.path.relpath(source, common_source_prefix)
     target = os.path.join(sdk_ext_dir, relative_source)
-    copy_or_link(source, target)
-
-  # Symlink packages/
-  package_path = os.path.join(args.package_root, args.package_name)
-  copy_or_link(lib_path, package_path)
-
-  # Link dart-pkg/$package/packages to dart-pkg/packages
-  link_if_possible(args.package_root, target_packages_dir)
-
-  # Remove any broken symlinks in target_dir and package root.
-  remove_broken_symlinks(target_dir)
-  remove_broken_symlinks(args.package_root)
-
-  # If any entrypoints are defined, write them to disk so that the analyzer
-  # test can find them.
-  with open(args.entries_file, 'w') as file:
-    for entrypoint in entrypoint_targets:
-      file.write(entrypoint + '\n')
+    copy(source, target)
 
   # Write stamp file.
   with open(args.stamp_file, 'w'):
