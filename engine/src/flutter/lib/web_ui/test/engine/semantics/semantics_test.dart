@@ -1646,7 +1646,7 @@ void _testVerticalScrolling() {
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral scrollTop
-    // is still a positive number.
+    // is 0.
     expect(scrollable.scrollTop, 0);
 
     semantics().semanticsEnabled = false;
@@ -1874,7 +1874,7 @@ void _testHorizontalScrolling() {
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral
-    // scrollLeft is still a positive number.
+    // scrollLeft is still 0.
     expect(scrollable.scrollLeft, 0);
 
     semantics().semanticsEnabled = false;
