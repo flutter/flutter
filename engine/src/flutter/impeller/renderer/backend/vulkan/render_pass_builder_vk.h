@@ -70,7 +70,6 @@ class RenderPassBuilderVK {
   std::optional<vk::AttachmentDescription> GetColor0Resolve() const;
 
  private:
-  bool is_swapchain_ = false;
   std::optional<vk::AttachmentDescription> color0_;
   std::optional<vk::AttachmentDescription> color0_resolve_;
   std::optional<vk::AttachmentDescription> depth_stencil_;

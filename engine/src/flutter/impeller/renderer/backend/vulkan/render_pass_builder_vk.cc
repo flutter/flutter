@@ -196,15 +196,10 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   // to the onscreen.
   deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
   deps[0].dstSubpass = 0u;
-  if (is_swapchain_) {
-    deps[0].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-    deps[0].srcAccessMask = {};
-  } else {
-    deps[0].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                           vk::PipelineStageFlagBits::eFragmentShader;
-    deps[0].srcAccessMask = vk::AccessFlagBits::eShaderRead |
-                            vk::AccessFlagBits::eColorAttachmentWrite;
-  }
+  deps[0].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                         vk::PipelineStageFlagBits::eFragmentShader;
+  deps[0].srcAccessMask = vk::AccessFlagBits::eShaderRead |
+                          vk::AccessFlagBits::eColorAttachmentWrite;
   deps[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
   deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
   deps[0].dependencyFlags = kSelfDependencyFlags;
@@ -274,10 +269,6 @@ void InsertBarrierForInputAttachmentRead(const vk::CommandBuffer& buffer,
                          {},                           //
                          barrier                       //
   );
-}
-
-void RenderPassBuilderVK::SetSwapchain(bool value) {
-  is_swapchain_ = value;
 }
 
 const std::map<size_t, vk::AttachmentDescription>&
