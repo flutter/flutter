@@ -727,6 +727,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       // Next, we render the second contents to a snapshot, or create a 1x1
       // texture for the foreground color.
       std::shared_ptr<Texture> src_texture;
+      SamplerDescriptor src_sampler_descriptor = SamplerDescriptor{};
       if (foreground_color.has_value()) {
         src_texture = foreground_texture;
       } else {
@@ -739,6 +740,7 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
         // different, but we only need to support blending two contents together
         // in limited circumstances (mask blur).
         src_texture = src_snapshot->texture;
+        src_sampler_descriptor = src_snapshot->sampler_descriptor;
       }
 
       std::array<VS::PerVertexData, 4> vertices = {
@@ -820,11 +822,6 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       VS::FrameInfo frame_info;
       FS::FragInfo frag_info;
 
-      SamplerDescriptor src_sampler_descriptor = SamplerDescriptor{};
-      if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
-        src_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
-        src_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
-      }
       raw_ptr<const Sampler> src_sampler =
           renderer.GetContext()->GetSamplerLibrary()->GetSampler(
               src_sampler_descriptor);
