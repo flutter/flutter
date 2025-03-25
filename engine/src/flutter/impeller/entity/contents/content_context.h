@@ -9,6 +9,7 @@
 #include <memory>
 #include <optional>
 #include <unordered_map>
+#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/status_or.h"
@@ -40,6 +41,8 @@
 #include "impeller/entity/glyph_atlas.frag.h"
 #include "impeller/entity/glyph_atlas.vert.h"
 #include "impeller/entity/gradient_fill.vert.h"
+#include "impeller/entity/line.frag.h"
+#include "impeller/entity/line.vert.h"
 #include "impeller/entity/linear_gradient_fill.frag.h"
 #include "impeller/entity/linear_to_srgb_filter.frag.h"
 #include "impeller/entity/morphology_filter.frag.h"
@@ -146,6 +149,7 @@ using FramebufferBlendScreenPipeline = FramebufferBlendPipelineHandle;
 using FramebufferBlendSoftLightPipeline = FramebufferBlendPipelineHandle;
 using GaussianBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, GaussianFragmentShader>;
 using GlyphAtlasPipeline = RenderPipelineHandle<GlyphAtlasVertexShader, GlyphAtlasFragmentShader>;
+using LinePipeline = RenderPipelineHandle<LineVertexShader, LineFragmentShader>;
 using LinearGradientFillPipeline = GradientPipelineHandle<LinearGradientFillFragmentShader>;
 using LinearGradientSSBOFillPipeline = GradientPipelineHandle<LinearGradientSsboFillFragmentShader>;
 using LinearGradientUniformFillPipeline = GradientPipelineHandle<LinearGradientUniformFillFragmentShader>;
@@ -245,7 +249,7 @@ struct ContentContextOptions {
   };
 
   SampleCount sample_count = SampleCount::kCount1;
-  BlendMode blend_mode = BlendMode::kSourceOver;
+  BlendMode blend_mode = BlendMode::kSrcOver;
   CompareFunction depth_compare = CompareFunction::kAlways;
   StencilMode stencil_mode = ContentContextOptions::StencilMode::kIgnore;
   PrimitiveType primitive_type = PrimitiveType::kTriangle;
@@ -351,6 +355,7 @@ class ContentContext {
   PipelineRef GetFramebufferBlendSoftLightPipeline(ContentContextOptions opts) const;
   PipelineRef GetGaussianBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetGlyphAtlasPipeline(ContentContextOptions opts) const;
+  PipelineRef GetLinePipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientSSBOFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetLinearGradientUniformFillPipeline(ContentContextOptions opts) const;
@@ -521,7 +526,13 @@ class ContentContext {
     void SetDefault(const ContentContextOptions& options,
                     std::unique_ptr<PipelineHandleT> pipeline) {
       default_options_ = options;
-      Set(options, std::move(pipeline));
+      if (pipeline) {
+        Set(options, std::move(pipeline));
+      }
+    }
+
+    void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
+      desc_ = std::move(desc);
     }
 
     void CreateDefault(const Context& context,
@@ -534,7 +545,13 @@ class ContentContext {
         return;
       }
       options.ApplyToPipelineDescriptor(*desc);
-      SetDefault(options, std::make_unique<PipelineHandleT>(context, desc));
+      desc_ = desc;
+      if (context.GetFlags().lazy_shader_mode) {
+        SetDefault(options, nullptr);
+      } else {
+        SetDefault(options, std::make_unique<PipelineHandleT>(context, desc_,
+                                                              /*async=*/true));
+      }
     }
 
     PipelineHandleT* Get(const ContentContextOptions& options) const {
@@ -547,16 +564,29 @@ class ContentContext {
       return nullptr;
     }
 
-    PipelineHandleT* GetDefault() const {
+    bool IsDefault(const ContentContextOptions& opts) {
+      return default_options_.has_value() &&
+             opts.ToKey() == default_options_.value().ToKey();
+    }
+
+    PipelineHandleT* GetDefault(const Context& context) {
       if (!default_options_.has_value()) {
         return nullptr;
       }
+      PipelineHandleT* result = Get(default_options_.value());
+      if (result != nullptr) {
+        return result;
+      }
+      SetDefault(
+          default_options_.value(),
+          std::make_unique<PipelineHandleT>(context, desc_, /*async=*/false));
       return Get(default_options_.value());
     }
 
     size_t GetPipelineCount() const { return pipelines_.size(); }
 
    private:
+    std::optional<PipelineDescriptor> desc_;
     std::optional<ContentContextOptions> default_options_;
     std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>>
         pipelines_;
@@ -619,6 +649,7 @@ class ContentContext {
   mutable Variants<FramebufferBlendSoftLightPipeline> framebuffer_blend_softlight_pipelines_;
   mutable Variants<GaussianBlurPipeline> gaussian_blur_pipelines_;
   mutable Variants<GlyphAtlasPipeline> glyph_atlas_pipelines_;
+  mutable Variants<LinePipeline> line_pipelines_;
   mutable Variants<LinearGradientFillPipeline> linear_gradient_fill_pipelines_;
   mutable Variants<LinearGradientSSBOFillPipeline> linear_gradient_ssbo_fill_pipelines_;
   mutable Variants<LinearGradientUniformFillPipeline> linear_gradient_uniform_fill_pipelines_;
@@ -688,7 +719,10 @@ class ContentContext {
       return found;
     }
 
-    RenderPipelineHandleT* default_handle = container.GetDefault();
+    RenderPipelineHandleT* default_handle = container.GetDefault(*GetContext());
+    if (container.IsDefault(opts)) {
+      return default_handle;
+    }
 
     // The default must always be initialized in the constructor.
     FML_CHECK(default_handle != nullptr);

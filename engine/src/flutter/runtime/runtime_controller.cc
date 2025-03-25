@@ -383,13 +383,14 @@ bool RuntimeController::DispatchPointerDataPacket(
   return false;
 }
 
-bool RuntimeController::DispatchSemanticsAction(int32_t node_id,
+bool RuntimeController::DispatchSemanticsAction(int64_t view_id,
+                                                int32_t node_id,
                                                 SemanticsAction action,
                                                 fml::MallocMapping args) {
   TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
                "basic");
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->DispatchSemanticsAction(node_id, action,
+    platform_configuration->DispatchSemanticsAction(view_id, node_id, action,
                                                     std::move(args));
     return true;
   }
@@ -447,10 +448,14 @@ void RuntimeController::CheckIfAllViewsRendered() {
 }
 
 // |PlatformConfigurationClient|
-void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
-  if (platform_data_.semantics_enabled) {
-    client_.UpdateSemantics(update->takeNodes(), update->takeActions());
-  }
+void RuntimeController::UpdateSemantics(int64_t view_id,
+                                        SemanticsUpdate* update) {
+  client_.UpdateSemantics(view_id, update->takeNodes(), update->takeActions());
+}
+
+// |PlatformConfigurationClient|
+void RuntimeController::SetSemanticsTreeEnabled(bool enabled) {
+  client_.SetSemanticsTreeEnabled(enabled);
 }
 
 // |PlatformConfigurationClient|

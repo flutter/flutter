@@ -490,7 +490,8 @@ class RuntimeController : public PlatformConfigurationClient,
   /// @brief      Dispatch the semantics action to the specified accessibility
   ///             node.
   ///
-  /// @param[in]  node_id The identified of the accessibility node.
+  /// @param[in]  view_id The identifier of the view.
+  /// @param[in]  node_id The identifier of the accessibility node.
   /// @param[in]  action  The semantics action to perform on the specified
   ///                     accessibility node.
   /// @param[in]  args    Optional data that applies to the specified action.
@@ -498,7 +499,8 @@ class RuntimeController : public PlatformConfigurationClient,
   /// @return     If the semantics action was dispatched. This may fail if an
   ///             isolate is not running.
   ///
-  bool DispatchSemanticsAction(int32_t node_id,
+  bool DispatchSemanticsAction(int64_t view_id,
+                               int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -641,6 +643,12 @@ class RuntimeController : public PlatformConfigurationClient,
   // |PlatformConfigurationClient|
   std::shared_ptr<const fml::Mapping> GetPersistentIsolateData() override;
 
+  // |PlatformConfigurationClient|
+  void UpdateSemantics(int64_t view_id, SemanticsUpdate* update) override;
+
+  // |PlatformConfigurationClient|
+  void SetSemanticsTreeEnabled(bool enabled) override;
+
   const fml::WeakPtr<IOManager>& GetIOManager() const {
     return context_.io_manager;
   }
@@ -765,9 +773,6 @@ class RuntimeController : public PlatformConfigurationClient,
               Scene* scene,
               double width,
               double height) override;
-
-  // |PlatformConfigurationClient|
-  void UpdateSemantics(SemanticsUpdate* update) override;
 
   // |PlatformConfigurationClient|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;

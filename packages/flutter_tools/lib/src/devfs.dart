@@ -380,13 +380,15 @@ class UpdateFSReport {
     Duration compileDuration = Duration.zero,
     Duration transferDuration = Duration.zero,
     Duration findInvalidatedDuration = Duration.zero,
+    bool hotReloadRejected = false,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
        _syncedBytes = syncedBytes,
        _scannedSourcesCount = scannedSourcesCount,
        _compileDuration = compileDuration,
        _transferDuration = transferDuration,
-       _findInvalidatedDuration = findInvalidatedDuration;
+       _findInvalidatedDuration = findInvalidatedDuration,
+       _hotReloadRejected = hotReloadRejected;
 
   bool get success => _success;
   int get invalidatedSourcesCount => _invalidatedSourcesCount;
@@ -396,6 +398,12 @@ class UpdateFSReport {
   Duration get transferDuration => _transferDuration;
   Duration get findInvalidatedDuration => _findInvalidatedDuration;
 
+  /// Whether there was a hot reload rejection in this compile.
+  ///
+  /// On the web, hot reload can be rejected during compile time instead of at
+  /// runtime.
+  bool get hotReloadRejected => _hotReloadRejected;
+
   bool _success;
   int _invalidatedSourcesCount;
   int _syncedBytes;
@@ -403,6 +411,7 @@ class UpdateFSReport {
   Duration _compileDuration;
   Duration _transferDuration;
   Duration _findInvalidatedDuration;
+  bool _hotReloadRejected;
 
   void incorporateResults(UpdateFSReport report) {
     if (!report._success) {
@@ -414,6 +423,9 @@ class UpdateFSReport {
     _compileDuration += report._compileDuration;
     _transferDuration += report._transferDuration;
     _findInvalidatedDuration += report._findInvalidatedDuration;
+    if (report._hotReloadRejected) {
+      _hotReloadRejected = true;
+    }
   }
 }
 

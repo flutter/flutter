@@ -719,6 +719,26 @@ class PlatformDispatcher {
   @Native<Void Function(Int64)>(symbol: 'PlatformConfigurationNativeApi::RegisterBackgroundIsolate')
   external static void __registerBackgroundIsolate(int rootIsolateId);
 
+  /// Informs the engine whether the framework is generating a semantics tree.
+  ///
+  /// Only framework knows when semantics tree should be generated. It uses this
+  /// method to notify the engine whether the framework will generate a semantics tree.
+  ///
+  /// In the case where platforms want to enable semantics, e.g. when
+  /// assistive technologies are enabled, it notifies framework through
+  /// [onSemanticsEnabledChanged].
+  ///
+  /// After this has been set to true, platforms are expected to prepare for accepting
+  /// semantics update sent via [FlutterView.updateSemantics]. When this is set to false, platforms
+  /// may dispose any resources associated with processing semantics as no further
+  /// semantics updates will be sent via [FlutterView.updateSemantics].
+  ///
+  /// One must call this method with true before sending update through [updateSemantics].
+  void setSemanticsTreeEnabled(bool enabled) => _setSemanticsTreeEnabled(enabled);
+
+  @Native<Void Function(Bool)>(symbol: 'PlatformConfigurationNativeApi::SetSemanticsTreeEnabled')
+  external static void _setSemanticsTreeEnabled(bool update);
+
   /// Deprecated. Migrate to [ChannelBuffers.setListener] instead.
   ///
   /// Called whenever this platform dispatcher receives a message from a
@@ -939,10 +959,12 @@ class PlatformDispatcher {
     call `updateSemantics`.
   ''')
   void updateSemantics(SemanticsUpdate update) =>
-      _updateSemantics(update as _NativeSemanticsUpdate);
+      _updateSemantics(_implicitViewId!, update as _NativeSemanticsUpdate);
 
-  @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::UpdateSemantics')
-  external static void _updateSemantics(_NativeSemanticsUpdate update);
+  @Native<Void Function(Int64, Pointer<Void>)>(
+    symbol: 'PlatformConfigurationNativeApi::UpdateSemantics',
+  )
+  external static void _updateSemantics(int viewId, _NativeSemanticsUpdate update);
 
   /// The system-reported default locale of the device.
   ///
@@ -1332,14 +1354,14 @@ class PlatformDispatcher {
   }
 
   // Called from the engine, via hooks.dart
-  void _dispatchSemanticsAction(int nodeId, int action, ByteData? args) {
+  void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args) {
     _invoke1<SemanticsActionEvent>(
       onSemanticsActionEvent,
       _onSemanticsActionEventZone,
       SemanticsActionEvent(
         type: SemanticsAction.fromIndex(action)!,
         nodeId: nodeId,
-        viewId: 0, // TODO(goderbauer): Wire up the real view ID.
+        viewId: viewId,
         arguments: args,
       ),
     );
@@ -1526,10 +1548,6 @@ class PlatformDispatcher {
 
 /// A color specified in the operating system UI color palette.
 ///
-/// The static getters in this class, such as [accentColor] and [buttonText],
-/// provide standard system colors defined by the
-/// [W3C CSS specification](https://drafts.csswg.org/css-color/#css-system-colors).
-///
 /// As of the current release, system colors are supported on web only. To check
 /// if the current platform supports system colors, use the static
 /// [platformProvidesSystemColors] field. If the field is `false`, other
@@ -1543,6 +1561,28 @@ class PlatformDispatcher {
 /// recommended that widgets use system-specified colors to make content more
 /// legible for users.
 ///
+/// The "light" system colors are available through [SystemColor.light], and the "dark" system
+/// colors are available through [SystemColor.dark].
+///
+/// Example:
+///
+/// ```dart
+/// import 'dart:ui';
+///
+/// Color getSystemAccentColor() {
+///   Color? systemAccentColor;
+///   if (SystemColor.platformProvidesSystemColors) {
+///     if (PlatformDispatcher.instance.platformBrightness == Brightness.light) {
+///       systemAccentColor = SystemColor.light.accentColor.value;
+///     } else {
+///       systemAccentColor = SystemColor.dark.accentColor.value;
+///     }
+///   }
+///
+///   return systemAccentColor ?? const Color(0xFF007AFF);
+/// }
+/// ```
+///
 /// See also:
 ///
 ///   * https://drafts.csswg.org/css-color/#css-system-colors
@@ -1551,8 +1591,8 @@ class PlatformDispatcher {
 final class SystemColor {
   /// Creates an instance of a system color.
   ///
-  /// [name] is the name of the color. System colors provided by static getters
-  /// in this class, such as [accentColor] and [buttonText], use standard names
+  /// [name] is the name of the color. System colors provided by [SystemColorPalette], such as
+  /// [SystemColorPalette.accentColor] and [SystemColorPalette.buttonText], use standard names
   /// defined by the [W3C CSS specification](https://drafts.csswg.org/css-color/#css-system-colors).
   ///
   /// [value] is the color value, if this color name is supported, and null if
@@ -1596,6 +1636,23 @@ final class SystemColor {
   ///   * [isSupported], which returns whether a specific color is supported.
   static bool get platformProvidesSystemColors => false;
 
+  /// A palette of system colors for light mode.
+  static final SystemColorPalette light = SystemColorPalette._(Brightness.light);
+
+  /// A palette of system colors for dark mode.
+  static final SystemColorPalette dark = SystemColorPalette._(Brightness.dark);
+}
+
+/// A palette of system colors specified in the operating system for a given [brightness].
+///
+/// The getters in this class, such as [accentColor] and [buttonText], provide standard system
+/// colors defined by the [W3C CSS specification](https://drafts.csswg.org/css-color/#css-system-colors).
+final class SystemColorPalette {
+  SystemColorPalette._(this.brightness);
+
+  /// The brightness mode for which this palette is defined.
+  final Brightness brightness;
+
   static UnsupportedError _systemColorUnsupportedError() {
     return UnsupportedError('SystemColor not supported on the current platform.');
   }
@@ -1605,133 +1662,133 @@ final class SystemColor {
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get accentColor => throw _systemColorUnsupportedError();
+  SystemColor get accentColor => throw _systemColorUnsupportedError();
 
   /// Returns system color named "AccentColorText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get accentColorText => throw _systemColorUnsupportedError();
+  SystemColor get accentColorText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "ActiveText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get activeText => throw _systemColorUnsupportedError();
+  SystemColor get activeText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "ButtonBorder".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get buttonBorder => throw _systemColorUnsupportedError();
+  SystemColor get buttonBorder => throw _systemColorUnsupportedError();
 
   /// Returns system color named "ButtonFace".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get buttonFace => throw _systemColorUnsupportedError();
+  SystemColor get buttonFace => throw _systemColorUnsupportedError();
 
   /// Returns system color named "ButtonText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get buttonText => throw _systemColorUnsupportedError();
+  SystemColor get buttonText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "Canvas".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get canvas => throw _systemColorUnsupportedError();
+  SystemColor get canvas => throw _systemColorUnsupportedError();
 
   /// Returns system color named "CanvasText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get canvasText => throw _systemColorUnsupportedError();
+  SystemColor get canvasText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "Field".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get field => throw _systemColorUnsupportedError();
+  SystemColor get field => throw _systemColorUnsupportedError();
 
   /// Returns system color named "FieldText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get fieldText => throw _systemColorUnsupportedError();
+  SystemColor get fieldText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "GrayText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get grayText => throw _systemColorUnsupportedError();
+  SystemColor get grayText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "Highlight".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get highlight => throw _systemColorUnsupportedError();
+  SystemColor get highlight => throw _systemColorUnsupportedError();
 
   /// Returns system color named "HighlightText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get highlightText => throw _systemColorUnsupportedError();
+  SystemColor get highlightText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "LinkText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get linkText => throw _systemColorUnsupportedError();
+  SystemColor get linkText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "Mark".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get mark => throw _systemColorUnsupportedError();
+  SystemColor get mark => throw _systemColorUnsupportedError();
 
   /// Returns system color named "MarkText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get markText => throw _systemColorUnsupportedError();
+  SystemColor get markText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "SelectedItem".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get selectedItem => throw _systemColorUnsupportedError();
+  SystemColor get selectedItem => throw _systemColorUnsupportedError();
 
   /// Returns system color named "SelectedItemText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get selectedItemText => throw _systemColorUnsupportedError();
+  SystemColor get selectedItemText => throw _systemColorUnsupportedError();
 
   /// Returns system color named "VisitedText".
   ///
   /// See also:
   ///
   ///   * https://drafts.csswg.org/css-color/#css-system-colors
-  static SystemColor get visitedText => throw _systemColorUnsupportedError();
+  SystemColor get visitedText => throw _systemColorUnsupportedError();
 }
 
 /// Configuration of the platform.
