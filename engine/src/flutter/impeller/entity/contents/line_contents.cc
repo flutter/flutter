@@ -162,7 +162,7 @@ bool LineContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
-  frag_info.color = color_.Premultiply();
+  frag_info.color = color_;
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
