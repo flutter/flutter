@@ -480,6 +480,9 @@ class ManifestAssetBundle implements AssetBundle {
       }
     }
     print('XXXXX - Looking at $flutterHookResult');
+    print(
+      'XXXXX - assetVariants ${assetVariants.map((_Asset key, List<_Asset> value) => MapEntry((key.entryUri, key.baseDir, key.relativeUri), value))}',
+    );
     for (final HookAsset dataAsset in flutterHookResult?.dataAssets ?? <HookAsset>[]) {
       final Package package = packageConfig[dataAsset.package]!;
       final Uri fileUri = dataAsset.file;
