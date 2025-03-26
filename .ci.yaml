@@ -3865,17 +3865,17 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: flavors_test_macos
-
-  - name: Mac macos_integration_test
-    presubmit: false
-    recipe: devicelab/devicelab_drone
-    timeout: 60
-    bringup: true
-    properties:
-      tags: >
-        ["devicelab", "hostonly", "mac"]
       task_name: macos_integration_test
+
+  # - name: Mac macos_integration_test
+  #   presubmit: false
+  #   recipe: devicelab/devicelab_drone
+  #   timeout: 60
+  #   bringup: true
+  #   properties:
+  #     tags: >
+  #       ["devicelab", "hostonly", "mac"]
+  #     task_name: macos_integration_test
 
   - name: Mac_benchmark flutter_gallery_macos__compile
     presubmit: false
