@@ -610,7 +610,7 @@ TEST_P(AiksTest, TwoContourPathWithSinglePointContour) {
   DisplayListBuilder builder;
 
   DlPaint paint;
-  paint.setColor(DlColor::kWhite());
+  paint.setColor(DlColor::kRed());
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setStrokeWidth(15.0);
   paint.setStrokeCap(DlStrokeCap::kRound);
