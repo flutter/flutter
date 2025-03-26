@@ -58,6 +58,8 @@ class SemanticsTester {
     bool? isMultiline,
     bool? isSlider,
     bool? isKeyboardKey,
+    bool? hasRequiredState,
+    bool? isRequired,
 
     // Actions
     int actions = 0,
@@ -204,6 +206,12 @@ class SemanticsTester {
     }
     if (isKeyboardKey ?? false) {
       flags |= ui.SemanticsFlag.isKeyboardKey.index;
+    }
+    if (hasRequiredState ?? false) {
+      flags |= ui.SemanticsFlag.hasRequiredState.index;
+    }
+    if (isRequired ?? false) {
+      flags |= ui.SemanticsFlag.isRequired.index;
     }
 
     // Actions

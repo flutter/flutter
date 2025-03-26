@@ -91,6 +91,30 @@ void main() async {
     },
   );
 
+  test('FragmentShader setImageSampler asserts if image is disposed', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
+    final Image blueGreenImage = await _createBlueGreenImage();
+    final FragmentShader fragmentShader = program.fragmentShader();
+
+    try {
+      blueGreenImage.dispose();
+      expect(
+        () {
+          fragmentShader.setImageSampler(0, blueGreenImage);
+        },
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            contains('Image has been disposed'),
+          ),
+        ),
+      );
+    } finally {
+      fragmentShader.dispose();
+    }
+  });
+
   test('Disposed FragmentShader on Paint', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('blue_green_sampler.frag.iplr');
     final Image blueGreenImage = await _createBlueGreenImage();

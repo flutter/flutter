@@ -49,6 +49,7 @@ typedef DwdsLauncher =
       required Stream<BuildResult> buildResults,
       required ConnectionProvider chromeConnection,
       required ToolConfiguration toolConfiguration,
+      bool injectDebuggingSupportCode,
     });
 
 // A minimal index for projects that do not yet support web. A meta tag is used
@@ -428,6 +429,10 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
+      // Defaults to 'chrome' if deviceManager or specifiedDeviceId is null,
+      // ensuring the condition is true by default.
+      injectDebuggingSupportCode:
+          (globals.deviceManager?.specifiedDeviceId ?? 'chrome') == 'chrome',
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -1139,7 +1144,14 @@ class WebDevFS implements DevFS {
       recompileRestart: fullRestart,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
-      return UpdateFSReport();
+      return UpdateFSReport(
+        // TODO(srujzs): We're currently reliant on compile error string parsing
+        // as hot reload rejections are sent to stderr just like other
+        // compilation errors. Ideally, we should have some shared parsing
+        // functionality, but that would require a shared package.
+        // See https://github.com/dart-lang/sdk/issues/60275.
+        hotReloadRejected: compilerOutput?.errorMessage?.contains('Hot reload rejected') ?? false,
+      );
     }
 
     // Only update the last compiled time if we successfully compiled.

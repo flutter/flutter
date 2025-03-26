@@ -11,6 +11,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -130,7 +131,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 }
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
-  CurvedAnimation? _opacityAnimation;
+  late CurvedAnimation _opacityAnimation;
 
   @override
   void initState() {
@@ -145,12 +146,12 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         oldWidget.route.animation != widget.route.animation ||
         oldWidget.route.selectedIndex != widget.route.selectedIndex ||
         widget.route.items.length != oldWidget.route.items.length) {
+      _opacityAnimation.dispose();
       _setOpacityAnimation();
     }
   }
 
   void _setOpacityAnimation() {
-    _opacityAnimation?.dispose();
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
       _opacityAnimation = CurvedAnimation(
@@ -204,7 +205,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
   @override
   void dispose() {
-    _opacityAnimation?.dispose();
+    _opacityAnimation.dispose();
     super.dispose();
   }
 
@@ -226,11 +227,11 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         child: child,
       );
     }
-    child = FadeTransition(opacity: _opacityAnimation!, child: child);
+    child = FadeTransition(opacity: _opacityAnimation, child: child);
     if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(shortcuts: _webShortcuts, child: child);
     }
-    return child;
+    return Semantics(role: SemanticsRole.menuItem, child: child);
   }
 }
 
@@ -332,6 +333,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           getSelectedItemOffset: () => route.getItemOffset(route.selectedIndex),
         ),
         child: Semantics(
+          role: SemanticsRole.menu,
           scopesRoute: true,
           namesRoute: true,
           explicitChildNodes: true,
@@ -1303,6 +1305,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   late Map<Type, Action<Intent>> _actionMap;
   bool _isHovering = false;
   bool _hasPrimaryFocus = false;
+  bool _isMenuExpanded = false;
 
   // Only used if needed to create _internalNode.
   FocusNode _createFocusNode() {
@@ -1346,6 +1349,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   void _removeDropdownRoute() {
     _dropdownRoute?._dismiss();
+    _isMenuExpanded = false;
     _dropdownRoute = null;
     _lastOrientation = null;
   }
@@ -1443,6 +1447,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     });
 
     widget.onTap?.call();
+    _isMenuExpanded = true;
   }
 
   // When isDense is true, reduce the height of this button from _kMenuItemHeight to
@@ -1671,6 +1676,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         hintIndex != null || (_selectedIndex != null && widget.selectedItemBuilder == null);
     return Semantics(
       button: !childHasButtonSemantic,
+      expanded: _isMenuExpanded,
       child: Actions(actions: _actionMap, child: result),
     );
   }
@@ -1725,6 +1731,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     super.onSaved,
     super.validator,
     super.errorBuilder,
+    super.forceErrorText,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
     bool? enableFeedback,

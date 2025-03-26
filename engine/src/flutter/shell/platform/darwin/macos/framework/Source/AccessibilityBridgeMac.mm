@@ -332,6 +332,8 @@ AccessibilityBridgeMac::MacOSEventsFromAXEvent(ui::AXEventGenerator::Event event
 void AccessibilityBridgeMac::DispatchAccessibilityAction(ui::AXNode::AXID target,
                                                          FlutterSemanticsAction action,
                                                          fml::MallocMapping data) {
+  // TODO(mattkae): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
   NSCAssert(flutter_engine_, @"Flutter engine should not be deallocated");
   NSCAssert(view_controller_.viewLoaded && view_controller_.view.window,
             @"The accessibility bridge should not receive accessibility actions if the flutter view"

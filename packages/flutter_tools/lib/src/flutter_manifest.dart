@@ -433,7 +433,6 @@ class FlutterManifest {
   /// See also:
   ///
   ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
-  ///   * [generateLocalizations]
   late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;

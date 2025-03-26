@@ -34,7 +34,7 @@ DlAtlasGeometry::DlAtlasGeometry(const std::shared_ptr<Texture>& atlas,
 DlAtlasGeometry::~DlAtlasGeometry() = default;
 
 bool DlAtlasGeometry::ShouldUseBlend() const {
-  return colors_ != nullptr && mode_ != BlendMode::kSource;
+  return colors_ != nullptr && mode_ != BlendMode::kSrc;
 }
 
 bool DlAtlasGeometry::ShouldSkip() const {

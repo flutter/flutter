@@ -9,6 +9,7 @@
 
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/geometry/color.h"
 #include "impeller/typographer/font_glyph_pair.h"
 #include "impeller/typographer/text_frame.h"

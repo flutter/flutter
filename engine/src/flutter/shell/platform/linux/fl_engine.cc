@@ -356,7 +356,7 @@ static void fl_engine_post_task(FlutterTask task,
                                 void* user_data) {
   FlEngine* self = static_cast<FlEngine*>(user_data);
 
-  fl_task_runner_post_task(self->task_runner, task, target_time_nanos);
+  fl_task_runner_post_flutter_task(self->task_runner, task, target_time_nanos);
 }
 
 // Called when a platform message is received from the engine.
@@ -630,7 +630,6 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   FlutterCustomTaskRunners custom_task_runners = {};
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
-  custom_task_runners.render_task_runner = &platform_task_runner;
 
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
@@ -1202,7 +1201,8 @@ gboolean fl_engine_send_key_event_finish(FlEngine* self,
 }
 
 void fl_engine_dispatch_semantics_action(FlEngine* self,
-                                         uint64_t id,
+                                         FlutterViewId view_id,
+                                         uint64_t node_id,
                                          FlutterSemanticsAction action,
                                          GBytes* data) {
   g_return_if_fail(FL_IS_ENGINE(self));
@@ -1218,8 +1218,14 @@ void fl_engine_dispatch_semantics_action(FlEngine* self,
         g_bytes_get_data(data, &action_data_length));
   }
 
-  self->embedder_api.DispatchSemanticsAction(self->engine, id, action,
-                                             action_data, action_data_length);
+  FlutterSendSemanticsActionInfo info;
+  info.struct_size = sizeof(FlutterSendSemanticsActionInfo);
+  info.view_id = view_id;
+  info.node_id = node_id;
+  info.action = action;
+  info.data = action_data;
+  info.data_length = action_data_length;
+  self->embedder_api.SendSemanticsAction(self->engine, &info);
 }
 
 gboolean fl_engine_mark_texture_frame_available(FlEngine* self,

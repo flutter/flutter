@@ -15,6 +15,8 @@ struct _FlViewAccessible {
 
   GWeakRef engine;
 
+  FlutterViewId view_id;
+
   // Semantics nodes keyed by ID
   GHashTable* semantics_nodes_by_id;
 
@@ -32,10 +34,10 @@ static FlAccessibleNode* create_node(FlViewAccessible* self,
   }
 
   if (semantics->flags & kFlutterSemanticsFlagIsTextField) {
-    return fl_accessible_text_field_new(engine, semantics->id);
+    return fl_accessible_text_field_new(engine, self->view_id, semantics->id);
   }
 
-  return fl_accessible_node_new(engine, semantics->id);
+  return fl_accessible_node_new(engine, self->view_id, semantics->id);
 }
 
 static FlAccessibleNode* lookup_node(FlViewAccessible* self, int32_t id) {
@@ -129,16 +131,20 @@ static void fl_view_accessible_init(FlViewAccessible* self) {
       g_direct_hash, g_direct_equal, nullptr, g_object_unref);
 }
 
-FlViewAccessible* fl_view_accessible_new(FlEngine* engine) {
+FlViewAccessible* fl_view_accessible_new(FlEngine* engine,
+                                         FlutterViewId view_id) {
   FlViewAccessible* self =
       FL_VIEW_ACCESSIBLE(g_object_new(fl_view_accessible_get_type(), nullptr));
   g_weak_ref_init(&self->engine, engine);
+  self->view_id = view_id;
   return self;
 }
 
 void fl_view_accessible_handle_update_semantics(
     FlViewAccessible* self,
     const FlutterSemanticsUpdate2* update) {
+  g_return_if_fail(FL_IS_VIEW_ACCESSIBLE(self));
+
   g_autoptr(GHashTable) pending_children =
       g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
                             reinterpret_cast<GDestroyNotify>(fl_value_unref));

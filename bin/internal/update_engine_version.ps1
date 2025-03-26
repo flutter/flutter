@@ -23,6 +23,11 @@
 
 $ErrorActionPreference = "Stop"
 
+# When called from a submodule hook; these will override `git -C dir`
+$env:GIT_DIR = $null
+$env:GIT_INDEX_FILE = $null
+$env:GIT_WORK_TREE = $null
+
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 

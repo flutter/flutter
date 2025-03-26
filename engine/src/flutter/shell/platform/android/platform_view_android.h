@@ -26,7 +26,8 @@ namespace flutter {
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
   AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
-                            bool enable_impeller);
+                            bool enable_impeller,
+                            bool lazy_shader_mode);
 
   ~AndroidSurfaceFactoryImpl() override;
 
@@ -35,6 +36,7 @@ class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  private:
   const std::shared_ptr<AndroidContext>& android_context_;
   const bool enable_impeller_;
+  const bool lazy_shader_mode_;
 };
 
 class PlatformViewAndroid final : public PlatformView {
@@ -133,6 +135,7 @@ class PlatformViewAndroid final : public PlatformView {
 
   // |PlatformView|
   void UpdateSemantics(
+      int64_t view_id,
       flutter::SemanticsNodeUpdates update,
       flutter::CustomAccessibilityActionUpdates actions) override;
 

@@ -91,6 +91,7 @@ source_set("flutter_linux_sources") {
              "fl_method_codec_private.h",
              "fl_plugin_registrar_private.h",
              "fl_pointer_manager.h",
+             "fl_view_private.h",
              "fl_window_state_monitor.h",
              "key_mapping.h",
            ]
@@ -258,14 +259,12 @@ executable("flutter_linux_unittests") {
     "testing/fl_test_gtk_logs.h",
     "testing/mock_engine.cc",
     "testing/mock_epoxy.cc",
-    "testing/mock_im_context.cc",
-    "testing/mock_keymap.cc",
+    "testing/mock_gtk.cc",
     "testing/mock_plugin_registrar.cc",
     "testing/mock_renderer.cc",
     "testing/mock_settings.cc",
     "testing/mock_signal_handler.cc",
     "testing/mock_texture_registrar.cc",
-    "testing/mock_window.cc",
   ]
 
   public_configs = [ "//flutter:config" ]

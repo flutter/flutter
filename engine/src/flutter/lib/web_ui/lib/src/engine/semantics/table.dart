@@ -9,7 +9,7 @@ import 'semantics.dart';
 ///
 /// Uses aria table role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticTable extends SemanticRole {
   SemanticTable(SemanticsObject semanticsObject)
     : super.withBasics(
@@ -28,7 +28,7 @@ class SemanticTable extends SemanticRole {
 ///
 /// Uses aria cell role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticCell extends SemanticRole {
   SemanticCell(SemanticsObject semanticsObject)
     : super.withBasics(
@@ -47,7 +47,7 @@ class SemanticCell extends SemanticRole {
 ///
 /// Uses aria row role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticRow extends SemanticRole {
   SemanticRow(SemanticsObject semanticsObject)
     : super.withBasics(
@@ -66,7 +66,7 @@ class SemanticRow extends SemanticRole {
 ///
 /// Uses aria columnheader role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticColumnHeader extends SemanticRole {
   SemanticColumnHeader(SemanticsObject semanticsObject)
     : super.withBasics(

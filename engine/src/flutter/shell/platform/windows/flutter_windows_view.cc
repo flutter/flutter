@@ -176,14 +176,6 @@ bool FlutterWindowsView::OnFrameGenerated(size_t width, size_t height) {
   return true;
 }
 
-void FlutterWindowsView::UpdateFlutterCursor(const std::string& cursor_name) {
-  binding_handler_->UpdateFlutterCursor(cursor_name);
-}
-
-void FlutterWindowsView::SetFlutterCursor(HCURSOR cursor) {
-  binding_handler_->SetFlutterCursor(cursor);
-}
-
 void FlutterWindowsView::ForceRedraw() {
   if (resize_status_ == ResizeState::kDone) {
     // Request new frame.
