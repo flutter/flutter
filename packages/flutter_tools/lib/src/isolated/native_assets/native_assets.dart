@@ -516,12 +516,13 @@ Future<DartHookResult> _runDartHooks({
     LinkResult? linkResult;
     if (linkingEnabled) {
       linkResult = await _link(buildRunner, target, buildResult);
+      assets.addAll(linkResult.encodedAssets);
+      print('XXXXX - Add link ${linkResult.encodedAssets}');
+    } else {
+      assets.addAll(buildResult.encodedAssets);
+      print('XXXXX - Add build ${buildResult.encodedAssets}');
     }
 
-    assets.addAll(<EncodedAsset>[
-      ...buildResult.encodedAssets,
-      if (linkResult != null) ...linkResult.encodedAssets,
-    ]);
     dependencies.addAll(<Uri>[
       ...buildResult.dependencies,
       if (linkResult != null) ...linkResult.dependencies,
