@@ -323,7 +323,7 @@ abstract class BoxBorder extends ShapeBorder {
       case BoxShape.circle:
         assert(
           borderRadius == null,
-          'A borderRadius cannot be given when shape is a BoxShape.circle.',
+          'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
         );
         borderRect = RRect.fromRectAndRadius(
           Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0),
@@ -703,7 +703,7 @@ class Border extends BoxBorder {
             case BoxShape.circle:
               assert(
                 borderRadius == null,
-                'A borderRadius cannot be given when shape is a BoxShape.circle.',
+                'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
               );
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
             case BoxShape.rectangle:
@@ -1081,7 +1081,7 @@ class BorderDirectional extends BoxBorder {
             case BoxShape.circle:
               assert(
                 borderRadius == null,
-                'A borderRadius cannot be given when shape is a BoxShape.circle.',
+                'A circle cannot have a border radius. Remove either the shape or the borderRadius argument.',
               );
               BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
             case BoxShape.rectangle:
