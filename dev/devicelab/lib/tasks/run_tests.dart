@@ -106,12 +106,6 @@ class AndroidRunOutputTest extends RunOutputTask {
   }
 
   @override
-  bool isExpectedStderr(String line) {
-    // TODO(egarciad): Remove once https://github.com/flutter/flutter/issues/95131 is fixed.
-    return line.contains('Mapping new ns');
-  }
-
-  @override
   TaskResult verify(List<String> stdout, List<String> stderr) {
     final String gradleTask = release ? 'assembleRelease' : 'assembleDebug';
     final String apk = release ? 'app-release.apk' : 'app-debug.apk';
