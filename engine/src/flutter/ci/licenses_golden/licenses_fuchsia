@@ -1,4 +1,4 @@
-Signature: d6b196acf3e635ef658732a28deb4774
+Signature: fe849bcd5746ffb1059d9ae57d34ca90
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -17941,6 +17941,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl + .
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_member_watcher.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc + ../../../fuchsia/sdk/linux/LICENSE
@@ -17952,6 +17953,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_member_watcher.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc
