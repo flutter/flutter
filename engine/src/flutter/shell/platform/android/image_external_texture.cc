@@ -67,23 +67,19 @@ void ImageExternalTexture::OnGrContextCreated() {
 
 // Implementing flutter::ContextListener.
 void ImageExternalTexture::OnGrContextDestroyed() {
-  FML_LOG(ERROR) << "OnGrContextDestroyed";
   if (state_ == AttachmentState::kAttached) {
     switch (texture_lifecycle_) {
       case ImageLifecycle::kReset: {
-        FML_LOG(ERROR) << "kREset";
         dl_image_.reset();
         image_lru_.Clear();
       } break;
-      case ImageLifecycle::kKeepAlive: {
-        FML_LOG(ERROR) << "kKeepAlive";
-      }
-      // Intentionally do nothing.
-      ///
-      // If we reset the image, we are not able to re-acquire it, but the
-      // producer of the image will not know to reproduce it, resulting in a
-      // blank image. See https://github.com/flutter/flutter/issues/163561.
-      break;
+      case ImageLifecycle::kKeepAlive:
+        // Intentionally do nothing.
+        ///
+        // If we reset the image, we are not able to re-acquire it, but the
+        // producer of the image will not know to reproduce it, resulting in a
+        // blank image. See https://github.com/flutter/flutter/issues/163561.
+        break;
     }
     Detach();
   }
