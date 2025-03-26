@@ -23,6 +23,10 @@ import java.util.Properties
  * A collection of static utility functions used by the Flutter Gradle Plugin.
  */
 object FlutterPluginUtils {
+    private const val MANIFEST_NAME_KEY = "android:name"
+    private const val MANIFEST_VALUE_KEY = "android:value"
+    private const val MANIFEST_VALUE_TRUE = "true"
+
     // Gradle properties. These must correspond to the values used in
     // flutter/packages/flutter_tools/lib/src/android/gradle.dart, and therefore it is not
     // recommended to use these const values in tests.
@@ -404,8 +408,8 @@ object FlutterPluginUtils {
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
-    // TODO: https://github.com/flutter/flutter/issues/165882
-    // Use find by type and AbstractAppExtension instead. Or delete in favor of getAndroidExtension.
+    // TODO: Use find by type and AbstractAppExtension instead. Or delete in favor of getAndroidExtension.
+    //       see https://github.com/flutter/flutter/issues/165882
     private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
         project.extensions.findByName("android") as? AbstractAppExtension
 
@@ -896,11 +900,11 @@ object FlutterPluginUtils {
         android.applicationVariants.configureEach {
             val variant = this
             project.tasks.register("output${FlutterPluginUtils.capitalize(variant.name)}AppLinkSettings") {
-                val task = this
+                val task: Task = this
                 task.description =
                     "stores app links settings for the given build variant of this Android project into a json file."
                 variant.outputs.configureEach {
-                    val baseVariantOutput = this
+                    val baseVariantOutput: BaseVariantOutput = this
                     // Deeplinks are defined in AndroidManifest.xml and is only available after
                     // processResourcesProvider.
                     dependsOn(findProcessResources(baseVariantOutput))
@@ -923,7 +927,7 @@ object FlutterPluginUtils {
      * Extracts app deeplink information from the Android manifest file of a variant then returns
      * an AppLinkSettings object.
      *
-     * @receiver BaseVariantOutput The output of a specific build variant (e.g., debug, release).
+     * @param BaseVariantOutput The output of a specific build variant (e.g., debug, release).
      * @param variant The application variant being processed.
      */
     private fun createAppLinkSettings(
@@ -942,125 +946,113 @@ object FlutterPluginUtils {
             manifest.children().find { node ->
                 node is Node && node.name() == "application"
             } as Node?
+        if (applicationNode == null) {
+            return appLinkSettings
+        }
+        val activities: List<Node> =
+            applicationNode.children().filterIsInstance<Node>().filter { item ->
+                item.name() == "activity"
+            }
 
-        applicationNode?.let { appNode ->
-            val activities: List<Any?> =
-                appNode.children().filter { item ->
-                    item is Node && item.name() == "activity"
+        activities.forEach { activity ->
+            val metaDataItems: List<Node> =
+                activity.children().filterIsInstance<Node>().filter { metaItem ->
+                    metaItem.name() == "meta-data"
+                }
+            metaDataItems.forEach { metaDataItem ->
+                val nameAttribute: Boolean =
+                    metaDataItem.attribute(MANIFEST_NAME_KEY) == "flutter_deeplinking_enabled"
+                val valueAttribute: Boolean =
+                    metaDataItem.attribute(MANIFEST_VALUE_KEY) == MANIFEST_VALUE_TRUE
+                if (nameAttribute && valueAttribute) {
+                    appLinkSettings.deeplinkingFlagEnabled = true
+                }
+            }
+            val intentFilterItems: List<Node> =
+                activity.children().filterIsInstance<Node>().filter { filterItem ->
+                    filterItem.name() == "intent-filter"
+                }
+            intentFilterItems.forEach { appLinkIntent ->
+                // Print out the host attributes in data tags.
+                val schemes: MutableSet<String?> = mutableSetOf()
+                val hosts: MutableSet<String?> = mutableSetOf()
+                val paths: MutableSet<String?> = mutableSetOf()
+                val intentFilterCheck = IntentFilterCheck()
+                if (appLinkIntent.attribute("android:autoVerify") == MANIFEST_VALUE_TRUE) {
+                    intentFilterCheck.hasAutoVerify = true
                 }
 
-            activities.forEach { activity ->
-                if (activity is Node) {
-                    val metaDataItems: List<Any?> =
-                        activity.children().filter { metaItem ->
-                            metaItem is Node && metaItem.name() == "meta-data"
-                        }
-                    metaDataItems.forEach { metaDataItem ->
-                        if (metaDataItem is Node) {
-                            val nameAttribute: Boolean =
-                                metaDataItem.attribute("android:name") == "flutter_deeplinking_enabled"
-                            val valueAttribute: Boolean =
-                                metaDataItem.attribute("android:value") == "true"
-                            if (nameAttribute && valueAttribute) {
-                                appLinkSettings.deeplinkingFlagEnabled = true
-                            }
+                val actionItems: List<Node> =
+                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
+                        item.name() == "action"
+                    }
+                // Any action item causes intentFilterCheck to always be true
+                // and we keep looping instead of exiting out early.
+                // TODO: Exit out early per intent filter action view.
+                actionItems.forEach { action ->
+                    if (action.attribute(MANIFEST_NAME_KEY) == "android.intent.action.VIEW") {
+                        intentFilterCheck.hasActionView = true
+                    }
+                }
+                val categoryItems: List<Node> =
+                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
+                        item.name() == "category"
+                    }
+                categoryItems.forEach { category ->
+                    // TODO: Exit out early per intent filter default category.
+                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.DEFAULT") {
+                        intentFilterCheck.hasDefaultCategory = true
+                    }
+                    // TODO: Exit out early per intent filter browsable category.
+                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.BROWSABLE") {
+                        intentFilterCheck.hasBrowsableCategory =
+                            true
+                    }
+                }
+                val dataItems: List<Node> =
+                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
+                        item.name() == "data"
+                    }
+                dataItems.forEach { data ->
+                    data.attributes().forEach { entry ->
+                        when (entry.key) {
+                            "android:scheme" -> schemes.add(entry.value.toString())
+                            "android:host" -> hosts.add(entry.value.toString())
+                            // All path patterns add to paths.
+                            "android:pathAdvancedPattern" ->
+                                paths.add(
+                                    entry.value.toString()
+                                )
+
+                            "android:pathPattern" -> paths.add(entry.value.toString())
+                            "android:path" -> paths.add(entry.value.toString())
+                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
+                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
                         }
                     }
-                    val intentFilterItems: List<Any?> =
-                        activity.children().filter { filterItem ->
-                            filterItem is Node && filterItem.name() == "intent-filter"
-                        }
-                    intentFilterItems.forEach { appLinkIntent ->
-                        if (appLinkIntent is Node) {
-                            // Print out the host attributes in data tags.
-                            val schemes: MutableSet<String?> = mutableSetOf()
-                            val hosts: MutableSet<String?> = mutableSetOf()
-                            val paths: MutableSet<String?> = mutableSetOf()
-                            val intentFilterCheck = IntentFilterCheck()
-                            if (appLinkIntent.attribute("android:autoVerify") == "true") {
-                                intentFilterCheck.hasAutoVerify = true
-                            }
-
-                            val actionItems: List<Any?> =
-                                appLinkIntent.children().filter { item ->
-                                    item is Node && item.name() == "action"
-                                }
-                            // Any action item causes intentFilterCheck to always be true
-                            // and we keep looping instead of exiting out early.
-                            // TODO exit out early per intent filter action view.
-                            actionItems.forEach { action ->
-                                if (action is Node) {
-                                    if (action.attribute("android:name") == "android.intent.action.VIEW") {
-                                        intentFilterCheck.hasActionView = true
-                                    }
-                                }
-                            }
-                            val categoryItems: List<Any?> =
-                                appLinkIntent.children().filter { item ->
-                                    item is Node && item.name() == "category"
-                                }
-                            categoryItems.forEach { category ->
-                                if (category is Node) {
-                                    // TODO exit out early per intent filter default category.
-                                    if (category.attribute("android:name") == "android.intent.category.DEFAULT") {
-                                        intentFilterCheck.hasDefaultCategory = true
-                                    }
-                                    // TODO exit out early per intent filter browsable category.
-                                    if (category.attribute("android:name") == "android.intent.category.BROWSABLE") {
-                                        intentFilterCheck.hasBrowsableCategory =
-                                            true
-                                    }
-                                }
-                            }
-                            val dataItems: List<Any?> =
-                                appLinkIntent.children().filter { item ->
-                                    item is Node && item.name() == "data"
-                                }
-                            dataItems.forEach { data ->
-                                if (data is Node) {
-                                    data.attributes().forEach { entry ->
-                                        when ((entry.key)) {
-                                            "android:scheme" -> schemes.add(entry.value.toString())
-                                            "android:host" -> hosts.add(entry.value.toString())
-                                            // All path patterns add to paths.
-                                            "android:pathAdvancedPattern" ->
-                                                paths.add(
-                                                    entry.value.toString()
-                                                )
-
-                                            "android:pathPattern" -> paths.add(entry.value.toString())
-                                            "android:path" -> paths.add(entry.value.toString())
-                                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
-                                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
-                                        }
-                                    }
-                                }
-                            }
-                            if (hosts.isNotEmpty() || paths.isNotEmpty()) {
-                                if (schemes.isEmpty()) {
-                                    schemes.add(null)
-                                }
-                                if (hosts.isEmpty()) {
-                                    hosts.add(null)
-                                }
-                                if (paths.isEmpty()) {
-                                    paths.add(".*")
-                                }
-                                // Sets are not ordered this could produce a bug.
-                                schemes.forEach { scheme ->
-                                    hosts.forEach { host ->
-                                        paths.forEach { path ->
-                                            appLinkSettings.deeplinks.add(
-                                                Deeplink(
-                                                    scheme,
-                                                    host,
-                                                    path,
-                                                    intentFilterCheck
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
+                }
+                if (hosts.isNotEmpty() || paths.isNotEmpty()) {
+                    if (schemes.isEmpty()) {
+                        schemes.add(null)
+                    }
+                    if (hosts.isEmpty()) {
+                        hosts.add(null)
+                    }
+                    if (paths.isEmpty()) {
+                        paths.add(".*")
+                    }
+                    // Sets are not ordered this could produce a bug.
+                    schemes.forEach { scheme ->
+                        hosts.forEach { host ->
+                            paths.forEach { path ->
+                                appLinkSettings.deeplinks.add(
+                                    Deeplink(
+                                        scheme,
+                                        host,
+                                        path,
+                                        intentFilterCheck
+                                    )
+                                )
                             }
                         }
                     }

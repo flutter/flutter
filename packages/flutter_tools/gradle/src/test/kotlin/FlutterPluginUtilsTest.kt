@@ -1230,61 +1230,77 @@ class FlutterPluginUtilsTest {
     fun addTasksForOutputsAppLinkSettingsActual(
         @TempDir tempDir: Path
     ) {
-        val mockProject = mockk<Project>()
-        val mockLogger = mockk<Logger>()
-        every { mockProject.logger } returns mockLogger
-        every { mockLogger.info(any()) } returns Unit
-        every { mockLogger.warn(any()) } returns Unit
-        val mockAbstractAppExtension = mockk<AbstractAppExtension>()
-        every { mockProject.extensions.findByName("android") } returns mockAbstractAppExtension
-
-        val testVariants: DomainObjectSet<ApplicationVariant> = mockk<DomainObjectSet<ApplicationVariant>>()
-        val variant1 = mockk<ApplicationVariant>()
-        every { variant1.name } returns "one"
-        every { variant1.applicationId } returns "com.example.FlutterActivity1"
-        val variant2 = mockk<ApplicationVariant>()
-        every { variant2.name } returns "two"
-        every { variant2.applicationId } returns "com.example.FlutterActivity2"
-        val variants = mutableListOf(variant1, variant2)
-        // Capture the "action" that needs to be run for each variant.
-        val actionSlot = slot<Action<ApplicationVariant>>()
-        every { testVariants.configureEach(capture(actionSlot)) } answers {
-            // Execute the action for each variant.
-            variants.forEach { variant ->
-                actionSlot.captured.execute(variant)
-            }
-        }
-        every { mockAbstractAppExtension.applicationVariants } returns testVariants
-
+        val variants: MutableList<ApplicationVariant> = mutableListOf()
+        val registerTaskList = mutableListOf<Task>()
         val descriptionSlot = slot<String>()
-        val registerTaskSlot = slot<Action<Task>>()
-        val registerTaskList: MutableList<Task> = mutableListOf()
-        every { mockProject.tasks } returns
-            mockk<TaskContainer> {
-                val registerTaskNameSlot = slot<String>()
-                every { register(capture(registerTaskNameSlot), capture(registerTaskSlot)) } answers registerAnswer@{
-                    val mockRegisterTask =
-                        mockk<Task> {
-                            every { name } returns registerTaskNameSlot.captured
-                            every { description = capture(descriptionSlot) } returns Unit
-                            every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
-                            val doLastActionSlot = slot<Action<Task>>()
-                            every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
-                                // We need to capture the task as well
-                                doLastActionSlot.captured.execute(mockk())
-                                return@doLastAnswer mockk()
-                            }
-                        }
-                    registerTaskList.add(mockRegisterTask)
-                    registerTaskSlot.captured.execute(mockRegisterTask)
-                    return@registerAnswer mockk()
-                }
+        // vars so variables can be overridden below.
+        var mockLogger = mockk<Logger>()
+        var variantWithLinks = mockk<ApplicationVariant>()
 
-                every { named(any<String>()) } returns
+        val mockProject =
+            mockk<Project> {
+                every { logger } returns
                     mockk {
-                        every { configure(any<Action<Task>>()) } returns mockk()
+                        mockLogger = this
+                        every { info(any()) } returns Unit
+                        every { warn(any()) } returns Unit
+                    }
+                every { extensions.findByName("android") } returns
+                    mockk<AbstractAppExtension> {
+                        val variant1 =
+                            mockk<ApplicationVariant> {
+                                every { name } returns "one"
+                                every { applicationId } returns "com.example.FlutterActivity1"
+                            }
+                        variants.add(variant1)
+                        mockk<ApplicationVariant> {
+                            variantWithLinks = this
+                            every { name } returns "two"
+                            every { applicationId } returns "com.example.FlutterActivity2"
+                        }
+                        variants.add(variantWithLinks)
+                        // Capture the "action" that needs to be run for each variant.
+                        val actionSlot = slot<Action<ApplicationVariant>>()
+                        every { applicationVariants } returns
+                            mockk<DomainObjectSet<ApplicationVariant>> {
+                                every { configureEach(capture(actionSlot)) } answers {
+                                    // Execute the action for each variant.
+                                    variants.forEach { variant ->
+                                        actionSlot.captured.execute(variant)
+                                    }
+                                }
+                            }
+                    }
+
+                val registerTaskSlot = slot<Action<Task>>()
+                every { tasks } returns
+                    mockk<TaskContainer> {
+                        val registerTaskNameSlot = slot<String>()
+                        every { register(capture(registerTaskNameSlot), capture(registerTaskSlot)) } answers registerAnswer@{
+                            val mockRegisterTask =
+                                mockk<Task> {
+                                    every { name } returns registerTaskNameSlot.captured
+                                    every { description = capture(descriptionSlot) } returns Unit
+                                    every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
+                                    val doLastActionSlot = slot<Action<Task>>()
+                                    every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
+                                        // We need to capture the task as well
+                                        doLastActionSlot.captured.execute(mockk())
+                                        return@doLastAnswer mockk()
+                                    }
+                                }
+                            registerTaskList.add(mockRegisterTask)
+                            registerTaskSlot.captured.execute(mockRegisterTask)
+                            return@registerAnswer mockk()
+                        }
+
+                        every { named(any<String>()) } returns
+                            mockk {
+                                every { configure(any<Action<Task>>()) } returns mockk()
+                            }
                     }
             }
+
         variants.forEach { variant ->
             val testOutputs: DomainObjectCollection<BaseVariantOutput> = mockk<DomainObjectCollection<BaseVariantOutput>>()
             val baseVariantSlot = slot<Action<BaseVariantOutput>>()
@@ -1328,7 +1344,7 @@ class FlutterPluginUtilsTest {
         // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
         val outputFileText = outputFile.readText()
         // Only variant2 since that one has app links.
-        assertContains(outputFileText, variant2.applicationId)
+        assertContains(outputFileText, variantWithLinks.applicationId)
         // Host.
         assertContains(outputFileText, "deeplink.flutter.dev")
         // pathPrefix used in variant2 combined with prefix logic.
