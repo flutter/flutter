@@ -4431,16 +4431,16 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 6,
+          "fp16_arithmetic": 0,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "varying"
             ],
             "longest_path_cycles": [
-              0.21875,
-              0.140625,
-              0.21875,
+              0.1875,
+              0.1875,
+              0.1875,
               0.0,
               0.0,
               1.75,
@@ -4459,9 +4459,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.125,
-              0.140625,
+              0.171875,
+              0.171875,
+              0.109375,
               0.0,
               0.0,
               1.75,
@@ -4471,9 +4471,9 @@
               "varying"
             ],
             "total_cycles": [
-              0.21875,
-              0.140625,
-              0.21875,
+              0.1875,
+              0.1875,
+              0.1875,
               0.0,
               0.0,
               1.75,
@@ -8251,7 +8251,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 15,
+          "fp16_arithmetic": 33,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -8259,8 +8259,8 @@
             ],
             "longest_path_cycles": [
               0.1875,
-              0.140625,
-              0.1875,
+              0.171875,
+              0.15625,
               0.1875,
               0.0,
               1.75,
@@ -8280,8 +8280,8 @@
             ],
             "shortest_path_cycles": [
               0.1875,
-              0.125,
-              0.140625,
+              0.15625,
+              0.109375,
               0.1875,
               0.0,
               1.75,
@@ -8292,8 +8292,8 @@
             ],
             "total_cycles": [
               0.1875,
-              0.140625,
-              0.1875,
+              0.171875,
+              0.15625,
               0.1875,
               0.0,
               1.75,
@@ -8302,7 +8302,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 6,
+          "uniform_registers_used": 4,
           "work_registers_used": 18
         }
       }
