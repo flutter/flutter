@@ -11,9 +11,7 @@ object NativePluginLoaderReflectionBridge {
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
     ): List<Map<String, Any>> {
-        if (nativePluginLoader == null) {
-            nativePluginLoader = extraProperties.get("nativePluginLoader")!!
-        }
+        nativePluginLoader = extraProperties.get("nativePluginLoader")!!
 
         @Suppress("UNCHECKED_CAST")
         val pluginList: List<Map<String, Any>> =
@@ -33,9 +31,8 @@ object NativePluginLoaderReflectionBridge {
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
     ): Map<String, Any> {
-        if (nativePluginLoader == null) {
-            nativePluginLoader = extraProperties.get("nativePluginLoader")!!
-        }
+        nativePluginLoader = extraProperties.get("nativePluginLoader")!!
+
         @Suppress("UNCHECKED_CAST")
         val dependenciesMetadata: Map<String, Any> =
             nativePluginLoader!!::class
