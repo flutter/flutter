@@ -674,7 +674,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   Rect? describeApproximatePaintClip(RenderSliver child) {
-    if (child.ensureSemantics) {
+    if (child.ensureSemantics && !(child.geometry!.visible || child.geometry!.cacheExtent > 0.0)) {
       // Return null here so we don't end up clipping out a semantics node rect
       // for a sliver child when we explicitly want it to be included in the semantics tree.
       return null;
@@ -726,7 +726,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   Rect? describeSemanticsClip(RenderSliver? child) {
-    if (child != null && child.ensureSemantics) {
+    if (child != null &&
+        child.ensureSemantics &&
+        !(child.geometry!.visible || child.geometry!.cacheExtent > 0.0)) {
       // Return null here so we don't end up clipping out a semantics node rect
       // for a sliver child when we explicitly want it to be included in the semantics tree.
       return null;
