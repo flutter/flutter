@@ -247,6 +247,36 @@ Future<void> frameworkTestsRunner() async {
     await runFixTests('integration_test');
     await runFixTests('flutter_driver');
     await runPrivateTests();
+
+    // Run java unit tests for integration_test
+    //
+    // Generate Gradle wrapper if it doesn't exist.
+    Process.runSync(
+      flutter,
+      <String>['build', 'apk', '--config-only'],
+      workingDirectory: path.join(
+        flutterRoot,
+        'packages',
+        'integration_test',
+        'example',
+        'android',
+      ),
+    );
+    await runCommand(
+      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew$bat'),
+      <String>[
+        ':integration_test:testDebugUnitTest',
+        '--tests',
+        'dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest',
+      ],
+      workingDirectory: path.join(
+        flutterRoot,
+        'packages',
+        'integration_test',
+        'example',
+        'android',
+      ),
+    );
   }
 
   Future<void> runMisc() async {
@@ -289,40 +319,10 @@ Future<void> frameworkTestsRunner() async {
         '--exclude-tags=web',
       ],
     );
-    // Run java unit tests for integration_test
-    //
-    // Generate Gradle wrapper if it doesn't exist.
-    Process.runSync(
-      flutter,
-      <String>['build', 'apk', '--config-only'],
-      workingDirectory: path.join(
-        flutterRoot,
-        'packages',
-        'integration_test',
-        'example',
-        'android',
-      ),
-    );
-    await runCommand(
-      path.join(flutterRoot, 'packages', 'integration_test', 'example', 'android', 'gradlew$bat'),
-      <String>[
-        ':integration_test:testDebugUnitTest',
-        '--tests',
-        'dev.flutter.plugins.integration_test.FlutterDeviceScreenshotTest',
-      ],
-      workingDirectory: path.join(
-        flutterRoot,
-        'packages',
-        'integration_test',
-        'example',
-        'android',
-      ),
-    );
     await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'));
     await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
     await runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
     await runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'));
-    await runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'non_nullable'));
     const String httpClientWarning =
         'Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses\n'
         'TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request\n'

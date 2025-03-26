@@ -169,10 +169,10 @@ void CompositorContext::ScopedFrame::PaintLayerTreeSkia(
 
     if (needs_save_layer) {
       TRACE_EVENT0("flutter", "Canvas::saveLayer");
-      SkRect bounds = SkRect::Make(ToSkISize(layer_tree.frame_size()));
+      DlRect bounds = DlRect::MakeSize(layer_tree.frame_size());
       DlPaint paint;
       paint.setBlendMode(DlBlendMode::kSrc);
-      canvas()->SaveLayer(&bounds, &paint);
+      canvas()->SaveLayer(bounds, &paint);
     }
     canvas()->Clear(DlColor::kTransparent());
   }
@@ -185,10 +185,15 @@ void CompositorContext::ScopedFrame::PaintLayerTreeImpeller(
     flutter::LayerTree& layer_tree,
     std::optional<DlRect> clip_rect,
     bool ignore_raster_cache) {
-  if (canvas() && clip_rect) {
-    canvas()->Translate(-clip_rect->GetX(), -clip_rect->GetY());
+  DlAutoCanvasRestore restore(canvas(), clip_rect.has_value());
+
+  if (canvas()) {
+    if (clip_rect) {
+      canvas()->ClipRect(clip_rect.value());
+    }
   }
 
+  // The canvas()->Restore() is taken care of by the DlAutoCanvasRestore
   layer_tree.Paint(*this, ignore_raster_cache);
 }
 

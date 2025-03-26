@@ -158,8 +158,8 @@ extension CanvasKitExtension on CanvasKit {
       _GetOffscreenWebGLContext(canvas, options).toDartDouble;
 
   @JS('MakeGrContext')
-  external SkGrContext _MakeGrContext(JSNumber glContext);
-  SkGrContext MakeGrContext(double glContext) => _MakeGrContext(glContext.toJS);
+  external SkGrContext? _MakeGrContext(JSNumber glContext);
+  SkGrContext? MakeGrContext(double glContext) => _MakeGrContext(glContext.toJS);
 
   @JS('MakeOnScreenGLSurface')
   external SkSurface? _MakeOnScreenGLSurface(
@@ -2756,30 +2756,16 @@ extension SkTextStylePropertiesExtension on SkTextStyleProperties {
 
   @JS('shadows')
   external set _shadows(JSArray<JSAny?>? value);
-  set shadows(List<SkTextShadow>? value) =>
-          // TODO(joshualitt): remove this cast when we reify JS types on JS
-          // backends.
-          // ignore: unnecessary_cast
-          _shadows =
-          (value as List<JSAny>?)?.toJS;
+  set shadows(List<SkTextShadow>? value) => _shadows = (value as List<JSAny>?)?.toJS;
 
   @JS('fontFeatures')
   external set _fontFeatures(JSArray<JSAny?>? value);
-  set fontFeatures(List<SkFontFeature>? value) =>
-          // TODO(joshualitt): remove this cast when we reify JS types on JS
-          // backends.
-          // ignore: unnecessary_cast
-          _fontFeatures =
-          (value as List<JSAny>?)?.toJS;
+  set fontFeatures(List<SkFontFeature>? value) => _fontFeatures = (value as List<JSAny>?)?.toJS;
 
   @JS('fontVariations')
   external set _fontVariations(JSArray<JSAny?>? value);
   set fontVariations(List<SkFontVariation>? value) =>
-          // TODO(joshualitt): remove this cast when we reify JS types on JS
-          // backends.
-          // ignore: unnecessary_cast
-          _fontVariations =
-          (value as List<JSAny>?)?.toJS;
+      _fontVariations = (value as List<JSAny>?)?.toJS;
 }
 
 @JS()
@@ -3431,17 +3417,14 @@ String get _canvasKitBaseUrl => configuration.canvasKitBaseUrl;
 
 @visibleForTesting
 List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
-  switch (variant) {
-    case CanvasKitVariant.auto:
-      return <String>[
-        if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
-        _kFullCanvasKitJsFileName,
-      ];
-    case CanvasKitVariant.full:
-      return <String>[_kFullCanvasKitJsFileName];
-    case CanvasKitVariant.chromium:
-      return <String>[_kChromiumCanvasKitJsFileName];
-  }
+  return switch (variant) {
+    CanvasKitVariant.auto => <String>[
+      if (_enableCanvasKitChromiumInAutoMode) _kChromiumCanvasKitJsFileName,
+      _kFullCanvasKitJsFileName,
+    ],
+    CanvasKitVariant.full => <String>[_kFullCanvasKitJsFileName],
+    CanvasKitVariant.chromium => <String>[_kChromiumCanvasKitJsFileName],
+  };
 }
 
 Iterable<String> get _canvasKitJsUrls {

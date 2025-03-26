@@ -6,7 +6,7 @@ import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart';
+import 'package:ui/src/engine/browser_detection.dart';
 import 'package:ui/ui.dart';
 
 import '../common/test_initialization.dart';
@@ -16,11 +16,11 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpImplicitView();
+  setUpUnitTests();
 
   Future<Image> createTestImageByColor(Color color) async {
-    final EnginePictureRecorder recorder = EnginePictureRecorder();
-    final RecordingCanvas canvas = recorder.beginRecording(const Rect.fromLTRB(0, 0, 2, 2));
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, const Rect.fromLTRB(0, 0, 2, 2));
     canvas.drawColor(color, BlendMode.srcOver);
     final Picture testPicture = recorder.endRecording();
     final Image testImage = await testPicture.toImage(2, 2);
@@ -39,12 +39,16 @@ Future<void> testMain() async {
     // test the header.
     final List<int> pngHeader = <int>[137, 80, 78, 71, 13, 10, 26, 10];
     expect(pngBytes.buffer.asUint8List().sublist(0, pngHeader.length), pngHeader);
-  });
+
+    // Firefox does not support WebGL in headless mode.
+  }, skip: isFirefox);
 
   test('Image.toByteData(format: ImageByteFormat.rawStraightRgba)', () async {
     final Image testImage = await createTestImageByColor(const Color(0xAAFFFF00));
 
     final ByteData bytes = (await testImage.toByteData(format: ImageByteFormat.rawStraightRgba))!;
     expect(bytes.buffer.asUint32List(), <int>[0xAA00FFFF, 0xAA00FFFF, 0xAA00FFFF, 0xAA00FFFF]);
-  });
+
+    // Firefox does not support WebGL in headless mode.
+  }, skip: isFirefox);
 }

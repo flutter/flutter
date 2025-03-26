@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
-
 import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -20,8 +19,8 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
+import '../features.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../version.dart';
 
 /// The [Pub] instance.
@@ -113,7 +112,6 @@ abstract class Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
-    required Usage usage,
   }) = _DefaultPub;
 
   /// Create a [Pub] instance with a mocked [stdio].
@@ -124,7 +122,6 @@ abstract class Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
-    required Usage usage,
     required Stdio stdio,
   }) = _DefaultPub.test;
 
@@ -211,12 +208,10 @@ class _DefaultPub implements Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
-    required Usage usage,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
-       _usage = usage,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _stdio = null;
@@ -228,13 +223,11 @@ class _DefaultPub implements Pub {
     required ProcessManager processManager,
     required Platform platform,
     required BotDetector botDetector,
-    required Usage usage,
     required Stdio stdio,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _botDetector = botDetector,
-       _usage = usage,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _stdio = stdio;
@@ -244,7 +237,6 @@ class _DefaultPub implements Pub {
   final ProcessUtils _processUtils;
   final Platform _platform;
   final BotDetector _botDetector;
-  final Usage _usage;
   final ProcessManager _processManager;
   final Stdio? _stdio;
 
@@ -501,8 +493,6 @@ class _DefaultPub implements Pub {
     }
 
     final int code = exitCode;
-    final String result = code == 0 ? 'success' : 'failure';
-    PubResultEvent(context: context.toAnalyticsString(), result: result, usage: _usage).send();
 
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');
@@ -580,12 +570,6 @@ class _DefaultPub implements Pub {
       mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
       environment: pubEnvironment,
     );
-
-    String result = 'success';
-    if (code != 0) {
-      result = 'failure';
-    }
-    PubResultEvent(context: context.toAnalyticsString(), result: result, usage: _usage).send();
 
     if (code != 0) {
       final StringBuffer buffer = StringBuffer('$failureMessage\n');
@@ -777,24 +761,24 @@ class _DefaultPub implements Pub {
         .childFile('package_config_subset')
         .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
 
-    // TODO(matanlurey): Remove this once flutter_gen is removed.
-    //
-    // This is actually incorrect logic; the presence of a `generate: true`
-    // does *NOT* mean that we need to add `flutter_gen` to the package config,
-    // and never did, but the name of the manifest field was labeled and
-    // described incorrectly.
-    //
-    // Tracking removal: https://github.com/flutter/flutter/issues/102983.
+    // If we aren't generating localizations, short-circuit.
     if (!project.manifest.generateLocalizations) {
       return;
     }
 
-    // TODO(matanlurey): Remove this once flutter_gen is removed.
-    //
-    // See https://github.com/dart-lang/pub/issues/4471.
-    if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
-      throwToolExit('`generate: true` is not supported within workspaces.');
+    // Workaround for https://github.com/flutter/flutter/issues/164864.
+    // If this flag is set, synthetic packages cannot be used, so we short-circut.
+    if (featureFlags.isExplicitPackageDependenciesEnabled) {
+      return;
     }
+
+    if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
+      throwToolExit(
+        '`generate: true` is not supported within workspaces unless flutter config '
+        '--explicit-package-dependencies is set.',
+      );
+    }
+
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;
     }

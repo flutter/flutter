@@ -147,10 +147,6 @@ class UserMessages {
   ) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update the Android SDK visit ${androidSdkInstallUrl(platform)} for detailed instructions.';
-  String get androidMissingCmdTools =>
-      'cmdline-tools component is missing\n'
-      'Run `path/to/sdkmanager --install "cmdline-tools;latest"`\n'
-      'See https://developer.android.com/studio/command-line for more details.';
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
@@ -279,6 +275,9 @@ class UserMessages {
   String get gtkLibrariesMissing =>
       'GTK 3.0 development libraries are required for Linux development.\n'
       'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
+  String get eglinfoMissing =>
+      "Unable to access driver information using 'eglinfo'.\n"
+      'It is likely available from your distribution (e.g.: apt install mesa-utils)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) =>

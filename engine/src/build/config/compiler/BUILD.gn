@@ -280,6 +280,9 @@ config("compiler") {
     if (wasm_use_pthreads) {
       cflags += [ "-pthread" ]
       ldflags += [ "-pthread" ]
+    } if (wasm_shared_memory) {
+      cflags += [ "-sSHARED_MEMORY=1" ]
+      ldflags += [ "-sSHARED_MEMORY=1" ]
     }
     ldflags += [
       "-s",
@@ -929,6 +932,14 @@ config("no_optimize") {
     if (!using_sanitizer && !enable_profiling) {
       cflags += [ "-fomit-frame-pointer" ]
     }
+    ldflags = common_optimize_on_ldflags
+  } else if (is_wasm) {
+    # On WASM we don't want to fully deoptimize the debug build because the
+    # compiled binary will have some functions with too many local variables
+    # and Chrome will reject it.
+    cflags = [
+      "-O1",
+    ]
     ldflags = common_optimize_on_ldflags
   } else {
     cflags = [ "-O0" ]

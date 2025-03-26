@@ -20,11 +20,7 @@ class PlatformViewApp extends StatefulWidget {
 class PlatformViewAppState extends State<PlatformViewApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(),
-      title: 'Advanced Layout',
-      home: const PlatformViewLayout(),
-    );
+    return const MaterialApp(title: 'Advanced Layout', home: PlatformViewLayout());
   }
 }
 

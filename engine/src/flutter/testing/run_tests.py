@@ -37,7 +37,7 @@ SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 BUILDROOT_DIR = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
 OUT_DIR = os.path.join(BUILDROOT_DIR, 'out')
 GOLDEN_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'resources')
-FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'third_party', 'txt', 'third_party', 'fonts')
+FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'txt', 'third_party', 'fonts')
 ROBOTO_FONT_PATH = os.path.join(FONTS_DIR, 'Roboto-Regular.ttf')
 FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 
@@ -765,13 +765,7 @@ def run_android_tests(android_variant='android_debug_unopt', adb_path=None):
 
   run_android_unittest('flutter_shell_native_unittests', android_variant, adb_path)
   run_android_unittest('impeller_toolkit_android_unittests', android_variant, adb_path)
-
-  systrace_test = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'android_systrace_test.py')
-  scenario_apk = os.path.join(OUT_DIR, android_variant, 'firebase_apks', 'scenario_app.apk')
-  run_cmd([
-      systrace_test, '--adb-path', adb_path, '--apk-path', scenario_apk, '--package-name',
-      'dev.flutter.scenarios', '--activity-name', '.PlatformViewsActivity'
-  ])
+  run_android_unittest('impeller_vulkan_android_unittests', android_variant, adb_path)
 
 
 def run_objc_tests(ios_variant='ios_debug_sim_unopt', test_filter=None):
@@ -965,12 +959,11 @@ def uses_package_test_runner(package):
 #
 # The second element of each tuple is a list of additional command line
 # arguments to pass to each of the packages tests.
-def build_dart_host_test_list(build_dir):
+def build_dart_host_test_list():
   dart_host_tests = [
       os.path.join('flutter', 'ci'),
       os.path.join('flutter', 'flutter_frontend_server'),
       os.path.join('flutter', 'testing', 'skia_gold_client'),
-      os.path.join('flutter', 'testing', 'scenario_app'),
       os.path.join('flutter', 'tools', 'api_check'),
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
@@ -983,8 +976,6 @@ def build_dart_host_test_list(build_dir):
       os.path.join('flutter', 'tools', 'pkg', 'engine_repo_tools'),
       os.path.join('flutter', 'tools', 'pkg', 'git_repo_tools'),
   ]
-  if not is_asan(build_dir):
-    dart_host_tests += [os.path.join('flutter', 'tools', 'path_ops', 'dart')]
 
   return dart_host_tests
 
@@ -1335,7 +1326,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 
   if 'dart-host' in types:
     dart_filter = args.dart_host_filter.split(',') if args.dart_host_filter else None
-    dart_host_packages = build_dart_host_test_list(build_dir)
+    dart_host_packages = build_dart_host_test_list()
     tasks = []
     for dart_host_package in dart_host_packages:
       if dart_filter is None or dart_host_package in dart_filter:
@@ -1372,7 +1363,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
     run_benchmark_tests(build_dir)
     run_engine_benchmarks(build_dir, engine_filter)
 
-  if ('engine' in types or 'font-subset' in types) and 'debug' in build_dir:
+  if 'font-subset' in types:
     cmd = ['python3', 'test.py', '--variant', args.variant]
     if 'arm64' in args.variant:
       cmd += ['--target-cpu', 'arm64']

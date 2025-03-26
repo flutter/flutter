@@ -752,7 +752,7 @@ void main() async {
     // However, Flutter opts-in to a Skia feature to render tabs as a single space.
     // See: https://github.com/flutter/flutter/issues/79153
     final File file = File(
-      path.join(_flutterBuildPath, 'flutter', 'third_party', 'txt', 'assets', 'Roboto-Regular.ttf'),
+      path.join(_flutterBuildPath, 'flutter', 'txt', 'assets', 'Roboto-Regular.ttf'),
     );
     final Uint8List fontData = await file.readAsBytes();
     await loadFontFromList(fontData, fontFamily: 'RobotoSerif');
@@ -1316,7 +1316,7 @@ void main() async {
 
   test('TextDecoration renders non-solid lines', () async {
     final File file = File(
-      path.join(_flutterBuildPath, 'flutter', 'third_party', 'txt', 'assets', 'Roboto-Regular.ttf'),
+      path.join(_flutterBuildPath, 'flutter', 'txt', 'assets', 'Roboto-Regular.ttf'),
     );
     final Uint8List fontData = await file.readAsBytes();
     await loadFontFromList(fontData, fontFamily: 'RobotoSlab');
