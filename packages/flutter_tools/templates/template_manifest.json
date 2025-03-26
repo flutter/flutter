@@ -358,6 +358,8 @@
     "templates/widget_preview_scaffold/lib/src/controls.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/generated_preview.dart.tmpl",
     "templates/widget_preview_scaffold/lib/src/utils.dart.tmpl",
+    "templates/widget_preview_scaffold/fonts.tmpl/Roboto_Mono/LICENSE.txt",
+    "templates/widget_preview_scaffold/fonts.tmpl/Roboto_Mono/RobotoMono-Regular.ttf",
     "templates/widget_preview_scaffold/pubspec.yaml.tmpl",
     "templates/widget_preview_scaffold/README.md.tmpl",
 
