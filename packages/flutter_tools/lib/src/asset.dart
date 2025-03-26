@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -26,6 +25,12 @@ import 'license_collector.dart';
 import 'project.dart';
 
 class FlutterHookResult {
+  FlutterHookResult({
+    required this.buildStart,
+    required this.buildEnd,
+    required this.dataAssets,
+    required this.dependencies,
+  });
   List<HookAsset> dataAssets;
 
   /// The timestamp at which we start a build - so the timestamp of the inputs.
@@ -36,13 +41,6 @@ class FlutterHookResult {
   final DateTime buildEnd;
 
   final List<Uri> dependencies;
-
-  FlutterHookResult({
-    required this.buildStart,
-    required this.buildEnd,
-    required this.dataAssets,
-    required this.dependencies,
-  });
 
   /// Whether caller may need to re-run the dart build.
   bool isUpToDate(FileSystem fileSystem) {

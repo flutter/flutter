@@ -1,9 +1,13 @@
+// Copyright 2025 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'asset.dart' show FlutterHookResult;
 import 'build_info.dart' show TargetPlatform;
 import 'build_system/build_system.dart' show Environment;
 
-abstract class DartBuilder {
-  DartBuilder();
+abstract class FlutterHookRunner {
+  FlutterHookRunner();
 
   FlutterHookResult? dartDataHookResult;
 

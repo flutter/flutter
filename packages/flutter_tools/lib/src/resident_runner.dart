@@ -29,10 +29,10 @@ import 'bundle.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'convert.dart';
-import 'dart_builder.dart' show DartBuilder;
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
+import 'hook_runner.dart' show FlutterHookRunner;
 import 'ios/application_package.dart';
 import 'ios/devices.dart';
 import 'project.dart';
@@ -1076,8 +1076,8 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Environment get environment => _environment;
 
-  /// Can dispatch [DartBuilder.runHooks] to get new assets from the hooks.
-  final DartBuilder? dartBuilder;
+  /// Can dispatch [FlutterHookRunner.runHooks] to get new assets from the hooks.
+  final FlutterHookRunner? dartBuilder;
 
   @override
   bool hotMode;
