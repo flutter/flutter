@@ -50,8 +50,7 @@ enum PlatformType {
   macos,
   windows,
   fuchsia,
-  custom,
-  windowsPreview;
+  custom;
 
   @override
   String toString() => name;
@@ -939,8 +938,6 @@ class DebuggingOptions {
     this.traceSystrace = false,
     this.traceToFile,
     this.endlessTraceBuffer = false,
-    this.dumpSkpOnShaderCompilation = false,
-    this.cacheSkSL = false,
     this.purgePersistentCache = false,
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
@@ -967,7 +964,6 @@ class DebuggingOptions {
     this.webUseWasm = false,
     this.vmserviceOutFile,
     this.fastStart = false,
-    this.nullAssertions = false,
     this.nativeNullAssertions = false,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableVulkanValidation = false,
@@ -1002,7 +998,6 @@ class DebuggingOptions {
     this.webHeaders = const <String, String>{},
     WebRendererMode? webRenderer,
     this.webUseWasm = false,
-    this.cacheSkSL = false,
     this.traceAllowlist,
     this.enableImpeller = ImpellerStatus.platformDefault,
     this.enableVulkanValidation = false,
@@ -1025,7 +1020,6 @@ class DebuggingOptions {
        traceSystrace = false,
        traceToFile = null,
        endlessTraceBuffer = false,
-       dumpSkpOnShaderCompilation = false,
        purgePersistentCache = false,
        verboseSystemLogs = false,
        hostVmServicePort = null,
@@ -1036,7 +1030,6 @@ class DebuggingOptions {
        vmserviceOutFile = null,
        fastStart = false,
        webEnableExpressionEvaluation = false,
-       nullAssertions = false,
        nativeNullAssertions = false,
        serveObservatory = false,
        enableDevTools = false,
@@ -1062,8 +1055,6 @@ class DebuggingOptions {
     required this.traceSystrace,
     required this.traceToFile,
     required this.endlessTraceBuffer,
-    required this.dumpSkpOnShaderCompilation,
-    required this.cacheSkSL,
     required this.purgePersistentCache,
     required this.useTestFonts,
     required this.verboseSystemLogs,
@@ -1090,7 +1081,6 @@ class DebuggingOptions {
     required this.webUseWasm,
     required this.vmserviceOutFile,
     required this.fastStart,
-    required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.enableImpeller,
     required this.enableVulkanValidation,
@@ -1123,8 +1113,6 @@ class DebuggingOptions {
   final bool traceSystrace;
   final String? traceToFile;
   final bool endlessTraceBuffer;
-  final bool dumpSkpOnShaderCompilation;
-  final bool cacheSkSL;
   final bool purgePersistentCache;
   final bool useTestFonts;
   final bool verboseSystemLogs;
@@ -1190,8 +1178,6 @@ class DebuggingOptions {
   final String? vmserviceOutFile;
   final bool fastStart;
 
-  final bool nullAssertions;
-
   /// Additional null runtime checks inserted for web applications.
   ///
   /// See also:
@@ -1205,17 +1191,16 @@ class DebuggingOptions {
     DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
     bool isCoreDevice = false,
   }) {
-    final String dartVmFlags = computeDartVmFlags(this);
     return <String>[
       if (enableDartProfiling) '--enable-dart-profiling',
       if (disableServiceAuthCodes) '--disable-service-auth-codes',
       if (disablePortPublication) '--disable-vm-service-publication',
       if (startPaused) '--start-paused',
       // Wrap dart flags in quotes for physical devices
-      if (environmentType == EnvironmentType.physical && dartVmFlags.isNotEmpty)
-        '--dart-flags="$dartVmFlags"',
-      if (environmentType == EnvironmentType.simulator && dartVmFlags.isNotEmpty)
-        '--dart-flags=$dartVmFlags',
+      if (environmentType == EnvironmentType.physical && dartFlags.isNotEmpty)
+        '--dart-flags="$dartFlags"',
+      if (environmentType == EnvironmentType.simulator && dartFlags.isNotEmpty)
+        '--dart-flags=$dartFlags',
       if (useTestFonts) '--use-test-fonts',
       // Core Devices (iOS 17 devices) are debugged through Xcode so don't
       // include these flags, which are used to check if the app was launched
@@ -1232,9 +1217,7 @@ class DebuggingOptions {
       if (traceAllowlist != null) '--trace-allowlist="$traceAllowlist"',
       if (traceSkiaAllowlist != null) '--trace-skia-allowlist="$traceSkiaAllowlist"',
       if (endlessTraceBuffer) '--endless-trace-buffer',
-      if (dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (verboseSystemLogs) '--verbose-logging',
-      if (cacheSkSL) '--cache-sksl',
       if (purgePersistentCache) '--purge-persistent-cache',
       if (route != null) '--route=$route',
       if (platformArgs['trace-startup'] as bool? ?? false) '--trace-startup',
@@ -1269,8 +1252,6 @@ class DebuggingOptions {
     'traceSystrace': traceSystrace,
     'traceToFile': traceToFile,
     'endlessTraceBuffer': endlessTraceBuffer,
-    'dumpSkpOnShaderCompilation': dumpSkpOnShaderCompilation,
-    'cacheSkSL': cacheSkSL,
     'purgePersistentCache': purgePersistentCache,
     'useTestFonts': useTestFonts,
     'verboseSystemLogs': verboseSystemLogs,
@@ -1297,7 +1278,6 @@ class DebuggingOptions {
     'webUseWasm': webUseWasm,
     'vmserviceOutFile': vmserviceOutFile,
     'fastStart': fastStart,
-    'nullAssertions': nullAssertions,
     'nativeNullAssertions': nativeNullAssertions,
     'enableImpeller': enableImpeller.asBool,
     'enableVulkanValidation': enableVulkanValidation,
@@ -1314,6 +1294,10 @@ class DebuggingOptions {
     // the flutter_tools binary that is currently checked into Google3.
     // Remove this when that binary has been updated.
     'webUseLocalCanvaskit': false,
+    // See above: these fields are required for backwards compatibility
+    // with the google3 checked in binary.
+    'dumpSkpOnShaderCompilation': false,
+    'cacheSkSL': false,
   };
 
   static DebuggingOptions fromJson(Map<String, Object?> json, BuildInfo buildInfo) =>
@@ -1334,8 +1318,6 @@ class DebuggingOptions {
         traceSystrace: json['traceSystrace']! as bool,
         traceToFile: json['traceToFile'] as String?,
         endlessTraceBuffer: json['endlessTraceBuffer']! as bool,
-        dumpSkpOnShaderCompilation: json['dumpSkpOnShaderCompilation']! as bool,
-        cacheSkSL: json['cacheSkSL']! as bool,
         purgePersistentCache: json['purgePersistentCache']! as bool,
         useTestFonts: json['useTestFonts']! as bool,
         verboseSystemLogs: json['verboseSystemLogs']! as bool,
@@ -1365,7 +1347,6 @@ class DebuggingOptions {
         webUseWasm: json['webUseWasm']! as bool,
         vmserviceOutFile: json['vmserviceOutFile'] as String?,
         fastStart: json['fastStart']! as bool,
-        nullAssertions: json['nullAssertions']! as bool,
         nativeNullAssertions: json['nativeNullAssertions']! as bool,
         enableImpeller: ImpellerStatus.fromBool(json['enableImpeller'] as bool?),
         enableVulkanValidation: (json['enableVulkanValidation'] as bool?) ?? false,
@@ -1444,13 +1425,4 @@ class NoOpDeviceLogReader implements DeviceLogReader {
 
   @override
   Future<void> provideVmService(FlutterVmService connectedVmService) async {}
-}
-
-/// Append --null_assertions to any existing Dart VM flags if
-/// [debuggingOptions.nullAssertions] is true.
-String computeDartVmFlags(DebuggingOptions debuggingOptions) {
-  return <String>[
-    if (debuggingOptions.dartFlags.isNotEmpty) debuggingOptions.dartFlags,
-    if (debuggingOptions.nullAssertions) '--null_assertions',
-  ].join(',');
 }

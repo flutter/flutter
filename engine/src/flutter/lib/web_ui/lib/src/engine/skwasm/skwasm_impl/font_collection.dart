@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:js_interop';
-
 import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
@@ -180,6 +179,7 @@ class SkwasmFontCollection implements FlutterFontCollection {
     } else {
       fontCollectionRegisterTypeface(handle, typeface.handle, nullptr);
     }
+    fontCollectionClearCaches(handle);
     return true;
   }
 
@@ -192,16 +192,16 @@ class SkwasmFontCollection implements FlutterFontCollection {
 }
 
 class SkwasmFallbackRegistry implements FallbackFontRegistry {
-  SkwasmFallbackRegistry(this.fontCollection);
+  SkwasmFallbackRegistry(this._fontCollection);
 
-  final SkwasmFontCollection fontCollection;
+  final SkwasmFontCollection _fontCollection;
 
   @override
   List<int> getMissingCodePoints(List<int> codePoints, List<String> fontFamilies) =>
       withStackScope((StackScope scope) {
         final List<SkwasmTypeface> typefaces =
             fontFamilies
-                .map((String family) => fontCollection.registeredTypefaces[family])
+                .map((String family) => _fontCollection.registeredTypefaces[family])
                 .fold(
                   const Iterable<SkwasmTypeface>.empty(),
                   (Iterable<SkwasmTypeface> accumulated, List<SkwasmTypeface>? typefaces) =>
@@ -228,9 +228,9 @@ class SkwasmFallbackRegistry implements FallbackFontRegistry {
 
   @override
   Future<void> loadFallbackFont(String familyName, String url) =>
-      fontCollection.loadFontFromUrl(familyName, url);
+      _fontCollection.loadFontFromUrl(familyName, url);
 
   @override
   void updateFallbackFontFamilies(List<String> families) =>
-      fontCollection.setDefaultFontFamilies(families);
+      _fontCollection.setDefaultFontFamilies(families);
 }

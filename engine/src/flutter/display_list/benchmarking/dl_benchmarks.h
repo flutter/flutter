@@ -11,10 +11,6 @@
 #include "flutter/display_list/testing/dl_test_surface_provider.h"
 
 #include "third_party/benchmark/include/benchmark/benchmark.h"
-#include "third_party/skia/include/core/SkCanvas.h"
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkRRect.h"
-#include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
 namespace testing {
@@ -31,6 +27,13 @@ enum class RRectType {
   kSimple,
   kNinePatch,
   kComplex,
+};
+
+enum class PathVerb {
+  kLine,
+  kQuad,
+  kConic,
+  kCubic,
 };
 
 DlPaint GetPaintForRun(unsigned attributes);
@@ -65,11 +68,11 @@ void BM_DrawDRRect(benchmark::State& state,
 void BM_DrawPath(benchmark::State& state,
                  BackendType backend_type,
                  unsigned attributes,
-                 SkPath::Verb type);
+                 PathVerb type);
 void BM_DrawPoints(benchmark::State& state,
                    BackendType backend_type,
                    unsigned attributes,
-                   DlCanvas::PointMode mode);
+                   DlPointMode mode);
 void BM_DrawVertices(benchmark::State& state,
                      BackendType backend_type,
                      unsigned attributes,
@@ -83,7 +86,7 @@ void BM_DrawImageRect(benchmark::State& state,
                       BackendType backend_type,
                       unsigned attributes,
                       DlImageSampling options,
-                      DlCanvas::SrcRectConstraint constraint,
+                      DlSrcRectConstraint constraint,
                       bool upload_bitmap);
 void BM_DrawImageNine(benchmark::State& state,
                       BackendType backend_type,
@@ -97,7 +100,7 @@ void BM_DrawShadow(benchmark::State& state,
                    BackendType backend_type,
                    unsigned attributes,
                    bool transparent_occluder,
-                   SkPath::Verb type);
+                   PathVerb type);
 void BM_SaveLayer(benchmark::State& state,
                   BackendType backend_type,
                   unsigned attributes,
@@ -160,7 +163,7 @@ void BM_SaveLayer(benchmark::State& state,
                     Lines/BACKEND,                                      \
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
-                    SkPath::Verb::kLine_Verb)                           \
+                    PathVerb::kLine)                                    \
       ->RangeMultiplier(2)                                              \
       ->Range(8, 512)                                                   \
       ->UseRealTime()                                                   \
@@ -171,7 +174,7 @@ void BM_SaveLayer(benchmark::State& state,
                     Quads/BACKEND,                                      \
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
-                    SkPath::Verb::kQuad_Verb)                           \
+                    PathVerb::kQuad)                                    \
       ->RangeMultiplier(2)                                              \
       ->Range(8, 512)                                                   \
       ->UseRealTime()                                                   \
@@ -182,7 +185,7 @@ void BM_SaveLayer(benchmark::State& state,
                     Conics/BACKEND,                                     \
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
-                    SkPath::Verb::kConic_Verb)                          \
+                    PathVerb::kConic)                                   \
       ->RangeMultiplier(2)                                              \
       ->Range(8, 512)                                                   \
       ->UseRealTime()                                                   \
@@ -193,7 +196,7 @@ void BM_SaveLayer(benchmark::State& state,
                     Cubics/BACKEND,                                     \
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
-                    SkPath::Verb::kCubic_Verb)                          \
+                    PathVerb::kCubic)                                   \
       ->RangeMultiplier(2)                                              \
       ->Range(8, 512)                                                   \
       ->UseRealTime()                                                   \
@@ -205,7 +208,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Points/BACKEND,                      \
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
-                    DlCanvas::PointMode::kPoints)                       \
+                    DlPointMode::kPoints)                               \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
@@ -214,7 +217,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Lines/BACKEND,                       \
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
-                    DlCanvas::PointMode::kLines)                        \
+                    DlPointMode::kLines)                                \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
@@ -223,7 +226,7 @@ void BM_SaveLayer(benchmark::State& state,
   BENCHMARK_CAPTURE(BM_DrawPoints, Polygon/BACKEND,                     \
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
-                    DlCanvas::PointMode::kPolygon)                      \
+                    DlPointMode::kPolygon)                              \
       ->RangeMultiplier(2)                                              \
       ->Range(1024, 32768)                                              \
       ->UseRealTime()                                                   \
@@ -349,7 +352,7 @@ void BM_SaveLayer(benchmark::State& state,
       BackendType::k##BACKEND##Backend,                                 \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
-      DlCanvas::SrcRectConstraint::kStrict, false)                      \
+      DlSrcRectConstraint::kStrict, false)                              \
       ->RangeMultiplier(2)                                              \
       ->Range(32, 256)                                                  \
       ->UseRealTime()                                                   \
@@ -360,7 +363,7 @@ void BM_SaveLayer(benchmark::State& state,
       BackendType::k##BACKEND##Backend,                                 \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
-      DlCanvas::SrcRectConstraint::kFast, false)                        \
+      DlSrcRectConstraint::kFast, false)                                \
       ->RangeMultiplier(2)                                              \
       ->Range(32, 256)                                                  \
       ->UseRealTime()                                                   \
@@ -371,7 +374,7 @@ void BM_SaveLayer(benchmark::State& state,
       BackendType::k##BACKEND##Backend,                                 \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
-      DlCanvas::SrcRectConstraint::kStrict, true)                       \
+      DlSrcRectConstraint::kStrict, true)                               \
       ->RangeMultiplier(2)                                              \
       ->Range(32, 256)                                                  \
       ->UseRealTime()                                                   \
@@ -382,7 +385,7 @@ void BM_SaveLayer(benchmark::State& state,
       BackendType::k##BACKEND##Backend,                                 \
       ATTRIBUTES,                                                       \
       DlImageSampling::kNearestNeighbor,                                \
-      DlCanvas::SrcRectConstraint::kFast, true)                         \
+      DlSrcRectConstraint::kFast, true)                                 \
       ->RangeMultiplier(2)                                              \
       ->Range(32, 256)                                                  \
       ->UseRealTime()                                                   \
@@ -443,7 +446,7 @@ void BM_SaveLayer(benchmark::State& state,
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
                     true,                                               \
-                    SkPath::Verb::kLine_Verb)                           \
+                    PathVerb::kLine)                                    \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 32)                                                    \
       ->UseRealTime()                                                   \
@@ -453,7 +456,7 @@ void BM_SaveLayer(benchmark::State& state,
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
                     true,                                               \
-                    SkPath::Verb::kQuad_Verb)                           \
+                    PathVerb::kQuad)                                    \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 32)                                                    \
       ->UseRealTime()                                                   \
@@ -463,7 +466,7 @@ void BM_SaveLayer(benchmark::State& state,
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
                     true,                                               \
-                    SkPath::Verb::kConic_Verb)                          \
+                    PathVerb::kConic)                                   \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 32)                                                    \
       ->UseRealTime()                                                   \
@@ -473,7 +476,7 @@ void BM_SaveLayer(benchmark::State& state,
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
                     true,                                               \
-                    SkPath::Verb::kCubic_Verb)                          \
+                    PathVerb::kCubic)                                   \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 32)                                                    \
       ->UseRealTime()                                                   \
@@ -483,7 +486,7 @@ void BM_SaveLayer(benchmark::State& state,
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
                     false,                                              \
-                    SkPath::Verb::kLine_Verb)                           \
+                    PathVerb::kLine)                                    \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 32)                                                    \
       ->UseRealTime()                                                   \
@@ -493,7 +496,7 @@ void BM_SaveLayer(benchmark::State& state,
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
                     false,                                              \
-                    SkPath::Verb::kQuad_Verb)                           \
+                    PathVerb::kQuad)                                    \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 32)                                                    \
       ->UseRealTime()                                                   \
@@ -503,7 +506,7 @@ void BM_SaveLayer(benchmark::State& state,
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
                     false,                                              \
-                    SkPath::Verb::kConic_Verb)                          \
+                    PathVerb::kConic)                                   \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 32)                                                    \
       ->UseRealTime()                                                   \
@@ -513,7 +516,7 @@ void BM_SaveLayer(benchmark::State& state,
                     BackendType::k##BACKEND##Backend,                   \
                     ATTRIBUTES,                                         \
                     false,                                              \
-                    SkPath::Verb::kCubic_Verb)                          \
+                    PathVerb::kCubic)                                   \
       ->RangeMultiplier(2)                                              \
       ->Range(1, 32)                                                    \
       ->UseRealTime()                                                   \

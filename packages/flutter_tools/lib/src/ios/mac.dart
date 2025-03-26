@@ -25,6 +25,7 @@ import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/swift_package_manager.dart';
 import '../macos/xcode.dart';
+import '../migrations/lldb_init_migration.dart';
 import '../migrations/swift_package_manager_gitignore_migration.dart';
 import '../migrations/swift_package_manager_integration_migration.dart';
 import '../migrations/xcode_project_object_version_migration.dart';
@@ -168,6 +169,14 @@ Future<XcodeBuildResult> buildXcodeProject({
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),
+    LLDBInitMigration(
+      app.project,
+      buildInfo,
+      globals.logger,
+      deviceID: deviceID,
+      fileSystem: globals.fs,
+      environmentType: environmentType,
+    ),
   ];
 
   final ProjectMigration migration = ProjectMigration(migrators);
@@ -272,6 +281,9 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
+      fileSystem: globals.fs,
+      fileSystemUtils: globals.fsUtils,
+      plistParser: globals.plistParser,
     );
   }
 
@@ -315,6 +327,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     for (final MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
       buildCommands.add('${signingConfig.key}=${signingConfig.value}');
     }
+  }
+
+  if (codesign) {
     buildCommands.add('-allowProvisioningUpdates');
     buildCommands.add('-allowProvisioningDeviceRegistration');
   }

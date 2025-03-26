@@ -432,7 +432,6 @@ void main() {
     });
     Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
-        useMaterial3: true,
         child: Column(
           children: <Widget>[
             ChoiceChip(
@@ -506,7 +505,6 @@ void main() {
     const Color selectedColor = Color(0xffff0000);
     Widget buildApp({required bool enabled, required bool selected}) {
       return wrapForChip(
-        useMaterial3: true,
         child: Column(
           children: <Widget>[
             ChoiceChip(
@@ -724,7 +722,7 @@ void main() {
 
   testWidgets('ChoiceChip.chipAnimationStyle is passed to RawChip', (WidgetTester tester) async {
     final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
-      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      enableAnimation: const AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
 
@@ -747,7 +745,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final ChipAnimationStyle chipAnimationStyle = ChipAnimationStyle(
-      enableAnimation: AnimationStyle(duration: Durations.extralong4),
+      enableAnimation: const AnimationStyle(duration: Durations.extralong4),
       selectAnimation: AnimationStyle.noAnimation,
     );
 

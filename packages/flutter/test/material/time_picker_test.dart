@@ -10,6 +10,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/feedback_tester.dart';
@@ -159,7 +160,7 @@ void main() {
   });
 
   testWidgets('Material3 - Dialog size - input mode', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const TimePickerEntryMode entryMode = TimePickerEntryMode.input;
     const double textScaleFactor = 1.0;
     const Size timePickerMinInputSize = Size(312, 216);
@@ -224,7 +225,7 @@ void main() {
   testWidgets('Material3 - Dial background uses correct default color', (
     WidgetTester tester,
   ) async {
-    ThemeData theme = ThemeData(useMaterial3: true);
+    ThemeData theme = ThemeData();
     Widget buildTimePicker(ThemeData themeData) {
       return MaterialApp(
         theme: themeData,
@@ -644,10 +645,7 @@ void main() {
         RenderObject render = tester.renderObject(
           find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodInputPadding'),
         );
-        expect(
-          (render as dynamic).orientation,
-          Orientation.portrait,
-        ); // ignore: avoid_dynamic_calls
+        expect((render as dynamic).orientation, Orientation.portrait);
 
         // landscape
         tester.view.physicalSize = const Size(800.5, 800);
@@ -1069,7 +1067,6 @@ void main() {
         const String cancelString = 'Cancel';
         Widget buildFrame(TextDirection textDirection) {
           return MaterialApp(
-            theme: ThemeData(useMaterial3: true),
             home: Material(
               child: Center(
                 child: Builder(
@@ -2162,6 +2159,56 @@ void main() {
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/162229.
+  testWidgets(
+    'Time picker spacing between time control and day period control for locales using "a h:mm" pattern',
+    (WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+
+      final Finder dayPeriodControlFinder = find.byWidgetPredicate(
+        (Widget w) => '${w.runtimeType}' == '_DayPeriodControl',
+      );
+      final Finder timeControlFinder =
+          find.ancestor(of: find.text('7'), matching: find.byType(Row)).first;
+
+      // Render in portrait mode.
+      tester.view.physicalSize = const Size(800, 800.5);
+      tester.view.devicePixelRatio = 1;
+      await mediaQueryBoilerplate(
+        tester,
+        materialType: MaterialType.material3,
+        locale: const Locale('ko', 'KR'),
+      );
+
+      expect(
+        tester.getBottomLeft(timeControlFinder).dx -
+            tester.getBottomRight(dayPeriodControlFinder).dx,
+        12,
+      );
+
+      // Dismiss the dialog.
+      final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(
+        tester.element(find.byType(TextButton).first),
+      );
+      await tester.tap(find.text(materialLocalizations.okButtonLabel));
+      await tester.pumpAndSettle();
+
+      // Render in landscape mode.
+      tester.view.physicalSize = const Size(800.5, 800);
+      tester.view.devicePixelRatio = 1;
+      await mediaQueryBoilerplate(
+        tester,
+        materialType: MaterialType.material3,
+        locale: const Locale('ko', 'KR'),
+      );
+
+      expect(
+        tester.getTopLeft(timeControlFinder).dy - tester.getBottomLeft(dayPeriodControlFinder).dy,
+        12,
+      );
+    },
+  );
 }
 
 final Finder findDialPaint = find.descendant(
@@ -2204,15 +2251,16 @@ Future<void> mediaQueryBoilerplate(
   bool tapButton = true,
   required MaterialType materialType,
   Orientation? orientation,
+  Locale locale = const Locale('en', 'US'),
 }) async {
   await tester.pumpWidget(
     Theme(
       data: ThemeData(useMaterial3: materialType == MaterialType.material3),
       child: Localizations(
-        locale: const Locale('en', 'US'),
+        locale: locale,
         delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
         ],
         child: MediaQuery(
           data: MediaQueryData(

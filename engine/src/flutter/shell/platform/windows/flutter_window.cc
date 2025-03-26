@@ -30,49 +30,6 @@ static const int kMaxTouchDeviceId = 128;
 
 static const int kLinesPerScrollWindowsDefault = 3;
 
-// Maps a Flutter cursor name to an HCURSOR.
-//
-// Returns the arrow cursor for unknown constants.
-//
-// This map must be kept in sync with Flutter framework's
-// services/mouse_cursor.dart.
-static HCURSOR GetCursorByName(const std::string& cursor_name) {
-  static auto* cursors = new std::map<std::string, const wchar_t*>{
-      {"allScroll", IDC_SIZEALL},
-      {"basic", IDC_ARROW},
-      {"click", IDC_HAND},
-      {"forbidden", IDC_NO},
-      {"help", IDC_HELP},
-      {"move", IDC_SIZEALL},
-      {"none", nullptr},
-      {"noDrop", IDC_NO},
-      {"precise", IDC_CROSS},
-      {"progress", IDC_APPSTARTING},
-      {"text", IDC_IBEAM},
-      {"resizeColumn", IDC_SIZEWE},
-      {"resizeDown", IDC_SIZENS},
-      {"resizeDownLeft", IDC_SIZENESW},
-      {"resizeDownRight", IDC_SIZENWSE},
-      {"resizeLeft", IDC_SIZEWE},
-      {"resizeLeftRight", IDC_SIZEWE},
-      {"resizeRight", IDC_SIZEWE},
-      {"resizeRow", IDC_SIZENS},
-      {"resizeUp", IDC_SIZENS},
-      {"resizeUpDown", IDC_SIZENS},
-      {"resizeUpLeft", IDC_SIZENWSE},
-      {"resizeUpRight", IDC_SIZENESW},
-      {"resizeUpLeftDownRight", IDC_SIZENWSE},
-      {"resizeUpRightDownLeft", IDC_SIZENESW},
-      {"wait", IDC_WAIT},
-  };
-  const wchar_t* idc_name = IDC_ARROW;
-  auto it = cursors->find(cursor_name);
-  if (it != cursors->end()) {
-    idc_name = it->second;
-  }
-  return ::LoadCursor(nullptr, idc_name);
-}
-
 static constexpr int32_t kDefaultPointerDeviceId = 0;
 
 // This method is only valid during a window message related to mouse/touch
@@ -144,7 +101,6 @@ FlutterWindow::FlutterWindow(
   keyboard_manager_ = std::make_unique<KeyboardManager>(this);
 
   InitializeChild("FLUTTERVIEW", width, height);
-  current_cursor_ = ::LoadCursor(nullptr, IDC_ARROW);
 }
 
 // Base constructor for mocks
@@ -176,13 +132,18 @@ PhysicalWindowBounds FlutterWindow::GetPhysicalWindowBounds() {
   return {GetCurrentWidth(), GetCurrentHeight()};
 }
 
-void FlutterWindow::UpdateFlutterCursor(const std::string& cursor_name) {
-  SetFlutterCursor(GetCursorByName(cursor_name));
-}
+bool FlutterWindow::Focus() {
+  auto hwnd = GetWindowHandle();
+  if (hwnd == nullptr) {
+    return false;
+  }
 
-void FlutterWindow::SetFlutterCursor(HCURSOR cursor) {
-  current_cursor_ = cursor;
-  ::SetCursor(current_cursor_);
+  HWND prevFocus = ::SetFocus(hwnd);
+  if (prevFocus == nullptr) {
+    return false;
+  }
+
+  return true;
 }
 
 void FlutterWindow::OnDpiScale(unsigned int dpi) {};
@@ -241,10 +202,6 @@ void FlutterWindow::OnPointerLeave(double x,
                                    FlutterPointerDeviceKind device_kind,
                                    int32_t device_id) {
   binding_handler_delegate_->OnPointerLeave(x, y, device_kind, device_id);
-}
-
-void FlutterWindow::OnSetCursor() {
-  ::SetCursor(current_cursor_);
 }
 
 void FlutterWindow::OnText(const std::u16string& text) {
@@ -377,9 +334,19 @@ void FlutterWindow::OnWindowStateEvent(WindowStateEvent event) {
       break;
     case WindowStateEvent::kFocus:
       focused_ = true;
+      if (binding_handler_delegate_) {
+        binding_handler_delegate_->OnFocus(
+            FlutterViewFocusState::kFocused,
+            FlutterViewFocusDirection::kUndefined);
+      }
       break;
     case WindowStateEvent::kUnfocus:
       focused_ = false;
+      if (binding_handler_delegate_) {
+        binding_handler_delegate_->OnFocus(
+            FlutterViewFocusState::kUnfocused,
+            FlutterViewFocusDirection::kUndefined);
+      }
       break;
   }
   HWND hwnd = GetWindowHandle();
@@ -625,7 +592,8 @@ FlutterWindow::HandleMessage(UINT const message,
     case WM_SETCURSOR: {
       UINT hit_test_result = LOWORD(lparam);
       if (hit_test_result == HTCLIENT) {
-        OnSetCursor();
+        // Halt further processing to prevent DefWindowProc from setting the
+        // cursor back to the registered class cursor.
         return TRUE;
       }
       break;
