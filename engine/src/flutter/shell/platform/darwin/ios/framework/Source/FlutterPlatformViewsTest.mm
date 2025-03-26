@@ -4664,7 +4664,7 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
 
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
-  layer->UpdateViewState(nil, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
+  layer->UpdateViewState(flutterView, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
   // Should not update the view state (e.g. overlay_view_wrapper's frame) when FlutterView's screen
   // is nil.
   XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
