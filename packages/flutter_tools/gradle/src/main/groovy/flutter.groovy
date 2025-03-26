@@ -481,7 +481,7 @@ class FlutterPlugin implements Plugin<Project> {
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies(Project project) {
         if (pluginDependencies == null) {
-            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(FlutterPluginUtils.getFlutterSourceDirectory(project))
+            Map meta = NativePluginLoaderReflectionBridge.getDependenciesMetadata(project.ext, FlutterPluginUtils.getFlutterSourceDirectory(project))
             if (meta == null) {
                 pluginDependencies = []
             } else {
