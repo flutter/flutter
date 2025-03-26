@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "display_list/effects/color_filters/dl_blend_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
@@ -16,6 +17,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
+#include "impeller/display_list/dl_atlas_geometry.h"
 #include "impeller/display_list/image_filter.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -44,6 +46,7 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/geometry/rstransform.h"
 #include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
@@ -156,8 +159,10 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   }
 
   return std::make_unique<EntityPassTarget>(
-      target, renderer.GetDeviceCapabilities().SupportsReadFromResolve(),
-      renderer.GetDeviceCapabilities().SupportsImplicitResolvingMSAA());
+      target,                                                           //
+      renderer.GetDeviceCapabilities().SupportsReadFromResolve(),       //
+      renderer.GetDeviceCapabilities().SupportsImplicitResolvingMSAA()  //
+  );
 }
 
 }  // namespace
@@ -703,8 +708,8 @@ void Canvas::DrawImage(const std::shared_ptr<Texture>& image,
     return;
   }
 
-  const auto source = Rect::MakeSize(image->GetSize());
-  const auto dest = source.Shift(offset);
+  const Rect source = Rect::MakeSize(image->GetSize());
+  const Rect dest = source.Shift(offset);
 
   DrawImageRect(image, source, dest, paint, sampler);
 }
@@ -719,8 +724,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
     return;
   }
 
-  auto size = image->GetSize();
-
+  ISize size = image->GetSize();
   if (size.IsEmpty()) {
     return;
   }
@@ -730,6 +734,53 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
   if (!clipped_source) {
     return;
   }
+
+  // Optimization: if the texture has a color filter that is a simple
+  // porter-duff blend, then instead of performing a save layer we should swap
+  // out the shader for the porter duff blend shader and avoid a saveLayer. This
+  // can only be done for imageRects without a strict source rect, as the porter
+  // duff shader does not support this feature. This optimization is important
+  // for flame.
+  if (src_rect_constraint != SourceRectConstraint::kStrict &&  //
+      paint.color_filter &&                                    //
+      paint.image_filter == nullptr &&                         //
+      !paint.mask_blur_descriptor.has_value() &&               //
+      paint.color_filter->asBlend() != nullptr &&              //
+      paint.color_filter->asBlend()->mode() <= Entity::kLastPipelineBlendMode) {
+    const flutter::DlBlendColorFilter* blend_filter =
+        paint.color_filter->asBlend();
+    Paint paint_copy = paint;
+    paint_copy.color_filter = nullptr;
+
+    Scalar sx = dest.GetWidth() / source.GetWidth();
+    Scalar sy = dest.GetHeight() / source.GetHeight();
+    Scalar tx = dest.GetLeft() - source.GetLeft() * sx;
+    Scalar ty = dest.GetTop() - source.GetTop() * sy;
+
+    RSTransform rs_transform(sx, sy, tx, ty);
+    flutter::DlColor color = blend_filter->color();
+    DlAtlasGeometry geometry = DlAtlasGeometry(image,                 //
+                                               &rs_transform,         //
+                                               &source,               //
+                                               &color,                //
+                                               1,                     //
+                                               blend_filter->mode(),  //
+                                               sampler,               //
+                                               std::nullopt           //
+    );
+    auto atlas_contents = std::make_shared<AtlasContents>();
+    atlas_contents->SetGeometry(&geometry);
+    atlas_contents->SetAlpha(paint.color.alpha);
+
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint_copy.blend_mode);
+    entity.SetContents(paint_copy.WithFilters(atlas_contents));
+
+    AddRenderEntityToCurrentPass(entity);
+    return;
+  }
+
   if (*clipped_source != source) {
     Scalar sx = dest.GetWidth() / source.GetWidth();
     Scalar sy = dest.GetHeight() / source.GetHeight();
