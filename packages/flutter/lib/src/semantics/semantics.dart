@@ -728,6 +728,7 @@ class SemanticsData with Diagnosticable {
     required this.scrollIndex,
     required this.scrollChildCount,
     required this.scrollPosition,
+    required this.scrollExtentTotal,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
     required this.platformViewId,
@@ -898,6 +899,14 @@ class SemanticsData with Diagnosticable {
   ///  * [ScrollPosition.pixels], from where this value is usually taken.
   final double? scrollPosition;
 
+  /// Indicates the total quantity of available content if the node is
+  /// scrollable.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.extentTotal], from where this value is usually taken.
+  final double? scrollExtentTotal;
+
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
   /// scrollable.
   ///
@@ -1064,6 +1073,7 @@ class SemanticsData with Diagnosticable {
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
+    properties.add(DoubleProperty('scrollExtentTotal', scrollExtentTotal, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
     properties.add(DiagnosticsProperty<Uri>('linkUrl', linkUrl, defaultValue: null));
@@ -1103,6 +1113,7 @@ class SemanticsData with Diagnosticable {
         other.scrollIndex == scrollIndex &&
         other.textSelection == textSelection &&
         other.scrollPosition == scrollPosition &&
+        other.scrollExtentTotal == scrollExtentTotal &&
         other.scrollExtentMax == scrollExtentMax &&
         other.scrollExtentMin == scrollExtentMin &&
         other.platformViewId == platformViewId &&
@@ -1142,6 +1153,7 @@ class SemanticsData with Diagnosticable {
     scrollExtentMin,
     platformViewId,
     Object.hash(
+      scrollExtentTotal,
       maxValueLength,
       currentValueLength,
       transform,
@@ -2803,6 +2815,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _sortKey != config._sortKey ||
         _textSelection != config._textSelection ||
         _scrollPosition != config._scrollPosition ||
+        _scrollExtentTotal != config._scrollExtentTotal ||
         _scrollExtentMax != config._scrollExtentMax ||
         _scrollExtentMin != config._scrollExtentMin ||
         _actionsAsBits != config._actionsAsBits ||
@@ -3067,6 +3080,15 @@ class SemanticsNode with DiagnosticableTreeMixin {
   double? get scrollPosition => _scrollPosition;
   double? _scrollPosition;
 
+  /// Indicates the total quantity of available content if the node is
+  /// scrollable.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.extentTotal], from where this value is usually taken.
+  double? get scrollExtentTotal => _scrollExtentTotal;
+  double? _scrollExtentTotal;
+
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
   /// scrollable.
   ///
@@ -3223,6 +3245,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _textSelection = config._textSelection;
     _isMultiline = config.isMultiline;
     _scrollPosition = config._scrollPosition;
+    _scrollExtentTotal = config._scrollExtentTotal;
     _scrollExtentMax = config._scrollExtentMax;
     _scrollExtentMin = config._scrollExtentMin;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
@@ -3279,6 +3302,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     int? scrollChildCount = _scrollChildCount;
     int? scrollIndex = _scrollIndex;
     double? scrollPosition = _scrollPosition;
+    double? scrollExtentTotal = _scrollExtentTotal;
     double? scrollExtentMax = _scrollExtentMax;
     double? scrollExtentMin = _scrollExtentMin;
     int? platformViewId = _platformViewId;
@@ -3324,6 +3348,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
         scrollChildCount ??= node._scrollChildCount;
         scrollIndex ??= node._scrollIndex;
         scrollPosition ??= node._scrollPosition;
+        scrollExtentTotal ??= node._scrollExtentTotal;
         scrollExtentMax ??= node._scrollExtentMax;
         scrollExtentMin ??= node._scrollExtentMin;
         platformViewId ??= node._platformViewId;
@@ -3435,6 +3460,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollChildCount: scrollChildCount,
       scrollIndex: scrollIndex,
       scrollPosition: scrollPosition,
+      scrollExtentTotal: scrollExtentTotal,
       scrollExtentMax: scrollExtentMax,
       scrollExtentMin: scrollExtentMin,
       platformViewId: platformViewId,
@@ -3521,6 +3547,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       scrollChildren: data.scrollChildCount ?? 0,
       scrollIndex: data.scrollIndex ?? 0,
       scrollPosition: data.scrollPosition ?? double.nan,
+      scrollExtentTotal: data.scrollExtentTotal ?? double.nan,
       scrollExtentMax: data.scrollExtentMax ?? double.nan,
       scrollExtentMin: data.scrollExtentMin ?? double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
@@ -3727,6 +3754,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(IntProperty('scrollIndex', scrollIndex, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMin', scrollExtentMin, defaultValue: null));
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
+    properties.add(DoubleProperty('scrollExtentTotal', scrollExtentTotal, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(IntProperty('indexInParent', indexInParent, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
@@ -5667,6 +5695,20 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// Indicates the total quantity of available content if the node is
+  /// scrollable.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollPosition.extentTotal], from where this value is usually taken.
+  double? get scrollExtentTotal => _scrollExtentTotal;
+  double? _scrollExtentTotal;
+  set scrollExtentTotal(double? value) {
+    assert(value != null);
+    _scrollExtentTotal = value;
+    _hasBeenAnnotated = true;
+  }
+
   /// Indicates the maximum in-range value for [scrollPosition] if the node is
   /// scrollable.
   ///
@@ -5858,6 +5900,7 @@ class SemanticsConfiguration {
     _flags |= child._flags;
     _textSelection ??= child._textSelection;
     _scrollPosition ??= child._scrollPosition;
+    _scrollExtentTotal ??= child._scrollExtentTotal;
     _scrollExtentMax ??= child._scrollExtentMax;
     _scrollExtentMin ??= child._scrollExtentMin;
     _hintOverrides ??= child._hintOverrides;
@@ -5953,6 +5996,7 @@ class SemanticsConfiguration {
       .._tagsForChildren = _tagsForChildren
       .._textSelection = _textSelection
       .._scrollPosition = _scrollPosition
+      .._scrollExtentTotal = _scrollExtentTotal
       .._scrollExtentMax = _scrollExtentMax
       .._scrollExtentMin = _scrollExtentMin
       .._actionsAsBits = _actionsAsBits
