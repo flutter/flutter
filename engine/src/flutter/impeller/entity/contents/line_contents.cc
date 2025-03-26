@@ -26,6 +26,64 @@ using CreateGeometryCallback =
 const int32_t kCurveResolution = 32;
 const float kSampleRadius = 1.f;
 
+uint8_t DoubleToUint8(double x) {
+  return static_cast<uint8_t>(std::clamp(std::round(x * 255.0), 0.0, 255.0));
+}
+
+/// See also: CreateGradientTexture
+std::shared_ptr<Texture> CreateCurveTexture(
+    Scalar width,
+    Scalar radius,
+    Scalar scale,
+    const std::shared_ptr<impeller::Context>& context) {
+  //
+  impeller::TextureDescriptor texture_descriptor;
+  texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
+  texture_descriptor.format = PixelFormat::kR8UNormInt;
+  texture_descriptor.size = {kCurveResolution, 1};
+
+  std::vector<uint8_t> curve_data =
+      LineContents::CreateCurveData(width, radius, scale);
+
+  return CreateTexture(texture_descriptor, curve_data, context, "LineCurve");
+}
+
+GeometryResult CreateGeometry(const ContentContext& renderer,
+                              const Entity& entity,
+                              RenderPass& pass,
+                              const Geometry* geometry) {
+  using PerVertexData = LineVertexShader::PerVertexData;
+  const LineGeometry* line_geometry =
+      static_cast<const LineGeometry*>(geometry);
+
+  auto& transform = entity.GetTransform();
+  auto& host_buffer = renderer.GetTransientsBuffer();
+
+  size_t count = 4;
+  fml::Status calculate_status;
+  BufferView vertex_buffer = host_buffer.Emplace(
+      count * sizeof(PerVertexData), alignof(PerVertexData),
+      [line_geometry, &transform, &calculate_status](uint8_t* buffer) {
+        auto vertices = reinterpret_cast<PerVertexData*>(buffer);
+        calculate_status = LineContents::CalculatePerVertex(
+            vertices, line_geometry, transform);
+      });
+  if (!calculate_status.ok()) {
+    return kEmptyResult;
+  }
+
+  return GeometryResult{
+      .type = PrimitiveType::kTriangleStrip,
+      .vertex_buffer =
+          {
+              .vertex_buffer = vertex_buffer,
+              .vertex_count = count,
+              .index_type = IndexType::kNone,
+          },
+      .transform = entity.GetShaderTransform(pass),
+  };
+}
+
 struct LineInfo {
   Vector3 e0;
   Vector3 e1;
@@ -55,97 +113,6 @@ LineInfo CalculateLineInfo(Point p0, Point p1, Scalar width, Scalar radius) {
   };
 }
 
-uint8_t DoubleToUint8(double x) {
-  return static_cast<uint8_t>(std::clamp(std::round(x * 255.0), 0.0, 255.0));
-}
-
-/// See also: CreateGradientTexture
-std::shared_ptr<Texture> CreateCurveTexture(
-    Scalar width,
-    Scalar radius,
-    Scalar scale,
-    const std::shared_ptr<impeller::Context>& context) {
-  //
-  impeller::TextureDescriptor texture_descriptor;
-  texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-  texture_descriptor.format = PixelFormat::kR8UNormInt;
-  texture_descriptor.size = {kCurveResolution, 1};
-
-  std::vector<uint8_t> curve_data;
-  curve_data.reserve(kCurveResolution);
-  for (int i = 0; i < kCurveResolution; ++i) {
-    double norm = (static_cast<double>(i) + 1.0) / 32.0;
-    double loc = scale * norm * (radius + width / 2.0);
-    double den = radius * 2.0 + 1.0;
-    curve_data.push_back(DoubleToUint8(loc / den));
-  }
-
-  return CreateTexture(texture_descriptor, curve_data, context, "LineCurve");
-}
-
-GeometryResult CreateGeometry(const ContentContext& renderer,
-                              const Entity& entity,
-                              RenderPass& pass,
-                              const Geometry* geometry) {
-  using PerVertexData = LineVertexShader::PerVertexData;
-  const LineGeometry* line_geometry =
-      static_cast<const LineGeometry*>(geometry);
-
-  auto& transform = entity.GetTransform();
-
-  Point corners[4];
-  if (!LineGeometry::ComputeCorners(
-          corners, transform,
-          /*extend_endpoints=*/line_geometry->GetCap() != Cap::kButt,
-          line_geometry->GetP0(), line_geometry->GetP1(),
-          line_geometry->GetWidth() + kSampleRadius * 2.0)) {
-    return kEmptyResult;
-  }
-
-  auto& host_buffer = renderer.GetTransientsBuffer();
-
-  size_t count = 4;
-  Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
-  LineInfo line_info =
-      CalculateLineInfo(line_geometry->GetP0(), line_geometry->GetP1(),
-                        line_geometry->GetWidth(), kSampleRadius);
-  BufferView vertex_buffer = host_buffer.Emplace(
-      count * sizeof(PerVertexData), alignof(PerVertexData),
-      [&corners, &line_info](uint8_t* buffer) {
-        auto vertices = reinterpret_cast<PerVertexData*>(buffer);
-        for (auto& corner : corners) {
-          *vertices++ = {
-              .position = corner,
-              .e0 = line_info.e0,
-              .e1 = line_info.e1,
-              .e2 = line_info.e2,
-              .e3 = line_info.e3,
-          };
-        }
-      });
-
-  std::shared_ptr<Texture> curve_texture = CreateCurveTexture(
-      line_geometry->GetWidth(), kSampleRadius, scale, renderer.GetContext());
-
-  SamplerDescriptor sampler_desc;
-  sampler_desc.min_filter = MinMagFilter::kLinear;
-  sampler_desc.mag_filter = MinMagFilter::kLinear;
-
-  FS::BindCurve(
-      pass, curve_texture,
-      renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
-
-  return GeometryResult{
-      .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer =
-          {
-              .vertex_buffer = vertex_buffer,
-              .vertex_count = count,
-              .index_type = IndexType::kNone,
-          },
-      .transform = entity.GetShaderTransform(pass),
-  };
-}
 }  // namespace
 
 std::unique_ptr<LineContents> LineContents::Make(
@@ -166,6 +133,18 @@ bool LineContents::Render(const ContentContext& renderer,
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
   frag_info.color = color_;
+
+  Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
+  std::shared_ptr<Texture> curve_texture = CreateCurveTexture(
+      geometry_->GetWidth(), kSampleRadius, scale, renderer.GetContext());
+
+  SamplerDescriptor sampler_desc;
+  sampler_desc.min_filter = MinMagFilter::kLinear;
+  sampler_desc.mag_filter = MinMagFilter::kLinear;
+
+  FS::BindCurve(
+      pass, curve_texture,
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
@@ -188,4 +167,44 @@ std::optional<Rect> LineContents::GetCoverage(const Entity& entity) const {
   return geometry_->GetCoverage(entity.GetTransform());
 }
 
+std::vector<uint8_t> LineContents::CreateCurveData(Scalar width,
+                                                   Scalar radius,
+                                                   Scalar scale) {
+  std::vector<uint8_t> curve_data;
+  curve_data.reserve(kCurveResolution);
+  for (int i = 0; i < kCurveResolution; ++i) {
+    double norm = (static_cast<double>(i) + 1.0) / 32.0;
+    double loc = scale * norm * (radius + width / 2.0);
+    double den = radius * 2.0 + 1.0;
+    curve_data.push_back(DoubleToUint8(loc / den));
+  }
+  return curve_data;
+}
+
+fml::Status LineContents::CalculatePerVertex(
+    LineVertexShader::PerVertexData* per_vertex,
+    const LineGeometry* geometry,
+    const Matrix& entity_transform) {
+  Point corners[4];
+  if (!LineGeometry::ComputeCorners(
+          corners, entity_transform,
+          /*extend_endpoints=*/geometry->GetCap() != Cap::kButt,
+          geometry->GetP0(), geometry->GetP1(),
+          geometry->GetWidth() + kSampleRadius * 2.0)) {
+    return fml::Status(fml::StatusCode::kAborted, "No valid corners");
+  }
+  LineInfo line_info = CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),
+                                         geometry->GetWidth(), kSampleRadius);
+  for (auto& corner : corners) {
+    *per_vertex++ = {
+        .position = corner,
+        .e0 = line_info.e0,
+        .e1 = line_info.e1,
+        .e2 = line_info.e2,
+        .e3 = line_info.e3,
+    };
+  }
+
+  return {};
+}
 }  // namespace impeller

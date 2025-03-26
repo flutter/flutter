@@ -9,10 +9,20 @@
 
 #include "flutter/impeller/entity/contents/contents.h"
 #include "flutter/impeller/entity/geometry/line_geometry.h"
+#include "impeller/entity/line.vert.h"
 
 namespace impeller {
 class LineContents : public Contents {
  public:
+  static std::vector<uint8_t> CreateCurveData(Scalar width,
+                                              Scalar radius,
+                                              Scalar scale);
+
+  static fml::Status CalculatePerVertex(
+    LineVertexShader::PerVertexData* per_vertex,
+      const LineGeometry* geometry,
+      const Matrix& entity_transform);
+
   static std::unique_ptr<LineContents> Make(
       std::unique_ptr<LineGeometry> geometry,
       Color color);
