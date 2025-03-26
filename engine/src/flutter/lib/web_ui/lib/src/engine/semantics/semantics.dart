@@ -219,6 +219,7 @@ class SemanticsNodeUpdate {
     required this.scrollChildren,
     required this.scrollIndex,
     required this.scrollPosition,
+    required this.scrollExtentTotal,
     required this.scrollExtentMax,
     required this.scrollExtentMin,
     required this.rect,
@@ -279,6 +280,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollPosition;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final double scrollExtentTotal;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final double scrollExtentMax;
@@ -1028,6 +1032,19 @@ class SemanticsObject {
   }
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
+  double? get scrollExtentTotal => _scrollExtentTotal;
+  double? _scrollExtentTotal;
+
+  static const int _scrollExtentTotalIndex = 1 << 17;
+
+  /// Whether the [scrollExtentTotal] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isScrollExtentTotalDirty => _isDirty(_scrollExtentTotalIndex);
+  void _markScrollExtentTotalDirty() {
+    _dirtyFields |= _scrollExtentTotalIndex;
+  }
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
   double? get scrollExtentMax => _scrollExtentMax;
   double? _scrollExtentMax;
 
@@ -1558,6 +1575,11 @@ class SemanticsObject {
     if (_scrollIndex != update.scrollIndex) {
       _scrollIndex = update.scrollIndex;
       _markScrollIndexDirty();
+    }
+
+    if (_scrollExtentTotal != update.scrollExtentTotal) {
+      _scrollExtentTotal = update.scrollExtentTotal;
+      _markScrollExtentTotalDirty();
     }
 
     if (_scrollExtentMax != update.scrollExtentMax) {

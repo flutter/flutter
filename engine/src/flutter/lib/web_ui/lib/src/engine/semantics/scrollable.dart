@@ -10,12 +10,10 @@ import 'package:ui/ui.dart' as ui;
 /// Implements vertical and horizontal scrolling functionality for semantics
 /// objects.
 ///
-/// Scrolling is implement by calculating a delta between the current dom scroll
-/// position and the previous dom scroll position. This delta is then applied to
-/// the current [SemanticsObject.scrollPosition], and sent in a [ui.SemanticsAction.scrollToOffset]
-/// to the framework where it applies the value to its scrollable and we receive a
-/// [ui.SemanticsUpdate] containing the new [SemanticsObject.scrollPosition] and
-/// child positions.
+/// Scrolling is controlled by sending the current dom scroll position in a
+/// [ui.SemanticsAction.scrollToOffset] to the framework where it applies the
+/// value to its scrollable and we receive a [ui.SemanticsUpdate] containing the
+/// new [SemanticsObject.scrollPosition] and child positions.
 class SemanticScrollable extends SemanticRole {
   SemanticScrollable(SemanticsObject semanticsObject)
     : super.withBasics(
@@ -32,24 +30,15 @@ class SemanticScrollable extends SemanticRole {
   /// Disables browser-driven scrolling in the presence of pointer events.
   GestureModeCallback? _gestureModeListener;
 
-  /// DOM element used as a workaround for: https://github.com/flutter/flutter/issues/104036
-  ///
-  /// When the assistive technology gets to the last element of the scrollable
-  /// list, the browser thinks the scrollable area doesn't have any more content,
-  /// so it overrides the value of "scrollTop"/"scrollLeft" with zero. As a result,
-  /// the user can't scroll back up/left.
-  ///
-  /// As a workaround, we add this DOM element and set its size to
-  /// [canonicalNeutralScrollPosition] so the browser believes
-  /// that the scrollable area still has some more content, and doesn't override
-  /// scrollTop/scrollLetf with zero.
+  /// Dom element used to indicate to the browser the total quantity of available
+  /// content under this scrollable area. This element is sized based on the
+  /// [SemanticsObject.scrollExtentTotal] that is received from the framework.
   final DomElement _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
 
   /// Listens to HTML "scroll" gestures detected by the browser.
   ///
-  /// When we detect a "scroll" gesture we calculate a delta and apply
-  /// it to the current [SemanticsObject.scrollPosition], this is then
-  /// converted to a [ui.SemanticsAction.scrollToOffset].
+  /// When we detect a "scroll" gesture we send the updated dom scroll position
+  /// to the framework in a [ui.SemanticsAction.scrollToOffset].
   @visibleForTesting
   DomEventListener? scrollListener;
 
@@ -58,8 +47,7 @@ class SemanticScrollable extends SemanticRole {
       semanticsObject.isVerticalScrollContainer || semanticsObject.isHorizontalScrollContainer;
 
   /// The previous value of the "scrollTop" or "scrollLeft" property of this object's
-  /// [element], used to calculate a delta between the current value of "scrollTop"
-  /// or "scrollLeft" and this value.
+  /// [element], used to determine if the content was scrolled.
   int _previousDomScrollPosition = 0;
 
   /// Responds to browser-detected "scroll" gestures.
@@ -69,31 +57,26 @@ class SemanticScrollable extends SemanticRole {
         return;
       }
 
-      final double scrollDelta = (_domScrollPosition - _previousDomScrollPosition).toDouble();
-      final double? scrollOffset = semanticsObject.scrollPosition;
-      final double newScrollOffset = scrollOffset! + scrollDelta;
-      print(
-        'recomputing scroll position \n current dom position: $_domScrollPosition \n previous scroll position $_previousDomScrollPosition\n delta: $scrollDelta\n current offset: $scrollOffset \n new offset $newScrollOffset\nprevious size height: ${element.style.height}\n previous size width: ${element.style.width}',
-      );
-
       _previousDomScrollPosition = _domScrollPosition;
-      _neutralizeDomScrollPosition();
+      print(
+        'current scroll offset from framework: ${semanticsObject.scrollPosition}, next offset $_domScrollPosition',
+      );
+      _updateScrollableState();
       semanticsObject.recomputePositionAndSize();
       semanticsObject.updateChildrenPositionAndSize();
-      print('new size height: ${element.style.height}\n new size width: ${element.style.width}\n');
 
       final int semanticsId = semanticsObject.id;
       final Float64List offsets = Float64List(2);
 
       if (semanticsObject.isVerticalScrollContainer) {
         offsets[0] = 0.0;
-        offsets[1] = newScrollOffset;
+        offsets[1] = element.scrollTop;
       } else {
         assert(semanticsObject.isHorizontalScrollContainer);
-        offsets[0] = newScrollOffset;
+        offsets[0] = element.scrollLeft;
         offsets[1] = 0.0;
       }
-
+      print('sending new offset to framework');
       final ByteData? message = const StandardMessageCodec().encodeMessage(offsets);
       EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
         viewId,
@@ -117,7 +100,7 @@ class SemanticScrollable extends SemanticRole {
       ..pointerEvents = 'none';
     append(_scrollOverflowElement);
     print(
-      'init scrollable state,  rect size ${semanticsObject.rect}, scroll extent max ${semanticsObject.scrollExtentMax}',
+      'init scrollable state,  rect size ${semanticsObject.rect}, scroll extent total ${semanticsObject.scrollExtentTotal}',
     );
   }
 
@@ -126,7 +109,7 @@ class SemanticScrollable extends SemanticRole {
     super.update();
 
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
-      _neutralizeDomScrollPosition();
+      _updateScrollableState();
       semanticsObject.recomputePositionAndSize();
       semanticsObject.updateChildrenPositionAndSize();
     });
@@ -173,44 +156,35 @@ class SemanticScrollable extends SemanticRole {
     }
   }
 
-  /// Resets the scroll position (top or left) to the neutral value.
-  ///
-  /// The scroll position of the scrollable HTML node that's considered to
-  /// have zero offset relative to Flutter's notion of scroll position is
-  /// referred to as "neutral scroll position".
-  ///
-  /// We always set the scroll position to a non-zero value in order to
-  /// be able to scroll in the negative direction. When scrollTop/scrollLeft is
-  /// zero the browser will refuse to scroll back even when there is more
-  /// content available.
-  void _neutralizeDomScrollPosition() {
+  /// Updates the scrollable state of the semantics object.
+  void _updateScrollableState() {
     // This value is arbitrary.
-    const int canonicalNeutralScrollPosition = 10;
     final ui.Rect? rect = semanticsObject.rect;
     if (rect == null) {
       printWarning('Warning! the rect attribute of semanticsObject is null');
       return;
     }
     if (semanticsObject.isVerticalScrollContainer) {
-      // Place the _scrollOverflowElement at the end of the content and
-      // make sure that when we neutralize the scrolling position,
-      // so it doesn't scroll into the visible area.
-      final int verticalOffset = rect.height.ceil() + canonicalNeutralScrollPosition;
+      // Place the _scrollOverflowElement at the beginning of the content
+      // and size it based on the total scroll extent so the browser
+      // knows how much scrollable content there is.
+      final double? scrollExtentTotal = semanticsObject.scrollExtentTotal;
+      assert(scrollExtentTotal != null);
+      print('scroll extent total: ${semanticsObject.scrollExtentTotal}');
       _scrollOverflowElement.style
-        ..transform = 'translate(0px,${verticalOffset}px)'
         ..width = '${rect.width.round()}px'
-        ..height = '${canonicalNeutralScrollPosition}px';
+        ..height = '${scrollExtentTotal!}px';
       semanticsObject
         ..verticalScrollAdjustment = element.scrollTop
         ..horizontalScrollAdjustment = 0.0;
     } else if (semanticsObject.isHorizontalScrollContainer) {
-      // Place the _scrollOverflowElement at the end of the content and
-      // make sure that when we neutralize the scrolling position,
-      // it doesn't scroll into the visible area.
-      final int horizontalOffset = rect.width.ceil() + canonicalNeutralScrollPosition;
+      // Place the _scrollOverflowElement at the beginning of the content
+      // and size it based on the total scroll extent so the browser
+      // knows how much scrollable content there is.
+      final double? scrollExtentTotal = semanticsObject.scrollExtentTotal;
+      assert(scrollExtentTotal != null);
       _scrollOverflowElement.style
-        ..transform = 'translate(${horizontalOffset}px,0px)'
-        ..width = '${canonicalNeutralScrollPosition}px'
+        ..width = '${scrollExtentTotal!}px'
         ..height = '${rect.height.round()}px';
       semanticsObject
         ..verticalScrollAdjustment = 0.0
