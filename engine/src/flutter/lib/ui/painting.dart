@@ -6640,11 +6640,11 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
     assert(_rsuperellipseIsValid(rsuperellipse));
-    _clipRSuperellipse(rsuperellipse, doAntiAlias);
+    _clipRSuperellipse(rsuperellipse._native(), doAntiAlias);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Bool)>(symbol: 'Canvas::clipRSuperellipse')
-  external void _clipRSuperellipse(RSuperellipse rsuperellipse, bool doAntiAlias);
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Bool)>(symbol: 'Canvas::clipRSuperellipse')
+  external void _clipRSuperellipse(_NativeRSuperellipse rsuperellipse, bool doAntiAlias);
 
   @override
   void clipPath(Path path, {bool doAntiAlias = true}) {
