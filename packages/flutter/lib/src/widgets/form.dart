@@ -10,6 +10,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -769,6 +770,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
 
     Form.maybeOf(context)?._register(this);
 
+    final Widget child = Semantics(
+      validationResult: hasError ? SemanticsValidationResult.invalid : SemanticsValidationResult.valid,
+      child: widget.builder(this),
+    );
+
     if (Form.maybeOf(context)?.widget.autovalidateMode == AutovalidateMode.onUnfocus &&
             widget.autovalidateMode != AutovalidateMode.always ||
         widget.autovalidateMode == AutovalidateMode.onUnfocus) {
@@ -783,11 +789,11 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
           }
         },
         focusNode: _focusNode,
-        child: widget.builder(this),
+        child: child,
       );
     }
 
-    return widget.builder(this);
+    return child;
   }
 }
 

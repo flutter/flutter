@@ -56,6 +56,7 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
+    this.validationResult = SemanticsValidationResult.none,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        tags = tags?.toSet() ?? <SemanticsTag>{};
@@ -80,6 +81,7 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
+    this.validationResult = SemanticsValidationResult.none,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -120,6 +122,7 @@ class TestSemantics {
     this.scrollChildren,
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
+    this.validationResult = SemanticsValidationResult.none,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
@@ -231,6 +234,14 @@ class TestSemantics {
   final int? scrollChildren;
 
   final TextSelection? textSelection;
+
+  /// The validation result for this node, if any.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsValidationResult], which is the enum listing possible values
+  ///    for this field.
+  final SemanticsValidationResult validationResult;
 
   static Matrix4 _applyRootChildScale(Matrix4? transform) {
     final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
@@ -390,6 +401,10 @@ class TestSemantics {
 
     if (role != node.role) {
       return fail('expected node id $id to have role $role but found role ${node.role}');
+    }
+
+    if (validationResult != node.validationResult) {
+      return fail('expected node id $id to have validationResult $validationResult but found validationResult ${node.validationResult}');
     }
 
     if (children.isEmpty) {
