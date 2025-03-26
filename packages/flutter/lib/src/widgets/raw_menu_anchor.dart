@@ -586,7 +586,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
       tapRegionGroupId: root.menuController,
     );
 
-    return widget.overlayBuilder(anchorContext, info);
+    return widget.overlayBuilder(context, info);
   }
 
   @override
