@@ -272,7 +272,8 @@ struct ContentContext::Pipelines {
   Variants<TexturePipeline> texture;
   Variants<TextureStrictSrcPipeline> texture_strict_src;
   Variants<TiledTexturePipeline> tiled_texture;
-  Variants<VerticesUberShader> vertices_uber_shader_;
+  Variants<VerticesUber1Shader> vertices_uber_1_;
+  Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
 #ifdef IMPELLER_ENABLE_OPENGLES
@@ -668,8 +669,10 @@ ContentContext::ContentContext(
                                                options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
-    pipelines_->vertices_uber_shader_.CreateDefault(*context_, options,
-                                                    {supports_decal});
+    pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
+                                               {supports_decal});
+    pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
+                                               {supports_decal});
 
     const std::array<std::vector<Scalar>, 15> porter_duff_constants =
         GetPorterDuffSpecConstants(supports_decal);
@@ -1425,9 +1428,14 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
   return GetPipeline(this, pipelines_->framebuffer_blend_softlight, opts);
 }
 
-PipelineRef ContentContext::GetDrawVerticesUberShader(
+PipelineRef ContentContext::GetDrawVerticesUber1Pipeline(
     ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->vertices_uber_shader_, opts);
+  return GetPipeline(this, pipelines_->vertices_uber_1_, opts);
+}
+
+PipelineRef ContentContext::GetDrawVerticesUber2Pipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->vertices_uber_2_, opts);
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {

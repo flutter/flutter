@@ -43,7 +43,7 @@ void main() {
   f16vec4 src = IPHalfUnpremultiply(
       Sample(texture_sampler, v_texture_coords, frag_info.tmx, frag_info.tmy));
   f16vec3 blend_result =
-      AdvancedBlend(dst.rgb, src.rgb, int(frag_info.blend_mode - 14.0));
+      AdvancedBlendHalf2(dst.rgb, src.rgb, int(frag_info.blend_mode - 14.0));
   frag_color = IPApplyBlendedColor(dst, src, blend_result);
   frag_color *= frag_info.alpha;
 }
