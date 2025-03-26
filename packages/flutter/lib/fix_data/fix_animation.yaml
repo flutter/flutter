@@ -18,7 +18,7 @@
 # * Fixes in this file are from the Animation library. *
 version: 1
 transforms:
-  # Change made in https://github.com/flutter/flutter/pull/XXX
+  # Change made in https://github.com/flutter/flutter/pull/166012
   - title: "Migrate to positional 'curve' parameter"
     date: 2025-03-26
     element:

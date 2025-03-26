@@ -5,7 +5,7 @@
 import 'package:flutter/animation.dart';
 
 void main() {
-  // Change made in https://github.com/flutter/flutter/pull/XXX
+  // Change made in https://github.com/flutter/flutter/pull/166012
   final curveTween1 = CurveTween(curve: Curves.ease);
   const curve = Curves.ease;
   final curveTween2 = CurveTween(curve: curve);
