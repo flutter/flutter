@@ -1582,7 +1582,7 @@ void _testVerticalScrolling() {
 
     final scrollable = owner().debugSemanticsTree![0]!.semanticRole! as SemanticScrollable;
     final scrollEvent = createDomEvent('Event', 'scroll') as JSAny;
-    final listener = scrollable.scrollListener! as JSFunction;
+    final listener = scrollable.scrollListener!;
     expect(() => listener.callAsFunction(null, scrollEvent), returnsNormally);
 
     semantics().semanticsEnabled = false;
