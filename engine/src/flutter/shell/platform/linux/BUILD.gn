@@ -91,6 +91,7 @@ source_set("flutter_linux_sources") {
              "fl_method_codec_private.h",
              "fl_plugin_registrar_private.h",
              "fl_pointer_manager.h",
+             "fl_view_private.h",
              "fl_window_state_monitor.h",
              "key_mapping.h",
            ]
