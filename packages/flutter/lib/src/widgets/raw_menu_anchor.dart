@@ -591,7 +591,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   @override
   Widget buildAnchor(BuildContext context) {
     final Widget? overlayPortal =
-        widget.child == null
+        widget.child == null || widget.builder == null
             ? null
             : useRootOverlay
             ? OverlayPortal.targetsRootOverlay(
@@ -616,14 +616,14 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
           key: _anchorKey,
           builder: (BuildContext context) {
             return widget.builder?.call(context, menuController, overlayPortal) ??
-                overlayPortal ??
+                widget.child ??
                 const SizedBox();
           },
         ),
       ),
     );
 
-    if (widget.child == null) {
+    if (widget.child == null || widget.builder == null) {
       if (useRootOverlay) {
         return OverlayPortal.targetsRootOverlay(
           controller: _overlayController,
