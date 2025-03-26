@@ -1631,7 +1631,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ) {
     // When secondary animation is stopped at the beginning, do not wrap the page
     // with the delegated transition.
-    if (receivedTransition == null || secondaryAnimation.isDismissed) {
+    if (receivedTransition == null) {
       return buildTransitions(context, animation, secondaryAnimation, child);
     }
 
