@@ -4,6 +4,7 @@
 
 precision mediump float;
 
+#include <impeller/color.glsl>
 #include <impeller/types.glsl>
 
 uniform FragInfo {
@@ -41,4 +42,5 @@ float CalculateLine() {
 void main() {
   float line = CalculateLine();
   frag_color = vec4(frag_info.color.xyz, line);
+  frag_color = IPPremultiply(frag_color);
 }
