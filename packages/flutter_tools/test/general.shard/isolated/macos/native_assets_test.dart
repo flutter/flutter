@@ -324,12 +324,12 @@ void main() {
             nativeAssetsFileUri: nativeAssetsFileUri,
           );
           final String expectedArchsBeingBuilt =
-              flutterTester ? (isArm64 ? 'arm64' : 'x64') : '[arm64, x64]';
+              flutterTester ? (isArm64 ? 'macos_arm64' : 'macos_x64') : 'macos_arm64, macos_x64';
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for macos $expectedArchsBeingBuilt.',
-              'Building native assets for macos $expectedArchsBeingBuilt done.',
+              'Building native assets for $expectedArchsBeingBuilt.',
+              'Building native assets for $expectedArchsBeingBuilt done.',
             ]),
           );
           final String nativeAssetsFileContent =

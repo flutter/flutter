@@ -136,8 +136,8 @@ void main() {
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for $expectedOS $expectedArch.',
-              'Building native assets for $expectedOS $expectedArch done.',
+              'Building native assets for ${expectedOS}_$expectedArch.',
+              'Building native assets for ${expectedOS}_$expectedArch done.',
             ]),
           );
           expect(

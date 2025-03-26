@@ -49,6 +49,8 @@ sealed class AssetBuildTarget {
 
   List<ProtocolExtension> get extensions;
 
+  String get targetString;
+
   List<DataAssetsExtension> get dataAssetExtensions => <DataAssetsExtension>[
     if (supportedAssetTypes.contains(DataAsset.type)) DataAssetsExtension(),
   ];
@@ -163,6 +165,9 @@ final class WebAssetTarget extends AssetBuildTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[...dataAssetExtensions];
+
+  @override
+  String get targetString => 'web';
 }
 
 sealed class CodeAssetTarget extends AssetBuildTarget {
@@ -202,6 +207,9 @@ class WindowsAssetTarget extends CodeAssetTarget {
     ...codeAssetExtensionFor(OS.windows),
     ...dataAssetExtensions,
   ];
+
+  @override
+  String get targetString => 'windows_${architecture.name}';
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
@@ -216,6 +224,9 @@ final class LinuxAssetTarget extends CodeAssetTarget {
     ...codeAssetExtensionFor(OS.linux),
     ...dataAssetExtensions,
   ];
+
+  @override
+  String get targetString => 'linux_${architecture.name}';
 }
 
 final class IOSAssetTarget extends CodeAssetTarget {
@@ -250,6 +261,9 @@ final class IOSAssetTarget extends CodeAssetTarget {
       ),
     ...dataAssetExtensions,
   ];
+
+  @override
+  String get targetString => 'ios_${architecture.name}';
 }
 
 final class MacOSAssetTarget extends CodeAssetTarget {
@@ -268,6 +282,9 @@ final class MacOSAssetTarget extends CodeAssetTarget {
       ),
     ...dataAssetExtensions,
   ];
+
+  @override
+  String get targetString => 'macos_${architecture.name}';
 }
 
 final class AndroidAssetTarget extends CodeAssetTarget {
@@ -298,6 +315,9 @@ final class AndroidAssetTarget extends CodeAssetTarget {
       ),
     ...dataAssetExtensions,
   ];
+
+  @override
+  String get targetString => 'android_${architecture.name}';
 }
 
 final class FlutterTesterAssetTarget extends CodeAssetTarget {
@@ -309,6 +329,9 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
     ...codeAssetExtensionFor(OS.current),
     ...dataAssetExtensions,
   ];
+
+  @override
+  String get targetString => '${OS.current}_${architecture.name}';
 }
 
 List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {

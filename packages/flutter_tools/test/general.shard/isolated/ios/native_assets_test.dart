@@ -218,8 +218,8 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for ios [arm64, x64].',
-            'Building native assets for ios [arm64, x64] done.',
+            'Building native assets for ios_arm64, ios_x64.',
+            'Building native assets for ios_arm64, ios_x64 done.',
           ]),
         );
         expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);

@@ -108,8 +108,8 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for android arm64.',
-            'Building native assets for android arm64 done.',
+            'Building native assets for android_arm64.',
+            'Building native assets for android_arm64 done.',
           ]),
         );
 

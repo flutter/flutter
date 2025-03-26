@@ -504,7 +504,9 @@ Future<DartHookResult> _runDartHooks({
 }) async {
   final DateTime buildStart = DateTime.now();
 
-  final String targetString = targets.map((AssetBuildTarget target) => target.platform).toString();
+  final String targetString = targets
+      .map((AssetBuildTarget target) => target.targetString)
+      .join(', ');
 
   globals.logger.printTrace('Building native assets for $targetString.');
 
