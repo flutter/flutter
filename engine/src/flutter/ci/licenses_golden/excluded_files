@@ -3,7 +3,6 @@
 ../../../.gitignore
 ../../../.gn
 ../../../AUTHORS
-../../../CODEOWNERS
 ../../../README.md
 ../../../build
 ../../../build_overrides
@@ -16,7 +15,6 @@
 ../../../flutter/.gitignore
 ../../../flutter/.style.yapf
 ../../../flutter/AUTHORS
-../../../flutter/CODEOWNERS
 ../../../flutter/CONTRIBUTING.md
 ../../../flutter/Doxyfile
 ../../../flutter/README.md
