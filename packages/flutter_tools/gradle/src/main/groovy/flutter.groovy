@@ -19,6 +19,7 @@ import com.flutter.gradle.FlutterPluginConstants
 import com.flutter.gradle.FlutterTask
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.IntentFilterCheck
+import com.flutter.gradle.NativePluginLoaderReflectionBridge
 import com.flutter.gradle.VersionUtils
 import groovy.xml.QName
 import org.gradle.api.file.Directory
@@ -121,7 +122,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         // Load shared gradle functions
-        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
+        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "scripts", "native_plugin_loader.gradle.kts")
 
         FlutterExtension extension = project.extensions.create("flutter", FlutterExtension)
         Properties localProperties = new Properties()
@@ -424,7 +425,7 @@ class FlutterPlugin implements Plugin<Project> {
      * and filtered then with the [doesSupportAndroidPlatform] method instead of
      * just using the `plugins.android` list.
      */
-    private void configureLegacyPluginEachProjects(Project project) {
+    static private void configureLegacyPluginEachProjects(Project project) {
         try {
             // Read the contents of the settings.gradle file.
             // Remove block/line comments
@@ -466,11 +467,11 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * The map value contains either the plugins `name` (String),
      * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
      */
     private List<Map<String, Object>> getPluginList(Project project) {
         if (pluginList == null) {
-            pluginList = project.ext.nativePluginLoader.getPlugins(FlutterPluginUtils.getFlutterSourceDirectory(project))
+            pluginList = NativePluginLoaderReflectionBridge.getPlugins(project.ext, FlutterPluginUtils.getFlutterSourceDirectory(project))
         }
         return pluginList
     }
