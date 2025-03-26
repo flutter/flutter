@@ -46,15 +46,8 @@ proxy is correctly initialized and shut down around invocations of `ninja`.
 ### gcloud
 
 Before running an RBE build, you must be authenticated with the Google cloud
-project that owns the RBE worker pool. A gcloud SDK is checked out with the
-engine repo under e.g. `//flutter/buildtools/mac-arm64/gcloud`.
-(Replace `mac-arm64` with the directory name that is correct for your host
-platform.)
-
-The `gcloud` tool in this SDK must be on your path. The tool lives under
-`//flutter/buildtools/mac-arm64/gcloud/bin`, which is the path to add to your
-`PATH` environment variable. Alternatively, you can get the gcloud SDK on your
-path by installing it on your system by following the instructions at
+project that owns the RBE worker pool. You'll need the `gcloud` SDK, which you
+can install by following the instructions at
 [https://cloud.google.com/sdk/docs/install](https://cloud.google.com/sdk/docs/install).
 
 On macOS, before running the `gcloud` command ensure that `python3` is on your

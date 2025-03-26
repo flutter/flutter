@@ -51,12 +51,9 @@ FLUTTER_ASSERT_ARC
     CAMetalLayer* layer = (CAMetalLayer*)self.layer;
 #pragma clang diagnostic pop
     layer.pixelFormat = pixelFormat;
-    if (pixelFormat == MTLPixelFormatRGBA16Float || pixelFormat == MTLPixelFormatBGRA10_XR ||
-        pixelFormat == MTLPixelFormatBGR10_XR) {
+    if (pixelFormat == MTLPixelFormatRGBA16Float || pixelFormat == MTLPixelFormatBGRA10_XR) {
       self->_colorSpaceRef = fml::CFRef(CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB));
       layer.colorspace = self->_colorSpaceRef;
-      // Overlay layers always need an alpha channel.
-      layer.pixelFormat = MTLPixelFormatBGRA10_XR;
     }
   }
   return self;
