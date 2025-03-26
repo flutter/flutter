@@ -3865,17 +3865,7 @@ targets:
         ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: macos_integration_test
-
-  # - name: Mac macos_integration_test
-  #   presubmit: false
-  #   recipe: devicelab/devicelab_drone
-  #   timeout: 60
-  #   bringup: true
-  #   properties:
-  #     tags: >
-  #       ["devicelab", "hostonly", "mac"]
-  #     task_name: macos_integration_test
+      task_name: flavors_test_macos
 
   - name: Mac_benchmark flutter_gallery_macos__compile
     presubmit: false
@@ -4330,24 +4320,34 @@ targets:
       - engine/**
       - DEPS
 
+  # - name: Mac plugin_test_macos
+  #   recipe: devicelab/devicelab_drone
+  #   timeout: 60
+  #   properties:
+  #     dependencies: >-
+  #       [
+  #         {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
+  #       ]
+  #     tags: >
+  #       ["devicelab", "hostonly", "mac"]
+  #     task_name: plugin_test_macos
+  #   runIf:
+  #     - dev/**
+  #     - packages/flutter_tools/**
+  #     - bin/**
+  #     - .ci.yaml
+  #     - engine/**
+  #     - DEPS
+
   - name: Mac plugin_test_macos
+  # - name: Mac macos_integration_test
     recipe: devicelab/devicelab_drone
     timeout: 60
+    # bringup: true
     properties:
-      dependencies: >-
-        [
-          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"}
-        ]
       tags: >
         ["devicelab", "hostonly", "mac"]
-      task_name: plugin_test_macos
-    runIf:
-      - dev/**
-      - packages/flutter_tools/**
-      - bin/**
-      - .ci.yaml
-      - engine/**
-      - DEPS
+      task_name: macos_integration_test
 
   - name: Mac_x64 tool_host_cross_arch_tests
     recipe: flutter/flutter_drone
