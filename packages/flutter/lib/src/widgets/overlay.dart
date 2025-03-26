@@ -1920,7 +1920,8 @@ class _OverlayPortalState extends State<OverlayPortal> {
 
   void _setupController(OverlayPortalController controller) {
     assert(
-      controller._attachTarget == null || controller._attachTarget == this,
+      controller._attachTarget == this ||
+          !((controller._attachTarget?.context as StatefulElement?)?.debugIsActive ?? false),
       'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}.',
     );
     final int? controllerZOrderIndex = controller._zOrderIndex;
@@ -1951,8 +1952,13 @@ class _OverlayPortalState extends State<OverlayPortal> {
   }
 
   @override
-  void dispose() {
+  void activate() {
     assert(widget.controller._attachTarget == this);
+    super.activate();
+  }
+
+  @override
+  void dispose() {
     widget.controller._attachTarget = null;
     _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
