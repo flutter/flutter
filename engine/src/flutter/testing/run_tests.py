@@ -1079,10 +1079,9 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
     extra_env.update(vulkan_validation_env(build_dir))
     run_cmd([tests_path, f'--working_dir={temp_dir}'], cwd=build_dir, env=extra_env)
     dart_bin = os.path.join(build_dir, 'dart-sdk', 'bin', 'dart')
-    golden_path = os.path.join('testing', 'impeller_golden_tests_output.txt')
     script_path = os.path.join('tools', 'dir_contents_diff', 'bin', 'dir_contents_diff.dart')
     diff_result = subprocess.run(
-        f'{dart_bin} {script_path} {golden_path} {temp_dir}',
+        f'{dart_bin} {script_path} {temp_dir}',
         check=False,
         shell=True,
         stdout=subprocess.PIPE,
