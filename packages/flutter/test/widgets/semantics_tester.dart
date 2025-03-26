@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
@@ -404,7 +402,9 @@ class TestSemantics {
     }
 
     if (validationResult != node.validationResult) {
-      return fail('expected node id $id to have validationResult $validationResult but found validationResult ${node.validationResult}');
+      return fail(
+        'expected node id $id to have validationResult $validationResult but found validationResult ${node.validationResult}',
+      );
     }
 
     if (children.isEmpty) {

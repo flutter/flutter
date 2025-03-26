@@ -33,7 +33,16 @@ import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
 export 'dart:ui'
-    show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection, VoidCallback, SemanticsValidationResult, SemanticsRole;
+    show
+        Offset,
+        Rect,
+        SemanticsAction,
+        SemanticsFlag,
+        SemanticsRole,
+        SemanticsValidationResult,
+        StringAttribute,
+        TextDirection,
+        VoidCallback;
 
 export 'package:flutter/foundation.dart'
     show
@@ -986,6 +995,7 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsProperties.controlsNodes}
   final Set<String>? controlsNodes;
 
+  /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   final SemanticsValidationResult validationResult;
 
   /// Whether [flags] contains the given flag.
@@ -1049,18 +1059,16 @@ class SemanticsData with Diagnosticable {
       properties.add(IterableProperty<String>('controls', controlsNodes, ifEmpty: null));
     }
     if (role != SemanticsRole.none) {
-      properties.add(EnumProperty<SemanticsRole>(
-        'role',
-        role,
-        defaultValue: SemanticsRole.none,
-      ));
+      properties.add(EnumProperty<SemanticsRole>('role', role, defaultValue: SemanticsRole.none));
     }
     if (validationResult != SemanticsValidationResult.none) {
-      properties.add(EnumProperty<SemanticsValidationResult>(
-        'validationResult',
-        validationResult,
-        defaultValue: SemanticsValidationResult.none,
-      ));
+      properties.add(
+        EnumProperty<SemanticsValidationResult>(
+          'validationResult',
+          validationResult,
+          defaultValue: SemanticsValidationResult.none,
+        ),
+      );
     }
   }
 
@@ -2184,7 +2192,13 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<SemanticsRole>('role', role, defaultValue: null));
-    properties.add(EnumProperty<SemanticsValidationResult>('validationResult', validationResult, defaultValue: null));
+    properties.add(
+      EnumProperty<SemanticsValidationResult>(
+        'validationResult',
+        validationResult,
+        defaultValue: null,
+      ),
+    );
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     properties.add(
       DiagnosticsProperty<SemanticsHintOverrides>(
@@ -3114,6 +3128,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Set<String>? get controlsNodes => _controlsNodes;
   Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
 
+  /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   SemanticsValidationResult get validationResult => _validationResult;
   SemanticsValidationResult _validationResult = SemanticsValidationResult.none;
 
@@ -3346,7 +3361,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         } else if (validationResult == SemanticsValidationResult.valid) {
           // When merging nodes, invalid validation result takes precedence.
           // Otherwise, validation information could be lost.
-          if (node._validationResult != SemanticsValidationResult.none && node._validationResult != SemanticsValidationResult.valid) {
+          if (node._validationResult != SemanticsValidationResult.none &&
+              node._validationResult != SemanticsValidationResult.valid) {
             validationResult = node._validationResult;
           }
         }
@@ -5841,7 +5857,8 @@ class SemanticsConfiguration {
       _controlsNodes = <String>{..._controlsNodes!, ...child._controlsNodes!};
     }
 
-    if (_validationResult == SemanticsValidationResult.none && child._validationResult != _validationResult) {
+    if (_validationResult == SemanticsValidationResult.none &&
+        child._validationResult != _validationResult) {
       _validationResult = child._validationResult;
     }
 
