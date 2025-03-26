@@ -479,9 +479,6 @@ static void realize_cb(FlView* self) {
   g_signal_connect_swapped(toplevel_window, "delete-event",
                            G_CALLBACK(window_delete_event_cb), self);
 
-  fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
-                             FL_RENDERABLE(self));
-
   // Flutter engine will need to make the context current from raster thread
   // during initialization.
   fl_renderer_clear_current(FL_RENDERER(self->renderer));
@@ -557,9 +554,6 @@ static void fl_view_dispose(GObject* object) {
       g_signal_handler_disconnect(handler, self->cursor_changed_cb_id);
       self->cursor_changed_cb_id = 0;
     }
-
-    // Stop rendering.
-    fl_renderer_remove_view(FL_RENDERER(self->renderer), self->view_id);
 
     // Release the view ID from the engine.
     fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
@@ -773,6 +767,8 @@ G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
   g_signal_connect_swapped(self->gl_area, "unrealize", G_CALLBACK(unrealize_cb),
                            self);
 
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(self));
+
   return self;
 }
 
@@ -784,13 +780,10 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
   g_assert(FL_IS_RENDERER_GDK(renderer));
   self->renderer = FL_RENDERER_GDK(g_object_ref(renderer));
 
-  self->view_id = fl_engine_add_view(engine, 1, 1, 1.0, self->cancellable,
-                                     view_added_cb, self);
+  self->view_id = fl_engine_add_view(engine, FL_RENDERABLE(self), 1, 1, 1.0,
+                                     self->cancellable, view_added_cb, self);
 
   setup_engine(self);
-
-  fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
-                             FL_RENDERABLE(self));
 
   g_signal_connect_swapped(self->gl_area, "realize",
                            G_CALLBACK(secondary_realize_cb), self);

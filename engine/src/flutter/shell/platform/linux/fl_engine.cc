@@ -8,6 +8,7 @@
 
 #include <cstring>
 
+#include "flutter/common/constants.h"
 #include "flutter/shell/platform/common/engine_switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/linux/fl_binary_messenger_private.h"
@@ -92,6 +93,9 @@ struct _FlEngine {
 
   // Next ID to use for a view.
   FlutterViewId next_view_id;
+
+  // Objects rendering the views.
+  GHashTable* renderables_by_view_id;
 
   // Function to call when a platform message is received.
   FlEnginePlatformMessageHandler platform_message_handler;
@@ -489,6 +493,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->keyboard_handler);
   g_clear_object(&self->mouse_cursor_handler);
   g_clear_object(&self->task_runner);
+  g_clear_pointer(&self->renderables_by_view_id, g_hash_table_unref);
 
   if (self->platform_message_handler_destroy_notify) {
     self->platform_message_handler_destroy_notify(
@@ -534,6 +539,12 @@ static void fl_engine_init(FlEngine* self) {
 
   // Implicit view is 0, so start at 1.
   self->next_view_id = 1;
+  self->renderables_by_view_id = g_hash_table_new_full(
+      g_direct_hash, g_direct_equal, nullptr, [](gpointer value) {
+        GWeakRef* ref = static_cast<GWeakRef*>(value);
+        g_weak_ref_clear(ref);
+        free(ref);
+      });
 
   self->texture_registrar = fl_texture_registrar_new(self);
 }
@@ -734,7 +745,15 @@ void fl_engine_notify_display_update(FlEngine* self,
   }
 }
 
+void fl_engine_set_implicit_view(FlEngine* self, FlRenderable* renderable) {
+  GWeakRef* ref = g_new(GWeakRef, 1);
+  g_weak_ref_init(ref, G_OBJECT(renderable));
+  g_hash_table_insert(self->renderables_by_view_id,
+                      GINT_TO_POINTER(flutter::kFlutterImplicitViewId), ref);
+}
+
 FlutterViewId fl_engine_add_view(FlEngine* self,
+                                 FlRenderable* renderable,
                                  size_t width,
                                  size_t height,
                                  double pixel_ratio,
@@ -747,6 +766,11 @@ FlutterViewId fl_engine_add_view(FlEngine* self,
 
   FlutterViewId view_id = self->next_view_id;
   self->next_view_id++;
+
+  GWeakRef* ref = g_new(GWeakRef, 1);
+  g_weak_ref_init(ref, G_OBJECT(renderable));
+  g_hash_table_insert(self->renderables_by_view_id, GINT_TO_POINTER(view_id),
+                      ref);
 
   // We don't know which display this view will open on, so set to zero and this
   // will be updated in a following FlutterWindowMetricsEvent
@@ -784,12 +808,22 @@ gboolean fl_engine_add_view_finish(FlEngine* self,
   return g_task_propagate_boolean(G_TASK(result), error);
 }
 
+FlRenderable* fl_engine_get_renderable(FlEngine* self, FlutterViewId view_id) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+
+  GWeakRef* ref = static_cast<GWeakRef*>(g_hash_table_lookup(
+      self->renderables_by_view_id, GINT_TO_POINTER(view_id)));
+  return FL_RENDERABLE(g_weak_ref_get(ref));
+}
+
 void fl_engine_remove_view(FlEngine* self,
                            FlutterViewId view_id,
                            GCancellable* cancellable,
                            GAsyncReadyCallback callback,
                            gpointer user_data) {
   g_return_if_fail(FL_IS_ENGINE(self));
+
+  g_hash_table_remove(self->renderables_by_view_id, GINT_TO_POINTER(view_id));
 
   g_autoptr(GTask) task = g_task_new(self, cancellable, callback, user_data);
 
