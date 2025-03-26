@@ -21,6 +21,7 @@ import '../window.dart';
 import 'accessibility.dart';
 import 'alert.dart';
 import 'checkable.dart';
+import 'disable.dart';
 import 'expandable.dart';
 import 'focusable.dart';
 import 'header.dart';
@@ -31,6 +32,7 @@ import 'label_and_value.dart';
 import 'link.dart';
 import 'list.dart';
 import 'live_region.dart';
+import 'menus.dart';
 import 'platform_view.dart';
 import 'requirable.dart';
 import 'route.dart';
@@ -464,6 +466,21 @@ enum EngineSemanticsRole {
   ///
   /// Provides a label or a value.
   generic,
+
+  /// A visible list of items or a widget that can be made to open and close.
+  menu,
+
+  /// A horizontally displayed [menu] that remains visible.
+  menuBar,
+
+  /// An option in a set of choices contained by a [menu] or [menuBar].
+  menuItem,
+
+  /// An option with a checkbox in a set of choices contained by a [menu] or [menuBar].
+  menuItemCheckbox,
+
+  /// An option with a radio button in a set of choices contained by a [menu] or [menuBar].
+  menuItemRadio,
 }
 
 /// Responsible for setting the `role` ARIA attribute, for attaching
@@ -636,6 +653,14 @@ abstract class SemanticRole {
         preferredRepresentation: preferredRepresentation,
       ),
     );
+  }
+
+  void addCheckedBehavior() {
+    addSemanticBehavior(Checkable(semanticsObject, this));
+  }
+
+  void addDisabledBehavior() {
+    addSemanticBehavior(CanDisable(semanticsObject, this));
   }
 
   /// Adds generic functionality for handling taps and clicks.
@@ -1395,6 +1420,9 @@ class SemanticsObject {
   /// This field is only meaningful if [hasEnabledState] is true.
   bool get isEnabled => hasFlag(ui.SemanticsFlag.isEnabled);
 
+  /// Whether this object can be in one of "expanded" or "collapsed" state.
+  bool get hasExpandedState => hasFlag(ui.SemanticsFlag.hasExpandedState);
+
   /// Whether this object represents a vertically scrollable area.
   bool get isVerticalScrollContainer =>
       hasAction(ui.SemanticsAction.scrollDown) || hasAction(ui.SemanticsAction.scrollUp);
@@ -1622,12 +1650,6 @@ class SemanticsObject {
     // Apply updates to the DOM.
     _updateRole();
 
-    // All properties that affect positioning and sizing are checked together
-    // any one of them triggers position and size recomputation.
-    if (isRectDirty || isTransformDirty || isScrollPositionDirty) {
-      recomputePositionAndSize();
-    }
-
     if (semanticRole!.acceptsPointerEvents) {
       element.style.pointerEvents = 'all';
     } else {
@@ -1833,6 +1855,16 @@ class SemanticsObject {
         return EngineSemanticsRole.columnHeader;
       case ui.SemanticsRole.radioGroup:
         return EngineSemanticsRole.radioGroup;
+      case ui.SemanticsRole.menu:
+        return EngineSemanticsRole.menu;
+      case ui.SemanticsRole.menuBar:
+        return EngineSemanticsRole.menuBar;
+      case ui.SemanticsRole.menuItem:
+        return EngineSemanticsRole.menuItem;
+      case ui.SemanticsRole.menuItemCheckbox:
+        return EngineSemanticsRole.menuItemCheckbox;
+      case ui.SemanticsRole.menuItemRadio:
+        return EngineSemanticsRole.menuItemRadio;
       case ui.SemanticsRole.alert:
         return EngineSemanticsRole.alert;
       case ui.SemanticsRole.status:
@@ -1847,9 +1879,6 @@ class SemanticsObject {
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:
-      case ui.SemanticsRole.menuBar:
-      case ui.SemanticsRole.menu:
-      case ui.SemanticsRole.menuItem:
       case ui.SemanticsRole.form:
       case ui.SemanticsRole.tooltip:
       case ui.SemanticsRole.loadingSpinner:
@@ -1913,6 +1942,11 @@ class SemanticsObject {
       EngineSemanticsRole.cell => SemanticCell(this),
       EngineSemanticsRole.row => SemanticRow(this),
       EngineSemanticsRole.columnHeader => SemanticColumnHeader(this),
+      EngineSemanticsRole.menu => SemanticMenu(this),
+      EngineSemanticsRole.menuBar => SemanticMenuBar(this),
+      EngineSemanticsRole.menuItem => SemanticMenuItem(this),
+      EngineSemanticsRole.menuItemCheckbox => SemanticMenuItemCheckbox(this),
+      EngineSemanticsRole.menuItemRadio => SemanticMenuItemRadio(this),
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
       EngineSemanticsRole.generic => GenericRole(this),
@@ -1955,6 +1989,11 @@ class SemanticsObject {
 
     // Reparent element.
     if (previousElement != element) {
+      if (_currentChildrenInRenderOrder != null) {
+        for (final child in _currentChildrenInRenderOrder!) {
+          element.append(child.element);
+        }
+      }
       final DomElement? parent = previousElement?.parent;
       if (parent != null) {
         parent.insertBefore(element, previousElement);
@@ -1991,6 +2030,14 @@ class SemanticsObject {
   /// not use the [Selectable] behavior.
   bool get isCheckable =>
       hasFlag(ui.SemanticsFlag.hasCheckedState) || hasFlag(ui.SemanticsFlag.hasToggledState);
+
+  /// If true, this node represents something that can be in a "checked" or
+  /// state, such as checkboxes, radios, and switches.
+  bool get isChecked => hasFlag(ui.SemanticsFlag.isChecked);
+
+  /// If true, this node represents something that can be in a "mixed" or
+  /// state, such as checkboxes.
+  bool get isMixed => hasFlag(ui.SemanticsFlag.isCheckStateMixed);
 
   /// If true, this node represents something that can be annotated as
   /// "selected", such as a tab, or an item in a list.
@@ -2059,8 +2106,29 @@ class SemanticsObject {
   double verticalAdjustmentFromParent = 0.0;
   double horizontalAdjustmentFromParent = 0.0;
 
-  /// Computes the size and position of [element] and, if this element
-  /// [hasChildren], computes the parent adjustment for each child.
+  /// If this element [hasChildren], computes the parent adjustment for each child.
+  void recomputeChildrenAdjustment(Set<SemanticsObject> dirtyNodes) {
+    if (!hasChildren) {
+      return;
+    }
+    // If this node has children, we need to compensate for the parent's rect and
+    // pass down the scroll adjustments.
+    final double translateX = -_rect!.left + horizontalScrollAdjustment;
+    final double translateY = -_rect!.top + verticalScrollAdjustment;
+
+    for (final childIndex in _childrenInTraversalOrder!) {
+      final child = owner._semanticsTree[childIndex]!;
+
+      if (child.horizontalAdjustmentFromParent != translateX ||
+          child.verticalAdjustmentFromParent != translateY) {
+        child.horizontalAdjustmentFromParent = translateX;
+        child.verticalAdjustmentFromParent = translateY;
+        dirtyNodes.add(child);
+      }
+    }
+  }
+
+  /// Computes the size and position of [element]
   void recomputePositionAndSize() {
     element.style
       ..width = '${_rect!.width}px'
@@ -2070,22 +2138,6 @@ class SemanticsObject {
     final Float32List? transform = _transform;
     final bool hasIdentityTransform =
         transform == null || isIdentityFloat32ListTransform(transform);
-
-    // If this node has children, we need to compensate for the parent's rect and
-    // pass down the scroll adjustments.
-    if (hasChildren) {
-      final double translateX = -_rect!.left + horizontalScrollAdjustment;
-      final double translateY = -_rect!.top + verticalScrollAdjustment;
-
-      for (final childIndex in _childrenInTraversalOrder!) {
-        final child = owner._semanticsTree[childIndex];
-        if (child == null) {
-          continue;
-        }
-        child.horizontalAdjustmentFromParent = translateX;
-        child.verticalAdjustmentFromParent = translateY;
-      }
-    }
 
     if (hasZeroRectOffset &&
         hasIdentityTransform &&
@@ -2126,12 +2178,11 @@ class SemanticsObject {
 
   /// Computes the size and position of children.
   void updateChildrenPositionAndSize() {
-    for (final childIndex in _childrenInTraversalOrder!) {
-      final child = owner._semanticsTree[childIndex];
-      if (child == null) {
-        continue;
-      }
-      child.recomputePositionAndSize();
+    final Set<SemanticsObject> dirtyNodes = <SemanticsObject>{};
+    recomputeChildrenAdjustment(dirtyNodes);
+
+    for (final node in dirtyNodes) {
+      node.recomputePositionAndSize();
     }
   }
 
@@ -2625,6 +2676,8 @@ class EngineSemanticsOwner {
   SemanticsUpdatePhase get phase => _phase;
   SemanticsUpdatePhase _phase = SemanticsUpdatePhase.idle;
 
+  /// The current semantics tree.
+  Map<int, SemanticsObject> get semanticsTree => _semanticsTree;
   final Map<int, SemanticsObject> _semanticsTree = <int, SemanticsObject>{};
   final Map<String, int> identifiersToIds = <String, int>{};
 
@@ -2794,15 +2847,27 @@ class EngineSemanticsOwner {
       object.updateSelf(nodeUpdate);
     }
 
+    final Set<SemanticsObject> nodesWithDirtyPositionsAndSizes = <SemanticsObject>{};
     // Second, fix the tree structure. This is moved out into its own loop,
     // because each object's own information must be updated first.
     for (final SemanticsNodeUpdate nodeUpdate in nodeUpdates) {
       final SemanticsObject object = _semanticsTree[nodeUpdate.id]!;
       object.updateChildren();
-      object._dirtyFields = 0;
 
-      object.recomputePositionAndSize();
-      object.updateChildrenPositionAndSize();
+      if (object.isRectDirty ||
+          object.isTransformDirty ||
+          object.isScrollPositionDirty ||
+          object.isChildrenInTraversalOrderDirty) {
+        nodesWithDirtyPositionsAndSizes.add(object);
+
+        object.recomputeChildrenAdjustment(nodesWithDirtyPositionsAndSizes);
+      }
+
+      object._dirtyFields = 0;
+    }
+
+    for (final node in nodesWithDirtyPositionsAndSizes) {
+      node.recomputePositionAndSize();
     }
 
     final SemanticsObject root = _semanticsTree[0]!;

@@ -56,7 +56,7 @@ class VerticesSimpleBlendContents final : public Contents {
   Scalar alpha_ = 1.0;
   std::shared_ptr<VerticesGeometry> geometry_;
   std::shared_ptr<Texture> texture_;
-  BlendMode blend_mode_ = BlendMode::kSource;
+  BlendMode blend_mode_ = BlendMode::kSrc;
   SamplerDescriptor descriptor_ = {};
   Entity::TileMode tile_mode_x_ = Entity::TileMode::kClamp;
   Entity::TileMode tile_mode_y_ = Entity::TileMode::kClamp;

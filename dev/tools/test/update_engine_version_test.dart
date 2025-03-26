@@ -52,17 +52,21 @@ void main() {
     }
   }
 
-  io.ProcessResult run(String executable, List<String> args) {
-    print('Running "$executable ${args.join(" ")}"');
+  io.ProcessResult run(String executable, List<String> args, {String? workingPath}) {
+    print('Running "$executable ${args.join(" ")}"${workingPath != null ? ' $workingPath' : ''}');
     final io.ProcessResult result = io.Process.runSync(
       executable,
       args,
       environment: environment,
-      workingDirectory: testRoot.root.absolute.path,
+      workingDirectory: workingPath ?? testRoot.root.absolute.path,
       includeParentEnvironment: false,
     );
     if (result.exitCode != 0) {
-      fail('Failed running "$executable $args" (exit code = ${result.exitCode})');
+      fail(
+        'Failed running "$executable $args" (exit code = ${result.exitCode}),'
+        '\nstdout: ${result.stdout}'
+        '\nstderr: ${result.stderr}',
+      );
     }
     printIfNotEmpty('stdout', (result.stdout as String).trim());
     printIfNotEmpty('stderr', (result.stderr as String).trim());
@@ -185,12 +189,22 @@ void main() {
   }
 
   /// Initializes a blank git repo in [testRoot.root].
-  void initGitRepoWithBlankInitialCommit() {
-    run('git', <String>['init', '--initial-branch', 'master']);
-    run('git', <String>['config', '--local', 'user.email', 'test@example.com']);
-    run('git', <String>['config', '--local', 'user.name', 'Test User']);
-    run('git', <String>['add', '.']);
-    run('git', <String>['commit', '-m', 'Initial commit']);
+  void initGitRepoWithBlankInitialCommit({String? workingPath}) {
+    run('git', <String>['init', '--initial-branch', 'master'], workingPath: workingPath);
+    run('git', <String>[
+      'config',
+      '--local',
+      'user.email',
+      'test@example.com',
+    ], workingPath: workingPath);
+    run('git', <String>['config', '--local', 'user.name', 'Test User'], workingPath: workingPath);
+    run('git', <String>['add', '.'], workingPath: workingPath);
+    run('git', <String>[
+      'commit',
+      '--allow-empty',
+      '-m',
+      'Initial commit',
+    ], workingPath: workingPath);
   }
 
   /// Creates a `bin/internal/engine.version` file in [testRoot].
@@ -207,9 +221,14 @@ void main() {
   /// Sets up and fetches a [remote] (such as `upstream` or `origin`) for [testRoot.root].
   ///
   /// The remote points at itself (`testRoot.root.path`) for ease of testing.
-  void setupRemote({required String remote}) {
-    run('git', <String>['remote', 'add', remote, testRoot.root.path]);
-    run('git', <String>['fetch', remote]);
+  void setupRemote({required String remote, String? rootPath}) {
+    run('git', <String>[
+      'remote',
+      'add',
+      remote,
+      rootPath ?? testRoot.root.path,
+    ], workingPath: rootPath);
+    run('git', <String>['fetch', remote], workingPath: rootPath);
   }
 
   /// Returns the SHA computed by `merge-base HEAD {{ref}}/master`.
@@ -221,6 +240,40 @@ void main() {
     ]);
     return mergeBaseHeadOrigin.stdout as String;
   }
+
+  group('GIT_DIR', () {
+    late Directory externalGit;
+    late String externalHead;
+    setUp(() {
+      externalGit = localFs.systemTempDirectory.createTempSync('GIT_DIR_test.');
+      initGitRepoWithBlankInitialCommit(workingPath: externalGit.path);
+      setupRemote(remote: 'upstream', rootPath: externalGit.path);
+
+      externalHead =
+          (run('git', <String>['rev-parse', 'HEAD'], workingPath: externalGit.path).stdout
+                  as String)
+              .trim();
+    });
+
+    test('un-sets environment variables', () {
+      // Needs to happen before GIT_DIR is set
+      initGitRepoWithBlankInitialCommit();
+      setupRemote(remote: 'upstream');
+
+      environment['GIT_DIR'] = '${externalGit.path}/.git';
+      environment['GIT_INDEX_FILE'] = '${externalGit.path}/.git/index';
+      environment['GIT_WORK_TREE'] = externalGit.path;
+
+      runUpdateEngineVersion();
+
+      final String engineStamp = testRoot.binCacheEngineStamp.readAsStringSync().trim();
+      expect(engineStamp, isNot(equals(externalHead)));
+    });
+
+    tearDown(() {
+      externalGit.deleteSync(recursive: true);
+    });
+  });
 
   group('if FLUTTER_PREBUILT_ENGINE_VERSION is set', () {
     setUp(() {

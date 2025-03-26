@@ -19,6 +19,7 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
+import '../features.dart';
 import '../project.dart';
 import '../version.dart';
 
@@ -760,24 +761,24 @@ class _DefaultPub implements Pub {
         .childFile('package_config_subset')
         .writeAsStringSync(_computePackageConfigSubset(packageConfig, _fileSystem));
 
-    // TODO(matanlurey): Remove this once flutter_gen is removed.
-    //
-    // This is actually incorrect logic; the presence of a `generate: true`
-    // does *NOT* mean that we need to add `flutter_gen` to the package config,
-    // and never did, but the name of the manifest field was labeled and
-    // described incorrectly.
-    //
-    // Tracking removal: https://github.com/flutter/flutter/issues/102983.
+    // If we aren't generating localizations, short-circuit.
     if (!project.manifest.generateLocalizations) {
       return;
     }
 
-    // TODO(matanlurey): Remove this once flutter_gen is removed.
-    //
-    // See https://github.com/dart-lang/pub/issues/4471.
-    if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
-      throwToolExit('`generate: true` is not supported within workspaces.');
+    // Workaround for https://github.com/flutter/flutter/issues/164864.
+    // If this flag is set, synthetic packages cannot be used, so we short-circut.
+    if (featureFlags.isExplicitPackageDependenciesEnabled) {
+      return;
     }
+
+    if (!_fileSystem.path.equals(packageConfigFile.parent.parent.path, project.directory.path)) {
+      throwToolExit(
+        '`generate: true` is not supported within workspaces unless flutter config '
+        '--explicit-package-dependencies is set.',
+      );
+    }
+
     if (packageConfig.packages.any((Package package) => package.name == 'flutter_gen')) {
       return;
     }
