@@ -643,6 +643,9 @@ class _MonthPickerState extends State<_MonthPicker> {
           // the same day of the month.
           _focusedDay = _focusableDayForMonth(_currentMonth, _focusedDay!.day);
         }
+        // Announce is not recommended for use on all platforms.
+        // This particular case has a blocker from migration.
+        // See TODO(flutter/flutter/issues/165857): Add unfocusable semantic property to force non-focus on widgets
         SemanticsService.announce(
           widget.calendarDelegate.formatMonthYear(_currentMonth, _localizations),
           _textDirection,
