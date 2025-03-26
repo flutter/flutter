@@ -680,21 +680,21 @@ class _DecoyChildState extends State<_DecoyChild> with TickerProviderStateMixin 
         tween: RectTween(
           begin: widget.beginRect,
           end: widget.beginRect,
-        ).chain(CurveTween(curve: Curves.linear)),
+        ).chain(CurveTween(Curves.linear)),
         weight: beginPause,
       ),
       TweenSequenceItem<Rect?>(
         tween: RectTween(
           begin: widget.beginRect,
           end: widget.endRect,
-        ).chain(CurveTween(curve: Curves.easeOutSine)),
+        ).chain(CurveTween(Curves.easeOutSine)),
         weight: openAnimationLength,
       ),
       TweenSequenceItem<Rect?>(
         tween: RectTween(
           begin: widget.endRect,
           end: widget.endRect,
-        ).chain(CurveTween(curve: Curves.linear)),
+        ).chain(CurveTween(Curves.linear)),
         weight: endPause,
       ),
     ]).animate(widget.controller);
@@ -777,8 +777,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   double? _scale = 1.0;
   final GlobalKey _sheetGlobalKey = GlobalKey();
 
-  static final CurveTween _curve = CurveTween(curve: Curves.easeOutBack);
-  static final CurveTween _curveReverse = CurveTween(curve: Curves.easeInBack);
+  static final CurveTween _curve = CurveTween(Curves.easeOutBack);
+  static final CurveTween _curveReverse = CurveTween(Curves.easeInBack);
   static final RectTween _rectTween = RectTween();
   static final Animatable<Rect?> _rectAnimatable = _rectTween.chain(_curve);
   static final RectTween _rectTweenReverse = RectTween();

@@ -104,11 +104,11 @@ Animation<T> _getEmphasizedEasingAnimation<T>({
   return TweenSequence<T>(<TweenSequenceItem<T>>[
     TweenSequenceItem<T>(
       weight: firstWeight,
-      tween: Tween<T>(begin: begin, end: peak).chain(CurveTween(curve: firstCurve)),
+      tween: Tween<T>(begin: begin, end: peak).chain(CurveTween(firstCurve)),
     ),
     TweenSequenceItem<T>(
       weight: secondWeight,
-      tween: Tween<T>(begin: peak, end: end).chain(CurveTween(curve: secondCurve)),
+      tween: Tween<T>(begin: peak, end: end).chain(CurveTween(secondCurve)),
     ),
   ]).animate(parent);
 }

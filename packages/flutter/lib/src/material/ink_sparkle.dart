@@ -133,7 +133,7 @@ class InkSparkle extends InteractiveInkFeature {
           ..forward();
 
     _radiusScale = TweenSequence<double>(<TweenSequenceItem<double>>[
-      TweenSequenceItem<double>(tween: CurveTween(curve: Curves.fastOutSlowIn), weight: 75),
+      TweenSequenceItem<double>(tween: CurveTween(Curves.fastOutSlowIn), weight: 75),
       TweenSequenceItem<double>(tween: ConstantTween<double>(1.0), weight: 25),
     ]).animate(_animationController);
 

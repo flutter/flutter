@@ -649,7 +649,7 @@ class _AnimatedBottomAppBar extends StatelessWidget {
     final Animation<double> fadeOut = Tween<double>(
       begin: 1,
       end: -1,
-    ).animate(drawerController.drive(CurveTween(curve: Easing.legacy)));
+    ).animate(drawerController.drive(CurveTween(Easing.legacy)));
 
     return Selector<EmailStore, bool>(
       selector: (BuildContext context, EmailStore emailStore) => emailStore.onMailView,

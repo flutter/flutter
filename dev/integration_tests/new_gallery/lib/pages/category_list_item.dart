@@ -35,7 +35,7 @@ class CategoryListItem extends StatefulWidget {
 }
 
 class _CategoryListItemState extends State<CategoryListItem> with SingleTickerProviderStateMixin {
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
+  static final Animatable<double> _easeInTween = CurveTween(Curves.easeIn);
   static const Duration _expandDuration = Duration(milliseconds: 200);
   late AnimationController _controller;
   late Animation<double> _childrenHeightFactor;

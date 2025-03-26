@@ -662,7 +662,7 @@ class _HeroFlight {
       // The toHero no longer exists or it's no longer the flight's destination.
       // Continue flying while fading out.
       _heroOpacity = _proxyAnimation.drive(
-        _reverseTween.chain(CurveTween(curve: Interval(_proxyAnimation.value, 1.0))),
+        _reverseTween.chain(CurveTween(Interval(_proxyAnimation.value, 1.0))),
       );
     }
     // Update _aborted for the next animation tick.

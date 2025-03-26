@@ -572,7 +572,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
     _placeholderOpacityAnimation = animation.drive(
       TweenSequence<double>(<TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
-          tween: _placeholderOpacity!.chain(CurveTween(curve: widget.fadeOutCurve)),
+          tween: _placeholderOpacity!.chain(CurveTween(widget.fadeOutCurve)),
           weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
         ),
         TweenSequenceItem<double>(
@@ -594,7 +594,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
           weight: widget.fadeOutDuration.inMilliseconds.toDouble(),
         ),
         TweenSequenceItem<double>(
-          tween: _targetOpacity!.chain(CurveTween(curve: widget.fadeInCurve)),
+          tween: _targetOpacity!.chain(CurveTween(widget.fadeInCurve)),
           weight: widget.fadeInDuration.inMilliseconds.toDouble(),
         ),
       ]),

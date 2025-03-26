@@ -1114,13 +1114,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _animationController = AnimationController(duration: _kDialAnimateDuration, vsync: this);
     _thetaTween = Tween<double>(begin: _getThetaForTime(widget.selectedTime));
     _radiusTween = Tween<double>(begin: _getRadiusForTime(widget.selectedTime));
-    _theta = _animationController.drive(CurveTween(curve: standardEasing)).drive(_thetaTween)
-      ..addListener(
-        () => setState(() {
-          /* _theta.value has changed */
-        }),
-      );
-    _radius = _animationController.drive(CurveTween(curve: standardEasing)).drive(_radiusTween)
+    _theta = _animationController.drive(CurveTween(standardEasing)).drive(_thetaTween)..addListener(
+      () => setState(() {
+        /* _theta.value has changed */
+      }),
+    );
+    _radius = _animationController.drive(CurveTween(standardEasing)).drive(_radiusTween)
       ..addListener(
         () => setState(() {
           /* _radius.value has changed */

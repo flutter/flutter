@@ -247,7 +247,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             0,
             (layerTop - layerSize.height) * _peakVelocityProgress,
           ),
-        ).chain(CurveTween(curve: firstCurve)),
+        ).chain(CurveTween(firstCurve)),
         weight: firstWeight,
       ),
       TweenSequenceItem<RelativeRect>(
@@ -259,7 +259,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
             (layerTop - layerSize.height) * _peakVelocityProgress,
           ),
           end: RelativeRect.fill,
-        ).chain(CurveTween(curve: secondCurve)),
+        ).chain(CurveTween(secondCurve)),
         weight: secondWeight,
       ),
     ]).animate(animation);

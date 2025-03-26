@@ -972,8 +972,8 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
     // then from 0 back to 1 in the second half.
     const Curve curve = Interval(0.5, 1.0, curve: Curves.ease);
     return _AnimationSwap<double>(
-      ReverseAnimation(parent.drive(CurveTween(curve: curve.flipped))),
-      parent.drive(CurveTween(curve: curve)),
+      ReverseAnimation(parent.drive(CurveTween(curve.flipped))),
+      parent.drive(CurveTween(curve)),
       parent,
       0.5,
     );
@@ -986,7 +986,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
     end: 1.0,
   );
 
-  static final Animatable<double> _thresholdCenterTween = CurveTween(curve: const Threshold(0.5));
+  static final Animatable<double> _thresholdCenterTween = CurveTween(const Threshold(0.5));
 
   @override
   Animation<double> getRotationAnimation({required Animation<double> parent}) {

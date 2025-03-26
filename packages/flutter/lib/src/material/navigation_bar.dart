@@ -831,9 +831,10 @@ class NavigationIndicator extends StatelessWidget {
         final double scale =
             animation.isDismissed
                 ? 0.0
-                : Tween<double>(begin: .4, end: 1.0).transform(
-                  CurveTween(curve: Curves.easeInOutCubicEmphasized).transform(animation.value),
-                );
+                : Tween<double>(
+                  begin: .4,
+                  end: 1.0,
+                ).transform(CurveTween(Curves.easeInOutCubicEmphasized).transform(animation.value));
 
         return Transform(
           alignment: Alignment.center,
@@ -1353,7 +1354,7 @@ class _CurvedAnimationBuilderState extends State<_CurvedAnimationBuilder> {
         (_preservedDirection ?? _animationDirection) != AnimationStatus.reverse;
 
     final Animation<double> curvedAnimation = CurveTween(
-      curve: shouldUseForwardCurve ? widget.curve : widget.reverseCurve,
+      shouldUseForwardCurve ? widget.curve : widget.reverseCurve,
     ).animate(widget.animation);
 
     return widget.builder(context, curvedAnimation);

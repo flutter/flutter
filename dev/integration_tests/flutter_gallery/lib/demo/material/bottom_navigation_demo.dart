@@ -24,7 +24,7 @@ class NavigationIconView {
        ),
        controller = AnimationController(duration: kThemeAnimationDuration, vsync: vsync) {
     _animation = controller.drive(
-      CurveTween(curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn)),
+      CurveTween(const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn)),
     );
   }
 

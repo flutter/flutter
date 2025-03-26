@@ -33,8 +33,8 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
     begin: const Offset(0.0, 0.25),
     end: Offset.zero,
   );
-  static final Animatable<double> _fastOutSlowInTween = CurveTween(curve: Curves.fastOutSlowIn);
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
+  static final Animatable<double> _fastOutSlowInTween = CurveTween(Curves.fastOutSlowIn);
+  static final Animatable<double> _easeInTween = CurveTween(Curves.easeIn);
 
   final Animation<Offset> _positionAnimation;
   final Animation<double> _opacityAnimation;
@@ -214,14 +214,14 @@ class _ZoomPageTransition extends StatelessWidget {
           tween: Tween<double>(
             begin: 0.0,
             end: 0.4,
-          ).chain(CurveTween(curve: const Cubic(0.05, 0.0, 0.133333, 0.06))),
+          ).chain(CurveTween(const Cubic(0.05, 0.0, 0.133333, 0.06))),
           weight: 0.166666,
         ),
         TweenSequenceItem<double>(
           tween: Tween<double>(
             begin: 0.4,
             end: 1.0,
-          ).chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1.0))),
+          ).chain(CurveTween(const Cubic(0.208333, 0.82, 0.25, 1.0))),
           weight: 1.0 - 0.166666,
         ),
       ];
@@ -345,7 +345,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition>
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
     end: 1.00,
-  ).chain(CurveTween(curve: const Interval(0.125, 0.250)));
+  ).chain(CurveTween(const Interval(0.125, 0.250)));
 
   static final Animatable<double> _scaleDownTransition = Tween<double>(
     begin: 1.10,
@@ -360,7 +360,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition>
   static final Animatable<double?> _scrimOpacityTween = Tween<double?>(
     begin: 0.0,
     end: 0.60,
-  ).chain(CurveTween(curve: const Interval(0.2075, 0.4175)));
+  ).chain(CurveTween(const Interval(0.2075, 0.4175)));
 
   void _updateAnimations() {
     fadeTransition =
@@ -454,7 +454,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition>
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
     end: 0.0,
-  ).chain(CurveTween(curve: const Interval(0.0825, 0.2075)));
+  ).chain(CurveTween(const Interval(0.0825, 0.2075)));
 
   static final Animatable<double> _scaleUpTransition = Tween<double>(
     begin: 1.00,
@@ -549,13 +549,13 @@ class _FadeForwardsPageTransition extends StatelessWidget {
   static final Animatable<Offset> _forwardTranslationTween = Tween<Offset>(
     begin: const Offset(0.25, 0.0),
     end: Offset.zero,
-  ).chain(CurveTween(curve: FadeForwardsPageTransitionsBuilder._transitionCurve));
+  ).chain(CurveTween(FadeForwardsPageTransitionsBuilder._transitionCurve));
 
   // The old page slides back from left to right.
   static final Animatable<Offset> _backwardTranslationTween = Tween<Offset>(
     begin: Offset.zero,
     end: const Offset(0.25, 0.0),
-  ).chain(CurveTween(curve: FadeForwardsPageTransitionsBuilder._transitionCurve));
+  ).chain(CurveTween(FadeForwardsPageTransitionsBuilder._transitionCurve));
 
   @override
   Widget build(BuildContext context) {
@@ -772,25 +772,25 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   static final Animatable<Offset> _secondaryBackwardTranslationTween = Tween<Offset>(
     begin: Offset.zero,
     end: const Offset(-0.25, 0.0),
-  ).chain(CurveTween(curve: _transitionCurve));
+  ).chain(CurveTween(_transitionCurve));
 
   // The previous page slides from left to right as the current page disappears.
   static final Animatable<Offset> _secondaryForwardTranslationTween = Tween<Offset>(
     begin: const Offset(-0.25, 0.0),
     end: Offset.zero,
-  ).chain(CurveTween(curve: _transitionCurve));
+  ).chain(CurveTween(_transitionCurve));
 
   // The fade in transition when the new page appears.
   static final Animatable<double> _fadeInTransition = Tween<double>(
     begin: 0.0,
     end: 1.0,
-  ).chain(CurveTween(curve: const Interval(0.0, 0.75)));
+  ).chain(CurveTween(const Interval(0.0, 0.75)));
 
   // The fade out transition of the old page when the new page appears.
   static final Animatable<double> _fadeOutTransition = Tween<double>(
     begin: 1.0,
     end: 0.0,
-  ).chain(CurveTween(curve: const Interval(0.0, 0.25)));
+  ).chain(CurveTween(const Interval(0.0, 0.25)));
 
   static Widget _delegatedTransition(
     BuildContext context,

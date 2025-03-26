@@ -2240,9 +2240,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         ColorTween(
           begin: barrierColor!.withOpacity(0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
-        ).chain(
-          CurveTween(curve: barrierCurve),
-        ), // changedInternalState is called if barrierCurve updates
+        ).chain(CurveTween(barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
       barrier = AnimatedModalBarrier(
         color: color,

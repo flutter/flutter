@@ -613,7 +613,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         });
 
     _animation = effectiveController.drive(
-      Tween<double>(begin: _effectiveScrollOffset, end: endValue).chain(CurveTween(curve: curve)),
+      Tween<double>(begin: _effectiveScrollOffset, end: endValue).chain(CurveTween(curve)),
     );
   }
 

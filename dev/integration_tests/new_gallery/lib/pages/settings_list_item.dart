@@ -94,7 +94,7 @@ class SettingsListItem<T> extends StatefulWidget {
 
 class _SettingsListItemState<T> extends State<SettingsListItem<T?>>
     with SingleTickerProviderStateMixin {
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
+  static final Animatable<double> _easeInTween = CurveTween(Curves.easeIn);
   static const Duration _expandDuration = Duration(milliseconds: 150);
   late AnimationController _controller;
   late Animation<double> _childrenHeightFactor;

@@ -29,7 +29,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   static final Animatable<Offset> _drawerDetailsTween = Tween<Offset>(
     begin: const Offset(0.0, -1.0),
     end: Offset.zero,
-  ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+  ).chain(CurveTween(Curves.fastOutSlowIn));
 
   late AnimationController _controller;
   late Animation<double> _drawerContentsOpacity;
