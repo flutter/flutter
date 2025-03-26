@@ -16,6 +16,114 @@
 
 namespace impeller {
 
+DrawImageRectAtlasGeometry::DrawImageRectAtlasGeometry(
+    std::shared_ptr<Texture> texture,
+    const Rect& source,
+    const Rect& destination,
+    const Color& color,
+    BlendMode blend_mode,
+    const SamplerDescriptor& desc)
+    : texture_(std::move(texture)),
+      source_(source),
+      destination_(destination),
+      color_(color),
+      blend_mode_(blend_mode),
+      desc_(desc) {}
+
+DrawImageRectAtlasGeometry::~DrawImageRectAtlasGeometry() = default;
+
+bool DrawImageRectAtlasGeometry::ShouldUseBlend() const {
+  return true;
+}
+
+bool DrawImageRectAtlasGeometry::ShouldSkip() const {
+  return false;
+}
+
+VertexBuffer DrawImageRectAtlasGeometry::CreateSimpleVertexBuffer(
+    HostBuffer& host_buffer) const {
+  using VS = TextureFillVertexShader;
+  constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
+
+  BufferView buffer_view = host_buffer.Emplace(
+      sizeof(VS::PerVertexData) * 6, alignof(VS::PerVertexData),
+      [&](uint8_t* raw_data) {
+        VS::PerVertexData* data =
+            reinterpret_cast<VS::PerVertexData*>(raw_data);
+        int offset = 0;
+        std::array<TPoint<float>, 4> destination_points =
+            destination_.GetPoints();
+        std::array<TPoint<float>, 4> texture_coords =
+            Rect::MakeSize(texture_->GetSize()).Project(source_).GetPoints();
+        for (size_t j = 0; j < 6; j++) {
+          data[offset].position = destination_points[indices[j]];
+          data[offset].texture_coords = texture_coords[indices[j]];
+          offset++;
+        }
+      });
+
+  return VertexBuffer{
+      .vertex_buffer = buffer_view,
+      .index_buffer = {},
+      .vertex_count = 6,
+      .index_type = IndexType::kNone,
+  };
+}
+
+VertexBuffer DrawImageRectAtlasGeometry::CreateBlendVertexBuffer(
+    HostBuffer& host_buffer) const {
+  using VS = PorterDuffBlendVertexShader;
+  constexpr size_t indices[6] = {0, 1, 2, 1, 2, 3};
+
+  BufferView buffer_view = host_buffer.Emplace(
+      sizeof(VS::PerVertexData) * 6, alignof(VS::PerVertexData),
+      [&](uint8_t* raw_data) {
+        VS::PerVertexData* data =
+            reinterpret_cast<VS::PerVertexData*>(raw_data);
+        int offset = 0;
+        std::array<TPoint<float>, 4> texture_coords =
+            Rect::MakeSize(texture_->GetSize()).Project(source_).GetPoints();
+        std::array<TPoint<float>, 4> destination_points =
+            destination_.GetPoints();
+        for (size_t j = 0; j < 6; j++) {
+          data[offset].vertices = destination_points[indices[j]];
+          data[offset].texture_coords = texture_coords[indices[j]];
+          data[offset].color = color_.Premultiply();
+          offset++;
+        }
+      });
+
+  return VertexBuffer{
+      .vertex_buffer = buffer_view,
+      .index_buffer = {},
+      .vertex_count = 6,
+      .index_type = IndexType::kNone,
+  };
+}
+
+Rect DrawImageRectAtlasGeometry::ComputeBoundingBox() const {
+  return destination_;
+}
+
+const std::shared_ptr<Texture>& DrawImageRectAtlasGeometry::GetAtlas() const {
+  return texture_;
+}
+
+const SamplerDescriptor& DrawImageRectAtlasGeometry::GetSamplerDescriptor()
+    const {
+  return desc_;
+}
+
+BlendMode DrawImageRectAtlasGeometry::GetBlendMode() const {
+  return blend_mode_;
+}
+
+bool DrawImageRectAtlasGeometry::ShouldInvertBlendMode() const {
+  return false;
+}
+
+////
+
 AtlasContents::AtlasContents() = default;
 
 AtlasContents::~AtlasContents() = default;
@@ -97,8 +205,10 @@ bool AtlasContents::Render(const ContentContext& renderer,
     pass.SetCommandLabel("DrawAtlas Blend");
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
-    auto inverted_blend_mode =
-        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc);
+    BlendMode inverted_blend_mode =
+        geometry_->ShouldInvertBlendMode()
+            ? (InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc))
+            : blend_mode;
     pass.SetPipeline(renderer.GetPorterDuffPipeline(inverted_blend_mode,
                                                     OptionsFromPass(pass)));
 

@@ -749,33 +749,22 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
       paint.color_filter->asBlend()->mode() <= Entity::kLastPipelineBlendMode) {
     const flutter::DlBlendColorFilter* blend_filter =
         paint.color_filter->asBlend();
-    Paint paint_copy = paint;
-    paint_copy.color_filter = nullptr;
+    DrawImageRectAtlasGeometry geometry = DrawImageRectAtlasGeometry(
+        /*texture=*/image,
+        /*source=*/source,
+        /*destination=*/dest,
+        /*color=*/skia_conversions::ToColor(blend_filter->color()),
+        /*blend_mode=*/blend_filter->mode(),
+        /*desc=*/sampler);
 
-    Scalar sx = dest.GetWidth() / source.GetWidth();
-    Scalar sy = dest.GetHeight() / source.GetHeight();
-    Scalar tx = dest.GetLeft() - source.GetLeft() * sx;
-    Scalar ty = dest.GetTop() - source.GetTop() * sy;
-
-    RSTransform rs_transform(sx, sy, tx, ty);
-    flutter::DlColor color = blend_filter->color();
-    DlAtlasGeometry geometry = DlAtlasGeometry(image,                 //
-                                               &rs_transform,         //
-                                               &source,               //
-                                               &color,                //
-                                               1,                     //
-                                               blend_filter->mode(),  //
-                                               sampler,               //
-                                               std::nullopt           //
-    );
     auto atlas_contents = std::make_shared<AtlasContents>();
     atlas_contents->SetGeometry(&geometry);
     atlas_contents->SetAlpha(paint.color.alpha);
 
     Entity entity;
     entity.SetTransform(GetCurrentTransform());
-    entity.SetBlendMode(paint_copy.blend_mode);
-    entity.SetContents(paint_copy.WithFilters(atlas_contents));
+    entity.SetBlendMode(paint.blend_mode);
+    entity.SetContents(atlas_contents);
 
     AddRenderEntityToCurrentPass(entity);
     return;
