@@ -981,7 +981,7 @@ TEST(FlEngineTest, ChildObjects) {
 
   // Check objects exist before engine started.
   EXPECT_NE(fl_engine_get_binary_messenger(engine), nullptr);
-  EXPECT_NE(fl_engine_get_renderer(engine), nullptr);
+  EXPECT_NE(fl_engine_get_compositor(engine), nullptr);
   EXPECT_NE(fl_engine_get_display_monitor(engine), nullptr);
   EXPECT_NE(fl_engine_get_task_runner(engine), nullptr);
   EXPECT_NE(fl_engine_get_keyboard_manager(engine), nullptr);
