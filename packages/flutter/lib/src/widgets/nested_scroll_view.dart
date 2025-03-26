@@ -1513,10 +1513,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     RenderObject? targetRenderObject,
     ScrollableState? previousScrollable,
   }) {
-    if (coordinator.shuldIgnoreEnsureVisible(
-      this,
-      previousScrollable: previousScrollable,
-    )) {
+    if (coordinator.shuldIgnoreEnsureVisible(this, previousScrollable: previousScrollable)) {
       return Future<void>.value();
     }
     return super.ensureVisible(
