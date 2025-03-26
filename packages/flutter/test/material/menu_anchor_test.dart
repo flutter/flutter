@@ -76,12 +76,6 @@ void main() {
     return results;
   }
 
-  Finder findMenuBarItemLabels() {
-    return find.byWidgetPredicate(
-      (Widget widget) => widget.runtimeType.toString() == '_MenuItemLabel',
-    );
-  }
-
   // Finds the mnemonic associated with the menu item that has the given label.
   Finder findMnemonic(String label) {
     return find
