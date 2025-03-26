@@ -261,7 +261,7 @@ public class FlutterRenderer implements TextureRegistry {
     final ImageTextureRegistryEntry entry =
         new ImageTextureRegistryEntry(nextTextureId.getAndIncrement());
     Log.v(TAG, "New ImageTextureEntry ID: " + entry.id());
-    registerImageTexture(entry.id(), entry, /*resetOnBackground=*/false);
+    registerImageTexture(entry.id(), entry, /*resetOnBackground=*/ false);
     return entry;
   }
 
@@ -1271,7 +1271,9 @@ public class FlutterRenderer implements TextureRegistry {
   }
 
   private void registerImageTexture(
-      long textureId, @NonNull TextureRegistry.ImageConsumer imageTexture, boolean resetOnBackground) {
+      long textureId,
+      @NonNull TextureRegistry.ImageConsumer imageTexture,
+      boolean resetOnBackground) {
     flutterJNI.registerImageTexture(textureId, imageTexture, resetOnBackground);
   }
 

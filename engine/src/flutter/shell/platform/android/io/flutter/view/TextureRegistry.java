@@ -61,7 +61,6 @@ public interface TextureRegistry {
     resetInBackground
   }
 
-
   /**
    * Creates and a {@link SurfaceProducer}, or a Flutter-managed {@link Surface}.
    *
