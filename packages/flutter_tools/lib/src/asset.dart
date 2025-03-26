@@ -333,6 +333,7 @@ class ManifestAssetBundle implements AssetBundle {
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
     _lastBuildTimestamp = DateTime.now();
+    _lastHookResult = flutterHookResult;
     if (flutterManifest.isEmpty) {
       entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
         DevFSStringContent('{}'),
