@@ -13,12 +13,11 @@ class MyDataSource extends DataTableSource {
 
   void setData(List<List<Comparable<Object>>> rawData, int sortColumn, bool sortAscending) {
     sortedData =
-    rawData.toList()
-      ..sort((List<Comparable<Object>> a, List<Comparable<Object>> b) {
-        final Comparable<Object> cellA = a[_displayIndexToRawIndex[sortColumn]];
-        final Comparable<Object> cellB = b[_displayIndexToRawIndex[sortColumn]];
-        return cellA.compareTo(cellB) * (sortAscending ? 1 : -1);
-      });
+        rawData.toList()..sort((List<Comparable<Object>> a, List<Comparable<Object>> b) {
+          final Comparable<Object> cellA = a[_displayIndexToRawIndex[sortColumn]];
+          final Comparable<Object> cellB = b[_displayIndexToRawIndex[sortColumn]];
+          return cellA.compareTo(cellB) * (sortAscending ? 1 : -1);
+        });
     notifyListeners();
   }
 
@@ -29,7 +28,7 @@ class MyDataSource extends DataTableSource {
     String value;
     if (data is DateTime) {
       value =
-      '${data.year}-${data.month.toString().padLeft(2, '0')}-${data.day.toString().padLeft(2, '0')}';
+          '${data.year}-${data.month.toString().padLeft(2, '0')}-${data.day.toString().padLeft(2, '0')}';
     } else {
       value = data.toString();
     }
@@ -74,10 +73,7 @@ class DataTableExampleApp extends StatelessWidget {
 class _MyMaterialScrollBehavior extends MaterialScrollBehavior {
   @override
   Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
-    return Scrollbar(
-      controller: details.controller,
-      child: child,
-    );
+    return Scrollbar(controller: details.controller, child: child);
   }
 }
 
@@ -89,8 +85,7 @@ class DataTableExample extends StatefulWidget {
 }
 
 class _DataTableExampleState extends State<DataTableExample> {
-  final MyDataSource dataSource = MyDataSource()
-    ..setData(episodes, 0, true);
+  final MyDataSource dataSource = MyDataSource()..setData(episodes, 0, true);
 
   int _columnIndex = 0;
   bool _columnAscending = true;
