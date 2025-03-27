@@ -7,9 +7,6 @@
 struct _FlOpenGLManager {
   GObject parent_instance;
 
-  // Window being rendered on.
-  GdkWindow* window;
-
   // OpenGL rendering context used by GDK.
   GdkGLContext* gdk_context;
 
@@ -44,18 +41,12 @@ FlOpenGLManager* fl_opengl_manager_new() {
   return self;
 }
 
-void fl_opengl_manager_set_window(FlOpenGLManager* self, GdkWindow* window) {
-  g_return_if_fail(FL_IS_OPENGL_MANAGER(self));
-
-  g_assert(self->window == nullptr);
-  self->window = window;
-}
-
 gboolean fl_opengl_manager_create_contexts(FlOpenGLManager* self,
+                                           GdkWindow* window,
                                            GError** error) {
   g_return_val_if_fail(FL_IS_OPENGL_MANAGER(self), FALSE);
 
-  self->gdk_context = gdk_window_create_gl_context(self->window, error);
+  self->gdk_context = gdk_window_create_gl_context(window, error);
   if (self->gdk_context == nullptr) {
     return FALSE;
   }
@@ -63,7 +54,7 @@ gboolean fl_opengl_manager_create_contexts(FlOpenGLManager* self,
     return FALSE;
   }
 
-  self->main_context = gdk_window_create_gl_context(self->window, error);
+  self->main_context = gdk_window_create_gl_context(window, error);
   if (self->main_context == nullptr) {
     return FALSE;
   }
@@ -71,7 +62,7 @@ gboolean fl_opengl_manager_create_contexts(FlOpenGLManager* self,
     return FALSE;
   }
 
-  self->resource_context = gdk_window_create_gl_context(self->window, error);
+  self->resource_context = gdk_window_create_gl_context(window, error);
   if (self->resource_context == nullptr) {
     return FALSE;
   }

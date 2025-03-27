@@ -437,15 +437,14 @@ static void gesture_zoom_end_cb(FlView* self) {
 }
 
 static GdkGLContext* create_context_cb(FlView* self) {
-  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
-  fl_opengl_manager_set_window(opengl_manager,
-                               gtk_widget_get_parent_window(GTK_WIDGET(self)));
-
   init_scrolling(self);
   init_touch(self);
 
+  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
   g_autoptr(GError) error = nullptr;
-  if (!fl_opengl_manager_create_contexts(opengl_manager, &error)) {
+  if (!fl_opengl_manager_create_contexts(
+          opengl_manager, gtk_widget_get_parent_window(GTK_WIDGET(self)),
+          &error)) {
     gtk_gl_area_set_error(self->gl_area, error);
     return nullptr;
   }
