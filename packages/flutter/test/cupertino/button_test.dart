@@ -943,10 +943,12 @@ void main() {
   });
 
   testWidgets('Mouse cursor resolves in enabled/disabled states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Button');
     Widget buildButton({required bool enabled, MouseCursor? cursor}) {
       return CupertinoApp(
         home: Center(
           child: CupertinoButton(
+            focusNode: focusNode,
             onPressed: enabled ? () {} : null,
             mouseCursor: cursor,
             child: const Text('Tap Me'),
@@ -966,7 +968,7 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoButton)));
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-      SystemMouseCursors.basic,
+      SystemMouseCursors.grab,
     );
     await gesture.removePointer();
 
@@ -980,6 +982,19 @@ void main() {
       SystemMouseCursors.forbidden,
     );
     await gesture.removePointer();
+
+    // Test focused state mouse cursor
+    await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
+    await tester.pump();
+    focusNode.requestFocus();
+    if (focusNode.hasFocus) {
+      await tester.pump();
+      expect(
+        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+        SystemMouseCursors.copy,
+      );
+    }
+    await gesture.removePointer();
   });
 }
 
@@ -992,10 +1007,12 @@ class _ButtonMouseCursor extends WidgetStateMouseCursor {
 
   @override
   MouseCursor resolve(Set<WidgetState> states) {
-    if (states.contains(WidgetState.disabled)) {
-      return SystemMouseCursors.forbidden;
-    }
-    return SystemMouseCursors.basic;
+    return const WidgetStateMouseCursor.fromMap({
+      WidgetState.disabled: SystemMouseCursors.forbidden,
+      WidgetState.pressed: SystemMouseCursors.grab,
+      WidgetState.focused: SystemMouseCursors.copy,
+      WidgetState.any: SystemMouseCursors.basic,
+    });
   }
 
   @override
