@@ -87,6 +87,9 @@ typedef SelectionChangedCallback =
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
+/// Signature for a function that determines the selection when focus is given
+typedef SetCustomSelectionOnFocus = TextSelection Function();
+
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
 ///
@@ -882,6 +885,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
+    this.setCustomSelectionOnFocus,
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
@@ -1797,6 +1801,14 @@ class EditableText extends StatefulWidget {
   /// [RenderEditable.selectionEnabled].
   /// {@endtemplate}
   bool get selectionEnabled => enableInteractiveSelection;
+
+  /// {@template flutter.widgets.editableText.setCustomSelectionOnFocus}
+  /// Set a custom text selection when focus is given
+  ///
+  /// If null, all text will be selected on web and desktop. Everything else will
+  /// leave text selection as it was before.
+  /// {@endtemplate}
+  final SetCustomSelectionOnFocus? setCustomSelectionOnFocus;
 
   /// {@template flutter.widgets.editableText.autofillHints}
   /// A list of strings that helps the autofill service identify the type of this
@@ -4619,7 +4631,8 @@ class EditableTextState extends State<EditableText>
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
-      final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
+      final TextSelection? updatedSelection =
+          widget.setCustomSelectionOnFocus?.call() ?? _adjustedSelectionWhenFocused();
       if (updatedSelection != null) {
         _handleSelectionChanged(updatedSelection, null);
       }
