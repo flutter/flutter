@@ -11,18 +11,17 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
+import 'package:flutter_tools/src/isolated/native_assets/macos/native_assets_host.dart'
+    show cCompilerConfigMacOS;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
-import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
-import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -32,7 +31,6 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
-  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -49,7 +47,6 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
-    runPackageName = environment.projectDir.basename;
   });
 
   for (final bool flutterTester in <bool>[false, true]) {
@@ -171,6 +168,14 @@ void main() {
                     ],
                   ),
                 ] else ...<FakeCommand>[
+                  const FakeCommand(
+                    command: <Pattern>['xcrun', 'clang', '--version'],
+                    stdout: 'InstalledDir: /some/path/',
+                  ),
+                  const FakeCommand(
+                    command: <Pattern>['xcrun', 'clang', '--version'],
+                    stdout: 'InstalledDir: /some/path/',
+                  ),
                   FakeCommand(
                     command: <Pattern>[
                       'lipo',
@@ -390,22 +395,7 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         return;
       }
 
-      final File packageConfigFile = writePackageConfigFile(
-        directory: fileSystem.directory(projectUri),
-        mainLibName: 'my_app',
-      );
-      final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        packageConfigFile,
-        logger: environment.logger,
-      );
-      final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
-        packageConfigFile.path,
-        packageConfig,
-        fileSystem,
-        logger,
-        runPackageName,
-      );
-      final CCompilerConfig result = (await runner.cCompilerConfig)!;
+      final CCompilerConfig result = await cCompilerConfigMacOS();
       expect(
         result.compiler,
         Uri.file(

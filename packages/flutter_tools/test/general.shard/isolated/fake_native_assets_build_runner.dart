@@ -17,8 +17,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     this.onLink,
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.linkResult = const FakeFlutterNativeAssetsBuilderResult(),
-    this.cCompilerConfigResult,
-    this.ndkCCompilerConfigResult,
   });
 
   // TODO(dcharkes): Cleanup this fake https://github.com/flutter/flutter/issues/162061
@@ -27,8 +25,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
   final BuildResult? buildResult;
   final LinkResult? linkResult;
   final List<String> packagesWithNativeAssetsResult;
-  final CCompilerConfig? cCompilerConfigResult;
-  final CCompilerConfig? ndkCCompilerConfigResult;
 
   int buildInvocations = 0;
   int linkInvocations = 0;
@@ -98,12 +94,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     packagesWithNativeAssetsInvocations++;
     return packagesWithNativeAssetsResult;
   }
-
-  @override
-  Future<CCompilerConfig?> get cCompilerConfig async => cCompilerConfigResult;
-
-  @override
-  Future<CCompilerConfig?> get ndkCCompilerConfig async => cCompilerConfigResult;
 }
 
 final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkResult {

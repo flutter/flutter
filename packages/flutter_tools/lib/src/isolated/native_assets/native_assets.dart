@@ -23,11 +23,8 @@ import '../../globals.dart' as globals;
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';
 import 'ios/native_assets.dart';
-import 'linux/native_assets.dart';
 import 'macos/native_assets.dart';
-import 'macos/native_assets_host.dart';
 import 'targets.dart';
-import 'windows/native_assets.dart';
 
 export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, DynamicLoadingBundled;
 export 'package:native_assets_cli/data_assets_builder.dart' show DataAsset;
@@ -139,12 +136,6 @@ abstract interface class FlutterNativeAssetsBuildRunner {
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
   });
-
-  /// The C compiler config to use for compilation.
-  Future<CCompilerConfig?> get cCompilerConfig;
-
-  /// The NDK compiler to use to use for compilation for Android.
-  Future<CCompilerConfig?> get ndkCCompilerConfig;
 }
 
 /// Uses `package:native_assets_builder` for its implementation.
@@ -225,28 +216,6 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }) {
     return _buildRunner.link(extensions: extensions, buildResult: buildResult);
   }
-
-  @override
-  late final Future<CCompilerConfig?> cCompilerConfig = () {
-    if (globals.platform.isMacOS || globals.platform.isIOS) {
-      return cCompilerConfigMacOS();
-    }
-    if (globals.platform.isLinux) {
-      return cCompilerConfigLinux();
-    }
-    if (globals.platform.isWindows) {
-      return cCompilerConfigWindows();
-    }
-    if (globals.platform.isAndroid) {
-      throwToolExit('Should use ndkCCompilerConfig for Android.');
-    }
-    throwToolExit('Unknown target OS.');
-  }();
-
-  @override
-  late final Future<CCompilerConfig> ndkCCompilerConfig = () {
-    return cCompilerConfigAndroid();
-  }();
 }
 
 Future<Uri> _writeNativeAssetsJson(
