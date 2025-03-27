@@ -583,8 +583,9 @@ class _LineCaretMetrics {
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
 ///
-/// The default text style is white. To change the color of the text,
-/// pass a [TextStyle] object to the [TextSpan] in `text`.
+/// The default text style color is white on non-web platforms and black on
+/// the web. If developing across both platforms, always set the text color
+/// explicitly.
 class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
