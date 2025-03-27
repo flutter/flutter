@@ -3631,6 +3631,7 @@
 ../../../flutter/txt/tests
 ../../../flutter/txt/third_party/fonts
 ../../../flutter/web_sdk
+../../../fuchsia/sdk/linux/.build-id
 ../../../fuchsia/sdk/linux/.versions
 ../../../fuchsia/sdk/linux/AUTHORS
 ../../../fuchsia/sdk/linux/NOTICE.fuchsia
