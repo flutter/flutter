@@ -5,8 +5,8 @@
 /// Provides utilities for testing engine code.
 library matchers;
 
-import 'dart:math' as math;
 import 'dart:js_interop';
+import 'dart:math' as math;
 
 import 'package:html/dom.dart' as html;
 import 'package:html/parser.dart' as html;
