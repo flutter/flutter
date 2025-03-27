@@ -7,5 +7,5 @@ import 'dart:io' show exitCode;
 import 'package:dir_contents_diff/dir_contents_diff.dart';
 
 void main(List<String> args) {
-  exitCode = run(args);
+  run(args);
 }

@@ -5,7 +5,7 @@
 import 'dart:io';
 
 /// The main entrypoint for the program, returns `exitCode`.
-int run(List<String> args) {
+void run(List<String> args) {
   if (args.length != 1) {
     throw Exception('usage: <path to directory>');
   }
