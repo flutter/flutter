@@ -175,7 +175,7 @@ typedef struct MouseState {
 - (instancetype)initWithEngine:(FlutterEngine*)engine
                        nibName:(nullable NSString*)nibName
                         bundle:(nullable NSBundle*)nibBundle {
-  NSAssert(engine != nil, @"Engine is required");
+  FML_CHECK(engine) << "initWithEngine:nibName:bundle: must be called with non-nil engine";
   self = [super initWithNibName:nibName bundle:nibBundle];
   if (self) {
     _viewOpaque = YES;

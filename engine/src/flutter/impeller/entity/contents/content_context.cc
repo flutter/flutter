@@ -475,7 +475,7 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   }
 
   desc.SetPrimitiveType(primitive_type);
-  desc.SetPolygonMode(wireframe ? PolygonMode::kLine : PolygonMode::kFill);
+  desc.SetPolygonMode(PolygonMode::kFill);
 }
 
 std::array<std::vector<Scalar>, 15> GetPorterDuffSpecConstants(
@@ -911,10 +911,6 @@ std::shared_ptr<Context> ContentContext::GetContext() const {
 
 const Capabilities& ContentContext::GetDeviceCapabilities() const {
   return *context_->GetCapabilities();
-}
-
-void ContentContext::SetWireframe(bool wireframe) {
-  wireframe_ = wireframe;
 }
 
 PipelineRef ContentContext::GetCachedRuntimeEffectPipeline(
