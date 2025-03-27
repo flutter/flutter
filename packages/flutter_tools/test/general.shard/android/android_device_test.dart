@@ -499,10 +499,10 @@ Uptime: 441088659 Realtime: 521464097
   });
 
   testUsingContext(
-    'AdbLogReader.provideVmService catches any RPCError due to VM service disconnection',
+    'AdbLogReader.provideVmService catches any RPCError due to VM service disconnection by text',
     () async {
       final BufferLogger logger = globals.logger as BufferLogger;
-      final FlutterVmService vmService = FlutterVmService(_MyFakeVmService());
+      final FlutterVmService vmService = FlutterVmService(_MyFakeVmServiceConnectionDisposedText());
       final AdbLogReader logReader = AdbLogReader.test(FakeProcess(), 'foo', logger);
       await logReader.provideVmService(vmService);
       expect(
@@ -518,12 +518,47 @@ Uptime: 441088659 Realtime: 521464097
     },
     overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
   );
+
+  testUsingContext(
+    'AdbLogReader.provideVmService catches any RPCError due to VM service disconnection by code',
+    () async {
+      final BufferLogger logger = globals.logger as BufferLogger;
+      final FlutterVmService vmService = FlutterVmService(_MyFakeVmServiceConnectionDisposedCode());
+      final AdbLogReader logReader = AdbLogReader.test(FakeProcess(), 'foo', logger);
+      await logReader.provideVmService(vmService);
+      expect(
+        logger.traceText,
+        'VmService.getVm call failed: null: (-32010) '
+        'Dummy text not matched\n',
+      );
+      expect(
+        logger.errorText,
+        'An error occurred when setting up filtering for adb logs. '
+        'Unable to communicate with the VM service.\n',
+      );
+    },
+    overrides: <Type, Generator>{Logger: () => BufferLogger.test()},
+  );
 }
 
-class _MyFakeVmService extends Fake implements VmService {
+/// A mock VM Service that throws a generic [RPCErrorKind.kServerError] error
+/// with the text "Service connection disposed".
+///
+/// This is the way these errors are currently sent (as of Feb 2025) but are
+/// planned to be migrated to their own error code (see
+/// [_MyFakeVmServiceConnectionDisposedCode]) soon.
+class _MyFakeVmServiceConnectionDisposedText extends Fake implements VmService {
   @override
   Future<VM> getVM() async {
     throw RPCError(null, RPCErrorKind.kServerError.code, 'Service connection disposed');
+  }
+}
+
+/// A mock VM Service that throws a [RPCErrorKind.kConnectionDisposed] error.
+class _MyFakeVmServiceConnectionDisposedCode extends Fake implements VmService {
+  @override
+  Future<VM> getVM() async {
+    throw RPCError(null, RPCErrorKind.kConnectionDisposed.code, 'Dummy text not matched');
   }
 }
 
