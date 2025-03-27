@@ -60,6 +60,10 @@ void main() {
                 stdout: 'InstalledDir: /some/path/',
               ),
               const FakeCommand(
+                command: <Pattern>['xcrun', 'clang', '--version'],
+                stdout: 'InstalledDir: /some/path/',
+              ),
+              const FakeCommand(
                 command: <Pattern>[
                   'lipo',
                   '-create',
