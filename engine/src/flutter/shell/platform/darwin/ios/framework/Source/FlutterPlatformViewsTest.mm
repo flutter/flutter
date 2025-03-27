@@ -4399,15 +4399,12 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
                                                        @"viewType" : @"MockFlutterPlatformView"
                                                      }]
             result:result];
-  FlutterPlatformViewsTestMockFlutterViewController* mockFlutterViewController =
-      [[FlutterPlatformViewsTestMockFlutterViewController alloc] init];
-  flutterPlatformViewsController.flutterViewController = mockFlutterViewController;
   UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
   flutterPlatformViewsController.flutterView = flutterView;
   // Create embedded view params
   flutter::MutatorsStack stack;
   // Layer tree always pushes a screen scale factor to the stack
-  flutter::DlScalar screenScale = [mockFlutterViewController flutterScreenIfViewLoaded].scale;
+  flutter::DlScalar screenScale = [UIScreen mainScreen].scale;
   flutter::DlMatrix screenScaleMatrix = flutter::DlMatrix::MakeScale({screenScale, screenScale, 1});
   stack.PushTransform(screenScaleMatrix);
   // Push a translate matrix
