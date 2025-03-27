@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 /// The main entrypoint for the program, returns `exitCode`.
 void run(List<String> args) {
   if (args.length != 1) {
