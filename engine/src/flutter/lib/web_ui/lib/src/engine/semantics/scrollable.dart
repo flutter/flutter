@@ -57,17 +57,6 @@ class SemanticScrollable extends SemanticRole {
         return;
       }
 
-      // The browser has tried to set a value that is past the frameworks scrollExtentMax.
-      // The framework will attempt to bring the scroll position into a valid range, so instead
-      // we neutralize the dom scroll position to the scrollExtentMax so we don't send an
-      // invalid value to the framework.
-      final double? scrollExtentMax = semanticsObject.scrollExtentMax;
-      assert(scrollExtentMax != null);
-      if (_domScrollPosition > scrollExtentMax!) {
-        element.scrollTop = scrollExtentMax;
-        return;
-      }
-
       _previousDomScrollPosition = _domScrollPosition;
       print(
         'current scroll offset from framework: ${semanticsObject.scrollPosition}, next offset $_domScrollPosition',
@@ -181,7 +170,7 @@ class SemanticScrollable extends SemanticRole {
       // knows how much scrollable content there is.
       final double? scrollExtentTotal = semanticsObject.scrollExtentTotal;
       assert(scrollExtentTotal != null);
-      print('scroll extent total: ${scrollExtentTotal}\n');
+      print('scroll extent total: ${semanticsObject.scrollExtentTotal}');
       _scrollOverflowElement.style
         ..width = '${rect.width.round()}px'
         ..height = '${scrollExtentTotal!}px';
