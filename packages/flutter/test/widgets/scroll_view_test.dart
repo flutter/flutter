@@ -1814,4 +1814,21 @@ void main() {
 
     expect(tester.testTextInput.isVisible, isFalse);
   });
+
+  testWidgets('ListView displays emptyBuilder when list is empty', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ListView.builder(
+            itemCount: 0,
+            emptyBuilder: (context) => Center(child: Text('No items found')),
+            itemBuilder: (context, index) => Container(),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('No items found'), findsOneWidget);
+  });
+
 }
