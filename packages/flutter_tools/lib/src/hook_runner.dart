@@ -7,9 +7,9 @@ import 'build_info.dart' show TargetPlatform;
 import 'build_system/build_system.dart' show Environment;
 
 abstract class FlutterHookRunner {
-  FlutterHookRunner();
+  FlutterHookRunner() : flutterHookResult = FlutterHookResult.empty();
 
-  FlutterHookResult? dartDataHookResult;
+  FlutterHookResult flutterHookResult;
 
   Future<FlutterHookResult> runHooks({
     required TargetPlatform targetPlatform,

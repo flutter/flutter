@@ -19,9 +19,9 @@ class FlutterHookRunnerNative extends FlutterHookRunner {
     required Environment environment,
   }) async {
     globals.printTrace('runDartBuild() with ${environment.defines} and $targetPlatform');
-    if (!(dartDataHookResult?.hasAnyModifiedFiles(globals.fs) ?? false)) {
+    if (!flutterHookResult.hasAnyModifiedFiles(globals.fs)) {
       globals.printTrace('runDartBuild() - up-to-date already');
-      return dartDataHookResult!;
+      return flutterHookResult;
     }
     globals.printTrace('runDartBuild() - will perform dart build');
 
@@ -38,10 +38,10 @@ class FlutterHookRunnerNative extends FlutterHookRunner {
       }
     }
 
-    dartDataHookResult = await DartBuild.loadHookResult(
+    flutterHookResult = await DartBuild.loadHookResult(
       environment,
     ).then((DartHookResult hookResult) => hookResult.asFlutterResult);
     globals.printTrace('runDartBuild() - done');
-    return dartDataHookResult!;
+    return flutterHookResult;
   }
 }
