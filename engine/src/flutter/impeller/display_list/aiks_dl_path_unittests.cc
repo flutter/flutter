@@ -641,5 +641,25 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, TwoContourPathWithSinglePointContour) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(15.0);
+  paint.setStrokeCap(DlStrokeCap::kRound);
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(100, 100));
+  path_builder.LineTo(DlPoint(150, 150));
+  path_builder.MoveTo(DlPoint(200, 200));
+  path_builder.LineTo(DlPoint(200, 200));
+
+  builder.DrawPath(DlPath(path_builder), paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
