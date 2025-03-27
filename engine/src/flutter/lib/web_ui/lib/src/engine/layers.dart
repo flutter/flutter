@@ -297,20 +297,20 @@ class ClipRSuperellipseLayer with PictureEngineLayer implements ui.ClipRSuperell
 }
 
 class ClipRSuperellipseOperation implements LayerOperation {
-  const ClipRSuperellipseOperation(this.rse, this.clip);
+  const ClipRSuperellipseOperation(this.rsuperellipse, this.clip);
 
-  final ui.RSuperellipse rse;
+  final ui.RSuperellipse rsuperellipse;
   final ui.Clip clip;
 
   @override
-  ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rse.outerRect);
+  ui.Rect mapRect(ui.Rect contentRect) => contentRect.intersect(rsuperellipse.outerRect);
 
   @override
   void pre(SceneCanvas canvas) {
     canvas.save();
-    canvas.clipRSuperellipse(rse, doAntiAlias: clip != ui.Clip.hardEdge);
+    canvas.clipRSuperellipse(rsuperellipse, doAntiAlias: clip != ui.Clip.hardEdge);
     if (clip == ui.Clip.antiAliasWithSaveLayer) {
-      canvas.saveLayer(rse.outerRect, ui.Paint());
+      canvas.saveLayer(rsuperellipse.outerRect, ui.Paint());
     }
   }
 
@@ -324,34 +324,34 @@ class ClipRSuperellipseOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // TODO(dkwingsmt): Properly implement clipRSE on Web instead of falling
+    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
     // back to RRect.  https://github.com/flutter/flutter/issues/163718
-    return PlatformViewStyling(clip: PlatformViewRRectClip(rse.toApproximateRRect()));
+    return PlatformViewStyling(clip: PlatformViewRRectClip(rsuperellipse.toApproximateRRect()));
   }
 
   @override
   bool get affectsBackdrop => false;
 
   @override
-  String toString() => 'ClipRSuperellipseOperation(rse: $rse, clip: $clip)';
+  String toString() => 'ClipRSuperellipseOperation(rsuperellipse: $rsuperellipse, clip: $clip)';
 
   @override
   Map<String, Object> get debugJsonDescription {
     return <String, Object>{
       'type': 'clipRSuperEllipse',
-      'rse': {
-        'left': rse.left,
-        'top': rse.top,
-        'right': rse.right,
-        'bottom': rse.bottom,
-        'tlRadiusX': rse.tlRadiusX,
-        'tlRadiusY': rse.tlRadiusY,
-        'trRadiusX': rse.trRadiusX,
-        'trRadiusY': rse.trRadiusY,
-        'brRadiusX': rse.brRadiusX,
-        'brRadiusY': rse.brRadiusY,
-        'blRadiusX': rse.blRadiusX,
-        'blRadiusY': rse.blRadiusY,
+      'rsuperellipse': {
+        'left': rsuperellipse.left,
+        'top': rsuperellipse.top,
+        'right': rsuperellipse.right,
+        'bottom': rsuperellipse.bottom,
+        'tlRadiusX': rsuperellipse.tlRadiusX,
+        'tlRadiusY': rsuperellipse.tlRadiusY,
+        'trRadiusX': rsuperellipse.trRadiusX,
+        'trRadiusY': rsuperellipse.trRadiusY,
+        'brRadiusX': rsuperellipse.brRadiusX,
+        'brRadiusY': rsuperellipse.brRadiusY,
+        'blRadiusX': rsuperellipse.blRadiusX,
+        'blRadiusY': rsuperellipse.blRadiusY,
       },
       'clip': clip.name,
     };

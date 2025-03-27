@@ -177,9 +177,9 @@ void Canvas::clipRRect(const RRect& rrect, bool doAntiAlias) {
   }
 }
 
-void Canvas::clipRSuperellipse(const RSuperellipse& rse, bool doAntiAlias) {
+void Canvas::clipRSuperellipse(const RSuperellipse* rse, bool doAntiAlias) {
   if (display_list_builder_) {
-    builder()->ClipRoundSuperellipse(rse.rsuperellipse, DlClipOp::kIntersect,
+    builder()->ClipRoundSuperellipse(rse->rsuperellipse(), DlClipOp::kIntersect,
                                      doAntiAlias);
   }
 }
@@ -302,7 +302,7 @@ void Canvas::drawDRRect(const RRect& outer,
   }
 }
 
-void Canvas::drawRSuperellipse(const RSuperellipse& rse,
+void Canvas::drawRSuperellipse(const RSuperellipse* rse,
                                Dart_Handle paint_objects,
                                Dart_Handle paint_data) {
   Paint paint(paint_objects, paint_data);
@@ -311,7 +311,7 @@ void Canvas::drawRSuperellipse(const RSuperellipse& rse,
   if (display_list_builder_) {
     DlPaint dl_paint;
     paint.paint(dl_paint, kDrawDRRectFlags, DlTileMode::kDecal);
-    builder()->DrawRoundSuperellipse(rse.rsuperellipse, dl_paint);
+    builder()->DrawRoundSuperellipse(rse->rsuperellipse(), dl_paint);
   }
 }
 
