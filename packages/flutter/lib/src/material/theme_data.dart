@@ -62,6 +62,7 @@ import 'scrollbar_theme.dart';
 import 'search_bar_theme.dart';
 import 'search_view_theme.dart';
 import 'segmented_button_theme.dart';
+import 'shadows.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'switch_theme.dart';
@@ -180,6 +181,9 @@ enum MaterialTapTargetSize {
   /// specification.
   shrinkWrap,
 }
+
+/// Signature for the mapping of elevation levels to their respective shadow
+typedef ElevationToShadow = Map<int, List<BoxShadow>>;
 
 /// Defines the configuration of the overall visual [Theme] for a [MaterialApp]
 /// or a widget subtree within the app.
@@ -305,6 +309,7 @@ class ThemeData with Diagnosticable {
     Color? shadowColor,
     Color? splashColor,
     Color? unselectedWidgetColor,
+    ElevationToShadow? elevationToShadow,
     // TYPOGRAPHY & ICONOGRAPHY
     String? fontFamily,
     List<String>? fontFamilyFallback,
@@ -469,6 +474,7 @@ class ThemeData with Diagnosticable {
       brightness: effectiveBrightness,
     );
     unselectedWidgetColor ??= isDark ? Colors.white70 : Colors.black54;
+    elevationToShadow ??= kElevationToShadow;
     // Spec doesn't specify a dark theme secondaryHeaderColor, this is a guess.
     secondaryHeaderColor ??= isDark ? Colors.grey[700]! : primarySwatch[50]!;
     hintColor ??= isDark ? Colors.white60 : Colors.black.withOpacity(0.6);
@@ -606,6 +612,7 @@ class ThemeData with Diagnosticable {
       shadowColor: shadowColor,
       splashColor: splashColor,
       unselectedWidgetColor: unselectedWidgetColor,
+      elevationToShadow: elevationToShadow,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: iconTheme,
       primaryTextTheme: primaryTextTheme,
@@ -717,6 +724,7 @@ class ThemeData with Diagnosticable {
     required this.shadowColor,
     required this.splashColor,
     required this.unselectedWidgetColor,
+    this.elevationToShadow = kElevationToShadow,
     // TYPOGRAPHY & ICONOGRAPHY
     required this.iconTheme,
     required this.primaryIconTheme,
@@ -1270,6 +1278,9 @@ class ThemeData with Diagnosticable {
   /// Defaults to a [platform]-appropriate typography.
   final Typography typography;
 
+  /// Override map of elevation offsets used by Material Design to [BoxShadow] definitions.
+  final ElevationToShadow? elevationToShadow;
+
   // COMPONENT THEMES
 
   /// A theme for customizing icons of [BackButtonIcon], [CloseButtonIcon],
@@ -1500,6 +1511,7 @@ class ThemeData with Diagnosticable {
     Color? shadowColor,
     Color? splashColor,
     Color? unselectedWidgetColor,
+    ElevationToShadow? elevationToShadow,
     // TYPOGRAPHY & ICONOGRAPHY
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
@@ -1618,6 +1630,7 @@ class ThemeData with Diagnosticable {
       shadowColor: shadowColor ?? this.shadowColor,
       splashColor: splashColor ?? this.splashColor,
       unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
+      elevationToShadow: elevationToShadow ?? this.elevationToShadow,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: iconTheme ?? this.iconTheme,
       primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
@@ -1934,6 +1947,7 @@ class ThemeData with Diagnosticable {
       shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t)!,
       splashColor: Color.lerp(a.splashColor, b.splashColor, t)!,
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t)!,
+      elevationToShadow: t < 0.5 ? a.elevationToShadow : b.elevationToShadow,
       // TYPOGRAPHY & ICONOGRAPHY
       iconTheme: IconThemeData.lerp(a.iconTheme, b.iconTheme, t),
       primaryIconTheme: IconThemeData.lerp(a.primaryIconTheme, b.primaryIconTheme, t),
