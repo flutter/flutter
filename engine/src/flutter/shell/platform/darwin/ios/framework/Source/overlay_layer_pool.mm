@@ -58,7 +58,7 @@ void OverlayLayerPool::CreateLayer(const std::shared_ptr<IOSContext>& ios_contex
   std::shared_ptr<OverlayLayer> layer;
   UIView* overlay_view;
   UIView* overlay_view_wrapper;
-  
+
   CGFloat screenScale = [UIScreen mainScreen].scale;
   overlay_view = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
                                                        pixelFormat:pixel_format];
