@@ -19,6 +19,7 @@ import com.flutter.gradle.FlutterPluginConstants
 import com.flutter.gradle.FlutterTask
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.IntentFilterCheck
+import com.flutter.gradle.NativePluginLoader
 import com.flutter.gradle.VersionUtils
 import groovy.xml.QName
 import org.gradle.api.file.Directory
@@ -62,6 +63,7 @@ class FlutterPlugin implements Plugin<Project> {
     private String engineRealm
     private List<Map<String, Object>> pluginList
     private List<Map<String, Object>> pluginDependencies
+    private nativePluginLoader = new NativePluginLoader()
 
     /**
      * Flutter Docs Website URLs for help messages.
@@ -121,7 +123,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         // Load shared gradle functions
-        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
+        //project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
 
         FlutterExtension extension = project.extensions.create("flutter", FlutterExtension)
         Properties localProperties = new Properties()
@@ -466,11 +468,11 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * The map value contains either the plugins `name` (String),
      * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     * See [com.flutter.gradle.NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
      */
     private List<Map<String, Object>> getPluginList(Project project) {
         if (pluginList == null) {
-            pluginList = project.ext.nativePluginLoader.getPlugins(FlutterPluginUtils.getFlutterSourceDirectory(project))
+            pluginList = nativePluginLoader.getPlugins(FlutterPluginUtils.getFlutterSourceDirectory(project))
         }
         return pluginList
     }
@@ -480,7 +482,7 @@ class FlutterPlugin implements Plugin<Project> {
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies(Project project) {
         if (pluginDependencies == null) {
-            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(FlutterPluginUtils.getFlutterSourceDirectory(project))
+            Map meta = nativePluginLoader.getDependenciesMetadata(FlutterPluginUtils.getFlutterSourceDirectory(project))
             if (meta == null) {
                 pluginDependencies = []
             } else {
