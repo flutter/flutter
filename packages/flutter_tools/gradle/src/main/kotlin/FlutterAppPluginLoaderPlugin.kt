@@ -40,7 +40,6 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
                     "native_plugin_loader.gradle.kts"
                 )
             )
-            to()
         }
 
         NativePluginLoaderReflectionBridge

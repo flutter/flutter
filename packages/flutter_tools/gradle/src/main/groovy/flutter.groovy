@@ -57,11 +57,6 @@ class FlutterPlugin implements Plugin<Project> {
     private List<Map<String, Object>> pluginList
     private List<Map<String, Object>> pluginDependencies
 
-    /**
-     * Flutter Docs Website URLs for help messages.
-     */
-    private final String kWebsiteDeploymentAndroidBuildConfig = "https://flutter.dev/to/review-gradle-config"
-
     @Override
     void apply(Project project) {
         this.project = project
