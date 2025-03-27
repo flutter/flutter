@@ -372,6 +372,7 @@ void main() {
       includesNodeWith(
         scrollExtentMin: 0.0,
         scrollPosition: 0.0,
+        scrollExtentTotal: 0.0,
         scrollExtentMax: 520.0,
         actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
       ),
@@ -384,6 +385,7 @@ void main() {
       includesNodeWith(
         scrollExtentMin: 0.0,
         scrollPosition: 394.3,
+        scrollExtentTotal: 0.0,
         scrollExtentMax: 520.0,
         actions: <SemanticsAction>[
           SemanticsAction.scrollUp,
@@ -400,6 +402,7 @@ void main() {
       includesNodeWith(
         scrollExtentMin: 0.0,
         scrollPosition: 520.0,
+        scrollExtentTotal: 0.0,
         scrollExtentMax: 520.0,
         actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollToOffset],
       ),
@@ -429,6 +432,7 @@ void main() {
       includesNodeWith(
         scrollExtentMin: 0.0,
         scrollPosition: 0.0,
+        scrollExtentTotal: 0.0,
         scrollExtentMax: double.infinity,
         actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollToOffset],
       ),
@@ -441,6 +445,7 @@ void main() {
       includesNodeWith(
         scrollExtentMin: 0.0,
         scrollPosition: 394.3,
+        scrollExtentTotal: 0.0,
         scrollExtentMax: double.infinity,
         actions: <SemanticsAction>[
           SemanticsAction.scrollUp,
@@ -457,6 +462,7 @@ void main() {
       includesNodeWith(
         scrollExtentMin: 0.0,
         scrollPosition: 788.6,
+        scrollExtentTotal: 0.0,
         scrollExtentMax: double.infinity,
         actions: <SemanticsAction>[
           SemanticsAction.scrollUp,

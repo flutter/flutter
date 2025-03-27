@@ -584,6 +584,7 @@ class SemanticsTester {
     List<SemanticsFlag>? flags,
     Set<SemanticsTag>? tags,
     double? scrollPosition,
+    double? scrollExtentTotal,
     double? scrollExtentMax,
     double? scrollExtentMin,
     int? currentValueLength,
@@ -659,6 +660,9 @@ class SemanticsTester {
         }
       }
       if (scrollPosition != null && !nearEqual(node.scrollPosition, scrollPosition, 0.1)) {
+        return false;
+      }
+      if (scrollExtentTotal != null && !nearEqual(node.scrollExtentTotal, scrollExtentTotal, 0.1)) {
         return false;
       }
       if (scrollExtentMax != null && !nearEqual(node.scrollExtentMax, scrollExtentMax, 0.1)) {
@@ -952,6 +956,7 @@ class _IncludesNodeWith extends Matcher {
     this.flags,
     this.tags,
     this.scrollPosition,
+    this.scrollExtentTotal,
     this.scrollExtentMax,
     this.scrollExtentMin,
     this.maxValueLength,
@@ -966,6 +971,7 @@ class _IncludesNodeWith extends Matcher {
              increasedValue != null ||
              decreasedValue != null ||
              scrollPosition != null ||
+             scrollExtentTotal != null ||
              scrollExtentMax != null ||
              scrollExtentMin != null ||
              maxValueLength != null ||
@@ -985,6 +991,7 @@ class _IncludesNodeWith extends Matcher {
   final List<SemanticsFlag>? flags;
   final Set<SemanticsTag>? tags;
   final double? scrollPosition;
+  final double? scrollExtentTotal;
   final double? scrollExtentMax;
   final double? scrollExtentMin;
   final int? currentValueLength;
@@ -1008,6 +1015,7 @@ class _IncludesNodeWith extends Matcher {
           flags: flags,
           tags: tags,
           scrollPosition: scrollPosition,
+          scrollExtentTotal: scrollExtentTotal,
           scrollExtentMax: scrollExtentMax,
           scrollExtentMin: scrollExtentMin,
           currentValueLength: currentValueLength,
@@ -1044,6 +1052,7 @@ class _IncludesNodeWith extends Matcher {
       if (increasedValue != null) 'increasedValue "$increasedValue"',
       if (decreasedValue != null) 'decreasedValue "$decreasedValue"',
       if (scrollPosition != null) 'scrollPosition "$scrollPosition"',
+      if (scrollExtentTotal != null) 'scrollExtentTotal "$scrollExtentTotal"',
       if (scrollExtentMax != null) 'scrollExtentMax "$scrollExtentMax"',
       if (scrollExtentMin != null) 'scrollExtentMin "$scrollExtentMin"',
       if (currentValueLength != null) 'currentValueLength "$currentValueLength"',
@@ -1072,6 +1081,7 @@ Matcher includesNodeWith({
   List<SemanticsFlag>? flags,
   Set<SemanticsTag>? tags,
   double? scrollPosition,
+  double? scrollExtentTotal,
   double? scrollExtentMax,
   double? scrollExtentMin,
   int? maxValueLength,
@@ -1092,6 +1102,7 @@ Matcher includesNodeWith({
     flags: flags,
     tags: tags,
     scrollPosition: scrollPosition,
+    scrollExtentTotal: scrollExtentTotal,
     scrollExtentMax: scrollExtentMax,
     scrollExtentMin: scrollExtentMin,
     maxValueLength: maxValueLength,
