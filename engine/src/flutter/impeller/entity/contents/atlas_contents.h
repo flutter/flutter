@@ -36,7 +36,7 @@ class AtlasGeometry {
 
   virtual BlendMode GetBlendMode() const = 0;
 
-  virtual bool ShouldInvertBlendMode() const { return false; }
+  virtual bool ShouldInvertBlendMode() const { return true; }
 };
 
 /// @brief An atlas geometry that adapts for drawImageRect.
