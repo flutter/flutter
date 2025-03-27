@@ -7,7 +7,7 @@ library;
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, TextBox;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, LineMetrics, SemanticsInputType, TextBox;
 
 import 'package:characters/characters.dart';
 import 'package:flutter/foundation.dart';
@@ -1385,7 +1385,7 @@ class RenderEditable extends RenderBox
       ..isReadOnly = readOnly
       // This is the default for customer that uses RenderEditable directly.
       // The real value is typically set by EditableText.
-      ..inputType = SemanticsInputType.text;
+      ..inputType = ui.SemanticsInputType.text;
 
     if (hasFocus && selectionEnabled) {
       config.onSetSelection = _handleSetSelection;

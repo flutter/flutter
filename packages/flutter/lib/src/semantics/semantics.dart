@@ -16,6 +16,7 @@ import 'dart:ui'
         Rect,
         SemanticsAction,
         SemanticsFlag,
+        SemanticsInputType,
         SemanticsRole,
         SemanticsUpdate,
         SemanticsUpdateBuilder,
@@ -3652,6 +3653,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
+    if (_inputType != SemanticsInputType.none) {
+      properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
+    }
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -5628,7 +5632,7 @@ class SemanticsConfiguration {
   /// {@macro flutter.semantics.SemanticsProperties.inputType}
   SemanticsInputType get inputType => _inputType;
   SemanticsInputType _inputType = SemanticsInputType.none;
-  set inputType(SemanticsInputType? value) {
+  set inputType(SemanticsInputType value) {
     assert(value != null);
     _inputType = value;
     _hasBeenAnnotated = true;
@@ -5807,7 +5811,7 @@ class SemanticsConfiguration {
       _role = child._role;
     }
     if (_inputType == SemanticsInputType.none) {
-      _role = child._role;
+      _inputType = child._inputType;
     }
     _attributedHint = _concatAttributedString(
       thisAttributedString: _attributedHint,

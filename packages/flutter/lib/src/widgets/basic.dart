@@ -9,7 +9,9 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image, ImageFilter, SemanticsRole, TextHeightBehavior;
+import 'dart:ui'
+    as ui
+    show Image, ImageFilter, SemanticsInputType, SemanticsRole, TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
