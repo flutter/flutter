@@ -1070,9 +1070,9 @@ def contains_png_recursive(directory):
   Returns:
     True if a .png file is found, False otherwise.
   """
-  for root, _, files in os.walk(directory):
+  for _, _, files in os.walk(directory):
     for filename in files:
-      if filename.lower().endswith(".png"):
+      if filename.lower().endswith('.png'):
         return True
   return False
 
@@ -1094,8 +1094,9 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
     extra_env = metal_validation_env()
     extra_env.update(vulkan_validation_env(build_dir))
     run_cmd([tests_path, f'--working_dir={temp_dir}'], cwd=build_dir, env=extra_env)
+    dart_bin = os.path.join(build_dir, 'dart-sdk', 'bin', 'dart')
 
-    if (not contains_png_recursive(temp_dir)):
+    if not contains_png_recursive(temp_dir):
       raise RuntimeError('impeller_golden_tests diff failure - no PNGs found!')
 
     if not require_skia_gold:
