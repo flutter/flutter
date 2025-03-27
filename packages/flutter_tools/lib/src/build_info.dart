@@ -565,6 +565,34 @@ enum TargetPlatform {
     }
   }
 
+  String get osName {
+    switch (this) {
+      case TargetPlatform.linux_x64:
+      case TargetPlatform.linux_arm64:
+        return 'linux';
+      case TargetPlatform.darwin:
+        return 'macos';
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.windows_arm64:
+        return 'windows';
+      case TargetPlatform.android:
+      case TargetPlatform.android_arm:
+      case TargetPlatform.android_arm64:
+      case TargetPlatform.android_x64:
+      case TargetPlatform.android_x86:
+        return 'android';
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        return 'fuchsia';
+      case TargetPlatform.ios:
+        return 'ios';
+      case TargetPlatform.tester:
+        return 'flutter-tester';
+      case TargetPlatform.web_javascript:
+        return 'web';
+    }
+  }
+
   String get simpleName {
     switch (this) {
       case TargetPlatform.linux_x64:
