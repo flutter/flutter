@@ -10,6 +10,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
+#include "flutter/shell/platform/linux/testing/mock_renderer.h"
 
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -651,8 +652,10 @@ TEST(FlEngineTest, AddView) {
         return kSuccess;
       }));
 
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   FlutterViewId view_id =
-      fl_engine_add_view(engine, 123, 456, 2.0, nullptr, add_view_cb, loop);
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
+                         nullptr, add_view_cb, loop);
   EXPECT_GT(view_id, 0);
   EXPECT_TRUE(called);
 
@@ -688,8 +691,10 @@ TEST(FlEngineTest, AddViewError) {
         return kSuccess;
       }));
 
-  FlutterViewId view_id = fl_engine_add_view(engine, 123, 456, 2.0, nullptr,
-                                             add_view_error_cb, loop);
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
+                         nullptr, add_view_error_cb, loop);
   EXPECT_GT(view_id, 0);
 
   // Blocks here until add_view_error_cb is called.
@@ -718,8 +723,10 @@ TEST(FlEngineTest, AddViewEngineError) {
         return kInvalidArguments;
       }));
 
-  FlutterViewId view_id = fl_engine_add_view(engine, 123, 456, 2.0, nullptr,
-                                             add_view_engine_error_cb, loop);
+  g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(renderable), 123, 456, 2.0,
+                         nullptr, add_view_engine_error_cb, loop);
   EXPECT_GT(view_id, 0);
 
   // Blocks here until remove_view_engine_error_cb is called.

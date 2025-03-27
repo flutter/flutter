@@ -24,6 +24,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -459,9 +460,19 @@ void Canvas::DrawLine(const Point& p0,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  LineGeometry geom(p0, p1, paint.stroke_width, paint.stroke_cap);
-  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint,
-                                          /*reuse_depth=*/reuse_depth);
+  auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke_width,
+                                                 paint.stroke_cap);
+
+  if (renderer_.GetContext()->GetFlags().antialiased_lines &&
+      !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
+      !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
+    auto contents = LineContents::Make(std::move(geometry), paint.color);
+    entity.SetContents(std::move(contents));
+    AddRenderEntityToCurrentPass(entity, reuse_depth);
+  } else {
+    AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
+                                            /*reuse_depth=*/reuse_depth);
+  }
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
@@ -1707,8 +1718,8 @@ bool Canvas::SupportsBlitToOnscreen() const {
   return renderer_.GetContext()
              ->GetCapabilities()
              ->SupportsTextureToTextureBlits() &&
-         renderer_.GetContext()->GetBackendType() !=
-             Context::BackendType::kOpenGLES;
+         renderer_.GetContext()->GetBackendType() ==
+             Context::BackendType::kMetal;
 }
 
 bool Canvas::BlitToOnscreen(bool is_onscreen) {

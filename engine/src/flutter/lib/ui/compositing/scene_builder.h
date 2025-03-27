@@ -61,7 +61,7 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
                      int clip_behavior,
                      const fml::RefPtr<EngineLayer>& old_layer);
   void pushClipRSuperellipse(Dart_Handle layer_handle,
-                             const RSuperellipse& rse,
+                             const RSuperellipse* rse,
                              int clip_behavior,
                              const fml::RefPtr<EngineLayer>& old_layer);
   void pushClipPath(Dart_Handle layer_handle,

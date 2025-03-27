@@ -17,7 +17,9 @@
 #include "impeller/toolkit/interop/context.h"
 #include "impeller/toolkit/interop/dl_builder.h"
 #include "impeller/toolkit/interop/formats.h"
+#include "impeller/toolkit/interop/glyph_info.h"
 #include "impeller/toolkit/interop/image_filter.h"
+#include "impeller/toolkit/interop/line_metrics.h"
 #include "impeller/toolkit/interop/mask_filter.h"
 #include "impeller/toolkit/interop/object.h"
 #include "impeller/toolkit/interop/paint.h"
@@ -58,7 +60,9 @@ DEFINE_PEER_GETTER(ColorSource, ImpellerColorSource);
 DEFINE_PEER_GETTER(Context, ImpellerContext);
 DEFINE_PEER_GETTER(DisplayList, ImpellerDisplayList);
 DEFINE_PEER_GETTER(DisplayListBuilder, ImpellerDisplayListBuilder);
+DEFINE_PEER_GETTER(GlyphInfo, ImpellerGlyphInfo);
 DEFINE_PEER_GETTER(ImageFilter, ImpellerImageFilter);
+DEFINE_PEER_GETTER(LineMetrics, ImpellerLineMetrics);
 DEFINE_PEER_GETTER(MaskFilter, ImpellerMaskFilter);
 DEFINE_PEER_GETTER(Paint, ImpellerPaint);
 DEFINE_PEER_GETTER(Paragraph, ImpellerParagraph);
@@ -1151,6 +1155,21 @@ void ImpellerDisplayListBuilderDrawParagraph(ImpellerDisplayListBuilder builder,
 }
 
 IMPELLER_EXTERN_C
+void ImpellerDisplayListBuilderDrawShadow(ImpellerDisplayListBuilder builder,
+                                          ImpellerPath path,
+                                          const ImpellerColor* color,
+                                          float elevation,
+                                          bool occluder_is_transparent,
+                                          float device_pixel_ratio) {
+  GetPeer(builder)->DrawShadow(*GetPeer(path),             //
+                               ToDisplayListType(*color),  //
+                               elevation,                  //
+                               occluder_is_transparent,    //
+                               device_pixel_ratio          //
+  );
+}
+
+IMPELLER_EXTERN_C
 ImpellerParagraphBuilder ImpellerParagraphBuilderNew(
     ImpellerTypographyContext context) {
   auto builder =
@@ -1258,6 +1277,12 @@ uint32_t ImpellerParagraphGetLineCount(ImpellerParagraph paragraph) {
 }
 
 IMPELLER_EXTERN_C
+ImpellerRange ImpellerParagraphGetWordBoundary(ImpellerParagraph paragraph,
+                                               size_t code_unit_index) {
+  return GetPeer(paragraph)->GetWordBoundary(code_unit_index);
+}
+
+IMPELLER_EXTERN_C
 ImpellerTypographyContext ImpellerTypographyContextNew() {
   auto context = Create<TypographyContext>();
   if (!context->IsValid()) {
@@ -1292,6 +1317,156 @@ bool ImpellerTypographyContextRegisterFont(ImpellerTypographyContext context,
   );
   return GetPeer(context)->RegisterFont(std::move(wrapped_contents),
                                         family_name_alias);
+}
+
+IMPELLER_EXTERN_C
+ImpellerLineMetrics ImpellerParagraphGetLineMetrics(
+    ImpellerParagraph paragraph) {
+  return GetPeer(paragraph)->GetLineMetrics().GetC();
+}
+
+IMPELLER_EXTERN_C
+ImpellerGlyphInfo ImpellerParagraphCreateGlyphInfoAtCodeUnitIndexNew(
+    ImpellerParagraph paragraph,
+    size_t code_unit_index) {
+  return GetPeer(paragraph)
+      ->GetGlyphInfoAtCodeUnitIndex(code_unit_index)
+      .Leak();
+}
+
+IMPELLER_EXTERN_C
+ImpellerGlyphInfo ImpellerParagraphCreateGlyphInfoAtParagraphCoordinatesNew(
+    ImpellerParagraph paragraph,
+    double x,
+    double y) {
+  return GetPeer(paragraph)
+      ->GetClosestGlyphInfoAtParagraphCoordinates(x, y)
+      .Leak();
+}
+
+//------------------------------------------------------------------------------
+// Line Metrics
+//------------------------------------------------------------------------------
+
+IMPELLER_EXTERN_C
+void ImpellerLineMetricsRetain(ImpellerLineMetrics line_metrics) {
+  ObjectBase::SafeRetain(line_metrics);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerLineMetricsRelease(ImpellerLineMetrics line_metrics) {
+  ObjectBase::SafeRelease(line_metrics);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetUnscaledAscent(ImpellerLineMetrics metrics,
+                                            size_t line) {
+  return GetPeer(metrics)->GetUnscaledAscent(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetAscent(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetAscent(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetDescent(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetDescent(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetBaseline(ImpellerLineMetrics metrics,
+                                      size_t line) {
+  return GetPeer(metrics)->GetBaseline(line);
+}
+
+IMPELLER_EXTERN_C
+bool ImpellerLineMetricsIsHardbreak(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->IsHardbreak(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetWidth(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetWidth(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetHeight(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetHeight(line);
+}
+
+IMPELLER_EXTERN_C
+double ImpellerLineMetricsGetLeft(ImpellerLineMetrics metrics, size_t line) {
+  return GetPeer(metrics)->GetLeft(line);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerLineMetricsGetCodeUnitStartIndex(ImpellerLineMetrics metrics,
+                                                size_t line) {
+  return GetPeer(metrics)->GetCodeUnitStartIndex(line);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerLineMetricsGetCodeUnitEndIndex(ImpellerLineMetrics metrics,
+                                              size_t line) {
+  return GetPeer(metrics)->GetCodeUnitEndIndex(line);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerLineMetricsGetCodeUnitEndIndexExcludingWhitespace(
+    ImpellerLineMetrics metrics,
+    size_t line) {
+  return GetPeer(metrics)->GetCodeUnitEndIndexExcludingWhitespace(line);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerLineMetricsGetCodeUnitEndIndexIncludingNewline(
+    ImpellerLineMetrics metrics,
+    size_t line) {
+  return GetPeer(metrics)->GetCodeUnitEndIndexIncludingNewline(line);
+}
+
+//------------------------------------------------------------------------------
+// Glyph Info
+//------------------------------------------------------------------------------
+
+IMPELLER_EXTERN_C
+void ImpellerGlyphInfoRetain(ImpellerGlyphInfo glyph_info) {
+  ObjectBase::SafeRetain(glyph_info);
+}
+
+IMPELLER_EXTERN_C
+void ImpellerGlyphInfoRelease(ImpellerGlyphInfo glyph_info) {
+  ObjectBase::SafeRelease(glyph_info);
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeBegin(
+    ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->GetGraphemeClusterCodeUnitRangeBegin();
+}
+
+IMPELLER_EXTERN_C
+size_t ImpellerGlyphInfoGetGraphemeClusterCodeUnitRangeEnd(
+    ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->GetGraphemeClusterCodeUnitRangeEnd();
+}
+
+IMPELLER_EXTERN_C
+ImpellerRect ImpellerGlyphInfoGetGraphemeClusterBounds(
+    ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->GetGraphemeClusterBounds();
+}
+
+IMPELLER_EXTERN_C
+bool ImpellerGlyphInfoIsEllipsis(ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->IsEllipsis();
+}
+
+IMPELLER_EXTERN_C
+ImpellerTextDirection ImpellerGlyphInfoGetTextDirection(
+    ImpellerGlyphInfo glyph_info) {
+  return GetPeer(glyph_info)->GetTextDirection();
 }
 
 }  // namespace impeller::interop
