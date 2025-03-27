@@ -19,7 +19,7 @@ class FlutterHookRunnerNative extends FlutterHookRunner {
     required Environment environment,
   }) async {
     globals.printTrace('runDartBuild() with ${environment.defines} and $targetPlatform');
-    if (dartDataHookResult?.isUpToDate(globals.fs) ?? false) {
+    if (!(dartDataHookResult?.hasAnyModifiedFiles(globals.fs) ?? false)) {
       globals.printTrace('runDartBuild() - up-to-date already');
       return dartDataHookResult!;
     }

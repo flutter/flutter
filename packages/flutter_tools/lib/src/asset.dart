@@ -25,13 +25,22 @@ import 'license_collector.dart';
 import 'project.dart';
 
 class FlutterHookResult {
-  FlutterHookResult({
+  const FlutterHookResult({
     required this.buildStart,
     required this.buildEnd,
     required this.dataAssets,
     required this.dependencies,
   });
-  List<HookAsset> dataAssets;
+
+  FlutterHookResult.empty()
+    : this(
+        buildStart: DateTime(2025),
+        buildEnd: DateTime(2025),
+        dataAssets: <HookAsset>[],
+        dependencies: <Uri>[],
+      );
+
+  final List<HookAsset> dataAssets;
 
   /// The timestamp at which we start a build - so the timestamp of the inputs.
   final DateTime buildStart;
@@ -43,9 +52,8 @@ class FlutterHookResult {
   final List<Uri> dependencies;
 
   /// Whether caller may need to re-run the dart build.
-  bool isUpToDate(FileSystem fileSystem) {
-    return !_wasAnyFileModifiedSince(fileSystem, buildStart, dependencies);
-  }
+  bool hasAnyModifiedFiles(FileSystem fileSystem) =>
+      _wasAnyFileModifiedSince(fileSystem, buildStart, dependencies);
 
   /// Whether the files produced by the build are up-to-date.
   ///
@@ -228,7 +236,8 @@ class ManifestAssetBundle implements AssetBundle {
        _platform = platform,
        _flutterRoot = flutterRoot,
        _splitDeferredAssets = splitDeferredAssets,
-       _licenseCollector = LicenseCollector(fileSystem: fileSystem);
+       _licenseCollector = LicenseCollector(fileSystem: fileSystem),
+       _lastHookResult = FlutterHookResult.empty();
 
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -254,7 +263,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   DateTime? _lastBuildTimestamp;
 
-  FlutterHookResult? _lastHookResult;
+  FlutterHookResult _lastHookResult;
 
   // We assume the main asset is designed for a device pixel ratio of 1.0.
   static const String _kAssetManifestJsonFilename = 'AssetManifest.json';
@@ -276,15 +285,13 @@ class ManifestAssetBundle implements AssetBundle {
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
     if (!wasBuiltOnce() ||
-        _lastHookResult == null ||
         // We need to re-run the dart build.
-        !_lastHookResult!.isUpToDate(_fileSystem) ||
+        _lastHookResult.hasAnyModifiedFiles(_fileSystem) ||
         // We don't have to re-run the dart build, but some files the dart build
         // wants us to bundle have changed contents.
-        _lastHookResult!.isOutputDirty(_fileSystem)) {
+        _lastHookResult.isOutputDirty(_fileSystem)) {
       return true;
     }
-
     final DateTime lastBuildTimestamp = _lastBuildTimestamp!;
 
     final FileStat manifestStat = _fileSystem.file(manifestPath).statSync();
@@ -333,7 +340,7 @@ class ManifestAssetBundle implements AssetBundle {
     // hang on hot reload, as the incremental dill files will never be copied to the
     // device.
     _lastBuildTimestamp = DateTime.now();
-    _lastHookResult = flutterHookResult;
+    _lastHookResult = flutterHookResult ?? FlutterHookResult.empty();
     if (flutterManifest.isEmpty) {
       entries[_kAssetManifestJsonFilename] = AssetBundleEntry(
         DevFSStringContent('{}'),
