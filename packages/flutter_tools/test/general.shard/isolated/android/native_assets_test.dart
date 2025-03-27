@@ -7,7 +7,6 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -139,7 +138,7 @@ void main() {
         targetPlatform: TargetPlatform.android_x64,
         projectUri: projectUri,
         fileSystem: fileSystem,
-        buildRunner: _BuildRunnerWithoutNdk(),
+        buildRunner: FakeFlutterNativeAssetsBuildRunner(),
       );
       expect(
         (globals.logger as BufferLogger).traceText,
@@ -164,18 +163,12 @@ void main() {
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
           fileSystem: fileSystem,
-          buildRunner: _BuildRunnerWithoutNdk(packagesWithNativeAssetsResult: <String>['bar']),
+          buildRunner: FakeFlutterNativeAssetsBuildRunner(
+            packagesWithNativeAssetsResult: <String>['bar'],
+          ),
         ),
         throwsToolExit(message: 'Android NDK Clang could not be found.'),
       );
     },
   );
-}
-
-class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
-  _BuildRunnerWithoutNdk({super.packagesWithNativeAssetsResult = const <String>[]});
-
-  @override
-  Future<CCompilerConfig> get ndkCCompilerConfig async =>
-      throwToolExit('Android NDK Clang could not be found.');
 }

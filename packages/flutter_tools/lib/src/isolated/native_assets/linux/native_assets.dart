@@ -12,12 +12,12 @@ import '../../../globals.dart' as globals;
 /// Flutter expects `clang++` to be on the path on Linux hosts.
 ///
 /// Search for the accompanying `clang`, `ar`, and `ld`.
-Future<CCompilerConfig> cCompilerConfigLinux() async {
-  const String kClangPlusPlusBinary = 'clang++';
-  const String kClangBinary = 'clang';
-  const String kArBinary = 'llvm-ar';
-  const String kLdBinary = 'ld.lld';
+const String kClangPlusPlusBinary = 'clang++';
+const String kClangBinary = 'clang';
+const String kArBinary = 'llvm-ar';
+const String kLdBinary = 'ld.lld';
 
+Future<CCompilerConfig> cCompilerConfigLinux() async {
   final ProcessResult whichResult = await globals.processManager.run(<String>[
     'which',
     kClangPlusPlusBinary,
@@ -26,7 +26,8 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
     throwToolExit('Failed to find $kClangPlusPlusBinary on PATH.');
   }
   File clangPpFile = globals.fs.file((whichResult.stdout as String).trim());
-  clangPpFile = globals.fs.file(await clangPpFile.resolveSymbolicLinks());
+  final String resolvedClangPpFile = await clangPpFile.resolveSymbolicLinks();
+  clangPpFile = globals.fs.file(resolvedClangPpFile);
 
   final Directory clangDir = clangPpFile.parent;
   final Map<String, Uri> binaryPaths = <String, Uri>{};
