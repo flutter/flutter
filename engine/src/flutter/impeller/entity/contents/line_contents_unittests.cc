@@ -90,5 +90,16 @@ TEST(LineContents, CalculatePerVertex) {
               kEhCloseEnough);
 }
 
+TEST(LineContents, CreateCurveData) {
+  std::vector<uint8_t> data = LineContents::CreateCurveData(/*width=*/31,
+                                                            /*radius=*/1,
+                                                            /*scale=*/1);
+  EXPECT_EQ(data.size(), 32u);
+  EXPECT_NEAR(data[0] / 255.f, 0.f, kEhCloseEnough);
+  EXPECT_NEAR(data[1] / 255.f, 0.5f, 0.02);
+  EXPECT_NEAR(data[2] / 255.f, 1.f, kEhCloseEnough);
+  EXPECT_NEAR(data[3] / 255.f, 1.f, kEhCloseEnough);
+}
+
 }  // namespace testing
 }  // namespace impeller

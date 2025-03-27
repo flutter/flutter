@@ -173,11 +173,11 @@ std::vector<uint8_t> LineContents::CreateCurveData(Scalar width,
                                                    Scalar scale) {
   std::vector<uint8_t> curve_data;
   curve_data.reserve(kCurveResolution);
+  double slope = 1.0 / ((radius * 2) / (width + radius));
   for (int i = 0; i < kCurveResolution; ++i) {
-    double norm = (static_cast<double>(i) + 1.0) / 32.0;
-    double loc = scale * norm * (radius + width / 2.0);
-    double den = radius * 2.0 + 1.0;
-    curve_data.push_back(DoubleToUint8(loc / den));
+    double norm = (static_cast<double>(i)) / 31.0;
+    double scaled = slope * norm;
+    curve_data.push_back(DoubleToUint8(scaled));
   }
   return curve_data;
 }
