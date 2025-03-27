@@ -99,9 +99,7 @@ class SemanticScrollable extends SemanticRole {
       // Ignore pointer events since this is a dummy element.
       ..pointerEvents = 'none';
     append(_scrollOverflowElement);
-    print(
-      'init scrollable state,  rect size ${semanticsObject.rect}',
-    );
+    print('init scrollable state,  rect size ${semanticsObject.rect}');
   }
 
   @override
