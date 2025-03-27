@@ -1006,7 +1006,7 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
         // than a slice, but the TextDecoder API doesn't work on shared buffer
         // sources yet.
         // See https://bugs.chromium.org/p/chromium/issues/detail?id=1012656
-        createUint8ArrayFromBuffer(
+        JSUint8Array(
           skwasmInstance.wasmMemory.buffer,
         ).slice(utf8Data.address, utf8Data.address + outSize.value),
       );

@@ -401,7 +401,7 @@ Future<Uint8List> readChunked(
   int contentLength,
   ui_web.ImageCodecChunkCallback chunkCallback,
 ) async {
-  final JSUint8Array result = createUint8ArrayFromLength(contentLength);
+  final JSUint8Array result = JSUint8Array.withLength(contentLength);
   int position = 0;
   int cumulativeBytesLoaded = 0;
   await payload.read((JSUint8Array chunk) {
