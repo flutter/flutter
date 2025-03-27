@@ -1715,7 +1715,6 @@ class _RenderScrollSemantics extends RenderProxyBox {
     if (position.haveDimensions) {
       config
         ..hasImplicitScrolling = allowImplicitScrolling
-        ..scrollExtentTotal = _position.extentTotal
         ..scrollPosition = _position.pixels
         ..scrollExtentMax = _position.maxScrollExtent
         ..scrollExtentMin = _position.minScrollExtent
