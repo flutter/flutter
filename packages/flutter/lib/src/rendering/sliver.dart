@@ -2022,16 +2022,6 @@ class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
   RenderSliverToBoxAdapter({super.child});
 
   @override
-  Rect get semanticBounds {
-    switch (constraints.axis) {
-      case Axis.horizontal:
-        return Rect.fromLTWH(0.0, 0.0, geometry!.maxPaintExtent, constraints.crossAxisExtent);
-      case Axis.vertical:
-        return Rect.fromLTWH(0.0, 0.0, constraints.crossAxisExtent, geometry!.maxPaintExtent);
-    }
-  }
-
-  @override
   void performLayout() {
     if (child == null) {
       geometry = SliverGeometry.zero;
