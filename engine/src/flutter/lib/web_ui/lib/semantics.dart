@@ -388,6 +388,7 @@ class SemanticsUpdateBuilder {
     String? linkUrl,
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
+    required SemanticsInputType inputType,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -431,6 +432,7 @@ class SemanticsUpdateBuilder {
         linkUrl: linkUrl,
         role: role,
         controlsNodes: controlsNodes,
+        inputType: inputType,
       ),
     );
   }

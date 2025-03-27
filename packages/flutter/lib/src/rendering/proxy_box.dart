@@ -4548,7 +4548,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     }
 
     if (_properties.inputType != null) {
-      config.inputType = _properties.inputType;
+      config.inputType = _properties.inputType!;
     }
 
     // Registering _perform* as action handlers instead of the user provided
