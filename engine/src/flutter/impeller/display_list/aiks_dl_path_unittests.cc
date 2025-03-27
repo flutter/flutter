@@ -382,6 +382,41 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// The goal of this test is to show that scaling the lines doesn't also scale
+// the antialiasing. The amount of blurring should be the same for both
+// horizontal lines.
+TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
+  Scalar scale = 5.0;
+  Scalar line_width = 10.f;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Scale", &scale, 0.001, 5);
+      ImGui::SliderFloat("Width", &line_width, 1, 20);
+
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+
+    DlPaint paint;
+    paint.setColor(DlColor::kGreenYellow());
+    paint.setStrokeWidth(line_width);
+
+    builder.DrawLine(DlPoint(100, 100), DlPoint(350, 100), paint);
+    builder.DrawLine(DlPoint(100, 100), DlPoint(350, 150), paint);
+
+    builder.Translate(100, 300);
+    builder.Scale(scale, scale);
+    builder.Translate(-100, -300);
+    builder.DrawLine(DlPoint(100, 300), DlPoint(350, 300), paint);
+    builder.DrawLine(DlPoint(100, 300), DlPoint(350, 450), paint);
+
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
