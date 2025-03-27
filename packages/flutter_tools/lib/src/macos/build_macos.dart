@@ -206,7 +206,8 @@ Future<void> buildMacOS({
         scheme,
         '-derivedDataPath',
         flutterBuildDir.absolute.path,
-        ..._calculateDestination(buildSettings),
+        '-destination',
+        'generic/platform=macOS',
         'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
         'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
         if (verboseLogging) 'VERBOSE_SCRIPT_LOGGING=YES' else '-quiet',
@@ -365,19 +366,4 @@ File? _createDisabledSandboxEntitlementFile(MacOSProject macos, String configura
     ),
   );
   return disabledSandboxEntitlementFile;
-}
-
-List<String> _calculateDestination(Map<String, String> settings) {
-  final List<String> destinations = <String>[];
-  if (settings.containsKey('ONLY_ACTIVE_ARCH') && settings['ONLY_ACTIVE_ARCH'] == 'YES') {
-    destinations.add('-destination');
-    destinations.add('platform=macOS,arch=${globals.os.hostPlatform.platformName}');
-  } else if (settings.containsKey('ARCHS')) {
-    final List<String> archs = settings['ARCHS']!.split(' ');
-    for (final String arch in archs) {
-      destinations.add('-destination');
-      destinations.add('platform=macOS,arch=$arch');
-    }
-  }
-  return destinations;
 }
