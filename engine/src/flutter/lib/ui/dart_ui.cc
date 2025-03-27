@@ -78,6 +78,7 @@ typedef CanvasPath Path;
   V(PathMeasure::Create)                                           \
   V(Path::Create)                                                  \
   V(PictureRecorder::Create)                                       \
+  V(RSuperellipse::Create)                                         \
   V(SceneBuilder::Create)                                          \
   V(SemanticsUpdateBuilder::Create)                                \
   /* Other */                                                      \
@@ -283,6 +284,7 @@ typedef CanvasPath Path;
   V(Picture, dispose)                            \
   V(Picture, toImage)                            \
   V(Picture, toImageSync)                        \
+  V(RSuperellipse, contains)                     \
   V(SceneBuilder, addPerformanceOverlay)         \
   V(SceneBuilder, addPicture)                    \
   V(SceneBuilder, addPlatformView)               \
