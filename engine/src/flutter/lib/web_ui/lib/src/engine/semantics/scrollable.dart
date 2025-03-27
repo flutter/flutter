@@ -170,7 +170,9 @@ class SemanticScrollable extends SemanticRole {
       // knows how much scrollable content there is.
       final double? scrollExtentTotal = semanticsObject.scrollExtentTotal;
       assert(scrollExtentTotal != null);
-      print('scroll extent total: ${semanticsObject.scrollExtentTotal}');
+      print(
+        'scroll extent total: $scrollExtentTotal, scroll extent max: ${semanticsObject.scrollExtentMax}',
+      );
       _scrollOverflowElement.style
         ..width = '${rect.width.round()}px'
         ..height = '${scrollExtentTotal!}px';
