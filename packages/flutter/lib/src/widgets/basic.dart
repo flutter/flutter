@@ -1732,7 +1732,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// ```dart
   /// Transform.rotate(
   ///   angle: math.pi,
-  ///   origin: const Offset(100, 100), 
+  ///   origin: const Offset(100, 100),
   ///   child: const Text('I am rotating off of the center'),
   /// )
   /// ```
@@ -1744,7 +1744,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// Transform.rotate(
   ///   angle: math.pi,
   ///   alignment: Alignment.topLeft, // Now the alignment is explicitly set to topLeft.
-  ///   origin: const Offset(100, 100), 
+  ///   origin: const Offset(100, 100),
   ///   child: const Text('I am rotating correctly from the center'),
   /// )
   /// ```
