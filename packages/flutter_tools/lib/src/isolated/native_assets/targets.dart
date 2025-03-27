@@ -33,10 +33,13 @@ import '../../build_info.dart'
         kSdkRoot;
 import '../../build_system/exceptions.dart' show MissingDefineException;
 import '../../macos/xcode.dart' as xcode show environmentTypeFromSdkroot;
-import 'android/native_assets.dart' show getNativeAndroidArchitecture, targetAndroidNdkApi;
+import 'android/native_assets.dart'
+    show cCompilerConfigAndroid, getNativeAndroidArchitecture, targetAndroidNdkApi;
 import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, targetIOSVersion;
+import 'linux/native_assets.dart';
 import 'macos/native_assets.dart' show getNativeMacOSArchitecture, targetMacOSVersion;
-import 'native_assets.dart' show FlutterNativeAssetsBuildRunner;
+import 'macos/native_assets_host.dart';
+import 'windows/native_assets.dart';
 
 /// This is a translation layer between Flutter, which knows only
 /// [TargetPlatform]s, and `dart-lang/native`, which knows only asset types and
@@ -181,8 +184,7 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 
   late final CCompilerConfig? cCompilerConfigSync;
 
-  Future<void> setCCompilerConfig(FlutterNativeAssetsBuildRunner buildRunner) async =>
-      cCompilerConfigSync = await buildRunner.cCompilerConfig;
+  Future<void> setCCompilerConfig();
 
   List<CodeAssetExtension> codeAssetExtensionFor(OS os) => <CodeAssetExtension>[
     if (supportedAssetTypes.contains(CodeAsset.type))
@@ -209,6 +211,9 @@ class WindowsAssetTarget extends CodeAssetTarget {
   ];
 
   @override
+  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigWindows();
+
+  @override
   String get targetString => 'windows_${architecture.name}';
 }
 
@@ -218,6 +223,9 @@ final class LinuxAssetTarget extends CodeAssetTarget {
     required super.supportedAssetTypes,
     required super.architecture,
   });
+
+  @override
+  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigLinux();
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -239,6 +247,9 @@ final class IOSAssetTarget extends CodeAssetTarget {
 
   final Map<String, String> environmentDefines;
   final FileSystem fileSystem;
+
+  @override
+  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigMacOS();
 
   IOSCodeConfig _getIOSConfig(Map<String, String> environmentDefines, FileSystem fileSystem) {
     final String? sdkRoot = environmentDefines[kSdkRoot];
@@ -284,6 +295,9 @@ final class MacOSAssetTarget extends CodeAssetTarget {
   ];
 
   @override
+  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigMacOS();
+
+  @override
   String get targetString => 'macos_${architecture.name}';
 }
 
@@ -300,8 +314,7 @@ final class AndroidAssetTarget extends CodeAssetTarget {
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
-  Future<void> setCCompilerConfig(FlutterNativeAssetsBuildRunner buildRunner) async =>
-      cCompilerConfigSync = await buildRunner.ndkCCompilerConfig;
+  Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigAndroid();
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -332,6 +345,15 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
 
   @override
   String get targetString => '${OS.current}_${architecture.name}';
+
+  @override
+  Future<void> setCCompilerConfig() async =>
+      cCompilerConfigSync = await switch (OS.current) {
+        OS.linux => cCompilerConfigLinux(),
+        OS.windows => cCompilerConfigWindows(),
+        OS.macOS => cCompilerConfigMacOS(),
+        OS() => throw UnsupportedError('Flutter tester supports only linux, windows and macOS.'),
+      };
 }
 
 List<AndroidArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {

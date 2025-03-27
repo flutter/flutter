@@ -44,6 +44,13 @@ Future<DartHookResult> runFlutterSpecificHooks({
   if (!await _hookRunRequired(buildRunner)) {
     return DartHookResult.empty();
   }
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.name.split('_').first);
+  final Directory buildDir = fileSystem.directory(buildUri);
+  if (!await buildDir.exists()) {
+    // Ensure the folder exists so the native build system can copy it even
+    // if there's no native assets.
+    await buildDir.create(recursive: true);
+  }
 
   final List<String> supportedAssetTypes = <String>[
     if (featureFlags.isNativeAssetsEnabled) CodeAsset.type,
@@ -59,7 +66,7 @@ Future<DartHookResult> runFlutterSpecificHooks({
   // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
   // while using it in native_assets_builder is not.
   for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
-    await target.setCCompilerConfig(buildRunner);
+    await target.setCCompilerConfig();
   }
 
   final BuildMode buildMode = _getBuildMode(
@@ -67,14 +74,6 @@ Future<DartHookResult> runFlutterSpecificHooks({
     targetPlatform == TargetPlatform.tester,
   );
   final bool linkingEnabled = _nativeAssetsLinkingEnabled(buildMode);
-
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.name.split('_').first);
-  final Directory buildDir = fileSystem.directory(buildUri);
-  if (!await buildDir.exists()) {
-    // Ensure the folder exists so the native build system can copy it even
-    // if there's no native assets.
-    await buildDir.create(recursive: true);
-  }
 
   return _runDartHooks(
     buildRunner: buildRunner,
