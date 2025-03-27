@@ -4630,9 +4630,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutter::OverlayLayerPool pool;
 
   // Add layers to the pool.
-  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm, 1);
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm);
   XCTAssertEqual(pool.size(), 1u);
-  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm, 1);
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm);
   XCTAssertEqual(pool.size(), 2u);
 
   // Mark all layers as unused.
@@ -4655,22 +4655,16 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   flutter::OverlayLayerPool pool;
 
   // Add layers to the pool.
-  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm, 1);
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm);
   XCTAssertEqual(pool.size(), 1u);
 
   std::shared_ptr<flutter::OverlayLayer> layer = pool.GetNextLayer();
 
+  CGFloat screenScale = [UIScreen mainScreen].scale;
   layer->UpdateViewState(nil, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
-  // Should not update the view state (e.g. overlay_view_wrapper's frame) when FlutterView is nil.
-  XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
-
-  FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
-                                                            opaque:YES
-                                                   enableWideGamut:NO];
-  layer->UpdateViewState(flutterView, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
-  // Should not update the view state (e.g. overlay_view_wrapper's frame) when FlutterView's screen
-  // is nil.
-  XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
+  XCTAssertTrue(CGRectEqualToRect(
+      layer->overlay_view_wrapper.frame,
+      CGRectMake(1 / screenScale, 2 / screenScale, 3 / screenScale, 4 / screenScale)));
 }
 
 - (void)testFlutterPlatformViewControllerSubmitFramePreservingFrameDamage {

@@ -903,7 +903,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 - (void)createLayerWithIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
                       pixelFormat:(MTLPixelFormat)pixelFormat
                       screenScale:(CGFloat)screenScale {
-  self.layerPool->CreateLayer(iosContext, pixelFormat, screenScale);
+  // TODO(hellohuanlin): pass in screenScale.
+  self.layerPool->CreateLayer(iosContext, pixelFormat);
 }
 
 - (void)removeUnusedLayers:(const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers

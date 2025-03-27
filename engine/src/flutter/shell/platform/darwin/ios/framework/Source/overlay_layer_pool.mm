@@ -23,15 +23,10 @@ void OverlayLayer::UpdateViewState(UIView* flutter_view,
                                    SkRect rect,
                                    int64_t view_id,
                                    int64_t overlay_id) {
-  FlutterView* flutterView = (FlutterView*)flutter_view;
-  // There can be a race where UpdateViewState() is called when flutter_view or flutter_view's
-  // screen is nil when app is backgrounded.
-  // It's unlikely for scale to be 0, but just to be safe here since it's used in a scaling
-  // calculation division below
-  if (!flutterView || !flutterView.screen || flutterView.screen.scale == 0.0f) {
-    return;
-  }
-  CGFloat screenScale = flutterView.screen.scale;
+  // TODO(hellohuanlin): Remove this deprecated API usage. Watch out for flutter_view or
+  // flutter_view's screen being nil when background the app.
+  CGFloat screenScale = [UIScreen mainScreen].scale;
+
   // Set the size of the overlay view wrapper.
   // This wrapper view masks the overlay view.
   overlay_view_wrapper.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
@@ -62,13 +57,15 @@ std::shared_ptr<OverlayLayer> OverlayLayerPool::GetNextLayer() {
 }
 
 void OverlayLayerPool::CreateLayer(const std::shared_ptr<IOSContext>& ios_context,
-                                   MTLPixelFormat pixel_format,
-                                   CGFloat screenScale) {
+                                   MTLPixelFormat pixel_format) {
   FML_DCHECK([[NSThread currentThread] isMainThread]);
   std::shared_ptr<OverlayLayer> layer;
   UIView* overlay_view;
   UIView* overlay_view_wrapper;
 
+  // TODO(hellohuanlin): Remove this deprecated API usage. Watch out for flutter_view or
+  // flutter_view's screen being nil when background the app.
+  CGFloat screenScale = [UIScreen mainScreen].scale;
   overlay_view = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
                                                        pixelFormat:pixel_format];
   overlay_view_wrapper = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
