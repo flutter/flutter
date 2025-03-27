@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-///
+/// @docImport 'package:flutter/material.dart';
+/// 
+/// @docImport 'list_section.dart';
 library;
 
 import 'package:flutter/widgets.dart';
@@ -12,68 +14,96 @@ import 'icons.dart';
 import 'list_tile.dart';
 import 'theme.dart';
 
-/// The curve of the animation used to expand or collapse the [CupertinoCollapsible].
+/// The curve of the animation used to expand or collapse the
+/// [CupertinoExpansionTile].
 ///
-/// The same curve is used for both expansion and collapse animations.
-///
-/// Based on iOS 17 manual testing.
+/// Eyeballed from an iPhone 15 simulator running iOS 17.5.
 const Curve _kAnimationCurve = Curves.easeInOut;
 
-/// The height of the header of the collapsible, which is a [CupertinoListTile].
-const double _kHeaderHeight = 44.0;
+/// The duration of the animation used to expand or collapse the
+/// [CupertinoExpansionTile].
+///
+/// Eyeballed from an iPhone 15 simulator running iOS 17.5.
+const Duration _kAnimationDuration = Duration(milliseconds: 300);
 
-/// The font size of the header's rotating trailing icon.
+/// The font size of the rotating trailing icon in the header of a
+/// [CupertinoExpansionTile].
+///
+/// Eyeballed from an iPhone 15 simulator running iOS 17.5.
 const double _kIconFontSize = 15.0;
 
-///
-enum CollapsibleTransitionMode {
+/// The height of the header in a [CupertinoExpansionTile], which is the default
+/// [CupertinoListTile].
+const double _kHeaderHeight = 44.0;
+
+/// Defines how a [CupertinoExpansionTile] should transition its child between
+/// its collapsed state and its expanded state.
+enum ExpansionTileTransitionMode {
+  /// Transition by fading a fully extended [CupertinoExpansionTile.child].
   ///
+  /// When the [CupertinoExpansionTile] expands, the child appears fully extended
+  /// and fades into view. When the [CupertinoExpansionTile] collapses, the child
+  /// remains fully extended and fades out of view.
   fade,
 
+  /// Transition by scrolling [CupertinoExpansionTile.child] under the header.
   ///
+  /// When the [CupertinoExpansionTile] expands, the child scrolls from under the
+  /// header until it becomes fully extended. When the [CupertinoExpansionTile]
+  /// collapses, the child scrolls under the header until it is fully collapsed.
   scroll,
 }
 
+/// A single-line [CupertinoListTile] with an expansion arrow icon that expands
+/// or collapses the tile to reveal or hide the [child].
 ///
-class CupertinoCollapsible extends StatefulWidget {
-  ///
-  const CupertinoCollapsible({
+/// See also:
+///
+///  * [ExpansionTile], the Material Design equivalent.
+///  * [CupertinoListSection], useful for creating an expansion tile [child].
+///  * [CupertinoListTile], the header of a [CupertinoExpansionTile].
+class CupertinoExpansionTile extends StatefulWidget {
+  /// Creates a single-line [CupertinoListTile] with an expansion arrow icon
+  /// that expands or collapses the tile to reveal or hide the [child].
+  const CupertinoExpansionTile({
     super.key,
     required this.title,
     required this.child,
     this.controller,
-    this.transitionMode = CollapsibleTransitionMode.fade,
+    this.transitionMode = ExpansionTileTransitionMode.fade,
   });
 
   /// A [title] is used to convey the central information. Usually a [Text].
   final Widget title;
 
-  /// If provided, the controller can be used to expand and collapse tiles.
+  /// Programmatically expands and collapses the [CupertinoExpansionTile].
   ///
-  /// In cases were control over the tile's state is needed from a callback triggered
-  /// by a widget within the tile, [ExpansibleController.of] may be more convenient
-  /// than supplying a controller.
+  /// In cases where control over the tile's state is needed from a
+  /// callback triggered by a widget within the tile, [ExpansibleController.of]
+  /// may be more convenient than supplying a controller.
   final ExpansibleController? controller;
 
-  /// The body of the collapsible.
+  /// The body of the [CupertinoExpansionTile].
   final Widget child;
 
+  /// How the [CupertinoExpansionTile] should transition its child between its
+  /// collapsed state and its expanded state.
   ///
-  final CollapsibleTransitionMode transitionMode;
+  /// Defaults to [ExpansionTileTransitionMode.fade].
+  final ExpansionTileTransitionMode transitionMode;
 
   @override
-  State<CupertinoCollapsible> createState() => _CupertinoCollapsibleState();
+  State<CupertinoExpansionTile> createState() => _CupertinoExpansionTileState();
 }
 
-class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
-  static final Animatable<double> _quarterTween = Tween<double>(begin: 0.0, end: 0.25);
-  final OverlayPortalController _fadeController = OverlayPortalController();
+class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   final GlobalKey _headerKey = GlobalKey();
-  late Offset headerOffset;
+  final OverlayPortalController _fadeController = OverlayPortalController();
+  static final Animatable<double> _quarterTween = Tween<double>(begin: 0.0, end: 0.25);
 
-  late Animation<double> _iconTurns;
   late ExpansibleController _tileController;
+  late Animation<double> _iconTurns;
+  late Offset headerOffset;
 
   @override
   void initState() {
@@ -81,8 +111,16 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
     _tileController = widget.controller ?? ExpansibleController();
   }
 
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _tileController.dispose();
+    }
+    super.dispose();
+  }
+
   Widget? _buildIcon(BuildContext context, Animation<double> animation) {
-    _iconTurns = animation.drive(_quarterTween.chain(_easeInTween));
+    _iconTurns = animation.drive(_quarterTween.chain(CurveTween(curve: _kAnimationCurve)));
     final double? size = CupertinoTheme.of(context).textTheme.textStyle.fontSize;
     // Replicate the Icon logic here to get a slightly bolder icon.
     return RotationTransition(
@@ -131,7 +169,7 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
     );
   }
 
-  Widget _buildCollapsible(
+  Widget _buildExpansible(
     BuildContext context,
     Widget header,
     Widget body,
@@ -143,7 +181,7 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
         header,
         Opacity(
           opacity:
-              animation.isAnimating && widget.transitionMode == CollapsibleTransitionMode.fade
+              animation.isAnimating && widget.transitionMode == ExpansionTileTransitionMode.fade
                   ? 0.0
                   : 1.0,
           child: body,
@@ -151,7 +189,7 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
       ],
     );
 
-    if (widget.transitionMode == CollapsibleTransitionMode.scroll) {
+    if (widget.transitionMode == ExpansionTileTransitionMode.scroll) {
       return child;
     }
 
@@ -182,10 +220,11 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
   Widget build(BuildContext context) {
     return Expansible(
       controller: _tileController,
+      duration: _kAnimationDuration,
       curve: _kAnimationCurve,
       headerBuilder: _buildHeader,
       bodyBuilder: (BuildContext context, Animation<double> animation) => widget.child,
-      expansibleBuilder: _buildCollapsible,
+      expansibleBuilder: _buildExpansible,
     );
   }
 }
