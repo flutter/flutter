@@ -6,9 +6,7 @@ import 'asset.dart' show FlutterHookResult;
 import 'build_info.dart' show TargetPlatform;
 import 'build_system/build_system.dart' show Environment;
 
-abstract class FlutterHookRunner {
-  FlutterHookRunner();
-
+abstract interface class FlutterHookRunner {
   Future<FlutterHookResult> runHooks({
     required TargetPlatform targetPlatform,
     required Environment environment,
