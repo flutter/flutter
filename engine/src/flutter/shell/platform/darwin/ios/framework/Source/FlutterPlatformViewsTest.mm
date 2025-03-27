@@ -16,7 +16,6 @@
 #include "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
@@ -4662,14 +4661,6 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
 
   layer->UpdateViewState(nil, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
   // Should not update the view state (e.g. overlay_view_wrapper's frame) when FlutterView is nil.
-  XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
-
-  FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
-                                                            opaque:YES
-                                                   enableWideGamut:NO];
-  layer->UpdateViewState(flutterView, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
-  // Should not update the view state (e.g. overlay_view_wrapper's frame) when FlutterView's screen
-  // is nil.
   XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
 }
 
