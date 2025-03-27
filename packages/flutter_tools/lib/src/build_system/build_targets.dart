@@ -15,7 +15,9 @@ abstract class BuildTargets {
   Target get dartPluginRegistrantTarget;
   Target webServiceWorker(FileSystem fileSystem, List<WebCompilerConfig> compileConfigs);
   Target buildFlutterBundle({
+    required TargetPlatform platform,
     required BuildMode mode,
+    bool buildAOTAssets = true,
     @Deprecated(
       'Use the build environment `outputDir` instead. '
       'This feature was deprecated after v3.31.0-1.0.pre.',
@@ -40,7 +42,9 @@ class NoOpBuildTargets extends BuildTargets {
 
   @override
   Target buildFlutterBundle({
+    required TargetPlatform platform,
     required BuildMode mode,
+    bool buildAOTAssets = true,
     @Deprecated(
       'Use the build environment `outputDir` instead. '
       'This feature was deprecated after v3.31.0-1.0.pre.',

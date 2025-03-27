@@ -666,6 +666,7 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
     String? assetDirPath,
     String? outputDirPath,
     Uri? nativeAssets,
+    bool buildAOTAssets = false,
     bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
   }) async {}
