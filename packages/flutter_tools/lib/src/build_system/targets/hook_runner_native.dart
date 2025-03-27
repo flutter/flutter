@@ -11,7 +11,9 @@ import '../build_system.dart' show BuildResult, Environment, ExceptionMeasuremen
 import 'native_assets.dart' show DartBuild;
 
 class FlutterHookRunnerNative extends FlutterHookRunner {
-  FlutterHookRunnerNative();
+  FlutterHookRunnerNative() : flutterHookResult = FlutterHookResult.empty();
+
+  FlutterHookResult flutterHookResult;
 
   @override
   Future<FlutterHookResult> runHooks({
