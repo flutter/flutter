@@ -149,6 +149,10 @@ abstract class BrowserImageDecoder implements ui.Codec {
 
       return webDecoder;
     } catch (error) {
+      // TODO(srujzs): Replace this with `error.isJSAny` when we have that API
+      // in `dart:js_interop`.
+      // https://github.com/dart-lang/sdk/issues/56905
+      // ignore: invalid_runtime_check_with_js_interop_types
       if (error is JSAny && error.isA<DomException>()) {
         if ((error as DomException).name == DomException.notSupported) {
           throw ImageCodecException(

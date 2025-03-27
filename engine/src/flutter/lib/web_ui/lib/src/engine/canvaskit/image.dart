@@ -404,7 +404,7 @@ Future<Uint8List> readChunked(
   final JSUint8Array result = createUint8ArrayFromLength(contentLength);
   int position = 0;
   int cumulativeBytesLoaded = 0;
-  await payload.read<JSUint8Array>((JSUint8Array chunk) {
+  await payload.read((JSUint8Array chunk) {
     cumulativeBytesLoaded += chunk.length;
     chunkCallback(cumulativeBytesLoaded, contentLength);
     result.set(chunk, position);

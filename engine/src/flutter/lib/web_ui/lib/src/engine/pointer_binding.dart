@@ -322,9 +322,9 @@ class ClickDebouncer {
     assert(event.type == 'pointerdown', 'Click debouncing must begin with a pointerdown');
 
     final DomEventTarget? target = event.target;
-    if (target is DomElement && target.hasAttribute('flt-tappable')) {
+    if (target.isA<DomElement>() && (target! as DomElement).hasAttribute('flt-tappable')) {
       _state = (
-        target: target,
+        target: target as DomElement,
         // The 200ms duration was chosen empirically by testing tapping, mouse
         // clicking, trackpad tapping and clicking, as well as the following
         // screen readers: TalkBack on Android, VoiceOver on macOS, Narrator/

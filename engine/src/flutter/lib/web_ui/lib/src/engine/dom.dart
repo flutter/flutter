@@ -1108,7 +1108,7 @@ extension HttpFetchResponseExtension on HttpFetchResponse {
   ///
   /// Combined with [HttpFetchResponse.contentLength], this can be used to
   /// implement various "progress bar" functionality.
-  Future<void> read<T>(HttpFetchReader<T> reader) {
+  Future<void> read(HttpFetchReader<JSUint8Array> reader) {
     return payload.read(reader);
   }
 
@@ -1206,7 +1206,7 @@ abstract class HttpFetchPayload {
   ///
   /// Combined with [HttpFetchResponse.contentLength], this can be used to
   /// implement various "progress bar" functionality.
-  Future<void> read<T>(HttpFetchReader<T> reader);
+  Future<void> read(HttpFetchReader<JSUint8Array> reader);
 
   /// Returns the data as a [ByteBuffer].
   Future<ByteBuffer> asByteBuffer();
@@ -1224,7 +1224,7 @@ class HttpFetchPayloadImpl implements HttpFetchPayload {
   final DomResponse _domResponse;
 
   @override
-  Future<void> read<T>(HttpFetchReader<T> callback) async {
+  Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
     final _DomReadableStream stream = _domResponse.body;
     final _DomStreamReader reader = stream.getReader();
 
@@ -1233,7 +1233,7 @@ class HttpFetchPayloadImpl implements HttpFetchPayload {
       if (chunk.done) {
         break;
       }
-      callback(chunk.value as T);
+      callback(chunk.value! as JSUint8Array);
     }
   }
 
@@ -1261,7 +1261,7 @@ class MockHttpFetchPayload implements HttpFetchPayload {
   final int _chunkSize;
 
   @override
-  Future<void> read<T>(HttpFetchReader<T> callback) async {
+  Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
     final int totalLength = _byteBuffer.lengthInBytes;
     int currentIndex = 0;
     while (currentIndex < totalLength) {
@@ -1271,7 +1271,7 @@ class MockHttpFetchPayload implements HttpFetchPayload {
         currentIndex,
         currentIndex + chunkSize,
       );
-      callback(chunk.toJS as T);
+      callback(chunk.toJS);
       currentIndex += chunkSize;
     }
   }
@@ -1795,8 +1795,8 @@ extension type DomTouchEvent._(JSObject _) implements DomUIEvent {
   external bool get shiftKey;
 
   @JS('changedTouches')
-  external _DomTouchList get _changedTouches;
-  Iterable<DomTouch> get changedTouches => createDomTouchListWrapper<DomTouch>(_changedTouches);
+  external _DomList get _changedTouches;
+  Iterable<DomTouch> get changedTouches => createDomListWrapper<DomTouch>(_changedTouches);
 }
 
 @JS('Touch')
@@ -2264,10 +2264,10 @@ bool domInstanceOfString(JSAny element, String objectType) => element.instanceOf
 /// should only be returned as a wrapped object to Dart.
 extension type _DomList._(JSObject _) implements JSObject {
   external double get length;
-  external DomNode item(int index);
+  external JSObject item(int index);
 }
 
-class _DomListIterator<T> implements Iterator<T> {
+class _DomListIterator<T extends JSObject> implements Iterator<T> {
   _DomListIterator(this.list);
 
   final _DomList list;
@@ -2286,7 +2286,7 @@ class _DomListIterator<T> implements Iterator<T> {
   T get current => list.item(index) as T;
 }
 
-class _DomListWrapper<T> extends Iterable<T> {
+class _DomListWrapper<T extends JSObject> extends Iterable<T> {
   _DomListWrapper._(this.list);
 
   final _DomList list;
@@ -2301,48 +2301,7 @@ class _DomListWrapper<T> extends Iterable<T> {
 
 /// This is a work around for a `TypeError` which can be triggered by calling
 /// `toList` on the `Iterable`.
-Iterable<T> createDomListWrapper<T>(_DomList list) => _DomListWrapper<T>._(list).cast<T>();
-
-// https://developer.mozilla.org/en-US/docs/Web/API/TouchList
-extension type _DomTouchList._(JSObject _) implements JSObject {
-  external double get length;
-  external DomNode item(int index);
-}
-
-class _DomTouchListIterator<T> implements Iterator<T> {
-  _DomTouchListIterator(this.list);
-
-  final _DomTouchList list;
-  int index = -1;
-
-  @override
-  bool moveNext() {
-    index++;
-    if (index > list.length) {
-      throw StateError('Iterator out of bounds');
-    }
-    return index < list.length;
-  }
-
-  @override
-  T get current => list.item(index) as T;
-}
-
-class _DomTouchListWrapper<T> extends Iterable<T> {
-  _DomTouchListWrapper._(this.list);
-
-  final _DomTouchList list;
-
-  @override
-  Iterator<T> get iterator => _DomTouchListIterator<T>(list);
-
-  /// Override the length to avoid iterating through the whole collection.
-  @override
-  int get length => list.length.toInt();
-}
-
-Iterable<T> createDomTouchListWrapper<T>(_DomTouchList list) =>
-    _DomTouchListWrapper<T>._(list).cast<T>();
+Iterable<T> createDomListWrapper<T extends JSObject>(_DomList list) => _DomListWrapper<T>._(list);
 
 @JS('Symbol')
 extension type DomSymbol._(JSObject _) implements JSObject {
@@ -2394,7 +2353,7 @@ extension type DomIteratorResult._(JSObject _) implements JSObject {
 }
 
 /// Wraps a native JS iterator to provide a Dart [Iterator].
-class DomIteratorWrapper<T> implements Iterator<T> {
+class DomIteratorWrapper<T extends JSAny> implements Iterator<T> {
   DomIteratorWrapper(this._iterator);
 
   final DomIterator _iterator;

@@ -317,7 +317,7 @@ class _MockNativeMemoryFinalizationRegistry implements NativeMemoryFinalizationR
   final List<_MockPair> registeredPairs = <_MockPair>[];
 
   @override
-  void register(Object owner, UniqueRef<Object> ref) {
+  void register(Object owner, UniqueRef<JSObject> ref) {
     registeredPairs.add(_MockPair(owner, ref));
   }
 }
@@ -326,5 +326,5 @@ class _MockPair {
   _MockPair(this.owner, this.ref);
 
   Object owner;
-  UniqueRef<Object> ref;
+  UniqueRef<JSObject> ref;
 }
