@@ -104,11 +104,11 @@ void SceneBuilder::pushClipRRect(Dart_Handle layer_handle,
 
 void SceneBuilder::pushClipRSuperellipse(
     Dart_Handle layer_handle,
-    const RSuperellipse& rse,
+    const RSuperellipse* rse,
     int clip_behavior,
     const fml::RefPtr<EngineLayer>& old_layer) {
   auto layer = std::make_shared<flutter::ClipRSuperellipseLayer>(
-      rse.rsuperellipse, static_cast<flutter::Clip>(clip_behavior));
+      rse->rsuperellipse(), static_cast<flutter::Clip>(clip_behavior));
   PushLayer(layer);
   EngineLayer::MakeRetained(layer_handle, layer);
 

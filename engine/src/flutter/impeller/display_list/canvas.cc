@@ -1718,25 +1718,17 @@ bool Canvas::SupportsBlitToOnscreen() const {
   return renderer_.GetContext()
              ->GetCapabilities()
              ->SupportsTextureToTextureBlits() &&
-         renderer_.GetContext()->GetBackendType() !=
-             Context::BackendType::kOpenGLES;
+         renderer_.GetContext()->GetBackendType() ==
+             Context::BackendType::kMetal;
 }
 
 bool Canvas::BlitToOnscreen(bool is_onscreen) {
-  std::shared_ptr<CommandBuffer> command_buffer =
-      renderer_.GetContext()->CreateCommandBuffer();
+  auto command_buffer = renderer_.GetContext()->CreateCommandBuffer();
   command_buffer->SetLabel("EntityPass Root Command Buffer");
-  RenderTarget offscreen_target = render_passes_.back()
-                                      .inline_pass_context->GetPassTarget()
-                                      .GetRenderTarget();
-  // If the src and destination format differ (due to wide gamut, alpha-less
-  // format, et cetera), then a draw must always be performed instead of a blit.
-  if (SupportsBlitToOnscreen() &&
-      offscreen_target.GetRenderTargetTexture()
-              ->GetTextureDescriptor()
-              .format == render_target_.GetRenderTargetTexture()
-                             ->GetTextureDescriptor()
-                             .format) {
+  auto offscreen_target = render_passes_.back()
+                              .inline_pass_context->GetPassTarget()
+                              .GetRenderTarget();
+  if (SupportsBlitToOnscreen()) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
                        render_target_.GetRenderTargetTexture());

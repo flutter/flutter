@@ -24,12 +24,11 @@ namespace testing {
 std::unique_ptr<Canvas> CreateTestCanvas(
     ContentContext& context,
     std::optional<Rect> cull_rect = std::nullopt,
-    bool requires_readback = false,
-    std::optional<PixelFormat> format = std::nullopt) {
+    bool requires_readback = false) {
   TextureDescriptor onscreen_desc;
   onscreen_desc.size = {100, 100};
   onscreen_desc.format =
-      format.value_or(context.GetDeviceCapabilities().GetDefaultColorFormat());
+      context.GetDeviceCapabilities().GetDefaultColorFormat();
   onscreen_desc.usage = TextureUsage::kRenderTarget;
   onscreen_desc.storage_mode = StorageMode::kDevicePrivate;
   onscreen_desc.sample_count = SampleCount::kCount1;
@@ -379,24 +378,11 @@ TEST_P(AiksTest, SupportsBlitToOnscreen) {
   auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
                                  /*requires_readback=*/true);
 
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
+  if (GetBackend() != PlaygroundBackend::kMetal) {
     EXPECT_FALSE(canvas->SupportsBlitToOnscreen());
   } else {
     EXPECT_TRUE(canvas->SupportsBlitToOnscreen());
   }
-}
-
-TEST_P(AiksTest, SupportsBlitToOnscreenWithDifferentFormat) {
-  if (GetBackend() == PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP() << "Not valid on GLES";
-  }
-  // Create an onscreen format which is different than the offscreen format,
-  // then make the canvas perform a restore to verify a blit is not used.
-  ContentContext context(GetContext(), nullptr);
-  auto canvas = CreateTestCanvas(context, Rect::MakeLTRB(0, 0, 100, 100),
-                                 /*requires_readback=*/true,
-                                 /*format=*/PixelFormat::kB8G8R8A8UNormIntSRGB);
-  canvas->EndReplay();
 }
 
 }  // namespace testing

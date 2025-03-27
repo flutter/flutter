@@ -24,7 +24,7 @@ using CreateGeometryCallback =
                                  const Geometry* geometry)>;
 
 const int32_t kCurveResolution = 32;
-const Scalar kSampleRadius = 0.5f;
+const float kSampleRadius = 1.f;
 
 struct LineInfo {
   Vector3 e0;
@@ -62,6 +62,8 @@ uint8_t DoubleToUint8(double x) {
 /// See also: CreateGradientTexture
 std::shared_ptr<Texture> CreateCurveTexture(
     Scalar width,
+    Scalar radius,
+    Scalar scale,
     const std::shared_ptr<impeller::Context>& context) {
   //
   impeller::TextureDescriptor texture_descriptor;
@@ -73,8 +75,8 @@ std::shared_ptr<Texture> CreateCurveTexture(
   curve_data.reserve(kCurveResolution);
   for (int i = 0; i < kCurveResolution; ++i) {
     double norm = (static_cast<double>(i) + 1.0) / 32.0;
-    double loc = norm * (kSampleRadius + width / 2.0);
-    double den = kSampleRadius * 2.0 + 1.0;
+    double loc = scale * norm * (radius + width / 2.0);
+    double den = radius * 2.0 + 1.0;
     curve_data.push_back(DoubleToUint8(loc / den));
   }
 
@@ -96,13 +98,14 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
           corners, transform,
           /*extend_endpoints=*/line_geometry->GetCap() != Cap::kButt,
           line_geometry->GetP0(), line_geometry->GetP1(),
-          line_geometry->GetWidth() + kSampleRadius)) {
+          line_geometry->GetWidth() + kSampleRadius * 2.0)) {
     return kEmptyResult;
   }
 
   auto& host_buffer = renderer.GetTransientsBuffer();
 
   size_t count = 4;
+  Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
   LineInfo line_info =
       CalculateLineInfo(line_geometry->GetP0(), line_geometry->GetP1(),
                         line_geometry->GetWidth(), kSampleRadius);
@@ -121,8 +124,8 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
         }
       });
 
-  std::shared_ptr<Texture> curve_texture =
-      CreateCurveTexture(line_geometry->GetWidth(), renderer.GetContext());
+  std::shared_ptr<Texture> curve_texture = CreateCurveTexture(
+      line_geometry->GetWidth(), kSampleRadius, scale, renderer.GetContext());
 
   SamplerDescriptor sampler_desc;
   sampler_desc.min_filter = MinMagFilter::kLinear;
@@ -162,7 +165,7 @@ bool LineContents::Render(const ContentContext& renderer,
 
   VS::FrameInfo frame_info;
   FS::FragInfo frag_info;
-  frag_info.color = color_.Premultiply();
+  frag_info.color = color_;
 
   PipelineBuilderCallback pipeline_callback =
       [&renderer](ContentContextOptions options) {
