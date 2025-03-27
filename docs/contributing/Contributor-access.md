@@ -124,7 +124,7 @@ We currently have the following review teams:
 
 * [`android-reviewers`](https://github.com/orgs/flutter/teams/android-reviewers): for folks working on the Android port of Flutter; use `#hackers-android` for discussions.
 * [`devtools-reviewers`](https://github.com/orgs/flutter/teams/devtools-reviewers): for the [devtools](https://github.com/flutter/devtools) repo; use `#hackers-devexp` for discussions.
-* * [`andriosoid-reviewers`](https://github.com/orgs/flutter/teams/ios-reviewers): for folks working on the iOS port of Flutter; use `#hackers-ios` for discussions.
+* * [`ios-reviewers`](https://github.com/orgs/flutter/teams/ios-reviewers): for folks working on the iOS port of Flutter; use `#hackers-ios` for discussions.
 * [`website-reviewers`](https://github.com/orgs/flutter/teams/website-reviewers): for folks working on www.flutter.dev and docs.flutter.dev; use `#hackers-devrel` for discussions.
 
 To create a new team, contact @github-admin on Discord. You will also need to create a `CODEOWNERS` file to actually trigger the review assignment.
