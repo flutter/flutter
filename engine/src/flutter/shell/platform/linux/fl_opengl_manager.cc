@@ -13,7 +13,8 @@ struct _FlOpenGLManager {
   // Main OpenGL rendering context used by Flutter.
   GdkGLContext* main_context;
 
-  // Secondary OpenGL rendering context used by Flutter.
+  // OpenGL rendering context used by a Flutter background thread for
+  // asynchronous texture uploads.
   GdkGLContext* resource_context;
 };
 
