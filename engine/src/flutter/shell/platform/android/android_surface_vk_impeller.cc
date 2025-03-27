@@ -37,7 +37,7 @@ bool AndroidSurfaceVKImpeller::IsValid() const {
 }
 
 void AndroidSurfaceVKImpeller::TeardownOnScreenContext() {
-  // Nothing to do.
+  surface_context_vk_->TeardownSwapchain();
 }
 
 std::unique_ptr<Surface> AndroidSurfaceVKImpeller::CreateGPUSurface(

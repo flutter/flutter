@@ -20,6 +20,7 @@
 #include "flutter/shell/platform/linux/fl_socket_accessible.h"
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
+#include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
@@ -224,6 +225,11 @@ static void view_added_cb(GObject* object,
 // Called when the engine updates accessibility.
 static void update_semantics_cb(FlView* self,
                                 const FlutterSemanticsUpdate2* update) {
+  // A semantics update is routed to a particular view.
+  if (update->view_id != self->view_id) {
+    return;
+  }
+
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 }
 
@@ -473,9 +479,6 @@ static void realize_cb(FlView* self) {
   g_signal_connect_swapped(toplevel_window, "delete-event",
                            G_CALLBACK(window_delete_event_cb), self);
 
-  fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
-                             FL_RENDERABLE(self));
-
   // Flutter engine will need to make the context current from raster thread
   // during initialization.
   fl_renderer_clear_current(FL_RENDERER(self->renderer));
@@ -488,11 +491,6 @@ static void realize_cb(FlView* self) {
   setup_cursor(self);
 
   handle_geometry_changed(self);
-
-  self->view_accessible = fl_view_accessible_new(self->engine);
-  fl_socket_accessible_embed(
-      FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
-      atk_plug_get_id(ATK_PLUG(self->view_accessible)));
 }
 
 static void secondary_realize_cb(FlView* self) {
@@ -556,9 +554,6 @@ static void fl_view_dispose(GObject* object) {
       g_signal_handler_disconnect(handler, self->cursor_changed_cb_id);
       self->cursor_changed_cb_id = 0;
     }
-
-    // Stop rendering.
-    fl_renderer_remove_view(FL_RENDERER(self->renderer), self->view_id);
 
     // Release the view ID from the engine.
     fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
@@ -677,6 +672,22 @@ static void fl_view_class_init(FlViewClass* klass) {
                                        fl_socket_accessible_get_type());
 }
 
+// Engine related construction.
+static void setup_engine(FlView* self) {
+  self->view_accessible = fl_view_accessible_new(self->engine, self->view_id);
+  fl_socket_accessible_embed(
+      FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
+      atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+
+  self->pointer_manager = fl_pointer_manager_new(self->view_id, self->engine);
+
+  self->on_pre_engine_restart_cb_id =
+      g_signal_connect_swapped(self->engine, "on-pre-engine-restart",
+                               G_CALLBACK(on_pre_engine_restart_cb), self);
+  self->update_semantics_cb_id = g_signal_connect_swapped(
+      self->engine, "update-semantics", G_CALLBACK(update_semantics_cb), self);
+}
+
 static void fl_view_init(FlView* self) {
   self->cancellable = g_cancellable_new();
 
@@ -747,13 +758,7 @@ G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
   g_assert(FL_IS_RENDERER_GDK(renderer));
   self->renderer = FL_RENDERER_GDK(g_object_ref(renderer));
 
-  self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
-
-  self->on_pre_engine_restart_cb_id =
-      g_signal_connect_swapped(self->engine, "on-pre-engine-restart",
-                               G_CALLBACK(on_pre_engine_restart_cb), self);
-  self->update_semantics_cb_id = g_signal_connect_swapped(
-      engine, "update-semantics", G_CALLBACK(update_semantics_cb), self);
+  setup_engine(self);
 
   g_signal_connect_swapped(self->gl_area, "create-context",
                            G_CALLBACK(create_context_cb), self);
@@ -761,6 +766,8 @@ G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
                            self);
   g_signal_connect_swapped(self->gl_area, "unrealize", G_CALLBACK(unrealize_cb),
                            self);
+
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(self));
 
   return self;
 }
@@ -773,20 +780,13 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
   g_assert(FL_IS_RENDERER_GDK(renderer));
   self->renderer = FL_RENDERER_GDK(g_object_ref(renderer));
 
-  self->on_pre_engine_restart_cb_id =
-      g_signal_connect_swapped(engine, "on-pre-engine-restart",
-                               G_CALLBACK(on_pre_engine_restart_cb), self);
+  self->view_id = fl_engine_add_view(engine, FL_RENDERABLE(self), 1, 1, 1.0,
+                                     self->cancellable, view_added_cb, self);
 
-  self->view_id = fl_engine_add_view(engine, 1, 1, 1.0, self->cancellable,
-                                     view_added_cb, self);
-  fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
-                             FL_RENDERABLE(self));
-
-  self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
+  setup_engine(self);
 
   g_signal_connect_swapped(self->gl_area, "realize",
                            G_CALLBACK(secondary_realize_cb), self);
-
   return self;
 }
 
@@ -806,4 +806,9 @@ G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,
   g_return_if_fail(FL_IS_VIEW(self));
   gdk_rgba_free(self->background_color);
   self->background_color = gdk_rgba_copy(color);
+}
+
+FlViewAccessible* fl_view_get_accessible(FlView* self) {
+  g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
+  return self->view_accessible;
 }

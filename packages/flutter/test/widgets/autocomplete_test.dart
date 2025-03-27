@@ -326,8 +326,6 @@ void main() {
 
       // Tap on the text field to open the options.
       await tester.tap(find.byKey(fieldKey));
-      // Two pumps required due to post frame callback.
-      await tester.pump();
       await tester.pump();
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, kOptions.length);
@@ -446,17 +444,10 @@ void main() {
           );
       }
 
-      // Add an extra pump to account for any potential frame delays introduced
-      // by the post frame callback in the _RawAutocompleteOptions
-      // implementation.
-      await tester.pump();
       setState(() {
         alignment = Alignment.topCenter;
       });
 
-      // One frame for the field to move and one frame for the options to
-      // follow.
-      await tester.pump();
       await tester.pump();
 
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -596,8 +587,6 @@ void main() {
       expect(find.byKey(optionsKey), findsNothing);
 
       await tester.tap(find.byType(TextField));
-      // Two pumps required due to post frame callback.
-      await tester.pump();
       await tester.pump();
 
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -1128,10 +1117,6 @@ void main() {
     final Offset fieldOffset = tester.getTopLeft(find.byKey(fieldKey));
     final Size fieldSize = tester.getSize(find.byKey(fieldKey));
     expect(optionsTopLeft.dy, fieldOffset.dy + fieldSize.height);
-
-    // Add an extra pump to account for any potential frame delays introduced by
-    // the post frame callback in the _RawAutocompleteOptions implementation.
-    await tester.pump();
 
     // Move the field (similar to as if the keyboard opened). The options move
     // to follow the field.
@@ -2210,9 +2195,6 @@ void main() {
     final RenderBox optionsBox = tester.renderObject(find.byKey(optionsKey));
     expect(optionsBox.size.width, 100.0);
 
-    // Add an extra pump to account for any potential frame delays introduced by
-    // the post frame callback in the _RawAutocompleteOptions implementation.
-    await tester.pump();
     setState(() {
       width = 200.0;
     });
@@ -2248,21 +2230,26 @@ void main() {
         FocusNode focusNode,
         VoidCallback onSubmitted,
       ) {
-        return TextField(key: fieldKey, focusNode: focusNode, controller: textEditingController);
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter localStateSetter) {
+            setState = localStateSetter;
+            return SizedBox(
+              width: width,
+              child: TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              ),
+            );
+          },
+        );
       },
     );
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter localStateSetter) {
-                setState = localStateSetter;
-                return SizedBox(width: width, child: autocomplete);
-              },
-            ),
-          ),
+          body: Padding(padding: const EdgeInsets.symmetric(horizontal: 32.0), child: autocomplete),
         ),
       ),
     );
@@ -2283,9 +2270,6 @@ void main() {
     expect(fieldBox.size.width, 100.0);
     expect(optionsBox.size.width, 100.0);
 
-    // Add an extra pump to account for any potential frame delays introduced by
-    // the post frame callback in the _RawAutocompleteOptions implementation.
-    await tester.pump();
     setState(() {
       width = 200.0;
     });

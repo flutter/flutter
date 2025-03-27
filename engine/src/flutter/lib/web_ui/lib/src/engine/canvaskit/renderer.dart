@@ -573,4 +573,7 @@ class CanvasKitRenderer implements Renderer {
     baseline: baseline,
     lineNumber: lineNumber,
   );
+
+  @override
+  void dumpDebugInfo() {}
 }

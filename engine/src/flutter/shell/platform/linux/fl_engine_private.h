@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
+#include "flutter/shell/platform/linux/fl_renderable.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
@@ -128,8 +129,18 @@ void fl_engine_notify_display_update(FlEngine* engine,
                                      size_t displays_length);
 
 /**
+ * fl_engine_set_implicit_view:
+ * @engine: an #FlEngine.
+ * @renderable: the object that will render the implicit view.
+ *
+ * Sets the object to render the implicit view.
+ */
+void fl_engine_set_implicit_view(FlEngine* engine, FlRenderable* renderable);
+
+/**
  * fl_engine_add_view:
  * @engine: an #FlEngine.
+ * @renderable: the object that will render this view.
  * @width: width of view in pixels.
  * @height: height of view in pixels.
  * @pixel_ratio: scale factor for view.
@@ -144,6 +155,7 @@ void fl_engine_notify_display_update(FlEngine* engine,
  * Returns: the ID for the view.
  */
 FlutterViewId fl_engine_add_view(FlEngine* engine,
+                                 FlRenderable* renderable,
                                  size_t width,
                                  size_t height,
                                  double pixel_ratio,
@@ -165,6 +177,18 @@ FlutterViewId fl_engine_add_view(FlEngine* engine,
 gboolean fl_engine_add_view_finish(FlEngine* engine,
                                    GAsyncResult* result,
                                    GError** error);
+
+/**
+ * fl_engine_get_renderable:
+ * @engine: an #FlEngine.
+ * @view_id: ID to check.
+ *
+ * Gets the renderable associated with the give view ID.
+ *
+ * Returns: (transfer full): a reference to an #FlRenderable or %NULL if none
+ * for this ID.
+ */
+FlRenderable* fl_engine_get_renderable(FlEngine* engine, FlutterViewId view_id);
 
 /**
  * fl_engine_remove_view:
@@ -414,12 +438,14 @@ gboolean fl_engine_send_key_event_finish(FlEngine* engine,
 /**
  * fl_engine_dispatch_semantics_action:
  * @engine: an #FlEngine.
- * @id: the semantics action identifier.
+ * @view_id: the view that the event occured on.
+ * @node_id: the semantics action identifier.
  * @action: the action being dispatched.
  * @data: (allow-none): data associated with the action.
  */
 void fl_engine_dispatch_semantics_action(FlEngine* engine,
-                                         uint64_t id,
+                                         FlutterViewId view_id,
+                                         uint64_t node_id,
                                          FlutterSemanticsAction action,
                                          GBytes* data);
 

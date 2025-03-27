@@ -26,10 +26,7 @@ class _WidgetPreviewIconButton extends StatelessWidget {
         ),
         child: IconButton(
           onPressed: onPressed,
-          icon: Icon(
-            color: Colors.white,
-            icon,
-          ),
+          icon: Icon(color: Colors.white, icon),
         ),
       ),
     );
@@ -42,9 +39,11 @@ class ZoomControls extends StatelessWidget {
   const ZoomControls({
     super.key,
     required TransformationController transformationController,
+    required this.enabled,
   }) : _transformationController = transformationController;
 
   final TransformationController _transformationController;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -53,23 +52,19 @@ class ZoomControls extends StatelessWidget {
       children: <Widget>[
         _WidgetPreviewIconButton(
           tooltip: 'Zoom in',
-          onPressed: _zoomIn,
+          onPressed: enabled ? _zoomIn : null,
           icon: Icons.zoom_in,
         ),
-        const SizedBox(
-          width: 10,
-        ),
+        const SizedBox(width: 10),
         _WidgetPreviewIconButton(
           tooltip: 'Zoom out',
-          onPressed: _zoomOut,
+          onPressed: enabled ? _zoomOut : null,
           icon: Icons.zoom_out,
         ),
-        const SizedBox(
-          width: 10,
-        ),
+        const SizedBox(width: 10),
         _WidgetPreviewIconButton(
           tooltip: 'Reset zoom',
-          onPressed: _reset,
+          onPressed: enabled ? _reset : null,
           icon: Icons.refresh,
         ),
       ],

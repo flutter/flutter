@@ -358,8 +358,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   bool _buttonHeldDown = false;
+  bool _tapInProgress = false;
 
   void _handleTapDown(TapDownDetails event) {
+    _tapInProgress = true;
     if (!_buttonHeldDown) {
       _buttonHeldDown = true;
       _animate();
@@ -367,6 +369,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapUp(TapUpDetails event) {
+    _tapInProgress = false;
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -379,19 +382,20 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapCancel() {
+    _tapInProgress = false;
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
     }
   }
 
-  void _handTapMove(TapMoveDetails event) {
+  void _handleTapMove(TapMoveDetails event) {
     final RenderBox renderObject = context.findRenderObject()! as RenderBox;
     final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
     final bool buttonShouldHeldDown = renderObject.paintBounds
         .inflate(CupertinoButton.tapMoveSlop())
         .contains(localPosition);
-    if (buttonShouldHeldDown != _buttonHeldDown) {
+    if (_tapInProgress && buttonShouldHeldDown != _buttonHeldDown) {
       _buttonHeldDown = buttonShouldHeldDown;
       _animate();
     }
@@ -518,7 +522,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                 instance.onTapDown = enabled ? _handleTapDown : null;
                 instance.onTapUp = enabled ? _handleTapUp : null;
                 instance.onTapCancel = enabled ? _handleTapCancel : null;
-                instance.onTapMove = enabled ? _handTapMove : null;
+                instance.onTapMove = enabled ? _handleTapMove : null;
                 instance.gestureSettings = gestureSettings;
               },
             ),
