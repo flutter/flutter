@@ -15,6 +15,7 @@ import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginConstants
 import com.flutter.gradle.FlutterTask
 import com.flutter.gradle.FlutterPluginUtils
+import com.flutter.gradle.NativePluginLoaderReflectionBridge
 import org.gradle.api.file.Directory
 
 import java.nio.file.Paths
