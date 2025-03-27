@@ -787,7 +787,7 @@ class CustomScrollView extends ScrollView {
   /// be laid out in a viewport (i.e. when scrolling).
   ///
   /// Typically, the simplest way to combine boxes into a sliver environment is
-  /// to use a [SliverList] (maybe using a [ListView, which is a convenient
+  /// to use a [SliverList] (maybe using a [ListView], which is a convenient
   /// combination of a [CustomScrollView] and a [SliverList]). In rare cases,
   /// e.g. if a single [Divider] widget is needed between two [SliverGrid]s,
   /// a [SliverToBoxAdapter] can be used to wrap the box widgets.
