@@ -108,18 +108,21 @@ enum class MaliGPU {
   kUnknown,
 };
 
+// Ordered by approximate release date. We currently don't attempt to
+// parse the exact power VR GPU variant so newer names will fall back
+// to OpenGL. This is acceptable for now.
 enum class PowerVRGPU {
   kUnknown,
   // Not good.
-  // kRogue,
+  kRogue,
   // Vulkan may work, but not tested.
-  // kAXE,
-  // kAXM,
-  // kAXT,
-  // kBXE,
-  // kBXM,
-  // kBXS,
-  // kBXT,
+  kAXE,
+  kAXM,
+  kAXT,
+  kBXE,
+  kBXM,
+  kBXS,
+  kBXT,
   // First good vulkan drivers.
   kCXT,
   kDXT,
