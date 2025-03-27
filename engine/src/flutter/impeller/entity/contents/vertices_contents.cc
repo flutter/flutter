@@ -189,11 +189,7 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
 
   auto options = OptionsFromPassAndEntity(pass, entity);
   options.primitive_type = geometry_result.type;
-  if (blend_mode <= BlendMode::kSoftLight) {
-    pass.SetPipeline(renderer.GetDrawVerticesUber1Pipeline(options));
-  } else {
-    pass.SetPipeline(renderer.GetDrawVerticesUber2Pipeline(options));
-  }
+  pass.SetPipeline(renderer.GetDrawVerticesUberPipeline(blend_mode, options));
 
   FS::BindTextureSampler(pass, texture, dst_sampler);
 

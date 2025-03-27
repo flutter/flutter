@@ -134,13 +134,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
 
-  if (blend_mode <= BlendMode::kSoftLight) {
-    pass.SetPipeline(
-        renderer.GetDrawVerticesUber1Pipeline(OptionsFromPass(pass)));
-  } else {
-    pass.SetPipeline(
-        renderer.GetDrawVerticesUber2Pipeline(OptionsFromPass(pass)));
-  }
+  renderer.GetDrawVerticesUberPipeline(blend_mode, OptionsFromPass(pass));
   FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
 
   VUS::FrameInfo frame_info;

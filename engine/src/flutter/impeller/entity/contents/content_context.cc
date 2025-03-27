@@ -1428,14 +1428,14 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
   return GetPipeline(this, pipelines_->framebuffer_blend_softlight, opts);
 }
 
-PipelineRef ContentContext::GetDrawVerticesUber1Pipeline(
+PipelineRef ContentContext::GetDrawVerticesUberPipeline(
+    BlendMode blend_mode,
     ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->vertices_uber_1_, opts);
-}
-
-PipelineRef ContentContext::GetDrawVerticesUber2Pipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->vertices_uber_2_, opts);
+  if (blend_mode <= BlendMode::kSoftLight) {
+    return GetPipeline(this, pipelines_->vertices_uber_1_, opts);
+  } else {
+    return GetPipeline(this, pipelines_->vertices_uber_2_, opts);
+  }
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
