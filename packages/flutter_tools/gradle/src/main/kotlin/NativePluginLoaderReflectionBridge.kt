@@ -3,6 +3,7 @@ package com.flutter.gradle
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import java.io.File
 
+// TODO(gmackall): We should prioritize removing this awful reflection.
 object NativePluginLoaderReflectionBridge {
     private var nativePluginLoader: Any? = null
 

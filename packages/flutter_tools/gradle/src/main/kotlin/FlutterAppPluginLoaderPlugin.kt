@@ -43,16 +43,6 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
             to()
         }
 
-        // TODO(gmackall): We should prioritize removing this awful reflection.
-        val nativePluginLoader = settings.extraProperties.get("nativePluginLoader")!!
-        val pluginList: List<*>? =
-            (
-                nativePluginLoader::class
-                    .members
-                    .firstOrNull { it.name == "getPlugins" }
-                    ?.call(nativePluginLoader, flutterProjectRoot) as? List<*>
-            )
-
         NativePluginLoaderReflectionBridge
             .getPlugins(settings.extraProperties, flutterProjectRoot)
             .forEach { androidPlugin ->
