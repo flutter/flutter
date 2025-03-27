@@ -127,6 +127,7 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
       onTap: _onHeaderTap,
       title: widget.title,
       trailing: _buildIcon(context, animation),
+      backgroundColorActivated: CupertinoColors.transparent,
     );
   }
 
