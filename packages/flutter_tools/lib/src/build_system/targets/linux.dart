@@ -87,15 +87,16 @@ class UnpackLinux extends Target {
 
 /// Creates a bundle for the Linux desktop target.
 abstract class BundleLinuxAssets extends Target {
-  const BundleLinuxAssets(this.targetPlatform);
+  const BundleLinuxAssets(this.targetPlatform, {this.unpackDesktopEmbedder = true});
 
   final TargetPlatform targetPlatform;
+  final bool unpackDesktopEmbedder;
 
   @override
   List<Target> get dependencies => <Target>[
     const KernelSnapshot(),
     const InstallCodeAssets(),
-    UnpackLinux(targetPlatform),
+    if (unpackDesktopEmbedder) UnpackLinux(targetPlatform),
   ];
 
   @override
@@ -194,7 +195,7 @@ class LinuxAotBundle extends Target {
 }
 
 class DebugBundleLinuxAssets extends BundleLinuxAssets {
-  const DebugBundleLinuxAssets(super.targetPlatform);
+  const DebugBundleLinuxAssets(super.targetPlatform, {super.unpackDesktopEmbedder});
 
   @override
   String get name => 'debug_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
@@ -209,7 +210,7 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
 }
 
 class ProfileBundleLinuxAssets extends BundleLinuxAssets {
-  const ProfileBundleLinuxAssets(super.targetPlatform);
+  const ProfileBundleLinuxAssets(super.targetPlatform, {super.unpackDesktopEmbedder});
 
   @override
   String get name => 'profile_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';
@@ -225,7 +226,7 @@ class ProfileBundleLinuxAssets extends BundleLinuxAssets {
 }
 
 class ReleaseBundleLinuxAssets extends BundleLinuxAssets {
-  const ReleaseBundleLinuxAssets(super.targetPlatform);
+  const ReleaseBundleLinuxAssets(super.targetPlatform, {super.unpackDesktopEmbedder});
 
   @override
   String get name => 'release_bundle_${getNameForTargetPlatform(targetPlatform)}_assets';

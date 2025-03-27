@@ -47,6 +47,7 @@ class BundleBuilder {
     )
     String? assetDirPath,
     String? outputDirPath,
+    bool buildAOTAssets = false,
     bool buildNativeAssets = true,
     @visibleForTesting BuildSystem? buildSystem,
   }) async {
@@ -85,7 +86,9 @@ class BundleBuilder {
     );
     final Directory? assetDir = assetDirPath != null ? globals.fs.directory(assetDirPath) : null;
     final Target target = globals.buildTargets.buildFlutterBundle(
+      platform: platform,
       mode: buildInfo.mode,
+      buildAOTAssets: buildAOTAssets,
       assetDir: assetDir,
     );
     final BuildResult result = await buildSystem.build(target, environment);

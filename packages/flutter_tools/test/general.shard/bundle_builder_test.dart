@@ -300,6 +300,36 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
+
+  testUsingContext(
+    'Release bundle includes AOT assets',
+    () async {
+      final dependencies = <String>[];
+      final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        for (final Target dep in target.dependencies) {
+          dependencies.add(dep.name);
+        }
+      });
+      await BundleBuilder().build(
+        platform: TargetPlatform.linux_x64,
+        buildInfo: BuildInfo.release,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        mainPath: globals.fs.path.join('lib', 'main.dart'),
+        outputDirPath: 'example',
+        depfilePath: 'example.d',
+        buildAOTAssets: true,
+        buildSystem: buildSystem,
+      );
+      expect(dependencies, contains('linux_aot_bundle'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
 }
 
 class FakeAssetBundle extends Fake implements AssetBundle {
