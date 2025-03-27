@@ -22,8 +22,8 @@ import 'widget_preview.dart';
 ///
 /// Provides users with details about the thrown exception, including the exception
 /// contents and a scrollable stack trace.
-class WidgetPreviewErrorWidget extends StatelessWidget {
-  WidgetPreviewErrorWidget({
+class _WidgetPreviewErrorWidget extends StatelessWidget {
+  _WidgetPreviewErrorWidget({
     required this.error,
     required StackTrace stackTrace,
     required this.size,
@@ -43,12 +43,9 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
     final TextStyle boldStyle = fixBlurryText(
       TextStyle(fontWeight: FontWeight.bold),
     );
-    final TextStyle monoStyle = fixBlurryText(
-      TextStyle(fontFamily: 'RobotoMono'),
-    );
 
-    return SizedBox.fromSize(
-      size: size,
+    return SizedBox(
+      height: size.height,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,13 +57,15 @@ class WidgetPreviewErrorWidget extends StatelessWidget {
                     text: 'Failed to initialize widget tree: ',
                     style: boldStyle,
                   ),
-                  TextSpan(text: error.toString(), style: monoStyle),
+                  // TODO(bkonyi): use monospace font
+                  TextSpan(text: error.toString()),
                 ],
               ),
             ),
             Text('Stacktrace:', style: boldStyle),
+            // TODO(bkonyi): use monospace font
             SelectableText.rich(
-              TextSpan(children: _formatFrames(trace.frames), style: monoStyle),
+              TextSpan(children: _formatFrames(trace.frames)),
             ),
           ],
         ),
@@ -148,7 +147,7 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       preview = widget.preview.builder();
     } on Object catch (error, stackTrace) {
       errorThrownDuringTreeConstruction = true;
-      preview = WidgetPreviewErrorWidget(
+      preview = _WidgetPreviewErrorWidget(
         error: error,
         stackTrace: stackTrace,
         size: maxSizeConstraints.biggest,

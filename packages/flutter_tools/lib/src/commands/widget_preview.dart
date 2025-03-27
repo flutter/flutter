@@ -578,6 +578,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
         'flutter_lints',
+        'stack_trace',
       ],
       context: PubContext.pubAdd,
       command: pubAdd,
