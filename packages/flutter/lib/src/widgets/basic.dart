@@ -1726,7 +1726,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// this render object) in which to apply the matrix.
   ///
   /// This offset is applied after any [alignment] transformation.
-  /// In this example, the origin appears to be offset from the center of the,
+  /// In this example the origin appears to be offset from the center of the,
   /// widget, since [alignment] defaults to [Alignment.center].
   ///
   /// ```dart
@@ -1751,7 +1751,6 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
   /// translation. This property is provided just for convenience.
-    
   final Offset? origin;
 
   /// The alignment of the origin, relative to the size of the box.
