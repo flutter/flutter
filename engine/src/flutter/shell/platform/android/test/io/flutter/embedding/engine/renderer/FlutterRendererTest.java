@@ -829,7 +829,8 @@ public class FlutterRendererTest {
   @SuppressWarnings({"deprecation", "removal"})
   public void ImageReaderSurfaceProducerIsCleanedUpOnTrimMemory() {
     FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
-    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    TextureRegistry.SurfaceProducer producer =
+        flutterRenderer.createSurfaceProducer(TextureRegistry.SurfaceLifecycle.resetInBackground);
 
     // Create and set a mock callback.
     TextureRegistry.SurfaceProducer.Callback callback =
