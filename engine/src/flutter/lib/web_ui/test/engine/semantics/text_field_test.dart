@@ -117,19 +117,17 @@ void testMain() {
       expect(inputElement.disabled, isFalse);
     });
 
-    test('renders a text field with input type', () {
-      const inputTypeEnumToString = <ui.SemanticsInputType, string> {
+    test('renders text fields with input types', () {
+      const inputTypeEnumToString = <ui.SemanticsInputType, String>{
         ui.SemanticsInputType.none: 'text',
         ui.SemanticsInputType.text: 'text',
         ui.SemanticsInputType.url: 'url',
         ui.SemanticsInputType.phone: 'tel',
         ui.SemanticsInputType.search: 'search',
         ui.SemanticsInputType.email: 'email',
-
-      }
-      for (final ui.SemanticsInputType type in uiSemanticsInputType.values) {
-        createTextFieldSemantics(
-            value: 'text', inputType: type);
+      };
+      for (final ui.SemanticsInputType type in ui.SemanticsInputType.values) {
+        createTextFieldSemantics(value: 'text', inputType: type);
 
         expectSemanticsTree(owner(), '<sem><input type="${inputTypeEnumToString[type]}" /></sem>');
       }
