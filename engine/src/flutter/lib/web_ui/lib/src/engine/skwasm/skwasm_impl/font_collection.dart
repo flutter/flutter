@@ -141,7 +141,7 @@ class SkwasmFontCollection implements FlutterFontCollection {
     });
     final SkDataHandle fontData = skDataCreate(length);
     int dataAddress = skDataGetPointer(fontData).cast<Int8>().address;
-    final JSUint8Array wasmMemory = createUint8ArrayFromBuffer(skwasmInstance.wasmMemory.buffer);
+    final JSUint8Array wasmMemory = JSUint8Array(skwasmInstance.wasmMemory.buffer);
     for (final JSUint8Array chunk in chunks) {
       wasmMemory.set(chunk, dataAddress);
       dataAddress += chunk.length;
