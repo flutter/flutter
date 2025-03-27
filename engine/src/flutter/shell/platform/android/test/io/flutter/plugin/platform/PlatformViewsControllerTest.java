@@ -1621,7 +1621,7 @@ public class PlatformViewsControllerTest {
 
           @NonNull
           @Override
-          public SurfaceProducer createSurfaceProducer() {
+          public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
             return new SurfaceProducer() {
               @Override
               public void setCallback(SurfaceProducer.Callback cb) {}
