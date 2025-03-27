@@ -51,9 +51,6 @@ typedef struct {
   // The format used to create textures.
   GLint general_format;
 
-  // Views being rendered.
-  GHashTable* views;
-
   // target dimension for resizing
   int target_width;
   int target_height;
@@ -84,12 +81,6 @@ typedef struct {
 } FlRendererPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE(FlRenderer, fl_renderer, G_TYPE_OBJECT)
-
-static void free_weak_ref(gpointer value) {
-  GWeakRef* ref = static_cast<GWeakRef*>(value);
-  g_weak_ref_clear(ref);
-  free(ref);
-}
 
 // Check if running on an NVIDIA driver.
 static gboolean is_nvidia() {
@@ -349,10 +340,12 @@ static gboolean present_layers(FlRenderer* self,
     }
   }
 
-  GWeakRef* ref = static_cast<GWeakRef*>(
-      g_hash_table_lookup(priv->views, GINT_TO_POINTER(view_id)));
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+  if (engine == nullptr) {
+    return TRUE;
+  }
   g_autoptr(FlRenderable) renderable =
-      ref != nullptr ? FL_RENDERABLE(g_weak_ref_get(ref)) : nullptr;
+      fl_engine_get_renderable(engine, view_id);
   if (renderable == nullptr) {
     return TRUE;
   }
@@ -462,7 +455,6 @@ static void fl_renderer_dispose(GObject* object) {
   fl_renderer_unblock_main_thread(self);
 
   g_weak_ref_clear(&priv->engine);
-  g_clear_pointer(&priv->views, g_hash_table_unref);
   g_clear_pointer(&priv->framebuffers_by_view_id, g_hash_table_unref);
   g_mutex_clear(&priv->present_mutex);
   g_cond_clear(&priv->present_condition);
@@ -477,8 +469,6 @@ static void fl_renderer_class_init(FlRendererClass* klass) {
 static void fl_renderer_init(FlRenderer* self) {
   FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
       fl_renderer_get_instance_private(self));
-  priv->views = g_hash_table_new_full(g_direct_hash, g_direct_equal, nullptr,
-                                      free_weak_ref);
   priv->framebuffers_by_view_id = g_hash_table_new_full(
       g_direct_hash, g_direct_equal, nullptr,
       reinterpret_cast<GDestroyNotify>(g_ptr_array_unref));
@@ -493,28 +483,6 @@ void fl_renderer_set_engine(FlRenderer* self, FlEngine* engine) {
   g_return_if_fail(FL_IS_RENDERER(self));
 
   g_weak_ref_init(&priv->engine, engine);
-}
-
-void fl_renderer_add_renderable(FlRenderer* self,
-                                FlutterViewId view_id,
-                                FlRenderable* renderable) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
-  g_return_if_fail(FL_IS_RENDERER(self));
-
-  GWeakRef* ref = g_new(GWeakRef, 1);
-  g_weak_ref_init(ref, G_OBJECT(renderable));
-  g_hash_table_insert(priv->views, GINT_TO_POINTER(view_id), ref);
-}
-
-void fl_renderer_remove_view(FlRenderer* self, FlutterViewId view_id) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
-  g_return_if_fail(FL_IS_RENDERER(self));
-
-  g_hash_table_remove(priv->views, GINT_TO_POINTER(view_id));
 }
 
 void* fl_renderer_get_proc_address(FlRenderer* self, const char* name) {

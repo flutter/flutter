@@ -16,6 +16,7 @@
 #include "flutter/fml/thread.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
@@ -4624,9 +4625,9 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
   [engine run];
   XCTAssertTrue(engine.platformView != nullptr);
-  auto ios_context = engine.platformView->GetIosContext();
+  std::shared_ptr<flutter::IOSContext> ios_context = engine.platformView->GetIosContext();
 
-  auto pool = flutter::OverlayLayerPool{};
+  flutter::OverlayLayerPool pool;
 
   // Add layers to the pool.
   pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm, 1);
@@ -4642,6 +4643,34 @@ fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   auto unused_layers = pool.RemoveUnusedLayers();
   XCTAssertEqual(unused_layers.size(), 2u);
   XCTAssertEqual(pool.size(), 1u);
+}
+
+- (void)testLayerUpdateViewStateWithNilFlutterViewShouldNotCrash {
+  // Create an IOSContext.
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar"];
+  [engine run];
+  XCTAssertTrue(engine.platformView != nullptr);
+  std::shared_ptr<flutter::IOSContext> ios_context = engine.platformView->GetIosContext();
+
+  flutter::OverlayLayerPool pool;
+
+  // Add layers to the pool.
+  pool.CreateLayer(ios_context, MTLPixelFormatBGRA8Unorm, 1);
+  XCTAssertEqual(pool.size(), 1u);
+
+  std::shared_ptr<flutter::OverlayLayer> layer = pool.GetNextLayer();
+
+  layer->UpdateViewState(nil, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
+  // Should not update the view state (e.g. overlay_view_wrapper's frame) when FlutterView is nil.
+  XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
+
+  FlutterView* flutterView = [[FlutterView alloc] initWithDelegate:engine
+                                                            opaque:YES
+                                                   enableWideGamut:NO];
+  layer->UpdateViewState(flutterView, SkRect::MakeXYWH(1, 2, 3, 4), 0, 0);
+  // Should not update the view state (e.g. overlay_view_wrapper's frame) when FlutterView's screen
+  // is nil.
+  XCTAssertTrue(CGRectEqualToRect(layer->overlay_view_wrapper.frame, CGRectZero));
 }
 
 - (void)testFlutterPlatformViewControllerSubmitFramePreservingFrameDamage {
