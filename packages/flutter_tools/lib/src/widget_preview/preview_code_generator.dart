@@ -103,6 +103,10 @@ class PreviewCodeGenerator {
                   preview.wrapperLibraryUri,
                 ).call(<Expression>[previewWidget]);
               }
+              previewWidget =
+                  Method((MethodBuilder previewBuilder) {
+                    previewBuilder.body = previewWidget.code;
+                  }).closure;
               previewExpressions.add(
                 refer(
                   'WidgetPreview',
@@ -115,7 +119,7 @@ class PreviewCodeGenerator {
                     key: PreviewDetails.kTextScaleFactor,
                     property: preview.textScaleFactor,
                   ),
-                  'child': previewWidget,
+                  'builder': previewWidget,
                 }),
               );
             }
