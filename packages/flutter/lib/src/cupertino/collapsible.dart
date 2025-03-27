@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'icons.dart';
 import 'list_tile.dart';
+import 'theme.dart';
 
 /// The curve of the animation used to expand or collapse the [CupertinoCollapsible].
 ///
@@ -21,13 +22,16 @@ const Curve _kAnimationCurve = Curves.easeInOut;
 /// The height of the header of the collapsible, which is a [CupertinoListTile].
 const double _kHeaderHeight = 44.0;
 
+/// The font size of the header's rotating trailing icon.
+const double _kIconFontSize = 15.0;
+
 ///
 enum CollapsibleTransitionMode {
   ///
-  fadeTransition,
+  fade,
 
   ///
-  scrollTransition,
+  scroll,
 }
 
 ///
@@ -38,7 +42,7 @@ class CupertinoCollapsible extends StatefulWidget {
     required this.title,
     required this.child,
     this.controller,
-    this.transitionMode = CollapsibleTransitionMode.fadeTransition,
+    this.transitionMode = CollapsibleTransitionMode.fade,
   });
 
   /// A [title] is used to convey the central information. Usually a [Text].
@@ -79,19 +83,26 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
 
   Widget? _buildIcon(BuildContext context, Animation<double> animation) {
     _iconTurns = animation.drive(_quarterTween.chain(_easeInTween));
+    final double? size = CupertinoTheme.of(context).textTheme.textStyle.fontSize;
     // Replicate the Icon logic here to get a slightly bolder icon.
     return RotationTransition(
       turns: _iconTurns,
-      child: Text.rich(
-        TextSpan(
-          text: String.fromCharCode(CupertinoIcons.right_chevron.codePoint),
-          style: TextStyle(
-            inherit: false,
-            color: CupertinoColors.activeBlue,
-            fontSize: 15.0,
-            fontWeight: FontWeight.w900,
-            fontFamily: CupertinoIcons.right_chevron.fontFamily,
-            package: CupertinoIcons.right_chevron.fontPackage,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Center(
+          child: Text.rich(
+            TextSpan(
+              text: String.fromCharCode(CupertinoIcons.right_chevron.codePoint),
+              style: TextStyle(
+                inherit: false,
+                color: CupertinoColors.activeBlue,
+                fontSize: _kIconFontSize,
+                fontWeight: FontWeight.w900,
+                fontFamily: CupertinoIcons.right_chevron.fontFamily,
+                package: CupertinoIcons.right_chevron.fontPackage,
+              ),
+            ),
           ),
         ),
       ),
@@ -116,8 +127,6 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
       onTap: _onHeaderTap,
       title: widget.title,
       trailing: _buildIcon(context, animation),
-      padding: const EdgeInsets.only(right: 20.0),
-      backgroundColorActivated: CupertinoColors.transparent,
     );
   }
 
@@ -133,8 +142,7 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
         header,
         Opacity(
           opacity:
-              animation.isAnimating &&
-                      widget.transitionMode == CollapsibleTransitionMode.fadeTransition
+              animation.isAnimating && widget.transitionMode == CollapsibleTransitionMode.fade
                   ? 0.0
                   : 1.0,
           child: body,
@@ -142,7 +150,7 @@ class _CupertinoCollapsibleState extends State<CupertinoCollapsible> {
       ],
     );
 
-    if (widget.transitionMode == CollapsibleTransitionMode.scrollTransition) {
+    if (widget.transitionMode == CollapsibleTransitionMode.scroll) {
       return child;
     }
 
