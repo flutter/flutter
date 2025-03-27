@@ -41,15 +41,16 @@ Future<DartHookResult> runFlutterSpecificHooks({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  if (!await _hookRunRequired(buildRunner)) {
-    return DartHookResult.empty();
-  }
   final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName);
   final Directory buildDir = fileSystem.directory(buildUri);
   if (!await buildDir.exists()) {
     // Ensure the folder exists so the native build system can copy it even
     // if there's no native assets.
     await buildDir.create(recursive: true);
+  }
+
+  if (!await _hookRunRequired(buildRunner)) {
+    return DartHookResult.empty();
   }
 
   final List<String> supportedAssetTypes = <String>[
