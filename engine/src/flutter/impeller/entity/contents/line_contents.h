@@ -14,12 +14,13 @@
 namespace impeller {
 class LineContents : public Contents {
  public:
+  static const Scalar kSampleRadius;
   static std::vector<uint8_t> CreateCurveData(Scalar width,
                                               Scalar radius,
                                               Scalar scale);
 
   static fml::Status CalculatePerVertex(
-    LineVertexShader::PerVertexData* per_vertex,
+      LineVertexShader::PerVertexData* per_vertex,
       const LineGeometry* geometry,
       const Matrix& entity_transform);
 

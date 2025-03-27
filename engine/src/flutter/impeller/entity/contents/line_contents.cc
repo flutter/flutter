@@ -24,7 +24,6 @@ using CreateGeometryCallback =
                                  const Geometry* geometry)>;
 
 const int32_t kCurveResolution = 32;
-const float kSampleRadius = 1.f;
 
 uint8_t DoubleToUint8(double x) {
   return static_cast<uint8_t>(std::clamp(std::round(x * 255.0), 0.0, 255.0));
@@ -114,6 +113,8 @@ LineInfo CalculateLineInfo(Point p0, Point p1, Scalar width, Scalar radius) {
 }
 
 }  // namespace
+
+const Scalar LineContents::kSampleRadius = 1.f;
 
 std::unique_ptr<LineContents> LineContents::Make(
     std::unique_ptr<LineGeometry> geometry,
