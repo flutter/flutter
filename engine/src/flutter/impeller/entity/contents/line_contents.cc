@@ -47,10 +47,11 @@ std::shared_ptr<Texture> CreateCurveTexture(
   return CreateTexture(texture_descriptor, curve_data, context, "LineCurve");
 }
 
-GeometryResult CreateGeometry(const ContentContext& renderer,
-                              const Entity& entity,
-                              RenderPass& pass,
-                              const Geometry* geometry) {
+std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
+    const Geometry* geometry) {
   using PerVertexData = LineVertexShader::PerVertexData;
   const LineGeometry* line_geometry =
       static_cast<const LineGeometry*>(geometry);
@@ -60,7 +61,7 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
 
   size_t count = 4;
   fml::StatusOr<LineContents::EffectiveLineParameters> calculate_status =
-      fml::Status();
+      LineContents::EffectiveLineParameters{.width = 0, .radius = 0};
   BufferView vertex_buffer = host_buffer.Emplace(
       count * sizeof(PerVertexData), alignof(PerVertexData),
       [line_geometry, &transform, &calculate_status](uint8_t* buffer) {
@@ -69,19 +70,24 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
             vertices, line_geometry, transform);
       });
   if (!calculate_status.ok()) {
-    return kEmptyResult;
+    return std::make_pair(
+        LineContents::EffectiveLineParameters{
+            .width = line_geometry->GetWidth(),
+            .radius = LineContents::kSampleRadius},
+        kEmptyResult);
   }
 
-  return GeometryResult{
-      .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer =
-          {
-              .vertex_buffer = vertex_buffer,
-              .vertex_count = count,
-              .index_type = IndexType::kNone,
-          },
-      .transform = entity.GetShaderTransform(pass),
-  };
+  return std::make_pair(calculate_status.value(),
+                        GeometryResult{
+                            .type = PrimitiveType::kTriangleStrip,
+                            .vertex_buffer =
+                                {
+                                    .vertex_buffer = vertex_buffer,
+                                    .vertex_count = count,
+                                    .index_type = IndexType::kNone,
+                                },
+                            .transform = entity.GetShaderTransform(pass),
+                        });
 }
 
 struct LineInfo {
@@ -112,7 +118,6 @@ LineInfo CalculateLineInfo(Point p0, Point p1, Scalar width, Scalar radius) {
           1.0 + k * (p1.x * p1.x + p1.y * p1.y - p0.x * p1.x - p0.y * p1.y)),
   };
 }
-
 }  // namespace
 
 const Scalar LineContents::kSampleRadius = 1.f;
@@ -137,6 +142,10 @@ bool LineContents::Render(const ContentContext& renderer,
   frag_info.color = color_;
 
   Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
+
+  auto geometry_result =
+      CreateGeometry(renderer, entity, pass, geometry_.get());
+
   std::shared_ptr<Texture> curve_texture = CreateCurveTexture(
       geometry_->GetWidth(), kSampleRadius, scale, renderer.GetContext());
 
@@ -162,7 +171,11 @@ bool LineContents::Render(const ContentContext& renderer,
         return true;
       },
       /*force_stencil=*/false,
-      /*create_geom_callback=*/CreateGeometry);
+      /*create_geom_callback=*/
+      [geometry_result = std::move(geometry_result)](
+          const ContentContext& renderer, const Entity& entity,
+          RenderPass& pass,
+          const Geometry* geometry) { return geometry_result.second; });
 }
 
 std::optional<Rect> LineContents::GetCoverage(const Entity& entity) const {
