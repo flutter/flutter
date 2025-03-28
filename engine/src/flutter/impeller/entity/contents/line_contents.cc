@@ -59,7 +59,8 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
   auto& host_buffer = renderer.GetTransientsBuffer();
 
   size_t count = 4;
-  fml::Status calculate_status;
+  fml::StatusOr<LineContents::EffectiveLineParameters> calculate_status =
+      fml::Status();
   BufferView vertex_buffer = host_buffer.Emplace(
       count * sizeof(PerVertexData), alignof(PerVertexData),
       [line_geometry, &transform, &calculate_status](uint8_t* buffer) {
@@ -186,7 +187,7 @@ std::vector<uint8_t> LineContents::CreateCurveData(Scalar width,
 }
 
 namespace {
-void ExpandLine(Point corners[4], Point expansion) {
+void ExpandLine(std::array<Point, 4>& corners, Point expansion) {
   Point along = (corners[1] - corners[0]).Normalize();
   Point across = (corners[2] - corners[0]).Normalize();
   corners[0] += -1 * (across * expansion.x) + -1 * (along * expansion.y);
@@ -196,16 +197,16 @@ void ExpandLine(Point corners[4], Point expansion) {
 }
 }  // namespace
 
-fml::Status LineContents::CalculatePerVertex(
-    LineVertexShader::PerVertexData* per_vertex,
-    const LineGeometry* geometry,
-    const Matrix& entity_transform) {
+fml::StatusOr<LineContents::EffectiveLineParameters>
+LineContents::CalculatePerVertex(LineVertexShader::PerVertexData* per_vertex,
+                                 const LineGeometry* geometry,
+                                 const Matrix& entity_transform) {
   Scalar scale = entity_transform.GetMaxBasisLengthXY();
-  Point corners[4];
+  std::array<Point, 4> corners;
   // Make sure we get kSampleRadius pixels to sample from.
   Scalar expand_size = std::max(kSampleRadius / scale, kSampleRadius);
   if (!LineGeometry::ComputeCorners(
-          corners, entity_transform,
+          corners.data(), entity_transform,
           /*extend_endpoints=*/geometry->GetCap() != Cap::kButt,
           geometry->GetP0(), geometry->GetP1(), geometry->GetWidth())) {
     return fml::Status(fml::StatusCode::kAborted, "No valid corners");
@@ -228,6 +229,7 @@ fml::Status LineContents::CalculatePerVertex(
     };
   }
 
-  return {};
+  return EffectiveLineParameters{.width = effective_line_width,
+                                 .radius = effective_sample_radius};
 }
 }  // namespace impeller

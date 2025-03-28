@@ -64,11 +64,13 @@ TEST(LineContents, CalculatePerVertex) {
       /*cap=*/Cap::kButt);
   Matrix transform;
 
-  fml::Status status =
+  fml::StatusOr<LineContents::EffectiveLineParameters> status =
       LineContents::CalculatePerVertex(per_vertex, geometry.get(), transform);
   Scalar offset =
       (LineContents::kSampleRadius * 2.0 + geometry->GetWidth()) / 2.f;
   ASSERT_TRUE(status.ok());
+  EXPECT_EQ(status.value().width, 5.f);
+  EXPECT_EQ(status.value().radius, LineContents::kSampleRadius);
   EXPECT_POINT_NEAR(per_vertex[0].position,
                     Point(100 - LineContents::kSampleRadius, 100 + offset));
   EXPECT_POINT_NEAR(per_vertex[1].position,
@@ -129,7 +131,7 @@ TEST(LineContents, CalculatePerVertexLimit) {
                      Matrix::MakeScale({scale, scale, 1.0}) *
                      Matrix::MakeTranslation({-100, -100, 1.0});
 
-  fml::Status status =
+  fml::StatusOr<LineContents::EffectiveLineParameters> status =
       LineContents::CalculatePerVertex(per_vertex, geometry.get(), transform);
 
   Scalar one_radius_size = std::max(LineContents::kSampleRadius / scale,
@@ -137,6 +139,9 @@ TEST(LineContents, CalculatePerVertexLimit) {
   Scalar one_px_size = 1.f / scale;
   Scalar offset = one_px_size / 2.f + one_radius_size;
   ASSERT_TRUE(status.ok());
+  EXPECT_NEAR(status.value().width, 20.f, kEhCloseEnough);
+  EXPECT_NEAR(status.value().radius, one_px_size * LineContents::kSampleRadius,
+              kEhCloseEnough);
   EXPECT_POINT_NEAR(per_vertex[0].position,
                     Point(100 - one_radius_size, 100 + offset));
   EXPECT_POINT_NEAR(per_vertex[1].position,
@@ -148,7 +153,8 @@ TEST(LineContents, CalculatePerVertexLimit) {
 
   EXPECT_NEAR(CalculateLine(per_vertex[0], Point(150, 100)), 1.f,
               kEhCloseEnough);
-  // EXPECT_NEAR(CalculateLine(per_vertex[0], Point(150, 100 + one_px_size)), 1.f,
+  // EXPECT_NEAR(CalculateLine(per_vertex[0], Point(150, 100 +
+  // one_px_size)), 1.f,
   //             kEhCloseEnough);
 }
 
