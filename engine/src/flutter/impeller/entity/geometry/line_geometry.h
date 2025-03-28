@@ -58,7 +58,8 @@ class LineGeometry final : public Geometry {
                              bool extend_endpoints,
                              Point p0,
                              Point p1,
-                             Scalar width);
+                             Scalar width,
+                             std::optional<Point> expansion = std::nullopt);
 
  private:
   // |Geometry|

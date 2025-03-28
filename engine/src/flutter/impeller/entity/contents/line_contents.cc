@@ -193,8 +193,8 @@ fml::Status LineContents::CalculatePerVertex(
   if (!LineGeometry::ComputeCorners(
           corners, entity_transform,
           /*extend_endpoints=*/geometry->GetCap() != Cap::kButt,
-          geometry->GetP0(), geometry->GetP1(),
-          geometry->GetWidth() + kSampleRadius * 2.0)) {
+          geometry->GetP0(), geometry->GetP1(), geometry->GetWidth(),
+          Point(kSampleRadius, kSampleRadius))) {
     return fml::Status(fml::StatusCode::kAborted, "No valid corners");
   }
   LineInfo line_info = CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),

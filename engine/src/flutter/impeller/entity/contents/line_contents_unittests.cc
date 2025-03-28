@@ -69,10 +69,14 @@ TEST(LineContents, CalculatePerVertex) {
   Scalar offset =
       (LineContents::kSampleRadius * 2.0 + geometry->GetWidth()) / 2.f;
   ASSERT_TRUE(status.ok());
-  EXPECT_POINT_NEAR(per_vertex[0].position, Point(100, 100 + offset));
-  EXPECT_POINT_NEAR(per_vertex[1].position, Point(200, 100 + offset));
-  EXPECT_POINT_NEAR(per_vertex[2].position, Point(100, 100 - offset));
-  EXPECT_POINT_NEAR(per_vertex[3].position, Point(200, 100 - offset));
+  EXPECT_POINT_NEAR(per_vertex[0].position,
+                    Point(100 - LineContents::kSampleRadius, 100 + offset));
+  EXPECT_POINT_NEAR(per_vertex[1].position,
+                    Point(200 + LineContents::kSampleRadius, 100 + offset));
+  EXPECT_POINT_NEAR(per_vertex[2].position,
+                    Point(100 - LineContents::kSampleRadius, 100 - offset));
+  EXPECT_POINT_NEAR(per_vertex[3].position,
+                    Point(200 + LineContents::kSampleRadius, 100 - offset));
 
   for (int i = 1; i < 4; ++i) {
     EXPECT_VECTOR3_NEAR(per_vertex[0].e0, per_vertex[i].e0) << i;
@@ -110,6 +114,35 @@ TEST(LineContents, CreateCurveDataScaled) {
   EXPECT_NEAR(data[1] / 255.f, 0.5f, 0.02);
   EXPECT_NEAR(data[2] / 255.f, 1.f, kEhCloseEnough);
   EXPECT_NEAR(data[3] / 255.f, 1.f, kEhCloseEnough);
+}
+
+// This scales the line to be less than 1 pixel.
+TEST(LineContents, CalculatePerVertexLimit) {
+  LineVertexShader::PerVertexData per_vertex[4];
+  Scalar scale = 0.05;
+  auto geometry = std::make_unique<LineGeometry>(
+      /*p0=*/Point{100, 100},  //
+      /*p1=*/Point{200, 100},  //
+      /*width=*/10.f,          //
+      /*cap=*/Cap::kButt);
+  Matrix transform = Matrix::MakeTranslation({100, 100, 1.0}) *
+                     Matrix::MakeScale({scale, scale, 1.0}) *
+                     Matrix::MakeTranslation({-100, -100, 1.0});
+
+  fml::Status status =
+      LineContents::CalculatePerVertex(per_vertex, geometry.get(), transform);
+
+  Scalar one_px_size = 1.f / scale;
+  Scalar offset = one_px_size / 2.f + LineContents::kSampleRadius;
+  ASSERT_TRUE(status.ok());
+  EXPECT_POINT_NEAR(per_vertex[0].position,
+                    Point(100 - LineContents::kSampleRadius, 100 + offset));
+  EXPECT_POINT_NEAR(per_vertex[1].position,
+                    Point(200 + LineContents::kSampleRadius, 100 + offset));
+  EXPECT_POINT_NEAR(per_vertex[2].position,
+                    Point(100 - LineContents::kSampleRadius, 100 - offset));
+  EXPECT_POINT_NEAR(per_vertex[3].position,
+                    Point(200 + LineContents::kSampleRadius, 100 - offset));
 }
 
 }  // namespace testing
