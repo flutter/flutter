@@ -50,7 +50,7 @@ void main() {
     'Native assets: non-bundled libraries require no copying',
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
+      ProcessManager: FakeProcessManager.empty,
     },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -103,7 +103,7 @@ void main() {
 
   testUsingContext(
     'build with assets but not enabled',
-    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+    overrides: <Type, Generator>{ProcessManager: FakeProcessManager.empty},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
@@ -127,7 +127,7 @@ void main() {
     'build no assets',
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
+      ProcessManager: FakeProcessManager.empty,
     },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -174,7 +174,7 @@ void main() {
     'Native assets build error',
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty,
+      ProcessManager: FakeProcessManager.empty,
     },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -200,7 +200,7 @@ void main() {
     'Native assets: no duplicate assets with linking',
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
+      ProcessManager: FakeProcessManager.empty,
     },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
