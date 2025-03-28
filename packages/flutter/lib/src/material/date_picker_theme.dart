@@ -63,6 +63,9 @@ class DatePickerThemeData with Diagnosticable {
     this.todayForegroundColor,
     this.todayBackgroundColor,
     this.todayBorder,
+    this.selectedForegroundColor,
+    this.selectedBackgroundColor,
+    this.selectedBorder,
     this.yearStyle,
     this.yearForegroundColor,
     this.yearBackgroundColor,
@@ -229,6 +232,22 @@ class DatePickerThemeData with Diagnosticable {
   /// {@end-tool}
   final BorderSide? todayBorder;
 
+  /// Overrides the default color used to paint the selected day
+  /// label in the grid of the dialog's [CalendarDatePicker] and
+  /// the corresponding year in the dialog's [YearPicker].
+  final WidgetStateProperty<Color?>? selectedForegroundColor;
+
+  /// Overrides the default color used to paint the background of the
+  /// selected day label in the grid of the date picker.
+  final WidgetStateProperty<Color?>? selectedBackgroundColor;
+
+  /// Overrides the border used to paint the selected day label in the grid of
+  /// the date picker.
+  ///
+  /// The border side's [BorderSide.color] is not used,
+  /// [selectedForegroundColor] is used instead.
+  final BorderSide? selectedBorder;
+
   /// Overrides the default text style used to paint each of the year
   /// entries in the year selector of the date picker.
   ///
@@ -380,6 +399,9 @@ class DatePickerThemeData with Diagnosticable {
     WidgetStateProperty<Color?>? todayForegroundColor,
     WidgetStateProperty<Color?>? todayBackgroundColor,
     BorderSide? todayBorder,
+    WidgetStateProperty<Color?>? selectedForegroundColor,
+    WidgetStateProperty<Color?>? selectedBackgroundColor,
+    BorderSide? selectedBorder,
     TextStyle? yearStyle,
     WidgetStateProperty<Color?>? yearForegroundColor,
     WidgetStateProperty<Color?>? yearBackgroundColor,
@@ -420,6 +442,9 @@ class DatePickerThemeData with Diagnosticable {
       todayForegroundColor: todayForegroundColor ?? this.todayForegroundColor,
       todayBackgroundColor: todayBackgroundColor ?? this.todayBackgroundColor,
       todayBorder: todayBorder ?? this.todayBorder,
+      selectedForegroundColor: selectedForegroundColor ?? this.selectedForegroundColor,
+      selectedBackgroundColor: selectedBackgroundColor ?? this.selectedBackgroundColor,
+      selectedBorder: selectedBorder ?? this.selectedBorder,
       yearStyle: yearStyle ?? this.yearStyle,
       yearForegroundColor: yearForegroundColor ?? this.yearForegroundColor,
       yearBackgroundColor: yearBackgroundColor ?? this.yearBackgroundColor,
@@ -501,6 +526,19 @@ class DatePickerThemeData with Diagnosticable {
         Color.lerp,
       ),
       todayBorder: _lerpBorderSide(a?.todayBorder, b?.todayBorder, t),
+      selectedForegroundColor: WidgetStateProperty.lerp<Color?>(
+        a?.selectedForegroundColor,
+        b?.selectedForegroundColor,
+        t,
+        Color.lerp,
+      ),
+      selectedBackgroundColor: WidgetStateProperty.lerp<Color?>(
+        a?.selectedBackgroundColor,
+        b?.selectedBackgroundColor,
+        t,
+        Color.lerp,
+      ),
+      selectedBorder: _lerpBorderSide(a?.selectedBorder, b?.selectedBorder, t),
       yearStyle: TextStyle.lerp(a?.yearStyle, b?.yearStyle, t),
       yearForegroundColor: WidgetStateProperty.lerp<Color?>(
         a?.yearForegroundColor,
@@ -602,6 +640,9 @@ class DatePickerThemeData with Diagnosticable {
     todayForegroundColor,
     todayBackgroundColor,
     todayBorder,
+    selectedForegroundColor,
+    selectedBackgroundColor,
+    selectedBorder,
     yearStyle,
     yearForegroundColor,
     yearBackgroundColor,
@@ -648,6 +689,9 @@ class DatePickerThemeData with Diagnosticable {
         other.todayForegroundColor == todayForegroundColor &&
         other.todayBackgroundColor == todayBackgroundColor &&
         other.todayBorder == todayBorder &&
+        other.selectedForegroundColor == selectedForegroundColor &&
+        other.selectedBackgroundColor == selectedBackgroundColor &&
+        other.selectedBorder == selectedBorder &&
         other.yearStyle == yearStyle &&
         other.yearForegroundColor == yearForegroundColor &&
         other.yearBackgroundColor == yearBackgroundColor &&
@@ -742,6 +786,23 @@ class DatePickerThemeData with Diagnosticable {
     );
     properties.add(
       DiagnosticsProperty<BorderSide?>('todayBorder', todayBorder, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
+        'selectedForegroundColor',
+        selectedForegroundColor,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<WidgetStateProperty<Color?>>(
+        'selectedBackgroundColor',
+        selectedBackgroundColor,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<BorderSide?>('selectedBorder', selectedBorder, defaultValue: null),
     );
     properties.add(DiagnosticsProperty<TextStyle>('yearStyle', yearStyle, defaultValue: null));
     properties.add(
@@ -1047,6 +1108,15 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
   BorderSide? get todayBorder => BorderSide(color: _colors.primary);
 
   @override
+  WidgetStateProperty<Color?>? get selectedForegroundColor => todayForegroundColor;
+
+  @override
+  WidgetStateProperty<Color?>? get selectedBackgroundColor => todayBackgroundColor;
+
+  @override
+  BorderSide? get selectedBorder => todayBorder;
+
+  @override
   TextStyle? get yearStyle => _textTheme.bodyLarge;
 
   @override
@@ -1228,6 +1298,15 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   BorderSide? get todayBorder => BorderSide(color: _colors.primary);
+
+  @override
+  WidgetStateProperty<Color?>? get selectedForegroundColor => todayForegroundColor;
+
+  @override
+  WidgetStateProperty<Color?>? get selectedBackgroundColor => todayBackgroundColor;
+
+  @override
+  BorderSide? get selectedBorder => todayBorder;
 
   @override
   TextStyle? get yearStyle => _textTheme.bodyLarge;

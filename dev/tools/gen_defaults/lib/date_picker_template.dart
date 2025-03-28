@@ -163,6 +163,15 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
   BorderSide? get todayBorder => ${border('md.comp.date-picker.modal.date.today.container.outline')};
 
   @override
+  WidgetStateProperty<Color?>? get selectedForegroundColor => todayForegroundColor;
+
+  @override
+  WidgetStateProperty<Color?>? get selectedBackgroundColor => todayBackgroundColor;
+
+  @override
+  BorderSide? get selectedBorder => todayBorder;
+
+  @override
   TextStyle? get yearStyle => ${textStyle("md.comp.date-picker.modal.year-selection.year.label-text")};
 
   @override
