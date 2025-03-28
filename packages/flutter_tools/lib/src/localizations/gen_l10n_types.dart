@@ -245,7 +245,6 @@ class Placeholder {
   final bool? isCustomDateFormat;
   // The following will be initialized after all messages are parsed in the Message constructor.
   String? type;
-
   bool isPlural = false;
   bool isSelect = false;
   bool isDateTime = false;
