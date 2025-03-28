@@ -128,6 +128,9 @@ final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkRes
         for (final String linkerName in codeAssetsForLinking.keys)
           linkerName: <EncodedAsset>[
             for (final CodeAsset codeAsset in codeAssetsForLinking[linkerName]!) codeAsset.encode(),
+          ],
+        for (final String linkerName in dataAssetsForLinking.keys)
+          linkerName: <EncodedAsset>[
             for (final DataAsset dataAsset in dataAssetsForLinking[linkerName]!) dataAsset.encode(),
           ],
       },
