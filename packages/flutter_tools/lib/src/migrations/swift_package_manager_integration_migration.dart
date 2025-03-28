@@ -64,8 +64,11 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// Existing macOS identifier for Runner PBXFrameworksBuildPhase.
   static const String _macosRunnerFrameworksBuildPhaseIdentifier = '33CC10EA2044A3C60003C045';
 
-  /// Existing identifier for the `productType` of a PBXNativeTarget that is an application.
-  static const String _kNativeTargetApplicationProductType = 'com.apple.product-type.application';
+  /// Existing iOS identifier for Runner PBXNativeTarget.
+  static const String _iosRunnerNativeTargetIdentifier = '97C146ED1CF9000F007C117D';
+
+  /// Existing macOS identifier for Runner PBXNativeTarget.
+  static const String _macosRunnerNativeTargetIdentifier = '33CC10EC2044A3C60003C045';
 
   /// Existing iOS identifier for Runner PBXProject.
   static const String _iosProjectIdentifier = '97C146E61CF9000F007C117D';
@@ -85,6 +88,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     return _platform == SupportedPlatform.ios
         ? _iosRunnerFrameworksBuildPhaseIdentifier
         : _macosRunnerFrameworksBuildPhaseIdentifier;
+  }
+
+  String get _runnerNativeTargetIdentifier {
+    return _platform == SupportedPlatform.ios
+        ? _iosRunnerNativeTargetIdentifier
+        : _macosRunnerNativeTargetIdentifier;
   }
 
   String get _projectIdentifier {
@@ -266,6 +275,14 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       throw Exception(
         'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
         'for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    if (blueprintIdentifier != null && blueprintIdentifier != _runnerNativeTargetIdentifier) {
+      throw Exception(
+        'The scheme "${schemeFile.basename}" references a custom target, which requires a manual migration.\n'
+        'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
+        'for instructions on how to migrate custom targets.',
       );
     }
 
