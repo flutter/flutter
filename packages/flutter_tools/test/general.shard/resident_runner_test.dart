@@ -241,6 +241,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -840,6 +848,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -916,18 +932,28 @@ void main() {
             jsonResponse: fakePausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'removeBreakpoint',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'breakpointId': 'test-breakpoint',
+            },
+          ),
+          FakeVmServiceRequest(
+            method: 'resume',
+            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
-          const FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, String>{'isolateId': '1', 'exceptionPauseMode': 'None'},
-          ),
-          const FakeVmServiceRequest(
-            method: 'removeBreakpoint',
-            args: <String, String>{'isolateId': '1', 'breakpointId': 'test-breakpoint'},
-          ),
-          const FakeVmServiceRequest(method: 'resume', args: <String, String>{'isolateId': '1'}),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -978,6 +1004,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -1005,6 +1039,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -1030,6 +1072,14 @@ void main() {
             method: 'getIsolate',
             args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
             jsonResponse: fakeUnpausedIsolate.toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
           ),
           FakeVmServiceRequest(
             method: 'getVM',
