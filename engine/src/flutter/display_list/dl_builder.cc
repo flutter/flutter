@@ -12,6 +12,7 @@
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
 #include "flutter/display_list/utils/dl_accumulation_rect.h"
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 #include "fml/logging.h"
 
 namespace flutter {
@@ -1252,18 +1253,27 @@ void DisplayListBuilder::DrawDiffRoundRect(const DlRoundRect& outer,
 }
 void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
   if (rse.IsRect()) {
-    drawRect(rse.GetBounds());
+    return drawRect(rse.GetBounds());
   } else if (rse.IsOval()) {
-    drawOval(rse.GetBounds());
-  } else {
-    DisplayListAttributeFlags flags = kDrawRSuperellipseFlags;
-    OpResult result = PaintResult(current_, flags);
-    if (result != OpResult::kNoEffect &&
-        AccumulateOpBounds(rse.GetBounds(), flags)) {
+    return drawOval(rse.GetBounds());
+  }
+
+  DisplayListAttributeFlags flags = kDrawRSuperellipseFlags;
+  OpResult result = PaintResult(current_, flags);
+  if (result != OpResult::kNoEffect &&
+      AccumulateOpBounds(rse.GetBounds(), flags)) {
+    if (current_.getDrawStyle() == DlDrawStyle::kFill) {
       Push<DrawRoundSuperellipseOp>(0, rse);
-      CheckLayerOpacityCompatibility();
-      UpdateLayerResult(result);
+    } else {
+      DlPathBuilder builder;
+      builder.SetConvexity(impeller::Convexity::kConvex);
+      builder.SetBounds(rse.GetBounds());
+      builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(rse.GetBounds(),
+                                                        rse.GetRadii()));
+      Push<DrawPathOp>(0, DlPath(builder.TakePath()));
     }
+    CheckLayerOpacityCompatibility();
+    UpdateLayerResult(result);
   }
 }
 void DisplayListBuilder::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,

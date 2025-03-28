@@ -6,6 +6,7 @@
 
 #include <cmath>
 
+#include "flutter/impeller/geometry/round_superellipse_param.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -199,6 +200,29 @@ void CanvasPath::addPolygon(const tonic::Float32List& points, bool close) {
 
 void CanvasPath::addRRect(const RRect& rrect) {
   sk_path_.addRRect(ToSkRRect(rrect.rrect));
+  resetVolatility();
+}
+
+void CanvasPath::addRSuperellipse(const RSuperellipse* rsuperellipse) {
+  if (rsuperellipse->IsRect()) {
+    auto bounds = rsuperellipse->bounds();
+    return addRect(bounds.GetLeft(), bounds.GetTop(), bounds.GetRight(),
+                   bounds.GetBottom());
+  }
+  if (rsuperellipse->IsOval()) {
+    auto bounds = rsuperellipse->bounds();
+    return addOval(bounds.GetLeft(), bounds.GetTop(), bounds.GetRight(),
+                   bounds.GetBottom());
+  }
+
+  DlPathBuilder builder;
+  builder.SetConvexity(impeller::Convexity::kConvex);
+  builder.SetBounds(rsuperellipse->bounds());
+  builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(rsuperellipse->bounds(),
+                                                    rsuperellipse->radii()));
+  sk_path_.addPath(DlPath(builder.TakePath()).GetSkPath(),
+                   SkPath::kAppend_AddPathMode);
+
   resetVolatility();
 }
 

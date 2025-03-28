@@ -3033,6 +3033,10 @@ abstract class Path {
   /// argument.
   void addRRect(RRect rrect);
 
+  /// Adds a new sub-path that consists of curves needed to form the rounded
+  /// superellipse described by the argument.
+  void addRSuperellipse(RSuperellipse rsuperellipse);
+
   /// Adds the sub-paths of `path`, offset by `offset`, to this path.
   ///
   /// If `matrix4` is specified, the path will be transformed by this matrix
@@ -3374,6 +3378,15 @@ base class _NativePath extends NativeFieldWrapperClass1 implements Path {
 
   @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'Path::addRRect')
   external void _addRRect(Float32List rrect);
+
+  @override
+  void addRSuperellipse(RSuperellipse rsuperellipse) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _addRSuperellipse(rsuperellipse._native());
+  }
+
+  @Native<Void Function(Pointer<Void>, Pointer<Void>)>(symbol: 'Path::addRSuperellipse')
+  external void _addRSuperellipse(_NativeRSuperellipse rsuperellipse);
 
   @override
   void addPath(Path path, Offset offset, {Float64List? matrix4}) {
