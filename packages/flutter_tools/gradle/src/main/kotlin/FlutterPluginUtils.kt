@@ -402,7 +402,7 @@ object FlutterPluginUtils {
         return project.property(PROP_LOCAL_ENGINE_BUILD_MODE) == flutterBuildMode
     }
 
-    private fun getAndroidExtension(project: Project): BaseExtension {
+    internal fun getAndroidExtension(project: Project): BaseExtension {
         // Common supertype of the android extension types.
         // But maybe this should be https://developer.android.com/reference/tools/gradle-api/8.7/com/android/build/api/dsl/TestedExtension.
         return project.extensions.findByType(BaseExtension::class.java)!!
@@ -628,7 +628,7 @@ object FlutterPluginUtils {
      *    2. libflutter.so
      *
      * Should only be called on the main gradle [Project] for this application
-     * of the [FlutterPlugin].
+     * of the [FlutterPluginDelegate].
      */
     @JvmStatic
     @JvmName("addFlutterDependencies")
