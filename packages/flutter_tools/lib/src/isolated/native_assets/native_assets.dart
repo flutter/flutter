@@ -63,8 +63,8 @@ Future<DartHookResult> runFlutterSpecificHooks({
 
   // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
   // while using it in native_assets_builder is not.
-  for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
-    await target.setCCompilerConfig();
+  for (final target in targets.whereType<CodeAssetTarget>()) {
+    await buildRunner.setCCompilerConfig(target);
   }
 
   final BuildMode buildMode = _getBuildMode(
@@ -136,6 +136,8 @@ abstract interface class FlutterNativeAssetsBuildRunner {
     required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
   });
+
+  Future<void> setCCompilerConfig(CodeAssetTarget target);
 }
 
 /// Uses `package:native_assets_builder` for its implementation.
@@ -216,6 +218,9 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }) {
     return _buildRunner.link(extensions: extensions, buildResult: buildResult);
   }
+
+  @override
+  Future<void> setCCompilerConfig(CodeAssetTarget target) async => target.setCCompilerConfig();
 }
 
 Future<Uri> _writeNativeAssetsJson(

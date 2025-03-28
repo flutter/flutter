@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
+import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 
@@ -94,6 +95,14 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
     packagesWithNativeAssetsInvocations++;
     return packagesWithNativeAssetsResult;
   }
+
+  CCompilerConfig? get cCompilerConfigResult => null;
+  CCompilerConfig? get ndkCCompilerConfigResult => null;
+
+  @override
+  Future<void> setCCompilerConfig(CodeAssetTarget target) async =>
+      target.cCompilerConfigSync =
+          target is AndroidAssetTarget ? ndkCCompilerConfigResult : cCompilerConfigResult;
 }
 
 final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkResult {
