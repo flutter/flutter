@@ -399,18 +399,38 @@ TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
     DisplayListBuilder builder;
     builder.Scale(GetContentScale().x, GetContentScale().y);
 
-    DlPaint paint;
-    paint.setColor(DlColor::kGreenYellow());
-    paint.setStrokeWidth(line_width);
+    builder.DrawPaint(DlPaint(DlColor(0xff111111)));
 
-    builder.DrawLine(DlPoint(100, 100), DlPoint(350, 100), paint);
-    builder.DrawLine(DlPoint(100, 100), DlPoint(350, 150), paint);
+    {
+      DlPaint paint;
+      paint.setColor(DlColor::kGreenYellow());
+      paint.setStrokeWidth(line_width);
 
-    builder.Translate(100, 300);
-    builder.Scale(scale, scale);
-    builder.Translate(-100, -300);
-    builder.DrawLine(DlPoint(100, 300), DlPoint(350, 300), paint);
-    builder.DrawLine(DlPoint(100, 300), DlPoint(350, 450), paint);
+      builder.DrawLine(DlPoint(100, 100), DlPoint(350, 100), paint);
+      builder.DrawLine(DlPoint(100, 100), DlPoint(350, 150), paint);
+
+      builder.Save();
+      builder.Translate(100, 300);
+      builder.Scale(scale, scale);
+      builder.Translate(-100, -300);
+      builder.DrawLine(DlPoint(100, 300), DlPoint(350, 300), paint);
+      builder.DrawLine(DlPoint(100, 300), DlPoint(350, 450), paint);
+      builder.Restore();
+    }
+
+    {
+      DlPaint paint;
+      paint.setColor(DlColor::kGreenYellow());
+      paint.setStrokeWidth(2.0);
+
+      builder.Save();
+      builder.Translate(100, 500);
+      builder.Scale(0.2, 0.2);
+      builder.Translate(-100, -500);
+      builder.DrawLine(DlPoint(100, 500), DlPoint(350, 500), paint);
+      builder.DrawLine(DlPoint(100, 500), DlPoint(350, 650), paint);
+      builder.Restore();
+    }
 
     return builder.Build();
   };

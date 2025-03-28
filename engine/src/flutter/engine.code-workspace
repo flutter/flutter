@@ -125,7 +125,9 @@
       "csetjmp": "cpp",
       "cfenv": "cpp",
       "execution": "cpp",
-      "print": "cpp"
+      "print": "cpp",
+      "source_location": "cpp",
+      "syncstream": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
