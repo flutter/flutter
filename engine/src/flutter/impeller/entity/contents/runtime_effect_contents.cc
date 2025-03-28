@@ -239,15 +239,13 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     size_t sampler_location = 0;
     size_t buffer_location = 0;
 
-    // Sampler uniforms are ordered in the IPLR according to their
+    // uniforms are ordered in the IPLR according to their
     // declaration and the uniform location reflects the correct offset to
-    // be mapped to - except that it may include all proceeding float
-    // uniforms. For example, a float sampler that comes after 4 float
-    // uniforms may have a location of 4. To convert to the actual offset
-    // we need to find the largest location assigned to a float uniform
-    // and then subtract this from all uniform locations. This is more or
-    // less the same operation we previously performed in the shader
-    // compiler.
+    // be mapped to - except that it may include all proceeding
+    // uniforms of a different type. For example, a texture sampler that comes
+    // after 4 float uniforms may have a location of 4. Since we know that
+    // the declarations are already ordered, we can track the uniform location
+    // ourselves.
     for (const auto& uniform : runtime_stage_->GetUniforms()) {
       std::unique_ptr<ShaderMetadata> metadata = MakeShaderMetadata(uniform);
       switch (uniform.type) {
