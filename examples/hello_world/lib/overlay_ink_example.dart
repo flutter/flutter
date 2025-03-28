@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
                 final visibility = Visibility.of(context);
                 print('visibility root: $visibility');
                 // return Container(width: 111, height: 112, color: Colors.red);
-                return Ink(child: Container(width: 111, height: 112, color: Colors.red));
+                return Ink(child: InkWell(onTap: () => context.push('/root/sub'), child: Container(width: 111, height: 112, color: Colors.red)));
               },
               routes: [
                 // Must be nested, so layouts are stacked on top
