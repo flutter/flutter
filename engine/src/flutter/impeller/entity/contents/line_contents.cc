@@ -210,9 +210,10 @@ fml::Status LineContents::CalculatePerVertex(
           geometry->GetP0(), geometry->GetP1(), geometry->GetWidth())) {
     return fml::Status(fml::StatusCode::kAborted, "No valid corners");
   }
+  Scalar effective_line_width = std::fabsf((corners[2] - corners[0]).y);
   ExpandLine(corners, Point(expand_size, expand_size));
   LineInfo line_info = CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),
-                                         geometry->GetWidth(), kSampleRadius);
+                                         effective_line_width, kSampleRadius);
   for (auto& corner : corners) {
     *per_vertex++ = {
         .position = corner,
