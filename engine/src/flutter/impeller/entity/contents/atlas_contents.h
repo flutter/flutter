@@ -105,8 +105,8 @@ class AtlasContents final : public Contents {
   AtlasContents& operator=(const AtlasContents&) = delete;
 };
 
-/////
-
+/// A specialized atlas class for applying a color matrix filter to a
+/// drawImageRect call.
 class ColorFilterAtlasContents final : public Contents {
  public:
   explicit ColorFilterAtlasContents();
@@ -128,6 +128,9 @@ class ColorFilterAtlasContents final : public Contents {
               RenderPass& pass) const override;
 
  private:
+  // These contents are created temporarily on the stack and never stored.
+  // The referenced geometry is also stack allocated and will be de-allocated
+  // after the contents are.
   AtlasGeometry* geometry_ = nullptr;
   ColorMatrix matrix_;
   Scalar alpha_ = 1.0;
