@@ -28,7 +28,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
 
-class FlutterPluginDelegate : Plugin<Project> {
+class FlutterPlugin : Plugin<Project> {
     companion object {
         const val PROP_LOCAL_ENGINE_REPO: String = "local-engine-repo"
 
@@ -56,11 +56,11 @@ class FlutterPluginDelegate : Plugin<Project> {
 
         private fun addFlutterDeps(
             variant: BaseVariant,
-            flutterPluginDelegate: FlutterPluginDelegate,
+            flutterPlugin: FlutterPlugin,
             targetPlatforms: List<String>
         ): Task {
             // Shorthand
-            val project: Project = flutterPluginDelegate.project!!
+            val project: Project = flutterPlugin.project!!
 
             val fileSystemRootsValue: Array<String>? =
                 (project.findProperty("filesystem-roots") as? String)?.split("\\|")?.toTypedArray()
@@ -143,13 +143,13 @@ class FlutterPluginDelegate : Plugin<Project> {
             // `this` (`verbose this.isVerbose()`).
             val compileTaskProvider: TaskProvider<FlutterTask> =
                 project.tasks.register(taskName, FlutterTask::class.java) {
-                    flutterRoot = flutterPluginDelegate.flutterRoot
-                    flutterExecutable = flutterPluginDelegate.flutterExecutable
+                    flutterRoot = flutterPlugin.flutterRoot
+                    flutterExecutable = flutterPlugin.flutterExecutable
                     buildMode = variantBuildMode
                     minSdkVersion = variant.mergedFlavor.minSdkVersion!!.apiLevel
-                    localEngine = flutterPluginDelegate.localEngine
-                    localEngineHost = flutterPluginDelegate.localEngineHost
-                    localEngineSrcPath = flutterPluginDelegate.localEngineSrcPath
+                    localEngine = flutterPlugin.localEngine
+                    localEngineHost = flutterPlugin.localEngineHost
+                    localEngineSrcPath = flutterPlugin.localEngineSrcPath
                     targetPath = FlutterPluginUtils.getFlutterTarget(project)
                     verbose = FlutterPluginUtils.isProjectVerbose(project)
                     fastStart = FlutterPluginUtils.isProjectFastStart(project)

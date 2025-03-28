@@ -628,7 +628,7 @@ object FlutterPluginUtils {
      *    2. libflutter.so
      *
      * Should only be called on the main gradle [Project] for this application
-     * of the [FlutterPluginDelegate].
+     * of the [FlutterPlugin].
      */
     @JvmStatic
     @JvmName("addFlutterDependencies")
