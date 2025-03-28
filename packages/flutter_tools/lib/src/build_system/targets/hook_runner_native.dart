@@ -11,9 +11,9 @@ import '../build_system.dart' show BuildResult, Environment, ExceptionMeasuremen
 import 'native_assets.dart' show DartBuild;
 
 class FlutterHookRunnerNative implements FlutterHookRunner {
-  FlutterHookRunnerNative() : _flutterHookResult = FlutterHookResult.empty();
+  FlutterHookRunnerNative();
 
-  FlutterHookResult _flutterHookResult;
+  FlutterHookResult? _flutterHookResult;
 
   @override
   Future<FlutterHookResult> runHooks({
@@ -21,9 +21,9 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
     required Environment environment,
   }) async {
     globals.printTrace('runDartBuild() with ${environment.defines} and $targetPlatform');
-    if (!_flutterHookResult.hasAnyModifiedFiles(globals.fs)) {
+    if (_flutterHookResult != null && !_flutterHookResult!.hasAnyModifiedFiles(globals.fs)) {
       globals.printTrace('runDartBuild() - up-to-date already');
-      return _flutterHookResult;
+      return _flutterHookResult!;
     }
     globals.printTrace('runDartBuild() - will perform dart build');
 
