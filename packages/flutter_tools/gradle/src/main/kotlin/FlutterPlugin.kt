@@ -63,31 +63,35 @@ class FlutterPlugin : Plugin<Project> {
             val project: Project = flutterPlugin.project!!
 
             val fileSystemRootsValue: Array<String>? =
-                (project.findProperty("filesystem-roots") as? String)?.split("\\|")?.toTypedArray()
+                project
+                    .findProperty("filesystem-roots")
+                    ?.toString()
+                    ?.split("\\|")
+                    ?.toTypedArray()
             val fileSystemSchemeValue: String? =
-                project.findProperty("filesystem-scheme") as? String
+                project.findProperty("filesystem-scheme")?.toString()
             val trackWidgetCreationValue: Boolean =
-                project.findProperty("track-widget-creation") as? Boolean ?: true
+                project.findProperty("track-widget-creation")?.toString()?.toBooleanStrictOrNull() ?: true
             val frontendServerStarterPathValue: String? =
-                project.findProperty("frontend-server-starter-path") as? String
+                project.findProperty("frontend-server-starter-path")?.toString()
             val extraFrontEndOptionsValue: String? =
-                project.findProperty("extra-front-end-options") as? String
+                project.findProperty("extra-front-end-options")?.toString()
             val extraGenSnapshotOptionsValue: String? =
-                project.findProperty("extra-gen-snapshot-options") as? String
-            val splitDebugInfoValue: String? = project.findProperty("split-debug-info") as? String
+                project.findProperty("extra-gen-snapshot-options")?.toString()
+            val splitDebugInfoValue: String? = project.findProperty("split-debug-info")?.toString()
             val dartObfuscationValue: Boolean =
-                project.findProperty("dart-obfuscation") as? Boolean ?: false
+                project.findProperty("dart-obfuscation")?.toString()?.toBoolean() ?: false
             val treeShakeIconsOptionsValue: Boolean =
-                project.findProperty("tree-shake-icons") as? Boolean ?: false
-            val dartDefinesValue: String? = project.findProperty("dart-defines") as? String
+                project.findProperty("tree-shake-icons")?.toString()?.toBoolean() ?: false
+            val dartDefinesValue: String? = project.findProperty("dart-defines")?.toString()
             val performanceMeasurementFileValue: String? =
-                project.findProperty("performance-measurement-file") as? String
+                project.findProperty("performance-measurement-file")?.toString()
             val codeSizeDirectoryValue: String? =
-                project.findProperty("code-size-directory") as? String
+                project.findProperty("code-size-directory")?.toString()
             val deferredComponentsValue: Boolean =
-                project.findProperty("deferred-components") as? Boolean ?: false
+                project.findProperty("deferred-components")?.toString()?.toBooleanStrictOrNull() ?: false
             val validateDeferredComponentsValue: Boolean =
-                project.findProperty("validate-deferred-components") as? Boolean ?: true
+                project.findProperty("validate-deferred-components")?.toString()?.toBooleanStrictOrNull() ?: true
 
             if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
                 variant.outputs.forEach { output ->
