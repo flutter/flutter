@@ -513,13 +513,13 @@ Future<DartHookResult> _runDartHooks({
 
   if (dataAssets.map((DataAsset asset) => asset.id).toSet().length != dataAssets.length) {
     throwToolExit(
-      'Found duplicates in the data assets: ${dataAssets.map((DataAsset e) => e.id).toList()}.',
+      'Found duplicates in the data assets: ${dataAssets.map((DataAsset e) => e.id).toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
     );
   }
 
-  if (codeAssets.map((CodeAsset asset) => asset.id).toSet().length != codeAssets.length) {
+  if (codeAssets.toSet().length != codeAssets.length) {
     throwToolExit(
-      'Found duplicates in the code assets: ${codeAssets.map((CodeAsset e) => e.id).toList()}.',
+      'Found duplicates in the code assets: ${codeAssets.map((CodeAsset e) => e.id).toList()} while compiling for ${targets.map((AssetBuildTarget e) => e.targetString).toList()}.',
     );
   }
 
