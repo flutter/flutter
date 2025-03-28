@@ -458,6 +458,7 @@ $newContent
   /// - The migrator is rerun through the flutter CLI upon executing `flutter run`
   /// - The migrator should skip sections like 'PBXBuildFile' or 'XCSwiftPackageProductDependency',
   ///   since they are already migrated
+  /// - The migrator should warn that the newly added target should be migrated manually
   void _ensureNewIdentifiersNotUsed(List<String> lines) {
     if (_isIdentifierOutsideAllowedSections(
       _flutterPluginsSwiftPackageBuildFileIdentifier,
