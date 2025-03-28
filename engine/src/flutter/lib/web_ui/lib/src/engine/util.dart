@@ -379,25 +379,6 @@ String colorComponentsToCssString(int r, int g, int b, int a) {
   }
 }
 
-/// Determines if the (dynamic) exception passed in is a NS_ERROR_FAILURE
-/// (from Firefox).
-///
-/// NS_ERROR_FAILURE (0x80004005) is the most general of all the (Firefox)
-/// errors and occurs for all errors for which a more specific error code does
-/// not apply. (https://developer.mozilla.org/en-US/docs/Mozilla/Errors)
-///
-/// Other browsers do not throw this exception.
-///
-/// In Flutter, this exception happens when we try to perform some operations on
-/// a Canvas when the application is rendered in a display:none iframe.
-///
-/// We need this in [BitmapCanvas] and [RecordingCanvas] to swallow this
-/// Firefox exception without interfering with others (potentially useful
-/// for the programmer).
-bool isNsErrorFailureException(Object e) {
-  return getJsProperty<dynamic>(e, 'name') == 'NS_ERROR_FAILURE';
-}
-
 /// From: https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#Syntax
 ///
 /// Generic font families are a fallback mechanism, a means of preserving some

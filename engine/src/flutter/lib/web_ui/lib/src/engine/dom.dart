@@ -171,6 +171,9 @@ extension type DomConsole._(JSObject _) implements JSObject {
   void debug(Object? arg) => _debug(arg.toString());
 }
 
+@JS('parseFloat')
+external JSNumber parseFloatImpl(JSString value);
+
 @JS('window')
 external DomWindow get domWindow;
 

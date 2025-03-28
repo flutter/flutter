@@ -13,6 +13,7 @@ library browser_api;
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:js_util' as js_util;
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -25,40 +26,11 @@ import 'display.dart';
 import 'dom.dart';
 import 'vector_math.dart';
 
-/// Returns true if [object] has property [name], false otherwise.
-///
-/// This is equivalent to writing `name in object` in plain JavaScript.
-bool hasJsProperty(Object object, String name) {
-  return js_util.hasProperty(object, name);
-}
-
 /// Returns the value of property [name] from a JavaScript [object].
 ///
 /// This is equivalent to writing `object.name` in plain JavaScript.
-T getJsProperty<T>(Object object, String name) {
+T getJsProperty<T>(JSObject object, String name) {
   return js_util.getProperty<T>(object, name);
-}
-
-const Set<String> _safeJsProperties = <String>{'decoding', '__flutter_state'};
-
-/// Sets the value of property [name] on a JavaScript [object].
-///
-/// This is equivalent to writing `object.name = value` in plain JavaScript.
-T setJsProperty<T>(Object object, String name, T value) {
-  assert(
-    _safeJsProperties.contains(name),
-    'Attempted to set property "$name" on a JavaScript object. This property '
-    'has not been checked for safety. Possible solutions to this problem:\n'
-    ' - Do not set this property.\n'
-    ' - Use a `js_util` API that does the same thing.\n'
-    ' - Ensure that the property is safe then add it to _safeJsProperties set.',
-  );
-  return js_util.setProperty<T>(object, name, value);
-}
-
-/// Converts a JavaScript `Promise` into Dart [Future].
-Future<T> promiseToFuture<T>(Object jsPromise) {
-  return js_util.promiseToFuture<T>(jsPromise);
 }
 
 /// Parses a string [source] into a double.
@@ -66,13 +38,13 @@ Future<T> promiseToFuture<T>(Object jsPromise) {
 /// Uses the JavaScript `parseFloat` function instead of Dart's [double.parse]
 /// because the latter can't parse strings like "20px".
 ///
-/// Returns null if it fails to parse.
-num? parseFloat(String source) {
+/// Returns `null` if it fails to parse.
+double? parseFloat(String source) {
   // Using JavaScript's `parseFloat` here because it can parse values
   // like "20px", while Dart's `double.tryParse` fails.
-  final num? result = js_util.callMethod(domWindow, 'parseFloat', <Object>[source]);
+  final double result = parseFloatImpl(source.toJS).toDartDouble;
 
-  if (result == null || result.isNaN) {
+  if (result.isNaN) {
     return null;
   }
   return result;
@@ -92,7 +64,7 @@ bool get windowHasFocus => js_util.callMethod<bool>(domDocument, 'hasFocus', <dy
 num? parseFontSize(DomElement element) {
   num? fontSize;
 
-  if (hasJsProperty(element, 'computedStyleMap')) {
+  if (element.hasProperty('computedStyleMap'.toJS).toDart) {
     // Use the newer `computedStyleMap` API available on some browsers.
     final Object? computedStyleMap = js_util.callMethod<Object?>(
       element,
@@ -121,7 +93,7 @@ num? parseFontSize(DomElement element) {
 /// Provides haptic feedback.
 void vibrate(int durationMs) {
   final DomNavigator navigator = domWindow.navigator;
-  if (hasJsProperty(navigator, 'vibrate')) {
+  if (navigator.hasProperty('vibrate'.toJS).toDart) {
     js_util.callMethod<void>(navigator, 'vibrate', <num>[durationMs]);
   }
 }
@@ -203,7 +175,8 @@ extension type ImageDecoder._(JSObject _) implements JSObject {
 
   external ImageTrackList get tracks;
   external bool get complete;
-  external JSPromise<JSAny?> decode(DecodeOptions options);
+  external JSPromise<JSAny?> get completed;
+  external JSPromise<DecodeResult> decode(DecodeOptions options);
   external void close();
 }
 

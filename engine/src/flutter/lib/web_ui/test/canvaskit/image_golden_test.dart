@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -96,7 +97,7 @@ class BitmapTestCodec extends TestFileCodec {
   Future<ui.Codec> createCodecFromTestFile(String testFile) async {
     final DomHTMLImageElement imageElement = createDomHTMLImageElement();
     imageElement.src = testFile;
-    setJsProperty<String>(imageElement, 'decoding', 'async');
+    imageElement['decoding'] = 'async'.toJS;
 
     await imageElement.decode();
 
