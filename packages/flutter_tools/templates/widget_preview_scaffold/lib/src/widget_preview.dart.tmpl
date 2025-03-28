@@ -15,10 +15,10 @@ import 'package:flutter/widgets.dart';
 ///    previews.
 // TODO(bkonyi): link to actual documentation when available.
 class WidgetPreview {
-  /// Wraps [child] in a [WidgetPreview] instance that applies some set of
+  /// Wraps [builder] in a [WidgetPreview] instance that applies some set of
   /// properties.
   const WidgetPreview({
-    required this.child,
+    required this.builder,
     this.name,
     this.width,
     this.height,
@@ -30,22 +30,22 @@ class WidgetPreview {
   /// If not provided, no name will be associated with the preview.
   final String? name;
 
-  /// The [Widget] to be rendered in the preview.
-  final Widget child;
+  /// A callback to build the [Widget] to be rendered in the preview.
+  final Widget Function() builder;
 
-  /// Artificial width constraint to be applied to the [child].
+  /// Artificial width constraint to be applied to the [Widget] returned by [builder].
   ///
   /// If not provided, the previewed widget will attempt to set its own width
   /// constraints and may result in an unbounded constraint error.
   final double? width;
 
-  /// Artificial height constraint to be applied to the [child].
+  /// Artificial height constraint to be applied to the [Widget] returned by [builder].
   ///
   /// If not provided, the previewed widget will attempt to set its own height
   /// constraints and may result in an unbounded constraint error.
   final double? height;
 
-  /// Applies font scaling to text within the [child].
+  /// Applies font scaling to text within the [Widget] returned by [builder].
   ///
   /// If not provided, the default text scaling factor provided by [MediaQuery]
   /// will be used.

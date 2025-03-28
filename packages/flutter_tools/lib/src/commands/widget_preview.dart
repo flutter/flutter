@@ -519,10 +519,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   }) {
     final List<AssetsEntry> assets = rootManifest.assets.map(transformAssetsEntry).toList();
 
-    final List<Font> fonts =
-        rootManifest.fonts.map((Font font) {
-          return Font(font.familyName, font.fontAssets.map(transformFontAsset).toList());
-        }).toList();
+    final List<Font> fonts = <Font>[
+      ...widgetPreviewManifest.fonts,
+      ...rootManifest.fonts.map((Font font) {
+        return Font(font.familyName, font.fontAssets.map(transformFontAsset).toList());
+      }),
+    ];
 
     final List<Uri> shaders = rootManifest.shaders.map(transformAssetUri).toList();
 
@@ -576,6 +578,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
         'flutter_lints',
+        'stack_trace',
       ],
       context: PubContext.pubAdd,
       command: pubAdd,
