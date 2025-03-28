@@ -10,8 +10,11 @@
 #include <utility>
 
 #include "display_list/effects/color_filters/dl_blend_color_filter.h"
+#include "display_list/effects/color_filters/dl_matrix_color_filter.h"
+#include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
@@ -52,6 +55,12 @@
 namespace impeller {
 
 namespace {
+
+bool IsPipelineBlendOrMatrixFilter(const flutter::DlColorFilter* filter) {
+  return filter->type() == flutter::DlColorFilterType::kMatrix ||
+         (filter->type() == flutter::DlColorFilterType::kBlend &&
+          filter->asBlend()->mode() <= Entity::kLastPipelineBlendMode);
+}
 
 static bool UseColorSourceContents(
     const std::shared_ptr<VerticesGeometry>& vertices,
@@ -736,37 +745,63 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
   }
 
   // Optimization: if the texture has a color filter that is a simple
-  // porter-duff blend, then instead of performing a save layer we should swap
-  // out the shader for the porter duff blend shader and avoid a saveLayer. This
-  // can only be done for imageRects without a strict source rect, as the porter
-  // duff shader does not support this feature. This optimization is important
-  // for flame.
+  // porter-duff blend or matrix filter, then instead of performing a save layer
+  // we should swap out the shader for the porter duff blend shader and avoid a
+  // saveLayer. This can only be done for imageRects without a strict source
+  // rect, as the porter duff shader does not support this feature. This
+  // optimization is important for flame.
   if (src_rect_constraint != SourceRectConstraint::kStrict &&  //
       paint.color_filter &&                                    //
       paint.image_filter == nullptr &&                         //
       !paint.mask_blur_descriptor.has_value() &&               //
-      paint.color_filter->asBlend() != nullptr &&              //
-      paint.color_filter->asBlend()->mode() <= Entity::kLastPipelineBlendMode) {
-    const flutter::DlBlendColorFilter* blend_filter =
-        paint.color_filter->asBlend();
-    DrawImageRectAtlasGeometry geometry = DrawImageRectAtlasGeometry(
-        /*texture=*/image,
-        /*source=*/source,
-        /*destination=*/dest,
-        /*color=*/skia_conversions::ToColor(blend_filter->color()),
-        /*blend_mode=*/blend_filter->mode(),
-        /*desc=*/sampler);
+      IsPipelineBlendOrMatrixFilter(paint.color_filter)) {
+    if (paint.color_filter->type() == flutter::DlColorFilterType::kBlend) {
+      const flutter::DlBlendColorFilter* blend_filter =
+          paint.color_filter->asBlend();
+      DrawImageRectAtlasGeometry geometry = DrawImageRectAtlasGeometry(
+          /*texture=*/image,
+          /*source=*/source,
+          /*destination=*/dest,
+          /*color=*/skia_conversions::ToColor(blend_filter->color()),
+          /*blend_mode=*/blend_filter->mode(),
+          /*desc=*/sampler);
 
-    auto atlas_contents = std::make_shared<AtlasContents>();
-    atlas_contents->SetGeometry(&geometry);
-    atlas_contents->SetAlpha(paint.color.alpha);
+      auto atlas_contents = std::make_shared<AtlasContents>();
+      atlas_contents->SetGeometry(&geometry);
+      atlas_contents->SetAlpha(paint.color.alpha);
 
-    Entity entity;
-    entity.SetTransform(GetCurrentTransform());
-    entity.SetBlendMode(paint.blend_mode);
-    entity.SetContents(atlas_contents);
+      Entity entity;
+      entity.SetTransform(GetCurrentTransform());
+      entity.SetBlendMode(paint.blend_mode);
+      entity.SetContents(atlas_contents);
 
-    AddRenderEntityToCurrentPass(entity);
+      AddRenderEntityToCurrentPass(entity);
+    } else {
+      const flutter::DlMatrixColorFilter* matrix_filter =
+          paint.color_filter->asMatrix();
+
+      DrawImageRectAtlasGeometry geometry = DrawImageRectAtlasGeometry(
+          /*texture=*/image,
+          /*source=*/source,
+          /*destination=*/dest,
+          /*color=*/Color::Khaki(),            // ignored
+          /*blend_mode=*/BlendMode::kSrcOver,  // ignored
+          /*desc=*/sampler);
+
+      auto atlas_contents = std::make_shared<ColorFilterAtlasContents>();
+      atlas_contents->SetGeometry(&geometry);
+      atlas_contents->SetAlpha(paint.color.alpha);
+      impeller::ColorMatrix color_matrix;
+      matrix_filter->get_matrix(color_matrix.array);
+      atlas_contents->SetMatrix(color_matrix);
+
+      Entity entity;
+      entity.SetTransform(GetCurrentTransform());
+      entity.SetBlendMode(paint.blend_mode);
+      entity.SetContents(atlas_contents);
+
+      AddRenderEntityToCurrentPass(entity);
+    }
     return;
   }
 

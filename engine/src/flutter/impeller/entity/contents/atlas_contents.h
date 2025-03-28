@@ -105,6 +105,38 @@ class AtlasContents final : public Contents {
   AtlasContents& operator=(const AtlasContents&) = delete;
 };
 
+/////
+
+class ColorFilterAtlasContents final : public Contents {
+ public:
+  explicit ColorFilterAtlasContents();
+
+  ~ColorFilterAtlasContents() override;
+
+  void SetGeometry(AtlasGeometry* geometry);
+
+  void SetAlpha(Scalar alpha);
+
+  void SetMatrix(ColorMatrix matrix);
+
+  // |Contents|
+  std::optional<Rect> GetCoverage(const Entity& entity) const override;
+
+  // |Contents|
+  bool Render(const ContentContext& renderer,
+              const Entity& entity,
+              RenderPass& pass) const override;
+
+ private:
+  AtlasGeometry* geometry_ = nullptr;
+  ColorMatrix matrix_;
+  Scalar alpha_ = 1.0;
+
+  ColorFilterAtlasContents(const ColorFilterAtlasContents&) = delete;
+
+  ColorFilterAtlasContents& operator=(const ColorFilterAtlasContents&) = delete;
+};
+
 }  // namespace impeller
 
 #endif  // FLUTTER_IMPELLER_ENTITY_CONTENTS_ATLAS_CONTENTS_H_

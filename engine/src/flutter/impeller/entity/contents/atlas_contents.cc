@@ -8,6 +8,7 @@
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
@@ -150,11 +151,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
     return true;
   }
 
-  auto dst_sampler_descriptor = geometry_->GetSamplerDescriptor();
-  if (renderer.GetDeviceCapabilities().SupportsDecalSamplerAddressMode()) {
-    dst_sampler_descriptor.width_address_mode = SamplerAddressMode::kDecal;
-    dst_sampler_descriptor.height_address_mode = SamplerAddressMode::kDecal;
-  }
+  const SamplerDescriptor& dst_sampler_descriptor =
+      geometry_->GetSamplerDescriptor();
   raw_ptr<const Sampler> dst_sampler =
       renderer.GetContext()->GetSamplerLibrary()->GetSampler(
           dst_sampler_descriptor);
@@ -163,8 +161,6 @@ bool AtlasContents::Render(const ContentContext& renderer,
   if (!geometry_->ShouldUseBlend()) {
     using VS = TextureFillVertexShader;
     using FS = TextureFillFragmentShader;
-
-    auto dst_sampler_descriptor = geometry_->GetSamplerDescriptor();
 
     raw_ptr<const Sampler> dst_sampler =
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
@@ -263,6 +259,85 @@ bool AtlasContents::Render(const ContentContext& renderer,
 
   FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
   VUS::BindFrameInfo(pass, host_buffer.EmplaceUniform(frame_info));
+
+  return pass.Draw().ok();
+}
+
+///////////////
+
+ColorFilterAtlasContents::ColorFilterAtlasContents() = default;
+
+ColorFilterAtlasContents::~ColorFilterAtlasContents() = default;
+
+std::optional<Rect> ColorFilterAtlasContents::GetCoverage(
+    const Entity& entity) const {
+  if (!geometry_) {
+    return std::nullopt;
+  }
+  return geometry_->ComputeBoundingBox().TransformBounds(entity.GetTransform());
+}
+
+void ColorFilterAtlasContents::SetGeometry(AtlasGeometry* geometry) {
+  geometry_ = geometry;
+}
+
+void ColorFilterAtlasContents::SetAlpha(Scalar alpha) {
+  alpha_ = alpha;
+}
+
+void ColorFilterAtlasContents::SetMatrix(ColorMatrix matrix) {
+  matrix_ = matrix;
+}
+
+bool ColorFilterAtlasContents::Render(const ContentContext& renderer,
+                                      const Entity& entity,
+                                      RenderPass& pass) const {
+  if (geometry_->ShouldSkip() || alpha_ <= 0.0) {
+    return true;
+  }
+
+  const SamplerDescriptor& dst_sampler_descriptor =
+      geometry_->GetSamplerDescriptor();
+
+  raw_ptr<const Sampler> dst_sampler =
+      renderer.GetContext()->GetSamplerLibrary()->GetSampler(
+          dst_sampler_descriptor);
+
+  auto& host_buffer = renderer.GetTransientsBuffer();
+
+  using VS = ColorMatrixColorFilterPipeline::VertexShader;
+  using FS = ColorMatrixColorFilterPipeline::FragmentShader;
+
+#ifdef IMPELLER_DEBUG
+  pass.SetCommandLabel("Atlas ColorFilter");
+#endif  // IMPELLER_DEBUG
+  pass.SetVertexBuffer(geometry_->CreateSimpleVertexBuffer(host_buffer));
+  pass.SetPipeline(
+      renderer.GetColorMatrixColorFilterPipeline(OptionsFromPass(pass)));
+
+  FS::FragInfo frag_info;
+  VS::FrameInfo frame_info;
+
+  FS::BindInputTexture(pass, geometry_->GetAtlas(), dst_sampler);
+  frame_info.texture_sampler_y_coord_scale =
+      geometry_->GetAtlas()->GetYCoordScale();
+
+  frag_info.input_alpha = 1;
+  frag_info.output_alpha = alpha_;
+  const float* matrix = matrix_.array;
+  frag_info.color_v = Vector4(matrix[4], matrix[9], matrix[14], matrix[19]);
+  frag_info.color_m = Matrix(matrix[0], matrix[5], matrix[10], matrix[15],  //
+                             matrix[1], matrix[6], matrix[11], matrix[16],  //
+                             matrix[2], matrix[7], matrix[12], matrix[17],  //
+                             matrix[3], matrix[8], matrix[13], matrix[18]   //
+  );
+
+  FS::BindFragInfo(pass, host_buffer.EmplaceUniform(frag_info));
+
+  frame_info.mvp = entity.GetShaderTransform(pass);
+
+  auto uniform_view = host_buffer.EmplaceUniform(frame_info);
+  VS::BindFrameInfo(pass, uniform_view);
 
   return pass.Draw().ok();
 }

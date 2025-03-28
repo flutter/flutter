@@ -252,7 +252,7 @@ TEST_P(AiksTest, DlAtlasGeometrySkip) {
   EXPECT_TRUE(geom.ShouldSkip());
 }
 
-TEST_P(AiksTest, DrawImageRectWithColorFilter) {
+TEST_P(AiksTest, DrawImageRectWithBlendColorFilter) {
   sk_sp<DlImageImpeller> texture =
       DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
 
@@ -267,6 +267,42 @@ TEST_P(AiksTest, DrawImageRectWithColorFilter) {
   paint_with_filter.setImageFilter(&filter);
 
   // Compare porter-duff blend modes.
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  // Uses image filter to disable atlas conversion.
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {},
+                        &paint_with_filter);
+
+  // Uses atlas conversion.
+  builder.Translate(600, 0);
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {}, &paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, DrawImageRectWithMatrixColorFilter) {
+  sk_sp<DlImageImpeller> texture =
+      DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
+
+  DisplayListBuilder builder;
+  static const constexpr ColorMatrix kColorInversion = {
+      .array = {
+          -1.0, 0,    0,    1.0, 0,  //
+          0,    -1.0, 0,    1.0, 0,  //
+          0,    0,    -1.0, 1.0, 0,  //
+          1.0,  1.0,  1.0,  1.0, 0   //
+      }};
+  DlPaint paint = DlPaint().setColorFilter(
+      DlColorFilter::MakeMatrix(kColorInversion.array));
+
+  DlMatrix filter_matrix = DlMatrix();
+  auto filter = flutter::DlMatrixImageFilter(filter_matrix,
+                                             flutter::DlImageSampling::kLinear);
+  DlPaint paint_with_filter = paint;
+  paint_with_filter.setImageFilter(&filter);
+
+  // Compare inverting color matrix filter.
   builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
   // Uses image filter to disable atlas conversion.
   builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
