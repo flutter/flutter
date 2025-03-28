@@ -12,8 +12,6 @@
 
 namespace impeller {
 
-namespace {}  // namespace
-
 PathBuilder::PathBuilder() {
   AddContourComponent({});
 }
