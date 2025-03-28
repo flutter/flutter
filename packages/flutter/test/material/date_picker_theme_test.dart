@@ -1236,7 +1236,7 @@ void main() {
 
     await tester.pumpWidget(buildFrame());
 
-    // find container whose child is text 2025
+    // Find container whose child is text 2025.
     final Finder yearContainer =
         find.ancestor(of: find.text('2025'), matching: find.byType(Container)).first;
 

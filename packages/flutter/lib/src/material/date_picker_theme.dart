@@ -263,7 +263,7 @@ class DatePickerThemeData with Diagnosticable {
   /// If the selected year is not the current year, the provided shape with the
   /// value of [yearBackgroundColor] is used to paint the shape decoration of
   /// the year label.
-  final MaterialStateProperty<OutlinedBorder?>? yearShape;
+  final WidgetStateProperty<OutlinedBorder?>? yearShape;
 
   /// Overrides the default [Scaffold.backgroundColor] for
   /// [DateRangePickerDialog].
@@ -395,10 +395,10 @@ class DatePickerThemeData with Diagnosticable {
     WidgetStateProperty<Color?>? todayBackgroundColor,
     BorderSide? todayBorder,
     TextStyle? yearStyle,
-    MaterialStateProperty<Color?>? yearForegroundColor,
-    MaterialStateProperty<Color?>? yearBackgroundColor,
-    MaterialStateProperty<Color?>? yearOverlayColor,
-    MaterialStateProperty<OutlinedBorder?>? yearShape,
+    WidgetStateProperty<Color?>? yearForegroundColor,
+    WidgetStateProperty<Color?>? yearBackgroundColor,
+    WidgetStateProperty<Color?>? yearOverlayColor,
+    WidgetStateProperty<OutlinedBorder?>? yearShape,
     Color? rangePickerBackgroundColor,
     double? rangePickerElevation,
     Color? rangePickerShadowColor,
@@ -536,7 +536,7 @@ class DatePickerThemeData with Diagnosticable {
         t,
         Color.lerp,
       ),
-      yearShape: MaterialStateProperty.lerp<OutlinedBorder?>(
+      yearShape: WidgetStateProperty.lerp<OutlinedBorder?>(
         a?.yearShape,
         b?.yearShape,
         t,
@@ -790,7 +790,7 @@ class DatePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(
-      DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>(
+      DiagnosticsProperty<WidgetStateProperty<OutlinedBorder?>>(
         'yearShape',
         yearShape,
         defaultValue: null,
@@ -973,8 +973,8 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
     : super(
         elevation: 24.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
-        dayShape: const MaterialStatePropertyAll<OutlinedBorder>(CircleBorder()),
-        yearShape: const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+        dayShape: const WidgetStatePropertyAll<OutlinedBorder>(CircleBorder()),
+        yearShape: const WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
         rangePickerElevation: 0.0,
         rangePickerShape: const RoundedRectangleBorder(),
       );
@@ -1148,8 +1148,8 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
         // TODO(tahatesser): Update this to use token when gen_defaults
         // supports `CircleBorder` for fully rounded corners.
-        dayShape: const MaterialStatePropertyAll<OutlinedBorder>(CircleBorder()),
-        yearShape: const MaterialStatePropertyAll<OutlinedBorder>(StadiumBorder()),
+        dayShape: const WidgetStatePropertyAll<OutlinedBorder>(CircleBorder()),
+        yearShape: const WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
         rangePickerElevation: 0.0,
         rangePickerShape: const RoundedRectangleBorder(),
       );
