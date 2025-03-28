@@ -14,7 +14,6 @@ resolution: workspace
 
 dependencies:
   args: any
-  dir_contents_diff: any
   engine_repo_tools: any
   meta: any
   path: any
