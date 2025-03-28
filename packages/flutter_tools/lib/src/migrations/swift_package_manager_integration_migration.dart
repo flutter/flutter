@@ -398,7 +398,7 @@ $newContent
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
-    final bool nativeApplicationTargetsMigrated = _areNativeApplicationTargetsMigrated(
+    final bool nativeTargetsMigrated = _areNativeTargetsMigrated(
       projectInfo,
       logErrorIfNotMigrated: logErrorIfNotMigrated,
     );
@@ -416,7 +416,7 @@ $newContent
     );
     return buildFilesMigrated &&
         frameworksBuildPhaseMigrated &&
-        nativeApplicationTargetsMigrated &&
+        nativeTargetsMigrated &&
         projectObjectMigrated &&
         localSwiftPackageMigrated &&
         swiftPackageMigrated;
@@ -433,7 +433,7 @@ $newContent
 
     lines = _migrateBuildFile(lines, parsedInfo);
     lines = _migrateFrameworksBuildPhase(lines, parsedInfo);
-    lines = _migrateNativeApplicationTargets(lines, parsedInfo);
+    lines = _migrateNativeTargets(lines, parsedInfo);
     lines = _migrateProjectObject(lines, parsedInfo);
     lines = _migrateLocalPackageProductDependencies(lines, parsedInfo);
     lines = _migratePackageProductDependencies(lines, parsedInfo);
@@ -595,12 +595,7 @@ $newContent
     return lines;
   }
 
-  bool _isNativeApplicationTargetMigrated(ParsedNativeTarget target) {
-    assert(
-      target.productType == _kNativeTargetApplicationProductType,
-      'Only application targets are supported by the SPM migrator.',
-    );
-
+  bool _isNativeTargetMigrated(ParsedNativeTarget target) {
     if (target.packageProductDependencies == null) {
       return false;
     }
@@ -610,15 +605,11 @@ $newContent
     );
   }
 
-  bool _areNativeApplicationTargetsMigrated(
+  bool _areNativeTargetsMigrated(
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
-    final bool migrated = projectInfo.nativeTargets
-        .where(
-          (ParsedNativeTarget target) => target.productType == _kNativeTargetApplicationProductType,
-        )
-        .every(_isNativeApplicationTargetMigrated);
+    final bool migrated = projectInfo.nativeTargets.every(_isNativeTargetMigrated);
 
     if (logErrorIfNotMigrated && !migrated) {
       logger.printError('Some PBXNativeTargets were not migrated or were migrated incorrectly.');
@@ -675,8 +666,8 @@ $newContent
     lines.insert(packageProductDependenciesIndex + 1, newContent);
   }
 
-  List<String> _migrateNativeApplicationTargets(List<String> lines, ParsedProjectInfo projectInfo) {
-    if (projectInfo.nativeTargets.isNotEmpty && _areNativeApplicationTargetsMigrated(projectInfo)) {
+  List<String> _migrateNativeTargets(List<String> lines, ParsedProjectInfo projectInfo) {
+    if (projectInfo.nativeTargets.isNotEmpty && _areNativeTargetsMigrated(projectInfo)) {
       logger.printTrace('PBXNativeTargets already migrated. Skipping...');
       return lines;
     }
@@ -1109,17 +1100,12 @@ class ParsedNativeTarget {
       packageProductDependencies = switch (data['packageProductDependencies']) {
         final List<Object?> dependencies => dependencies.whereType<String>().toList(),
         _ => null,
-      },
-      productType = switch (data) {
-        {'productType': final String productType} => productType,
-        _ => null,
       };
 
   final Map<String, Object?> data;
   final String identifier;
   final String? name;
   final List<String>? packageProductDependencies;
-  final String? productType;
 }
 
 /// Representation of data parsed from PBXProject section in Xcode project's
