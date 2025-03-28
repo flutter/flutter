@@ -1147,13 +1147,19 @@ class _DayState extends State<_Day> {
     _statesController.value = states;
 
     final Color? dayForegroundColor = resolve<Color?>(
-      (DatePickerThemeData? theme) =>
-          widget.isToday ? theme?.todayForegroundColor : theme?.dayForegroundColor,
+      (DatePickerThemeData? theme) => switch ((widget.isSelectedDay, widget.isToday)) {
+        (true, _) => theme?.selectedForegroundColor,
+        (_, true) => theme?.todayForegroundColor,
+        _ => theme?.dayForegroundColor,
+      },
       states,
     );
     final Color? dayBackgroundColor = resolve<Color?>(
-      (DatePickerThemeData? theme) =>
-          widget.isToday ? theme?.todayBackgroundColor : theme?.dayBackgroundColor,
+      (DatePickerThemeData? theme) => switch ((widget.isSelectedDay, widget.isToday)) {
+        (true, _) => theme?.selectedBackgroundColor,
+        (_, true) => theme?.todayBackgroundColor,
+        _ => theme?.dayBackgroundColor,
+      },
       states,
     );
     final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
@@ -1162,17 +1168,22 @@ class _DayState extends State<_Day> {
     );
     final OutlinedBorder dayShape =
         resolve<OutlinedBorder?>((DatePickerThemeData? theme) => theme?.dayShape, states)!;
-    final ShapeDecoration decoration =
-        widget.isToday
-            ? ShapeDecoration(
-              color: dayBackgroundColor,
-              shape: dayShape.copyWith(
-                side: (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
-                  color: dayForegroundColor,
-                ),
-              ),
-            )
-            : ShapeDecoration(color: dayBackgroundColor, shape: dayShape);
+    final ShapeDecoration decoration = ShapeDecoration(
+      color: dayBackgroundColor,
+      shape: switch ((widget.isSelectedDay, widget.isToday)) {
+        (true, _) => dayShape.copyWith(
+          side: (datePickerTheme.selectedBorder ?? defaults.selectedBorder!).copyWith(
+            color: dayForegroundColor,
+          ),
+        ),
+        (_, true) => dayShape.copyWith(
+          side: (datePickerTheme.todayBorder ?? defaults.todayBorder!).copyWith(
+            color: dayForegroundColor,
+          ),
+        ),
+        _ => dayShape,
+      },
+    );
 
     Widget dayWidget = Ink(
       decoration: decoration,
@@ -1395,13 +1406,19 @@ class _YearPickerState extends State<YearPicker> {
     };
 
     final Color? textColor = resolve<Color?>(
-      (DatePickerThemeData? theme) =>
-          isCurrentYear ? theme?.todayForegroundColor : theme?.yearForegroundColor,
+      (DatePickerThemeData? theme) => switch ((isSelected, isCurrentYear)) {
+        (true, _) => theme?.selectedForegroundColor,
+        (_, true) => theme?.todayForegroundColor,
+        _ => theme?.yearForegroundColor,
+      },
       states,
     );
     final Color? background = resolve<Color?>(
-      (DatePickerThemeData? theme) =>
-          isCurrentYear ? theme?.todayBackgroundColor : theme?.yearBackgroundColor,
+      (DatePickerThemeData? theme) => switch ((isSelected, isCurrentYear)) {
+        (true, _) => theme?.selectedBackgroundColor,
+        (_, true) => theme?.todayBackgroundColor,
+        _ => theme?.yearBackgroundColor,
+      },
       states,
     );
     final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
@@ -1410,7 +1427,12 @@ class _YearPickerState extends State<YearPicker> {
     );
 
     BoxBorder? border;
-    if (isCurrentYear) {
+    if (isSelected) {
+      final BorderSide? selectedBorder = datePickerTheme.selectedBorder ?? defaults.selectedBorder;
+      if (selectedBorder != null) {
+        border = Border.fromBorderSide(selectedBorder.copyWith(color: textColor));
+      }
+    } else if (isCurrentYear) {
       final BorderSide? todayBorder = datePickerTheme.todayBorder ?? defaults.todayBorder;
       if (todayBorder != null) {
         border = Border.fromBorderSide(todayBorder.copyWith(color: textColor));
