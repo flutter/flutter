@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:quiver/testing/async.dart';
@@ -1557,6 +1558,33 @@ void _testVerticalScrolling() {
 
     final DomElement scrollable = findScrollable(owner());
     expect(scrollable.scrollTop, isZero);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('scroll events ignored when actions not available', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+  <sem role="group" style="touch-action: none">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+  </sem>''');
+
+    final scrollable = owner().debugSemanticsTree![0]!.semanticRole! as SemanticScrollable;
+    final scrollEvent = createDomEvent('Event', 'scroll') as JSAny;
+    final listener = scrollable.scrollListener!;
+    expect(() => listener.callAsFunction(null, scrollEvent), returnsNormally);
+
     semantics().semanticsEnabled = false;
   });
 
