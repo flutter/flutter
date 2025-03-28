@@ -1705,9 +1705,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       //
       // This test ensures that both template and locale can be equally partially defined
       // in the arb.
-      testWithoutContext('translation placeholder type definitions can be inferred for plurals', () {
-        setupLocalizations(<String, String>{
-          'en': '''
+      testWithoutContext(
+        'translation placeholder type definitions can be inferred for plurals',
+        () {
+          setupLocalizations(<String, String>{
+            'en': '''
 {
   "helloWorld": "{count, plural, one{Hello World!} other{Hello Worlds!}}",
   "@helloWorld": {
@@ -1717,7 +1719,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     }
   }
 }''',
-          'de': '''
+            'de': '''
 {
   "helloWorld": "{count, plural, one{Hallo Welt!} other{Hallo Welten!}}",
   "@helloWorld": {
