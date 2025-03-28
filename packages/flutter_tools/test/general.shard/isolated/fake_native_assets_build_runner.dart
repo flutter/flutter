@@ -114,17 +114,21 @@ final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkRes
 
   factory FakeFlutterNativeAssetsBuilderResult.fromAssets({
     List<CodeAsset> codeAssets = const <CodeAsset>[],
+    List<DataAsset> dataAssets = const <DataAsset>[],
     Map<String, List<CodeAsset>> codeAssetsForLinking = const <String, List<CodeAsset>>{},
+    Map<String, List<DataAsset>> dataAssetsForLinking = const <String, List<DataAsset>>{},
     List<Uri> dependencies = const <Uri>[],
   }) {
     return FakeFlutterNativeAssetsBuilderResult(
       encodedAssets: <EncodedAsset>[
         for (final CodeAsset codeAsset in codeAssets) codeAsset.encode(),
+        for (final DataAsset dataAsset in dataAssets) dataAsset.encode(),
       ],
       encodedAssetsForLinking: <String, List<EncodedAsset>>{
         for (final String linkerName in codeAssetsForLinking.keys)
           linkerName: <EncodedAsset>[
             for (final CodeAsset codeAsset in codeAssetsForLinking[linkerName]!) codeAsset.encode(),
+            for (final DataAsset dataAsset in dataAssetsForLinking[linkerName]!) dataAsset.encode(),
           ],
       },
       dependencies: dependencies,
