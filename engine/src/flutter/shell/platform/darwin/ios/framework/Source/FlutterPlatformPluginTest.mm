@@ -31,6 +31,7 @@ FLUTTER_ASSERT_ARC
 @end
 
 @implementation FlutterPlatformPluginTest
+
 - (void)testSearchWebInvokedWithEscapedTerm {
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
@@ -49,11 +50,9 @@ FLUTTER_ASSERT_ARC
 
   FlutterResult result = ^(id result) {
     OCMVerify([mockPlugin searchWeb:@"Testing Word!"]);
-#if not APPLICATION_EXTENSION_API_ONLY
     OCMVerify([mockApplication openURL:[NSURL URLWithString:@"x-web-search://?Testing%20Word!"]
                                options:@{}
                      completionHandler:nil]);
-#endif
     [invokeExpectation fulfill];
   };
 
@@ -62,10 +61,14 @@ FLUTTER_ASSERT_ARC
   [mockApplication stopMocking];
 }
 
-- (void)testSearchWebInvokedWithNonEscapedTerm {
+- (void)testSearchWebSkippedIfAppExtension {
+  id mockBundle = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([mockBundle objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
   id mockApplication = OCMClassMock([UIApplication class]);
   OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
-
+  OCMReject([mockApplication openURL:OCMOCK_ANY options:OCMOCK_ANY completionHandler:OCMOCK_ANY]);
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [engine runWithEntrypoint:nil];
 
@@ -80,16 +83,13 @@ FLUTTER_ASSERT_ARC
 
   FlutterResult result = ^(id result) {
     OCMVerify([mockPlugin searchWeb:@"Test"]);
-#if not APPLICATION_EXTENSION_API_ONLY
-    OCMVerify([mockApplication openURL:[NSURL URLWithString:@"x-web-search://?Test"]
-                               options:@{}
-                     completionHandler:nil]);
-#endif
+
     [invokeExpectation fulfill];
   };
 
   [mockPlugin handleMethodCall:methodCall result:result];
   [self waitForExpectationsWithTimeout:1 handler:nil];
+  [mockBundle stopMocking];
   [mockApplication stopMocking];
 }
 
@@ -389,37 +389,83 @@ FLUTTER_ASSERT_ARC
   FlutterViewController* flutterViewController =
       [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
 
-  // Update to hidden.
+  // Update the visibility of the status bar to hidden.
   FlutterPlatformPlugin* plugin = [engine platformPlugin];
 
-  XCTestExpectation* enableSystemUIOverlaysCalled =
+  XCTestExpectation* systemOverlaysBottomExpectation =
       [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
-  FlutterResult resultSet = ^(id result) {
-    [enableSystemUIOverlaysCalled fulfill];
+  FlutterResult systemOverlaysBottomResult = ^(id result) {
+    [systemOverlaysBottomExpectation fulfill];
   };
-  FlutterMethodCall* methodCallSet =
+  FlutterMethodCall* setSystemOverlaysBottomCall =
       [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
                                         arguments:@[ @"SystemUiOverlay.bottom" ]];
-  [plugin handleMethodCall:methodCallSet result:resultSet];
+  [plugin handleMethodCall:setSystemOverlaysBottomCall result:systemOverlaysBottomResult];
   [self waitForExpectationsWithTimeout:1 handler:nil];
-#if not APPLICATION_EXTENSION_API_ONLY
   OCMVerify([mockApplication setStatusBarHidden:YES]);
-#endif
 
-  // Update to shown.
-  XCTestExpectation* enableSystemUIOverlaysCalled2 =
+  // Update the visibility of the status bar to shown.
+  XCTestExpectation* systemOverlaysTopExpectation =
       [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
-  FlutterResult resultSet2 = ^(id result) {
-    [enableSystemUIOverlaysCalled2 fulfill];
+  FlutterResult systemOverlaysTopResult = ^(id result) {
+    [systemOverlaysTopExpectation fulfill];
   };
-  FlutterMethodCall* methodCallSet2 =
+  FlutterMethodCall* setSystemOverlaysTopCall =
       [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
                                         arguments:@[ @"SystemUiOverlay.top" ]];
-  [plugin handleMethodCall:methodCallSet2 result:resultSet2];
+  [plugin handleMethodCall:setSystemOverlaysTopCall result:systemOverlaysTopResult];
   [self waitForExpectationsWithTimeout:1 handler:nil];
-#if not APPLICATION_EXTENSION_API_ONLY
   OCMVerify([mockApplication setStatusBarHidden:NO]);
-#endif
+
+  [flutterViewController deregisterNotifications];
+  [mockApplication stopMocking];
+  [bundleMock stopMocking];
+}
+
+- (void)testStatusBarHiddenNotUpdatedInAppExtension {
+  id bundleMock = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"])
+      .andReturn(@NO);
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMReject([mockApplication setStatusBarHidden:OCMOCK_ANY]);
+
+  // Enabling system UI overlays to update status bar.
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+
+  // Update the visibility of the status bar to hidden does not occur with extensions.
+  FlutterPlatformPlugin* plugin = [engine platformPlugin];
+
+  XCTestExpectation* systemOverlaysBottomExpectation =
+      [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
+  FlutterResult systemOverlaysBottomResult = ^(id result) {
+    [systemOverlaysBottomExpectation fulfill];
+  };
+  FlutterMethodCall* setSystemOverlaysBottomCall =
+      [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
+                                        arguments:@[ @"SystemUiOverlay.bottom" ]];
+  [plugin handleMethodCall:setSystemOverlaysBottomCall result:systemOverlaysBottomResult];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+  OCMReject([mockApplication setStatusBarHidden:YES]);
+
+  // Update the visibility of the status bar to shown does not occur with extensions.
+  XCTestExpectation* systemOverlaysTopExpectation =
+      [self expectationWithDescription:@"setEnabledSystemUIOverlays"];
+  FlutterResult systemOverlaysTopResult = ^(id result) {
+    [systemOverlaysTopExpectation fulfill];
+  };
+  FlutterMethodCall* setSystemOverlaysTopCall =
+      [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setEnabledSystemUIOverlays"
+                                        arguments:@[ @"SystemUiOverlay.top" ]];
+  [plugin handleMethodCall:setSystemOverlaysTopCall result:systemOverlaysTopResult];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
+  OCMReject([mockApplication setStatusBarHidden:NO]);
 
   [flutterViewController deregisterNotifications];
   [mockApplication stopMocking];
@@ -452,9 +498,42 @@ FLUTTER_ASSERT_ARC
   [plugin handleMethodCall:methodCallSet result:resultSet];
   [self waitForExpectationsWithTimeout:1 handler:nil];
 
-#if not APPLICATION_EXTENSION_API_ONLY
   OCMVerify([mockApplication setStatusBarStyle:UIStatusBarStyleLightContent]);
-#endif
+
+  [flutterViewController deregisterNotifications];
+  [mockApplication stopMocking];
+  [bundleMock stopMocking];
+}
+
+- (void)testStatusBarStyleNotUpdatedInAppExtension {
+  id bundleMock = OCMPartialMock([NSBundle mainBundle]);
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"])
+      .andReturn(@NO);
+  OCMStub([bundleMock objectForInfoDictionaryKey:@"NSExtension"]).andReturn(@{
+    @"NSExtensionPointIdentifier" : @"com.apple.share-services"
+  });
+  id mockApplication = OCMClassMock([UIApplication class]);
+  OCMStub([mockApplication sharedApplication]).andReturn(mockApplication);
+  OCMReject([mockApplication setStatusBarHidden:OCMOCK_ANY]);
+
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
+  [engine runWithEntrypoint:nil];
+  FlutterViewController* flutterViewController =
+      [[FlutterViewController alloc] initWithEngine:engine nibName:nil bundle:nil];
+  XCTAssertFalse(flutterViewController.prefersStatusBarHidden);
+
+  FlutterPlatformPlugin* plugin = [engine platformPlugin];
+
+  XCTestExpectation* enableSystemUIModeCalled =
+      [self expectationWithDescription:@"setSystemUIOverlayStyle"];
+  FlutterResult resultSet = ^(id result) {
+    [enableSystemUIModeCalled fulfill];
+  };
+  FlutterMethodCall* methodCallSet =
+      [FlutterMethodCall methodCallWithMethodName:@"SystemChrome.setSystemUIOverlayStyle"
+                                        arguments:@{@"statusBarBrightness" : @"Brightness.dark"}];
+  [plugin handleMethodCall:methodCallSet result:resultSet];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
 
   [flutterViewController deregisterNotifications];
   [mockApplication stopMocking];

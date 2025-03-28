@@ -482,20 +482,19 @@ TEST_F(FlutterWindowsEngineTest, DispatchSemanticsAction) {
 
   bool called = false;
   std::string message = "Hello";
-  modifier.embedder_api().DispatchSemanticsAction = MOCK_ENGINE_PROC(
-      DispatchSemanticsAction,
-      ([&called, &message](auto engine, auto target, auto action, auto data,
-                           auto data_length) {
+  modifier.embedder_api().SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction, ([&called, &message](auto engine, auto info) {
         called = true;
-        EXPECT_EQ(target, 42);
-        EXPECT_EQ(action, kFlutterSemanticsActionDismiss);
-        EXPECT_EQ(memcmp(data, message.c_str(), message.size()), 0);
-        EXPECT_EQ(data_length, message.size());
+        EXPECT_EQ(info->view_id, 456);
+        EXPECT_EQ(info->node_id, 42);
+        EXPECT_EQ(info->action, kFlutterSemanticsActionDismiss);
+        EXPECT_EQ(memcmp(info->data, message.c_str(), message.size()), 0);
+        EXPECT_EQ(info->data_length, message.size());
         return kSuccess;
       }));
 
   auto data = fml::MallocMapping::Copy(message.c_str(), message.size());
-  engine->DispatchSemanticsAction(42, kFlutterSemanticsActionDismiss,
+  engine->DispatchSemanticsAction(456, 42, kFlutterSemanticsActionDismiss,
                                   std::move(data));
   EXPECT_TRUE(called);
 }
@@ -1377,6 +1376,78 @@ TEST_F(FlutterWindowsEngineTest, OnViewFocusChangeRequest) {
 
   EXPECT_CALL(view, Focus()).WillOnce(Return(true));
   modifier.OnViewFocusChangeRequest(&request);
+}
+
+TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder{context};
+  builder.SetDartEntrypoint("sendSemanticsTreeInfo");
+
+  // Setup: a signal for when we have send out all of our semantics updates
+  bool done = false;
+  auto native_entry =
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
+  context.AddNativeFunction("Signal", native_entry);
+
+  // Setup: Create the engine and two views + enable semantics
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  auto window_binding_handler1 =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  auto window_binding_handler2 =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+
+  // The following mocks are required by
+  // FlutterWindowsView::CreateWindowMetricsEvent so that we create a valid
+  // view.
+  EXPECT_CALL(*window_binding_handler1, GetPhysicalWindowBounds)
+      .WillRepeatedly(testing::Return(PhysicalWindowBounds{100, 100}));
+  EXPECT_CALL(*window_binding_handler1, GetDpiScale)
+      .WillRepeatedly(testing::Return(96.0));
+  EXPECT_CALL(*window_binding_handler2, GetPhysicalWindowBounds)
+      .WillRepeatedly(testing::Return(PhysicalWindowBounds{200, 200}));
+  EXPECT_CALL(*window_binding_handler2, GetDpiScale)
+      .WillRepeatedly(testing::Return(96.0));
+
+  auto windows_engine = reinterpret_cast<FlutterWindowsEngine*>(engine.get());
+  EngineModifier modifier{windows_engine};
+  modifier.embedder_api().RunsAOTCompiledDartCode = []() { return false; };
+
+  // We want to avoid adding an implicit view as the first view
+  modifier.SetNextViewId(kImplicitViewId + 1);
+
+  auto view1 = windows_engine->CreateView(std::move(window_binding_handler1));
+  auto view2 = windows_engine->CreateView(std::move(window_binding_handler2));
+
+  // Act: UpdateSemanticsEnabled will trigger the semantics updates
+  // to get sent.
+  windows_engine->UpdateSemanticsEnabled(true);
+
+  while (!done) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+
+  auto accessibility_bridge1 = view1->accessibility_bridge().lock();
+  auto accessibility_bridge2 = view2->accessibility_bridge().lock();
+
+  // Expect: that the semantics trees are updated with their
+  // respective nodes.
+  while (
+      !accessibility_bridge1->GetPlatformNodeFromTree(view1->view_id() + 1)) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+
+  while (
+      !accessibility_bridge2->GetPlatformNodeFromTree(view2->view_id() + 1)) {
+    windows_engine->task_runner()->ProcessTasks();
+  }
+
+  // Rely on timeout mechanism in CI.
+  auto tree1 = accessibility_bridge1->GetTree();
+  auto tree2 = accessibility_bridge2->GetTree();
+  EXPECT_NE(tree1->GetFromId(view1->view_id() + 1), nullptr);
+  EXPECT_NE(tree2->GetFromId(view2->view_id() + 1), nullptr);
 }
 
 }  // namespace testing
