@@ -47,10 +47,11 @@ std::shared_ptr<Texture> CreateCurveTexture(
   return CreateTexture(texture_descriptor, curve_data, context, "LineCurve");
 }
 
-GeometryResult CreateGeometry(const ContentContext& renderer,
-                              const Entity& entity,
-                              RenderPass& pass,
-                              const Geometry* geometry) {
+std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
+    const ContentContext& renderer,
+    const Entity& entity,
+    RenderPass& pass,
+    const Geometry* geometry) {
   using PerVertexData = LineVertexShader::PerVertexData;
   const LineGeometry* line_geometry =
       static_cast<const LineGeometry*>(geometry);
@@ -59,7 +60,8 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
   auto& host_buffer = renderer.GetTransientsBuffer();
 
   size_t count = 4;
-  fml::Status calculate_status;
+  fml::StatusOr<LineContents::EffectiveLineParameters> calculate_status =
+      LineContents::EffectiveLineParameters{.width = 0, .radius = 0};
   BufferView vertex_buffer = host_buffer.Emplace(
       count * sizeof(PerVertexData), alignof(PerVertexData),
       [line_geometry, &transform, &calculate_status](uint8_t* buffer) {
@@ -68,19 +70,24 @@ GeometryResult CreateGeometry(const ContentContext& renderer,
             vertices, line_geometry, transform);
       });
   if (!calculate_status.ok()) {
-    return kEmptyResult;
+    return std::make_pair(
+        LineContents::EffectiveLineParameters{
+            .width = line_geometry->GetWidth(),
+            .radius = LineContents::kSampleRadius},
+        kEmptyResult);
   }
 
-  return GeometryResult{
-      .type = PrimitiveType::kTriangleStrip,
-      .vertex_buffer =
-          {
-              .vertex_buffer = vertex_buffer,
-              .vertex_count = count,
-              .index_type = IndexType::kNone,
-          },
-      .transform = entity.GetShaderTransform(pass),
-  };
+  return std::make_pair(calculate_status.value(),
+                        GeometryResult{
+                            .type = PrimitiveType::kTriangleStrip,
+                            .vertex_buffer =
+                                {
+                                    .vertex_buffer = vertex_buffer,
+                                    .vertex_count = count,
+                                    .index_type = IndexType::kNone,
+                                },
+                            .transform = entity.GetShaderTransform(pass),
+                        });
 }
 
 struct LineInfo {
@@ -111,7 +118,6 @@ LineInfo CalculateLineInfo(Point p0, Point p1, Scalar width, Scalar radius) {
           1.0 + k * (p1.x * p1.x + p1.y * p1.y - p0.x * p1.x - p0.y * p1.y)),
   };
 }
-
 }  // namespace
 
 const Scalar LineContents::kSampleRadius = 1.f;
@@ -136,6 +142,10 @@ bool LineContents::Render(const ContentContext& renderer,
   frag_info.color = color_;
 
   Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
+
+  auto geometry_result =
+      CreateGeometry(renderer, entity, pass, geometry_.get());
+
   std::shared_ptr<Texture> curve_texture = CreateCurveTexture(
       geometry_->GetWidth(), kSampleRadius, scale, renderer.GetContext());
 
@@ -161,7 +171,11 @@ bool LineContents::Render(const ContentContext& renderer,
         return true;
       },
       /*force_stencil=*/false,
-      /*create_geom_callback=*/CreateGeometry);
+      /*create_geom_callback=*/
+      [geometry_result = std::move(geometry_result)](
+          const ContentContext& renderer, const Entity& entity,
+          RenderPass& pass,
+          const Geometry* geometry) { return geometry_result.second; });
 }
 
 std::optional<Rect> LineContents::GetCoverage(const Entity& entity) const {
@@ -185,20 +199,39 @@ std::vector<uint8_t> LineContents::CreateCurveData(Scalar width,
   return curve_data;
 }
 
-fml::Status LineContents::CalculatePerVertex(
-    LineVertexShader::PerVertexData* per_vertex,
-    const LineGeometry* geometry,
-    const Matrix& entity_transform) {
-  Point corners[4];
+namespace {
+void ExpandLine(std::array<Point, 4>& corners, Point expansion) {
+  Point along = (corners[1] - corners[0]).Normalize();
+  Point across = (corners[2] - corners[0]).Normalize();
+  corners[0] += -1 * (across * expansion.x) + -1 * (along * expansion.y);
+  corners[1] += -1 * (across * expansion.x) + (along * expansion.y);
+  corners[2] += (across * expansion.x) + -1 * (along * expansion.y);
+  corners[3] += (across * expansion.x) + (along * expansion.y);
+}
+}  // namespace
+
+fml::StatusOr<LineContents::EffectiveLineParameters>
+LineContents::CalculatePerVertex(LineVertexShader::PerVertexData* per_vertex,
+                                 const LineGeometry* geometry,
+                                 const Matrix& entity_transform) {
+  Scalar scale = entity_transform.GetMaxBasisLengthXY();
+  std::array<Point, 4> corners;
+  // Make sure we get kSampleRadius pixels to sample from.
+  Scalar expand_size = std::max(kSampleRadius / scale, kSampleRadius);
   if (!LineGeometry::ComputeCorners(
-          corners, entity_transform,
+          corners.data(), entity_transform,
           /*extend_endpoints=*/geometry->GetCap() != Cap::kButt,
-          geometry->GetP0(), geometry->GetP1(),
-          geometry->GetWidth() + kSampleRadius * 2.0)) {
+          geometry->GetP0(), geometry->GetP1(), geometry->GetWidth())) {
     return fml::Status(fml::StatusCode::kAborted, "No valid corners");
   }
-  LineInfo line_info = CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),
-                                         geometry->GetWidth(), kSampleRadius);
+  Scalar effective_line_width = std::fabsf((corners[2] - corners[0]).y);
+  ExpandLine(corners, Point(expand_size, expand_size));
+  Scalar padded_line_width = std::fabsf((corners[2] - corners[0]).y);
+  Scalar effective_sample_radius =
+      (padded_line_width - effective_line_width) / 2.f;
+  LineInfo line_info =
+      CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),
+                        effective_line_width, effective_sample_radius);
   for (auto& corner : corners) {
     *per_vertex++ = {
         .position = corner,
@@ -209,6 +242,7 @@ fml::Status LineContents::CalculatePerVertex(
     };
   }
 
-  return {};
+  return EffectiveLineParameters{.width = effective_line_width,
+                                 .radius = effective_sample_radius};
 }
 }  // namespace impeller
