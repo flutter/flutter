@@ -4793,13 +4793,11 @@ void _testSemanticsValidationResult() {
 
     tester.expectSemantics('''
 <sem id="flt-semantic-node-0" aria-invalid--missing>
-  <sem-c>
-    <sem id="flt-semantic-node-1" aria-invalid--missing></sem>
-    <sem id="flt-semantic-node-2" aria-invalid="false"></sem>
-    <sem id="flt-semantic-node-3" aria-invalid="true"></sem>
-    <sem id="flt-semantic-node-4" aria-invalid="grammar"></sem>
-    <sem id="flt-semantic-node-5" aria-invalid="spelling"></sem>
-  </sem-c>
+  <sem id="flt-semantic-node-1" aria-invalid--missing></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid="true"></sem>
+  <sem id="flt-semantic-node-4" aria-invalid="grammar"></sem>
+  <sem id="flt-semantic-node-5" aria-invalid="spelling"></sem>
 </sem>''');
 
     // Shift all values, observe that the values changed accordingly
@@ -4823,13 +4821,11 @@ void _testSemanticsValidationResult() {
 
     tester.expectSemantics('''
 <sem id="flt-semantic-node-0" aria-invalid--missing>
-  <sem-c>
-    <sem id="flt-semantic-node-1" aria-invalid="false"></sem>
-    <sem id="flt-semantic-node-2" aria-invalid="true"></sem>
-    <sem id="flt-semantic-node-3" aria-invalid="grammar"></sem>
-    <sem id="flt-semantic-node-4" aria-invalid="spelling"></sem>
-    <sem id="flt-semantic-node-5" aria-invalid--missing></sem>
-  </sem-c>
+  <sem id="flt-semantic-node-1" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="true"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid="grammar"></sem>
+  <sem id="flt-semantic-node-4" aria-invalid="spelling"></sem>
+  <sem id="flt-semantic-node-5" aria-invalid--missing></sem>
 </sem>''');
   });
 }

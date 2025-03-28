@@ -793,10 +793,23 @@ abstract class SemanticRole {
   /// If [validationResult] is null, removes the `aria-invalid` attribute from
   /// the element.
   static void updateAriaInvalid(DomElement element, ui.SemanticsValidationResult validationResult) {
-    if (validationResult != ui.SemanticsValidationResult.none) {
-      element.setAttribute('aria-invalid', validationResult.toAriaValue());
-    } else {
-      element.removeAttribute('aria-invalid');
+    switch (validationResult) {
+      case ui.SemanticsValidationResult.none:
+        element.removeAttribute('aria-invalid');
+      case ui.SemanticsValidationResult.valid:
+        // 'false' may seem counter-intuitive for a "valid" result, but it's
+        // because the ARIA attribute is `aria-invalid`, so its value is
+        // reversed.
+        element.setAttribute('aria-invalid', 'false');
+      case ui.SemanticsValidationResult.invalid:
+        // 'true' may seem counter-intuitive for an "invalid" result, but it's
+        // because the ARIA attribute is `aria-invalid`, so its value is
+        // reversed.
+        element.setAttribute('aria-invalid', 'true');
+      case ui.SemanticsValidationResult.grammar:
+        element.setAttribute('aria-invalid', 'grammar');
+      case ui.SemanticsValidationResult.spelling:
+        element.setAttribute('aria-invalid', 'spelling');
     }
   }
 
@@ -3117,31 +3130,4 @@ enum EnabledState {
   ///
   /// The node is disabled.
   disabled,
-}
-
-extension SemanticsValidationResultExtension on ui.SemanticsValidationResult {
-  /// Returns the ARIA value for this enum value.
-  ///
-  /// The ARIA value can be applied to the `aria-invalid` attribute.
-  String toAriaValue() {
-    switch (this) {
-      case ui.SemanticsValidationResult.none:
-        assert(false, 'ui.SemanticsValidationResult.none should not be converted to ARIA value.');
-        return '';
-      case ui.SemanticsValidationResult.valid:
-        // 'false' may seem counter-intuitive for a "valid" result, but it's
-        // because the ARIA attribute is `aria-invalid`, so its value is
-        // reversed.
-        return 'false';
-      case ui.SemanticsValidationResult.invalid:
-        // 'true' may seem counter-intuitive for an "invalid" result, but it's
-        // because the ARIA attribute is `aria-invalid`, so its value is
-        // reversed.
-        return 'true';
-      case ui.SemanticsValidationResult.grammar:
-        return 'grammar';
-      case ui.SemanticsValidationResult.spelling:
-        return 'spelling';
-    }
-  }
 }

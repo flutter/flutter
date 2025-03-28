@@ -3130,7 +3130,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   SemanticsValidationResult get validationResult => _validationResult;
-  SemanticsValidationResult _validationResult = SemanticsValidationResult.none;
+  SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
