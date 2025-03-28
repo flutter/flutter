@@ -37,7 +37,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class FlutterPluginDelegateUtilsTest {
+class FlutterPluginUtilsTest {
     companion object {
         val exampleEngineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
 
