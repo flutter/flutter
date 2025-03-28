@@ -5,6 +5,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterResizeSynchronizer.h"
 #import "flutter/fml/logging.h"
 
+#include <atomic>
+
 @implementation FlutterResizeSynchronizer {
   std::atomic_bool _inResize;
   bool _shuttingDown;
