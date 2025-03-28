@@ -19,7 +19,15 @@ class LineContents : public Contents {
                                               Scalar radius,
                                               Scalar scale);
 
-  static fml::Status CalculatePerVertex(
+  struct EffectiveLineParameters {
+    Scalar width;
+    Scalar radius;
+  };
+
+  /// Calculates the values needed for the vertex shader, per vertex.
+  /// Returns the effective line parameters that are used. These differ from the
+  /// ones provided by `geometry` when the line gets clamped for being too thin.
+  static fml::StatusOr<EffectiveLineParameters> CalculatePerVertex(
       LineVertexShader::PerVertexData* per_vertex,
       const LineGeometry* geometry,
       const Matrix& entity_transform);
