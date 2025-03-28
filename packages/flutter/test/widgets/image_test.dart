@@ -1787,14 +1787,14 @@ void main() {
 
   testWidgets('Image errorBuilder handles errors during navigation transitions', (WidgetTester tester) async {
     bool errorHandled = false;
-    
+
     // Create a navigator key to control navigation
     final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-    
+
     // Create a test image provider that will fail on demand
     final _TestImageStreamCompleter streamCompleter = _TestImageStreamCompleter();
     final _TestImageProvider imageProvider = _TestImageProvider(streamCompleter: streamCompleter);
-    
+
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1803,7 +1803,7 @@ void main() {
           onGenerateRoute: (RouteSettings settings) {
             return PageRouteBuilder<void>(
               settings: settings,
-              pageBuilder: (BuildContext context, _, __) {
+              pageBuilder: (BuildContext context, _, _) {
                 if (settings.name == '/') {
                   return Column(
                     children: <Widget>[
@@ -1829,22 +1829,22 @@ void main() {
         ),
       ),
     );
-    
+
     // Navigate to second page to trigger the transition state
     await tester.tap(find.text('Navigate'));
     await tester.pump(); // Start navigation animation
-    
+
     // During the transition when TickerMode is disabled, trigger an error
     streamCompleter.setError(exception: 'Image error during transition');
-    
+
     // Verify no exceptions propagate to the framework
     expect(tester.takeException(), isNull);
-    
+
     // Complete navigation and return to the first page
     await tester.pumpAndSettle();
     navigatorKey.currentState!.pop(); // Manually navigate back
     await tester.pumpAndSettle();
-    
+
     // Verify errorBuilder was invoked and rendered
     expect(errorHandled, isTrue);
     expect(find.text('Error handled'), findsOneWidget);
