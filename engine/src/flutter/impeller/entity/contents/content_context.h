@@ -176,7 +176,7 @@ class ContentContext {
   PipelineRef GetDestinationOutBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDestinationOverBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDownsamplePipeline(ContentContextOptions opts) const;
-  PipelineRef GetDrawVerticesUberShader(ContentContextOptions opts) const;
+  PipelineRef GetDrawVerticesUberPipeline(BlendMode blend_mode, ContentContextOptions opts) const;
   PipelineRef GetFastGradientPipeline(ContentContextOptions opts) const;
   PipelineRef GetFramebufferBlendColorBurnPipeline(ContentContextOptions opts) const;
   PipelineRef GetFramebufferBlendColorDodgePipeline(ContentContextOptions opts) const;
