@@ -619,21 +619,11 @@ bool _allTargetsCached(File performanceFile) {
   if (dryRun) {
     return true;
   }
-  // These targets run on all iOS and macOS builds to ensure
-  // dev dependencies are enabled on debug/profile mode and disabled
-  // on release mode.
-  const Set<String> skipList = <String>{
-    'check_dev_dependencies_ios',
-    'check_dev_dependencies_macos',
-  };
   final Map<String, Object?> data =
       json.decode(performanceFile.readAsStringSync()) as Map<String, Object?>;
   final List<Map<String, Object?>> targets =
       (data['targets']! as List<Object?>).cast<Map<String, Object?>>();
-  return targets.every(
-    (Map<String, Object?> element) =>
-        skipList.contains(element['name']) || element['skipped'] == true,
-  );
+  return targets.every((Map<String, Object?> element) => element['skipped'] == true);
 }
 
 Future<void> _flutterBuildDart2js(
