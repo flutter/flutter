@@ -894,6 +894,9 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
         );
       }
     }
+    print('children.length: ${children.length}');
+    print('onstageCount: $onstageCount');
+    print('skipCount: ${children.length - onstageCount}');
     return _Theater(
       skipCount: children.length - onstageCount,
       clipBehavior: widget.clipBehavior,
