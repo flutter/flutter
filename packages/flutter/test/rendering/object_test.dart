@@ -717,6 +717,7 @@ class TestThrowingRenderObject extends RenderObject {
     return Rect.zero;
   }
 }
+
 final class _TestPipelineOwner extends PipelineOwner {
   // Make these protected fields visible for testing.
   @override
