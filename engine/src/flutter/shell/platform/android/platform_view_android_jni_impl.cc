@@ -530,10 +530,16 @@ static void RegisterImageTexture(JNIEnv* env,
                                  jobject jcaller,
                                  jlong shell_holder,
                                  jlong texture_id,
-                                 jobject image_texture_entry) {
+                                 jobject image_texture_entry,
+                                 jboolean reset_on_background) {
+  ImageExternalTexture::ImageLifecycle lifecycle =
+      reset_on_background ? ImageExternalTexture::ImageLifecycle::kReset
+                          : ImageExternalTexture::ImageLifecycle::kKeepAlive;
+
   ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterImageTexture(
-      static_cast<int64_t>(texture_id),                                 //
-      fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry)  //
+      static_cast<int64_t>(texture_id),                                  //
+      fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry),  //
+      lifecycle                                                          //
   );
 }
 
@@ -811,7 +817,7 @@ bool RegisterApi(JNIEnv* env) {
       {
           .name = "nativeRegisterImageTexture",
           .signature = "(JJLjava/lang/ref/"
-                       "WeakReference;)V",
+                       "WeakReference;Z)V",
           .fnPtr = reinterpret_cast<void*>(&RegisterImageTexture),
       },
       {
