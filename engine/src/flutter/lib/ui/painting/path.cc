@@ -218,8 +218,8 @@ void CanvasPath::addRSuperellipse(const RSuperellipse* rsuperellipse) {
   DlPathBuilder builder;
   builder.SetConvexity(impeller::Convexity::kConvex);
   builder.SetBounds(rsuperellipse->bounds());
-  builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(rsuperellipse->bounds(),
-                                                    rsuperellipse->radii()));
+  builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
+      rsuperellipse->bounds(), rsuperellipse->radii()));
   sk_path_.addPath(DlPath(builder.TakePath()).GetSkPath(),
                    SkPath::kAppend_AddPathMode);
 

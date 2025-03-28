@@ -1268,8 +1268,8 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
       DlPathBuilder builder;
       builder.SetConvexity(impeller::Convexity::kConvex);
       builder.SetBounds(rse.GetBounds());
-      builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(rse.GetBounds(),
-                                                        rse.GetRadii()));
+      builder.AddRoundSuperellipse(
+          DlRoundSuperellipse::MakeRectRadii(rse.GetBounds(), rse.GetRadii()));
       Push<DrawPathOp>(0, DlPath(builder.TakePath()));
     }
     CheckLayerOpacityCompatibility();
