@@ -2182,7 +2182,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         "description": "The first day of spring",
         "placeholders": {
           "springStartDate": {
-            "format": "MMMd"
+            "format": "MMMMd"
           }
         }
       }
