@@ -296,7 +296,7 @@ void main() async {
   });
 
   test('FragmentShader Uniforms with interleaved textures are sorted ', () async {
-    final FragmentProgram program = await FragmentProgram.fromAsset('uniforms_ordering.frag.iplr');
+    final FragmentProgram program = await FragmentProgram.fromAsset('uniform_ordering.frag.iplr');
 
     // The shader will not render green if the compiler doesn't keep the
     // uniforms in the right order.
