@@ -7697,10 +7697,10 @@
       }
     }
   },
-  "flutter/impeller/entity/gles/vertices_uber.frag.gles": {
+  "flutter/impeller/entity/gles/vertices_uber_1.frag.gles": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/gles/vertices_uber.frag.gles",
+      "filename": "flutter/impeller/entity/gles/vertices_uber_1.frag.gles",
       "has_side_effects": false,
       "has_uniform_computation": true,
       "modifies_coverage": false,
@@ -7720,7 +7720,7 @@
             "longest_path_cycles": [
               1.2625000476837158,
               1.2625000476837158,
-              0.675000011920929,
+              0.737500011920929,
               0.3125,
               0.0,
               0.5,
@@ -7752,10 +7752,10 @@
               "arith_fma"
             ],
             "total_cycles": [
-              3.862499952316284,
-              3.862499952316284,
-              2.799999952316284,
-              0.9375,
+              2.40625,
+              2.40625,
+              1.75,
+              0.6875,
               0.0,
               0.5,
               0.25
@@ -7763,14 +7763,14 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 14,
+          "uniform_registers_used": 10,
           "work_registers_used": 32
         }
       }
     },
     "Mali-T880": {
       "core": "Mali-T880",
-      "filename": "flutter/impeller/entity/gles/vertices_uber.frag.gles",
+      "filename": "flutter/impeller/entity/gles/vertices_uber_1.frag.gles",
       "has_uniform_computation": false,
       "type": "Fragment",
       "variants": {
@@ -7781,7 +7781,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              14.1899995803833,
+              11.880000114440918,
               5.0,
               1.0
             ],
@@ -7802,7 +7802,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              47.33333206176758,
+              23.0,
               6.0,
               1.0
             ]
@@ -7810,6 +7810,123 @@
           "thread_occupancy": 50,
           "uniform_registers_used": 1,
           "work_registers_used": 8
+        }
+      }
+    }
+  },
+  "flutter/impeller/entity/gles/vertices_uber_2.frag.gles": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/gles/vertices_uber_2.frag.gles",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 0,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "longest_path_cycles": [
+              1.1124999523162842,
+              1.1124999523162842,
+              0.800000011920929,
+              0.3125,
+              0.0,
+              0.5,
+              0.25
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "varying"
+            ],
+            "shortest_path_cycles": [
+              0.421875,
+              0.421875,
+              0.359375,
+              0.0625,
+              0.0,
+              0.5,
+              0.25
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "total_cycles": [
+              1.8875000476837158,
+              1.8875000476837158,
+              1.28125,
+              0.375,
+              0.0,
+              0.5,
+              0.25
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 8,
+          "work_registers_used": 24
+        }
+      }
+    },
+    "Mali-T880": {
+      "core": "Mali-T880",
+      "filename": "flutter/impeller/entity/gles/vertices_uber_2.frag.gles",
+      "has_uniform_computation": false,
+      "type": "Fragment",
+      "variants": {
+        "Main": {
+          "has_stack_spilling": true,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arithmetic"
+            ],
+            "longest_path_cycles": [
+              11.220000267028809,
+              9.0,
+              1.0
+            ],
+            "pipelines": [
+              "arithmetic",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              3.630000114440918,
+              5.0,
+              1.0
+            ],
+            "total_bound_pipelines": [
+              "arithmetic"
+            ],
+            "total_cycles": [
+              27.66666603088379,
+              14.0,
+              1.0
+            ]
+          },
+          "thread_occupancy": 100,
+          "uniform_registers_used": 1,
+          "work_registers_used": 4
         }
       }
     }
@@ -10540,10 +10657,10 @@
       }
     }
   },
-  "flutter/impeller/entity/vertices_uber.frag.vkspv": {
+  "flutter/impeller/entity/vertices_uber_1.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/vertices_uber.frag.vkspv",
+      "filename": "flutter/impeller/entity/vertices_uber_1.frag.vkspv",
       "has_side_effects": false,
       "has_uniform_computation": true,
       "modifies_coverage": false,
@@ -10561,9 +10678,9 @@
               "arith_fma"
             ],
             "longest_path_cycles": [
-              1.1124999523162842,
-              1.1124999523162842,
-              0.84375,
+              1.2625000476837158,
+              1.2625000476837158,
+              0.6875,
               0.3125,
               0.0,
               0.5,
@@ -10596,10 +10713,10 @@
               "arith_fma"
             ],
             "total_cycles": [
-              3.875,
-              3.875,
-              2.40625,
-              0.9375,
+              2.4375,
+              2.4375,
+              1.5,
+              0.6875,
               0.0,
               0.5,
               0.25
@@ -10607,8 +10724,81 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 14,
+          "uniform_registers_used": 12,
           "work_registers_used": 32
+        }
+      }
+    }
+  },
+  "flutter/impeller/entity/vertices_uber_2.frag.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/vertices_uber_2.frag.vkspv",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 0,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "longest_path_cycles": [
+              1.1124999523162842,
+              1.1124999523162842,
+              0.699999988079071,
+              0.3125,
+              0.0,
+              0.5,
+              0.25
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "shortest_path_cycles": [
+              0.5625,
+              0.5625,
+              0.234375,
+              0.125,
+              0.0,
+              0.5,
+              0.25
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "total_cycles": [
+              1.90625,
+              1.90625,
+              1.09375,
+              0.375,
+              0.0,
+              0.5,
+              0.25
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 8,
+          "work_registers_used": 23
         }
       }
     }

@@ -393,6 +393,7 @@ targets:
       task_name: analyzer_benchmark
 
   - name: Linux coverage
+    bringup: true # https://github.com/flutter/flutter/issues/164591
     presubmit: false
     recipe: flutter/coverage
     timeout: 120

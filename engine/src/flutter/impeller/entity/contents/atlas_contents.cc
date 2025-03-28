@@ -232,16 +232,16 @@ bool AtlasContents::Render(const ContentContext& renderer,
     return pass.Draw().ok();
   }
 
-  using VUS = VerticesUberShader::VertexShader;
-  using FS = VerticesUberShader::FragmentShader;
+  using VUS = VerticesUber1Shader::VertexShader;
+  using FS = VerticesUber1Shader::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
   pass.SetCommandLabel("DrawAtlas Advanced Blend");
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
 
-  pass.SetPipeline(renderer.GetDrawVerticesUberShader(
-      OptionsFromPassAndEntity(pass, entity)));
+  renderer.GetDrawVerticesUberPipeline(blend_mode,
+                                       OptionsFromPassAndEntity(pass, entity));
   FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
 
   VUS::FrameInfo frame_info;
