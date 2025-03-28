@@ -85,15 +85,24 @@ settings set target.source-map "flutter/" "/path/to/engine/src/flutter/"
 
 ## Debugging Android builds with gdb
 
-See https://github.com/flutter/engine/blob/main/sky/tools/flutter_gdb#L13
+See https://github.com/flutter/flutter/blob/master/engine/src/flutter/sky/tools/flutter_gdb
 
 ## Debugging native engine code on Android with Android Studio
 
-1. Build the local engine with the `--no-stripped` flag.
-2. Decide on a Flutter app that you with to debug and run it with `flutter run` and the local engine flags. i.e.: `--debug --local-engine-src-path path/to/my/engine/src --local-engine=android_debug_unopt_arm64`
+1. Build an unoptimized local engine. i.e. `et build -c host_debug_unopt_arm64 && et build -c android_debug_unopt_arm64`.
+2. Decide on a Flutter app that you with to debug and run it with `flutter run` and the local engine flags. i.e.: `--debug --local-engine-src-path path/to/my/engine/src --local-engine=android_debug_unopt_arm64`.
 3. Open Android Studio and use `File > Profile or Debug APK`. The location of the debug build APK should be `build/app/outputs/apk/debug/app-debug.apk` under the Flutter app project.
-4. To attach the debugger, use `Run > Attach Debugger to Android Process`. For "Use Android Debugger Settings from" choose `[Use default settings]`, and for "Debug Type" choose `Native Only`.
-5. Once attached, you can use Android Studio to open local engine C++ source files and set breakpoints.
+
+<img src="https://github.com/user-attachments/assets/a58ed74b-1a9e-45ce-ae64-350b2119710e" width="600" />
+
+4. You may see the warning "One or more debug symbols point to paths not found on this machine". Add "Debuggable Library" path `out/android_debug_unopt_arm64/lib/libflutter.so`.
+
+<img src="https://github.com/user-attachments/assets/44845f2b-c317-489b-9eb8-e24bbd0ce78a" width="600" />
+
+5. To attach the debugger, use `Run > Attach Debugger to Android Process`.  For "Use Android Debugger Settings from" choose `[Use default settings]`, and for "Debug Type" choose `Native Only`.
+<img src="https://github.com/user-attachments/assets/a79dc331-6540-4c03-b880-58d1552a7f75" width="600" />
+
+7. Once attached, you can use Android Studio to open local engine C++ source files and set breakpoints. You can set Symbolic Breakpoints, i.e. Symbol name `impeller::ContextVK::ContectVK`.
 
 ## Debugging Windows builds with Visual Studio
 
