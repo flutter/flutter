@@ -9,7 +9,6 @@ uniform sampler2D u_texture;
 uniform float b;
 uniform float c;
 
-
 out vec4 frag_color;
 
 void main() {
