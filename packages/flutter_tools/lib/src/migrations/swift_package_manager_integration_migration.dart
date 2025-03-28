@@ -311,18 +311,18 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 $newContent
       </PreActions>
 ''';
-      final String? buildActionEntries =
+      String? buildAction =
           schemeLines.where((String line) => line.contains('<BuildActionEntries>')).firstOrNull;
-      if (buildActionEntries == null) {
-        throw Exception(
-          'Failed to parse ${schemeFile.basename}: Could not find BuildActionEntries.',
-        );
-      } else {
-        newScheme = schemeContent.replaceFirst(
-          buildActionEntries,
-          '$newContent$buildActionEntries',
-        );
+      if (buildAction == null) {
+        // If there are no BuildActionEntries, append before end of BuildAction.
+        buildAction =
+            schemeLines.where((String line) => line.contains('</BuildAction>')).firstOrNull;
+
+        if (buildAction == null) {
+          throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildAction.');
+        }
       }
+      newScheme = schemeContent.replaceFirst(buildAction, '$newContent$buildAction');
     }
 
     schemeFile.writeAsStringSync(newScheme);

@@ -1843,9 +1843,9 @@ CreateEmbedderSemanticsUpdateCallbackV1(
         update_semantics_custom_action_callback,
     void* user_data) {
   return [update_semantics_node_callback,
-          update_semantics_custom_action_callback,
-          user_data](const flutter::SemanticsNodeUpdates& nodes,
-                     const flutter::CustomAccessibilityActionUpdates& actions) {
+          update_semantics_custom_action_callback, user_data](
+             int64_t view_id, const flutter::SemanticsNodeUpdates& nodes,
+             const flutter::CustomAccessibilityActionUpdates& actions) {
     flutter::EmbedderSemanticsUpdate update{nodes, actions};
     FlutterSemanticsUpdate* update_ptr = update.get();
 
@@ -1890,7 +1890,7 @@ CreateEmbedderSemanticsUpdateCallbackV2(
     FlutterUpdateSemanticsCallback update_semantics_callback,
     void* user_data) {
   return [update_semantics_callback, user_data](
-             const flutter::SemanticsNodeUpdates& nodes,
+             int64_t view_id, const flutter::SemanticsNodeUpdates& nodes,
              const flutter::CustomAccessibilityActionUpdates& actions) {
     flutter::EmbedderSemanticsUpdate update{nodes, actions};
 
@@ -1905,9 +1905,9 @@ CreateEmbedderSemanticsUpdateCallbackV3(
     FlutterUpdateSemanticsCallback2 update_semantics_callback,
     void* user_data) {
   return [update_semantics_callback, user_data](
-             const flutter::SemanticsNodeUpdates& nodes,
+             int64_t view_id, const flutter::SemanticsNodeUpdates& nodes,
              const flutter::CustomAccessibilityActionUpdates& actions) {
-    flutter::EmbedderSemanticsUpdate2 update{nodes, actions};
+    flutter::EmbedderSemanticsUpdate2 update{view_id, nodes, actions};
 
     update_semantics_callback(update.get(), user_data);
   };
@@ -2093,6 +2093,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     settings.root_isolate_create_callback =
         [callback, user_data](const auto& isolate) { callback(user_data); };
   }
+
+  // Wire up callback for engine and print logging.
   if (SAFE_ACCESS(args, log_message_callback, nullptr) != nullptr) {
     FlutterLogMessageCallback callback =
         SAFE_ACCESS(args, log_message_callback, nullptr);
@@ -2101,7 +2103,17 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
                                         const std::string& message) {
       callback(tag.c_str(), message.c_str(), user_data);
     };
+  } else {
+    settings.log_message_callback = [](const std::string& tag,
+                                       const std::string& message) {
+      // Fall back to logging to stdout if unspecified.
+      if (tag.empty()) {
+        std::cout << tag << ": ";
+      }
+      std::cout << message << std::endl;
+    };
   }
+
   if (SAFE_ACCESS(args, log_tag, nullptr) != nullptr) {
     settings.log_tag = SAFE_ACCESS(args, log_tag, nullptr);
   }
@@ -3177,14 +3189,27 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length) {
+  FlutterSendSemanticsActionInfo info{
+      .struct_size = sizeof(FlutterSendSemanticsActionInfo),
+      .view_id = kFlutterImplicitViewId,
+      .node_id = node_id,
+      .action = action,
+      .data = data,
+      .data_length = data_length};
+  return FlutterEngineSendSemanticsAction(engine, &info);
+}
+
+FlutterEngineResult FlutterEngineSendSemanticsAction(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterSendSemanticsActionInfo* info) {
   if (engine == nullptr) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Invalid engine handle.");
   }
-  auto engine_action = static_cast<flutter::SemanticsAction>(action);
+  auto engine_action = static_cast<flutter::SemanticsAction>(info->action);
   if (!reinterpret_cast<flutter::EmbedderEngine*>(engine)
            ->DispatchSemanticsAction(
-               node_id, engine_action,
-               fml::MallocMapping::Copy(data, data_length))) {
+               info->view_id, info->node_id, engine_action,
+               fml::MallocMapping::Copy(info->data, info->data_length))) {
     return LOG_EMBEDDER_ERROR(kInternalInconsistency,
                               "Could not dispatch semantics action.");
   }
@@ -3693,6 +3718,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(UpdateAccessibilityFeatures,
            FlutterEngineUpdateAccessibilityFeatures);
   SET_PROC(DispatchSemanticsAction, FlutterEngineDispatchSemanticsAction);
+  SET_PROC(SendSemanticsAction, FlutterEngineSendSemanticsAction);
   SET_PROC(OnVsync, FlutterEngineOnVsync);
   SET_PROC(ReloadSystemFonts, FlutterEngineReloadSystemFonts);
   SET_PROC(TraceEventDurationBegin, FlutterEngineTraceEventDurationBegin);

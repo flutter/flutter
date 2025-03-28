@@ -7,6 +7,7 @@
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/path_builder.h"
@@ -86,21 +87,9 @@ class StrokeGenerator {
           polyline.GetContourPointBounds(contour_i);
 
       size_t contour_delta = contour_end_point_i - contour_start_point_i;
-      if (contour_delta == 1) {
-        Point p = polyline.GetPoint(contour_start_point_i);
-        cap_proc(vtx_builder, p, {-stroke_width * 0.5f, 0}, scale,
-                 /*reverse=*/false);
-        cap_proc(vtx_builder, p, {stroke_width * 0.5f, 0}, scale,
-                 /*reverse=*/false);
-        continue;
-      } else if (contour_delta == 0) {
+      if (contour_delta == 0) {
         continue;  // This contour has no renderable content.
       }
-
-      previous_offset = offset;
-      offset = ComputeOffset(contour_start_point_i, contour_start_point_i,
-                             contour_end_point_i, contour);
-      const Point contour_first_offset = offset.GetVector();
 
       if (contour_i > 0) {
         // This branch only executes when we've just finished drawing a contour
@@ -123,6 +112,20 @@ class StrokeGenerator {
         vtx_builder.AppendVertex(vtx.position);
         vtx_builder.AppendVertex(vtx.position);
       }
+
+      if (contour_delta == 1) {
+        Point p = polyline.GetPoint(contour_start_point_i);
+        cap_proc(vtx_builder, p, {-stroke_width * 0.5f, 0}, scale,
+                 /*reverse=*/false);
+        cap_proc(vtx_builder, p, {stroke_width * 0.5f, 0}, scale,
+                 /*reverse=*/false);
+        continue;
+      }
+
+      previous_offset = offset;
+      offset = ComputeOffset(contour_start_point_i, contour_start_point_i,
+                             contour_end_point_i, contour);
+      const Point contour_first_offset = offset.GetVector();
 
       // Generate start cap.
       if (!polyline.contours[contour_i].is_closed) {

@@ -8,6 +8,7 @@ import("//flutter/build/bin_to_obj.gni")
 import("//flutter/build/zip_bundle.gni")
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/lib/snapshot/gen_snapshot.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/shell/gpu/gpu.gni")
 import("//flutter/shell/version/version.gni")
@@ -166,7 +167,7 @@ source_set("flutter_shell_native_src") {
     "//flutter/shell/platform/android/surface",
     "//flutter/shell/platform/android/surface:native_window",
     "//flutter/skia",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
     "//flutter/vulkan",
   ]
 
@@ -681,11 +682,22 @@ generated_file("android_entitlement_config") {
 
 if (target_cpu != "x86") {
   zip_bundle("gen_snapshot") {
-    gen_snapshot_bin = "gen_snapshot"
     gen_snapshot_out_dir =
         get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
                        "root_out_dir")
-    gen_snapshot_path = rebase_path("$gen_snapshot_out_dir/$gen_snapshot_bin")
+
+    # The source gen_snapshot binary from the build outputs.
+    gen_snapshot_src = rebase_path("$gen_snapshot_out_dir/gen_snapshot")
+
+    # The output gen_snapshot binary name in the archive.
+    gen_snapshot_dest = "gen_snapshot"
+
+    if (host_os == "mac") {
+      gen_snapshot_src = rebase_path("$root_out_dir/universal/gen_snapshot")
+    } else if (host_os == "win") {
+      gen_snapshot_src = rebase_path("$root_out_dir/gen_snapshot.exe")
+      gen_snapshot_dest = "gen_snapshot.exe"
+    }
 
     if (host_os == "linux") {
       output = "$android_zip_archive_dir/linux-x64.zip"
@@ -693,18 +705,16 @@ if (target_cpu != "x86") {
       output = "$android_zip_archive_dir/darwin-x64.zip"
     } else if (host_os == "win") {
       output = "$android_zip_archive_dir/windows-x64.zip"
-      gen_snapshot_bin = "gen_snapshot.exe"
-      gen_snapshot_path = rebase_path("$root_out_dir/$gen_snapshot_bin")
     }
 
     files = [
       {
-        source = gen_snapshot_path
-        destination = gen_snapshot_bin
+        source = gen_snapshot_src
+        destination = gen_snapshot_dest
       },
     ]
 
-    deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
+    deps = [ "//flutter/lib/snapshot:generate_snapshot_bins" ]
 
     if (host_os == "mac") {
       deps += [ ":android_entitlement_config" ]

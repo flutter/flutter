@@ -24,6 +24,7 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
@@ -85,7 +86,7 @@ static void ApplyFramebufferBlend(Entity& entity) {
   contents->SetChildContents(src_contents);
   contents->SetBlendMode(entity.GetBlendMode());
   entity.SetContents(std::move(contents));
-  entity.SetBlendMode(BlendMode::kSource);
+  entity.SetBlendMode(BlendMode::kSrc);
 }
 
 /// @brief Create the subpass restore contents, appling any filters or opacity
@@ -374,8 +375,7 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
            FilterContents::BlurStyle::kNormal &&
        paint.image_filter) ||
       (paint.mask_blur_descriptor->style == FilterContents::BlurStyle::kSolid &&
-       (!rrect_color.IsOpaque() ||
-        paint.blend_mode != BlendMode::kSourceOver))) {
+       (!rrect_color.IsOpaque() || paint.blend_mode != BlendMode::kSrcOver))) {
     Rect render_bounds = rect;
     if (paint.mask_blur_descriptor->style !=
         FilterContents::BlurStyle::kInner) {
@@ -460,9 +460,19 @@ void Canvas::DrawLine(const Point& p0,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  LineGeometry geom(p0, p1, paint.stroke_width, paint.stroke_cap);
-  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint,
-                                          /*reuse_depth=*/reuse_depth);
+  auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke_width,
+                                                 paint.stroke_cap);
+
+  if (renderer_.GetContext()->GetFlags().antialiased_lines &&
+      !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
+      !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
+    auto contents = LineContents::Make(std::move(geometry), paint.color);
+    entity.SetContents(std::move(contents));
+    AddRenderEntityToCurrentPass(entity, reuse_depth);
+  } else {
+    AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
+                                            /*reuse_depth=*/reuse_depth);
+  }
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
@@ -766,7 +776,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   // of Skia's SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER flag, which
   // is enabled when the Flutter engine builds Skia.
   if (!paint.color_source) {
-    blend_mode = BlendMode::kDestination;
+    blend_mode = BlendMode::kDst;
   }
 
   Entity entity;
@@ -780,7 +790,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   }
 
   // If the blend mode is destination don't bother to bind or create a texture.
-  if (blend_mode == BlendMode::kDestination) {
+  if (blend_mode == BlendMode::kDst) {
     auto contents = std::make_shared<VerticesSimpleBlendContents>();
     contents->SetBlendMode(blend_mode);
     contents->SetAlpha(paint.color.alpha);
@@ -1326,7 +1336,7 @@ bool Canvas::Restore() {
             element_entity.GetBlendMode(), inputs);
         contents->SetCoverageHint(element_entity.GetCoverage());
         element_entity.SetContents(std::move(contents));
-        element_entity.SetBlendMode(BlendMode::kSource);
+        element_entity.SetBlendMode(BlendMode::kSrc);
       }
     }
 
@@ -1489,9 +1499,9 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       Matrix::MakeTranslation(Vector3(-GetGlobalPassPosition())) *
       entity.GetTransform());
   entity.SetInheritedOpacity(transform_stack_.back().distributed_opacity);
-  if (entity.GetBlendMode() == BlendMode::kSourceOver &&
+  if (entity.GetBlendMode() == BlendMode::kSrcOver &&
       entity.GetContents()->IsOpaque(entity.GetTransform())) {
-    entity.SetBlendMode(BlendMode::kSource);
+    entity.SetBlendMode(BlendMode::kSrc);
   }
 
   // If the entity covers the current render target and is a solid color, then
@@ -1558,7 +1568,7 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       auto contents =
           ColorFilterContents::MakeBlend(entity.GetBlendMode(), inputs);
       entity.SetContents(std::move(contents));
-      entity.SetBlendMode(BlendMode::kSource);
+      entity.SetBlendMode(BlendMode::kSrc);
     }
   }
 
@@ -1678,7 +1688,7 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
 
   Entity msaa_backdrop_entity;
   msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
-  msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
+  msaa_backdrop_entity.SetBlendMode(BlendMode::kSrc);
   msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
   if (!msaa_backdrop_entity.Render(renderer_, current_render_pass)) {
     VALIDATION_LOG << "Failed to render MSAA backdrop entity.";
@@ -1708,8 +1718,8 @@ bool Canvas::SupportsBlitToOnscreen() const {
   return renderer_.GetContext()
              ->GetCapabilities()
              ->SupportsTextureToTextureBlits() &&
-         renderer_.GetContext()->GetBackendType() !=
-             Context::BackendType::kOpenGLES;
+         renderer_.GetContext()->GetBackendType() ==
+             Context::BackendType::kMetal;
 }
 
 bool Canvas::BlitToOnscreen(bool is_onscreen) {
@@ -1718,7 +1728,6 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
   auto offscreen_target = render_passes_.back()
                               .inline_pass_context->GetPassTarget()
                               .GetRenderTarget();
-
   if (SupportsBlitToOnscreen()) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
@@ -1740,7 +1749,7 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
 
       Entity entity;
       entity.SetContents(contents);
-      entity.SetBlendMode(BlendMode::kSource);
+      entity.SetBlendMode(BlendMode::kSrc);
 
       if (!entity.Render(renderer_, *render_pass)) {
         VALIDATION_LOG << "Failed to render EntityPass root blit.";
@@ -1762,6 +1771,24 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
   }
 }
 
+bool Canvas::EnsureFinalMipmapGeneration() const {
+  if (!render_target_.GetRenderTargetTexture()->NeedsMipmapGeneration()) {
+    return true;
+  }
+  std::shared_ptr<CommandBuffer> cmd_buffer =
+      renderer_.GetContext()->CreateCommandBuffer();
+  if (!cmd_buffer) {
+    return false;
+  }
+  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+  if (!blit_pass) {
+    return false;
+  }
+  blit_pass->GenerateMipmap(render_target_.GetRenderTargetTexture());
+  blit_pass->EncodeCommands();
+  return renderer_.GetContext()->EnqueueCommandBuffer(std::move(cmd_buffer));
+}
+
 void Canvas::EndReplay() {
   FML_DCHECK(render_passes_.size() == 1u);
   render_passes_.back().inline_pass_context->GetRenderPass();
@@ -1775,7 +1802,9 @@ void Canvas::EndReplay() {
   if (requires_readback_) {
     BlitToOnscreen(/*is_onscreen_=*/is_onscreen_);
   }
-
+  if (!EnsureFinalMipmapGeneration()) {
+    VALIDATION_LOG << "Failed to generate onscreen mipmaps.";
+  }
   if (!renderer_.GetContext()->FlushCommandBuffers()) {
     // Not much we can do.
     VALIDATION_LOG << "Failed to submit command buffers";

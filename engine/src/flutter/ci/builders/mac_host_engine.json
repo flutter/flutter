@@ -18,7 +18,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -64,7 +64,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -85,7 +85,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -133,7 +133,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -141,7 +141,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -187,7 +187,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -206,7 +206,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -249,7 +249,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -257,7 +257,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -300,7 +300,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -308,7 +308,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -351,7 +351,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -371,7 +371,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -417,7 +417,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -425,7 +425,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -470,7 +470,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -478,7 +478,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -523,7 +523,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -544,7 +544,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -593,7 +593,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -601,7 +601,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -649,7 +649,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -657,7 +657,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -704,7 +704,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -723,7 +723,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -770,7 +770,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -778,7 +778,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -825,7 +825,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -833,7 +833,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -880,7 +880,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -900,7 +900,7 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -950,7 +950,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -958,7 +958,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -1007,7 +1007,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -1015,7 +1015,7 @@
         {
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-13|Mac-14",
+                "os=Mac-14",
                 "cpu=arm64"
             ],
             "gclient_variables": {
@@ -1064,7 +1064,7 @@
             },
             "properties": {
                 "$flutter/osx_sdk": {
-                    "sdk_version": "15a240d"
+                    "sdk_version": "16c5032a"
                 }
             },
             "timeout": 90
@@ -1141,9 +1141,9 @@
                     "--dst",
                     "out/debug/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_debug_gen_snapshot_arm64/gen_snapshot_arm64",
+                    "out/ci/mac_debug_gen_snapshot_arm64/universal/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_debug_gen_snapshot/gen_snapshot_x64",
+                    "out/ci/host_debug_gen_snapshot/universal/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -1154,9 +1154,9 @@
                     "--dst",
                     "out/profile/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_profile_gen_snapshot_arm64/gen_snapshot_arm64",
+                    "out/ci/mac_profile_gen_snapshot_arm64/universal/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_profile_gen_snapshot/gen_snapshot_x64",
+                    "out/ci/host_profile_gen_snapshot/universal/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
@@ -1167,9 +1167,9 @@
                     "--dst",
                     "out/release/snapshot",
                     "--arm64-path",
-                    "out/ci/mac_release_gen_snapshot_arm64/gen_snapshot_arm64",
+                    "out/ci/mac_release_gen_snapshot_arm64/universal/gen_snapshot_arm64",
                     "--x64-path",
-                    "out/ci/host_release_gen_snapshot/gen_snapshot_x64",
+                    "out/ci/host_release_gen_snapshot/universal/gen_snapshot_x64",
                     "--zip"
                 ],
                 "script": "flutter/sky/tools/create_macos_gen_snapshots.py"
