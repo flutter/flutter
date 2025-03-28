@@ -11,6 +11,7 @@
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
+#include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_renderable.h"
 #include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
@@ -63,18 +64,6 @@ FlEngine* fl_engine_new_with_binary_messenger(
     FlBinaryMessenger* binary_messenger);
 
 /**
- * fl_engine_new_with_renderer:
- * @project: an #FlDartProject.
- * @renderer: an #FlRenderer.
- *
- * Creates new Flutter engine.
- *
- * Returns: a new #FlEngine.
- */
-FlEngine* fl_engine_new_with_renderer(FlDartProject* project,
-                                      FlRenderer* renderer);
-
-/**
  * fl_engine_get_renderer:
  * @engine: an #FlEngine.
  *
@@ -83,6 +72,16 @@ FlEngine* fl_engine_new_with_renderer(FlDartProject* project,
  * Returns: an #FlRenderer.
  */
 FlRenderer* fl_engine_get_renderer(FlEngine* engine);
+
+/**
+ * fl_engine_get_opengl_manager:
+ * @engine: an #FlEngine.
+ *
+ * Gets the OpenGL manager used by this engine.
+ *
+ * Returns: an #FlOpenGLManager.
+ */
+FlOpenGLManager* fl_engine_get_opengl_manager(FlEngine* engine);
 
 /**
  * fl_engine_get_display_monitor:

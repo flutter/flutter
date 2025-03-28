@@ -25,7 +25,7 @@ typedef enum {
 
 GQuark fl_renderer_error_quark(void) G_GNUC_CONST;
 
-G_DECLARE_DERIVABLE_TYPE(FlRenderer, fl_renderer, FL, RENDERER, GObject)
+G_DECLARE_FINAL_TYPE(FlRenderer, fl_renderer, FL, RENDERER, GObject)
 
 /**
  * FlRenderer:
@@ -33,83 +33,15 @@ G_DECLARE_DERIVABLE_TYPE(FlRenderer, fl_renderer, FL, RENDERER, GObject)
  * #FlRenderer is an abstract class that allows Flutter to draw pixels.
  */
 
-struct _FlRendererClass {
-  GObjectClass parent_class;
-
-  /**
-   * Virtual method called when Flutter needs to make the OpenGL context
-   * current.
-   * @renderer: an #FlRenderer.
-   */
-  void (*make_current)(FlRenderer* renderer);
-
-  /**
-   * Virtual method called when Flutter needs to make the OpenGL resource
-   * context current.
-   * @renderer: an #FlRenderer.
-   */
-  void (*make_resource_current)(FlRenderer* renderer);
-
-  /**
-   * Virtual method called when Flutter needs to clear the OpenGL context.
-   * @renderer: an #FlRenderer.
-   */
-  void (*clear_current)(FlRenderer* renderer);
-};
-
 /**
- * fl_renderer_set_engine:
- * @renderer: an #FlRenderer.
+ * fl_renderer_new:
  * @engine: an #FlEngine.
  *
- * Called when the renderer is connected to an engine.
+ * Creates a new renderer.
+ *
+ * Returns: a new #FlRenderer.
  */
-void fl_renderer_set_engine(FlRenderer* renderer, FlEngine* engine);
-
-/**
- * fl_renderer_get_proc_address:
- * @renderer: an #FlRenderer.
- * @name: a function name.
- *
- * Gets the rendering API function that matches the given name.
- *
- * Returns: a function pointer.
- */
-void* fl_renderer_get_proc_address(FlRenderer* renderer, const char* name);
-
-/**
- * fl_renderer_make_current:
- * @renderer: an #FlRenderer.
- *
- * Makes the rendering context current.
- */
-void fl_renderer_make_current(FlRenderer* renderer);
-
-/**
- * fl_renderer_make_resource_current:
- * @renderer: an #FlRenderer.
- *
- * Makes the resource rendering context current.
- */
-void fl_renderer_make_resource_current(FlRenderer* renderer);
-
-/**
- * fl_renderer_clear_current:
- * @renderer: an #FlRenderer.
- *
- * Clears the current rendering context.
- */
-void fl_renderer_clear_current(FlRenderer* renderer);
-
-/**
- * fl_renderer_get_fbo:
- * @renderer: an #FlRenderer.
- *
- * Gets the frame buffer object to render to.
- *
- * Returns: a frame buffer object index.
- */
-guint32 fl_renderer_get_fbo(FlRenderer* renderer);
+FlRenderer* fl_renderer_new(FlEngine* engine);
 
 /**
  * fl_renderer_create_backing_store:

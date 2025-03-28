@@ -7,7 +7,7 @@
 #include "flutter/shell/platform/linux/testing/fl_test.h"
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
-#include "flutter/shell/platform/linux/testing/mock_renderer.h"
+#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 namespace {
 class ImModuleEnv : public ::testing::Environment {
