@@ -4140,14 +4140,15 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
 /// render subtree during the [RenderObject]'s layout process. When an ancestor
 /// [RenderObject] chooses to skip laying out this [RenderObject] in its
 /// [performLayout] implementation (for example, for performance reasons, an
-/// [Overlay] may skip laying out an offstage [OverlayEntry] while keep it in the
-/// tree), normally the [layoutCallback] will not be invoked because the [layout]
-/// method will not be called. This can be undesirable when the [layoutCallback]
-/// involves rebuilding dirty widgets (most notably, the [LayoutBuilder] widget).
-/// Unlike render subtrees, typically all dirty widgets (even off-screen ones) in
-/// a widget tree must be rebuilt. This mixin makes sure once scheduled, the
-/// [layoutCallback] method will be invoked even if it's skipped by an ancestor
-/// [RenderObject], unless this [RenderObject] has never been laid out.
+/// [Overlay] may skip laying out an offstage [OverlayEntry] while keeping it in
+/// the tree), normally the [layoutCallback] will not be invoked because the
+/// [layout] method will not be called. This can be undesirable when the
+/// [layoutCallback] involves rebuilding dirty widgets (most notably, the
+/// [LayoutBuilder] widget). Unlike render subtrees, typically all dirty widgets
+/// (even off-screen ones) in a widget tree must be rebuilt. This mixin makes
+/// sure once scheduled, the [layoutCallback] method will be invoked even if it's
+/// skipped by an ancestor [RenderObject], unless this [RenderObject] has never
+/// been laid out.
 ///
 /// Subclasses must not invoke the layout callback directly. Instead, call
 /// [runLayoutCallback] in the [performLayout] implementation.
@@ -4193,7 +4194,8 @@ mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
     _needsRebuild = true;
     // This ensures that the layout callback will be run even if an ancestor
     // chooses to not lay out this subtree (for example, obstructed OverlayEntries
-    // with `maintainState` set to true).
+    // with `maintainState` set to true), to maintain the widget tree integrity
+    // (making sure global keys are unique, for example).
     owner?._nodesNeedingLayout.add(this);
     // In an active tree, markNeedsLayout is needed to inform the layout boundary
     // that its child size may change.
