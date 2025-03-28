@@ -672,6 +672,20 @@ $newContent
       return lines;
     }
 
+    final Iterable<ParsedNativeTarget> customTargets = projectInfo.nativeTargets.where(
+      (ParsedNativeTarget target) => target.identifier != _runnerNativeTargetIdentifier,
+    );
+
+    // If there are unmigrated custom targets, abort the migration.
+    // Otherwise, continue migrating the default Runner target.
+    if (customTargets.isNotEmpty) {
+      throw Exception(
+        'The PBXNativeTargets section references one or more custom targets, which requires a manual migration.\n'
+        'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
+        'for instructions on how to migrate custom targets.',
+      );
+    }
+
     final (int startSectionIndex, int endSectionIndex) = _sectionRange('PBXNativeTarget', lines);
 
     // Find index where Native Target for the Runner target begins.
