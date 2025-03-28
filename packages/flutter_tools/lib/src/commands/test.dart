@@ -273,10 +273,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ..addOption(
         'timeout',
         help:
-            'The default test timeout, specified either '
-            'in seconds (e.g. "60s"), '
-            'as a multiplier of the default timeout (e.g. "2x"), '
-            'or as the string "none" to disable the timeout entirely.',
+            'The default timeout for individual tests, specified either in '
+            'seconds (e.g. "60s"), as a multiplier of the default test timeout '
+            '(e.g. "2x"), or as the string "none" to disable test timeouts '
+            'entirely. This value does not apply to the default test suite '
+            'loading timeout.',
       )
       ..addFlag(
         'ignore-timeouts',
