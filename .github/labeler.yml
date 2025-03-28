@@ -229,6 +229,7 @@ team-infra:
     - any-glob-to-any-file:
       - docs/infra/**/*
 
+# Keep this synced with CODEOWNERS.
 team-ios:
   - changed-files:
     - any-glob-to-any-file:
