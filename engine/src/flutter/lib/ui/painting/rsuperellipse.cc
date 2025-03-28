@@ -5,7 +5,6 @@
 #include "flutter/lib/ui/painting/rsuperellipse.h"
 
 #include "flutter/fml/logging.h"
-#include "flutter/impeller/geometry/scalar.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "third_party/tonic/logging/dart_error.h"
 

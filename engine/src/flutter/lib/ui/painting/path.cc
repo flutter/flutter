@@ -6,7 +6,6 @@
 
 #include <cmath>
 
-#include "flutter/impeller/geometry/round_superellipse_param.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"
