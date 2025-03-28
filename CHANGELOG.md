@@ -26,6 +26,10 @@ INTERNAL NOTE
 -->
 ## Flutter 3.29 Changes
 
+### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)
+- [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Impeller,
+  All platforms, Text that is scaled over 48x renders incorrectly.
+
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
 - [dart 3.7.2 changelog](https://github.com/dart-lang/sdk/blob/stable/CHANGELOG.md#372)
