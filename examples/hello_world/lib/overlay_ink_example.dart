@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
       // Or for a more realistic use-case, navigate to the url /root/sub on the web
       initialLocation: '/root/sub',
       routes: [
-        StatefulShellRoute.indexedStack(
+        ShellRoute(
           builder: (context, state, navigationShell) {
             // return Scaffold(body: const ListTile(title: Text('someText'))); // Does work
             return Scaffold(
@@ -21,29 +21,25 @@ class MyApp extends StatelessWidget {
               body: navigationShell,
             ); // Does not work
           },
-          branches: [
-            StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/root',
+              builder: (context, __) {
+                final visibility = Visibility.of(context);
+                print('visibility root: $visibility');
+                // return Container(width: 111, height: 112, color: Colors.red);
+                return Ink(child: Container(width: 111, height: 112, color: Colors.red));
+              },
               routes: [
+                // Must be nested, so layouts are stacked on top
                 GoRoute(
-                  path: '/root',
+                  path: 'sub',
                   builder: (context, __) {
                     final visibility = Visibility.of(context);
-                    print('visibility root: $visibility');
-                    // return Container(width: 111, height: 112, color: Colors.red);
-                    return Ink(child: Container(width: 111, height: 112, color: Colors.red));
+                    print('visibility child: $visibility');
+                    return Container(width: 222, height: 223, color: Colors.blue);
+                    return const Text('subA');
                   },
-                  routes: [
-                    // Must be nested, so layouts are stacked on top
-                    GoRoute(
-                      path: 'sub',
-                      builder: (context, __) {
-                        final visibility = Visibility.of(context);
-                        print('visibility child: $visibility');
-                        return Container(width: 222, height: 223, color: Colors.blue);
-                        return const Text('subA');
-                      },
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -53,21 +49,21 @@ class MyApp extends StatelessWidget {
     );
 
     // Surprisingly this is working:
-    return MaterialApp(
-      routes: {
-        '/root':
-            (BuildContext context) => Scaffold(
-              appBar: AppBar(),
-              body: Ink(child: Container(width: 111, height: 112, color: Colors.red)),
-            ),
-        '/root/sub':
-            (BuildContext context) => Scaffold(
-              appBar: AppBar(),
-              body: Ink(child: Container(width: 222, height: 223, color: Colors.blue)),
-            ),
-      },
-      initialRoute: '/root/sub',
-    );
+    // return MaterialApp(
+    //   routes: {
+    //     '/root':
+    //         (BuildContext context) => Scaffold(
+    //           appBar: AppBar(),
+    //           body: Ink(child: Container(width: 111, height: 112, color: Colors.red)),
+    //         ),
+    //     '/root/sub':
+    //         (BuildContext context) => Scaffold(
+    //           appBar: AppBar(),
+    //           body: Ink(child: Container(width: 222, height: 223, color: Colors.blue)),
+    //         ),
+    //   },
+    //   initialRoute: '/root/sub',
+    // );
 
     return MaterialApp.router(routerConfig: router);
   }
