@@ -510,6 +510,19 @@ Future<DartHookResult> _runDartHooks({
           .where((EncodedAsset asset) => asset.type == DataAsset.type)
           .map<DataAsset>(DataAsset.fromEncoded)
           .toList();
+
+  if (dataAssets.map((DataAsset asset) => asset.id).toSet().length != dataAssets.length) {
+    throwToolExit(
+      'Found duplicates in the data assets: ${dataAssets.map((DataAsset e) => e.id).toList()}.',
+    );
+  }
+
+  if (codeAssets.map((CodeAsset asset) => asset.id).toSet().length != codeAssets.length) {
+    throwToolExit(
+      'Found duplicates in the code assets: ${codeAssets.map((CodeAsset e) => e.id).toList()}.',
+    );
+  }
+
   globals.logger.printTrace('Building native assets for $targetString done.');
 
   return DartHookResult(
