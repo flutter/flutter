@@ -55,5 +55,5 @@ void main() {
                 float16_t(0), float16_t(1.0));
 
   // premultiply the outputs
-  frag_color = f16vec4(color.rgb * color.a, color.a) * frag_info.output_alpha;
+  frag_color = IPHalfPremultiply(color) * frag_info.output_alpha;
 }
