@@ -205,8 +205,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
         geometry_->ShouldInvertBlendMode()
             ? (InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc))
             : blend_mode;
-    pass.SetPipeline(renderer.GetPorterDuffPipeline(inverted_blend_mode,
-                                                    OptionsFromPass(pass)));
+    pass.SetPipeline(renderer.GetPorterDuffPipeline(
+        inverted_blend_mode, OptionsFromPassAndEntity(pass, entity)));
 
     FS::FragInfo frag_info;
     VS::FrameInfo frame_info;
@@ -240,7 +240,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
 
-  pass.SetPipeline(renderer.GetDrawVerticesUberShader(OptionsFromPass(pass)));
+  pass.SetPipeline(renderer.GetDrawVerticesUberShader(
+      OptionsFromPassAndEntity(pass, entity)));
   FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
 
   VUS::FrameInfo frame_info;
