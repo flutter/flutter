@@ -895,12 +895,12 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         final String file = event['fileUri']! as String;
         final int line = event['line']! as int;
         final int column = event['column']! as int;
-        expect(file, endsWith('widget_inspector_test.dart'));
+        expect(file, endsWith('text.dart'));
         // We don't hardcode the actual lines the widgets are created on as that
         // would make this test fragile.
         expect(line, isNotNull);
         // Column numbers are more stable than line numbers.
-        expect(column, equals(28));
+        expect(column, equals(16));
       },
       // [intended] Test requires --track-widget-creation flag.
       skip: !WidgetInspectorService.instance.isWidgetCreationTracked(),
