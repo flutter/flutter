@@ -15,15 +15,15 @@ object NativePluginLoaderReflectionBridge {
     fun getPlugins(
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
-    ): List<Map<String, Any>> {
+    ): List<Map<String?, Any?>> {
         nativePluginLoader = extraProperties.get("nativePluginLoader")!!
 
         @Suppress("UNCHECKED_CAST")
-        val pluginList: List<Map<String, Any>> =
+        val pluginList: List<Map<String?, Any?>> =
             nativePluginLoader!!::class
                 .members
                 .firstOrNull { it.name == "getPlugins" }
-                ?.call(nativePluginLoader, flutterProjectRoot) as List<Map<String, Any>>
+                ?.call(nativePluginLoader, flutterProjectRoot) as List<Map<String?, Any?>>
 
         return pluginList
     }

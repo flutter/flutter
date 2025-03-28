@@ -13,6 +13,7 @@ import com.flutter.gradle.BaseApplicationNameHandler
 import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginConstants
+import com.flutter.gradle.FlutterPluginDelegate
 import com.flutter.gradle.FlutterTask
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
@@ -56,6 +57,7 @@ class FlutterPlugin implements Plugin<Project> {
     private String engineRealm
     private List<Map<String, Object>> pluginList
     private List<Map<String, Object>> pluginDependencies
+    private FlutterPluginDelegate = new FlutterPluginDelegate()
 
     @Override
     void apply(Project project) {
@@ -470,12 +472,16 @@ class FlutterPlugin implements Plugin<Project> {
             Task cleanPackageAssets
             try {
                 packageAssets = project.tasks.named("package${variant.name.capitalize()}Assets").get()
+                println("HI GRAY, packageAssets tYPE is " + packageAssets.getClass().canonicalName.toString())
             } catch (UnknownTaskException ignored) {
+                println("HI GRAY, packageAssets tYPE is null")
                 packageAssets = null
             }
             try {
                 cleanPackageAssets = project.tasks.named("cleanPackage${variant.name.capitalize()}Assets").get()
+                println("HI GRAY, cleanpackageAssets TYPE is " + cleanPackageAssets.getClass().canonicalName.toString())
             } catch (UnknownTaskException ignored) {
+                println("HI GRAY, clean tYPE is null")
                 cleanPackageAssets = null
             }
             boolean isUsedAsSubproject = packageAssets && cleanPackageAssets && !isBuildingAar
@@ -617,6 +623,7 @@ class FlutterPlugin implements Plugin<Project> {
                 if (!FlutterPluginUtils.shouldConfigureFlutterTask(project, assembleTask)) {
                     return
                 }
+                println("hi gray before addflutter deps")
                 Task copyFlutterAssetsTask = addFlutterDeps(variant)
                 BaseVariantOutput variantOutput = variant.outputs.first()
                 ProcessAndroidResources processResources = variantOutput.hasProperty(FlutterPluginConstants.PROP_PROCESS_RESOURCES_PROVIDER) ?
