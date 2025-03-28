@@ -5,55 +5,83 @@
 #include "flutter/lib/ui/painting/rsuperellipse.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/lib/ui/floating_point.h"
 #include "third_party/tonic/logging/dart_error.h"
-#include "third_party/tonic/typed_data/typed_list.h"
 
-using flutter::RSuperellipse;
+namespace flutter {
 
-namespace tonic {
+namespace {
 
-// Construct an DlRoundSuperellipse from a Dart RSuperellipse object.
-// The Dart RSuperellipse is a Float32List containing
-//   [left, top, right, bottom, xRadius, yRadius]
-RSuperellipse DartConverter<flutter::RSuperellipse>::FromDart(
-    Dart_Handle value) {
-  Float32List buffer(value);
-
-  RSuperellipse result;
-  result.is_null = true;
-  if (buffer.data() == nullptr) {
-    return result;
-  }
-
+flutter::DlRect BuildBounds(float left, float top, float right, float bottom) {
   // The Flutter rect may be inverted (upside down, backward, or both)
   // Historically, Skia would normalize such rects but we will do that
-  // manually below when we construct the Impeller RoundRect
+  // manually below when we construct the Impeller Rect
   flutter::DlRect raw_rect =
-      flutter::DlRect::MakeLTRB(buffer[0], buffer[1], buffer[2], buffer[3]);
+      flutter::DlRect::MakeLTRB(left, top, right, bottom);
+  return raw_rect.GetPositive();
+}
 
+impeller::RoundingRadii BuildRadii(float tl_radius_x,
+                                   float tl_radius_y,
+                                   float tr_radius_x,
+                                   float tr_radius_y,
+                                   float br_radius_x,
+                                   float br_radius_y,
+                                   float bl_radius_x,
+                                   float bl_radius_y) {
   // Flutter has radii in TL,TR,BR,BL (clockwise) order,
   // but Impeller uses TL,TR,BL,BR (zig-zag) order
-  impeller::RoundingRadii radii = {
-      .top_left = flutter::DlSize(buffer[4], buffer[5]),
-      .top_right = flutter::DlSize(buffer[6], buffer[7]),
-      .bottom_left = flutter::DlSize(buffer[10], buffer[11]),
-      .bottom_right = flutter::DlSize(buffer[8], buffer[9]),
+  return impeller::RoundingRadii{
+      .top_left = flutter::DlSize(tl_radius_x, tl_radius_y),
+      .top_right = flutter::DlSize(tr_radius_x, tr_radius_y),
+      .bottom_left = flutter::DlSize(bl_radius_x, bl_radius_y),
+      .bottom_right = flutter::DlSize(br_radius_x, br_radius_y),
   };
+}
+}  // namespace
 
-  result.rsuperellipse = flutter::DlRoundSuperellipse::MakeRectRadii(
-      raw_rect.GetPositive(), radii);
+IMPLEMENT_WRAPPERTYPEINFO(ui, RSuperellipse);
 
-  result.is_null = false;
-  return result;
+void RSuperellipse::Create(Dart_Handle wrapper,
+                           double left,
+                           double top,
+                           double right,
+                           double bottom,
+                           double tl_radius_x,
+                           double tl_radius_y,
+                           double tr_radius_x,
+                           double tr_radius_y,
+                           double br_radius_x,
+                           double br_radius_y,
+                           double bl_radius_x,
+                           double bl_radius_y) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  auto res = fml::MakeRefCounted<RSuperellipse>(
+      BuildBounds(SafeNarrow(left), SafeNarrow(top), SafeNarrow(right),
+                  SafeNarrow(bottom)),
+      BuildRadii(SafeNarrow(tl_radius_x), SafeNarrow(tl_radius_y),
+                 SafeNarrow(tr_radius_x), SafeNarrow(tr_radius_y),
+                 SafeNarrow(br_radius_x), SafeNarrow(br_radius_y),
+                 SafeNarrow(bl_radius_x), SafeNarrow(bl_radius_y)));
+  res->AssociateWithDartWrapper(wrapper);
 }
 
-RSuperellipse DartConverter<flutter::RSuperellipse>::FromArguments(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
-  Dart_Handle value = Dart_GetNativeArgument(args, index);
-  FML_DCHECK(!CheckAndHandleError(value));
-  return FromDart(value);
+RSuperellipse::RSuperellipse(flutter::DlRect bounds,
+                             impeller::RoundingRadii radii)
+    : bounds_(bounds), radii_(radii) {}
+
+RSuperellipse::~RSuperellipse() = default;
+
+flutter::DlRoundSuperellipse RSuperellipse::rsuperellipse() const {
+  return flutter::DlRoundSuperellipse::MakeRectRadii(bounds_, radii_);
 }
 
-}  // namespace tonic
+impeller::RoundSuperellipseParam RSuperellipse::param() const {
+  return impeller::RoundSuperellipseParam::MakeBoundsRadii(bounds_, radii_);
+}
+
+bool RSuperellipse::contains(double x, double y) {
+  return param().Contains(DlPoint(SafeNarrow(x), SafeNarrow(y)));
+}
+
+}  // namespace flutter

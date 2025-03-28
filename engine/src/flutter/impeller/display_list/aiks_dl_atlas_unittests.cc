@@ -180,7 +180,7 @@ TEST_P(AiksTest, DrawAtlasPlusWideGamut) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(AiksTest, DlAtlasGeometryNoBlend) {
+TEST_P(AiksTest, DlAtlasGeometryNoBlendRenamed) {
   auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
 
   DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
