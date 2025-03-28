@@ -1090,11 +1090,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// The [RenderObject]s which need to be laid out in the next [flushLayout] pass.
   ///
-  /// [RenderObject]s with [RenderObject.isRepaintBoundary] are added to this list
-  /// when they are marked for layout. Subclasses of [PipelineOwner] may use this list
+  /// [RenderObject]s with [RenderObject.isRepaintBoundary] are added
+  /// when they are marked for layout. Subclasses of [PipelineOwner] may use them
   /// to invalidate caches or otherwise make performance optimizations.
   @protected
-  List<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
+  Iterable<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
 
   /// Whether this pipeline is currently in the layout phase.
   ///
@@ -1242,11 +1242,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// The [RenderObject]s which need to be painted in the next [flushPaint] pass.
   ///
-  /// [RenderObject]s marked with [RenderObject.isRepaintBoundary] are added to this list
-  /// when they are marked needing paint. Subclasses of [PipelineOwner] may use this list
+  /// [RenderObject]s marked with [RenderObject.isRepaintBoundary] are added
+  /// when they are marked needing paint. Subclasses of [PipelineOwner] may use them
   /// to invalidate caches or otherwise make performance optimizations.
   @protected
-  List<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
+  Iterable<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
 
   /// Whether this pipeline is currently in the paint phase.
   ///
