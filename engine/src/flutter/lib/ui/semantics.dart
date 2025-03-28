@@ -948,6 +948,11 @@ class SemanticsFlag {
 /// selected at least one radio option.
 enum SemanticsValidationResult {
   /// The node has no validation information attached to it.
+  ///
+  /// This is the default value. Most semantics nodes do not contain validation
+  /// information. Typically, only nodes that are part of an input form - text
+  /// fields, checkboxes, radio buttons, dropdowns - are validated and attach
+  /// validation results to their corresponding semantics nodes.
   none,
 
   /// The entered value is valid, and no error should be displayed to the user.
@@ -1184,11 +1189,10 @@ abstract class SemanticsUpdateBuilder {
   /// [SemanticsRole.none] if not set.
   ///
   /// If `validationResult` is not null, indicates the result of validating a
-  /// form field. If null, indicates that validation result is either unknown,
-  /// or the form field is not being validated. Form fields that validate user
-  /// input but do not use this argument should use other ways to communicate
-  /// validation errors to the user, such as embedding validation error text in
-  /// the label.
+  /// form field. If null, indicates that the node is not being validated, or
+  /// that the result is unknown. Form fields that validate user input but do
+  /// not use this argument should use other ways to communicate validation
+  /// errors to the user, such as embedding validation error text in the label.
   ///
   /// See also:
   ///
