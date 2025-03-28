@@ -1242,7 +1242,7 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   ///
   /// The returned list is an unmodifiable copy of the internal cache.
   /// The internal cache will continue to update without notifying this copy.
-  List<RenderObject> get nodesNeedingPaint => List<RenderObject>.unmodifiable(_nodesNeedingPaint);
+  @protected List<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
 
   /// Whether this pipeline is currently in the paint phase.
   ///
