@@ -103,7 +103,7 @@ class Surface extends DisplayCanvas {
 
   /// The <canvas> backing this Surface in the case that OffscreenCanvas isn't
   /// supported.
-  DomCanvasElement? _canvasElement;
+  DomHTMLCanvasElement? _canvasElement;
 
   /// Note, if this getter is called, then this Surface is being used as an
   /// overlay and must be backed by an onscreen <canvas> element.
@@ -153,7 +153,7 @@ class Surface extends DisplayCanvas {
       if (useOffscreenCanvas) {
         bitmap = _offscreenCanvas!.transferToImageBitmap();
       } else {
-        bitmapSource = _canvasElement! as JSObject;
+        bitmapSource = _canvasElement!;
         bitmap = await createImageBitmap(bitmapSource, (
           x: 0,
           y: _pixelHeight - bitmapSize.height,
@@ -291,7 +291,7 @@ class Surface extends DisplayCanvas {
     return _surface = _createNewSurface(size);
   }
 
-  JSVoid _contextRestoredListener(DomEvent event) {
+  void _contextRestoredListener(DomEvent event) {
     assert(
       _contextLost,
       'Received "webglcontextrestored" event but never received '
@@ -304,7 +304,7 @@ class Surface extends DisplayCanvas {
     event.preventDefault();
   }
 
-  JSVoid _contextLostListener(DomEvent event) {
+  void _contextLostListener(DomEvent event) {
     assert(
       event.target == _offscreenCanvas || event.target == _canvasElement,
       'Received a context lost event for a disposed canvas',
@@ -323,9 +323,13 @@ class Surface extends DisplayCanvas {
       _offscreenCanvas!.removeEventListener(
         'webglcontextrestored',
         _cachedContextRestoredListener,
-        false,
+        false.toJS,
       );
-      _offscreenCanvas!.removeEventListener('webglcontextlost', _cachedContextLostListener, false);
+      _offscreenCanvas!.removeEventListener(
+        'webglcontextlost',
+        _cachedContextLostListener,
+        false.toJS,
+      );
       _offscreenCanvas = null;
       _cachedContextRestoredListener = null;
       _cachedContextLostListener = null;
@@ -333,9 +337,13 @@ class Surface extends DisplayCanvas {
       _canvasElement!.removeEventListener(
         'webglcontextrestored',
         _cachedContextRestoredListener,
-        false,
+        false.toJS,
       );
-      _canvasElement!.removeEventListener('webglcontextlost', _cachedContextLostListener, false);
+      _canvasElement!.removeEventListener(
+        'webglcontextlost',
+        _cachedContextLostListener,
+        false.toJS,
+      );
       _canvasElement!.remove();
       _canvasElement = null;
       _cachedContextRestoredListener = null;
@@ -356,7 +364,7 @@ class Surface extends DisplayCanvas {
       _offscreenCanvas = offscreenCanvas;
       _canvasElement = null;
     } else {
-      final DomCanvasElement canvas = createDomCanvasElement(
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(
         width: _pixelWidth,
         height: _pixelHeight,
       );
@@ -379,8 +387,8 @@ class Surface extends DisplayCanvas {
     // See also: https://www.khronos.org/webgl/wiki/HandlingContextLost
     _cachedContextRestoredListener = createDomEventListener(_contextRestoredListener);
     _cachedContextLostListener = createDomEventListener(_contextLostListener);
-    htmlCanvas.addEventListener('webglcontextlost', _cachedContextLostListener, false);
-    htmlCanvas.addEventListener('webglcontextrestored', _cachedContextRestoredListener, false);
+    htmlCanvas.addEventListener('webglcontextlost', _cachedContextLostListener, false.toJS);
+    htmlCanvas.addEventListener('webglcontextrestored', _cachedContextRestoredListener, false.toJS);
     _forceNewContext = false;
     _contextLost = false;
 
@@ -490,11 +498,15 @@ class Surface extends DisplayCanvas {
 
   @override
   void dispose() {
-    _offscreenCanvas?.removeEventListener('webglcontextlost', _cachedContextLostListener, false);
+    _offscreenCanvas?.removeEventListener(
+      'webglcontextlost',
+      _cachedContextLostListener,
+      false.toJS,
+    );
     _offscreenCanvas?.removeEventListener(
       'webglcontextrestored',
       _cachedContextRestoredListener,
-      false,
+      false.toJS,
     );
     _cachedContextLostListener = null;
     _cachedContextRestoredListener = null;

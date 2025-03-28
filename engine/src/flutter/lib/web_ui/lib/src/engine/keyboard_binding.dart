@@ -142,7 +142,7 @@ class KeyboardBinding {
   final Map<String, DomEventListener> _listeners = <String, DomEventListener>{};
 
   void _addEventListener(String eventName, DartDomEventListener handler) {
-    JSVoid loggedHandler(DomEvent event) {
+    void loggedHandler(DomEvent event) {
       if (_debugLogKeyEvents) {
         print(event.type);
       }
@@ -151,16 +151,16 @@ class KeyboardBinding {
       }
     }
 
-    final DomEventListener wrappedHandler = createDomEventListener(loggedHandler);
+    final DomEventListener wrappedHandler = loggedHandler.toJS;
     assert(!_listeners.containsKey(eventName));
     _listeners[eventName] = wrappedHandler;
-    domWindow.addEventListener(eventName, wrappedHandler, true);
+    domWindow.addEventListener(eventName, wrappedHandler, true.toJS);
   }
 
   /// Remove all active event listeners.
   void _clearListeners() {
     _listeners.forEach((String eventName, DomEventListener listener) {
-      domWindow.removeEventListener(eventName, listener, true);
+      domWindow.removeEventListener(eventName, listener, true.toJS);
     });
     _listeners.clear();
   }

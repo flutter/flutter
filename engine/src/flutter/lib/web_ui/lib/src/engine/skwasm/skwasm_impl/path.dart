@@ -26,7 +26,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
   SkwasmPath.fromHandle(PathHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawPath> _registry = SkwasmFinalizationRegistry<RawPath>(
-    pathDispose,
+    (PathHandle handle) => pathDispose(handle),
   );
 
   @override

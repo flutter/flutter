@@ -240,7 +240,7 @@ sealed class SliceContainer {
 final class PictureSliceContainer extends SliceContainer {
   factory PictureSliceContainer(ui.Rect bounds) {
     final DomElement container = domDocument.createElement(kCanvasContainerTag);
-    final DomCanvasElement canvas = createDomCanvasElement(
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(
       width: bounds.width.toInt(),
       height: bounds.height.toInt(),
     );
@@ -289,13 +289,13 @@ final class PictureSliceContainer extends SliceContainer {
   }
 
   void renderBitmap(DomImageBitmap bitmap) {
-    final DomCanvasRenderingContextBitmapRenderer ctx = canvas.contextBitmapRenderer;
+    final DomImageBitmapRenderingContext ctx = canvas.contextBitmapRenderer;
     ctx.transferFromImageBitmap(bitmap);
   }
 
   @override
   final DomElement container;
-  final DomCanvasElement canvas;
+  final DomHTMLCanvasElement canvas;
 }
 
 final class PlatformViewContainer extends SliceContainer {

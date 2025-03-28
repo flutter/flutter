@@ -6,7 +6,6 @@ environment:
   sdk: ^3.7.0-0
 
 dependencies:
-  js: ^0.7.0
   meta: ^1.14.0
   web_locale_keymap:
     path: ../../third_party/web_locale_keymap
