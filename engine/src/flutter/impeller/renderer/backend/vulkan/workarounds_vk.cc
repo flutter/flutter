@@ -11,22 +11,18 @@ WorkaroundsVK GetWorkaroundsFromDriverInfo(DriverInfoVK& driver_info) {
   WorkaroundsVK workarounds;
 
   const auto& adreno_gpu = driver_info.GetAdrenoGPUInfo();
-  const auto& mali_gpu = driver_info.GetMaliGPUInfo();
+  const auto& powervr_gpu = driver_info.GetPowerVRGPUInfo();
 
-  workarounds.batch_submit_command_buffer_timeout = true;
   if (adreno_gpu.has_value()) {
     workarounds.slow_primitive_restart_performance = true;
     workarounds.broken_mipmap_generation = true;
 
     if (adreno_gpu.value() <= AdrenoGPU::kAdreno630) {
       workarounds.input_attachment_self_dependency_broken = true;
+      workarounds.batch_submit_command_buffer_timeout = true;
     }
-
-    if (adreno_gpu.value() >= AdrenoGPU::kAdreno702) {
-      workarounds.batch_submit_command_buffer_timeout = false;
-    }
-  } else if (mali_gpu.has_value()) {
-    workarounds.batch_submit_command_buffer_timeout = false;
+  } else if (powervr_gpu.has_value()) {
+    workarounds.input_attachment_self_dependency_broken = true;
   }
   return workarounds;
 }

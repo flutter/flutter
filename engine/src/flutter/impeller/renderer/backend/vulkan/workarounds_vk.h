@@ -25,6 +25,8 @@ struct WorkaroundsVK {
 
   /// On older 600 Series Adreno the input attachment / self dependency
   /// cycle for programmable blending is broken.
+  ///
+  /// Also broken on newer PowerVR.
   bool input_attachment_self_dependency_broken = false;
 
   /// Almost all Adreno series GPU (from 600 up to 800) have problems
