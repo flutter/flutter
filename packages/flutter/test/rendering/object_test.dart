@@ -23,7 +23,7 @@ void main() {
   });
 
   test('nodesNeedingLayout updated with layout changes', () {
-    final PipelineOwner owner = PipelineOwner();
+    final _TestPipelineOwner owner = _TestPipelineOwner();
     final TestRenderObject renderObject = TestRenderObject()..isRepaintBoundary = true;
     renderObject.attach(owner);
     expect(owner.nodesNeedingLayout, isEmpty);
@@ -37,7 +37,7 @@ void main() {
   });
 
   test('nodesNeedingPaint updated with paint changes', () {
-    final PipelineOwner owner = PipelineOwner();
+    final _TestPipelineOwner owner = _TestPipelineOwner();
     final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true)
       ..isRepaintBoundary = true;
     final OffsetLayer layer = OffsetLayer();
@@ -716,4 +716,12 @@ class TestThrowingRenderObject extends RenderObject {
     assert(false); // The test shouldn't call this.
     return Rect.zero;
   }
+}
+final class _TestPipelineOwner extends PipelineOwner {
+  // Make these protected fields visible for testing.
+  @override
+  Iterable<RenderObject> get nodesNeedingLayout => super.nodesNeedingLayout;
+
+  @override
+  Iterable<RenderObject> get nodesNeedingPaint => super.nodesNeedingPaint;
 }
