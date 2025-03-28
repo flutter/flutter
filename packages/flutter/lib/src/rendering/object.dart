@@ -1088,6 +1088,12 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   bool _shouldMergeDirtyNodes = false;
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
 
+  /// The [RenderObject]s which need to be laid out in the next [flushLayout] pass.
+  ///
+  /// The returned list is an unmodifiable copy of the internal cache.
+  /// The internal cache will continue to update without notifying this copy.
+  List<RenderObject> get nodesNeedingLayout => List<RenderObject>.unmodifiable(_nodesNeedingLayout);
+
   /// Whether this pipeline is currently in the layout phase.
   ///
   /// Specifically, whether [flushLayout] is currently running.
@@ -1231,6 +1237,12 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   }
 
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
+
+  /// The [RenderObject]s which need to be painted in the next [flushPaint] pass.
+  ///
+  /// The returned list is an unmodifiable copy of the internal cache.
+  /// The internal cache will continue to update without notifying this copy.
+  List<RenderObject> get nodesNeedingPaint => List<RenderObject>.unmodifiable(_nodesNeedingPaint);
 
   /// Whether this pipeline is currently in the paint phase.
   ///

@@ -22,6 +22,37 @@ void main() {
     );
   });
 
+  test('nodesNeedingLayout updated with layout changes', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject = TestRenderObject()..isRepaintBoundary = true;
+    renderObject.attach(owner);
+    expect(owner.nodesNeedingLayout, isEmpty);
+
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    renderObject.markNeedsLayout();
+    expect(owner.nodesNeedingLayout, contains(renderObject));
+
+    owner.flushLayout();
+    expect(owner.nodesNeedingLayout, isEmpty);
+  });
+
+  test('nodesNeedingPaint updated with paint changes', () {
+    final PipelineOwner owner = PipelineOwner();
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true)
+      ..isRepaintBoundary = true;
+    final OffsetLayer layer = OffsetLayer();
+    layer.attach(owner);
+    renderObject.attach(owner);
+    expect(owner.nodesNeedingPaint, isEmpty);
+
+    renderObject.markNeedsPaint();
+    renderObject.scheduleInitialPaint(layer);
+    expect(owner.nodesNeedingPaint, contains(renderObject));
+
+    owner.flushPaint();
+    expect(owner.nodesNeedingPaint, isEmpty);
+  });
+
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
     final TestRenderObject renderObject = TestRenderObject();
