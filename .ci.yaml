@@ -572,7 +572,6 @@ targets:
     enabled_branches:
       - master
     recipe: flutter/flutter_drone
-    bringup: true
     # Timeout in minutes for the whole task.
     timeout: 60
     properties:
