@@ -285,23 +285,36 @@ class LinuxDoctorValidator extends DoctorValidator {
         }
 
         // Check if has specified OpenGL extension.
-        ValidationMessage extensionStatus(String variableName, String extensionName) {
-          final List<String> waylandExtensions =
-              driverInfo.getListVariable(kWaylandPlatform, variableName) ?? <String>[];
-          final List<String> x11Extensions =
-              driverInfo.getListVariable(kX11Platform, variableName) ?? <String>[];
+        ValidationMessage extensionStatus(String extensionName) {
+          final List<String> coreWaylandExtensions =
+              driverInfo.getListVariable(kWaylandPlatform, kOpenGLCoreProfileExtensions) ??
+              <String>[];
+          final List<String> coreX11Extensions =
+              driverInfo.getListVariable(kX11Platform, kOpenGLCoreProfileExtensions) ?? <String>[];
+          final List<String> esWaylandExtensions =
+              driverInfo.getListVariable(kWaylandPlatform, kOpenGLESProfileExtensions) ??
+              <String>[];
+          final List<String> esX11Extensions =
+              driverInfo.getListVariable(kX11Platform, kOpenGLESProfileExtensions) ?? <String>[];
 
-          final bool hasWayland = waylandExtensions.contains(extensionName);
-          final bool hasX11 = x11Extensions.contains(extensionName);
+          List<String> cases = <String>[];
+          if (coreWaylandExtensions.contains(extensionName)) {
+            cases.add('core/Wayland');
+          }
+          if (coreX11Extensions.contains(extensionName)) {
+            cases.add('core/X11');
+          }
+          if (esWaylandExtensions.contains(extensionName)) {
+            cases.add('ES/Wayland');
+          }
+          if (esX11Extensions.contains(extensionName)) {
+            cases.add('ES/X11');
+          }
           String status;
-          if (!hasWayland && !hasX11) {
-            status = 'no';
-          } else if (!hasWayland) {
-            status = 'yes (X11)';
-          } else if (!hasX11) {
-            status = 'yes (Wayland)';
+          if (cases.isNotEmpty) {
+            status = 'yes (${cases.join(", ")})';
           } else {
-            status = 'yes';
+            status = 'no';
           }
 
           return ValidationMessage('$extensionName: $status');
@@ -329,8 +342,10 @@ class LinuxDoctorValidator extends DoctorValidator {
             ValidationMessage('OpenGL ES shading language version: $shadingLanguageVersion'),
           );
         }
-        messages.add(extensionStatus(kOpenGLCoreProfileExtensions, 'GL_EXT_framebuffer_blit'));
-        messages.add(extensionStatus(kOpenGLESProfileExtensions, 'GL_EXT_texture_format_BGRA8888'));
+        messages.add(extensionStatus('GL_EXT_framebuffer_blit'));
+        messages.add(extensionStatus('GL_EXT_texture_format_BGRA8888'));
+        messages.add(extensionStatus('GL_OES_EGL_image'));
+        messages.add(extensionStatus('GL_OES_EGL_image_external'));
       }
     }
 
