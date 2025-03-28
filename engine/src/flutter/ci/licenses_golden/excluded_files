@@ -3,7 +3,6 @@
 ../../../.gitignore
 ../../../.gn
 ../../../AUTHORS
-../../../CODEOWNERS
 ../../../README.md
 ../../../build
 ../../../build_overrides
@@ -16,7 +15,6 @@
 ../../../flutter/.gitignore
 ../../../flutter/.style.yapf
 ../../../flutter/AUTHORS
-../../../flutter/CODEOWNERS
 ../../../flutter/CONTRIBUTING.md
 ../../../flutter/Doxyfile
 ../../../flutter/README.md
@@ -3633,6 +3631,7 @@
 ../../../flutter/txt/tests
 ../../../flutter/txt/third_party/fonts
 ../../../flutter/web_sdk
+../../../fuchsia/sdk/linux/.build-id
 ../../../fuchsia/sdk/linux/.versions
 ../../../fuchsia/sdk/linux/AUTHORS
 ../../../fuchsia/sdk/linux/NOTICE.fuchsia

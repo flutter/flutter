@@ -97,7 +97,6 @@ struct ContentContextOptions {
   PixelFormat color_attachment_pixel_format = PixelFormat::kUnknown;
   bool has_depth_stencil_attachments = true;
   bool depth_write_enabled = false;
-  bool wireframe = false;
   bool is_for_rrect_blur_clear = false;
 
   constexpr uint64_t ToKey() const {
@@ -110,7 +109,7 @@ struct ContentContextOptions {
     static_assert(sizeof(color_attachment_pixel_format) == 1);
 
     return (is_for_rrect_blur_clear ? 1llu : 0llu) << 0 |
-           (wireframe ? 1llu : 0llu) << 1 |
+           (0) << 1 |  // // Unused, previously wireframe.
            (has_depth_stencil_attachments ? 1llu : 0llu) << 2 |
            (depth_write_enabled ? 1llu : 0llu) << 3 |
            // enums
@@ -177,7 +176,7 @@ class ContentContext {
   PipelineRef GetDestinationOutBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDestinationOverBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetDownsamplePipeline(ContentContextOptions opts) const;
-  PipelineRef GetDrawVerticesUberShader(ContentContextOptions opts) const;
+  PipelineRef GetDrawVerticesUberPipeline(BlendMode blend_mode, ContentContextOptions opts) const;
   PipelineRef GetFastGradientPipeline(ContentContextOptions opts) const;
   PipelineRef GetFramebufferBlendColorBurnPipeline(ContentContextOptions opts) const;
   PipelineRef GetFramebufferBlendColorDodgePipeline(ContentContextOptions opts) const;
@@ -239,8 +238,6 @@ class ContentContext {
   std::shared_ptr<Context> GetContext() const;
 
   const Capabilities& GetDeviceCapabilities() const;
-
-  void SetWireframe(bool wireframe);
 
   using SubpassCallback =
       std::function<bool(const ContentContext&, RenderPass&)>;
@@ -343,7 +340,6 @@ class ContentContext {
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
   std::shared_ptr<Texture> empty_texture_;
-  bool wireframe_ = false;
 
   ContentContext(const ContentContext&) = delete;
 
