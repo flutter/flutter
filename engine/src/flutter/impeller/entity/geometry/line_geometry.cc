@@ -54,8 +54,7 @@ bool LineGeometry::ComputeCorners(Point corners[4],
                                   bool extend_endpoints,
                                   Point p0,
                                   Point p1,
-                                  Scalar width,
-                                  std::optional<Point> expansion) {
+                                  Scalar width) {
   auto along = ComputeAlongVector(transform, extend_endpoints, p0, p1, width);
   if (along.IsZero()) {
     return false;
@@ -71,18 +70,6 @@ bool LineGeometry::ComputeCorners(Point corners[4],
     corners[1] += along;
     corners[2] -= along;
     corners[3] += along;
-  }
-  if (expansion.has_value()) {
-    Point across_norm = across.Normalize();
-    Point along_norm = along.Normalize();
-    corners[0] +=
-        -1 * (across_norm * expansion->x) + -1 * (along_norm * expansion->y);
-    corners[1] +=
-        -1 * (across_norm * expansion->x) + (along_norm * expansion->y);
-    corners[2] +=
-        (across_norm * expansion->x) + -1 * (along_norm * expansion->y);
-    corners[3] +=
-        (across_norm * expansion->x) + (along_norm * expansion->y);
   }
   return true;
 }

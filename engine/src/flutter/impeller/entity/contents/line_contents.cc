@@ -185,6 +185,17 @@ std::vector<uint8_t> LineContents::CreateCurveData(Scalar width,
   return curve_data;
 }
 
+namespace {
+void ExpandLine(Point corners[4], Point expansion) {
+  Point along = (corners[1] - corners[0]).Normalize();
+  Point across = (corners[2] - corners[0]).Normalize();
+  corners[0] += -1 * (across * expansion.x) + -1 * (along * expansion.y);
+  corners[1] += -1 * (across * expansion.x) + (along * expansion.y);
+  corners[2] += (across * expansion.x) + -1 * (along * expansion.y);
+  corners[3] += (across * expansion.x) + (along * expansion.y);
+}
+}  // namespace
+
 fml::Status LineContents::CalculatePerVertex(
     LineVertexShader::PerVertexData* per_vertex,
     const LineGeometry* geometry,
@@ -196,10 +207,10 @@ fml::Status LineContents::CalculatePerVertex(
   if (!LineGeometry::ComputeCorners(
           corners, entity_transform,
           /*extend_endpoints=*/geometry->GetCap() != Cap::kButt,
-          geometry->GetP0(), geometry->GetP1(), geometry->GetWidth(),
-          Point(expand_size, expand_size))) {
+          geometry->GetP0(), geometry->GetP1(), geometry->GetWidth())) {
     return fml::Status(fml::StatusCode::kAborted, "No valid corners");
   }
+  ExpandLine(corners, Point(expand_size, expand_size));
   LineInfo line_info = CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),
                                          geometry->GetWidth(), kSampleRadius);
   for (auto& corner : corners) {

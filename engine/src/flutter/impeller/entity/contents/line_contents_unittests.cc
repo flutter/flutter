@@ -145,6 +145,11 @@ TEST(LineContents, CalculatePerVertexLimit) {
                     Point(100 - one_radius_size, 100 - offset));
   EXPECT_POINT_NEAR(per_vertex[3].position,
                     Point(200 + one_radius_size, 100 - offset));
+
+  EXPECT_NEAR(CalculateLine(per_vertex[0], Point(150, 100)), 1.f,
+              kEhCloseEnough);
+  // EXPECT_NEAR(CalculateLine(per_vertex[0], Point(150, 100 + one_px_size)), 1.f,
+  //             kEhCloseEnough);
 }
 
 }  // namespace testing
