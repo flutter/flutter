@@ -1186,13 +1186,13 @@ class _RenderDecoration extends RenderBox
             ? math.max(_minWidth(input, height), _minWidth(hint, height))
             : _minWidth(input, height);
     return _minWidth(icon, height) +
-        (prefixIcon != null ? prefixToInputGap : contentPadding.start) +
+        (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _minWidth(prefixIcon, height) +
         _minWidth(prefix, height) +
         contentWidth +
         _minWidth(suffix, height) +
         _minWidth(suffixIcon, height) +
-        (suffixIcon != null ? inputToSuffixGap : contentPadding.end);
+        (suffixIcon != null ? inputToSuffixGap : contentPadding.end + decoration.inputGap);
   }
 
   @override
@@ -1202,13 +1202,13 @@ class _RenderDecoration extends RenderBox
             ? math.max(_maxWidth(input, height), _maxWidth(hint, height))
             : _maxWidth(input, height);
     return _maxWidth(icon, height) +
-        (prefixIcon != null ? prefixToInputGap : contentPadding.start) +
+        (prefixIcon != null ? prefixToInputGap : contentPadding.start + decoration.inputGap) +
         _maxWidth(prefixIcon, height) +
         _maxWidth(prefix, height) +
         contentWidth +
         _maxWidth(suffix, height) +
         _maxWidth(suffixIcon, height) +
-        (suffixIcon != null ? inputToSuffixGap : contentPadding.end);
+        (suffixIcon != null ? inputToSuffixGap : contentPadding.end + decoration.inputGap);
   }
 
   double _lineHeight(double width, List<RenderBox?> boxes) {

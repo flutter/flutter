@@ -741,10 +741,14 @@ void main() {
 
     final double width = tester.getSize(find.byType(DropdownMenu<int>)).width;
     const double menuEntryPadding = 24.0; // See _kDefaultHorizontalPadding.
+    const double decorationStartGap = 4.0; // See _kInputStartGap.
     const double leadingWidth = 16.0;
     const double trailingWidth = 56.0;
 
-    expect(width, entryLabelWidth + leadingWidth + trailingWidth + menuEntryPadding);
+    expect(
+      width,
+      entryLabelWidth + leadingWidth + trailingWidth + menuEntryPadding + decorationStartGap,
+    );
   });
 
   testWidgets('The width is determined by the label when it is longer than menu entries', (
