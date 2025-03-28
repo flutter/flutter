@@ -519,6 +519,7 @@ class DevFS {
       _baseUri = Uri.parse(response.json!['uri'] as String);
     } on vm_service.RPCError catch (rpcException) {
       if (rpcException.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          rpcException.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           rpcException.message.contains('Service connection disposed')) {
         // This can happen if the device has been disconnected, so translate to
         // a DevFSException, which the caller will handle.

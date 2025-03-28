@@ -23,12 +23,6 @@ declare_args() {
   # Whether to include backtrace support.
   enable_backtrace = true
 
-  # Whether to include --fapplication-extension when build iOS framework.
-  # This is currently a test flag and does not work properly.
-  #TODO(cyanglaz): Remove above comment about test flag when the entire iOS embedder supports app extension
-  #https://github.com/flutter/flutter/issues/124289
-  darwin_extension_safe = false
-
   # Whether binary size optimizations with the assumption that Impeller is the
   # only supported rendering engine are enabled.
   #

@@ -955,7 +955,8 @@ class Radius {
 
   /// A radius with [x] and [y] values set to zero.
   ///
-  /// You can use [Radius.zero] with [RRect] to have right-angle corners.
+  /// You can use [Radius.zero] with [RRect] or [RSuperellipse] to have
+  /// right-angle corners.
   static const Radius zero = Radius.circular(0.0);
 
   /// Returns this [Radius], with values clamped to the given min and max
@@ -1135,23 +1136,6 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     required double blRadiusX,
     required double blRadiusY,
   });
-
-  Float32List _getValue32() {
-    final Float32List result = Float32List(12);
-    result[0] = left;
-    result[1] = top;
-    result[2] = right;
-    result[3] = bottom;
-    result[4] = tlRadiusX;
-    result[5] = tlRadiusY;
-    result[6] = trRadiusX;
-    result[7] = trRadiusY;
-    result[8] = brRadiusX;
-    result[9] = brRadiusY;
-    result[10] = blRadiusX;
-    result[11] = blRadiusY;
-    return result;
-  }
 
   /// The offset of the left edge of this rectangle from the x axis.
   final double left;
@@ -1386,8 +1370,8 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
   /// of the width/height.
   ///
   /// Skia already handles RRects with radii that are too large in this way.
-  /// Therefore, this method is only needed for RRect use cases that require
-  /// the appropriately scaled radii values.
+  /// Therefore, this method is only needed for use cases of [RRect] or
+  /// [RSuperellipse] that require the appropriately scaled radii values.
   ///
   /// See the [Skia scaling implementation](https://github.com/google/skia/blob/main/src/core/SkRRect.cpp)
   /// for more details.
@@ -1717,6 +1701,23 @@ class RRect extends _RRectLike<RRect> {
     brRadiusY: brRadiusY,
   );
 
+  Float32List _getValue32() {
+    final Float32List result = Float32List(12);
+    result[0] = left;
+    result[1] = top;
+    result[2] = right;
+    result[3] = bottom;
+    result[4] = tlRadiusX;
+    result[5] = tlRadiusY;
+    result[6] = trRadiusX;
+    result[7] = trRadiusY;
+    result[8] = brRadiusX;
+    result[9] = brRadiusY;
+    result[10] = blRadiusX;
+    result[11] = blRadiusY;
+    return result;
+  }
+
   /// A rounded rectangle with all the values set to zero.
   static const RRect zero = RRect._raw();
 
@@ -1806,20 +1807,17 @@ class RRect extends _RRectLike<RRect> {
 
 /// An immutable rounded superellipse.
 ///
-/// A rounded superellipse is a shape similar to a typical rounded rectangle
-/// ([RRect]), but with smoother transitions between the straight sides and the
-/// rounded corners. It resembles the `RoundedRectangle` shape in SwiftUI with
-/// the `.continuous` corner style.
+/// A rounded superellipse (not to be confused with a standard superellipse) is
+/// a shape formed by replacing the four curved corners of a superellipse with
+/// circular arcs. A (standard) superellipse follows the formula x^n + y^n =
+/// a^n, and while n > 2 gives it rounded corners, they tend to be too sharp and
+/// pronounced.  Replacing them with circular arcs makes the shape feel softer
+/// and more natural.
 ///
-/// Technically, a canonical rounded superellipse, i.e. one with a uniform
-/// corner radius ([RSuperellipse.fromRectAndRadius]), is created by replacing
-/// the four corners of a superellipse (also known as a Lamé curve) with
-/// circular arcs. A rounded superellipse with non-uniform radii is extended on it
-/// by concatenating arc segments and transformation.
-///
-/// The corner radius parameters used in this class corresponds to SwiftUI's
-/// `cornerRadius` parameter, which is close to, but not exactly equals to, the
-/// radius of the corner circles.
+/// Visually, a rounded superellipse looks similar to a typical rounded rectangle
+/// ([RRect]) but with smoother transitions between the straight edges and
+/// corners. It closely matches the `RoundedRectangle` shape in SwiftUI with the
+/// `.continuous` corner style.
 class RSuperellipse extends _RRectLike<RSuperellipse> {
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
   /// and the same radii along its horizontal axis and its vertical axis.
@@ -2006,6 +2004,16 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     brRadiusY: brRadiusY,
   );
 
+  _NativeRSuperellipse _native() {
+    return _NativeRSuperellipse(this);
+  }
+
+  /// Whether the point specified by the given offset (which is assumed to be
+  /// relative to the origin) lies inside the rounded superellipse.
+  bool contains(Offset point) {
+    return _native().contains(point);
+  }
+
   /// A rounded rectangle with all the values set to zero.
   static const RSuperellipse zero = RSuperellipse._raw();
 
@@ -2038,6 +2046,67 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   String toString() {
     return _toString(className: 'RSuperellipse');
   }
+}
+
+class _NativeRSuperellipse extends NativeFieldWrapperClass1 {
+  _NativeRSuperellipse(RSuperellipse rsuperellipse) {
+    _constructor(
+      rsuperellipse.left,
+      rsuperellipse.top,
+      rsuperellipse.right,
+      rsuperellipse.bottom,
+      rsuperellipse.tlRadiusX,
+      rsuperellipse.tlRadiusY,
+      rsuperellipse.trRadiusX,
+      rsuperellipse.trRadiusY,
+      rsuperellipse.brRadiusX,
+      rsuperellipse.brRadiusY,
+      rsuperellipse.blRadiusX,
+      rsuperellipse.blRadiusY,
+    );
+  }
+
+  @Native<
+    Void Function(
+      Handle,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+      Double,
+    )
+  >(symbol: 'RSuperellipse::Create')
+  external void _constructor(
+    double left,
+    double top,
+    double right,
+    double bottom,
+    double tlRadiusX,
+    double tlRadiusY,
+    double trRadiusX,
+    double trRadiusY,
+    double brRadiusX,
+    double brRadiusY,
+    double blRadiusX,
+    double blRadiusY,
+  );
+
+  bool contains(Offset point) {
+    return _contains(point.dx, point.dy);
+  }
+
+  @Native<Bool Function(Pointer<Void>, Double, Double)>(
+    symbol: 'RSuperellipse::contains',
+    isLeaf: true,
+  )
+  external bool _contains(double x, double y);
 }
 
 /// A transform consisting of a translation, a rotation, and a uniform scale.
