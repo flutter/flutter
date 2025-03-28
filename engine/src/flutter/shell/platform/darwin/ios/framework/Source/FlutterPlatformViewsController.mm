@@ -12,7 +12,6 @@
 #include "flutter/fml/synchronization/count_down_latch.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
@@ -209,8 +208,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 /// Runs on the platform thread.
 - (void)createLayerWithIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-                      pixelFormat:(MTLPixelFormat)pixelFormat
-                      screenScale:(CGFloat)screenScale;
+                      pixelFormat:(MTLPixelFormat)pixelFormat;
 
 /// Removes overlay views and platform views that aren't needed in the current frame.
 /// Must run on the platform thread.
@@ -484,9 +482,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   CGRect frame =
       CGRectMake(-clipView.frame.origin.x, -clipView.frame.origin.y,
                  CGRectGetWidth(self.flutterView.bounds), CGRectGetHeight(self.flutterView.bounds));
-  clipView.maskView = [self.maskViewPool
-      getMaskViewWithFrame:frame
-               screenScale:[self.flutterViewController flutterScreenIfViewLoaded].scale];
+  clipView.maskView = [self.maskViewPool getMaskViewWithFrame:frame];
 }
 
 - (void)applyMutators:(const flutter::MutatorsStack&)mutatorsStack
@@ -508,7 +504,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
     [self.maskViewPool insertViewToPoolIfNeeded:(FlutterClippingMaskView*)(clipView.maskView)];
     clipView.maskView = nil;
   }
-  CGFloat screenScale = [self.flutterViewController flutterScreenIfViewLoaded].scale;
+  CGFloat screenScale = [UIScreen mainScreen].scale;
   auto iter = mutatorsStack.Begin();
   while (iter != mutatorsStack.End()) {
     switch ((*iter)->GetType()) {
@@ -636,7 +632,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
   // when we apply the transforms matrix in |applyMutators:embeddedView:boundingRect|, we need
   // to remember to do a reverse translate.
   const SkRect& rect = params.finalBoundingRect();
-  CGFloat screenScale = [self.flutterViewController flutterScreenIfViewLoaded].scale;
+  CGFloat screenScale = [UIScreen mainScreen].scale;
   clippingView.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
                                   rect.width() / screenScale, rect.height() / screenScale);
   [self applyMutators:mutatorStack embeddedView:touchInterceptor boundingRect:rect];
@@ -796,8 +792,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
       self.platformTaskRunner, [self, missingLayerCount, iosContext, latch]() {
         for (auto i = 0u; i < missingLayerCount; i++) {
           [self createLayerWithIosContext:iosContext
-                              pixelFormat:((FlutterView*)self.flutterView).pixelFormat
-                              screenScale:((FlutterView*)self.flutterView).screen.scale];
+                              pixelFormat:((FlutterView*)self.flutterView).pixelFormat];
         }
         latch->CountDown();
       });
@@ -901,9 +896,8 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 }
 
 - (void)createLayerWithIosContext:(const std::shared_ptr<flutter::IOSContext>&)iosContext
-                      pixelFormat:(MTLPixelFormat)pixelFormat
-                      screenScale:(CGFloat)screenScale {
-  self.layerPool->CreateLayer(iosContext, pixelFormat, screenScale);
+                      pixelFormat:(MTLPixelFormat)pixelFormat {
+  self.layerPool->CreateLayer(iosContext, pixelFormat);
 }
 
 - (void)removeUnusedLayers:(const std::vector<std::shared_ptr<flutter::OverlayLayer>>&)unusedLayers

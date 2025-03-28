@@ -58,9 +58,7 @@ class OverlayLayerPool {
   /// @brief Create a new overlay layer.
   ///
   /// This method can only be called on the Platform thread.
-  void CreateLayer(const std::shared_ptr<IOSContext>& ios_context,
-                   MTLPixelFormat pixel_format,
-                   CGFloat screenScale);
+  void CreateLayer(const std::shared_ptr<IOSContext>& ios_context, MTLPixelFormat pixel_format);
 
   /// @brief Removes unused layers from the pool. Returns the unused layers.
   std::vector<std::shared_ptr<OverlayLayer>> RemoveUnusedLayers();
