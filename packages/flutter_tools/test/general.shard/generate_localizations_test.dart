@@ -1690,7 +1690,21 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         },
       );
 
-      testWithoutContext('translations can copy the placeholder definitions for plurals', () {
+      // Regression test for https://github.com/flutter/flutter/issues/163627
+      //
+      // If placeholders have no explicit type (like `int` or `String`) set
+      // their type can be inferred.
+      //
+      // Later in the pipeline it is ensured that each locales placeholder types
+      // matches the definitions in the template.
+      //
+      // If only the types of the template had been inferred,
+      // and not for the translation there would be a mismatch:
+      // in this case `num` for count and `null` (the default), which is incompatible
+      //
+      // This test ensures that both template and locale can be equally partially defined
+      // in the arb.
+      testWithoutContext('translation placeholder type definitions can be inferred for plurals', () {
         setupLocalizations(<String, String>{
           'en': '''
 {
