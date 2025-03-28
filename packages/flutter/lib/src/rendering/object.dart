@@ -1093,6 +1093,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// [RenderObject]s with [RenderObject.isRepaintBoundary] are added
   /// when they are marked for layout. Subclasses of [PipelineOwner] may use them
   /// to invalidate caches or otherwise make performance optimizations.
+  /// Since nodes may be marked for layout at any time, they are best checked during
+  /// [flushLayout].
+  ///
+  /// Note that this does not include marked children of child [PipelineOwner]s.
   @protected
   Iterable<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
 
@@ -1245,6 +1249,10 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// [RenderObject]s marked with [RenderObject.isRepaintBoundary] are added
   /// when they are marked needing paint. Subclasses of [PipelineOwner] may use them
   /// to invalidate caches or otherwise make performance optimizations.
+  /// Since nodes may be marked for layout at any time, they are best checked during
+  /// [flushPaint].
+  ///
+  /// Note that this does not include marked children of child [PipelineOwner]s.
   @protected
   Iterable<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
 
