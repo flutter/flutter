@@ -305,6 +305,7 @@ class DraggableScrollableSheet extends StatefulWidget {
     this.snap = false,
     this.snapSizes,
     this.snapAnimationDuration,
+    this.snapAnimationCurve = Curves.linear,
     this.controller,
     this.shouldCloseOnMinExtent = true,
     required this.builder,
@@ -386,6 +387,11 @@ class DraggableScrollableSheet extends StatefulWidget {
   /// If it's not set, then the animation duration is the distance to the snap
   /// target divided by the velocity of the widget.
   final Duration? snapAnimationDuration;
+
+  /// Defines a curve for the snap animations.
+  ///
+  /// If it's not set, then the animation curve is [Curves.linear].
+  final Curve snapAnimationCurve;
 
   /// A controller that can be used to programmatically control this sheet.
   final DraggableScrollableController? controller;
@@ -499,6 +505,7 @@ class _DraggableSheetExtent {
     required this.snapSizes,
     required this.initialSize,
     this.snapAnimationDuration,
+    this.snapAnimationCurve = Curves.linear,
     ValueNotifier<double>? currentSize,
     bool? hasDragged,
     bool? hasChanged,
@@ -521,6 +528,7 @@ class _DraggableSheetExtent {
   final bool snap;
   final List<double> snapSizes;
   final Duration? snapAnimationDuration;
+  final Curve snapAnimationCurve;
   final double initialSize;
   final bool shouldCloseOnMinExtent;
   final ValueNotifier<double> _currentSize;
@@ -619,6 +627,7 @@ class _DraggableSheetExtent {
     required List<double> snapSizes,
     required double initialSize,
     required Duration? snapAnimationDuration,
+    required Curve snapAnimationCurve,
     required bool shouldCloseOnMinExtent,
   }) {
     return _DraggableSheetExtent(
@@ -627,6 +636,7 @@ class _DraggableSheetExtent {
       snap: snap,
       snapSizes: snapSizes,
       snapAnimationDuration: snapAnimationDuration,
+      snapAnimationCurve: snapAnimationCurve,
       initialSize: initialSize,
       // Set the current size to the possibly updated initial size if the sheet
       // hasn't changed yet.
@@ -653,6 +663,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       snap: widget.snap,
       snapSizes: _impliedSnapSizes(),
       snapAnimationDuration: widget.snapAnimationDuration,
+      snapAnimationCurve: widget.snapAnimationCurve,
       initialSize: widget.initialChildSize,
       shouldCloseOnMinExtent: widget.shouldCloseOnMinExtent,
     );
@@ -740,6 +751,7 @@ class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
       snap: widget.snap,
       snapSizes: _impliedSnapSizes(),
       snapAnimationDuration: widget.snapAnimationDuration,
+      snapAnimationCurve: widget.snapAnimationCurve,
       initialSize: widget.initialChildSize,
       shouldCloseOnMinExtent: widget.shouldCloseOnMinExtent,
     );
@@ -952,6 +964,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         initialVelocity: velocity,
         pixelSnapSize: extent.pixelSnapSizes,
         snapAnimationDuration: extent.snapAnimationDuration,
+        snapAnimationCurve: extent.snapAnimationCurve,
         tolerance: physics.toleranceFor(this),
       );
     } else {
@@ -1129,24 +1142,29 @@ class _SnappingSimulation extends Simulation {
     required double initialVelocity,
     required List<double> pixelSnapSize,
     Duration? snapAnimationDuration,
+    this.snapAnimationCurve = Curves.linear,
     super.tolerance,
   }) {
     _pixelSnapSize = _getSnapSize(initialVelocity, pixelSnapSize);
+    displacement = _pixelSnapSize - position;
 
     if (snapAnimationDuration != null && snapAnimationDuration.inMilliseconds > 0) {
-      velocity = (_pixelSnapSize - position) * 1000 / snapAnimationDuration.inMilliseconds;
-    }
-    // Check the direction of the target instead of the sign of the velocity because
-    // we may snap in the opposite direction of velocity if velocity is very low.
-    else if (_pixelSnapSize < position) {
-      velocity = math.min(-minimumSpeed, initialVelocity);
+      duration = snapAnimationDuration.inMilliseconds / 1000;
     } else {
-      velocity = math.max(minimumSpeed, initialVelocity);
+      // Check the direction of the target instead of the sign of the velocity because
+      // we may snap in the opposite direction of velocity if velocity is very low.
+      final double averageVelocity =
+          _pixelSnapSize < position
+              ? math.min(-minimumSpeed, initialVelocity)
+              : math.max(minimumSpeed, initialVelocity);
+      duration = math.max(0.01, displacement / averageVelocity);
     }
   }
 
   final double position;
-  late final double velocity;
+  final Curve snapAnimationCurve;
+  late final double displacement;
+  late final double duration;
 
   // A minimum speed to snap at. Used to ensure that the snapping animation
   // does not play too slowly.
@@ -1159,23 +1177,24 @@ class _SnappingSimulation extends Simulation {
     if (isDone(time)) {
       return 0;
     }
-    return velocity;
+    if (snapAnimationCurve != Curves.linear) {
+      // Approximate the derivative using two points.
+      const double delta = 0.001;
+      return (x(time + delta) - x(time)) / delta;
+    } else {
+      return displacement / duration;
+    }
   }
 
   @override
   bool isDone(double time) {
-    return x(time) == _pixelSnapSize;
+    return time >= duration;
   }
 
   @override
   double x(double time) {
-    final double newPosition = position + velocity * time;
-    if ((velocity >= 0 && newPosition > _pixelSnapSize) ||
-        (velocity < 0 && newPosition < _pixelSnapSize)) {
-      // We're passed the snap size, return it instead.
-      return _pixelSnapSize;
-    }
-    return newPosition;
+    final double progress = math.min(time / duration, 1.0);
+    return position + displacement * snapAnimationCurve.transform(progress);
   }
 
   // Find the two closest snap sizes to the position. If the velocity is
