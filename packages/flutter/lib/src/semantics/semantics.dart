@@ -5633,7 +5633,6 @@ class SemanticsConfiguration {
   SemanticsInputType get inputType => _inputType;
   SemanticsInputType _inputType = SemanticsInputType.none;
   set inputType(SemanticsInputType value) {
-    assert(value != null);
     _inputType = value;
     _hasBeenAnnotated = true;
   }
