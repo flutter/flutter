@@ -868,7 +868,7 @@ class _SnackBarState extends State<SnackBar> {
     return Hero(
       tag: '<SnackBar Hero tag - ${widget.content}>',
       transitionOnUserGestures: true,
-      child: ClipRect(clipBehavior: widget.clipBehavior, child: snackBarTransition),
+      child: snackBarTransition,
     );
   }
 }
