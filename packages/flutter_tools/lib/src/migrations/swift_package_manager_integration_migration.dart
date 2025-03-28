@@ -674,32 +674,33 @@ $newContent
 
     final (int startSectionIndex, int endSectionIndex) = _sectionRange('PBXNativeTarget', lines);
 
-    // Apply the migration to each application target within the section.
-    final Iterable<ParsedNativeTarget> applicationNativeTargets = projectInfo.nativeTargets.where(
-      (ParsedNativeTarget target) => target.productType == _kNativeTargetApplicationProductType,
-    );
+    // Find index where Native Target for the Runner target begins.
+    final ParsedNativeTarget? runnerNativeTarget =
+        projectInfo.nativeTargets
+            .where(
+              (ParsedNativeTarget target) => target.identifier == _runnerNativeTargetIdentifier,
+            )
+            .firstOrNull;
 
-    if (applicationNativeTargets.isEmpty) {
+    if (runnerNativeTarget == null) {
       throw Exception(
-        'Unable to find parsed PBXNativeTargets for ${_xcodeProject.hostAppProjectName} project.',
+        'Unable to find parsed PBXNativeTarget for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
-    for (final ParsedNativeTarget nativeTarget in applicationNativeTargets) {
-      if (_isNativeApplicationTargetMigrated(nativeTarget)) {
-        final String pbxTargetLabel = _getPbxNativeTargetLabel(nativeTarget);
+    if (_isNativeTargetMigrated(runnerNativeTarget)) {
+      final String pbxTargetLabel = _getPbxNativeTargetLabel(runnerNativeTarget);
 
-        logger.printTrace('$pbxTargetLabel already migrated. Skipping...');
-        continue;
-      }
-
-      _migrateNativeApplicationTarget(
-        lines,
-        nativeTarget,
-        startSectionIndex: startSectionIndex,
-        endSectionIndex: endSectionIndex,
-      );
+      logger.printTrace('$pbxTargetLabel already migrated. Skipping...');
+      return lines;
     }
+
+    _migrateNativeApplicationTarget(
+      lines,
+      runnerNativeTarget,
+      startSectionIndex: startSectionIndex,
+      endSectionIndex: endSectionIndex,
+    );
 
     return lines;
   }
