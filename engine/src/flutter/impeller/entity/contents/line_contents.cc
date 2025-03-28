@@ -189,12 +189,15 @@ fml::Status LineContents::CalculatePerVertex(
     LineVertexShader::PerVertexData* per_vertex,
     const LineGeometry* geometry,
     const Matrix& entity_transform) {
+  Scalar scale = entity_transform.GetMaxBasisLengthXY();
   Point corners[4];
+  // Make sure we get kSampleRadius pixels to sample from.
+  Scalar expand_size = std::max(kSampleRadius / scale, kSampleRadius);
   if (!LineGeometry::ComputeCorners(
           corners, entity_transform,
           /*extend_endpoints=*/geometry->GetCap() != Cap::kButt,
           geometry->GetP0(), geometry->GetP1(), geometry->GetWidth(),
-          Point(kSampleRadius, kSampleRadius))) {
+          Point(expand_size, expand_size))) {
     return fml::Status(fml::StatusCode::kAborted, "No valid corners");
   }
   LineInfo line_info = CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),

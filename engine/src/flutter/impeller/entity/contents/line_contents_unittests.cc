@@ -132,17 +132,19 @@ TEST(LineContents, CalculatePerVertexLimit) {
   fml::Status status =
       LineContents::CalculatePerVertex(per_vertex, geometry.get(), transform);
 
+  Scalar one_radius_size = std::max(LineContents::kSampleRadius / scale,
+                                    LineContents::kSampleRadius);
   Scalar one_px_size = 1.f / scale;
-  Scalar offset = one_px_size / 2.f + LineContents::kSampleRadius;
+  Scalar offset = one_px_size / 2.f + one_radius_size;
   ASSERT_TRUE(status.ok());
   EXPECT_POINT_NEAR(per_vertex[0].position,
-                    Point(100 - LineContents::kSampleRadius, 100 + offset));
+                    Point(100 - one_radius_size, 100 + offset));
   EXPECT_POINT_NEAR(per_vertex[1].position,
-                    Point(200 + LineContents::kSampleRadius, 100 + offset));
+                    Point(200 + one_radius_size, 100 + offset));
   EXPECT_POINT_NEAR(per_vertex[2].position,
-                    Point(100 - LineContents::kSampleRadius, 100 - offset));
+                    Point(100 - one_radius_size, 100 - offset));
   EXPECT_POINT_NEAR(per_vertex[3].position,
-                    Point(200 + LineContents::kSampleRadius, 100 - offset));
+                    Point(200 + one_radius_size, 100 - offset));
 }
 
 }  // namespace testing
