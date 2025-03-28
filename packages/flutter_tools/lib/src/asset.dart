@@ -61,16 +61,13 @@ class FlutterHookResult {
   /// the output may be existing on disc and not be produced by the build
   /// itself - in which case we may not need to re-build if the file changes,
   /// but we may need to make a new asset bundle with the modified file).
-  bool isOutputDirty(FileSystem fileSystem) {
-    return _wasAnyFileModifiedSince(
-      fileSystem,
-      buildEnd,
-      dataAssets.map((HookAsset e) => e.file).toList(),
-    );
-  }
+  bool isOutputDirty(FileSystem fileSystem) => _wasAnyFileModifiedSince(
+    fileSystem,
+    buildEnd,
+    dataAssets.map((HookAsset e) => e.file).toList(),
+  );
 
   static bool _wasAnyFileModifiedSince(FileSystem fileSystem, DateTime since, List<Uri> uris) {
-    print('Checking if any modified files in $uris are modified since ${since.toIso8601String()}');
     for (final Uri uri in uris) {
       final DateTime modified = fileSystem.statSync(uri.toFilePath()).modified;
       if (modified.isAfter(since)) {

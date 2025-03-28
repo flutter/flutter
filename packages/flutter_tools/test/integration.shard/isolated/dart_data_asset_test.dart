@@ -115,7 +115,7 @@ void main() {
                   // `id2` data asset.
                   writeAssets(assets, root);
                   writeHookLibrary(root, assets, available: <String>['id1', 'id2']);
-                  writeHelperLibrary(root, 'version2', assets.keys.toList());
+                  writeHelperLibrary(root, 'afterRestart', assets.keys.toList());
                   return 'R';
                 },
               ),
@@ -124,7 +124,7 @@ void main() {
                   <Pattern>[
                     // Once the app runs it will print whether it found assets.
                     // We expect it to having found the new `id2` now.
-                    'VERSION: version2',
+                    'VERSION: afterRestart',
                     'FOUND "packages/data_asset_example/id1": "content1".',
 
                     // Flutter web doesn't support new assets on hot-restart atm
@@ -146,7 +146,7 @@ void main() {
                     assets['id4'] = 'content4';
                     writeAssets(assets, root);
                     writeHookLibrary(root, assets, available: <String>['id1', 'id2', 'id3']);
-                    writeHelperLibrary(root, 'version3', assets.keys.toList());
+                    writeHelperLibrary(root, 'afterReload', assets.keys.toList());
                     return 'r';
                   },
                 ),
@@ -154,7 +154,7 @@ void main() {
                 Multiple.contains(
                   <Pattern>[
                     // Once the app runs it will print whether it found assets.
-                    'VERSION: version3',
+                    'VERSION: afterReload',
                     'FOUND "packages/data_asset_example/id1": "content1".',
                     // Flutter web doesn't support new assets on hot-reload atm
                     // -> See https://github.com/flutter/flutter/issues/137265
