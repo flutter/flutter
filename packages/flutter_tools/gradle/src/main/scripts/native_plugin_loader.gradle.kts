@@ -1,4 +1,6 @@
-// blah
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import groovy.json.JsonSlurper
 import java.io.File
@@ -31,18 +33,16 @@ class NativePluginLoader {
             return nativePlugins
         }
 
-        check(meta["plugins"] is Map<*, *>) { "Metadata 'plugins' is not a Map: $meta" }
-        val androidPluginsUntyped = (meta["plugins"] as Map<*, *>?)?.get("android")
+        val pluginsMap: Map<*, *> = (meta["plugins"] as? Map<*, *>) ?: error("Metadata 'plugins' is not a Map: $meta")
+        val androidPluginsUntyped = pluginsMap["android"]
         if (androidPluginsUntyped == null) {
             return nativePlugins // Return empty list if android plugins are not found
         }
-        check(androidPluginsUntyped is List<*>) { "Metadata 'plugins.android' is not a List: $meta" }
-        val androidPlugins = androidPluginsUntyped as List<*>
+        val androidPlugins = androidPluginsUntyped as? List<*> ?: error("Metadata 'plugins.android' is not a List: $meta")
 
         // Includes the Flutter plugins that support the Android platform.
         androidPlugins.forEach { androidPluginUntyped ->
-            check(androidPluginUntyped is Map<*, *>) { "androidPlugin is not a Map: $androidPluginUntyped" }
-            val androidPlugin = androidPluginUntyped as Map<*, *>
+            val androidPlugin = androidPluginUntyped as? Map<*, *> ?: error("androidPlugin is not a Map: $androidPluginUntyped")
 
             // The property types can be found in _filterPluginsByPlatform defined in
             // packages/flutter_tools/lib/src/flutter_plugins.dart.
@@ -53,12 +53,7 @@ class NativePluginLoader {
 
             // Skip plugins that have no native build (such as a Dart-only implementation
             // of a federated plugin).
-            val needsBuild =
-                if (androidPlugin.containsKey(NATIVE_BUILD_KEY)) {
-                    androidPlugin[NATIVE_BUILD_KEY] as? Boolean ?: true // Default to true if not a boolean
-                } else {
-                    true
-                }
+            val needsBuild = androidPlugin[NATIVE_BUILD_KEY] as? Boolean ?: true
             if (needsBuild) {
                 nativePlugins.add(androidPlugin as Map<String, Any>) // Safe cast when adding, assuming type is now validated
             }
@@ -82,11 +77,12 @@ class NativePluginLoader {
         val pluginsDependencyFile = File(flutterSourceDirectory, FLUTTER_PLUGINS_DEPENDENCIES_FILE)
         if (pluginsDependencyFile.exists()) {
             val slurper = JsonSlurper()
-            val objectUntyped = slurper.parseText(pluginsDependencyFile.readText())
-            check(objectUntyped is Map<*, *>) { "Parsed JSON is not a Map: $objectUntyped" }
-            val objectTyped = objectUntyped as Map<String, Any> // Safe cast after check
-            parsedFlutterPluginsDependencies = objectTyped
-            return objectTyped
+            val readText = slurper.parseText(pluginsDependencyFile.readText())
+            val parsedText =
+                readText as? Map<String, Any>
+                    ?: error("Parsed JSON is not a Map<String, Any>: $readText")
+            parsedFlutterPluginsDependencies = parsedText
+            return parsedText
         }
         return null
     }
