@@ -42,5 +42,10 @@ float CalculateLine() {
 void main() {
   float line = CalculateLine();
   frag_color = vec4(frag_info.color.xyz, line);
+  //////////////////////////////////////////////////////////////////////////////
+  // This is a nice way to visually debug this shader:
+  // frag_color =
+  //   vec4(mix(vec3(1, 0,0), frag_info.color.xyz, line), 1.0);
+  //////////////////////////////////////////////////////////////////////////////
   frag_color = IPPremultiply(frag_color);
 }
