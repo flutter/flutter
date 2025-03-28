@@ -1291,6 +1291,21 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
     if (keepStreamAlive && _completerHandle == null && _imageStream?.completer != null) {
       _completerHandle = _imageStream!.completer!.keepAlive();
+      
+      // If we have an errorBuilder, ensure errors are still captured
+      if (widget.errorBuilder != null) {
+        // Add an ephemeral error listener that will be automatically removed
+        // when an error occurs or the image completes loading
+        _imageStream!.completer!.addEphemeralErrorListener((Object error, StackTrace? stack) {
+          if (!mounted) {
+            return;
+          }
+          setState(() {
+            _lastException = error;
+            _lastStack = stack;
+          });
+        });
+      }
     }
 
     _imageStream!.removeListener(_getListener());
