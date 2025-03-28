@@ -1062,7 +1062,7 @@ class DirectoryChange():
 
 def contains_png_recursive(directory):
   """
-  Checks if a directory (and its subdirectories) contains at least one .png file.
+  Recursively checks if a directory contains at least one .png file.
 
   Args:
     directory: The path to the directory to check.
