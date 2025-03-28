@@ -85,16 +85,4 @@ bool RSuperellipse::contains(double x, double y) {
   return param().Contains(DlPoint(SafeNarrow(x), SafeNarrow(y)));
 }
 
-bool RSuperellipse::IsRect() const {
-  return !bounds_.IsEmpty() && radii_.AreAllCornersEmpty();
-}
-
-bool RSuperellipse::IsOval() const {
-  return !bounds_.IsEmpty() && radii_.AreAllCornersSame() &&
-         impeller::ScalarNearlyEqual(radii_.top_left.width,
-                                     bounds_.GetWidth() * 0.5f) &&
-         impeller::ScalarNearlyEqual(radii_.top_left.height,
-                                     bounds_.GetHeight() * 0.5f);
-}
-
 }  // namespace flutter

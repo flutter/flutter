@@ -244,9 +244,15 @@ PathBuilder& PathBuilder::AddRoundRect(RoundRect round_rect) {
 }
 
 PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
-  impeller::RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(),
-                                                    rse.GetRadii())
-      .AddToPath(*this);
+  if (rse.IsRect()) {
+    AddRect(rse.GetBounds());
+  } else if (rse.IsOval()) {
+    AddOval(rse.GetBounds());
+  } else {
+    impeller::RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(),
+                                                      rse.GetRadii())
+        .AddToPath(*this);
+  }
   return *this;
 }
 

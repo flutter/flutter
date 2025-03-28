@@ -204,17 +204,6 @@ void CanvasPath::addRRect(const RRect& rrect) {
 }
 
 void CanvasPath::addRSuperellipse(const RSuperellipse* rsuperellipse) {
-  if (rsuperellipse->IsRect()) {
-    auto bounds = rsuperellipse->bounds();
-    return addRect(bounds.GetLeft(), bounds.GetTop(), bounds.GetRight(),
-                   bounds.GetBottom());
-  }
-  if (rsuperellipse->IsOval()) {
-    auto bounds = rsuperellipse->bounds();
-    return addOval(bounds.GetLeft(), bounds.GetTop(), bounds.GetRight(),
-                   bounds.GetBottom());
-  }
-
   DlPathBuilder builder;
   builder.SetConvexity(impeller::Convexity::kConvex);
   builder.SetBounds(rsuperellipse->bounds());
