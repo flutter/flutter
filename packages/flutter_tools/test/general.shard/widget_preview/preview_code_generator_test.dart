@@ -73,7 +73,7 @@ void main() {
         // The generated file is unfortunately unformatted.
         const String expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'widget_preview.dart' as _i1;import 'foo.dart' as _i2;import 'src/bar.dart' as _i3;import 'wrapper.dart' as _i4;import 'package:flutter/widgets.dart' as _i5;List<_i1.WidgetPreview> previews() => [_i1.WidgetPreview(child: _i2.preview()), _i1.WidgetPreview(child: _i3.barPreview1()), _i1.WidgetPreview(child: _i3.barPreview2()), _i1.WidgetPreview(name: Foo, height: 456.0, width: 123.0, textScaleFactor: 50.0, child: _i4.wrapper(_i5.Builder(builder: _i3.barPreview3())), ), ];''';
+import 'widget_preview.dart' as _i1;import 'foo.dart' as _i2;import 'src/bar.dart' as _i3;import 'wrapper.dart' as _i4;import 'package:flutter/widgets.dart' as _i5;List<_i1.WidgetPreview> previews() => [_i1.WidgetPreview(builder: () => _i2.preview()), _i1.WidgetPreview(builder: () => _i3.barPreview1()), _i1.WidgetPreview(builder: () => _i3.barPreview2()), _i1.WidgetPreview(name: Foo, height: 456.0, width: 123.0, textScaleFactor: 50.0, builder: () => _i4.wrapper(_i5.Builder(builder: _i3.barPreview3())), ), ];''';
         expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
 
         // Regenerate the generated file with no previews.
