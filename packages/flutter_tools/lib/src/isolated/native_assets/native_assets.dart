@@ -63,7 +63,7 @@ Future<DartHookResult> runFlutterSpecificHooks({
 
   // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
   // while using it in native_assets_builder is not.
-  for (final target in targets.whereType<CodeAssetTarget>()) {
+  for (final CodeAssetTarget target in targets.whereType<CodeAssetTarget>()) {
     await buildRunner.setCCompilerConfig(target);
   }
 

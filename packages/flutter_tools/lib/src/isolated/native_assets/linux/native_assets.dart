@@ -12,12 +12,12 @@ import '../../../globals.dart' as globals;
 /// Flutter expects `clang++` to be on the path on Linux hosts.
 ///
 /// Search for the accompanying `clang`, `ar`, and `ld`.
-const String kClangPlusPlusBinary = 'clang++';
-const String kClangBinary = 'clang';
-const String kArBinary = 'llvm-ar';
-const String kLdBinary = 'ld.lld';
 
 Future<CCompilerConfig> cCompilerConfigLinux() async {
+  const String kClangPlusPlusBinary = 'clang++';
+  const String kClangBinary = 'clang';
+  const String kArBinary = 'llvm-ar';
+  const String kLdBinary = 'ld.lld';
   final ProcessResult whichResult = await globals.processManager.run(<String>[
     'which',
     kClangPlusPlusBinary,
