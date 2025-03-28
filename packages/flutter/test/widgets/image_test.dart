@@ -1785,7 +1785,9 @@ void main() {
     expect(tester.takeException(), 'threw');
   });
 
-  testWidgets('Image errorBuilder handles errors during navigation transitions', (WidgetTester tester) async {
+  testWidgets('Image errorBuilder handles errors during navigation transitions', (
+    WidgetTester tester,
+  ) async {
     bool errorHandled = false;
 
     // Create a navigator key to control navigation
