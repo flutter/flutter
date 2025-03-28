@@ -212,8 +212,12 @@ fml::Status LineContents::CalculatePerVertex(
   }
   Scalar effective_line_width = std::fabsf((corners[2] - corners[0]).y);
   ExpandLine(corners, Point(expand_size, expand_size));
-  LineInfo line_info = CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),
-                                         effective_line_width, kSampleRadius);
+  Scalar padded_line_width = std::fabsf((corners[2] - corners[0]).y);
+  Scalar effective_sample_radius =
+      (padded_line_width - effective_line_width) / 2.f;
+  LineInfo line_info =
+      CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),
+                        effective_line_width, effective_sample_radius);
   for (auto& corner : corners) {
     *per_vertex++ = {
         .position = corner,
