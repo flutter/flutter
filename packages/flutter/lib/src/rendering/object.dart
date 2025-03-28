@@ -1090,9 +1090,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// The [RenderObject]s which need to be laid out in the next [flushLayout] pass.
   ///
-  /// The returned list is an unmodifiable copy of the internal cache.
-  /// The internal cache will continue to update without notifying this copy.
-  List<RenderObject> get nodesNeedingLayout => List<RenderObject>.unmodifiable(_nodesNeedingLayout);
+  /// [RenderObject]s with [RenderObject.isRepaintBoundary] are added to this list
+  /// when they are marked for layout. Subclasses of [PipelineOwner] may use this list
+  /// to invalidate caches or otherwise make performance optimizations.
+  @protected
+  List<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
 
   /// Whether this pipeline is currently in the layout phase.
   ///
@@ -1240,9 +1242,11 @@ base class PipelineOwner with DiagnosticableTreeMixin {
 
   /// The [RenderObject]s which need to be painted in the next [flushPaint] pass.
   ///
-  /// The returned list is an unmodifiable copy of the internal cache.
-  /// The internal cache will continue to update without notifying this copy.
-  @protected List<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
+  /// [RenderObject]s marked with [RenderObject.isRepaintBoundary] are added to this list
+  /// when they are marked needing paint. Subclasses of [PipelineOwner] may use this list
+  /// to invalidate caches or otherwise make performance optimizations.
+  @protected
+  List<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
 
   /// Whether this pipeline is currently in the paint phase.
   ///
