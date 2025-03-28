@@ -413,8 +413,95 @@ Future<void> mainImpl() async {
   runApp(_WidgetPreviewScaffold());
 }
 
-class _WidgetPreviewScaffold extends StatelessWidget {
+// Define the Enum for Layout Types
+enum LayoutType { gridView, listView }
+
+class _WidgetPreviewScaffold extends StatefulWidget {
   const _WidgetPreviewScaffold();
+
+  @override
+  _WidgetPreviewScaffoldState createState() => _WidgetPreviewScaffoldState();
+}
+
+class _WidgetPreviewScaffoldState extends State<_WidgetPreviewScaffold> {
+  LayoutType _selectedLayout = LayoutType.gridView; // Default to GridView
+
+  // Function to toggle layouts based on enum value
+  void _toggleLayout(LayoutType layout) {
+    setState(() {
+      _selectedLayout = layout;
+    });
+  }
+
+  Widget _buildGridViewFlex(List<WidgetPreview> previewList) {
+    return SingleChildScrollView(
+      child: Wrap(
+        spacing: 8.0,
+        runSpacing: 8.0,
+        alignment: WrapAlignment.start,
+        children: <Widget>[
+          for (final WidgetPreview preview in previewList)
+            WidgetPreviewWidget(preview: preview),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerticalListView(List<WidgetPreview> previewList) {
+    return ListView.builder(
+      itemCount: previewList.length,
+      itemBuilder: (context, index) {
+        final preview = previewList[index];
+        return Center(child: WidgetPreviewWidget(preview: preview));
+      },
+    );
+  }
+
+  Widget _displayToggleLayoutButtons() {
+    return Positioned(
+      top: 20.0,
+      left: 20.0,
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          children: [
+            IconButton(
+              onPressed: () {
+                _toggleLayout(LayoutType.gridView);
+              },
+              icon: Icon(Icons.grid_on),
+              color:
+                  _selectedLayout == LayoutType.gridView
+                      ? Colors.blue
+                      : Colors.black,
+            ),
+            IconButton(
+              onPressed: () {
+                _toggleLayout(LayoutType.listView);
+              },
+              icon: Icon(Icons.view_list),
+              color:
+                  _selectedLayout == LayoutType.listView
+                      ? Colors.blue
+                      : Colors.black,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _displayPreviewer(Widget previewView) {
+    return Positioned.fill(
+      left: 60.0,
+      right: 20.0,
+      child: Container(padding: EdgeInsets.all(8.0), child: previewView),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -439,26 +526,29 @@ class _WidgetPreviewScaffold extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints constraints) {
           return WidgetPreviewerWindowConstraints(
             constraints: constraints,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  for (final WidgetPreview preview in previewList)
-                    WidgetPreviewWidget(preview: preview),
-                ],
-              ),
-            ),
+            child: switch (_selectedLayout) {
+              LayoutType.gridView => _buildGridViewFlex(previewList),
+              LayoutType.listView => _buildVerticalListView(previewList),
+            },
           );
         },
       );
     }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Material(
         color: Colors.transparent,
         child: DefaultAssetBundle(
           bundle: PreviewAssetBundle(),
-          child: previewView,
+          child: Stack(
+            children: [
+              // Display the previewer
+              _displayPreviewer(previewView),
+              // Display the layout toggle buttons
+              _displayToggleLayoutButtons(),
+            ],
+          ),
         ),
       ),
     );
