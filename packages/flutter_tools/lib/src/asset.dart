@@ -52,8 +52,10 @@ class FlutterHookResult {
   final List<Uri> dependencies;
 
   /// Whether caller may need to re-run the dart build.
-  bool hasAnyModifiedFiles(FileSystem fileSystem) =>
-      _wasAnyFileModifiedSince(fileSystem, buildStart, dependencies);
+  bool hasAnyModifiedFiles(FileSystem fileSystem) {
+    print('Checking if any modified files are there');
+    return _wasAnyFileModifiedSince(fileSystem, buildStart, dependencies);
+  }
 
   /// Whether the files produced by the build are up-to-date.
   ///
