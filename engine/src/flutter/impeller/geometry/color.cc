@@ -31,7 +31,7 @@ static constexpr inline bool ValidateBlendModes() {
   IMPELLER_FOR_EACH_BLEND_MODE(_IMPELLER_ASSERT_BLEND_MODE)
   // Ensure the total number of blend modes match.
   if (i - 1 !=
-      static_cast<std::underlying_type_t<BlendMode>>(BlendMode::kLast)) {
+      static_cast<std::underlying_type_t<BlendMode>>(BlendMode::kLastMode)) {
     return false;
   }
   return true;
@@ -160,36 +160,36 @@ Color Color::Blend(Color src, BlendMode blend_mode) const {
   switch (blend_mode) {
     case BlendMode::kClear:
       return Color::BlackTransparent();
-    case BlendMode::kSource:
+    case BlendMode::kSrc:
       return src;
-    case BlendMode::kDestination:
+    case BlendMode::kDst:
       return dst;
-    case BlendMode::kSourceOver:
+    case BlendMode::kSrcOver:
       // r = s + (1-sa)*d
       return (src.Premultiply() + dst.Premultiply() * (1 - src.alpha))
           .Unpremultiply();
-    case BlendMode::kDestinationOver:
+    case BlendMode::kDstOver:
       // r = d + (1-da)*s
       return (dst.Premultiply() + src.Premultiply() * (1 - dst.alpha))
           .Unpremultiply();
-    case BlendMode::kSourceIn:
+    case BlendMode::kSrcIn:
       // r = s * da
       return (src.Premultiply() * dst.alpha).Unpremultiply();
-    case BlendMode::kDestinationIn:
+    case BlendMode::kDstIn:
       // r = d * sa
       return (dst.Premultiply() * src.alpha).Unpremultiply();
-    case BlendMode::kSourceOut:
+    case BlendMode::kSrcOut:
       // r = s * ( 1- da)
       return (src.Premultiply() * (1 - dst.alpha)).Unpremultiply();
-    case BlendMode::kDestinationOut:
+    case BlendMode::kDstOut:
       // r = d * (1-sa)
       return (dst.Premultiply() * (1 - src.alpha)).Unpremultiply();
-    case BlendMode::kSourceATop:
+    case BlendMode::kSrcATop:
       // r = s*da + d*(1-sa)
       return (src.Premultiply() * dst.alpha +
               dst.Premultiply() * (1 - src.alpha))
           .Unpremultiply();
-    case BlendMode::kDestinationATop:
+    case BlendMode::kDstATop:
       // r = d*sa + s*(1-da)
       return (dst.Premultiply() * src.alpha +
               src.Premultiply() * (1 - dst.alpha))

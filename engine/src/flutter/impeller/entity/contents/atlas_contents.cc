@@ -65,7 +65,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
     auto pipeline_options = OptionsFromPassAndEntity(pass, entity);
     pipeline_options.primitive_type = PrimitiveType::kTriangle;
     pipeline_options.depth_write_enabled =
-        pipeline_options.blend_mode == BlendMode::kSource;
+        pipeline_options.blend_mode == BlendMode::kSrc;
 
     pass.SetPipeline(renderer.GetTexturePipeline(pipeline_options));
     pass.SetVertexBuffer(geometry_->CreateSimpleVertexBuffer(host_buffer));
@@ -98,7 +98,7 @@ bool AtlasContents::Render(const ContentContext& renderer,
 #endif  // IMPELLER_DEBUG
     pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
     auto inverted_blend_mode =
-        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSource);
+        InvertPorterDuffBlend(blend_mode).value_or(BlendMode::kSrc);
     pass.SetPipeline(renderer.GetPorterDuffPipeline(inverted_blend_mode,
                                                     OptionsFromPass(pass)));
 
@@ -126,15 +126,15 @@ bool AtlasContents::Render(const ContentContext& renderer,
     return pass.Draw().ok();
   }
 
-  using VUS = VerticesUberShader::VertexShader;
-  using FS = VerticesUberShader::FragmentShader;
+  using VUS = VerticesUber1Shader::VertexShader;
+  using FS = VerticesUber1Shader::FragmentShader;
 
 #ifdef IMPELLER_DEBUG
   pass.SetCommandLabel("DrawAtlas Advanced Blend");
 #endif  // IMPELLER_DEBUG
   pass.SetVertexBuffer(geometry_->CreateBlendVertexBuffer(host_buffer));
 
-  pass.SetPipeline(renderer.GetDrawVerticesUberShader(OptionsFromPass(pass)));
+  renderer.GetDrawVerticesUberPipeline(blend_mode, OptionsFromPass(pass));
   FS::BindTextureSampler(pass, geometry_->GetAtlas(), dst_sampler);
 
   VUS::FrameInfo frame_info;

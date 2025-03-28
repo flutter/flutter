@@ -382,6 +382,102 @@ TEST_P(AiksTest, DrawLinesRenderCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// The goal of this test is to show that scaling the lines doesn't also scale
+// the antialiasing. The amount of blurring should be the same for both
+// horizontal lines.
+TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
+  Scalar scale = 5.0;
+  Scalar line_width = 10.f;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Scale", &scale, 0.001, 5);
+      ImGui::SliderFloat("Width", &line_width, 1, 20);
+
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
+
+    builder.DrawPaint(DlPaint(DlColor(0xff111111)));
+
+    {
+      DlPaint paint;
+      paint.setColor(DlColor::kGreenYellow());
+      paint.setStrokeWidth(line_width);
+
+      builder.DrawLine(DlPoint(100, 100), DlPoint(350, 100), paint);
+      builder.DrawLine(DlPoint(100, 100), DlPoint(350, 150), paint);
+
+      builder.Save();
+      builder.Translate(100, 300);
+      builder.Scale(scale, scale);
+      builder.Translate(-100, -300);
+      builder.DrawLine(DlPoint(100, 300), DlPoint(350, 300), paint);
+      builder.DrawLine(DlPoint(100, 300), DlPoint(350, 450), paint);
+      builder.Restore();
+    }
+
+    {
+      DlPaint paint;
+      paint.setColor(DlColor::kGreenYellow());
+      paint.setStrokeWidth(2.0);
+
+      builder.Save();
+      builder.Translate(100, 500);
+      builder.Scale(0.2, 0.2);
+      builder.Translate(-100, -500);
+      builder.DrawLine(DlPoint(100, 500), DlPoint(350, 500), paint);
+      builder.DrawLine(DlPoint(100, 500), DlPoint(350, 650), paint);
+      builder.Restore();
+    }
+
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  builder.DrawPaint(DlPaint(DlColor(0xff111111)));
+
+  DlPaint paint;
+  paint.setColor(DlColor::kGreenYellow());
+  paint.setStrokeWidth(10);
+
+  auto draw = [&builder](DlPaint& paint) {
+    for (auto cap :
+         {DlStrokeCap::kButt, DlStrokeCap::kSquare, DlStrokeCap::kRound}) {
+      paint.setStrokeCap(cap);
+      DlPoint origin = {100, 100};
+      builder.DrawLine(DlPoint(150, 100), DlPoint(250, 100), paint);
+      for (int d = 15; d < 90; d += 15) {
+        Matrix m = Matrix::MakeRotationZ(Degrees(d));
+        Point origin = {100, 100};
+        Point p0 = {50, 0};
+        Point p1 = {150, 0};
+        auto a = origin + m * p0;
+        auto b = origin + m * p1;
+
+        builder.DrawLine(a, b, paint);
+      }
+      builder.DrawLine(DlPoint(100, 150), DlPoint(100, 250), paint);
+      builder.DrawCircle(origin, 35, paint);
+
+      builder.DrawLine(DlPoint(250, 250), DlPoint(250, 250), paint);
+
+      builder.Translate(250, 0);
+    }
+    builder.Translate(-750, 250);
+  };
+
+  draw(paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, DrawRectStrokesRenderCorrectly) {
   DisplayListBuilder builder;
   DlPaint paint;
@@ -561,6 +657,26 @@ TEST_P(AiksTest, CanRenderOverlappingMultiContourPath) {
 
     builder.DrawPath(DlPath(path_builder), paint);
   }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, TwoContourPathWithSinglePointContour) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(15.0);
+  paint.setStrokeCap(DlStrokeCap::kRound);
+
+  DlPathBuilder path_builder;
+  path_builder.MoveTo(DlPoint(100, 100));
+  path_builder.LineTo(DlPoint(150, 150));
+  path_builder.MoveTo(DlPoint(200, 200));
+  path_builder.LineTo(DlPoint(200, 200));
+
+  builder.DrawPath(DlPath(path_builder), paint);
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
