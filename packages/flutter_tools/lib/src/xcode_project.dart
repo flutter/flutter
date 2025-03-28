@@ -149,13 +149,8 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// Checks if FlutterGeneratedPluginSwiftPackage has been added to the
   /// project's build settings by checking the contents of the pbxproj.
   bool get flutterPluginSwiftPackageInProjectSettings {
-    if (!xcodeProjectInfoFile.existsSync()) {
-      return false;
-    }
-
-    return xcodeProjectInfoFile.readAsStringSync().contains(
-      '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
-    );
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
   }
 
   /// True if this project doesn't have Swift Package Manager disabled in the

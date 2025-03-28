@@ -522,13 +522,8 @@ class FakeIosProject extends Fake implements IosProject {
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
-    if (!xcodeProjectInfoFile.existsSync()) {
-      return false;
-    }
-
-    return xcodeProjectInfoFile.readAsStringSync().contains(
-      '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
-    );
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
   }
 
   @override
@@ -562,13 +557,8 @@ class FakeMacOSProject extends Fake implements MacOSProject {
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
-    if (!xcodeProjectInfoFile.existsSync()) {
-      return false;
-    }
-
-    return xcodeProjectInfoFile.readAsStringSync().contains(
-      '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
-    );
+    return xcodeProjectInfoFile.existsSync() &&
+        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
   }
 
   @override
