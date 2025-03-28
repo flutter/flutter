@@ -1260,6 +1260,8 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
     OpResult result = PaintResult(current_, flags);
     if (result != OpResult::kNoEffect &&
         AccumulateOpBounds(rse.GetBounds(), flags)) {
+      // DrawRoundSuperellipseOp only supports filling. Anything related to
+      // stroking must use path approximation.
       if (current_.getDrawStyle() == DlDrawStyle::kFill) {
         Push<DrawRoundSuperellipseOp>(0, rse);
       } else {
