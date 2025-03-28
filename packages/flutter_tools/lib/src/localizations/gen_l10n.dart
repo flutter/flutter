@@ -176,7 +176,7 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
             (isCustomDateFormat == null || !isCustomDateFormat)) {
           if (placeholder.dateFormatParts.length > 1) {
             throw L10nException(
-              'For the message "${message.resourceId}" the Date format "$placeholderFormat" for placeholder '
+              'For the message "${message.resourceId}" the date format "$placeholderFormat" for placeholder '
               '${placeholder.name} contains at least one invalid date format in locale "$locale". '
               'Ensure all date formats joined by a "+" character have '
               'a corresponding DateFormat constructor.\n Check the intl '
@@ -185,7 +185,7 @@ String generateDateFormattingLogic(Message message, LocaleInfo locale) {
           }
 
           throw L10nException(
-            'For the message "${message.resourceId}" the Date format "$placeholderFormat" for placeholder '
+            'For the message "${message.resourceId}" the date format "$placeholderFormat" for placeholder '
             '${placeholder.name} does not have a corresponding DateFormat '
             'constructor in locale "$locale". Check the intl library\'s DateFormat class '
             'constructors for allowed date formats, or set "isCustomDateFormat" attribute '
