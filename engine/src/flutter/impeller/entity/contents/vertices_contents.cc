@@ -110,7 +110,19 @@ bool VerticesSimpleBlendContents::Render(const ContentContext& renderer,
       texture = texture_;
     }
   } else {
-    texture = renderer.GetEmptyTexture();
+    TextureDescriptor desc;
+    desc.storage_mode = StorageMode::kDevicePrivate;
+    desc.format = PixelFormat::kR8G8B8A8UNormInt;
+    desc.size = ISize{1, 1};
+    texture =
+        renderer.GetContext()->GetResourceAllocator()->CreateTexture(desc);
+
+    std::array<uint8_t, 4> data = Color::BlackTransparent().ToR8G8B8A8();
+    std::shared_ptr<fml::NonOwnedMapping> data_mapping =
+        std::make_shared<fml::NonOwnedMapping>(data.data(), data.size());
+    if (!texture->SetContents(std::move(data_mapping))) {
+      VALIDATION_LOG << "Failed to set contents for empty texture";
+    }
   }
   if (!texture) {
     VALIDATION_LOG << "Missing texture for VerticesSimpleBlendContents";

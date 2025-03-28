@@ -7,7 +7,7 @@
 #include <memory>
 #include <utility>
 
-#include "fml/trace_event.h"
+#include "fml/mapping.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
@@ -536,29 +536,6 @@ ContentContext::ContentContext(
     return;
   }
 
-  {
-    TextureDescriptor desc;
-    desc.storage_mode = StorageMode::kDevicePrivate;
-    desc.format = PixelFormat::kR8G8B8A8UNormInt;
-    desc.size = ISize{1, 1};
-    empty_texture_ = GetContext()->GetResourceAllocator()->CreateTexture(desc);
-
-    std::array<uint8_t, 4> data = Color::BlackTransparent().ToR8G8B8A8();
-    std::shared_ptr<CommandBuffer> cmd_buffer =
-        GetContext()->CreateCommandBuffer();
-    std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
-    HostBuffer& host_buffer = GetTransientsBuffer();
-    BufferView buffer_view = host_buffer.Emplace(data);
-    blit_pass->AddCopy(buffer_view, empty_texture_);
-
-    if (!blit_pass->EncodeCommands() || !GetContext()
-                                             ->GetCommandQueue()
-                                             ->Submit({std::move(cmd_buffer)})
-                                             .ok()) {
-      VALIDATION_LOG << "Failed to create empty texture.";
-    }
-  }
-
   auto options = ContentContextOptions{
       .sample_count = SampleCount::kCount4,
       .color_attachment_pixel_format =
@@ -827,10 +804,6 @@ ContentContext::~ContentContext() = default;
 
 bool ContentContext::IsValid() const {
   return is_valid_;
-}
-
-std::shared_ptr<Texture> ContentContext::GetEmptyTexture() const {
-  return empty_texture_;
 }
 
 fml::StatusOr<RenderTarget> ContentContext::MakeSubpass(

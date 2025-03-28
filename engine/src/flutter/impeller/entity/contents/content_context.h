@@ -5,15 +5,11 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_CONTENTS_CONTENT_CONTEXT_H_
 #define FLUTTER_IMPELLER_ENTITY_CONTENTS_CONTENT_CONTEXT_H_
 
-#include <initializer_list>
 #include <memory>
-#include <optional>
 #include <unordered_map>
-#include <utility>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/status_or.h"
-#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/geometry/color.h"
@@ -231,10 +227,6 @@ class ContentContext {
 #endif  // IMPELLER_ENABLE_OPENGLES
   // clang-format on
 
-  // An empty 1x1 texture for binding drawVertices/drawAtlas or other cases
-  // that don't always have a texture (due to blending).
-  std::shared_ptr<Texture> GetEmptyTexture() const;
-
   std::shared_ptr<Context> GetContext() const;
 
   const Capabilities& GetDeviceCapabilities() const;
@@ -339,7 +331,6 @@ class ContentContext {
   std::shared_ptr<Tessellator> tessellator_;
   std::shared_ptr<RenderTargetAllocator> render_target_cache_;
   std::shared_ptr<HostBuffer> host_buffer_;
-  std::shared_ptr<Texture> empty_texture_;
 
   ContentContext(const ContentContext&) = delete;
 
