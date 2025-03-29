@@ -44,7 +44,7 @@ external set windowFlutterCanvasKit(CanvasKit? value);
 external CanvasKit? get windowFlutterCanvasKit;
 
 @JS('window.flutterCanvasKitLoaded')
-external JSPromise<JSAny>? get windowFlutterCanvasKitLoaded;
+external JSPromise<CanvasKit>? get windowFlutterCanvasKitLoaded;
 
 extension type CanvasKit(JSObject _) implements JSObject {
   external SkBlendModeEnum get BlendMode;
