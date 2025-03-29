@@ -272,6 +272,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     }
 
     if (index == -1 || index + 3 >= schemeLines.length) {
+      // TODO(vashworth): The BuildableReference references a native target, not the project
       throw Exception(
         'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
         'for ${_xcodeProject.hostAppProjectName}.',
@@ -550,7 +551,7 @@ $newContent
     if (runnerFrameworksPhaseStartIndex == -1 ||
         runnerFrameworksPhaseStartIndex > endSectionIndex) {
       throw Exception(
-        'Unable to find PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
+        'Unable to find PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
@@ -566,7 +567,7 @@ $newContent
             .firstOrNull;
     if (runnerFrameworksPhase == null) {
       throw Exception(
-        'Unable to find parsed PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} target.',
+        'Unable to find parsed PBXFrameworksBuildPhase for ${_xcodeProject.hostAppProjectName} project.',
       );
     }
 
@@ -585,7 +586,7 @@ $newContent
       );
       if (startFilesIndex == -1 || startFilesIndex > endSectionIndex) {
         throw Exception(
-          'Unable to files for PBXFrameworksBuildPhase ${_xcodeProject.hostAppProjectName} target.',
+          'Unable to find files for PBXFrameworksBuildPhase ${_xcodeProject.hostAppProjectName} project.',
         );
       }
       const String newContent =
@@ -758,7 +759,7 @@ $newContent
       startSectionIndex,
     );
     if (projectStartIndex == -1 || projectStartIndex > endSectionIndex) {
-      throw Exception('Unable to find PBXProject for ${_xcodeProject.hostAppProjectName}.');
+      throw Exception('Unable to find PBXProject for ${_xcodeProject.hostAppProjectName} project.');
     }
 
     // Get the Runner project from the parsed project info.
@@ -768,7 +769,9 @@ $newContent
             .toList()
             .firstOrNull;
     if (projectObject == null) {
-      throw Exception('Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName}.');
+      throw Exception(
+        'Unable to find parsed PBXProject for ${_xcodeProject.hostAppProjectName} project.',
+      );
     }
 
     if (projectObject.packageReferences == null) {
