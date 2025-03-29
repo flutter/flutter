@@ -1729,9 +1729,10 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
     }
   }
 }''',
-        });
-        expect(getSyntheticGeneratedFileContent(locale: 'en'), isA<String>());
-      });
+          });
+          expect(getSyntheticGeneratedFileContent(locale: 'en'), isA<String>());
+        },
+      );
     });
 
     group('DateTime tests', () {
