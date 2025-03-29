@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 {
+    // TODO(https://fxbug.dev/404543928): Remove this shard usage when possible
+    // and replace with explicit routes.
     include: [ "syslog/client.shard.cml" ],
     use: [
         // This is used by the Dart VM to communicate from Dart code to C++ code.
@@ -22,13 +24,6 @@
             directory: "tzdata-icu",
             rights: [ "r*" ],
             path: "/config/tzdata/icu",
-        },
-        {
-            protocol: [
-                "fuchsia.logger.LogSink",
-                "fuchsia.inspect.InspectSink",
-            ],
-            from: "parent/diagnostics",
         },
         {
             protocol: [
