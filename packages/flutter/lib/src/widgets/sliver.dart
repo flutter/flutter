@@ -1771,3 +1771,13 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
         .forEach(visitor);
   }
 }
+
+/// A sliver that ensures its sliver child is included in the semantics tree.
+class SliverEnsureSemantics extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that ensures its sliver child is included in the semantics tree.
+  const SliverEnsureSemantics({super.key, required Widget sliver}) : super(child: sliver);
+
+  @override
+  RenderSliverEnsureSemantics createRenderObject(BuildContext context) =>
+      RenderSliverEnsureSemantics();
+}

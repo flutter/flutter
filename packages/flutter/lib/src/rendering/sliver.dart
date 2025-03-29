@@ -1306,6 +1306,17 @@ List<DiagnosticsNode> _debugCompareFloats(
 /// than zero, then it should override [childCrossAxisPosition]. For example
 /// [RenderSliverGrid] overrides this method.
 abstract class RenderSliver extends RenderObject {
+  /// Whether this sliver should be included in the semantics tree.
+  ///
+  /// This value is used by [RenderViewportBase.visitChildrenForSemantics]
+  /// to ensure a sliver is included in the semantics tree regardless of its geometry.
+  bool get ensureSemantics => _ensureSemantics;
+  bool _ensureSemantics = false;
+  set ensureSemantics(bool value) {
+    _ensureSemantics = value;
+    markNeedsSemanticsUpdate();
+  }
+
   // layout input
   @override
   SliverConstraints get constraints => super.constraints as SliverConstraints;
