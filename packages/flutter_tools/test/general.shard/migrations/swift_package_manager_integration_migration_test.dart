@@ -755,7 +755,7 @@ void main() {
         expect(testLogger.traceText, contains('project.pbxproj already migrated. Skipping...'));
       });
 
-      testWithoutContext('skips PBXNativeTarget migration if all targets are migrated', () async {
+      testWithoutContext('skips Runner PBXNativeTarget migration if already migrated', () async {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         const SupportedPlatform platform = SupportedPlatform.ios;
