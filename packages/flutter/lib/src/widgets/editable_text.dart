@@ -907,6 +907,7 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
+    this.hintLocales,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -2032,6 +2033,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
+  /// {@macro flutter.services.TextInputConfiguration.hintLocales}
+  final List<Locale>? hintLocales;
+
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
 
@@ -2357,6 +2361,9 @@ class EditableText extends StatefulWidget {
                 ? const <String>[]
                 : kDefaultContentInsertionMimeTypes,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
     );
   }
 }
@@ -5059,6 +5066,7 @@ class EditableTextState extends State<EditableText>
           widget.contentInsertionConfiguration == null
               ? const <String>[]
               : widget.contentInsertionConfiguration!.allowedMimeTypes,
+      hintLocales: widget.hintLocales,
     );
   }
 

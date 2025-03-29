@@ -13320,6 +13320,7 @@ void main() {
       scrollPadding: EdgeInsets.zero,
       scrollPhysics: ClampingScrollPhysics(),
       enableInteractiveSelection: false,
+      hintLocales: <Locale>[Locale('en'), Locale('fr')],
     ).debugFillProperties(builder);
 
     final List<String> description =
@@ -13350,6 +13351,7 @@ void main() {
       'scrollPadding: EdgeInsets.zero',
       'selection disabled',
       'scrollPhysics: ClampingScrollPhysics',
+      'hintLocales: [en, fr]',
     ]);
   });
 
@@ -17540,6 +17542,16 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('hintLocales is passed to EditableText', (WidgetTester tester) async {
+    const List<Locale> hintLocales = <Locale>[Locale('en'), Locale('fr')];
+    await tester.pumpWidget(
+      const MaterialApp(home: Material(child: TextField(hintLocales: hintLocales))),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.hintLocales, hintLocales);
+  });
 }
 
 /// A Simple widget for testing the obscure text.
