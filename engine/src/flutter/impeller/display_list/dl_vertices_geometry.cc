@@ -7,6 +7,7 @@
 #include "display_list/dl_vertices.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/skia_conversions.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/geometry/point.h"
 
 namespace impeller {

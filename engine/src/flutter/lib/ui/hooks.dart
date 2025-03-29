@@ -283,8 +283,8 @@ void _dispatchPointerDataPacket(ByteData packet) {
 }
 
 @pragma('vm:entry-point')
-void _dispatchSemanticsAction(int nodeId, int action, ByteData? args) {
-  PlatformDispatcher.instance._dispatchSemanticsAction(nodeId, action, args);
+void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args) {
+  PlatformDispatcher.instance._dispatchSemanticsAction(viewId, nodeId, action, args);
 }
 
 @pragma('vm:entry-point')

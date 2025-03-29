@@ -2,18 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <thread>
 #include "gtest/gtest.h"
 
 #include "flutter/common/constants.h"
 #include "flutter/fml/logging.h"
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
-#include "flutter/shell/platform/linux/testing/mock_renderer.h"
+#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 #include <epoxy/egl.h>
 
 TEST(FlRendererTest, BackgroundColor) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   ON_CALL(epoxy, epoxy_is_desktop_gl).WillByDefault(::testing::Return(true));
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
@@ -23,11 +28,9 @@ TEST(FlRendererTest, BackgroundColor) {
   EXPECT_CALL(epoxy, glClearColor(0.2, 0.3, 0.4, 0.5));
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
+  g_autoptr(FlRenderer) renderer = fl_renderer_new(engine);
   fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_add_renderable(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId,
-                             FL_RENDERABLE(renderable));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
@@ -35,33 +38,50 @@ TEST(FlRendererTest, BackgroundColor) {
   FlutterBackingStore backing_store;
   fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
                                    &backing_store);
-  const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
-                               .type = kFlutterLayerContentTypeBackingStore,
-                               .backing_store = &backing_store,
-                               .size = {.width = 1024, .height = 1024}};
-  const FlutterLayer* layers[] = {&layer0};
-  fl_renderer_present_layers(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId, layers, 1);
+
+  fml::AutoResetWaitableEvent latch;
+
+  // Simulate raster thread.
+  std::thread([&]() {
+    const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
+                                 .type = kFlutterLayerContentTypeBackingStore,
+                                 .backing_store = &backing_store,
+                                 .size = {.width = 1024, .height = 1024}};
+    const FlutterLayer* layers[] = {&layer0};
+
+    fl_renderer_present_layers(FL_RENDERER(renderer),
+                               flutter::kFlutterImplicitViewId, layers, 1);
+    latch.Signal();
+  }).detach();
+
+  while (fl_mock_renderable_get_redraw_count(renderable) == 0) {
+    g_main_context_iteration(nullptr, true);
+  }
+
   GdkRGBA background_color = {
       .red = 0.2, .green = 0.3, .blue = 0.4, .alpha = 0.5};
   fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
                      1024, 1024, &background_color);
+
+  // Wait until the raster thread has finished before letting
+  // the engine go out of scope.
+  latch.Wait();
 }
 
 TEST(FlRendererTest, RestoresGLState) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   constexpr int kWidth = 100;
   constexpr int kHeight = 100;
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
+  g_autoptr(FlRenderer) renderer = fl_renderer_new(engine);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, kWidth, kHeight);
 
-  fl_renderer_add_renderable(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId,
-                             FL_RENDERABLE(renderable));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_renderer_wait_for_frame(FL_RENDERER(renderer), kWidth, kHeight);
 
   FlutterBackingStore backing_store;
@@ -79,9 +99,20 @@ TEST(FlRendererTest, RestoresGLState) {
   constexpr GLuint kFakeTextureName = 123;
   glBindTexture(GL_TEXTURE_2D, kFakeTextureName);
 
-  fl_renderer_present_layers(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId, layers.data(),
-                             layers.size());
+  fml::AutoResetWaitableEvent latch;
+
+  // Simulate raster thread.
+  std::thread([&]() {
+    fl_renderer_present_layers(FL_RENDERER(renderer),
+                               flutter::kFlutterImplicitViewId, layers.data(),
+                               layers.size());
+    latch.Signal();
+  }).detach();
+
+  while (fl_mock_renderable_get_redraw_count(renderable) == 0) {
+    g_main_context_iteration(nullptr, true);
+  }
+
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
@@ -91,10 +122,16 @@ TEST(FlRendererTest, RestoresGLState) {
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
                 reinterpret_cast<GLint*>(&texture_2d_binding));
   EXPECT_EQ(texture_2d_binding, kFakeTextureName);
+
+  // Wait until the raster thread has finished before letting
+  // the engine go out of scope.
+  latch.Wait();
 }
 
 TEST(FlRendererTest, BlitFramebuffer) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   // OpenGL 3.0
   ON_CALL(epoxy, glGetString(GL_VENDOR))
@@ -106,11 +143,9 @@ TEST(FlRendererTest, BlitFramebuffer) {
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
+  g_autoptr(FlRenderer) renderer = fl_renderer_new(engine);
   fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_add_renderable(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId,
-                             FL_RENDERABLE(renderable));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
@@ -118,21 +153,37 @@ TEST(FlRendererTest, BlitFramebuffer) {
   FlutterBackingStore backing_store;
   fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
                                    &backing_store);
-  const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
-                               .type = kFlutterLayerContentTypeBackingStore,
-                               .backing_store = &backing_store,
-                               .size = {.width = 1024, .height = 1024}};
-  const FlutterLayer* layers[] = {&layer0};
-  fl_renderer_present_layers(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId, layers, 1);
+
+  fml::AutoResetWaitableEvent latch;
+
+  // Simulate raster thread.
+  std::thread([&]() {
+    const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
+                                 .type = kFlutterLayerContentTypeBackingStore,
+                                 .backing_store = &backing_store,
+                                 .size = {.width = 1024, .height = 1024}};
+    const FlutterLayer* layers[] = {&layer0};
+    fl_renderer_present_layers(FL_RENDERER(renderer),
+                               flutter::kFlutterImplicitViewId, layers, 1);
+    latch.Signal();
+  }).detach();
+
+  while (fl_mock_renderable_get_redraw_count(renderable) == 0) {
+    g_main_context_iteration(nullptr, true);
+  }
+
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
                      1024, 1024, &background_color);
+
+  latch.Wait();
 }
 
 TEST(FlRendererTest, BlitFramebufferExtension) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   // OpenGL 2.0 with GL_EXT_framebuffer_blit extension
   ON_CALL(epoxy, glGetString(GL_VENDOR))
@@ -149,11 +200,9 @@ TEST(FlRendererTest, BlitFramebufferExtension) {
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
+  g_autoptr(FlRenderer) renderer = fl_renderer_new(engine);
   fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_add_renderable(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId,
-                             FL_RENDERABLE(renderable));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
@@ -161,21 +210,37 @@ TEST(FlRendererTest, BlitFramebufferExtension) {
   FlutterBackingStore backing_store;
   fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
                                    &backing_store);
-  const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
-                               .type = kFlutterLayerContentTypeBackingStore,
-                               .backing_store = &backing_store,
-                               .size = {.width = 1024, .height = 1024}};
-  const FlutterLayer* layers[] = {&layer0};
-  fl_renderer_present_layers(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId, layers, 1);
+
+  fml::AutoResetWaitableEvent latch;
+
+  // Simulate raster thread.
+  std::thread([&]() {
+    const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
+                                 .type = kFlutterLayerContentTypeBackingStore,
+                                 .backing_store = &backing_store,
+                                 .size = {.width = 1024, .height = 1024}};
+    const FlutterLayer* layers[] = {&layer0};
+    fl_renderer_present_layers(FL_RENDERER(renderer),
+                               flutter::kFlutterImplicitViewId, layers, 1);
+    latch.Signal();
+  }).detach();
+
+  while (fl_mock_renderable_get_redraw_count(renderable) == 0) {
+    g_main_context_iteration(nullptr, true);
+  }
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
                      1024, 1024, &background_color);
+  // Wait until the raster thread has finished before letting
+  // the engine go out of scope.
+  latch.Wait();
 }
 
 TEST(FlRendererTest, NoBlitFramebuffer) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   // OpenGL 2.0
   ON_CALL(epoxy, glGetString(GL_VENDOR))
@@ -185,11 +250,9 @@ TEST(FlRendererTest, NoBlitFramebuffer) {
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
+  g_autoptr(FlRenderer) renderer = fl_renderer_new(engine);
   fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_add_renderable(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId,
-                             FL_RENDERABLE(renderable));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
@@ -197,21 +260,39 @@ TEST(FlRendererTest, NoBlitFramebuffer) {
   FlutterBackingStore backing_store;
   fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
                                    &backing_store);
-  const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
-                               .type = kFlutterLayerContentTypeBackingStore,
-                               .backing_store = &backing_store,
-                               .size = {.width = 1024, .height = 1024}};
-  const FlutterLayer* layers[] = {&layer0};
-  fl_renderer_present_layers(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId, layers, 1);
+
+  fml::AutoResetWaitableEvent latch;
+
+  // Simulate raster thread.
+  std::thread([&]() {
+    const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
+                                 .type = kFlutterLayerContentTypeBackingStore,
+                                 .backing_store = &backing_store,
+                                 .size = {.width = 1024, .height = 1024}};
+    const FlutterLayer* layers[] = {&layer0};
+    fl_renderer_present_layers(FL_RENDERER(renderer),
+                               flutter::kFlutterImplicitViewId, layers, 1);
+    latch.Signal();
+  }).detach();
+
+  while (fl_mock_renderable_get_redraw_count(renderable) == 0) {
+    g_main_context_iteration(nullptr, true);
+  }
+
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
                      1024, 1024, &background_color);
+
+  // Wait until the raster thread has finished before letting
+  // the engine go out of scope.
+  latch.Wait();
 }
 
 TEST(FlRendererTest, BlitFramebufferNvidia) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   // OpenGL 3.0, but on NVIDIA driver so temporarily disabled due to
   // https://github.com/flutter/flutter/issues/152099
@@ -222,11 +303,9 @@ TEST(FlRendererTest, BlitFramebufferNvidia) {
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
+  g_autoptr(FlRenderer) renderer = fl_renderer_new(engine);
   fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_add_renderable(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId,
-                             FL_RENDERABLE(renderable));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
@@ -234,21 +313,39 @@ TEST(FlRendererTest, BlitFramebufferNvidia) {
   FlutterBackingStore backing_store;
   fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
                                    &backing_store);
-  const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
-                               .type = kFlutterLayerContentTypeBackingStore,
-                               .backing_store = &backing_store,
-                               .size = {.width = 1024, .height = 1024}};
-  const FlutterLayer* layers[] = {&layer0};
-  fl_renderer_present_layers(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId, layers, 1);
+
+  fml::AutoResetWaitableEvent latch;
+
+  // Simulate raster thread.
+  std::thread([&]() {
+    const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
+                                 .type = kFlutterLayerContentTypeBackingStore,
+                                 .backing_store = &backing_store,
+                                 .size = {.width = 1024, .height = 1024}};
+    const FlutterLayer* layers[] = {&layer0};
+    fl_renderer_present_layers(FL_RENDERER(renderer),
+                               flutter::kFlutterImplicitViewId, layers, 1);
+    latch.Signal();
+  }).detach();
+
+  while (fl_mock_renderable_get_redraw_count(renderable) == 0) {
+    g_main_context_iteration(nullptr, true);
+  }
+
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
   fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
                      1024, 1024, &background_color);
+
+  // Wait until the raster thread has finished before letting
+  // the engine go out of scope.
+  latch.Wait();
 }
 
 TEST(FlRendererTest, MultiView) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
+  g_autoptr(FlDartProject) project = fl_dart_project_new();
+  g_autoptr(FlEngine) engine = fl_engine_new(project);
 
   // OpenGL 3.0
   ON_CALL(epoxy, glGetString(GL_VENDOR))
@@ -260,13 +357,12 @@ TEST(FlRendererTest, MultiView) {
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlMockRenderable) secondary_renderable = fl_mock_renderable_new();
 
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
+  g_autoptr(FlRenderer) renderer = fl_renderer_new(engine);
   fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_add_renderable(FL_RENDERER(renderer),
-                             flutter::kFlutterImplicitViewId,
-                             FL_RENDERABLE(renderable));
-  fl_renderer_add_renderable(FL_RENDERER(renderer), 1,
-                             FL_RENDERABLE(secondary_renderable));
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
+  FlutterViewId view_id =
+      fl_engine_add_view(engine, FL_RENDERABLE(secondary_renderable), 1024, 768,
+                         1.0, nullptr, nullptr, nullptr);
   fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
 
   EXPECT_EQ(fl_mock_renderable_get_redraw_count(renderable),
@@ -280,15 +376,30 @@ TEST(FlRendererTest, MultiView) {
   FlutterBackingStore backing_store;
   fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
                                    &backing_store);
-  const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
-                               .type = kFlutterLayerContentTypeBackingStore,
-                               .backing_store = &backing_store,
-                               .size = {.width = 1024, .height = 1024}};
-  const FlutterLayer* layers[] = {&layer0};
-  fl_renderer_present_layers(FL_RENDERER(renderer), 1, layers, 1);
+
+  fml::AutoResetWaitableEvent latch;
+
+  // Simulate raster thread.
+  std::thread([&]() {
+    const FlutterLayer layer0 = {.struct_size = sizeof(FlutterLayer),
+                                 .type = kFlutterLayerContentTypeBackingStore,
+                                 .backing_store = &backing_store,
+                                 .size = {.width = 1024, .height = 1024}};
+    const FlutterLayer* layers[] = {&layer0};
+    fl_renderer_present_layers(FL_RENDERER(renderer), view_id, layers, 1);
+    latch.Signal();
+  }).detach();
+
+  while (fl_mock_renderable_get_redraw_count(secondary_renderable) == 0) {
+    g_main_context_iteration(nullptr, true);
+  }
 
   EXPECT_EQ(fl_mock_renderable_get_redraw_count(renderable),
             static_cast<size_t>(0));
   EXPECT_EQ(fl_mock_renderable_get_redraw_count(secondary_renderable),
             static_cast<size_t>(1));
+
+  // Wait until the raster thread has finished before letting
+  // the engine go out of scope.
+  latch.Wait();
 }

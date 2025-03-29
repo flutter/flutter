@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:js_interop';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -422,18 +421,18 @@ Future<void> testMain() async {
       image.src = url;
       await completer.future;
 
-      final DomImageBitmap bitmap = await createImageBitmap(image as JSObject);
+      final DomImageBitmap bitmap = await createImageBitmap(image);
       domWindow.URL.revokeObjectURL(url);
 
-      expect(bitmap.width.toDartInt, 150);
-      expect(bitmap.height.toDartInt, 150);
+      expect(bitmap.width, 150);
+      expect(bitmap.height, 150);
       final ui.Image uiImage = await renderer.createImageFromImageBitmap(bitmap);
 
       if (isSkwasm && isMultiThreaded) {
         // Multi-threaded skwasm transfers the bitmap to the web worker, so it should be
         // disposed/consumed.
-        expect(bitmap.width.toDartInt, 0);
-        expect(bitmap.height.toDartInt, 0);
+        expect(bitmap.width, 0);
+        expect(bitmap.height, 0);
       }
       return uiImage;
     });

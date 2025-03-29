@@ -116,7 +116,7 @@ int? _cachedWebGLVersion;
 ///
 /// Our CanvasKit backend is affected due to: https://github.com/emscripten-core/emscripten/issues/11819
 int _detectWebGLVersion() {
-  final DomCanvasElement canvas = createDomCanvasElement(width: 1, height: 1);
+  final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 1, height: 1);
   if (canvas.getContext('webgl2') != null) {
     if (_workAroundBug91333) {
       return WebGLVersion.webgl1;
