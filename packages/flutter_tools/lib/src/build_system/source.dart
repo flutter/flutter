@@ -5,6 +5,7 @@
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../project.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
@@ -41,6 +42,9 @@ class SourceVisitor implements ResolvedFiles {
   ///
   /// Defaults to `true`.
   final bool inputs;
+
+  /// The current project.
+  late final FlutterProject _project = FlutterProject.fromDirectory(environment.projectDir);
 
   @override
   final List<File> sources = <File>[];
@@ -222,6 +226,33 @@ class SourceVisitor implements ResolvedFiles {
     }
     sources.add(entity as File);
   }
+
+  void visitProjectSource(ProjectSourceBuilder builder) {
+    final FileSystemEntity source = builder(_project);
+    final String path = source.absolute.path;
+
+    if (source is File) {
+      sources.add(environment.fileSystem.file(path));
+      return;
+    }
+
+    if (source is Directory) {
+      final Directory directory = environment.fileSystem.directory(path);
+      if (!directory.existsSync()) {
+        return;
+      }
+
+      for (final FileSystemEntity entity in directory.listSync(recursive: true)) {
+        if (entity is File) {
+          sources.add(entity);
+        }
+      }
+
+      return;
+    }
+
+    throw Exception('Unsupported source type: $source');
+  }
 }
 
 /// A description of an input or output of a [Target].
@@ -249,6 +280,11 @@ abstract class Source {
   ///
   /// If [artifact] points to a directory then all child files are included.
   const factory Source.hostArtifact(HostArtifact artifact) = _HostArtifactSource;
+
+  /// The source is provided by a [FlutterProject].
+  ///
+  /// If the result of [sourceBuilder] is a directory then all child files are included.
+  const factory Source.fromProject(ProjectSourceBuilder sourceBuilder) = _ProjectSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -297,6 +333,20 @@ class _HostArtifactSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
+
+  @override
+  bool get implicit => false;
+}
+
+typedef ProjectSourceBuilder = FileSystemEntity Function(FlutterProject);
+
+class _ProjectSource implements Source {
+  const _ProjectSource(this.builder);
+
+  final ProjectSourceBuilder builder;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitProjectSource(builder);
 
   @override
   bool get implicit => false;

@@ -740,13 +740,6 @@ class CheckDevDependenciesMacOS extends CheckDevDependencies {
 
   @override
   List<Source> get inputs {
-    final FlutterProject project = FlutterProject.current();
-    final File xcodePropertiesFile = project.macos.generatedXcodePropertiesFile;
-    final String xcodePropertiesPattern = xcodePropertiesFile.path.replaceFirst(
-      project.directory.path,
-      '{PROJECT_DIR}/',
-    );
-
     return <Source>[
       ...super.inputs,
       const Source.pattern(
@@ -756,7 +749,7 @@ class CheckDevDependenciesMacOS extends CheckDevDependencies {
       // The generated Xcode properties file contains
       // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
       // This target should re-run whenever that value changes.
-      Source.pattern(xcodePropertiesPattern),
+      Source.fromProject((FlutterProject project) => project.macos.generatedXcodePropertiesFile),
     ];
   }
 

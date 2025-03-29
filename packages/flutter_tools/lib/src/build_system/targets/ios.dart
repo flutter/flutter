@@ -445,14 +445,9 @@ abstract class IosLLDBInit extends Target {
   ];
 
   @override
-  List<Source> get outputs {
-    final FlutterProject flutterProject = FlutterProject.current();
-    final String lldbInitFilePath = flutterProject.ios.lldbInitFile.path.replaceFirst(
-      flutterProject.directory.path,
-      '{PROJECT_DIR}/',
-    );
-    return <Source>[Source.pattern(lldbInitFilePath)];
-  }
+  List<Source> get outputs => <Source>[
+    Source.fromProject((FlutterProject project) => project.ios.lldbInitFile),
+  ];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -566,13 +561,6 @@ class CheckDevDependenciesIos extends CheckDevDependencies {
 
   @override
   List<Source> get inputs {
-    final FlutterProject project = FlutterProject.current();
-    final File xcodePropertiesFile = project.ios.generatedXcodePropertiesFile;
-    final String xcodePropertiesPattern = xcodePropertiesFile.path.replaceFirst(
-      project.directory.path,
-      '{PROJECT_DIR}/',
-    );
-
     return <Source>[
       ...super.inputs,
       const Source.pattern(
@@ -582,7 +570,7 @@ class CheckDevDependenciesIos extends CheckDevDependencies {
       // The generated Xcode properties file contains
       // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
       // This target should re-run whenever that value changes.
-      Source.pattern(xcodePropertiesPattern),
+      Source.fromProject((FlutterProject project) => project.ios.generatedXcodePropertiesFile),
     ];
   }
 

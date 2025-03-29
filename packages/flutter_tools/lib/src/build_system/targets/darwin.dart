@@ -13,13 +13,6 @@ import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
 
-/// Source for the .flutter-plugins-dependencies file.
-/// Must match [FlutterProject.flutterPluginsDependenciesFile].
-@visibleForTesting
-const Source flutterPluginsDependenciesSource = Source.pattern(
-  '{PROJECT_DIR}/.flutter-plugins-dependencies',
-);
-
 /// A target that checks that dev dependencies are enabled on debug/profile
 /// builds and disabled on release builds.
 ///
@@ -35,14 +28,12 @@ abstract class CheckDevDependencies extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  List<Source> get inputs {
-    return const <Source>[
-      Source.pattern(
-        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
-      ),
-      flutterPluginsDependenciesSource,
-    ];
-  }
+  List<Source> get inputs => <Source>[
+    const Source.pattern(
+      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
+    ),
+    Source.fromProject((FlutterProject project) => project.flutterPluginsDependenciesFile),
+  ];
 
   @override
   List<Source> get outputs => const <Source>[];
