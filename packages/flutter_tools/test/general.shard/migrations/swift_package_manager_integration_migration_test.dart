@@ -654,57 +654,68 @@ void main() {
             },
           );
 
-          testWithoutContext(
-            'successfully updates scheme with BlueprintIdentifier that is different from the default',
-            () async {
-              final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-              final BufferLogger testLogger = BufferLogger.test();
-              final FakeXcodeProject project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
-                logger: testLogger,
-              );
+          testWithoutContext('fails if scheme references custom target', () async {
+            const String scheme = 'Other';
+            const BuildInfo buildInfo = BuildInfo(
+              BuildMode.debug,
+              'other',
+              trackWidgetCreation: true,
+              treeShakeIcons: false,
+              packageConfigPath: '.dart_tool/package_config.json',
+            );
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+              schemes: const <String>['Runner', scheme],
+            );
 
-              final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(
-                platform,
-              );
+            final String nativeTargetIdentifier = _alternateRunnerNativeTargetIdentifier(platform);
 
-              // Ensure that a non-default identifier works.
-              expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
-              runnerNativeTargetIdentifierOverride = nativeTargetIdentifier;
-
-              // Create the Scheme file with a different BlueprintIdentifier
-              // to simulate that it is made for a different target.
-              _createProjectFiles(project, platform, createSchemeFile: false);
-              project.xcodeProjectSchemeFile().createSync(recursive: true);
-              project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildActions(platform));
-
-              final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
-                _plutilOutput(_allSectionsMigratedAsJson(platform)),
-                _plutilOutput(_allSectionsMigratedAsJson(platform)),
-              ]);
-
-              final SwiftPackageManagerIntegrationMigration projectMigration =
-                  SwiftPackageManagerIntegrationMigration(
-                    project,
-                    platform,
-                    BuildInfo.debug,
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                    logger: testLogger,
-                    fileSystem: memoryFileSystem,
-                    plistParser: plistParser,
-                    features: swiftPackageManagerFullyEnabledFlags,
-                  );
-
-              await projectMigration.migrate();
-              expect(
-                project.xcodeProjectSchemeFile().readAsStringSync(),
-                _validBuildActions(platform, hasFrameworkScript: true),
-              );
-
+            // Ensure that a non-default identifier works.
+            expect(nativeTargetIdentifier, isNot(_runnerNativeTargetIdentifier(platform)));
+            runnerNativeTargetIdentifierOverride = nativeTargetIdentifier;
+            addTearDown(() {
               runnerNativeTargetIdentifierOverride = null;
-            },
-          );
+            });
+
+            // Create the Scheme file with a different BlueprintIdentifier
+            // to simulate that it is made for a different target.
+            _createProjectFiles(project, platform, createSchemeFile: false);
+            project.xcodeProjectSchemeFile(scheme: scheme).createSync(recursive: true);
+            project
+                .xcodeProjectSchemeFile(scheme: scheme)
+                .writeAsStringSync(_validBuildActions(platform));
+
+            final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+              _plutilOutput(_allSectionsMigratedAsJson(platform)),
+            ]);
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  buildInfo,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: plistParser,
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+                message:
+                    'The scheme "Other.xcscheme" references a custom target, which requires a manual migration.\n'
+                    'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
+                    'for instructions on how to migrate custom targets.',
+              ),
+            );
+          });
         });
       }
     });
@@ -3718,14 +3729,16 @@ class FakeXcodeProject extends Fake implements IosProject {
     required MemoryFileSystem fileSystem,
     required String platform,
     required this.logger,
+    this.schemes = const <String>['Runner'],
   }) : hostAppRoot = fileSystem.directory('app_name').childDirectory(platform),
        parent = FakeFlutterProject(fileSystem: fileSystem);
 
   final Logger logger;
+  final List<String> schemes;
   late XcodeProjectInfo? _projectInfo = XcodeProjectInfo(
     <String>['Runner'],
     <String>['Debug', 'Release', 'Profile'],
-    <String>['Runner'],
+    schemes,
     logger,
   );
 
