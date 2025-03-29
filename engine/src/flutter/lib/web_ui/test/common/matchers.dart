@@ -10,9 +10,7 @@ import 'dart:math' as math;
 
 import 'package:html/dom.dart' as html;
 import 'package:html/parser.dart' as html;
-
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
@@ -273,7 +271,7 @@ class HtmlPatternMatcher extends Matcher {
 
     final html.Element element =
         html.parseFragment((object as DomElement).outerHTML).children.single;
-    matchElements(_Breadcrumbs.root, mismatches, element, pattern);
+    _matchElements(_Breadcrumbs.root, mismatches, element, pattern);
     return mismatches.isEmpty;
   }
 
@@ -298,7 +296,7 @@ class HtmlPatternMatcher extends Matcher {
     return aName == bName;
   }
 
-  void matchElements(
+  void _matchElements(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -315,11 +313,11 @@ class HtmlPatternMatcher extends Matcher {
       return;
     }
 
-    matchAttributes(breadcrumb, mismatches, element, pattern);
-    matchChildren(breadcrumb, mismatches, element, pattern);
+    _matchAttributes(breadcrumb, mismatches, element, pattern);
+    _matchChildren(breadcrumb, mismatches, element, pattern);
   }
 
-  void matchAttributes(
+  void _matchAttributes(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -332,7 +330,7 @@ class HtmlPatternMatcher extends Matcher {
 
       if (expectedName == 'style') {
         // Style is a complex attribute that deserves a special comparison algorithm.
-        matchStyle(parent, mismatches, element, pattern);
+        _matchStyle(parent, mismatches, element, pattern);
       } else {
         if (!element.attributes.containsKey(expectedName)) {
           mismatches.add('$breadcrumb: attribute $expectedName="$expectedValue" missing.');
@@ -363,7 +361,7 @@ class HtmlPatternMatcher extends Matcher {
     return result;
   }
 
-  void matchStyle(
+  void _matchStyle(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -418,7 +416,7 @@ class HtmlPatternMatcher extends Matcher {
     return cleanNodes;
   }
 
-  void matchChildren(
+  void _matchChildren(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -439,7 +437,7 @@ class HtmlPatternMatcher extends Matcher {
       final html.Node actualChild = actualChildNodes[i];
 
       if (expectedChild is html.Element && actualChild is html.Element) {
-        matchElements(parent, mismatches, actualChild, expectedChild);
+        _matchElements(parent, mismatches, actualChild, expectedChild);
       } else if (expectedChild is html.Text && actualChild is html.Text) {
         if (expectedChild.data != actualChild.data) {
           mismatches.add(

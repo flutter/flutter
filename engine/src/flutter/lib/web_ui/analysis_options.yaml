@@ -14,5 +14,4 @@ linter:
     no_default_cases: false
     prefer_relative_imports: false
     public_member_api_docs: false
-    unawaited_futures: true
     use_setters_to_change_properties: false
