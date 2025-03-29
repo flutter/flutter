@@ -153,6 +153,160 @@ TEST_P(AiksTest, CanRenderQuadraticStrokeWithInstantTurn) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, CanRenderFilledConicPaths) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  paint.setDrawStyle(DlDrawStyle::kFill);
+
+  DlPaint reference_paint;
+  reference_paint.setColor(DlColor::kGreen());
+  reference_paint.setDrawStyle(DlDrawStyle::kFill);
+
+  DlPathBuilder path_builder;
+  DlPathBuilder reference_builder;
+
+  // weight of 1.0 is just a quadratic bezier
+  path_builder.MoveTo(DlPoint(100, 100));
+  path_builder.ConicCurveTo(DlPoint(150, 150), DlPoint(200, 100), 1.0f);
+  reference_builder.MoveTo(DlPoint(300, 100));
+  reference_builder.QuadraticCurveTo(DlPoint(350, 150), DlPoint(400, 100));
+
+  // weight of sqrt(2)/2 is a circular section
+  path_builder.MoveTo(DlPoint(100, 200));
+  path_builder.ConicCurveTo(DlPoint(150, 250), DlPoint(200, 200), kSqrt2Over2);
+  reference_builder.MoveTo(DlPoint(300, 200));
+  auto magic = DlPathBuilder::kArcApproximationMagic;
+  reference_builder.CubicCurveTo(DlPoint(300, 200) + DlPoint(50, 50) * magic,
+                                 DlPoint(400, 200) + DlPoint(-50, 50) * magic,
+                                 DlPoint(400, 200));
+
+  // weight of .01 is nearly a straight line
+  path_builder.MoveTo(DlPoint(100, 300));
+  path_builder.ConicCurveTo(DlPoint(150, 350), DlPoint(200, 300), 0.01f);
+  reference_builder.MoveTo(DlPoint(300, 300));
+  reference_builder.LineTo(DlPoint(350, 300.5));
+  reference_builder.LineTo(DlPoint(400, 300));
+
+  // weight of 100.0 is nearly a triangle
+  path_builder.MoveTo(DlPoint(100, 400));
+  path_builder.ConicCurveTo(DlPoint(150, 450), DlPoint(200, 400), 100.0f);
+  reference_builder.MoveTo(DlPoint(300, 400));
+  reference_builder.LineTo(DlPoint(350, 450));
+  reference_builder.LineTo(DlPoint(400, 400));
+
+  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(DlPath(reference_builder), reference_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderStrokedConicPaths) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  paint.setStrokeWidth(10);
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeCap(DlStrokeCap::kRound);
+  paint.setStrokeJoin(DlStrokeJoin::kRound);
+
+  DlPaint reference_paint;
+  reference_paint.setColor(DlColor::kGreen());
+  reference_paint.setStrokeWidth(10);
+  reference_paint.setDrawStyle(DlDrawStyle::kStroke);
+  reference_paint.setStrokeCap(DlStrokeCap::kRound);
+  reference_paint.setStrokeJoin(DlStrokeJoin::kRound);
+
+  DlPathBuilder path_builder;
+  DlPathBuilder reference_builder;
+
+  // weight of 1.0 is just a quadratic bezier
+  path_builder.MoveTo(DlPoint(100, 100));
+  path_builder.ConicCurveTo(DlPoint(150, 150), DlPoint(200, 100), 1.0f);
+  reference_builder.MoveTo(DlPoint(300, 100));
+  reference_builder.QuadraticCurveTo(DlPoint(350, 150), DlPoint(400, 100));
+
+  // weight of sqrt(2)/2 is a circular section
+  path_builder.MoveTo(DlPoint(100, 200));
+  path_builder.ConicCurveTo(DlPoint(150, 250), DlPoint(200, 200), kSqrt2Over2);
+  reference_builder.MoveTo(DlPoint(300, 200));
+  auto magic = DlPathBuilder::kArcApproximationMagic;
+  reference_builder.CubicCurveTo(DlPoint(300, 200) + DlPoint(50, 50) * magic,
+                                 DlPoint(400, 200) + DlPoint(-50, 50) * magic,
+                                 DlPoint(400, 200));
+
+  // weight of .0 is a straight line
+  path_builder.MoveTo(DlPoint(100, 300));
+  path_builder.ConicCurveTo(DlPoint(150, 350), DlPoint(200, 300), 0.0f);
+  reference_builder.MoveTo(DlPoint(300, 300));
+  reference_builder.LineTo(DlPoint(400, 300));
+
+  // weight of 100.0 is nearly a triangle
+  path_builder.MoveTo(DlPoint(100, 400));
+  path_builder.ConicCurveTo(DlPoint(150, 450), DlPoint(200, 400), 100.0f);
+  reference_builder.MoveTo(DlPoint(300, 400));
+  reference_builder.LineTo(DlPoint(350, 450));
+  reference_builder.LineTo(DlPoint(400, 400));
+
+  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(DlPath(reference_builder), reference_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderTightConicPath) {
+  DisplayListBuilder builder;
+  // builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  paint.setDrawStyle(DlDrawStyle::kFill);
+
+  DlPaint reference_paint;
+  reference_paint.setColor(DlColor::kGreen());
+  reference_paint.setDrawStyle(DlDrawStyle::kFill);
+
+  DlPathBuilder path_builder;
+
+  path_builder.MoveTo(DlPoint(200, 200));
+  path_builder.ConicCurveTo(DlPoint(300, 900), DlPoint(400, 200), 5.0f);
+
+  DlPathBuilder reference_builder;
+  ConicPathComponent component(DlPoint(600, 200),  //
+                               DlPoint(700, 900),  //
+                               DlPoint(800, 200),  //
+                               5.0f);
+  reference_builder.MoveTo(component.p1);
+  constexpr int N = 100;
+  for (int i = 1; i < N; i++) {
+    reference_builder.LineTo(component.Solve(static_cast<Scalar>(i) / N));
+  }
+  reference_builder.LineTo(component.p2);
+
+  DlPaint line_paint;
+  line_paint.setColor(DlColor::kYellow());
+  line_paint.setDrawStyle(DlDrawStyle::kStroke);
+  line_paint.setStrokeWidth(1.0f);
+
+  // Draw some lines to provide a spacial reference for the curvature of
+  // the tips of the direct rendering and the manually tessellated version.
+  builder.DrawLine(DlPoint(290.5f, 200), DlPoint(290.5f, 900), line_paint);
+  builder.DrawLine(DlPoint(309.5f, 200), DlPoint(309.5f, 900), line_paint);
+  builder.DrawLine(DlPoint(690.5f, 200), DlPoint(690.5f, 900), line_paint);
+  builder.DrawLine(DlPoint(709.5f, 200), DlPoint(709.5f, 900), line_paint);
+  builder.DrawLine(DlPoint(200, 785.5f), DlPoint(800, 785.5f), line_paint);
+
+  // Draw the two paths (direct and manually tessellated) on top of the lines.
+  builder.DrawPath(DlPath(path_builder), paint);
+  builder.DrawPath(DlPath(reference_builder), reference_paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderDifferencePaths) {
   DisplayListBuilder builder;
 
