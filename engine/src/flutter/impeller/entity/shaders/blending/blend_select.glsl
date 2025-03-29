@@ -93,13 +93,13 @@ f16vec3 AdvancedBlendHalf1(f16vec3 dst, f16vec3 src, int blend_type) {
   if (blend_type == 6) {
     return IPBlendHardLight(dst, src);
   }
-  if (blend_type == 7) {
-    return IPBlendSoftLight(dst, src);
-  }
   return f16vec3(0.0hf);
 }
 
 f16vec3 AdvancedBlendHalf2(f16vec3 dst, f16vec3 src, int blend_type) {
+  if (blend_type == 7) {
+    return IPBlendSoftLight(dst, src);
+  }
   if (blend_type == 8) {
     return IPBlendDifference(dst, src);
   }

@@ -1427,7 +1427,7 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
 PipelineRef ContentContext::GetDrawVerticesUberPipeline(
     BlendMode blend_mode,
     ContentContextOptions opts) const {
-  if (blend_mode <= BlendMode::kSoftLight) {
+  if (blend_mode <= BlendMode::kHardLight) {
     return GetPipeline(this, pipelines_->vertices_uber_1_, opts);
   } else {
     return GetPipeline(this, pipelines_->vertices_uber_2_, opts);
