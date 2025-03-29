@@ -240,10 +240,6 @@ typedef NS_ENUM(NSInteger, FlutterAppExitResponse) {
 + (nullable FlutterEngine*)engineForIdentifier:(int64_t)identifier;
 @end
 
-@interface FlutterEngine (Tests)
-- (nonnull FlutterThreadSynchronizer*)testThreadSynchronizer;
-@end
-
 NS_ASSUME_NONNULL_END
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_FRAMEWORK_SOURCE_FLUTTERENGINE_INTERNAL_H_
