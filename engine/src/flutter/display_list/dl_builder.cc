@@ -1260,7 +1260,16 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
     OpResult result = PaintResult(current_, flags);
     if (result != OpResult::kNoEffect &&
         AccumulateOpBounds(rse.GetBounds(), flags)) {
-      Push<DrawRoundSuperellipseOp>(0, rse);
+      if (current_.getDrawStyle() == DlDrawStyle::kFill) {
+        Push<DrawRoundSuperellipseOp>(0, rse);
+      } else {
+        DlPathBuilder builder;
+        builder.SetConvexity(impeller::Convexity::kConvex);
+        builder.SetBounds(rse.GetBounds());
+        builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
+            rse.GetBounds(), rse.GetRadii()));
+        Push<DrawPathOp>(0, DlPath(builder.TakePath()));
+      }
       CheckLayerOpacityCompatibility();
       UpdateLayerResult(result);
     }

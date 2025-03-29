@@ -253,6 +253,7 @@ typedef CanvasPath Path;
   V(Path, addPathWithMatrix)                     \
   V(Path, addPolygon)                            \
   V(Path, addRRect)                              \
+  V(Path, addRSuperellipse)                      \
   V(Path, addRect)                               \
   V(Path, arcTo)                                 \
   V(Path, arcToPoint)                            \
