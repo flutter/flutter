@@ -619,7 +619,7 @@ $newContent
     return migrated;
   }
 
-  void _migrateNativeApplicationTarget(
+  void _migrateNativeTarget(
     List<String> lines,
     ParsedNativeTarget nativeTarget, {
     required int startSectionIndex,
@@ -713,7 +713,7 @@ $newContent
       return lines;
     }
 
-    _migrateNativeApplicationTarget(
+    _migrateNativeTarget(
       lines,
       runnerNativeTarget,
       startSectionIndex: startSectionIndex,
