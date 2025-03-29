@@ -685,6 +685,7 @@ Matcher matchesSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
+  ui.SemanticsInputType? inputType,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -768,6 +769,7 @@ Matcher matchesSemantics({
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -878,6 +880,7 @@ Matcher containsSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
+  ui.SemanticsInputType? inputType,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -960,6 +963,7 @@ Matcher containsSemantics({
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -2395,6 +2399,7 @@ class _MatchesSemanticsData extends Matcher {
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
+    required this.inputType,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2546,6 +2551,7 @@ class _MatchesSemanticsData extends Matcher {
   final int? platformViewId;
   final int? maxValueLength;
   final int? currentValueLength;
+  final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
 
   /// There are three possible states for these two maps:
@@ -2591,6 +2597,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (tooltip != null) {
       description.add(' with tooltip: $tooltip');
+    }
+    if (inputType != null) {
+      description.add(' with inputType: $inputType');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> expectedActions =
@@ -2795,6 +2804,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
+    }
+    if (inputType != null && inputType != data.inputType) {
+      return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];
