@@ -195,7 +195,7 @@ void main() {
                 xcodeProject.podfile.writeAsStringSync('Standard Podfile template');
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
                 xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
-                  'FlutterGeneratedPluginSwiftPackage',
+                  '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
                 );
 
                 final DarwinDependencyManagement dependencyManagement = DarwinDependencyManagement(
@@ -261,7 +261,7 @@ void main() {
                 xcodeProject.podfile.writeAsStringSync('Non-Standard Podfile template');
                 xcodeProject.xcodeProjectInfoFile.createSync(recursive: true);
                 xcodeProject.xcodeProjectInfoFile.writeAsStringSync(
-                  'FlutterGeneratedPluginSwiftPackage',
+                  '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
                 );
 
                 final DarwinDependencyManagement dependencyManagement = DarwinDependencyManagement(
