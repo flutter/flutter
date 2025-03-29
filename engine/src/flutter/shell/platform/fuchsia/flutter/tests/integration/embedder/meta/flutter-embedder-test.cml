@@ -9,6 +9,8 @@
         // This test needs both the vulkan facet and the hermetic-tier-2 facet,
         // so we are forced to make it a system test.
         "sys/testing/system-test.shard.cml",
+        // TODO(https://fxbug.dev/404543928): Remove this shard usage when possible
+        // and replace with explicit routes.
         "syslog/client.shard.cml",
         "inspect/client.shard.cml",
     ],

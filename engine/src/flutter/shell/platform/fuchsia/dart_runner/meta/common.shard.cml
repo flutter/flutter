@@ -25,6 +25,13 @@
         },
         {
             protocol: [
+                "fuchsia.logger.LogSink",
+                "fuchsia.inspect.InspectSink",
+            ],
+            from: "parent/diagnostics",
+        },
+        {
+            protocol: [
                 "fuchsia.device.NameProvider",  // For fdio uname()
                 "fuchsia.feedback.CrashReporter",
                 "fuchsia.intl.PropertyProvider",  // For dartVM timezone support

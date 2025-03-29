@@ -1,6 +1,9 @@
 {
     include: [
          "sys/component/realm_builder_absolute.shard.cml",
+
+        // TODO(https://fxbug.dev/404543928): Remove this shard usage when possible
+        // and replace with explicit routes.
          "syslog/client.shard.cml",
         "inspect/client.shard.cml",
     ],
