@@ -23,6 +23,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
@@ -700,6 +701,7 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: FlutterProject.current(),
           buildInfo: debuggingOptions.buildInfo,
+          featureFlags: featureFlags,
           targetOverride: mainPath,
         );
       }
@@ -939,6 +941,7 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: flutterProject,
           buildInfo: debuggingOptions.buildInfo,
+          featureFlags: featureFlags,
           targetOverride: mainPath,
           configurationBuildDir: bundle.parent.absolute.path,
         );
