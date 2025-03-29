@@ -3287,6 +3287,38 @@ String migratedRunnerWithUnmigratedOtherTargetSection(SupportedPlatform platform
   return migratedNativeTargetSection(platform, otherNativeTarget: otherTarget);
 }
 
+/// A variant of [migratedNativeTargetSection]
+/// that includes an additional PBXNativeTarget, "OtherTarget", that is migrated.
+String migratedRunnerAndMigratedOtherTargetSection(SupportedPlatform platform) {
+  final String otherTarget = <String>[
+    '   354BE72C2A385E0200F71CEE /* OtherTarget */ = {',
+    '     isa = PBXNativeTarget;',
+    '     buildConfigurationList = 354BE73C2A385E0200F71CEE /* Build configuration list for PBXNativeTarget "OtherTarget" */;',
+    '     buildPhases = (',
+    '       354BE72E2A385E0200F71CEE /* Run Script */,',
+    '       354BE72F2A385E0200F71CEE /* Sources */,',
+    '       354BE7322A385E0200F71CEE /* Frameworks */,',
+    '       354BE7342A385E0200F71CEE /* Resources */,',
+    '       35EC537E2A4038C200CBDB83 /* Embed Frameworks */,',
+    '       354BE73A2A385E0200F71CEE /* Thin Binary */,',
+    '     );',
+    '     buildRules = (',
+    '     );',
+    '     dependencies = (',
+    '     );',
+    '     name = OtherTarget;',
+    '     packageProductDependencies = (',
+    '				78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,',
+    '     );',
+    '     productName = OtherTarget;',
+    '     productReference = 354BE7402A385E0200F71CEE /* OtherTarget.app */;',
+    '     productType = "com.apple.product-type.application";',
+    '   };',
+  ].join('\n');
+
+  return migratedNativeTargetSection(platform, otherNativeTarget: otherTarget);
+}
+
 String unmigratedNativeTargetSectionAsJson(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
