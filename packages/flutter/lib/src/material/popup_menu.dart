@@ -17,7 +17,6 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
-import 'divider_theme.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -127,36 +126,27 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   @override
   final double height;
 
-  /// The thickness of the line drawn within the divider.
+  /// The thickness of the line drawn within the [PopupMenuDivider].
   ///
-  /// A divider with a [thickness] of 0.0 is always drawn as a line with a
-  /// height of exactly one device pixel.
-  ///
-  /// If this is null, then the [DividerThemeData.thickness] is used. If
-  /// that is also null, then this defaults to 0.0.
+  /// {@macro flutter.material.Divider.thickness}
   final double? thickness;
 
-  /// The amount of empty space to the leading edge of the divider.
+  /// The amount of empty space to the leading edge of the [PopupMenuDivider].
   ///
-  /// If this is null, then the [DividerThemeData.indent] is used. If that is
-  /// also null, then this defaults to 0.0.
+  /// {@macro flutter.material.Divider.indent}
   final double? indent;
 
-  /// The amount of empty space to the trailing edge of the divider.
+  /// The amount of empty space to the trailing edge of the [PopupMenuDivider].
   ///
-  /// If this is null, then the [DividerThemeData.endIndent] is used. If that is
-  /// also null, then this defaults to 0.0.
+  /// {@macro flutter.material.Divider.endIndent}
   final double? endIndent;
 
-  /// The amount of radius for the border of the divider.
+  /// The amount of radius for the border of the [PopupMenuDivider].
   ///
-  /// If this is null, then the default radius of [BoxDecoration] will be used.
+  /// {@macro flutter.material.Divider.radius}
   final BorderRadiusGeometry? radius;
 
-  /// The color to use when painting the line.
-  ///
-  /// If this is null, then the [DividerThemeData.color] is used. If that is
-  /// also null, then [ThemeData.dividerColor] is used.
+  /// {@macro flutter.material.Divider.color}
   ///
   /// {@tool snippet}
   ///
