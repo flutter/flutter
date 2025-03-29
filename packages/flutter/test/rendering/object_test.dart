@@ -22,6 +22,37 @@ void main() {
     );
   });
 
+  test('nodesNeedingLayout updated with layout changes', () {
+    final _TestPipelineOwner owner = _TestPipelineOwner();
+    final TestRenderObject renderObject = TestRenderObject()..isRepaintBoundary = true;
+    renderObject.attach(owner);
+    expect(owner.nodesNeedingLayout, isEmpty);
+
+    renderObject.layout(const BoxConstraints.tightForFinite());
+    renderObject.markNeedsLayout();
+    expect(owner.nodesNeedingLayout, contains(renderObject));
+
+    owner.flushLayout();
+    expect(owner.nodesNeedingLayout, isEmpty);
+  });
+
+  test('nodesNeedingPaint updated with paint changes', () {
+    final _TestPipelineOwner owner = _TestPipelineOwner();
+    final TestRenderObject renderObject = TestRenderObject(allowPaintBounds: true)
+      ..isRepaintBoundary = true;
+    final OffsetLayer layer = OffsetLayer();
+    layer.attach(owner);
+    renderObject.attach(owner);
+    expect(owner.nodesNeedingPaint, isEmpty);
+
+    renderObject.markNeedsPaint();
+    renderObject.scheduleInitialPaint(layer);
+    expect(owner.nodesNeedingPaint, contains(renderObject));
+
+    owner.flushPaint();
+    expect(owner.nodesNeedingPaint, isEmpty);
+  });
+
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     // Initialize all bindings because owner.flushSemantics() requires a window
     final TestRenderObject renderObject = TestRenderObject();
@@ -685,4 +716,13 @@ class TestThrowingRenderObject extends RenderObject {
     assert(false); // The test shouldn't call this.
     return Rect.zero;
   }
+}
+
+final class _TestPipelineOwner extends PipelineOwner {
+  // Make these protected fields visible for testing.
+  @override
+  Iterable<RenderObject> get nodesNeedingLayout => super.nodesNeedingLayout;
+
+  @override
+  Iterable<RenderObject> get nodesNeedingPaint => super.nodesNeedingPaint;
 }
