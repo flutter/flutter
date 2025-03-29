@@ -673,13 +673,15 @@ $newContent
       return lines;
     }
 
-    final Iterable<ParsedNativeTarget> customTargets = projectInfo.nativeTargets.where(
-      (ParsedNativeTarget target) => target.identifier != _runnerNativeTargetIdentifier,
-    );
+    final Iterable<ParsedNativeTarget> notMigratedCustomTargets = projectInfo.nativeTargets.where((
+      ParsedNativeTarget target,
+    ) {
+      return target.identifier != _runnerNativeTargetIdentifier && !_isNativeTargetMigrated(target);
+    });
 
     // If there are unmigrated custom targets, abort the migration.
     // Otherwise, continue migrating the default Runner target.
-    if (customTargets.isNotEmpty) {
+    if (notMigratedCustomTargets.isNotEmpty) {
       throw Exception(
         'The PBXNativeTargets section references one or more custom targets, which requires a manual migration.\n'
         'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
