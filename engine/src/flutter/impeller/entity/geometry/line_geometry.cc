@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/entity/geometry/line_geometry.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/geometry.h"
 
 namespace impeller {
@@ -26,13 +27,16 @@ Scalar LineGeometry::ComputePixelHalfWidth(const Matrix& transform,
 }
 
 Vector2 LineGeometry::ComputeAlongVector(const Matrix& transform,
-                                         bool allow_zero_length) const {
-  Scalar stroke_half_width = ComputePixelHalfWidth(transform, width_);
+                                         bool allow_zero_length,
+                                         Point p0,
+                                         Point p1,
+                                         Scalar width) {
+  Scalar stroke_half_width = ComputePixelHalfWidth(transform, width);
   if (stroke_half_width < kEhCloseEnough) {
     return {};
   }
 
-  auto along = p1_ - p0_;
+  auto along = p1 - p0;
   Scalar length = along.GetLength();
   if (length < kEhCloseEnough) {
     if (!allow_zero_length) {
@@ -47,17 +51,20 @@ Vector2 LineGeometry::ComputeAlongVector(const Matrix& transform,
 
 bool LineGeometry::ComputeCorners(Point corners[4],
                                   const Matrix& transform,
-                                  bool extend_endpoints) const {
-  auto along = ComputeAlongVector(transform, extend_endpoints);
+                                  bool extend_endpoints,
+                                  Point p0,
+                                  Point p1,
+                                  Scalar width) {
+  auto along = ComputeAlongVector(transform, extend_endpoints, p0, p1, width);
   if (along.IsZero()) {
     return false;
   }
 
   auto across = Vector2(along.y, -along.x);
-  corners[0] = p0_ - across;
-  corners[1] = p1_ - across;
-  corners[2] = p0_ + across;
-  corners[3] = p1_ + across;
+  corners[0] = p0 - across;
+  corners[1] = p1 - across;
+  corners[2] = p0 + across;
+  corners[3] = p1 + across;
   if (extend_endpoints) {
     corners[0] -= along;
     corners[1] += along;
@@ -86,7 +93,8 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
   }
 
   Point corners[4];
-  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare)) {
+  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare, p0_, p1_,
+                      width_)) {
     return kEmptyResult;
   }
 
@@ -118,7 +126,8 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
 std::optional<Rect> LineGeometry::GetCoverage(const Matrix& transform) const {
   Point corners[4];
   // Note: MSAA boolean doesn't matter for coverage computation.
-  if (!ComputeCorners(corners, transform, cap_ != Cap::kButt)) {
+  if (!ComputeCorners(corners, transform, cap_ != Cap::kButt, p0_, p1_,
+                      width_)) {
     return {};
   }
 

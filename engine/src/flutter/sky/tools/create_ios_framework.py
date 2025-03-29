@@ -84,10 +84,10 @@ def main():
 
   # Copy gen_snapshot binary to destination directory.
   if arm64_out_dir:
-    gen_snapshot = os.path.join(arm64_out_dir, 'gen_snapshot_arm64')
+    gen_snapshot = os.path.join(arm64_out_dir, 'universal', 'gen_snapshot_arm64')
     sky_utils.copy_binary(gen_snapshot, os.path.join(dst, 'gen_snapshot_arm64'))
   if x64_out_dir:
-    gen_snapshot = os.path.join(x64_out_dir, 'gen_snapshot_x64')
+    gen_snapshot = os.path.join(x64_out_dir, 'universal', 'gen_snapshot_x64')
     sky_utils.copy_binary(gen_snapshot, os.path.join(dst, 'gen_snapshot_x64'))
 
   zip_archive(dst, args)

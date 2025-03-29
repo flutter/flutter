@@ -140,6 +140,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   @override
   EngineFlutterWindow? get implicitView => viewManager[kImplicitViewId] as EngineFlutterWindow?;
 
+  @override
+  int? get engineId => null;
+
   /// A callback that is invoked whenever the platform's [devicePixelRatio],
   /// [physicalSize], [padding], [viewInsets], or [systemGestureInsets]
   /// values change, for example when the device is rotated or when the
@@ -827,11 +830,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return;
     }
     updateLocales(); // First time, for good measure.
-    _onLocaleChangedSubscription = DomSubscription(domWindow, 'languagechange', (DomEvent _) {
-      // Update internal config, then propagate the changes.
-      updateLocales();
-      invokeOnLocaleChanged();
-    });
+    _onLocaleChangedSubscription = DomSubscription(
+      domWindow,
+      'languagechange',
+      createDomEventListener((DomEvent _) {
+        // Update internal config, then propagate the changes.
+        updateLocales();
+        invokeOnLocaleChanged();
+      }),
+    );
   }
 
   /// Removes the [_onLocaleChangedSubscription].
@@ -1076,10 +1083,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light,
     );
 
-    _brightnessMediaQueryListener = createDomEventListener((DomEvent event) {
-      final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
-      _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-    });
+    _brightnessMediaQueryListener =
+        (DomEvent event) {
+          final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+          _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
+        }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
   }
 

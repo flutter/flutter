@@ -383,13 +383,14 @@ bool RuntimeController::DispatchPointerDataPacket(
   return false;
 }
 
-bool RuntimeController::DispatchSemanticsAction(int32_t node_id,
+bool RuntimeController::DispatchSemanticsAction(int64_t view_id,
+                                                int32_t node_id,
                                                 SemanticsAction action,
                                                 fml::MallocMapping args) {
   TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
                "basic");
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->DispatchSemanticsAction(node_id, action,
+    platform_configuration->DispatchSemanticsAction(view_id, node_id, action,
                                                     std::move(args));
     return true;
   }
@@ -447,9 +448,11 @@ void RuntimeController::CheckIfAllViewsRendered() {
 }
 
 // |PlatformConfigurationClient|
-void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
+void RuntimeController::UpdateSemantics(int64_t view_id,
+                                        SemanticsUpdate* update) {
   if (platform_data_.semantics_enabled) {
-    client_.UpdateSemantics(update->takeNodes(), update->takeActions());
+    client_.UpdateSemantics(view_id, update->takeNodes(),
+                            update->takeActions());
   }
 }
 
@@ -537,7 +540,8 @@ bool RuntimeController::LaunchRootIsolate(
     std::optional<std::string> dart_entrypoint_library,
     const std::vector<std::string>& dart_entrypoint_args,
     std::unique_ptr<IsolateConfiguration> isolate_configuration,
-    std::shared_ptr<NativeAssetsManager> native_assets_manager) {
+    std::shared_ptr<NativeAssetsManager> native_assets_manager,
+    std::optional<int64_t> engine_id) {
   if (root_isolate_.lock()) {
     FML_LOG(ERROR) << "Root isolate was already running.";
     return false;
@@ -585,6 +589,11 @@ bool RuntimeController::LaunchRootIsolate(
     platform_configuration->DidCreateIsolate();
     if (!FlushRuntimeStateToIsolate()) {
       FML_DLOG(ERROR) << "Could not set up initial isolate state.";
+    }
+    if (engine_id) {
+      if (!platform_configuration->SetEngineId(*engine_id)) {
+        FML_DLOG(ERROR) << "Could not set engine identifier.";
+      }
     }
   } else {
     FML_DCHECK(false) << "RuntimeController created without window binding.";

@@ -6,6 +6,7 @@ import("//build/compiled_action.gni")
 import("//flutter/build/bin_to_obj.gni")
 import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/lib/snapshot/gen_snapshot.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("$dart_src/utils/compile_platform.gni")
 
@@ -28,21 +29,26 @@ group("generate_snapshot_bins") {
     ":generate_snapshot_bin",
     ":kernel_platform_files",
   ]
+  public_deps = []
 
   # Build gen_snapshot for the currently specified target_cpu.
-  #
-  # For macOS target builds: needed for both target CPUs (arm64, x64).
-  # For iOS, Android target builds: all AOT target CPUs are arm/arm64.
-  if (host_os == "mac" && (target_os == "mac" || target_os == "ios")) {
-    deps += [ ":create_macos_gen_snapshots" ]
+  if (host_os == "mac" &&
+      (target_os == "mac" || target_os == "ios" || target_os == "android")) {
+    # For macOS target builds: needed for both target CPUs (arm64, x64).
+    public_deps += [ ":create_macos_gen_snapshots" ]
   } else if (host_os == "mac" &&
              (target_cpu == "arm" || target_cpu == "arm64")) {
-    deps += [ ":create_arm_gen_snapshot" ]
+    # For iOS, Android target builds: all AOT target CPUs are arm/arm64.
+    public_deps += [ ":create_arm_gen_snapshot" ]
+  } else if (target_cpu == "arm" || target_cpu == "arm64" ||
+             target_cpu == "x64") {
+    # For other host OSes, build gen_snapshot directly.
+    public_deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
   }
 
   # Build analyze_snapshot for 64-bit target CPUs.
   if (host_os == "linux" && (target_cpu == "x64" || target_cpu == "arm64")) {
-    deps += [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
+    public_deps += [ "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)" ]
   }
 }
 
@@ -165,15 +171,9 @@ if (host_os == "mac" && target_os != "mac" &&
         get_label_info("$dart_src/runtime/bin:gen_snapshot($host_toolchain)",
                        "root_out_dir")
 
-    # Determine suffixed output gen_snapshot name.
-    target_cpu_suffix = target_cpu
-    if (target_cpu == "arm") {
-      target_cpu_suffix = "armv7"
-    }
-
     sources = [ "${host_output_dir}/gen_snapshot" ]
-    outputs = [ "${host_output_dir}/gen_snapshot_${target_cpu_suffix}" ]
-    deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
+    outputs = [ "${host_output_dir}/gen_snapshot${gen_snapshot_suffix}" ]
+    public_deps = [ "$dart_src/runtime/bin:gen_snapshot($host_toolchain)" ]
     visibility = [ ":*" ]
   }
 }
@@ -184,8 +184,9 @@ if (host_os == "mac" && target_os != "mac" &&
 # to `gen_snapshot_arm64` or `gen_snapshot_x64` depending on the target
 # platform.
 #
-# This target is used for builds targeting iOS and macOS.
-if (host_os == "mac" && (target_os == "mac" || target_os == "ios")) {
+# This target is used for builds targeting iOS, macOS, and Android.
+if (host_os == "mac" &&
+    (target_os == "mac" || target_os == "ios" || target_os == "android")) {
   template("build_mac_gen_snapshot") {
     assert(defined(invoker.host_arch))
     host_cpu = invoker.host_arch
@@ -208,36 +209,51 @@ if (host_os == "mac" && (target_os == "mac" || target_os == "ios")) {
       args = [
         rebase_path("${output_dir}/${gen_snapshot_target_name}"),
         rebase_path(
-            "${root_out_dir}/artifacts_$host_cpu/gen_snapshot_${target_cpu}"),
+            "${root_out_dir}/artifacts_$host_cpu/gen_snapshot${gen_snapshot_suffix}"),
       ]
-      outputs =
-          [ "${root_out_dir}/artifacts_$host_cpu/gen_snapshot_${target_cpu}" ]
+      outputs = [ "${root_out_dir}/artifacts_$host_cpu/gen_snapshot${gen_snapshot_suffix}" ]
       deps = [ gen_snapshot_target ]
     }
   }
 
-  build_mac_gen_snapshot("create_macos_gen_snapshot_arm64_${target_cpu}") {
+  # Build gen_snapshot for arm64 macOS hosts.
+  build_mac_gen_snapshot(
+      "create_macos_gen_snapshot_arm64${gen_snapshot_suffix}") {
     host_arch = "arm64"
   }
 
-  build_mac_gen_snapshot("create_macos_gen_snapshot_x64_${target_cpu}") {
+  # Build gen_snapshot for x64 macOS hosts.
+  build_mac_gen_snapshot(
+      "create_macos_gen_snapshot_x64${gen_snapshot_suffix}") {
     host_arch = "x64"
   }
 
+  if (target_os == "android") {
+    # Each Android engine build targets a specific architecture and does not
+    # need to add the target architecture to the universal binary filename.
+    universal_binary_name = "gen_snapshot"
+  } else {
+    universal_binary_name = "gen_snapshot${gen_snapshot_suffix}"
+  }
+  universal_output_path = "${root_out_dir}/universal/${universal_binary_name}"
+
+  # Create a universal binary from the two architecture-specific gen_snapshots.
   action("create_macos_gen_snapshots") {
     script = "//flutter/sky/tools/create_macos_binary.py"
-    outputs = [ "${root_out_dir}/gen_snapshot_${target_cpu}" ]
+    outputs = [ universal_output_path ]
     args = [
       "--in-arm64",
-      rebase_path("${root_out_dir}/artifacts_arm64/gen_snapshot_${target_cpu}"),
+      rebase_path(
+          "${root_out_dir}/artifacts_arm64/gen_snapshot${gen_snapshot_suffix}"),
       "--in-x64",
-      rebase_path("${root_out_dir}/artifacts_x64/gen_snapshot_${target_cpu}"),
+      rebase_path(
+          "${root_out_dir}/artifacts_x64/gen_snapshot${gen_snapshot_suffix}"),
       "--out",
-      rebase_path("${root_out_dir}/gen_snapshot_${target_cpu}"),
+      rebase_path(universal_output_path),
     ]
     deps = [
-      ":create_macos_gen_snapshot_arm64_${target_cpu}",
-      ":create_macos_gen_snapshot_x64_${target_cpu}",
+      ":create_macos_gen_snapshot_arm64${gen_snapshot_suffix}",
+      ":create_macos_gen_snapshot_x64${gen_snapshot_suffix}",
     ]
   }
 }

@@ -36,7 +36,8 @@ namespace flutter {
 class PlatformViewEmbedder final : public PlatformView {
  public:
   using UpdateSemanticsCallback =
-      std::function<void(flutter::SemanticsNodeUpdates update,
+      std::function<void(int64_t view_id,
+                         flutter::SemanticsNodeUpdates update,
                          flutter::CustomAccessibilityActionUpdates actions)>;
   using PlatformMessageResponseCallback =
       std::function<void(std::unique_ptr<PlatformMessage>)>;
@@ -104,6 +105,7 @@ class PlatformViewEmbedder final : public PlatformView {
 
   // |PlatformView|
   void UpdateSemantics(
+      int64_t view_id,
       flutter::SemanticsNodeUpdates update,
       flutter::CustomAccessibilityActionUpdates actions) override;
 

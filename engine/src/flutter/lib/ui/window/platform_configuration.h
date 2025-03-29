@@ -92,9 +92,10 @@ class PlatformConfigurationClient {
   //--------------------------------------------------------------------------
   /// @brief      Receives an updated semantics tree from the Framework.
   ///
+  /// @param[in] viewId The identifier of the view to update.
   /// @param[in] update The updated semantic tree to apply.
   ///
-  virtual void UpdateSemantics(SemanticsUpdate* update) = 0;
+  virtual void UpdateSemantics(int64_t viewId, SemanticsUpdate* update) = 0;
 
   //--------------------------------------------------------------------------
   /// @brief      When the Flutter application has a message to send to the
@@ -356,6 +357,14 @@ class PlatformConfiguration final {
   /// @return     Whether the focus event was sent.
   bool SendFocusEvent(const ViewFocusEvent& event);
 
+  /// @brief     Sets the opaque identifier of the engine.
+  ///
+  ///            The identifier can be passed from Dart to native code to
+  ///            retrieve the engine instance.
+  ///
+  /// @return    Whether the identifier was set.
+  bool SetEngineId(int64_t engine_id);
+
   //----------------------------------------------------------------------------
   /// @brief      Update the view metrics for the specified view.
   ///
@@ -443,12 +452,14 @@ class PlatformConfiguration final {
   ///             originates on the platform view and has been forwarded to the
   ///             platform configuration here by the engine.
   ///
+  /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node.
   /// @param[in]  action  The accessibility related action performed on the
   ///                     node of the specified ID.
   /// @param[in]  args    Optional data that applies to the specified action.
   ///
-  void DispatchSemanticsAction(int32_t node_id,
+  void DispatchSemanticsAction(int64_t view_id,
+                               int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -548,6 +559,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue add_view_;
   tonic::DartPersistentValue remove_view_;
   tonic::DartPersistentValue send_view_focus_event_;
+  tonic::DartPersistentValue set_engine_id_;
   tonic::DartPersistentValue update_window_metrics_;
   tonic::DartPersistentValue update_displays_;
   tonic::DartPersistentValue update_locales_;
@@ -611,7 +623,7 @@ class PlatformConfigurationNativeApi {
                      double width,
                      double height);
 
-  static void UpdateSemantics(SemanticsUpdate* update);
+  static void UpdateSemantics(int64_t viewId, SemanticsUpdate* update);
 
   static void SetNeedsReportTimings(bool value);
 

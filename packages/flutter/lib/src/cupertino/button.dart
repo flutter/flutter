@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/widgets.dart';
 
@@ -89,6 +90,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
@@ -124,6 +126,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(minimumSize == null || minSize == null),
@@ -153,6 +156,7 @@ class CupertinoButton extends StatefulWidget {
     this.focusNode,
     this.onFocusChange,
     this.autofocus = false,
+    this.mouseCursor,
     this.onLongPress,
     required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
@@ -257,11 +261,40 @@ class CupertinoButton extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
+  /// The cursor for a mouse pointer when it enters or is hovering over the widget.
+  ///
+  /// If [mouseCursor] is a [WidgetStateMouseCursor],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]:
+  ///  * [WidgetState.disabled].
+  ///
+  /// If null, then [MouseCursor.defer] is used when the button is disabled.
+  /// When the button is enabled, [SystemMouseCursors.click] is used on Web
+  /// and [MouseCursor.defer] is used on other platforms.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetStateMouseCursor], a [MouseCursor] that implements
+  ///    [WidgetStateProperty] which is used in APIs that need to accept
+  ///    either a [MouseCursor] or a [WidgetStateProperty].
+  final MouseCursor? mouseCursor;
+
   final _CupertinoButtonStyle _style;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set [onPressed] or [onLongPress] to a non-null value.
   bool get enabled => onPressed != null || onLongPress != null;
+
+  /// The distance a button needs to be moved after being pressed for its opacity to change.
+  ///
+  /// The opacity changes when the position moved is this distance away from the button.
+  static double tapMoveSlop() {
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.iOS ||
+      TargetPlatform.android ||
+      TargetPlatform.fuchsia => kCupertinoButtonTapMoveSlop,
+      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 0.0,
+    };
+  }
 
   @override
   State<CupertinoButton> createState() => _CupertinoButtonState();
@@ -283,6 +316,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   late Animation<double> _opacityAnimation;
 
   late bool isFocused;
+
+  static final WidgetStateProperty<MouseCursor> _defaultCursor =
+      WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+        return !states.contains(WidgetState.disabled) && kIsWeb
+            ? SystemMouseCursors.click
+            : MouseCursor.defer;
+      });
 
   @override
   void initState() {
@@ -316,8 +356,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   bool _buttonHeldDown = false;
+  bool _tapInProgress = false;
 
   void _handleTapDown(TapDownDetails event) {
+    _tapInProgress = true;
     if (!_buttonHeldDown) {
       _buttonHeldDown = true;
       _animate();
@@ -325,15 +367,34 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapUp(TapUpDetails event) {
+    _tapInProgress = false;
+    if (_buttonHeldDown) {
+      _buttonHeldDown = false;
+      _animate();
+    }
+    final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
+    if (renderObject.paintBounds.inflate(CupertinoButton.tapMoveSlop()).contains(localPosition)) {
+      _handleTap();
+    }
+  }
+
+  void _handleTapCancel() {
+    _tapInProgress = false;
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
     }
   }
 
-  void _handleTapCancel() {
-    if (_buttonHeldDown) {
-      _buttonHeldDown = false;
+  void _handleTapMove(TapMoveDetails event) {
+    final RenderBox renderObject = context.findRenderObject()! as RenderBox;
+    final Offset localPosition = renderObject.globalToLocal(event.globalPosition);
+    final bool buttonShouldHeldDown = renderObject.paintBounds
+        .inflate(CupertinoButton.tapMoveSlop())
+        .contains(localPosition);
+    if (_tapInProgress && buttonShouldHeldDown != _buttonHeldDown) {
+      _buttonHeldDown = buttonShouldHeldDown;
       _animate();
     }
   }
@@ -430,8 +491,15 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
           textStyle.fontSize != null ? textStyle.fontSize! * 1.2 : kCupertinoButtonDefaultIconSize,
     );
 
+    final DeviceGestureSettings? gestureSettings = MediaQuery.maybeGestureSettingsOf(context);
+
+    final Set<WidgetState> states = <WidgetState>{if (!enabled) WidgetState.disabled};
+    final MouseCursor effectiveMouseCursor =
+        WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+        _defaultCursor.resolve(states);
+
     return MouseRegion(
-      cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: effectiveMouseCursor,
       child: FocusableActionDetector(
         actions: _actionMap,
         focusNode: widget.focusNode,
@@ -439,13 +507,29 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         onFocusChange: widget.onFocusChange,
         onShowFocusHighlight: _onShowFocusHighlight,
         enabled: enabled,
-        child: GestureDetector(
+        child: RawGestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: enabled ? _handleTapDown : null,
-          onTapUp: enabled ? _handleTapUp : null,
-          onTapCancel: enabled ? _handleTapCancel : null,
-          onTap: widget.onPressed,
-          onLongPress: widget.onLongPress,
+          gestures: <Type, GestureRecognizerFactory>{
+            TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+              () => TapGestureRecognizer(postAcceptSlopTolerance: null),
+              (TapGestureRecognizer instance) {
+                instance.onTapDown = enabled ? _handleTapDown : null;
+                instance.onTapUp = enabled ? _handleTapUp : null;
+                instance.onTapCancel = enabled ? _handleTapCancel : null;
+                instance.onTapMove = enabled ? _handleTapMove : null;
+                instance.gestureSettings = gestureSettings;
+              },
+            ),
+            if (widget.onLongPress != null)
+              LongPressGestureRecognizer:
+                  GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+                    () => LongPressGestureRecognizer(),
+                    (LongPressGestureRecognizer instance) {
+                      instance.onLongPress = widget.onLongPress;
+                      instance.gestureSettings = gestureSettings;
+                    },
+                  ),
+          },
           child: Semantics(
             button: true,
             child: ConstrainedBox(
