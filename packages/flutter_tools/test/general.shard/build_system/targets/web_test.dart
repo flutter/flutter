@@ -21,10 +21,10 @@ import 'package:flutter_tools/src/web_template.dart';
 
 import '../../../src/common.dart';
 import '../../../src/fake_process_manager.dart';
-import '../../../src/fake_pub_deps.dart';
 import '../../../src/fakes.dart';
 import '../../../src/package_config.dart';
 import '../../../src/testbed.dart';
+import '../../../src/throwing_pub.dart';
 
 const List<String> _kDart2jsLinuxArgs = <String>[
   'Artifact.engineDartBinary.TargetPlatform.web_javascript',
@@ -66,7 +66,7 @@ void main() {
 name: foo
 ''');
 
-        writePackageConfigFile(
+        writePackageConfigFiles(
           directory: globals.fs.currentDirectory,
           mainLibName: 'my_app',
           packages: <String, String>{'foo': 'foo/'},
@@ -125,7 +125,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -310,7 +310,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -336,7 +336,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -371,7 +371,7 @@ name: foo
         Platform: () => windows,
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -404,7 +404,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -428,7 +428,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -453,7 +453,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
@@ -486,7 +486,7 @@ name: foo
       overrides: <Type, Generator>{
         TemplateRenderer: () => const MustacheTemplateRenderer(),
         FeatureFlags: enableExplicitPackageDependencies,
-        Pub: FakePubWithPrimedDeps.new,
+        Pub: ThrowingPub.new,
       },
     ),
   );
