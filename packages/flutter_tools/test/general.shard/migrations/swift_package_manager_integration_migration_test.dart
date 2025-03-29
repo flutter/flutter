@@ -1359,7 +1359,7 @@ void main() {
                 await expectLater(
                   () => projectMigration.migrate(),
                   throwsToolExit(
-                    message: 'Unable to find PBXFrameworksBuildPhase for Runner target',
+                    message: 'Unable to find PBXFrameworksBuildPhase for Runner project',
                   ),
                 );
               },
@@ -1412,7 +1412,7 @@ void main() {
                 await expectLater(
                   () => projectMigration.migrate(),
                   throwsToolExit(
-                    message: 'Unable to find PBXFrameworksBuildPhase for Runner target',
+                    message: 'Unable to find PBXFrameworksBuildPhase for Runner project',
                   ),
                 );
               },
@@ -1457,7 +1457,7 @@ void main() {
               await expectLater(
                 () => projectMigration.migrate(),
                 throwsToolExit(
-                  message: 'Unable to find parsed PBXFrameworksBuildPhase for Runner target',
+                  message: 'Unable to find parsed PBXFrameworksBuildPhase for Runner project',
                 ),
               );
             });
@@ -2083,7 +2083,7 @@ void main() {
                     );
                 await expectLater(
                   () => projectMigration.migrate(),
-                  throwsToolExit(message: 'Unable to find PBXProject for Runner'),
+                  throwsToolExit(message: 'Unable to find PBXProject for Runner project'),
                 );
               },
             );
@@ -2135,7 +2135,7 @@ void main() {
                     );
                 await expectLater(
                   () => projectMigration.migrate(),
-                  throwsToolExit(message: 'Unable to find PBXProject for Runner'),
+                  throwsToolExit(message: 'Unable to find PBXProject for Runner project'),
                 );
               },
             );
@@ -2177,7 +2177,7 @@ void main() {
                   );
               await expectLater(
                 () => projectMigration.migrate(),
-                throwsToolExit(message: 'Unable to find parsed PBXProject for Runner'),
+                throwsToolExit(message: 'Unable to find parsed PBXProject for Runner project'),
               );
             });
 
