@@ -2964,6 +2964,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   }
 
   [inputView configureWithDictionary:field];
+  if (needsPasswordAutofill) {
+    // Disable autocorrection to avoid flashing password bar.
+    // see: https://github.com/flutter/flutter/issues/134723
+    inputView.autocorrectionType = UITextAutocorrectionTypeNo;
+    inputView.spellCheckingType = UITextSpellCheckingTypeNo;
+  }
   return inputView;
 }
 
