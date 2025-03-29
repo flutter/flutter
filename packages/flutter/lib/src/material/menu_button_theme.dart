@@ -103,7 +103,7 @@ class MenuButtonThemeData with Diagnosticable {
 /// * [ThemeData.menuButtonTheme], which can be used to override the default
 ///   [ButtonStyle] for [MenuItemButton]s and [SubmenuButton]s below the overall
 ///   [Theme].
-class MenuButtonTheme extends InheritedTheme {
+class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData, Object?> {
   /// Create a [MenuButtonTheme].
   const MenuButtonTheme({super.key, required this.data, required super.child});
 
@@ -133,4 +133,19 @@ class MenuButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(MenuButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    MenuButtonTheme oldWidget,
+    Set<ThemeSelector<MenuButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<MenuButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

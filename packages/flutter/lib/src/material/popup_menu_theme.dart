@@ -257,7 +257,7 @@ class PopupMenuThemeData with Diagnosticable {
 ///
 /// Values specified here are used for popup menu properties that are not
 /// given an explicit non-null value.
-class PopupMenuTheme extends InheritedTheme {
+class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData, Object?> {
   /// Creates a popup menu theme that controls the configurations for
   /// popup menus in its widget subtree.
   const PopupMenuTheme({super.key, required this.data, required super.child});
@@ -287,4 +287,19 @@ class PopupMenuTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(PopupMenuTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    PopupMenuTheme oldWidget,
+    Set<ThemeSelector<PopupMenuThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<PopupMenuThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
