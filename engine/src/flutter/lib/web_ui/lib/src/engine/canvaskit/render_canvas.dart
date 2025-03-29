@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
-
 import '../display.dart';
 import '../dom.dart';
 import '../util.dart';
@@ -47,12 +45,11 @@ class RenderCanvas extends DisplayCanvas {
   final DomElement hostElement = createDomElement('flt-canvas-container');
 
   /// The underlying `<canvas>` element used to display the pixels.
-  final DomCanvasElement canvasElement = createDomCanvasElement();
+  final DomHTMLCanvasElement canvasElement = createDomCanvasElement();
   int _pixelWidth = 0;
   int _pixelHeight = 0;
 
-  late final DomCanvasRenderingContextBitmapRenderer renderContext =
-      canvasElement.contextBitmapRenderer;
+  late final DomImageBitmapRenderingContext renderContext = canvasElement.contextBitmapRenderer;
 
   late final DomCanvasRenderingContext2D renderContext2d = canvasElement.context2D;
 
@@ -75,7 +72,7 @@ class RenderCanvas extends DisplayCanvas {
   /// The canvas will be resized to accomodate the bitmap immediately before
   /// rendering it.
   void render(DomImageBitmap bitmap) {
-    _ensureSize(BitmapSize(bitmap.width.toDartInt, bitmap.height.toDartInt));
+    _ensureSize(BitmapSize(bitmap.width, bitmap.height));
     renderContext.transferFromImageBitmap(bitmap);
   }
 

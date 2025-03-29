@@ -67,7 +67,6 @@ AccessibilityBridge::AccessibilityBridge(
 AccessibilityBridge::~AccessibilityBridge() {
   [accessibility_channel_ setMessageHandler:nil];
   clearState();
-  view_controller_.viewIfLoaded.accessibilityElements = nil;
 }
 
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
@@ -382,6 +381,7 @@ void AccessibilityBridge::clearState() {
   [objects_ removeAllObjects];
   previous_route_id_ = 0;
   previous_routes_.clear();
+  view_controller_.viewIfLoaded.accessibilityElements = nil;
 }
 
 }  // namespace flutter

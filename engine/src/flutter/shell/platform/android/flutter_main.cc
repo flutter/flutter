@@ -32,7 +32,7 @@
 namespace flutter {
 
 constexpr int kMinimumAndroidApiLevelForImpeller = 29;
-constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 34;
+constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 31;
 
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
