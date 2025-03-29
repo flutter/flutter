@@ -10,6 +10,7 @@ class MyDataSource extends DataTableSource {
   static const List<int> _displayIndexToRawIndex = <int>[0, 3, 4, 5, 6];
 
   late List<List<Comparable<Object>>> sortedData;
+
   void setData(List<List<Comparable<Object>>> rawData, int sortColumn, bool sortAscending) {
     sortedData =
         rawData.toList()..sort((List<Comparable<Object>> a, List<Comparable<Object>> b) {
@@ -62,9 +63,17 @@ class DataTableExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: SingleChildScrollView(padding: EdgeInsets.all(12.0), child: DataTableExample()),
+    return MaterialApp(
+      scrollBehavior: _MyMaterialScrollBehavior(),
+      home: const SingleChildScrollView(padding: EdgeInsets.all(12.0), child: DataTableExample()),
     );
+  }
+}
+
+class _MyMaterialScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    return Scrollbar(controller: details.controller, child: child);
   }
 }
 
