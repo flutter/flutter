@@ -2608,7 +2608,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert(_relayoutBoundary == this);
+    assert(_relayoutBoundary == this || this is RenderObjectWithLayoutCallbackMixin);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -2877,6 +2877,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// parentUsesSize ensures that this render object will undergo layout if the
   /// child undergoes layout. Otherwise, the child can change its layout
   /// information without informing this render object.
+  ///
+  /// Some special [RenderObject] subclasses (such as the one used by
+  /// [OverlayPortal.overlayChildLayoutBuilder]) call [applyPaintTransform] in
+  /// their [performLayout] implementation. To ensure such [RenderObject]s get
+  /// the up-to-date paint transform, [RenderObject] subclasses should typically
+  /// update the paint transform (as reported by [applyPaintTransform]) in this
+  /// method instead of [paint].
   @protected
   void performLayout();
 
@@ -3494,8 +3501,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Applies the transform that would be applied when painting the given child
   /// to the given matrix.
   ///
-  /// Used by coordinate conversion functions to translate coordinates local to
-  /// one render object into coordinates local to another render object.
+  /// Used by coordinate conversion functions ([getTransformTo], for example) to
+  /// translate coordinates local to one render object into coordinates local to
+  /// another render object.
   ///
   /// Some RenderObjects will provide a zeroed out matrix in this method,
   /// indicating that the child should not paint anything or respond to hit
@@ -4121,6 +4129,77 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
     return child != null
         ? <DiagnosticsNode>[child!.toDiagnosticsNode(name: 'child')]
         : <DiagnosticsNode>[];
+  }
+}
+
+/// A mixin for managing [RenderObject] with a [layoutCallback], which will be
+/// invoked during this [RenderObject]'s layout process if scheduled using
+/// [scheduleLayoutCallback].
+///
+/// A layout callback is typically a callback that mutates the [RenderObject]'s
+/// render subtree during the [RenderObject]'s layout process. When an ancestor
+/// [RenderObject] chooses to skip laying out this [RenderObject] in its
+/// [performLayout] implementation (for example, for performance reasons, an
+/// [Overlay] may skip laying out an offstage [OverlayEntry] while keeping it in
+/// the tree), normally the [layoutCallback] will not be invoked because the
+/// [layout] method will not be called. This can be undesirable when the
+/// [layoutCallback] involves rebuilding dirty widgets (most notably, the
+/// [LayoutBuilder] widget). Unlike render subtrees, typically all dirty widgets
+/// (even off-screen ones) in a widget tree must be rebuilt. This mixin makes
+/// sure once scheduled, the [layoutCallback] method will be invoked even if it's
+/// skipped by an ancestor [RenderObject], unless this [RenderObject] has never
+/// been laid out.
+///
+/// Subclasses must not invoke the layout callback directly. Instead, call
+/// [runLayoutCallback] in the [performLayout] implementation.
+///
+/// See also:
+///
+///  * [LayoutBuilder] and [SliverLayoutBuilder], which use the mixin.
+mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
+  // The initial value of this flag must be set to true to prevent the layout
+  // callback from being scheduled when the subtree has never been laid out (in
+  // which case the `constraints` or any other layout information is unknown).
+  bool _needsRebuild = true;
+
+  /// The layout callback to be invoked during [performLayout].
+  ///
+  /// This method should not be invoked directly. Instead, call
+  /// [runLayoutCallback] in the [performLayout] implementation. This callback
+  /// will be invoked using [invokeLayoutCallback].
+  @visibleForOverriding
+  void layoutCallback();
+
+  /// Invokes [layoutCallback] with [invokeLayoutCallback].
+  ///
+  /// This method must be called in [performLayout], typically as early as
+  /// possible before any layout work is done, to avoid re-dirtying any child
+  /// [RenderObject]s.
+  @mustCallSuper
+  void runLayoutCallback() {
+    assert(debugDoingThisLayout);
+    invokeLayoutCallback((_) => layoutCallback());
+    _needsRebuild = false;
+  }
+
+  /// Informs the framework that the layout callback has been updated and must be
+  /// invoked again when this [RenderObject] is ready for layout, even when an
+  /// ancestor [RenderObject] chooses to skip laying out this render subtree.
+  @mustCallSuper
+  void scheduleLayoutCallback() {
+    if (_needsRebuild) {
+      assert(debugNeedsLayout);
+      return;
+    }
+    _needsRebuild = true;
+    // This ensures that the layout callback will be run even if an ancestor
+    // chooses to not lay out this subtree (for example, obstructed OverlayEntries
+    // with `maintainState` set to true), to maintain the widget tree integrity
+    // (making sure global keys are unique, for example).
+    owner?._nodesNeedingLayout.add(this);
+    // In an active tree, markNeedsLayout is needed to inform the layout boundary
+    // that its child size may change.
+    super.markNeedsLayout();
   }
 }
 

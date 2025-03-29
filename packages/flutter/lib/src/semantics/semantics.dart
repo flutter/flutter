@@ -115,19 +115,21 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.row => _semanticsRow,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
     SemanticsRole.radioGroup => _semanticsRadioGroup,
+    SemanticsRole.menu => _semanticsMenu,
+    SemanticsRole.menuBar => _semanticsMenuBar,
+    SemanticsRole.menuItem => _semanticsMenuItem,
+    SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
+    SemanticsRole.menuItemRadio => _semanticsMenuItemRadio,
     SemanticsRole.alert => _noLiveRegion,
     SemanticsRole.status => _noLiveRegion,
+    SemanticsRole.list => _noCheckRequired,
+    SemanticsRole.listItem => _semanticsListItem,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
     SemanticsRole.searchBox => _unimplemented,
     SemanticsRole.dragHandle => _unimplemented,
     SemanticsRole.spinButton => _unimplemented,
     SemanticsRole.comboBox => _unimplemented,
-    SemanticsRole.menuBar => _unimplemented,
-    SemanticsRole.menu => _unimplemented,
-    SemanticsRole.menuItem => _unimplemented,
-    SemanticsRole.list => _unimplemented,
-    SemanticsRole.listItem => _unimplemented,
     SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
     SemanticsRole.loadingSpinner => _unimplemented,
@@ -240,6 +242,68 @@ sealed class _DebugSemanticsRoleChecks {
     return error;
   }
 
+  static FlutterError? _semanticsMenu(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu cannot be empty');
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsMenuBar(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu bar cannot be empty');
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsMenuItem(SemanticsNode node) {
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item must be a child of a menu or a menu bar');
+  }
+
+  static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
+      return FlutterError('a menu item checkbox must be checkable');
+    }
+
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item checkbox must be a child of a menu or a menu bar');
+  }
+
+  static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
+      return FlutterError('a menu item radio must be checkable');
+    }
+
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item radio must be a child of a menu or a menu bar');
+  }
+
   static FlutterError? _noLiveRegion(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     if (data.hasFlag(SemanticsFlag.isLiveRegion)) {
@@ -247,6 +311,25 @@ sealed class _DebugSemanticsRoleChecks {
         'Node ${node.id} has role ${data.role} but is also a live region. '
         'A node can not have ${data.role} and be live region at the same time. '
         'Either remove the role or the live region',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsListItem(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    final SemanticsNode? parent = node.parent;
+    if (parent == null) {
+      return FlutterError(
+        "Semantics node ${node.id} has role ${data.role} but doesn't have a parent",
+      );
+    }
+    final SemanticsData parentSemanticsData = parent.getSemanticsData();
+    if (parentSemanticsData.role != SemanticsRole.list) {
+      return FlutterError(
+        'Semantics node ${node.id} has role ${data.role}, but its '
+        "parent node ${parent.id} doesn't have the role ${SemanticsRole.list}. "
+        'Please assign the ${SemanticsRole.list} to node ${parent.id}',
       );
     }
     return null;
@@ -1156,6 +1239,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.namesRoute,
     this.image,
     this.liveRegion,
+    this.isRequired,
     this.maxValueLength,
     this.currentValueLength,
     this.identifier,
@@ -1425,6 +1509,22 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsFlag.isLiveRegion], the semantics flag this setting controls.
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
   final bool? liveRegion;
+
+  /// If non-null, whether the node should be considered required.
+  ///
+  /// If true, user input is required on the semantics node before a form can
+  /// be submitted. If false, the node is optional before a form can be
+  /// submitted. If null, the node does not have a required semantics.
+  ///
+  /// For example, a login form requires its email text field to be non-empty.
+  ///
+  /// On web, this will set a `aria-required` attribute on the DOM element
+  /// that corresponds to the semantics node.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsFlag.isRequired], for the flag this setting controls.
+  final bool? isRequired;
 
   /// The maximum number of characters that can be entered into an editable
   /// text field.
@@ -2017,6 +2117,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('isRequired', isRequired, defaultValue: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(
@@ -5328,7 +5429,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is a keyboard key (true) or not
-  //(false).
+  /// (false).
   bool get isKeyboardKey => _hasFlag(SemanticsFlag.isKeyboardKey);
   set isKeyboardKey(bool value) {
     _setFlag(SemanticsFlag.isKeyboardKey, value);
@@ -5386,6 +5487,24 @@ class SemanticsConfiguration {
   bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
   set isMultiline(bool value) {
     _setFlag(SemanticsFlag.isMultiline, value);
+  }
+
+  /// Whether the semantics node has a required state.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have a required state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have a
+  /// required state.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
+  bool? get isRequired =>
+      _hasFlag(SemanticsFlag.hasRequiredState) ? _hasFlag(SemanticsFlag.isRequired) : null;
+  set isRequired(bool? value) {
+    _setFlag(SemanticsFlag.hasRequiredState, true);
+    _setFlag(SemanticsFlag.isRequired, value!);
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts
@@ -5520,6 +5639,23 @@ class SemanticsConfiguration {
 
   bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
 
+  bool get _hasExplicitRole {
+    if (_role != SemanticsRole.none) {
+      return true;
+    }
+    if (_hasFlag(SemanticsFlag.isTextField) ||
+        // In non web platforms, the header is a trait.
+        (_hasFlag(SemanticsFlag.isHeader) && kIsWeb) ||
+        _hasFlag(SemanticsFlag.isSlider) ||
+        _hasFlag(SemanticsFlag.isLink) ||
+        _hasFlag(SemanticsFlag.scopesRoute) ||
+        _hasFlag(SemanticsFlag.isImage) ||
+        _hasFlag(SemanticsFlag.isKeyboardKey)) {
+      return true;
+    }
+    return false;
+  }
+
   // CONFIGURATION COMBINATION LOGIC
 
   /// Whether this configuration is compatible with the provided `other`
@@ -5547,6 +5683,9 @@ class SemanticsConfiguration {
       return false;
     }
     if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
+      return false;
+    }
+    if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
     return true;

@@ -51,6 +51,38 @@ void main() {
     });
   });
 
+  group('list', () {
+    testWidgets('failure case, list item without list parent', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(role: SemanticsRole.listItem, child: const Text('some child')),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(
+        error.message,
+        startsWith('Semantics node 1 has role ${SemanticsRole.listItem}, but its parent'),
+      );
+    });
+
+    testWidgets('Success case', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.list,
+            explicitChildNodes: true,
+            child: Semantics(role: SemanticsRole.listItem, child: const Text('some child')),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('tabBar', () {
     testWidgets('failure case, empty child', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -261,6 +293,280 @@ void main() {
             role: SemanticsRole.radioGroup,
             explicitChildNodes: true,
             child: Semantics(toggled: true, child: const SizedBox.square(dimension: 1)),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('menu', () {
+    testWidgets('failure case, empty child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menu,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'a menu cannot be empty');
+    });
+
+    testWidgets('Success case', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menu,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItem,
+              selected: false,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('menuBar', () {
+    testWidgets('failure case, empty child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuBar,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'a menu bar cannot be empty');
+    });
+
+    testWidgets('Success case', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuBar,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItem,
+              selected: false,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('menuItem', () {
+    testWidgets('failure case, no menu or menuBar as ancester', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuItem,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'A menu item must be a child of a menu or a menu bar');
+    });
+
+    testWidgets('Success case with menu as an ancester', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menu,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItem,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case with menuBar as an ancester', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuBar,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItem,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('menuItemCheckbox', () {
+    testWidgets('failure case, no checked flag', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuItemCheckbox,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'a menu item checkbox must be checkable');
+    });
+
+    testWidgets('failure case, no menu or menuBar as its ancestor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuItemCheckbox,
+            checked: false,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'A menu item checkbox must be a child of a menu or a menu bar');
+    });
+
+    testWidgets('Success case with menu as an ancester', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menu,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItemCheckbox,
+              checked: true,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case with menuBar as an ancester', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuBar,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItemCheckbox,
+              checked: false,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('menuItemRadio', () {
+    testWidgets('failure case, no checked flag', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuItemRadio,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'a menu item radio must be checkable');
+    });
+
+    testWidgets('failure case, no menu or menuBar as its ancestor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuItemRadio,
+            checked: false,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final FlutterError error = exception! as FlutterError;
+      expect(error.message, 'A menu item radio must be a child of a menu or a menu bar');
+    });
+
+    testWidgets('Success case with menu as an ancester', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menu,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItemRadio,
+              checked: true,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Success case with menuBar as an ancester', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.menuBar,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.menuItemRadio,
+              checked: false,
+              onTap: () {},
+              child: const Text('some child'),
+            ),
           ),
         ),
       );

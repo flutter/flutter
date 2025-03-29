@@ -32,8 +32,8 @@ bool _rrectIsValid(RRect rrect) {
   return true;
 }
 
-bool _rseIsValid(RSuperellipse rse) {
-  assert(!rse.hasNaN, 'RSuperellipse argument contained a NaN value.');
+bool _rsuperellipseIsValid(RSuperellipse rsuperellipse) {
+  assert(!rsuperellipse.hasNaN, 'RSuperellipse argument contained a NaN value.');
   return true;
 }
 
@@ -263,7 +263,7 @@ class Color {
   ///
   /// A value of 0 means this color is fully transparent. A value of 255 means
   /// this color is fully opaque.
-  @Deprecated('Use .a.')
+  @Deprecated('Use (*.a * 255.0).round() & 0xff')
   int get alpha => (0xff000000 & value) >> 24;
 
   /// The alpha channel of this color as a double.
@@ -274,15 +274,15 @@ class Color {
   double get opacity => alpha / 0xFF;
 
   /// The red channel of this color in an 8 bit value.
-  @Deprecated('Use .r.')
+  @Deprecated('Use (*.r * 255.0).round() & 0xff')
   int get red => (0x00ff0000 & value) >> 16;
 
   /// The green channel of this color in an 8 bit value.
-  @Deprecated('Use .g.')
+  @Deprecated('Use (*.g * 255.0).round() & 0xff')
   int get green => (0x0000ff00 & value) >> 8;
 
   /// The blue channel of this color in an 8 bit value.
-  @Deprecated('Use .b.')
+  @Deprecated('Use (*.b * 255.0).round() & 0xff')
   int get blue => (0x000000ff & value) >> 0;
 
   /// Returns a new color with the provided components updated.
@@ -5280,6 +5280,7 @@ base class FragmentShader extends Shader {
   /// results will be undefined.
   void setImageSampler(int index, Image image) {
     assert(!debugDisposed, 'Tried to access uniforms on a disposed Shader: $this');
+    assert(!image.debugDisposed, 'Image has been disposed');
     _setImageSampler(index, image._image);
   }
 
@@ -5893,7 +5894,7 @@ abstract class Canvas {
   /// If multiple draw commands intersect with the clip boundary, this can result
   /// in incorrect blending at the clip boundary. See [saveLayer] for a
   /// discussion of how to address that and some examples of using [clipRSuperellipse].
-  void clipRSuperellipse(RSuperellipse rse, {bool doAntiAlias = true});
+  void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true});
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given [Path].
@@ -6023,7 +6024,7 @@ abstract class Canvas {
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-light-mode-only)
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/dart-ui/canvas_rsuperellipse.png#gh-dark-mode-only)
-  void drawRSuperellipse(RSuperellipse rse, Paint paint);
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint);
 
   /// Draws an axis-aligned oval that fills the given axis-aligned rectangle
   /// with the given [Paint]. Whether the oval is filled or stroked (or both) is
@@ -6637,13 +6638,13 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   external void _clipRRect(Float32List rrect, bool doAntiAlias);
 
   @override
-  void clipRSuperellipse(RSuperellipse rse, {bool doAntiAlias = true}) {
-    assert(_rseIsValid(rse));
-    _clipRSuperellipse(rse._getValue32(), doAntiAlias);
+  void clipRSuperellipse(RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _clipRSuperellipse(rsuperellipse._native(), doAntiAlias);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Bool)>(symbol: 'Canvas::clipRSuperellipse')
-  external void _clipRSuperellipse(Float32List rse, bool doAntiAlias);
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Bool)>(symbol: 'Canvas::clipRSuperellipse')
+  external void _clipRSuperellipse(_NativeRSuperellipse rsuperellipse, bool doAntiAlias);
 
   @override
   void clipPath(Path path, {bool doAntiAlias = true}) {
@@ -6756,14 +6757,16 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   );
 
   @override
-  void drawRSuperellipse(RSuperellipse rse, Paint paint) {
-    assert(_rseIsValid(rse));
-    _drawRSuperellipse(rse._getValue32(), paint._objects, paint._data);
+  void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint) {
+    assert(_rsuperellipseIsValid(rsuperellipse));
+    _drawRSuperellipse(rsuperellipse._native(), paint._objects, paint._data);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(symbol: 'Canvas::drawRSuperellipse')
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle, Handle)>(
+    symbol: 'Canvas::drawRSuperellipse',
+  )
   external void _drawRSuperellipse(
-    Float32List rse,
+    _NativeRSuperellipse rsuperellipse,
     List<Object?>? paintObjects,
     ByteData paintData,
   );

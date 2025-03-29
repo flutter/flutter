@@ -32,6 +32,7 @@
 namespace flutter {
 
 constexpr int kMinimumAndroidApiLevelForImpeller = 29;
+constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 31;
 
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
@@ -324,8 +325,10 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
       return kVulkanUnsupportedFallback;
     }
 
-    if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
-      // Probably MediaTek. Avoid Vulkan.
+    if (api_level < kMinimumAndroidApiLevelForMediaTekVulkan &&
+        __system_property_find("ro.vendor.mediatek.platform") != nullptr) {
+      // Probably MediaTek. Avoid Vulkan if older than 34 to work around
+      // crashes when importing AHB.
       return kVulkanUnsupportedFallback;
     }
 

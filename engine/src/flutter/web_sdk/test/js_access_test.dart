@@ -17,7 +17,7 @@ import 'dart:io';
 import 'package:test/test.dart';
 
 // Libraries that allow making arbitrary calls to JavaScript.
-const List<String> _jsAccessLibraries = <String>['dart:js_util', 'package:js'];
+const List<String> _jsAccessLibraries = <String>['dart:js_util'];
 
 // Libraries that are allowed to make direct calls to JavaScript. These
 // libraries must be reviewed carefully to make sure JavaScript APIs are used

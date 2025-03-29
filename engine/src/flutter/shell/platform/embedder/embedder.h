@@ -249,6 +249,13 @@ typedef enum {
   /// The semantics node has the quality of either being "selected" or
   /// "not selected".
   kFlutterSemanticsFlagHasSelectedState = 1 << 28,
+  /// Whether a semantics node has the quality of being required.
+  kFlutterSemanticsFlagHasRequiredState = 1 << 29,
+  /// Whether user input is required on the semantics node before a form can be
+  /// submitted.
+  ///
+  /// Only applicable when kFlutterSemanticsFlagHasRequiredState flag is on.
+  kFlutterSemanticsFlagIsRequired = 1 << 30,
 } FlutterSemanticsFlag;
 
 typedef enum {
@@ -1680,6 +1687,8 @@ typedef struct {
   /// Array of semantics custom action pointers. Has length
   /// `custom_action_count`.
   FlutterSemanticsCustomAction2** custom_actions;
+  // The ID of the view that this update is associated with.
+  FlutterViewId view_id;
 } FlutterSemanticsUpdate2;
 
 typedef void (*FlutterUpdateSemanticsNodeCallback)(
@@ -2638,6 +2647,27 @@ typedef struct {
   int64_t engine_id;
 } FlutterProjectArgs;
 
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterSendSemanticsActionInfo).
+  size_t struct_size;
+
+  /// The ID of the view that includes the node.
+  FlutterViewId view_id;
+
+  /// The semantics node identifier.
+  uint64_t node_id;
+
+  /// The semantics action.
+  FlutterSemanticsAction action;
+
+  /// Data associated with the action.
+  const uint8_t* data;
+
+  /// The data length.
+  size_t data_length;
+} FlutterSendSemanticsActionInfo;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -3071,7 +3101,10 @@ FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
     FlutterAccessibilityFeature features);
 
 //------------------------------------------------------------------------------
-/// @brief      Dispatch a semantics action to the specified semantics node.
+/// @brief      Dispatch a semantics action to the specified semantics node
+///             in the implicit view.
+///
+/// @deprecated Use `FlutterEngineSendSemanticsAction` instead.
 ///
 /// @param[in]  engine       A running engine instance.
 /// @param[in]  node_id      The semantics node identifier.
@@ -3088,6 +3121,22 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length);
+
+//------------------------------------------------------------------------------
+/// @brief      Dispatch a semantics action to the specified semantics node
+///             within a specific view.
+///
+/// @param[in]  engine  A running engine instance.
+/// @param[in]  info    The dispatch semantics on view arguments.
+///                     This can be deallocated once
+///                     |FlutterEngineSendSemanticsAction| returns.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSendSemanticsAction(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterSendSemanticsActionInfo* info);
 
 //------------------------------------------------------------------------------
 /// @brief      Notify the engine that a vsync event occurred. A baton passed to
@@ -3476,6 +3525,9 @@ typedef FlutterEngineResult (*FlutterEngineDispatchSemanticsActionFnPtr)(
     FlutterSemanticsAction action,
     const uint8_t* data,
     size_t data_length);
+typedef FlutterEngineResult (*FlutterEngineSendSemanticsActionFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterSendSemanticsActionInfo* info);
 typedef FlutterEngineResult (*FlutterEngineOnVsyncFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     intptr_t baton,
@@ -3578,6 +3630,7 @@ typedef struct {
   FlutterEngineAddViewFnPtr AddView;
   FlutterEngineRemoveViewFnPtr RemoveView;
   FlutterEngineSendViewFocusEventFnPtr SendViewFocusEvent;
+  FlutterEngineSendSemanticsActionFnPtr SendSemanticsAction;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------
