@@ -3805,8 +3805,13 @@ class FakeXcodeProject extends Fake implements IosProject {
 
   @override
   bool get flutterPluginSwiftPackageInProjectSettings {
-    return xcodeProjectInfoFile.existsSync() &&
-        xcodeProjectInfoFile.readAsStringSync().contains('FlutterGeneratedPluginSwiftPackage');
+    if (!xcodeProjectInfoFile.existsSync()) {
+      return false;
+    }
+
+    return xcodeProjectInfoFile.readAsStringSync().contains(
+      '78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile',
+    );
   }
 
   @override
