@@ -301,9 +301,10 @@ void main() async {
     // The shader will not render green if the compiler doesn't keep the
     // uniforms in the right order.
     final FragmentShader shader = program.fragmentShader();
-    for (int i = 0; i < 3; i++) {
-      shader.setFloat(i, i.toDouble());
-    }
+    shader.setFloat(0, 1);
+    shader.setFloat(1, 2);
+    shader.setFloat(2, 3);
+
     final Image blueGreenImage = _createBlueGreenImageSync();
     shader.setImageSampler(0, blueGreenImage);
 
