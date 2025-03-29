@@ -1523,6 +1523,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   CGRect keyboardFrame = [info[UIKeyboardFrameEndUserInfoKey] CGRectValue];
   FlutterKeyboardMode keyboardMode = [self calculateKeyboardAttachMode:notification];
   CGFloat calculatedInset = [self calculateKeyboardInset:keyboardFrame keyboardMode:keyboardMode];
+  NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+
+  // If the software keyboard is displayed before displaying the PasswordManager prompt,
+  // UIKeyboardWillHideNotification will occur immediately after UIKeyboardWillShowNotification.
+  // The duration of the animation will be 0.0, and the calculated inset will be 0.0.
+  // In this case, it is necessary to cancel the animation and hide the keyboard immediately.
+  // https://github.com/flutter/flutter/pull/164884
+  if (keyboardMode == FlutterKeyboardModeHidden && calculatedInset == 0.0 && duration == 0.0) {
+    [self hideKeyboardImmediately];
+    return;
+  }
 
   // Avoid double triggering startKeyBoardAnimation.
   if (self.targetViewInsetBottom == calculatedInset) {
@@ -1530,7 +1541,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   }
 
   self.targetViewInsetBottom = calculatedInset;
-  NSTimeInterval duration = [info[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
 
   // Flag for simultaneous compounding animation calls.
   // This captures animation calls made while the keyboard animation is currently animating. If the
@@ -1771,6 +1781,21 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
           [strongSelf ensureViewportMetricsIsCorrect];
         }
       }];
+}
+
+- (void)hideKeyboardImmediately {
+  [self invalidateKeyboardAnimationVSyncClient];
+  if (self.keyboardAnimationView) {
+    [self.keyboardAnimationView.layer removeAllAnimations];
+    [self removeKeyboardAnimationView];
+    self.keyboardAnimationView = nil;
+  }
+  if (self.keyboardSpringAnimation) {
+    self.keyboardSpringAnimation = nil;
+  }
+  // Reset targetViewInsetBottom to 0.0.
+  self.targetViewInsetBottom = 0.0;
+  [self ensureViewportMetricsIsCorrect];
 }
 
 - (void)setUpKeyboardSpringAnimationIfNeeded:(CAAnimation*)keyboardAnimation {
