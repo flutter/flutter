@@ -871,7 +871,7 @@ void main() {
         },
       );
 
-      testWithoutContext('skips PBXNativeTarget migration for already migrated target', () async {
+      testWithoutContext('fails if unmigrated custom target is detected', () async {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
         const SupportedPlatform platform = SupportedPlatform.ios;
@@ -905,15 +905,8 @@ void main() {
 
         settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
 
-        final List<String> settingsAsJsonAfterMigration = <String>[
-          ..._allSectionsMigratedAsJson(platform),
-        ];
-        settingsAsJsonAfterMigration[_nativeTargetSectionIndex] =
-            migratedRunnerAndMigratedOtherTargetSectionAsJson(platform);
-
         final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
           _plutilOutput(settingsAsJsonBeforeMigration),
-          _plutilOutput(settingsAsJsonAfterMigration),
         ]);
 
         final SwiftPackageManagerIntegrationMigration projectMigration =
@@ -928,19 +921,14 @@ void main() {
               features: swiftPackageManagerFullyEnabledFlags,
             );
 
-        await projectMigration.migrate();
-
-        expect(
-          testLogger.traceText,
-          isNot(contains('PBXNativeTargets already migrated. Skipping...')),
-        );
-        expect(
-          testLogger.traceText,
-          contains('PBXNativeTarget "Runner" already migrated. Skipping...'),
-        );
-        expect(
-          testLogger.traceText,
-          isNot(contains('PBXNativeTarget "OtherTarget" already migrated. Skipping...')),
+        await expectLater(
+          () => projectMigration.migrate(),
+          throwsToolExit(
+            message:
+                'The PBXNativeTargets section references one or more custom targets, which requires a manual migration.\n'
+                'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
+                'for instructions on how to migrate custom targets.',
+          ),
         );
       });
 
