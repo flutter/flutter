@@ -3724,6 +3724,48 @@ void main() {
       },
     );
 
+    testWidgets('menu repositions to left of button when it would overflow on right with offset', (
+      WidgetTester tester,
+    ) async {
+      await changeSurfaceSize(tester, const Size(800, 600));
+      const Offset anchorAlignmentOffset = Offset(50, 0);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.bottomRight,
+            child: MenuAnchor(
+              alignmentOffset: anchorAlignmentOffset,
+              menuChildren: const <Widget>[MenuItemButton(child: Text('Button1'))],
+              builder: (BuildContext context, MenuController controller, Widget? child) {
+                return FilledButton(
+                  onPressed: () {
+                    if (controller.isOpen) {
+                      controller.close();
+                    } else {
+                      controller.open();
+                    }
+                  },
+                  child: const Text('Tap me'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.pump();
+      await tester.tap(find.text('Tap me'));
+      await tester.pump();
+
+      expect(find.byType(MenuItemButton), findsOneWidget);
+
+      final Offset buttonOffset = tester.getTopLeft(find.byType(FilledButton));
+      final Rect submenuRect = collectSubmenuRects().first;
+
+      // Submenu should be rendered 50 pixels to the left of the button.
+      expect(buttonOffset.dx - submenuRect.right, anchorAlignmentOffset.dx);
+    });
+
     Future<void> buildDensityPaddingApp(
       WidgetTester tester, {
       required TextDirection textDirection,
