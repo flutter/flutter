@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 
@@ -49,7 +50,7 @@ void main() {
     'Native assets: non-bundled libraries require no copying',
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
+      ProcessManager: FakeProcessManager.empty,
     },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -77,7 +78,7 @@ void main() {
         makeCodeAsset('free', LookupInExecutable()),
         makeCodeAsset('draw', DynamicLoadingSystem(Uri.file('/usr/lib/skia.so'))),
       ];
-      final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      final DartHookResult dartHookResult = await runFlutterSpecificHooks(
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.linux_x64,
         projectUri: projectUri,
@@ -89,7 +90,7 @@ void main() {
         ),
       );
       await installCodeAssets(
-        dartBuildResult: dartBuildResult,
+        dartHookResult: dartHookResult,
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
@@ -102,13 +103,13 @@ void main() {
 
   testUsingContext(
     'build with assets but not enabled',
-    overrides: <Type, Generator>{ProcessManager: () => FakeProcessManager.empty()},
+    overrides: <Type, Generator>{ProcessManager: FakeProcessManager.empty},
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
       await packageConfig.create();
       expect(
-        () => runFlutterSpecificDartBuild(
+        () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
           targetPlatform: TargetPlatform.windows_x64,
           projectUri: projectUri,
@@ -117,11 +118,7 @@ void main() {
             packagesWithNativeAssetsResult: <String>['bar'],
           ),
         ),
-        throwsToolExit(
-          message:
-              'Package(s) bar require the native assets feature to be enabled. '
-              'Enable using `flutter config --enable-native-assets`.',
-        ),
+        throwsToolExit(message: 'Enable code assets using `flutter config --enable-native-assets`'),
       );
     },
   );
@@ -130,7 +127,7 @@ void main() {
     'build no assets',
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
+      ProcessManager: FakeProcessManager.empty,
     },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -142,7 +139,7 @@ void main() {
       final Map<String, String> environmentDefines = <String, String>{
         kBuildMode: BuildMode.debug.cliName,
       };
-      final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+      final DartHookResult dartHookResult = await runFlutterSpecificHooks(
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
@@ -152,7 +149,7 @@ void main() {
         ),
       );
       await installCodeAssets(
-        dartBuildResult: dartBuildResult,
+        dartHookResult: dartHookResult,
         environmentDefines: environmentDefines,
         targetPlatform: TargetPlatform.windows_x64,
         projectUri: projectUri,
@@ -177,14 +174,14 @@ void main() {
     'Native assets build error',
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
+      ProcessManager: FakeProcessManager.empty,
     },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.parent.create();
       await packageConfig.create();
       expect(
-        () => runFlutterSpecificDartBuild(
+        () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{kBuildMode: BuildMode.debug.cliName},
           targetPlatform: TargetPlatform.linux_x64,
           projectUri: projectUri,
@@ -203,7 +200,7 @@ void main() {
     'Native assets: no duplicate assets with linking',
     overrides: <Type, Generator>{
       FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      ProcessManager: () => FakeProcessManager.empty(),
+      ProcessManager: FakeProcessManager.empty,
     },
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
@@ -226,7 +223,7 @@ void main() {
         file: file,
       );
 
-      final DartBuildResult result = await runFlutterSpecificDartBuild(
+      final DartHookResult result = await runFlutterSpecificHooks(
         environmentDefines: <String, String>{
           // Release mode means the dart build has linking enabled.
           kBuildMode: BuildMode.release.cliName,

@@ -7,7 +7,7 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/common.dart' show throwToolExit;
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 
@@ -89,7 +90,7 @@ void main() {
           kBuildMode: buildMode.cliName,
           kMinSdkVersion: minSdkVersion,
         };
-        final DartBuildResult result = await runFlutterSpecificDartBuild(
+        final DartHookResult result = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
@@ -97,7 +98,7 @@ void main() {
           buildRunner: buildRunner,
         );
         await installCodeAssets(
-          dartBuildResult: result,
+          dartHookResult: result,
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.android_arm64,
           projectUri: projectUri,
@@ -107,8 +108,8 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for android arm64.',
-            'Building native assets for android arm64 done.',
+            'Building native assets for android_arm64.',
+            'Building native assets for android_arm64 done.',
           ]),
         );
 
@@ -130,7 +131,7 @@ void main() {
     () async {
       final File packageConfig = environment.projectDir.childFile('.dart_tool/package_config.json');
       await packageConfig.create(recursive: true);
-      await runFlutterSpecificDartBuild(
+      await runFlutterSpecificHooks(
         environmentDefines: <String, String>{
           kBuildMode: BuildMode.debug.cliName,
           kMinSdkVersion: minSdkVersion,
@@ -155,7 +156,7 @@ void main() {
       await packageConfig.parent.create();
       await packageConfig.create();
       expect(
-        () => runFlutterSpecificDartBuild(
+        () => runFlutterSpecificHooks(
           environmentDefines: <String, String>{
             kBuildMode: BuildMode.debug.cliName,
             kMinSdkVersion: minSdkVersion,
@@ -175,6 +176,6 @@ class _BuildRunnerWithoutNdk extends FakeFlutterNativeAssetsBuildRunner {
   _BuildRunnerWithoutNdk({super.packagesWithNativeAssetsResult = const <String>[]});
 
   @override
-  Future<CCompilerConfig> get ndkCCompilerConfig async =>
+  CCompilerConfig? get ndkCCompilerConfigResult =>
       throwToolExit('Android NDK Clang could not be found.');
 }
