@@ -226,6 +226,7 @@ Widget _wrapWithBackground({
 
   return ClipRect(
     child: BackdropFilter(
+      blendMode: BlendMode.srcATop,
       enabled: backgroundColor.alpha != 0xFF && enableBackgroundFilterBlur,
       filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       child: childWithBackground,
