@@ -10,7 +10,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
-#include "flutter/shell/platform/linux/testing/mock_renderer.h"
+#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)

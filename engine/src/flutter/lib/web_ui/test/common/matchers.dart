@@ -5,6 +5,7 @@
 /// Provides utilities for testing engine code.
 library matchers;
 
+import 'dart:js_interop';
 import 'dart:math' as math;
 
 import 'package:html/dom.dart' as html;
@@ -259,14 +260,19 @@ class HtmlPatternMatcher extends Matcher {
 
   @override
   bool matches(final Object? object, Map<Object?, Object?> matchState) {
-    if (object is! DomElement) {
+    // TODO(srujzs): Replace this with `!object.isJSAny` once we have that API
+    // in `dart:js_interop`.
+    // https://github.com/dart-lang/sdk/issues/56905
+    // ignore: invalid_runtime_check_with_js_interop_types
+    if (object is! JSAny || !object.isA<DomElement>()) {
       return false;
     }
 
     final List<String> mismatches = <String>[];
     matchState['mismatches'] = mismatches;
 
-    final html.Element element = html.parseFragment(object.outerHTML).children.single;
+    final html.Element element =
+        html.parseFragment((object as DomElement).outerHTML).children.single;
     matchElements(_Breadcrumbs.root, mismatches, element, pattern);
     return mismatches.isEmpty;
   }

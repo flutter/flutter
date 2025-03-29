@@ -38,9 +38,14 @@ static const char* fragment_shader_src =
 
 G_DEFINE_QUARK(fl_renderer_error_quark, fl_renderer_error)
 
-typedef struct {
+struct _FlRenderer {
+  GObject parent_instance;
+
   // Engine we are rendering.
   GWeakRef engine;
+
+  // OpenGL contexts.
+  FlOpenGLManager* opengl_manager;
 
   // Flag to track lazy initialization.
   gboolean initialized;
@@ -78,9 +83,9 @@ typedef struct {
   // Condition to unblock the raster thread after task is completed on platform
   // thread.
   GCond present_condition;
-} FlRendererPrivate;
+};
 
-G_DEFINE_TYPE_WITH_PRIVATE(FlRenderer, fl_renderer, G_TYPE_OBJECT)
+G_DEFINE_TYPE(FlRenderer, fl_renderer, G_TYPE_OBJECT)
 
 // Check if running on an NVIDIA driver.
 static gboolean is_nvidia() {
@@ -127,30 +132,25 @@ static GLfloat pixels_to_gl_coords(GLfloat position, GLfloat pixels) {
 
 // Perform single run OpenGL initialization.
 static void initialize(FlRenderer* self) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
-  if (priv->initialized) {
+  if (self->initialized) {
     return;
   }
-  priv->initialized = TRUE;
+  self->initialized = TRUE;
 
   if (epoxy_has_gl_extension("GL_EXT_texture_format_BGRA8888")) {
-    priv->sized_format = GL_BGRA8_EXT;
-    priv->general_format = GL_BGRA_EXT;
+    self->sized_format = GL_BGRA8_EXT;
+    self->general_format = GL_BGRA_EXT;
   } else {
-    priv->sized_format = GL_RGBA8;
-    priv->general_format = GL_RGBA;
+    self->sized_format = GL_RGBA8;
+    self->general_format = GL_RGBA;
   }
 }
 
 static void fl_renderer_unblock_main_thread(FlRenderer* self) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-  if (priv->blocking_main_thread) {
-    priv->blocking_main_thread = false;
+  if (self->blocking_main_thread) {
+    self->blocking_main_thread = false;
 
-    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
     if (engine != nullptr) {
       fl_task_runner_release_main_thread(fl_engine_get_task_runner(engine));
     }
@@ -158,9 +158,6 @@ static void fl_renderer_unblock_main_thread(FlRenderer* self) {
 }
 
 static void setup_shader(FlRenderer* self) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
   GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
   glCompileShader(vertex_shader);
@@ -181,15 +178,15 @@ static void setup_shader(FlRenderer* self) {
     g_warning("Failed to compile fragment shader: %s", shader_log);
   }
 
-  priv->program = glCreateProgram();
-  glAttachShader(priv->program, vertex_shader);
-  glAttachShader(priv->program, fragment_shader);
-  glLinkProgram(priv->program);
+  self->program = glCreateProgram();
+  glAttachShader(self->program, vertex_shader);
+  glAttachShader(self->program, fragment_shader);
+  glLinkProgram(self->program);
 
   GLint link_status;
-  glGetProgramiv(priv->program, GL_LINK_STATUS, &link_status);
+  glGetProgramiv(self->program, GL_LINK_STATUS, &link_status);
   if (link_status == GL_FALSE) {
-    g_autofree gchar* program_log = get_program_log(priv->program);
+    g_autofree gchar* program_log = get_program_log(self->program);
     g_warning("Failed to link program: %s", program_log);
   }
 
@@ -221,9 +218,6 @@ static void render_with_textures(FlRenderer* self,
                                  GPtrArray* framebuffers,
                                  int width,
                                  int height) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
   // Save bindings that are set by this function.  All bindings must be restored
   // to their original values because Skia expects that its bindings have not
   // been altered.
@@ -237,7 +231,7 @@ static void render_with_textures(FlRenderer* self,
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  glUseProgram(priv->program);
+  glUseProgram(self->program);
 
   for (guint i = 0; i < framebuffers->len; i++) {
     FlFramebuffer* framebuffer =
@@ -263,11 +257,11 @@ static void render_with_textures(FlRenderer* self,
     glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data,
                  GL_STATIC_DRAW);
-    GLint position_index = glGetAttribLocation(priv->program, "position");
+    GLint position_index = glGetAttribLocation(self->program, "position");
     glEnableVertexAttribArray(position_index);
     glVertexAttribPointer(position_index, 2, GL_FLOAT, GL_FALSE,
                           sizeof(GLfloat) * 4, 0);
-    GLint texcoord_index = glGetAttribLocation(priv->program, "in_texcoord");
+    GLint texcoord_index = glGetAttribLocation(self->program, "in_texcoord");
     glEnableVertexAttribArray(texcoord_index);
     glVertexAttribPointer(texcoord_index, 2, GL_FLOAT, GL_FALSE,
                           sizeof(GLfloat) * 4,
@@ -290,10 +284,7 @@ static void render(FlRenderer* self,
                    GPtrArray* framebuffers,
                    int width,
                    int height) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
-  if (priv->has_gl_framebuffer_blit) {
+  if (self->has_gl_framebuffer_blit) {
     render_with_blit(self, framebuffers);
   } else {
     render_with_textures(self, framebuffers, width, height);
@@ -304,21 +295,18 @@ static gboolean present_layers(FlRenderer* self,
                                FlutterViewId view_id,
                                const FlutterLayer** layers,
                                size_t layers_count) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
   g_return_val_if_fail(FL_IS_RENDERER(self), FALSE);
 
   // ignore incoming frame with wrong dimensions in trivial case with just one
   // layer
-  if (priv->blocking_main_thread && layers_count == 1 &&
+  if (self->blocking_main_thread && layers_count == 1 &&
       layers[0]->offset.x == 0 && layers[0]->offset.y == 0 &&
-      (layers[0]->size.width != priv->target_width ||
-       layers[0]->size.height != priv->target_height)) {
+      (layers[0]->size.width != self->target_width ||
+       layers[0]->size.height != self->target_height)) {
     return TRUE;
   }
 
-  priv->had_first_frame = true;
+  self->had_first_frame = true;
 
   fl_renderer_unblock_main_thread(self);
 
@@ -340,7 +328,7 @@ static gboolean present_layers(FlRenderer* self,
     }
   }
 
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
   if (engine == nullptr) {
     return TRUE;
   }
@@ -352,7 +340,7 @@ static gboolean present_layers(FlRenderer* self,
 
   if (view_id == flutter::kFlutterImplicitViewId) {
     // Store for rendering later
-    g_hash_table_insert(priv->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
+    g_hash_table_insert(self->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
                         g_ptr_array_ref(framebuffers));
   } else {
     // Composite into a single framebuffer.
@@ -374,7 +362,7 @@ static gboolean present_layers(FlRenderer* self,
       }
 
       FlFramebuffer* view_framebuffer =
-          fl_framebuffer_new(priv->general_format, width, height);
+          fl_framebuffer_new(self->general_format, width, height);
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
                         fl_framebuffer_get_id(view_framebuffer));
       render(self, framebuffers, width, height);
@@ -390,13 +378,13 @@ static gboolean present_layers(FlRenderer* self,
     size_t data_length = width * height * 4;
     g_autofree uint8_t* data = static_cast<uint8_t*>(malloc(data_length));
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fl_framebuffer_get_id(framebuffer));
-    glReadPixels(0, 0, width, height, priv->general_format, GL_UNSIGNED_BYTE,
+    glReadPixels(0, 0, width, height, self->general_format, GL_UNSIGNED_BYTE,
                  data);
 
     // Write into a texture in the views context.
     fl_renderable_make_current(renderable);
     FlFramebuffer* view_framebuffer =
-        fl_framebuffer_new(priv->general_format, width, height);
+        fl_framebuffer_new(self->general_format, width, height);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
                       fl_framebuffer_get_id(view_framebuffer));
     glBindTexture(GL_TEXTURE_2D,
@@ -407,7 +395,7 @@ static gboolean present_layers(FlRenderer* self,
     g_autoptr(GPtrArray) secondary_framebuffers =
         g_ptr_array_new_with_free_func(g_object_unref);
     g_ptr_array_add(secondary_framebuffers, g_object_ref(view_framebuffer));
-    g_hash_table_insert(priv->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
+    g_hash_table_insert(self->framebuffers_by_view_id, GINT_TO_POINTER(view_id),
                         g_ptr_array_ref(secondary_framebuffers));
   }
 
@@ -432,32 +420,30 @@ typedef struct {
 // Perform the present on the main thread.
 static void present_layers_task_cb(gpointer user_data) {
   PresentLayersData* data = static_cast<PresentLayersData*>(user_data);
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(data->self));
+  FlRenderer* self = data->self;
 
   // Perform the present.
-  fl_renderer_make_current(data->self);
-  data->result = present_layers(data->self, data->view_id, data->layers,
-                                data->layers_count);
-  fl_renderer_clear_current(data->self);
+  fl_opengl_manager_make_current(self->opengl_manager);
+  data->result =
+      present_layers(self, data->view_id, data->layers, data->layers_count);
+  fl_opengl_manager_clear_current(self->opengl_manager);
 
   // Complete fl_renderer_present_layers().
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&priv->present_mutex);
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->present_mutex);
   data->finished = TRUE;
-  g_cond_signal(&priv->present_condition);
+  g_cond_signal(&self->present_condition);
 }
 
 static void fl_renderer_dispose(GObject* object) {
   FlRenderer* self = FL_RENDERER(object);
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
 
   fl_renderer_unblock_main_thread(self);
 
-  g_weak_ref_clear(&priv->engine);
-  g_clear_pointer(&priv->framebuffers_by_view_id, g_hash_table_unref);
-  g_mutex_clear(&priv->present_mutex);
-  g_cond_clear(&priv->present_condition);
+  g_weak_ref_clear(&self->engine);
+  g_clear_object(&self->opengl_manager);
+  g_clear_pointer(&self->framebuffers_by_view_id, g_hash_table_unref);
+  g_mutex_clear(&self->present_mutex);
+  g_cond_clear(&self->present_condition);
 
   G_OBJECT_CLASS(fl_renderer_parent_class)->dispose(object);
 }
@@ -467,65 +453,33 @@ static void fl_renderer_class_init(FlRendererClass* klass) {
 }
 
 static void fl_renderer_init(FlRenderer* self) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-  priv->framebuffers_by_view_id = g_hash_table_new_full(
+  self->framebuffers_by_view_id = g_hash_table_new_full(
       g_direct_hash, g_direct_equal, nullptr,
       reinterpret_cast<GDestroyNotify>(g_ptr_array_unref));
-  g_mutex_init(&priv->present_mutex);
-  g_cond_init(&priv->present_condition);
+  g_mutex_init(&self->present_mutex);
+  g_cond_init(&self->present_condition);
 }
 
-void fl_renderer_set_engine(FlRenderer* self, FlEngine* engine) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
+FlRenderer* fl_renderer_new(FlEngine* engine) {
+  FlRenderer* self = FL_RENDERER(g_object_new(fl_renderer_get_type(), nullptr));
 
-  g_return_if_fail(FL_IS_RENDERER(self));
+  g_weak_ref_init(&self->engine, engine);
+  self->opengl_manager =
+      FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
 
-  g_weak_ref_init(&priv->engine, engine);
-}
-
-void* fl_renderer_get_proc_address(FlRenderer* self, const char* name) {
-  g_return_val_if_fail(FL_IS_RENDERER(self), NULL);
-
-  return reinterpret_cast<void*>(eglGetProcAddress(name));
-}
-
-void fl_renderer_make_current(FlRenderer* self) {
-  g_return_if_fail(FL_IS_RENDERER(self));
-  FL_RENDERER_GET_CLASS(self)->make_current(self);
-}
-
-void fl_renderer_make_resource_current(FlRenderer* self) {
-  g_return_if_fail(FL_IS_RENDERER(self));
-  FL_RENDERER_GET_CLASS(self)->make_resource_current(self);
-}
-
-void fl_renderer_clear_current(FlRenderer* self) {
-  g_return_if_fail(FL_IS_RENDERER(self));
-  FL_RENDERER_GET_CLASS(self)->clear_current(self);
-}
-
-guint32 fl_renderer_get_fbo(FlRenderer* self) {
-  g_return_val_if_fail(FL_IS_RENDERER(self), 0);
-
-  // There is only one frame buffer object - always return that.
-  return 0;
+  return self;
 }
 
 gboolean fl_renderer_create_backing_store(
     FlRenderer* self,
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
-  fl_renderer_make_current(self);
+  fl_opengl_manager_make_current(self->opengl_manager);
 
   initialize(self);
 
   FlFramebuffer* framebuffer = fl_framebuffer_new(
-      priv->general_format, config->size.width, config->size.height);
+      self->general_format, config->size.width, config->size.height);
   if (!framebuffer) {
     g_warning("Failed to create backing store");
     return FALSE;
@@ -536,7 +490,7 @@ gboolean fl_renderer_create_backing_store(
   backing_store_out->open_gl.framebuffer.user_data = framebuffer;
   backing_store_out->open_gl.framebuffer.name =
       fl_framebuffer_get_id(framebuffer);
-  backing_store_out->open_gl.framebuffer.target = priv->sized_format;
+  backing_store_out->open_gl.framebuffer.target = self->sized_format;
   backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
     // Backing store destroyed in fl_renderer_collect_backing_store(), set
     // on FlutterCompositor.collect_backing_store_callback during engine start.
@@ -548,7 +502,7 @@ gboolean fl_renderer_create_backing_store(
 gboolean fl_renderer_collect_backing_store(
     FlRenderer* self,
     const FlutterBackingStore* backing_store) {
-  fl_renderer_make_current(self);
+  fl_opengl_manager_make_current(self->opengl_manager);
 
   // OpenGL context is required when destroying #FlFramebuffer.
   g_object_unref(backing_store->open_gl.framebuffer.user_data);
@@ -558,17 +512,14 @@ gboolean fl_renderer_collect_backing_store(
 void fl_renderer_wait_for_frame(FlRenderer* self,
                                 int target_width,
                                 int target_height) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
   g_return_if_fail(FL_IS_RENDERER(self));
 
-  priv->target_width = target_width;
-  priv->target_height = target_height;
+  self->target_width = target_width;
+  self->target_height = target_height;
 
-  if (priv->had_first_frame && !priv->blocking_main_thread) {
-    priv->blocking_main_thread = true;
-    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+  if (self->had_first_frame && !self->blocking_main_thread) {
+    self->blocking_main_thread = true;
+    g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
     if (engine != nullptr) {
       fl_task_runner_block_main_thread(fl_engine_get_task_runner(engine));
     }
@@ -581,11 +532,9 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
                                     size_t layers_count) {
   // Detach the context from raster thread. Needed because blitting
   // will be done on the main thread, which will make the context current.
-  fl_renderer_clear_current(self);
+  fl_opengl_manager_clear_current(self->opengl_manager);
 
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&priv->engine));
+  g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
 
   // Schedule the present to run on the main thread.
   FlTaskRunner* task_runner = fl_engine_get_task_runner(engine);
@@ -600,32 +549,29 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
   fl_task_runner_post_callback(task_runner, present_layers_task_cb, &data);
 
   // Block until present completes.
-  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&priv->present_mutex);
+  g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->present_mutex);
   while (!data.finished) {
-    g_cond_wait(&priv->present_condition, &priv->present_mutex);
+    g_cond_wait(&self->present_condition, &self->present_mutex);
   }
 
   // Restore the context to the raster thread in case the engine needs it
   // to do some cleanup.
-  fl_renderer_make_current(self);
+  fl_opengl_manager_make_current(self->opengl_manager);
 
   return data.result;
 }
 
 void fl_renderer_setup(FlRenderer* self) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
   g_return_if_fail(FL_IS_RENDERER(self));
 
   // Note: NVIDIA and Vivante are temporarily disabled due to
   // https://github.com/flutter/flutter/issues/152099
-  priv->has_gl_framebuffer_blit =
+  self->has_gl_framebuffer_blit =
       !is_nvidia() && !is_vivante() &&
       (epoxy_gl_version() >= 30 ||
        epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 
-  if (!priv->has_gl_framebuffer_blit) {
+  if (!self->has_gl_framebuffer_blit) {
     setup_shader(self);
   }
 }
@@ -635,9 +581,6 @@ void fl_renderer_render(FlRenderer* self,
                         int width,
                         int height,
                         const GdkRGBA* background_color) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
   g_return_if_fail(FL_IS_RENDERER(self));
 
   glClearColor(background_color->red, background_color->green,
@@ -645,7 +588,7 @@ void fl_renderer_render(FlRenderer* self,
   glClear(GL_COLOR_BUFFER_BIT);
 
   GPtrArray* framebuffers = reinterpret_cast<GPtrArray*>((g_hash_table_lookup(
-      priv->framebuffers_by_view_id, GINT_TO_POINTER(view_id))));
+      self->framebuffers_by_view_id, GINT_TO_POINTER(view_id))));
   if (framebuffers != nullptr) {
     render(self, framebuffers, width, height);
   }
@@ -654,12 +597,9 @@ void fl_renderer_render(FlRenderer* self,
 }
 
 void fl_renderer_cleanup(FlRenderer* self) {
-  FlRendererPrivate* priv = reinterpret_cast<FlRendererPrivate*>(
-      fl_renderer_get_instance_private(self));
-
   g_return_if_fail(FL_IS_RENDERER(self));
 
-  if (priv->program != 0) {
-    glDeleteProgram(priv->program);
+  if (self->program != 0) {
+    glDeleteProgram(self->program);
   }
 }
