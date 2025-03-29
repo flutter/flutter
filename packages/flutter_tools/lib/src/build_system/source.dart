@@ -12,7 +12,7 @@ import 'exceptions.dart';
 //                                                                  //
 //  ✨ THINKING OF MOVING/REFACTORING THIS FILE? READ ME FIRST! ✨  //
 //                                                                  //
-//  There is a link to this file in //docs/tool/Engine-artfiacts.md //
+//  There is a link to this file in //docs/tool/Engine-artifacts.md //
 //  and it would be very kind of you to update the link, if needed. //
 //                                                                  //
 //////////////////////////////////////////////////////////////////////

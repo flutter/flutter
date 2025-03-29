@@ -9,11 +9,19 @@ import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
+import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
 
-/// A target that checks that dev dependencies are enabled on debug builds and
-/// disabled on release/profile builds.
+/// Source for the .flutter-plugins-dependencies file.
+/// Must match [FlutterProject.flutterPluginsDependenciesFile].
+@visibleForTesting
+const Source flutterPluginsDependenciesSource = Source.pattern(
+  '{PROJECT_DIR}/.flutter-plugins-dependencies',
+);
+
+/// A target that checks that dev dependencies are enabled on debug/profile
+/// builds and disabled on release builds.
 ///
 /// The Flutter tool enables/disables dev dependencies using the build mode.
 /// These can get out of sync if the user switches the build mode in Xcode.
@@ -27,12 +35,14 @@ abstract class CheckDevDependencies extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  List<Source> get inputs => <Source>[
-    const Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
-    ),
-    const Source.pattern('{PROJECT_DIR}/.flutter-plugins-dependencies'),
-  ];
+  List<Source> get inputs {
+    return const <Source>[
+      Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/darwin.dart',
+      ),
+      flutterPluginsDependenciesSource,
+    ];
+  }
 
   @override
   List<Source> get outputs => const <Source>[];
@@ -42,13 +52,18 @@ abstract class CheckDevDependencies extends Target {
   @visibleForOverriding
   String get debugBuildCommand;
 
+  // The command that turns on dev dependencies.
+  // Displayed in the error message if dev dependencies are off in a profile build.
+  @visibleForOverriding
+  String get profileBuildCommand;
+
   // The command that turns off dev dependencies.
-  // Displayed in the error message if dev dependencies are off in a debug build.
+  // Displayed in the error message if dev dependencies are off in a release build.
   @visibleForOverriding
   String get releaseBuildCommand;
 
-  // Check that dev dependencies are enabled on debug builds and disabled on
-  // release or profile builds.
+  // Check that dev dependencies are enabled on debug or profile builds and
+  // disabled on release builds.
   //
   // The Flutter tool enables/disables dev dependencies using the build mode.
   // These can get out of sync if the user switches the build mode in Xcode.
@@ -118,7 +133,7 @@ abstract class CheckDevDependencies extends Target {
         '\n'
         'You can turn on Dart dev dependencies by running this in your Flutter project:\n'
         '\n'
-        '  $debugBuildCommand\n'
+        '  ${profile ? profileBuildCommand : debugBuildCommand}\n'
         '\n',
       );
       throwToolExit('Dev dependencies disabled in ${profile ? 'profile' : 'debug'} build');
@@ -128,7 +143,8 @@ abstract class CheckDevDependencies extends Target {
   // Check if the iOS project has Dart dev dependencies. On error, assumes true.
   bool _hasDevDependencies(Environment environment) {
     // If the app has no plugins, the .flutter-plugins-dependencies file isn't generated.
-    final File pluginsFile = environment.projectDir.childFile('.flutter-plugins-dependencies');
+    final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
+    final File pluginsFile = project.flutterPluginsDependenciesFile;
     if (!pluginsFile.existsSync()) {
       return false;
     }

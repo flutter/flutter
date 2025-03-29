@@ -739,20 +739,32 @@ class CheckDevDependenciesMacOS extends CheckDevDependencies {
   String get name => 'check_dev_dependencies_macos';
 
   @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart',
-    ),
+  List<Source> get inputs {
+    final FlutterProject project = FlutterProject.current();
+    final File xcodePropertiesFile = project.macos.generatedXcodePropertiesFile;
+    final String xcodePropertiesPattern = xcodePropertiesFile.path.replaceFirst(
+      project.directory.path,
+      '{PROJECT_DIR}/',
+    );
 
-    // The generated Xcode properties file contains
-    // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
-    // This target should re-run whenever that value changes.
-    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/Flutter-Generated.xcconfig'),
-  ];
+    return <Source>[
+      ...super.inputs,
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart',
+      ),
+
+      // The generated Xcode properties file contains
+      // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
+      // This target should re-run whenever that value changes.
+      Source.pattern(xcodePropertiesPattern),
+    ];
+  }
 
   @override
   String get debugBuildCommand => 'flutter build macos --config-only --debug';
+
+  @override
+  String get profileBuildCommand => 'flutter build macos --config-only --profile';
 
   @override
   String get releaseBuildCommand => 'flutter build macos --config-only --release';

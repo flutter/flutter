@@ -565,23 +565,32 @@ class CheckDevDependenciesIos extends CheckDevDependencies {
   String get name => 'check_dev_dependencies_ios';
 
   @override
-  List<Source> get inputs => <Source>[
-    ...super.inputs,
-    const Source.pattern(
-      '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
-    ),
+  List<Source> get inputs {
+    final FlutterProject project = FlutterProject.current();
+    final File xcodePropertiesFile = project.ios.generatedXcodePropertiesFile;
+    final String xcodePropertiesPattern = xcodePropertiesFile.path.replaceFirst(
+      project.directory.path,
+      '{PROJECT_DIR}/',
+    );
 
-    // The generated Xcode properties file contains
-    // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
-    // This target should re-run whenever that value changes.
-    if (FlutterProject.current().isModule)
-      const Source.pattern('{PROJECT_DIR}/.ios/Flutter/Generated.xcconfig')
-    else
-      const Source.pattern('{PROJECT_DIR}/ios/Flutter/Generated.xcconfig'),
-  ];
+    return <Source>[
+      ...super.inputs,
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+      ),
+
+      // The generated Xcode properties file contains
+      // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
+      // This target should re-run whenever that value changes.
+      Source.pattern(xcodePropertiesPattern),
+    ];
+  }
 
   @override
   String get debugBuildCommand => 'flutter build ios --config-only --debug';
+
+  @override
+  String get profileBuildCommand => 'flutter build ios --config-only --profile';
 
   @override
   String get releaseBuildCommand => 'flutter build ios --config-only --release';
@@ -598,11 +607,7 @@ abstract class IosAssetBundle extends Target {
   const IosAssetBundle();
 
   @override
-  List<Target> get dependencies => const <Target>[
-    CheckDevDependenciesIos(),
-    KernelSnapshot(),
-    InstallCodeAssets(),
-  ];
+  List<Target> get dependencies => const <Target>[KernelSnapshot(), InstallCodeAssets()];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -743,6 +748,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Target> get dependencies => <Target>[
+    const CheckDevDependenciesIos(),
     const DebugUniversalFramework(),
     const DebugIosLLDBInit(),
     ...super.dependencies,
