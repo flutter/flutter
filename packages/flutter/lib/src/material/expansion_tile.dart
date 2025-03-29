@@ -457,8 +457,8 @@ class ExpansionTile extends StatefulWidget {
 }
 
 class _ExpansionTileState extends State<ExpansionTile> {
-  static final Animatable<double> _easeInTween = CurveTween(curve: Curves.easeIn);
-  static final Animatable<double> _easeOutTween = CurveTween(curve: Curves.easeOut);
+  static final Animatable<double> _easeInTween = CurveTween(Curves.easeIn);
+  static final Animatable<double> _easeOutTween = CurveTween(Curves.easeOut);
   static final Animatable<double> _halfTween = Tween<double>(begin: 0.0, end: 0.5);
 
   final ShapeBorderTween _borderTween = ShapeBorderTween();

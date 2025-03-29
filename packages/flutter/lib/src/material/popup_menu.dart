@@ -678,9 +678,9 @@ class _PopupMenuState<T> extends State<_PopupMenu<T>> {
       );
     }
 
-    final CurveTween opacity = CurveTween(curve: const Interval(0.0, 1.0 / 3.0));
-    final CurveTween width = CurveTween(curve: Interval(0.0, unit));
-    final CurveTween height = CurveTween(curve: Interval(0.0, unit * widget.route.items.length));
+    final CurveTween opacity = CurveTween(const Interval(0.0, 1.0 / 3.0));
+    final CurveTween width = CurveTween(Interval(0.0, unit));
+    final CurveTween height = CurveTween(Interval(0.0, unit * widget.route.items.length));
 
     final Widget child = ConstrainedBox(
       constraints:

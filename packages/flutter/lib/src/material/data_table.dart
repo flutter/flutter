@@ -1344,7 +1344,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   static final Animatable<double> _turnTween = Tween<double>(
     begin: 0.0,
     end: math.pi,
-  ).chain(CurveTween(curve: Curves.easeIn));
+  ).chain(CurveTween(Curves.easeIn));
 
   @override
   void initState() {

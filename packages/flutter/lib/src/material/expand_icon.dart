@@ -124,7 +124,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   static final Animatable<double> _iconTurnTween = Tween<double>(
     begin: 0.0,
     end: 0.5,
-  ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+  ).chain(CurveTween(Curves.fastOutSlowIn));
 
   @override
   void initState() {

@@ -26,7 +26,7 @@ export 'tween.dart' show Animatable;
 ///   <TweenSequenceItem<double>>[
 ///     TweenSequenceItem<double>(
 ///       tween: Tween<double>(begin: 5.0, end: 10.0)
-///         .chain(CurveTween(curve: Curves.ease)),
+///         .chain(CurveTween( Curves.ease)),
 ///       weight: 40.0,
 ///     ),
 ///     TweenSequenceItem<double>(
@@ -35,7 +35,7 @@ export 'tween.dart' show Animatable;
 ///     ),
 ///     TweenSequenceItem<double>(
 ///       tween: Tween<double>(begin: 10.0, end: 5.0)
-///         .chain(CurveTween(curve: Curves.ease)),
+///         .chain(CurveTween( Curves.ease)),
 ///       weight: 40.0,
 ///     ),
 ///   ],
@@ -135,7 +135,7 @@ class TweenSequenceItem<T> {
   ///
   /// ```dart
   /// Tween<double>(begin: 0.0, end: 10.0)
-  ///   .chain(CurveTween(curve: Curves.ease))
+  ///   .chain(CurveTween( Curves.ease))
   /// ```
   /// {@end-tool}
   final Animatable<T> tween;
