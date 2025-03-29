@@ -258,8 +258,6 @@ class CupertinoSheetTransition extends StatefulWidget {
     final Animation<double> scaleAnimation = curvedAnimation.drive(_kScaleTween);
     curvedAnimation.dispose();
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
-
     final bool isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
     final Color overlayColor = isDarkMode ? const Color(0xFFc8c8c8) : const Color(0xFF000000);
 
@@ -347,6 +345,9 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   // Curve of secondary page which is becoming covered by another sheet.
   CurvedAnimation? _secondaryPositionCurve;
 
+  // Whether the device is in dark mode.
+  late bool _isDarkMode;
+
   @override
   void initState() {
     super.initState();
@@ -364,8 +365,18 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _isDarkMode = CupertinoTheme.brightnessOf(context) == Brightness.dark;
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
+  }
+
+  @override
   void dispose() {
     _disposeCurve();
+    SystemChrome.setSystemUIOverlayStyle(
+      _isDarkMode ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+    );
     super.dispose();
   }
 
