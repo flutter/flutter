@@ -18,18 +18,25 @@ const List<String> firstLaunchMessages = <String>[
   'Creating widget preview scaffolding at:',
   'Performing initial build of the Widget Preview Scaffold...',
   'Widget Preview Scaffold initial build complete.',
+  'Launching the Widget Preview Scaffold...',
   'Loading previews into the Widget Preview Scaffold...',
   'Done loading previews.',
 ];
 
 const List<String> subsequentLaunchMessages = <String>[
+  'Launching the Widget Preview Scaffold...',
   'Loading previews into the Widget Preview Scaffold...',
   'Done loading previews.',
 ];
 
 const List<String> firstLaunchMessagesWeb = <String>[
   'Creating widget preview scaffolding at:',
-  'Loading previews into the Widget Preview Scaffold...',
+  'Launching the Widget Preview Scaffold...',
+  'Done loading previews.',
+];
+
+const List<String> subsequentLaunchMessagesWeb = <String>[
+  'Launching the Widget Preview Scaffold...',
   'Done loading previews.',
 ];
 
@@ -61,10 +68,10 @@ void main() {
       'widget-preview',
       'start',
       '--verbose',
-      if (useWeb) ...<String>[
-        '--${WidgetPreviewStartCommand.kUseFlutterWeb}',
-        '--${WidgetPreviewStartCommand.kHeadlessWeb}',
-      ],
+      if (useWeb)
+        '--${WidgetPreviewStartCommand.kHeadlessWeb}'
+      else
+        '--${WidgetPreviewStartCommand.kUseFlutterDesktop}',
     ], workingDirectory: tempDir.path);
 
     final Completer<void> completer = Completer<void>();
@@ -123,7 +130,7 @@ void main() {
       await runWidgetPreview(expectedMessages: firstLaunchMessagesWeb, useWeb: true);
 
       // We shouldn't regenerate the scaffold after the initial run.
-      await runWidgetPreview(expectedMessages: subsequentLaunchMessages, useWeb: true);
+      await runWidgetPreview(expectedMessages: subsequentLaunchMessagesWeb, useWeb: true);
     });
   });
 }
