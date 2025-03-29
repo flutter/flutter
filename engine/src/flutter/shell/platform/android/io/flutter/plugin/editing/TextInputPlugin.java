@@ -20,9 +20,17 @@ import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
+import android.view.inputmethod.DeleteGesture;
+import android.view.inputmethod.DeleteRangeGesture;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InsertGesture;
+import android.view.inputmethod.InsertModeGesture;
+import android.view.inputmethod.JoinOrSplitGesture;
+import android.view.inputmethod.RemoveSpaceGesture;
+import android.view.inputmethod.SelectGesture;
+import android.view.inputmethod.SelectRangeGesture;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -35,7 +43,9 @@ import io.flutter.embedding.engine.systemchannels.TextInputChannel.TextEditState
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Set;
 
 /** Android implementation of the text input plugin. */
 public class TextInputPlugin implements ListenableEditingState.EditingStateWatcher {
@@ -357,10 +367,25 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
       EditorInfoCompat.setStylusHandwritingEnabled(outAttrs, true);
     }
-    // TODO(justinmc): Scribe stylus gestures should be supported here via
-    // outAttrs.setSupportedHandwritingGestures and
-    // outAttrs.setSupportedHandwritingGesturePreviews.
-    // https://github.com/flutter/flutter/issues/156018
+
+    EditorInfoCompat.setStylusHandwritingEnabled(outAttrs, true);
+    outAttrs.setSupportedHandwritingGestures(
+        Arrays.asList(
+            SelectGesture.class,
+            SelectRangeGesture.class,
+            InsertGesture.class,
+            InsertModeGesture.class,
+            DeleteGesture.class,
+            DeleteRangeGesture.class,
+            SelectRangeGesture.class,
+            JoinOrSplitGesture.class,
+            RemoveSpaceGesture.class));
+    outAttrs.setSupportedHandwritingGesturePreviews(
+        Set.of(
+            SelectGesture.class,
+            SelectRangeGesture.class,
+            DeleteGesture.class,
+            DeleteRangeGesture.class));
 
     InputConnectionAdaptor connection =
         new InputConnectionAdaptor(
