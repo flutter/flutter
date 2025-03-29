@@ -720,6 +720,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeCap,
     this.constraints,
     this.trackGap,
+    this.controller,
     @Deprecated(
       'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
       'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
@@ -751,6 +752,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     this.strokeAlign,
     this.constraints,
     this.trackGap,
+    this.controller,
     @Deprecated(
       'Set this flag to false to opt into the 2024 progress indicator appearance. Defaults to true. '
       'In the future, this flag will default to false. Use ProgressIndicatorThemeData to customize individual properties. '
@@ -868,6 +870,9 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// This is a constant for use with [strokeAlign].
   static const double strokeAlignOutside = 1.0;
 
+  /// The animation controller for the circular progress indicator.
+  final AnimationController? controller;
+
   @override
   State<CircularProgressIndicator> createState() => _CircularProgressIndicatorState();
 }
@@ -889,14 +894,16 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   );
 
   late AnimationController _controller;
+  late AnimationController _fallbackController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _fallbackController = AnimationController(
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       vsync: this,
     );
+    _controller = widget.controller ?? _fallbackController;
     if (widget.value == null) {
       _controller.repeat();
     }
@@ -905,6 +912,12 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller && _controller != widget.controller) {
+      if (oldWidget.controller == null) {
+        _controller.dispose();
+      }
+      _controller = widget.controller ?? _fallbackController;
+    }
     if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
     } else if (widget.value != null && _controller.isAnimating) {
