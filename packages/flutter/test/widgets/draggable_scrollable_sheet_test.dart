@@ -1893,7 +1893,8 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('Ensures DraggableScrollableSheet snaps exactly to minChildSize', (
+  // Regression test for https://github.com/flutter/flutter/issues/140701
+  testWidgets('DraggableScrollableSheet snaps exactly to minChildSize', (
     WidgetTester tester,
   ) async {
     double? lastExtent;

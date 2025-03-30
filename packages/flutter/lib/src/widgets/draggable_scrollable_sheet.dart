@@ -910,18 +910,18 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
     }
   }
 
-  /// Checks if the sheet's current size is close to a snap size, returning the
-  /// snap size if so; returns null otherwise.
-  double? get _currentSnapSize {
+  // Checks if the sheet's current size is close to a snap size, returning the
+  // snap size if so; returns null otherwise.
+  double? _getCurrentSnapSize() {
     return extent.snapSizes.firstWhereOrNull((double snapSize) {
       return (extent.currentSize - snapSize).abs() <=
           extent.pixelsToSize(physics.toleranceFor(this).distance);
     });
   }
 
-  bool get _isAtSnapSize => _currentSnapSize != null;
+  bool _isAtSnapSize() => _getCurrentSnapSize() != null;
 
-  bool get _shouldSnap => extent.snap && extent.hasDragged && !_isAtSnapSize;
+  bool _shouldSnap() => extent.snap && extent.hasDragged && !_isAtSnapSize();
 
   @override
   void dispose() {
@@ -934,7 +934,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
 
   @override
   void goBallistic(double velocity) {
-    if ((velocity == 0.0 && !_shouldSnap) ||
+    if ((velocity == 0.0 && !_shouldSnap()) ||
         (velocity < 0.0 && listShouldScroll) ||
         (velocity > 0.0 && extent.isAtMax)) {
       super.goBallistic(velocity);
@@ -989,7 +989,7 @@ class _DraggableScrollableSheetScrollPosition extends ScrollPositionWithSingleCo
         // Update the extent value after the snap animation completes to
         // avoid rounding errors that could prevent the sheet from closing when
         // it reaches minSize.
-        final double? snapSize = _currentSnapSize;
+        final double? snapSize = _getCurrentSnapSize();
         if (snapSize != null) {
           extent.updateSize(snapSize, context.notificationContext!);
         }
