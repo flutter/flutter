@@ -10,7 +10,7 @@ import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart' show HostPlatform;
+import 'package:flutter_tools/src/base/os.dart' show HostPlatform, OperatingSystemUtils;
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -103,8 +103,10 @@ void main() {
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+    final String arch =
+        fakeOperatingSystemUtils.hostPlatform == HostPlatform.darwin_x64 ? 'x86_64' : 'arm64';
     final String destination =
-        configuration == 'Debug' ? 'platform=macOS,arch=x86_64' : 'generic/platform=macOS';
+        configuration == 'Debug' ? 'platform=macOS,arch=$arch' : 'generic/platform=macOS';
     return FakeCommand(
       command: <String>[
         '/usr/bin/env',
@@ -902,6 +904,180 @@ STDERR STUFF
           ),
       Pub: ThrowingPub.new,
       FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    },
+  );
+
+  testUsingContext(
+    'Build with x86_64 destination on if host arch is x86_64 (debug)',
+    () async {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+      createMinimalMockProjectFiles();
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            '/usr/bin/env',
+            'xcrun',
+            'xcodebuild',
+            '-workspace',
+            flutterProject.macos.xcodeWorkspace!.path,
+            '-configuration',
+            'Debug',
+            '-scheme',
+            'Runner',
+            '-derivedDataPath',
+            flutterBuildDir.absolute.path,
+            '-destination',
+            'platform=macOS,arch=x86_64',
+            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+            '-quiet',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+        ),
+      ]);
+
+      final BuildCommand command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: fakeOperatingSystemUtils,
+      );
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: FakePubWithPrimedDeps.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => fakeOperatingSystemUtils,
+    },
+  );
+
+  testUsingContext(
+    'Build with arm64 destination on if host arch is arm64 (debug)',
+    () async {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+      createMinimalMockProjectFiles();
+      fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm64;
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            '/usr/bin/env',
+            'xcrun',
+            'xcodebuild',
+            '-workspace',
+            flutterProject.macos.xcodeWorkspace!.path,
+            '-configuration',
+            'Debug',
+            '-scheme',
+            'Runner',
+            '-derivedDataPath',
+            flutterBuildDir.absolute.path,
+            '-destination',
+            'platform=macOS,arch=arm64',
+            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+            '-quiet',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+        ),
+      ]);
+      fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm64;
+
+      final BuildCommand command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: fakeOperatingSystemUtils,
+      );
+
+      await createTestCommandRunner(
+        command,
+      ).run(const <String>['build', 'macos', '--debug', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: FakePubWithPrimedDeps.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => fakeOperatingSystemUtils,
+    },
+  );
+
+  testUsingContext(
+    'Build with generic destination in release mode',
+    () async {
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(
+        fileSystem.currentDirectory,
+      );
+      final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
+      createMinimalMockProjectFiles();
+
+      fakeProcessManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            '/usr/bin/env',
+            'xcrun',
+            'xcodebuild',
+            '-workspace',
+            flutterProject.macos.xcodeWorkspace!.path,
+            '-configuration',
+            'Release',
+            '-scheme',
+            'Runner',
+            '-derivedDataPath',
+            flutterBuildDir.absolute.path,
+            '-destination',
+            'generic/platform=macOS',
+            'OBJROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+            'SYMROOT=${fileSystem.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+            '-quiet',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+        ),
+      ]);
+
+      final BuildCommand command = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: fakeOperatingSystemUtils,
+      );
+
+      await createTestCommandRunner(command).run(const <String>['build', 'macos', '--no-pub']);
+
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Platform: () => macosPlatform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => fakeProcessManager,
+      Pub: FakePubWithPrimedDeps.new,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+      XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      OperatingSystemUtils: () => fakeOperatingSystemUtils,
     },
   );
 }
