@@ -1,0 +1,19 @@
+name : pubspec
+
+version: 1.2.3
+homepage: https://example-pet-store.com/newtify
+documentation: https://example-pet-store.com/newtify/docs
+
+environment:
+  sdk: '^3.7.0'
+  
+dependencies:
+  http: ^0.13.4
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+
+  
+dev_dependencies:
+  test: '>=1.15.0 <2.0.0'
