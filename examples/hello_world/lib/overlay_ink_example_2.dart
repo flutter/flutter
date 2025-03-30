@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [Overlay].
 
-void main() => runApp(const OverlayApp());
+void main() {
+  // debugRepaintRainbowEnabled = true;
+  // debugPrintMarkNeedsLayoutStacks = true;
+  // debugPrintMarkNeedsPaintStacks = true;
+  // debugPrintLayouts = true;
+  runApp(const OverlayApp());
+}
 
 class OverlayApp extends StatelessWidget {
   const OverlayApp({super.key});
@@ -21,9 +27,6 @@ class OverlayExample extends StatefulWidget {
 }
 
 class _OverlayExampleState extends State<OverlayExample> {
-  // Add the OverlayEntry to the Overlay.
-  // Overlay.of(context, debugRequiredFor: widget).insert(overlayEntry!);
-
   @override
   void dispose() {
     super.dispose();
@@ -31,25 +34,27 @@ class _OverlayExampleState extends State<OverlayExample> {
 
   @override
   Widget build(BuildContext context) {
-    return Overlay(
-      initialEntries: [
-        OverlayEntry(
-          builder:
-              (BuildContext context) => Scaffold(
-                appBar: AppBar(title: Text('Entry A')),
-                body: Ink(child: Container(width: 333, height: 333, color: Colors.red)),
-              ),
-          opaque: true,
-        ),
-        OverlayEntry(
-          builder:
-              (BuildContext context) => Scaffold(
-                appBar: AppBar(title: Text('Entry B')),
-                body: Ink(child: Container(width: 222, height: 222, color: Colors.blue)),
-              ),
-          opaque: true,
-        ),
-      ],
+    return Material(
+      child: Overlay(
+        initialEntries: [
+          OverlayEntry(
+            builder: (BuildContext context) {
+              return Ink(child: Container(width: 111, height: 112, color: Colors.red));
+            },
+            opaque: true,
+            canSizeOverlay: true,
+            maintainState: true,
+          ),
+          OverlayEntry(
+            builder: (BuildContext context) {
+              return Container(width: 222, height: 223, color: Colors.blue);
+            },
+            opaque: true,
+            canSizeOverlay: true,
+            maintainState: true,
+          ),
+        ],
+      ),
     );
   }
 }
