@@ -16,6 +16,8 @@ G_DECLARE_DERIVABLE_TYPE(FlCompositor, fl_compositor, FL, COMPOSITOR, GObject)
 struct _FlCompositorClass {
   GObjectClass parent_class;
 
+  FlutterRendererType (*get_renderer_type)(FlCompositor* compositor);
+
   gboolean (*create_backing_store)(FlCompositor* compositor,
                                    const FlutterBackingStoreConfig* config,
                                    FlutterBackingStore* backing_store_out);
@@ -38,6 +40,16 @@ struct _FlCompositorClass {
  *
  * #FlCompositor is an abstract class that implements Flutter compositing.
  */
+
+/**
+ * fl_compositor_get_renderer_type:
+ * @compositor: an #FlCompositor.
+ *
+ * Gets the rendering method this compositor uses.
+ *
+ * Returns: a FlutterRendererType.
+ */
+FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* compositor);
 
 /**
  * fl_compositor_create_backing_store:
