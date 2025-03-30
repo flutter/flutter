@@ -755,122 +755,6 @@ void main() {
         expect(testLogger.traceText, contains('project.pbxproj already migrated. Skipping...'));
       });
 
-      testWithoutContext('skips Runner PBXNativeTarget migration if already migrated', () async {
-        final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-        final BufferLogger testLogger = BufferLogger.test();
-        const SupportedPlatform platform = SupportedPlatform.ios;
-        final FakeXcodeProject project = FakeXcodeProject(
-          platform: platform.name,
-          fileSystem: memoryFileSystem,
-          logger: testLogger,
-        );
-
-        _createProjectFiles(project, platform, createSchemeFile: false);
-        project.xcodeProjectSchemeFile().createSync(recursive: true);
-        project.xcodeProjectSchemeFile().writeAsStringSync(
-          _validBuildActions(platform, hasFrameworkScript: true),
-        );
-
-        // Replace the PBXNativeTarget section with the migrated variant, so that the migration skips it.
-        final List<String> pbxprojSections = _allSectionsUnmigrated(platform);
-        pbxprojSections[_nativeTargetSectionIndex] = migratedNativeTargetSection(platform);
-
-        project.xcodeProjectInfoFile.writeAsStringSync(_projectSettings(pbxprojSections));
-
-        final List<String> settingsAsJsonBeforeMigration = <String>[
-          ..._allSectionsUnmigratedAsJson(platform),
-        ];
-        settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
-            migratedNativeTargetSectionAsJson(platform);
-        settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
-
-        final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
-          _plutilOutput(settingsAsJsonBeforeMigration),
-          _plutilOutput(_allSectionsMigratedAsJson(platform)),
-        ]);
-
-        final SwiftPackageManagerIntegrationMigration projectMigration =
-            SwiftPackageManagerIntegrationMigration(
-              project,
-              platform,
-              BuildInfo.debug,
-              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-              logger: testLogger,
-              fileSystem: memoryFileSystem,
-              plistParser: plistParser,
-              features: swiftPackageManagerFullyEnabledFlags,
-            );
-
-        await projectMigration.migrate();
-
-        expect(testLogger.traceText, contains('PBXNativeTargets already migrated. Skipping...'));
-      });
-
-      testWithoutContext(
-        'skips PBXNativeTarget migration if all targets already migrated',
-        () async {
-          final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-          final BufferLogger testLogger = BufferLogger.test();
-          const SupportedPlatform platform = SupportedPlatform.ios;
-          final FakeXcodeProject project = FakeXcodeProject(
-            platform: platform.name,
-            fileSystem: memoryFileSystem,
-            logger: testLogger,
-          );
-
-          _createProjectFiles(project, platform, createSchemeFile: false);
-          project.xcodeProjectSchemeFile().createSync(recursive: true);
-          project.xcodeProjectSchemeFile().writeAsStringSync(
-            _validBuildActions(platform, hasFrameworkScript: true),
-          );
-
-          // Replace the PBXNativeTarget section with the migrated two target variant,
-          // so that the migration skips it.
-          final List<String> pbxprojSections = _allSectionsUnmigrated(platform);
-          pbxprojSections[_nativeTargetSectionIndex] = migratedRunnerAndMigratedOtherTargetSection(
-            platform,
-          );
-
-          project.xcodeProjectInfoFile.writeAsStringSync(_projectSettings(pbxprojSections));
-
-          final List<String> settingsAsJsonBeforeMigration = <String>[
-            ..._allSectionsUnmigratedAsJson(platform),
-          ];
-
-          settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
-              migratedRunnerAndMigratedOtherTargetSectionAsJson(platform);
-
-          settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
-
-          final List<String> settingsAsJsonAfterMigration = <String>[
-            ..._allSectionsMigratedAsJson(platform),
-          ];
-          settingsAsJsonAfterMigration[_nativeTargetSectionIndex] =
-              migratedRunnerAndMigratedOtherTargetSectionAsJson(platform);
-
-          final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
-            _plutilOutput(settingsAsJsonBeforeMigration),
-            _plutilOutput(settingsAsJsonAfterMigration),
-          ]);
-
-          final SwiftPackageManagerIntegrationMigration projectMigration =
-              SwiftPackageManagerIntegrationMigration(
-                project,
-                platform,
-                BuildInfo.debug,
-                xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                logger: testLogger,
-                fileSystem: memoryFileSystem,
-                plistParser: plistParser,
-                features: swiftPackageManagerFullyEnabledFlags,
-              );
-
-          await projectMigration.migrate();
-
-          expect(testLogger.traceText, contains('PBXNativeTargets already migrated. Skipping...'));
-        },
-      );
-
       testWithoutContext('fails if unmigrated custom target is detected', () async {
         final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
         final BufferLogger testLogger = BufferLogger.test();
@@ -1996,7 +1880,128 @@ void main() {
                 expect(plistParser.hasRemainingExpectations, isFalse);
               },
             );
-          });
+
+            testWithoutContext(
+              'skips PBXNativeTarget migration if all targets already migrated',
+              () async {
+                final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+                final BufferLogger testLogger = BufferLogger.test();
+                final FakeXcodeProject project = FakeXcodeProject(
+                  platform: platform.name,
+                  fileSystem: memoryFileSystem,
+                  logger: testLogger,
+                );
+
+                _createProjectFiles(project, platform, createSchemeFile: false);
+                project.xcodeProjectSchemeFile().createSync(recursive: true);
+                project.xcodeProjectSchemeFile().writeAsStringSync(
+                  _validBuildActions(platform, hasFrameworkScript: true),
+                );
+
+                // Replace the PBXNativeTarget section with the migrated two target variant,
+                // so that the migration skips it.
+                final List<String> pbxprojSections = _allSectionsUnmigrated(platform);
+                pbxprojSections[_nativeTargetSectionIndex] =
+                    migratedRunnerAndMigratedOtherTargetSection(platform);
+
+                project.xcodeProjectInfoFile.writeAsStringSync(_projectSettings(pbxprojSections));
+
+                final List<String> settingsAsJsonBeforeMigration = <String>[
+                  ..._allSectionsUnmigratedAsJson(platform),
+                ];
+
+                settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
+                    migratedRunnerAndMigratedOtherTargetSectionAsJson(platform);
+
+                settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
+
+                final List<String> settingsAsJsonAfterMigration = <String>[
+                  ..._allSectionsMigratedAsJson(platform),
+                ];
+                settingsAsJsonAfterMigration[_nativeTargetSectionIndex] =
+                    migratedRunnerAndMigratedOtherTargetSectionAsJson(platform);
+
+                final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+                  _plutilOutput(settingsAsJsonBeforeMigration),
+                  _plutilOutput(settingsAsJsonAfterMigration),
+                ]);
+
+                final SwiftPackageManagerIntegrationMigration projectMigration =
+                    SwiftPackageManagerIntegrationMigration(
+                      project,
+                      platform,
+                      BuildInfo.debug,
+                      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                      logger: testLogger,
+                      fileSystem: memoryFileSystem,
+                      plistParser: plistParser,
+                      features: swiftPackageManagerFullyEnabledFlags,
+                    );
+
+                await projectMigration.migrate();
+
+                expect(
+                  testLogger.traceText,
+                  contains('PBXNativeTargets already migrated. Skipping...'),
+                );
+              },
+            );
+
+            testWithoutContext(
+              'skips Runner PBXNativeTarget migration if already migrated',
+              () async {
+                final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+                final BufferLogger testLogger = BufferLogger.test();
+                final FakeXcodeProject project = FakeXcodeProject(
+                  platform: platform.name,
+                  fileSystem: memoryFileSystem,
+                  logger: testLogger,
+                );
+
+                _createProjectFiles(project, platform, createSchemeFile: false);
+                project.xcodeProjectSchemeFile().createSync(recursive: true);
+                project.xcodeProjectSchemeFile().writeAsStringSync(
+                  _validBuildActions(platform, hasFrameworkScript: true),
+                );
+
+                // Replace the PBXNativeTarget section with the migrated variant, so that the migration skips it.
+                final List<String> pbxprojSections = _allSectionsUnmigrated(platform);
+                pbxprojSections[_nativeTargetSectionIndex] = migratedNativeTargetSection(platform);
+
+                project.xcodeProjectInfoFile.writeAsStringSync(_projectSettings(pbxprojSections));
+
+                final List<String> settingsAsJsonBeforeMigration = <String>[
+                  ..._allSectionsUnmigratedAsJson(platform),
+                ];
+                settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
+                    migratedNativeTargetSectionAsJson(platform);
+                settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
+
+                final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
+                  _plutilOutput(settingsAsJsonBeforeMigration),
+                  _plutilOutput(_allSectionsMigratedAsJson(platform)),
+                ]);
+
+                final SwiftPackageManagerIntegrationMigration projectMigration =
+                    SwiftPackageManagerIntegrationMigration(
+                      project,
+                      platform,
+                      BuildInfo.debug,
+                      xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                      logger: testLogger,
+                      fileSystem: memoryFileSystem,
+                      plistParser: plistParser,
+                      features: swiftPackageManagerFullyEnabledFlags,
+                    );
+
+                await projectMigration.migrate();
+
+                expect(
+                  testLogger.traceText,
+                  contains('PBXNativeTargets already migrated. Skipping...'),
+                );
+              },
+            );
 
           group('migrate PBXProject', () {
             testWithoutContext('fails if missing PBXProject section', () async {
