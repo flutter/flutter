@@ -357,6 +357,17 @@ class Canvas {
                                Size corner_radii,
                                const Paint& paint);
 
+  /// For simple DrawImageRect calls, optimize any draws with a color filter
+  /// into the corresponding atlas draw.
+  ///
+  /// Returns whether not the optimization was applied.
+  bool AttemptColorFilterOptimization(const std::shared_ptr<Texture>& image,
+                                      Rect source,
+                                      Rect dest,
+                                      const Paint& paint,
+                                      const SamplerDescriptor& sampler,
+                                      SourceRectConstraint src_rect_constraint);
+
   RenderPass& GetCurrentRenderPass() const;
 
   Canvas(const Canvas&) = delete;
