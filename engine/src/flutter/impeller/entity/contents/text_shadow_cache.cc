@@ -1,0 +1,87 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#include "impeller/entity/contents/text_shadow_cache.h"
+
+#include "fml/closure.h"
+#include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/contents.h"
+#include "impeller/entity/contents/filters/filter_contents.h"
+
+namespace impeller {
+
+void TextShadowCache::MarkFrameStart() {
+  for (auto& entry : entries_) {
+    entry.second.used_this_frame = false;
+  }
+}
+
+void TextShadowCache::MarkFrameEnd() {
+  std::vector<TextShadowCacheKey> to_remove;
+  for (auto& entry : entries_) {
+    if (!entry.second.used_this_frame) {
+      to_remove.push_back(entry.first);
+    }
+  }
+  for (const auto& key : to_remove) {
+    entries_.erase(key);
+  }
+}
+
+std::optional<Entity> TextShadowCache::Lookup(
+    const ContentContext& renderer,
+    const Entity& entity,
+    const std::shared_ptr<FilterContents>& contents,
+    const TextShadowCacheKey& text_key) {
+  std::unordered_map<TextShadowCacheKey, TextShadowCacheData>::iterator it =
+      entries_.find(text_key);
+
+  if (it != entries_.end()) {
+    it->second.used_this_frame = true;
+    Entity cache_entity = it->second.entity.Clone();
+    cache_entity.SetClipDepth(entity.GetClipDepth());
+    cache_entity.SetTransform(entity.GetTransform() * it->second.key_matrix);
+    return cache_entity;
+  }
+
+  std::optional<Rect> filter_coverage = contents->GetCoverage(entity);
+  if (!filter_coverage.has_value()) {
+    return std::nullopt;
+  }
+
+  // Execute the filter to produce a snapshot that can be resued on subsequent
+  // frames. To prevent this texture from being re-used by the render target
+  // cache, we temporarily disable any RT caching.
+  renderer.GetRenderTargetCache()->Disable();
+  fml::ScopedCleanupClosure closure(
+      [&] { renderer.GetRenderTargetCache()->Enable(); });
+  std::optional<Entity> maybe_entity =
+      contents->GetEntity(renderer, entity, contents->GetCoverageHint());
+  if (!maybe_entity.has_value()) {
+    return std::nullopt;
+  }
+
+  // The original entity has a transform matrix A. The snapshot entity has a
+  // transform matrix B. We need a function that converts A to B, so that if we
+  // render an entity with a slightly different transform matrix A', it appears
+  // in the correct position.
+  //   A * K = B
+  //   A-1 * A * K = A-1 * B
+  //   K = A-1 * B
+  //
+  // The transform matrix K can be computed by inverse A times B. Multiplying
+  // any subsequent entity transforms by this matrix will correctly position
+  // them.
+  Matrix key_matrix =
+      entity.GetTransform().Invert() * maybe_entity->GetTransform();
+  entries_[text_key] =
+      TextShadowCacheData{.entity = maybe_entity.value().Clone(),
+                          .used_this_frame = true,
+                          .key_matrix = key_matrix};
+
+  maybe_entity->SetClipDepth(entity.GetClipDepth());
+  return maybe_entity;
+}
+
+}  // namespace impeller

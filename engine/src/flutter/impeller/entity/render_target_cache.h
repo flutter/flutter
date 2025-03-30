@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_ENTITY_RENDER_TARGET_CACHE_H_
 
 #include <string_view>
+
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
@@ -26,6 +27,12 @@ class RenderTargetCache : public RenderTargetAllocator {
 
   // |RenderTargetAllocator|
   void End() override;
+
+  // |RenderTargetAllocator|
+  void Disable() override;
+
+  // |RenderTargetAllocator|
+  void Enable() override;
 
   RenderTarget CreateOffscreen(
       const Context& context,
@@ -67,6 +74,7 @@ class RenderTargetCache : public RenderTargetAllocator {
 
   std::vector<RenderTargetData> render_target_data_;
   uint32_t keep_alive_frame_count_;
+  uint32_t cache_disabled_count_ = 0;
 
   RenderTargetCache(const RenderTargetCache&) = delete;
 

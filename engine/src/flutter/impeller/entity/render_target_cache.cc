@@ -14,12 +14,14 @@ RenderTargetCache::RenderTargetCache(std::shared_ptr<Allocator> allocator,
       keep_alive_frame_count_(keep_alive_frame_count) {}
 
 void RenderTargetCache::Start() {
+  cache_disabled_count_ = 0;
   for (auto& td : render_target_data_) {
     td.used_this_frame = false;
   }
 }
 
 void RenderTargetCache::End() {
+  cache_disabled_count_ = 0;
   std::vector<RenderTargetData> retain;
 
   for (RenderTargetData& td : render_target_data_) {
@@ -31,6 +33,17 @@ void RenderTargetCache::End() {
     }
   }
   render_target_data_.swap(retain);
+}
+
+void RenderTargetCache::Disable() {
+  cache_disabled_count_++;
+}
+
+void RenderTargetCache::Enable() {
+  if (cache_disabled_count_ == 0) {
+    return;
+  }
+  cache_disabled_count_--;
 }
 
 RenderTarget RenderTargetCache::CreateOffscreen(
@@ -54,19 +67,22 @@ RenderTarget RenderTargetCache::CreateOffscreen(
       .has_msaa = false,
       .has_depth_stencil = stencil_attachment_config.has_value(),
   };
-  for (RenderTargetData& render_target_data : render_target_data_) {
-    const RenderTargetConfig other_config = render_target_data.config;
-    if (!render_target_data.used_this_frame && other_config == config) {
-      render_target_data.used_this_frame = true;
-      render_target_data.keep_alive_frame_count = keep_alive_frame_count_;
-      ColorAttachment color0 =
-          render_target_data.render_target.GetColorAttachment(0);
-      std::optional<DepthAttachment> depth =
-          render_target_data.render_target.GetDepthAttachment();
-      std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
-      return RenderTargetAllocator::CreateOffscreen(
-          context, size, mip_count, label, color_attachment_config,
-          stencil_attachment_config, color0.texture, depth_tex);
+
+  if (cache_disabled_count_ == 0) {
+    for (RenderTargetData& render_target_data : render_target_data_) {
+      const RenderTargetConfig other_config = render_target_data.config;
+      if (!render_target_data.used_this_frame && other_config == config) {
+        render_target_data.used_this_frame = true;
+        render_target_data.keep_alive_frame_count = keep_alive_frame_count_;
+        ColorAttachment color0 =
+            render_target_data.render_target.GetColorAttachment(0);
+        std::optional<DepthAttachment> depth =
+            render_target_data.render_target.GetDepthAttachment();
+        std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
+        return RenderTargetAllocator::CreateOffscreen(
+            context, size, mip_count, label, color_attachment_config,
+            stencil_attachment_config, color0.texture, depth_tex);
+      }
     }
   }
   RenderTarget created_target = RenderTargetAllocator::CreateOffscreen(
@@ -107,20 +123,22 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
       .has_msaa = true,
       .has_depth_stencil = stencil_attachment_config.has_value(),
   };
-  for (RenderTargetData& render_target_data : render_target_data_) {
-    const RenderTargetConfig other_config = render_target_data.config;
-    if (!render_target_data.used_this_frame && other_config == config) {
-      render_target_data.used_this_frame = true;
-      render_target_data.keep_alive_frame_count = keep_alive_frame_count_;
-      ColorAttachment color0 =
-          render_target_data.render_target.GetColorAttachment(0);
-      std::optional<DepthAttachment> depth =
-          render_target_data.render_target.GetDepthAttachment();
-      std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
-      return RenderTargetAllocator::CreateOffscreenMSAA(
-          context, size, mip_count, label, color_attachment_config,
-          stencil_attachment_config, color0.texture, color0.resolve_texture,
-          depth_tex);
+  if (cache_disabled_count_ == 0) {
+    for (RenderTargetData& render_target_data : render_target_data_) {
+      const RenderTargetConfig other_config = render_target_data.config;
+      if (!render_target_data.used_this_frame && other_config == config) {
+        render_target_data.used_this_frame = true;
+        render_target_data.keep_alive_frame_count = keep_alive_frame_count_;
+        ColorAttachment color0 =
+            render_target_data.render_target.GetColorAttachment(0);
+        std::optional<DepthAttachment> depth =
+            render_target_data.render_target.GetDepthAttachment();
+        std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
+        return RenderTargetAllocator::CreateOffscreenMSAA(
+            context, size, mip_count, label, color_attachment_config,
+            stencil_attachment_config, color0.texture, color0.resolve_texture,
+            depth_tex);
+      }
     }
   }
   RenderTarget created_target = RenderTargetAllocator::CreateOffscreenMSAA(
