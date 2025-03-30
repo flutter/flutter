@@ -620,6 +620,8 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   @override
   void paint(PaintingContext context, Offset offset) {
     final List<InkFeature>? inkFeatures = _inkFeatures;
+    print('Call paint: ${inkFeatures?.length}: ${describeIdentity(this)}');
+    // print('firstLayoutedParent: ${}, ');
     if (inkFeatures != null && inkFeatures.isNotEmpty) {
       final Canvas canvas = context.canvas;
       canvas.save();
@@ -767,22 +769,26 @@ abstract class InkFeature {
   RenderObject? _getFirstLayoutedParent(RenderObject renderObject) {
     final parent = renderObject.parent;
     if (parent == null) return null;
+    print('parent: ${parent}, ');
     if (parent is RenderBox && parent.hasSize) return parent;
     return _getFirstLayoutedParent(parent);
   }
 
   void _paint(Canvas canvas) {
+
     // Ignore render objects which have not been laid out.
     // if (!referenceBox.hasSize) {
     //   return;
     // }
+
+      print('Size: ${referenceBox.size}');
     // If we don't want to allow unlayouted renderboxes to be ignored, we should narrow the error down:
-    if (!referenceBox.hasSize) {
-      // TODO(gustl22): Should we extract the causing widget from the [referenceBox.debugCreator.element.widget] ?
-      final RenderObject? firstLayoutedParent = _getFirstLayoutedParent(referenceBox);
-      assert(referenceBox.hasSize,
-          'paint() has been called before the child was laid out. The first parent in the tree which was layouted is: $firstLayoutedParent');
-    }
+    // if (!referenceBox.hasSize) {
+    //   // TODO(gustl22): Should we extract the causing widget from the [referenceBox.debugCreator.element.widget] ?
+
+    //   assert(referenceBox.hasSize,
+    //   'paint() has been called before the child was laid out. The first parent in the tree which was layouted is: $firstLayoutedParent');
+    // }
 
     assert(referenceBox.attached);
     assert(!_debugDisposed);

@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  // debugRepaintRainbowEnabled = true;
+  // debugPrintMarkNeedsLayoutStacks = true;
+  // debugPrintMarkNeedsPaintStacks = true;
+  // debugPrintLayouts = true;
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -15,30 +21,25 @@ class MyApp extends StatelessWidget {
       routes: [
         ShellRoute(
           builder: (context, state, navigationShell) {
-            // return Scaffold(body: const ListTile(title: Text('someText'))); // Does work
-            return Scaffold(
-              appBar: AppBar(title: Text(state.fullPath ?? '')),
-              body: navigationShell,
-            ); // Does not work
+            return Material(child: navigationShell);
           },
           routes: [
             GoRoute(
               path: '/root',
               builder: (context, __) {
-                final visibility = Visibility.of(context);
-                print('visibility root: $visibility');
-                // return Container(width: 111, height: 112, color: Colors.red);
-                return Ink(child: InkWell(onTap: () => context.push('/root/sub'), child: Container(width: 111, height: 112, color: Colors.red)));
+                return Ink(
+                  child: InkWell(
+                    onTap: () => context.push('/root/sub'),
+                    child: Container(width: 111, height: 112, color: Colors.red),
+                  ),
+                );
               },
               routes: [
                 // Must be nested, so layouts are stacked on top
                 GoRoute(
                   path: 'sub',
                   builder: (context, __) {
-                    final visibility = Visibility.of(context);
-                    print('visibility child: $visibility');
                     return Container(width: 222, height: 223, color: Colors.blue);
-                    return const Text('subA');
                   },
                 ),
               ],
@@ -48,42 +49,6 @@ class MyApp extends StatelessWidget {
       ],
     );
 
-    // Surprisingly this is working:
-    // return MaterialApp(
-    //   routes: {
-    //     '/root':
-    //         (BuildContext context) => Scaffold(
-    //           appBar: AppBar(),
-    //           body: Ink(child: Container(width: 111, height: 112, color: Colors.red)),
-    //         ),
-    //     '/root/sub':
-    //         (BuildContext context) => Scaffold(
-    //           appBar: AppBar(),
-    //           body: Ink(child: Container(width: 222, height: 223, color: Colors.blue)),
-    //         ),
-    //   },
-    //   initialRoute: '/root/sub',
-    // );
-
     return MaterialApp.router(routerConfig: router);
-  }
-}
-
-class OverlayExample extends StatefulWidget {
-  const OverlayExample({super.key});
-
-  @override
-  State<OverlayExample> createState() => _OverlayExampleState();
-}
-
-class _OverlayExampleState extends State<OverlayExample> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Ink(child: Container(width: 222, height: 222, color: Colors.blue)));
   }
 }
