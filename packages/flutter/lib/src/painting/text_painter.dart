@@ -561,8 +561,6 @@ class _LineCaretMetrics {
   }
 }
 
-const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
-
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -585,8 +583,9 @@ const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
 /// changes, return to step 2. If the text to be painted changes,
 /// return to step 1.
 ///
-/// The default text style is white. To change the color of the text,
-/// pass a [TextStyle] object to the [TextSpan] in `text`.
+/// The default text style color is white on non-web platforms and black on
+/// the web. If developing across both platforms, always set the text color
+/// explicitly.
 class TextPainter {
   /// Creates a text painter that paints the given text.
   ///
@@ -628,15 +627,7 @@ class TextPainter {
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis,
        _textHeightBehavior = textHeightBehavior {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterPaintingLibrary,
-        className: '$TextPainter',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', 'TextPainter', this));
   }
 
   /// Computes the width of a configured [TextPainter].
@@ -1786,11 +1777,7 @@ class TextPainter {
       _disposed = true;
       return true;
     }());
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _layoutTemplate?.dispose();
     _layoutTemplate = null;
     _layoutCache?.paragraph.dispose();

@@ -79,7 +79,7 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   };
 
   auto context = impeller::ContextGLES::Create(
-      std::move(proc_table),
+      impeller::Flags{}, std::move(proc_table),
       is_gles3 ? gles3_shader_mappings : gles2_shader_mappings,
       enable_gpu_tracing);
   if (!context) {
@@ -102,7 +102,7 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
       reactor_worker_(std::shared_ptr<ReactorWorker>(new ReactorWorker())),
       display_(std::move(display)) {
   if (!display_ || !display_->IsValid()) {
-    FML_DLOG(ERROR) << "Could not create context with invalid EGL display.";
+    FML_LOG(ERROR) << "Could not create context with invalid EGL display.";
     return;
   }
 
@@ -130,7 +130,7 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
       FML_LOG(INFO) << "Warning: This device doesn't support MSAA for onscreen "
                        "framebuffers. Falling back to a single sample.";
     } else {
-      FML_DLOG(ERROR) << "Could not choose onscreen config.";
+      FML_LOG(ERROR) << "Could not choose onscreen config.";
       return;
     }
   }
@@ -138,20 +138,20 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
   desc.surface_type = impeller::egl::SurfaceType::kPBuffer;
   auto offscreen_config = display_->ChooseConfig(desc);
   if (!offscreen_config) {
-    FML_DLOG(ERROR) << "Could not choose offscreen config.";
+    FML_LOG(ERROR) << "Could not choose offscreen config.";
     return;
   }
 
   auto onscreen_context = display_->CreateContext(*onscreen_config, nullptr);
   if (!onscreen_context) {
-    FML_DLOG(ERROR) << "Could not create onscreen context.";
+    FML_LOG(ERROR) << "Could not create onscreen context.";
     return;
   }
 
   auto offscreen_context =
       display_->CreateContext(*offscreen_config, onscreen_context.get());
   if (!offscreen_context) {
-    FML_DLOG(ERROR) << "Could not create offscreen context.";
+    FML_LOG(ERROR) << "Could not create offscreen context.";
     return;
   }
 
@@ -160,7 +160,7 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
   auto offscreen_surface =
       display_->CreatePixelBufferSurface(*offscreen_config, 1u, 1u);
   if (!offscreen_context->MakeCurrent(*offscreen_surface)) {
-    FML_DLOG(ERROR) << "Could not make offscreen context current.";
+    FML_LOG(ERROR) << "Could not make offscreen context current.";
     return;
   }
 
@@ -168,12 +168,12 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
       CreateImpellerContext(reactor_worker_, enable_gpu_tracing);
 
   if (!impeller_context) {
-    FML_DLOG(ERROR) << "Could not create Impeller context.";
+    FML_LOG(ERROR) << "Could not create Impeller context.";
     return;
   }
 
   if (!offscreen_context->ClearCurrent()) {
-    FML_DLOG(ERROR) << "Could not clear offscreen context.";
+    FML_LOG(ERROR) << "Could not clear offscreen context.";
     return;
   }
   // Setup context listeners.
@@ -191,7 +191,7 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
       };
   if (!onscreen_context->AddLifecycleListener(listener).has_value() ||
       !offscreen_context->AddLifecycleListener(listener).has_value()) {
-    FML_DLOG(ERROR) << "Could not add lifecycle listeners";
+    FML_LOG(ERROR) << "Could not add lifecycle listeners";
   }
 
   onscreen_config_ = std::move(onscreen_config);

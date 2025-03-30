@@ -505,15 +505,7 @@ class TrainHoppingAnimation extends Animation<double>
     this._nextTrain, {
     this.onSwitchedTrain,
   }) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/animation.dart',
-        className: '$TrainHoppingAnimation',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('animation', 'TrainHoppingAnimation', this));
     if (_nextTrain != null) {
       if (_currentTrain!.value == _nextTrain!.value) {
         _currentTrain = _nextTrain;
@@ -598,11 +590,7 @@ class TrainHoppingAnimation extends Animation<double>
   /// After this is called, this object is no longer usable.
   @override
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     assert(_currentTrain != null);
     _currentTrain!.removeStatusListener(_statusChangeHandler);
     _currentTrain!.removeListener(_valueChangeHandler);

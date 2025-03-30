@@ -19,6 +19,7 @@ import 'package:test_api/fake.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 
 void main() {
   group('WidgetPreviewStartCommand', () {
@@ -58,6 +59,8 @@ void main() {
       'can create a pubspec.yaml for the preview scaffold including root project assets',
       () {
         final FlutterManifest root = rootProject.manifest;
+        final FlutterManifest emptyPreviewManifest =
+            rootProject.widgetPreviewScaffoldProject.manifest;
         final FlutterManifest updated = command.buildPubspec(
           rootManifest: rootProject.manifest,
           widgetPreviewManifest: rootProject.widgetPreviewScaffoldProject.manifest,
@@ -72,9 +75,28 @@ void main() {
           expect(updatedEntry, WidgetPreviewStartCommand.transformAssetsEntry(rootEntry));
         }
 
-        expect(updated.fonts.length, root.fonts.length);
-        for (int i = 0; i < root.fonts.length; ++i) {
-          final Font rootFont = root.fonts[i];
+        final int emptyPreviewFontCount = emptyPreviewManifest.fonts.length;
+        final int expectedFontCount = root.fonts.length + emptyPreviewFontCount;
+        expect(updated.fonts.length, expectedFontCount);
+
+        // Verify that the updated preview scaffold pubspec includes fonts needed by
+        // the previewer.
+        for (int i = 0; i < emptyPreviewFontCount; ++i) {
+          final Font defaultPreviewerFont = emptyPreviewManifest.fonts[i];
+          final Font updatedFont = updated.fonts[i];
+          expect(updatedFont.familyName, defaultPreviewerFont.familyName);
+          expect(updatedFont.fontAssets.length, defaultPreviewerFont.fontAssets.length);
+          for (int j = 0; j < defaultPreviewerFont.fontAssets.length; ++j) {
+            final FontAsset rootFontAsset = defaultPreviewerFont.fontAssets[j];
+            final FontAsset updatedFontAsset = updatedFont.fontAssets[j];
+            expect(updatedFontAsset.descriptor, rootFontAsset.descriptor);
+          }
+        }
+
+        // Verify fonts from the root project are included in the updated preview
+        // scaffold pubspec.
+        for (int i = emptyPreviewFontCount; i < expectedFontCount; ++i) {
+          final Font rootFont = root.fonts[i - emptyPreviewFontCount];
           final Font updatedFont = updated.fonts[i];
           expect(updatedFont.familyName, rootFont.familyName);
           expect(updatedFont.fontAssets.length, rootFont.fontAssets.length);
@@ -174,19 +196,6 @@ flutter:
                 - deferredComponentArg
         - path: package/deferredComponentUri''';
 
-  static const String basicPackageConfig = '''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "test",
-      "rootUri": "fileSystem.currentDirectory.path",
-      "packageUri": "lib/"
-    }
-  ]
-}
-''';
-
   final String projectRoot;
   final FileSystem fileSystem;
   final Logger logger;
@@ -212,10 +221,9 @@ flutter:
 
   @override
   late final File packageConfig = () {
-    final File file = fileSystem
-      .directory(fileSystem.path.join(projectRoot, '.dart_tool'))
-      .childFile('package_config.json')..createSync(recursive: true);
-    file.writeAsStringSync(basicPackageConfig);
-    return file;
+    return writePackageConfigFile(
+      directory: fileSystem.directory(projectRoot),
+      mainLibName: 'my_app',
+    );
   }();
 }

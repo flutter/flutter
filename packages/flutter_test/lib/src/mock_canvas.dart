@@ -289,6 +289,43 @@ abstract class PaintPattern {
     PaintingStyle style,
   });
 
+  /// Indicates that a rounded superellipse is expected next.
+  ///
+  /// The next rounded superellipse is examined. Any arguments that are passed
+  /// to this method are compared to the actual [Canvas.drawRSuperellipse]
+  /// call's arguments and any mismatches result in failure.
+  ///
+  /// If no call to [Canvas.drawRSuperellipse] was made, then this results in
+  /// failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawRSuperellipse] call are ignored.
+  ///
+  /// The [Paint]-related arguments (`color`, `strokeWidth`, `hasMaskFilter`)
+  /// are compared against the state of the [Paint] object after the
+  /// painting has completed, not at the time of the call. If the same [Paint]
+  /// object is reused multiple times, then this may not match the actual
+  /// arguments as they were seen by the method.
+  void rsuperellipse({
+    RSuperellipse? rsuperellipse,
+    Color? color,
+    double? strokeWidth,
+    bool? hasMaskFilter,
+  });
+
+  /// Indicates that a rounded superellipse clip is expected next.
+  ///
+  /// The next rounded superellipse clip is examined. Any arguments that are
+  /// passed to this method are compared to the actual
+  /// [Canvas.clipRSuperellipse] call's argument and any mismatches result in
+  /// failure.
+  ///
+  /// If no call to [Canvas.clipRSuperellipse] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.clipRSuperellipse] call are ignored.
+  void clipRSuperellipse({RSuperellipse? rsuperellipse});
+
   /// Indicates that a circle is expected next.
   ///
   /// The next circle is examined. Any arguments that are passed to this method
@@ -904,6 +941,28 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher
   }
 
   @override
+  void rsuperellipse({
+    RSuperellipse? rsuperellipse,
+    Color? color,
+    double? strokeWidth,
+    bool? hasMaskFilter,
+  }) {
+    _predicates.add(
+      _RSuperellipsePaintPredicate(
+        rsuperellipse: rsuperellipse,
+        color: color,
+        strokeWidth: strokeWidth,
+        hasMaskFilter: hasMaskFilter,
+      ),
+    );
+  }
+
+  @override
+  void clipRSuperellipse({RSuperellipse? rsuperellipse}) {
+    _predicates.add(_FunctionPaintPredicate(#clipRSuperellipse, <dynamic>[rsuperellipse]));
+  }
+
+  @override
   void circle({
     double? x,
     double? y,
@@ -1430,6 +1489,38 @@ class _DRRectPaintPredicate extends _TwoParameterPaintPredicate<RRect, RRect> {
     super.hasMaskFilter,
     super.style,
   }) : super(#drawDRRect, 'a rounded rectangle outline', expected1: outer, expected2: inner);
+}
+
+class _RSuperellipsePaintPredicate extends _DrawCommandPaintPredicate {
+  _RSuperellipsePaintPredicate({
+    this.rsuperellipse,
+    super.color,
+    super.strokeWidth,
+    super.hasMaskFilter,
+  }) : super(#drawRSuperellipse, 'a rounded superellipse', 2, 1);
+
+  final RSuperellipse? rsuperellipse;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final RSuperellipse rsuperellipseArgument = arguments[0] as RSuperellipse;
+    if (rsuperellipse != null && rsuperellipseArgument != rsuperellipse) {
+      throw FlutterError(
+        'It called $methodName with a rounded superellipse, '
+        '$rsuperellipseArgument, which was not exactly the expected rounded '
+        'superellipse ($rsuperellipse).',
+      );
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (rsuperellipse != null) {
+      description.add('rounded superellipse $rsuperellipse');
+    }
+  }
 }
 
 class _CirclePaintPredicate extends _DrawCommandPaintPredicate {

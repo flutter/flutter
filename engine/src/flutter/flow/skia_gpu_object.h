@@ -183,6 +183,7 @@ class SkiaGPUObject {
     if (object_ && queue_) {
       queue_->Unref(object_.release());
     }
+    // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     queue_ = nullptr;
     FML_DCHECK(object_ == nullptr);
   }
