@@ -276,7 +276,7 @@ void main() {
           ..addRSuperellipse(rsuperellipse)
           ..close();
 
-    expect(path.contains(const Offset(0, 0)), isTrue);
+    expect(path.contains(Offset.zero), isTrue);
     expect(path.contains(const Offset(-49.999, -49.999)), isFalse);
     expect(path.contains(const Offset(-49.999, 49.999)), isFalse);
     expect(path.contains(const Offset(49.999, 49.999)), isFalse);
