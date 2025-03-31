@@ -28,7 +28,7 @@ void main() {
   }
 
   Finder findMenuItem(MenuItem menuItem) {
-    // For each menu items there are two MenuItemButton widgets.
+    // For each menu item there are two MenuItemButton widgets.
     // The last one is the real button item in the menu.
     // The first one is not visible, it is part of _DropdownMenuBody
     // which is used to compute the dropdown width.
@@ -754,6 +754,8 @@ void main() {
     await tester.tap(findMenuItem(MenuItem.menuItem1));
     await tester.pump();
 
+    expect(savedValue, MenuItem.menuItem0);
+
     fieldKey.currentState!.save();
     await tester.pump();
 
@@ -786,6 +788,8 @@ void main() {
 
     await tester.tap(findMenuItem(MenuItem.menuItem1));
     await tester.pump();
+
+    expect(savedValue, MenuItem.menuItem0);
 
     formKey.currentState!.save();
     await tester.pump();

@@ -62,12 +62,12 @@ class DropdownMenuFormField<T> extends FormField<T> {
     List<TextInputFormatter>? inputFormatters,
     DropdownMenuCloseBehavior closeBehavior = DropdownMenuCloseBehavior.all,
     super.onSaved,
-    AutovalidateMode? autovalidateMode,
+    AutovalidateMode autovalidateMode = AutovalidateMode.disabled,
     super.validator,
     super.forceErrorText,
   }) : super(
          initialValue: initialSelection,
-         autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
+         autovalidateMode: autovalidateMode,
          builder: (FormFieldState<T> field) {
            final _DropdownMenuFormFieldState<T> state = field as _DropdownMenuFormFieldState<T>;
            void onSelectedHandler(T? value) {
