@@ -774,8 +774,9 @@ void main() {
         // Replace the PBXNativeTarget section with a two target variant,
         // where the default Runner target is migrated, but the second target is not.
         final List<String> pbxprojSections = _allSectionsUnmigrated(platform);
-        pbxprojSections[_nativeTargetSectionIndex] = migratedRunnerWithUnmigratedOtherTargetSection(
+        pbxprojSections[_nativeTargetSectionIndex] = migratedNativeTargetSection(
           platform,
+          otherNativeTarget: unmigratedOtherApplicationTarget,
         );
 
         project.xcodeProjectInfoFile.writeAsStringSync(_projectSettings(pbxprojSections));
@@ -784,8 +785,10 @@ void main() {
           ..._allSectionsUnmigratedAsJson(platform),
         ];
 
-        settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
-            migratedRunnerWithUnmigratedOtherTargetSectionAsJson(platform);
+        settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] = <String>[
+          migratedNativeTargetSectionAsJson(platform),
+          unmigratedOtherApplicationTargetAsJson,
+        ].join(',\n');
 
         settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
 
@@ -1901,8 +1904,10 @@ void main() {
                 // Replace the PBXNativeTarget section with the migrated two target variant,
                 // so that the migration skips it.
                 final List<String> pbxprojSections = _allSectionsUnmigrated(platform);
-                pbxprojSections[_nativeTargetSectionIndex] =
-                    migratedRunnerAndMigratedOtherTargetSection(platform);
+                pbxprojSections[_nativeTargetSectionIndex] = migratedNativeTargetSection(
+                  platform,
+                  otherNativeTarget: migratedOtherApplicationTarget,
+                );
 
                 project.xcodeProjectInfoFile.writeAsStringSync(_projectSettings(pbxprojSections));
 
@@ -1910,16 +1915,20 @@ void main() {
                   ..._allSectionsUnmigratedAsJson(platform),
                 ];
 
-                settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] =
-                    migratedRunnerAndMigratedOtherTargetSectionAsJson(platform);
+                settingsAsJsonBeforeMigration[_nativeTargetSectionIndex] = <String>[
+                  migratedNativeTargetSectionAsJson(platform),
+                  migratedOtherApplicationTargetAsJson,
+                ].join(',\n');
 
                 settingsAsJsonBeforeMigration.removeAt(_buildFileSectionIndex);
 
                 final List<String> settingsAsJsonAfterMigration = <String>[
                   ..._allSectionsMigratedAsJson(platform),
                 ];
-                settingsAsJsonAfterMigration[_nativeTargetSectionIndex] =
-                    migratedRunnerAndMigratedOtherTargetSectionAsJson(platform);
+                settingsAsJsonAfterMigration[_nativeTargetSectionIndex] = <String>[
+                  migratedNativeTargetSectionAsJson(platform),
+                  migratedOtherApplicationTargetAsJson,
+                ].join(',\n');
 
                 final FakePlistParser plistParser = FakePlistParser.multiple(<String>[
                   _plutilOutput(settingsAsJsonBeforeMigration),
@@ -2002,6 +2011,7 @@ void main() {
                 );
               },
             );
+          });
 
           group('migrate PBXProject', () {
             testWithoutContext('fails if missing PBXProject section', () async {
@@ -3225,6 +3235,109 @@ String migratedFrameworksBuildPhaseSectionAsJson(SupportedPlatform platform) {
 }
 
 // PBXNativeTarget
+const String unmigratedOtherApplicationTarget = '''
+   354BE72C2A385E0200F71CEE /* OtherTarget */ = {
+     isa = PBXNativeTarget;
+     buildConfigurationList = 354BE73C2A385E0200F71CEE /* Build configuration list for PBXNativeTarget "OtherTarget" */;
+     buildPhases = (
+       354BE72E2A385E0200F71CEE /* Run Script */,
+       354BE72F2A385E0200F71CEE /* Sources */,
+       354BE7322A385E0200F71CEE /* Frameworks */,
+       354BE7342A385E0200F71CEE /* Resources */,
+       35EC537E2A4038C200CBDB83 /* Embed Frameworks */,
+       354BE73A2A385E0200F71CEE /* Thin Binary */,
+     );
+     buildRules = (
+     );
+     dependencies = (
+     );
+     name = OtherTarget;
+     packageProductDependencies = (
+     );
+     productName = OtherTarget;
+     productReference = 354BE7402A385E0200F71CEE /* OtherTarget.app */;
+     productType = "com.apple.product-type.application";
+   };''';
+
+const String unmigratedOtherApplicationTargetAsJson = '''
+    "354BE72C2A385E0200F71CEE" : {
+      "buildConfigurationList" : "354BE73C2A385E0200F71CEE",
+      "buildPhases" : [
+        "354BE72E2A385E0200F71CEE",
+        "354BE72F2A385E0200F71CEE",
+        "354BE7322A385E0200F71CEE",
+        "354BE7342A385E0200F71CEE",
+        "35EC537E2A4038C200CBDB83",
+        "354BE73A2A385E0200F71CEE"
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+
+      ],
+      "isa" : "PBXNativeTarget",
+      "name" : "OtherTarget",
+      "packageProductDependencies" : [
+
+      ],
+      "productName" : "OtherTarget",
+      "productReference" : "354BE7402A385E0200F71CEE",
+      "productType" : "com.apple.product-type.application"
+    }''';
+
+const String migratedOtherApplicationTarget = '''
+   354BE72C2A385E0200F71CEE /* OtherTarget */ = {
+     isa = PBXNativeTarget;
+     buildConfigurationList = 354BE73C2A385E0200F71CEE /* Build configuration list for PBXNativeTarget "OtherTarget" */;
+     buildPhases = (
+       354BE72E2A385E0200F71CEE /* Run Script */,
+       354BE72F2A385E0200F71CEE /* Sources */,
+       354BE7322A385E0200F71CEE /* Frameworks */,
+       354BE7342A385E0200F71CEE /* Resources */,
+       35EC537E2A4038C200CBDB83 /* Embed Frameworks */,
+       354BE73A2A385E0200F71CEE /* Thin Binary */,
+     );
+     buildRules = (
+     );
+     dependencies = (
+     );
+     name = OtherTarget;
+     packageProductDependencies = (
+       78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,
+     );
+     productName = OtherTarget;
+     productReference = 354BE7402A385E0200F71CEE /* OtherTarget.app */;
+     productType = "com.apple.product-type.application";
+   };''';
+
+const String migratedOtherApplicationTargetAsJson = '''
+    "354BE72C2A385E0200F71CEE" : {
+      "buildConfigurationList" : "354BE73C2A385E0200F71CEE",
+      "buildPhases" : [
+        "354BE72E2A385E0200F71CEE",
+        "354BE72F2A385E0200F71CEE",
+        "354BE7322A385E0200F71CEE",
+        "354BE7342A385E0200F71CEE",
+        "35EC537E2A4038C200CBDB83",
+        "354BE73A2A385E0200F71CEE"
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+
+      ],
+      "isa" : "PBXNativeTarget",
+      "name" : "OtherTarget",
+      "packageProductDependencies" : [
+        "78A3181F2AECB46A00862997"
+      ],
+      "productName" : "OtherTarget",
+      "productReference" : "354BE7402A385E0200F71CEE",
+      "productType" : "com.apple.product-type.application"
+    }''';
+
 String unmigratedNativeTargetSection(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
@@ -3312,69 +3425,6 @@ String migratedNativeTargetSection(
   return builder.toString();
 }
 
-/// A variant of [migratedNativeTargetSection]
-/// that includes an additional PBXNativeTarget, "OtherTarget", that is not migrated.
-String migratedRunnerWithUnmigratedOtherTargetSection(SupportedPlatform platform) {
-  final String otherTarget = <String>[
-    '   354BE72C2A385E0200F71CEE /* OtherTarget */ = {',
-    '     isa = PBXNativeTarget;',
-    '     buildConfigurationList = 354BE73C2A385E0200F71CEE /* Build configuration list for PBXNativeTarget "OtherTarget" */;',
-    '     buildPhases = (',
-    '       354BE72E2A385E0200F71CEE /* Run Script */,',
-    '       354BE72F2A385E0200F71CEE /* Sources */,',
-    '       354BE7322A385E0200F71CEE /* Frameworks */,',
-    '       354BE7342A385E0200F71CEE /* Resources */,',
-    '       35EC537E2A4038C200CBDB83 /* Embed Frameworks */,',
-    '       354BE73A2A385E0200F71CEE /* Thin Binary */,',
-    '     );',
-    '     buildRules = (',
-    '     );',
-    '     dependencies = (',
-    '     );',
-    '     name = OtherTarget;',
-    '     packageProductDependencies = (',
-    '     );',
-    '     productName = OtherTarget;',
-    '     productReference = 354BE7402A385E0200F71CEE /* OtherTarget.app */;',
-    '     productType = "com.apple.product-type.application";',
-    '   };',
-  ].join('\n');
-
-  return migratedNativeTargetSection(platform, otherNativeTarget: otherTarget);
-}
-
-/// A variant of [migratedNativeTargetSection]
-/// that includes an additional PBXNativeTarget, "OtherTarget", that is migrated.
-String migratedRunnerAndMigratedOtherTargetSection(SupportedPlatform platform) {
-  final String otherTarget = <String>[
-    '   354BE72C2A385E0200F71CEE /* OtherTarget */ = {',
-    '     isa = PBXNativeTarget;',
-    '     buildConfigurationList = 354BE73C2A385E0200F71CEE /* Build configuration list for PBXNativeTarget "OtherTarget" */;',
-    '     buildPhases = (',
-    '       354BE72E2A385E0200F71CEE /* Run Script */,',
-    '       354BE72F2A385E0200F71CEE /* Sources */,',
-    '       354BE7322A385E0200F71CEE /* Frameworks */,',
-    '       354BE7342A385E0200F71CEE /* Resources */,',
-    '       35EC537E2A4038C200CBDB83 /* Embed Frameworks */,',
-    '       354BE73A2A385E0200F71CEE /* Thin Binary */,',
-    '     );',
-    '     buildRules = (',
-    '     );',
-    '     dependencies = (',
-    '     );',
-    '     name = OtherTarget;',
-    '     packageProductDependencies = (',
-    '				78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,',
-    '     );',
-    '     productName = OtherTarget;',
-    '     productReference = 354BE7402A385E0200F71CEE /* OtherTarget.app */;',
-    '     productType = "com.apple.product-type.application";',
-    '   };',
-  ].join('\n');
-
-  return migratedNativeTargetSection(platform, otherNativeTarget: otherTarget);
-}
-
 String unmigratedNativeTargetSectionAsJson(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
@@ -3432,70 +3482,6 @@ String migratedNativeTargetSectionAsJson(SupportedPlatform platform) {
       ],
       "productName" : "Runner",
       "productReference" : "97C146EE1CF9000F007C117D",
-      "productType" : "com.apple.product-type.application"
-    }''';
-}
-
-/// A variant of [migratedNativeTargetSectionAsJson]
-/// that includes an additional PBXNativeTarget, "OtherTarget", that is not migrated.
-String migratedRunnerWithUnmigratedOtherTargetSectionAsJson(SupportedPlatform platform) {
-  return '''
-${migratedNativeTargetSectionAsJson(platform)},
-    "354BE72C2A385E0200F71CEE" : {
-      "buildConfigurationList" : "354BE73C2A385E0200F71CEE",
-      "buildPhases" : [
-        "354BE72E2A385E0200F71CEE",
-        "354BE72F2A385E0200F71CEE",
-        "354BE7322A385E0200F71CEE",
-        "354BE7342A385E0200F71CEE",
-        "35EC537E2A4038C200CBDB83",
-        "354BE73A2A385E0200F71CEE"
-      ],
-      "buildRules" : [
-
-      ],
-      "dependencies" : [
-
-      ],
-      "isa" : "PBXNativeTarget",
-      "name" : "OtherTarget",
-      "packageProductDependencies" : [
-
-      ],
-      "productName" : "OtherTarget",
-      "productReference" : "354BE7402A385E0200F71CEE",
-      "productType" : "com.apple.product-type.application"
-    }''';
-}
-
-/// A variant of [migratedRunnerWithUnmigratedOtherTargetSectionAsJson]
-/// with both targets migrated.
-String migratedRunnerAndMigratedOtherTargetSectionAsJson(SupportedPlatform platform) {
-  return '''
-${migratedNativeTargetSectionAsJson(platform)},
-    "354BE72C2A385E0200F71CEE" : {
-      "buildConfigurationList" : "354BE73C2A385E0200F71CEE",
-      "buildPhases" : [
-        "354BE72E2A385E0200F71CEE",
-        "354BE72F2A385E0200F71CEE",
-        "354BE7322A385E0200F71CEE",
-        "354BE7342A385E0200F71CEE",
-        "35EC537E2A4038C200CBDB83",
-        "354BE73A2A385E0200F71CEE"
-      ],
-      "buildRules" : [
-
-      ],
-      "dependencies" : [
-
-      ],
-      "isa" : "PBXNativeTarget",
-      "name" : "OtherTarget",
-      "packageProductDependencies" : [
-        "78A3181F2AECB46A00862997"
-      ],
-      "productName" : "OtherTarget",
-      "productReference" : "354BE7402A385E0200F71CEE",
       "productType" : "com.apple.product-type.application"
     }''';
 }
