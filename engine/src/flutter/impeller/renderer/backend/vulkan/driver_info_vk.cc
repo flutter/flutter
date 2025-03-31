@@ -119,6 +119,17 @@ AdrenoGPU GetAdrenoVersion(std::string_view version) {
   return result->second;
 }
 
+PowerVRGPU GetPowerVRVersion(std::string_view version) {
+  // We don't really care about the specific model, just the series.
+  if (version.find("DXT") != std::string::npos) {
+    return PowerVRGPU::kDXT;
+  }
+  if (version.find("CXT") != std::string::npos) {
+    return PowerVRGPU::kCXT;
+  }
+  return PowerVRGPU::kUnknown;
+}
+
 MaliGPU GetMaliVersion(std::string_view version) {
   // These names are usually Mali-VERSION or Mali-Version-EXTRA_CRAP.
   auto dash_pos = version.find("Mali-");
@@ -264,6 +275,9 @@ DriverInfoVK::DriverInfoVK(const vk::PhysicalDevice& device) {
     case VendorVK::kARM:
       mali_gpu_ = GetMaliVersion(driver_name_);
       break;
+    case VendorVK::kPowerVR:
+      powervr_gpu_ = GetPowerVRVersion(driver_name_);
+      break;
     default:
       break;
   }
@@ -356,7 +370,7 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // https://github.com/flutter/flutter/issues/160866
   // https://github.com/flutter/flutter/issues/160804
   // https://github.com/flutter/flutter/issues/160406
-  if (vendor_ == VendorVK::kImgTec) {
+  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kCXT) {
     return true;
   }
   return false;
@@ -368,6 +382,10 @@ std::optional<MaliGPU> DriverInfoVK::GetMaliGPUInfo() const {
 
 std::optional<AdrenoGPU> DriverInfoVK::GetAdrenoGPUInfo() const {
   return adreno_gpu_;
+}
+
+std::optional<PowerVRGPU> DriverInfoVK::GetPowerVRGPUInfo() const {
+  return powervr_gpu_;
 }
 
 }  // namespace impeller
