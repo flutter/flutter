@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'package:flutter/material.dart';
-/// 
+///
 /// @docImport 'list_section.dart';
 library;
 
@@ -103,7 +103,7 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
 
   late ExpansibleController _tileController;
   late Animation<double> _iconTurns;
-  late Offset headerOffset;
+  late Offset _headerOffset;
 
   @override
   void initState() {
@@ -149,7 +149,7 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
 
   void _onHeaderTap() {
     final RenderBox headerBox = _headerKey.currentContext!.findRenderObject()! as RenderBox;
-    headerOffset = headerBox.localToGlobal(Offset.zero);
+    _headerOffset = headerBox.localToGlobal(Offset.zero);
     _fadeController.show();
 
     if (_tileController.isExpanded) {
@@ -199,8 +199,8 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
           controller: _fadeController,
           overlayChildBuilder: (BuildContext context) {
             return Positioned(
-              top: headerOffset.dy + _kHeaderHeight,
-              left: headerOffset.dx,
+              top: _headerOffset.dy + _kHeaderHeight,
+              left: _headerOffset.dx,
               child: ConstrainedBox(
                 constraints: constraints,
                 child: Visibility(

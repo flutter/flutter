@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('can be controlled by ExpansibleController', (WidgetTester tester) async {
+  testWidgets('Can be controlled by ExpansibleController', (WidgetTester tester) async {
     final ExpansibleController controller = ExpansibleController();
     await tester.pumpWidget(
       CupertinoApp(
@@ -35,7 +35,7 @@ void main() {
     expect(find.text('Content'), findsNothing);
   });
 
-  testWidgets('toggles expansion on tap', (WidgetTester tester) async {
+  testWidgets('Toggles expansion on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -56,7 +56,7 @@ void main() {
     expect(find.text('Content'), findsNothing);
   });
 
-  testWidgets('animates icon rotation on tap', (WidgetTester tester) async {
+  testWidgets('Animates icon rotation on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -105,6 +105,7 @@ void main() {
     // Pump until halfway through the animation.
     await tester.pump(const Duration(milliseconds: 150));
     expect(find.text('Content'), findsNWidgets(2));
+    expect(find.byType(FadeTransition), findsOneWidget);
     expect(
       tester
           .firstRenderObject<RenderAnimatedOpacity>(
@@ -150,6 +151,9 @@ void main() {
 
     // Pump until halfway through the animation.
     await tester.pump(const Duration(milliseconds: 150));
+    expect(find.byType(Placeholder), findsOneWidget);
+    // The content does not fade.
+    expect(find.byType(FadeTransition), findsNothing);
     expect(
       tester.getBottomLeft(find.byType(Placeholder)).dy,
       moreOrLessEquals(81.5, epsilon: 0.01),
