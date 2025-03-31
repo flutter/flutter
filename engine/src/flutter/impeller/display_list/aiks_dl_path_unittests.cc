@@ -260,7 +260,7 @@ TEST_P(AiksTest, CanRenderStrokedConicPaths) {
 
 TEST_P(AiksTest, CanRenderTightConicPath) {
   DisplayListBuilder builder;
-  // builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::kRed());
@@ -272,13 +272,13 @@ TEST_P(AiksTest, CanRenderTightConicPath) {
 
   DlPathBuilder path_builder;
 
-  path_builder.MoveTo(DlPoint(200, 200));
-  path_builder.ConicCurveTo(DlPoint(300, 900), DlPoint(400, 200), 5.0f);
+  path_builder.MoveTo(DlPoint(100, 100));
+  path_builder.ConicCurveTo(DlPoint(150, 450), DlPoint(200, 100), 5.0f);
 
   DlPathBuilder reference_builder;
-  ConicPathComponent component(DlPoint(600, 200),  //
-                               DlPoint(700, 900),  //
-                               DlPoint(800, 200),  //
+  ConicPathComponent component(DlPoint(300, 100),  //
+                               DlPoint(350, 450),  //
+                               DlPoint(400, 100),  //
                                5.0f);
   reference_builder.MoveTo(component.p1);
   constexpr int N = 100;
@@ -293,12 +293,12 @@ TEST_P(AiksTest, CanRenderTightConicPath) {
   line_paint.setStrokeWidth(1.0f);
 
   // Draw some lines to provide a spacial reference for the curvature of
-  // the tips of the direct rendering and the manually tessellated version.
-  builder.DrawLine(DlPoint(290.5f, 200), DlPoint(290.5f, 900), line_paint);
-  builder.DrawLine(DlPoint(309.5f, 200), DlPoint(309.5f, 900), line_paint);
-  builder.DrawLine(DlPoint(690.5f, 200), DlPoint(690.5f, 900), line_paint);
-  builder.DrawLine(DlPoint(709.5f, 200), DlPoint(709.5f, 900), line_paint);
-  builder.DrawLine(DlPoint(200, 785.5f), DlPoint(800, 785.5f), line_paint);
+  // the tips of the direct rendering and the manually tessellated versions.
+  builder.DrawLine(DlPoint(145, 100), DlPoint(145, 450), line_paint);
+  builder.DrawLine(DlPoint(155, 100), DlPoint(155, 450), line_paint);
+  builder.DrawLine(DlPoint(345, 100), DlPoint(345, 450), line_paint);
+  builder.DrawLine(DlPoint(355, 100), DlPoint(355, 450), line_paint);
+  builder.DrawLine(DlPoint(100, 392.5f), DlPoint(400, 392.5f), line_paint);
 
   // Draw the two paths (direct and manually tessellated) on top of the lines.
   builder.DrawPath(DlPath(path_builder), paint);
