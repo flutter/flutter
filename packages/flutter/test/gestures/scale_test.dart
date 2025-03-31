@@ -1830,4 +1830,91 @@ void main() {
       tap.dispose();
     },
   );
+
+  testGesture('ScaleStartDetails should contain the correct PointerDeviceKind', (
+    GestureTester tester,
+  ) {
+    final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
+
+    bool didStartScale = false;
+    PointerDeviceKind? updatedKind;
+    scale.onStart = (ScaleStartDetails details) {
+      didStartScale = true;
+      updatedKind = details.kind;
+    };
+    scale.onEnd = (ScaleEndDetails details) {
+      didStartScale = false;
+    };
+
+    // The default kind is touch.
+    // ignore: avoid_redundant_argument_values
+    final TestPointer pointer1 = TestPointer(1, PointerDeviceKind.touch);
+    final PointerDownEvent down = pointer1.down(Offset.zero);
+    scale.addPointer(down);
+    tester.closeArena(1);
+    // One-finger panning
+    tester.route(down);
+    tester.route(pointer1.move(const Offset(20.0, 30.0)));
+    expect(didStartScale, isTrue);
+    expect(updatedKind, PointerDeviceKind.touch);
+    tester.route(pointer1.up());
+    expect(didStartScale, isFalse);
+
+    final TestPointer pointer2 = TestPointer(2, PointerDeviceKind.mouse);
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
+    scale.addPointer(down2);
+    tester.closeArena(2);
+    tester.route(down2);
+    tester.route(pointer2.move(const Offset(20.0, 30.0)));
+    expect(didStartScale, isTrue);
+    expect(updatedKind, PointerDeviceKind.mouse);
+    tester.route(pointer2.up());
+    expect(didStartScale, isFalse);
+
+    final TestPointer pointer3 = TestPointer(3, PointerDeviceKind.stylus);
+    final PointerDownEvent down3 = pointer3.down(const Offset(10.0, 20.0));
+    scale.addPointer(down3);
+    tester.closeArena(3);
+    tester.route(down3);
+    tester.route(pointer3.move(const Offset(20.0, 30.0)));
+    expect(didStartScale, isTrue);
+    expect(updatedKind, PointerDeviceKind.stylus);
+    tester.route(pointer3.up());
+    expect(didStartScale, isFalse);
+
+    final TestPointer pointer4 = TestPointer(4, PointerDeviceKind.invertedStylus);
+    final PointerDownEvent down4 = pointer4.down(const Offset(10.0, 20.0));
+    scale.addPointer(down4);
+    tester.closeArena(4);
+    tester.route(down4);
+    tester.route(pointer4.move(const Offset(20.0, 30.0)));
+    expect(didStartScale, isTrue);
+    expect(updatedKind, PointerDeviceKind.invertedStylus);
+    tester.route(pointer4.up());
+    expect(didStartScale, isFalse);
+
+    final TestPointer pointer5 = TestPointer(5, PointerDeviceKind.unknown);
+    final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 20.0));
+    scale.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    tester.route(pointer5.move(const Offset(20.0, 30.0)));
+    expect(didStartScale, isTrue);
+    expect(updatedKind, PointerDeviceKind.unknown);
+    tester.route(pointer5.up());
+    expect(didStartScale, isFalse);
+
+    final TestPointer pointer6 = TestPointer(6, PointerDeviceKind.trackpad);
+    final PointerPanZoomStartEvent down6 = pointer6.panZoomStart(const Offset(10.0, 20.0));
+    scale.addPointerPanZoom(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    tester.route(pointer6.panZoomUpdate(const Offset(20.0, 30.0)));
+    expect(didStartScale, isTrue);
+    expect(updatedKind, PointerDeviceKind.trackpad);
+    tester.route(pointer6.panZoomEnd());
+    expect(didStartScale, isFalse);
+
+    scale.dispose();
+  });
 }

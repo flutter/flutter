@@ -1573,7 +1573,7 @@ void _paragraphTests() {
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 
-    final DomCanvasElement canvas = createDomCanvasElement(width: 400, height: 160);
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 400, height: 160);
     domDocument.body!.append(canvas);
 
     // TODO(yjbanov): WebGL screenshot tests do not work on Firefox - https://github.com/flutter/flutter/issues/109265
@@ -1721,7 +1721,7 @@ void _paragraphTests() {
   test(
     'MakeOnScreenGLSurface test',
     () {
-      final DomCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
       final WebGLContext gl = canvas.getGlContext(webGLVersion);
       final int sampleCount = gl.getParameter(gl.samples);
       final int stencilBits = gl.getParameter(gl.stencilBits);
@@ -1748,7 +1748,7 @@ void _paragraphTests() {
   test(
     'MakeRenderTarget test',
     () {
-      final DomCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
 
       final int glContext =
           canvasKit.GetWebGLContext(
