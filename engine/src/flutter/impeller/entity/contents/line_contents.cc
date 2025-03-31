@@ -77,7 +77,6 @@ std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
         kEmptyResult);
   }
 
-
   Point diff = line_geometry->GetP1() - line_geometry->GetP0();
   Scalar angle = std::atan2(diff.y, diff.x);
   Entity rotated_entity = entity.Clone();
@@ -87,17 +86,18 @@ std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
            Matrix::MakeTranslation(-1 * line_geometry->GetP0());
   rotated_entity.SetTransform(matrix);
 
-  return std::make_pair(calculate_status.value(),
-                        GeometryResult{
-                            .type = PrimitiveType::kTriangleStrip,
-                            .vertex_buffer =
-                                {
-                                    .vertex_buffer = vertex_buffer,
-                                    .vertex_count = count,
-                                    .index_type = IndexType::kNone,
-                                },
-                            .transform = rotated_entity.GetShaderTransform(pass),
-                        });
+  return std::make_pair(
+      calculate_status.value(),
+      GeometryResult{
+          .type = PrimitiveType::kTriangleStrip,
+          .vertex_buffer =
+              {
+                  .vertex_buffer = vertex_buffer,
+                  .vertex_count = count,
+                  .index_type = IndexType::kNone,
+              },
+          .transform = rotated_entity.GetShaderTransform(pass),
+      });
 }
 
 struct LineInfo {
