@@ -637,7 +637,8 @@ List<FlutterCodeAsset> _filterCodeAssets(List<EncodedAsset> assets, Target targe
     assets
         .where((EncodedAsset asset) => asset.isCodeAsset)
         .map<FlutterCodeAsset>(
-          (EncodedAsset c) => FlutterCodeAsset(codeAsset: CodeAsset.fromEncoded(c), target: target),
+          (EncodedAsset encodedAsset) =>
+              FlutterCodeAsset(codeAsset: encodedAsset.asCodeAsset, target: target),
         )
         .toList();
 
