@@ -241,7 +241,7 @@ bool _writeFlutterPluginsList(
     pluginsFile,
     result,
   );
-  if (contentsChanged) {
+  if (pluginsChanged || contentsChanged) {
     final String pluginFileContent = json.encode(result);
     pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   }
