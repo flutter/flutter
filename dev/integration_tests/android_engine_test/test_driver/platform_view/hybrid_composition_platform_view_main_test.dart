@@ -54,7 +54,7 @@ void main() async {
       nativeDriver.screenshot(),
       matchesGoldenFileWithRetries('$goldenPrefix.blue_orange_gradient_portrait.png'),
     );
-  }, timeout: Timeout.none);
+  }, timeout: Timeout.none, skip: 'https://github.com/flutter/flutter/issues/165032');
 
   test('should rotate landscape and screenshot the gradient', () async {
     await nativeDriver.rotateToLandscape();
@@ -68,5 +68,5 @@ void main() async {
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portait_rotated_back.png'),
     );
-  }, timeout: Timeout.none);
+  }, timeout: Timeout.none, skip: 'https://github.com/flutter/flutter/issues/165032');
 }
