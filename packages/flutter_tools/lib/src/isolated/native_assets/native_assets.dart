@@ -624,7 +624,7 @@ Future<DartBuildResult> _runDartBuild({
       if (linkResult == null) {
         _throwNativeAssetsLinkFailed();
       }
-      codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
+      codeAssets.addAll(_filterCodeAssets(linkResult.encodedAssets, target));
       dependencies.addAll(linkResult.dependencies);
     }
   }
