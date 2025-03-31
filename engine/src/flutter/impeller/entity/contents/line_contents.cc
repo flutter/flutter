@@ -77,6 +77,8 @@ std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
         kEmptyResult);
   }
 
+  // We do the math in CalculatePerVertex in unrotated space.  This then applies
+  // the rotation to the line.
   Point diff = line_geometry->GetP1() - line_geometry->GetP0();
   Scalar angle = std::atan2(diff.y, diff.x);
   Entity rotated_entity = entity.Clone();
@@ -227,9 +229,12 @@ LineContents::CalculatePerVertex(LineVertexShader::PerVertexData* per_vertex,
                                  const Matrix& entity_transform) {
   Scalar scale = entity_transform.GetMaxBasisLengthXY();
 
-  Point d = geometry->GetP1() - geometry->GetP0();
-  Scalar mag = d.GetLength();
-  Point p1_prime = Point(geometry->GetP0().x + mag, geometry->GetP0().y);
+  // Transform the line into unrotated space by rotating p1 to be horizontal
+  // with p0. We do this because there seems to be a flaw in the eN calculations
+  // where they create thinner lines for diagonal lines.
+  Point diff = geometry->GetP1() - geometry->GetP0();
+  Scalar magnitude = diff.GetLength();
+  Point p1_prime = Point(geometry->GetP0().x + magnitude, geometry->GetP0().y);
 
   std::array<Point, 4> corners;
   // Make sure we get kSampleRadius pixels to sample from.
