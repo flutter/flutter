@@ -81,6 +81,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     r'\s*BlueprintIdentifier\s=\s"([A-Z0-9]+)"',
   );
 
+  /// Existing identifier for a PBXNativeTarget that is a unit testing bundle.
+  static const String _unitTestBundleIdentifier = 'com.apple.product-type.bundle.unit-test';
+
+  /// Existing identifier for a PBXNativeTarget that is a UI testing bundle.
+  static const String _uiTestBundleIdentifier = 'com.apple.product-type.bundle.ui-testing';
+
   File get backupProjectSettings =>
       _fileSystem.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
 
@@ -607,11 +613,19 @@ $newContent
     );
   }
 
+  bool _isNotATestingNativeTarget(ParsedNativeTarget target) {
+    return target.productType != _unitTestBundleIdentifier &&
+        target.productType != _uiTestBundleIdentifier;
+  }
+
   bool _areNativeTargetsMigrated(
     ParsedProjectInfo projectInfo, {
     bool logErrorIfNotMigrated = false,
   }) {
-    final bool migrated = projectInfo.nativeTargets.every(_isNativeTargetMigrated);
+    final bool migrated = projectInfo.nativeTargets
+        // Skip native targets that are intended for testing, as those do not need a migration.
+        .where(_isNotATestingNativeTarget)
+        .every(_isNativeTargetMigrated);
 
     if (logErrorIfNotMigrated && !migrated) {
       logger.printError('Some PBXNativeTargets were not migrated or were migrated incorrectly.');
@@ -677,7 +691,10 @@ $newContent
     final Iterable<ParsedNativeTarget> notMigratedCustomTargets = projectInfo.nativeTargets.where((
       ParsedNativeTarget target,
     ) {
-      return target.identifier != _runnerNativeTargetIdentifier && !_isNativeTargetMigrated(target);
+      return target.identifier != _runnerNativeTargetIdentifier &&
+          // Skip native targets that are intended for testing, as those do not need a migration.
+          _isNotATestingNativeTarget(target) &&
+          !_isNativeTargetMigrated(target);
     });
 
     // If there are unmigrated custom targets, abort the migration.
@@ -1121,12 +1138,17 @@ class ParsedNativeTarget {
       packageProductDependencies = switch (data['packageProductDependencies']) {
         final List<Object?> dependencies => dependencies.whereType<String>().toList(),
         _ => null,
+      },
+      productType = switch (data) {
+        {'productType': final String productType} => productType,
+        _ => null,
       };
 
   final Map<String, Object?> data;
   final String identifier;
   final String? name;
   final List<String>? packageProductDependencies;
+  final String? productType;
 }
 
 /// Representation of data parsed from PBXProject section in Xcode project's
