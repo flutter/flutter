@@ -90,7 +90,7 @@ See https://github.com/flutter/flutter/blob/master/engine/src/flutter/sky/tools/
 ## Debugging native engine code on Android with Android Studio
 
 1. Build an unoptimized local engine. i.e. `et build -c host_debug_unopt_arm64 && et build -c android_debug_unopt_arm64`.
-2. Decide on a Flutter app that you with to debug and run it with `flutter run` and the local engine flags. i.e.: `--debug --local-engine-src-path path/to/my/engine/src --local-engine=android_debug_unopt_arm64`.
+2. Decide on a Flutter app that you with to debug and run it with `flutter build apk` and the local engine flags. i.e.: `--debug --local-engine-src-path path/to/my/engine/src --local-engine=android_debug_unopt_arm64`.
 3. Open Android Studio and use `File > Profile or Debug APK`. The location of the debug build APK should be `build/app/outputs/apk/debug/app-debug.apk` under the Flutter app project.
 
 <img src="https://github.com/user-attachments/assets/a58ed74b-1a9e-45ce-ae64-350b2119710e" width="600" />
