@@ -33,6 +33,8 @@ void main() {
     await tester.pump();
     expect(controller.isExpanded, isFalse);
     expect(find.text('Content'), findsNothing);
+
+    controller.dispose();
   });
 
   testWidgets('Toggles expansion on tap', (WidgetTester tester) async {
