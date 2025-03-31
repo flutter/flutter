@@ -345,7 +345,7 @@ TEST_P(TextContentsTest, SimpleSubpixel80) {
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
 #endif
 
-  std::vector<GlyphAtlasPipeline::VertexShader::PerVertexData> data;
+  std::vector<GlyphAtlasPipeline::VertexShader::PerVertexData> data(4);
 
   std::shared_ptr<TextFrame> text_frame = MakeTextFrame(
       "1", "ahem.ttf", TextOptions{.font_size = 50, .is_subpixel = true});
