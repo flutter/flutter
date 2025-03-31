@@ -610,6 +610,15 @@ object FlutterPluginUtils {
             "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
         )
 
+        // AGP defaults to outputting build artifacts in `android/app/.cxx`. Move these build
+        // artifacts out of the source directories and to Flutter's build directory.
+        gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
+            gradleProject.layout.buildDirectory
+                .dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/.cxx")
+                .get()
+                .asFile.path
+        )
+
         // CMake will print warnings when you try to build an empty project.
         // These arguments silence the warnings - our project is intentionally
         // empty.
