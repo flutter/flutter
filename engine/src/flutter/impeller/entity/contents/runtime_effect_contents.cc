@@ -239,7 +239,7 @@ bool RuntimeEffectContents::Render(const ContentContext& renderer,
     size_t sampler_location = 0;
     size_t buffer_location = 0;
 
-    // uniforms are ordered in the IPLR according to their
+    // Uniforms are ordered in the IPLR according to their
     // declaration and the uniform location reflects the correct offset to
     // be mapped to - except that it may include all proceeding
     // uniforms of a different type. For example, a texture sampler that comes
