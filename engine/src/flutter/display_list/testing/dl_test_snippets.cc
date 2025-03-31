@@ -753,7 +753,8 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            {1, 56, 1,
             [](DlOpReceiver& r) { r.drawRoundRect(kTestRRect.Shift(5, 5)); }},
        }},
-      // DrawRSuperellipse is not included since due to flexible size
+      // DrawRSuperellipse is omitted because the testing framework doesn't
+      // support flexible size.
       // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/166284
       {"DrawDRRect",
        {
