@@ -155,12 +155,7 @@ Future<void> main() async {
 
         section('AGP cxx build artifacts');
 
-        final String defaultPath = path.join(
-          project.rootPath,
-          'android',
-          'app',
-          '.cxx',
-        );
+        final String defaultPath = path.join(project.rootPath, 'android', 'app', '.cxx');
 
         final String modifiedPath = path.join(
           project.rootPath,
