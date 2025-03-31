@@ -38,7 +38,7 @@ class DlAtlasGeometry : public AtlasGeometry {
 
   Rect ComputeBoundingBox() const override;
 
-  std::shared_ptr<Texture> GetAtlas() const override;
+  const std::shared_ptr<Texture>& GetAtlas() const override;
 
   const SamplerDescriptor& GetSamplerDescriptor() const override;
 

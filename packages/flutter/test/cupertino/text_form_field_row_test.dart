@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/services/spell_check.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/editable_text_utils.dart';
 
 void main() {
   testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
@@ -518,4 +521,59 @@ void main() {
     expect(stateKey.currentState!.value, 'initialValue');
     expect(value, 'initialValue');
   });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        _updateMediaQueryFromView(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          _updateMediaQueryFromView(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(CupertinoApp(home: CupertinoTextField(controller: controller)));
+
+        // No context menu shown.
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  });
+}
+
+// Trigger MediaQuery to update itself based on the View, which is not
+// recreated between tests. This is necessary when changing something on
+// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
+// TODO(justinmc): This hack can be removed if
+// https://github.com/flutter/flutter/issues/165519 is fixed.
+void _updateMediaQueryFromView(WidgetTester tester) {
+  expect(find.byType(MediaQuery), findsOneWidget);
+  final WidgetsBindingObserver widgetsBindingObserver =
+      tester.state(
+            find.ancestor(
+              of: find.byType(MediaQuery),
+              matching: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
+              ),
+            ),
+          )
+          as WidgetsBindingObserver;
+  widgetsBindingObserver.didChangeMetrics();
 }

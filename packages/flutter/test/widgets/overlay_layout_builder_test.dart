@@ -140,6 +140,51 @@ void main() {
     expect(regularChildSize, childSize);
   });
 
+  testWidgets('builder callback is called when OverlayPortal rebuilds', (
+    WidgetTester tester,
+  ) async {
+    late StateSetter setState;
+    Color color = const Color(0x12345678);
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () =>
+          overlayEntry
+            ..remove()
+            ..dispose(),
+    );
+
+    Widget builder(BuildContext _, OverlayChildLayoutInfo _) => ColoredBox(color: color);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setter) {
+                    setState = setter;
+                    return OverlayPortal.overlayChildLayoutBuilder(
+                      controller: controller1,
+                      overlayChildBuilder: builder,
+                      child: const SizedBox(),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.byType(ColoredBox), paints..rect(color: color));
+
+    setState(() => color = const Color(0x87654321));
+    await tester.pump();
+    expect(find.byType(ColoredBox), paints..rect(color: color));
+  });
+
   testWidgets('Positioned works in the builder', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(
@@ -237,7 +282,7 @@ void main() {
     expect(paintTransform, Matrix4.translationValues(10.0, 20.0, 0.0) * transform);
   });
 
-  testWidgets('Still works if child is null', (WidgetTester tester) async {
+  testWidgets('Still works if child and overlay child are null', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(
       () =>
@@ -262,7 +307,7 @@ void main() {
                     controller: controller1,
                     overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
                       regularChildSize = layoutInfo.childSize;
-                      return const SizedBox();
+                      return const _NullLeaf();
                     },
                     child: null,
                   ),
@@ -317,4 +362,23 @@ void main() {
       ),
     );
   });
+}
+
+class _NullLeaf extends Widget {
+  const _NullLeaf();
+  @override
+  Element createElement() => _NullElement(this);
+}
+
+class _NullElement extends Element {
+  _NullElement(super.widget);
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    rebuild(force: true);
+  }
+
+  @override
+  bool get debugDoingBuild => throw UnimplementedError();
 }

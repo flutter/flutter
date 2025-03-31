@@ -11,6 +11,5 @@ This is an index of team-facing documentation for topics relating to Engineering
 - [Flutter's Build Infrastructure](../../dev/bots/README.md)
 - [Flutter's repository architecture](../about/Flutter's-repository-architecture.md)
 - [GitHub Action Workflows](GitHub-Action-Workflows.md)
-- [Infra Ticket Queue](Infra-Ticket-Queue.md)
 - [Labeling PRs](../contributing/Labeling-PRs.md)
 - [New Android Version](../platforms/android/New-Android-version.md)
