@@ -75,6 +75,8 @@ You can speed up your workflow by adding the `--config-only` flag to set up the 
 flutter build ios --local-engine ios_debug_unopt --local-engine-host host_debug_unopt --config-only
 ```
 
+If you are a Googler using RBE, [update `~/.lldbinit`](#googlers-using-rbe) to tell Xcode where the engine sources are located.
+
 To start debugging, open your Flutter app `ios/Runner.xcworkspace` file in Xcode. Ensure **Product > Scheme > Edit Scheme > Run > Build Configuration** matches your engine runtime mode (defaults to `Debug`).
 
 <img src="https://user-images.githubusercontent.com/682784/76341195-ee050680-62b9-11ea-956d-c27d65e5eec9.png" alt="Product > Scheme > Edit Scheme > Run > Build Configuration" width="900"/>
@@ -82,8 +84,6 @@ To start debugging, open your Flutter app `ios/Runner.xcworkspace` file in Xcode
 Add an engine symbol breakpoint via **Debug > Breakpoints > Create Symbolic Breakpoint...**. The **Symbol** field should be the engine symbol you're interested in, like `-[FlutterEngine runWithEntrypoint:]` (note the `-[` prefix has no space).
 
 You can also set a breakpoint directly with [lldb](https://lldb.llvm.org/tutorial.html) by expanding **Flutter > Runner** in the Runner Project Navigator. Put a breakpoint in `AppDelegate.swift`'s `application(didFinishLaunchingWithOptions:)` (Swift project) or `main.m`'s `main()` (Objective-C project) and start the application by clicking the Run button (CMD + R). Then, set your desired breakpoint in the engine in `lldb` via `breakpoint set -...`.
-
-If you are a Googler using RBE, [don't forget to update `~/.lldbinit`](#googlers-using-rbe) to tell Xcode where the engine sources are located.
 
 ## Debugging Android builds with gdb
 
@@ -101,7 +101,7 @@ See https://github.com/flutter/flutter/blob/master/engine/src/flutter/sky/tools/
 
 <img src="https://github.com/user-attachments/assets/44845f2b-c317-489b-9eb8-e24bbd0ce78a" width="600" />
 
-5. If you are a Googler using RBE, [don't forget to update `~/.lldbinit`](#googlers-using-rbe) to tell Android Studio where the engine sources are located.
+5. If you are a Googler using RBE, [update `~/.lldbinit`](#googlers-using-rbe) to tell Android Studio where the engine sources are located.
 
 6. To attach the debugger, use `Run > Attach Debugger to Android Process`.  For "Use Android Debugger Settings from" choose `[Use default settings]`, and for "Debug Type" choose `Native Only`.
 <img src="https://github.com/user-attachments/assets/a79dc331-6540-4c03-b880-58d1552a7f75" width="600" />
