@@ -69,7 +69,7 @@ std::shared_ptr<GlyphAtlas> CreateGlyphAtlas(
 }
 
 Rect PerVertexDataPositionToRect(
-    GlyphAtlasPipeline::VertexShader::PerVertexData data[4]) {
+    std::array<GlyphAtlasPipeline::VertexShader::PerVertexData, 4>& data) {
   Scalar right = FLT_MIN;
   Scalar left = FLT_MAX;
   Scalar top = FLT_MAX;
@@ -85,7 +85,7 @@ Rect PerVertexDataPositionToRect(
 }
 
 Rect PerVertexDataUVToRect(
-    GlyphAtlasPipeline::VertexShader::PerVertexData data[4],
+    std::array<GlyphAtlasPipeline::VertexShader::PerVertexData, 4>& data,
     ISize texture_size) {
   Scalar right = FLT_MIN;
   Scalar left = FLT_MAX;
@@ -111,7 +111,7 @@ TEST_P(TextContentsTest, SimpleComputeVertexData) {
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
 #endif
 
-  GlyphAtlasPipeline::VertexShader::PerVertexData data[4];
+  std::array<GlyphAtlasPipeline::VertexShader::PerVertexData, 4> data;
 
   std::shared_ptr<TextFrame> text_frame =
       MakeTextFrame("1", "ahem.ttf", TextOptions{.font_size = 50});
@@ -147,7 +147,7 @@ TEST_P(TextContentsTest, SimpleComputeVertexData2x) {
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
 #endif
 
-  GlyphAtlasPipeline::VertexShader::PerVertexData data[4];
+  std::array<GlyphAtlasPipeline::VertexShader::PerVertexData, 4> data;
 
   std::shared_ptr<TextFrame> text_frame =
       MakeTextFrame("1", "ahem.ttf", TextOptions{.font_size = 50});
@@ -226,7 +226,7 @@ TEST_P(TextContentsTest, SimpleSubpixel) {
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
 #endif
 
-  GlyphAtlasPipeline::VertexShader::PerVertexData data[4];
+  std::array<GlyphAtlasPipeline::VertexShader::PerVertexData, 4> data;
 
   std::shared_ptr<TextFrame> text_frame = MakeTextFrame(
       "1", "ahem.ttf", TextOptions{.font_size = 50, .is_subpixel = true});
@@ -263,7 +263,7 @@ TEST_P(TextContentsTest, SimpleSubpixel3x) {
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
 #endif
 
-  GlyphAtlasPipeline::VertexShader::PerVertexData data[4];
+  std::array<GlyphAtlasPipeline::VertexShader::PerVertexData, 4> data;
 
   std::shared_ptr<TextFrame> text_frame = MakeTextFrame(
       "1", "ahem.ttf", TextOptions{.font_size = 50, .is_subpixel = true});
@@ -307,7 +307,7 @@ TEST_P(TextContentsTest, SimpleSubpixel26) {
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
 #endif
 
-  GlyphAtlasPipeline::VertexShader::PerVertexData data[4];
+  std::array<GlyphAtlasPipeline::VertexShader::PerVertexData, 4> data;
 
   std::shared_ptr<TextFrame> text_frame = MakeTextFrame(
       "1", "ahem.ttf", TextOptions{.font_size = 50, .is_subpixel = true});
@@ -344,7 +344,7 @@ TEST_P(TextContentsTest, SimpleSubpixel80) {
   GTEST_SKIP() << "Results aren't stable across linux and macos.";
 #endif
 
-  GlyphAtlasPipeline::VertexShader::PerVertexData data[4];
+  std::array<GlyphAtlasPipeline::VertexShader::PerVertexData, 4> data;
 
   std::shared_ptr<TextFrame> text_frame = MakeTextFrame(
       "1", "ahem.ttf", TextOptions{.font_size = 50, .is_subpixel = true});
