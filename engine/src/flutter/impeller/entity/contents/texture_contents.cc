@@ -208,6 +208,10 @@ bool TextureContents::Render(const ContentContext& renderer,
     // coordinates.
     sampler_desc.width_address_mode = SamplerAddressMode::kClampToEdge;
     sampler_desc.height_address_mode = SamplerAddressMode::kClampToEdge;
+    sampler_desc.min_filter = sampler_descriptor_.min_filter;
+    sampler_desc.mag_filter = sampler_descriptor_.mag_filter;
+    sampler_desc.mip_filter = MipFilter::kBase;
+
     FSExternal::BindSAMPLEREXTERNALOESTextureSampler(
         pass, texture_,
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
