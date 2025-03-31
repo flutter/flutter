@@ -43,6 +43,7 @@ void main() {
     writePackageConfigFile(mainLibName: 'foo', directory: fileSystem.currentDirectory);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('lib', 'a.dart')).createSync(recursive: true);
     logger = BufferLogger.test();
     processManager = FakeProcessManager.any();
   });
@@ -146,6 +147,110 @@ void main() {
               'BuildMode': 'release',
               'DartDefines':
                   'Zm9vPWE=,RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
+    },
+  );
+
+  testUsingContext(
+    'Infers target entrypoint correctly from --target',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/136830.
+      final BuildCommand buildCommand = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+      await runner.run(<String>[
+        'build',
+        'web',
+        '--no-pub',
+        '--no-web-resources-cdn',
+        '--target=lib/a.dart',
+      ]);
+
+      final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
+      expect(buildDir.existsSync(), true);
+      expect(testLogger.statusText, contains('Compiling lib/a.dart for the Web...'));
+      expect(testLogger.statusText, contains('✓ Built ${buildDir.path}'));
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem:
+          () => TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/a.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines':
+                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
+              'DartObfuscation': 'false',
+              'TrackWidgetCreation': 'false',
+              'TreeShakeIcons': 'true',
+              'UseLocalCanvasKit': 'true',
+            });
+          }),
+    },
+  );
+
+  testUsingContext(
+    'Infers target entrypoint correctly from positional argument list',
+    () async {
+      // Regression test for https://github.com/flutter/flutter/issues/136830.
+      final BuildCommand buildCommand = BuildCommand(
+        androidSdk: FakeAndroidSdk(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        fileSystem: fileSystem,
+        logger: logger,
+        osUtils: FakeOperatingSystemUtils(),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+      await runner.run(<String>[
+        'build',
+        'web',
+        '--no-pub',
+        '--no-web-resources-cdn',
+        'lib/a.dart',
+      ]);
+
+      final Directory buildDir = fileSystem.directory(fileSystem.path.join('build', 'web'));
+      expect(buildDir.existsSync(), true);
+      expect(testLogger.statusText, contains('Compiling lib/a.dart for the Web...'));
+      expect(testLogger.statusText, contains('✓ Built ${buildDir.path}'));
+    },
+    overrides: <Type, Generator>{
+      Platform: () => fakePlatform,
+      FileSystem: () => fileSystem,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
+      ProcessManager: () => processManager,
+      BuildSystem:
+          () => TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            expect(environment.defines, <String, String>{
+              'TargetFile': 'lib/a.dart',
+              'HasWebPlugins': 'true',
+              'ServiceWorkerStrategy': 'offline-first',
+              'BuildMode': 'release',
+              'DartDefines':
+                  'RkxVVFRFUl9WRVJTSU9OPTAuMC4w,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049MTExMTE=,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049YWJjZGU=,RkxVVFRFUl9EQVJUX1ZFUlNJT049MTI=',
               'DartObfuscation': 'false',
               'TrackWidgetCreation': 'false',
               'TreeShakeIcons': 'true',
