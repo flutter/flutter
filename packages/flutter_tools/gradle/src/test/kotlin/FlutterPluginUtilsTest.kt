@@ -862,7 +862,7 @@ class FlutterPluginUtilsTest {
         verify(exactly = 1) {
             mockCmakeOptions.path
         }
-        verify(exactly = 1) { mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt") }
+        verify(exactly = 1) { mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt") }
         verify(exactly = 1) {
             mockDefaultConfig.externalNativeBuild.cmake.arguments(
                 "-Wno-dev",

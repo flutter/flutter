@@ -611,7 +611,7 @@ object FlutterPluginUtils {
 
         // Otherwise, point to an empty CMakeLists.txt, and ignore associated warnings.
         gradleProjectAndroidExtension.externalNativeBuild.cmake.path(
-            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+            "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt"
         )
 
         // CMake will print warnings when you try to build an empty project.
