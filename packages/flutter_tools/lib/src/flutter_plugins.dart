@@ -284,7 +284,7 @@ bool _writeFlutterPluginsList(
     final Map<String, Object?> newJsonCopy = <String, Object?>{...newJson};
 
     // The 'info' property is a comment that doesn't affect functionality.
-    // The 'dependencyGraph' property is deprecated and shouldn't be ued.
+    // The 'dependencyGraph' property is deprecated and shouldn't be used.
     // The 'date_created' property is always updated.
     // The 'plugins' property has already been checked by the logic above.
     const List<String> ignoredKeys = <String>[
