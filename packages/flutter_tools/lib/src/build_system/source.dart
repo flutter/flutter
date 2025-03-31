@@ -263,6 +263,13 @@ abstract class Source {
   ///
   /// If [optional] is true, the file is not required to exist. In this case, it
   /// is never resolved as an input.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// // A project's `pubspec.yaml` file:
+  /// Source.fromProject((FlutterProject project) => project.pubspecFile);
+  /// ```
   const factory Source.fromProject(ProjectSourceBuilder sourceBuilder, {bool optional}) =
       _ProjectSource;
 
