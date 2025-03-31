@@ -14,6 +14,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/geometry/dl_path.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -1470,6 +1471,21 @@ bool Canvas::Restore() {
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
+  // TODO(jonahwilliams): we should switch to path rendering based on a more
+  // intelligent metric than just looking at the total canvas scale. Skia uses
+  // the scaled size of the glyph. See also:
+  // https://github.com/flutter/flutter/issues/165583
+  if (GetCurrentTransform().GetMaxBasisLengthXY() > 24) {
+    std::optional<flutter::DlPath> path = text_frame->GetPath();
+    if (path.has_value()) {
+      Save(1);
+      Concat(Matrix::MakeTranslation(position));
+      DrawPath(path->GetPath(), paint);
+      Restore();
+      return;
+    }
+  }
+
   Entity entity;
   entity.SetClipDepth(GetClipHeight());
   entity.SetBlendMode(paint.blend_mode);

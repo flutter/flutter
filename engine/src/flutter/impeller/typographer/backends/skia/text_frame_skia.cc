@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/fml/logging.h"
 #include "impeller/typographer/backends/skia/typeface_skia.h"
 #include "impeller/typographer/font.h"
@@ -14,6 +15,7 @@
 #include "third_party/skia/include/core/SkFontMetrics.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkRect.h"
+#include "third_party/skia/modules/skparagraph/include/Paragraph.h"  // nogncheck
 #include "third_party/skia/src/core/SkStrikeSpec.h"    // nogncheck
 #include "third_party/skia/src/core/SkTextBlobPriv.h"  // nogncheck
 
@@ -83,7 +85,13 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
         continue;
     }
   }
-  return std::make_shared<TextFrame>(runs, ToRect(blob->bounds()), has_color);
+  return std::make_shared<TextFrame>(
+      runs, ToRect(blob->bounds()), has_color, [blob]() {
+        SkPath path = skia::textlayout::Paragraph::GetPath(blob.get());
+        SkPath transformed = path.makeTransform(
+            SkMatrix::Translate(blob->bounds().left(), blob->bounds().top()));
+        return flutter::DlPath(transformed);
+      });
 }
 
 }  // namespace impeller

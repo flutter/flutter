@@ -6,11 +6,18 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 
 #include <cstdint>
+
 #include "impeller/geometry/rational.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
 
+namespace flutter {
+class DlPath;
+}
+
 namespace impeller {
+
+using PathCreator = std::function<std::optional<flutter::DlPath>()>;
 
 //------------------------------------------------------------------------------
 /// @brief      Represents a collection of shaped text runs.
@@ -24,7 +31,10 @@ class TextFrame {
  public:
   TextFrame();
 
-  TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color);
+  TextFrame(std::vector<TextRun>& runs,
+            Rect bounds,
+            bool has_color,
+            const PathCreator& path_creator = {});
 
   ~TextFrame();
 
@@ -95,11 +105,9 @@ class TextFrame {
 
   Rational GetScale() const;
 
-  TextFrame& operator=(TextFrame&& other) = default;
-
-  TextFrame(const TextFrame& other) = default;
-
   const Matrix& GetTransform() const { return transform_; }
+
+  std::optional<flutter::DlPath> GetPath() const;
 
   Point GetOffset() const;
 
@@ -120,6 +128,7 @@ class TextFrame {
   std::vector<TextRun> runs_;
   Rect bounds_;
   bool has_color_;
+  const PathCreator path_creator_;
 
   // Data that is cached when rendering the text frame and is only
   // valid for the current atlas generation.
