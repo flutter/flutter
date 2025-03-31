@@ -77,6 +77,16 @@ std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
         kEmptyResult);
   }
 
+
+  Point diff = line_geometry->GetP1() - line_geometry->GetP0();
+  Scalar angle = std::atan2(diff.y, diff.x);
+  Entity rotated_entity = entity.Clone();
+  Matrix matrix = entity.GetTransform();
+  matrix = matrix * Matrix::MakeTranslation(line_geometry->GetP0()) *
+           Matrix::MakeRotationZ(Radians(angle)) *
+           Matrix::MakeTranslation(-1 * line_geometry->GetP0());
+  rotated_entity.SetTransform(matrix);
+
   return std::make_pair(calculate_status.value(),
                         GeometryResult{
                             .type = PrimitiveType::kTriangleStrip,
@@ -86,7 +96,7 @@ std::pair<LineContents::EffectiveLineParameters, GeometryResult> CreateGeometry(
                                     .vertex_count = count,
                                     .index_type = IndexType::kNone,
                                 },
-                            .transform = entity.GetShaderTransform(pass),
+                            .transform = rotated_entity.GetShaderTransform(pass),
                         });
 }
 
@@ -161,6 +171,7 @@ bool LineContents::Render(const ContentContext& renderer,
       [&renderer](ContentContextOptions options) {
         return renderer.GetLinePipeline(options);
       };
+
   return ColorSourceContents::DrawGeometry<VS>(
       this, geometry_.get(), renderer, entity, pass, pipeline_callback,
       frame_info,
@@ -215,13 +226,18 @@ LineContents::CalculatePerVertex(LineVertexShader::PerVertexData* per_vertex,
                                  const LineGeometry* geometry,
                                  const Matrix& entity_transform) {
   Scalar scale = entity_transform.GetMaxBasisLengthXY();
+
+  Point d = geometry->GetP1() - geometry->GetP0();
+  Scalar mag = d.GetLength();
+  Point p1_prime = Point(geometry->GetP0().x + mag, geometry->GetP0().y);
+
   std::array<Point, 4> corners;
   // Make sure we get kSampleRadius pixels to sample from.
   Scalar expand_size = std::max(kSampleRadius / scale, kSampleRadius);
   if (!LineGeometry::ComputeCorners(
           corners.data(), entity_transform,
           /*extend_endpoints=*/geometry->GetCap() != Cap::kButt,
-          geometry->GetP0(), geometry->GetP1(), geometry->GetWidth())) {
+          geometry->GetP0(), p1_prime, geometry->GetWidth())) {
     return fml::Status(fml::StatusCode::kAborted, "No valid corners");
   }
   Scalar effective_line_width = std::fabsf((corners[2] - corners[0]).y);
@@ -230,8 +246,8 @@ LineContents::CalculatePerVertex(LineVertexShader::PerVertexData* per_vertex,
   Scalar effective_sample_radius =
       (padded_line_width - effective_line_width) / 2.f;
   LineInfo line_info =
-      CalculateLineInfo(geometry->GetP0(), geometry->GetP1(),
-                        effective_line_width, effective_sample_radius);
+      CalculateLineInfo(geometry->GetP0(), p1_prime, effective_line_width,
+                        effective_sample_radius);
   for (auto& corner : corners) {
     *per_vertex++ = {
         .position = corner,
