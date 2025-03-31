@@ -117,21 +117,6 @@ DebugReportVK::Result DebugReportVK::OnDebugCallback(
   if (data->messageIdNumber == 0x609A13B) {
     return Result::kContinue;
   }
-  // TODO(149111): Fix VUID-VkShaderModuleCreateInfo-pCode-08737.
-  if (data->pMessageIdName != nullptr &&
-      strcmp(data->pMessageIdName,
-             "VUID-VkShaderModuleCreateInfo-pCode-08737") == 0) {
-    return Result::kContinue;
-  }
-  // TODO(149111): Fix
-  // VUID-VkPipelineShaderStageCreateInfo-pSpecializationInfo-06849.
-  if (data->pMessageIdName != nullptr &&
-      strcmp(
-          data->pMessageIdName,
-          "VUID-VkPipelineShaderStageCreateInfo-pSpecializationInfo-06849") ==
-          0) {
-    return Result::kContinue;
-  }
 
   // This warning happens when running tests that use SwiftShader.
   // Some SPIR-V shaders request the UniformAndStorageBuffer16BitAccess
@@ -145,7 +130,6 @@ DebugReportVK::Result DebugReportVK::OnDebugCallback(
   std::vector<std::pair<std::string, std::string>> items;
 
   items.emplace_back("Severity", vk::to_string(severity));
-
   items.emplace_back("Type", vk::to_string(type));
 
   if (data->pMessageIdName) {
