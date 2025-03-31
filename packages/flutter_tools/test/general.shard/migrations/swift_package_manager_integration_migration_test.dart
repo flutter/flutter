@@ -3120,6 +3120,26 @@ String _projectIdentifier(SupportedPlatform platform) {
       : '33CC10E52044A3C60003C045';
 }
 
+String _runnerTestsTarget(SupportedPlatform platform) {
+  return platform == SupportedPlatform.ios ? runnerTestsTargetIos : runnerTestsTargetMacos;
+}
+
+String _runnerUITestsTarget(SupportedPlatform platform) {
+  return platform == SupportedPlatform.ios ? runnerUITestsTargetIos : runnerUITestsTargetMacos;
+}
+
+String _runnerTestsTargetAsJson(SupportedPlatform platform) {
+  return platform == SupportedPlatform.ios
+      ? runnerTestsTargetIosAsJson
+      : runnerTestsTargetMacosAsJson;
+}
+
+String _runnerUITestsTargetAsJson(SupportedPlatform platform) {
+  return platform == SupportedPlatform.ios
+      ? runnerUITestsTargetIosAsJson
+      : runnerUITestsTargetMacosAsJson;
+}
+
 // PBXBuildFile
 const String unmigratedBuildFileSection = '''
 /* Begin PBXBuildFile section */
@@ -3336,6 +3356,190 @@ const String migratedOtherApplicationTargetAsJson = '''
       "productName" : "OtherTarget",
       "productReference" : "354BE7402A385E0200F71CEE",
       "productType" : "com.apple.product-type.application"
+    }''';
+
+const String runnerTestsTargetIos = '''
+   331C8080294A63A400263BE5 /* RunnerTests */ = {
+     isa = PBXNativeTarget;
+     buildConfigurationList = 331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */;
+     buildPhases = (
+       2AE287FFFE7E9A0A556FAB17 /* [CP] Check Pods Manifest.lock */,
+       331C807D294A63A400263BE5 /* Sources */,
+       331C807F294A63A400263BE5 /* Resources */,
+       C6D5C1912D94BBDDC851B5AD /* Frameworks */,
+     );
+     buildRules = (
+     );
+     dependencies = (
+       331C8086294A63A400263BE5 /* PBXTargetDependency */,
+     );
+     name = RunnerTests;
+     productName = RunnerTests;
+     productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
+     productType = "com.apple.product-type.bundle.unit-test";
+   };''';
+
+const String runnerTestsTargetIosAsJson = '''
+    "331C8080294A63A400263BE5" : {
+      "buildConfigurationList" : "331C8087294A63A400263BE5",
+      "buildPhases" : [
+        "2AE287FFFE7E9A0A556FAB17",
+        "331C807D294A63A400263BE5",
+        "331C807F294A63A400263BE5",
+        "C6D5C1912D94BBDDC851B5AD"
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+        "331C8086294A63A400263BE5"
+      ],
+      "isa" : "PBXNativeTarget",
+      "name" : "RunnerTests",
+      "productName" : "RunnerTests",
+      "productReference" : "331C8081294A63A400263BE5",
+      "productType" : "com.apple.product-type.bundle.unit-test"
+    }''';
+
+const String runnerTestsTargetMacos = '''
+   331C80D4294CF70F00263BE5 /* RunnerTests */ = {
+     isa = PBXNativeTarget;
+     buildConfigurationList = 331C80DE294CF71000263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */;
+     buildPhases = (
+       3277B0B414012D3DCE9EE962 /* [CP] Check Pods Manifest.lock */,
+       331C80D1294CF70F00263BE5 /* Sources */,
+       331C80D2294CF70F00263BE5 /* Frameworks */,
+       331C80D3294CF70F00263BE5 /* Resources */,
+     );
+     buildRules = (
+     );
+     dependencies = (
+       331C80DA294CF71000263BE5 /* PBXTargetDependency */,
+     );
+     name = RunnerTests;
+     productName = RunnerTests;
+     productReference = 331C80D5294CF71000263BE5 /* RunnerTests.xctest */;
+     productType = "com.apple.product-type.bundle.unit-test";
+   };''';
+
+const String runnerTestsTargetMacosAsJson = '''
+    "331C80D4294CF70F00263BE5" : {
+      "buildConfigurationList" : "331C80DE294CF71000263BE5",
+      "buildPhases" : [
+        "3277B0B414012D3DCE9EE962",
+        "331C80D1294CF70F00263BE5",
+        "331C80D2294CF70F00263BE5",
+        "331C80D3294CF70F00263BE5"
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+        "331C80DA294CF71000263BE5"
+      ],
+      "isa" : "PBXNativeTarget",
+      "name" : "RunnerTests",
+      "productName" : "RunnerTests",
+      "productReference" : "331C80D5294CF71000263BE5",
+      "productType" : "com.apple.product-type.bundle.unit-test"
+    }''';
+
+const String runnerUITestsTargetIos = '''
+   43AA61E72D9ACBAA00529601 /* RunnerUITests */ = {
+     isa = PBXNativeTarget;
+     buildConfigurationList = 43AA61F32D9ACBAA00529601 /* Build configuration list for PBXNativeTarget "RunnerUITests" */;
+     buildPhases = (
+       43AA61E42D9ACBAA00529601 /* Sources */,
+       43AA61E52D9ACBAA00529601 /* Frameworks */,
+       43AA61E62D9ACBAA00529601 /* Resources */,
+     );
+     buildRules = (
+     );
+     dependencies = (
+       43AA61EF2D9ACBAA00529601 /* PBXTargetDependency */,
+     );
+     fileSystemSynchronizedGroups = (
+       43AA61E92D9ACBAA00529601 /* RunnerUITests */,
+     );
+     name = RunnerUITests;
+     packageProductDependencies = (
+     );
+     productName = RunnerUITests;
+     productReference = 43AA61E82D9ACBAA00529601 /* RunnerUITests.xctest */;
+     productType = "com.apple.product-type.bundle.ui-testing";
+   };''';
+
+const String runnerUITestsTargetIosAsJson = '''
+    "43AA61E72D9ACBAA00529601" : {
+      "buildConfigurationList" : "43AA61F32D9ACBAA00529601",
+      "buildPhases" : [
+        "43AA61E42D9ACBAA00529601",
+        "43AA61E52D9ACBAA00529601",
+        "43AA61E62D9ACBAA00529601"
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+        "43AA61EF2D9ACBAA00529601"
+      ],
+      "fileSystemSynchronizedGroups" : [
+        "43AA61E92D9ACBAA00529601"
+      ],
+      "isa" : "PBXNativeTarget",
+      "name" : "RunnerUITests",
+      "productName" : "RunnerUITests",
+      "productReference" : "43AA61E82D9ACBAA00529601",
+      "productType" : "com.apple.product-type.bundle.ui-testing"
+    }''';
+
+const String runnerUITestsTargetMacos = '''
+   43AA61F72D9ACBC800529601 /* RunnerUITests */ = {
+     isa = PBXNativeTarget;
+     buildConfigurationList = 43AA62032D9ACBC800529601 /* Build configuration list for PBXNativeTarget "RunnerUITests" */;
+     buildPhases = (
+       43AA61F42D9ACBC800529601 /* Sources */,
+       43AA61F52D9ACBC800529601 /* Frameworks */,
+       43AA61F62D9ACBC800529601 /* Resources */,
+     );
+     buildRules = (
+     );
+     dependencies = (
+       43AA61FF2D9ACBC800529601 /* PBXTargetDependency */,
+     );
+     fileSystemSynchronizedGroups = (
+       43AA61F92D9ACBC800529601 /* RunnerUITests */,
+     );
+     name = RunnerUITests;
+     packageProductDependencies = (
+     );
+     productName = RunnerUITests;
+     productReference = 43AA61F82D9ACBC800529601 /* RunnerUITests.xctest */;
+     productType = "com.apple.product-type.bundle.ui-testing";
+   };''';
+
+const String runnerUITestsTargetMacosAsJson = '''
+    "43AA61F72D9ACBC800529601" : {
+      "buildConfigurationList" : "43AA62032D9ACBC800529601",
+      "buildPhases" : [
+        "43AA61F42D9ACBC800529601",
+        "43AA61F52D9ACBC800529601",
+        "43AA61F62D9ACBC800529601"
+      ],
+      "buildRules" : [
+
+      ],
+      "dependencies" : [
+        "43AA61FF2D9ACBC800529601"
+      ],
+      "fileSystemSynchronizedGroups" : [
+        "43AA61F92D9ACBC800529601"
+      ],
+      "isa" : "PBXNativeTarget",
+      "name" : "RunnerUITests",
+      "productName" : "RunnerUITests",
+      "productReference" : "43AA61F82D9ACBC800529601",
+      "productType" : "com.apple.product-type.bundle.ui-testing"
     }''';
 
 String unmigratedNativeTargetSection(
