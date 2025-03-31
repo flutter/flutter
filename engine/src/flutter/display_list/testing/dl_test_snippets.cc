@@ -753,17 +753,8 @@ std::vector<DisplayListInvocationGroup> CreateAllRenderingOps() {
            {1, 56, 1,
             [](DlOpReceiver& r) { r.drawRoundRect(kTestRRect.Shift(5, 5)); }},
        }},
-      {"DrawRSuperellipse",
-       {
-           {1, 56, 1,
-            [](DlOpReceiver& r) {
-              r.drawRoundSuperellipse(kTestRSuperellipse);
-            }},
-           {1, 56, 1,
-            [](DlOpReceiver& r) {
-              r.drawRoundSuperellipse(kTestRSuperellipse.Shift(5, 5));
-            }},
-       }},
+      // DrawRSuperellipse is not included since due to flexible size
+      // TODO(dkwingsmt): https://github.com/flutter/flutter/issues/166284
       {"DrawDRRect",
        {
            {1, 104, 1,
