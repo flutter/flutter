@@ -3342,9 +3342,10 @@ String unmigratedNativeTargetSection(
   SupportedPlatform platform, {
   bool missingPackageProductDependencies = false,
   bool withOtherDependency = false,
+  String? otherNativeTarget,
 }) {
-  return <String>[
-    '/* Begin PBXNativeTarget section */',
+  final StringBuffer builder = StringBuffer();
+  final String runnerTarget = <String>[
     '		${_runnerNativeTargetIdentifier(platform)} /* Runner */ = {',
     '			isa = PBXNativeTarget;',
     '			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;',
@@ -3370,8 +3371,19 @@ String unmigratedNativeTargetSection(
     '			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;',
     '			productType = "com.apple.product-type.application";',
     '		};',
-    '/* End PBXNativeTarget section */',
   ].join('\n');
+
+  builder.writeln('/* Begin PBXNativeTarget section */');
+
+  builder.writeln(runnerTarget);
+
+  if (otherNativeTarget != null) {
+    builder.writeln(otherNativeTarget);
+  }
+
+  builder.write('/* End PBXNativeTarget section */');
+
+  return builder.toString();
 }
 
 String migratedNativeTargetSection(
