@@ -44,7 +44,8 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
                             DisplayListBuilder& canvas,
                             const std::string& text,
                             const std::string_view& font_fixture,
-                            const TextRenderOptions& options = {}) {
+                            const TextRenderOptions& options = {},
+                            const std::optional<SkFont>& font = std::nullopt) {
   // Draw the baseline.
   DlPaint paint;
   paint.setColor(DlColor::kAqua().withAlpha(255 * 0.25));
@@ -57,17 +58,23 @@ bool RenderTextInCanvasSkia(const std::shared_ptr<Context>& context,
   canvas.DrawCircle(options.position, 5.0, paint);
 
   // Construct the text blob.
-  auto c_font_fixture = std::string(font_fixture);
-  auto mapping = flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
-  if (!mapping) {
-    return false;
+  SkFont selected_font;
+  if (!font.has_value()) {
+    auto c_font_fixture = std::string(font_fixture);
+    auto mapping =
+        flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
+    if (!mapping) {
+      return false;
+    }
+    sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+    selected_font = SkFont(font_mgr->makeFromData(mapping), options.font_size);
+    if (options.is_subpixel) {
+      selected_font.setSubpixel(true);
+    }
+  } else {
+    selected_font = font.value();
   }
-  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
-  SkFont sk_font(font_mgr->makeFromData(mapping), options.font_size);
-  if (options.is_subpixel) {
-    sk_font.setSubpixel(true);
-  }
-  auto blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
+  auto blob = SkTextBlob::MakeFromString(text.c_str(), selected_font);
   if (!blob) {
     return false;
   }
@@ -812,12 +819,20 @@ TEST_P(AiksTest, SingleIconShadowTest) {
                 .GetCacheSizeForTesting(),
             0u);
 
+  // Create font instance outside loop so all draws use identical font instance.
+  auto c_font_fixture = std::string(kFontFixture);
+  auto mapping = flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
+  ASSERT_TRUE(mapping);
+  sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
+  SkFont sk_font(font_mgr->makeFromData(mapping), 50);
+
   for (auto i = 0; i < 10; i++) {
     ASSERT_TRUE(RenderTextInCanvasSkia(
         GetContext(), builder, "A", kFontFixture,
         TextRenderOptions{
             .color = DlColor::kBlue(),
-            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)}));
+            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)},
+        sk_font));
   }
 
   DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
