@@ -76,13 +76,13 @@ void main() {
 
     await tester.tap(find.text('Title'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 250));
     expect(tester.getTopLeft(iconFinder).dx, moreOrLessEquals(785.0, epsilon: 0.01));
     expect(tester.getTopLeft(iconFinder).dy, moreOrLessEquals(14.7, epsilon: 0.01));
 
     await tester.tap(find.text('Title'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 250));
     expect(tester.getTopLeft(iconFinder).dx, moreOrLessEquals(770.2, epsilon: 0.01));
     expect(tester.getTopLeft(iconFinder).dy, moreOrLessEquals(14.5, epsilon: 0.01));
   });
@@ -103,7 +103,7 @@ void main() {
     await tester.pump();
 
     // Pump until halfway through the animation.
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pump(const Duration(milliseconds: 125));
     expect(find.text('Content'), findsNWidgets(2));
     expect(find.byType(FadeTransition), findsOneWidget);
     expect(
@@ -117,12 +117,12 @@ void main() {
     );
 
     // At the end of the animation, the fading content has completely disappeared.
-    await tester.pump(const Duration(milliseconds: 150) + infinitesimalDuration);
+    await tester.pump(const Duration(milliseconds: 125) + infinitesimalDuration);
     expect(find.text('Content'), findsOneWidget);
 
     await tester.tap(find.text('Title'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300) + infinitesimalDuration);
+    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
     expect(find.text('Content'), findsNothing);
   });
 
@@ -150,7 +150,7 @@ void main() {
     await tester.pump();
 
     // Pump until halfway through the animation.
-    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pump(const Duration(milliseconds: 125));
     expect(find.byType(Placeholder), findsOneWidget);
     // The content does not fade.
     expect(find.byType(FadeTransition), findsNothing);
@@ -160,7 +160,7 @@ void main() {
     );
 
     // Pump until the end of the animation.
-    await tester.pump(const Duration(milliseconds: 150) + infinitesimalDuration);
+    await tester.pump(const Duration(milliseconds: 125) + infinitesimalDuration);
     expect(
       tester.getBottomLeft(find.byType(Placeholder)).dy,
       moreOrLessEquals(begin + placeholderHeight, epsilon: 0.01),

@@ -24,7 +24,7 @@ const Curve _kAnimationCurve = Curves.easeInOut;
 /// [CupertinoExpansionTile].
 ///
 /// Eyeballed from an iPhone 15 simulator running iOS 17.5.
-const Duration _kAnimationDuration = Duration(milliseconds: 300);
+const Duration _kAnimationDuration = Duration(milliseconds: 250);
 
 /// The font size of the rotating trailing icon in the header of a
 /// [CupertinoExpansionTile].
