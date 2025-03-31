@@ -635,7 +635,7 @@ Future<DartBuildResult> _runDartBuild({
 
 List<FlutterCodeAsset> _filterCodeAssets(List<EncodedAsset> assets, Target target) =>
     assets
-        .where((EncodedAsset asset) => asset.type == CodeAsset.type)
+        .where((EncodedAsset asset) => asset.isCodeAsset)
         .map<FlutterCodeAsset>(
           (EncodedAsset c) => FlutterCodeAsset(codeAsset: CodeAsset.fromEncoded(c), target: target),
         )
