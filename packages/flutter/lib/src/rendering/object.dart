@@ -1099,7 +1099,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// Relayout boundaries owned by child [PipelineOwner]s are not included here.
   ///
   /// Boundaries appear in an arbitrary order, and may appear multiple times.
-  @protected @nonVirtual
+  @protected
+  @nonVirtual
   Iterable<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
 
   /// Whether this pipeline is currently in the layout phase.
@@ -1255,7 +1256,8 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// [flushPaint].
   ///
   /// Marked children of child [PipelineOwner]s are not included here.
-  @protected @nonVirtual
+  @protected
+  @nonVirtual
   Iterable<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
 
   /// Whether this pipeline is currently in the paint phase.

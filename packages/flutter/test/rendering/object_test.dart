@@ -26,14 +26,14 @@ void main() {
     final _TestPipelineOwner owner = _TestPipelineOwner();
     final TestRenderObject renderObject = TestRenderObject()..isRepaintBoundary = true;
     renderObject.attach(owner);
-    expect(owner.nodesNeedingLayout, isEmpty);
+    expect(owner.needLayout, isEmpty);
 
     renderObject.layout(const BoxConstraints.tightForFinite());
     renderObject.markNeedsLayout();
-    expect(owner.nodesNeedingLayout, contains(renderObject));
+    expect(owner.needLayout, contains(renderObject));
 
     owner.flushLayout();
-    expect(owner.nodesNeedingLayout, isEmpty);
+    expect(owner.needLayout, isEmpty);
   });
 
   test('nodesNeedingPaint updated with paint changes', () {
@@ -43,14 +43,14 @@ void main() {
     final OffsetLayer layer = OffsetLayer();
     layer.attach(owner);
     renderObject.attach(owner);
-    expect(owner.nodesNeedingPaint, isEmpty);
+    expect(owner.needPaint, isEmpty);
 
     renderObject.markNeedsPaint();
     renderObject.scheduleInitialPaint(layer);
-    expect(owner.nodesNeedingPaint, contains(renderObject));
+    expect(owner.needPaint, contains(renderObject));
 
     owner.flushPaint();
-    expect(owner.nodesNeedingPaint, isEmpty);
+    expect(owner.needPaint, isEmpty);
   });
 
   test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
@@ -720,9 +720,7 @@ class TestThrowingRenderObject extends RenderObject {
 
 final class _TestPipelineOwner extends PipelineOwner {
   // Make these protected fields visible for testing.
-  @override
-  Iterable<RenderObject> get nodesNeedingLayout => super.nodesNeedingLayout;
+  Iterable<RenderObject> get needLayout => super.nodesNeedingLayout;
 
-  @override
-  Iterable<RenderObject> get nodesNeedingPaint => super.nodesNeedingPaint;
+  Iterable<RenderObject> get needPaint => super.nodesNeedingPaint;
 }
