@@ -22,6 +22,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
@@ -845,6 +847,8 @@ class FlutterPluginUtilsTest {
         val project = mockk<Project>()
         val mockCmakeOptions = mockk<CmakeOptions>()
         val mockDefaultConfig = mockk<DefaultConfig>()
+        val mockDirectoryProperty = mockk<DirectoryProperty>()
+        val mockDirectory = mockk<Directory>()
         every {
             project.extensions
                 .findByType(BaseExtension::class.java)!!
@@ -852,17 +856,24 @@ class FlutterPluginUtilsTest {
         } returns mockCmakeOptions
         every { project.extensions.findByType(BaseExtension::class.java)!!.defaultConfig } returns mockDefaultConfig
 
+        val basePath = "/base/path"
+        val fakeBuildPath = "/randomapp/build/app/"
         every { mockCmakeOptions.path } returns null
         every { mockCmakeOptions.path(any()) } returns Unit
         every { mockDefaultConfig.externalNativeBuild.cmake.arguments(any(), any()) } returns Unit
+        every { mockCmakeOptions.buildStagingDirectory(any()) } returns Unit
+        every { project.layout.buildDirectory } returns mockDirectoryProperty
+        every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
+        every { mockDirectoryProperty.get() } returns mockDirectory
+        every { mockDirectory.asFile.path } returns fakeBuildPath
 
-        val basePath = "/base/path"
         FlutterPluginUtils.forceNdkDownload(project, basePath)
 
         verify(exactly = 1) {
             mockCmakeOptions.path
         }
         verify(exactly = 1) { mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt") }
+        verify(exactly = 1) { mockCmakeOptions.buildStagingDirectory(any()) }
         verify(exactly = 1) {
             mockDefaultConfig.externalNativeBuild.cmake.arguments(
                 "-Wno-dev",
@@ -1276,11 +1287,18 @@ class FlutterPluginUtilsTest {
                 every { tasks } returns
                     mockk<TaskContainer> {
                         val registerTaskNameSlot = slot<String>()
-                        every { register(capture(registerTaskNameSlot), capture(registerTaskSlot)) } answers registerAnswer@{
+                        every {
+                            register(
+                                capture(registerTaskNameSlot),
+                                capture(registerTaskSlot)
+                            )
+                        } answers registerAnswer@{
                             val mockRegisterTask =
                                 mockk<Task> {
                                     every { name } returns registerTaskNameSlot.captured
-                                    every { description = capture(descriptionSlot) } returns Unit
+                                    every {
+                                        description = capture(descriptionSlot)
+                                    } returns Unit
                                     every { dependsOn(any<ProcessAndroidResources>()) } returns mockk()
                                     val doLastActionSlot = slot<Action<Task>>()
                                     every { doLast(capture(doLastActionSlot)) } answers doLastAnswer@{
@@ -1302,7 +1320,8 @@ class FlutterPluginUtilsTest {
             }
 
         variants.forEach { variant ->
-            val testOutputs: DomainObjectCollection<BaseVariantOutput> = mockk<DomainObjectCollection<BaseVariantOutput>>()
+            val testOutputs: DomainObjectCollection<BaseVariantOutput> =
+                mockk<DomainObjectCollection<BaseVariantOutput>>()
             val baseVariantSlot = slot<Action<BaseVariantOutput>>()
             val baseVariantOutput = mockk<BaseVariantOutput>()
             // Create a real file in a temp directory.
@@ -1313,7 +1332,9 @@ class FlutterPluginUtilsTest {
             manifest.writeText(manifestText)
             val mockProcessResourcesProvider = mockk<TaskProvider<ProcessAndroidResources>>()
             val mockProcessResources = mockk<ProcessAndroidResources>()
-            every { mockProcessResourcesProvider.hint(ProcessAndroidResources::class).get() } returns mockProcessResources
+            every {
+                mockProcessResourcesProvider.hint(ProcessAndroidResources::class).get()
+            } returns mockProcessResources
             every { baseVariantOutput.processResourcesProvider } returns mockProcessResourcesProvider
             // Fallback processing.
             every { mockProcessResources.manifestFile } returns manifest
@@ -1336,7 +1357,10 @@ class FlutterPluginUtilsTest {
         assert(descriptionSlot.captured.contains("stores app links settings for the given build variant"))
         assertEquals(variants.size, registerTaskList.size)
         for (i in 0 until variants.size) {
-            assertEquals("output${FlutterPluginUtils.capitalize(variants[i].name)}AppLinkSettings", registerTaskList[i].name)
+            assertEquals(
+                "output${FlutterPluginUtils.capitalize(variants[i].name)}AppLinkSettings",
+                registerTaskList[i].name
+            )
             verify(exactly = 1) { registerTaskList[i].dependsOn(any<ProcessAndroidResources>()) }
         }
         // Output assertions are minimal which ensures code is running but is not exhaustive testing.
