@@ -1091,13 +1091,14 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   /// The [RenderObject]s representing relayout boundaries which need to be laid out
   /// in the next [flushLayout] pass.
   ///
-  /// [RenderObject]s with [RenderObject.isRela] are added
-  /// when they are marked for layout. Subclasses of [PipelineOwner] may use them
-  /// to invalidate caches or otherwise make performance optimizations.
-  /// Since nodes may be marked for layout at any time, they are best checked during
-  /// [flushLayout].
+  /// Relayout boundaries are added when they are marked for layout.
+  /// Subclasses of [PipelineOwner] may use them to invalidate caches or
+  /// otherwise make performance optimizations. Since nodes may be marked for
+  /// layout at any time, they are best checked during [flushLayout].
   ///
-  /// Note that this does not include marked children of child [PipelineOwner]s.
+  /// Relayout boundaries owned by child [PipelineOwner]s are not included here.
+  ///
+  /// Boundaries appear in an arbitrary order, and may appear multiple times.
   @protected @nonVirtual
   Iterable<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
 
