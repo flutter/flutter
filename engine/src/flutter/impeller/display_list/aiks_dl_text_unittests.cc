@@ -13,6 +13,9 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/testing/testing.h"
+#include "impeller/display_list/aiks_context.h"
+#include "impeller/display_list/dl_dispatcher.h"
+#include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/matrix.h"
@@ -729,6 +732,101 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
 
   EXPECT_TRUE(text_contents.Render(aiks_context.GetContentContext(), entity,
                                    *render_pass));
+}
+
+TEST_P(AiksTest, TextWithShadowCache) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  // Cache empty
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  ASSERT_TRUE(RenderTextInCanvasSkia(
+      GetContext(), builder, "Hello World", kFontFixture,
+      TextRenderOptions{
+          .color = DlColor::kBlue(),
+          .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)}));
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // Text should be cached.
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            1u);
+}
+
+TEST_P(AiksTest, MultipleTextWithShadowCache) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  // Cache empty
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  for (auto i = 0; i < 5; i++) {
+    ASSERT_TRUE(RenderTextInCanvasSkia(
+        GetContext(), builder, "Hello World", kFontFixture,
+        TextRenderOptions{
+            .color = DlColor::kBlue(),
+            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)}));
+  }
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // Text should be cached. Each text gets its own entry as we don't analyze the
+  // strings.
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            5u);
+}
+
+TEST_P(AiksTest, SingleIconShadowTest) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  AiksContext aiks_context(GetContext(),
+                           std::make_shared<TypographerContextSkia>());
+  // Cache empty
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            0u);
+
+  for (auto i = 0; i < 10; i++) {
+    ASSERT_TRUE(RenderTextInCanvasSkia(
+        GetContext(), builder, "A", kFontFixture,
+        TextRenderOptions{
+            .color = DlColor::kBlue(),
+            .filter = DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 4)}));
+  }
+
+  DisplayListToTexture(builder.Build(), {400, 400}, aiks_context);
+
+  // Text should be cached. All 10 glyphs use the same cache entry.
+  EXPECT_EQ(aiks_context.GetContentContext()
+                .GetTextShadowCache()
+                .GetCacheSizeForTesting(),
+            1u);
 }
 
 }  // namespace testing

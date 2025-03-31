@@ -1472,8 +1472,9 @@ bool Canvas::AttemptBlurredTextOptimization(
     const std::shared_ptr<TextContents>& text_contents,
     Entity& entity,
     const Paint& paint) {
-  if (!paint.mask_blur_descriptor.has_value() ||
-      paint.image_filter != nullptr || paint.color_filter != nullptr ||
+  if (!paint.mask_blur_descriptor.has_value() ||  //
+      paint.image_filter != nullptr ||            //
+      paint.color_filter != nullptr ||            //
       paint.invert_colors) {
     return false;
   }
@@ -1497,7 +1498,8 @@ bool Canvas::AttemptBlurredTextOptimization(
       /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
       /*p_identifier=*/identifier,
       /*p_is_single_glyph=*/maybe_glyph.has_value(),
-      /*p_font=*/text_frame->GetFont());
+      /*p_font=*/text_frame->GetFont(),
+      /*p_sigma=*/paint.mask_blur_descriptor->sigma);
 
   std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
       renderer_, entity, filter, cache_key);
