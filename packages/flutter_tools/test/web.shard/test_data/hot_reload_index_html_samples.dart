@@ -86,7 +86,6 @@ found in the LICENSE file. -->
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->
@@ -176,7 +175,6 @@ found in the LICENSE file. -->
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
   <title>Integration test. App load with flutter.js and onEntrypointLoaded API</title>
   <!-- iOS meta tags & icons -->
@@ -208,7 +206,6 @@ found in the LICENSE file. -->
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->
@@ -232,7 +229,6 @@ found in the LICENSE file. -->
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
 
   <title>Web Test</title>
   <!-- iOS meta tags & icons -->
