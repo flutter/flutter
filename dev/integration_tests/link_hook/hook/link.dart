@@ -17,8 +17,8 @@ void main(List<String> args) async {
         // Change the asset id to something that is used.
         name: '${packageName}_bindings_generated.dart',
         linkMode: asset.linkMode,
-        os: asset.os,
-        architecture: asset.architecture,
+        os: input.config.code.targetOS,
+        architecture: input.config.code.targetArchitecture,
         file: asset.file,
       ),
     );
