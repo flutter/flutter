@@ -1779,6 +1779,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "springBegins"'),
+                contains('locale "en"'),
                 contains('asdf'),
                 contains('springStartDate'),
                 contains('does not have a corresponding DateFormat'),
@@ -1913,9 +1915,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "loggedIn"'),
+                contains('locale "en"'),
                 contains('"foo+bar+baz"'),
                 contains('lastLoginDate'),
-                contains('contains at least one invalid date format.'),
+                contains('contains at least one invalid date format'),
               ),
             ),
           ),
@@ -1945,9 +1949,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "loggedIn"'),
+                contains('locale "en"'),
                 contains('"yMd+Hm+"'),
                 contains('lastLoginDate'),
-                contains('contains at least one invalid date format.'),
+                contains('contains at least one invalid date format'),
               ),
             ),
           ),
@@ -1976,7 +1982,11 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             isA<L10nException>().having(
               (L10nException e) => e.message,
               'message',
-              contains('the "format" attribute needs to be set'),
+              allOf(
+                contains('message "springBegins"'),
+                contains('locale "en"'),
+                contains('the "format" attribute needs to be set'),
+              ),
             ),
           ),
         );
@@ -2163,8 +2173,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             isA<L10nException>().having(
               (L10nException e) => e.message,
               'message',
-              contains(
-                'The placeholder, springStartDate, has its "type" resource attribute set to the "String" type in locale "ja", but it is "DateTime" in the template placeholder.',
+              allOf(
+                contains('placeholder "springStartDate"'),
+                contains('locale "ja"'),
+                contains(
+                  '"type" resource attribute set to the type "String" in locale "ja", but it is "DateTime" in the template placeholder.',
+                ),
               ),
             ),
           ),
@@ -2210,8 +2224,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               isA<L10nException>().having(
                 (L10nException e) => e.message,
                 'message',
-                contains(
-                  'The placeholder, springStartDate, has its "type" resource attribute set to the "Object" type in locale "ja", but it is "DateTime" in the template placeholder.',
+                allOf(
+                  contains('placeholder "springStartDate"'),
+                  contains('locale "ja"'),
+                  contains(
+                    'has its "type" resource attribute set to the type "Object" in locale "ja", but it is "DateTime" in the template placeholder.',
+                  ),
                 ),
               ),
             ),
@@ -2366,6 +2384,8 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               (L10nException e) => e.message,
               'message',
               allOf(
+                contains('message "courseCompletion"'),
+                contains('locale "en"'),
                 contains('asdf'),
                 contains('progress'),
                 contains('does not have a corresponding NumberFormat'),
@@ -2469,6 +2489,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                 (L10nException e) => e.message,
                 'message',
                 allOf(
+                  contains('message "helloWorlds"'),
                   contains('is not properly formatted'),
                   contains('Ensure that it is a map with string valued keys'),
                 ),
@@ -2519,6 +2540,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
                 (L10nException e) => e.message,
                 'message',
                 allOf(
+                  contains('message "genderSelect"'),
                   contains('is not properly formatted'),
                   contains('Ensure that it is a map with string valued keys'),
                 ),
@@ -2632,8 +2654,12 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         } on L10nException {
           expect(
             logger.errorText,
-            contains(
-              'Date format "yMMMMMd" for placeholder today does not have a corresponding DateFormat constructor',
+            allOf(
+              contains('message "datetime"'),
+              contains('locale "en"'),
+              contains(
+                'date format "yMMMMMd" for placeholder today does not have a corresponding DateFormat constructor',
+              ),
             ),
           );
         }
