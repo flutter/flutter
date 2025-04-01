@@ -591,6 +591,69 @@ TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
+TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
+  float scale = 5.0f;
+  float line_width = 10.f;
+  float rotation = 0.f;
+
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      // Use ImGui::SliderFloat for consistency
+      ImGui::SliderFloat("Scale", &scale, 0.001f, 5.0f);
+      ImGui::SliderFloat("Width", &line_width, 1.0f, 20.0f);
+      ImGui::SliderFloat("Rotation", &rotation, 0.0f, 180.0f);
+
+      ImGui::End();
+    }
+    DisplayListBuilder builder;
+    builder.Scale(static_cast<float>(GetContentScale().x),
+                  static_cast<float>(GetContentScale().y));
+
+    builder.DrawPaint(DlPaint(DlColor(0xff111111)));  // Background
+
+    {
+      DlPaint hex_paint;
+      hex_paint.setColor(
+          DlColor::kGreen());  // Changed color to Red for visibility
+      hex_paint.setStrokeWidth(line_width);  // Use the interactive width
+
+      float cx = 512.0f;  // Center X
+      float cy = 384.0f;  // Center Y
+      float r = 80.0f;    // Radius (distance from center to vertex)
+
+      float r_sin60 = r * std::sqrt(3.0f) / 2.0f;
+      float r_cos60 = r / 2.0f;
+
+      DlPoint v0 = DlPoint(cx + r, cy);                  // Right vertex
+      DlPoint v1 = DlPoint(cx + r_cos60, cy - r_sin60);  // Top-right vertex
+      DlPoint v2 = DlPoint(
+          cx - r_cos60,
+          cy - r_sin60);  // Top-left vertex (v1-v2 is top horizontal side)
+      DlPoint v3 = DlPoint(cx - r, cy);                  // Left vertex
+      DlPoint v4 = DlPoint(cx - r_cos60, cy + r_sin60);  // Bottom-left vertex
+      DlPoint v5 =
+          DlPoint(cx + r_cos60, cy + r_sin60);  // Bottom-right vertex (v4-v5 is
+                                                // bottom horizontal side)
+
+      builder.Translate(cx, cy);
+      builder.Scale(scale, scale);
+      builder.Rotate(rotation);
+      builder.Translate(-cx, -cy);
+
+      builder.DrawLine(v0, v1, hex_paint);
+      builder.DrawLine(v1, v2, hex_paint);  // Top side
+      builder.DrawLine(v2, v3, hex_paint);
+      builder.DrawLine(v3, v4, hex_paint);
+      builder.DrawLine(v4, v5, hex_paint);  // Bottom side
+      builder.DrawLine(v5, v0, hex_paint);  // Close the hexagon
+    }
+
+    return builder.Build();
+  };
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
