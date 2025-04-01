@@ -1692,6 +1692,7 @@ class _TextFieldState extends State<TextField>
           dragStartBehavior: widget.dragStartBehavior,
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
+          autofillHints: widget.autofillHints,
           autofillClient: this,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
           clipBehavior: widget.clipBehavior,

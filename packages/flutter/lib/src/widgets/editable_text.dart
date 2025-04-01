@@ -826,7 +826,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    bool autocorrect = true,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -908,6 +908,7 @@ class EditableText extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
   }) : assert(obscuringCharacter.length == 1),
+       autocorrect = _inferAutocorrect(autocorrect: autocorrect, autofillHints: autofillHints),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -2106,6 +2107,39 @@ class EditableText extends StatefulWidget {
     }
 
     return resultButtonItem;
+  }
+
+  // Infer the value of autocorrect from AutofillHints.
+  static bool _inferAutocorrect({
+    required bool autocorrect,
+    required Iterable<String>? autofillHints,
+  }) {
+    if (autofillHints == null || autofillHints.isEmpty || kIsWeb) {
+      return autocorrect;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        final bool passwordRelatedHint = autofillHints.any(
+          (String hint) =>
+              hint == AutofillHints.username ||
+              hint == AutofillHints.password ||
+              hint == AutofillHints.newPassword,
+        );
+        if (passwordRelatedHint) {
+          // https://github.com/flutter/flutter/issues/134723
+          // Set autocorrect to false for password-related Hints to prevent Keyboard flash.
+          return false;
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        break;
+    }
+
+    return autocorrect;
   }
 
   // Infer the keyboard type of an `EditableText` if it's not specified.
