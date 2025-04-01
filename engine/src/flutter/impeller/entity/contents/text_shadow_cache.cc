@@ -34,10 +34,8 @@ void TextShadowCache::MarkFrameStart() {
 }
 
 void TextShadowCache::MarkFrameEnd() {
-  absl::erase_if(entries_, [](const TextShadowCacheKey& key,
-                              const TextShadowCacheData& data) {
-    return !data.used_this_frame;
-  });
+  absl::erase_if(entries_,
+                 [](const auto& pair) { return !pair.second.used_this_frame; });
 }
 
 std::optional<Entity> TextShadowCache::Lookup(
@@ -63,9 +61,9 @@ std::optional<Entity> TextShadowCache::Lookup(
   // Execute the filter to produce a snapshot that can be resued on subsequent
   // frames. To prevent this texture from being re-used by the render target
   // cache, we temporarily disable any RT caching.
-  renderer.GetRenderTargetCache()->Disable();
+  renderer.GetRenderTargetCache()->DisableCache();
   fml::ScopedCleanupClosure closure(
-      [&] { renderer.GetRenderTargetCache()->Enable(); });
+      [&] { renderer.GetRenderTargetCache()->EnableCache(); });
   std::optional<Entity> maybe_entity =
       contents->GetEntity(renderer, entity, contents->GetCoverageHint());
   if (!maybe_entity.has_value()) {
