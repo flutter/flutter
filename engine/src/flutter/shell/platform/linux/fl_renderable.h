@@ -34,7 +34,7 @@ struct _FlRenderableInterface {
  * @renderable: an #FlRenderable
  *
  * Indicate the renderable needs to redraw. When ready, the renderable should
- * call fl_renderer_draw().
+ * call fl_compositor_draw().
  */
 void fl_renderable_redraw(FlRenderable* renderable);
 
