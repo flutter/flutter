@@ -571,24 +571,24 @@ abstract class SemanticRole {
     element.setAttribute('id', 'flt-semantic-node-${semanticsObject.id}');
 
     // The root node has some properties that other nodes do not.
-    // if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
-    //   // Make all semantics transparent. Use `filter` instead of `opacity`
-    //   // attribute because `filter` is stronger. `opacity` does not apply to
-    //   // some elements, particularly on iOS, such as the slider thumb and track.
-    //   //
-    //   // Use transparency instead of "visibility:hidden" or "display:none"
-    //   // so that a screen reader does not ignore these elements.
-    //   element.style.filter = 'opacity(0%)';
+    if (semanticsObject.id == 0 && !configuration.debugShowSemanticsNodes) {
+      // Make all semantics transparent. Use `filter` instead of `opacity`
+      // attribute because `filter` is stronger. `opacity` does not apply to
+      // some elements, particularly on iOS, such as the slider thumb and track.
+      //
+      // Use transparency instead of "visibility:hidden" or "display:none"
+      // so that a screen reader does not ignore these elements.
+      element.style.filter = 'opacity(0%)';
 
-    //   // Make text explicitly transparent to signal to the browser that no
-    //   // rasterization needs to be done.
-    //   element.style.color = 'rgba(0,0,0,0)';
-    // }
+      // Make text explicitly transparent to signal to the browser that no
+      // rasterization needs to be done.
+      element.style.color = 'rgba(0,0,0,0)';
+    }
 
     // Make semantic elements visible for debugging by outlining them using a
     // green border. Do not use `border` attribute because it affects layout
     // (`outline` does not).
-    if (true) {
+    if (configuration.debugShowSemanticsNodes) {
       element.style.outline = '1px solid green';
     }
     return element;
