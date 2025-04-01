@@ -2656,9 +2656,7 @@ class EngineSemantics {
       'wheel',
     ];
 
-    const List<String> keyboardEventTypes = <String>[
-      'keyDown',
-    ];
+    const List<String> keyboardEventTypes = <String>['keyDown'];
 
     if (keyboardEventTypes.contains(event.type)) {
       _gestureMode = GestureMode.browserGestures;
