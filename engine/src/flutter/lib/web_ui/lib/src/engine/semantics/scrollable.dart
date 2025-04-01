@@ -32,7 +32,8 @@ class SemanticScrollable extends SemanticRole {
 
   /// Dom element used to indicate to the browser the total quantity of available
   /// content under this scrollable area. This element is sized based on the
-  /// [SemanticsObject.scrollExtentTotal] that is received from the framework.
+  /// total scroll extent calculated by scrollExtentMax - scrollExtentMin + rect.height
+  /// of the [SemanticsObject] managed by this scrollable.
   final DomElement _scrollOverflowElement = createDomElement('flt-semantics-scroll-overflow');
 
   /// Listens to HTML "scroll" gestures detected by the browser.
@@ -98,7 +99,7 @@ class SemanticScrollable extends SemanticRole {
     // the clientHeight is offset by scrollbar width the browser may think we have
     // a greater scroll extent then what is actually available.
     //
-    // We already hide the scrollbar visibly, so here we set scrollbar-width
+    // We already make the scrollbar transparent so here we set scrollbar-width
     // to "none" to prevent it from affecting the max scroll extent.
     semanticsObject.element.style.scrollbarWidth = 'none';
 
