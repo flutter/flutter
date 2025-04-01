@@ -83,17 +83,36 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                RenderPass& pass) const {
   using VT = SolidFillVertexShader::PerVertexData;
 
-  auto& transform = entity.GetTransform();
+  Matrix transform = entity.GetTransform();
   auto radius = ComputePixelHalfWidth(transform, width_);
+
+  Point p0 = p0_;
+  Point p1 = p1_;
+
+  // Hairline pixel alignment.
+  if (width_ == 0.f && transform.IsTranslationScaleOnly()) {
+    p0 = transform * p0_;
+    p1 = transform * p1_;
+    transform = Matrix();
+    if (std::fabs(p0.x - p1.x) < kEhCloseEnough) {
+      p0.x = std::round(p0.x);
+      p0.x += 0.5;
+      p1.x = p0.x;
+    } else if (std::fabs(p0.y - p1.y) < kEhCloseEnough) {
+      p0.y = std::round(p0.y);
+      p0.y += 0.5;
+      p1.y = p0.y;
+    }
+  }
 
   if (cap_ == Cap::kRound) {
     auto generator =
-        renderer.GetTessellator().RoundCapLine(transform, p0_, p1_, radius);
+        renderer.GetTessellator().RoundCapLine(transform, p0, p1, radius);
     return ComputePositionGeometry(renderer, generator, entity, pass);
   }
 
   Point corners[4];
-  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare, p0_, p1_,
+  if (!ComputeCorners(corners, transform, cap_ == Cap::kSquare, p0, p1,
                       width_)) {
     return kEmptyResult;
   }
@@ -111,6 +130,8 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
         }
       });
 
+  Entity cloned = entity.Clone();
+  cloned.SetTransform(transform);
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer =
@@ -119,7 +140,7 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
               .vertex_count = count,
               .index_type = IndexType::kNone,
           },
-      .transform = entity.GetShaderTransform(pass),
+      .transform = cloned.GetShaderTransform(pass),
   };
 }
 
