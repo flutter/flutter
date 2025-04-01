@@ -32,7 +32,7 @@ transforms:
     date: 2025-04-01
     element:
       uris: [ 'material.dart' ]
-      class: 'ExpansionTileController'
+      typedef: 'ExpansionTileController'
     changes:
       - kind: 'rename'
         newName: 'ExpansibleController'
