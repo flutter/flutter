@@ -826,7 +826,7 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    bool autocorrect = true,
+    bool? autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -908,7 +908,7 @@ class EditableText extends StatefulWidget {
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
   }) : assert(obscuringCharacter.length == 1),
-       autocorrect = _inferAutocorrect(autocorrect: autocorrect, autofillHints: autofillHints),
+       autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
        smartQuotesType =
@@ -1051,7 +1051,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true.
+  /// Defaults to true if iOS and [autofillHints] has password related hint and false.
   /// {@endtemplate}
   final bool autocorrect;
 
@@ -2109,13 +2109,10 @@ class EditableText extends StatefulWidget {
     return resultButtonItem;
   }
 
-  // Infer the value of autocorrect from AutofillHints.
-  static bool _inferAutocorrect({
-    required bool autocorrect,
-    required Iterable<String>? autofillHints,
-  }) {
+  // Infer the value of autocorrect from autofillHints.
+  static bool _inferAutocorrect({required Iterable<String>? autofillHints}) {
     if (autofillHints == null || autofillHints.isEmpty || kIsWeb) {
-      return autocorrect;
+      return true;
     }
 
     switch (defaultTargetPlatform) {
@@ -2128,7 +2125,7 @@ class EditableText extends StatefulWidget {
         );
         if (passwordRelatedHint) {
           // https://github.com/flutter/flutter/issues/134723
-          // Set autocorrect to false for password-related Hints to prevent Keyboard flash.
+          // Set autocorrect to false for password related hints to prevent Keyboard flash.
           return false;
         }
       case TargetPlatform.macOS:
@@ -2139,7 +2136,7 @@ class EditableText extends StatefulWidget {
         break;
     }
 
-    return autocorrect;
+    return true;
   }
 
   // Infer the keyboard type of an `EditableText` if it's not specified.

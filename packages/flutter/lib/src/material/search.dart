@@ -155,7 +155,7 @@ abstract class SearchDelegate<T> {
     this.searchFieldDecorationTheme,
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
-    this.autocorrect = true,
+    this.autocorrect,
     this.enableSuggestions = true,
   }) : assert(searchFieldStyle == null || searchFieldDecorationTheme == null);
 
@@ -371,7 +371,7 @@ abstract class SearchDelegate<T> {
   final TextInputType? keyboardType;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool? autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
   final bool enableSuggestions;

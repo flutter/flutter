@@ -131,7 +131,7 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.enableIMEPersonalizedLearning = true,
     this.autofocus = false,
     this.onTap,
-    this.autocorrect = true,
+    this.autocorrect,
     this.enabled,
     this.cursorWidth = 2.0,
     this.cursorHeight,
@@ -275,7 +275,7 @@ class CupertinoSearchTextField extends StatefulWidget {
   final VoidCallback? onTap;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool? autocorrect;
 
   /// Whether to allow the platform to automatically format quotes.
   ///
