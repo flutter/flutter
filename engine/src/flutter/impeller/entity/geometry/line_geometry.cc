@@ -78,6 +78,16 @@ Scalar LineGeometry::ComputeAlphaCoverage(const Matrix& entity) const {
   return Geometry::ComputeStrokeAlphaCoverage(entity, width_);
 }
 
+namespace {
+/// Minimizes the err when rounding to the closest 0.5 value.
+/// If we round up, it drops down a half.  If we round down it bumps up a half.
+Scalar RoundToHalf(Scalar x) {
+  Scalar whole;
+  std::modf(x, &whole);
+  return whole + 0.5;
+}
+}  // namespace
+
 GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
                                                const Entity& entity,
                                                RenderPass& pass) const {
@@ -95,12 +105,10 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
     p1 = transform * p1_;
     transform = Matrix();
     if (std::fabs(p0.x - p1.x) < kEhCloseEnough) {
-      p0.x = std::round(p0.x);
-      p0.x += 0.5;
+      p0.x = RoundToHalf(p0.x);
       p1.x = p0.x;
     } else if (std::fabs(p0.y - p1.y) < kEhCloseEnough) {
-      p0.y = std::round(p0.y);
-      p0.y += 0.5;
+      p0.y = RoundToHalf(p0.y);
       p1.y = p0.y;
     }
   }
@@ -141,7 +149,7 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
               .vertex_count = count,
               .index_type = IndexType::kNone,
           },
-      .transform = cloned.GetShaderTransform(pass),
+      .transform = fixed_transform.GetShaderTransform(pass),
   };
 }
 
