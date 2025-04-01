@@ -13,6 +13,7 @@
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
+#include "fml/closure.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
@@ -1334,15 +1335,17 @@ std::shared_ptr<Texture> DisplayListToTexture(
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
   context.GetContentContext().GetTextShadowCache().MarkFrameStart();
+  fml::ScopedCleanupClosure([&] {
+    if (reset_host_buffer) {
+      context.GetContentContext().GetTransientsBuffer().Reset();
+    }
+    context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
+    context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+    context.GetContext()->DisposeThreadLocalCachedResources();
+  });
+
   display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
   impeller_dispatcher.FinishRecording();
-
-  if (reset_host_buffer) {
-    context.GetContentContext().GetTransientsBuffer().Reset();
-  }
-  context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
-  context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-  context.GetContext()->DisposeThreadLocalCachedResources();
 
   return target.GetRenderTargetTexture();
 }
@@ -1369,12 +1372,15 @@ bool RenderToTarget(ContentContext& context,
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
   context.GetTextShadowCache().MarkFrameStart();
+  fml::ScopedCleanupClosure([&] {
+    if (reset_host_buffer) {
+      context.GetTransientsBuffer().Reset();
+    }
+    context.GetTextShadowCache().MarkFrameEnd();
+  });
+
   display_list->Dispatch(impeller_dispatcher, cull_rect);
   impeller_dispatcher.FinishRecording();
-  if (reset_host_buffer) {
-    context.GetTransientsBuffer().Reset();
-  }
-  context.GetTextShadowCache().MarkFrameEnd();
   context.GetLazyGlyphAtlas()->ResetTextFrames();
 
   return true;

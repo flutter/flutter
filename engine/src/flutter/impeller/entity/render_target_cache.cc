@@ -39,7 +39,12 @@ void RenderTargetCache::Disable() {
   cache_disabled_count_++;
 }
 
+bool RenderTargetCache::CacheEnabled() const {
+  return cache_disabled_count_ == 0;
+}
+
 void RenderTargetCache::Enable() {
+  FML_DCHECK(cache_disabled_count_ > 0);
   if (cache_disabled_count_ == 0) {
     return;
   }
@@ -68,7 +73,7 @@ RenderTarget RenderTargetCache::CreateOffscreen(
       .has_depth_stencil = stencil_attachment_config.has_value(),
   };
 
-  if (cache_disabled_count_ == 0) {
+  if (CacheEnabled()) {
     for (RenderTargetData& render_target_data : render_target_data_) {
       const RenderTargetConfig other_config = render_target_data.config;
       if (!render_target_data.used_this_frame && other_config == config) {
@@ -123,7 +128,7 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
       .has_msaa = true,
       .has_depth_stencil = stencil_attachment_config.has_value(),
   };
-  if (cache_disabled_count_ == 0) {
+  if (CacheEnabled()) {
     for (RenderTargetData& render_target_data : render_target_data_) {
       const RenderTargetConfig other_config = render_target_data.config;
       if (!render_target_data.used_this_frame && other_config == config) {

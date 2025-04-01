@@ -1504,9 +1504,11 @@ bool Canvas::AttemptBlurredTextOptimization(
   std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
       renderer_, entity, filter, cache_key);
   if (result.has_value()) {
-    AddRenderEntityToCurrentPass(result.value(), false);
+    AddRenderEntityToCurrentPass(result.value(), /*reuse_depth=*/false);
+    return true;
+  } else {
+    return false;
   }
-  return true;
 }
 
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,

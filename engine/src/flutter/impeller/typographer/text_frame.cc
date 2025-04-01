@@ -146,7 +146,7 @@ bool TextFrame::IsFrameComplete() const {
   return bound_values_.size() == run_size;
 }
 
-Font TextFrame::GetFont() const {
+const Font& TextFrame::GetFont() const {
   return runs_[0].GetFont();
 }
 

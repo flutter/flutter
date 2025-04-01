@@ -18,14 +18,13 @@ void TextShadowCache::MarkFrameStart() {
 }
 
 void TextShadowCache::MarkFrameEnd() {
-  std::vector<TextShadowCacheKey> to_remove;
-  for (auto& entry : entries_) {
-    if (!entry.second.used_this_frame) {
-      to_remove.push_back(entry.first);
+  auto it = entries_.begin();
+  while (it != entries_.end()) {
+    if (!it->second.used_this_frame) {
+      it = entries_.erase(it);
+    } else {
+      it++;
     }
-  }
-  for (const auto& key : to_remove) {
-    entries_.erase(key);
   }
 }
 
@@ -34,8 +33,7 @@ std::optional<Entity> TextShadowCache::Lookup(
     const Entity& entity,
     const std::shared_ptr<FilterContents>& contents,
     const TextShadowCacheKey& text_key) {
-  std::unordered_map<TextShadowCacheKey, TextShadowCacheData>::iterator it =
-      entries_.find(text_key);
+  auto it = entries_.find(text_key);
 
   if (it != entries_.end()) {
     it->second.used_this_frame = true;

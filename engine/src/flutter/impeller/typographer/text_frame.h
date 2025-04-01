@@ -86,7 +86,7 @@ class TextFrame {
   std::optional<Glyph> AsSingleGlyph() const;
 
   /// @brief Return the font of the first glyph run.
-  Font GetFont() const;
+  const Font& GetFont() const;
 
   /// @brief Store text frame scale, offset, and properties for hashing in th
   /// glyph atlas.

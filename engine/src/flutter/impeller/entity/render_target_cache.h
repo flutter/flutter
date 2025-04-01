@@ -72,6 +72,8 @@ class RenderTargetCache : public RenderTargetAllocator {
     RenderTarget render_target;
   };
 
+  bool CacheEnabled() const;
+
   std::vector<RenderTargetData> render_target_data_;
   uint32_t keep_alive_frame_count_;
   uint32_t cache_disabled_count_ = 0;
