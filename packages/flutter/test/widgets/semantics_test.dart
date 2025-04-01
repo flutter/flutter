@@ -1698,6 +1698,44 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('RenderSemanticsAnnotations provides validation result', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    Future<SemanticsConfiguration> pumpValidationResult(SemanticsValidationResult result) async {
+      final ValueKey<String> key = ValueKey<String>('heading-$result');
+      await tester.pumpWidget(
+        Semantics(
+          key: key,
+          validationResult: result,
+          child: Text('Validation result $result', textDirection: TextDirection.ltr),
+        ),
+      );
+      final RenderSemanticsAnnotations object = tester.renderObject<RenderSemanticsAnnotations>(
+        find.byKey(key),
+      );
+      final SemanticsConfiguration config = SemanticsConfiguration();
+      object.describeSemanticsConfiguration(config);
+      return config;
+    }
+
+    final SemanticsConfiguration noneResult = await pumpValidationResult(
+      SemanticsValidationResult.none,
+    );
+    expect(noneResult.validationResult, SemanticsValidationResult.none);
+
+    final SemanticsConfiguration validResult = await pumpValidationResult(
+      SemanticsValidationResult.valid,
+    );
+    expect(validResult.validationResult, SemanticsValidationResult.valid);
+
+    final SemanticsConfiguration invalidResult = await pumpValidationResult(
+      SemanticsValidationResult.invalid,
+    );
+    expect(invalidResult.validationResult, SemanticsValidationResult.invalid);
+
+    semantics.dispose();
+  });
 }
 
 class CustomSortKey extends OrdinalSortKey {

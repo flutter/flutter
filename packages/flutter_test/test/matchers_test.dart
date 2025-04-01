@@ -731,6 +731,7 @@ void main() {
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1033,6 +1034,7 @@ void main() {
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1132,6 +1134,7 @@ void main() {
         linkUrl: null,
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1238,6 +1241,7 @@ void main() {
         linkUrl: null,
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1270,6 +1274,7 @@ void main() {
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1358,6 +1363,7 @@ void main() {
         linkUrl: null,
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
