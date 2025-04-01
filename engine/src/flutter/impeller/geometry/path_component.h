@@ -252,6 +252,10 @@ struct ConicPathComponent {
   void AppendPolylinePoints(Scalar scale_factor,
                             std::vector<Point>& points) const;
 
+  using PointProc = std::function<void(const Point& point)>;
+
+  void ToLinearPathComponents(Scalar scale_factor, const PointProc& proc) const;
+
   void ToLinearPathComponents(Scalar scale, VertexWriter& writer) const;
 
   size_t CountLinearPathComponents(Scalar scale) const;
