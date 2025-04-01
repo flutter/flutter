@@ -515,6 +515,7 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   set fontVariationSettings(String value) => setProperty('font-variation-settings', value);
   set visibility(String value) => setProperty('visibility', value);
   set overflow(String value) => setProperty('overflow', value);
+  set scrollbarWidth(String value) => setProperty('scrollbar-width', value);
   set boxShadow(String value) => setProperty('box-shadow', value);
   set borderTopLeftRadius(String value) => setProperty('border-top-left-radius', value);
   set borderTopRightRadius(String value) => setProperty('border-top-right-radius', value);
@@ -577,6 +578,7 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   String get fontVariationSettings => getPropertyValue('font-variation-settings');
   String get visibility => getPropertyValue('visibility');
   String get overflow => getPropertyValue('overflow');
+  String get scrollbarWidth => getPropertyValue('scrollbar-width');
   String get boxShadow => getPropertyValue('box-shadow');
   String get borderTopLeftRadius => getPropertyValue('border-top-left-radius');
   String get borderTopRightRadius => getPropertyValue('border-top-right-radius');

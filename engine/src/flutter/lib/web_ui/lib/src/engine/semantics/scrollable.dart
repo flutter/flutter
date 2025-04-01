@@ -92,6 +92,18 @@ class SemanticScrollable extends SemanticRole {
     // Scrolling is controlled by setting overflow-y/overflow-x to 'scroll`. The
     // default overflow = "visible" needs to be unset.
     semanticsObject.element.style.overflow = '';
+    // On macOS the scrollbar behavior which can be set in the settings application
+    // may sometimes insert scrollbars into an application when a peripheral like a
+    // mouse or keyboard is plugged in. This causes the clientHeight or clientWidth
+    // of the scrollable dom element to be offset by the width of the scrollbar.
+    // This causes issues in the vertical scrolling context because the max scroll
+    // extent is calculated by the element's scrollHeight - clientHeight, so when
+    // the clientHeight is offset by scrollbar width the browser may think we have
+    // a greater scroll extent then what is actually available.
+    //
+    // We already hide the scrollbar visibly, so here we set scrollbar-width
+    // to "none" to prevent it from affecting the max scroll extent.
+    semanticsObject.element.style.scrollbarWidth = 'none';
 
     _scrollOverflowElement.style
       ..position = 'absolute'
