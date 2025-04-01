@@ -102,13 +102,17 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
       p0.y = std::round(p0.y);
       p0.y += 0.5;
       p1.y = p0.y;
+      FML_LOG(ERROR) << p0.y;
     }
   }
+
+  Entity cloned = entity.Clone();
+  cloned.SetTransform(transform);
 
   if (cap_ == Cap::kRound) {
     auto generator =
         renderer.GetTessellator().RoundCapLine(transform, p0, p1, radius);
-    return ComputePositionGeometry(renderer, generator, entity, pass);
+    return ComputePositionGeometry(renderer, generator, cloned, pass);
   }
 
   Point corners[4];
@@ -130,8 +134,6 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
         }
       });
 
-  Entity cloned = entity.Clone();
-  cloned.SetTransform(transform);
   return GeometryResult{
       .type = PrimitiveType::kTriangleStrip,
       .vertex_buffer =

@@ -667,6 +667,13 @@ void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
     return;
   }
 
+  DlPoint start;
+  DlPoint end;
+  if (path.IsLine(&start, &end)) {
+    canvas.DrawLine(start, end, paint);
+    return;
+  }
+
   canvas.DrawPath(path.GetPath(), paint);
 }
 
