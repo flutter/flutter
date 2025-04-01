@@ -59,7 +59,7 @@ performance implications. See [#49801][pr_49801] for an example.
 
 #### Linux Embedding
 
-> [!NOTE]  
+> [!NOTE]
 > The Linux embedding instead follows idiomatic GObject-based C style.
 
 Use of C++ in the [Linux embedding][] is discouraged in that embedding to avoid
@@ -215,14 +215,10 @@ in postsubmit.
 
 ### Skia Gold
 
-The Flutter engine uses [Skia Gold][skia_gold] for image comparison tests which fail if:
-
-- The image is different from an accepted baseline.
-- An image is not uploaded but is expected to be (see
-  [`dir_contents_diff`][dir_contents_diff]).
+The Flutter engine uses [Skia Gold][skia_gold] for image comparison tests which
+fail if the image is different from an accepted baseline image.
 
 [skia_gold]: https://flutter-engine-gold.skia.org/
-[dir_contents_diff]: ./tools/dir_contents_diff/
 
 Any untriaged failures will block presubmit and postsubmit tests.
 
