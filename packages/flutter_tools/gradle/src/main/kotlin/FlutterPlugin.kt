@@ -266,7 +266,7 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addFlutterDependencies(
             project!!,
             buildType,
-            getPluginConfigurer().getPluginList(),
+            getPluginConfigurer(),
             engineVersion!!
         )
     }
