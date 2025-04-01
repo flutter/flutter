@@ -19,11 +19,10 @@ rootProject.allprojects {
     }
 }
 
-apply plugin: "com.android.library"
+apply(plugin = "com.android.library")
 
 android {
     namespace = "{{androidIdentifier}}"
-
     compileSdk = {{compileSdkVersion}}
 
     compileOptions {
@@ -43,8 +42,8 @@ android {
     testOptions {
         unitTests.all {
             testLogging {
-               events "passed", "skipped", "failed", "standardOut", "standardError"
-               outputs.upToDateWhen {false}
+               events("passed", "skipped", "failed", "standardOut", "standardError")
+               outputs.upToDateWhen { false }
                showStandardStreams = true
             }
         }
