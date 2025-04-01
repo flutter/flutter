@@ -3770,10 +3770,7 @@ void main() {
       final EditableText editableText = tester.firstWidget(find.byType(EditableText));
       expect(editableText.autocorrect, isFalse);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
   testWidgets(
@@ -3799,10 +3796,7 @@ void main() {
       final EditableText editableText = tester.firstWidget(find.byType(EditableText));
       expect(editableText.autocorrect, isFalse);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
   testWidgets(
@@ -3828,10 +3822,7 @@ void main() {
       EditableText editableText = tester.firstWidget(find.byType(EditableText));
       expect(editableText.autocorrect, isFalse);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.iOS,
-      TargetPlatform.macOS,
-    }),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
   );
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {

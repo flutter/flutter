@@ -2120,7 +2120,6 @@ class EditableText extends StatefulWidget {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
         final bool passwordRelatedHint = autofillHints.any(
           (String hint) =>
               hint == AutofillHints.username ||
@@ -2132,6 +2131,7 @@ class EditableText extends StatefulWidget {
           // Set autocorrect to false for password-related Hints to prevent Keyboard flash.
           return false;
         }
+      case TargetPlatform.macOS:
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
