@@ -57,6 +57,7 @@ class TestSemantics {
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
     this.validationResult = SemanticsValidationResult.none,
+    this.inputType = SemanticsInputType.none,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        tags = tags?.toSet() ?? <SemanticsTag>{};
@@ -82,6 +83,7 @@ class TestSemantics {
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
     this.validationResult = SemanticsValidationResult.none,
+    this.inputType = SemanticsInputType.none,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -123,6 +125,8 @@ class TestSemantics {
     Iterable<SemanticsTag>? tags,
     this.role = SemanticsRole.none,
     this.validationResult = SemanticsValidationResult.none,
+    this.inputType = SemanticsInputType.none,
+    this.controlsNodes = const <String>{},
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
@@ -263,6 +267,21 @@ class TestSemantics {
   ///
   /// Defaults to SemanticsRole.none if not set.
   final SemanticsRole role;
+
+  /// The expected input type for the node.
+  ///
+  /// Defaults to SemanticsInputType.none if not set.
+  final SemanticsInputType inputType;
+
+  /// The expected nodes that this node controls.
+  ///
+  /// Defaults to an empty set if not set.
+  final Set<String> controlsNodes;
+
+  /// The expected input type for the node.
+  ///
+  /// Defaults to an empty set if not set.
+  final Set<String> controlsNodes;
 
   bool _matches(
     SemanticsNode? node,
@@ -408,6 +427,17 @@ class TestSemantics {
         'expected node id $id to have validationResult $validationResult but found validationResult ${node.validationResult}',
       );
     }
+    if (inputType != node.inputType) {
+      return fail(
+        'expected node id $id to have input type $inputType but found input type ${node.inputType}',
+      );
+    }
+
+    if (!setEquals(controlsNodes, node.controlsNodes)) {
+      return fail(
+        'expected node id $id to controls nodes $controlsNodes but found controlling nodes ${node.controlsNodes}',
+      );
+    }
 
     if (children.isEmpty) {
       return true;
@@ -493,6 +523,12 @@ class TestSemantics {
     }
     if (thickness != null) {
       buf.writeln('$indent  thickness: $thickness,');
+    }
+    if (inputType != SemanticsInputType.none) {
+      buf.writeln('$indent  inputType: $inputType,');
+    }
+    if (controlsNodes.isNotEmpty) {
+      buf.writeln('$indent  controlsNodes: $controlsNodes,');
     }
     buf.writeln('$indent  children: <TestSemantics>[');
     for (final TestSemantics child in children) {

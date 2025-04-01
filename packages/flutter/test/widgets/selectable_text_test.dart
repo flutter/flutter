@@ -8,7 +8,7 @@
 @TestOn('!chrome')
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, SemanticsInputType;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -1616,6 +1616,7 @@ void main() {
               id: 1,
               actions: <SemanticsAction>[SemanticsAction.longPress],
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               children: <TestSemantics>[
                 TestSemantics(
                   id: 2,
@@ -2165,6 +2166,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               actions: <SemanticsAction>[SemanticsAction.longPress],
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
                 SemanticsFlag.isReadOnly,
@@ -2194,6 +2196,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               textSelection: const TextSelection.collapsed(offset: 9),
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2227,6 +2230,7 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 4),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2262,6 +2266,7 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 0),
               value: 'Guten Tag',
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorForwardByCharacter,
@@ -2341,6 +2346,7 @@ void main() {
               id: 1,
               value: 'Guten Tag',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 // Absent the following because enableInteractiveSelection: false
@@ -2386,6 +2392,7 @@ void main() {
               id: 1,
               value: 'Hello',
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[SemanticsAction.longPress],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
@@ -2417,6 +2424,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2450,6 +2458,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2526,6 +2535,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           actions: <SemanticsAction>[SemanticsAction.longPress],
+                          inputType: ui.SemanticsInputType.text,
                           children: <TestSemantics>[
                             TestSemantics(
                               children: <TestSemantics>[
@@ -2599,6 +2609,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2652,6 +2663,7 @@ void main() {
               value: 'Hello',
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
               textDirection: TextDirection.ltr,
+              inputType: ui.SemanticsInputType.text,
               actions: <SemanticsAction>[
                 SemanticsAction.longPress,
                 SemanticsAction.moveCursorBackwardByCharacter,
@@ -2698,6 +2710,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: inputFieldId,
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
@@ -2724,6 +2737,7 @@ void main() {
           children: <TestSemantics>[
             TestSemantics(
               id: inputFieldId,
+              inputType: ui.SemanticsInputType.text,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isReadOnly,
                 SemanticsFlag.isTextField,
