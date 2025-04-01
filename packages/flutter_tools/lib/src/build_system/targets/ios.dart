@@ -444,14 +444,9 @@ abstract class IosLLDBInit extends Target {
   ];
 
   @override
-  List<Source> get outputs {
-    final FlutterProject flutterProject = FlutterProject.current();
-    final String lldbInitFilePath = flutterProject.ios.lldbInitFile.path.replaceFirst(
-      flutterProject.directory.path,
-      '{PROJECT_DIR}/',
-    );
-    return <Source>[Source.pattern(lldbInitFilePath)];
-  }
+  List<Source> get outputs => <Source>[
+    Source.fromProject((FlutterProject project) => project.ios.lldbInitFile),
+  ];
 
   @override
   List<Target> get dependencies => <Target>[];
