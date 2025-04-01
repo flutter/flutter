@@ -411,6 +411,11 @@ class DartIsolate : public UIDartState {
   static Dart_Handle LoadLibraryFromKernel(
       const std::shared_ptr<const fml::Mapping>& mapping);
 
+  // Runs a task on the platform task runner that sets the isolate's owner
+  // thread to the platform task runner's thread.  Must be called on the UI task
+  // runner.
+  void SetOwnerToPlatformThread();
+
  private:
   friend class IsolateConfiguration;
   class AutoFireClosure {

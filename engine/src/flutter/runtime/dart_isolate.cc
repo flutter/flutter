@@ -155,7 +155,10 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
 
   {
     tonic::DartState::Scope scope(isolate.get());
-    Dart_SetCurrentThreadOwnsIsolate();
+    if (settings.merged_platform_ui_thread !=
+        Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+      Dart_SetCurrentThreadOwnsIsolate();
+    }
 
     if (settings.root_isolate_create_callback) {
       // Isolate callbacks always occur in isolate scope and before user code
@@ -349,6 +352,7 @@ Dart_Isolate DartIsolate::CreatePlatformIsolate(Dart_Handle entry_point,
       }
       old_task_observer_add(key, callback);
     });
+    return fml::TaskQueueId::Invalid();
   };
 
   UIDartState::Context context(task_runners);
@@ -1371,6 +1375,22 @@ void DartIsolate::DartIsolateCleanupCallback(
 
 std::weak_ptr<DartIsolate> DartIsolate::GetWeakIsolatePtr() {
   return std::static_pointer_cast<DartIsolate>(shared_from_this());
+}
+
+void DartIsolate::SetOwnerToPlatformThread() {
+  const TaskRunners& task_runners = GetTaskRunners();
+  FML_DCHECK(task_runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
+
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners.GetPlatformTaskRunner(), [&latch, dart_isolate = isolate()] {
+        {
+          tonic::DartIsolateScope isolate_scope(dart_isolate);
+          Dart_SetCurrentThreadOwnsIsolate();
+        }
+        latch.Signal();
+      });
+  latch.Wait();
 }
 
 void DartIsolate::AddIsolateShutdownCallback(const fml::closure& closure) {
