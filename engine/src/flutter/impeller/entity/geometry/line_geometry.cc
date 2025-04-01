@@ -102,7 +102,6 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
       p0.y = std::round(p0.y);
       p0.y += 0.5;
       p1.y = p0.y;
-      FML_LOG(ERROR) << p0.y;
     }
   }
 
