@@ -679,7 +679,7 @@ dependencies:
           ProcessManager: () => FakeProcessManager.any(),
           SystemClock: () => systemClock,
           FlutterVersion: () => flutterVersion,
-          Pub: FakePubWithPrimedDeps.new,
+          Pub: ThrowingPub.new,
           // TODO(matanlurey): Remove as part of https://github.com/flutter/flutter/issues/160257.
           // Not necessary, you can observe this bug by calling `generateLegacyPlugins: false`,
           // but since this flag is about to be enabled, and enabling it implicitly sets that
