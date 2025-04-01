@@ -52,14 +52,17 @@ class SemanticScrollable extends SemanticRole {
 
   /// Responds to browser-detected "scroll" gestures.
   void _recomputeScrollPosition() {
+    print('scroll detected current dom scroll $_domScrollPosition, previous dom scroll $_previousDomScrollPosition');
     if (_domScrollPosition != _previousDomScrollPosition) {
+      print('valid scroll detected');
       if (!EngineSemantics.instance.shouldAcceptBrowserGesture('scroll')) {
+        print('browser not accepting scroll');
         return;
       }
 
       _previousDomScrollPosition = _domScrollPosition;
       print(
-        'current scroll offset from framework: ${semanticsObject.scrollPosition}, next offset $_domScrollPosition',
+        'current scroll offset from framework: ${semanticsObject.scrollPosition}, next offset $_domScrollPosition, previous dom offset: $_previousDomScrollPosition',
       );
       _updateScrollableState();
       semanticsObject.recomputePositionAndSize();
@@ -122,6 +125,9 @@ class SemanticScrollable extends SemanticRole {
       final double? scrollPosition = semanticsObject.scrollPosition;
       assert(scrollPosition != null);
       if (scrollPosition != _domScrollPosition) {
+        print(
+          'SemanticUpdate triggered, framework and dom scroll position mismatch have diverged framework: $scrollPosition vs dom: $_domScrollPosition, attempting to resync',
+        );
         element.scrollTop = scrollPosition!;
         _previousDomScrollPosition = _domScrollPosition;
       }
@@ -227,6 +233,7 @@ class SemanticScrollable extends SemanticRole {
   }
 
   void _updateCssOverflow() {
+    print('gesture mode has changed new mode: ${EngineSemantics.instance.gestureMode}');
     switch (EngineSemantics.instance.gestureMode) {
       case GestureMode.browserGestures:
         // overflow:scroll will cause the browser report "scroll" events when
