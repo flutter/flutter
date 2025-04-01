@@ -590,6 +590,9 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   Widget buildAnchor(BuildContext context) {
+    // Only when both `child` and `builder` are not null, can the anchor and its
+    // children have a parent-child relationship. This is useful for a11y
+    // traversal in a `MenuBar` composed of a list of `SubmenuButton`s.
     final Widget? overlayPortal =
         widget.child == null || widget.builder == null
             ? null
