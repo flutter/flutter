@@ -64,7 +64,8 @@ PlatformViewIOS::PlatformViewIOS(
                                          delegate.OnPlatformViewGetSettings().enable_impeller
                                              ? IOSRenderingBackend::kImpeller
                                              : IOSRenderingBackend::kSkia,
-                                         is_gpu_disabled_sync_switch),
+                                         is_gpu_disabled_sync_switch,
+                                         delegate.OnPlatformViewGetSettings()),
                       platform_views_controller,
                       task_runners) {}
 

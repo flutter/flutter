@@ -49,6 +49,7 @@ typedef DwdsLauncher =
       required Stream<BuildResult> buildResults,
       required ConnectionProvider chromeConnection,
       required ToolConfiguration toolConfiguration,
+      bool injectDebuggingSupportCode,
     });
 
 // A minimal index for projects that do not yet support web. A meta tag is used
@@ -428,6 +429,10 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
+      // Defaults to 'chrome' if deviceManager or specifiedDeviceId is null,
+      // ensuring the condition is true by default.
+      injectDebuggingSupportCode:
+          (globals.deviceManager?.specifiedDeviceId ?? 'chrome') == 'chrome',
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {

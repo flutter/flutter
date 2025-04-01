@@ -197,10 +197,8 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   deps[0].srcSubpass = VK_SUBPASS_EXTERNAL;
   deps[0].dstSubpass = 0u;
   deps[0].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                         vk::PipelineStageFlagBits::eFragmentShader |
-                         vk::PipelineStageFlagBits::eTransfer;
+                         vk::PipelineStageFlagBits::eFragmentShader;
   deps[0].srcAccessMask = vk::AccessFlagBits::eShaderRead |
-                          vk::AccessFlagBits::eTransferRead |
                           vk::AccessFlagBits::eColorAttachmentWrite;
   deps[0].dstStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
   deps[0].dstAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
@@ -217,22 +215,23 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   deps[1].dependencyFlags = kSelfDependencyFlags;
 
   // Outgoing dependency. The resolve step or color attachment must complete
-  // before we can sample from the image, or use it as a blit src.
+  // before we can sample from the image. This dependency is ignored for the
+  // onscreen as we will already insert a barrier before presenting the
+  // swapchain.
   deps[2].srcSubpass = 0u;  // first subpass
   deps[2].dstSubpass = VK_SUBPASS_EXTERNAL;
   deps[2].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
   deps[2].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-  deps[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader |
-                         vk::PipelineStageFlagBits::eTransfer;
-  deps[2].dstAccessMask =
-      vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eTransferRead;
+  deps[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
+  deps[2].dstAccessMask = vk::AccessFlagBits::eShaderRead;
   deps[2].dependencyFlags = kSelfDependencyFlags;
 
   vk::RenderPassCreateInfo render_pass_desc;
   render_pass_desc.setPAttachments(attachments.data());
   render_pass_desc.setAttachmentCount(attachments_index);
   render_pass_desc.setSubpasses(subpass0);
-  render_pass_desc.setDependencies(deps);
+  render_pass_desc.setPDependencies(deps);
+  render_pass_desc.setDependencyCount(3);
 
   auto [result, pass] = device.createRenderPassUnique(render_pass_desc);
   if (result != vk::Result::eSuccess) {

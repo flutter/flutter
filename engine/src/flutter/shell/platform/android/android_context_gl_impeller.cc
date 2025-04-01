@@ -79,7 +79,7 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   };
 
   auto context = impeller::ContextGLES::Create(
-      std::move(proc_table),
+      impeller::Flags{}, std::move(proc_table),
       is_gles3 ? gles3_shader_mappings : gles2_shader_mappings,
       enable_gpu_tracing);
   if (!context) {

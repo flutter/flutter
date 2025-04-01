@@ -36,6 +36,39 @@ void main() {
     expect(snappingSimulation.dx(time), 0);
   });
 
+  test('SpringSimulation results are continuous near critical damping', () {
+    // Regression test for https://github.com/flutter/flutter/issues/163858
+    const double time = 0.4;
+    const double stiffness = 0.4;
+    const double mass = 0.4;
+    final SpringSimulation critical = SpringSimulation(
+      SpringDescription.withDampingRatio(stiffness: stiffness, mass: mass),
+      0,
+      1,
+      0,
+    );
+    expect(critical.x(time), moreOrLessEquals(0.06155, epsilon: 0.01));
+    expect(critical.dx(time), moreOrLessEquals(0.2681, epsilon: 0.01));
+
+    final SpringSimulation slightlyOver = SpringSimulation(
+      SpringDescription.withDampingRatio(stiffness: stiffness, mass: mass, ratio: 1 + 1e-3),
+      0,
+      1,
+      0,
+    );
+    expect(slightlyOver.x(time), moreOrLessEquals(0.06155, epsilon: 0.01));
+    expect(slightlyOver.dx(time), moreOrLessEquals(0.2681, epsilon: 0.01));
+
+    final SpringSimulation slightlyUnder = SpringSimulation(
+      SpringDescription.withDampingRatio(stiffness: stiffness, mass: mass, ratio: 1 - 1e-3),
+      0,
+      1,
+      0,
+    );
+    expect(slightlyUnder.x(time), moreOrLessEquals(0.06155, epsilon: 0.01));
+    expect(slightlyUnder.dx(time), moreOrLessEquals(0.2681, epsilon: 0.01));
+  });
+
   group('SpringDescription.withDurationAndBounce', () {
     test('creates spring with expected results', () {
       final SpringDescription spring = SpringDescription.withDurationAndBounce(bounce: 0.3);

@@ -26,6 +26,7 @@
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl_skia.h"
 #include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 #include "fml/logging.h"
+#include "impeller/display_list/aiks_context.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
@@ -52,14 +53,21 @@ AndroidContext::ContextSettings CreateContextSettings(
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
   settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.impeller_flags.lazy_shader_mode =
+      p_settings.impeller_enable_lazy_shader_mode;
+  settings.impeller_flags.antialiased_lines =
+      p_settings.impeller_antialiased_lines;
   return settings;
 }
 }  // namespace
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
-    bool enable_impeller)
-    : android_context_(context), enable_impeller_(enable_impeller) {}
+    bool enable_impeller,
+    bool lazy_shader_mode)
+    : android_context_(context),
+      enable_impeller_(enable_impeller),
+      lazy_shader_mode_(lazy_shader_mode) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
@@ -132,8 +140,10 @@ PlatformViewAndroid::PlatformViewAndroid(
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-        android_context_,                                     //
-        delegate.OnPlatformViewGetSettings().enable_impeller  //
+        android_context_,                                      //
+        delegate.OnPlatformViewGetSettings().enable_impeller,  //
+        delegate.OnPlatformViewGetSettings()
+            .impeller_enable_lazy_shader_mode  //
     );
     android_surface_ = surface_factory_->CreateSurface();
     android_use_new_platform_view_ =
@@ -338,26 +348,27 @@ void PlatformViewAndroid::RegisterExternalTexture(
 
 void PlatformViewAndroid::RegisterImageTexture(
     int64_t texture_id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry) {
+    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
+    ImageExternalTexture::ImageLifecycle lifecycle) {
   switch (android_context_->RenderingApi()) {
     case AndroidRenderingAPI::kImpellerOpenGLES:
       // Impeller GLES.
       RegisterTexture(std::make_shared<ImageExternalTextureGLImpeller>(
           std::static_pointer_cast<impeller::ContextGLES>(
               android_context_->GetImpellerContext()),
-          texture_id, image_texture_entry, jni_facade_));
+          texture_id, image_texture_entry, jni_facade_, lifecycle));
       break;
     case AndroidRenderingAPI::kSkiaOpenGLES:
       // Legacy GL.
       RegisterTexture(std::make_shared<ImageExternalTextureGLSkia>(
           std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
-          texture_id, image_texture_entry, jni_facade_));
+          texture_id, image_texture_entry, jni_facade_, lifecycle));
       break;
     case AndroidRenderingAPI::kImpellerVulkan:
       RegisterTexture(std::make_shared<ImageExternalTextureVKImpeller>(
           std::static_pointer_cast<impeller::ContextVK>(
               android_context_->GetImpellerContext()),
-          texture_id, image_texture_entry, jni_facade_));
+          texture_id, image_texture_entry, jni_facade_, lifecycle));
       break;
     case AndroidRenderingAPI::kSoftware:
       FML_LOG(INFO) << "Software rendering does not support external textures.";
