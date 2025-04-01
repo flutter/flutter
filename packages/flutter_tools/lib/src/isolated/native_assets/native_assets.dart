@@ -78,6 +78,12 @@ final class DartBuildResult {
   ];
 }
 
+/// A [CodeAsset] for a specific [target].
+///
+/// Flutter builds [CodeAsset]s for multiple architectures (on MacOS and iOS).
+/// This class distinguishes the (otherwise identical) [codeAsset]s on different
+/// [target]s. These are then later combined into a single [KernelAsset] before
+/// being added to the native assets manifest.
 class FlutterCodeAsset {
   FlutterCodeAsset({required this.codeAsset, required this.target});
 
