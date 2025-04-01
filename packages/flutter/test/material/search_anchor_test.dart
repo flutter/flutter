@@ -4029,16 +4029,23 @@ void main() {
       // Open search view.
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
+      const double fakeKeyboardHeight = 500.0;
+      final double physicalBottomPadding = fakeKeyboardHeight * tester.view.devicePixelRatio;
 
-      // Make sure the first item is visible.
-      expect(find.text('Item 0'), findsOne);
+      // Simulate the keyboard opening resizing the view.
+      tester.view.viewInsets = FakeViewPadding(bottom: physicalBottomPadding);
+      addTearDown(tester.view.reset);
 
       // Scroll down to the end of the list.
+      expect(find.byType(ListView), findsOne);
       await tester.fling(find.byType(ListView), const Offset(0, -5000), 5000);
       await tester.pumpAndSettle();
 
-      // Make sure the last item is visible.
-      expect(find.text('Item 29'), findsOne);
+      // The last item should not be hidden by the keyboard.
+      final double lastItemBottom = tester.getRect(find.text('Item 29')).bottom;
+      final double fakeKeyboardTop =
+          tester.getSize(find.byType(MaterialApp)).height - fakeKeyboardHeight;
+      expect(lastItemBottom, lessThanOrEqualTo(fakeKeyboardTop));
     },
   );
 }
