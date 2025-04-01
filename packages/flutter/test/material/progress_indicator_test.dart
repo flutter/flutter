@@ -433,25 +433,27 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/165294
   testWidgets('CircularProgressIndicator.adaptive stroke width', (WidgetTester tester) async {
     await tester.pumpWidget(const CircularProgressIndicator.adaptive());
 
+    // The default strokeWidth is 4.0
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
 
-    final ThemeData themeData = ThemeData(
+    final ThemeData themeData = theme.copyWith(
       progressIndicatorTheme: const ProgressIndicatorThemeData(strokeWidth: 10.0),
     );
     await tester.pumpWidget(
       Theme(data: themeData, child: const CircularProgressIndicator.adaptive()),
     );
 
+    // Get the theme’s strokeWidth.
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 10.0));
 
     await tester.pumpWidget(
       Theme(data: themeData, child: const CircularProgressIndicator.adaptive(strokeWidth: 16.0)),
     );
 
+    // The strokeWidth parameter should override the theme’s strokeWidth.
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
