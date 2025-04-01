@@ -1498,6 +1498,7 @@
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/README.md
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/test
+../../../flutter/third_party/dart/runtime/tools/profiling/.dart_tool
 ../../../flutter/third_party/dart/runtime/tools/profiling/.gitignore
 ../../../flutter/third_party/dart/runtime/tools/profiling/CHANGELOG.md
 ../../../flutter/third_party/dart/runtime/tools/profiling/README.md
