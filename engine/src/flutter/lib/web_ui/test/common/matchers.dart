@@ -5,13 +5,12 @@
 /// Provides utilities for testing engine code.
 library matchers;
 
+import 'dart:js_interop';
 import 'dart:math' as math;
 
 import 'package:html/dom.dart' as html;
 import 'package:html/parser.dart' as html;
-
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
@@ -259,22 +258,26 @@ class HtmlPatternMatcher extends Matcher {
 
   @override
   bool matches(final Object? object, Map<Object?, Object?> matchState) {
-    if (object is! DomElement) {
+    // TODO(srujzs): Replace this with `!object.isJSAny` once we have that API
+    // in `dart:js_interop`.
+    // https://github.com/dart-lang/sdk/issues/56905
+    // ignore: invalid_runtime_check_with_js_interop_types
+    if (object is! JSAny || !object.isA<DomElement>()) {
       return false;
     }
 
     final List<String> mismatches = <String>[];
     matchState['mismatches'] = mismatches;
 
-    final html.Element element = html.parseFragment(object.outerHTML).children.single;
-    matchElements(_Breadcrumbs.root, mismatches, element, pattern);
+    final html.Element element =
+        html.parseFragment((object as DomElement).outerHTML).children.single;
+    _matchElements(_Breadcrumbs.root, mismatches, element, pattern);
     return mismatches.isEmpty;
   }
 
   static bool _areTagsEqual(html.Element a, html.Element b) {
     const Map<String, String> synonyms = <String, String>{
       'sem': 'flt-semantics',
-      'sem-c': 'flt-semantics-container',
       'sem-img': 'flt-semantics-img',
       'sem-tf': 'flt-semantics-text-field',
     };
@@ -293,7 +296,7 @@ class HtmlPatternMatcher extends Matcher {
     return aName == bName;
   }
 
-  void matchElements(
+  void _matchElements(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -310,11 +313,11 @@ class HtmlPatternMatcher extends Matcher {
       return;
     }
 
-    matchAttributes(breadcrumb, mismatches, element, pattern);
-    matchChildren(breadcrumb, mismatches, element, pattern);
+    _matchAttributes(breadcrumb, mismatches, element, pattern);
+    _matchChildren(breadcrumb, mismatches, element, pattern);
   }
 
-  void matchAttributes(
+  void _matchAttributes(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -327,7 +330,7 @@ class HtmlPatternMatcher extends Matcher {
 
       if (expectedName == 'style') {
         // Style is a complex attribute that deserves a special comparison algorithm.
-        matchStyle(parent, mismatches, element, pattern);
+        _matchStyle(parent, mismatches, element, pattern);
       } else {
         if (!element.attributes.containsKey(expectedName)) {
           mismatches.add('$breadcrumb: attribute $expectedName="$expectedValue" missing.');
@@ -358,7 +361,7 @@ class HtmlPatternMatcher extends Matcher {
     return result;
   }
 
-  void matchStyle(
+  void _matchStyle(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -413,7 +416,7 @@ class HtmlPatternMatcher extends Matcher {
     return cleanNodes;
   }
 
-  void matchChildren(
+  void _matchChildren(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -434,7 +437,7 @@ class HtmlPatternMatcher extends Matcher {
       final html.Node actualChild = actualChildNodes[i];
 
       if (expectedChild is html.Element && actualChild is html.Element) {
-        matchElements(parent, mismatches, actualChild, expectedChild);
+        _matchElements(parent, mismatches, actualChild, expectedChild);
       } else if (expectedChild is html.Text && actualChild is html.Text) {
         if (expectedChild.data != actualChild.data) {
           mismatches.add(
