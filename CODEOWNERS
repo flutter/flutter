@@ -23,10 +23,10 @@
 /engine/src/flutter/shell/platform/embedder/tests/embedder_frozen.h @cbracken @chinmaygarde @loic-sharma
 
 # iOS team - keep this synced with .github/labeler.yml's team-ios section.
-/engine/src/flutter/shell/platform/darwin/common/ @ios-reviewers
-/engine/src/flutter/shell/platform/darwin/ios/framework/ @ios-reviewers
-/packages/flutter_tools/**/ios/* @ios-reviewers
-/packages/flutter_tools/**/macos/* @ios-reviewers
-/packages/flutter_tools/**/*xcode* @ios-reviewers
-/packages/flutter_tools/**/*ios* @ios-reviewers
-/packages/flutter_tools/**/*macos* @ios-reviewers
+/engine/src/flutter/shell/platform/darwin/common/ @flutter/ios-reviewers
+/engine/src/flutter/shell/platform/darwin/ios/framework/ @flutter/ios-reviewers
+/packages/flutter_tools/**/ios/* @flutter/ios-reviewers
+/packages/flutter_tools/**/macos/* @flutter/ios-reviewers
+/packages/flutter_tools/**/*xcode* @flutter/ios-reviewers
+/packages/flutter_tools/**/*ios* @flutter/ios-reviewers
+/packages/flutter_tools/**/*macos* @flutter/ios-reviewers

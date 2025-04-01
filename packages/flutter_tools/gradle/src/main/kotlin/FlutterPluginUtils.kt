@@ -614,6 +614,23 @@ object FlutterPluginUtils {
             "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
         )
 
+        // AGP defaults to outputting build artifacts in `android/app/.cxx`. This directory is a
+        // build artifact, so we move it from that directory to within Flutter's build directory
+        // to avoid polluting source directories with build artifacts.
+        //
+        // AGP explicitely recommends not setting the buildStagingDirectory to be within a build
+        // directory in
+        // https://developer.android.com/reference/tools/gradle-api/8.3/null/com/android/build/api/dsl/Cmake#buildStagingDirectory(kotlin.Any),
+        // but as we are not actually building anything (and are instead only tricking AGP into
+        // downloading the NDK), it is acceptable for the buildStagingDirectory to be removed
+        // and rebuilt when running clean builds.
+        gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
+            gradleProject.layout.buildDirectory
+                .dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/.cxx")
+                .get()
+                .asFile.path
+        )
+
         // CMake will print warnings when you try to build an empty project.
         // These arguments silence the warnings - our project is intentionally
         // empty.
