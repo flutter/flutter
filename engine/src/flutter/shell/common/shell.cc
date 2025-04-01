@@ -567,6 +567,15 @@ Shell::~Shell() {
         platform_latch.Signal();
       }));
   platform_latch.Wait();
+
+  if (settings_.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+    // Move the UI task runner back to its original thread to enable shutdown of
+    // that thread.
+    fml::MessageLoopTaskQueues::GetInstance()->Unmerge(
+        task_runners_.GetPlatformTaskRunner()->GetTaskQueueId(),
+        task_runners_.GetUITaskRunner()->GetTaskQueueId());
+  }
 }
 
 std::unique_ptr<Shell> Shell::Spawn(
@@ -811,7 +820,7 @@ fml::TaskRunnerAffineWeakPtr<Rasterizer> Shell::GetRasterizer() const {
   return weak_rasterizer_;
 }
 
-fml::WeakPtr<Engine> Shell::GetEngine() {
+fml::TaskRunnerAffineWeakPtr<Engine> Shell::GetEngine() {
   FML_DCHECK(is_set_up_);
   return weak_engine_;
 }
@@ -1079,12 +1088,12 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   fml::TaskRunner::RunNowAndFlushMessages(
       task_runners_.GetUITaskRunner(),
-      fml::MakeCopyable([engine = engine_->GetWeakPtr(),
-                         message = std::move(message)]() mutable {
-        if (engine) {
-          engine->DispatchPlatformMessage(std::move(message));
-        }
-      }));
+      fml::MakeCopyable(
+          [engine = weak_engine_, message = std::move(message)]() mutable {
+            if (engine) {
+              engine->DispatchPlatformMessage(std::move(message));
+            }
+          }));
 }
 
 // |PlatformView::Delegate|
