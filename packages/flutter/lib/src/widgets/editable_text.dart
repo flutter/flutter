@@ -2117,6 +2117,8 @@ class EditableText extends StatefulWidget {
 
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
+        // username, password and newPassword are password related hint.
+        // newUsername is not supported on iOS.
         final bool passwordRelatedHint = autofillHints.any(
           (String hint) =>
               hint == AutofillHints.username ||
