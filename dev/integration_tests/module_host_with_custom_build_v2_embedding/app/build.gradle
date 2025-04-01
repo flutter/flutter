@@ -6,7 +6,7 @@ apply plugin: 'com.android.application'
 
 android {
     namespace = "io.flutter.addtoapp"
-    compileSdk 34
+    compileSdk = 35
 
     // Flutter's CI installs the NDK at a non-standard path.
     // This non-standard structure is initially created by
@@ -18,16 +18,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     defaultConfig {
-        applicationId "io.flutter.addtoapp"
-        minSdkVersion 21
-        targetSdkVersion 34
-        versionCode 1
-        versionName "1.0"
+        applicationId = "io.flutter.addtoapp"
+        minSdk = 21
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0"
     }
     // Test build types.
     buildTypes {
@@ -36,15 +36,15 @@ android {
             // This is required because the `:flutter` project doesn't define this custom build type.
             // Without the fallback, the Android plugin will make Gradle exit with the following error:
             // `Unable to find a matching variant of project :flutter`
-            matchingFallbacks = ['debug']
+            matchingFallbacks += 'debug'
         }
         prod {
             initWith release
-            matchingFallbacks = ['release']
+            matchingFallbacks += 'release'
         }
     }
     // Test flavors.
-    flavorDimensions "version"
+    flavorDimensions += "version"
     productFlavors {
         demo {
             dimension "version"

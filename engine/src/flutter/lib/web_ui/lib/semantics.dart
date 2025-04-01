@@ -160,6 +160,8 @@ class SemanticsFlag {
   static const int _kHasExpandedStateIndex = 1 << 26;
   static const int _kIsExpandedIndex = 1 << 27;
   static const int _kHasSelectedStateIndex = 1 << 28;
+  static const int _kHasRequiredStateIndex = 1 << 29;
+  static const int _kIsRequiredIndex = 1 << 30;
 
   static const SemanticsFlag hasCheckedState = SemanticsFlag._(
     _kHasCheckedStateIndex,
@@ -214,6 +216,11 @@ class SemanticsFlag {
     'hasExpandedState',
   );
   static const SemanticsFlag isExpanded = SemanticsFlag._(_kIsExpandedIndex, 'isExpanded');
+  static const SemanticsFlag hasRequiredState = SemanticsFlag._(
+    _kHasRequiredStateIndex,
+    'hasRequiredState',
+  );
+  static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
 
   static const Map<int, SemanticsFlag> _kFlagById = <int, SemanticsFlag>{
     _kHasCheckedStateIndex: hasCheckedState,
@@ -245,6 +252,8 @@ class SemanticsFlag {
     _kIsCheckStateMixedIndex: isCheckStateMixed,
     _kHasExpandedStateIndex: hasExpandedState,
     _kIsExpandedIndex: isExpanded,
+    _kHasRequiredStateIndex: hasRequiredState,
+    _kIsRequiredIndex: isRequired,
   };
 
   static List<SemanticsFlag> get values => _kFlagById.values.toList(growable: false);
@@ -256,7 +265,37 @@ class SemanticsFlag {
 }
 
 // Mirrors engine/src/flutter/lib/ui/semantics.dart
-enum SemanticsRole { none, tab, tabBar, tabPanel }
+enum SemanticsRole {
+  none,
+  tab,
+  tabBar,
+  tabPanel,
+  dialog,
+  alertDialog,
+  table,
+  cell,
+  row,
+  columnHeader,
+  searchBox,
+  dragHandle,
+  spinButton,
+  comboBox,
+  menuBar,
+  menu,
+  menuItem,
+  menuItemCheckbox,
+  menuItemRadio,
+  list,
+  listItem,
+  form,
+  tooltip,
+  loadingSpinner,
+  progressBar,
+  hotKey,
+  radioGroup,
+  status,
+  alert,
+}
 
 // When adding a new StringAttributeType, the classes in these file must be
 // updated as well.
@@ -345,6 +384,7 @@ class SemanticsUpdateBuilder {
     int headingLevel = 0,
     String? linkUrl,
     SemanticsRole role = SemanticsRole.none,
+    required List<String>? controlsNodes,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -387,6 +427,7 @@ class SemanticsUpdateBuilder {
         headingLevel: headingLevel,
         linkUrl: linkUrl,
         role: role,
+        controlsNodes: controlsNodes,
       ),
     );
   }

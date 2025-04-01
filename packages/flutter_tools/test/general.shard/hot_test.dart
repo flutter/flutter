@@ -23,6 +23,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
+import '../src/package_config.dart';
 import 'hot_shared.dart';
 
 void main() {
@@ -179,14 +180,7 @@ void main() {
       testUsingContext(
         'setupHotRestart function fails',
         () async {
-          fileSystem.directory('.dart_tool').childFile('package_config.json')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": []
-}
-''');
+          writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
           final FakeDevice device = FakeDevice();
           final List<FlutterDevice> devices = <FlutterDevice>[FakeFlutterDevice(device)];
           final OperationResult result = await HotRunner(
@@ -214,14 +208,7 @@ void main() {
       testUsingContext(
         'setupHotReload function fails',
         () async {
-          fileSystem.directory('.dart_tool').childFile('package_config.json')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": []
-}
-''');
+          writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
           final FakeDevice device = FakeDevice();
           final FakeFlutterDevice fakeFlutterDevice = FakeFlutterDevice(device);
           final List<FlutterDevice> devices = <FlutterDevice>[fakeFlutterDevice];
@@ -270,14 +257,7 @@ void main() {
       testUsingContext(
         'shutdown hook called after signal',
         () async {
-          fileSystem.directory('.dart_tool').childFile('package_config.json')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": []
-}
-''');
+          writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
           final FakeDevice device = FakeDevice();
           final List<FlutterDevice> devices = <FlutterDevice>[
             FlutterDevice(
@@ -307,14 +287,7 @@ void main() {
       testUsingContext(
         'shutdown hook called after app stop',
         () async {
-          fileSystem.directory('.dart_tool').childFile('package_config.json')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": []
-}
-''');
+          writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
           final FakeDevice device = FakeDevice();
           final List<FlutterDevice> devices = <FlutterDevice>[
             FlutterDevice(
@@ -629,14 +602,7 @@ void main() {
       'Exits with code 2 when HttpException is thrown '
       'during VM service connection',
       () async {
-        fileSystem.directory('.dart_tool').childFile('package_config.json')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": []
-}
-''');
+        writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
 
         final FakeResidentCompiler residentCompiler = FakeResidentCompiler();
         final FakeDevice device = FakeDevice();

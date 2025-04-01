@@ -357,6 +357,14 @@ void main() {
     );
   });
 
+  test('ClipRSuperellipseLayer prints clipBehavior in debug info', () {
+    expect(getDebugInfo(ClipRSuperellipseLayer()), contains('clipBehavior: Clip.antiAlias'));
+    expect(
+      getDebugInfo(ClipRSuperellipseLayer(clipBehavior: Clip.antiAliasWithSaveLayer)),
+      contains('clipBehavior: Clip.antiAliasWithSaveLayer'),
+    );
+  });
+
   test('ClipPathLayer prints clipBehavior in debug info', () {
     expect(getDebugInfo(ClipPathLayer()), contains('clipBehavior: Clip.antiAlias'));
     expect(
@@ -458,6 +466,18 @@ void main() {
     final ClipRRectLayer layer = ClipRRectLayer(clipRRect: RRect.zero);
     checkNeedsAddToScene(layer, () {
       layer.clipRRect = RRect.fromRectAndRadius(unitRect, Radius.zero);
+    });
+    checkNeedsAddToScene(layer, () {
+      layer.clipBehavior = Clip.antiAliasWithSaveLayer;
+    });
+  });
+
+  test('mutating ClipRSuperellipseLayer fields triggers needsAddToScene', () {
+    final ClipRSuperellipseLayer layer = ClipRSuperellipseLayer(
+      clipRSuperellipse: RSuperellipse.zero,
+    );
+    checkNeedsAddToScene(layer, () {
+      layer.clipRSuperellipse = RSuperellipse.fromRectAndRadius(unitRect, Radius.zero);
     });
     checkNeedsAddToScene(layer, () {
       layer.clipBehavior = Clip.antiAliasWithSaveLayer;
@@ -726,12 +746,16 @@ void main() {
     expect(layer.describeClipBounds(), null);
 
     const Rect bounds = Rect.fromLTRB(10, 10, 20, 20);
-    final RRect rbounds = RRect.fromRectXY(bounds, 2, 2);
+    final RRect rrBounds = RRect.fromRectXY(bounds, 2, 2);
+    final RSuperellipse rseBounds = RSuperellipse.fromRectXY(bounds, 2, 2);
     layer = ClipRectLayer(clipRect: bounds);
     expect(layer.describeClipBounds(), bounds);
 
-    layer = ClipRRectLayer(clipRRect: rbounds);
-    expect(layer.describeClipBounds(), rbounds.outerRect);
+    layer = ClipRRectLayer(clipRRect: rrBounds);
+    expect(layer.describeClipBounds(), rrBounds.outerRect);
+
+    layer = ClipRSuperellipseLayer(clipRSuperellipse: rseBounds);
+    expect(layer.describeClipBounds(), rseBounds.outerRect);
 
     layer = ClipPathLayer(clipPath: Path()..addRect(bounds));
     expect(layer.describeClipBounds(), bounds);
@@ -990,6 +1014,7 @@ void main() {
     final OpacityLayer opacityLayer = OpacityLayer();
     final ClipRectLayer clipRectLayer = ClipRectLayer();
     final ClipRRectLayer clipRRectLayer = ClipRRectLayer();
+    final ClipRSuperellipseLayer clipRSuperellipseLayer = ClipRSuperellipseLayer();
     final ImageFilterLayer imageFilterLayer = ImageFilterLayer();
     final BackdropFilterLayer backdropFilterLayer = BackdropFilterLayer();
     final ColorFilterLayer colorFilterLayer = ColorFilterLayer();
@@ -999,6 +1024,7 @@ void main() {
     expect(opacityLayer.supportsRasterization(), true);
     expect(clipRectLayer.supportsRasterization(), true);
     expect(clipRRectLayer.supportsRasterization(), true);
+    expect(clipRSuperellipseLayer.supportsRasterization(), true);
     expect(imageFilterLayer.supportsRasterization(), true);
     expect(backdropFilterLayer.supportsRasterization(), true);
     expect(colorFilterLayer.supportsRasterization(), true);

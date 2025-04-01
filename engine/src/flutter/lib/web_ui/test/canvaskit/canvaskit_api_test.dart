@@ -1573,7 +1573,7 @@ void _paragraphTests() {
     final SkParagraph paragraph = builder.build();
     paragraph.layout(500);
 
-    final DomCanvasElement canvas = createDomCanvasElement(width: 400, height: 160);
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 400, height: 160);
     domDocument.body!.append(canvas);
 
     // TODO(yjbanov): WebGL screenshot tests do not work on Firefox - https://github.com/flutter/flutter/issues/109265
@@ -1721,7 +1721,7 @@ void _paragraphTests() {
   test(
     'MakeOnScreenGLSurface test',
     () {
-      final DomCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
       final WebGLContext gl = canvas.getGlContext(webGLVersion);
       final int sampleCount = gl.getParameter(gl.samples);
       final int stencilBits = gl.getParameter(gl.stencilBits);
@@ -1730,9 +1730,9 @@ void _paragraphTests() {
         canvas,
         SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
       );
-      final SkGrContext grContext = canvasKit.MakeGrContext(glContext);
+      final SkGrContext? grContext = canvasKit.MakeGrContext(glContext);
       final SkSurface? skSurface = canvasKit.MakeOnScreenGLSurface(
-        grContext,
+        grContext!,
         100,
         100,
         SkColorSpaceSRGB,
@@ -1748,15 +1748,15 @@ void _paragraphTests() {
   test(
     'MakeRenderTarget test',
     () {
-      final DomCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
+      final DomHTMLCanvasElement canvas = createDomCanvasElement(width: 100, height: 100);
 
       final int glContext =
           canvasKit.GetWebGLContext(
             canvas,
             SkWebGLContextOptions(antialias: 0, majorVersion: webGLVersion.toDouble()),
           ).toInt();
-      final SkGrContext grContext = canvasKit.MakeGrContext(glContext.toDouble());
-      final SkSurface? surface = canvasKit.MakeRenderTarget(grContext, 1, 1);
+      final SkGrContext? grContext = canvasKit.MakeGrContext(glContext.toDouble());
+      final SkSurface? surface = canvasKit.MakeRenderTarget(grContext!, 1, 1);
 
       expect(surface, isNotNull);
     },

@@ -201,6 +201,8 @@ class Canvas {
 
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
 
+  void DrawRoundSuperellipse(const RoundSuperellipse& rse, const Paint& paint);
+
   void DrawCircle(const Point& center, Scalar radius, const Paint& paint);
 
   void DrawPoints(const Point points[],
@@ -250,6 +252,20 @@ class Canvas {
 
   // Visible for testing.
   bool RequiresReadback() const { return requires_readback_; }
+
+  // Whether the current device has the capabilities to blit an offscreen
+  // texture into the onscreen.
+  //
+  // This requires the availibility of the blit framebuffer command, but is
+  // disabled for GLES. A simple glBlitFramebuffer does not support resolving
+  // different sample counts which may be present in GLES when using MSAA.
+  //
+  // Visible for testing.
+  bool SupportsBlitToOnscreen() const;
+
+  /// For picture snapshots we need addition steps to verify that final mipmaps
+  /// are generated.
+  bool EnsureFinalMipmapGeneration() const;
 
  private:
   ContentContext& renderer_;
@@ -340,6 +356,17 @@ class Canvas {
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
                                const Paint& paint);
+
+  /// For simple DrawImageRect calls, optimize any draws with a color filter
+  /// into the corresponding atlas draw.
+  ///
+  /// Returns whether not the optimization was applied.
+  bool AttemptColorFilterOptimization(const std::shared_ptr<Texture>& image,
+                                      Rect source,
+                                      Rect dest,
+                                      const Paint& paint,
+                                      const SamplerDescriptor& sampler,
+                                      SourceRectConstraint src_rect_constraint);
 
   RenderPass& GetCurrentRenderPass() const;
 

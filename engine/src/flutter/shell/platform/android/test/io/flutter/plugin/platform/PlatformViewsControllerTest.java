@@ -1621,7 +1621,7 @@ public class PlatformViewsControllerTest {
 
           @NonNull
           @Override
-          public SurfaceProducer createSurfaceProducer() {
+          public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
             return new SurfaceProducer() {
               @Override
               public void setCallback(SurfaceProducer.Callback cb) {}
@@ -1665,6 +1665,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.attach(context, registry, executor);
 
     PlatformViewsController2 secondController = new PlatformViewsController2();
+    secondController.setRegistry(new PlatformViewRegistryImpl());
 
     final FlutterEngine engine = mock(FlutterEngine.class);
     when(engine.getRenderer()).thenReturn(new FlutterRenderer(jni));

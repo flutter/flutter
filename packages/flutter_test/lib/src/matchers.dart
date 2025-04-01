@@ -246,6 +246,22 @@ Matcher isSameColorAs(Color color, {double threshold = colorEpsilon}) {
   return _ColorMatcher(color, threshold);
 }
 
+/// Asserts that the object is a [TextScaler] that reflects the user's font
+/// scale preferences from the platform's accessibility settings.
+///
+/// This matcher is useful for verifying the text scaling within a widget subtree
+/// respects the user accessibility preferences, and not accidentally being
+/// shadowed by a [MediaQuery] with a different type of [TextScaler].
+///
+/// In widget tests, the value of the system font scale preference can be
+/// changed via [TestPlatformDispatcher.textScaleFactorTestValue].
+///
+/// If `withScaleFactor` is specified and non-null, this matcher also asserts
+/// that the [TextScaler]'s' `textScaleFactor` equals `withScaleFactor`.
+Matcher isSystemTextScaler({double? withScaleFactor}) {
+  return _IsSystemTextScaler(withScaleFactor);
+}
+
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
 /// Specifically, this matcher checks that the string does not contains newline
@@ -675,6 +691,7 @@ Matcher matchesSemantics({
   bool isCheckStateMixed = false,
   bool isSelected = false,
   bool isButton = false,
+  bool hasSelectedState = false,
   bool isSlider = false,
   bool isKeyboardKey = false,
   bool isLink = false,
@@ -698,6 +715,8 @@ Matcher matchesSemantics({
   bool hasImplicitScrolling = false,
   bool hasExpandedState = false,
   bool isExpanded = false,
+  bool hasRequiredState = false,
+  bool isRequired = false,
   // Actions //
   bool hasTapAction = false,
   bool hasFocusAction = false,
@@ -778,6 +797,8 @@ Matcher matchesSemantics({
     hasImplicitScrolling: hasImplicitScrolling,
     hasExpandedState: hasExpandedState,
     isExpanded: isExpanded,
+    hasRequiredState: hasRequiredState,
+    isRequired: isRequired,
     // Actions
     hasTapAction: hasTapAction,
     hasFocusAction: hasFocusAction,
@@ -886,6 +907,8 @@ Matcher containsSemantics({
   bool? hasImplicitScrolling,
   bool? hasExpandedState,
   bool? isExpanded,
+  bool? hasRequiredState,
+  bool? isRequired,
   // Actions
   bool? hasTapAction,
   bool? hasFocusAction,
@@ -966,6 +989,8 @@ Matcher containsSemantics({
     hasImplicitScrolling: hasImplicitScrolling,
     hasExpandedState: hasExpandedState,
     isExpanded: isExpanded,
+    hasRequiredState: hasRequiredState,
+    isRequired: isRequired,
     // Actions
     hasTapAction: hasTapAction,
     hasFocusAction: hasFocusAction,
@@ -1202,6 +1227,58 @@ class _IsNotInCard extends Matcher {
 
   @override
   Description describe(Description description) => description.add('not in card');
+}
+
+class _IsSystemTextScaler extends Matcher {
+  const _IsSystemTextScaler(this.expectedUserTextScaleFactor);
+
+  final double? expectedUserTextScaleFactor;
+
+  // TODO(LongCatIsLooong): update the runtime type after introducing _SystemTextScaler.
+  static final Type _expectedRuntimeType = (const TextScaler.linear(2)).runtimeType;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is! TextScaler) {
+      return failWithDescription(matchState, '${item.runtimeType} is not a TextScaler');
+    }
+    if (!identical(item.runtimeType, _expectedRuntimeType)) {
+      return failWithDescription(matchState, '${item.runtimeType} is not a system TextScaler');
+    }
+    final double actualTextScaleFactor = item.textScaleFactor;
+    if (expectedUserTextScaleFactor != null &&
+        expectedUserTextScaleFactor != actualTextScaleFactor) {
+      return failWithDescription(
+        matchState,
+        'expecting a scale factor of $expectedUserTextScaleFactor, but got $actualTextScaleFactor',
+      );
+    }
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    final String scaleFactorExpectation =
+        expectedUserTextScaleFactor == null ? '' : '(${expectedUserTextScaleFactor}x)';
+    return description.add(
+      'A TextScaler that reflects the font scale settings in the system user preference ($_expectedRuntimeType$scaleFactorExpectation)',
+    );
+  }
+
+  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+    matchState['failure'] = description;
+    return false;
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    return mismatchDescription.add(matchState['failure'] as String);
+  }
 }
 
 class _HasOneLineDescription extends Matcher {
@@ -2347,6 +2424,8 @@ class _MatchesSemanticsData extends Matcher {
     required bool? hasImplicitScrolling,
     required bool? hasExpandedState,
     required bool? isExpanded,
+    required bool? hasRequiredState,
+    required bool? isRequired,
     // Actions
     required bool? hasTapAction,
     required bool? hasFocusAction,
@@ -2406,6 +2485,8 @@ class _MatchesSemanticsData extends Matcher {
          if (isSlider != null) SemanticsFlag.isSlider: isSlider,
          if (hasExpandedState != null) SemanticsFlag.hasExpandedState: hasExpandedState,
          if (isExpanded != null) SemanticsFlag.isExpanded: isExpanded,
+         if (hasRequiredState != null) SemanticsFlag.hasRequiredState: hasRequiredState,
+         if (isRequired != null) SemanticsFlag.isRequired: isRequired,
        },
        actions = <SemanticsAction, bool>{
          if (hasTapAction != null) SemanticsAction.tap: hasTapAction,

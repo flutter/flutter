@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "impeller/display_list/aiks_context.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
 #include "impeller/entity/gles/modern_shaders_gles.h"
@@ -80,7 +81,8 @@ EmbedderSurfaceGLImpeller::EmbedderSurfaceGLImpeller(
   }
 
   impeller_context_ = impeller::ContextGLES::Create(
-      std::move(gl), shader_mappings, /*enable_gpu_tracing=*/false);
+      impeller::Flags{}, std::move(gl), shader_mappings,
+      /*enable_gpu_tracing=*/false);
 
   if (!impeller_context_) {
     FML_LOG(ERROR) << "Could not create Impeller context.";

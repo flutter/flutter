@@ -16,7 +16,6 @@ typedef PlatformMessageCallback =
     void Function(String name, ByteData? data, PlatformMessageResponseCallback? callback);
 typedef ErrorCallback = bool Function(Object exception, StackTrace stackTrace);
 
-// ignore: avoid_classes_with_only_static_members
 /// A token that represents a root isolate.
 class RootIsolateToken {
   static RootIsolateToken? get instance {
@@ -37,6 +36,8 @@ abstract class PlatformDispatcher {
   FlutterView? view({required int id});
 
   FlutterView? get implicitView;
+
+  int? get engineId;
 
   VoidCallback? get onMetricsChanged;
   set onMetricsChanged(VoidCallback? callback);
@@ -152,6 +153,54 @@ abstract class PlatformDispatcher {
   set onFrameDataChanged(VoidCallback? callback) {}
 
   double scaleFontSize(double unscaledFontSize);
+}
+
+final class SystemColor {
+  const SystemColor({required this.name, this.value});
+  final String name;
+  final Color? value;
+  bool get isSupported => value != null;
+  static bool get platformProvidesSystemColors => true;
+
+  static final SystemColorPalette light = SystemColorPalette._(
+    engine.SystemColorPaletteDetector.light,
+  );
+
+  static final SystemColorPalette dark = SystemColorPalette._(
+    engine.SystemColorPaletteDetector.dark,
+  );
+}
+
+final class SystemColorPalette {
+  SystemColorPalette._(this._detector);
+
+  Brightness get brightness => _detector.brightness;
+
+  final engine.SystemColorPaletteDetector _detector;
+
+  SystemColor _lookUp(String name) {
+    return _detector.systemColors[name]!;
+  }
+
+  SystemColor get accentColor => _lookUp('AccentColor');
+  SystemColor get accentColorText => _lookUp('AccentColorText');
+  SystemColor get activeText => _lookUp('ActiveText');
+  SystemColor get buttonBorder => _lookUp('ButtonBorder');
+  SystemColor get buttonFace => _lookUp('ButtonFace');
+  SystemColor get buttonText => _lookUp('ButtonText');
+  SystemColor get canvas => _lookUp('Canvas');
+  SystemColor get canvasText => _lookUp('CanvasText');
+  SystemColor get field => _lookUp('Field');
+  SystemColor get fieldText => _lookUp('FieldText');
+  SystemColor get grayText => _lookUp('GrayText');
+  SystemColor get highlight => _lookUp('Highlight');
+  SystemColor get highlightText => _lookUp('HighlightText');
+  SystemColor get linkText => _lookUp('LinkText');
+  SystemColor get mark => _lookUp('Mark');
+  SystemColor get markText => _lookUp('MarkText');
+  SystemColor get selectedItem => _lookUp('SelectedItem');
+  SystemColor get selectedItemText => _lookUp('SelectedItemText');
+  SystemColor get visitedText => _lookUp('VisitedText');
 }
 
 enum FramePhase {
