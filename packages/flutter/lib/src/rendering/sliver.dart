@@ -1314,6 +1314,8 @@ abstract class RenderSliver extends RenderObject {
   ///
   /// [RenderSliverEnsureSemantics] overrides this value to `true` to ensure
   /// its sliver child is included in the semantics tree.
+  ///
+  /// Defaults to `false`.
   bool get ensureSemantics => false;
 
   // layout input
