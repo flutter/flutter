@@ -35,7 +35,7 @@ void RenderTargetCache::End() {
   render_target_data_.swap(retain);
 }
 
-void RenderTargetCache::Disable() {
+void RenderTargetCache::DisableCache() {
   cache_disabled_count_++;
 }
 
@@ -43,7 +43,7 @@ bool RenderTargetCache::CacheEnabled() const {
   return cache_disabled_count_ == 0;
 }
 
-void RenderTargetCache::Enable() {
+void RenderTargetCache::EnableCache() {
   FML_DCHECK(cache_disabled_count_ > 0);
   if (cache_disabled_count_ == 0) {
     return;

@@ -177,11 +177,11 @@ class RenderTargetAllocator {
       const std::shared_ptr<Texture>& existing_color_resolve_texture = nullptr,
       const std::shared_ptr<Texture>& existing_depth_stencil_texture = nullptr);
 
-  /// @brief Disable the cache until another call to enable.
-  virtual void Disable() {}
+  /// @brief Disable any caching until the next call to `EnabledCache`.
+  virtual void DisableCache() {}
 
-  /// @brief Re-enable the cache if disabled.
-  virtual void Enable() {}
+  /// @brief Re-enable any caching if disabled.
+  virtual void EnableCache() {}
 
   /// @brief Mark the beginning of a frame workload.
   ///

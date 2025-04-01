@@ -7,8 +7,8 @@
 
 #include <cstdint>
 #include <memory>
-#include <unordered_map>
 
+#include "flutter/third_party/abseil-cpp/absl/container/flat_hash_map.h"
 #include "impeller/entity/entity.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/geometry/sigma.h"
@@ -40,24 +40,19 @@ class TextShadowCache {
     int64_t identifier;
     bool is_single_glyph;
     Font font;
-    Sigma sigma;
+    Rational rounded_sigma;
 
     TextShadowCacheKey(Scalar p_max_basis,
                        int64_t p_identifier,
                        bool p_is_single_glyph,
                        const Font& p_font,
-                       Sigma p_sigma)
-        : max_basis(p_max_basis),
-          identifier(p_identifier),
-          is_single_glyph(p_is_single_glyph),
-          font(p_font),
-          sigma(p_sigma) {}
+                       Sigma p_sigma);
 
     struct Hash {
       std::size_t operator()(const TextShadowCacheKey& key) const {
         return fml::HashCombine(key.max_basis, key.identifier,
                                 key.is_single_glyph, key.font.GetHash(),
-                                key.sigma.sigma);
+                                key.rounded_sigma.GetHash());
       }
     };
 
@@ -67,7 +62,8 @@ class TextShadowCache {
         return lhs.max_basis == rhs.max_basis &&
                lhs.identifier == rhs.identifier &&
                lhs.is_single_glyph == rhs.is_single_glyph &&
-               lhs.font.IsEqual(rhs.font) && lhs.sigma.sigma == rhs.sigma.sigma;
+               lhs.font.IsEqual(rhs.font) &&
+               lhs.rounded_sigma == rhs.rounded_sigma;
       }
     };
   };
@@ -101,10 +97,10 @@ class TextShadowCache {
     Matrix key_matrix;
   };
 
-  std::unordered_map<TextShadowCacheKey,
-                     TextShadowCacheData,
-                     TextShadowCacheKey::Hash,
-                     TextShadowCacheKey::Equal>
+  absl::flat_hash_map<TextShadowCacheKey,
+                      TextShadowCacheData,
+                      TextShadowCacheKey::Hash,
+                      TextShadowCacheKey::Equal>
       entries_;
 };
 

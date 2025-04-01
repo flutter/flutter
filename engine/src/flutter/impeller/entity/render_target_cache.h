@@ -29,10 +29,10 @@ class RenderTargetCache : public RenderTargetAllocator {
   void End() override;
 
   // |RenderTargetAllocator|
-  void Disable() override;
+  void DisableCache() override;
 
   // |RenderTargetAllocator|
-  void Enable() override;
+  void EnableCache() override;
 
   RenderTarget CreateOffscreen(
       const Context& context,

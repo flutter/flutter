@@ -8,8 +8,24 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
+#include "impeller/geometry/sigma.h"
 
 namespace impeller {
+
+// Rounds sigma values for gaussian blur to nearest decimal.
+static constexpr int32_t kMaxSigmaDenominator = 10;
+
+TextShadowCache::TextShadowCacheKey::TextShadowCacheKey(Scalar p_max_basis,
+                                                        int64_t p_identifier,
+                                                        bool p_is_single_glyph,
+                                                        const Font& p_font,
+                                                        Sigma p_sigma)
+    : max_basis(p_max_basis),
+      identifier(p_identifier),
+      is_single_glyph(p_is_single_glyph),
+      font(p_font),
+      rounded_sigma(Rational(std::round(p_sigma.sigma * kMaxSigmaDenominator),
+                             kMaxSigmaDenominator)) {}
 
 void TextShadowCache::MarkFrameStart() {
   for (auto& entry : entries_) {
@@ -18,14 +34,10 @@ void TextShadowCache::MarkFrameStart() {
 }
 
 void TextShadowCache::MarkFrameEnd() {
-  auto it = entries_.begin();
-  while (it != entries_.end()) {
-    if (!it->second.used_this_frame) {
-      it = entries_.erase(it);
-    } else {
-      it++;
-    }
-  }
+  absl::erase_if(entries_, [](const TextShadowCacheKey& key,
+                              const TextShadowCacheData& data) {
+    return !data.used_this_frame;
+  });
 }
 
 std::optional<Entity> TextShadowCache::Lookup(
