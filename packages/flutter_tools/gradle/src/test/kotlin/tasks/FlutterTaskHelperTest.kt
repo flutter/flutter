@@ -1,5 +1,6 @@
 package com.flutter.gradle.tasks
 
+import com.flutter.gradle.FlutterPluginConstants
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
