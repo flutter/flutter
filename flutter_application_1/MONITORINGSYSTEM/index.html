@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <title>Surface Disinfection Monitoring System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #eef2f7;
+            color: #333;
+            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth transition for background and text color */
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transition: box-shadow 0.3s ease, transform 0.3s ease; /* Add smooth shadow and scale transitions */
+        }
+
+        .container:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Slightly deeper shadow on hover */
+            transform: translateY(-5px); /* Lift the container slightly on hover */
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #1a5276;
+        }
+
+        .info {
+            margin: 20px 0;
+            font-size: 16px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info select {
+            width: auto;
+            padding: 5px;
+            margin-left: 5px;
+            font-size: 14px;
+        }
+
+        .info span {
+            display: flex;
+            align-items: center;
+        }
+
+        #login-section, #monitoring-section, #saved-data-section {
+            margin-top: 30px;
+        }
+
+        input[type="text"], input[type="checkbox"] {
+            margin: 10px 0;
+            padding: 12px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus {
+            border-color: #154360;
+            box-shadow: 0 0 8px rgba(26, 82, 118, 0.5); /* Add a glowing effect on focus */
+            outline: none;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease; /* Smooth transition for focus effects */
+        }
+
+        button {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 12px 25px;
+            background-color: #1a5276;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition for hover effects */
+        }
+
+        button:hover {
+            background-color: #154360;
+            transform: scale(1.05); /* Slightly enlarge button on hover */
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #1a5276;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+            transition: background-color 0.3s ease; /* Smooth transition for row hover effect */
+        }
+
+        table td {
+            background-color: #f9f9f9;
+            text-align: center; /* Center content in table cells */
+            vertical-align: middle; /* Vertically align content */
+        }
+
+        img {
+            display: block;
+            margin: 0 auto 20px;
+            width: 200px;
+            transition: transform 0.3s ease; /* Smooth transition for scaling */
+        }
+
+        img:hover {
+            transform: scale(1.1); /* Slightly enlarge logo on hover */
+        }
+
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .form-table th, .form-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .form-table th {
+            background-color: #1a5276;
+            color: white;
+        }
+
+        .form-table td {
+            background-color: #f9f9f9;
+        }
+
+        #month-year-section {
+            display: none; /* Initially hidden */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+            gap: 10px; /* Add spacing between elements */
+        }
+
+        #month-year-section span {
+            text-align: center; /* Center text inside the span */
+        }
+
+        .input-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-container input[type="text"] {
+            width: 40%; /* Reduce width to 40% of the container */
+            padding: 10px 30px 10px 10px; /* Adjust padding */
+            font-size: 14px; /* Keep font size consistent */
+            border: 1.5px solid #1a5276;
+            border-radius: 6px;
+            margin: 0 auto; /* Center align the input field */
+            display: block; /* Ensure the input is treated as a block element */
+            transition: all 0.3s ease; /* Smooth transition for all input changes */
+        }
+
+        .input-container input[type="text"]:focus {
+            border-color: #154360; /* Keep focus styling consistent */
+            box-shadow: 0 0 6px rgba(26, 82, 118, 0.4); /* Adjust shadow for smaller size */
+            outline: none; /* Remove default outline */
+        }
+
+        .input-container input[type="text"]::placeholder {
+            color: #aaa; /* Subtle placeholder color */
+            font-style: italic; /* Italicize placeholder text */
+        }
+
+        .input-container .login-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #aaa;
+            pointer-events: none; /* Prevent interaction with the icon */
+            transition: color 0.3s ease; /* Smooth transition for icon color */
+        }
+
+        .input-container input[type="text"]:focus + .login-icon {
+            color: #154360; /* Change icon color on focus */
+        }
+
+        .input-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .input-container input[type="text"] {
+            flex: 1; /* Allow the input to take up available space */
+            padding-right: 40px; /* Add space for the icon */
+        }
+
+        /* Pop-out message styling */
+        .popup-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a5276;
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-size: 16px;
+            font-weight: bold;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
+            z-index: 1000;
+        }
+
+        .popup-message.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(10px); /* Slide down effect */
+        }
+
+        .popup-message.error {
+            background-color: #c0392b; /* Red for error messages */
+        }
+
+        .popup-message.success {
+            background-color: #27ae60; /* Green for success messages */
+        }
+
+        .wrapper {
+            position: relative;
+            width: 90%; /* Adjust width for better responsiveness */
+            max-width: 750px; /* Ensure it doesn't exceed 750px */
+            height: auto;
+            margin: 20px auto; /* Add vertical margin for spacing */
+            background: rgba(255, 255, 255, 0.9); /* Add slight transparency */
+            border: 2px solid #0ef;
+            overflow: hidden;
+            box-shadow: 0 0 25px rgba(0, 238, 255, 0.8); /* Adjust shadow opacity */
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+        }
+
+        .wrapper:hover {
+            transform: scale(1.02); /* Slightly enlarge on hover */
+            box-shadow: 0 0 35px rgba(0, 238, 255, 1); /* Intensify shadow on hover */
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container" role="main">
+            <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                <img src="./logo.png" alt="Company Logo" aria-label="Company Logo" style="width: 300px;">
+            </div>
+            <h1 style="font-size: 18px;">MEDICAL AFFAIRS – LABORATORY SERVICES</h1>
+            <h2 style="font-size: 34px;">Surface Disinfection Monitoring</h2>
+            <div class="info" id="month-year-section" style="display: none;">
+                <span>
+                    <strong>MONTH/YEAR:</strong>
+                    <select id="month" aria-label="Select Month">
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April" selected>April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                    <select id="year" aria-label="Select Year">
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </span>
+            </div>
+            <section id="login-section" aria-labelledby="login-heading">
+                <div class="input-container">
+                    <input type="text" id="badgeNumber" placeholder="Enter your Badge Number here..." required aria-required="true">
+                    <span class="login-icon" aria-hidden="true">👤</span>
+                </div>
+                <button type="button" onclick="redirectToUnitLocation()">Log In</button>
+            </section>
+            <section id="monitoring-section" style="display:none;" aria-labelledby="monitoring-heading">
+                <h2 id="monitoring-heading">Monitoring Form</h2>
+                <table style="width: 100%; border-collapse: collapse; text-align: left; border: 1px solid #ddd;">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Check</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Benchtops</td>
+                            <td><input type="checkbox" id="benchtops"></td>
+                        </tr>
+                        <tr>
+                            <td>Keyboard</td>
+                            <td><input type="checkbox" id="keyboard"></td>
+                        </tr>
+                        <tr>
+                            <td>Mouse</td>
+                            <td><input type="checkbox" id="mouse"></td>
+                        </tr>
+                        <tr>
+                            <td>Monitor</td>
+                            <td><input type="checkbox" id="monitor"></td>
+                        </tr>
+                        <tr>
+                            <td>Phone</td>
+                            <td><input type="checkbox" id="phone"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button type="button" onclick="submitMonitoring()" aria-label="Submit Monitoring Data">Submit</button>
+                    <button type="button" onclick="viewData()" aria-label="View Saved Data">View Saved Data</button>
+                    <button type="button" onclick="saveAsPDF()" aria-label="Save Data as PDF">Save as PDF</button>
+                </div>
+            </section>
+            <section id="saved-data-section" style="display:none;" aria-labelledby="saved-data-heading">
+                <h2 id="saved-data-heading">Saved Monitoring Data</h2>
+                <table id="data-table" aria-describedby="saved-data-heading">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Badge Number</th>
+                            <th scope="col">Benchtops</th>
+                            <th scope="col">Keyboard</th>
+                            <th scope="col">Mouse</th>
+                            <th scope="col">Monitor</th>
+                            <th scope="col">Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-body">
+                        <!-- Saved data will be populated here -->
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="text-align: left;">
+                        <label for="checkedBy" style="font-weight: bold; font-size: 14px;">Checked by:</label>
+                        <select id="checkedBy" aria-label="Checked by" onchange="updatePosition('checkedBy', 'checkedByPosition')" style="padding: 5px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc;">
+                            <option value="" disabled selected>Select Name</option>
+                            <option value="Melvie Del Mundo-Caoile">Melvie Del Mundo-Caoile</option>
+                            <option value="Mary Antonette Erazo">Mary Antonette Erazo</option>
+                            <option value="Saud Mohammed Sanchez">Saud Mohammed Sanchez</option>
+                            <option value="Rahaf Fahad Al Othaimeen">Rahaf Fahad Al Othaimeen</option>
+                            <option value="Muhannad Ahmed Ali">Muhannad Ahmed Ali</option>
+                            <option value="Deema Ibrahim Al Humaidan">Deema Ibrahim Al Humaidan</option>
+                        </select>
+                        <p id="checkedByPosition" style="margin-top: 5px; font-style: italic; color: #555; font-size: 13px;"></p>
+                    </div>
+                    <div style="text-align: center;">
+                        <label for="reviewedBy" style="font-weight: bold; font-size: 14px;">Reviewed by:</label>
+                        <select id="reviewedBy" aria-label="Reviewed by" onchange="updatePosition('reviewedBy', 'reviewedByPosition')" style="padding: 5px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc;">
+                            <option value="" disabled selected>Select Name</option>
+                            <option value="Shane Richel Esterban">Shane Richel Esterban</option>
+                            <option value="Haneen Saad Almanie">Haneen Saad Almanie</option>
+                        </select>
+                        <p id="reviewedByPosition" style="margin-top: 5px; font-style: italic; color: #555; font-size: 13px;"></p>
+                    </div>
+                    <div style="text-align: right;">
+                        <label for="approvedBy" style="font-weight: bold; font-size: 14px;">Approved by:</label>
+                        <select id="approvedBy" aria-label="Approved by" onchange="updatePosition('approvedBy', 'approvedByPosition')" style="padding: 5px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc;">
+                            <option value="" disabled selected>Select Name</option>
+                            <option value="Dr. Eman A. Abouahmad">Dr. Eman A. Abouahmad</option>
+                        </select>
+                        <p id="approvedByPosition" style="margin-top: 5px; font-style: italic; color: #555; font-size: 13px;"></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script src="./script.js"></script>
+    <script>
+        const positions = {
+            "Melvie Del Mundo-Caoile": "Microbiology Section in-charge",
+            "Mary Antonette Erazo": "Immunology Section in-charge",
+            "Saud Mohammed Sanchez": "Blood Bank Section in-charge",
+            "Rahaf Fahad Al Othaimeen": "Chemistry Section in-charge",
+            "Muhannad Ahmed Ali": "Hematology/Clinical Microscopy Section in-charge",
+            "Deema Ibrahim Al Humaidan": "Preanalytical Section in-charge",
+            "Shane Richel Esterban": "Health and Safety Officer",
+            "Haneen Saad Almanie": "Medical Technologist III",
+            "Dr. Eman A. Abouahmad": "Laboratory Medical Director"
+        };
+
+        let isLoggedIn = false; // Track login status
+        let lastSubmissionDate = null; // Track the last submission date
+
+        function login() {
+            const badgeNumber = document.getElementById('badgeNumber').value.trim(); // Trim whitespace
+            if (!badgeNumber) { // Check if badge number is empty
+                showPopupMessage('Please enter your badge number.', 'error'); // Error message
+                return; // Prevent further execution
+            }
+            localStorage.setItem('loggedInBadgeNumber', badgeNumber); // Save badge number to localStorage
+            showPopupMessage('Login successful!', 'success'); // Success message
+            window.location.href = './monitoring.html'; // Redirect to monitoring page
+        }
+
+        function submitMonitoring() {
+            if (!isLoggedIn) {
+                showPopupMessage('Please log in first.', 'error');
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+            if (lastSubmissionDate === today) {
+                showPopupMessage('You can only submit data once per day.', 'error');
+                return;
+            }
+
+            // Logic for submitting monitoring data
+            lastSubmissionDate = today; // Update the last submission date
+            showPopupMessage('Monitoring data submitted successfully!', 'success');
+        }
+
+        function updatePosition(selectId, positionId) {
+            const selectedName = document.getElementById(selectId).value;
+            const position = positions[selectedName] || "";
+            document.getElementById(positionId).textContent = position;
+        }
+
+        function goToLogin() {
+            window.location.href = './index.html'; // Redirect to the login page
+        }
+
+        function redirectToUnitLocation() {
+            const badgeNumber = document.getElementById('badgeNumber').value.trim(); // Trim whitespace
+            if (!badgeNumber) { // Check if badge number is empty
+                showPopupMessage('Please enter your badge number.', 'error'); // Error message
+                return; // Prevent further execution
+            }
+            window.location.href = './unit-location.html'; // Redirect to the unit location page
+        }
+
+        // Function to show a pop-out message
+        function showPopupMessage(message, type = 'success') {
+            const popup = document.createElement('div');
+            popup.className = `popup-message ${type}`;
+            popup.textContent = message;
+
+            document.body.appendChild(popup);
+
+            // Trigger the animation
+            setTimeout(() => {
+                popup.classList.add('show');
+            }, 10);
+
+            // Remove the popup after 3 seconds
+            setTimeout(() => {
+                popup.classList.remove('show');
+                setTimeout(() => popup.remove(), 500); // Wait for the transition to finish
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

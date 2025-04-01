@@ -1,0 +1,241 @@
+/* General styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #a8edea, #fed6e3); /* Aesthetic gradient */
+    background-blend-mode: normal; /* Removed overlay mode */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    filter: brightness(0.95); /* Slight dim for a softer look */
+    color: #333;
+    line-height: 1.6;
+    animation: fadeIn 0.2s ease-in-out; /* Reduced duration */
+}
+
+.container {
+    width: 80%;
+    margin: 20px auto;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.6); /* Glassmorphism effect */
+    -webkit-backdrop-filter: blur(10px); /* Blur effect for Safari */
+    backdrop-filter: blur(10px); /* Blur effect */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.container:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+header h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+    color: #0d6efd;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Enhanced text shadow */
+    font-family: 'Poppins', sans-serif; /* Modern font */
+    letter-spacing: 1px; /* Improved readability */
+    animation: slideIn 0.2s ease-out;
+}
+
+header h2 {
+    font-size: 1.8em;
+    color: #495057;
+    margin-bottom: 25px;
+    font-weight: 400;
+}
+
+form {
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.5); /* Glassmorphism effect */
+    -webkit-backdrop-filter: blur(8px); /* Blur effect for Safari */
+    backdrop-filter: blur(8px); /* Blur effect */
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form:hover {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+form label {
+    font-weight: 600;
+    margin-right: 10px;
+    color: #495057;
+}
+
+form input,
+form select,
+form button {
+    padding: 12px 15px;
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Subtle border */
+    border-radius: 6px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #ffffff, #f1f3f5); /* Softer gradient */
+}
+
+form input:focus,
+form select:focus,
+form button:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+}
+
+form button {
+    background-color: #0d6efd;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    border-radius: 50px; /* Rounded button */
+    padding: 12px 20px; /* Larger button for better aesthetics */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15); /* Added shadow */
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+form button:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2); /* Enhanced hover shadow */
+}
+
+form button:active {
+    transform: translateY(0);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.5); /* Glassmorphism effect */
+    backdrop-filter: blur(8px); /* Blur effect */
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+table:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+}
+
+table th,
+table td {
+    border: 1px solid #dee2e6;
+    padding: 15px;
+    text-align: left;
+    font-size: 0.95em;
+}
+
+table th {
+    background-color: #f1f3f5;
+    font-weight: 700;
+    color: #343a40;
+    text-transform: uppercase;
+}
+
+table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+table tr:hover {
+    background-color: #e9ecef;
+    transition: background-color 0.3s ease;
+}
+
+footer {
+    text-align: -webkit-center; /* Fallback for older browsers */
+    text-align: center;
+    margin-top: 40px;
+    color: #6c757d;
+    font-size: 0.9em;
+    padding: 20px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.3); /* Subtle border */
+    background: rgba(255, 255, 255, 0.5); /* Glassmorphism effect */
+    backdrop-filter: blur(8px); /* Blur effect */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* Enhanced shadow */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+footer:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.6);
+    color: #495057;
+}
+
+footer a {
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+/* Exclude saved PDF form */
+@media print {
+    body {
+        background: #fff !important;
+    }
+
+    .container {
+        box-shadow: none;
+        background: #fff;
+    }
+
+    form,
+    footer,
+    table {
+        background: #fff;
+        box-shadow: none;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>Select Unit/Location</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #eef2f7, #d6e4f0);
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: linear-gradient(145deg, #ffffff, #f0f4f8);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            color: #1a5276;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px;
+            background-color: #1a5276;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #154360;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        footer button {
+            padding: 15px 30px;
+            background-color: #1a5276;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        footer button:hover {
+            background-color: #154360;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .wrapper {
+            position: relative;
+            width: 750px;
+            height: auto;
+            margin: 0 auto;
+            background: transparent;
+            border: 2px solid #0ef;
+            overflow: hidden;
+            box-shadow: 0 0 25px #0ef;
+            border-radius: 15px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container" style="padding-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                <img src="./logo.png" alt="Company Logo" aria-label="Company Logo" style="width: 300px; margin-bottom: 20px;">
+            </div>
+            <h1 style="margin: 0;">Select Unit/Location</h1>
+            <div class="button-grid">
+                <button onclick="selectUnit('Microbiology')">Microbiology</button>
+                <button onclick="selectUnit('Blood Bank')">Blood Bank</button>
+                <button onclick="selectUnit('Immunology')">Immunology</button>
+                <button onclick="selectUnit('Chemistry')">Chemistry</button>
+                <button onclick="selectUnit('Hematology/Microscopy')">Hematology/Microscopy</button>
+                <button onclick="selectUnit('Preanalytical')">Preanalytical</button>
+            </div>
+            <footer style="margin-top: 30px;">
+                <button type="button" onclick="goToLogin()" style="
+                    padding: 15px 30px;
+                    background: linear-gradient(135deg, #1a5276, #154360);
+                    color: #fff;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    transition: all 0.3s ease;
+                    text-decoration: none;
+                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                " onmouseover="this.style.background='linear-gradient(135deg, #154360, #1a5276)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 12px rgba(0, 0, 0, 0.2)';" onmouseout="this.style.background='linear-gradient(135deg, #1a5276, #154360)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.1)';">
+                    Home
+                </button>
+            </footer>
+        </div>
+    </div>
+    <script>
+        function selectUnit(unit) {
+            // Redirect to the monitoring page with the selected unit as a query parameter
+            window.location.href = `./monitoring.html?unit=${encodeURIComponent(unit)}`;
+        }
+
+        function goToLogin() {
+            window.location.href = './index.html'; // Redirect to the login page
+        }
+
+        // Ensure data is stored and retrieved separately for each unit
+        function saveMonitoringData(unit, data) {
+            const key = `monitoringData_${unit}`;
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+
+        function getMonitoringData(unit) {
+            const key = `monitoringData_${unit}`;
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : [];
+        }
+    </script>
+</body>
+</html>

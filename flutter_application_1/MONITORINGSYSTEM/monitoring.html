@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surface Disinfection Monitoring</title>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            border: 1px solid #d1d9e6;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        h1 {
+            color: #1a5276;
+            font-size: 24px;
+        }
+
+        h2 {
+            color: #154360;
+            font-size: 28px;
+        }
+
+        h3 {
+            color: #1a5276;
+            font-size: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #1a5276;
+            color: white;
+            font-weight: bold;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #1a5276;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #154360;
+            transform: scale(1.05);
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 5px #1a5276;
+        }
+
+        .wrapper {
+            position: relative;
+            width: 98%; /* Further increase width for better visibility */
+            max-width: 900px; /* Ensure it doesn't exceed 900px */
+            height: auto;
+            margin: 20px auto; /* Add vertical margin for spacing */
+            background: rgba(255, 255, 255, 0.9); /* Add slight transparency */
+            border: 2px solid #0ef;
+            overflow: hidden;
+            box-shadow: 0 0 25px rgba(0, 238, 255, 0.8); /* Adjust shadow opacity */
+            border-radius: 15px;
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover effects */
+        }
+
+        .wrapper:hover {
+            transform: scale(1.02); /* Slightly enlarge on hover */
+            box-shadow: 0 0 35px rgba(0, 238, 255, 1); /* Intensify shadow on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+                <img src="./logo.png" alt="Company Logo" aria-label="Company Logo" style="width: 300px;">
+            </div>
+            <h1 style="font-size: 18px;">MEDICAL AFFAIRS – LABORATORY SERVICES</h1>
+            <h2 style="font-size: 34px;">Surface Disinfection Monitoring</h2>
+            <h3 id="unit-title" style="text-align: center; color: #1a5276; margin-top: 10px;"></h3>
+            <div class="info" id="month-year-section" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+                <strong style="white-space: nowrap;">MONTH/YEAR:</strong>
+                <select id="month" aria-label="Select Month" style="padding: 5px; font-size: 14px;">
+                    <!-- Month options will be dynamically populated -->
+                </select>
+                <select id="year" aria-label="Select Year" style="padding: 5px; font-size: 14px;">
+                    <!-- Year options will be dynamically populated -->
+                </select>
+            </div>
+            <section id="monitoring-section" aria-labelledby="monitoring-heading">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; border: 1px solid #ddd;">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Check</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Benchtops</td>
+                            <td>
+                                <label for="benchtops" style="display: none;">Benchtops</label>
+                                <input type="checkbox" id="benchtops" title="Benchtops">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Keyboard</td>
+                            <td>
+                                <label for="keyboard" style="display: none;">Keyboard</label>
+                                <input type="checkbox" id="keyboard" title="Keyboard">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Mouse</td>
+                            <td>
+                                <label for="mouse" style="display: none;">Mouse</label>
+                                <input type="checkbox" id="mouse" title="Mouse">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Monitor</td>
+                            <td>
+                                <label for="monitor" style="display: none;">Monitor</label>
+                                <input type="checkbox" id="monitor" title="Monitor">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Phone</td>
+                            <td>
+                                <label for="phone" style="display: none;">Phone</label>
+                                <input type="checkbox" id="phone" title="Phone">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button type="button" onclick="submitMonitoring()" aria-label="Submit Monitoring Data" style="margin: 1px;">Submit</button>
+                    <button type="button" onclick="toggleSavedData()" aria-label="Toggle Saved Monitoring Data" style="margin: 1px;">View Saved Data</button>
+                    <button type="button" onclick="goBack()" aria-label="Go Back" style="margin: 1px;">Go Back</button>
+                    <button type="button" onclick="goHome()" style="margin: 1px; padding: 12px 25px; background-color: #1a5276; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease;">
+                        Home
+                    </button>
+                </div>
+                <div id="clear-button-container" style="margin-top: 20px; text-align: center; display: none;">
+                    <button type="button" onclick="clearSelectedData()" aria-label="Clear Selected Saved Data" style="padding: 12px 25px; background-color: #d9534f; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease;">
+                        Clear Selected Data
+                    </button>
+                </div>
+            </section>
+            <section id="saved-data-section" aria-labelledby="saved-data-heading" style="margin-top: 40px; display: none;">
+                <h2 id="saved-data-heading" style="text-align: center; color: #1a5276;">Saved Monitoring Data</h2>
+                <table id="data-table" style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid #ddd; margin-top: 20px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Badge Number</th>
+                            <th>Benchtops</th>
+                            <th>Keyboard</th>
+                            <th>Mouse</th>
+                            <th>Monitor</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-body">
+                        <!-- Saved data will be dynamically populated here -->
+                    </tbody>
+                </table>
+            </section>
+            <div id="staff-section" style="margin-top: 40px; display: none; justify-content: space-between; align-items: center;">
+                <div style="text-align: left;">
+                    <label for="checkedBy" style="font-weight: bold; font-size: 14px;">Checked by:</label>
+                    <select id="checkedBy" aria-label="Checked by" onchange="updatePosition('checkedBy', 'checkedByPosition')" style="padding: 5px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc;">
+                        <option value="" disabled selected>Select Name</option>
+                        <option value="Melvie Del Mundo-Caoile">Melvie Del Mundo-Caoile</option>
+                        <option value="Mary Antonette Erazo">Mary Antonette Erazo</option>
+                        <option value="Saud Mohammed Sanchez">Saud Mohammed Sanchez</option>
+                        <option value="Rahaf Fahad Al Othaimeen">Rahaf Fahad Al Othaimeen</option>
+                        <option value="Muhannad Ahmed Ali">Muhannad Ahmed Ali</option>
+                        <option value="Deema Ibrahim Al Humaidan">Deema Ibrahim Al Humaidan</option>
+                    </select>
+                    <p id="checkedByPosition" style="margin-top: 5px; font-style: italic; color: #1a5276; font-size: 14px; font-weight: bold;"></p>
+                </div>
+                <div style="text-align: center;">
+                    <label for="reviewedBy" style="font-weight: bold; font-size: 14px;">Reviewed by:</label>
+                    <select id="reviewedBy" aria-label="Reviewed by" onchange="updatePosition('reviewedBy', 'reviewedByPosition')" style="padding: 5px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc;">
+                        <option value="" disabled selected>Select Name</option>
+                        <option value="Shane Richel Esterban">Shane Richel Esterban</option>
+                        <option value="Haneen Saad Almanie">Haneen Saad Almanie</option>
+                    </select>
+                    <p id="reviewedByPosition" style="margin-top: 5px; font-style: italic; color: #1a5276; font-size: 14px; font-weight: bold;"></p>
+                </div>
+                <div style="text-align: right;">
+                    <label for="approvedBy" style="font-weight: bold; font-size: 14px;">Approved by:</label>
+                    <select id="approvedBy" aria-label="Approved by" onchange="updatePosition('approvedBy', 'approvedByPosition')" style="padding: 5px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc;">
+                        <option value="" disabled selected>Select Name</option>
+                        <option value="Dr. Eman A. Abouahmad">Dr. Eman A. Abouahmad</option>
+                    </select>
+                    <p id="approvedByPosition" style="margin-top: 5px; font-style: italic; color: #1a5276; font-size: 14px; font-weight: bold;"></p>
+                </div>
+            </div>
+            <div style="margin-top: 20px; text-align: center; display: none;" id="save-pdf-section">
+                <button type="button" onclick="previewPDF()" style="padding: 12px 25px; background-color: #1a5276; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease;">
+                    Preview PDF
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Get the unit from the query parameter and display it in the title
+        const params = new URLSearchParams(window.location.search);
+        const unit = params.get('unit');
+        if (unit) {
+            document.getElementById('unit-title').textContent = `Monitoring Form - ${unit}`;
+        }
+
+        // Populate the MONTH/YEAR dropdowns with the current month and year
+        const monthDropdown = document.getElementById('month');
+        const yearDropdown = document.getElementById('year');
+        const months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+
+        // Populate months
+        months.forEach((month, index) => {
+            const option = document.createElement('option');
+            option.value = month;
+            option.textContent = month;
+            if (index === currentMonth) {
+                option.selected = true;
+            }
+            monthDropdown.appendChild(option);
+        });
+
+        // Populate years (current year and next 10 years)
+        for (let i = 0; i < 5; i++) {
+            const option = document.createElement('option');
+            option.value = currentYear + i;
+            option.textContent = currentYear + i;
+            if (i === 0) {
+                option.selected = true;
+            }
+            yearDropdown.appendChild(option);
+        }
+
+        let loggedInBadgeNumber = null; // Track the logged-in badge number
+
+        function login() {
+            const badgeNumber = document.getElementById('badgeNumber').value.trim(); // Trim whitespace
+            if (badgeNumber) {
+                loggedInBadgeNumber = badgeNumber; // Save the logged-in badge number
+                localStorage.setItem('loggedInBadgeNumber', badgeNumber); // Persist the badge number
+                console.log('Badge number saved:', badgeNumber); // Debugging log
+                window.location.href = './unit-location.html'; // Redirect to Unit/Location page
+            } else {
+                alert('Please enter your badge number.');
+            }
+        }
+
+        function submitMonitoring() {
+            // Ensure all checkboxes are checked
+            const checkboxes = ['benchtops', 'keyboard', 'mouse', 'monitor', 'phone'];
+            const allChecked = checkboxes.every(id => document.getElementById(id).checked);
+
+            if (!allChecked) {
+                alert('Please ensure all items are checked before submitting.');
+                return;
+            }
+
+            const now = new Date(); // Get the current date and time
+            const today = now.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+            const lastSubmissionDate = localStorage.getItem(`lastSubmissionDate_${unit}`);
+
+            if (lastSubmissionDate === today) {
+                alert('You can only submit monitoring data once per day!!!');
+                return;
+            }
+
+            const badgeNumber = localStorage.getItem('loggedInBadgeNumber');
+            if (!badgeNumber) {
+                alert('Badge number is missing. Please log in again.');
+                window.location.href = './index.html'; // Redirect to the login page
+                return;
+            }
+
+            // Collect monitoring data
+            const data = {
+                date: today,
+                time: now.toLocaleTimeString(), // Add the current time in HH:MM:SS format
+                badgeNumber: badgeNumber, // Use the retrieved badge number
+                benchtops: document.getElementById('benchtops').checked ? 'YES' : 'NO',
+                keyboard: document.getElementById('keyboard').checked ? 'YES' : 'NO',
+                mouse: document.getElementById('mouse').checked ? 'YES' : 'NO',
+                monitor: document.getElementById('monitor').checked ? 'YES' : 'NO',
+                phone: document.getElementById('phone').checked ? 'YES' : 'NO',
+            };
+
+            // Save data to localStorage for the specific unit
+            const savedData = JSON.parse(localStorage.getItem(`monitoringData_${unit}`)) || [];
+            savedData.push(data);
+            localStorage.setItem(`monitoringData_${unit}`, JSON.stringify(savedData));
+            localStorage.setItem(`lastSubmissionDate_${unit}`, today); // Save today's date as the last submission date for the unit
+
+            alert('Monitoring data submitted successfully!');
+            populateSavedData(); // Refresh the saved data table
+        }
+
+        function populateSavedData() {
+            const savedData = JSON.parse(localStorage.getItem(`monitoringData_${unit}`)) || [];
+            const dataBody = document.getElementById('data-body');
+            dataBody.innerHTML = ''; // Clear existing rows
+
+            // Get selected month and year from dropdowns
+            const selectedMonth = document.getElementById('month').value;
+            const selectedYear = parseInt(document.getElementById('year').value, 10);
+
+            // Filter data for the selected month and year
+            const filteredData = savedData.filter(entry => {
+                const entryDate = new Date(entry.date);
+                return (
+                    entryDate.getMonth() === months.indexOf(selectedMonth) &&
+                    entryDate.getFullYear() === selectedYear
+                );
+            });
+
+            // Populate the table with filtered data
+            filteredData.forEach((entry) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.date}</td>
+                    <td>${entry.badgeNumber}</td> <!-- Display badge number -->
+                    <td>${entry.benchtops}</td>
+                    <td>${entry.keyboard}</td>
+                    <td>${entry.mouse}</td>
+                    <td>${entry.monitor}</td>
+                    <td>${entry.phone}</td>
+                `;
+                dataBody.appendChild(row);
+            });
+        }
+
+        // Add event listeners to dropdowns to update the saved data display
+        document.getElementById('month').addEventListener('change', populateSavedData);
+        document.getElementById('year').addEventListener('change', populateSavedData);
+
+        function toggleSavedData() {
+            const savedDataSection = document.getElementById('saved-data-section');
+            const staffSection = document.getElementById('staff-section');
+            const savePDFSection = document.getElementById('save-pdf-section');
+            if (savedDataSection.style.display === 'none') {
+                savedDataSection.style.display = 'block';
+                staffSection.style.display = 'flex'; // Show staff section
+                savePDFSection.style.display = 'block'; // Show Save as PDF button
+            } else {
+                savedDataSection.style.display = 'none';
+                staffSection.style.display = 'none'; // Hide staff section
+                savePDFSection.style.display = 'none'; // Hide Save as PDF button
+            }
+        }
+
+        function previewPDF() {
+            const unit = params.get('unit') || 'N/A';
+            const month = document.getElementById('month').value || 'N/A';
+            const year = document.getElementById('year').value || 'N/A';
+            const checkedBy = document.getElementById('checkedBy').value || 'N/A';
+            const checkedByPosition = document.getElementById('checkedByPosition').textContent || 'N/A';
+            const reviewedBy = document.getElementById('reviewedBy').value || 'N/A';
+            const reviewedByPosition = document.getElementById('reviewedByPosition').textContent || 'N/A';
+            const approvedBy = document.getElementById('approvedBy').value || 'N/A';
+            const approvedByPosition = document.getElementById('approvedByPosition').textContent || 'N/A';
+
+            // Save data to sessionStorage for the preview page
+            sessionStorage.setItem('previewData', JSON.stringify({
+                unit,
+                month,
+                year,
+                checkedBy,
+                checkedByPosition,
+                reviewedBy,
+                reviewedByPosition,
+                approvedBy,
+                approvedByPosition,
+                tableHTML: document.getElementById('data-table').outerHTML
+            }));
+
+            // Redirect to the preview page
+            window.location.href = './preview.html';
+        }
+
+        function goHome() {
+            window.location.href = './index.html'; // Redirect to the home page
+        }
+
+        function goBack() {
+            const unit = localStorage.getItem('currentUnit') || getQueryParam('unit'); // Retrieve unit from localStorage or query parameter
+            if (unit) {
+                window.location.href = `./unit-location.html?unit=${encodeURIComponent(unit)}`; // Pass the unit in the URL
+            } else {
+                window.location.href = './unit-location.html'; // Fallback if unit is not available
+            }
+        }
+
+        const positions = {
+            "Melvie Del Mundo-Caoile": "Microbiology Section in-charge",
+            "Mary Antonette Erazo": "Immunology Section in-charge",
+            "Saud Mohammed Sanchez": "Blood Bank Section in-charge",
+            "Rahaf Fahad Al Othaimeen": "Chemistry Section in-charge",
+            "Muhannad Ahmed Ali": "Hematology/Clinical Microscopy Section in-charge",
+            "Deema Ibrahim Al Humaidan": "Preanalytical Section in-charge",
+            "Shane Richel Esterban": "Laboratory Health and Safety Officer",
+            "Haneen Saad Almanie": "Medical Technologist III",
+            "Dr. Eman A. Abouahmad": "Laboratory Medical Director"
+        };
+
+        function updatePosition(selectId, positionId) {
+            const selectedName = document.getElementById(selectId).value;
+            const position = positions[selectedName] || "";
+            document.getElementById(positionId).textContent = position;
+        }
+
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const unit = getQueryParam('unit');
+            if (unit) {
+                localStorage.setItem('currentUnit', unit); // Save the unit to localStorage
+                document.getElementById('unit-title').textContent = `Monitoring: ${unit}`;
+            } else {
+                document.getElementById('unit-title').textContent = 'Monitoring: Unknown Unit';
+            }
+
+            // Automatically populate and display saved data for the current month and year
+            const currentMonth = months[currentDate.getMonth()];
+            const currentYear = currentDate.getFullYear();
+            document.getElementById('month').value = currentMonth;
+            document.getElementById('year').value = currentYear;
+            populateSavedData();
+        });
+    </script>
+</body>
+</html>

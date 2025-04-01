@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preview PDF</title>
+    <link rel="stylesheet" href="./style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            border: 1px solid #d1d9e6;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        h1 {
+            color: #1a5276;
+            font-size: 24px;
+        }
+
+        h2 {
+            color: #154360;
+            font-size: 28px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: center; /* Center-align table contents */
+            vertical-align: middle;
+        }
+
+        table th {
+            background-color: #1a5276;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        table caption {
+            caption-side: top;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #154360;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: #1a5276;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #154360;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; align-items: center; justify-content: center; position: relative;">
+            <img src="./logo.png" alt="Company Logo" aria-label="Company Logo" style="width: 300px; margin-bottom: 20px;">
+        </div>
+        <h1 style="font-size: 18px; color: #1a5276; text-align: center; margin-bottom: 20px;">MEDICAL AFFAIRS – LABORATORY SERVICES</h1>
+        <h1>Surface Disinfection Monitoring Form</h1>
+        <div id="preview-content">
+            <!-- Preview content will be dynamically populated -->
+        </div>
+        <div style="text-align: center;">
+            <button type="button" onclick="saveAsPDF()">Save as PDF</button>
+            <button type="button" onclick="deleteSelectedRows()">Delete</button> <!-- Changed Clear to Delete -->
+            <button type="button" onclick="goBack()">Go Back</button>
+            <button type="button" onclick="goHome()" style="margin-top: 20px; padding: 12px 25px; background-color: #1a5276; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease;">
+                Home
+            </button>
+        </div>
+    </div>
+    <script>
+        function goHome() {
+            window.location.href = './index.html'; // Redirect to the home page
+        }
+
+        function loadPreview() {
+            const previewData = JSON.parse(sessionStorage.getItem('previewData'));
+            if (!previewData) {
+                alert('No data to preview.');
+                window.location.href = './monitoring.html';
+                return;
+            }
+
+            const { unit, month, year, checkedBy, checkedByPosition, reviewedBy, reviewedByPosition, approvedBy, approvedByPosition, tableHTML } = previewData;
+
+            // Add checkboxes to the table rows
+            const tableContainer = document.createElement('div');
+            tableContainer.innerHTML = tableHTML;
+            const table = tableContainer.querySelector('table');
+            if (table) {
+                const rows = table.querySelectorAll('tr');
+                rows.forEach((row, index) => {
+                    if (index === 0) {
+                        // Add a header for the checkbox column
+                        const headerCell = document.createElement('th');
+                        headerCell.textContent = 'Select';
+                        row.insertBefore(headerCell, row.firstChild);
+                    } else {
+                        // Add a checkbox to each row
+                        const checkboxCell = document.createElement('td');
+                        checkboxCell.innerHTML = `<input type="checkbox" class="row-checkbox" data-row-index="${index - 1}">`;
+                        row.insertBefore(checkboxCell, row.firstChild);
+                    }
+                });
+            }
+
+            const previewContent = `
+                <h2>${unit}</h2> <!-- Display only the unit name -->
+                <h3>Month/Year: ${month} ${year}</h3>
+                ${tableContainer.innerHTML}
+                <p><strong>Checked by:</strong> ${checkedBy} (${checkedByPosition})</p>
+                <p><strong>Reviewed by:</strong> ${reviewedBy} (${reviewedByPosition})</p>
+                <p><strong>Approved by:</strong> ${approvedBy} (${approvedByPosition})</p>
+            `;
+
+            document.getElementById('preview-content').innerHTML = previewContent;
+        }
+
+        async function saveAsPDF() {
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                alert('Failed to load jsPDF library. Please check your internet connection or library import.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const previewData = JSON.parse(sessionStorage.getItem('previewData'));
+            if (!previewData) {
+                alert('No data to save.');
+                return;
+            }
+
+            const { unit, month, year, checkedBy, checkedByPosition, reviewedBy, reviewedByPosition, approvedBy, approvedByPosition, tableHTML } = previewData;
+
+            try {
+                // Add "MEDICAL AFFAIRS – LABORATORY SERVICES"
+                doc.setFontSize(14);
+                doc.setTextColor(26, 82, 118); // Professional blue color
+                doc.text('MEDICAL AFFAIRS – LABORATORY SERVICES', 105, 20, { align: 'center' });
+
+                // Add title
+                doc.setFontSize(20);
+                doc.setTextColor(21, 67, 96); // Darker blue for the title
+                doc.text('Surface Disinfection Monitoring Form', 105, 30, { align: 'center' });
+
+                // Add unit and date without underline styling
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold'); // Bold font for text
+                doc.text('Unit:', 10, 45);
+                doc.setFont('helvetica', 'normal'); // Normal font for content
+                doc.text(unit, 25, 45);
+
+                doc.setFont('helvetica', 'bold'); // Bold font for text
+                doc.text('Date:', 10, 55);
+                doc.setFont('helvetica', 'normal'); // Normal font for content
+                doc.text(`${month} ${year}`, 25, 55);
+
+                // Add table with enhanced layout
+                const tableContainer = document.createElement('div');
+                tableContainer.innerHTML = tableHTML;
+                const table = tableContainer.querySelector('table');
+                if (!table) {
+                    throw new Error('Failed to find the table element. Ensure the table is correctly rendered.');
+                }
+                doc.autoTable({
+                    html: table,
+                    startY: 65,
+                    theme: 'grid',
+                    headStyles: {
+                        fillColor: [26, 82, 118], // Blue header background
+                        textColor: 255, // White text
+                        fontStyle: 'bold',
+                        halign: 'center',
+                    },
+                    bodyStyles: {
+                        textColor: 50, // Dark gray text
+                        fontSize: 10,
+                        halign: 'center', // Center-align table contents
+                        cellPadding: 4, // Adjust padding for better fit
+                    },
+                    alternateRowStyles: {
+                        fillColor: [249, 249, 249], // Light gray for alternate rows
+                    },
+                    styles: {
+                        fontSize: 10,
+                        cellPadding: 4, // Consistent padding for all cells
+                        overflow: 'linebreak', // Enable line breaking for long text
+                        valign: 'middle', // Vertically align content to the middle
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 'auto' }, // Auto-adjust column width
+                        1: { cellWidth: 'auto' },
+                        2: { cellWidth: 'auto' },
+                        // Add more column styles as needed
+                    },
+                });
+
+                const finalY = doc.lastAutoTable.finalY || 65;
+                doc.setDrawColor(26, 82, 118); // Blue color for the line
+                doc.setLineWidth(0.8); // Thicker line
+                doc.line(10, finalY + 5, 200, finalY + 5); // Horizontal line below the table
+
+                // Add enhanced staff details with bold labels and spacing
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold'); // Bold font for labels
+                doc.text('Checked by:', 10, finalY + 15, { align: 'left' }); // Left-aligned
+                doc.text('_________________________', 10, finalY + 25, { align: 'left' }); // Space for signature
+                doc.setFont('helvetica', 'normal'); // Normal font for names and positions
+                doc.text(checkedBy, 10, finalY + 35, { align: 'left' }); // Name
+                doc.text(`(${checkedByPosition})`, 10, finalY + 40, { align: 'left' }); // Position below name
+
+                doc.setFont('helvetica', 'bold'); // Bold font for labels
+                doc.text('Reviewed by:', 105, finalY + 15, { align: 'center' }); // Center-aligned
+                doc.text('_________________________', 105, finalY + 25, { align: 'center' }); // Space for signature
+                doc.setFont('helvetica', 'normal'); // Normal font for names and positions
+                doc.text(reviewedBy, 105, finalY + 35, { align: 'center' }); // Name
+                doc.text(`(${reviewedByPosition})`, 105, finalY + 40, { align: 'center' }); // Position below name
+
+                doc.setFont('helvetica', 'bold'); // Bold font for labels
+                doc.text('Approved by:', 200, finalY + 15, { align: 'right' }); // Right-aligned
+                doc.text('_________________________', 200, finalY + 25, { align: 'right' }); // Space for signature
+                doc.setFont('helvetica', 'normal'); // Normal font for names and positions
+                doc.text(approvedBy, 200, finalY + 35, { align: 'right' }); // Name
+                doc.text(`(${approvedByPosition})`, 200, finalY + 40, { align: 'right' }); // Position below name
+
+                // Save the PDF
+                doc.save('SurfaceDisinfectionMonitoringForm.pdf');
+            } catch (error) {
+                console.error('Error saving PDF:', error.message);
+                alert(`Failed to save PDF: ${error.message}`);
+            }
+        }
+
+        function goBack() {
+            // Ensure sessionStorage data is not cleared
+            window.location.href = './monitoring.html'; // Redirect to the monitoring page
+        }
+
+        function deleteSelectedRows() {
+            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('No rows selected to delete.');
+                return;
+            }
+
+            if (confirm('Are you sure you want to delete the selected rows?')) {
+                const table = document.querySelector('#preview-content table');
+                checkboxes.forEach((checkbox) => {
+                    const row = checkbox.closest('tr');
+                    row.remove(); // Remove the selected row
+                });
+
+                alert('Selected rows deleted.');
+            }
+        }
+
+        // Load preview data on page load
+        window.onload = loadPreview;
+    </script>
+</body>
+</html>
