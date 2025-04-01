@@ -157,6 +157,7 @@ dev_dependencies:
       expect(fakePackageTest.lastArgs, isNot(contains('compact')));
       expect(fakePackageTest.lastArgs, isNot(contains('--timeout')));
       expect(fakePackageTest.lastArgs, isNot(contains('30s')));
+      expect(fakePackageTest.lastArgs, isNot(contains('--ignore-timeouts')));
       expect(fakePackageTest.lastArgs, isNot(contains('--concurrency')));
     },
     overrides: <Type, Generator>{
@@ -583,6 +584,7 @@ dev_dependencies:
           '--reporter=compact',
           '--file-reporter=json:reports/tests.json',
           '--timeout=100',
+          '--ignore-timeouts',
           '--concurrency=3',
           '--name=name1',
           '--plain-name=name2',
@@ -616,6 +618,7 @@ const List<String> packageTestArgs = <String>[
   '--file-reporter=json:reports/tests.json',
   '--timeout',
   '100',
+  '--ignore-timeouts',
   '--concurrency=3',
   '--name',
   'name1',
@@ -1562,6 +1565,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool ignoreTimeouts = false,
     bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
@@ -1611,6 +1615,7 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool ignoreTimeouts = false,
     bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
