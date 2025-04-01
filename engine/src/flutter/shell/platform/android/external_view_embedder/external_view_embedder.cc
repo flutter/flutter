@@ -85,12 +85,11 @@ void AndroidExternalViewEmbedder::SubmitFlutterView(
     view_rects[platform_id] = GetViewRect(platform_id);
   }
 
-  std::unordered_map<int64_t, SkRect> overlay_layers =
-      SliceViews(frame->Canvas(),     //
-                 composition_order_,  //
-                 slices_,             //
-                 view_rects           //
-      );
+  auto [overlay_layers, _] = SliceViews(frame->Canvas(),     //
+                                        composition_order_,  //
+                                        slices_,             //
+                                        view_rects           //
+  );
 
   // Submit the background canvas frame before switching the GL context to
   // the overlay surfaces.

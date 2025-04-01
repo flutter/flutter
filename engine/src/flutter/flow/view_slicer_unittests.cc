@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <unordered_map>
+
 #include "display_list/dl_builder.h"
 #include "flow/embedded_views.h"
 #include "flutter/flow/view_slicer.h"
@@ -33,10 +34,11 @@ TEST(ViewSlicerTest, CanSlicerNonOverlappingViews) {
   std::unordered_map<int64_t, SkRect> view_rects = {
       {1, SkRect::MakeLTRB(50, 50, 60, 60)}};
 
-  auto computed_overlays =
+  SlicedViews sliced_views =
       SliceViews(&builder, composition_order, slices, view_rects);
 
-  EXPECT_TRUE(computed_overlays.empty());
+  EXPECT_TRUE(sliced_views.computed_overlays.empty());
+  EXPECT_TRUE(sliced_views.occlusions.empty());
 }
 
 TEST(ViewSlicerTest, IgnoresFractionalOverlaps) {
@@ -49,10 +51,11 @@ TEST(ViewSlicerTest, IgnoresFractionalOverlaps) {
   std::unordered_map<int64_t, SkRect> view_rects = {
       {1, SkRect::MakeLTRB(50.5, 50.5, 100, 100)}};
 
-  auto computed_overlays =
+  SlicedViews sliced_views =
       SliceViews(&builder, composition_order, slices, view_rects);
 
-  EXPECT_TRUE(computed_overlays.empty());
+  EXPECT_TRUE(sliced_views.computed_overlays.empty());
+  EXPECT_TRUE(sliced_views.occlusions.empty());
 }
 
 TEST(ViewSlicerTest, ComputesOverlapWith1PV) {
@@ -65,14 +68,17 @@ TEST(ViewSlicerTest, ComputesOverlapWith1PV) {
   std::unordered_map<int64_t, SkRect> view_rects = {
       {1, SkRect::MakeLTRB(0, 0, 100, 100)}};
 
-  auto computed_overlays =
+  SlicedViews sliced_views =
       SliceViews(&builder, composition_order, slices, view_rects);
 
-  EXPECT_EQ(computed_overlays.size(), 1u);
-  auto overlay = computed_overlays.find(1);
-  ASSERT_NE(overlay, computed_overlays.end());
+  EXPECT_EQ(sliced_views.computed_overlays.size(), 1u);
+  auto overlay = sliced_views.computed_overlays.find(1);
+  ASSERT_NE(overlay, sliced_views.computed_overlays.end());
 
   EXPECT_EQ(overlay->second, SkRect::MakeLTRB(0, 0, 50, 50));
+
+  ASSERT_FALSE(sliced_views.occlusions.empty());
+  EXPECT_EQ(sliced_views.occlusions[0], DlIRect::MakeLTRB(0, 0, 50, 50));
 }
 
 TEST(ViewSlicerTest, ComputesOverlapWith2PV) {
@@ -88,19 +94,23 @@ TEST(ViewSlicerTest, ComputesOverlapWith2PV) {
       {2, SkRect::MakeLTRB(50, 50, 100, 100)},  //
   };
 
-  auto computed_overlays =
+  SlicedViews sliced_views =
       SliceViews(&builder, composition_order, slices, view_rects);
 
-  EXPECT_EQ(computed_overlays.size(), 2u);
+  EXPECT_EQ(sliced_views.computed_overlays.size(), 2u);
 
-  auto overlay = computed_overlays.find(1);
-  ASSERT_NE(overlay, computed_overlays.end());
+  auto overlay = sliced_views.computed_overlays.find(1);
+  ASSERT_NE(overlay, sliced_views.computed_overlays.end());
 
   EXPECT_EQ(overlay->second, SkRect::MakeLTRB(0, 0, 50, 50));
 
-  overlay = computed_overlays.find(2);
-  ASSERT_NE(overlay, computed_overlays.end());
+  overlay = sliced_views.computed_overlays.find(2);
+  ASSERT_NE(overlay, sliced_views.computed_overlays.end());
   EXPECT_EQ(overlay->second, SkRect::MakeLTRB(50, 50, 100, 100));
+
+  ASSERT_FALSE(sliced_views.occlusions.empty());
+  EXPECT_EQ(sliced_views.occlusions[0], DlIRect::MakeLTRB(0, 0, 50, 50));
+  EXPECT_EQ(sliced_views.occlusions[1], DlIRect::MakeLTRB(50, 50, 100, 100));
 }
 
 TEST(ViewSlicerTest, OverlappingTwoPVs) {
@@ -122,13 +132,13 @@ TEST(ViewSlicerTest, OverlappingTwoPVs) {
       {2, SkRect::MakeLTRB(50, 50, 100, 100)},  //
   };
 
-  auto computed_overlays =
+  SlicedViews sliced_views =
       SliceViews(&builder, composition_order, slices, view_rects);
 
-  EXPECT_EQ(computed_overlays.size(), 1u);
+  EXPECT_EQ(sliced_views.computed_overlays.size(), 1u);
 
-  auto overlay = computed_overlays.find(2);
-  ASSERT_NE(overlay, computed_overlays.end());
+  auto overlay = sliced_views.computed_overlays.find(2);
+  ASSERT_NE(overlay, sliced_views.computed_overlays.end());
 
   // We create a single overlay for both overlapping sections.
   EXPECT_EQ(overlay->second, SkRect::MakeLTRB(0, 0, 100, 100));

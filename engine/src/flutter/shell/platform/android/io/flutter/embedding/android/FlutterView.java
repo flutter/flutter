@@ -68,6 +68,7 @@ import io.flutter.plugin.editing.SpellCheckPlugin;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.mouse.MouseCursorPlugin;
+import io.flutter.plugin.platform.OcclusionRect;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.util.ViewUtils;
 import io.flutter.view.AccessibilityBridge;
@@ -1546,5 +1547,16 @@ public class FlutterView extends FrameLayout
      * from the associated {@code FlutterView}.
      */
     void onFlutterEngineDetachedFromFlutterView();
+  }
+
+  public List<OcclusionRect> GetOcclusionRects() {
+    // Note: this only works correctly when there is a single flutter
+    // view attached to the engine. This is because the platform view controller
+    // itself is a singleton and can only work correctly with single flutter
+    // view instances.
+    if (flutterEngine != null) {
+      return flutterEngine.getPlatformViewsController2().getOcclusionRects();
+    }
+    return new ArrayList<OcclusionRect>();
   }
 }

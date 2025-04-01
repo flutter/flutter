@@ -96,7 +96,9 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_on_engine_restart_method, onPreEngineRestart, "()V")                    \
   V(g_create_overlay_surface_method, createOverlaySurface,                    \
     "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
-  V(g_destroy_overlay_surfaces_method, destroyOverlaySurfaces, "()V")
+  V(g_destroy_overlay_surfaces_method, destroyOverlaySurfaces, "()V")         \
+  V(g_reset_occlusion_rects, resetOcclusionRects, "()V")                      \
+  V(g_add_occlusion_rect, addOcclusionRect, "(IIII)V")
 
 //
 
@@ -2244,6 +2246,32 @@ void PlatformViewAndroidJNIImpl::hideOverlaySurface2() {
   }
 
   env->CallVoidMethod(java_object.obj(), g_hide_overlay_surface2_method);
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::resetOcclusionRects() {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+  env->CallVoidMethod(java_object.obj(), g_reset_occlusion_rects);
+  FML_CHECK(fml::jni::CheckException(env));
+}
+
+void PlatformViewAndroidJNIImpl::addOcclusionRect(int x,
+                                                  int y,
+                                                  int width,
+                                                  int height) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  auto java_object = java_object_.get(env);
+  if (java_object.is_null()) {
+    return;
+  }
+  env->CallVoidMethod(java_object.obj(), g_add_occlusion_rect, x, y, width,
+                      height);
   FML_CHECK(fml::jni::CheckException(env));
 }
 

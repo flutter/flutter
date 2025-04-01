@@ -1391,6 +1391,30 @@ public class FlutterJNI {
         viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
   }
 
+  @UiThread
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  public void resetOcclusionRects() {
+    ensureRunningOnMainThread();
+    if (platformViewsController2 == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to reset occlusion rects");
+    }
+    platformViewsController2.resetOcclusionRects();
+  }
+
+  @UiThread
+  @SuppressWarnings("unused")
+  @SuppressLint("NewApi")
+  public void addOcclusionRect(int x, int y, int width, int height) {
+    ensureRunningOnMainThread();
+    if (platformViewsController2 == null) {
+      throw new RuntimeException(
+          "platformViewsController must be set before attempting to add occlusion rects");
+    }
+    platformViewsController2.addOcclusionRect(x, y, width, height);
+  }
+
   // ----- Start Localization Support ----
 
   /** Sets the localization plugin that is used in various localization methods. */

@@ -10,15 +10,16 @@
 
 namespace flutter {
 
-std::unordered_map<int64_t, SkRect> SliceViews(
+SlicedViews SliceViews(
     DlCanvas* background_canvas,
     const std::vector<int64_t>& composition_order,
     const std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>>&
         slices,
     const std::unordered_map<int64_t, SkRect>& view_rects) {
   std::unordered_map<int64_t, SkRect> overlay_layers;
+  std::vector<DlIRect> occlusion_rects;
 
-  auto current_frame_view_count = composition_order.size();
+  size_t current_frame_view_count = composition_order.size();
 
   // Restore the clip context after exiting this method since it's changed
   // below.
@@ -85,10 +86,12 @@ std::unordered_map<int64_t, SkRect> SliceViews(
       // Limit the number of native views, so it doesn't grow forever.
       //
       // In this case, the rects are merged into a single one that is the union
-      // of all the rects.
+      // of all the rects. We still track the individual occlusion rects before
+      // merging for reporting to the platform.
       DlRect partial_joined_rect;
       for (const DlIRect& rect : intersection_rects) {
         partial_joined_rect = partial_joined_rect.Union(DlRect::Make(rect));
+        occlusion_rects.push_back(DlIRect::RoundIn(DlRect::Make(rect)));
       }
 
       // Get the intersection rect with the `current_view_rect`,
@@ -120,7 +123,7 @@ std::unordered_map<int64_t, SkRect> SliceViews(
   // Manually trigger the DlAutoCanvasRestore before we submit the frame
   save.Restore();
 
-  return overlay_layers;
+  return {overlay_layers, occlusion_rects};
 }
 
 }  // namespace flutter
