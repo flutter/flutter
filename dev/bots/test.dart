@@ -128,6 +128,7 @@ Future<void> main(List<String> args) async {
       'tool_tests': _runToolTests,
       'web_tool_tests': _runWebToolTests,
       'tool_integration_tests': _runIntegrationToolTests,
+      'tool_widget_preview_scaffold_tests': _runWidgetPreviewScaffoldToolTests,
       'android_preview_tool_integration_tests': androidPreviewIntegrationToolTestsRunner,
       'android_java11_tool_integration_tests': androidJava11IntegrationToolTestsRunner,
       'tool_host_cross_arch_tests': _runToolHostCrossArchTests,
@@ -233,6 +234,12 @@ Future<void> _runIntegrationToolTests() async {
     forceSingleCore: true,
     testPaths: selectIndexOfTotalSubshard<String>(allTests),
     collectMetrics: true,
+  );
+}
+
+Future<void> _runWidgetPreviewScaffoldToolTests() async {
+  await runFlutterTest(
+    path.join(_toolsPath, 'test', 'widget_preview_scaffold.shard', 'widget_preview_scaffold'),
   );
 }
 

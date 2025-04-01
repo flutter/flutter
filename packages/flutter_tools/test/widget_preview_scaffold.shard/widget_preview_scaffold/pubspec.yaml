@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 0.0.1
 
 environment:
-  sdk: {{dartSdkVersionBounds}}
+  sdk: ^3.8.0-244.0.dev
 
 dependencies:
   flutter:
