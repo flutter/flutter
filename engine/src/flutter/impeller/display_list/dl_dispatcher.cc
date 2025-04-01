@@ -1335,7 +1335,7 @@ std::shared_ptr<Texture> DisplayListToTexture(
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
   context.GetContentContext().GetTextShadowCache().MarkFrameStart();
-  fml::ScopedCleanupClosure([&] {
+  fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
       context.GetContentContext().GetTransientsBuffer().Reset();
     }
@@ -1372,7 +1372,7 @@ bool RenderToTarget(ContentContext& context,
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
   context.GetTextShadowCache().MarkFrameStart();
-  fml::ScopedCleanupClosure([&] {
+  fml::ScopedCleanupClosure cleanup([&] {
     if (reset_host_buffer) {
       context.GetTransientsBuffer().Reset();
     }
