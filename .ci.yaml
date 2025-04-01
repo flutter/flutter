@@ -1601,7 +1601,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests
-      subshard: general
+      subshard: widget_preview_scaffold 
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
