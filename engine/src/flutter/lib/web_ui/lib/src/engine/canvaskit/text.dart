@@ -1081,7 +1081,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
 
     _placeholderCount++;
     _placeholderScales.add(scale);
-    final _CkParagraphPlaceholder placeholderStyle = toSkPlaceholderStyle(
+    final _CkParagraphPlaceholder placeholderStyle = _toSkPlaceholderStyle(
       width * scale,
       height * scale,
       alignment,
@@ -1101,7 +1101,7 @@ class CkParagraphBuilder implements ui.ParagraphBuilder {
     );
   }
 
-  static _CkParagraphPlaceholder toSkPlaceholderStyle(
+  static _CkParagraphPlaceholder _toSkPlaceholderStyle(
     double width,
     double height,
     ui.PlaceholderAlignment alignment,

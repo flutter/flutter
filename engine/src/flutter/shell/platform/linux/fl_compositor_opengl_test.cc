@@ -8,14 +8,15 @@
 #include "flutter/common/constants.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_framebuffer.h"
 #include "flutter/shell/platform/linux/testing/mock_epoxy.h"
-#include "flutter/shell/platform/linux/testing/mock_renderer.h"
+#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 #include <epoxy/egl.h>
 
-TEST(FlRendererTest, BackgroundColor) {
+TEST(FlCompositorOpenGLTest, BackgroundColor) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -28,17 +29,16 @@ TEST(FlRendererTest, BackgroundColor) {
   EXPECT_CALL(epoxy, glClearColor(0.2, 0.3, 0.4, 0.5));
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
-  fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_set_engine(FL_RENDERER(renderer), engine);
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
+  fl_compositor_opengl_setup(compositor);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
+  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
       .size = {.width = 1024, .height = 1024}};
   FlutterBackingStore backing_store;
-  fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
-                                   &backing_store);
+  fl_compositor_create_backing_store(FL_COMPOSITOR(compositor), &config,
+                                     &backing_store);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -50,8 +50,8 @@ TEST(FlRendererTest, BackgroundColor) {
                                  .size = {.width = 1024, .height = 1024}};
     const FlutterLayer* layers[] = {&layer0};
 
-    fl_renderer_present_layers(FL_RENDERER(renderer),
-                               flutter::kFlutterImplicitViewId, layers, 1);
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor),
+                                 flutter::kFlutterImplicitViewId, layers, 1);
     latch.Signal();
   }).detach();
 
@@ -61,15 +61,15 @@ TEST(FlRendererTest, BackgroundColor) {
 
   GdkRGBA background_color = {
       .red = 0.2, .green = 0.3, .blue = 0.4, .alpha = 0.5};
-  fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
-                     1024, 1024, &background_color);
+  fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
+                              1024, &background_color);
 
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
   latch.Wait();
 }
 
-TEST(FlRendererTest, RestoresGLState) {
+TEST(FlCompositorOpenGLTest, RestoresGLState) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -78,13 +78,12 @@ TEST(FlRendererTest, RestoresGLState) {
   constexpr int kHeight = 100;
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
-  fl_renderer_set_engine(FL_RENDERER(renderer), engine);
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
   g_autoptr(FlFramebuffer) framebuffer =
       fl_framebuffer_new(GL_RGB, kWidth, kHeight);
 
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_renderer_wait_for_frame(FL_RENDERER(renderer), kWidth, kHeight);
+  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), kWidth, kHeight);
 
   FlutterBackingStore backing_store;
   backing_store.type = kFlutterBackingStoreTypeOpenGL;
@@ -105,9 +104,9 @@ TEST(FlRendererTest, RestoresGLState) {
 
   // Simulate raster thread.
   std::thread([&]() {
-    fl_renderer_present_layers(FL_RENDERER(renderer),
-                               flutter::kFlutterImplicitViewId, layers.data(),
-                               layers.size());
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor),
+                                 flutter::kFlutterImplicitViewId, layers.data(),
+                                 layers.size());
     latch.Signal();
   }).detach();
 
@@ -117,8 +116,8 @@ TEST(FlRendererTest, RestoresGLState) {
 
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
-                     kWidth, kHeight, &background_color);
+  fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId,
+                              kWidth, kHeight, &background_color);
 
   GLuint texture_2d_binding;
   glGetIntegerv(GL_TEXTURE_BINDING_2D,
@@ -130,7 +129,7 @@ TEST(FlRendererTest, RestoresGLState) {
   latch.Wait();
 }
 
-TEST(FlRendererTest, BlitFramebuffer) {
+TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -145,17 +144,16 @@ TEST(FlRendererTest, BlitFramebuffer) {
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
-  fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_set_engine(FL_RENDERER(renderer), engine);
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
+  fl_compositor_opengl_setup(compositor);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
+  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
       .size = {.width = 1024, .height = 1024}};
   FlutterBackingStore backing_store;
-  fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
-                                   &backing_store);
+  fl_compositor_create_backing_store(FL_COMPOSITOR(compositor), &config,
+                                     &backing_store);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -166,8 +164,8 @@ TEST(FlRendererTest, BlitFramebuffer) {
                                  .backing_store = &backing_store,
                                  .size = {.width = 1024, .height = 1024}};
     const FlutterLayer* layers[] = {&layer0};
-    fl_renderer_present_layers(FL_RENDERER(renderer),
-                               flutter::kFlutterImplicitViewId, layers, 1);
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor),
+                                 flutter::kFlutterImplicitViewId, layers, 1);
     latch.Signal();
   }).detach();
 
@@ -177,13 +175,13 @@ TEST(FlRendererTest, BlitFramebuffer) {
 
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
-                     1024, 1024, &background_color);
+  fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
+                              1024, &background_color);
 
   latch.Wait();
 }
 
-TEST(FlRendererTest, BlitFramebufferExtension) {
+TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -203,17 +201,16 @@ TEST(FlRendererTest, BlitFramebufferExtension) {
   EXPECT_CALL(epoxy, glBlitFramebuffer);
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
-  fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_set_engine(FL_RENDERER(renderer), engine);
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
+  fl_compositor_opengl_setup(compositor);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
+  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
       .size = {.width = 1024, .height = 1024}};
   FlutterBackingStore backing_store;
-  fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
-                                   &backing_store);
+  fl_compositor_create_backing_store(FL_COMPOSITOR(compositor), &config,
+                                     &backing_store);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -224,8 +221,8 @@ TEST(FlRendererTest, BlitFramebufferExtension) {
                                  .backing_store = &backing_store,
                                  .size = {.width = 1024, .height = 1024}};
     const FlutterLayer* layers[] = {&layer0};
-    fl_renderer_present_layers(FL_RENDERER(renderer),
-                               flutter::kFlutterImplicitViewId, layers, 1);
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor),
+                                 flutter::kFlutterImplicitViewId, layers, 1);
     latch.Signal();
   }).detach();
 
@@ -234,14 +231,14 @@ TEST(FlRendererTest, BlitFramebufferExtension) {
   }
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
-                     1024, 1024, &background_color);
+  fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
+                              1024, &background_color);
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
   latch.Wait();
 }
 
-TEST(FlRendererTest, NoBlitFramebuffer) {
+TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -254,17 +251,16 @@ TEST(FlRendererTest, NoBlitFramebuffer) {
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(20));
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
-  fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_set_engine(FL_RENDERER(renderer), engine);
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
+  fl_compositor_opengl_setup(compositor);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
+  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
       .size = {.width = 1024, .height = 1024}};
   FlutterBackingStore backing_store;
-  fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
-                                   &backing_store);
+  fl_compositor_create_backing_store(FL_COMPOSITOR(compositor), &config,
+                                     &backing_store);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -275,8 +271,8 @@ TEST(FlRendererTest, NoBlitFramebuffer) {
                                  .backing_store = &backing_store,
                                  .size = {.width = 1024, .height = 1024}};
     const FlutterLayer* layers[] = {&layer0};
-    fl_renderer_present_layers(FL_RENDERER(renderer),
-                               flutter::kFlutterImplicitViewId, layers, 1);
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor),
+                                 flutter::kFlutterImplicitViewId, layers, 1);
     latch.Signal();
   }).detach();
 
@@ -286,15 +282,15 @@ TEST(FlRendererTest, NoBlitFramebuffer) {
 
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
-                     1024, 1024, &background_color);
+  fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
+                              1024, &background_color);
 
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
   latch.Wait();
 }
 
-TEST(FlRendererTest, BlitFramebufferNvidia) {
+TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -308,17 +304,16 @@ TEST(FlRendererTest, BlitFramebufferNvidia) {
   EXPECT_CALL(epoxy, epoxy_gl_version).WillRepeatedly(::testing::Return(30));
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
-  fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_set_engine(FL_RENDERER(renderer), engine);
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
+  fl_compositor_opengl_setup(compositor);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
-  fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
+  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
       .struct_size = sizeof(FlutterBackingStoreConfig),
       .size = {.width = 1024, .height = 1024}};
   FlutterBackingStore backing_store;
-  fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
-                                   &backing_store);
+  fl_compositor_create_backing_store(FL_COMPOSITOR(compositor), &config,
+                                     &backing_store);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -329,8 +324,8 @@ TEST(FlRendererTest, BlitFramebufferNvidia) {
                                  .backing_store = &backing_store,
                                  .size = {.width = 1024, .height = 1024}};
     const FlutterLayer* layers[] = {&layer0};
-    fl_renderer_present_layers(FL_RENDERER(renderer),
-                               flutter::kFlutterImplicitViewId, layers, 1);
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor),
+                                 flutter::kFlutterImplicitViewId, layers, 1);
     latch.Signal();
   }).detach();
 
@@ -340,15 +335,15 @@ TEST(FlRendererTest, BlitFramebufferNvidia) {
 
   GdkRGBA background_color = {
       .red = 0.0, .green = 0.0, .blue = 0.0, .alpha = 1.0};
-  fl_renderer_render(FL_RENDERER(renderer), flutter::kFlutterImplicitViewId,
-                     1024, 1024, &background_color);
+  fl_compositor_opengl_render(compositor, flutter::kFlutterImplicitViewId, 1024,
+                              1024, &background_color);
 
   // Wait until the raster thread has finished before letting
   // the engine go out of scope.
   latch.Wait();
 }
 
-TEST(FlRendererTest, MultiView) {
+TEST(FlCompositorOpenGLTest, MultiView) {
   ::testing::NiceMock<flutter::testing::MockEpoxy> epoxy;
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   g_autoptr(FlEngine) engine = fl_engine_new(project);
@@ -363,14 +358,13 @@ TEST(FlRendererTest, MultiView) {
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlMockRenderable) secondary_renderable = fl_mock_renderable_new();
 
-  g_autoptr(FlMockRenderer) renderer = fl_mock_renderer_new();
-  fl_renderer_setup(FL_RENDERER(renderer));
-  fl_renderer_set_engine(FL_RENDERER(renderer), engine);
+  g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
+  fl_compositor_opengl_setup(compositor);
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   FlutterViewId view_id =
       fl_engine_add_view(engine, FL_RENDERABLE(secondary_renderable), 1024, 768,
                          1.0, nullptr, nullptr, nullptr);
-  fl_renderer_wait_for_frame(FL_RENDERER(renderer), 1024, 1024);
+  fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
 
   EXPECT_EQ(fl_mock_renderable_get_redraw_count(renderable),
             static_cast<size_t>(0));
@@ -381,8 +375,8 @@ TEST(FlRendererTest, MultiView) {
       .struct_size = sizeof(FlutterBackingStoreConfig),
       .size = {.width = 1024, .height = 1024}};
   FlutterBackingStore backing_store;
-  fl_renderer_create_backing_store(FL_RENDERER(renderer), &config,
-                                   &backing_store);
+  fl_compositor_create_backing_store(FL_COMPOSITOR(compositor), &config,
+                                     &backing_store);
 
   fml::AutoResetWaitableEvent latch;
 
@@ -393,7 +387,7 @@ TEST(FlRendererTest, MultiView) {
                                  .backing_store = &backing_store,
                                  .size = {.width = 1024, .height = 1024}};
     const FlutterLayer* layers[] = {&layer0};
-    fl_renderer_present_layers(FL_RENDERER(renderer), view_id, layers, 1);
+    fl_compositor_present_layers(FL_COMPOSITOR(compositor), view_id, layers, 1);
     latch.Signal();
   }).detach();
 

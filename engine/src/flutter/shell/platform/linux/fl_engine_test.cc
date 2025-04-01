@@ -10,7 +10,7 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_json_message_codec.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_string_codec.h"
-#include "flutter/shell/platform/linux/testing/mock_renderer.h"
+#include "flutter/shell/platform/linux/testing/mock_renderable.h"
 
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
@@ -981,7 +981,7 @@ TEST(FlEngineTest, ChildObjects) {
 
   // Check objects exist before engine started.
   EXPECT_NE(fl_engine_get_binary_messenger(engine), nullptr);
-  EXPECT_NE(fl_engine_get_renderer(engine), nullptr);
+  EXPECT_NE(fl_engine_get_compositor(engine), nullptr);
   EXPECT_NE(fl_engine_get_display_monitor(engine), nullptr);
   EXPECT_NE(fl_engine_get_task_runner(engine), nullptr);
   EXPECT_NE(fl_engine_get_keyboard_manager(engine), nullptr);
