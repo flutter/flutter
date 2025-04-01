@@ -3982,6 +3982,7 @@
 ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_devfs_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_bti_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_mmio_reg_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_object_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_platform_device_cpp/meta.json
