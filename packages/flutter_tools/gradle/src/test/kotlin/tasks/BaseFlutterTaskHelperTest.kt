@@ -1,4 +1,4 @@
-package com.flutter.gradle
+package com.flutter.gradle.tasks
 
 import io.mockk.every
 import io.mockk.mockk
