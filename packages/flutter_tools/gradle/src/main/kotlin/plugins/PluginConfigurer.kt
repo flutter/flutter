@@ -1,5 +1,6 @@
 package com.flutter.gradle.plugins
 
+import androidx.annotation.VisibleForTesting
 import com.android.builder.model.BuildType
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginConstants
@@ -26,13 +27,13 @@ class PluginConfigurer(
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
      */
     internal fun getPluginList(): List<Map<String?, Any?>> {
-        if (pluginList == null) {
-            pluginList =
-                NativePluginLoaderReflectionBridge.getPlugins(
-                    project.extraProperties,
-                    FlutterPluginUtils.getFlutterSourceDirectory(project)
-                )
-        }
+        // if (pluginList == null) {
+        pluginList =
+            NativePluginLoaderReflectionBridge.getPlugins(
+                project.extraProperties,
+                FlutterPluginUtils.getFlutterSourceDirectory(project)
+            )
+        // }
         return pluginList!!
     }
 
@@ -257,7 +258,8 @@ class PluginConfigurer(
      * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
      * making the Gradle plugin project A depend on the Gradle plugin project B.
      */
-    private fun configurePluginDependencies(pluginObject: Map<String?, Any?>) {
+    @VisibleForTesting
+    internal fun configurePluginDependencies(pluginObject: Map<String?, Any?>) {
         val pluginName: String =
             requireNotNull(pluginObject["name"] as? String) {
                 "Missing valid \"name\" property for plugin object: $pluginObject"
