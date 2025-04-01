@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 ///
 /// @docImport 'proxy_box.dart';
+/// @docImport 'proxy_sliver.dart';
 /// @docImport 'sliver_fill.dart';
 /// @docImport 'sliver_grid.dart';
 /// @docImport 'sliver_list.dart';
@@ -1310,12 +1311,10 @@ abstract class RenderSliver extends RenderObject {
   ///
   /// This value is used by [RenderViewportBase.visitChildrenForSemantics]
   /// to ensure a sliver is included in the semantics tree regardless of its geometry.
-  bool get ensureSemantics => _ensureSemantics;
-  bool _ensureSemantics = false;
-  set ensureSemantics(bool value) {
-    _ensureSemantics = value;
-    markNeedsSemanticsUpdate();
-  }
+  ///
+  /// [RenderSliverEnsureSemantics] overrides this value to `true` to ensure
+  /// its sliver child is included in the semantics tree.
+  bool get ensureSemantics => false;
 
   // layout input
   @override
