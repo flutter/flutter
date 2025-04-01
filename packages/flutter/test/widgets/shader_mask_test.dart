@@ -102,5 +102,5 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('shader_mask.bounds.matches_top_left.png'),
     );
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/144555
+  });
 }
