@@ -105,13 +105,13 @@ GeometryResult LineGeometry::GetPositionBuffer(const ContentContext& renderer,
     }
   }
 
-  Entity cloned = entity.Clone();
-  cloned.SetTransform(transform);
+  Entity fixed_transform = entity.Clone();
+  fixed_transform.SetTransform(transform);
 
   if (cap_ == Cap::kRound) {
     auto generator =
         renderer.GetTessellator().RoundCapLine(transform, p0, p1, radius);
-    return ComputePositionGeometry(renderer, generator, cloned, pass);
+    return ComputePositionGeometry(renderer, generator, fixed_transform, pass);
   }
 
   Point corners[4];
