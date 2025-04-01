@@ -52,7 +52,9 @@ class SemanticScrollable extends SemanticRole {
 
   /// Responds to browser-detected "scroll" gestures.
   void _recomputeScrollPosition() {
-    print('scroll detected current dom scroll $_domScrollPosition, previous dom scroll $_previousDomScrollPosition');
+    print(
+      'scroll detected current dom scroll $_domScrollPosition, previous dom scroll $_previousDomScrollPosition',
+    );
     if (_domScrollPosition != _previousDomScrollPosition) {
       print('valid scroll detected');
       if (!EngineSemantics.instance.shouldAcceptBrowserGesture('scroll')) {
