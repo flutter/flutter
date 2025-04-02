@@ -1601,7 +1601,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests
-      subshard: widget_preview_scaffold 
+      subshard: widget_preview_scaffold
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
@@ -4602,7 +4602,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests
-      subshard: widget_preview_scaffold 
+      subshard: widget_preview_scaffold
       tags: >
         ["framework", "hostonly", "shard", "mac"]
     runIf:
@@ -6505,7 +6505,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       shard: tool_tests
-      subshard: widget_preview_scaffold 
+      subshard: widget_preview_scaffold
       tags: >
         ["framework", "hostonly", "shard", "windows"]
     runIf:
