@@ -1561,7 +1561,7 @@ workspace:
     );
 
     expect(flutterManifest, isNotNull);
-    expect(flutterManifest!.workspace, ['pkgs/bar', 'pkgs/foo']);
+    expect(flutterManifest!.workspace, <String>['pkgs/bar', 'pkgs/foo']);
   });
 
   testWithoutContext('FlutterManifest can parse empty workspace', () async {

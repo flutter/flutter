@@ -1556,7 +1556,7 @@ resolution: workspace
 
         expect(FlutterProject.fromDirectory(directory).workspaceProjects.map(
           (FlutterProject subproject) => subproject.manifest.appName
-        ).toList(), ['child1', 'child2', 'child2_example']);
+        ).toList(), <String>['child1', 'child2', 'child2_example']);
       });
     });
   });
