@@ -1,15 +1,20 @@
 package com.flutter.gradle.plugins
 
 import com.android.build.gradle.BaseExtension
+import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.cameraDependency
+import com.flutter.gradle.FlutterPluginUtilsTest.Companion.exampleEngineVersion
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.flutterPluginAndroidLifecycleDependency
+import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.logging.Logger
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -35,10 +40,9 @@ class PluginHandlerTest {
             mockk<Project> {
                 every { this@mockk.projectDir } returns projectDir.toFile()
             }
-        val pluginHandlerUnderTest = PluginHandler(mockProject)
 
         assertTrue {
-            pluginHandlerUnderTest.pluginSupportsAndroidPlatform()
+            PluginHandler.pluginSupportsAndroidPlatform(mockProject)
         } // Replace YourClass with the actual class containing the method
     }
 
@@ -53,10 +57,9 @@ class PluginHandlerTest {
             mockk<Project> {
                 every { this@mockk.projectDir } returns projectDir.toFile()
             }
-        val pluginHandlerUnderTest = PluginHandler(mockProject)
 
         assertFalse {
-            pluginHandlerUnderTest.pluginSupportsAndroidPlatform()
+            PluginHandler.pluginSupportsAndroidPlatform(mockProject)
         }
     }
 
@@ -67,9 +70,9 @@ class PluginHandlerTest {
         val pluginWithoutName: MutableMap<String?, Any?> = cameraDependency.toMutableMap()
         pluginWithoutName.remove("name")
 
-        val pluginHandlerUnderTest = PluginHandler(project)
         assertThrows<IllegalArgumentException> {
-            pluginHandlerUnderTest.configurePluginDependencies(
+            PluginHandler.configurePluginDependencies(
+                project = project,
                 pluginObject = pluginWithoutName
             )
         }
@@ -95,9 +98,9 @@ class PluginHandlerTest {
         every { mockBuildType.name } returns "debug"
         every { mockBuildType.isDebuggable } returns true
 
-        val pluginHandlerUnderTest = PluginHandler(project)
         assertThrows<IllegalArgumentException> {
-            pluginHandlerUnderTest.configurePluginDependencies(
+            PluginHandler.configurePluginDependencies(
+                project = project,
                 pluginObject = pluginWithNullDependencies
             )
         }
@@ -131,13 +134,95 @@ class PluginHandlerTest {
         every { pluginProject.dependencies } returns mockDependencyHandler
         every { mockDependencyHandler.add(any(), any()) } returns mockk()
 
-        val pluginHandlerUnderTest = PluginHandler(project)
-        pluginHandlerUnderTest.configurePluginDependencies(
+        PluginHandler.configurePluginDependencies(
+            project = project,
             pluginObject = pluginWithDependencies
         )
 
         verify { pluginProject.afterEvaluate(capture(captureActionSlot)) }
         captureActionSlot.captured.execute(pluginDependencyProject)
         verify { mockDependencyHandler.add("implementation", pluginDependencyProject) }
+    }
+
+    // configurePluginProject
+    @Test
+    fun `configurePluginProject throws IllegalArgumentException when plugin has no name`() {
+        val project = mockk<Project>()
+        val pluginWithoutName: MutableMap<String?, Any?> = cameraDependency.toMutableMap()
+        pluginWithoutName.remove("name")
+
+        assertThrows<IllegalArgumentException> {
+            PluginHandler.configurePluginProject(
+                project = project,
+                pluginObject = pluginWithoutName,
+                engineVersion = exampleEngineVersion
+            )
+        }
+    }
+
+    @Test
+    fun `configurePluginProject adds plugin project`() {
+        val project = mockk<Project>()
+        val pluginProject = mockk<Project>()
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        val mockLogger = mockk<Logger>()
+        every { project.logger } returns mockLogger
+        every { pluginProject.hasProperty("local-engine-repo") } returns false
+        every { pluginProject.hasProperty("android") } returns true
+        every { mockBuildType.name } returns "debug"
+        every { mockBuildType.isDebuggable } returns true
+        every { project.rootProject.findProject(":${cameraDependency["name"]}") } returns pluginProject
+        every { pluginProject.extensions.create(any(), any<Class<Any>>()) } returns mockk()
+        val captureActionSlot = slot<Action<Project>>()
+        val capturePluginActionSlot = slot<Action<Project>>()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { pluginProject.afterEvaluate(any<Action<Project>>()) } returns Unit
+
+        val mockProjectBuildTypes =
+            mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        val mockPluginProjectBuildTypes =
+            mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        every { project.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockProjectBuildTypes
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockPluginProjectBuildTypes
+        every { mockPluginProjectBuildTypes.addAll(any()) } returns true
+        every { pluginProject.configurations.named(any<String>()) } returns mockk()
+        every { pluginProject.dependencies.add(any(), any()) } returns mockk()
+
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .buildTypes
+                .iterator()
+        } returns
+            mutableListOf(
+                mockBuildType
+            ).iterator() andThen
+            mutableListOf( // can't return the same iterator as it is stateful
+                mockBuildType
+            ).iterator()
+        every { project.dependencies.add(any(), any()) } returns mockk()
+        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+
+        PluginHandler.configurePluginProject(
+            project = project,
+            pluginObject = cameraDependency,
+            engineVersion = exampleEngineVersion
+        )
+
+        verify { project.afterEvaluate(capture(captureActionSlot)) }
+        verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
+        captureActionSlot.captured.execute(project)
+        capturePluginActionSlot.captured.execute(pluginProject)
+        verify { pluginProject.extensions.create("flutter", FlutterExtension::class.java) }
+        verify {
+            pluginProject.dependencies.add(
+                "debugApi",
+                "io.flutter:flutter_embedding_debug:$exampleEngineVersion"
+            )
+        }
+        verify { project.dependencies.add("debugApi", pluginProject) }
+        verify { mockLogger wasNot called }
+        verify { mockPluginProjectBuildTypes.addAll(project.extensions.findByType(BaseExtension::class.java)!!.buildTypes) }
     }
 }
