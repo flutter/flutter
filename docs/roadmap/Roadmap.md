@@ -34,7 +34,9 @@ The new JS interop mechanism for Dart that supports both JS and Wasm compilation
 Finally, we've made good progress on support for hot reload on the web, and hope to launch it in 2025.
 
 ## Desktop platform
-The Flutter core team is focusing on mobile and web support in 2025, however we'll continue the collaboration initiated in 2024 with the Canonical team to drive support for multi-window on desktop platforms (Linux, macOS, and Windows).
+Google's Flutter team will focus on mobile and web support in 2025. However, Canonical's Flutter team continues to invest in desktop platforms (Windows, macOS, and Linux).
+
+In 2024, we landed multi-view rendering on desktop. In 2025, Canonical plans further improvements to multi-window, such as accessibility, keyboard, text input, and focus support. Canonical also plans to make progress on windowing APIs.
 
 ## Tooling and AI
 We'll continue integrate with AI solutions to offer AI assistance for core programming tasks.
