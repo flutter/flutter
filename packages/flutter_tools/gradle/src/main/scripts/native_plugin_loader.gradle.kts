@@ -5,6 +5,10 @@
 import groovy.json.JsonSlurper
 import java.io.File
 
+// When changing the names of either
+// 1. this file or
+// 2. the names of the methods on this class
+// be sure to also modify the corresponding values in ../kotlin/NativePluginLoaderReflectionBridge.kt
 class NativePluginLoader {
     companion object {
         // This string must match _kFlutterPluginsHasNativeBuildKey defined in

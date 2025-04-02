@@ -7,10 +7,21 @@ package com.flutter.gradle
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import java.io.File
 
-// TODO(gmackall): We should prioritize removing this awful reflection.
+// TODO(gmackall): Remove reflection after migrating to plugin style application in
+//  https://github.com/flutter/flutter/issues/166461.
+// New methods should not be added.
+
+/**
+ * Class to hide from Kotlin source the dangerous reflection being used to call methods defined
+ * in script gradle plugins.
+ */
+
 object NativePluginLoaderReflectionBridge {
     private var nativePluginLoader: Any? = null
 
+    /**
+     * An abstraction to hide reflection from calling sites. See ../scripts/native_plugin_loader.gradle.kts.
+     */
     @JvmStatic
     fun getPlugins(
         extraProperties: ExtraPropertiesExtension,
@@ -29,7 +40,7 @@ object NativePluginLoaderReflectionBridge {
     }
 
     /**
-     * Parses <project-src>/.flutter-plugins-dependencies
+     * An abstraction to hide reflection from calling sites. See ../scripts/native_plugin_loader.gradle.kts.
      */
     @JvmStatic
     fun getDependenciesMetadata(
