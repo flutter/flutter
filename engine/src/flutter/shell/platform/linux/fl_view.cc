@@ -11,6 +11,7 @@
 
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
+#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
@@ -194,9 +195,9 @@ static void handle_geometry_changed(FlView* self) {
   // Note: `gtk_widget_init()` initializes the size allocation to 1x1.
   if (allocation.width > 1 && allocation.height > 1 &&
       gtk_widget_get_realized(GTK_WIDGET(self))) {
-    fl_renderer_wait_for_frame(fl_engine_get_renderer(self->engine),
-                               allocation.width * scale_factor,
-                               allocation.height * scale_factor);
+    fl_compositor_wait_for_frame(fl_engine_get_compositor(self->engine),
+                                 allocation.width * scale_factor,
+                                 allocation.height * scale_factor);
   }
 }
 
@@ -464,7 +465,8 @@ static void realize_cb(FlView* self) {
     return;
   }
 
-  fl_renderer_setup(fl_engine_get_renderer(self->engine));
+  fl_compositor_opengl_setup(
+      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)));
 
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
 
@@ -502,9 +504,10 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
   int width = gtk_widget_get_allocated_width(GTK_WIDGET(self->gl_area));
   int height = gtk_widget_get_allocated_height(GTK_WIDGET(self->gl_area));
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self->gl_area));
-  fl_renderer_render(fl_engine_get_renderer(self->engine), self->view_id,
-                     width * scale_factor, height * scale_factor,
-                     self->background_color);
+  fl_compositor_opengl_render(
+      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)),
+      self->view_id, width * scale_factor, height * scale_factor,
+      self->background_color);
 
   return TRUE;
 }
@@ -520,7 +523,8 @@ static void unrealize_cb(FlView* self) {
     return;
   }
 
-  fl_renderer_cleanup(fl_engine_get_renderer(self->engine));
+  fl_compositor_opengl_cleanup(
+      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)));
 }
 
 static void size_allocate_cb(FlView* self) {
