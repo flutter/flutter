@@ -372,7 +372,6 @@ dev_dependencies:
 workspace:
 - child1
 - child2
-- child2/example
 ''');
         package.childFile('child1/pubspec.yaml')
           ..createSync(recursive: true)
@@ -385,6 +384,8 @@ resolution: workspace
           ..writeAsStringSync('''
 name: child2
 resolution: workspace
+workspace:
+- example
 ''');
         package.childFile('child2/example/pubspec.yaml')
           ..createSync(recursive: true)

@@ -729,11 +729,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   ) {
     final Set<String> packagesToInclude = <String>{};
     if (packagesRegExps.isEmpty) {
-      packagesToInclude.add(flutterProject.manifest.appName);
-      packagesToInclude.addAll(
-        flutterProject.workspaceProjects.map(
-            (FlutterProject subproject) => subproject.manifest.appName)
-      );
+      void addProject(FlutterProject project) {
+        packagesToInclude.add(project.manifest.appName);
+        project.workspaceProjects.forEach(addProject);
+      }
+      addProject(flutterProject);
     }
     try {
       for (final String regExpStr in packagesRegExps) {
