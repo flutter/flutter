@@ -155,6 +155,45 @@ void main() {
     },
   );
 
+  // Regression test for https://github.com/flutter/flutter/pull/166019
+  testWidgets('Applied blur does not go outside of bounds when in background', (
+    WidgetTester tester,
+  ) async {
+    const CupertinoDynamicColor background = CupertinoDynamicColor.withBrightness(
+      color: Color(0xFFE5E5E5),
+      darkColor: Color(0xF3E5E5E5),
+    );
+
+    final ScrollController scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoPageScaffold(
+          navigationBar: const CupertinoNavigationBar(
+            middle: Text('Title'),
+            backgroundColor: background,
+          ),
+          child: ListView(controller: scrollController, children: const <Widget>[Placeholder()]),
+        ),
+      ),
+    );
+
+    scrollController.jumpTo(100.0);
+    await tester.pump();
+
+    expect(
+      tester.widget(find.byType(BackdropFilter)),
+      isA<BackdropFilter>().having(
+        (BackdropFilter f) => f.blendMode == BlendMode.srcATop,
+        'filter is srcATop',
+        true,
+      ),
+    );
+    expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
+  });
+
   testWidgets("Background doesn't add blur effect when no content is scrolled under", (
     WidgetTester test,
   ) async {
