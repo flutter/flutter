@@ -22,7 +22,7 @@ dependencies:
   google_fonts: 6.2.1
   intl: 0.20.2
   meta: 1.16.0
-  provider: 6.1.2
+  provider: 6.1.4
   rally_assets: 3.0.1
   scoped_model: 2.0.0
   shrine_images: 2.0.2
@@ -311,4 +311,4 @@ flutter:
       fonts:
         - asset: packages/flutter_gallery_assets/fonts/GalleryIcons.ttf
 
-# PUBSPEC CHECKSUM: ee5c
+# PUBSPEC CHECKSUM: 115e
