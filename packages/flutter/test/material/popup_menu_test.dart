@@ -2863,6 +2863,48 @@ void main() {
     expect(mediaQueryPadding, EdgeInsets.zero);
   });
 
+  testWidgets("PopupMenu doesn't try to update position when unmounted", (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey buttonKey = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              const TextField(autofocus: true),
+              PopupMenuButton<int>(
+                key: buttonKey,
+                popUpAnimationStyle: const AnimationStyle(reverseDuration: Duration(milliseconds: 400)),
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    PopupMenuItem<int>(
+                      value: 1,
+                      child: const Text('ACTION'),
+                      onTap: () {},
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField));
+
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    // TODO(sstasi95): here we should trigger a layout change to test the fix
+    await tester.tap(find.text('ACTION'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ACTION'), findsNothing);
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
