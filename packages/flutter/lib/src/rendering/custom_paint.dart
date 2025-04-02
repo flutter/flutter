@@ -1017,6 +1017,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.textDirection != null) {
       config.textDirection = properties.textDirection;
     }
+    if (properties.inputType != null) {
+      config.inputType = properties.inputType!;
+    }
     if (properties.onTap != null) {
       config.onTap = properties.onTap;
     }

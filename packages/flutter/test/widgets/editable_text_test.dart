@@ -4079,8 +4079,8 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
-    final int semanticsId = render.debugSemantics!.id;
+    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
+    final int semanticsId = node.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
@@ -4185,8 +4185,8 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
-    final int semanticsId = render.debugSemantics!.id;
+    final SemanticsNode node = find.semantics.byValue('test for words').evaluate().first;
+    final int semanticsId = node.id;
 
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 14);
@@ -4300,8 +4300,8 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
-    final int semanticsId = render.debugSemantics!.id;
+    final SemanticsNode node = find.semantics.byValue('test').evaluate().first;
+    final int semanticsId = node.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
@@ -4417,8 +4417,8 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
-    final int semanticsId = render.debugSemantics!.id;
+    final SemanticsNode node = find.semantics.byValue('test for words').evaluate().first;
+    final int semanticsId = node.id;
 
     expect(controller.selection.baseOffset, 14);
     expect(controller.selection.extentOffset, 14);
@@ -4876,7 +4876,7 @@ void main() {
       await tester.pump();
 
       final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-      const int expectedNodeId = 5;
+      const int expectedNodeId = 4;
 
       expect(
         semantics,
@@ -4960,7 +4960,8 @@ void main() {
         await tester.pump();
 
         final SemanticsOwner owner = tester.binding.pipelineOwner.semanticsOwner!;
-        const int expectedNodeId = 5;
+        final SemanticsNode node = find.semantics.byValue('ABCDEFG').evaluate().first;
+        final int expectedNodeId = node.id;
 
         expect(controller.value.selection.isCollapsed, isTrue);
 
