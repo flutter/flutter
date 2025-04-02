@@ -16153,11 +16153,9 @@ void main() {
       (WidgetTester tester) async {
         TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
             true;
-        _updateMediaQueryFromView(tester);
         addTearDown(() {
           TestWidgetsFlutterBinding.instance.platformDispatcher
               .resetSupportsShowingSystemContextMenu();
-          _updateMediaQueryFromView(tester);
         });
 
         await tester.pumpWidget(
@@ -17704,24 +17702,4 @@ TextEditingController _textEditingController({String text = ''}) {
   final TextEditingController result = TextEditingController(text: text);
   addTearDown(result.dispose);
   return result;
-}
-
-// Trigger MediaQuery to update itself based on the View, which is not
-// recreated between tests. This is necessary when changing something on
-// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
-// TODO(justinmc): This hack can be removed if
-// https://github.com/flutter/flutter/issues/165519 is fixed.
-void _updateMediaQueryFromView(WidgetTester tester) {
-  expect(find.byType(MediaQuery), findsOneWidget);
-  final WidgetsBindingObserver widgetsBindingObserver =
-      tester.state(
-            find.ancestor(
-              of: find.byType(MediaQuery),
-              matching: find.byWidgetPredicate(
-                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
-              ),
-            ),
-          )
-          as WidgetsBindingObserver;
-  widgetsBindingObserver.didChangeMetrics();
 }
