@@ -685,6 +685,7 @@ Matcher matchesSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
+  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -768,6 +769,7 @@ Matcher matchesSemantics({
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    validationResult: validationResult,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -879,6 +881,7 @@ Matcher containsSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
+  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -962,6 +965,7 @@ Matcher containsSemantics({
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    validationResult: validationResult,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -2398,6 +2402,7 @@ class _MatchesSemanticsData extends Matcher {
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
+    required this.validationResult,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2552,6 +2557,7 @@ class _MatchesSemanticsData extends Matcher {
   final int? maxValueLength;
   final int? currentValueLength;
   final List<Matcher>? children;
+  final SemanticsValidationResult validationResult;
 
   /// There are three possible states for these two maps:
   ///
@@ -2664,6 +2670,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (hintOverrides != null) {
       description.add(' with custom hints: $hintOverrides');
+    }
+    if (validationResult != SemanticsValidationResult.none) {
+      description.add(' with validation result: $validationResult');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -2800,6 +2809,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
+    }
+    if (validationResult != data.validationResult) {
+      return failWithDescription(matchState, 'validationResult was: ${data.validationResult}');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];
