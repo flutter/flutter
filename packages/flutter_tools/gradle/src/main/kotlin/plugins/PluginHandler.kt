@@ -17,6 +17,10 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
 
+/**
+ * Handles interactions with the plugins used by the Flutter project, such as retrieving them as a
+ * list and configuring them as Gradle dependencies of the main Gradle project.
+ */
 class PluginHandler(
     val project: Project
 ) {
