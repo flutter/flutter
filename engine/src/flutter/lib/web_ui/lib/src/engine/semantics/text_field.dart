@@ -214,6 +214,11 @@ class SemanticTextField extends SemanticRole {
   late final DomHTMLElement editableElement;
 
   @override
+  void updateValidationResult() {
+    SemanticRole.updateAriaInvalid(editableElement, semanticsObject.validationResult);
+  }
+
+  @override
   bool focusAsRouteDefault() {
     editableElement.focusWithoutScroll();
     return true;
