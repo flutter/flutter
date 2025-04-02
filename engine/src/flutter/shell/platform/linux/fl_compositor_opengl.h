@@ -36,15 +36,6 @@ G_DECLARE_FINAL_TYPE(FlCompositorOpenGL,
 FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine);
 
 /**
- * fl_compositor_opengl_setup:
- * @compositor: an #FlCompositorOpenGL.
- *
- * Creates OpenGL resources required before rendering. Requires an active
- * context.
- */
-void fl_compositor_opengl_setup(FlCompositorOpenGL* compositor);
-
-/**
  * fl_compositor_opengl_render:
  * @compositor: an #FlCompositorOpenGL.
  * @view_id: view to render.

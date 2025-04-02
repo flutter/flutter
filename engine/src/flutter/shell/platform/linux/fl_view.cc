@@ -456,19 +456,7 @@ static GdkGLContext* create_context_cb(FlView* self) {
 }
 
 static void realize_cb(FlView* self) {
-  if (fl_compositor_get_renderer_type(fl_engine_get_compositor(self->engine)) ==
-      kOpenGL) {
-    fl_opengl_manager_make_current(fl_engine_get_opengl_manager(self->engine));
-
-    GError* gl_error = gtk_gl_area_get_error(GTK_GL_AREA(self->render_area));
-    if (gl_error != NULL) {
-      g_warning("Failed to initialize GLArea: %s", gl_error->message);
-      return;
-    }
-
-    fl_compositor_opengl_setup(
-        FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)));
-  }
+  fl_compositor_setup(fl_engine_get_compositor(self->engine));
 
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
 

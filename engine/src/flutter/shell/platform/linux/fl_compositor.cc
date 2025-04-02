@@ -18,6 +18,11 @@ FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* self) {
   return FL_COMPOSITOR_GET_CLASS(self)->get_renderer_type(self);
 }
 
+void fl_compositor_setup(FlCompositor* self) {
+  g_return_if_fail(FL_IS_COMPOSITOR(self));
+  FL_COMPOSITOR_GET_CLASS(self)->setup(self);
+}
+
 gboolean fl_compositor_create_backing_store(
     FlCompositor* self,
     const FlutterBackingStoreConfig* config,

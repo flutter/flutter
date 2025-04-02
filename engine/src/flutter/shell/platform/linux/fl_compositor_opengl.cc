@@ -440,6 +440,23 @@ static FlutterRendererType fl_compositor_opengl_get_renderer_type(
   return kOpenGL;
 }
 
+static void fl_compositor_opengl_setup(FlCompositor* compositor) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
+  fl_opengl_manager_make_current(self->opengl_manager);
+
+  // Note: NVIDIA and Vivante are temporarily disabled due to
+  // https://github.com/flutter/flutter/issues/152099
+  self->has_gl_framebuffer_blit =
+      !is_nvidia() && !is_vivante() &&
+      (epoxy_gl_version() >= 30 ||
+       epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
+
+  if (!self->has_gl_framebuffer_blit) {
+    setup_shader(self);
+  }
+}
+
 static gboolean fl_compositor_opengl_create_backing_store(
     FlCompositor* compositor,
     const FlutterBackingStoreConfig* config,
@@ -555,6 +572,7 @@ static void fl_compositor_opengl_dispose(GObject* object) {
 static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->get_renderer_type =
       fl_compositor_opengl_get_renderer_type;
+  FL_COMPOSITOR_CLASS(klass)->setup = fl_compositor_opengl_setup;
   FL_COMPOSITOR_CLASS(klass)->create_backing_store =
       fl_compositor_opengl_create_backing_store;
   FL_COMPOSITOR_CLASS(klass)->collect_backing_store =
@@ -584,21 +602,6 @@ FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine) {
       FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
 
   return self;
-}
-
-void fl_compositor_opengl_setup(FlCompositorOpenGL* self) {
-  g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
-
-  // Note: NVIDIA and Vivante are temporarily disabled due to
-  // https://github.com/flutter/flutter/issues/152099
-  self->has_gl_framebuffer_blit =
-      !is_nvidia() && !is_vivante() &&
-      (epoxy_gl_version() >= 30 ||
-       epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
-
-  if (!self->has_gl_framebuffer_blit) {
-    setup_shader(self);
-  }
 }
 
 void fl_compositor_opengl_render(FlCompositorOpenGL* self,

@@ -28,6 +28,10 @@ static FlutterRendererType fl_compositor_software_get_renderer_type(
   return kSoftware;
 }
 
+static void fl_compositor_software_setup(FlCompositor* compositor) {
+  // No special work required.
+}
+
 static gboolean fl_compositor_software_create_backing_store(
     FlCompositor* compositor,
     const FlutterBackingStoreConfig* config,
@@ -135,6 +139,7 @@ static void fl_compositor_software_class_init(
     FlCompositorSoftwareClass* klass) {
   FL_COMPOSITOR_CLASS(klass)->get_renderer_type =
       fl_compositor_software_get_renderer_type;
+  FL_COMPOSITOR_CLASS(klass)->setup = fl_compositor_software_setup;
   FL_COMPOSITOR_CLASS(klass)->create_backing_store =
       fl_compositor_software_create_backing_store;
   FL_COMPOSITOR_CLASS(klass)->collect_backing_store =

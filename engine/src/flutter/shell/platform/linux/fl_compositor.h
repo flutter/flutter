@@ -18,6 +18,8 @@ struct _FlCompositorClass {
 
   FlutterRendererType (*get_renderer_type)(FlCompositor* compositor);
 
+  void (*setup)(FlCompositor* compositor);
+
   gboolean (*create_backing_store)(FlCompositor* compositor,
                                    const FlutterBackingStoreConfig* config,
                                    FlutterBackingStore* backing_store_out);
@@ -50,6 +52,14 @@ struct _FlCompositorClass {
  * Returns: a FlutterRendererType.
  */
 FlutterRendererType fl_compositor_get_renderer_type(FlCompositor* compositor);
+
+/**
+ * fl_compositor_setup:
+ * @compositor: an #FlCompositor.
+ *
+ * Creates resources required before rendering.
+ */
+void fl_compositor_setup(FlCompositor* compositor);
 
 /**
  * fl_compositor_create_backing_store:
