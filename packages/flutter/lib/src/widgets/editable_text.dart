@@ -1051,7 +1051,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true if iOS and [autofillHints] has password related hint and false.
+  /// Defaults to true, false on iOS if [autofillHints] contains password related hints.
   /// {@endtemplate}
   final bool autocorrect;
 
@@ -2127,7 +2127,7 @@ class EditableText extends StatefulWidget {
         );
         if (passwordRelatedHint) {
           // https://github.com/flutter/flutter/issues/134723
-          // Set autocorrect to false for password related hints to prevent Keyboard flash.
+          // Set autocorrect to false to prevent password bar from flashing.
           return false;
         }
       case TargetPlatform.macOS:
