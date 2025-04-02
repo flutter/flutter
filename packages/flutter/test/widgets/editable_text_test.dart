@@ -3771,6 +3771,7 @@ void main() {
       expect(editableText.autocorrect, isFalse);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
   );
 
   testWidgets(
@@ -3797,6 +3798,7 @@ void main() {
       expect(editableText.autocorrect, isFalse);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
   );
 
   testWidgets(
@@ -3823,6 +3825,7 @@ void main() {
       expect(editableText.autocorrect, isFalse);
     },
     variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
+    skip: kIsWeb, // [intended]
   );
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
