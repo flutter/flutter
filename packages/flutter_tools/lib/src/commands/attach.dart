@@ -16,6 +16,7 @@ import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/targets/hook_runner_native.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../daemon.dart';
@@ -493,7 +494,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
           analytics: analytics,
         )
-        : ColdRunner(flutterDevices, target: targetFile, debuggingOptions: debuggingOptions);
+        : ColdRunner(
+          flutterDevices,
+          target: targetFile,
+          debuggingOptions: debuggingOptions,
+          dartBuilder: FlutterHookRunnerNative(),
+        );
   }
 
   Future<void> _validateArguments() async {}
@@ -530,5 +536,6 @@ class HotRunnerFactory {
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
+    dartBuilder: FlutterHookRunnerNative(),
   );
 }

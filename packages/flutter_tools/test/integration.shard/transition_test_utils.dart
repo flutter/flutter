@@ -234,8 +234,8 @@ Future<ProcessTestResult> runFlutter(
   }
 
   String stamp() => '[${(clock.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1).padLeft(5)}s]';
-  void processStdout(String line) {
-    final LogLine log = LogLine('stdout', stamp(), line);
+
+  void logLine(LogLine log, String line) {
     if (logging) {
       logs.add(log);
     }
@@ -279,12 +279,14 @@ Future<ProcessTestResult> runFlutter(
     }
   }
 
-  void processStderr(String line) {
+  void processStdout(String line) {
     final LogLine log = LogLine('stdout', stamp(), line);
-    logs.add(log);
-    if (streamingLogs) {
-      log.printClearly();
-    }
+    logLine(log, line);
+  }
+
+  void processStderr(String line) {
+    final LogLine log = LogLine('stderr', stamp(), line);
+    logLine(log, line);
   }
 
   if (debug) {
