@@ -13,6 +13,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
@@ -532,7 +533,8 @@ ContentContext::ContentContext(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
       host_buffer_(HostBuffer::Create(context_->GetResourceAllocator(),
-                                      context_->GetIdleWaiter())) {
+                                      context_->GetIdleWaiter())),
+      text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
