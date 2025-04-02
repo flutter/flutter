@@ -4784,6 +4784,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         screenshot12,
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
+      // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
     }, skip: impellerEnabled);
 
     group('layout explorer', () {
