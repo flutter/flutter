@@ -11,6 +11,7 @@ import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
+import com.flutter.gradle.plugins.PluginHandler
 import com.flutter.gradle.tasks.FlutterTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -41,6 +42,7 @@ class FlutterPlugin : Plugin<Project> {
     private var engineRealm: String? = null
     private var pluginList: List<Map<String?, Any?>>? = null
     private var pluginDependencies: List<Map<String?, Any?>>? = null
+    private var pluginHandler: PluginHandler? = null
 
     override fun apply(project: Project) {
         this.project = project
@@ -606,15 +608,13 @@ class FlutterPlugin : Plugin<Project> {
      * its `path` (String), or its `dependencies` (List<String>).
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
      */
-    private fun getPluginList(projectToGet: Project): List<Map<String?, Any?>> {
-        if (pluginList == null) {
-            pluginList =
-                NativePluginLoaderReflectionBridge.getPlugins(
-                    projectToGet.extraProperties,
-                    FlutterPluginUtils.getFlutterSourceDirectory(projectToGet)
-                )
+    private fun getPluginList(projectToGet: Project): List<Map<String?, Any?>> = getPluginHandler(projectToGet).getPluginList()
+
+    private fun getPluginHandler(project: Project): PluginHandler {
+        if (this.pluginHandler == null) {
+            this.pluginHandler = PluginHandler(project)
         }
-        return pluginList!!
+        return this.pluginHandler!!
     }
 
     companion object {
