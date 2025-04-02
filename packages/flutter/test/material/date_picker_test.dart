@@ -1823,6 +1823,7 @@ void main() {
             hasPasteAction: true,
             hasMoveCursorBackwardByCharacterAction: true,
             hasMoveCursorBackwardByWordAction: true,
+            validationResult: SemanticsValidationResult.valid,
           ),
         );
 

@@ -19,6 +19,7 @@ import 'dart:ui'
         SemanticsRole,
         SemanticsUpdate,
         SemanticsUpdateBuilder,
+        SemanticsValidationResult,
         StringAttribute,
         TextDirection;
 
@@ -32,7 +33,16 @@ import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
 export 'dart:ui'
-    show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection, VoidCallback;
+    show
+        Offset,
+        Rect,
+        SemanticsAction,
+        SemanticsFlag,
+        SemanticsRole,
+        SemanticsValidationResult,
+        StringAttribute,
+        TextDirection,
+        VoidCallback;
 
 export 'package:flutter/foundation.dart'
     show
@@ -726,6 +736,7 @@ class SemanticsData with Diagnosticable {
     required this.linkUrl,
     required this.role,
     required this.controlsNodes,
+    required this.validationResult,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -991,6 +1002,9 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsProperties.controlsNodes}
   final Set<String>? controlsNodes;
 
+  /// {@macro flutter.semantics.SemanticsProperties.validationResult}
+  final SemanticsValidationResult validationResult;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -1051,6 +1065,18 @@ class SemanticsData with Diagnosticable {
     if (controlsNodes != null) {
       properties.add(IterableProperty<String>('controls', controlsNodes, ifEmpty: null));
     }
+    if (role != SemanticsRole.none) {
+      properties.add(EnumProperty<SemanticsRole>('role', role, defaultValue: SemanticsRole.none));
+    }
+    if (validationResult != SemanticsValidationResult.none) {
+      properties.add(
+        EnumProperty<SemanticsValidationResult>(
+          'validationResult',
+          validationResult,
+          defaultValue: SemanticsValidationResult.none,
+        ),
+      );
+    }
   }
 
   @override
@@ -1083,6 +1109,7 @@ class SemanticsData with Diagnosticable {
         other.headingLevel == headingLevel &&
         other.linkUrl == linkUrl &&
         other.role == role &&
+        other.validationResult == validationResult &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
         setEquals<String>(controlsNodes, other.controlsNodes);
   }
@@ -1118,6 +1145,7 @@ class SemanticsData with Diagnosticable {
       linkUrl,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
       role,
+      validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
     ),
   );
@@ -1289,6 +1317,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.customSemanticsActions,
     this.role,
     this.controlsNodes,
+    this.validationResult = SemanticsValidationResult.none,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -2097,7 +2126,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// A enum to describe what role the subtree represents.
   ///
   /// Setting the role for a widget subtree helps assistive technologies, such
-  /// as screen readers, understand and interact with the UI correctly.
+  /// as screen readers, to understand and interact with the UI correctly.
   ///
   /// Defaults to [SemanticsRole.none] if not set, which means the subtree does
   /// not represent any complex ui or controls.
@@ -2116,6 +2145,21 @@ class SemanticsProperties extends DiagnosticableTree {
   /// of identifiers including the content's identifier to this property.
   /// {@endtemplate}
   final Set<String>? controlsNodes;
+
+  /// {@template flutter.semantics.SemanticsProperties.validationResult}
+  /// Describes the validation result for a form field represented by this
+  /// widget.
+  ///
+  /// Providing a validation result helps assistive technologies, such as screen
+  /// readers, to communicate to the user whether they provided correct
+  /// information in a form.
+  ///
+  /// Defaults to [SemanticsValidationResult.none] if not set, which means no
+  /// validation information is available for the respective semantics node.
+  ///
+  /// For a list of available validation results, see [SemanticsValidationResult].
+  /// {@endtemplate}
+  final SemanticsValidationResult validationResult;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -2155,6 +2199,13 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<SemanticsRole>('role', role, defaultValue: null));
+    properties.add(
+      EnumProperty<SemanticsValidationResult>(
+        'validationResult',
+        validationResult,
+        defaultValue: SemanticsValidationResult.none,
+      ),
+    );
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     properties.add(
       DiagnosticsProperty<SemanticsHintOverrides>(
@@ -2744,7 +2795,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _areUserActionsBlocked != config.isBlockingUserActions ||
         _headingLevel != config._headingLevel ||
         _linkUrl != config._linkUrl ||
-        _role != config.role;
+        _role != config.role ||
+        _validationResult != config.validationResult;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -3083,6 +3135,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Set<String>? get controlsNodes => _controlsNodes;
   Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
 
+  /// {@macro flutter.semantics.SemanticsProperties.validationResult}
+  SemanticsValidationResult get validationResult => _validationResult;
+  SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
@@ -3150,6 +3206,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _linkUrl = config._linkUrl;
     _role = config._role;
     _controlsNodes = config._controlsNodes;
+    _validationResult = config._validationResult;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -3200,6 +3257,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     Uri? linkUrl = _linkUrl;
     SemanticsRole role = _role;
     Set<String>? controlsNodes = _controlsNodes;
+    SemanticsValidationResult validationResult = _validationResult;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3305,6 +3363,17 @@ class SemanticsNode with DiagnosticableTreeMixin {
           controlsNodes = <String>{...controlsNodes!, ...node._controlsNodes!};
         }
 
+        if (validationResult == SemanticsValidationResult.none) {
+          validationResult = node._validationResult;
+        } else if (validationResult == SemanticsValidationResult.valid) {
+          // When merging nodes, invalid validation result takes precedence.
+          // Otherwise, validation information could be lost.
+          if (node._validationResult != SemanticsValidationResult.none &&
+              node._validationResult != SemanticsValidationResult.valid) {
+            validationResult = node._validationResult;
+          }
+        }
+
         return true;
       });
     }
@@ -3339,6 +3408,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       linkUrl: linkUrl,
       role: role,
       controlsNodes: controlsNodes,
+      validationResult: validationResult,
     );
   }
 
@@ -3425,6 +3495,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       linkUrl: data.linkUrl?.toString() ?? '',
       role: data.role,
       controlsNodes: data.controlsNodes?.toList(),
+      validationResult: data.validationResult,
     );
     _dirty = false;
   }
@@ -5595,6 +5666,14 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.validationResult}
+  SemanticsValidationResult get validationResult => _validationResult;
+  SemanticsValidationResult _validationResult = SemanticsValidationResult.none;
+  set validationResult(SemanticsValidationResult value) {
+    _validationResult = value;
+    _hasBeenAnnotated = true;
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -5785,6 +5864,15 @@ class SemanticsConfiguration {
       _controlsNodes = <String>{..._controlsNodes!, ...child._controlsNodes!};
     }
 
+    if (child._validationResult != _validationResult) {
+      if (child._validationResult == SemanticsValidationResult.invalid) {
+        // Invalid result always takes precedence.
+        _validationResult = SemanticsValidationResult.invalid;
+      } else if (_validationResult == SemanticsValidationResult.none) {
+        _validationResult = child._validationResult;
+      }
+    }
+
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
 
@@ -5827,7 +5915,8 @@ class SemanticsConfiguration {
       .._headingLevel = _headingLevel
       .._linkUrl = _linkUrl
       .._role = _role
-      .._controlsNodes = _controlsNodes;
+      .._controlsNodes = _controlsNodes
+      .._validationResult = _validationResult;
   }
 }
 

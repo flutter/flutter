@@ -1539,4 +1539,53 @@ void main() {
     expect(find.text('foo/error'), findsOneWidget);
     expect(find.text('bar/error'), findsOneWidget);
   });
+
+  testWidgets('FormField adds validation result to the semantics of the child', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
+    String? errorText;
+
+    Future<void> pumpWidget() async {
+      formKey.currentState?.reset();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    key: formKey,
+                    autovalidateMode: AutovalidateMode.always,
+                    child: TextFormField(validator: (String? value) => errorText),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextFormField), 'Hello');
+      await tester.pump();
+    }
+
+    // Test valid case
+    await pumpWidget();
+    expect(
+      tester.getSemantics(find.byType(TextFormField).last),
+      containsSemantics(isTextField: true, validationResult: SemanticsValidationResult.valid),
+    );
+
+    // Test invalid case
+    errorText = 'Error';
+    await pumpWidget();
+    expect(
+      tester.getSemantics(find.byType(TextFormField).last),
+      containsSemantics(isTextField: true, validationResult: SemanticsValidationResult.invalid),
+    );
+  });
 }

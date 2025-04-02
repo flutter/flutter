@@ -6,7 +6,6 @@
 library;
 
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
