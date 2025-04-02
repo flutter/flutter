@@ -57,7 +57,7 @@ Some links in the instructions below are Google-internal.
 9. To upload the new Java version to CIPD, please run this command:
 
     ```sh
-     cipd create -in <path_to_new_java_version_package>  -name flutter/java/openjdk/<platform-architecture> -tag version:<java_version> 
+     cipd create -in <path_to_new_java_version_package>  -name flutter/java/openjdk/<platform-architecture> -tag version:<java_version>
     ```
 
    Note: Please check you have the correct name, tags, package structure before uploading to CIPD
