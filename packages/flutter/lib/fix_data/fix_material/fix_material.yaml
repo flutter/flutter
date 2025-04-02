@@ -738,4 +738,30 @@ transforms:
           field: legacyDecelerate
           inClass: Easing
 
+  # Changes made in https://github.com/flutter/flutter/pull/166382
+  - title: "Migrate to 'activeThumbColor'"
+    date: 2022-09-15
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      constructor: ''
+      inClass: 'Switch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'activeColor'
+        newName: 'activeThumbColor'
+
+  # Changes made in https://github.com/flutter/flutter/pull/166382
+  - title: "Migrate to 'activeThumbColor'"
+    date: 2022-09-15
+    bulkApply: false
+    element:
+      uris: [ 'material.dart' ]
+      constructor: 'adaptive'
+      inClass: 'Switch'
+    changes:
+      - kind: 'renameParameter'
+        oldName: 'activeColor'
+        newName: 'activeThumbColor'
+
 # Before adding a new fix: read instructions at the top of this file.
