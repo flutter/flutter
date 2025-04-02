@@ -73,7 +73,7 @@ class PluginHandler(
      * and filtered then with the [doesSupportAndroidPlatform] method instead of
      * just using the `plugins.android` list.
      */
-    private fun configureLegacyPluginEachProjects(engineVersionValue: String) {
+    internal fun configureLegacyPluginEachProjects(engineVersionValue: String) {
         try {
             // Read the contents of the settings.gradle file.
             // Remove block/line comments

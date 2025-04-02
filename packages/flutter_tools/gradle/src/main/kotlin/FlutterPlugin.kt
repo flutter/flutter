@@ -485,7 +485,7 @@ class FlutterPlugin : Plugin<Project> {
         projectToConfigure: Project,
         engineVersionValue: String
     ) {
-        configureLegacyPluginEachProjects(projectToConfigure, engineVersionValue)
+        getPluginHandler(project!!).configureLegacyPluginEachProjects(engineVersionValue)
         val pluginList: List<Map<String?, Any?>> = getPluginList(projectToConfigure)
         pluginList.forEach { plugin: Map<String?, Any?> ->
             FlutterPluginUtils.configurePluginProject(
