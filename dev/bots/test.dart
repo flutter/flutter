@@ -588,6 +588,7 @@ Future<void> _flutterBuild(
   await runCommand(flutter, <String>[
     'build',
     platformBuildName,
+    if (verifyCaching) '--performance-measurement-file=perf.json',
     ...additionalArgs,
     if (release) '--release' else '--debug',
     '-v',
