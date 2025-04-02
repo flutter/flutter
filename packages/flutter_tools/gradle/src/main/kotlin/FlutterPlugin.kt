@@ -11,7 +11,6 @@ import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.flutter.gradle.FlutterPluginUtils.readPropertiesIfExist
-import com.flutter.gradle.plugins.PluginConfigurer
 import com.flutter.gradle.tasks.FlutterTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -23,22 +22,25 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import java.io.File
+import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
 import java.util.Properties
 
 class FlutterPlugin : Plugin<Project> {
-    internal var project: Project? = null
-    internal var flutterRoot: File? = null
-    internal var flutterExecutable: File? = null
-    internal var localEngine: String? = null
-    internal var localEngineHost: String? = null
-    internal var localEngineSrcPath: String? = null
-    internal var localProperties: Properties? = null
-    internal var engineVersion: String? = null
-    internal var engineRealm: String? = null
-    internal var pluginConfigurer: PluginConfigurer? = null
+    private var project: Project? = null
+    private var flutterRoot: File? = null
+    private var flutterExecutable: File? = null
+    private var localEngine: String? = null
+    private var localEngineHost: String? = null
+    private var localEngineSrcPath: String? = null
+    private var localProperties: Properties? = null
+    private var engineVersion: String? = null
+    private var engineRealm: String? = null
+    private var pluginList: List<Map<String?, Any?>>? = null
+    private var pluginDependencies: List<Map<String?, Any?>>? = null
 
     override fun apply(project: Project) {
         this.project = project
@@ -266,7 +268,10 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addFlutterDependencies(
             project!!,
             buildType,
-            getPluginConfigurer().getPluginList(),
+            NativePluginLoaderReflectionBridge.getPlugins(
+                project!!.extraProperties,
+                FlutterPluginUtils.getFlutterSourceDirectory(project!!)
+            ),
             engineVersion!!
         )
     }
@@ -395,10 +400,10 @@ class FlutterPlugin : Plugin<Project> {
                 .getByName("main")
                 .jniLibs
                 .srcDir(nativeAssetsDir)
-            getPluginConfigurer().configurePlugins(engineVersion!!)
+            configurePlugins(projectToAddTasksTo, engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
-                getPluginConfigurer().getPluginList()
+                getPluginList(projectToAddTasksTo)
             )
             return
         }
@@ -472,11 +477,147 @@ class FlutterPlugin : Plugin<Project> {
                 }
             }
         }
-        getPluginConfigurer().configurePlugins(engineVersion!!)
+        configurePlugins(projectToAddTasksTo, engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
-            getPluginConfigurer().getPluginList()
+            getPluginList(projectToAddTasksTo)
         )
+    }
+
+    private fun configurePlugins(
+        projectToConfigure: Project,
+        engineVersionValue: String
+    ) {
+        configureLegacyPluginEachProjects(projectToConfigure, engineVersionValue)
+        val pluginList: List<Map<String?, Any?>> = getPluginList(projectToConfigure)
+        pluginList.forEach { plugin: Map<String?, Any?> ->
+            FlutterPluginUtils.configurePluginProject(
+                projectToConfigure,
+                plugin,
+                engineVersionValue
+            )
+        }
+        pluginList.forEach { plugin: Map<String?, Any?> ->
+            FlutterPluginUtils.configurePluginDependencies(projectToConfigure, plugin)
+        }
+    }
+
+    // TODO(54566, 48918): Can remove once the issues are resolved.
+    //  This means all references to `.flutter-plugins` are then removed and
+    //  apps only depend exclusively on the `plugins` property in `.flutter-plugins-dependencies`.
+
+    /**
+     * Workaround to load non-native plugins for developers who may still use an
+     * old `settings.gradle` which includes all the plugins from the
+     * `.flutter-plugins` file, even if not made for Android.
+     * The settings.gradle then:
+     *     1) tries to add the android plugin implementation, which does not
+     *        exist at all, but is also not included successfully
+     *        (which does not throw an error and therefore isn't a problem), or
+     *     2) includes the plugin successfully as a valid android plugin
+     *        directory exists, even if the surrounding flutter package does not
+     *        support the android platform (see e.g. apple_maps_flutter: 1.0.1).
+     *        So as it's included successfully it expects to be added as API.
+     *        This is only possible by taking all plugins into account, which
+     *        only appear on the `dependencyGraph` and in the `.flutter-plugins` file.
+     * So in summary the plugins are currently selected from the `dependencyGraph`
+     * and filtered then with the [doesSupportAndroidPlatform] method instead of
+     * just using the `plugins.android` list.
+     */
+    private fun configureLegacyPluginEachProjects(
+        projectToConfigure: Project,
+        engineVersionValue: String
+    ) {
+        try {
+            // Read the contents of the settings.gradle file.
+            // Remove block/line comments
+            var settingsText =
+                FlutterPluginUtils
+                    .getSettingsGradleFileFromProjectDir(
+                        projectToConfigure.projectDir,
+                        projectToConfigure.logger
+                    ).readText(StandardCharsets.UTF_8)
+            settingsText =
+                settingsText
+                    .replace(Regex("""(?s)/\*.*?\*/"""), "")
+                    .replace(Regex("""(?m)//.*$"""), "")
+            if (!settingsText.contains("'.flutter-plugins'")) {
+                return
+            }
+        } catch (ignored: FileNotFoundException) {
+            throw GradleException(
+                "settings.gradle/settings.gradle.kts does not exist: " +
+                    FlutterPluginUtils
+                        .getSettingsGradleFileFromProjectDir(
+                            projectToConfigure.projectDir,
+                            projectToConfigure.logger
+                        ).absolutePath
+            )
+        }
+        // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
+        projectToConfigure.logger.quiet(
+            """
+            Warning: This project is still reading the deprecated '.flutter-plugins. file.
+            In an upcoming stable release support for this file will be completely removed and your build will fail.
+            See https:/flutter.dev/to/flutter-plugins-configuration.
+            """.trimIndent()
+        )
+        val deps: List<Map<String?, Any?>> = getPluginDependencies(projectToConfigure)
+        val pluginsNameSet = HashSet<String>()
+        getPluginList(projectToConfigure).mapTo(pluginsNameSet) { plugin -> plugin["name"] as String }
+        deps.filterNot { plugin -> pluginsNameSet.contains(plugin["name"]) }
+        deps.forEach { plugin: Map<String?, Any?> ->
+            val pluginProject = projectToConfigure.rootProject.findProject(":${plugin["name"]}")
+            if (pluginProject == null) {
+                // Plugin was not included in `settings.gradle`, but is listed in `.flutter-plugins`.
+                projectToConfigure.logger.error(
+                    "Plugin project :${plugin["name"]} listed, but not found. Please fix your settings.gradle/settings.gradle.kts."
+                )
+            } else if (FlutterPluginUtils.pluginSupportsAndroidPlatform(pluginProject)) {
+                // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
+                // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
+                FlutterPluginUtils.configurePluginProject(projectToConfigure, plugin, engineVersionValue)
+            } else {
+                // Plugin has no or an empty `android` folder. No action required.
+            }
+        }
+    }
+
+    // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
+    //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
+
+    /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
+    private fun getPluginDependencies(projectToGet: Project): List<Map<String?, Any?>> {
+        if (pluginDependencies == null) {
+            val meta: Map<String, Any> =
+                NativePluginLoaderReflectionBridge.getDependenciesMetadata(
+                    projectToGet.extraProperties,
+                    FlutterPluginUtils.getFlutterSourceDirectory(projectToGet)
+                )
+            // there should be a null check here, skip for now. I think I messed up platform types.
+            check(meta["dependencyGraph"] is List<*>)
+            @Suppress("UNCHECKED_CAST") // just for now :)
+            pluginDependencies = meta["dependencyGraph"] as List<Map<String?, Any?>>
+        }
+        return pluginDependencies!!
+    }
+
+    /**
+     * Gets the list of plugins (as map) that support the Android platform.
+     *
+     * The map value contains either the plugins `name` (String),
+     * its `path` (String), or its `dependencies` (List<String>).
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
+     */
+    private fun getPluginList(projectToGet: Project): List<Map<String?, Any?>> {
+        if (pluginList == null) {
+            pluginList =
+                NativePluginLoaderReflectionBridge.getPlugins(
+                    projectToGet.extraProperties,
+                    FlutterPluginUtils.getFlutterSourceDirectory(projectToGet)
+                )
+        }
+        return pluginList!!
     }
 
     companion object {
@@ -738,12 +879,5 @@ class FlutterPlugin : Plugin<Project> {
             }
             return copyFlutterAssetsTask
         }
-    }
-
-    private fun getPluginConfigurer(): PluginConfigurer {
-        if (pluginConfigurer == null) {
-            pluginConfigurer = PluginConfigurer(project!!)
-        }
-        return pluginConfigurer!!
     }
 }
