@@ -118,6 +118,7 @@ class DlPath {
 
   bool IsRect(DlRect* rect = nullptr, bool* is_closed = nullptr) const;
   bool IsOval(DlRect* bounds = nullptr) const;
+  bool IsLine(DlPoint* start = nullptr, DlPoint* end = nullptr) const;
   bool IsRoundRect(DlRoundRect* rrect = nullptr) const;
 
   bool IsSkRect(SkRect* rect, bool* is_closed = nullptr) const;
