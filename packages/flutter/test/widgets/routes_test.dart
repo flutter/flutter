@@ -766,6 +766,52 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
+    testWidgets(
+      'delegated transitions are removed when secondary animation is dismissed and next route is removed',
+      (WidgetTester tester) async {
+        final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorKey: navigator,
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                },
+              ),
+            ),
+            home: const Text('home'),
+          ),
+        );
+
+        // Push first page with custom transition builder.
+        final Route<void> firstRoute = CupertinoSheetRoute<void>(
+          builder: (_) {
+            return const Text('Page One');
+          },
+        );
+
+        navigator.currentState!.push(firstRoute);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Page One'), findsOneWidget);
+        final Finder cupertinoSheetDelegatedTransitionFinder = find.ancestor(
+          of: find.ancestor(of: find.byType(ClipRRect), matching: find.byType(AnimatedBuilder)),
+          matching: find.byType(ScaleTransition),
+        );
+        expect(cupertinoSheetDelegatedTransitionFinder, findsOneWidget);
+
+        navigator.currentState!.pop();
+        await tester.pumpAndSettle();
+
+        // Verify home is still visible without transitions.
+        expect(find.text('home'), findsOneWidget);
+
+        // Verify the delegated transition is removed.
+        expect(cupertinoSheetDelegatedTransitionFinder, findsNothing);
+      },
+    );
+
     testWidgets('secondary animation is kDismissed after train hopping finishes and pop', (
       WidgetTester tester,
     ) async {
