@@ -268,10 +268,7 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addFlutterDependencies(
             project!!,
             buildType,
-            NativePluginLoaderReflectionBridge.getPlugins(
-                project!!.extraProperties,
-                FlutterPluginUtils.getFlutterSourceDirectory(project!!)
-            ),
+            getPluginList(project!!),
             engineVersion!!
         )
     }
