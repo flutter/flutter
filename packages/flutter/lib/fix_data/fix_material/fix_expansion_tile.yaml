@@ -31,7 +31,7 @@ transforms:
   - title: "Migrate to 'ExpansibleController'"
     date: 2025-04-01
     element:
-      uris: [ 'material.dart' ]
+      uris: [ 'material.dart', 'widgets.dart' ]
       class: 'ExpansionTileController'
     changes:
       - kind: 'rename'
