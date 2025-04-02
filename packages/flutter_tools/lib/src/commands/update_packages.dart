@@ -226,12 +226,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       throwToolExit('The --transitive-closure flag cannot be used with the --paths flag');
     }
 
-    // Don't try and update the widget_preview_scaffold.shard/widget_preview_scaffold pubspec as it's
-    // used for testing.
-    packages.retainWhere((Directory directory) {
-      return !directory.path.endsWith('widget_preview_scaffold');
-    });
-
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations, integration_test).
     if (isConsumerOnly) {
       if (!isPrintTransitiveClosure) {
