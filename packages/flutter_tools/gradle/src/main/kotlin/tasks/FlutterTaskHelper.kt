@@ -4,7 +4,6 @@
 
 package com.flutter.gradle.tasks
 
-import com.flutter.gradle.FlutterPluginConstants
 import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
