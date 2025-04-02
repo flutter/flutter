@@ -141,19 +141,6 @@ object FlutterPluginUtils {
     // TODO(54566): Can remove this function and its call sites once resolved.
 
     /**
-     * Returns `true` if the given project is a plugin project having an `android` directory
-     * containing a `build.gradle` or `build.gradle.kts` file.
-     */
-    @JvmStatic
-    @JvmName("pluginSupportsAndroidPlatform")
-    internal fun pluginSupportsAndroidPlatform(project: Project): Boolean {
-        val buildGradle = File(File(project.projectDir.parentFile, "android"), "build.gradle")
-        val buildGradleKts =
-            File(File(project.projectDir.parentFile, "android"), "build.gradle.kts")
-        return buildGradle.exists() || buildGradleKts.exists()
-    }
-
-    /**
      * Returns the Gradle settings script for the build. When both Groovy and
      * Kotlin variants exist, then Groovy (settings.gradle) is preferred over
      * Kotlin (settings.gradle.kts). This is the same behavior as Gradle 8.5.
@@ -698,57 +685,6 @@ object FlutterPluginUtils {
                 buildType.name,
                 "io.flutter:${arch}_$flutterBuildMode:$engineVersion"
             )
-        }
-    }
-
-    /**
-     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
-     * Android project excluding dev dependencies.
-     *
-     * The map value contains either the plugins `name` (String),
-     * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
-     */
-    private fun getPluginListWithoutDevDependencies(pluginList: List<Map<String?, Any?>>): List<Map<String?, Any?>> =
-        pluginList.filter { pluginObject -> pluginObject["dev_dependency"] == false }
-
-    /**
-     * Add the dependencies on other plugin projects to the plugin project.
-     * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
-     * making the Gradle plugin project A depend on the Gradle plugin project B.
-     */
-    @JvmStatic
-    @JvmName("configurePluginDependencies")
-    internal fun configurePluginDependencies(
-        project: Project,
-        pluginObject: Map<String?, Any?>
-    ) {
-        val pluginName: String =
-            requireNotNull(pluginObject["name"] as? String) {
-                "Missing valid \"name\" property for plugin object: $pluginObject"
-            }
-        val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
-
-        getAndroidExtension(project).buildTypes.forEach { buildType ->
-            val flutterBuildMode: String = buildModeFor(buildType)
-            if (flutterBuildMode == "release" && (pluginObject["dev_dependency"] as? Boolean == true)) {
-                // This plugin is a dev dependency will not be included in the
-                // release build, so no need to add its dependencies.
-                return@forEach
-            }
-            val dependencies = requireNotNull(pluginObject["dependencies"] as? List<*>)
-            dependencies.forEach innerForEach@{ pluginDependencyName ->
-                check(pluginDependencyName is String)
-                if (pluginDependencyName.isEmpty()) {
-                    return@innerForEach
-                }
-
-                val dependencyProject =
-                    project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
-                pluginProject.afterEvaluate {
-                    pluginProject.dependencies.add("implementation", dependencyProject)
-                }
-            }
         }
     }
 

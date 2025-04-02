@@ -1,10 +1,13 @@
 package com.flutter.gradle.plugins
 
 import com.flutter.gradle.FlutterPluginUtils
+import com.flutter.gradle.FlutterPluginUtils.buildModeFor
+import com.flutter.gradle.FlutterPluginUtils.getAndroidExtension
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
+import java.io.File
 import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
 
@@ -119,7 +122,7 @@ class PluginHandler(
                 project.logger.error(
                     "Plugin project :${plugin["name"]} listed, but not found. Please fix your settings.gradle/settings.gradle.kts."
                 )
-            } else if (FlutterPluginUtils.pluginSupportsAndroidPlatform(pluginProject)) {
+            } else if (pluginSupportsAndroidPlatform()) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
                 FlutterPluginUtils.configurePluginProject(project, plugin, engineVersionValue)
@@ -140,7 +143,7 @@ class PluginHandler(
             )
         }
         pluginList.forEach { plugin: Map<String?, Any?> ->
-            FlutterPluginUtils.configurePluginDependencies(project, plugin)
+            configurePluginDependencies(plugin)
         }
     }
 
@@ -154,4 +157,50 @@ class PluginHandler(
      */
     internal fun getPluginListWithoutDevDependencies(): List<Map<String?, Any?>> =
         getPluginList().filter { pluginObject -> pluginObject["dev_dependency"] == false }
+
+    /**
+     * Returns `true` if the given project is a plugin project having an `android` directory
+     * containing a `build.gradle` or `build.gradle.kts` file.
+     */
+    internal fun pluginSupportsAndroidPlatform(): Boolean {
+        val buildGradle = File(File(project.projectDir.parentFile, "android"), "build.gradle")
+        val buildGradleKts =
+            File(File(project.projectDir.parentFile, "android"), "build.gradle.kts")
+        return buildGradle.exists() || buildGradleKts.exists()
+    }
+
+    /**
+     * Add the dependencies on other plugin projects to the plugin project.
+     * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
+     * making the Gradle plugin project A depend on the Gradle plugin project B.
+     */
+    internal fun configurePluginDependencies(pluginObject: Map<String?, Any?>) {
+        val pluginName: String =
+            requireNotNull(pluginObject["name"] as? String) {
+                "Missing valid \"name\" property for plugin object: $pluginObject"
+            }
+        val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
+
+        getAndroidExtension(project).buildTypes.forEach { buildType ->
+            val flutterBuildMode: String = buildModeFor(buildType)
+            if (flutterBuildMode == "release" && (pluginObject["dev_dependency"] as? Boolean == true)) {
+                // This plugin is a dev dependency will not be included in the
+                // release build, so no need to add its dependencies.
+                return@forEach
+            }
+            val dependencies = requireNotNull(pluginObject["dependencies"] as? List<*>)
+            dependencies.forEach innerForEach@{ pluginDependencyName ->
+                check(pluginDependencyName is String)
+                if (pluginDependencyName.isEmpty()) {
+                    return@innerForEach
+                }
+
+                val dependencyProject =
+                    project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
+                pluginProject.afterEvaluate {
+                    pluginProject.dependencies.add("implementation", dependencyProject)
+                }
+            }
+        }
+    }
 }
