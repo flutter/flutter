@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 
 import 'widget_preview_scaffold/test/widget_preview_scaffold_test_utils.dart';
 
