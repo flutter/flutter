@@ -109,7 +109,7 @@ class Switch extends StatelessWidget {
     required this.onChanged,
     @Deprecated(
       'Use activeTrackColor instead. '
-          'This feature was deprecated after v3.31.0-2.0.pre.',
+      'This feature was deprecated after v3.31.0-2.0.pre.',
     )
     Color? activeColor,
     Color? activeThumbColor,
@@ -140,7 +140,7 @@ class Switch extends StatelessWidget {
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-        activeThumbColor = activeThumbColor ?? activeColor;
+       activeThumbColor = activeThumbColor ?? activeColor;
 
   /// Creates an adaptive [Switch] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -169,7 +169,7 @@ class Switch extends StatelessWidget {
     required this.onChanged,
     @Deprecated(
       'Use activeTrackColor instead. '
-          'This feature was deprecated after v3.24.0-0.2.pre.',
+      'This feature was deprecated after v3.31.0-2.0.pre.',
     )
     Color? activeColor,
     Color? activeThumbColor,
