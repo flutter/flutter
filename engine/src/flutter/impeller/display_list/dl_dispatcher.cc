@@ -13,6 +13,7 @@
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
+#include "fml/closure.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
@@ -137,6 +138,13 @@ static impeller::SamplerDescriptor ToSamplerDescriptor(
   return desc;
 }
 
+static std::optional<const Rect> ToOptRect(const flutter::DlRect* rect) {
+  if (rect == nullptr) {
+    return std::nullopt;
+  }
+  return *rect;
+}
+
 // |flutter::DlOpReceiver|
 void DlDispatcherBase::setAntiAlias(bool aa) {
   AUTO_DEPTH_WATCHER(0u);
@@ -244,7 +252,7 @@ void DlDispatcherBase::setInvertColors(bool invert) {
 void DlDispatcherBase::setBlendMode(flutter::DlBlendMode dl_mode) {
   AUTO_DEPTH_WATCHER(0u);
 
-  paint_.blend_mode = skia_conversions::ToBlendMode(dl_mode);
+  paint_.blend_mode = dl_mode;
 }
 
 static FilterContents::BlurStyle ToBlurStyle(flutter::DlBlurStyle blur_style) {
@@ -506,8 +514,8 @@ void DlDispatcherBase::clipPath(const DlPath& path,
   } else {
     SkRRect rrect;
     if (path.IsSkRRect(&rrect) && rrect.isSimple()) {
-      RoundRectGeometry geom(skia_conversions::ToRect(rrect.rect()),
-                             skia_conversions::ToSize(rrect.getSimpleRadii()));
+      RoundRectGeometry geom(flutter::ToDlRect(rrect.rect()),
+                             flutter::ToDlSize(rrect.getSimpleRadii()));
       GetCanvas().ClipGeometry(geom, clip_op);
     } else {
       FillPathGeometry geom(path.GetPath());
@@ -523,7 +531,7 @@ void DlDispatcherBase::drawColor(flutter::DlColor color,
 
   Paint paint;
   paint.color = skia_conversions::ToColor(color);
-  paint.blend_mode = skia_conversions::ToBlendMode(dl_mode);
+  paint.blend_mode = dl_mode;
   GetCanvas().DrawPaint(paint);
 }
 
@@ -818,9 +826,9 @@ void DlDispatcherBase::drawAtlas(const sk_sp<flutter::DlImage> atlas,
                       tex,                                              //
                       colors,                                           //
                       static_cast<size_t>(count),                       //
-                      skia_conversions::ToBlendMode(mode),              //
+                      mode,                                             //
                       skia_conversions::ToSamplerDescriptor(sampling),  //
-                      skia_conversions::ToRect(cull_rect)               //
+                      ToOptRect(cull_rect)                              //
       );
   auto atlas_contents = std::make_shared<AtlasContents>();
   atlas_contents->SetGeometry(&geometry);
@@ -854,10 +862,10 @@ void DlDispatcherBase::drawDisplayList(
   if (opacity < SK_Scalar1) {
     Paint save_paint;
     save_paint.color = Color(0, 0, 0, opacity);
-    GetCanvas().SaveLayer(
-        save_paint, skia_conversions::ToRect(display_list->bounds()), nullptr,
-        ContentBoundsPromise::kContainsContents, display_list->total_depth(),
-        display_list->can_apply_group_opacity());
+    GetCanvas().SaveLayer(save_paint, display_list->GetBounds(), nullptr,
+                          ContentBoundsPromise::kContainsContents,
+                          display_list->total_depth(),
+                          display_list->can_apply_group_opacity());
   } else {
     // The display list may alter the clip, which must be restored to the
     // current clip at the end of playback.
@@ -985,8 +993,7 @@ static bool RequiresReadbackForBlends(
     const ContentContext& renderer,
     flutter::DlBlendMode max_root_blend_mode) {
   return !renderer.GetDeviceCapabilities().SupportsFramebufferFetch() &&
-         skia_conversions::ToBlendMode(max_root_blend_mode) >
-             Entity::kLastPipelineBlendMode;
+         max_root_blend_mode > Entity::kLastPipelineBlendMode;
 }
 
 CanvasDlDispatcher::CanvasDlDispatcher(ContentContext& renderer,
@@ -1013,8 +1020,8 @@ void CanvasDlDispatcher::drawVertices(
   AUTO_DEPTH_WATCHER(1u);
 
   GetCanvas().DrawVertices(
-      std::make_shared<DlVerticesGeometry>(vertices, renderer_),
-      skia_conversions::ToBlendMode(dl_mode), paint_);
+      std::make_shared<DlVerticesGeometry>(vertices, renderer_), dl_mode,
+      paint_);
 }
 
 void CanvasDlDispatcher::SetBackdropData(
@@ -1309,6 +1316,9 @@ std::shared_ptr<Texture> DisplayListToTexture(
             kDefaultColorAttachmentConfig  // color_attachment_config
     );
   }
+  if (!target.IsValid()) {
+    return nullptr;
+  }
 
   SkIRect sk_cull_rect = SkIRect::MakeWH(size.width, size.height);
   impeller::FirstPassDispatcher collector(
@@ -1324,14 +1334,18 @@ std::shared_ptr<Texture> DisplayListToTexture(
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
+  context.GetContentContext().GetTextShadowCache().MarkFrameStart();
+  fml::ScopedCleanupClosure cleanup([&] {
+    if (reset_host_buffer) {
+      context.GetContentContext().GetTransientsBuffer().Reset();
+    }
+    context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
+    context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+    context.GetContext()->DisposeThreadLocalCachedResources();
+  });
+
   display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
   impeller_dispatcher.FinishRecording();
-
-  if (reset_host_buffer) {
-    context.GetContentContext().GetTransientsBuffer().Reset();
-  }
-  context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-  context.GetContext()->DisposeThreadLocalCachedResources();
 
   return target.GetRenderTargetTexture();
 }
@@ -1357,11 +1371,16 @@ bool RenderToTarget(ContentContext& context,
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
+  context.GetTextShadowCache().MarkFrameStart();
+  fml::ScopedCleanupClosure cleanup([&] {
+    if (reset_host_buffer) {
+      context.GetTransientsBuffer().Reset();
+    }
+    context.GetTextShadowCache().MarkFrameEnd();
+  });
+
   display_list->Dispatch(impeller_dispatcher, cull_rect);
   impeller_dispatcher.FinishRecording();
-  if (reset_host_buffer) {
-    context.GetTransientsBuffer().Reset();
-  }
   context.GetLazyGlyphAtlas()->ResetTextFrames();
 
   return true;

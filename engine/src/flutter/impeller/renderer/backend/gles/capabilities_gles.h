@@ -117,6 +117,9 @@ class CapabilitiesGLES final
   bool SupportsPrimitiveRestart() const override;
 
   // |Capabilities|
+  bool SupportsExtendedRangeFormats() const override;
+
+  // |Capabilities|
   PixelFormat GetDefaultColorFormat() const override;
 
   // |Capabilities|

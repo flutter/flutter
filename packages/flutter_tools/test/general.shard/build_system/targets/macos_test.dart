@@ -813,7 +813,7 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshot.TargetPlatform.darwin.release_arm64',
+            'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
             '--deterministic',
             '--snapshot_kind=app-aot-assembly',
             '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
@@ -822,7 +822,7 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshot.TargetPlatform.darwin.release_x64',
+            'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
             '--deterministic',
             '--snapshot_kind=app-aot-assembly',
             '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',

@@ -1047,6 +1047,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _frameDuration = _nextFrame!.duration;
       _nextFrame!.image.dispose();
       _nextFrame = null;
+      if (_codec == null) {
+        // codec was disposed during _emitFrame
+        return;
+      }
       final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
       if (_codec!.repetitionCount == -1 || completedCycles <= _codec!.repetitionCount) {
         _decodeNextFrameAndSchedule();
@@ -1108,7 +1112,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _nextFrame!.image.dispose();
       _nextFrame = null;
 
-      _codec!.dispose();
+      _codec?.dispose();
       _codec = null;
       return;
     }

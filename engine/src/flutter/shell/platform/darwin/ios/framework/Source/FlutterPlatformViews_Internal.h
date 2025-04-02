@@ -37,17 +37,17 @@
 // Adds a clip rect operation to the queue.
 //
 // The `clipSkRect` is transformed with the `matrix` before adding to the queue.
-- (void)clipRect:(const SkRect&)clipSkRect matrix:(const SkMatrix&)matrix;
+- (void)clipRect:(const flutter::DlRect&)clipDlRect matrix:(const flutter::DlMatrix&)matrix;
 
 // Adds a clip rrect operation to the queue.
 //
 // The `clipSkRRect` is transformed with the `matrix` before adding to the queue.
-- (void)clipRRect:(const SkRRect&)clipSkRRect matrix:(const SkMatrix&)matrix;
+- (void)clipRRect:(const flutter::DlRoundRect&)clipDlRRect matrix:(const flutter::DlMatrix&)matrix;
 
 // Adds a clip path operation to the queue.
 //
 // The `path` is transformed with the `matrix` before adding to the queue.
-- (void)clipPath:(const SkPath&)path matrix:(const SkMatrix&)matrix;
+- (void)clipPath:(const flutter::DlPath&)path matrix:(const flutter::DlMatrix&)matrix;
 
 @end
 
@@ -66,7 +66,7 @@
 - (instancetype)initWithCapacity:(NSInteger)capacity;
 
 // Reuse a maskView from the pool, or allocate a new one.
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale;
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame;
 
 // Insert the `maskView` into the pool.
 - (void)insertViewToPoolIfNeeded:(FlutterClippingMaskView*)maskView;

@@ -8,6 +8,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -45,18 +46,18 @@ static const SEL kSelectorsHandledByPlugins[] = {
   if (self = [super init]) {
     std::string cachePath = fml::paths::JoinPaths({getenv("HOME"), kCallbackCacheSubDir});
     [FlutterCallbackCache setCachePath:[NSString stringWithUTF8String:cachePath.c_str()]];
-#if not APPLICATION_EXTENSION_API_ONLY
-    [self addObserverFor:UIApplicationDidEnterBackgroundNotification
-                selector:@selector(handleDidEnterBackground:)];
-    [self addObserverFor:UIApplicationWillEnterForegroundNotification
-                selector:@selector(handleWillEnterForeground:)];
-    [self addObserverFor:UIApplicationWillResignActiveNotification
-                selector:@selector(handleWillResignActive:)];
-    [self addObserverFor:UIApplicationDidBecomeActiveNotification
-                selector:@selector(handleDidBecomeActive:)];
-    [self addObserverFor:UIApplicationWillTerminateNotification
-                selector:@selector(handleWillTerminate:)];
-#endif
+    if (FlutterSharedApplication.isAvailable) {
+      [self addObserverFor:UIApplicationDidEnterBackgroundNotification
+                  selector:@selector(handleDidEnterBackground:)];
+      [self addObserverFor:UIApplicationWillEnterForegroundNotification
+                  selector:@selector(handleWillEnterForeground:)];
+      [self addObserverFor:UIApplicationWillResignActiveNotification
+                  selector:@selector(handleWillResignActive:)];
+      [self addObserverFor:UIApplicationDidBecomeActiveNotification
+                  selector:@selector(handleDidBecomeActive:)];
+      [self addObserverFor:UIApplicationWillTerminateNotification
+                  selector:@selector(handleWillTerminate:)];
+    }
     _delegates = [NSPointerArray weakObjectsPointerArray];
     _debugBackgroundTask = UIBackgroundTaskInvalid;
   }

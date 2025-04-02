@@ -135,6 +135,18 @@ TEST(RasterizerTest, create) {
   EXPECT_TRUE(rasterizer != nullptr);
 }
 
+TEST(RasterizerTest, isAiksContextInitialized) {
+  NiceMock<MockDelegate> delegate;
+  Settings settings;
+  ON_CALL(delegate, GetSettings()).WillByDefault(ReturnRef(settings));
+  auto rasterizer = std::make_shared<Rasterizer>(delegate);
+
+  EXPECT_TRUE(rasterizer != nullptr);
+  std::shared_ptr<SnapshotController::Delegate> snapshot_delegate = rasterizer;
+
+  EXPECT_FALSE(snapshot_delegate->IsAiksContextInitialized());
+}
+
 static std::unique_ptr<FrameTimingsRecorder> CreateFinishedBuildRecorder(
     fml::TimePoint timestamp) {
   std::unique_ptr<FrameTimingsRecorder> recorder =

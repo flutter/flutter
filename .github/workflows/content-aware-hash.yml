@@ -1,0 +1,26 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Generate a content aware hash for the Flutter Engine
+
+on: workflow_dispatch
+
+jobs:
+  generate-engine-content-hash:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Fetch base commit and origin/master
+        run: |
+          git fetch --no-tags --prune --depth=1 origin ${{ github.event.pull_request.base.sha }}
+
+      - name: Generate Hash
+        run: |
+          engine_content_hash=$(git ls-tree HEAD DEPS bin/internal/release-candidate-branch.version engine | git hash-object --stdin)
+          # test notice annotation for retrival from api
+          echo "::notice ::{\"engine_content_hash\": \"${engine_content_hash}\"}"
+          # test summary writing
+          echo "{\"engine_content_hash\": \"${engine_content_hash}\"" >> $GITHUB_STEP_SUMMARY

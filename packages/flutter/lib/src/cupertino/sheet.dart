@@ -11,6 +11,19 @@ import 'interface_level.dart';
 import 'route.dart';
 import 'theme.dart';
 
+// Smoothing factor applied to the device's top padding (which approximates the corner radius)
+// to achieve a smoother end to the corner radius animation.  A value of 1.0 would use
+// the full top padding. Values less than 1.0 reduce the effective corner radius, improving
+// the animation's appearance.  Determined through empirical testing.
+const double _kDeviceCornerRadiusSmoothingFactor = 0.9;
+
+// Threshold in logical pixels. If the calculated device corner radius (after applying
+// the smoothing factor) is below this value, the corner radius transition animation will
+// start from zero. This prevents abrupt transitions for devices with small or negligible
+// corner radii.  This value, combined with the smoothing factor, corresponds roughly
+// to double the targeted radius of 12.  Determined through testing and visual inspection.
+const double _kRoundedDeviceCornersThreshold = 20.0;
+
 // The distance from the top of the open sheet to the top of the screen, as a ratio
 // of the total height of the screen. Found from eyeballing a simulator running
 // iOS 18.0.
@@ -91,6 +104,11 @@ final Animatable<double> _kScaleTween = Tween<double>(begin: 1.0, end: 1.0 - _kS
 /// The whole sheet can be popped at once by either dragging down on the sheet,
 /// or calling [CupertinoSheetRoute.popSheet].
 ///
+/// When `enableDrag` is set to `true` (the default), users can dismiss the sheet
+/// by dragging it down or by calling [CupertinoSheetRoute.popSheet]. When
+/// `enableDrag` is `false`, users cannot dismiss the sheet by dragging, and it
+/// can only be closed by calling [CupertinoSheetRoute.popSheet].
+///
 /// iOS sheet widgets are generally designed to be tightly coupled to the context
 /// of the widget that opened the sheet. As such, it is not recommended to push
 /// a non-sheet route that covers the sheet without first popping the sheet. If
@@ -122,6 +140,7 @@ Future<T?> showCupertinoSheet<T>({
   required BuildContext context,
   required WidgetBuilder pageBuilder,
   bool useNestedNavigation = false,
+  bool enableDrag = true,
 }) {
   final WidgetBuilder builder;
   final GlobalKey<NavigatorState> nestedNavigatorKey = GlobalKey<NavigatorState>();
@@ -162,7 +181,7 @@ Future<T?> showCupertinoSheet<T>({
   return Navigator.of(
     context,
     rootNavigator: true,
-  ).push<T>(CupertinoSheetRoute<T>(builder: builder));
+  ).push<T>(CupertinoSheetRoute<T>(builder: builder, enableDrag: enableDrag));
 }
 
 /// Provides an iOS-style sheet transition.
@@ -221,10 +240,15 @@ class CupertinoSheetTransition extends StatefulWidget {
       reverseCurve: reverseCurve,
       parent: secondaryAnimation,
     );
-    final double deviceCornerRadius = MediaQuery.maybeViewPaddingOf(context)?.top ?? 0;
+
+    final double deviceCornerRadius =
+        (MediaQuery.maybeViewPaddingOf(context)?.top ?? 0) * _kDeviceCornerRadiusSmoothingFactor;
+    final bool roundedDeviceCorners = deviceCornerRadius > _kRoundedDeviceCornersThreshold;
 
     final Animatable<BorderRadiusGeometry> decorationTween = Tween<BorderRadiusGeometry>(
-      begin: BorderRadius.circular(deviceCornerRadius),
+      begin: BorderRadius.vertical(
+        top: Radius.circular(roundedDeviceCorners ? deviceCornerRadius : 0),
+      ),
       end: BorderRadius.circular(12),
     );
 
@@ -262,7 +286,13 @@ class CupertinoSheetTransition extends StatefulWidget {
           animation: radiusAnimation,
           child: child,
           builder: (BuildContext context, Widget? child) {
-            return ClipRRect(borderRadius: radiusAnimation.value, child: contrastedChild);
+            return ClipRRect(
+              borderRadius:
+                  !secondaryAnimation.isDismissed
+                      ? radiusAnimation.value
+                      : BorderRadius.circular(0),
+              child: contrastedChild,
+            );
           },
         ),
       ),
@@ -454,15 +484,17 @@ class _CupertinoSheetTransitionState extends State<CupertinoSheetTransition> {
 ///     `CupertinoSheetRoute`, with optional nested navigation built in.
 class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTransitionMixin<T> {
   /// Creates a page route that displays an iOS styled sheet.
-  CupertinoSheetRoute({super.settings, required this.builder});
+  CupertinoSheetRoute({super.settings, required this.builder, this.enableDrag = true});
 
   /// Builds the primary contents of the sheet route.
   final WidgetBuilder builder;
 
   @override
+  final bool enableDrag;
+
+  @override
   Widget buildContent(BuildContext context) {
     final double bottomPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
-
     return MediaQuery.removePadding(
       context: context,
       removeTop: true,
@@ -539,6 +571,11 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
   DelegatedTransitionBuilder? get delegatedTransition =>
       CupertinoSheetTransition.delegateTransition;
 
+  /// Determines whether the content can be dragged.
+  ///
+  /// If `true`, dragging is enabled; otherwise, it remains fixed.
+  bool get enableDrag;
+
   @override
   Widget buildPage(
     BuildContext context,
@@ -564,6 +601,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
     Widget child,
+    bool enableDrag,
   ) {
     final bool linearTransition = route.popGestureInProgress;
     return CupertinoSheetTransition(
@@ -571,7 +609,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
       secondaryRouteAnimation: secondaryAnimation,
       linearTransition: linearTransition,
       child: _CupertinoDownGestureDetector<T>(
-        enabledCallback: () => true,
+        enabledCallback: () => enableDrag,
         onStartPopGesture: () => _startPopGesture<T>(route),
         child: child,
       ),
@@ -590,7 +628,7 @@ mixin _CupertinoSheetRouteTransitionMixin<T> on PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child);
+    return buildPageTransitions<T>(this, context, animation, secondaryAnimation, child, enableDrag);
   }
 }
 

@@ -30,10 +30,10 @@ platform_properties:
           {"dependency": "open_jdk", "version": "version:17"}
         ]
       device_type: none
-      os: Mac-13|Mac-14
+      os: Mac-14
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "16c5032a"
         }
   windows:
     properties:
@@ -67,13 +67,6 @@ targets:
           {"dependency": "goldctl", "version": "git_revision:720a542f6fe4f92922c3b8f0fdcc4d2ac6bb83cd"}
         ]
     timeout: 90
-    runIf:
-      - DEPS
-      - engine/src/flutter/.ci.yaml
-      - engine/src/flutter/ci/builders/linux_android_emulator.json
-      - engine/src/flutter/lib/ui/**
-      - engine/src/flutter/shell/platform/android/**
-      - engine/src/flutter/testing/skia_gold_client/**
 
   - name: Linux builder_cache
     enabled_branches:
@@ -391,6 +384,7 @@ targets:
       cores: "8"
 
   - name: Linux linux_web_engine_tests
+    bringup: true # https://github.com/flutter/flutter/issues/165610 - Ubuntu 24.04 + Firefox
     recipe: engine_v2/engine_v2
     timeout: 120
     properties:
@@ -469,12 +463,12 @@ targets:
         ]
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "16c5032a"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-13|Mac-14
+      - os=Mac-14
 
   - name: Mac clangd
     recipe: engine_v2/builder
@@ -498,12 +492,12 @@ targets:
       config_name: mac_ios_engine
       $flutter/osx_sdk : >-
         {
-          "sdk_version": "15a240d"
+          "sdk_version": "16c5032a"
         }
     # Do not remove(https://github.com/flutter/flutter/issues/144644)
     # Scheduler will fail to get the platform
     drone_dimensions:
-      - os=Mac-13|Mac-14
+      - os=Mac-14
       - cpu=x86
 
   - name: Windows windows_android_aot_engine

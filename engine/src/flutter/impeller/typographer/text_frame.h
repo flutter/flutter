@@ -6,6 +6,8 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 
 #include <cstdint>
+#include "impeller/geometry/rational.h"
+#include "impeller/typographer/glyph.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
 
@@ -27,12 +29,13 @@ class TextFrame {
 
   ~TextFrame();
 
-  static Point ComputeSubpixelPosition(
+  static SubpixelPosition ComputeSubpixelPosition(
       const TextRun::GlyphPosition& glyph_position,
       AxisAlignment alignment,
       const Matrix& transform);
 
-  static Scalar RoundScaledFontSize(Scalar scale);
+  static Rational RoundScaledFontSize(Scalar scale);
+  static Rational RoundScaledFontSize(Rational scale);
 
   //----------------------------------------------------------------------------
   /// @brief      The conservative bounding box for this text frame.
@@ -78,9 +81,16 @@ class TextFrame {
   /// This method is only valid if [IsFrameComplete] returns true.
   const FrameBounds& GetFrameBounds(size_t index) const;
 
+  /// @brief If this text frame contains a single glyph (such as for an Icon),
+  ///        then return it, otherwise std::nullopt.
+  std::optional<Glyph> AsSingleGlyph() const;
+
+  /// @brief Return the font of the first glyph run.
+  const Font& GetFont() const;
+
   /// @brief Store text frame scale, offset, and properties for hashing in th
   /// glyph atlas.
-  void SetPerFrameData(Scalar scale,
+  void SetPerFrameData(Rational scale,
                        Point offset,
                        const Matrix& transform,
                        std::optional<GlyphProperties> properties);
@@ -91,19 +101,21 @@ class TextFrame {
   // processed.
   std::pair<size_t, intptr_t> GetAtlasGenerationAndID() const;
 
+  Rational GetScale() const;
+
   TextFrame& operator=(TextFrame&& other) = default;
 
   TextFrame(const TextFrame& other) = default;
 
   const Matrix& GetTransform() const { return transform_; }
 
+  Point GetOffset() const;
+
+  Matrix GetOffsetTransform() const;
+
  private:
   friend class TypographerContextSkia;
   friend class LazyGlyphAtlas;
-
-  Scalar GetScale() const;
-
-  Point GetOffset() const;
 
   std::optional<GlyphProperties> GetProperties() const;
 
@@ -120,7 +132,7 @@ class TextFrame {
   // Data that is cached when rendering the text frame and is only
   // valid for the current atlas generation.
   std::vector<FrameBounds> bound_values_;
-  Scalar scale_ = 0;
+  Rational scale_ = Rational(0, 1);
   size_t generation_ = 0;
   intptr_t atlas_id_ = 0;
   Point offset_;

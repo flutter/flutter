@@ -54,6 +54,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -101,6 +103,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -133,6 +137,8 @@ void main() {
       const String splitDebugInfo = '/path/to/split/debug/info';
       const String trackWidgetCreation = 'true';
       const String treeShake = 'true';
+      const String srcRoot = '/path/to/project';
+      const String iOSVersion = '18.3.1';
       final TestContext context = TestContext(
         <String>['build'],
         <String, String>{
@@ -154,6 +160,8 @@ void main() {
           'SPLIT_DEBUG_INFO': splitDebugInfo,
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
+          'SRCROOT': srcRoot,
+          'TARGET_DEVICE_OS_VERSION': iOSVersion,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -178,6 +186,8 @@ void main() {
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dSrcRoot=$srcRoot',
+              '-dTargetDeviceOSVersion=$iOSVersion',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_ios_bundle_flutter_assets',
             ],
@@ -251,6 +261,8 @@ void main() {
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
               '-dPreBuildAction=PrepareFramework',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               'debug_unpack_ios',
             ],
           ),
@@ -298,6 +310,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -326,6 +340,8 @@ void main() {
       const String splitDebugInfo = '/path/to/split/debug/info';
       const String trackWidgetCreation = 'true';
       const String treeShake = 'true';
+      const String srcRoot = '/path/to/project';
+      const String iOSVersion = '18.3.1';
       final TestContext context = TestContext(
         <String>['prepare'],
         <String, String>{
@@ -347,6 +363,8 @@ void main() {
           'SPLIT_DEBUG_INFO': splitDebugInfo,
           'TRACK_WIDGET_CREATION': trackWidgetCreation,
           'TREE_SHAKE_ICONS': treeShake,
+          'SRCROOT': srcRoot,
+          'TARGET_DEVICE_OS_VERSION': iOSVersion,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -371,6 +389,8 @@ void main() {
               '--ExtraGenSnapshotOptions=$extraGenSnapshotOptions',
               '--DartDefines=$dartDefines',
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
+              '-dSrcRoot=$srcRoot',
+              '-dTargetDeviceOSVersion=$iOSVersion',
               '-dPreBuildAction=PrepareFramework',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_unpack_ios',
@@ -422,6 +442,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -473,6 +495,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -523,6 +547,8 @@ void main() {
               '--ExtraGenSnapshotOptions=',
               '--DartDefines=',
               '--ExtraFrontEndOptions=',
+              '-dSrcRoot=',
+              '-dTargetDeviceOSVersion=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],

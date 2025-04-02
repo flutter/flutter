@@ -411,6 +411,20 @@ abstract final class SystemChrome {
   ///
   /// ### Android
   ///
+  /// Android limits the [orientations](https://developer.android.com/reference/android/R.attr#screenOrientation)
+  /// to the following combinations:
+  ///
+  ///   - None (empty) - Corresponds to unspecified
+  ///   - portraitUp - Corresponds to portrait
+  ///   - landscapeLeft - Corresponds to landscape
+  ///   - portraitDown - Corresponds to reversePortrait
+  ///   - portraitUp, portraitDown - Corresponds to userPortrait
+  ///   - landscapeRight - Corresponds to reverseLandscape
+  ///   - landscapeLeft, landscapeRight - Corresponds to userLandscape
+  ///   - portraitUp, landscapeLeft, landscapeRight - Corresponds to user
+  ///   - portraitUp, portraitDown, landscapeLeft, landscapeRight - Corresponds
+  ///   to fullUser
+  ///
   /// Android screens may choose to [letterbox](https://developer.android.com/guide/practices/enhanced-letterboxing)
   /// applications that lock orientation, particularly on larger screens. When
   /// letterboxing occurs on Android, the [MediaQueryData.size] reports the

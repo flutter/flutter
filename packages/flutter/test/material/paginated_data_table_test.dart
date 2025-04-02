@@ -1112,7 +1112,7 @@ void main() {
       addTearDown(source.dispose);
 
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           dataTableTheme: const DataTableThemeData(decoration: BoxDecoration(color: Colors.white)),
         ),
         home: PaginatedDataTable(
@@ -1308,7 +1308,7 @@ void main() {
       ),
     );
 
-    final Iterable<Icon> icons = tester.widgetList(find.byType(Icon));
+    final Iterable<IconButton> icons = tester.widgetList(find.byType(IconButton));
 
     expect(icons.elementAt(0).color, arrowHeadColor);
     expect(icons.elementAt(1).color, arrowHeadColor);

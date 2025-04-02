@@ -34,6 +34,13 @@ class MockWindowsProcTable : public WindowsProcTable {
 
   MOCK_METHOD(HRESULT, DwmFlush, (), (const, override));
 
+  MOCK_METHOD(HCURSOR,
+              LoadCursor,
+              (HINSTANCE instance, LPCWSTR cursor_name),
+              (const, override));
+
+  MOCK_METHOD(HCURSOR, SetCursor, (HCURSOR cursor), (const, override));
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowsProcTable);
 };

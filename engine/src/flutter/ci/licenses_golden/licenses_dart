@@ -1,4 +1,4 @@
-Signature: 84f86b2f50789f61cb66540906661036
+Signature: 273805199df1a0a2c84fce69a24219d3
 
 ====================================================================================================
 LIBRARY: dart
@@ -4231,6 +4231,7 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/engine/engine.h + ../../../flu
 ORIGIN: ../../../flutter/third_party/dart/runtime/engine/include/dart_engine.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/platform/lockers.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/simulator_arm64_trampolines.S + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart + ../../../flutter/third_party/dart/LICENSE
 TYPE: LicenseType.bsd
@@ -4241,6 +4242,7 @@ FILE: ../../../flutter/third_party/dart/runtime/engine/engine.h
 FILE: ../../../flutter/third_party/dart/runtime/engine/include/dart_engine.h
 FILE: ../../../flutter/third_party/dart/runtime/platform/lockers.h
 FILE: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart
+FILE: ../../../flutter/third_party/dart/runtime/vm/simulator_arm64_trampolines.S
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart
 ----------------------------------------------------------------------------------------------------
@@ -4860,7 +4862,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/d70b123c77d4115f332652c9bb21ac46a2456889
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/b8b4076b12378af3a4ecfd07fa41524c1fdf9b65
 /third_party/fallback_root_certificates/
 
 ====================================================================================================

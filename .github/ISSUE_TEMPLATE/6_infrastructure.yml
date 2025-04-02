@@ -1,3 +1,4 @@
+# TODO(matan): Update to reflect the new infra world, https://github.com/flutter/flutter/issues/165814
 name: The CI infrastructure used by Flutter has a problem
 description: |
   As a contributor, you want to file an issue about the build/test/release
@@ -23,11 +24,10 @@ body:
       description: |
         Is this a bug, feature request or Infra Task?
 
-        If you have a bug and you believe the issue is a blocker please add the P0 label and
-        set the project to 'Infra Ticket Queue.'
+        If you have a bug and you believe the issue is a blocker please add the `P0` label.
 
         If this is a devicelab feature such as a package update or a device is down please
-        add the 'device-lab' label to the created issue and set the project to 'Infra Ticket Queue.'
+        add the `infra: device lab` label to the created issue.
       options:
         - bug
         - feature request

@@ -730,6 +730,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -772,6 +773,8 @@ void main() {
           hasImplicitScrolling: true,
           hasExpandedState: true,
           isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1029,6 +1032,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1070,6 +1074,8 @@ void main() {
           hasImplicitScrolling: true,
           hasExpandedState: true,
           isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1125,6 +1131,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1166,6 +1173,8 @@ void main() {
           hasImplicitScrolling: false,
           hasExpandedState: false,
           isExpanded: false,
+          hasRequiredState: false,
+          isRequired: false,
           /* Actions */
           hasTapAction: false,
           hasLongPressAction: false,
@@ -1228,6 +1237,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1259,6 +1269,7 @@ void main() {
         headingLevel: 0,
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1346,6 +1357,7 @@ void main() {
         headingLevel: 0,
         linkUrl: null,
         role: ui.SemanticsRole.none,
+        controlsNodes: null,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

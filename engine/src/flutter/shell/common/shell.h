@@ -605,7 +605,8 @@ class Shell final : public PlatformView::Delegate,
       std::unique_ptr<PointerDataPacket> packet) override;
 
   // |PlatformView::Delegate|
-  void OnPlatformViewDispatchSemanticsAction(int32_t node_id,
+  void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
+                                             int32_t node_id,
                                              SemanticsAction action,
                                              fml::MallocMapping args) override;
 
@@ -666,6 +667,7 @@ class Shell final : public PlatformView::Delegate,
 
   // |Engine::Delegate|
   void OnEngineUpdateSemantics(
+      int64_t view_id,
       SemanticsNodeUpdates update,
       CustomAccessibilityActionUpdates actions) override;
 

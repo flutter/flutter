@@ -154,4 +154,22 @@ void testMain() {
       expect('$exception', contains('operation failed'));
     }
   });
+
+  test('unordered list equality', () {
+    expect(unorderedListEqual<int>(null, null), isTrue);
+    expect(unorderedListEqual<int>(<int>[], null), isTrue);
+    expect(unorderedListEqual<int>(<int>[], <int>[]), isTrue);
+    expect(unorderedListEqual<int>(<int>[1], <int>[1]), isTrue);
+    expect(unorderedListEqual<int>(<int>[1, 2], <int>[1, 2]), isTrue);
+    expect(unorderedListEqual<int>(<int>[2, 1], <int>[1, 2]), isTrue);
+    expect(unorderedListEqual<int>(<int>[2, 1, 3], <int>[3, 1, 2]), isTrue);
+
+    expect(unorderedListEqual<int>(<int>[1], null), isFalse);
+    expect(unorderedListEqual<int>(<int>[1], <int>[2]), isFalse);
+    expect(unorderedListEqual<int>(<int>[1, 2], <int>[2, 2]), isFalse);
+    expect(unorderedListEqual<int>(<int>[1, 2], <int>[2, 3]), isFalse);
+    expect(unorderedListEqual<int>(<int>[1, 2], <int>[3, 4]), isFalse);
+    expect(unorderedListEqual<int>(<int>[2, 1, 3], <int>[3, 1, 1]), isFalse);
+    expect(unorderedListEqual<int>(<int>[1, 1, 2], <int>[3, 1, 1]), isFalse);
+  });
 }

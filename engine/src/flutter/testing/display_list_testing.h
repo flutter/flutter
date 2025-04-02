@@ -44,8 +44,6 @@ extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DisplayList& display_list);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlPaint& paint);
-extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlBlendMode& mode);
 extern std::ostream& operator<<(std::ostream& os, const flutter::DlClipOp& op);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlPointMode& op);

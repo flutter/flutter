@@ -35,12 +35,13 @@
 
 // CREATE_NATIVE_ENTRY is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
+// NOLINTBEGIN(clang-analyzer-cplusplus.NewDeleteLeaks)
 
 namespace impeller {
 
 class TestImpellerContext : public impeller::Context {
  public:
-  TestImpellerContext() = default;
+  TestImpellerContext() : impeller::Context(impeller::Flags{}) {}
 
   BackendType GetBackendType() const override { return BackendType::kMetal; }
 
@@ -385,6 +386,9 @@ TEST_F(ImageDecoderFixtureTest, ImpellerUploadToSharedNoGpu) {
   ASSERT_EQ(no_gpu_access_context->command_buffer_count_, 0ul);
   ASSERT_EQ(result.second, "");
   EXPECT_EQ(no_gpu_access_context->DidDisposeResources(), true);
+  EXPECT_EQ(
+      result.first->impeller_texture()->GetTextureDescriptor().storage_mode,
+      impeller::StorageMode::kHostVisible);
 
   no_gpu_access_context->FlushTasks(/*fail=*/true);
 }
@@ -1007,174 +1011,6 @@ TEST_F(ImageDecoderFixtureTest,
   PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
 }
 
-TEST_F(ImageDecoderFixtureTest, MultiFrameCodecDidAccessGpuDisabledSyncSwitch) {
-  auto settings = CreateSettingsForFixture();
-  auto vm_ref = DartVMRef::Create(settings);
-  auto vm_data = vm_ref.GetVMData();
-
-  auto gif_mapping = flutter::testing::OpenFixtureAsSkData("hello_loop_2.gif");
-
-  ASSERT_TRUE(gif_mapping);
-
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> gif_generator =
-      registry.CreateCompatibleGenerator(gif_mapping);
-  ASSERT_TRUE(gif_generator);
-
-  TaskRunners runners(GetCurrentTestName(),         // label
-                      CreateNewThread("platform"),  // platform
-                      CreateNewThread("raster"),    // raster
-                      CreateNewThread("ui"),        // ui
-                      CreateNewThread("io")         // io
-  );
-
-  std::unique_ptr<TestIOManager> io_manager;
-  fml::RefPtr<MultiFrameCodec> codec;
-  fml::AutoResetWaitableEvent latch;
-
-  auto validate_frame_callback = [&latch](Dart_NativeArguments args) {
-    EXPECT_FALSE(Dart_IsNull(Dart_GetNativeArgument(args, 0)));
-    latch.Signal();
-  };
-
-  AddNativeCallback("ValidateFrameCallback",
-                    CREATE_NATIVE_ENTRY(validate_frame_callback));
-  // Setup the IO manager.
-  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
-    io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
-  });
-
-  auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "main", {},
-                                      GetDefaultKernelFilePath(),
-                                      io_manager->GetWeakIOManager());
-
-  PostTaskSync(runners.GetUITaskRunner(), [&]() {
-    fml::AutoResetWaitableEvent isolate_latch;
-
-    EXPECT_TRUE(isolate->RunInIsolateScope([&]() -> bool {
-      Dart_Handle library = Dart_RootLibrary();
-      if (Dart_IsError(library)) {
-        isolate_latch.Signal();
-        return false;
-      }
-      Dart_Handle closure =
-          Dart_GetField(library, Dart_NewStringFromCString("frameCallback"));
-      if (Dart_IsError(closure) || !Dart_IsClosure(closure)) {
-        isolate_latch.Signal();
-        return false;
-      }
-
-      EXPECT_FALSE(io_manager->did_access_is_gpu_disabled_sync_switch_);
-      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator));
-      codec->getNextFrame(closure);
-      isolate_latch.Signal();
-      return true;
-    }));
-    isolate_latch.Wait();
-  });
-
-  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
-    EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
-  });
-
-  latch.Wait();
-
-  // Destroy the Isolate
-  isolate = nullptr;
-
-  // Destroy the MultiFrameCodec
-  PostTaskSync(runners.GetUITaskRunner(), [&]() { codec = nullptr; });
-
-  // Destroy the IO manager
-  PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
-}
-
-TEST_F(ImageDecoderFixtureTest, MultiFrameCodecIsPausedWhenGPUIsUnavailable) {
-  auto settings = CreateSettingsForFixture();
-  settings.enable_impeller = true;
-  auto vm_ref = DartVMRef::Create(settings);
-  auto vm_data = vm_ref.GetVMData();
-
-  auto gif_mapping = flutter::testing::OpenFixtureAsSkData("hello_loop_2.gif");
-
-  ASSERT_TRUE(gif_mapping);
-
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> gif_generator =
-      registry.CreateCompatibleGenerator(gif_mapping);
-  ASSERT_TRUE(gif_generator);
-
-  TaskRunners runners(GetCurrentTestName(),         // label
-                      CreateNewThread("platform"),  // platform
-                      CreateNewThread("raster"),    // raster
-                      CreateNewThread("ui"),        // ui
-                      CreateNewThread("io")         // io
-  );
-
-  std::unique_ptr<TestIOManager> io_manager;
-  fml::RefPtr<MultiFrameCodec> codec;
-  fml::AutoResetWaitableEvent latch;
-
-  auto validate_frame_callback = [&latch](Dart_NativeArguments args) {
-    EXPECT_FALSE(Dart_IsNull(Dart_GetNativeArgument(args, 0)));
-    latch.Signal();
-  };
-
-  AddNativeCallback("ValidateFrameCallback",
-                    CREATE_NATIVE_ENTRY(validate_frame_callback));
-
-  // Setup the IO manager.
-  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
-    io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
-    // Mark GPU disabled.
-    io_manager->SetGpuDisabled(true);
-  });
-
-  auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "main", {},
-                                      GetDefaultKernelFilePath(),
-                                      io_manager->GetWeakIOManager());
-
-  PostTaskSync(runners.GetUITaskRunner(), [&]() {
-    fml::AutoResetWaitableEvent isolate_latch;
-
-    EXPECT_TRUE(isolate->RunInIsolateScope([&]() -> bool {
-      Dart_Handle library = Dart_RootLibrary();
-      if (Dart_IsError(library)) {
-        isolate_latch.Signal();
-        return false;
-      }
-      Dart_Handle closure =
-          Dart_GetField(library, Dart_NewStringFromCString("frameCallback"));
-      if (Dart_IsError(closure) || !Dart_IsClosure(closure)) {
-        isolate_latch.Signal();
-        return false;
-      }
-
-      EXPECT_FALSE(io_manager->did_access_is_gpu_disabled_sync_switch_);
-      codec = fml::MakeRefCounted<MultiFrameCodec>(std::move(gif_generator));
-      codec->getNextFrame(closure);
-      isolate_latch.Signal();
-      return true;
-    }));
-    isolate_latch.Wait();
-  });
-
-  PostTaskSync(runners.GetIOTaskRunner(), [&]() {
-    EXPECT_TRUE(io_manager->did_access_is_gpu_disabled_sync_switch_);
-  });
-
-  latch.Wait();
-
-  // Destroy the Isolate
-  isolate = nullptr;
-
-  // Destroy the MultiFrameCodec
-  PostTaskSync(runners.GetUITaskRunner(), [&]() { codec = nullptr; });
-
-  // Destroy the IO manager
-  PostTaskSync(runners.GetIOTaskRunner(), [&]() { io_manager.reset(); });
-}
-
 TEST_F(ImageDecoderFixtureTest, NullCheckBuffer) {
   auto context = std::make_shared<impeller::TestImpellerContext>();
   auto allocator = ImpellerAllocator(context->GetResourceAllocator());
@@ -1185,4 +1021,5 @@ TEST_F(ImageDecoderFixtureTest, NullCheckBuffer) {
 }  // namespace testing
 }  // namespace flutter
 
+// NOLINTEND(clang-analyzer-cplusplus.NewDeleteLeaks)
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
