@@ -1187,7 +1187,7 @@ void main() {
       expect(find.byType(CupertinoSwitch), findsNothing);
 
       final Switch adaptiveSwitch = tester.widget(find.byType(Switch));
-      expect(adaptiveSwitch.activeColor, activeTrackColor, reason: 'on ${platform.name}');
+      expect(adaptiveSwitch.activeThumbColor, activeTrackColor, reason: 'on ${platform.name}');
       expect(adaptiveSwitch.inactiveTrackColor, inactiveTrackColor, reason: 'on ${platform.name}');
       expect(
         adaptiveSwitch.thumbColor?.resolve(<MaterialState>{}),
@@ -4187,6 +4187,59 @@ void main() {
     await tester.pumpWidget(buildSwitch(padding: const EdgeInsets.all(4.0)));
 
     expect(tester.getSize(find.byType(Switch)), const Size(60.0, 56.0));
+  });
+
+  testWidgets('Switch activeThumbColor', (WidgetTester tester) async {
+    const Color activeTrackColor = Color(0xffff1200);
+    const Color activeThumbColor = Color(0xffff12ff);
+
+    Widget buildSwitch({Color? activeColor, Color? activeThumbColor}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: Material(
+          child: Center(
+            child: Switch(
+              activeColor: activeTrackColor,
+              activeThumbColor: activeThumbColor,
+              value: true,
+              onChanged: null,
+            ),
+          ),
+        ),
+      );
+    }
+
+    Widget buildSwitchAdaptive({Color? activeColor, Color? activeThumbColor}) {
+      return Directionality(
+        textDirection: TextDirection.rtl,
+        child: Material(
+          child: Center(
+            child: Switch.adaptive(
+              activeColor: activeTrackColor,
+              activeThumbColor: activeThumbColor,
+              value: true,
+              onChanged: null,
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSwitch(activeColor: activeTrackColor));
+    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeTrackColor);
+
+    await tester.pumpWidget(
+      buildSwitch(activeColor: activeTrackColor, activeThumbColor: activeThumbColor),
+    );
+    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
+
+    await tester.pumpWidget(buildSwitchAdaptive(activeColor: activeTrackColor));
+    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeTrackColor);
+
+    await tester.pumpWidget(
+      buildSwitchAdaptive(activeColor: activeTrackColor, activeThumbColor: activeThumbColor),
+    );
+    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
   });
 }
 
