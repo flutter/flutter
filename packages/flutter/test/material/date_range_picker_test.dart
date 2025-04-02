@@ -1471,6 +1471,7 @@ void main() {
             label: '30, Saturday, January 30, 2016, Today',
             hasTapAction: true,
             hasFocusAction: true,
+            hasSelectedState: true,
             isFocusable: true,
           ),
         );
