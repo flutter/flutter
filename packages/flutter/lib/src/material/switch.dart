@@ -108,7 +108,7 @@ class Switch extends StatelessWidget {
     required this.value,
     required this.onChanged,
     @Deprecated(
-      'Use activeTrackColor instead. '
+      'Use activeColor instead. '
       'This feature was deprecated after v3.31.0-2.0.pre.',
     )
     Color? activeColor,
@@ -168,7 +168,7 @@ class Switch extends StatelessWidget {
     required this.value,
     required this.onChanged,
     @Deprecated(
-      'Use activeTrackColor instead. '
+      'Use activeColor instead. '
       'This feature was deprecated after v3.31.0-2.0.pre.',
     )
     Color? activeColor,
