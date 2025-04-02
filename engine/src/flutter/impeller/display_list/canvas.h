@@ -17,6 +17,7 @@
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -367,6 +368,12 @@ class Canvas {
                                       const Paint& paint,
                                       const SamplerDescriptor& sampler,
                                       SourceRectConstraint src_rect_constraint);
+
+  bool AttemptBlurredTextOptimization(
+      const std::shared_ptr<TextFrame>& text_frame,
+      const std::shared_ptr<TextContents>& text_contents,
+      Entity& entity,
+      const Paint& paint);
 
   RenderPass& GetCurrentRenderPass() const;
 
