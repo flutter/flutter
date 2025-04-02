@@ -11,8 +11,17 @@ import java.io.File
 import java.nio.file.Paths
 import java.util.Properties
 
-const val FLUTTER_SDK_PATH = "flutterSdkPath"
+private const val FLUTTER_SDK_PATH = "flutterSdkPath"
 
+// Integration tests that cover this class include
+// - packages/flutter_tools/test/integration.shard/android_gradle_daemon_cache_test.dart
+// - packages/flutter_tools/test/integration.shard/android_plugin_compilesdkversion_mismatch_test.dart
+// And can be run by following the README in  packages/flutter_tools/.
+
+/**
+ * This plugin applies the native plugin loader plugin (../scripts/native_plugin_loader.gradle.kts)
+ * and then configures the main project to `include` each of the loaded flutter plugins.
+ */
 class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
     override fun apply(settings: Settings) {
         val flutterProjectRoot: File = settings.settingsDir.parentFile
@@ -48,7 +57,7 @@ class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
                 val pluginDirectory = File(androidPlugin["path"] as String, "android")
                 check(
                     pluginDirectory.exists()
-                ) { "Plugin directory does not exist: ${pluginDirectory.absolutePath}" } // Replaced assert with check
+                ) { "Plugin directory does not exist: ${pluginDirectory.absolutePath}" }
                 val pluginName = androidPlugin["name"] as String
                 settings.include(":$pluginName")
                 settings.project(":$pluginName").projectDir = pluginDirectory
