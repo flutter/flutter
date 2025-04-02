@@ -1696,11 +1696,6 @@ FlutterEngineResult FlutterEngineCreateAOTData(
       auto aot_data = std::make_unique<_FlutterEngineAOTData>();
       const char* error = nullptr;
 
-#if OS_FUCHSIA
-      // TODO(gw280): https://github.com/flutter/flutter/issues/50285
-      // Dart doesn't implement Dart_LoadELF on Fuchsia
-      Dart_LoadedElf* loaded_elf = nullptr;
-#else
       Dart_LoadedElf* loaded_elf = Dart_LoadELF(
           source->elf_path,               // file path
           0,                              // file offset
@@ -1710,7 +1705,6 @@ FlutterEngineResult FlutterEngineCreateAOTData(
           &aot_data->vm_isolate_data,     // vm isolate data (out)
           &aot_data->vm_isolate_instrs    // vm isolate instr (out)
       );
-#endif
 
       if (loaded_elf == nullptr) {
         return LOG_EMBEDDER_ERROR(kInvalidArguments, error);

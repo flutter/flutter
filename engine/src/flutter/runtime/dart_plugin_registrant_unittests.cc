@@ -52,9 +52,6 @@ class DartIsolateTest : public FixtureTest {
 };
 
 TEST_F(DartIsolateTest, DartPluginRegistrantIsPresent) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
-  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
-#else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 
   std::vector<std::string> messages;
@@ -99,13 +96,9 @@ TEST_F(DartIsolateTest, DartPluginRegistrantIsPresent) {
 
   ASSERT_EQ(messages.size(), 1u);
   ASSERT_EQ(messages[0], "_PluginRegistrant.register() was called");
-#endif
 }
 
 TEST_F(DartIsolateTest, DartPluginRegistrantFromBackgroundIsolate) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
-  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
-#else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 
   std::vector<std::string> messages;
@@ -151,13 +144,9 @@ TEST_F(DartIsolateTest, DartPluginRegistrantFromBackgroundIsolate) {
   ASSERT_EQ(messages.size(), 1u);
   ASSERT_EQ(messages[0],
             "_PluginRegistrant.register() was called on background isolate");
-#endif
 }
 
 TEST_F(DartIsolateTest, DartPluginRegistrantNotFromBackgroundIsolate) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
-  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
-#else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 
   std::vector<std::string> messages;
@@ -204,13 +193,9 @@ TEST_F(DartIsolateTest, DartPluginRegistrantNotFromBackgroundIsolate) {
   ASSERT_EQ(
       messages[0],
       "_PluginRegistrant.register() was not called on background isolate");
-#endif
 }
 
 TEST_F(DartIsolateTest, DartPluginRegistrantWhenRegisteringBackgroundIsolate) {
-#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
-  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
-#else
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 
   std::vector<std::string> messages;
@@ -256,7 +241,6 @@ TEST_F(DartIsolateTest, DartPluginRegistrantWhenRegisteringBackgroundIsolate) {
   ASSERT_EQ(messages.size(), 1u);
   ASSERT_EQ(messages[0],
             "_PluginRegistrant.register() was called on background isolate");
-#endif
 }
 
 }  // namespace testing
