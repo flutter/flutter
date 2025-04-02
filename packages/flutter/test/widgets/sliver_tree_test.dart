@@ -861,4 +861,43 @@ void main() {
       });
     },
   );
+
+  testWidgets('TreeSliver and PinnedHeaderSliver can render correctly when used together.', (
+    WidgetTester tester,
+  ) async {
+    const ValueKey<String> key = ValueKey<String>('sliver_tree_pined_header');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: RepaintBoundary(
+            key: key,
+            child: SizedBox(
+              height: 20,
+              width: 20,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  const PinnedHeaderSliver(child: SizedBox(height: 10)),
+                  TreeSliver<Object>(
+                    tree: <TreeSliverNode<Object>>[TreeSliverNode<Object>(Object())],
+                    treeRowExtentBuilder: (_, _) => 10,
+                    treeNodeBuilder: (
+                      BuildContext context,
+                      TreeSliverNode<Object?> node,
+                      AnimationStyle animationStyle,
+                    ) {
+                      return const ColoredBox(color: Colors.red);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await expectLater(find.byKey(key), matchesGoldenFile('sliver_tree.pined_header.0.png'));
+    expect(tester.getTopLeft(find.byType(ColoredBox)), const Offset(0, 10));
+  });
 }
