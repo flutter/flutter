@@ -35,10 +35,10 @@ class FlutterPlugin : Plugin<Project> {
     internal var localEngine: String? = null
     internal var localEngineHost: String? = null
     internal var localEngineSrcPath: String? = null
-    private var localProperties: Properties? = null
-    private var engineVersion: String? = null
-    private var engineRealm: String? = null
-    private var pluginConfigurer: PluginConfigurer? = null
+    internal var localProperties: Properties? = null
+    internal var engineVersion: String? = null
+    internal var engineRealm: String? = null
+    internal var pluginConfigurer: PluginConfigurer? = null
 
     override fun apply(project: Project) {
         this.project = project
@@ -266,7 +266,7 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addFlutterDependencies(
             project!!,
             buildType,
-            getPluginConfigurer(),
+            getPluginConfigurer().getPluginList(),
             engineVersion!!
         )
     }

@@ -1,23 +1,18 @@
 package com.flutter.gradle.plugins
 
-import androidx.annotation.VisibleForTesting
-import com.android.builder.model.BuildType
-import com.flutter.gradle.FlutterExtension
-import com.flutter.gradle.FlutterPluginConstants
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.NativePluginLoaderReflectionBridge
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
-import java.io.File
 import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
 
 class PluginConfigurer(
     val project: Project
 ) {
-    private var pluginList: List<Map<String?, Any?>>? = null
-    private var pluginDependencies: List<Map<String?, Any?>>? = null
+    internal var pluginList: List<Map<String?, Any?>>? = null
+    internal var pluginDependencies: List<Map<String?, Any?>>? = null
 
     /**
      * Gets the list of plugins (as map) that support the Android platform.
@@ -27,38 +22,28 @@ class PluginConfigurer(
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
      */
     internal fun getPluginList(): List<Map<String?, Any?>> {
-        // if (pluginList == null) {
-        pluginList =
-            NativePluginLoaderReflectionBridge.getPlugins(
-                project.extraProperties,
-                FlutterPluginUtils.getFlutterSourceDirectory(project)
-            )
-        // }
+        if (pluginList == null) {
+            pluginList =
+                NativePluginLoaderReflectionBridge.getPlugins(
+                    project.extraProperties,
+                    FlutterPluginUtils.getFlutterSourceDirectory(project)
+                )
+        }
         return pluginList!!
     }
-
-    /**
-     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
-     * Android project excluding dev dependencies.
-     *
-     * The map value contains either the plugins `name` (String),
-     * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
-     */
-    internal fun getPluginListWithoutDevDependencies(): List<Map<String?, Any?>> =
-        getPluginList().filter { pluginObject -> pluginObject["dev_dependency"] == false }
 
     internal fun configurePlugins(engineVersionValue: String) {
         configureLegacyPluginEachProjects(engineVersionValue)
         val pluginList: List<Map<String?, Any?>> = getPluginList()
         pluginList.forEach { plugin: Map<String?, Any?> ->
-            configurePluginProject(
+            FlutterPluginUtils.configurePluginProject(
+                project,
                 plugin,
                 engineVersionValue
             )
         }
         pluginList.forEach { plugin: Map<String?, Any?> ->
-            configurePluginDependencies(plugin)
+            FlutterPluginUtils.configurePluginDependencies(project, plugin)
         }
     }
 
@@ -130,10 +115,10 @@ class PluginConfigurer(
                 project.logger.error(
                     "Plugin project :${plugin["name"]} listed, but not found. Please fix your settings.gradle/settings.gradle.kts."
                 )
-            } else if (pluginSupportsAndroidPlatform(pluginProject)) {
+            } else if (FlutterPluginUtils.pluginSupportsAndroidPlatform(pluginProject)) {
                 // Plugin has a functioning `android` folder and is included successfully, although it's not supported.
                 // It must be configured nonetheless, to not throw an "Unresolved reference" exception.
-                configurePluginProject(plugin, engineVersionValue)
+                FlutterPluginUtils.configurePluginProject(project, plugin, engineVersionValue)
             } else {
                 // Plugin has no or an empty `android` folder. No action required.
             }
@@ -157,148 +142,5 @@ class PluginConfigurer(
             pluginDependencies = meta["dependencyGraph"] as List<Map<String?, Any?>>
         }
         return pluginDependencies!!
-    }
-
-    /**
-     * Performs configuration related to the plugin's Gradle [Project], including
-     * 1. Adding the plugin itself as a dependency to the main project.
-     * 2. Adding the main project's build types to the plugin's build types.
-     * 3. Adding a dependency on the Flutter embedding to the plugin.
-     *
-     * Should only be called on plugins that support the Android platform.
-     */
-    private fun configurePluginProject(
-        pluginObject: Map<String?, Any?>,
-        engineVersion: String
-    ) {
-        // TODO(gmackall): should guard this with a pluginObject.contains().
-        val pluginName =
-            requireNotNull(pluginObject["name"] as? String) { "Plugin name must be a string for plugin object: $pluginObject" }
-        val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
-
-        // Apply the "flutter" Gradle extension to plugins so that they can use it's vended
-        // compile/target/min sdk values.
-        pluginProject.extensions.create("flutter", FlutterExtension::class.java)
-
-        // Add plugin dependency to the app project. We only want to add dependency
-        // for dev dependencies in non-release builds.
-        project.afterEvaluate {
-            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                if (!(pluginObject["dev_dependency"] as Boolean) || buildType.name != "release") {
-                    project.dependencies.add("${buildType.name}Api", pluginProject)
-                }
-            }
-        }
-
-        // Wait until the Android plugin loaded.
-        pluginProject.afterEvaluate {
-            // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
-            val projectCompileSdkVersion: String =
-                FlutterPluginUtils.getCompileSdkFromProject(project)
-            val pluginCompileSdkVersion: String =
-                FlutterPluginUtils.getCompileSdkFromProject(pluginProject)
-            // TODO(gmackall): This is doing a string comparison, which is odd and also can be wrong
-            //                 when comparing preview versions (against non preview, and also in the
-            //                 case of alphabet reset which happened with "Baklava".
-            if (pluginCompileSdkVersion > projectCompileSdkVersion) {
-                project.logger.quiet("Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher.")
-                project.logger.quiet(
-                    "For more information about build configuration, see ${FlutterPluginConstants.WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG}."
-                )
-            }
-
-            FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-                addEmbeddingDependencyToPlugin(project, pluginProject, buildType, engineVersion)
-            }
-        }
-    }
-
-    private fun addEmbeddingDependencyToPlugin(
-        project: Project,
-        pluginProject: Project,
-        buildType: BuildType,
-        engineVersion: String
-    ) {
-        val flutterBuildMode: String = FlutterPluginUtils.buildModeFor(buildType)
-        // TODO(gmackall): this should be safe to remove, as the minimum required AGP is well above
-        //                 3.5. We should try to remove it.
-        // In AGP 3.5, the embedding must be added as an API implementation,
-        // so java8 features are desugared against the runtime classpath.
-        // For more, see https://github.com/flutter/flutter/issues/40126
-        if (!FlutterPluginUtils.supportsBuildMode(pluginProject, flutterBuildMode)) {
-            return
-        }
-        if (!pluginProject.hasProperty("android")) {
-            return
-        }
-
-        // Copy build types from the app to the plugin.
-        // This allows to build apps with plugins and custom build types or flavors.
-        FlutterPluginUtils.getAndroidExtension(pluginProject).buildTypes.addAll(
-            FlutterPluginUtils
-                .getAndroidExtension(
-                    project
-                ).buildTypes
-        )
-
-        // The embedding is API dependency of the plugin, so the AGP is able to desugar
-        // default method implementations when the interface is implemented by a plugin.
-        //
-        // See https://issuetracker.google.com/139821726, and
-        // https://github.com/flutter/flutter/issues/72185 for more details.
-        FlutterPluginUtils.addApiDependencies(
-            pluginProject,
-            buildType.name,
-            "io.flutter:flutter_embedding_$flutterBuildMode:$engineVersion"
-        )
-    }
-
-    /**
-     * Add the dependencies on other plugin projects to the plugin project.
-     * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
-     * making the Gradle plugin project A depend on the Gradle plugin project B.
-     */
-    @VisibleForTesting
-    internal fun configurePluginDependencies(pluginObject: Map<String?, Any?>) {
-        val pluginName: String =
-            requireNotNull(pluginObject["name"] as? String) {
-                "Missing valid \"name\" property for plugin object: $pluginObject"
-            }
-        val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
-
-        FlutterPluginUtils.getAndroidExtension(project).buildTypes.forEach { buildType ->
-            val flutterBuildMode: String = FlutterPluginUtils.buildModeFor(buildType)
-            if (flutterBuildMode == "release" && (pluginObject["dev_dependency"] as? Boolean == true)) {
-                // This plugin is a dev dependency will not be included in the
-                // release build, so no need to add its dependencies.
-                return@forEach
-            }
-            val dependencies = requireNotNull(pluginObject["dependencies"] as? List<*>)
-            dependencies.forEach innerForEach@{ pluginDependencyName ->
-                check(pluginDependencyName is String)
-                if (pluginDependencyName.isEmpty()) {
-                    return@innerForEach
-                }
-
-                val dependencyProject =
-                    project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
-                pluginProject.afterEvaluate {
-                    pluginProject.dependencies.add("implementation", dependencyProject)
-                }
-            }
-        }
-    }
-
-    // TODO(54566): Can remove this function and its call sites once resolved.
-
-    /**
-     * Returns `true` if the given project is a plugin project having an `android` directory
-     * containing a `build.gradle` or `build.gradle.kts` file.
-     */
-    private fun pluginSupportsAndroidPlatform(project: Project): Boolean {
-        val buildGradle = File(File(project.projectDir.parentFile, "android"), "build.gradle")
-        val buildGradleKts =
-            File(File(project.projectDir.parentFile, "android"), "build.gradle.kts")
-        return buildGradle.exists() || buildGradleKts.exists()
     }
 }
