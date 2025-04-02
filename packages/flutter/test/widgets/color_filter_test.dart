@@ -12,8 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../impeller_test_helpers.dart';
-
 void main() {
   testWidgets('Color filter - red', (WidgetTester tester) async {
     await tester.pumpWidget(

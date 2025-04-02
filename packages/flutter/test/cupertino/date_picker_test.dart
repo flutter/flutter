@@ -17,8 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../impeller_test_helpers.dart';
-
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
 final bool skipPerspectiveTextGoldens = isBrowser && isSkwasm;
 

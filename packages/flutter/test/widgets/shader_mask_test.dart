@@ -10,8 +10,6 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../impeller_test_helpers.dart';
-
 Shader createShader(Rect bounds) {
   return const LinearGradient(
     begin: Alignment.topCenter,
