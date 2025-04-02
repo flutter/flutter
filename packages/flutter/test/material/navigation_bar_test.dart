@@ -470,11 +470,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 3',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
         isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -482,10 +485,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 3',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -493,10 +499,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('ABC')),
       matchesSemantics(
-        label: 'ABC\nTab 3 of 3',
+        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -507,10 +516,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 3',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -518,11 +530,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 3',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -530,12 +545,42 @@ void main() {
     expect(
       tester.getSemantics(find.text('ABC')),
       matchesSemantics(
-        label: 'ABC\nTab 3 of 3',
+        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
+      ),
+    );
+  });
+  testWidgets('Navigation bar disabled semantics', (WidgetTester tester) async {
+    Widget widget({int selectedIndex = 0}) {
+      return _buildWidget(
+        NavigationBar(
+          selectedIndex: selectedIndex,
+          destinations: const <Widget>[
+            NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC', enabled: false),
+            NavigationDestination(icon: Icon(Icons.ac_unit), label: 'Another'),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(widget());
+
+    expect(
+      tester.getSemantics(find.text('AC')),
+      matchesSemantics(
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
+        textDirection: TextDirection.ltr,
+        isSelected: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isButton: true,
       ),
     );
   });
@@ -559,11 +604,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -571,10 +619,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -585,10 +636,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -596,9 +650,12 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         isSelected: true,
         isButton: true,
         hasTapAction: true,
