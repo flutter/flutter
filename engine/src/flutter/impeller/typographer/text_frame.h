@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include "impeller/geometry/rational.h"
+#include "impeller/typographer/glyph.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
 
@@ -79,6 +80,13 @@ class TextFrame {
   ///
   /// This method is only valid if [IsFrameComplete] returns true.
   const FrameBounds& GetFrameBounds(size_t index) const;
+
+  /// @brief If this text frame contains a single glyph (such as for an Icon),
+  ///        then return it, otherwise std::nullopt.
+  std::optional<Glyph> AsSingleGlyph() const;
+
+  /// @brief Return the font of the first glyph run.
+  const Font& GetFont() const;
 
   /// @brief Store text frame scale, offset, and properties for hashing in th
   /// glyph atlas.
