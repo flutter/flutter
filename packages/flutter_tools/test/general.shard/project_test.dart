@@ -1554,9 +1554,12 @@ name: child2_example
 resolution: workspace
 ''');
 
-        expect(FlutterProject.fromDirectory(directory).workspaceProjects.map(
-          (FlutterProject subproject) => subproject.manifest.appName
-        ).toList(), <String>['child1', 'child2', 'child2_example']);
+        expect(
+          FlutterProject.fromDirectory(directory).workspaceProjects
+              .map((FlutterProject subproject) => subproject.manifest.appName)
+              .toList(),
+          <String>['child1', 'child2', 'child2_example'],
+        );
       });
     });
   });

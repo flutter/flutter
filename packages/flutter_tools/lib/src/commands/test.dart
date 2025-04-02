@@ -733,6 +733,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         packagesToInclude.add(project.manifest.appName);
         project.workspaceProjects.forEach(addProject);
       }
+
       addProject(flutterProject);
     }
     try {

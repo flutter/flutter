@@ -373,23 +373,23 @@ workspace:
 - child1
 - child2
 ''');
-        package.childFile('child1/pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+      package.childFile('child1/pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
 name: child1
 resolution: workspace
 ''');
-        package.childFile('child2/pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+      package.childFile('child2/pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
 name: child2
 resolution: workspace
 workspace:
 - example
 ''');
-        package.childFile('child2/example/pubspec.yaml')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
+      package.childFile('child2/example/pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
 name: child2_example
 resolution: workspace
 ''');
@@ -413,10 +413,10 @@ resolution: workspace
               'forceCompile': true,
               'reportLines': true,
               'libraryFilters': <String>[
-                  'package:my_app/',
-                  'package:child1/',
-                  'package:child2/',
-                  'package:child2_example/',
+                'package:my_app/',
+                'package:child1/',
+                'package:child2/',
+                'package:child2_example/',
               ],
               'librariesAlreadyCompiled': <Object>[],
             },
