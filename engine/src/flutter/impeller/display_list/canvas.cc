@@ -1658,9 +1658,6 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
     }
   }
 
-  if (!reuse_depth) {
-    ++current_depth_;
-  }
   // We can render at a depth up to and including the depth of the currently
   // active clips and we will still be clipped out, but we cannot render at
   // a depth that is greater than the current clips or we will not be clipped.
@@ -1681,7 +1678,9 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       // to the render target texture so far need to execute before it's bound
       // for blending (otherwise the blend pass will end up executing before
       // all the previous commands in the active pass).
-      auto input_texture = FlipBackdrop(GetGlobalPassPosition());
+      auto input_texture = FlipBackdrop(GetGlobalPassPosition(),  //
+                                        /*should_remove_texture=*/false,
+                                        /*should_use_onscreen=*/false);
       if (!input_texture) {
         return;
       }
@@ -1702,6 +1701,10 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       entity.SetContents(std::move(contents));
       entity.SetBlendMode(BlendMode::kSrc);
     }
+  }
+
+  if (!reuse_depth) {
+    ++current_depth_;
   }
 
   const std::shared_ptr<RenderPass>& result =
