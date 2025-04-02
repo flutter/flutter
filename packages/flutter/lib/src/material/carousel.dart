@@ -107,6 +107,15 @@ import 'theme.dart';
 /// Here is an example to show different carousel layouts that [CarouselView]
 /// and [CarouselView.weighted] can build.
 ///
+/// On desktop and web running on desktop platforms, dragging to scroll with a mouse is disabled by default
+/// to align with the natural behavior found in other desktop applications.
+///
+/// Nevertheless, it remains feasible to scroll horizontally using a mouse by pressing Shift key while scrolling with the mouse wheel.
+///
+/// This behavior is dictated by the [ScrollBehavior], and can be changed by adding
+/// [PointerDeviceKind.mouse] to [ScrollBehavior.dragDevices].
+/// For more info on this, please refer to https://docs.flutter.dev/release/breaking-changes/default-scroll-behavior-drag
+///
 /// ** See code in examples/api/lib/material/carousel/carousel.0.dart **
 /// {@end-tool}
 ///
