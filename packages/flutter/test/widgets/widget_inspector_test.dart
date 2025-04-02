@@ -4478,47 +4478,50 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
     });
 
-    testWidgets('ext.flutter.inspector.screenshot', (WidgetTester tester) async {
-      final GlobalKey outerContainerKey = GlobalKey();
-      final GlobalKey paddingKey = GlobalKey();
-      final GlobalKey redContainerKey = GlobalKey();
-      final GlobalKey whiteContainerKey = GlobalKey();
-      final GlobalKey sizedBoxKey = GlobalKey();
+    testWidgets(
+      'ext.flutter.inspector.screenshot',
+      (WidgetTester tester) async {
+        final GlobalKey outerContainerKey = GlobalKey();
+        final GlobalKey paddingKey = GlobalKey();
+        final GlobalKey redContainerKey = GlobalKey();
+        final GlobalKey whiteContainerKey = GlobalKey();
+        final GlobalKey sizedBoxKey = GlobalKey();
 
-      // Complex widget tree intended to exercise features such as children
-      // with rotational transforms and clipping without introducing platform
-      // specific behavior as text rendering would.
-      await tester.pumpWidget(
-        Center(
-          child: RepaintBoundaryWithDebugPaint(
-            child: ColoredBox(
-              key: outerContainerKey,
-              color: Colors.white,
-              child: Padding(
-                key: paddingKey,
-                padding: const EdgeInsets.all(100.0),
-                child: SizedBox(
-                  key: sizedBoxKey,
-                  height: 100.0,
-                  width: 100.0,
-                  child: Transform.rotate(
-                    angle: 1.0, // radians
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.elliptical(10.0, 20.0),
-                        topRight: Radius.elliptical(5.0, 30.0),
-                        bottomLeft: Radius.elliptical(2.5, 12.0),
-                        bottomRight: Radius.elliptical(15.0, 6.0),
-                      ),
-                      child: ColoredBox(
-                        key: redContainerKey,
-                        color: Colors.red,
+        // Complex widget tree intended to exercise features such as children
+        // with rotational transforms and clipping without introducing platform
+        // specific behavior as text rendering would.
+        await tester.pumpWidget(
+          Center(
+            child: RepaintBoundaryWithDebugPaint(
+              child: ColoredBox(
+                key: outerContainerKey,
+                color: Colors.white,
+                child: Padding(
+                  key: paddingKey,
+                  padding: const EdgeInsets.all(100.0),
+                  child: SizedBox(
+                    key: sizedBoxKey,
+                    height: 100.0,
+                    width: 100.0,
+                    child: Transform.rotate(
+                      angle: 1.0, // radians
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.elliptical(10.0, 20.0),
+                          topRight: Radius.elliptical(5.0, 30.0),
+                          bottomLeft: Radius.elliptical(2.5, 12.0),
+                          bottomRight: Radius.elliptical(15.0, 6.0),
+                        ),
                         child: ColoredBox(
-                          key: whiteContainerKey,
-                          color: Colors.white,
-                          child: RepaintBoundary(
-                            child: Center(
-                              child: Container(color: Colors.black, height: 10.0, width: 10.0),
+                          key: redContainerKey,
+                          color: Colors.red,
+                          child: ColoredBox(
+                            key: whiteContainerKey,
+                            color: Colors.white,
+                            child: RepaintBoundary(
+                              child: Center(
+                                child: Container(color: Colors.black, height: 10.0, width: 10.0),
+                              ),
                             ),
                           ),
                         ),
@@ -4529,263 +4532,267 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      final Element repaintBoundary = find.byType(RepaintBoundaryWithDebugPaint).evaluate().single;
+        final Element repaintBoundary =
+            find.byType(RepaintBoundaryWithDebugPaint).evaluate().single;
 
-      final RenderRepaintBoundary renderObject =
-          repaintBoundary.renderObject! as RenderRepaintBoundary;
+        final RenderRepaintBoundary renderObject =
+            repaintBoundary.renderObject! as RenderRepaintBoundary;
 
-      final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
-      final int expectedChildLayerCount = getChildLayerCount(layer);
-      expect(expectedChildLayerCount, equals(2));
+        final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;
+        final int expectedChildLayerCount = getChildLayerCount(layer);
+        expect(expectedChildLayerCount, equals(2));
 
-      final ui.Image image1 = await layer.toImage(renderObject.semanticBounds.inflate(50.0));
-      addTearDown(image1.dispose);
+        final ui.Image image1 = await layer.toImage(renderObject.semanticBounds.inflate(50.0));
+        addTearDown(image1.dispose);
 
-      await expectLater(image1, matchesGoldenFile('inspector.repaint_boundary_margin.png'));
+        await expectLater(image1, matchesGoldenFile('inspector.repaint_boundary_margin.png'));
 
-      // Regression test for how rendering with a pixel scale other than 1.0
-      // was handled.
-      final ui.Image image2 = await layer.toImage(
-        renderObject.semanticBounds.inflate(50.0),
-        pixelRatio: 0.5,
-      );
-      addTearDown(image2.dispose);
+        // Regression test for how rendering with a pixel scale other than 1.0
+        // was handled.
+        final ui.Image image2 = await layer.toImage(
+          renderObject.semanticBounds.inflate(50.0),
+          pixelRatio: 0.5,
+        );
+        addTearDown(image2.dispose);
 
-      await expectLater(image2, matchesGoldenFile('inspector.repaint_boundary_margin_small.png'));
+        await expectLater(image2, matchesGoldenFile('inspector.repaint_boundary_margin_small.png'));
 
-      final ui.Image image3 = await layer.toImage(
-        renderObject.semanticBounds.inflate(50.0),
-        pixelRatio: 2.0,
-      );
-      addTearDown(image3.dispose);
+        final ui.Image image3 = await layer.toImage(
+          renderObject.semanticBounds.inflate(50.0),
+          pixelRatio: 2.0,
+        );
+        addTearDown(image3.dispose);
 
-      await expectLater(image3, matchesGoldenFile('inspector.repaint_boundary_margin_large.png'));
+        await expectLater(image3, matchesGoldenFile('inspector.repaint_boundary_margin_large.png'));
 
-      final Layer? layerParent = layer.parent;
-      final Layer? firstChild = layer.firstChild;
+        final Layer? layerParent = layer.parent;
+        final Layer? firstChild = layer.firstChild;
 
-      expect(layerParent, isNotNull);
-      expect(firstChild, isNotNull);
+        expect(layerParent, isNotNull);
+        expect(firstChild, isNotNull);
 
-      final ui.Image? screenshot1 = await service.screenshot(
-        repaintBoundary,
-        width: 300.0,
-        height: 300.0,
-      );
-      addTearDown(() => screenshot1?.dispose());
+        final ui.Image? screenshot1 = await service.screenshot(
+          repaintBoundary,
+          width: 300.0,
+          height: 300.0,
+        );
+        addTearDown(() => screenshot1?.dispose());
 
-      await expectLater(screenshot1, matchesGoldenFile('inspector.repaint_boundary.png'));
+        await expectLater(screenshot1, matchesGoldenFile('inspector.repaint_boundary.png'));
 
-      // Verify that taking a screenshot didn't change the layers associated with
-      // the renderObject.
-      expect(renderObject.debugLayer, equals(layer));
-      // Verify that taking a screenshot did not change the number of children
-      // of the layer.
-      expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
+        // Verify that taking a screenshot didn't change the layers associated with
+        // the renderObject.
+        expect(renderObject.debugLayer, equals(layer));
+        // Verify that taking a screenshot did not change the number of children
+        // of the layer.
+        expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
 
-      final ui.Image? screenshot2 = await service.screenshot(
-        repaintBoundary,
-        width: 500.0,
-        height: 500.0,
-        margin: 50.0,
-      );
-      addTearDown(() => screenshot2?.dispose());
+        final ui.Image? screenshot2 = await service.screenshot(
+          repaintBoundary,
+          width: 500.0,
+          height: 500.0,
+          margin: 50.0,
+        );
+        addTearDown(() => screenshot2?.dispose());
 
-      await expectLater(screenshot2, matchesGoldenFile('inspector.repaint_boundary_margin.png'));
+        await expectLater(screenshot2, matchesGoldenFile('inspector.repaint_boundary_margin.png'));
 
-      // Verify that taking a screenshot didn't change the layers associated with
-      // the renderObject.
-      expect(renderObject.debugLayer, equals(layer));
-      // Verify that taking a screenshot did not change the number of children
-      // of the layer.
-      expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
+        // Verify that taking a screenshot didn't change the layers associated with
+        // the renderObject.
+        expect(renderObject.debugLayer, equals(layer));
+        // Verify that taking a screenshot did not change the number of children
+        // of the layer.
+        expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
 
-      // Make sure taking a screenshot didn't change the parent of the layer.
-      expect(layer.parent, equals(layerParent));
+        // Make sure taking a screenshot didn't change the parent of the layer.
+        expect(layer.parent, equals(layerParent));
 
-      final ui.Image? screenshot3 = await service.screenshot(
-        repaintBoundary,
-        width: 300.0,
-        height: 300.0,
-        debugPaint: true,
-      );
-      addTearDown(() => screenshot3?.dispose());
+        final ui.Image? screenshot3 = await service.screenshot(
+          repaintBoundary,
+          width: 300.0,
+          height: 300.0,
+          debugPaint: true,
+        );
+        addTearDown(() => screenshot3?.dispose());
 
-      await expectLater(
-        screenshot3,
-        matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
-      );
-      // Verify that taking a screenshot with debug paint on did not change
-      // the number of children the layer has.
-      expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
+        await expectLater(
+          screenshot3,
+          matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
+        );
+        // Verify that taking a screenshot with debug paint on did not change
+        // the number of children the layer has.
+        expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
 
-      // Ensure that creating screenshots including ones with debug paint
-      // hasn't changed the regular render of the widget.
-      await expectLater(
-        find.byType(RepaintBoundaryWithDebugPaint),
-        matchesGoldenFile('inspector.repaint_boundary.png'),
-      );
+        // Ensure that creating screenshots including ones with debug paint
+        // hasn't changed the regular render of the widget.
+        await expectLater(
+          find.byType(RepaintBoundaryWithDebugPaint),
+          matchesGoldenFile('inspector.repaint_boundary.png'),
+        );
 
-      expect(renderObject.debugLayer, equals(layer));
-      expect(layer.attached, isTrue);
+        expect(renderObject.debugLayer, equals(layer));
+        expect(layer.attached, isTrue);
 
-      // Full size image
-      final ui.Image? screenshot4 = await service.screenshot(
-        find.byKey(outerContainerKey).evaluate().single,
-        width: 100.0,
-        height: 100.0,
-      );
-      addTearDown(() => screenshot4?.dispose());
+        // Full size image
+        final ui.Image? screenshot4 = await service.screenshot(
+          find.byKey(outerContainerKey).evaluate().single,
+          width: 100.0,
+          height: 100.0,
+        );
+        addTearDown(() => screenshot4?.dispose());
 
-      await expectLater(screenshot4, matchesGoldenFile('inspector.container.png'));
+        await expectLater(screenshot4, matchesGoldenFile('inspector.container.png'));
 
-      final ui.Image? screenshot5 = await service.screenshot(
-        find.byKey(outerContainerKey).evaluate().single,
-        width: 100.0,
-        height: 100.0,
-        debugPaint: true,
-      );
-      addTearDown(() => screenshot5?.dispose());
-
-      await expectLater(screenshot5, matchesGoldenFile('inspector.container_debugPaint.png'));
-
-      {
-        // Verify calling the screenshot method still works if the RenderObject
-        // needs to be laid out again.
-        final RenderObject container =
-            find.byKey(outerContainerKey).evaluate().single.renderObject!;
-        container
-          ..markNeedsLayout()
-          ..markNeedsPaint();
-        expect(container.debugNeedsLayout, isTrue);
-
-        final ui.Image? screenshot6 = await service.screenshot(
+        final ui.Image? screenshot5 = await service.screenshot(
           find.byKey(outerContainerKey).evaluate().single,
           width: 100.0,
           height: 100.0,
           debugPaint: true,
         );
-        addTearDown(() => screenshot6?.dispose());
+        addTearDown(() => screenshot5?.dispose());
 
-        await expectLater(screenshot6, matchesGoldenFile('inspector.container_debugPaint.png'));
-        expect(container.debugNeedsLayout, isFalse);
-      }
+        await expectLater(screenshot5, matchesGoldenFile('inspector.container_debugPaint.png'));
 
-      // Small image
-      final ui.Image? screenshot7 = await service.screenshot(
-        find.byKey(outerContainerKey).evaluate().single,
-        width: 50.0,
-        height: 100.0,
-      );
-      addTearDown(() => screenshot7?.dispose());
+        {
+          // Verify calling the screenshot method still works if the RenderObject
+          // needs to be laid out again.
+          final RenderObject container =
+              find.byKey(outerContainerKey).evaluate().single.renderObject!;
+          container
+            ..markNeedsLayout()
+            ..markNeedsPaint();
+          expect(container.debugNeedsLayout, isTrue);
 
-      await expectLater(screenshot7, matchesGoldenFile('inspector.container_small.png'));
+          final ui.Image? screenshot6 = await service.screenshot(
+            find.byKey(outerContainerKey).evaluate().single,
+            width: 100.0,
+            height: 100.0,
+            debugPaint: true,
+          );
+          addTearDown(() => screenshot6?.dispose());
 
-      final ui.Image? screenshot8 = await service.screenshot(
-        find.byKey(outerContainerKey).evaluate().single,
-        width: 400.0,
-        height: 400.0,
-        maxPixelRatio: 3.0,
-      );
-      addTearDown(() => screenshot8?.dispose());
+          await expectLater(screenshot6, matchesGoldenFile('inspector.container_debugPaint.png'));
+          expect(container.debugNeedsLayout, isFalse);
+        }
 
-      await expectLater(screenshot8, matchesGoldenFile('inspector.container_large.png'));
+        // Small image
+        final ui.Image? screenshot7 = await service.screenshot(
+          find.byKey(outerContainerKey).evaluate().single,
+          width: 50.0,
+          height: 100.0,
+        );
+        addTearDown(() => screenshot7?.dispose());
 
-      // This screenshot will show the clip rect debug paint but no other
-      // debug paint.
-      final ui.Image? screenshot9 = await service.screenshot(
-        find.byType(ClipRRect).evaluate().single,
-        width: 100.0,
-        height: 100.0,
-        debugPaint: true,
-      );
-      addTearDown(() => screenshot9?.dispose());
+        await expectLater(screenshot7, matchesGoldenFile('inspector.container_small.png'));
 
-      await expectLater(screenshot9, matchesGoldenFile('inspector.clipRect_debugPaint.png'));
+        final ui.Image? screenshot8 = await service.screenshot(
+          find.byKey(outerContainerKey).evaluate().single,
+          width: 400.0,
+          height: 400.0,
+          maxPixelRatio: 3.0,
+        );
+        addTearDown(() => screenshot8?.dispose());
 
-      final Element clipRect = find.byType(ClipRRect).evaluate().single;
+        await expectLater(screenshot8, matchesGoldenFile('inspector.container_large.png'));
 
-      final ui.Image? clipRectScreenshot = await service.screenshot(
-        clipRect,
-        width: 100.0,
-        height: 100.0,
-        margin: 20.0,
-        debugPaint: true,
-      );
-      addTearDown(() => clipRectScreenshot?.dispose());
+        // This screenshot will show the clip rect debug paint but no other
+        // debug paint.
+        final ui.Image? screenshot9 = await service.screenshot(
+          find.byType(ClipRRect).evaluate().single,
+          width: 100.0,
+          height: 100.0,
+          debugPaint: true,
+        );
+        addTearDown(() => screenshot9?.dispose());
 
-      // Add a margin so that the clip icon shows up in the screenshot.
-      // This golden image is platform dependent due to the clip icon.
-      await expectLater(
-        clipRectScreenshot,
-        matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
-      );
+        await expectLater(screenshot9, matchesGoldenFile('inspector.clipRect_debugPaint.png'));
 
-      // Verify we get the same image if we go through the service extension
-      // instead of invoking the screenshot method directly.
-      final Future<Object?> base64ScreenshotFuture = service
-          .testExtension(WidgetInspectorServiceExtensions.screenshot.name, <String, String>{
-            'id': service.toId(clipRect, 'group')!,
-            'width': '100.0',
-            'height': '100.0',
-            'margin': '20.0',
-            'debugPaint': 'true',
-          });
+        final Element clipRect = find.byType(ClipRRect).evaluate().single;
 
-      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-      final ui.Image screenshotImage =
-          (await binding.runAsync<ui.Image>(() async {
-            final String base64Screenshot = (await base64ScreenshotFuture)! as String;
-            final ui.Codec codec = await ui.instantiateImageCodec(base64.decode(base64Screenshot));
-            final ui.FrameInfo frame = await codec.getNextFrame();
-            codec.dispose();
-            return frame.image;
-          }))!;
-      addTearDown(screenshotImage.dispose);
+        final ui.Image? clipRectScreenshot = await service.screenshot(
+          clipRect,
+          width: 100.0,
+          height: 100.0,
+          margin: 20.0,
+          debugPaint: true,
+        );
+        addTearDown(() => clipRectScreenshot?.dispose());
 
-      await expectLater(screenshotImage, matchesReferenceImage(clipRectScreenshot!));
+        // Add a margin so that the clip icon shows up in the screenshot.
+        // This golden image is platform dependent due to the clip icon.
+        await expectLater(
+          clipRectScreenshot,
+          matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
+        );
 
-      // Test with a very visible debug paint
-      final ui.Image? screenshot10 = await service.screenshot(
-        find.byKey(paddingKey).evaluate().single,
-        width: 300.0,
-        height: 300.0,
-        debugPaint: true,
-      );
-      addTearDown(() => screenshot10?.dispose());
+        // Verify we get the same image if we go through the service extension
+        // instead of invoking the screenshot method directly.
+        final Future<Object?> base64ScreenshotFuture = service
+            .testExtension(WidgetInspectorServiceExtensions.screenshot.name, <String, String>{
+              'id': service.toId(clipRect, 'group')!,
+              'width': '100.0',
+              'height': '100.0',
+              'margin': '20.0',
+              'debugPaint': 'true',
+            });
 
-      await expectLater(screenshot10, matchesGoldenFile('inspector.padding_debugPaint.png'));
+        final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+        final ui.Image screenshotImage =
+            (await binding.runAsync<ui.Image>(() async {
+              final String base64Screenshot = (await base64ScreenshotFuture)! as String;
+              final ui.Codec codec = await ui.instantiateImageCodec(
+                base64.decode(base64Screenshot),
+              );
+              final ui.FrameInfo frame = await codec.getNextFrame();
+              codec.dispose();
+              return frame.image;
+            }))!;
+        addTearDown(screenshotImage.dispose);
 
-      // The bounds for this box crop its rendered content.
-      final ui.Image? screenshot11 = await service.screenshot(
-        find.byKey(sizedBoxKey).evaluate().single,
-        width: 300.0,
-        height: 300.0,
-        debugPaint: true,
-      );
-      addTearDown(() => screenshot11?.dispose());
+        await expectLater(screenshotImage, matchesReferenceImage(clipRectScreenshot!));
 
-      await expectLater(screenshot11, matchesGoldenFile('inspector.sizedBox_debugPaint.png'));
+        // Test with a very visible debug paint
+        final ui.Image? screenshot10 = await service.screenshot(
+          find.byKey(paddingKey).evaluate().single,
+          width: 300.0,
+          height: 300.0,
+          debugPaint: true,
+        );
+        addTearDown(() => screenshot10?.dispose());
 
-      // Verify that setting a margin includes the previously cropped content.
-      final ui.Image? screenshot12 = await service.screenshot(
-        find.byKey(sizedBoxKey).evaluate().single,
-        width: 300.0,
-        height: 300.0,
-        margin: 50.0,
-        debugPaint: true,
-      );
-      addTearDown(() => screenshot12?.dispose());
+        await expectLater(screenshot10, matchesGoldenFile('inspector.padding_debugPaint.png'));
 
-      await expectLater(
-        screenshot12,
-        matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
-      );
+        // The bounds for this box crop its rendered content.
+        final ui.Image? screenshot11 = await service.screenshot(
+          find.byKey(sizedBoxKey).evaluate().single,
+          width: 300.0,
+          height: 300.0,
+          debugPaint: true,
+        );
+        addTearDown(() => screenshot11?.dispose());
+
+        await expectLater(screenshot11, matchesGoldenFile('inspector.sizedBox_debugPaint.png'));
+
+        // Verify that setting a margin includes the previously cropped content.
+        final ui.Image? screenshot12 = await service.screenshot(
+          find.byKey(sizedBoxKey).evaluate().single,
+          width: 300.0,
+          height: 300.0,
+          margin: 50.0,
+          debugPaint: true,
+        );
+        addTearDown(() => screenshot12?.dispose());
+
+        await expectLater(
+          screenshot12,
+          matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
+        );
+      },
       // TODO(jonahwilliams): https://github.com/flutter/flutter/issues/143616
-    }, skip: impellerEnabled);
+      skip: impellerEnabled,
+    );
 
     group('layout explorer', () {
       const String group = 'test-group';
