@@ -8,9 +8,11 @@ import com.android.build.gradle.internal.dsl.CmakeOptions
 import com.android.build.gradle.internal.dsl.DefaultConfig
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
+import com.flutter.gradle.plugins.PluginHandler
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
@@ -27,6 +29,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -872,12 +875,8 @@ class FlutterPluginUtilsTest {
         verify(exactly = 1) {
             mockCmakeOptions.path
         }
-<<<<<<< HEAD
         verify(exactly = 1) { mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt") }
-=======
-        verify(exactly = 1) { mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt") }
         verify(exactly = 1) { mockCmakeOptions.buildStagingDirectory(any()) }
->>>>>>> master
         verify(exactly = 1) {
             mockDefaultConfig.externalNativeBuild.cmake.arguments(
                 "-Wno-dev",
@@ -892,6 +891,12 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addFlutterDependencies returns early if buildMode is not supported`() {
         val project = mockk<Project>()
+        every { project.extraProperties } returns mockk()
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
+        every { project.file(any()) } returns mockk()
+        val pluginHandler = PluginHandler(project)
+        mockkObject(NativePluginLoaderReflectionBridge)
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithoutDevDependency
         val buildType: BuildType = mockk<BuildType>()
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
@@ -903,7 +908,7 @@ class FlutterPluginUtilsTest {
         FlutterPluginUtils.addFlutterDependencies(
             project = project,
             buildType = buildType,
-            pluginList = pluginListWithoutDevDependency,
+            pluginHandler = pluginHandler,
             engineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
         )
 
@@ -918,6 +923,12 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addFlutterDependencies adds libflutter dependency but not embedding dependency when is a flutter app`() {
         val project = mockk<Project>()
+        every { project.extraProperties } returns mockk()
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
+        every { project.file(any()) } returns mockk()
+        val pluginHandler = PluginHandler(project)
+        mockkObject(NativePluginLoaderReflectionBridge)
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithoutDevDependency
         val buildType: BuildType = mockk<BuildType>()
         val engineVersion = exampleEngineVersion
         every { buildType.name } returns "debug"
@@ -931,7 +942,7 @@ class FlutterPluginUtilsTest {
         FlutterPluginUtils.addFlutterDependencies(
             project = project,
             buildType = buildType,
-            pluginList = pluginListWithoutDevDependency,
+            pluginHandler = pluginHandler,
             engineVersion = engineVersion
         )
 
@@ -949,6 +960,13 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addFlutterDependencies adds libflutter and embedding dep when only dep is dev dep in release mode`() {
         val project = mockk<Project>()
+        val pluginListWithSingleDevDependency = listOf(devDependency)
+        every { project.extraProperties } returns mockk()
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
+        every { project.file(any()) } returns mockk()
+        val pluginHandler = PluginHandler(project)
+        mockkObject(NativePluginLoaderReflectionBridge)
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithSingleDevDependency
         val buildType: BuildType = mockk<BuildType>()
         val engineVersion = exampleEngineVersion
         every { buildType.name } returns "release"
@@ -959,12 +977,10 @@ class FlutterPluginUtilsTest {
         every { project.configurations.named("api") } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
 
-        val pluginListWithSingleDevDependency = listOf(devDependency)
-
         FlutterPluginUtils.addFlutterDependencies(
             project = project,
             buildType = buildType,
-            pluginList = pluginListWithSingleDevDependency,
+            pluginHandler = pluginHandler,
             engineVersion = engineVersion
         )
 
@@ -998,6 +1014,13 @@ class FlutterPluginUtilsTest {
     @Test
     fun `addFlutterDependencies adds libflutter dep but not embedding dep when only dep is dev dep in debug mode`() {
         val project = mockk<Project>()
+        val pluginListWithSingleDevDependency = listOf(devDependency)
+        every { project.extraProperties } returns mockk()
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
+        every { project.file(any()) } returns mockk()
+        val pluginHandler = PluginHandler(project)
+        mockkObject(NativePluginLoaderReflectionBridge)
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithSingleDevDependency
         val buildType: BuildType = mockk<BuildType>()
         val engineVersion = exampleEngineVersion
         every { buildType.name } returns "debug"
@@ -1008,12 +1031,10 @@ class FlutterPluginUtilsTest {
         every { project.configurations.named("api") } returns mockk()
         every { project.dependencies.add(any(), any()) } returns mockk()
 
-        val pluginListWithSingleDevDependency = listOf(devDependency)
-
         FlutterPluginUtils.addFlutterDependencies(
             project = project,
             buildType = buildType,
-            pluginList = pluginListWithSingleDevDependency,
+            pluginHandler = pluginHandler,
             engineVersion = engineVersion
         )
 

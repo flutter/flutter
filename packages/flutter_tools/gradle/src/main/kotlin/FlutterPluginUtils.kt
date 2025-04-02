@@ -10,6 +10,7 @@ import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
+import com.flutter.gradle.plugins.PluginHandler
 import groovy.lang.Closure
 import groovy.util.Node
 import groovy.util.XmlParser
@@ -656,7 +657,7 @@ object FlutterPluginUtils {
     internal fun addFlutterDependencies(
         project: Project,
         buildType: BuildType,
-        pluginList: List<Map<String?, Any?>>,
+        pluginHandler: PluginHandler,
         engineVersion: String
     ) {
         val flutterBuildMode: String = buildModeFor(buildType)
@@ -676,11 +677,9 @@ object FlutterPluginUtils {
         // embedding.
         val pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency: List<Map<String?, Any?>> =
             if (flutterBuildMode == "release") {
-                getPluginListWithoutDevDependencies(
-                    pluginList
-                )
+                pluginHandler.getPluginListWithoutDevDependencies()
             } else {
-                pluginList
+                pluginHandler.getPluginList()
             }
 
         if (!isFlutterAppProject(project) || pluginsThatIncludeFlutterEmbeddingAsTransitiveDependency.isEmpty()) {

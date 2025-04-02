@@ -73,7 +73,7 @@ class PluginHandler(
      * and filtered then with the [doesSupportAndroidPlatform] method instead of
      * just using the `plugins.android` list.
      */
-    internal fun configureLegacyPluginEachProjects(engineVersionValue: String) {
+    private fun configureLegacyPluginEachProjects(engineVersionValue: String) {
         try {
             // Read the contents of the settings.gradle file.
             // Remove block/line comments
@@ -128,4 +128,30 @@ class PluginHandler(
             }
         }
     }
+
+    internal fun configurePlugins(engineVersionValue: String) {
+        configureLegacyPluginEachProjects(engineVersionValue)
+        val pluginList: List<Map<String?, Any?>> = getPluginList()
+        pluginList.forEach { plugin: Map<String?, Any?> ->
+            FlutterPluginUtils.configurePluginProject(
+                project,
+                plugin,
+                engineVersionValue
+            )
+        }
+        pluginList.forEach { plugin: Map<String?, Any?> ->
+            FlutterPluginUtils.configurePluginDependencies(project, plugin)
+        }
+    }
+
+    /**
+     * Gets the list of plugins (as map) that support the Android platform and are dependencies of the
+     * Android project excluding dev dependencies.
+     *
+     * The map value contains either the plugins `name` (String),
+     * its `path` (String), or its `dependencies` (List<String>).
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
+     */
+    internal fun getPluginListWithoutDevDependencies(): List<Map<String?, Any?>> =
+        getPluginList().filter { pluginObject -> pluginObject["dev_dependency"] == false }
 }

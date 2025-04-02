@@ -268,7 +268,7 @@ class FlutterPlugin : Plugin<Project> {
         FlutterPluginUtils.addFlutterDependencies(
             project!!,
             buildType,
-            getPluginList(project!!),
+            getPluginHandler(project!!),
             engineVersion!!
         )
     }
@@ -397,7 +397,7 @@ class FlutterPlugin : Plugin<Project> {
                 .getByName("main")
                 .jniLibs
                 .srcDir(nativeAssetsDir)
-            configurePlugins(projectToAddTasksTo, engineVersion!!)
+            getPluginHandler(project!!).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
                 getPluginList(projectToAddTasksTo)
@@ -474,37 +474,12 @@ class FlutterPlugin : Plugin<Project> {
                 }
             }
         }
-        configurePlugins(projectToAddTasksTo, engineVersion!!)
+        getPluginHandler(project!!).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
             getPluginList(projectToAddTasksTo)
         )
     }
-
-    private fun configurePlugins(
-        projectToConfigure: Project,
-        engineVersionValue: String
-    ) {
-        getPluginHandler(project!!).configureLegacyPluginEachProjects(engineVersionValue)
-        val pluginList: List<Map<String?, Any?>> = getPluginList(projectToConfigure)
-        pluginList.forEach { plugin: Map<String?, Any?> ->
-            FlutterPluginUtils.configurePluginProject(
-                projectToConfigure,
-                plugin,
-                engineVersionValue
-            )
-        }
-        pluginList.forEach { plugin: Map<String?, Any?> ->
-            FlutterPluginUtils.configurePluginDependencies(projectToConfigure, plugin)
-        }
-    }
-
-    // TODO(54566, 48918): Remove in favor of [getPluginList] only, see also
-    //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
-
-    /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
-    private fun getPluginDependencies(projectToGet: Project): List<Map<String?, Any?>> =
-        getPluginHandler(projectToGet).getPluginDependencies()
 
     /**
      * Gets the list of plugins (as map) that support the Android platform.

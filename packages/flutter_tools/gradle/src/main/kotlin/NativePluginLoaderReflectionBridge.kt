@@ -22,7 +22,6 @@ object NativePluginLoaderReflectionBridge {
     /**
      * An abstraction to hide reflection from calling sites. See ../scripts/native_plugin_loader.gradle.kts.
      */
-    @JvmStatic
     fun getPlugins(
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
@@ -42,7 +41,6 @@ object NativePluginLoaderReflectionBridge {
     /**
      * An abstraction to hide reflection from calling sites. See ../scripts/native_plugin_loader.gradle.kts.
      */
-    @JvmStatic
     fun getDependenciesMetadata(
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
