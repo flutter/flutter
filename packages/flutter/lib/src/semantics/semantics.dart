@@ -2196,7 +2196,7 @@ class SemanticsProperties extends DiagnosticableTree {
       EnumProperty<SemanticsValidationResult>(
         'validationResult',
         validationResult,
-        defaultValue: null,
+        defaultValue: SemanticsValidationResult.none,
       ),
     );
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
@@ -5857,9 +5857,13 @@ class SemanticsConfiguration {
       _controlsNodes = <String>{..._controlsNodes!, ...child._controlsNodes!};
     }
 
-    if (_validationResult == SemanticsValidationResult.none &&
-        child._validationResult != _validationResult) {
-      _validationResult = child._validationResult;
+    if (child._validationResult != _validationResult) {
+      if (child._validationResult == SemanticsValidationResult.invalid) {
+        // Invalid result always takes precedence.
+        _validationResult = SemanticsValidationResult.invalid;
+      } else if (_validationResult == SemanticsValidationResult.none) {
+        _validationResult = child._validationResult;
+      }
     }
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;

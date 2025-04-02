@@ -1703,7 +1703,7 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     Future<SemanticsConfiguration> pumpValidationResult(SemanticsValidationResult result) async {
-      final ValueKey<String> key = ValueKey<String>('heading-$result');
+      final ValueKey<String> key = ValueKey<String>('validation-$result');
       await tester.pumpWidget(
         Semantics(
           key: key,
@@ -1733,6 +1733,89 @@ void main() {
       SemanticsValidationResult.invalid,
     );
     expect(invalidResult.validationResult, SemanticsValidationResult.invalid);
+
+    semantics.dispose();
+  });
+
+  testWidgets('validation result precedence', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    Future<void> expectValidationResult({
+      required SemanticsValidationResult outer,
+      required SemanticsValidationResult inner,
+      required SemanticsValidationResult expected,
+    }) async {
+      const ValueKey<String> key = ValueKey<String>('validated-widget');
+      await tester.pumpWidget(
+        Semantics(
+          validationResult: outer,
+          child: Semantics(
+            validationResult: inner,
+            child: Text(
+              key: key,
+              'Outer = $outer; inner = $inner',
+              textDirection: TextDirection.ltr,
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode result = tester.getSemantics(find.byKey(key));
+      expect(
+        result,
+        containsSemantics(label: 'Outer = $outer; inner = $inner', validationResult: expected),
+      );
+    }
+
+    // Outer is none
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.none,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.none,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
+
+    // Outer is valid
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.valid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.valid,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
+
+    // Outer is invalid
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.none,
+      expected: SemanticsValidationResult.invalid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.valid,
+      expected: SemanticsValidationResult.invalid,
+    );
+    await expectValidationResult(
+      outer: SemanticsValidationResult.invalid,
+      inner: SemanticsValidationResult.invalid,
+      expected: SemanticsValidationResult.invalid,
+    );
 
     semantics.dispose();
   });
