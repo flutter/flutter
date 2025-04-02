@@ -1583,7 +1583,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    if (receivedTransition == null) {
+    if (receivedTransition == null || secondaryAnimation.isDismissed) {
       return buildTransitions(context, animation, secondaryAnimation, child);
     }
 
