@@ -58,9 +58,15 @@ class TestSemantics {
     this.role = SemanticsRole.none,
     this.validationResult = SemanticsValidationResult.none,
     this.inputType = SemanticsInputType.none,
+    Uri? linkUrl,
+    this.maxValueLength,
+    this.currentValueLength,
+    this.identifier = '',
+    this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
-       tags = tags?.toSet() ?? <SemanticsTag>{};
+       tags = tags?.toSet() ?? <SemanticsTag>{},
+       linkUrl = linkUrl ?? Uri();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
@@ -84,13 +90,19 @@ class TestSemantics {
     this.role = SemanticsRole.none,
     this.validationResult = SemanticsValidationResult.none,
     this.inputType = SemanticsInputType.none,
+    Uri? linkUrl,
+    this.maxValueLength,
+    this.currentValueLength,
+    this.identifier = '',
+    this.hintOverrides,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        rect = TestSemantics.rootRect,
        elevation = 0.0,
        thickness = 0.0,
-       tags = tags?.toSet() ?? <SemanticsTag>{};
+       tags = tags?.toSet() ?? <SemanticsTag>{},
+       linkUrl = linkUrl ?? Uri();
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for direct children of the root node.
@@ -127,10 +139,16 @@ class TestSemantics {
     this.validationResult = SemanticsValidationResult.none,
     this.inputType = SemanticsInputType.none,
     this.controlsNodes = const <String>{},
+    Uri? linkUrl,
+    this.maxValueLength,
+    this.currentValueLength,
+    this.identifier = '',
+    this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
-       tags = tags?.toSet() ?? <SemanticsTag>{};
+       tags = tags?.toSet() ?? <SemanticsTag>{},
+       linkUrl = linkUrl ?? Uri();
 
   /// The unique identifier for this node.
   ///
@@ -278,10 +296,30 @@ class TestSemantics {
   /// Defaults to an empty set if not set.
   final Set<String> controlsNodes;
 
-  /// The expected input type for the node.
+  /// The expected url for the node.
   ///
-  /// Defaults to an empty set if not set.
-  final Set<String> controlsNodes;
+  /// Defaults to an empty uri if not set.
+  final Uri linkUrl;
+
+  /// The expected max value length for the node.
+  ///
+  /// Defaults to null uri if not set.
+  final int? maxValueLength;
+
+  /// The expected current value length for the node.
+  ///
+  /// Defaults to null uri if not set.
+  final int? currentValueLength;
+
+  /// The expected identifier for the node.
+  ///
+  /// Defaults to an empty string if not set.
+  final String identifier;
+
+  /// The expected identifier for the node.
+  ///
+  /// Defaults to null if not set.
+  final SemanticsHintOverrides? hintOverrides;
 
   bool _matches(
     SemanticsNode? node,
@@ -439,6 +477,32 @@ class TestSemantics {
       );
     }
 
+    if (linkUrl.toString() != node.linkUrl.toString()) {
+      return fail(
+        'expected node id $id to have link url $linkUrl but found link url ${node.linkUrl}',
+      );
+    }
+    if (maxValueLength != node.maxValueLength) {
+      return fail(
+        'expected node id $id to have max value length $maxValueLength but found max value length ${node.maxValueLength}',
+      );
+    }
+    if (currentValueLength != node.currentValueLength) {
+      return fail(
+        'expected node id $id to have max value length $currentValueLength but found max value length ${node.currentValueLength}',
+      );
+    }
+    if (identifier != node.identifier) {
+      return fail(
+        'expected node id $id to have identifier $identifier but found identifier ${node.identifier}',
+      );
+    }
+    if (hintOverrides != node.hintOverrides) {
+      return fail(
+        'expected node id $id to have hint overrides $hintOverrides but found hint overrides ${node.hintOverrides}',
+      );
+    }
+
     if (children.isEmpty) {
       return true;
     }
@@ -529,6 +593,21 @@ class TestSemantics {
     }
     if (controlsNodes.isNotEmpty) {
       buf.writeln('$indent  controlsNodes: $controlsNodes,');
+    }
+    if (linkUrl.toString().isNotEmpty) {
+      buf.writeln('$indent  linkUrl: $linkUrl,');
+    }
+    if (maxValueLength != null) {
+      buf.writeln('$indent  maxValueLength: $maxValueLength,');
+    }
+    if (currentValueLength != null) {
+      buf.writeln('$indent  currentValueLength: $currentValueLength,');
+    }
+    if (identifier.isNotEmpty) {
+      buf.writeln('$indent  identifier: $identifier,');
+    }
+    if (hintOverrides != null) {
+      buf.writeln('$indent  hintOverrides: $hintOverrides,');
     }
     buf.writeln('$indent  children: <TestSemantics>[');
     for (final TestSemantics child in children) {
