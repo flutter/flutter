@@ -1522,6 +1522,43 @@ plugins {
         expect(updatedPubspecContents, validPubspecWithDependenciesAndNullValues);
       });
     });
+
+    group('workspaces', () {
+      _testInMemory('fails on invalid pubspec.yaml', () async {
+        final Directory directory = globals.fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: parent
+workspace:
+- child1
+- child2
+- child2/example
+''');
+        directory.childFile('child1/pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child1
+resolution: workspace
+''');
+        directory.childFile('child2/pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2
+resolution: workspace
+''');
+        directory.childFile('child2/example/pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: child2_example
+resolution: workspace
+''');
+
+        expect(FlutterProject.fromDirectory(directory).workspaceProjects.map(
+          (FlutterProject subproject) => subproject.manifest.appName
+        ).toList(), ['child1', 'child2', 'child2_example']);
+      });
+    });
   });
 
   group('watch companion', () {
