@@ -10,10 +10,8 @@ import 'package:path/path.dart' as pathlib;
 //                https://github.com/dart-lang/test/issues/1521
 import 'package:skia_gold_client/skia_gold_client.dart';
 import 'package:test_api/backend.dart' as hack;
-// TODO(ditman): Fix ignores when https://github.com/flutter/flutter/issues/143599 is resolved.
-import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:test_core/src/runner/hack_register_platform.dart'
-    as hack; // ignore: implementation_imports
+import 'package:test_core/src/executable.dart' as test;
+import 'package:test_core/src/runner/hack_register_platform.dart' as hack;
 
 import '../browser.dart';
 import '../common.dart';
@@ -173,15 +171,15 @@ class RunSuiteStep implements PipelineStep {
 
   Future<SkiaGoldClient?> _createSkiaClient() async {
     if (suite.testBundle.compileConfigs.length > 1) {
-      print('Not creating skia client due to multiple compile configs');
       // Multiple compile configs are only used for our fallback tests, which
       // do not collect goldens.
+      print('Did not create SkiaGoldClient. Reason: Multiple compile configs.');
       return null;
     }
     if (suite.runConfig.browser == BrowserName.safari) {
-      print('Not creating skia client for Safari');
       // Goldens from Safari produce too many diffs, disabled for now.
       // See https://github.com/flutter/flutter/issues/143591
+      print('Did not create SkiaGoldClient. Reason: Safari browser.');
       return null;
     }
     final Renderer renderer = suite.testBundle.compileConfigs.first.renderer;
@@ -204,14 +202,15 @@ class RunSuiteStep implements PipelineStep {
       'Renderer': rendererName,
       if (variant != null) 'CanvasKitVariant': variant.name,
     };
-    print('Created Skia Gold Client. dimensions: $dimensions');
     final SkiaGoldClient skiaClient = SkiaGoldClient(workDirectory, dimensions: dimensions);
 
-    if (await _checkSkiaClient(skiaClient)) {
-      print('Successfully checked Skia Gold Client');
+    final (success, reason) = await _checkSkiaClient(skiaClient);
+    if (success) {
+      print('Created SkiaGoldClient. Dimensions: $dimensions');
       return skiaClient;
     }
 
+    print('Did not create SkiaGoldClient. Reason: $reason.');
     if (requireSkiaGold) {
       throw ToolExit('Skia Gold is required but is unavailable.');
     }
@@ -220,13 +219,13 @@ class RunSuiteStep implements PipelineStep {
   }
 
   /// Checks whether the Skia Client is usable in this environment.
-  Future<bool> _checkSkiaClient(SkiaGoldClient skiaClient) async {
+  Future<(bool, String?)> _checkSkiaClient(SkiaGoldClient skiaClient) async {
     // Now let's check whether Skia Gold is reachable or not.
     if (isLuci) {
       if (SkiaGoldClient.isAvailable()) {
         try {
           await skiaClient.auth();
-          return true;
+          return (true, null);
         } catch (e) {
           print(e);
         }
@@ -235,14 +234,14 @@ class RunSuiteStep implements PipelineStep {
       try {
         // Check if we can reach Gold.
         await skiaClient.getExpectationForTest('');
-        return true;
+        return (true, null);
       } on io.OSError catch (_) {
-        print('OSError occurred, could not reach Gold.');
+        return (false, 'OSError occurred, could not reach Gold');
       } on io.SocketException catch (_) {
-        print('SocketException occurred, could not reach Gold.');
+        return (false, 'SocketException occurred, could not reach Gold');
       }
     }
 
-    return false;
+    return (false, 'Unknown');
   }
 }

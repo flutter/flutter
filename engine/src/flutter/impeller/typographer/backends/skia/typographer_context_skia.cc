@@ -205,6 +205,10 @@ static ISize ComputeNextAtlasSize(
   return {};
 }
 
+static Point SubpixelPositionToPoint(SubpixelPosition pos) {
+  return Point((pos & 0xff) / 4.f, (pos >> 2 & 0xff) / 4.f);
+}
+
 static void DrawGlyph(SkCanvas* canvas,
                       const SkPoint position,
                       const ScaledFont& scaled_font,
@@ -222,7 +226,7 @@ static void DrawGlyph(SkCanvas* canvas,
   sk_font.setHinting(SkFontHinting::kSlight);
   sk_font.setEmbolden(metrics.embolden);
   sk_font.setSubpixel(true);
-  sk_font.setSize(sk_font.getSize() * scaled_font.scale);
+  sk_font.setSize(sk_font.getSize() * static_cast<Scalar>(scaled_font.scale));
 
   auto glyph_color = prop.has_value() ? prop->color.ToARGB() : SK_ColorBLACK;
 
@@ -231,13 +235,15 @@ static void DrawGlyph(SkCanvas* canvas,
   glyph_paint.setBlendMode(SkBlendMode::kSrc);
   if (prop.has_value() && prop->stroke) {
     glyph_paint.setStroke(true);
-    glyph_paint.setStrokeWidth(prop->stroke_width * scaled_font.scale);
+    glyph_paint.setStrokeWidth(prop->stroke_width *
+                               static_cast<Scalar>(scaled_font.scale));
     glyph_paint.setStrokeCap(ToSkiaCap(prop->stroke_cap));
     glyph_paint.setStrokeJoin(ToSkiaJoin(prop->stroke_join));
     glyph_paint.setStrokeMiter(prop->stroke_miter);
   }
   canvas->save();
-  canvas->translate(glyph.subpixel_offset.x, glyph.subpixel_offset.y);
+  Point subpixel_offset = SubpixelPositionToPoint(glyph.subpixel_offset);
+  canvas->translate(subpixel_offset.x, subpixel_offset.y);
   canvas->drawGlyphs(1u,         // count
                      &glyph_id,  // glyphs
                      &position,  // positions
@@ -400,7 +406,7 @@ static Rect ComputeGlyphSize(const SkFont& font,
 
   // Expand the bounds of glyphs at subpixel offsets by 2 in the x direction.
   Scalar adjustment = 0.0;
-  if (glyph.subpixel_offset != Point(0, 0)) {
+  if (glyph.subpixel_offset != SubpixelPosition::kSubpixel00) {
     adjustment = 1.0;
   }
   return Rect::MakeLTRB(scaled_bounds.fLeft - adjustment, scaled_bounds.fTop,
@@ -417,6 +423,12 @@ TypographerContextSkia::CollectNewGlyphs(
   size_t generation_id = atlas->GetAtlasGeneration();
   intptr_t atlas_id = reinterpret_cast<intptr_t>(atlas.get());
   for (const auto& frame : text_frames) {
+// TODO(jonahwilliams): determine how to re-enable this. See
+// https://github.com/flutter/flutter/issues/163730 for example. This can
+// happen when the Aiks/Typographer context are re-created, but the last
+// DisplayList is re-used. The "atlas_id" check is not reliable, perhaps
+// because it may end up with the same memory?
+#if false
     auto [frame_generation_id, frame_atlas_id] =
         frame->GetAtlasGenerationAndID();
     if (atlas->IsValid() && frame->IsFrameComplete() &&
@@ -424,6 +436,7 @@ TypographerContextSkia::CollectNewGlyphs(
         !frame->GetFrameBounds(0).is_placeholder) {
       continue;
     }
+#endif  // false
     frame->ClearFrameBounds();
     frame->SetAtlasGeneration(generation_id, atlas_id);
 
@@ -446,13 +459,14 @@ TypographerContextSkia::CollectNewGlyphs(
       // Rather than computing the bounds at the requested point size and
       // scaling up the bounds, we scale up the font size and request the
       // bounds. This seems to give more accurate bounds information.
-      sk_font.setSize(sk_font.getSize() * scaled_font.scale);
+      sk_font.setSize(sk_font.getSize() *
+                      static_cast<Scalar>(scaled_font.scale));
       sk_font.setSubpixel(true);
 
       for (const auto& glyph_position : run.GetGlyphPositions()) {
-        Point subpixel = TextFrame::ComputeSubpixelPosition(
+        SubpixelPosition subpixel = TextFrame::ComputeSubpixelPosition(
             glyph_position, scaled_font.font.GetAxisAlignment(),
-            frame->GetOffset(), frame->GetScale());
+            frame->GetOffsetTransform());
         SubpixelGlyph subpixel_glyph(glyph_position.glyph, subpixel,
                                      frame->GetProperties());
         const auto& font_glyph_bounds =
@@ -460,8 +474,8 @@ TypographerContextSkia::CollectNewGlyphs(
 
         if (!font_glyph_bounds.has_value()) {
           new_glyphs.push_back(FontGlyphPair{scaled_font, subpixel_glyph});
-          auto glyph_bounds =
-              ComputeGlyphSize(sk_font, subpixel_glyph, scaled_font.scale);
+          auto glyph_bounds = ComputeGlyphSize(
+              sk_font, subpixel_glyph, static_cast<Scalar>(scaled_font.scale));
           glyph_sizes.push_back(glyph_bounds);
 
           auto frame_bounds = FrameBounds{

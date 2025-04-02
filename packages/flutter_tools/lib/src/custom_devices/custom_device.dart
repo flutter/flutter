@@ -278,7 +278,6 @@ class CustomDeviceAppSession {
     bool traceStartup,
     String? route,
   ) {
-    final String dartVmFlags = computeDartVmFlags(debuggingOptions);
     return <String>[
       if (traceStartup) 'trace-startup=true',
       if (route != null) 'route=$route',
@@ -291,8 +290,6 @@ class CustomDeviceAppSession {
       if (debuggingOptions.traceSystrace) 'trace-systrace=true',
       if (debuggingOptions.traceToFile != null) 'trace-to-file=${debuggingOptions.traceToFile}',
       if (debuggingOptions.endlessTraceBuffer) 'endless-trace-buffer=true',
-      if (debuggingOptions.dumpSkpOnShaderCompilation) 'dump-skp-on-shader-compilation=true',
-      if (debuggingOptions.cacheSkSL) 'cache-sksl=true',
       if (debuggingOptions.purgePersistentCache) 'purge-persistent-cache=true',
       if (debuggingOptions.debuggingEnabled) ...<String>[
         if (debuggingOptions.deviceVmServicePort != null)
@@ -303,7 +300,7 @@ class CustomDeviceAppSession {
         ],
         if (debuggingOptions.startPaused) 'start-paused=true',
         if (debuggingOptions.disableServiceAuthCodes) 'disable-service-auth-codes=true',
-        if (dartVmFlags.isNotEmpty) 'dart-flags=$dartVmFlags',
+        if (debuggingOptions.dartFlags.isNotEmpty) 'dart-flags=${debuggingOptions.dartFlags}',
         if (debuggingOptions.useTestFonts) 'use-test-fonts=true',
         if (debuggingOptions.verboseSystemLogs) 'verbose-logging=true',
       ],

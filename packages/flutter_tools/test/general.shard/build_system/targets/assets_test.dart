@@ -16,13 +16,12 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
+import '../../../src/package_config.dart';
 
 void main() {
   late Environment environment;
@@ -49,7 +48,6 @@ void main() {
         .createSync(recursive: true);
     fileSystem.file('assets/foo/bar.png').createSync(recursive: true);
     fileSystem.file('assets/wildcard/#bar.png').createSync(recursive: true);
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
     fileSystem.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync('''
@@ -66,20 +64,11 @@ flutter:
   testUsingContext(
     'includes LICENSE file inputs in dependencies',
     () async {
-      fileSystem.directory('.dart_tool').childFile('package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "foo",
-      "rootUri": "file:///bar",
-      "packageUri": "lib/"
-    }
-  ]
-}
-''');
+      writePackageConfigFile(
+        directory: globals.fs.currentDirectory,
+        mainLibName: 'example',
+        packages: <String, String>{'foo': 'bar'},
+      );
       fileSystem.file('bar/LICENSE')
         ..createSync(recursive: true)
         ..writeAsStringSync('THIS IS A LICENSE');
@@ -106,6 +95,7 @@ flutter:
   testUsingContext(
     'Copies files to correct asset directory',
     () async {
+      writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
       await const CopyAssets().build(environment);
 
       expect(
@@ -154,6 +144,7 @@ flutter:
         flavors:
           - strawberry
   ''');
+          writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
           fileSystem.file('assets/common/image.png').createSync(recursive: true);
           fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
@@ -202,6 +193,7 @@ flutter:
         flavors:
           - strawberry
   ''');
+          writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
           fileSystem.file('assets/common/image.png').createSync(recursive: true);
           fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
@@ -253,11 +245,6 @@ flutter:
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
-
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync('''
@@ -269,6 +256,8 @@ flutter:
         - package: my_capitalizer_transformer
           args: ["-a", "-b", "--color", "green"]
 ''');
+
+      writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
       fileSystem.file('input.txt')
         ..createSync(recursive: true)
@@ -343,11 +332,6 @@ flutter:
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
-
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync('''
@@ -359,6 +343,8 @@ flutter:
         - package: my_transformer
           args: ["-a", "-b", "--color", "green"]
 ''');
+
+      writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
       await fileSystem.file('input.txt').create(recursive: true);
 
@@ -443,11 +429,6 @@ flutter:
         defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
       );
 
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
-
       fileSystem.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync('''
@@ -458,6 +439,8 @@ flutter:
         transformers:
           - package: my_capitalizer_transformer
   ''');
+
+      writePackageConfigFile(directory: globals.fs.currentDirectory, mainLibName: 'example');
 
       fileSystem.file('input.txt')
         ..createSync(recursive: true)
@@ -501,140 +484,4 @@ flutter:
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
-
-  testWithoutContext('processSkSLBundle returns null if there is no path '
-      'to the bundle', () {
-    expect(
-      processSkSLBundle(
-        null,
-        targetPlatform: TargetPlatform.android,
-        fileSystem: MemoryFileSystem.test(),
-        logger: logger,
-      ),
-      isNull,
-    );
-  });
-
-  testWithoutContext('processSkSLBundle throws exception if bundle file is '
-      'missing', () {
-    expect(
-      () => processSkSLBundle(
-        'does_not_exist.sksl',
-        targetPlatform: TargetPlatform.android,
-        fileSystem: MemoryFileSystem.test(),
-        logger: logger,
-      ),
-      throwsException,
-    );
-  });
-
-  testWithoutContext('processSkSLBundle throws exception if the bundle is not '
-      'valid JSON', () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    fileSystem.file('bundle.sksl').writeAsStringSync('{');
-
-    expect(
-      () => processSkSLBundle(
-        'bundle.sksl',
-        targetPlatform: TargetPlatform.android,
-        fileSystem: fileSystem,
-        logger: logger,
-      ),
-      throwsException,
-    );
-    expect(logger.errorText, contains('was not a JSON object'));
-  });
-
-  testWithoutContext('processSkSLBundle throws exception if the bundle is not '
-      'a JSON object', () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    fileSystem.file('bundle.sksl').writeAsStringSync('[]');
-
-    expect(
-      () => processSkSLBundle(
-        'bundle.sksl',
-        targetPlatform: TargetPlatform.android,
-        fileSystem: fileSystem,
-        logger: logger,
-      ),
-      throwsException,
-    );
-    expect(logger.errorText, contains('was not a JSON object'));
-  });
-
-  testWithoutContext('processSkSLBundle throws an exception if the engine '
-      'revision is different', () {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    fileSystem
-        .file('bundle.sksl')
-        .writeAsStringSync(json.encode(<String, String>{'engineRevision': '1'}));
-
-    expect(
-      () => processSkSLBundle(
-        'bundle.sksl',
-        targetPlatform: TargetPlatform.android,
-        fileSystem: fileSystem,
-        logger: logger,
-        engineVersion: '2',
-      ),
-      throwsException,
-    );
-    expect(logger.errorText, contains('Expected Flutter 1, but found 2'));
-  });
-
-  testWithoutContext('processSkSLBundle warns if the bundle target platform is '
-      'different from the current target', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    fileSystem
-        .file('bundle.sksl')
-        .writeAsStringSync(
-          json.encode(<String, Object>{
-            'engineRevision': '2',
-            'platform': 'fuchsia-arm64',
-            'data': <String, Object>{},
-          }),
-        );
-
-    final DevFSContent content =
-        processSkSLBundle(
-          'bundle.sksl',
-          targetPlatform: TargetPlatform.android,
-          fileSystem: fileSystem,
-          logger: logger,
-          engineVersion: '2',
-        )!;
-
-    expect(await content.contentsAsBytes(), utf8.encode('{"data":{}}'));
-    expect(logger.errorText, contains('This may lead to less efficient shader caching'));
-  });
-
-  testWithoutContext('processSkSLBundle does not warn and produces bundle', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final BufferLogger logger = BufferLogger.test();
-    fileSystem
-        .file('bundle.sksl')
-        .writeAsStringSync(
-          json.encode(<String, Object>{
-            'engineRevision': '2',
-            'platform': 'android',
-            'data': <String, Object>{},
-          }),
-        );
-
-    final DevFSContent content =
-        processSkSLBundle(
-          'bundle.sksl',
-          targetPlatform: TargetPlatform.android,
-          fileSystem: fileSystem,
-          logger: logger,
-          engineVersion: '2',
-        )!;
-
-    expect(await content.contentsAsBytes(), utf8.encode('{"data":{}}'));
-    expect(logger.errorText, isEmpty);
-  });
 }

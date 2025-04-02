@@ -12,11 +12,20 @@
 FLUTTER_ASSERT_ARC
 
 namespace flutter {
+namespace {
+impeller::Flags SettingsToFlags(const Settings& settings) {
+  return impeller::Flags{
+      .antialiased_lines = settings.impeller_antialiased_lines,
+  };
+}
+}  // namespace
 
 IOSContextMetalImpeller::IOSContextMetalImpeller(
+    const Settings& settings,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
-    : darwin_context_metal_impeller_(
-          [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch]) {
+    : darwin_context_metal_impeller_([[FlutterDarwinContextMetalImpeller alloc]
+                           init:SettingsToFlags(settings)
+          gpuDisabledSyncSwitch:is_gpu_disabled_sync_switch]) {
   if (darwin_context_metal_impeller_.context) {
     aiks_context_ = std::make_shared<impeller::AiksContext>(
         darwin_context_metal_impeller_.context, impeller::TypographerContextSkia::Make());
@@ -29,19 +38,6 @@ IOSRenderingBackend IOSContextMetalImpeller::GetBackend() const {
   return IOSRenderingBackend::kImpeller;
 }
 
-sk_sp<GrDirectContext> IOSContextMetalImpeller::GetMainContext() const {
-  return nullptr;
-}
-
-sk_sp<GrDirectContext> IOSContextMetalImpeller::GetResourceContext() const {
-  return nullptr;
-}
-
-// |IOSContext|
-sk_sp<GrDirectContext> IOSContextMetalImpeller::CreateResourceContext() {
-  return nullptr;
-}
-
 // |IOSContext|
 std::shared_ptr<impeller::Context> IOSContextMetalImpeller::GetImpellerContext() const {
   return darwin_context_metal_impeller_.context;
@@ -50,12 +46,6 @@ std::shared_ptr<impeller::Context> IOSContextMetalImpeller::GetImpellerContext()
 // |IOSContext|
 std::shared_ptr<impeller::AiksContext> IOSContextMetalImpeller::GetAiksContext() const {
   return aiks_context_;
-}
-
-// |IOSContext|
-std::unique_ptr<GLContextResult> IOSContextMetalImpeller::MakeCurrent() {
-  // This only makes sense for contexts that need to be bound to a specific thread.
-  return std::make_unique<GLContextDefaultResult>(true);
 }
 
 // |IOSContext|

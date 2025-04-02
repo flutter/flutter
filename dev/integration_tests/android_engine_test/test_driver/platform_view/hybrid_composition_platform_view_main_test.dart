@@ -8,17 +8,18 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
 import '../_luci_skia_gold_prelude.dart';
+import '../_unstable_gold_retry.dart';
 
 /// For local debugging, a (local) golden-file is required as a baseline:
 ///
 /// ```sh
 /// # Checkout HEAD, i.e. *before* changes you want to test.
-/// UPDATE_GOLDENS=1 flutter drive lib/platform_view/hybrid_compoisition_platform_view_main.dart
+/// UPDATE_GOLDENS=1 flutter drive lib/platform_view/hybrid_composition_platform_view_main.dart
 ///
 /// # Make your changes.
 ///
 /// # Run the test against baseline.
-/// flutter drive lib/platform_view/hybrid_compoisition_platform_view_main.dart
+/// flutter drive lib/platform_view/hybrid_composition_platform_view_main.dart
 /// ```
 ///
 /// For a convenient way to deflake a test, see `tool/deflake.dart`.
@@ -30,7 +31,7 @@ void main() async {
 
   setUpAll(() async {
     if (isLuci) {
-      await enableSkiaGoldComparator(namePrefix: 'android_engine_test');
+      await enableSkiaGoldComparator(namePrefix: 'android_engine_test$goldenVariant');
     }
     flutterDriver = await FlutterDriver.connect();
     nativeDriver = await AndroidNativeDriver.connect(flutterDriver);
@@ -43,24 +44,39 @@ void main() async {
     await flutterDriver.close();
   });
 
-  test('should screenshot and match a blue -> orange gradient', () async {
-    await expectLater(
-      nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portrait.png'),
-    );
-  }, timeout: Timeout.none);
+  test(
+    'should screenshot and match a blue -> orange gradient',
+    () async {
+      // TODO(matanlurey): Determining if this is a failure (the screen is always black on CI)
+      // or timing dependent (if we would have waited X more seconds it would have rendered).
+      // See:
+      // - Vulkan: https://github.com/flutter/flutter/issues/162362
+      // - OpenGLES: https://github.com/flutter/flutter/issues/162363
+      await expectLater(
+        nativeDriver.screenshot(),
+        matchesGoldenFileWithRetries('$goldenPrefix.blue_orange_gradient_portrait.png'),
+      );
+    },
+    timeout: Timeout.none,
+    skip: true, // 'https://github.com/flutter/flutter/issues/165032'
+  );
 
-  test('should rotate landscape and screenshot the gradient', () async {
-    await nativeDriver.rotateToLandscape();
-    await expectLater(
-      nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_landscape_rotated.png'),
-    );
+  test(
+    'should rotate landscape and screenshot the gradient',
+    () async {
+      await nativeDriver.rotateToLandscape();
+      await expectLater(
+        nativeDriver.screenshot(),
+        matchesGoldenFile('$goldenPrefix.blue_orange_gradient_landscape_rotated.png'),
+      );
 
-    await nativeDriver.rotateResetDefault();
-    await expectLater(
-      nativeDriver.screenshot(),
-      matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portait_rotated_back.png'),
-    );
-  }, timeout: Timeout.none);
+      await nativeDriver.rotateResetDefault();
+      await expectLater(
+        nativeDriver.screenshot(),
+        matchesGoldenFile('$goldenPrefix.blue_orange_gradient_portait_rotated_back.png'),
+      );
+    },
+    timeout: Timeout.none,
+    skip: true, // https://github.com/flutter/flutter/issues/165032
+  );
 }

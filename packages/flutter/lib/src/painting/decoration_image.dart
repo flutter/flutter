@@ -319,15 +319,7 @@ abstract interface class DecorationImagePainter {
 
 class _DecorationImagePainter implements DecorationImagePainter {
   _DecorationImagePainter._(this._details, this._onChanged) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/painting.dart',
-        className: '$_DecorationImagePainter',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', '_DecorationImagePainter', this));
   }
 
   final DecorationImage _details;
@@ -438,9 +430,7 @@ class _DecorationImagePainter implements DecorationImagePainter {
 
   @override
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _imageStream?.removeListener(ImageStreamListener(_handleImage, onError: _details.onError));
     _image?.dispose();
     _image = null;
@@ -862,15 +852,7 @@ class _BlendedDecorationImage implements DecorationImage {
 
 class _BlendedDecorationImagePainter implements DecorationImagePainter {
   _BlendedDecorationImagePainter._(this.a, this.b, this.t) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/painting.dart',
-        className: '$_BlendedDecorationImagePainter',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', '_BlendedDecorationImagePainter', this));
   }
 
   final DecorationImagePainter? a;
@@ -901,9 +883,7 @@ class _BlendedDecorationImagePainter implements DecorationImagePainter {
 
   @override
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     a?.dispose();
     b?.dispose();
   }

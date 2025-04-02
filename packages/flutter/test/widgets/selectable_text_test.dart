@@ -423,6 +423,25 @@ void main() {
     expect(state.widget.cursorColor, cursorColor);
   });
 
+  testWidgets('Selectable Text can have custom selection color', (WidgetTester tester) async {
+    const Color selectionColor = Colors.orange;
+    const Color defaultSelectionColor = Colors.red;
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: DefaultSelectionStyle(
+            selectionColor: defaultSelectionColor,
+            child: SelectableText('text', selectionColor: selectionColor),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    expect(state.widget.selectionColor, selectionColor);
+  });
+
   testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const SelectableText('s')));
 
@@ -5548,4 +5567,61 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        _updateMediaQueryFromView(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          _updateMediaQueryFromView(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          MaterialApp(home: Material(child: TextField(controller: controller))),
+        );
+
+        // No context menu shown.
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  });
+}
+
+// Trigger MediaQuery to update itself based on the View, which is not
+// recreated between tests. This is necessary when changing something on
+// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
+// TODO(justinmc): This hack can be removed if
+// https://github.com/flutter/flutter/issues/165519 is fixed.
+void _updateMediaQueryFromView(WidgetTester tester) {
+  expect(find.byType(MediaQuery), findsOneWidget);
+  final WidgetsBindingObserver widgetsBindingObserver =
+      tester.state(
+            find.ancestor(
+              of: find.byType(MediaQuery),
+              matching: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
+              ),
+            ),
+          )
+          as WidgetsBindingObserver;
+  widgetsBindingObserver.didChangeMetrics();
 }

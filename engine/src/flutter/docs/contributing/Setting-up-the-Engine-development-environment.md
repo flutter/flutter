@@ -50,7 +50,7 @@ Clone the Flutter source code. As of late 2024, the engine source is part of the
 [Setup a `.gclient` file](../../../../../engine/README.md) in the repository
 root (the `flutter/flutter` repository root), and run `gclient sync`.
 
-The "Engine Tool" called `et` is useful when working with the engine. It is located in the [`engine/src/flutter/bin`](https://github.com/flutter/flutter/tree/0c3359df8c8342c8907316488b1404a216f215b6/engine/src/flutter/bin) directory. Add this to your `$PATH` in your `.rc` file.
+The "Engine Tool" called `et` is useful when working with the engine. It is located in the [`flutter/engine/src/flutter/bin`](https://github.com/flutter/flutter/tree/0c3359df8c8342c8907316488b1404a216f215b6/engine/src/flutter/bin) directory. Add this to your `$PATH` in your `.rc` file: e.g. on UNIX, using `export PATH=/path/to/flutter/engine/src/flutter/bin:$PATH`.
 
 ### Additional Steps for Web Engine
 
@@ -90,15 +90,33 @@ VSCode can provide some IDE features using the [C/C++ extension](https://marketp
 
 Intellisense can also use our `compile_commands.json` for more robust functionality. Either symlink `src/out/compile_commands.json` to the project root at `src` or provide an absolute path to it in the `c_cpp_properties.json` config file. See ["compile commands" in the c_cpp_properties.json reference](https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference). This will likely resolve the basic issues mentioned above.
 
-For example, in `src/.vscode/settings.json`:
+The easiest way to do this is create a [multi-root workspace](https://code.visualstudio.com/docs/editor/workspaces/workspaces#_multiroot-workspaces) that includes the Flutter SDK. For example, something like this:
 
 ```json
+# flutter.code-workspace
 {
-  "clangd.path": "buildtools/mac-arm64/clang/bin/clangd",
-  "clangd.arguments": [
-    "--compile-commands-dir=out/host_debug_unopt_arm64"
-  ],
-  "clang-format.executable": "buildtools/mac-arm64/clang/bin/clang-format"
+	"folders": [
+		{
+			"path": "path/to/the/flutter/sdk"
+		}
+	],
+	"settings": {}
+}
+```
+
+Then, edit the `"settings"` key:
+
+```json
+"settings": {
+    "html.format.enable": false,
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "master"
+    ],
+    "clangd.path": "engine/src/flutter/buildtools/mac-arm64/clang/bin/clangd",
+    "clangd.arguments": [
+        "--compile-commands-dir=engine/src/out/host_debug_unopt_arm64"
+    ],
+    "clang-format.executable": "engine/src/flutter/buildtools/mac-arm64/clang/bin/clang-format"
 }
 ```
 
@@ -106,8 +124,10 @@ For example, in `src/.vscode/settings.json`:
 
 ```shell
 # M1 Mac (host_debug_unopt_arm64)
-./tools/gn --unopt --mac-cpu arm64 --enable-impeller-vulkan --enable-impeller-opengles --enable-unittests
+et build -c host_debug_unopt_arm64
 ```
+
+Some files (such as the Android embedder) will require an Android `clangd` configuration.
 
 For adding IDE support to the Java code in the engine with VSCode, see ["Using VSCode as an IDE for the Android Embedding"](#using-vscode-as-an-ide-for-the-android-embedding-java).
 

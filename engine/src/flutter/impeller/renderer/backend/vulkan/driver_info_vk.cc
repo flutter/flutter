@@ -119,6 +119,17 @@ AdrenoGPU GetAdrenoVersion(std::string_view version) {
   return result->second;
 }
 
+PowerVRGPU GetPowerVRVersion(std::string_view version) {
+  // We don't really care about the specific model, just the series.
+  if (version.find("DXT") != std::string::npos) {
+    return PowerVRGPU::kDXT;
+  }
+  if (version.find("CXT") != std::string::npos) {
+    return PowerVRGPU::kCXT;
+  }
+  return PowerVRGPU::kUnknown;
+}
+
 MaliGPU GetMaliVersion(std::string_view version) {
   // These names are usually Mali-VERSION or Mali-Version-EXTRA_CRAP.
   auto dash_pos = version.find("Mali-");
@@ -166,6 +177,8 @@ constexpr VendorVK IdentifyVendor(uint32_t vendor) {
       return VendorVK::kApple;
     case 0x19E5:
       return VendorVK::kHuawei;
+    case 0x144D:
+      return VendorVK::kSamsung;
   }
   // Check if the ID is a known Khronos vendor.
   switch (vendor) {
@@ -201,6 +214,8 @@ constexpr const char* VendorToString(VendorVK vendor) {
       return "Apple";
     case VendorVK::kHuawei:
       return "Huawei";
+    case VendorVK::kSamsung:
+      return "Samsung";
   }
   FML_UNREACHABLE();
 }
@@ -259,6 +274,9 @@ DriverInfoVK::DriverInfoVK(const vk::PhysicalDevice& device) {
       break;
     case VendorVK::kARM:
       mali_gpu_ = GetMaliVersion(driver_name_);
+      break;
+    case VendorVK::kPowerVR:
+      powervr_gpu_ = GetPowerVRVersion(driver_name_);
       break;
     default:
       break;
@@ -329,18 +347,30 @@ bool DriverInfoVK::IsEmulator() const {
 }
 
 bool DriverInfoVK::IsKnownBadDriver() const {
-  if (adreno_gpu_.has_value()) {
-    AdrenoGPU adreno = adreno_gpu_.value();
-    // 630 is the lowest version I've tested on the still works.
-    // I suspect earlier 600s should work but this is waiting on
-    // more devices for testing.
-    if (adreno < AdrenoGPU::kAdreno630) {
-      return true;
-    }
-  }
   // Disable Maleoon series GPUs, see:
   // https://github.com/flutter/flutter/issues/156623
   if (vendor_ == VendorVK::kHuawei) {
+    return true;
+  }
+
+  if (vendor_ == VendorVK::kSamsung) {
+    // The first version of the Xclipse series GPU has reported
+    // bugs, unfortunately all versions of this GPU report the
+    // same driver version. Instead we use the Vulkan version
+    // as a proxy, assuming that any newer devices would not
+    // lower the supported Vulkan API level.
+    // See
+    // https://vulkan.gpuinfo.org/listreports.php?devicename=samsung+SM-S906B&platform=android
+    // https://github.com/flutter/flutter/issues/161334
+    return !api_version_.IsAtLeast(Version{1, 3, 0});
+  }
+
+  // https://github.com/flutter/flutter/issues/161122
+  // https://github.com/flutter/flutter/issues/160960
+  // https://github.com/flutter/flutter/issues/160866
+  // https://github.com/flutter/flutter/issues/160804
+  // https://github.com/flutter/flutter/issues/160406
+  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kCXT) {
     return true;
   }
   return false;
@@ -352,6 +382,10 @@ std::optional<MaliGPU> DriverInfoVK::GetMaliGPUInfo() const {
 
 std::optional<AdrenoGPU> DriverInfoVK::GetAdrenoGPUInfo() const {
   return adreno_gpu_;
+}
+
+std::optional<PowerVRGPU> DriverInfoVK::GetPowerVRGPUInfo() const {
+  return powervr_gpu_;
 }
 
 }  // namespace impeller

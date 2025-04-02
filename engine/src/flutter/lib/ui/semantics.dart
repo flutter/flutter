@@ -348,20 +348,160 @@ enum SemanticsRole {
 
   /// A tab button.
   ///
-  /// see also:
+  /// See also:
   ///
   ///  * [tabBar], which is the role for containers of tab buttons.
   tab,
 
   /// Contains tab buttons.
   ///
-  /// see also:
+  /// See also:
   ///
   ///  * [tab], which is the role for tab buttons.
   tabBar,
 
   /// The main display for a tab.
   tabPanel,
+
+  /// A pop up dialog.
+  dialog,
+
+  /// An alert dialog.
+  alertDialog,
+
+  /// A table structure containing data arranged in rows and columns.
+  ///
+  /// See also:
+  ///
+  /// * [cell], [row], [columnHeader] for table related roles.
+  table,
+
+  /// A cell in a [table] that does not contain column or row header information.
+  ///
+  /// See also:
+  ///
+  /// * [table],[row], [columnHeader] for table related roles.
+  cell,
+
+  /// A row of [cell]s or or [columnHeader]s in a [table].
+  ///
+  /// See also:
+  ///
+  /// * [table] ,[cell],[columnHeader] for table related roles.
+  row,
+
+  /// A cell in a [table] contains header information for a column.
+  ///
+  /// See also:
+  ///
+  /// * [table] ,[cell], [row] for table related roles.
+  columnHeader,
+
+  /// An input field for users to enter search terms.
+  searchBox,
+
+  /// A control used for dragging across content.
+  ///
+  /// For example, the drag handle of [ReorderableList].
+  dragHandle,
+
+  /// A control to cycle through content on tap.
+  ///
+  /// For example, the next and previous month button of a [CalendarDatePicker].
+  spinButton,
+
+  /// A input field with a dropdown list box attached.
+  ///
+  /// For example, a [DropdownMenu]
+  comboBox,
+
+  /// A presentation of [menu] that usually remains visible and is usually
+  /// presented horizontally.
+  ///
+  /// For example, a [MenuBar].
+  menuBar,
+
+  /// A permanently visible list of controls or a widget that can be made to
+  /// open and close.
+  ///
+  /// For example, a [MenuAnchor] or [DropdownButton].
+  menu,
+
+  /// An item in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItemCheckbox], a menu item with a checkbox. The [menuItemCheckbox]
+  ///  can also be used within [menu] and [menuBar].
+  /// * [menuItemRadio], a menu item with a radio button. This role is used by
+  /// [menu] or [menuBar] as well.
+  menuItem,
+
+  /// An item with a checkbox in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItem] and [menuItemRadio] for menu related roles.
+  menuItemCheckbox,
+
+  /// An item with a radio button in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItem] and [menuItemCheckbox] for menu related roles.
+  menuItemRadio,
+
+  /// A container to display multiple [listItem]s in vertical or horizontal
+  /// layout.
+  ///
+  /// For example, a [LisView] or [Column].
+  list,
+
+  /// An item in a [list].
+  listItem,
+
+  /// An area that represents a form.
+  form,
+
+  /// A pop up displayed when hovering over a component to provide contextual
+  /// explanation.
+  tooltip,
+
+  /// A graphic object that spins to indicate the application is busy.
+  ///
+  /// For example, a [CircularProgressIndicator].
+  loadingSpinner,
+
+  /// A graphic object that shows progress with a numeric number.
+  ///
+  /// For example, a [LinearProgressIndicator].
+  progressBar,
+
+  /// A keyboard shortcut field that allows the user to enter a combination or
+  /// sequence of keystrokes.
+  ///
+  /// For example, [Shortcuts].
+  hotKey,
+
+  /// A group of radio buttons.
+  radioGroup,
+
+  /// A component to provide advisory information that is not important to
+  /// justify an [alert].
+  ///
+  /// For example, a loading message for a web page.
+  status,
+
+  /// A component to provide important and usually time-sensitive information.
+  ///
+  /// The alert role should only be used for information that requires the
+  /// user's immediate attention, for example:
+  ///
+  /// * An invalid value was entered into a form field.
+  /// * The user's login session is about to expire.
+  /// * The connection to the server was lost so local changes will not be
+  ///   saved.
+  alert,
 }
 
 /// A Boolean value that can be associated with a semantics node.
@@ -411,6 +551,8 @@ class SemanticsFlag {
   static const int _kHasExpandedStateIndex = 1 << 26;
   static const int _kIsExpandedIndex = 1 << 27;
   static const int _kHasSelectedStateIndex = 1 << 28;
+  static const int _kHasRequiredStateIndex = 1 << 29;
+  static const int _kIsRequiredIndex = 1 << 30;
   // READ THIS: if you add a flag here, you MUST update the following:
   //
   // - Add an appropriately named and documented `static const SemanticsFlag`
@@ -723,6 +865,28 @@ class SemanticsFlag {
   ///   * [SemanticsFlag.hasExpandedState], which enables an expanded/collapsed state.
   static const SemanticsFlag isExpanded = SemanticsFlag._(_kIsExpandedIndex, 'isExpanded');
 
+  /// The semantics node has the quality of either being required or not.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.isRequired], which controls whether the node is required.
+  static const SemanticsFlag hasRequiredState = SemanticsFlag._(
+    _kHasRequiredStateIndex,
+    'hasRequiredState',
+  );
+
+  /// Whether a semantics node is required.
+  ///
+  /// If true, user input is required on the semantics node before a form can
+  /// be submitted.
+  ///
+  /// For example, a login form requires its email text field to be non-empty.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.hasRequiredState], which enables a required state state.
+  static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -756,6 +920,8 @@ class SemanticsFlag {
     _kIsCheckStateMixedIndex: isCheckStateMixed,
     _kHasExpandedStateIndex: hasExpandedState,
     _kIsExpandedIndex: isExpanded,
+    _kHasRequiredStateIndex: hasRequiredState,
+    _kIsRequiredIndex: isRequired,
   };
 
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
@@ -954,7 +1120,7 @@ abstract class SemanticsUpdateBuilder {
   ///
   /// For scrollable nodes `scrollPosition` describes the current scroll
   /// position in logical pixel. `scrollExtentMax` and `scrollExtentMin`
-  /// describe the maximum and minimum in-rage values that `scrollPosition` can
+  /// describe the maximum and minimum in-range values that `scrollPosition` can
   /// be. Both or either may be infinity to indicate unbound scrolling. The
   /// value for `scrollPosition` can (temporarily) be outside this range, for
   /// example during an overscroll. `scrollChildren` is the count of the
@@ -1029,6 +1195,7 @@ abstract class SemanticsUpdateBuilder {
     int headingLevel = 0,
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
+    required List<String>? controlsNodes,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1105,6 +1272,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int headingLevel = 0,
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
+    required List<String>? controlsNodes,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1151,6 +1319,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       headingLevel,
       linkUrl,
       role.index,
+      controlsNodes,
     );
   }
 
@@ -1196,6 +1365,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Handle,
       Int32,
+      Handle,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
@@ -1238,6 +1408,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     int headingLevel,
     String linkUrl,
     int role,
+    List<String>? controlsNodes,
   );
 
   @override

@@ -356,14 +356,14 @@ void main() {
 
     testWithoutContext('a non-empty realm is included in the storage url', () async {
       final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final Directory internalDir = fileSystem.currentDirectory
+      final Directory cacheDir = fileSystem.currentDirectory
           .childDirectory('bin')
-          .childDirectory('internal');
-      final File engineVersionFile = internalDir.childFile('engine.version');
+          .childDirectory('cache');
+      final File engineVersionFile = cacheDir.childFile('engine.stamp');
       engineVersionFile.createSync(recursive: true);
       engineVersionFile.writeAsStringSync('abcdef');
 
-      final File engineRealmFile = internalDir.childFile('engine.realm');
+      final File engineRealmFile = cacheDir.childFile('engine.realm');
       engineRealmFile.createSync(recursive: true);
       engineRealmFile.writeAsStringSync('flutter_archives_v2');
 
@@ -465,7 +465,7 @@ void main() {
     expect(packageUrl, isNotNull);
     expect(
       packageUrl.toString(),
-      'https://storage.googleapis.com/flutter_infra_release/flutter/null/package_dir.zip',
+      'https://storage.googleapis.com/flutter_infra_release/flutter/abc123/package_dir.zip',
     );
 
     final Directory dir =
@@ -903,7 +903,10 @@ void main() {
       canvasKitVersionFile.createSync(recursive: true);
       canvasKitVersionFile.writeAsStringSync('abcdefg');
 
-      final File engineVersionFile = internalDir.childFile('engine.version');
+      final Directory cacheDir = fileSystem.currentDirectory
+          .childDirectory('bin')
+          .childDirectory('cache');
+      final File engineVersionFile = cacheDir.childFile('engine.stamp');
       engineVersionFile.createSync(recursive: true);
       engineVersionFile.writeAsStringSync('hijklmnop');
 
@@ -953,7 +956,10 @@ void main() {
       canvasKitVersionFile.createSync(recursive: true);
       canvasKitVersionFile.writeAsStringSync('abcdefg');
 
-      final File engineVersionFile = internalDir.childFile('engine.version');
+      final Directory cacheDir = fileSystem.currentDirectory
+          .childDirectory('bin')
+          .childDirectory('cache');
+      final File engineVersionFile = cacheDir.childFile('engine.stamp');
       engineVersionFile.createSync(recursive: true);
       engineVersionFile.writeAsStringSync('hijklmnop');
 
@@ -998,6 +1004,13 @@ void main() {
     final Directory webCacheDirectory = cache.getWebSdkDirectory();
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
     final FlutterWebSdk webSdk = FlutterWebSdk(cache);
+
+    final Directory cacheDir = fileSystem.currentDirectory
+        .childDirectory('bin')
+        .childDirectory('cache');
+    final File engineVersionFile = cacheDir.childFile('engine.stamp');
+    engineVersionFile.createSync(recursive: true);
+    engineVersionFile.writeAsStringSync('hijklmnop');
 
     artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
       location.createSync(recursive: true);
@@ -1229,7 +1242,7 @@ void main() {
                 command: <String>[
                   '/bin/cache/flutter_gradle_wrapper.rand0/gradlew',
                   '-b',
-                  'packages/flutter_tools/gradle/resolve_dependencies.gradle',
+                  'packages/flutter_tools/gradle/resolve_dependencies.gradle.kts',
                   '--project-cache-dir',
                   '/bin/cache/flutter_gradle_wrapper.rand0',
                   'resolveDependencies',
@@ -1346,6 +1359,9 @@ class FakeSecondaryCache extends Fake implements Cache {
 
   @override
   String get storageBaseUrl => 'https://storage.googleapis.com';
+
+  @override
+  String get engineRevision => version ?? 'abc123';
 
   @override
   Directory getDownloadDir() => artifactDirectory;

@@ -29,8 +29,8 @@ TEST(MockTextureTest, Callbacks) {
 
 TEST(MockTextureTest, PaintCalls) {
   DisplayListBuilder builder;
-  const SkRect paint_bounds1 = SkRect::MakeWH(1.0f, 1.0f);
-  const SkRect paint_bounds2 = SkRect::MakeWH(2.0f, 2.0f);
+  const DlRect paint_bounds1 = DlRect::MakeWH(1.0f, 1.0f);
+  const DlRect paint_bounds2 = DlRect::MakeWH(2.0f, 2.0f);
   const DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
   const auto texture_image = MockTexture::MakeTestTexture(20, 20, 5);
   auto texture = std::make_shared<MockTexture>(0, texture_image);
@@ -41,8 +41,8 @@ TEST(MockTextureTest, PaintCalls) {
   texture->Paint(context, paint_bounds1, false, sampling);
   texture->Paint(context, paint_bounds2, true, sampling);
 
-  SkRect src1 = SkRect::Make(texture_image->bounds());
-  SkRect src2 = src1.makeInset(1.0, 1.0f);
+  DlRect src1 = DlRect::Make(texture_image->GetBounds());
+  DlRect src2 = src1.Expand(-1.0f, -1.0f);
 
   DisplayListBuilder expected_builder;
   expected_builder.DrawImageRect(texture_image, src1, paint_bounds1, sampling);
@@ -53,8 +53,8 @@ TEST(MockTextureTest, PaintCalls) {
 
 TEST(MockTextureTest, PaintCallsWithLinearSampling) {
   DisplayListBuilder builder;
-  const SkRect paint_bounds1 = SkRect::MakeWH(1.0f, 1.0f);
-  const SkRect paint_bounds2 = SkRect::MakeWH(2.0f, 2.0f);
+  const DlRect paint_bounds1 = DlRect::MakeWH(1.0f, 1.0f);
+  const DlRect paint_bounds2 = DlRect::MakeWH(2.0f, 2.0f);
   const auto sampling = DlImageSampling::kLinear;
   const auto texture_image = MockTexture::MakeTestTexture(20, 20, 5);
   auto texture = std::make_shared<MockTexture>(0, texture_image);
@@ -65,8 +65,8 @@ TEST(MockTextureTest, PaintCallsWithLinearSampling) {
   texture->Paint(context, paint_bounds1, false, sampling);
   texture->Paint(context, paint_bounds2, true, sampling);
 
-  SkRect src1 = SkRect::Make(texture_image->bounds());
-  SkRect src2 = src1.makeInset(1.0, 1.0f);
+  DlRect src1 = DlRect::Make(texture_image->GetBounds());
+  DlRect src2 = src1.Expand(-1.0f, -1.0f);
 
   DisplayListBuilder expected_builder;
   expected_builder.DrawImageRect(texture_image, src1, paint_bounds1, sampling);

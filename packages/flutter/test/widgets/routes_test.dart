@@ -2625,6 +2625,84 @@ void main() {
       expect(notifications.last.canHandlePop, isTrue);
     });
   });
+
+  testWidgets("ModalRoute's default directionalTraversalEdgeBehavior is the same as Navigator's", (
+    WidgetTester tester,
+  ) async {
+    Future<void> pumpWith(TraversalEdgeBehavior behavior) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            key: UniqueKey(),
+            routeDirectionalTraversalEdgeBehavior: behavior,
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const Center(child: Text('page'));
+                },
+                settings: settings,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TraversalEdgeBehavior element in TraversalEdgeBehavior.values) {
+      await pumpWith(element);
+      await tester.pumpAndSettle();
+      final FocusScopeNode focusScope = FocusScope.of(tester.element(find.text('page')));
+      expect(focusScope.directionalTraversalEdgeBehavior, element);
+    }
+  });
+
+  testWidgets('requestFocus works correctly in showGeneralDialog.', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(body: TextField(focusNode: focusNode)),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    showGeneralDialog<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: true,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, true);
+    expect(focusNode.hasFocus, false);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    showGeneralDialog<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: false,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
+    expect(focusNode.hasFocus, true);
+  });
 }
 
 double _getOpacity(GlobalKey key, WidgetTester tester) {

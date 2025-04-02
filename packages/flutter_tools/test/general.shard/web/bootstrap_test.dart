@@ -62,7 +62,6 @@ void main() {
   test('generateMainModule removes timeout from requireJS', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
 
@@ -83,7 +82,6 @@ void main() {
   test('generateMainModule hides requireJS injected by DDC', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
     expect(
@@ -101,7 +99,6 @@ void main() {
   test('generateMainModule embeds urls correctly', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
     // bootstrap main module has correct defined module.
@@ -117,7 +114,6 @@ void main() {
   test('generateMainModule can set bootstrap name', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
       bootstrapModule: 'foo_module.bootstrap',
     );
@@ -134,23 +130,30 @@ void main() {
   test('generateMainModule includes null safety switches', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: true,
       nativeNullAssertions: true,
     );
 
-    expect(result, contains('''dart_sdk.dart.nonNullAsserts(true);'''));
     expect(result, contains('''dart_sdk.dart.nativeNonNullAsserts(true);'''));
   });
 
   test('generateMainModule can disable null safety switches', () {
     final String result = generateMainModule(
       entrypoint: 'foo/bar/main.js',
-      nullAssertions: false,
       nativeNullAssertions: false,
     );
 
-    expect(result, contains('''dart_sdk.dart.nonNullAsserts(false);'''));
     expect(result, contains('''dart_sdk.dart.nativeNonNullAsserts(false);'''));
+  });
+
+  test('generateMainModule sets rootDirectories', () {
+    const String root = 'http://localhost:12345';
+    final String result = generateMainModule(
+      entrypoint: 'foo/bar/main.js',
+      nativeNullAssertions: false,
+      loaderRootDirectory: root,
+    );
+
+    expect(result, contains('''window.\$dartLoader.rootDirectories = ["$root"];'''));
   });
 
   test('generateTestBootstrapFileContents embeds urls correctly', () {
@@ -184,12 +187,11 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: true,
+        isWindows: false,
       );
       // ddc module loader js source is interpolated correctly.
-      expect(result, contains('"moduleLoader": "ddc_module_loader.js"'));
       expect(result, contains('"src": "ddc_module_loader.js"'));
       // stack trace mapper source is interpolated correctly.
-      expect(result, contains('"mapper": "mapper.js"'));
       expect(result, contains('"src": "mapper.js"'));
       // data-main is set to correct bootstrap module.
       expect(result, contains('"src": "main_module.bootstrap.js"'));
@@ -202,6 +204,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: true,
+        isWindows: false,
       );
       // LoadConfiguration and DDCLoader objects must be constructed.
       expect(result, contains(r'new window.$dartLoader.LoadConfiguration('));
@@ -222,6 +225,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: true,
+        isWindows: false,
       );
       expect(result, contains('"flutter-loader"'));
       expect(result, contains('"indeterminate"'));
@@ -233,6 +237,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: false,
+        isWindows: false,
       );
       expect(result, isNot(contains('"flutter-loader"')));
       expect(result, isNot(contains('"indeterminate"')));
@@ -245,6 +250,7 @@ void main() {
         ddcModuleLoaderUrl: 'ddc_module_loader.js',
         mapperUrl: 'mapper.js',
         generateLoadingIndicator: true,
+        isWindows: false,
       );
 
       // See: https://regexr.com/6q0ft
@@ -256,8 +262,8 @@ void main() {
     test('generateDDCLibraryBundleMainModule embeds the entrypoint correctly', () {
       final String result = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.js',
-        nullAssertions: false,
         nativeNullAssertions: false,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
       );
       // bootstrap main module has correct defined module.
       expect(result, contains('let appName = "org-dartlang-app:/main.js";'));
@@ -267,22 +273,20 @@ void main() {
     test('generateDDCLibraryBundleMainModule includes null safety switches', () {
       final String result = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.js',
-        nullAssertions: true,
         nativeNullAssertions: true,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
       );
 
-      expect(result, contains('nonNullAsserts: true'));
       expect(result, contains('nativeNonNullAsserts: true'));
     });
 
     test('generateDDCLibraryBundleMainModule can disable null safety switches', () {
       final String result = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.js',
-        nullAssertions: false,
         nativeNullAssertions: false,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
       );
 
-      expect(result, contains('nonNullAsserts: false'));
       expect(result, contains('nativeNonNullAsserts: false'));
     });
 

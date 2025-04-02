@@ -9,7 +9,6 @@ library;
 
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -63,7 +62,7 @@ void main() {
   testWidgets('SegmentedButton releases state controllers for deleted segments', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final Key key = UniqueKey();
 
     Widget buildApp(Widget button) {
@@ -105,7 +104,7 @@ void main() {
   testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -559,7 +558,7 @@ void main() {
   testWidgets('SegmentedButton default overlayColor and foregroundColor resolve pressed state', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -608,7 +607,7 @@ void main() {
   });
 
   testWidgets('SegmentedButton has no tooltips by default', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -632,7 +631,7 @@ void main() {
   });
 
   testWidgets('SegmentedButton has correct tooltips', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -929,7 +928,7 @@ void main() {
 
     // The width of the SegmentedButton must be less than the width of the parent widget.
     expect(segmentedButtonWidth, lessThan(screenWidth));
-  }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/145527
+  });
 
   testWidgets('SegmentedButton.styleFrom overlayColor overrides default overlay color', (
     WidgetTester tester,
@@ -1120,7 +1119,7 @@ void main() {
         p2: const Offset(166.8000030517578, tapTargetSize - 4.0),
       ),
     );
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('SegmentedButton vertical aligned children', (WidgetTester tester) async {
     await tester.pumpWidget(

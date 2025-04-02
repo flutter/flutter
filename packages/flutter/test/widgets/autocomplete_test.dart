@@ -326,8 +326,6 @@ void main() {
 
       // Tap on the text field to open the options.
       await tester.tap(find.byKey(fieldKey));
-      // Two pumps required due to post frame callback.
-      await tester.pump();
       await tester.pump();
       expect(find.byKey(optionsKey), findsOneWidget);
       expect(lastOptions.length, kOptions.length);
@@ -446,17 +444,10 @@ void main() {
           );
       }
 
-      // Add an extra pump to account for any potential frame delays introduced
-      // by the post frame callback in the _RawAutocompleteOptions
-      // implementation.
-      await tester.pump();
       setState(() {
         alignment = Alignment.topCenter;
       });
 
-      // One frame for the field to move and one frame for the options to
-      // follow.
-      await tester.pump();
       await tester.pump();
 
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -596,8 +587,6 @@ void main() {
       expect(find.byKey(optionsKey), findsNothing);
 
       await tester.tap(find.byType(TextField));
-      // Two pumps required due to post frame callback.
-      await tester.pump();
       await tester.pump();
 
       expect(find.byKey(fieldKey), findsOneWidget);
@@ -1129,10 +1118,6 @@ void main() {
     final Size fieldSize = tester.getSize(find.byKey(fieldKey));
     expect(optionsTopLeft.dy, fieldOffset.dy + fieldSize.height);
 
-    // Add an extra pump to account for any potential frame delays introduced by
-    // the post frame callback in the _RawAutocompleteOptions implementation.
-    await tester.pump();
-
     // Move the field (similar to as if the keyboard opened). The options move
     // to follow the field.
     setState(() {
@@ -1527,12 +1512,13 @@ void main() {
     expect(lastOptions, <String>['dingo', 'flamingo']);
   });
 
-  testWidgets('can navigate options with the keyboard', (WidgetTester tester) async {
+  testWidgets('can navigate options with the arrow keys', (WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     final GlobalKey optionsKey = GlobalKey();
     late Iterable<String> lastOptions;
     late FocusNode focusNode;
     late TextEditingController textEditingController;
+    late int lastHighlighted;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1564,6 +1550,7 @@ void main() {
               AutocompleteOnSelected<String> onSelected,
               Iterable<String> options,
             ) {
+              lastHighlighted = AutocompleteHighlightedOption.of(context);
               lastOptions = options;
               return Container(key: optionsKey);
             },
@@ -1607,19 +1594,209 @@ void main() {
     expect(lastOptions.elementAt(4), 'mouse');
     expect(lastOptions.elementAt(5), 'northern white rhinoceros');
 
-    // The selection should wrap at the top and bottom. Move up to 'mouse'
-    // and then back down to 'goose' and select it.
+    // Selection does not wrap (going up).
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(lastHighlighted, 0);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(lastHighlighted, 0);
+
+    // Selection does not wrap (going down).
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 1);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 2);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 3);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+    expect(lastHighlighted, 4);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+  });
+
+  testWidgets('can jump to ends with keyboard', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    late int lastHighlighted;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (
+              BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted,
+            ) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextFormField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+                onFieldSubmitted: (String value) {
+                  onFieldSubmitted();
+                },
+              );
+            },
+            optionsViewBuilder: (
+              BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options,
+            ) {
+              lastHighlighted = AutocompleteHighlightedOption.of(context);
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Enter text. The options are filtered by the text.
+    focusNode.requestFocus();
+    textEditingController.clear();
+    await tester.enterText(find.byKey(fieldKey), 'e');
     await tester.pump();
     expect(find.byKey(fieldKey), findsOneWidget);
-    expect(find.byKey(optionsKey), findsNothing);
-    expect(textEditingController.text, 'goose');
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 6);
+    expect(lastOptions.elementAt(0), 'chameleon');
+    expect(lastOptions.elementAt(1), 'elephant');
+    expect(lastOptions.elementAt(2), 'goose');
+    expect(lastOptions.elementAt(3), 'lemur');
+    expect(lastOptions.elementAt(4), 'mouse');
+    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
+
+    // Jump to the bottom.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+
+    // Doesn't wrap down.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+
+    // Jump to the top.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pump();
+    expect(lastHighlighted, 0);
+
+    // Doesn't wrap up.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pump();
+    expect(lastHighlighted, 0);
+  });
+
+  testWidgets('can navigate with page up/down keys', (WidgetTester tester) async {
+    final GlobalKey fieldKey = GlobalKey();
+    final GlobalKey optionsKey = GlobalKey();
+    late Iterable<String> lastOptions;
+    late FocusNode focusNode;
+    late TextEditingController textEditingController;
+    late int lastHighlighted;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: RawAutocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            fieldViewBuilder: (
+              BuildContext context,
+              TextEditingController fieldTextEditingController,
+              FocusNode fieldFocusNode,
+              VoidCallback onFieldSubmitted,
+            ) {
+              focusNode = fieldFocusNode;
+              textEditingController = fieldTextEditingController;
+              return TextFormField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+                onFieldSubmitted: (String value) {
+                  onFieldSubmitted();
+                },
+              );
+            },
+            optionsViewBuilder: (
+              BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options,
+            ) {
+              lastHighlighted = AutocompleteHighlightedOption.of(context);
+              lastOptions = options;
+              return Container(key: optionsKey);
+            },
+          ),
+        ),
+      ),
+    );
+
+    // Enter text. The options are filtered by the text.
+    focusNode.requestFocus();
+    textEditingController.clear();
+    await tester.enterText(find.byKey(fieldKey), 'e');
+    await tester.pump();
+    expect(find.byKey(fieldKey), findsOneWidget);
+    expect(find.byKey(optionsKey), findsOneWidget);
+    expect(lastOptions.length, 6);
+    expect(lastOptions.elementAt(0), 'chameleon');
+    expect(lastOptions.elementAt(1), 'elephant');
+    expect(lastOptions.elementAt(2), 'goose');
+    expect(lastOptions.elementAt(3), 'lemur');
+    expect(lastOptions.elementAt(4), 'mouse');
+    expect(lastOptions.elementAt(5), 'northern white rhinoceros');
+
+    // Jump down. Stops at the bottom and doesn't wrap.
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pump();
+    expect(lastHighlighted, 4);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pump();
+    expect(lastHighlighted, 5);
+
+    // Jump to the bottom and then jump up a page.
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pump();
+    expect(lastHighlighted, 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pump();
+    expect(lastHighlighted, 0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pump();
+    expect(lastHighlighted, 0);
   });
 
   testWidgets('can hide and show options with the keyboard', (WidgetTester tester) async {
@@ -1863,8 +2040,20 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await tester.pump();
       expect(lastHighlighted, 3);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(lastHighlighted, 4);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pump();
+      expect(lastHighlighted, 5);
 
       // And move it back up
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(lastHighlighted, 4);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.pump();
+      expect(lastHighlighted, 3);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
       expect(lastHighlighted, 2);
@@ -1875,10 +2064,10 @@ void main() {
       await tester.pump();
       expect(lastHighlighted, 0);
 
-      // Going back up should wrap around
+      // Arrow keys do not wrap.
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
       await tester.pump();
-      expect(lastHighlighted, 5);
+      expect(lastHighlighted, 0);
     },
   );
 
@@ -2006,9 +2195,6 @@ void main() {
     final RenderBox optionsBox = tester.renderObject(find.byKey(optionsKey));
     expect(optionsBox.size.width, 100.0);
 
-    // Add an extra pump to account for any potential frame delays introduced by
-    // the post frame callback in the _RawAutocompleteOptions implementation.
-    await tester.pump();
     setState(() {
       width = 200.0;
     });
@@ -2044,21 +2230,26 @@ void main() {
         FocusNode focusNode,
         VoidCallback onSubmitted,
       ) {
-        return TextField(key: fieldKey, focusNode: focusNode, controller: textEditingController);
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter localStateSetter) {
+            setState = localStateSetter;
+            return SizedBox(
+              width: width,
+              child: TextField(
+                key: fieldKey,
+                focusNode: focusNode,
+                controller: textEditingController,
+              ),
+            );
+          },
+        );
       },
     );
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter localStateSetter) {
-                setState = localStateSetter;
-                return SizedBox(width: width, child: autocomplete);
-              },
-            ),
-          ),
+          body: Padding(padding: const EdgeInsets.symmetric(horizontal: 32.0), child: autocomplete),
         ),
       ),
     );
@@ -2079,9 +2270,6 @@ void main() {
     expect(fieldBox.size.width, 100.0);
     expect(optionsBox.size.width, 100.0);
 
-    // Add an extra pump to account for any potential frame delays introduced by
-    // the post frame callback in the _RawAutocompleteOptions implementation.
-    await tester.pump();
     setState(() {
       width = 200.0;
     });

@@ -781,6 +781,19 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
   }
 }
 
+- (BOOL)accessibilityRespondsToUserInteraction {
+  // Return true only if the node contains actions other than system actions.
+  if ((self.node.actions & ~flutter::kSystemActions) != 0) {
+    return true;
+  }
+
+  if (!self.node.customAccessibilityActions.empty()) {
+    return true;
+  }
+
+  return false;
+}
+
 @end
 
 @implementation FlutterSemanticsObject
@@ -928,7 +941,12 @@ CGRect ConvertRectToGlobal(SemanticsObject* reference, CGRect local_rect) {
 }
 
 - (CGRect)accessibilityFrame {
-  return self.semanticsObject.accessibilityFrame;
+  // For OverlayPortals, the child element is sometimes outside the bounds of the parent
+  // Even if it's marked accessible, VoiceControl labels will not appear if it's too
+  // spatially distant. Set the frame to be the max screen size so all children are guaraenteed
+  // to be contained.
+
+  return UIScreen.mainScreen.bounds;
 }
 
 - (id)accessibilityContainer {

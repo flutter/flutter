@@ -14,14 +14,11 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../daemon.dart';
 import '../device.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
-import '../macos/macos_ipad_device.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -41,7 +38,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesFlavorOption();
     usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
-    addBundleSkSLPathOption(hide: !verboseHelp);
     usesApplicationBinaryOption();
     argParser
       ..addFlag(
@@ -63,20 +59,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         'verbose-system-logs',
         negatable: false,
         help: 'Include verbose logging from the Flutter engine.',
-      )
-      ..addFlag(
-        'cache-sksl',
-        negatable: false,
-        help: 'Cache the shader in the SkSL format instead of in binary or GLSL formats.',
-      )
-      ..addFlag(
-        'dump-skp-on-shader-compilation',
-        negatable: false,
-        help:
-            'Automatically dump the skp that triggers new shader compilations. '
-            'This is useful for writing custom ShaderWarmUp to reduce jank. '
-            'By default, this is not enabled as it introduces significant overhead. '
-            'This is only available in profile or debug builds.',
       )
       ..addFlag(
         'purge-persistent-cache',
@@ -227,7 +209,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesIpv6Flag(verboseHelp: verboseHelp);
     usesPubOption();
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
@@ -243,8 +224,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 
   bool get traceStartup => boolArg('trace-startup');
   bool get enableDartProfiling => boolArg('enable-dart-profiling');
-  bool get cacheSkSL => boolArg('cache-sksl');
-  bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
   bool get purgePersistentCache => boolArg('purge-persistent-cache');
   bool get disableServiceAuthCodes => boolArg('disable-service-auth-codes');
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
@@ -347,8 +326,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         traceSystrace: boolArg('trace-systrace'),
         traceToFile: stringArg('trace-to-file'),
         endlessTraceBuffer: boolArg('endless-trace-buffer'),
-        dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
-        cacheSkSL: cacheSkSL,
         purgePersistentCache: purgePersistentCache,
         deviceVmServicePort: deviceVmservicePort,
         hostVmServicePort: hostVmservicePort,
@@ -382,7 +359,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
             argParser.options.containsKey('fast-start') &&
             boolArg('fast-start') &&
             !runningWithPrebuiltApplication,
-        nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
         enableVulkanValidation: enableVulkanValidation,
@@ -534,24 +510,6 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<CustomDimensions> get usageValues async {
-    final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
-
-    return CustomDimensions(
-      commandRunIsEmulator: record.runIsEmulator,
-      commandRunTargetName: record.runTargetName,
-      commandRunTargetOsVersion: record.runTargetOsVersion,
-      commandRunModeName: record.runModeName,
-      commandRunProjectModule: record.runProjectModule,
-      commandRunProjectHostLanguage: record.runProjectHostLanguage,
-      commandRunAndroidEmbeddingVersion: record.runAndroidEmbeddingVersion,
-      commandRunEnableImpeller: record.runEnableImpeller,
-      commandRunIOSInterfaceType: record.runIOSInterfaceType,
-      commandRunIsTest: record.runIsTest,
-    );
-  }
-
-  @override
   Future<analytics.Event> unifiedAnalyticsUsageValues(String commandPath) async {
     final AnalyticsUsageValuesRecord record = await _sharedAnalyticsUsageValues;
 
@@ -684,15 +642,6 @@ class RunCommand extends RunCommandBase {
     if (devices == null) {
       throwToolExit(null);
     }
-
-    if (devices!.length == 1 && devices!.first is MacOSDesignedForIPadDevice) {
-      throwToolExit('Mac Designed for iPad is currently not supported for flutter run -d.');
-    }
-
-    if (globals.deviceManager!.hasSpecifiedAllDevices) {
-      devices?.removeWhere((Device device) => device is MacOSDesignedForIPadDevice);
-    }
-
     if (globals.deviceManager!.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit(
         'Using "-d all" with "--${FlutterOptions.kUseApplicationBinary}" is not supported',
@@ -719,10 +668,6 @@ class RunCommand extends RunCommandBase {
 
     if (useWasm && !webMode) {
       throwToolExit('--wasm is only supported on the web platform');
-    }
-
-    if (webRenderer.isDeprecated) {
-      globals.logger.printWarning(webRenderer.deprecationWarning);
     }
 
     if (webRenderer == WebRendererMode.skwasm && !useWasm) {
@@ -771,9 +716,11 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: await createDebuggingOptions(webMode),
         stayResident: stayResident,
         fileSystem: globals.fs,
-        usage: globals.flutterUsage,
         analytics: globals.analytics,
         logger: globals.logger,
+        terminal: globals.terminal,
+        platform: globals.platform,
+        outputPreferences: globals.outputPreferences,
         systemClock: globals.systemClock,
       );
     }
@@ -791,18 +738,7 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Daemon createMachineDaemon() {
-    final Daemon daemon = Daemon(
-      DaemonConnection(
-        daemonStreams: DaemonStreams.fromStdio(globals.stdio, logger: globals.logger),
-        logger: globals.logger,
-      ),
-      notifyingLogger:
-          (globals.logger is NotifyingLogger)
-              ? globals.logger as NotifyingLogger
-              : NotifyingLogger(verbose: globals.logger.isVerbose, parent: globals.logger),
-      logToStdout: true,
-    );
-    return daemon;
+    return Daemon.createMachineDaemon();
   }
 
   @override
@@ -932,6 +868,7 @@ class RunCommand extends RunCommandBase {
       }
     } on RPCError catch (error) {
       if (error.code == RPCErrorKind.kServiceDisappeared.code ||
+          error.code == RPCErrorKind.kConnectionDisposed.code ||
           error.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

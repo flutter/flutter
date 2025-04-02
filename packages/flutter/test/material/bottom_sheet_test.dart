@@ -937,7 +937,6 @@ void main() {
             surface: surfaceColor,
             surfaceTint: surfaceTintColor,
           ),
-          useMaterial3: true,
         ),
         home: Scaffold(
           body: BottomSheet(
@@ -967,7 +966,6 @@ void main() {
   testWidgets('Material3 - BottomSheet has transparent shadow', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           body: BottomSheet(
             onClosing: () {},
@@ -1065,10 +1063,7 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body'))),
-      ),
+      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
     );
 
     showModalBottomSheet<void>(
@@ -1145,10 +1140,7 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body'))),
-      ),
+      MaterialApp(home: Scaffold(key: scaffoldKey, body: const Center(child: Text('body')))),
     );
 
     showModalBottomSheet<void>(
@@ -1181,6 +1173,7 @@ void main() {
                           textDirection: TextDirection.ltr,
                           children: <TestSemantics>[
                             TestSemantics(
+                              flags: <SemanticsFlag>[SemanticsFlag.isButton],
                               actions: <SemanticsAction>[SemanticsAction.tap],
                               label: 'Dismiss',
                               textDirection: TextDirection.ltr,
@@ -1268,7 +1261,7 @@ void main() {
 
     Widget buildScaffold(GlobalKey scaffoldKey) {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           bottomSheetTheme: BottomSheetThemeData(
             dragHandleColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
               if (states.contains(MaterialState.hovered)) {
@@ -1315,9 +1308,7 @@ void main() {
   ) async {
     Widget buildScaffold(GlobalKey scaffoldKey, {Size? dragHandleSize}) {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
-          bottomSheetTheme: BottomSheetThemeData(dragHandleSize: dragHandleSize),
-        ),
+        theme: ThemeData(bottomSheetTheme: BottomSheetThemeData(dragHandleSize: dragHandleSize)),
         home: Scaffold(key: scaffoldKey),
       );
     }
@@ -1350,9 +1341,7 @@ void main() {
   ) async {
     Widget buildScaffold(GlobalKey scaffoldKey, {Size? dragHandleSize}) {
       return MaterialApp(
-        theme: ThemeData.light().copyWith(
-          bottomSheetTheme: BottomSheetThemeData(dragHandleSize: dragHandleSize),
-        ),
+        theme: ThemeData(bottomSheetTheme: BottomSheetThemeData(dragHandleSize: dragHandleSize)),
         home: Scaffold(key: scaffoldKey),
       );
     }
@@ -2010,9 +1999,8 @@ void main() {
   group('constraints', () {
     testWidgets('Material3 - Default constraints are max width 640', (WidgetTester tester) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: ThemeData(useMaterial3: true),
-          home: const MediaQuery(
+        const MaterialApp(
+          home: MediaQuery(
             data: MediaQueryData(size: Size(1000, 1000)),
             child: Scaffold(
               body: Center(child: Text('body')),
@@ -2106,7 +2094,6 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
-            useMaterial3: true,
             bottomSheetTheme: const BottomSheetThemeData(
               constraints: BoxConstraints(maxWidth: sheetMaxWidth),
             ),
@@ -2463,9 +2450,9 @@ void main() {
     // Test custom animation style.
     await tester.pumpWidget(
       buildWidget(
-        sheetAnimationStyle: AnimationStyle(
-          duration: const Duration(milliseconds: 800),
-          reverseDuration: const Duration(milliseconds: 400),
+        sheetAnimationStyle: const AnimationStyle(
+          duration: Duration(milliseconds: 800),
+          reverseDuration: Duration(milliseconds: 400),
         ),
       ),
     );
@@ -2623,9 +2610,9 @@ void main() {
     // Test custom animation style.
     await tester.pumpWidget(
       buildWidget(
-        sheetAnimationStyle: AnimationStyle(
-          duration: const Duration(milliseconds: 800),
-          reverseDuration: const Duration(milliseconds: 400),
+        sheetAnimationStyle: const AnimationStyle(
+          duration: Duration(milliseconds: 800),
+          reverseDuration: Duration(milliseconds: 400),
         ),
       ),
     );
@@ -2749,6 +2736,43 @@ void main() {
       expect(getTextFieldFocusNode()?.hasFocus, true);
     },
   );
+
+  testWidgets('requestFocus works correctly in showModalBottomSheet.', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(body: TextField(focusNode: focusNode)),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    showModalBottomSheet<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: true,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('BottomSheet'))).hasFocus, true);
+    expect(focusNode.hasFocus, false);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    showModalBottomSheet<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: false,
+      builder: (BuildContext context) => const Text('BottomSheet'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('BottomSheet'))).hasFocus, false);
+    expect(focusNode.hasFocus, true);
+  });
 }
 
 class _TestPage extends StatelessWidget {

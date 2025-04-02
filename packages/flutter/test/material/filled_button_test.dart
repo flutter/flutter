@@ -471,7 +471,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -543,7 +543,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode();
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1619,7 +1619,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           body: Center(
             child: FilledButton(key: key, onPressed: () {}, child: const Text('FilledButton')),
@@ -1638,7 +1638,7 @@ void main() {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Scaffold(
           body: Center(
             child: FilledButton.icon(
@@ -1768,7 +1768,7 @@ void main() {
   testWidgets(
     'FilledButton uses InkSparkle only for Android non-web when useMaterial3 is true',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData(useMaterial3: true);
+      final ThemeData theme = ThemeData();
 
       await tester.pumpWidget(
         MaterialApp(
@@ -2755,5 +2755,39 @@ void main() {
     final Offset buttonTopRight = tester.getTopRight(find.byType(Material).last);
     final Offset iconTopRight = tester.getTopRight(find.byIcon(Icons.add));
     expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/162839.
+  testWidgets('FilledButton icon uses provided foregroundColor over default icon color', (
+    WidgetTester tester,
+  ) async {
+    const Color foregroundColor = Color(0xFFFF1234);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(foregroundColor: foregroundColor),
+                  onPressed: () {},
+                  icon: const Icon(Icons.add),
+                  label: const Text('Button'),
+                ),
+                FilledButton.tonalIcon(
+                  style: FilledButton.styleFrom(foregroundColor: foregroundColor),
+                  onPressed: () {},
+                  icon: const Icon(Icons.mail),
+                  label: const Text('Button'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(iconStyle(tester, Icons.add).color, foregroundColor);
+    expect(iconStyle(tester, Icons.mail).color, foregroundColor);
   });
 }

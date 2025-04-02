@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -184,7 +185,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       createDomEventListener((DomEvent event) {
         tryEnableSemantics(event);
       }),
-      true,
+      true.toJS,
     );
 
     // Adding roles to semantics placeholder. 'aria-live' will make sure that
@@ -382,7 +383,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       createDomEventListener((DomEvent event) {
         tryEnableSemantics(event);
       }),
-      true,
+      true.toJS,
     );
 
     placeholder

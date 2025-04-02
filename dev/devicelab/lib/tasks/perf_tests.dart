@@ -107,6 +107,19 @@ TaskFunction createAndroidTextureScrollPerfTest({bool? enableImpeller}) {
   ).run;
 }
 
+TaskFunction createAndroidHCPPScrollPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
+    'test_driver/scroll_perf_hcpp.dart',
+    'platform_views_hcpp_scroll_perf',
+    testDriver: 'test_driver/scroll_perf_hcpp_test.dart',
+    needsFullTimeline: false,
+    enableImpeller: true,
+    enableSurfaceControl: true,
+    enableMergedPlatformThread: true,
+  ).run;
+}
+
 TaskFunction createAndroidViewScrollPerfTest() {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout_hybrid_composition',
@@ -257,11 +270,13 @@ TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true}) {
 TaskFunction createFlutterGalleryStartupTest({
   String target = 'lib/main.dart',
   Map<String, String>? runEnvironment,
+  bool enableLazyShaderMode = false,
 }) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
     runEnvironment: runEnvironment,
+    enableLazyShaderMode: enableLazyShaderMode,
   ).run;
 }
 
@@ -276,6 +291,28 @@ TaskFunction createFlutterGalleryCompileTest() {
 TaskFunction createHelloWorldCompileTest() {
   return CompileTest(
     '${flutterDirectory.path}/examples/hello_world',
+    reportPackageContentSizes: true,
+  ).run;
+}
+
+TaskFunction createImitationGameSwiftUITest() {
+  return CompileTest(
+    '${flutterDirectory.path}/dev/benchmarks/imitation_game_swiftui',
+    reportPackageContentSizes: true,
+  ).runSwiftUIApp;
+}
+
+TaskFunction createImitationGameFlutterTest() {
+  flutter(
+    'create',
+    options: <String>[
+      '--platforms=ios',
+      '${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter',
+      '--no-overwrite',
+    ],
+  );
+  return CompileTest(
+    '${flutterDirectory.path}/dev/benchmarks/imitation_game_flutter',
     reportPackageContentSizes: true,
   ).run;
 }
@@ -495,51 +532,6 @@ TaskFunction createsScrollSmoothnessPerfTest() {
       addResult(data['resample off with 59Hz input'], '_without_resampler_59Hz');
 
       return TaskResult.success(result, benchmarkScoreKeys: result.keys.toList());
-    });
-  };
-}
-
-TaskFunction createFramePolicyIntegrationTest() {
-  final String testDirectory = '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
-  const String testTarget = 'test/frame_policy.dart';
-  return () {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      await flutter(
-        'drive',
-        options: <String>[
-          '--no-android-gradle-daemon',
-          '-v',
-          '--verbose-system-logs',
-          '--profile',
-          '-t',
-          testTarget,
-          '-d',
-          deviceId,
-        ],
-      );
-      final Map<String, dynamic> data =
-          json.decode(
-                file(
-                  '${testOutputDirectory(testDirectory)}/frame_policy_event_delay.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
-      final Map<String, dynamic> fullLiveData = data['fullyLive'] as Map<String, dynamic>;
-      final Map<String, dynamic> benchmarkLiveData = data['benchmarkLive'] as Map<String, dynamic>;
-      final Map<String, dynamic> dataFormatted = <String, dynamic>{
-        'average_delay_fullyLive_millis': fullLiveData['average_delay_millis'],
-        'average_delay_benchmarkLive_millis': benchmarkLiveData['average_delay_millis'],
-        '90th_percentile_delay_fullyLive_millis': fullLiveData['90th_percentile_delay_millis'],
-        '90th_percentile_delay_benchmarkLive_millis':
-            benchmarkLiveData['90th_percentile_delay_millis'],
-      };
-
-      return TaskResult.success(dataFormatted, benchmarkScoreKeys: dataFormatted.keys.toList());
     });
   };
 }
@@ -825,6 +817,13 @@ void _addMetadataToManifest(String testDirectory, List<(String, String)> keyPair
   file.writeAsStringSync(xmlDoc.toXmlString(pretty: true, indent: '    '));
 }
 
+void _addSurfaceControlSupportToManifest(String testDirectory) {
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.EnableSurfaceControl', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
 void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
   final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.EnableMergedPlatformUIThread', 'true'),
@@ -839,6 +838,17 @@ void _addMergedPlatformThreadSupportToManifest(String testDirectory) {
 void _addVulkanGPUTracingToManifest(String testDirectory) {
   final List<(String, String)> keyPairs = <(String, String)>[
     ('io.flutter.embedding.android.EnableVulkanGPUTracing', 'true'),
+  ];
+  _addMetadataToManifest(testDirectory, keyPairs);
+}
+
+/// Opens the file at testDirectory + 'android/app/src/main/AndroidManifest.xml'
+/// <meta-data
+///   android:name="io.flutter.embedding.android.ImpellerShaderMode"
+///   android:value="lazy" />
+void _addLazyShaderMode(String testDirectory) {
+  final List<(String, String)> keyPairs = <(String, String)>[
+    ('io.flutter.embedding.android.ImpellerLazyShaderInitialization', 'true'),
   ];
   _addMetadataToManifest(testDirectory, keyPairs);
 }
@@ -884,10 +894,12 @@ class StartupTest {
     this.reportMetrics = true,
     this.target = 'lib/main.dart',
     this.runEnvironment,
+    this.enableLazyShaderMode = false,
   });
 
   final String testDirectory;
   final bool reportMetrics;
+  final bool enableLazyShaderMode;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -898,144 +910,155 @@ class StartupTest {
       const int iterations = 5;
       final List<Map<String, dynamic>> results = <Map<String, dynamic>>[];
 
-      section('Building application');
-      String? applicationBinaryPath;
-      switch (deviceOperatingSystem) {
-        case DeviceOperatingSystem.android:
-          await flutter(
-            'build',
-            options: <String>[
-              'apk',
-              '-v',
-              '--profile',
-              '--target-platform=android-arm,android-arm64',
-              '--target=$target',
-            ],
-          );
-          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-        case DeviceOperatingSystem.androidArm:
-          await flutter(
-            'build',
-            options: <String>[
-              'apk',
-              '-v',
-              '--profile',
-              '--target-platform=android-arm',
-              '--target=$target',
-            ],
-          );
-          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-        case DeviceOperatingSystem.androidArm64:
-          await flutter(
-            'build',
-            options: <String>[
-              'apk',
-              '-v',
-              '--profile',
-              '--target-platform=android-arm64',
-              '--target=$target',
-            ],
-          );
-          applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-        case DeviceOperatingSystem.fake:
-        case DeviceOperatingSystem.fuchsia:
-        case DeviceOperatingSystem.linux:
-          break;
-        case DeviceOperatingSystem.ios:
-        case DeviceOperatingSystem.macos:
-          await flutter(
-            'build',
-            options: <String>[
-              if (deviceOperatingSystem == DeviceOperatingSystem.ios) 'ios' else 'macos',
-              '-v',
-              '--profile',
-              '--target=$target',
-              if (deviceOperatingSystem == DeviceOperatingSystem.ios) '--no-publish-port',
-            ],
-          );
-          final String buildRoot = path.join(testDirectory, 'build');
-          applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
-        case DeviceOperatingSystem.windows:
-          await flutter(
-            'build',
-            options: <String>['windows', '-v', '--profile', '--target=$target'],
-          );
-          final String basename = path.basename(testDirectory);
-          final String arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
-          applicationBinaryPath = path.join(
-            testDirectory,
-            'build',
-            'windows',
-            arch,
-            'runner',
-            'Profile',
-            '$basename.exe',
-          );
+      if (enableLazyShaderMode) {
+        _addLazyShaderMode(testDirectory);
       }
 
-      const int maxFailures = 3;
-      int currentFailures = 0;
-      for (int i = 0; i < iterations; i += 1) {
-        // Startup should not take more than a few minutes. After 10 minutes,
-        // take a screenshot to help debug.
-        final Timer timer = Timer(const Duration(minutes: 10), () async {
-          print('Startup not completed within 10 minutes. Taking a screenshot...');
-          await _flutterScreenshot(
-            device.deviceId,
-            'screenshot_startup_${DateTime.now().toLocal().toIso8601String()}.png',
-          );
-        });
-        final int result = await flutter(
-          'run',
-          options: <String>[
-            '--no-android-gradle-daemon',
-            '--no-publish-port',
-            '--verbose',
-            '--profile',
-            '--trace-startup',
-            '--target=$target',
-            '-d',
-            device.deviceId,
-            if (applicationBinaryPath != null) '--use-application-binary=$applicationBinaryPath',
-          ],
-          environment: runEnvironment,
-          canFail: true,
-        );
-        timer.cancel();
-        if (result == 0) {
-          final Map<String, dynamic> data =
-              json.decode(
-                    file(
-                      '${testOutputDirectory(testDirectory)}/start_up_info.json',
-                    ).readAsStringSync(),
-                  )
-                  as Map<String, dynamic>;
-          results.add(data);
-        } else {
-          currentFailures += 1;
-          await _flutterScreenshot(
-            device.deviceId,
-            'screenshot_startup_failure_$currentFailures.png',
-          );
-          i -= 1;
-          if (currentFailures == maxFailures) {
-            return TaskResult.failure('Application failed to start $maxFailures times');
-          }
+      try {
+        section('Building application');
+        String? applicationBinaryPath;
+        switch (deviceOperatingSystem) {
+          case DeviceOperatingSystem.android:
+            await flutter(
+              'build',
+              options: <String>[
+                'apk',
+                '-v',
+                '--profile',
+                '--target-platform=android-arm,android-arm64',
+                '--target=$target',
+              ],
+            );
+            applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          case DeviceOperatingSystem.androidArm:
+            await flutter(
+              'build',
+              options: <String>[
+                'apk',
+                '-v',
+                '--profile',
+                '--target-platform=android-arm',
+                '--target=$target',
+              ],
+            );
+            applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          case DeviceOperatingSystem.androidArm64:
+            await flutter(
+              'build',
+              options: <String>[
+                'apk',
+                '-v',
+                '--profile',
+                '--target-platform=android-arm64',
+                '--target=$target',
+              ],
+            );
+            applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
+          case DeviceOperatingSystem.fake:
+          case DeviceOperatingSystem.fuchsia:
+          case DeviceOperatingSystem.linux:
+            break;
+          case DeviceOperatingSystem.ios:
+          case DeviceOperatingSystem.macos:
+            await flutter(
+              'build',
+              options: <String>[
+                if (deviceOperatingSystem == DeviceOperatingSystem.ios) 'ios' else 'macos',
+                '-v',
+                '--profile',
+                '--target=$target',
+                if (deviceOperatingSystem == DeviceOperatingSystem.ios) '--no-publish-port',
+              ],
+            );
+            final String buildRoot = path.join(testDirectory, 'build');
+            applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
+          case DeviceOperatingSystem.windows:
+            await flutter(
+              'build',
+              options: <String>['windows', '-v', '--profile', '--target=$target'],
+            );
+            final String basename = path.basename(testDirectory);
+            final String arch = Abi.current() == Abi.windowsX64 ? 'x64' : 'arm64';
+            applicationBinaryPath = path.join(
+              testDirectory,
+              'build',
+              'windows',
+              arch,
+              'runner',
+              'Profile',
+              '$basename.exe',
+            );
         }
 
-        await device.uninstallApp();
+        const int maxFailures = 3;
+        int currentFailures = 0;
+        for (int i = 0; i < iterations; i += 1) {
+          // Startup should not take more than a few minutes. After 10 minutes,
+          // take a screenshot to help debug.
+          final Timer timer = Timer(const Duration(minutes: 10), () async {
+            print('Startup not completed within 10 minutes. Taking a screenshot...');
+            await _flutterScreenshot(
+              device.deviceId,
+              'screenshot_startup_${DateTime.now().toLocal().toIso8601String()}.png',
+            );
+          });
+          final int result = await flutter(
+            'run',
+            options: <String>[
+              '--no-android-gradle-daemon',
+              '--no-publish-port',
+              '--verbose',
+              '--profile',
+              '--trace-startup',
+              '--target=$target',
+              '-d',
+              device.deviceId,
+              if (applicationBinaryPath != null) '--use-application-binary=$applicationBinaryPath',
+            ],
+            environment: runEnvironment,
+            canFail: true,
+          );
+          timer.cancel();
+          if (result == 0) {
+            final Map<String, dynamic> data =
+                json.decode(
+                      file(
+                        '${testOutputDirectory(testDirectory)}/start_up_info.json',
+                      ).readAsStringSync(),
+                    )
+                    as Map<String, dynamic>;
+            results.add(data);
+          } else {
+            currentFailures += 1;
+            await _flutterScreenshot(
+              device.deviceId,
+              'screenshot_startup_failure_$currentFailures.png',
+            );
+            i -= 1;
+            if (currentFailures == maxFailures) {
+              return TaskResult.failure('Application failed to start $maxFailures times');
+            }
+          }
+
+          await device.uninstallApp();
+        }
+
+        final Map<String, dynamic> averageResults = _average(results, iterations);
+
+        if (!reportMetrics) {
+          return TaskResult.success(averageResults);
+        }
+
+        return TaskResult.success(
+          averageResults,
+          benchmarkScoreKeys: <String>[
+            'timeToFirstFrameMicros',
+            'timeToFirstFrameRasterizedMicros',
+          ],
+        );
+      } finally {
+        await _resetManifest(testDirectory);
       }
-
-      final Map<String, dynamic> averageResults = _average(results, iterations);
-
-      if (!reportMetrics) {
-        return TaskResult.success(averageResults);
-      }
-
-      return TaskResult.success(
-        averageResults,
-        benchmarkScoreKeys: <String>['timeToFirstFrameMicros', 'timeToFirstFrameRasterizedMicros'],
-      );
     });
   }
 
@@ -1182,6 +1205,8 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.enableMergedPlatformThread = false,
+    this.enableSurfaceControl = false,
+    this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
   }) : _resultFilename = resultFilename;
 
@@ -1203,6 +1228,8 @@ class PerfTest {
     this.forceOpenGLES,
     this.disablePartialRepaint = false,
     this.enableMergedPlatformThread = false,
+    this.enableSurfaceControl = false,
+    this.enableLazyShaderMode = false,
     this.createPlatforms = const <String>[],
   }) : saveTraceFile = false,
        timelineFileName = null,
@@ -1258,6 +1285,12 @@ class PerfTest {
 
   /// Whether the UI thread should be the platform thread.
   final bool enableMergedPlatformThread;
+
+  /// Whether to enable SurfaceControl swapchain.
+  final bool enableSurfaceControl;
+
+  /// Whether to defer construction of all PSO objects in the Impeller backend.
+  final bool enableLazyShaderMode;
 
   /// Number of seconds to time out the test after, allowing debug callbacks to run.
   final int? timeoutSeconds;
@@ -1354,6 +1387,12 @@ class PerfTest {
           if (enableMergedPlatformThread) {
             _addMergedPlatformThreadSupportToManifest(testDirectory);
           }
+          if (enableSurfaceControl) {
+            _addSurfaceControlSupportToManifest(testDirectory);
+          }
+          if (enableLazyShaderMode) {
+            _addLazyShaderMode(testDirectory);
+          }
         }
         if (disablePartialRepaint || enableMergedPlatformThread) {
           changedPlist = true;
@@ -1428,8 +1467,6 @@ class PerfTest {
           recordGPU = false;
       }
 
-      // TODO(liyuqian): Remove isAndroid restriction once
-      // https://github.com/flutter/flutter/issues/61567 is fixed.
       final bool isAndroid = deviceOperatingSystem == DeviceOperatingSystem.android;
       return TaskResult.success(
         data,
@@ -1684,6 +1721,50 @@ class CompileTest {
       }
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
+    });
+  }
+
+  Future<TaskResult> runSwiftUIApp() async {
+    return inDirectory<TaskResult>(testDirectory, () async {
+      await Process.run('xcodebuild', <String>['clean', '-allTargets']);
+
+      int releaseSizeInBytes = 0;
+      final Stopwatch watch = Stopwatch();
+
+      watch.start();
+      await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        '-scheme',
+        'hello_world_swiftui',
+        '-target',
+        'hello_world_swiftui',
+        '-sdk',
+        'iphoneos',
+        '-configuration',
+        'Release',
+        '-archivePath',
+        '$testDirectory/hello_world_swiftui',
+        'archive',
+      ]).then((ProcessResult results) {
+        watch.stop();
+        print(results.stdout);
+        if (results.exitCode != 0) {
+          print(results.stderr);
+        }
+      });
+
+      final String appPath =
+          '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
+
+      // Zip up the .app file to get an approximation of the .ipa size.
+      await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
+      releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
+
+      final Map<String, dynamic> metrics = <String, dynamic>{};
+      metrics.addAll(<String, dynamic>{
+        'release_swiftui_compile_millis': watch.elapsedMilliseconds,
+        'release_swiftui_size_bytes': releaseSizeInBytes,
+      });
+      return TaskResult.success(metrics);
     });
   }
 

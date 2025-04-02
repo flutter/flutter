@@ -7,7 +7,6 @@
 #include "flutter/display_list/testing/dl_test_snippets.h"
 #include "flutter/shell/common/dl_op_spy.h"
 #include "flutter/testing/testing.h"
-#include "third_party/skia/include/core/SkRSXform.h"
 
 namespace flutter {
 namespace testing {
@@ -290,7 +289,7 @@ TEST(DlOpSpy, DrawPath) {
     DlPathBuilder path_builder;
     path_builder.MoveTo({0, 1});
     path_builder.LineTo({1, 1});
-    builder.DrawPath(DlPath(path_builder.TakePath()), paint);
+    builder.DrawPath(DlPath(path_builder), paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -303,7 +302,7 @@ TEST(DlOpSpy, DrawPath) {
     path_builder.MoveTo({0, 0});
     path_builder.LineTo({1, 0});
     path_builder.LineTo({0, 1});
-    builder.DrawPath(DlPath(path_builder.TakePath()), paint);
+    builder.DrawPath(DlPath(path_builder), paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -316,7 +315,7 @@ TEST(DlOpSpy, DrawPath) {
     DlPathBuilder path_builder;
     path_builder.MoveTo({0, 1});
     path_builder.LineTo({1, 1});
-    builder.DrawPath(DlPath(path_builder.TakePath()), paint);
+    builder.DrawPath(DlPath(path_builder), paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -350,7 +349,7 @@ TEST(DlOpSpy, DrawPoints) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
     const DlPoint points[] = {DlPoint(5, 4)};
-    builder.DrawPoints(DlCanvas::PointMode::kPoints, 1, points, paint);
+    builder.DrawPoints(DlPointMode::kPoints, 1, points, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -360,7 +359,7 @@ TEST(DlOpSpy, DrawPoints) {
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kTransparent());
     const DlPoint points[] = {DlPoint(5, 4)};
-    builder.DrawPoints(DlCanvas::PointMode::kPoints, 1, points, paint);
+    builder.DrawPoints(DlPointMode::kPoints, 1, points, paint);
     sk_sp<DisplayList> dl = builder.Build();
     DlOpSpy dl_op_spy;
     dl->Dispatch(dl_op_spy);
@@ -456,7 +455,9 @@ TEST(DlOpSpy, Images) {
   {  // DrawAtlas
     DisplayListBuilder builder;
     DlPaint paint(DlColor::kBlack());
-    const SkRSXform xform[] = {SkRSXform::Make(1, 0, 0, 0)};
+    const DlRSTransform xform[] = {
+        DlRSTransform::Make({0, 0}, 1.0f, DlDegrees(0)),
+    };
     const DlRect tex[] = {DlRect::MakeXYWH(10, 10, 10, 10)};
     DlRect cull_rect = DlRect::MakeWH(5, 5);
     builder.DrawAtlas(kTestImage1, xform, tex, nullptr, 1, DlBlendMode::kSrc,

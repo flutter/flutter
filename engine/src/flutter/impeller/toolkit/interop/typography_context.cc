@@ -7,7 +7,7 @@
 #include <mutex>
 
 #include "flutter/fml/icu_util.h"
-#include "flutter/third_party/txt/src/txt/platform.h"
+#include "flutter/txt/src/txt/platform.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/interop/embedded_icu_data.h"
 

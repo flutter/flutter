@@ -103,6 +103,7 @@ void testMain() {
       expect(inputElement.tagName.toLowerCase(), 'input');
       expect(inputElement.value, '');
       expect(inputElement.disabled, isFalse);
+      expect(inputElement.getAttribute('aria-required'), isNull);
     });
 
     test('renders a password field', () {
@@ -473,6 +474,16 @@ void testMain() {
         expect(strategy.domElement, tester.getTextField(2).editableElement);
       }
     });
+
+    test('renders a required text field', () {
+      createTextFieldSemantics(isRequired: true, value: 'hello');
+      expectSemanticsTree(owner(), '''<sem><input aria-required="true" /></sem>''');
+    });
+
+    test('renders a not required text field', () {
+      createTextFieldSemantics(isRequired: false, value: 'hello');
+      expectSemanticsTree(owner(), '''<sem><input aria-required="false" /></sem>''');
+    });
   });
 }
 
@@ -483,6 +494,7 @@ SemanticsObject createTextFieldSemantics({
   bool isFocused = false,
   bool isMultiline = false,
   bool isObscured = false,
+  bool? isRequired,
   ui.Rect rect = const ui.Rect.fromLTRB(0, 0, 100, 50),
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
@@ -497,6 +509,8 @@ SemanticsObject createTextFieldSemantics({
     isFocused: isFocused,
     isMultiline: isMultiline,
     isObscured: isObscured,
+    hasRequiredState: isRequired != null,
+    isRequired: isRequired,
     hasTap: true,
     rect: rect,
     textDirection: ui.TextDirection.ltr,

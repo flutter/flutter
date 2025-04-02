@@ -770,6 +770,94 @@ class _RepositoryCxxStlDualLicenseFile extends _RepositoryLicenseFile {
   List<License> get licenses => _licenses;
 }
 
+class _RepositoryLlvmLibcLicenseFile extends _RepositorySingleLicenseFile {
+  _RepositoryLlvmLibcLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
+    : super(parent, io, _parseLicense(io));
+
+  static final RegExp _pattern = RegExp(
+    r'^'
+    r'==============================================================================\n'
+    r'The LLVM Project is under the Apache License v2\.0 with LLVM Exceptions:\n'
+    r'==============================================================================\n'
+    r'\n('
+    r' *Apache License\n'
+    r' *Version 2.0, January 2004\n'
+    r' *http://www.apache.org/licenses/\n'
+    r'\n'
+    r'.+?)\n+'
+    r'---- LLVM Exceptions to the Apache 2.0 License ----'
+    r'.+?'
+    r'==============================================================================\n'
+    r'Software from third parties included in the LLVM Project:\n'
+    r'==============================================================================\n'
+    r'The LLVM Project contains third party software which is under different license\n'
+    r'terms\. All such code will be identified clearly using at least one of two\n'
+    r'mechanisms:\n'
+    r'1\) It will be in a separate directory tree with its own `LICENSE\.txt` or\n'
+    r' *`LICENSE` file at the top containing the specific license and restrictions\n'
+    r' *which apply to that software, or\n'
+    r'2\) It will contain specific license and restriction terms at the top of every\n'
+    r' *file\.\n'
+    r'\n'
+    r'==============================================================================\n'
+    r'Legacy LLVM License \(https://llvm\.org/docs/DeveloperPolicy\.html#legacy\):\n'
+    r'==============================================================================\n'
+    r'University of Illinois/NCSA\n'
+    r'Open Source License\n'
+    r'\n'
+    r'(Copyright \(c\) 2007-2019 University of Illinois at Urbana-Champaign\.\n'
+    r'All rights reserved\.\n'
+    r'\n'
+    r'Developed by:\n'
+    r'\n'
+    r' *LLVM Team\n'
+    r'\n'
+    r' *University of Illinois at Urbana-Champaign\n'
+    r'\n'
+    r' *http://llvm\.org\n'
+    r'\n'
+    r'Permission is hereby granted, free of charge, to any person obtaining a copy of\n'
+    r'this software and associated documentation files \(the "Software"\), to deal with\n'
+    r'the Software without restriction, including without limitation the rights to\n'
+    r'use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies\n'
+    r'of the Software, and to permit persons to whom the Software is furnished to do\n'
+    r'so, subject to the following conditions:\n'
+    r'\n'
+    r' *\* Redistributions of source code must retain the above copyright notice,\n'
+    r' *this list of conditions and the following disclaimers\.\n'
+    r'\n'
+    r' *\* Redistributions in binary form must reproduce the above copyright notice,\n'
+    r' *this list of conditions and the following disclaimers in the\n'
+    r' *documentation and/or other materials provided with the distribution\.\n'
+    r'\n'
+    r' *\* Neither the names of the LLVM Team, University of Illinois at\n'
+    r' *Urbana-Champaign, nor the names of its contributors may be used to\n'
+    r' *endorse or promote products derived from this Software without specific\n'
+    r' *prior written permission\.\n'
+    r'\n'
+    r'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n'
+    r'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS\n'
+    r'FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT\.  IN NO EVENT SHALL THE\n'
+    r'CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n'
+    r'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n'
+    r'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE\n'
+    r'SOFTWARE\.)\n*'
+    r'$',
+    dotAll: true,
+  );
+
+  static License _parseLicense(fs.TextFile io) {
+    final Match? match = _pattern.firstMatch(io.readString());
+    if (match == null) {
+      throw 'unexpected license file contents';
+    }
+    if (match.groupCount != 2) {
+      throw 'internal error; match count inconsistency\nRemainder:[[${match.input.substring(match.end)}]]';
+    }
+    return License.fromBodyAndType(match.group(2)!, LicenseType.bsd, origin: io.fullName);
+  }
+}
+
 class _RepositoryKhronosLicenseFile extends _RepositoryLicenseFile {
   _RepositoryKhronosLicenseFile(super.parent, super.io) : _licenses = _parseLicenses(io);
 
@@ -817,54 +905,59 @@ class _RepositoryKhronosLicenseFile extends _RepositoryLicenseFile {
 /// This file contains a bunch of different licenses, but other files
 /// refer to it as if it was a monolithic license so we sort of have
 /// to treat the whole thing as a MultiLicense.
-class _RepositoryOpenSSLLicenseFile extends _RepositorySingleLicenseFile {
-  _RepositoryOpenSSLLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
+class _RepositoryBoringSSLLicenseFile extends _RepositorySingleLicenseFile {
+  _RepositoryBoringSSLLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
     : super(parent, io, _parseLicense(io));
 
   static final RegExp _pattern = RegExp(
-    // advice is to skip the first 27 lines of this file in the LICENSE file
-    r'^BoringSSL is a fork of OpenSSL. As such, .+?'
-    r'The following are Google-internal bug numbers where explicit permission from\n'
-    r'some authors is recorded for use of their work\. \(This is purely for our own\n'
-    r'record keeping\.\)\n+'
-    r'[0-9+ \n]+\n+'
-    r'(' // 1
-    r' *OpenSSL License\n'
-    r' *---------------\n+)'
-    r'(.+?)\n+' // 2
-    r'(' // 3
-    r' *Original SSLeay License\n'
-    r' *-----------------------\n+)'
-    r'(.+?)\n+' // 4
-    r'( *ISC license used for completely new code in BoringSSL:\n+)' // 5
-    r'(.+?)\n+' // 6
-    r'( *The code in third_party/fiat carries the MIT license:\n+)' // 7
-    r'(.+?)\n+' // 8
-    r'(' // 9
+    r'^'
+    r'.*\n(' // 1
+    r' *Apache License\n'
+    r' *Version 2.0, January 2004\n'
+    r' *http://www.apache.org/licenses/\n'
+    r'\n'
+    r'.+?)\n+'
+    r'(' // 2
     r' *Licenses for support code\n'
     r' *-------------------------\n+)'
-    r'(.+?)\n+' // 10
-    r'(BoringSSL uses the Chromium test infrastructure to run a continuous build,\n' // 11
+    r'(.+?)\n+' // 3
+    r'(BoringSSL uses the Chromium test infrastructure to run a continuous build,\n' // 4
     r'trybots etc\. The scripts which manage this, and the script for generating build\n'
     r'metadata, are under the Chromium license\. Distributing code linked against\n'
     r'BoringSSL does not trigger this license\.)\n+'
-    r'(.+?)\n+$', // 12
+    r'(.+?)\n+$', // 5
     dotAll: true,
   );
 
   static License _parseLicense(fs.TextFile io) {
     final Match? match = _pattern.firstMatch(io.readString());
     if (match == null) {
-      throw 'Failed to match OpenSSL license pattern.';
+      throw 'Failed to match BoringSSL license pattern.';
     }
-    assert(match.groupCount == 12);
-    return License.fromMultipleBlocks(
-      List<String>.generate(match.groupCount, (int index) => match.group(index + 1)!).toList(),
-      LicenseType.openssl,
-      origin: io.fullName,
-      authors: 'The OpenSSL Project Authors',
-      yesWeKnowWhatItLooksLikeButItIsNot: true, // looks like BSD, but...
-    );
+    assert(match.groupCount == 5);
+    return License.fromBodyAndType(match.group(1)!, LicenseType.apache, origin: io.fullName);
+  }
+}
+
+class _RepositoryBoringSSLFiatLicenseFile extends _RepositorySingleLicenseFile {
+  _RepositoryBoringSSLFiatLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
+    : super(parent, io, _parseLicense(io));
+
+  static final RegExp _pattern = RegExp(
+    r'^(The Apache License, Version 2.0 \(Apache-2.0\)'
+    r'.*\n+'
+    r' *http://www.apache.org/licenses/.*)\n'
+    r'(.+?)\n+$',
+    dotAll: true,
+  );
+
+  static License _parseLicense(fs.TextFile io) {
+    final Match? match = _pattern.firstMatch(io.readString());
+    if (match == null) {
+      throw 'Failed to match BoringSSL Fiat license pattern.';
+    }
+    assert(match.groupCount == 2);
+    return License.fromBodyAndType(match.group(1)!, LicenseType.apache, origin: io.fullName);
   }
 }
 
@@ -890,13 +983,13 @@ class _RepositoryFuchsiaSdkLinuxLicenseFile extends _RepositorySingleLicenseFile
   }
 }
 
-/// The BoringSSL license file.
+/// The Vulkan validation layers license file.
 ///
 /// This file contains a bunch of different licenses, but other files
 /// refer to it as if it was a monolithic license so we sort of have
 /// to treat the whole thing as a MultiLicense.
-class _RepositoryVulkanApacheLicenseFile extends _RepositorySingleLicenseFile {
-  _RepositoryVulkanApacheLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
+class _RepositoryVulkanValidationApacheLicenseFile extends _RepositorySingleLicenseFile {
+  _RepositoryVulkanValidationApacheLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
     : super(parent, io, _parseLicense(io));
 
   static const String _prefix =
@@ -911,7 +1004,28 @@ class _RepositoryVulkanApacheLicenseFile extends _RepositorySingleLicenseFile {
   static License _parseLicense(fs.TextFile io) {
     final String body = io.readString();
     if (!body.startsWith(_prefix)) {
-      throw 'Failed to match Vulkan Apache license prefix.';
+      throw 'Failed to match vulkan-validation-layers license prefix.';
+    }
+    return License.fromBody(body.substring(_prefix.length), origin: io.fullName);
+  }
+}
+
+/// The Vulkan lunarg-vulkantools license file.
+class _RepositoryVulkanLunarGApacheLicenseFile extends _RepositorySingleLicenseFile {
+  _RepositoryVulkanLunarGApacheLicenseFile(_RepositoryDirectory parent, fs.TextFile io)
+    : super(parent, io, _parseLicense(io));
+
+  static const String _prefix =
+      'The majority of files in this project use the Apache 2.0 License.\n'
+      'There are a few exceptions and their license can either be found in the source or their directory homing the source.\n'
+      '\n'
+      '===========================================================================================\n'
+      '\n';
+
+  static License _parseLicense(fs.TextFile io) {
+    final String body = io.readString();
+    if (!body.startsWith(_prefix)) {
+      throw 'Failed to match lunarg-vulkantools Apache license prefix.';
     }
     return License.fromBody(body.substring(_prefix.length), origin: io.fullName);
   }
@@ -1017,21 +1131,27 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
   );
 
   static const Map<String, _Constructor> _specialCaseFiles = <String, _Constructor>{
-    '/flutter/third_party/boringssl/src/LICENSE': _RepositoryOpenSSLLicenseFile.new,
+    '/flutter/third_party/boringssl/src/LICENSE': _RepositoryBoringSSLLicenseFile.new,
+    '/flutter/third_party/boringssl/src/third_party/fiat/LICENSE':
+        _RepositoryBoringSSLFiatLicenseFile.new,
     '/flutter/third_party/dart/LICENSE': _RepositoryDartLicenseFile.new,
     '/flutter/third_party/freetype2/LICENSE.TXT': _RepositoryFreetypeLicenseFile.new,
     '/flutter/third_party/icu/LICENSE': _RepositoryIcuLicenseFile.new,
     '/flutter/third_party/inja/third_party/include/nlohmann/json.hpp': _RepositoryInjaJsonFile.new,
     '/flutter/third_party/libcxx/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
     '/flutter/third_party/libcxxabi/LICENSE.TXT': _RepositoryCxxStlDualLicenseFile.new,
+    '/flutter/third_party/llvm_libc/LICENSE.TXT': _RepositoryLlvmLibcLicenseFile.new,
     '/flutter/third_party/libjpeg-turbo/src/LICENSE': _RepositoryLibJpegTurboLicenseFile.new,
     '/flutter/third_party/libjpeg-turbo/src/README.ijg': _RepositoryReadmeIjgFile.new,
     '/flutter/third_party/libpng/LICENSE': _RepositoryLibPngLicenseFile.new,
     '/flutter/third_party/rapidjson/LICENSE': _RepositoryOpaqueLicenseFile.new,
     '/flutter/third_party/rapidjson/license.txt': _RepositoryOpaqueLicenseFile.new,
+    '/flutter/third_party/vulkan-deps/lunarg-vulkantools/src/LICENSE.txt':
+        _RepositoryVulkanLunarGApacheLicenseFile.new,
     '/flutter/third_party/vulkan-deps/vulkan-validation-layers/src/LICENSE.txt':
-        _RepositoryVulkanApacheLicenseFile.new,
+        _RepositoryVulkanValidationApacheLicenseFile.new,
     '/fuchsia/sdk/linux/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
+    '/fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl': _RepositorySourceFile.new,
     '/fuchsia/sdk/mac/LICENSE.vulkan': _RepositoryFuchsiaSdkLinuxLicenseFile.new,
     '/third_party/khronos/LICENSE': _RepositoryKhronosLicenseFile.new,
   };
@@ -1752,6 +1872,16 @@ class _RepositoryBoringSSLSourceDirectory extends _RepositoryDirectory {
 
   @override
   bool get isLicenseRoot => true;
+
+  @override
+  License? nearestLicenseOfType(LicenseType type) {
+    if (type == LicenseType.openssl) {
+      // OpenSSL has switched to the Apache license.  But one file (x86_64-gcc.cc.inc)
+      // includes the Apache license along with a comment using older language.
+      return nearestLicenseWithName('LICENSE');
+    }
+    return super.nearestLicenseOfType(type);
+  }
 }
 
 class _RepositoryFlutterDirectory extends _RepositoryDirectory {

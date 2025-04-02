@@ -16,16 +16,18 @@ namespace flutter {
 ImageExternalTexture::ImageExternalTexture(
     int64_t id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+    ImageLifecycle lifecycle)
     : Texture(id),
       image_texture_entry_(image_texture_entry),
-      jni_facade_(jni_facade) {}
+      jni_facade_(jni_facade),
+      texture_lifecycle_(lifecycle) {}
 
 ImageExternalTexture::~ImageExternalTexture() = default;
 
 // Implementing flutter::Texture.
 void ImageExternalTexture::Paint(PaintContext& context,
-                                 const SkRect& bounds,
+                                 const DlRect& bounds,
                                  bool freeze,
                                  const DlImageSampling sampling) {
   if (state_ == AttachmentState::kDetached) {
@@ -34,16 +36,16 @@ void ImageExternalTexture::Paint(PaintContext& context,
   Attach(context);
   const bool should_process_frame = !freeze;
   if (should_process_frame) {
-    ProcessFrame(context, bounds);
+    ProcessFrame(context, ToSkRect(bounds));
   }
   if (dl_image_) {
     context.canvas->DrawImageRect(
-        dl_image_,                                     // image
-        SkRect::Make(dl_image_->bounds()),             // source rect
-        bounds,                                        // destination rect
-        sampling,                                      // sampling
-        context.paint,                                 // paint
-        flutter::DlCanvas::SrcRectConstraint::kStrict  // enforce edges
+        dl_image_,                             // image
+        DlRect::Make(dl_image_->GetBounds()),  // source rect
+        bounds,                                // destination rect
+        sampling,                              // sampling
+        context.paint,                         // paint
+        flutter::DlSrcRectConstraint::kStrict  // enforce edges
     );
   } else {
     FML_LOG(INFO) << "No DlImage available for ImageExternalTexture to paint.";
@@ -66,8 +68,19 @@ void ImageExternalTexture::OnGrContextCreated() {
 // Implementing flutter::ContextListener.
 void ImageExternalTexture::OnGrContextDestroyed() {
   if (state_ == AttachmentState::kAttached) {
-    dl_image_.reset();
-    image_lru_.Clear();
+    switch (texture_lifecycle_) {
+      case ImageLifecycle::kReset: {
+        dl_image_.reset();
+        image_lru_.Clear();
+      } break;
+      case ImageLifecycle::kKeepAlive:
+        // Intentionally do nothing.
+        ///
+        // If we reset the image, we are not able to re-acquire it, but the
+        // producer of the image will not know to reproduce it, resulting in a
+        // blank image. See https://github.com/flutter/flutter/issues/163561.
+        break;
+    }
     Detach();
   }
   state_ = AttachmentState::kDetached;

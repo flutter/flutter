@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 const double _defaultBorderWidth = 1.0;
@@ -692,6 +693,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // focusColor
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
@@ -748,6 +750,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // focusColor
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
@@ -811,6 +814,7 @@ void main() {
     await hoverGesture.moveTo(Offset.zero);
 
     // focusColor
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
@@ -1175,7 +1179,7 @@ void main() {
     expect(firstToggleButtonDy, secondToggleButtonDy);
     expect(firstToggleButtonDy, closeTo(elevatedButtonDy - 1.7, 0.1));
     expect(firstToggleButtonDy, closeTo(textDy - 9.7, 0.1));
-  }, skip: kIsWeb && !isSkiaWeb); // https://github.com/flutter/flutter/issues/99933
+  });
 
   testWidgets('Directionality test', (WidgetTester tester) async {
     await tester.pumpWidget(

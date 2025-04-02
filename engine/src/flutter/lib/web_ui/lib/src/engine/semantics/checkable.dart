@@ -40,6 +40,24 @@ _CheckableKind _checkableKindFromSemanticsFlag(SemanticsObject semanticsObject) 
   }
 }
 
+/// Renders semantics objects that contain a group of radio buttons.
+///
+/// Radio buttons in the group have the [SemanticCheckable] role and must have
+/// the [ui.SemanticsFlag.isInMutuallyExclusiveGroup] flag.
+class SemanticRadioGroup extends SemanticRole {
+  SemanticRadioGroup(SemanticsObject semanticsObject)
+    : super.withBasics(
+        EngineSemanticsRole.radioGroup,
+        semanticsObject,
+        preferredLabelRepresentation: LabelRepresentation.ariaLabel,
+      ) {
+    setAriaRole('radiogroup');
+  }
+
+  @override
+  bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
+}
+
 /// Renders semantics objects that have checkable (on/off) states.
 ///
 /// Three objects which are implemented by this class are checkboxes, radio
@@ -136,6 +154,38 @@ class Selectable extends SemanticBehavior {
         owner.setAttribute('aria-selected', semanticsObject.isSelected);
       } else {
         owner.removeAttribute('aria-selected');
+      }
+    }
+  }
+}
+
+/// Adds checkability behavior to a semantic node.
+///
+/// A checkable node would have the `aria-checked` set to "true" if the node
+/// is currently checked (i.e. [SemanticsObject.isChecked] is true), set to
+/// "mixed" if the node is in a mixed state (i.e. [SemanticsObject.isMixed]) and
+/// set to "false" if it's not checked or mixed
+/// (i.e. [SemanticsObject.isChecked] and [SemanticsObject.isMixed] are
+/// false). If the node is not checkable (i.e. [SemanticsObject.isCheckable]
+/// is false), then `aria-checked` is unset.
+///
+/// This behavior is typically used for a checkbox or a radio button.
+class Checkable extends SemanticBehavior {
+  Checkable(super.semanticsObject, super.owner);
+
+  @override
+  void update() {
+    if (semanticsObject.isFlagsDirty) {
+      if (semanticsObject.isCheckable) {
+        if (semanticsObject.isChecked) {
+          owner.setAttribute('aria-checked', 'true');
+        } else if (semanticsObject.isMixed) {
+          owner.setAttribute('aria-checked', 'mixed');
+        } else {
+          owner.setAttribute('aria-checked', 'false');
+        }
+      } else {
+        owner.removeAttribute('aria-checked');
       }
     }
   }

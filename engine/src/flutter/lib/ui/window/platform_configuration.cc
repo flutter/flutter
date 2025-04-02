@@ -46,6 +46,11 @@ void PlatformConfiguration::DidCreateIsolate() {
                 Dart_GetField(library, tonic::ToDart("_addView")));
   remove_view_.Set(tonic::DartState::Current(),
                    Dart_GetField(library, tonic::ToDart("_removeView")));
+  send_view_focus_event_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_sendViewFocusEvent")));
+  set_engine_id_.Set(tonic::DartState::Current(),
+                     Dart_GetField(library, tonic::ToDart("_setEngineId")));
   update_window_metrics_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_updateWindowMetrics")));
@@ -146,6 +151,36 @@ bool PlatformConfiguration::RemoveView(int64_t view_id) {
       tonic::DartInvoke(remove_view_.Get(), {
                                                 tonic::ToDart(view_id),
                                             }));
+  return true;
+}
+
+bool PlatformConfiguration::SendFocusEvent(const ViewFocusEvent& event) {
+  std::shared_ptr<tonic::DartState> dart_state =
+      remove_view_.dart_state().lock();
+  if (!dart_state) {
+    return false;
+  }
+  tonic::DartState::Scope scope(dart_state);
+  tonic::CheckAndHandleError(tonic::DartInvoke(
+      send_view_focus_event_.Get(), {
+                                        tonic::ToDart(event.view_id()),
+                                        tonic::ToDart(event.state()),
+                                        tonic::ToDart(event.direction()),
+                                    }));
+  return true;
+}
+
+bool PlatformConfiguration::SetEngineId(int64_t engine_id) {
+  std::shared_ptr<tonic::DartState> dart_state =
+      set_engine_id_.dart_state().lock();
+  if (!dart_state) {
+    return false;
+  }
+  tonic::DartState::Scope scope(dart_state);
+  tonic::CheckAndHandleError(
+      tonic::DartInvoke(set_engine_id_.Get(), {
+                                                  tonic::ToDart(engine_id),
+                                              }));
   return true;
 }
 
@@ -345,7 +380,8 @@ void PlatformConfiguration::DispatchPointerDataPacket(
       tonic::DartInvoke(dispatch_pointer_data_packet_.Get(), {data_handle}));
 }
 
-void PlatformConfiguration::DispatchSemanticsAction(int32_t node_id,
+void PlatformConfiguration::DispatchSemanticsAction(int64_t view_id,
+                                                    int32_t node_id,
                                                     SemanticsAction action,
                                                     fml::MallocMapping args) {
   std::shared_ptr<tonic::DartState> dart_state =
@@ -364,8 +400,8 @@ void PlatformConfiguration::DispatchSemanticsAction(int32_t node_id,
 
   tonic::CheckAndHandleError(tonic::DartInvoke(
       dispatch_semantics_action_.Get(),
-      {tonic::ToDart(node_id), tonic::ToDart(static_cast<int32_t>(action)),
-       args_handle}));
+      {tonic::ToDart(view_id), tonic::ToDart(node_id),
+       tonic::ToDart(static_cast<int32_t>(action)), args_handle}));
 }
 
 void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime,
@@ -552,6 +588,17 @@ Dart_Handle PlatformConfigurationNativeApi::SendPortPlatformMessage(
   return HandlePlatformMessage(dart_state, name, data_handle, response);
 }
 
+void PlatformConfigurationNativeApi::RequestViewFocusChange(int64_t view_id,
+                                                            int64_t state,
+                                                            int64_t direction) {
+  ViewFocusChangeRequest request{view_id,  //
+                                 static_cast<ViewFocusState>(state),
+                                 static_cast<ViewFocusDirection>(direction)};
+  UIDartState* dart_state = UIDartState::Current();
+  dart_state->platform_configuration()->client()->RequestViewFocusChange(
+      request);
+}
+
 void PlatformConfigurationNativeApi::RespondToPlatformMessage(
     int response_id,
     const tonic::DartByteData& data) {
@@ -615,10 +662,11 @@ void PlatformConfigurationNativeApi::EndWarmUpFrame() {
   UIDartState::Current()->platform_configuration()->client()->EndWarmUpFrame();
 }
 
-void PlatformConfigurationNativeApi::UpdateSemantics(SemanticsUpdate* update) {
+void PlatformConfigurationNativeApi::UpdateSemantics(int64_t view_id,
+                                                     SemanticsUpdate* update) {
   UIDartState::ThrowIfUIOperationsProhibited();
   UIDartState::Current()->platform_configuration()->client()->UpdateSemantics(
-      update);
+      view_id, update);
 }
 
 Dart_Handle PlatformConfigurationNativeApi::ComputePlatformResolvedLocale(

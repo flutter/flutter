@@ -149,7 +149,7 @@ group("flutter") {
       "//flutter/impeller/geometry:geometry_benchmarks",
       "//flutter/lib/ui:ui_benchmarks",
       "//flutter/shell/common:shell_benchmarks",
-      "//flutter/third_party/txt:txt_benchmarks",
+      "//flutter/txt:txt_benchmarks",
     ]
   }
 
@@ -159,8 +159,8 @@ group("flutter") {
   }
 
   if ((flutter_runtime_mode == "debug" || flutter_runtime_mode == "profile") &&
-      (is_ios || is_android)) {
-    public_deps += [ "//flutter/testing/scenario_app" ]
+      is_ios) {
+    public_deps += [ "//flutter/testing/ios_scenario_app" ]
   }
 }
 
@@ -170,6 +170,8 @@ group("unittests") {
   public_deps = []
   if (is_android) {
     public_deps += [
+      "//flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests",
+      "//flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
       "//flutter/impeller/toolkit/android:apk_unittests",
       "//flutter/impeller/toolkit/android:unittests",
       "//flutter/shell/platform/android:flutter_shell_native_unittests",
@@ -200,7 +202,7 @@ group("unittests") {
       "//flutter/testing/dart",
       "//flutter/testing/smoke_test_failure",
       "//flutter/third_party/tonic/tests:tonic_unittests",
-      "//flutter/third_party/txt:txt_unittests",
+      "//flutter/txt:txt_unittests",
     ]
 
     # The accessibility library only supports Mac and Windows at the moment.

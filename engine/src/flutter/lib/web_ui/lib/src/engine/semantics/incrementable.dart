@@ -36,7 +36,7 @@ class SemanticIncrementable extends SemanticRole {
 
     _element.addEventListener(
       'change',
-      createDomEventListener((_) {
+      createDomEventListener((DomEvent _) {
         if (_element.disabled!) {
           return;
         }

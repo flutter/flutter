@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 #include "display_list/dl_sampling_options.h"
+#include "display_list/dl_types.h"
+#include "display_list/effects/dl_color_filter.h"
+#include "display_list/effects/image_filters/dl_matrix_image_filter.h"
+#include "display_list/geometry/dl_geometry_types.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
@@ -16,8 +20,6 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/scalar.h"
-#include "include/core/SkRSXform.h"
-#include "include/core/SkRefCnt.h"
 
 namespace impeller {
 namespace testing {
@@ -25,34 +27,14 @@ namespace testing {
 using namespace flutter;
 
 namespace {
-SkRSXform MakeTranslation(Scalar tx, Scalar ty) {
-  return SkRSXform::Make(1, 0, tx, ty);
+RSTransform MakeTranslation(Scalar tx, Scalar ty) {
+  return RSTransform::Make({tx, ty}, 1, DlDegrees(0));
 }
 
-std::tuple<std::vector<SkRect>, std::vector<SkRSXform>, sk_sp<DlImageImpeller>>
+std::tuple<std::vector<DlRect>,       //
+           std::vector<RSTransform>,  //
+           sk_sp<DlImageImpeller>>
 CreateTestData(const AiksTest* test) {
-  // Draws the image as four squares stiched together.
-  auto atlas =
-      DlImageImpeller::Make(test->CreateTextureForFixture("bay_bridge.jpg"));
-  auto size = atlas->impeller_texture()->GetSize();
-  // Divide image into four quadrants.
-  Scalar half_width = size.width / 2;
-  Scalar half_height = size.height / 2;
-  std::vector<SkRect> texture_coordinates = {
-      SkRect::MakeLTRB(0, 0, half_width, half_height),
-      SkRect::MakeLTRB(half_width, 0, size.width, half_height),
-      SkRect::MakeLTRB(0, half_height, half_width, size.height),
-      SkRect::MakeLTRB(half_width, half_height, size.width, size.height)};
-  // Position quadrants adjacent to eachother.
-  std::vector<SkRSXform> transforms = {
-      MakeTranslation(0, 0), MakeTranslation(half_width, 0),
-      MakeTranslation(0, half_height),
-      MakeTranslation(half_width, half_height)};
-  return std::make_tuple(texture_coordinates, transforms, atlas);
-}
-
-std::tuple<std::vector<DlRect>, std::vector<SkRSXform>, sk_sp<DlImageImpeller>>
-CreateDlTestData(const AiksTest* test) {
   // Draws the image as four squares stiched together.
   auto atlas =
       DlImageImpeller::Make(test->CreateTextureForFixture("bay_bridge.jpg"));
@@ -66,7 +48,7 @@ CreateDlTestData(const AiksTest* test) {
       DlRect::MakeLTRB(0, half_height, half_width, size.height),
       DlRect::MakeLTRB(half_width, half_height, size.width, size.height)};
   // Position quadrants adjacent to eachother.
-  std::vector<SkRSXform> transforms = {
+  std::vector<RSTransform> transforms = {
       MakeTranslation(0, 0), MakeTranslation(half_width, 0),
       MakeTranslation(0, half_height),
       MakeTranslation(half_width, half_height)};
@@ -138,9 +120,9 @@ TEST_P(AiksTest, DrawAtlasWithOpacity) {
 TEST_P(AiksTest, DrawAtlasNoColorFullSize) {
   auto atlas = DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
   auto size = atlas->impeller_texture()->GetSize();
-  std::vector<SkRect> texture_coordinates = {
-      SkRect::MakeLTRB(0, 0, size.width, size.height)};
-  std::vector<SkRSXform> transforms = {MakeTranslation(0, 0)};
+  std::vector<DlRect> texture_coordinates = {
+      DlRect::MakeLTRB(0, 0, size.width, size.height)};
+  std::vector<RSTransform> transforms = {MakeTranslation(0, 0)};
 
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
@@ -198,12 +180,12 @@ TEST_P(AiksTest, DrawAtlasPlusWideGamut) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-TEST_P(AiksTest, DlAtlasGeometryNoBlend) {
-  auto [texture_coordinates, transforms, atlas] = CreateDlTestData(this);
+TEST_P(AiksTest, DlAtlasGeometryNoBlendRenamed) {
+  auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
 
   DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
                        texture_coordinates.data(), nullptr, transforms.size(),
-                       BlendMode::kSourceOver, {}, std::nullopt);
+                       BlendMode::kSrcOver, {}, std::nullopt);
 
   EXPECT_FALSE(geom.ShouldUseBlend());
   EXPECT_FALSE(geom.ShouldSkip());
@@ -217,17 +199,16 @@ TEST_P(AiksTest, DlAtlasGeometryNoBlend) {
 }
 
 TEST_P(AiksTest, DlAtlasGeometryBlend) {
-  auto [texture_coordinates, transforms, atlas] = CreateDlTestData(this);
+  auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
 
   std::vector<DlColor> colors;
   colors.reserve(texture_coordinates.size());
   for (auto i = 0u; i < texture_coordinates.size(); i++) {
     colors.push_back(DlColor::ARGB(0.5, 1, 1, 1));
   }
-  DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
-                       texture_coordinates.data(), colors.data(),
-                       transforms.size(), BlendMode::kSourceOver, {},
-                       std::nullopt);
+  DlAtlasGeometry geom(
+      atlas->impeller_texture(), transforms.data(), texture_coordinates.data(),
+      colors.data(), transforms.size(), BlendMode::kSrcOver, {}, std::nullopt);
 
   EXPECT_TRUE(geom.ShouldUseBlend());
   EXPECT_FALSE(geom.ShouldSkip());
@@ -241,7 +222,7 @@ TEST_P(AiksTest, DlAtlasGeometryBlend) {
 }
 
 TEST_P(AiksTest, DlAtlasGeometryColorButNoBlend) {
-  auto [texture_coordinates, transforms, atlas] = CreateDlTestData(this);
+  auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
 
   std::vector<DlColor> colors;
   colors.reserve(texture_coordinates.size());
@@ -250,7 +231,7 @@ TEST_P(AiksTest, DlAtlasGeometryColorButNoBlend) {
   }
   DlAtlasGeometry geom(atlas->impeller_texture(), transforms.data(),
                        texture_coordinates.data(), colors.data(),
-                       transforms.size(), BlendMode::kSource, {}, std::nullopt);
+                       transforms.size(), BlendMode::kSrc, {}, std::nullopt);
 
   // Src blend mode means that colors would be ignored, even if provided.
   EXPECT_FALSE(geom.ShouldUseBlend());
@@ -258,7 +239,7 @@ TEST_P(AiksTest, DlAtlasGeometryColorButNoBlend) {
 }
 
 TEST_P(AiksTest, DlAtlasGeometrySkip) {
-  auto [texture_coordinates, transforms, atlas] = CreateDlTestData(this);
+  auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
 
   std::vector<DlColor> colors;
   colors.reserve(texture_coordinates.size());
@@ -269,6 +250,71 @@ TEST_P(AiksTest, DlAtlasGeometrySkip) {
                        texture_coordinates.data(), colors.data(),
                        transforms.size(), BlendMode::kClear, {}, std::nullopt);
   EXPECT_TRUE(geom.ShouldSkip());
+}
+
+TEST_P(AiksTest, DrawImageRectWithBlendColorFilter) {
+  sk_sp<DlImageImpeller> texture =
+      DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
+
+  DisplayListBuilder builder;
+  DlPaint paint = DlPaint().setColorFilter(DlColorFilter::MakeBlend(
+      DlColor::kRed().withAlphaF(0.4), DlBlendMode::kSrcOver));
+
+  DlMatrix filter_matrix = DlMatrix();
+  auto filter = flutter::DlMatrixImageFilter(filter_matrix,
+                                             flutter::DlImageSampling::kLinear);
+  DlPaint paint_with_filter = paint;
+  paint_with_filter.setImageFilter(&filter);
+
+  // Compare porter-duff blend modes.
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  // Uses image filter to disable atlas conversion.
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {},
+                        &paint_with_filter);
+
+  // Uses atlas conversion.
+  builder.Translate(600, 0);
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {}, &paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, DrawImageRectWithMatrixColorFilter) {
+  sk_sp<DlImageImpeller> texture =
+      DlImageImpeller::Make(CreateTextureForFixture("bay_bridge.jpg"));
+
+  DisplayListBuilder builder;
+  static const constexpr ColorMatrix kColorInversion = {
+      .array = {
+          -1.0, 0,    0,    1.0, 0,  //
+          0,    -1.0, 0,    1.0, 0,  //
+          0,    0,    -1.0, 1.0, 0,  //
+          1.0,  1.0,  1.0,  1.0, 0   //
+      }};
+  DlPaint paint = DlPaint().setColorFilter(
+      DlColorFilter::MakeMatrix(kColorInversion.array));
+
+  DlMatrix filter_matrix = DlMatrix();
+  auto filter = flutter::DlMatrixImageFilter(filter_matrix,
+                                             flutter::DlImageSampling::kLinear);
+  DlPaint paint_with_filter = paint;
+  paint_with_filter.setImageFilter(&filter);
+
+  // Compare inverting color matrix filter.
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
+  // Uses image filter to disable atlas conversion.
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {},
+                        &paint_with_filter);
+
+  // Uses atlas conversion.
+  builder.Translate(600, 0);
+  builder.DrawImageRect(texture, DlRect::MakeSize(texture->GetSize()),
+                        DlRect::MakeLTRB(0, 0, 500, 500), {}, &paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing

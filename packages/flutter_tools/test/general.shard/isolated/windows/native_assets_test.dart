@@ -22,6 +22,7 @@ import 'package:package_config/package_config_types.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -31,6 +32,7 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
+  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -47,6 +49,7 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
+    runPackageName = environment.projectDir.basename;
   });
 
   for (final bool flutterTester in <bool>[false, true]) {
@@ -74,13 +77,9 @@ void main() {
           ProcessManager: () => FakeProcessManager.empty(),
         },
         () async {
-          final File packageConfig = environment.projectDir
-              .childDirectory('.dart_tool')
-              .childFile('package_config.json');
+          writePackageConfigFile(directory: environment.projectDir, mainLibName: 'my_app');
           final Uri nonFlutterTesterAssetUri =
               environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename).uri;
-          await packageConfig.parent.create();
-          await packageConfig.create();
           final File dylibAfterCompiling = fileSystem.file('bar.dll');
           // The mock doesn't create the file, so create it here.
           await dylibAfterCompiling.create();
@@ -96,7 +95,7 @@ void main() {
             ),
           ];
           final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[Package('bar', projectUri)],
+            packagesWithNativeAssetsResult: <String>['bar'],
             buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
             linkResult:
                 buildMode == BuildMode.debug
@@ -253,29 +252,27 @@ void main() {
       );
       await msvcBinDir.create(recursive: true);
 
-      final File packageConfigFile = fileSystem
-          .directory(projectUri)
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json');
-      await packageConfigFile.parent.create();
-      await packageConfigFile.create();
+      final File packageConfigFile = writePackageConfigFile(
+        directory: fileSystem.directory(projectUri),
+        mainLibName: 'my_app',
+      );
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packageConfigFile,
         logger: environment.logger,
       );
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
-        projectUri,
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
+        runPackageName,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
       expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
       expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
-      expect(result.envScript, isNotNull);
-      expect(result.envScriptArgs, isNotNull);
+      expect(result.windows.developerCommandPrompt?.script, isNotNull);
+      expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
     },
   );
 }

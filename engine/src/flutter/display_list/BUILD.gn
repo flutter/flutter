@@ -45,6 +45,8 @@ source_set("display_list") {
     "dl_storage.cc",
     "dl_storage.h",
     "dl_tile_mode.h",
+    "dl_types.cc",
+    "dl_types.h",
     "dl_vertices.cc",
     "dl_vertices.h",
     "effects/color_filters/dl_blend_color_filter.cc",
@@ -139,8 +141,7 @@ source_set("display_list") {
 }
 
 test_fixtures("display_list_fixtures") {
-  fixtures =
-      [ "//flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf" ]
+  fixtures = [ "//flutter/txt/third_party/fonts/Roboto-Regular.ttf" ]
 }
 
 if (enable_unittests) {
@@ -205,7 +206,7 @@ if (enable_unittests) {
       "//flutter/display_list/testing:display_list_testing",
       "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
       "//flutter/testing",
-      "//flutter/third_party/txt",
+      "//flutter/txt",
     ]
 
     if (!defined(defines)) {

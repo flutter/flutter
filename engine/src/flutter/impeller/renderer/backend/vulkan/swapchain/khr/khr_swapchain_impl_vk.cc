@@ -186,10 +186,9 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
                      : surface_caps.maxImageCount  // max zero means no limit
       );
   swapchain_info.imageArrayLayers = 1u;
-  // Swapchain images are primarily used as color attachments (via resolve),
-  // blit targets, or input attachments.
+  // Swapchain images are primarily used as color attachments (via resolve) or
+  // input attachments.
   swapchain_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment |
-                              vk::ImageUsageFlagBits::eTransferDst |
                               vk::ImageUsageFlagBits::eInputAttachment;
   swapchain_info.preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
   swapchain_info.compositeAlpha = composite.value();
@@ -277,6 +276,38 @@ KHRSwapchainImplVK::~KHRSwapchainImplVK() {
 
 const ISize& KHRSwapchainImplVK::GetSize() const {
   return size_;
+}
+
+std::optional<ISize> KHRSwapchainImplVK::GetCurrentUnderlyingSurfaceSize()
+    const {
+  if (!IsValid()) {
+    return std::nullopt;
+  }
+
+  auto context = context_.lock();
+  if (!context) {
+    return std::nullopt;
+  }
+
+  auto& vk_context = ContextVK::Cast(*context);
+  const auto [result, surface_caps] =
+      vk_context.GetPhysicalDevice().getSurfaceCapabilitiesKHR(surface_.get());
+  if (result != vk::Result::eSuccess) {
+    return std::nullopt;
+  }
+
+  // From the spec: `currentExtent` is the current width and height of the
+  // surface, or the special value (0xFFFFFFFF, 0xFFFFFFFF) indicating that the
+  // surface size will be determined by the extent of a swapchain targeting the
+  // surface.
+  constexpr uint32_t kCurrentExtentsPlaceholder = 0xFFFFFFFF;
+  if (surface_caps.currentExtent.width == kCurrentExtentsPlaceholder ||
+      surface_caps.currentExtent.height == kCurrentExtentsPlaceholder) {
+    return std::nullopt;
+  }
+
+  return ISize::MakeWH(surface_caps.currentExtent.width,
+                       surface_caps.currentExtent.height);
 }
 
 bool KHRSwapchainImplVK::IsValid() const {

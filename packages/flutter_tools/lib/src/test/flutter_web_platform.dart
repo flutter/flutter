@@ -17,7 +17,6 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -33,6 +32,7 @@ import '../web/bootstrap.dart';
 import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
+import '../web/web_constants.dart';
 import 'test_compiler.dart';
 import 'test_golden_comparator.dart';
 import 'test_time_recorder.dart';
@@ -58,10 +58,7 @@ shelf.Handler createDirectoryHandler(Directory directory, {required bool crossOr
       file.openRead(),
       headers: <String, String>{
         if (contentType != null) 'Content-Type': contentType,
-        if (needsCrossOriginIsolated) ...<String, String>{
-          'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'credentialless',
-        },
+        if (needsCrossOriginIsolated) ...kMultiThreadedHeaders,
       },
     );
   };
@@ -72,7 +69,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     this._server,
     this._config,
     this._root, {
-    this.nullAssertions,
     required this.updateGoldens,
     required this.buildInfo,
     required this.webMemoryFS,
@@ -144,7 +140,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final Logger _logger;
   final Artifacts? _artifacts;
   final bool updateGoldens;
-  final bool? nullAssertions;
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
@@ -167,7 +162,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     String root, {
     bool updateGoldens = false,
     bool pauseAfterLoad = false,
-    bool nullAssertions = false,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
     required BuildInfo buildInfo,
@@ -218,7 +212,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       chromiumLauncher: chromiumLauncher,
       artifacts: artifacts,
       logger: logger,
-      nullAssertions: nullAssertions,
       processManager: processManager,
       webRenderer: webRenderer,
       useWasm: useWasm,
@@ -227,12 +220,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   bool get _closed => _closeMemo.hasRun;
-
-  NullSafetyMode get _nullSafetyMode {
-    return buildInfo.nullSafetyMode == NullSafetyMode.sound
-        ? NullSafetyMode.sound
-        : NullSafetyMode.unsound;
-  }
 
   final Configuration _config;
   final shelf.Server _server;
@@ -298,13 +285,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
       assert(buildInfo.canaryFeatures ?? true);
     }
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap =
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
             ? kDdcLibraryBundleDartSdkJsArtifactMap
             : kAmdDartSdkJsArtifactMap;
-    return _fileSystem.file(
-      _artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!),
-    );
+    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _dartSdkSourcemaps {
@@ -313,13 +298,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
       assert(buildInfo.canaryFeatures ?? true);
     }
-    final Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> dartSdkArtifactMap =
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap =
         buildInfo.ddcModuleFormat == DdcModuleFormat.ddc
             ? kDdcLibraryBundleDartSdkJsMapArtifactMap
             : kAmdDartSdkJsMapArtifactMap;
-    return _fileSystem.file(
-      _artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]![_nullSafetyMode]!),
-    );
+    return _fileSystem.file(_artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File _canvasKitFile(String relativePath) {
@@ -345,7 +328,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (request.url.path.endsWith('main.dart.bootstrap.js')) {
       return shelf.Response.ok(
         generateMainModule(
-          nullAssertions: nullAssertions!,
           nativeNullAssertions: true,
           bootstrapModule: 'main.dart.bootstrap',
           entrypoint: '/main.dart.js',
@@ -461,49 +443,12 @@ class FlutterWebPlatform extends PlatformPlugin {
           json.decode(await request.readAsString()) as Map<String, Object?>;
       final Uri goldenKey = Uri.parse(body['key']! as String);
       final Uri testUri = Uri.parse(body['testUri']! as String);
-      final num? width = body['width'] as num?;
-      final num? height = body['height'] as num?;
       Uint8List bytes;
 
       if (body.containsKey('bytes')) {
         bytes = base64.decode(body['bytes']! as String);
       } else {
-        // TODO(hterkelsen): Do not use browser screenshots for testing on the
-        // web once we transition off the HTML renderer. See:
-        // https://github.com/flutter/flutter/issues/135700
-        try {
-          final ChromeTab chromeTab =
-              (await getChromeTabGuarded(_browserManager!._browser.chromeConnection, (
-                ChromeTab tab,
-              ) {
-                return tab.url.contains(_browserManager!._browser.url!);
-              }))!;
-          final WipConnection connection = await chromeTab.connect();
-          final WipResponse response = await connection.sendCommand(
-            'Page.captureScreenshot',
-            <String, Object>{
-              // Clip the screenshot to include only the element.
-              // Prior to taking a screenshot, we are calling `window.render()` in
-              // `_matchers_web.dart` to only render the element on screen. That
-              // will make sure that the element will always be displayed on the
-              // origin of the screen.
-              'clip': <String, Object>{
-                'x': 0.0,
-                'y': 0.0,
-                'width': width!.toDouble(),
-                'height': height!.toDouble(),
-                'scale': 1.0,
-              },
-            },
-          );
-          bytes = base64.decode(response.result!['data'] as String);
-        } on WipError catch (ex) {
-          _logger.printError('Caught WIPError: $ex');
-          return shelf.Response.ok('WIP error: $ex');
-        } on FormatException catch (ex) {
-          _logger.printError('Caught FormatException: $ex');
-          return shelf.Response.ok('Caught exception: $ex');
-        }
+        return shelf.Response.ok('Request must contain bytes in the body.');
       }
       if (updateGoldens) {
         return switch (await _testGoldenComparator.update(testUri, bytes, goldenKey)) {
@@ -599,10 +544,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       ''',
         headers: <String, String>{
           'Content-Type': 'text/html',
-          if (webRenderer == WebRendererMode.skwasm) ...<String, String>{
-            'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'credentialless',
-          },
+          if (webRenderer == WebRendererMode.skwasm) ...kMultiThreadedHeaders,
         },
       );
     }
@@ -991,7 +933,6 @@ class BrowserManager {
       return await controller.suite;
       // Not limiting to catching Exception because the exception is rethrown.
     } catch (_) {
-      // ignore: avoid_catches_without_on_clauses
       closeIframe();
       rethrow;
     }

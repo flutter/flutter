@@ -1249,7 +1249,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Center(
           child: SizedBox(
             width: pixel6EmulatorWidth,
@@ -1300,7 +1299,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Center(
           child: PageView(
             controller: controller,
@@ -1400,6 +1398,163 @@ void main() {
     testWidgets('null to null', (WidgetTester tester) async {
       await tester.pumpWidget(createPageView(null));
       await tester.pumpWidget(createPageView(null));
+    });
+  });
+
+  group('Asserts in jumpToPage and animateToPage methods works properly', () {
+    Widget createPageView([PageController? controller]) {
+      return MaterialApp(
+        home: Scaffold(
+          body: PageView(
+            controller: controller,
+            children: <Widget>[
+              Container(color: Colors.red),
+              Container(color: Colors.green),
+              Container(color: Colors.blue),
+            ],
+          ),
+        ),
+      );
+    }
+
+    group('One pageController is attached to multiple PageViews', () {
+      Widget createMultiplePageViews(PageController controller) {
+        return MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: <Widget>[
+                Expanded(
+                  child: PageView(
+                    controller: controller,
+                    children: <Widget>[
+                      Container(color: Colors.red),
+                      Container(color: Colors.green),
+                      Container(color: Colors.blue),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: PageView(
+                    controller: controller,
+                    children: <Widget>[
+                      Container(color: Colors.orange),
+                      Container(color: Colors.purple),
+                      Container(color: Colors.yellow),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      testWidgets(
+        'animateToPage assertion is working properly when pageController is attached to multiple PageViews',
+        (WidgetTester tester) async {
+          final PageController controller = PageController();
+          addTearDown(controller.dispose);
+          await tester.pumpWidget(createMultiplePageViews(controller));
+
+          expect(
+            () => controller.animateToPage(
+              2,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.ease,
+            ),
+            throwsA(
+              isAssertionError.having(
+                (AssertionError error) => error.message,
+                'message',
+                equals(
+                  'Multiple PageViews are attached to '
+                  'the same PageController.',
+                ),
+              ),
+            ),
+          );
+        },
+      );
+
+      testWidgets(
+        'jumpToPage assertion is working properly when pageController is attached to multiple PageViews',
+        (WidgetTester tester) async {
+          final PageController controller = PageController();
+          addTearDown(controller.dispose);
+          await tester.pumpWidget(createMultiplePageViews(controller));
+
+          expect(
+            () => controller.jumpToPage(2),
+            throwsA(
+              isAssertionError.having(
+                (AssertionError error) => error.message,
+                'message',
+                equals(
+                  'Multiple PageViews are attached to '
+                  'the same PageController.',
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    });
+
+    group('PageController is attached or is not attached to PageView', () {
+      testWidgets('Assert behavior of animateToPage works properly', (WidgetTester tester) async {
+        final PageController controller = PageController();
+        addTearDown(controller.dispose);
+
+        // pageController is not attached to PageView
+        await tester.pumpWidget(createPageView());
+        expect(
+          () => controller.animateToPage(
+            2,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.ease,
+          ),
+          throwsA(
+            isAssertionError.having(
+              (AssertionError error) => error.message,
+              'message',
+              equals('PageController is not attached to a PageView.'),
+            ),
+          ),
+        );
+
+        // pageController is attached to PageView
+        await tester.pumpWidget(createPageView(controller));
+        expect(
+          () => controller.animateToPage(
+            2,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.ease,
+          ),
+          returnsNormally,
+        );
+      });
+
+      testWidgets('Assert behavior of jumpToPage works properly', (WidgetTester tester) async {
+        final PageController controller = PageController();
+        addTearDown(controller.dispose);
+
+        // pageController is not attached to PageView
+        await tester.pumpWidget(createPageView());
+        expect(
+          () => controller.jumpToPage(2),
+          throwsA(
+            isAssertionError.having(
+              (AssertionError error) => error.message,
+              'message',
+              equals('PageController is not attached to a PageView.'),
+            ),
+          ),
+        );
+
+        // pageController is attached to PageView
+        await tester.pumpWidget(createPageView(controller));
+        expect(() => controller.jumpToPage(2), returnsNormally);
+      });
     });
   });
 

@@ -849,6 +849,9 @@ class TextField extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
@@ -1341,7 +1344,8 @@ class _TextFieldState extends State<TextField>
       return false;
     }
 
-    if (cause == SelectionChangedCause.longPress || cause == SelectionChangedCause.scribble) {
+    if (cause == SelectionChangedCause.longPress ||
+        cause == SelectionChangedCause.stylusHandwriting) {
       return true;
     }
 

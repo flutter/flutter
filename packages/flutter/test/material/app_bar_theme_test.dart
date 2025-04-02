@@ -79,7 +79,7 @@ void main() {
   });
 
   testWidgets('Material3 - Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
         theme: theme,
@@ -369,14 +369,8 @@ void main() {
   testWidgets('Material3 - ThemeData colorScheme is used when no AppBarTheme is set', (
     WidgetTester tester,
   ) async {
-    final ThemeData lightTheme = ThemeData.from(
-      colorScheme: const ColorScheme.light(),
-      useMaterial3: true,
-    );
-    final ThemeData darkTheme = ThemeData.from(
-      colorScheme: const ColorScheme.dark(),
-      useMaterial3: true,
-    );
+    final ThemeData lightTheme = ThemeData.from(colorScheme: const ColorScheme.light());
+    final ThemeData darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark());
     Widget buildFrame(ThemeData appTheme) {
       return MaterialApp(
         theme: appTheme,
@@ -582,7 +576,6 @@ void main() {
               style: IconButton.styleFrom(foregroundColor: Colors.red),
             ),
             appBarTheme: const AppBarTheme(iconTheme: overallIconTheme),
-            useMaterial3: true,
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -611,7 +604,6 @@ void main() {
           theme: ThemeData(
             iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(iconSize: 32.0)),
             appBarTheme: const AppBarTheme(iconTheme: overallIconTheme),
-            useMaterial3: true,
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -644,7 +636,6 @@ void main() {
           theme: ThemeData(
             iconButtonTheme: iconButtonTheme,
             appBarTheme: const AppBarTheme(actionsIconTheme: actionsIconTheme),
-            useMaterial3: true,
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -676,7 +667,6 @@ void main() {
           theme: ThemeData(
             iconButtonTheme: iconButtonTheme,
             appBarTheme: const AppBarTheme(actionsIconTheme: actionsIconTheme),
-            useMaterial3: true,
           ),
           home: Scaffold(
             appBar: AppBar(
@@ -709,7 +699,6 @@ void main() {
       final ThemeData themeData = ThemeData(
         iconButtonTheme: iconButtonTheme,
         appBarTheme: appBarTheme,
-        useMaterial3: true,
       );
 
       await tester.pumpWidget(
@@ -761,6 +750,38 @@ void main() {
     expect(navToolBar.middleSpacing, 40);
   });
 
+  testWidgets('AppBar uses AppBarTheme.leadingWidth', (WidgetTester tester) async {
+    const double kLeadingWidth = 80;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarTheme(leadingWidth: kLeadingWidth)),
+        home: Scaffold(appBar: AppBar(leading: const Icon(Icons.chevron_left))),
+      ),
+    );
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    final BoxConstraints leadingConstraints = (navToolBar.leading! as ConstrainedBox).constraints;
+    expect(leadingConstraints.maxWidth, kLeadingWidth);
+    expect(leadingConstraints.minWidth, kLeadingWidth);
+  });
+
+  testWidgets('AppBar.leadingWidth takes priority over AppBarTheme.leadingWidth', (
+    WidgetTester tester,
+  ) async {
+    const double kLeadingWidth = 80;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarTheme(leadingWidth: kLeadingWidth)),
+        home: Scaffold(appBar: AppBar(leading: const Icon(Icons.chevron_left), leadingWidth: 40)),
+      ),
+    );
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    final BoxConstraints leadingConstraints = (navToolBar.leading! as ConstrainedBox).constraints;
+    expect(leadingConstraints.maxWidth, 40);
+    expect(leadingConstraints.minWidth, 40);
+  });
+
   testWidgets('SliverAppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(
@@ -789,6 +810,42 @@ void main() {
 
     final NavigationToolbar navToolbar = tester.widget(find.byType(NavigationToolbar));
     expect(navToolbar.middleSpacing, 40);
+  });
+
+  testWidgets('SliverAppBar uses AppBarTheme.leadingWidth', (WidgetTester tester) async {
+    const double kLeadingWidth = 80;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarTheme(leadingWidth: kLeadingWidth)),
+        home: const CustomScrollView(
+          slivers: <Widget>[SliverAppBar(leading: Icon(Icons.chevron_left))],
+        ),
+      ),
+    );
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    final BoxConstraints leadingConstraints = (navToolBar.leading! as ConstrainedBox).constraints;
+    expect(leadingConstraints.maxWidth, kLeadingWidth);
+    expect(leadingConstraints.minWidth, kLeadingWidth);
+  });
+
+  testWidgets('SliverAppBar.leadingWidth takes priority over AppBarTheme.leadingWidth ', (
+    WidgetTester tester,
+  ) async {
+    const double kLeadingWidth = 80;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarTheme(leadingWidth: kLeadingWidth)),
+        home: const CustomScrollView(
+          slivers: <Widget>[SliverAppBar(leading: Icon(Icons.chevron_left), leadingWidth: 40)],
+        ),
+      ),
+    );
+
+    final NavigationToolbar navToolBar = tester.widget(find.byType(NavigationToolbar));
+    final BoxConstraints leadingConstraints = (navToolBar.leading! as ConstrainedBox).constraints;
+    expect(leadingConstraints.maxWidth, 40);
+    expect(leadingConstraints.minWidth, 40);
   });
 
   testWidgets('SliverAppBar.medium uses AppBarTheme properties', (WidgetTester tester) async {
@@ -1100,6 +1157,7 @@ void main() {
       iconTheme: IconThemeData(color: Color(0xff000004)),
       centerTitle: true,
       titleSpacing: 40.0,
+      leadingWidth: 96,
       toolbarHeight: 96,
       toolbarTextStyle: TextStyle(color: Color(0xff000005)),
       titleTextStyle: TextStyle(color: Color(0xff000006)),
@@ -1125,6 +1183,7 @@ void main() {
         'iconTheme: IconThemeData#00000(color: ${const Color(0xff000004)})',
         'centerTitle: true',
         'titleSpacing: 40.0',
+        'leadingWidth: 96.0',
         'toolbarHeight: 96.0',
         'toolbarTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000005)})',
         'titleTextStyle: TextStyle(inherit: true, color: ${const Color(0xff000006)})',
@@ -1143,7 +1202,6 @@ void main() {
     'Material3 - AppBarTheme.iconTheme correctly applies custom white color in dark mode',
     (WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
-        useMaterial3: true,
         brightness: Brightness.dark,
         appBarTheme: const AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
       );

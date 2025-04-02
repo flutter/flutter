@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
@@ -15,6 +16,7 @@
 #include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/round_rect_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/rect.h"
 
@@ -108,6 +110,12 @@ std::unique_ptr<Geometry> Geometry::MakeStrokedCircle(const Point& center,
 std::unique_ptr<Geometry> Geometry::MakeRoundRect(const Rect& rect,
                                                   const Size& radii) {
   return std::make_unique<RoundRectGeometry>(rect, radii);
+}
+
+std::unique_ptr<Geometry> Geometry::MakeRoundSuperellipse(
+    const Rect& rect,
+    Scalar corner_radius) {
+  return std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
 }
 
 bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {

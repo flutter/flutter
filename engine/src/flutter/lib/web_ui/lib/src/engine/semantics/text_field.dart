@@ -126,9 +126,15 @@ class SemanticsTextEditingStrategy extends DefaultTextEditingStrategy {
     }
 
     // Subscribe to text and selection changes.
-    subscriptions.add(DomSubscription(activeDomElement, 'input', handleChange));
-    subscriptions.add(DomSubscription(activeDomElement, 'keydown', maybeSendAction));
-    subscriptions.add(DomSubscription(domDocument, 'selectionchange', handleChange));
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'input', createDomEventListener(handleChange)),
+    );
+    subscriptions.add(
+      DomSubscription(activeDomElement, 'keydown', createDomEventListener(maybeSendAction)),
+    );
+    subscriptions.add(
+      DomSubscription(domDocument, 'selectionchange', createDomEventListener(handleChange)),
+    );
     preventDefaultForMouseEvents();
   }
 
@@ -320,6 +326,12 @@ class SemanticTextField extends SemanticRole {
       }
     } else {
       editableElement.removeAttribute('aria-label');
+    }
+
+    if (semanticsObject.isRequirable) {
+      editableElement.setAttribute('aria-required', semanticsObject.isRequired);
+    } else {
+      editableElement.removeAttribute('aria-required');
     }
   }
 

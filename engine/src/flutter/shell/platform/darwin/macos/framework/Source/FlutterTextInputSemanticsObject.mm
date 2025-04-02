@@ -164,7 +164,7 @@ FlutterTextPlatformNode::FlutterTextPlatformNode(FlutterPlatformNodeDelegate* de
   view_controller_ = view_controller;
   appkit_text_field_ =
       [[FlutterTextField alloc] initWithPlatformNode:this
-                                         fieldEditor:view_controller.textInputPlugin];
+                                         fieldEditor:view_controller.engine.textInputPlugin];
   appkit_text_field_.bezeled = NO;
   appkit_text_field_.drawsBackground = NO;
   appkit_text_field_.bordered = NO;

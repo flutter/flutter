@@ -91,41 +91,41 @@ TEST(LayerStateStack, OldDelegateIsRolledBack) {
   DisplayListBuilder builder2;
   DlCanvas& canvas = builder2;
 
-  ASSERT_TRUE(builder.GetTransform().isIdentity());
-  ASSERT_TRUE(canvas.GetTransform().isIdentity());
+  ASSERT_TRUE(builder.GetMatrix().IsIdentity());
+  ASSERT_TRUE(canvas.GetMatrix().IsIdentity());
 
   state_stack.set_delegate(&builder);
 
-  ASSERT_TRUE(builder.GetTransform().isIdentity());
-  ASSERT_TRUE(canvas.GetTransform().isIdentity());
+  ASSERT_TRUE(builder.GetMatrix().IsIdentity());
+  ASSERT_TRUE(canvas.GetMatrix().IsIdentity());
 
   auto mutator = state_stack.save();
   mutator.translate({10, 10});
 
-  ASSERT_EQ(builder.GetTransform(), SkMatrix::Translate(10, 10));
-  ASSERT_TRUE(canvas.GetTransform().isIdentity());
+  ASSERT_EQ(builder.GetMatrix(), DlMatrix::MakeTranslation({10, 10}));
+  ASSERT_TRUE(canvas.GetMatrix().IsIdentity());
 
   state_stack.set_delegate(&canvas);
 
-  ASSERT_TRUE(builder.GetTransform().isIdentity());
-  ASSERT_EQ(canvas.GetTransform(), SkMatrix::Translate(10, 10));
+  ASSERT_TRUE(builder.GetMatrix().IsIdentity());
+  ASSERT_EQ(canvas.GetMatrix(), DlMatrix::MakeTranslation({10, 10}));
 
   state_stack.set_preroll_delegate(DlRect::MakeWH(100, 100));
 
-  ASSERT_TRUE(builder.GetTransform().isIdentity());
-  ASSERT_TRUE(canvas.GetTransform().isIdentity());
+  ASSERT_TRUE(builder.GetMatrix().IsIdentity());
+  ASSERT_TRUE(canvas.GetMatrix().IsIdentity());
 
   state_stack.set_delegate(&builder);
   state_stack.clear_delegate();
 
-  ASSERT_TRUE(builder.GetTransform().isIdentity());
-  ASSERT_TRUE(canvas.GetTransform().isIdentity());
+  ASSERT_TRUE(builder.GetMatrix().IsIdentity());
+  ASSERT_TRUE(canvas.GetMatrix().IsIdentity());
 
   state_stack.set_delegate(&canvas);
   state_stack.clear_delegate();
 
-  ASSERT_TRUE(builder.GetTransform().isIdentity());
-  ASSERT_TRUE(canvas.GetTransform().isIdentity());
+  ASSERT_TRUE(builder.GetMatrix().IsIdentity());
+  ASSERT_TRUE(canvas.GetMatrix().IsIdentity());
 }
 
 TEST(LayerStateStack, Opacity) {
