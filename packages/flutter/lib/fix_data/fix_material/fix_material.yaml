@@ -741,7 +741,6 @@ transforms:
   # Changes made in https://github.com/flutter/flutter/pull/166382
   - title: "Migrate to 'activeThumbColor'"
     date: 2025-04-03
-    bulkApply: false
     element:
       uris: [ 'material.dart' ]
       constructor: ''
@@ -754,7 +753,6 @@ transforms:
   # Changes made in https://github.com/flutter/flutter/pull/166382
   - title: "Migrate to 'activeThumbColor'"
     date: 2025-04-03
-    bulkApply: false
     element:
       uris: [ 'material.dart' ]
       constructor: 'adaptive'
