@@ -20,7 +20,6 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/color_filter.h"
-#include "impeller/display_list/dl_atlas_geometry.h"
 #include "impeller/display_list/image_filter.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -32,6 +31,7 @@
 #include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/circle_geometry.h"
@@ -1467,6 +1467,50 @@ bool Canvas::Restore() {
   return true;
 }
 
+bool Canvas::AttemptBlurredTextOptimization(
+    const std::shared_ptr<TextFrame>& text_frame,
+    const std::shared_ptr<TextContents>& text_contents,
+    Entity& entity,
+    const Paint& paint) {
+  if (!paint.mask_blur_descriptor.has_value() ||  //
+      paint.image_filter != nullptr ||            //
+      paint.color_filter != nullptr ||            //
+      paint.invert_colors) {
+    return false;
+  }
+
+  // TODO(bdero): This mask blur application is a hack. It will always wind up
+  //              doing a gaussian blur that affects the color source itself
+  //              instead of just the mask. The color filter text support
+  //              needs to be reworked in order to interact correctly with
+  //              mask filters.
+  //              https://github.com/flutter/flutter/issues/133297
+  std::shared_ptr<FilterContents> filter =
+      paint.mask_blur_descriptor->CreateMaskBlur(
+          FilterInput::Make(text_contents),
+          /*is_solid_color=*/true, GetCurrentTransform());
+
+  std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
+  int64_t identifier = maybe_glyph.has_value()
+                           ? maybe_glyph.value().index
+                           : reinterpret_cast<int64_t>(text_frame.get());
+  TextShadowCache::TextShadowCacheKey cache_key(
+      /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
+      /*p_identifier=*/identifier,
+      /*p_is_single_glyph=*/maybe_glyph.has_value(),
+      /*p_font=*/text_frame->GetFont(),
+      /*p_sigma=*/paint.mask_blur_descriptor->sigma);
+
+  std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
+      renderer_, entity, filter, cache_key);
+  if (result.has_value()) {
+    AddRenderEntityToCurrentPass(result.value(), /*reuse_depth=*/false);
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
@@ -1491,15 +1535,12 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   entity.SetTransform(GetCurrentTransform() *
                       Matrix::MakeTranslation(position));
 
-  // TODO(bdero): This mask blur application is a hack. It will always wind up
-  //              doing a gaussian blur that affects the color source itself
-  //              instead of just the mask. The color filter text support
-  //              needs to be reworked in order to interact correctly with
-  //              mask filters.
-  //              https://github.com/flutter/flutter/issues/133297
-  entity.SetContents(paint.WithFilters(paint.WithMaskBlur(
-      std::move(text_contents), true, GetCurrentTransform())));
+  if (AttemptBlurredTextOptimization(text_frame, text_contents, entity,
+                                     paint)) {
+    return;
+  }
 
+  entity.SetContents(paint.WithFilters(std::move(text_contents)));
   AddRenderEntityToCurrentPass(entity, false);
 }
 

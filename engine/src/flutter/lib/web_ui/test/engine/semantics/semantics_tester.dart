@@ -121,6 +121,7 @@ class SemanticsTester {
     String? linkUrl,
     ui.SemanticsRole? role,
     List<String>? controlsNodes,
+    ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
   }) {
     // Flags
     if (hasCheckedState ?? false) {
@@ -343,6 +344,7 @@ class SemanticsTester {
       linkUrl: linkUrl,
       role: role ?? ui.SemanticsRole.none,
       controlsNodes: controlsNodes,
+      validationResult: validationResult,
     );
     _nodeUpdates.add(update);
     return update;

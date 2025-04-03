@@ -257,4 +257,52 @@ void main() {
       'PathMetric(length: 120.0, isClosed: true, contourIndex: 1))',
     );
   });
+
+  test('RSuperellipse path is correct for a slim diagnal shape', () {
+    // This test mirrors a similar test from "geometry_test.dart" and serves as
+    // a smoke test.
+    final RSuperellipse rsuperellipse = RSuperellipse.fromLTRBAndCorners(
+      -50,
+      -50,
+      50,
+      50,
+      topLeft: const Radius.circular(1.0),
+      topRight: const Radius.circular(99.0),
+      bottomLeft: const Radius.circular(99.0),
+      bottomRight: const Radius.circular(1.0),
+    );
+    final Path path =
+        Path()
+          ..addRSuperellipse(rsuperellipse)
+          ..close();
+
+    expect(path.contains(Offset.zero), isTrue);
+    expect(path.contains(const Offset(-49.999, -49.999)), isFalse);
+    expect(path.contains(const Offset(-49.999, 49.999)), isFalse);
+    expect(path.contains(const Offset(49.999, 49.999)), isFalse);
+    expect(path.contains(const Offset(49.999, -49.999)), isFalse);
+
+    // The pointy ends at the NE and SW corners
+    checkPointWithOffset(path, const Offset(-49.70, -49.70), const Offset(-0.02, -0.02));
+    checkPointWithOffset(path, const Offset(49.70, 49.70), const Offset(0.02, 0.02));
+
+    // Checks two points symmetrical to the origin.
+    void checkDiagnalPoints(Offset p) {
+      checkPointWithOffset(path, p, const Offset(0.02, -0.02));
+      checkPointWithOffset(path, Offset(-p.dx, -p.dy), const Offset(-0.02, 0.02));
+    }
+
+    // A few other points along the edge
+    checkDiagnalPoints(const Offset(-40.0, -49.59));
+    checkDiagnalPoints(const Offset(-20.0, -45.64));
+    checkDiagnalPoints(const Offset(0.0, -37.01));
+    checkDiagnalPoints(const Offset(20.0, -21.96));
+    checkDiagnalPoints(const Offset(21.05, -20.92));
+    checkDiagnalPoints(const Offset(40.0, 5.68));
+  });
+}
+
+void checkPointWithOffset(Path path, Offset inPoint, Offset outwardOffset) {
+  expect(path.contains(inPoint), isTrue);
+  expect(path.contains(inPoint + outwardOffset), isFalse);
 }
