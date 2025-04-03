@@ -1512,13 +1512,17 @@ bool Canvas::AttemptBlurredTextOptimization(
   }
 }
 
+// If the text point size * max basis XY is larger than this value,
+// render the text as paths (if available) for faster and higher
+// fidelity rendering. This is a somewhat arbitrary cutoff
+static constexpr Scalar kMaxTextScale = 250;
+
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
-  // This is a somewhat arbitrary cutoff to switch from rasterized glyphs
-  // to path rendering, for both performance and fidelity purposes.
   Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
-  if (max_scale * text_frame->GetFont().GetMetrics().point_size > 250) {
+  if (max_scale * text_frame->GetFont().GetMetrics().point_size >
+      kMaxTextScale) {
     std::optional<flutter::DlPath> path = text_frame->GetPath();
     if (path.has_value()) {
       Save(1);
