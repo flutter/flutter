@@ -1530,6 +1530,7 @@ plugins {
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: parent
+flutter:
 workspace:
 - child1
 - child2
@@ -1539,18 +1540,21 @@ workspace:
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: child1
+flutter:
 resolution: workspace
 ''');
         directory.childFile('child2/pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: child2
+flutter:
 resolution: workspace
 ''');
         directory.childFile('child2/example/pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: child2_example
+flutter:
 resolution: workspace
 ''');
 
