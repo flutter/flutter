@@ -2781,10 +2781,10 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
 }
 
 #if defined(__clang_analyzer__)
-#define TEST_VM_SNAPSHOT_DATA nullptr
-#define TEST_VM_SNAPSHOT_INSTRUCTIONS nullptr
-#define TEST_ISOLATE_SNAPSHOT_DATA nullptr
-#define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS nullptr
+#define TEST_VM_SNAPSHOT_DATA "vm_data"
+#define TEST_VM_SNAPSHOT_INSTRUCTIONS "vm_instructions"
+#define TEST_ISOLATE_SNAPSHOT_DATA "isolate_data"
+#define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS "isolate_instructions"
 #endif
 
 //------------------------------------------------------------------------------

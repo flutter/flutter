@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine/canvaskit/image.dart';
-import 'package:ui/src/engine/dom.dart';
 import 'package:ui/src/engine/html_image_element_codec.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;

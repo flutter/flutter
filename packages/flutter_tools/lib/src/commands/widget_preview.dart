@@ -129,8 +129,8 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         hide: !verboseHelp,
       )
       ..addFlag(
-        kUseFlutterWeb,
-        help: 'Launches the widget preview environment using Flutter Web.',
+        kUseFlutterDesktop,
+        help: '(deprecated) Launches the widget preview environment using Flutter Desktop.',
         hide: !verboseHelp,
       )
       ..addFlag(
@@ -142,7 +142,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   static const String kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const String kLaunchPreviewer = 'launch-previewer';
-  static const String kUseFlutterWeb = 'web';
+  static const String kUseFlutterDesktop = 'desktop';
   static const String kHeadlessWeb = 'headless-web';
 
   @override
@@ -159,7 +159,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final bool verboseHelp;
 
-  bool get isWeb => boolArg(kUseFlutterWeb);
+  bool get isWeb => !boolArg(kUseFlutterDesktop);
 
   @override
   final FileSystem fs;
@@ -428,6 +428,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       const String? kEmptyRoute = null;
       const bool kEnableHotReload = true;
 
+      // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
+      logger.printStatus('Launching the Widget Preview Scaffold...');
+
       app = await Daemon.createMachineDaemon().appDomain.startApp(
         device,
         widgetPreviewScaffoldProject.directory.path,
@@ -446,7 +449,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
               widgetPreviewScaffoldProject.packageConfig.uri,
             ),
           ),
-          webEnableExposeUrl: false, // TODO(bkonyi): verify
+          webEnableExposeUrl: false,
           webRunHeadless: boolArg(kHeadlessWeb),
         ),
         kEnableHotReload, // hot mode
@@ -457,11 +460,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     } on Exception catch (error) {
       throwToolExit(error.toString());
     }
-    // Immediately perform a hot restart to ensure new previews are loaded into the prebuilt
-    // application.
-    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-    logger.printStatus('Loading previews into the Widget Preview Scaffold...');
-    await app.restart(fullRestart: true);
+
+    if (!isWeb) {
+      // Immediately perform a hot restart to ensure new previews are loaded into the prebuilt
+      // application.
+      // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
+      logger.printStatus('Loading previews into the Widget Preview Scaffold...');
+      await app.restart(fullRestart: true);
+    }
     // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Done loading previews.');
     return app;
@@ -519,10 +525,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   }) {
     final List<AssetsEntry> assets = rootManifest.assets.map(transformAssetsEntry).toList();
 
-    final List<Font> fonts =
-        rootManifest.fonts.map((Font font) {
-          return Font(font.familyName, font.fontAssets.map(transformFontAsset).toList());
-        }).toList();
+    final List<Font> fonts = <Font>[
+      ...widgetPreviewManifest.fonts,
+      ...rootManifest.fonts.map((Font font) {
+        return Font(font.familyName, font.fontAssets.map(transformFontAsset).toList());
+      }),
+    ];
 
     final List<Uri> shaders = rootManifest.shaders.map(transformAssetUri).toList();
 
@@ -576,6 +584,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
         'flutter_lints',
+        'stack_trace',
       ],
       context: PubContext.pubAdd,
       command: pubAdd,

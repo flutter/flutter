@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:quiver/testing/async.dart';
@@ -143,6 +144,9 @@ void runSemanticsTests() {
   });
   group('requirable', () {
     _testRequirable();
+  });
+  group('SemanticsValidationResult', () {
+    _testSemanticsValidationResult();
   });
 }
 
@@ -1557,6 +1561,33 @@ void _testVerticalScrolling() {
 
     final DomElement scrollable = findScrollable(owner());
     expect(scrollable.scrollTop, isZero);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('scroll events ignored when actions not available', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+  <sem role="group" style="touch-action: none">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+  </sem>''');
+
+    final scrollable = owner().debugSemanticsTree![0]!.semanticRole! as SemanticScrollable;
+    final scrollEvent = createDomEvent('Event', 'scroll') as JSAny;
+    final listener = scrollable.scrollListener!;
+    expect(() => listener.callAsFunction(null, scrollEvent), returnsNormally);
+
     semantics().semanticsEnabled = false;
   });
 
@@ -4732,6 +4763,58 @@ void _testRequirable() {
     expect(notRequirable3.getAttribute('aria-required'), isNull);
 
     semantics().semanticsEnabled = false;
+  });
+}
+
+void _testSemanticsValidationResult() {
+  test('renders validation result', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        // This node does not validate its contents and should not have an
+        // aria-invalid attribute at all.
+        tester.updateNode(id: 1),
+        // This node is valid. aria-invalid should be "false".
+        tester.updateNode(id: 2, validationResult: ui.SemanticsValidationResult.valid),
+        // This node is invalid. aria-invalid should be "true".
+        tester.updateNode(id: 3, validationResult: ui.SemanticsValidationResult.invalid),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0" aria-invalid--missing>
+  <sem id="flt-semantic-node-1" aria-invalid--missing></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid="true"></sem>
+</sem>''');
+
+    // Shift all values, observe that the values changed accordingly
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        // This node is valid. aria-invalid should be "false".
+        tester.updateNode(id: 1, validationResult: ui.SemanticsValidationResult.valid),
+        // This node is invalid. aria-invalid should be "true".
+        tester.updateNode(id: 2, validationResult: ui.SemanticsValidationResult.invalid),
+        // This node does not validate its contents and should not have an
+        // aria-invalid attribute at all.
+        tester.updateNode(id: 3),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0" aria-invalid--missing>
+  <sem id="flt-semantic-node-1" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="true"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid--missing></sem>
+</sem>''');
   });
 }
 

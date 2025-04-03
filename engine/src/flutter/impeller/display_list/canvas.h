@@ -17,6 +17,7 @@
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -356,6 +357,23 @@ class Canvas {
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
                                const Paint& paint);
+
+  /// For simple DrawImageRect calls, optimize any draws with a color filter
+  /// into the corresponding atlas draw.
+  ///
+  /// Returns whether not the optimization was applied.
+  bool AttemptColorFilterOptimization(const std::shared_ptr<Texture>& image,
+                                      Rect source,
+                                      Rect dest,
+                                      const Paint& paint,
+                                      const SamplerDescriptor& sampler,
+                                      SourceRectConstraint src_rect_constraint);
+
+  bool AttemptBlurredTextOptimization(
+      const std::shared_ptr<TextFrame>& text_frame,
+      const std::shared_ptr<TextContents>& text_contents,
+      Entity& entity,
+      const Paint& paint);
 
   RenderPass& GetCurrentRenderPass() const;
 

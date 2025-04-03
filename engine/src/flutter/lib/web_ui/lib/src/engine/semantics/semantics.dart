@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -245,6 +246,7 @@ class SemanticsNodeUpdate {
     this.linkUrl,
     required this.role,
     required this.controlsNodes,
+    required this.validationResult,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -357,6 +359,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final List<String>? controlsNodes;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.SemanticsValidationResult validationResult;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -615,11 +620,21 @@ abstract class SemanticRole {
 
   void removeAttribute(String name) => element.removeAttribute(name);
 
-  void addEventListener(String type, DomEventListener? listener, [bool? useCapture]) =>
-      element.addEventListener(type, listener, useCapture);
+  void addEventListener(String type, DomEventListener? listener, [bool? useCapture]) {
+    if (useCapture != null) {
+      element.addEventListener(type, listener, useCapture.toJS);
+    } else {
+      element.addEventListener(type, listener);
+    }
+  }
 
-  void removeEventListener(String type, DomEventListener? listener, [bool? useCapture]) =>
-      element.removeEventListener(type, listener, useCapture);
+  void removeEventListener(String type, DomEventListener? listener, [bool? useCapture]) {
+    if (useCapture != null) {
+      element.removeEventListener(type, listener, useCapture.toJS);
+    } else {
+      element.removeEventListener(type, listener);
+    }
+  }
 
   /// Convenience getter for the [Focusable] behavior, if any.
   Focusable? get focusable => _focusable;
@@ -711,6 +726,10 @@ abstract class SemanticRole {
   /// the object.
   @mustCallSuper
   void update() {
+    if (semanticsObject.isValidationResultDirty) {
+      updateValidationResult();
+    }
+
     final List<SemanticBehavior>? behaviors = _behaviors;
     if (behaviors == null) {
       return;
@@ -754,6 +773,40 @@ abstract class SemanticRole {
       });
     }
     removeAttribute('aria-controls');
+  }
+
+  /// Applies the current [SemanticsObject.validationResult] to the DOM managed
+  /// by this role.
+  ///
+  /// The default implementation applies the `aria-invalid` attribute to the
+  /// root [SemanticsObject.element]. Specific role implementations may prefer
+  /// to apply it to different elements, depending on their use-case. For
+  /// example, a text field may want to apply it on the underlying `<input>`
+  /// element.
+  void updateValidationResult() {
+    updateAriaInvalid(semanticsObject.element, semanticsObject.validationResult);
+  }
+
+  /// Converts [validationResult] to its ARIA value and sets it as the `aria-invalid`
+  /// attribute of the given [element].
+  ///
+  /// If [validationResult] is null, removes the `aria-invalid` attribute from
+  /// the element.
+  static void updateAriaInvalid(DomElement element, ui.SemanticsValidationResult validationResult) {
+    switch (validationResult) {
+      case ui.SemanticsValidationResult.none:
+        element.removeAttribute('aria-invalid');
+      case ui.SemanticsValidationResult.valid:
+        // 'false' may seem counter-intuitive for a "valid" result, but it's
+        // because the ARIA attribute is `aria-invalid`, so its value is
+        // reversed.
+        element.setAttribute('aria-invalid', 'false');
+      case ui.SemanticsValidationResult.invalid:
+        // 'true' may seem counter-intuitive for an "invalid" result, but it's
+        // because the ARIA attribute is `aria-invalid`, so its value is
+        // reversed.
+        element.setAttribute('aria-invalid', 'true');
+    }
   }
 
   /// Whether this role was disposed of.
@@ -1342,6 +1395,18 @@ class SemanticsObject {
     _dirtyFields |= _linkUrlIndex;
   }
 
+  /// The result of validating a form field, if the form field is being
+  /// validated, and null otherwise.
+  ui.SemanticsValidationResult get validationResult => _validationResult;
+  ui.SemanticsValidationResult _validationResult = ui.SemanticsValidationResult.none;
+
+  static const int _validationResultIndex = 1 << 27;
+
+  bool get isValidationResultDirty => _isDirty(_validationResultIndex);
+  void _markValidationResultDirty() {
+    _dirtyFields |= _validationResultIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -1638,6 +1703,11 @@ class SemanticsObject {
     if (_linkUrl != update.linkUrl) {
       _linkUrl = update.linkUrl;
       _markLinkUrlDirty();
+    }
+
+    if (_validationResult != update.validationResult) {
+      _validationResult = update.validationResult;
+      _markValidationResultDirty();
     }
 
     role = update.role;
