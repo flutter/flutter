@@ -4143,7 +4143,7 @@ class SemanticsOwner extends ChangeNotifier {
         ErrorHint(
           'Consider removing the above invisible SemanticsNodes if they were added by your '
           'RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+          '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
         ),
       ]);
     }());
