@@ -757,7 +757,8 @@ static char markerKey;
     size_t extent = std::clamp(location + signedLength, 0L, textLength);
 
     _activeModel->SetSelection(flutter::TextRange(base, extent));
-  } else if (_activeModel->composing() && !(_activeModel->composing_range() == _activeModel->selection())) {
+  } else if (_activeModel->composing() &&
+             !(_activeModel->composing_range() == _activeModel->selection())) {
     // When confirmed by Japanese IME, string replaces range of composing_range.
     // If selection == composing_range there is no problem.
     // If selection ! = composing_range the range of selection is only a part of composing_range.
