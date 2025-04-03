@@ -3013,6 +3013,62 @@ void main() {
     }
   });
 
+  testWidgets(
+    'Read-only fields can be traversed on all platforms',
+    (WidgetTester tester) async {
+      final TextEditingController controller1 = TextEditingController();
+      addTearDown(controller1.dispose);
+      final TextEditingController controller2 = TextEditingController();
+      addTearDown(controller2.dispose);
+      final FocusNode focusNode1 = FocusNode();
+      addTearDown(focusNode1.dispose);
+      final FocusNode focusNode2 = FocusNode();
+      addTearDown(focusNode2.dispose);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            children: <Widget>[
+              EditableText(
+                focusNode: focusNode1,
+                autofocus: true,
+                controller: controller1,
+                backgroundCursorColor: Colors.grey,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+              EditableText(
+                readOnly: true,
+                focusNode: focusNode2,
+                controller: controller2,
+                backgroundCursorColor: Colors.grey,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(focusNode1.hasPrimaryFocus, true);
+      expect(focusNode2.hasPrimaryFocus, false);
+
+      // Change focus to the readonly EditableText.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+      expect(focusNode1.hasPrimaryFocus, false);
+      expect(focusNode2.hasPrimaryFocus, true);
+
+      // Change focus back to the first EditableText.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+
+      expect(focusNode1.hasPrimaryFocus, true);
+      expect(focusNode2.hasPrimaryFocus, false);
+    },
+    variant: TargetPlatformVariant.all(),
+    skip: kIsWeb, // [intended]
+  );
+
   testWidgets('Sends "updateConfig" when read-only flag is flipped', (WidgetTester tester) async {
     bool readOnly = true;
     late StateSetter setState;
