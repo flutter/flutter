@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "fl_renderer.h"
+#include "fl_compositor_opengl.h"
 
 #include <epoxy/egl.h>
 #include <epoxy/gl.h>
@@ -36,10 +36,8 @@ static const char* fragment_shader_src =
     "  gl_FragColor = texture2D(texture, texcoord);\n"
     "}\n";
 
-G_DEFINE_QUARK(fl_renderer_error_quark, fl_renderer_error)
-
-struct _FlRenderer {
-  GObject parent_instance;
+struct _FlCompositorOpenGL {
+  FlCompositor parent_instance;
 
   // Engine we are rendering.
   GWeakRef engine;
@@ -85,7 +83,9 @@ struct _FlRenderer {
   GCond present_condition;
 };
 
-G_DEFINE_TYPE(FlRenderer, fl_renderer, G_TYPE_OBJECT)
+G_DEFINE_TYPE(FlCompositorOpenGL,
+              fl_compositor_opengl,
+              fl_compositor_get_type())
 
 // Check if running on an NVIDIA driver.
 static gboolean is_nvidia() {
@@ -131,7 +131,7 @@ static GLfloat pixels_to_gl_coords(GLfloat position, GLfloat pixels) {
 }
 
 // Perform single run OpenGL initialization.
-static void initialize(FlRenderer* self) {
+static void initialize(FlCompositorOpenGL* self) {
   if (self->initialized) {
     return;
   }
@@ -146,7 +146,7 @@ static void initialize(FlRenderer* self) {
   }
 }
 
-static void fl_renderer_unblock_main_thread(FlRenderer* self) {
+static void fl_compositor_opengl_unblock_main_thread(FlCompositorOpenGL* self) {
   if (self->blocking_main_thread) {
     self->blocking_main_thread = false;
 
@@ -157,7 +157,7 @@ static void fl_renderer_unblock_main_thread(FlRenderer* self) {
   }
 }
 
-static void setup_shader(FlRenderer* self) {
+static void setup_shader(FlCompositorOpenGL* self) {
   GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_shader_src, nullptr);
   glCompileShader(vertex_shader);
@@ -194,7 +194,8 @@ static void setup_shader(FlRenderer* self) {
   glDeleteShader(fragment_shader);
 }
 
-static void render_with_blit(FlRenderer* self, GPtrArray* framebuffers) {
+static void render_with_blit(FlCompositorOpenGL* self,
+                             GPtrArray* framebuffers) {
   // Disable the scissor test as it can affect blit operations.
   // Prevents regressions like: https://github.com/flutter/flutter/issues/140828
   // See OpenGL specification version 4.6, section 18.3.1.
@@ -214,7 +215,7 @@ static void render_with_blit(FlRenderer* self, GPtrArray* framebuffers) {
   glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
-static void render_with_textures(FlRenderer* self,
+static void render_with_textures(FlCompositorOpenGL* self,
                                  GPtrArray* framebuffers,
                                  int width,
                                  int height) {
@@ -280,7 +281,7 @@ static void render_with_textures(FlRenderer* self,
   glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
 }
 
-static void render(FlRenderer* self,
+static void render(FlCompositorOpenGL* self,
                    GPtrArray* framebuffers,
                    int width,
                    int height) {
@@ -291,11 +292,11 @@ static void render(FlRenderer* self,
   }
 }
 
-static gboolean present_layers(FlRenderer* self,
+static gboolean present_layers(FlCompositorOpenGL* self,
                                FlutterViewId view_id,
                                const FlutterLayer** layers,
                                size_t layers_count) {
-  g_return_val_if_fail(FL_IS_RENDERER(self), FALSE);
+  g_return_val_if_fail(FL_IS_COMPOSITOR_OPENGL(self), FALSE);
 
   // ignore incoming frame with wrong dimensions in trivial case with just one
   // layer
@@ -308,7 +309,7 @@ static gboolean present_layers(FlRenderer* self,
 
   self->had_first_frame = true;
 
-  fl_renderer_unblock_main_thread(self);
+  fl_compositor_opengl_unblock_main_thread(self);
 
   g_autoptr(GPtrArray) framebuffers =
       g_ptr_array_new_with_free_func(g_object_unref);
@@ -405,7 +406,7 @@ static gboolean present_layers(FlRenderer* self,
 }
 
 typedef struct {
-  FlRenderer* self;
+  FlCompositorOpenGL* self;
 
   FlutterViewId view_id;
 
@@ -420,7 +421,7 @@ typedef struct {
 // Perform the present on the main thread.
 static void present_layers_task_cb(gpointer user_data) {
   PresentLayersData* data = static_cast<PresentLayersData*>(user_data);
-  FlRenderer* self = data->self;
+  FlCompositorOpenGL* self = data->self;
 
   // Perform the present.
   fl_opengl_manager_make_current(self->opengl_manager);
@@ -428,52 +429,18 @@ static void present_layers_task_cb(gpointer user_data) {
       present_layers(self, data->view_id, data->layers, data->layers_count);
   fl_opengl_manager_clear_current(self->opengl_manager);
 
-  // Complete fl_renderer_present_layers().
+  // Complete fl_compositor_opengl_present_layers().
   g_autoptr(GMutexLocker) locker = g_mutex_locker_new(&self->present_mutex);
   data->finished = TRUE;
   g_cond_signal(&self->present_condition);
 }
 
-static void fl_renderer_dispose(GObject* object) {
-  FlRenderer* self = FL_RENDERER(object);
-
-  fl_renderer_unblock_main_thread(self);
-
-  g_weak_ref_clear(&self->engine);
-  g_clear_object(&self->opengl_manager);
-  g_clear_pointer(&self->framebuffers_by_view_id, g_hash_table_unref);
-  g_mutex_clear(&self->present_mutex);
-  g_cond_clear(&self->present_condition);
-
-  G_OBJECT_CLASS(fl_renderer_parent_class)->dispose(object);
-}
-
-static void fl_renderer_class_init(FlRendererClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_renderer_dispose;
-}
-
-static void fl_renderer_init(FlRenderer* self) {
-  self->framebuffers_by_view_id = g_hash_table_new_full(
-      g_direct_hash, g_direct_equal, nullptr,
-      reinterpret_cast<GDestroyNotify>(g_ptr_array_unref));
-  g_mutex_init(&self->present_mutex);
-  g_cond_init(&self->present_condition);
-}
-
-FlRenderer* fl_renderer_new(FlEngine* engine) {
-  FlRenderer* self = FL_RENDERER(g_object_new(fl_renderer_get_type(), nullptr));
-
-  g_weak_ref_init(&self->engine, engine);
-  self->opengl_manager =
-      FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
-
-  return self;
-}
-
-gboolean fl_renderer_create_backing_store(
-    FlRenderer* self,
+static gboolean fl_compositor_opengl_create_backing_store(
+    FlCompositor* compositor,
     const FlutterBackingStoreConfig* config,
     FlutterBackingStore* backing_store_out) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
   fl_opengl_manager_make_current(self->opengl_manager);
 
   initialize(self);
@@ -492,16 +459,19 @@ gboolean fl_renderer_create_backing_store(
       fl_framebuffer_get_id(framebuffer);
   backing_store_out->open_gl.framebuffer.target = self->sized_format;
   backing_store_out->open_gl.framebuffer.destruction_callback = [](void* p) {
-    // Backing store destroyed in fl_renderer_collect_backing_store(), set
-    // on FlutterCompositor.collect_backing_store_callback during engine start.
+    // Backing store destroyed in fl_compositor_opengl_collect_backing_store(),
+    // set on FlutterCompositor.collect_backing_store_callback during engine
+    // start.
   };
 
   return TRUE;
 }
 
-gboolean fl_renderer_collect_backing_store(
-    FlRenderer* self,
+static gboolean fl_compositor_opengl_collect_backing_store(
+    FlCompositor* compositor,
     const FlutterBackingStore* backing_store) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
   fl_opengl_manager_make_current(self->opengl_manager);
 
   // OpenGL context is required when destroying #FlFramebuffer.
@@ -509,10 +479,10 @@ gboolean fl_renderer_collect_backing_store(
   return TRUE;
 }
 
-void fl_renderer_wait_for_frame(FlRenderer* self,
-                                int target_width,
-                                int target_height) {
-  g_return_if_fail(FL_IS_RENDERER(self));
+static void fl_compositor_opengl_wait_for_frame(FlCompositor* compositor,
+                                                int target_width,
+                                                int target_height) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
 
   self->target_width = target_width;
   self->target_height = target_height;
@@ -526,10 +496,12 @@ void fl_renderer_wait_for_frame(FlRenderer* self,
   }
 }
 
-gboolean fl_renderer_present_layers(FlRenderer* self,
-                                    FlutterViewId view_id,
-                                    const FlutterLayer** layers,
-                                    size_t layers_count) {
+static gboolean fl_compositor_opengl_present_layers(FlCompositor* compositor,
+                                                    FlutterViewId view_id,
+                                                    const FlutterLayer** layers,
+                                                    size_t layers_count) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(compositor);
+
   // Detach the context from raster thread. Needed because blitting
   // will be done on the main thread, which will make the context current.
   fl_opengl_manager_clear_current(self->opengl_manager);
@@ -561,8 +533,54 @@ gboolean fl_renderer_present_layers(FlRenderer* self,
   return data.result;
 }
 
-void fl_renderer_setup(FlRenderer* self) {
-  g_return_if_fail(FL_IS_RENDERER(self));
+static void fl_compositor_opengl_dispose(GObject* object) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(object);
+
+  fl_compositor_opengl_unblock_main_thread(self);
+
+  g_weak_ref_clear(&self->engine);
+  g_clear_object(&self->opengl_manager);
+  g_clear_pointer(&self->framebuffers_by_view_id, g_hash_table_unref);
+  g_mutex_clear(&self->present_mutex);
+  g_cond_clear(&self->present_condition);
+
+  G_OBJECT_CLASS(fl_compositor_opengl_parent_class)->dispose(object);
+}
+
+static void fl_compositor_opengl_class_init(FlCompositorOpenGLClass* klass) {
+  FL_COMPOSITOR_CLASS(klass)->create_backing_store =
+      fl_compositor_opengl_create_backing_store;
+  FL_COMPOSITOR_CLASS(klass)->collect_backing_store =
+      fl_compositor_opengl_collect_backing_store;
+  FL_COMPOSITOR_CLASS(klass)->wait_for_frame =
+      fl_compositor_opengl_wait_for_frame;
+  FL_COMPOSITOR_CLASS(klass)->present_layers =
+      fl_compositor_opengl_present_layers;
+
+  G_OBJECT_CLASS(klass)->dispose = fl_compositor_opengl_dispose;
+}
+
+static void fl_compositor_opengl_init(FlCompositorOpenGL* self) {
+  self->framebuffers_by_view_id = g_hash_table_new_full(
+      g_direct_hash, g_direct_equal, nullptr,
+      reinterpret_cast<GDestroyNotify>(g_ptr_array_unref));
+  g_mutex_init(&self->present_mutex);
+  g_cond_init(&self->present_condition);
+}
+
+FlCompositorOpenGL* fl_compositor_opengl_new(FlEngine* engine) {
+  FlCompositorOpenGL* self = FL_COMPOSITOR_OPENGL(
+      g_object_new(fl_compositor_opengl_get_type(), nullptr));
+
+  g_weak_ref_init(&self->engine, engine);
+  self->opengl_manager =
+      FL_OPENGL_MANAGER(g_object_ref(fl_engine_get_opengl_manager(engine)));
+
+  return self;
+}
+
+void fl_compositor_opengl_setup(FlCompositorOpenGL* self) {
+  g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
 
   // Note: NVIDIA and Vivante are temporarily disabled due to
   // https://github.com/flutter/flutter/issues/152099
@@ -576,12 +594,12 @@ void fl_renderer_setup(FlRenderer* self) {
   }
 }
 
-void fl_renderer_render(FlRenderer* self,
-                        FlutterViewId view_id,
-                        int width,
-                        int height,
-                        const GdkRGBA* background_color) {
-  g_return_if_fail(FL_IS_RENDERER(self));
+void fl_compositor_opengl_render(FlCompositorOpenGL* self,
+                                 FlutterViewId view_id,
+                                 int width,
+                                 int height,
+                                 const GdkRGBA* background_color) {
+  g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
 
   glClearColor(background_color->red, background_color->green,
                background_color->blue, background_color->alpha);
@@ -596,8 +614,8 @@ void fl_renderer_render(FlRenderer* self,
   glFlush();
 }
 
-void fl_renderer_cleanup(FlRenderer* self) {
-  g_return_if_fail(FL_IS_RENDERER(self));
+void fl_compositor_opengl_cleanup(FlCompositorOpenGL* self) {
+  g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
 
   if (self->program != 0) {
     glDeleteProgram(self->program);
