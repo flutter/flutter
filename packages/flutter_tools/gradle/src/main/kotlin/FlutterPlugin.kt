@@ -395,7 +395,7 @@ class FlutterPlugin : Plugin<Project> {
                 .getByName("main")
                 .jniLibs
                 .srcDir(nativeAssetsDir)
-            getPluginHandler(project!!).configurePlugins(engineVersion!!)
+            getPluginHandler(projectToAddTasksTo!!).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
                 getPluginHandler(projectToAddTasksTo).getPluginList()
@@ -472,7 +472,7 @@ class FlutterPlugin : Plugin<Project> {
                 }
             }
         }
-        getPluginHandler(project!!).configurePlugins(engineVersion!!)
+        getPluginHandler(projectToAddTasksTo!!).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
             getPluginHandler(projectToAddTasksTo).getPluginList()
