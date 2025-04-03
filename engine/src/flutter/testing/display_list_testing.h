@@ -35,6 +35,12 @@ namespace flutter::testing {
     const sk_sp<const DisplayList>& b) {
   return DisplayListsNE_Verbose(a.get(), b.get());
 }
+class DlVerbosePath {
+ public:
+  explicit DlVerbosePath(const DlPath& path) : path(path) {}
+
+  const DlPath& path;
+};
 
 }  // namespace flutter::testing
 
@@ -76,6 +82,10 @@ extern std::ostream& operator<<(std::ostream& os,
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DisplayListOpCategory& category);
 extern std::ostream& operator<<(std::ostream& os, const flutter::DlPath& path);
+extern std::ostream& operator<<(std::ostream& os,
+                                const flutter::testing::DlVerbosePath& path);
+extern std::ostream& operator<<(std::ostream& os,
+                                const flutter::DlPathFillType& type);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlImageFilter& type);
 extern std::ostream& operator<<(std::ostream& os,
@@ -204,6 +214,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void out(const DlColorFilter* filter);
   void out(const DlImageFilter& filter);
   void out(const DlImageFilter* filter);
+  void out(const DlVerbosePath& path);
 
  private:
   std::ostream& os_;
@@ -219,6 +230,29 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   std::ostream& out_array(std::string name, int count, const T array[]);
 
   std::ostream& startl();
+
+  class DlPathStreamer : public DlPathReceiver {
+   public:
+    ~DlPathStreamer();
+
+    explicit DlPathStreamer(DisplayListStreamDispatcher& dispatcher)
+        : dispatcher_(dispatcher) {}
+
+    void RecommendSizes(size_t verb_count, size_t point_count);
+    void RecommendBounds(const DlRect& bounds);
+    void SetPathInfo(DlPathFillType fill_type, bool is_convex);
+    void MoveTo(const DlPoint& p2);
+    void LineTo(const DlPoint& p2);
+    void QuadTo(const DlPoint& cp, const DlPoint& p2);
+    bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight);
+    void CubicTo(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2);
+    void Close();
+
+   private:
+    DisplayListStreamDispatcher& dispatcher_;
+    bool done_with_info_ = false;
+  };
+  friend class DlPathStreamer;
 };
 
 class DisplayListGeneralReceiver : public DlOpReceiver {

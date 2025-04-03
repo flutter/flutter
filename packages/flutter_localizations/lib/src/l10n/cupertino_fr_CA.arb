@@ -1,4 +1,6 @@
 {
+  "cancelButtonLabel": "Annuler",
+  "backButtonLabel": "Retour",
   "clearButtonLabel": "Effacer",
   "lookUpButtonLabel": "Regarder en haut",
   "searchWebButtonLabel": "Rechercher sur le Web",

@@ -4,9 +4,9 @@
 
 #include "flutter/display_list/geometry/dl_path.h"
 
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/testing/dl_test_mock_path_receiver.h"
 #include "flutter/third_party/skia/include/core/SkRRect.h"
 
 namespace flutter {
@@ -595,31 +595,6 @@ TEST(DisplayListPath, IsLineFromImpellerPath) {
 }
 
 namespace {
-class DlPathReceiverMock : public DlPathReceiver {
- public:
-  MOCK_METHOD(void,
-              RecommendSizes,
-              (size_t verb_count, size_t point_count),
-              (override));
-  MOCK_METHOD(void, RecommendBounds, (const DlRect& bounds), (override));
-  MOCK_METHOD(void,
-              SetPathInfo,
-              (DlPathFillType fill_type, bool is_convex),
-              (override));
-  MOCK_METHOD(void, MoveTo, (const DlPoint& p2), (override));
-  MOCK_METHOD(void, LineTo, (const DlPoint& p2), (override));
-  MOCK_METHOD(void, QuadTo, (const DlPoint& cp, const DlPoint& p2), (override));
-  MOCK_METHOD(bool,
-              ConicTo,
-              (const DlPoint& cp, const DlPoint& p2, DlScalar weight),
-              (override));
-  MOCK_METHOD(void,
-              CubicTo,
-              (const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2),
-              (override));
-  MOCK_METHOD(void, Close, (), (override));
-};
-
 using ::testing::AtMost;
 using ::testing::Return;
 }  // namespace
@@ -923,6 +898,104 @@ TEST(DisplayListPath, DispatchImpellerPathConvexSpecified) {
   }
 
   path.Dispatch(mock_receiver);
+}
+
+TEST(DisplayListPath, DispatchSkiaPathConicToQuads) {
+  // If we execute conicTo with a weight of exactly 1.0, SkPath will turn
+  // it into a quadTo, so we avoid that by using 0.999
+  SkScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f - kEhCloseEnough,
+  };
+
+  for (SkScalar weight : weights) {
+    SkPath sk_path;
+    sk_path.moveTo(10, 10);
+    sk_path.conicTo(20, 10, 20, 20, weight);
+
+    std::array<DlPoint, 5> i_points;
+    impeller::ConicPathComponent i_conic(DlPoint(10, 10), DlPoint(20, 10),
+                                         DlPoint(20, 20), weight);
+    i_conic.SubdivideToQuadraticPoints(i_points);
+
+    ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+    // Recommendations must happen before any of the path segments is dispatched
+    ::testing::ExpectationSet all_recommendations;
+    all_recommendations +=                                  //
+        EXPECT_CALL(mock_receiver, RecommendSizes(2u, 3u))  //
+            .Times(AtMost(1));
+    all_recommendations +=
+        EXPECT_CALL(mock_receiver,
+                    RecommendBounds(DlRect::MakeLTRB(10, 10, 20, 20)))
+            .Times(AtMost(1));
+    EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, true));
+
+    {
+      ::testing::InSequence sequence;
+
+      EXPECT_CALL(mock_receiver, MoveTo(DlPoint(10, 10)))
+          .After(all_recommendations);
+      EXPECT_CALL(mock_receiver,
+                  ConicTo(DlPoint(20, 10), DlPoint(20, 20), weight))
+          .WillOnce(Return(false));
+      EXPECT_CALL(mock_receiver, QuadTo(i_points[1], i_points[2]));
+      EXPECT_CALL(mock_receiver, QuadTo(i_points[3], i_points[4]));
+    }
+
+    DlPath(sk_path).Dispatch(mock_receiver);
+  }
+}
+
+TEST(DisplayListPath, DispatchImpellerPathConicToQuads) {
+  // If we execute conicTo with a weight of exactly 1.0, SkPath will turn
+  // it into a quadTo, so we avoid that by using 0.999
+  DlScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f - kEhCloseEnough,
+  };
+
+  for (DlScalar weight : weights) {
+    DlPathBuilder path_builder;
+    path_builder.MoveTo(DlPoint(10, 10));
+    path_builder.ConicCurveTo(DlPoint(20, 10), DlPoint(20, 20), weight);
+
+    std::array<DlPoint, 5> i_points;
+    impeller::ConicPathComponent i_conic(DlPoint(10, 10), DlPoint(20, 10),
+                                         DlPoint(20, 20), weight);
+    i_conic.SubdivideToQuadraticPoints(i_points);
+
+    ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+    // Recommendations must happen before any of the path segments is dispatched
+    ::testing::ExpectationSet all_recommendations;
+    all_recommendations +=                                  //
+        EXPECT_CALL(mock_receiver, RecommendSizes(2u, 6u))  //
+            .Times(AtMost(1));
+    all_recommendations +=
+        EXPECT_CALL(mock_receiver,
+                    RecommendBounds(DlRect::MakeLTRB(10, 10, 20, 20)))
+            .Times(AtMost(1));
+    EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, false));
+
+    {
+      ::testing::InSequence sequence;
+
+      EXPECT_CALL(mock_receiver, MoveTo(DlPoint(10, 10)))
+          .After(all_recommendations);
+      EXPECT_CALL(mock_receiver,
+                  ConicTo(DlPoint(20, 10), DlPoint(20, 20), weight))
+          .WillOnce(Return(false));
+      EXPECT_CALL(mock_receiver, QuadTo(i_points[1], i_points[2]));
+      EXPECT_CALL(mock_receiver, QuadTo(i_points[3], i_points[4]));
+    }
+
+    DlPath(path_builder).Dispatch(mock_receiver);
+  }
 }
 
 #ifndef NDEBUG
