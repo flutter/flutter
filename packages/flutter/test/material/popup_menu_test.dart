@@ -2903,6 +2903,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('ACTION'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   group('feedback', () {
