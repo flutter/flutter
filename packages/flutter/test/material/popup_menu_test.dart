@@ -4477,6 +4477,135 @@ void main() {
 
     await tester.binding.setSurfaceSize(null);
   });
+
+  testWidgets('PopupMenuDivider custom thickness', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuDivider(thickness: 5.0),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    expect(decoration.border!.bottom.width, 5.0);
+  });
+
+  testWidgets('PopupMenuDivider custom indent', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuDivider(indent: 5.0),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final EdgeInsetsDirectional margin = container.margin! as EdgeInsetsDirectional;
+    expect(margin.start, 5.0);
+  });
+
+  testWidgets('PopupMenuDivider custom color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuDivider(color: Colors.deepOrange),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    expect(decoration.border!.bottom.color, Colors.deepOrange);
+  });
+
+  testWidgets('PopupMenuDivider custom end indent', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    const PopupMenuDivider(endIndent: 5.0),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final EdgeInsetsDirectional margin = container.margin! as EdgeInsetsDirectional;
+    expect(margin.end, 5.0);
+  });
+
+  testWidgets('PopupMenuDivider custom radius', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: PopupMenuButton<String>(
+              onSelected: (String result) {},
+              child: const Text('Menu Button'),
+              itemBuilder:
+                  (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuDivider(radius: BorderRadius.circular(5)),
+                  ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pump();
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration! as BoxDecoration;
+    final BorderRadius borderRadius = decoration.borderRadius! as BorderRadius;
+    expect(borderRadius.bottomLeft, const Radius.circular(5));
+    expect(borderRadius.bottomRight, const Radius.circular(5));
+    expect(borderRadius.topLeft, const Radius.circular(5));
+    expect(borderRadius.topRight, const Radius.circular(5));
+  });
 }
 
 Matcher overlaps(Rect other) => OverlapsMatcher(other);
