@@ -180,6 +180,20 @@ TEST_P(AiksTest, ScaledK) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// This is a test that looks for glyph artifacts we've see.
+TEST_P(AiksTest, MassiveScaleConvertToPath) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+  builder.Scale(25, 25);
+  RenderTextInCanvasSkia(
+      GetContext(), builder, "HELLO", "Roboto-Regular.ttf",
+      TextRenderOptions{.font_size = 16, .position = DlPoint(0, 20)});
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, CanRenderTextFrameWithScalingOverflow) {
   Scalar scale = 60.0;
   Scalar offsetx = -500.0;
