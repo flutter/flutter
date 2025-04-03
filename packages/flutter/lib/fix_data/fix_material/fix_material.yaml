@@ -740,7 +740,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/166382
   - title: "Migrate to 'activeThumbColor'"
-    date: 2022-09-15
+    date: 2025-04-03
     bulkApply: false
     element:
       uris: [ 'material.dart' ]
@@ -753,7 +753,7 @@ transforms:
 
   # Changes made in https://github.com/flutter/flutter/pull/166382
   - title: "Migrate to 'activeThumbColor'"
-    date: 2022-09-15
+    date: 2025-04-03
     bulkApply: false
     element:
       uris: [ 'material.dart' ]
@@ -763,5 +763,4 @@ transforms:
       - kind: 'renameParameter'
         oldName: 'activeColor'
         newName: 'activeThumbColor'
-
 # Before adding a new fix: read instructions at the top of this file.
