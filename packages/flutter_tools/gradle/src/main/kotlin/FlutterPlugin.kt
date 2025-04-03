@@ -38,8 +38,6 @@ class FlutterPlugin : Plugin<Project> {
     private var localProperties: Properties? = null
     private var engineVersion: String? = null
     private var engineRealm: String? = null
-    private var pluginList: List<Map<String?, Any?>>? = null
-    private var pluginDependencies: List<Map<String?, Any?>>? = null
     private var pluginHandler: PluginHandler? = null
 
     override fun apply(project: Project) {
@@ -400,7 +398,7 @@ class FlutterPlugin : Plugin<Project> {
             getPluginHandler(project!!).configurePlugins(engineVersion!!)
             FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
                 projectToAddTasksTo,
-                getPluginList(projectToAddTasksTo)
+                getPluginHandler(projectToAddTasksTo).getPluginList()
             )
             return
         }
@@ -477,18 +475,9 @@ class FlutterPlugin : Plugin<Project> {
         getPluginHandler(project!!).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
-            getPluginList(projectToAddTasksTo)
+            getPluginHandler(projectToAddTasksTo).getPluginList()
         )
     }
-
-    /**
-     * Gets the list of plugins (as map) that support the Android platform.
-     *
-     * The map value contains either the plugins `name` (String),
-     * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
-     */
-    private fun getPluginList(projectToGet: Project): List<Map<String?, Any?>> = getPluginHandler(projectToGet).getPluginList()
 
     private fun getPluginHandler(project: Project): PluginHandler {
         if (this.pluginHandler == null) {

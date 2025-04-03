@@ -166,6 +166,7 @@ class PluginHandler(
      * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
      */
     internal fun getPluginListWithoutDevDependencies(): List<Map<String?, Any?>> =
+        // done
         getPluginList().filter { pluginObject -> pluginObject["dev_dependency"] == false }
 
     companion object {
@@ -177,7 +178,7 @@ class PluginHandler(
          *
          * Should only be called on plugins that support the Android platform.
          */
-        internal fun configurePluginProject(
+        internal fun configurePluginProject( // done
             project: Project,
             pluginObject: Map<String?, Any?>,
             engineVersion: String
@@ -224,7 +225,7 @@ class PluginHandler(
             }
         }
 
-        private fun addEmbeddingDependencyToPlugin(
+        private fun addEmbeddingDependencyToPlugin( // done
             project: Project,
             pluginProject: Project,
             buildType: BuildType,
@@ -259,7 +260,7 @@ class PluginHandler(
          * Returns `true` if the given project is a plugin project having an `android` directory
          * containing a `build.gradle` or `build.gradle.kts` file.
          */
-        internal fun pluginSupportsAndroidPlatform(project: Project): Boolean {
+        internal fun pluginSupportsAndroidPlatform(project: Project): Boolean { // done
             val buildGradle = File(File(project.projectDir.parentFile, "android"), "build.gradle")
             val buildGradleKts =
                 File(File(project.projectDir.parentFile, "android"), "build.gradle.kts")
@@ -271,7 +272,7 @@ class PluginHandler(
          * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
          * making the Gradle plugin project A depend on the Gradle plugin project B.
          */
-        internal fun configurePluginDependencies(
+        internal fun configurePluginDependencies( // done
             project: Project,
             pluginObject: Map<String?, Any?>
         ) {
