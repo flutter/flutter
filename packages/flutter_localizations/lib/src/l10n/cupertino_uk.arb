@@ -38,6 +38,6 @@
   "searchWebButtonLabel": "Пошук в Інтернеті",
   "shareButtonLabel": "Поділитися…",
   "clearButtonLabel": "Очистити",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Скасувати",
+  "backButtonLabel": "Назад"
 }

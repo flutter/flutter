@@ -1,4 +1,6 @@
 {
+  "cancelButtonLabel": "Cancelar",
+  "backButtonLabel": "Atrás",
   "clearButtonLabel": "Borrar",
   "searchWebButtonLabel": "Buscar en la Web",
   "shareButtonLabel": "Compartir…",

@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "搜索",
   "shareButtonLabel": "共享…",
   "clearButtonLabel": "清除",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "取消",
+  "backButtonLabel": "返回"
 }

@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Hae verkosta",
   "shareButtonLabel": "Jaa…",
   "clearButtonLabel": "Tyhjennä",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Peru",
+  "backButtonLabel": "Takaisin"
 }
