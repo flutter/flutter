@@ -189,7 +189,7 @@ void main(List<String> args) async {
   await build(args, (input, output) async {
     final packageName = input.packageName;
 
-    if (!input.config.buildAssetTypes.contains(CodeAsset.type)) {
+    if (!input.config.buildCodeAssets) {
       return;
     }
     final builders = [
