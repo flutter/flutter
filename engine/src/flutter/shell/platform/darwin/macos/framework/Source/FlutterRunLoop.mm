@@ -109,7 +109,7 @@ static void PerformTimer(CFRunLoopTimerRef timer, void* info) {
 }
 
 + (void)ensureMainLoopInitialized {
-  FML_DCHECK([NSRunLoop currentRunLoop] == [NSRunLoop mainRunLoop]);
+  FML_DCHECK(NSRunLoop.currentRunLoop == NSRunLoop.mainRunLoop);
   if (mainLoop == nil) {
     mainLoop = [[FlutterRunLoop alloc] init];
   }
