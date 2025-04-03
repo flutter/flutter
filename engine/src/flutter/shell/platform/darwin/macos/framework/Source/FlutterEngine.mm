@@ -801,7 +801,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                         // We are already on UI thread right now, but have to do the
                         // extra hop to main thread.
                         [engine->_threadSynchronizer performOnPlatformThread:^{
-                          engine->_embedderAPI.OnVsync(_engine, baton, timeNanos, targetTimeNanos);
+                          engine->_embedderAPI.OnVsync(engine->_engine, baton, timeNanos, targetTimeNanos);
                         }];
                       }
                     }];
