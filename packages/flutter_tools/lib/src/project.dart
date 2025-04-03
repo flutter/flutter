@@ -134,7 +134,11 @@ class FlutterProject {
   /// List of [FlutterProject]s corresponding to the workspace entries.
   List<FlutterProject> get workspaceProjects =>
       manifest.workspace
-          .map((String entry) => FlutterProject.fromDirectory(directory.childDirectory(entry)))
+          .map(
+            (String entry) => FlutterProject.fromDirectory(
+              directory.childDirectory(directory.fileSystem.path.normalize(entry)),
+            ),
+          )
           .toList();
 
   /// The set of organization names found in this project as
