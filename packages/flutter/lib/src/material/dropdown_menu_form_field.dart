@@ -141,7 +141,7 @@ class _DropdownMenuFormFieldState<T> extends FormFieldState<T> {
   @override
   void didUpdateWidget(DropdownMenuFormField<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.initialValue != widget.initialValue) {
+    if (oldWidget.initialValue != widget.initialValue && !hasInteractedByUser) {
       setValue(widget.initialValue);
     }
   }
