@@ -1001,4 +1001,103 @@ void main() {
     final DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
     expect(dropdownMenu.errorText, validationError);
   });
+
+  testWidgets('Initial selection is applied', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            key: fieldKey,
+            dropdownMenuEntries: menuEntries,
+            initialSelection: MenuItem.menuItem0,
+          ),
+        ),
+      ),
+    );
+
+    expect(fieldKey.currentState!.value, MenuItem.menuItem0);
+  });
+
+  testWidgets(
+    'Initial selection is applied when updated and the field has not been updated in-between',
+    (WidgetTester tester) async {
+      final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenuFormField<MenuItem>(
+              key: fieldKey,
+              dropdownMenuEntries: menuEntries,
+              initialSelection: MenuItem.menuItem0,
+            ),
+          ),
+        ),
+      );
+
+      expect(fieldKey.currentState!.value, MenuItem.menuItem0);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenuFormField<MenuItem>(
+              key: fieldKey,
+              dropdownMenuEntries: menuEntries,
+              initialSelection: MenuItem.menuItem1,
+            ),
+          ),
+        ),
+      );
+
+      expect(fieldKey.currentState!.value, MenuItem.menuItem1);
+    },
+  );
+
+  testWidgets(
+    'Initial selection is not applied when updated and the field has been updated in-between',
+    (WidgetTester tester) async {
+      final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenuFormField<MenuItem>(
+              key: fieldKey,
+              dropdownMenuEntries: menuEntries,
+              initialSelection: MenuItem.menuItem0,
+            ),
+          ),
+        ),
+      );
+
+      expect(fieldKey.currentState!.value, MenuItem.menuItem0);
+
+      // Select a different item than the initial one.
+      await tester.tap(find.byType(DropdownMenu<MenuItem>));
+      await tester.pump();
+
+      await tester.tap(findMenuItem(MenuItem.menuItem2));
+      await tester.pump();
+
+      expect(fieldKey.currentState!.value, MenuItem.menuItem2);
+
+      // Update initial selection.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: DropdownMenuFormField<MenuItem>(
+              key: fieldKey,
+              dropdownMenuEntries: menuEntries,
+              initialSelection: MenuItem.menuItem1,
+            ),
+          ),
+        ),
+      );
+
+      // The value selected by the user is preserved.
+      expect(fieldKey.currentState!.value, MenuItem.menuItem2);
+    },
+  );
 }
