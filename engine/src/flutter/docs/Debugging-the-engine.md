@@ -57,6 +57,14 @@ Due to the number of events traced to the timeline, the trace buffer may be fill
 
 Also, make sure to run your application with the `--trace-skia` flag.
 
+## Googlers using RBE
+
+You need to tell your IDE where your Flutter Engine sources are located. You can do this using an LLDB Init file. Place one in your home directory named `~/.lldbinit`. The contents of the file should be (fixup the path as necessary):
+
+```
+settings set target.source-map "flutter/" "/path/to/engine/src/flutter/"
+```
+
 ## Debugging iOS builds with Xcode
 
 Building with `flutter --local-engine` will set a `LOCAL_ENGINE` Xcode build setting in your Flutter application's `ios/Flutter/Generated.xcconfig` file. This will be set until you run `flutter run` again with either a different `--local-engine` option, or with none at all (which will unset it).
@@ -67,6 +75,8 @@ You can speed up your workflow by adding the `--config-only` flag to set up the 
 flutter build ios --local-engine ios_debug_unopt --local-engine-host host_debug_unopt --config-only
 ```
 
+If you are a Googler using RBE, [update `~/.lldbinit`](#googlers-using-rbe) to tell Xcode where the engine sources are located.
+
 To start debugging, open your Flutter app `ios/Runner.xcworkspace` file in Xcode. Ensure **Product > Scheme > Edit Scheme > Run > Build Configuration** matches your engine runtime mode (defaults to `Debug`).
 
 <img src="https://user-images.githubusercontent.com/682784/76341195-ee050680-62b9-11ea-956d-c27d65e5eec9.png" alt="Product > Scheme > Edit Scheme > Run > Build Configuration" width="900"/>
@@ -75,25 +85,28 @@ Add an engine symbol breakpoint via **Debug > Breakpoints > Create Symbolic Brea
 
 You can also set a breakpoint directly with [lldb](https://lldb.llvm.org/tutorial.html) by expanding **Flutter > Runner** in the Runner Project Navigator. Put a breakpoint in `AppDelegate.swift`'s `application(didFinishLaunchingWithOptions:)` (Swift project) or `main.m`'s `main()` (Objective-C project) and start the application by clicking the Run button (CMD + R). Then, set your desired breakpoint in the engine in `lldb` via `breakpoint set -...`.
 
-### Googlers using RBE
-
-You need to tell Xcode where your Flutter Engine sources are located. You can do this using an LLDB Init file. Place one in your home directory named `~/.lldbinit`. The contents of the file should be (fixup the path as necessary):
-
-```
-settings set target.source-map "flutter/" "/path/to/engine/src/flutter/"
-```
-
 ## Debugging Android builds with gdb
 
-See https://github.com/flutter/engine/blob/main/sky/tools/flutter_gdb#L13
+See https://github.com/flutter/flutter/blob/master/engine/src/flutter/sky/tools/flutter_gdb
 
 ## Debugging native engine code on Android with Android Studio
 
-1. Build the local engine with the `--no-stripped` flag.
-2. Decide on a Flutter app that you with to debug and run it with `flutter run` and the local engine flags. i.e.: `--debug --local-engine-src-path path/to/my/engine/src --local-engine=android_debug_unopt_arm64`
+1. Build an unoptimized local engine. i.e. `et build -c host_debug_unopt_arm64 && et build -c android_debug_unopt_arm64`.
+2. Decide on a Flutter app that you with to debug and run it with `flutter build apk` and the local engine flags. i.e.: `--debug --local-engine-src-path path/to/my/engine/src --local-engine=android_debug_unopt_arm64`.
 3. Open Android Studio and use `File > Profile or Debug APK`. The location of the debug build APK should be `build/app/outputs/apk/debug/app-debug.apk` under the Flutter app project.
-4. To attach the debugger, use `Run > Attach Debugger to Android Process`. For "Use Android Debugger Settings from" choose `[Use default settings]`, and for "Debug Type" choose `Native Only`.
-5. Once attached, you can use Android Studio to open local engine C++ source files and set breakpoints.
+
+<img src="https://github.com/user-attachments/assets/a58ed74b-1a9e-45ce-ae64-350b2119710e" width="600" />
+
+4. You may see the warning "One or more debug symbols point to paths not found on this machine". Add "Debuggable Library" path `out/android_debug_unopt_arm64/lib/libflutter.so`.
+
+<img src="https://github.com/user-attachments/assets/44845f2b-c317-489b-9eb8-e24bbd0ce78a" width="600" />
+
+5. If you are a Googler using RBE, [update `~/.lldbinit`](#googlers-using-rbe) to tell Android Studio where the engine sources are located.
+
+6. To attach the debugger, use `Run > Attach Debugger to Android Process`.  For "Use Android Debugger Settings from" choose `[Use default settings]`, and for "Debug Type" choose `Native Only`.
+<img src="https://github.com/user-attachments/assets/a79dc331-6540-4c03-b880-58d1552a7f75" width="600" />
+
+7. Once attached, you can use Android Studio to open local engine C++ source files and set breakpoints. You can set Symbolic Breakpoints, i.e. Symbol name `impeller::ContextVK::ContectVK`.
 
 ## Debugging Windows builds with Visual Studio
 
