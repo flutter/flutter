@@ -122,7 +122,9 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle;
 
     final Widget customPaint = CustomPaint(
-      painter: _CupertinoTextSelectionHandlePainter(CupertinoTheme.of(context).primaryColor),
+      painter: _CupertinoTextSelectionHandlePainter(
+        CupertinoTheme.of(context).selectionHandleColor,
+      ),
     );
 
     // [buildHandle]'s widget is positioned at the selection cursor's bottom
