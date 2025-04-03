@@ -4208,7 +4208,6 @@ void main() {
       );
     }
 
-
     await tester.pumpWidget(buildSwitch(activeColor: activeThumbColor));
     expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
 

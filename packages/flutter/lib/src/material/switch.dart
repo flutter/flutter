@@ -322,7 +322,7 @@ class Switch extends StatelessWidget {
   /// {@end-tool}
   /// {@endtemplate}
   ///
-  /// If null, then the value of [activeColor] is used in the selected
+  /// If null, then the value of [activeThumbColor] is used in the selected
   /// state and [inactiveThumbColor] in the default state. If that is also null,
   /// then the value of [SwitchThemeData.thumbColor] is used. If that is also
   /// null, then the following colors are used:
@@ -371,7 +371,7 @@ class Switch extends StatelessWidget {
   /// | State    | Light theme                     | Dark theme                      |
   /// |----------|---------------------------------|---------------------------------|
   /// | Default  | `Color(0x52000000)`             | `Colors.white30`                |
-  /// | Selected | [activeColor] with alpha `0x80` | [activeColor] with alpha `0x80` |
+  /// | Selected | [activeThumbColor] with alpha `0x80` | [activeThumbColor] with alpha `0x80` |
   /// | Disabled | `Colors.black12`                | `Colors.white10`                |
   final MaterialStateProperty<Color?>? trackColor;
 
@@ -542,7 +542,7 @@ class Switch extends StatelessWidget {
   ///  * [WidgetState.focused].
   /// {@endtemplate}
   ///
-  /// If null, then the value of [activeColor] with alpha
+  /// If null, then the value of [activeThumbColor] with alpha
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [SwitchThemeData.overlayColor] is used. If that is
