@@ -159,10 +159,10 @@ source_set("flutter_linux_sources") {
     "fl_view.cc",
     "fl_view_accessible.cc",
     "fl_window_state_monitor.cc",
-    "fl_windowing_channel.cc",
-    "fl_windowing_handler.cc",
     "fl_windowing.cc",
     "fl_windowing.h",
+    "fl_windowing_channel.cc",
+    "fl_windowing_handler.cc",
     "key_mapping.g.cc",
   ]
 
