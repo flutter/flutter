@@ -596,6 +596,31 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   }
 }
 
+- (FlutterTaskRunnerDescription)createPlatformThreadTaskDescription {
+  static size_t sTaskRunnerIdentifiers = 0;
+  FlutterTaskRunnerDescription cocoa_task_runner_description = {
+      .struct_size = sizeof(FlutterTaskRunnerDescription),
+      // Retain for use in post_task_callback. Released in destruction_callback.
+      .user_data = (__bridge_retained void*)self,
+      .runs_task_on_current_thread_callback = [](void* user_data) -> bool {
+        return [[NSThread currentThread] isMainThread];
+      },
+      .post_task_callback = [](FlutterTask task, uint64_t target_time_nanos,
+                               void* user_data) -> void {
+        FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
+        [engine postMainThreadTask:task targetTimeInNanoseconds:target_time_nanos];
+      },
+      .identifier = ++sTaskRunnerIdentifiers,
+      .destruction_callback =
+          [](void* user_data) {
+            // Balancing release for the retain when setting user_data above.
+            FlutterEngine* engine = (__bridge_transfer FlutterEngine*)user_data;
+            engine = nil;
+          },
+  };
+  return cocoa_task_runner_description;
+}
+
 - (BOOL)runWithEntrypoint:(NSString*)entrypoint {
   if (self.running) {
     return NO;
@@ -656,28 +681,6 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
   flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
 
-  static size_t sTaskRunnerIdentifiers = 0;
-  const FlutterTaskRunnerDescription cocoa_task_runner_description = {
-      .struct_size = sizeof(FlutterTaskRunnerDescription),
-      // Retain for use in post_task_callback. Released in destruction_callback.
-      .user_data = (__bridge_retained void*)self,
-      .runs_task_on_current_thread_callback = [](void* user_data) -> bool {
-        return [[NSThread currentThread] isMainThread];
-      },
-      .post_task_callback = [](FlutterTask task, uint64_t target_time_nanos,
-                               void* user_data) -> void {
-        FlutterEngine* engine = (__bridge FlutterEngine*)user_data;
-        [engine postMainThreadTask:task targetTimeInNanoseconds:target_time_nanos];
-      },
-      .identifier = ++sTaskRunnerIdentifiers,
-      .destruction_callback =
-          [](void* user_data) {
-            // Balancing release for the retain when setting user_data above.
-            FlutterEngine* engine = (__bridge_transfer FlutterEngine*)user_data;
-            engine = nil;
-          },
-  };
-
   BOOL mergedPlatformUIThread = NO;
   NSNumber* enableMergedPlatformUIThread =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
@@ -689,11 +692,21 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
     NSLog(@"Running with merged UI and platform thread. Experimental.");
   }
 
+  // The task description needs to be created separately for platform task
+  // runner and UI task runner because each one has their own __bridge_retained
+  // engine user data.
+  FlutterTaskRunnerDescription platformTaskRunnerDescription =
+      [self createPlatformThreadTaskDescription];
+  std::optional<FlutterTaskRunnerDescription> uiTaskRunnerDescription;
+  if (mergedPlatformUIThread) {
+    uiTaskRunnerDescription = [self createPlatformThreadTaskDescription];
+  }
+
   const FlutterCustomTaskRunners custom_task_runners = {
       .struct_size = sizeof(FlutterCustomTaskRunners),
-      .platform_task_runner = &cocoa_task_runner_description,
+      .platform_task_runner = &platformTaskRunnerDescription,
       .thread_priority_setter = SetThreadPriority,
-      .ui_task_runner = mergedPlatformUIThread ? &cocoa_task_runner_description : nullptr,
+      .ui_task_runner = uiTaskRunnerDescription ? &uiTaskRunnerDescription.value() : nullptr,
   };
   flutterArguments.custom_task_runners = &custom_task_runners;
 
