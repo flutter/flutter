@@ -55,9 +55,15 @@ template("skwasm_variant") {
 
     inputs = [ rebase_path("library_skwasm_support.js") ]
     if (invoker.is_heavy) {
-      sources += [ "text/paragraph_builder_builtin_icu.cpp"]
+      sources += [
+        "animated_image.cpp",
+        "text/paragraph_builder_builtin_icu.cpp",
+      ]
     } else {
-      sources += [ "text/paragraph_builder_client_icu.cpp" ]
+      sources += [
+        "animated_image_stub.cpp",
+        "text/paragraph_builder_client_icu.cpp"
+      ]
     }
 
     if (is_debug) {
