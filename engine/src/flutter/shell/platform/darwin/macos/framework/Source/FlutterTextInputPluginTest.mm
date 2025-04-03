@@ -2019,8 +2019,9 @@ static const FlutterViewIdentifier kViewId = 1;
   id binaryMessengerMock = OCMProtocolMock(@protocol(FlutterBinaryMessenger));
   OCMStub([engineMock binaryMessenger]).andReturn(binaryMessengerMock);
 
-  FlutterViewController* viewController =
-      [[FlutterViewController alloc] initWithEngine:engineMock nibName:@"" bundle:nil];
+  FlutterViewController* viewController = [[FlutterViewController alloc] initWithEngine:engineMock
+                                                                                nibName:@""
+                                                                                 bundle:nil];
   FlutterTextInputPluginTestDelegate* delegate =
       [[FlutterTextInputPluginTestDelegate alloc] initWithBinaryMessenger:binaryMessengerMock
                                                            viewController:viewController];
@@ -2033,7 +2034,8 @@ static const FlutterViewIdentifier kViewId = 1;
   };
   [plugin handleMethodCall:[FlutterMethodCall methodCallWithMethodName:@"TextInput.setClient"
                                                              arguments:@[ @(1), setClientConfig ]]
-                    result:^(id result) {}];
+                    result:^(id result){
+                    }];
 
   FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"TextInput.setEditingState"
                                                               arguments:@{
@@ -2043,7 +2045,9 @@ static const FlutterViewIdentifier kViewId = 1;
                                                                 @"composingBase" : @(0),
                                                                 @"composingExtent" : @(9),
                                                               }];
-  [plugin handleMethodCall:call result:^(id result) {}];
+  [plugin handleMethodCall:call
+                    result:^(id result){
+                    }];
 
   [plugin insertText:@"今日は家に帰ります" replacementRange:NSMakeRange(NSNotFound, 0)];
 
@@ -2436,7 +2440,8 @@ TEST(FlutterTextInputPluginTest, HasZeroSizeAndClipsToBounds) {
 }
 
 TEST(FlutterTextInputPluginTest, InsertTextWithCollapsedSelectionInsideComposing) {
-  ASSERT_TRUE([[FlutterInputPluginTestObjc alloc] testInsertTextWithCollapsedSelectionInsideComposing]);
+  ASSERT_TRUE(
+      [[FlutterInputPluginTestObjc alloc] testInsertTextWithCollapsedSelectionInsideComposing]);
 }
 
 }  // namespace flutter::testing
