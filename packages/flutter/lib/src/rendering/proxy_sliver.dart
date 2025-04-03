@@ -473,9 +473,3 @@ class RenderSliverConstrainedCrossAxis extends RenderProxySliver {
     );
   }
 }
-
-/// Ensures its sliver child is included in the semantics tree.
-class RenderSliverEnsureSemantics extends RenderProxySliver {
-  @override
-  bool get ensureSemantics => true;
-}
