@@ -3845,6 +3845,295 @@ class SliverPadding extends SingleChildRenderObjectWidget {
   }
 }
 
+class SliverSemantics extends SingleChildRenderObjectWidget {
+  SliverSemantics({
+    Key? key,
+    Widget? sliver,
+    bool container = false,
+    bool explicitChildNodes = false,
+    bool excludeSemantics = false,
+    bool blockUserActions = false,
+    bool? enabled,
+    bool? checked,
+    bool? mixed,
+    bool? selected,
+    bool? toggled,
+    bool? button,
+    bool? slider,
+    bool? keyboardKey,
+    bool? link,
+    Uri? linkUrl,
+    bool? header,
+    int? headingLevel,
+    bool? textField,
+    bool? readOnly,
+    bool? focusable,
+    bool? focused,
+    bool? inMutuallyExclusiveGroup,
+    bool? obscured,
+    bool? multiline,
+    bool? scopesRoute,
+    bool? namesRoute,
+    bool? hidden,
+    bool? image,
+    bool? liveRegion,
+    bool? expanded,
+    bool? isRequired,
+    int? maxValueLength,
+    int? currentValueLength,
+    String? identifier,
+    String? label,
+    AttributedString? attributedLabel,
+    String? value,
+    AttributedString? attributedValue,
+    String? increasedValue,
+    AttributedString? attributedIncreasedValue,
+    String? decreasedValue,
+    AttributedString? attributedDecreasedValue,
+    String? hint,
+    AttributedString? attributedHint,
+    String? tooltip,
+    String? onTapHint,
+    String? onLongPressHint,
+    TextDirection? textDirection,
+    SemanticsSortKey? sortKey,
+    SemanticsTag? tagForChildren,
+    VoidCallback? onTap,
+    VoidCallback? onLongPress,
+    VoidCallback? onScrollLeft,
+    VoidCallback? onScrollRight,
+    VoidCallback? onScrollUp,
+    VoidCallback? onScrollDown,
+    VoidCallback? onIncrease,
+    VoidCallback? onDecrease,
+    VoidCallback? onCopy,
+    VoidCallback? onCut,
+    VoidCallback? onPaste,
+    VoidCallback? onDismiss,
+    MoveCursorHandler? onMoveCursorForwardByCharacter,
+    MoveCursorHandler? onMoveCursorBackwardByCharacter,
+    SetSelectionHandler? onSetSelection,
+    SetTextHandler? onSetText,
+    VoidCallback? onDidGainAccessibilityFocus,
+    VoidCallback? onDidLoseAccessibilityFocus,
+    VoidCallback? onFocus,
+    Map<CustomSemanticsAction, VoidCallback>? customSemanticsActions,
+    SemanticsRole? role,
+    Set<String>? controlsNodes,
+    SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  }) : this.fromProperties(
+         key: key,
+         child: sliver,
+         container: container,
+         explicitChildNodes: explicitChildNodes,
+         excludeSemantics: excludeSemantics,
+         blockUserActions: blockUserActions,
+         properties: SemanticsProperties(
+           enabled: enabled,
+           checked: checked,
+           mixed: mixed,
+           expanded: expanded,
+           toggled: toggled,
+           selected: selected,
+           button: button,
+           slider: slider,
+           keyboardKey: keyboardKey,
+           link: link,
+           linkUrl: linkUrl,
+           header: header,
+           headingLevel: headingLevel,
+           textField: textField,
+           readOnly: readOnly,
+           focusable: focusable,
+           focused: focused,
+           inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
+           obscured: obscured,
+           multiline: multiline,
+           scopesRoute: scopesRoute,
+           namesRoute: namesRoute,
+           hidden: hidden,
+           image: image,
+           liveRegion: liveRegion,
+           isRequired: isRequired,
+           maxValueLength: maxValueLength,
+           currentValueLength: currentValueLength,
+           identifier: identifier,
+           label: label,
+           attributedLabel: attributedLabel,
+           value: value,
+           attributedValue: attributedValue,
+           increasedValue: increasedValue,
+           attributedIncreasedValue: attributedIncreasedValue,
+           decreasedValue: decreasedValue,
+           attributedDecreasedValue: attributedDecreasedValue,
+           hint: hint,
+           attributedHint: attributedHint,
+           tooltip: tooltip,
+           textDirection: textDirection,
+           sortKey: sortKey,
+           tagForChildren: tagForChildren,
+           onTap: onTap,
+           onLongPress: onLongPress,
+           onScrollLeft: onScrollLeft,
+           onScrollRight: onScrollRight,
+           onScrollUp: onScrollUp,
+           onScrollDown: onScrollDown,
+           onIncrease: onIncrease,
+           onDecrease: onDecrease,
+           onCopy: onCopy,
+           onCut: onCut,
+           onPaste: onPaste,
+           onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
+           onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
+           onDidGainAccessibilityFocus: onDidGainAccessibilityFocus,
+           onDidLoseAccessibilityFocus: onDidLoseAccessibilityFocus,
+           onFocus: onFocus,
+           onDismiss: onDismiss,
+           onSetSelection: onSetSelection,
+           onSetText: onSetText,
+           customSemanticsActions: customSemanticsActions,
+           hintOverrides:
+               onTapHint != null || onLongPressHint != null
+                   ? SemanticsHintOverrides(
+                     onTapHint: onTapHint,
+                     onLongPressHint: onLongPressHint,
+                   )
+                   : null,
+           role: role,
+           controlsNodes: controlsNodes,
+           validationResult: validationResult,
+         ),
+       );
+
+  /// Creates a semantic annotation using [SemanticsProperties].
+  const SliverSemantics.fromProperties({
+    super.key,
+    super.child,
+    this.container = false,
+    this.explicitChildNodes = false,
+    this.excludeSemantics = false,
+    this.blockUserActions = false,
+    required this.properties,
+  });
+
+  /// Contains properties used by assistive technologies to make the application
+  /// more accessible.
+  final SemanticsProperties properties;
+
+  /// If [container] is true, this widget will introduce a new
+  /// node in the semantics tree. Otherwise, the semantics will be
+  /// merged with the semantics of any ancestors (if the ancestor allows that).
+  ///
+  /// Whether descendants of this widget can add their semantic information to the
+  /// [SemanticsNode] introduced by this configuration is controlled by
+  /// [explicitChildNodes].
+  final bool container;
+
+  /// Whether descendants of this widget are allowed to add semantic information
+  /// to the [SemanticsNode] annotated by this widget.
+  ///
+  /// When set to false descendants are allowed to annotate [SemanticsNode]s of
+  /// their parent with the semantic information they want to contribute to the
+  /// semantic tree.
+  /// When set to true the only way for descendants to contribute semantic
+  /// information to the semantic tree is to introduce new explicit
+  /// [SemanticsNode]s to the tree.
+  ///
+  /// If the semantics properties of this node include
+  /// [SemanticsProperties.scopesRoute] set to true, then [explicitChildNodes]
+  /// must be true also.
+  ///
+  /// This setting is often used in combination with [SemanticsConfiguration.isSemanticBoundary]
+  /// to create semantic boundaries that are either writable or not for children.
+  final bool explicitChildNodes;
+
+  /// Whether to replace all child semantics with this node.
+  ///
+  /// Defaults to false.
+  ///
+  /// When this flag is set to true, all child semantics nodes are ignored.
+  /// This can be used as a convenience for cases where a child is wrapped in
+  /// an [ExcludeSemantics] widget and then another [Semantics] widget.
+  final bool excludeSemantics;
+
+  /// Whether to block user interactions for the rendering subtree.
+  ///
+  /// Setting this to true will prevent users from interacting with The
+  /// rendering object configured by this widget and its subtree through
+  /// pointer-related [SemanticsAction]s in assistive technologies.
+  ///
+  /// The [SemanticsNode] created from this widget is still focusable by
+  /// assistive technologies. Only pointer-related [SemanticsAction]s, such as
+  /// [SemanticsAction.tap] or its friends, are blocked.
+  ///
+  /// If this widget is merged into a parent semantics node, only the
+  /// [SemanticsAction]s of this widget and the widgets in the subtree are
+  /// blocked.
+  ///
+  /// For example:
+  /// ```dart
+  /// void _myTap() { }
+  /// void _myLongPress() { }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Semantics(
+  ///     onTap: _myTap,
+  ///     child: Semantics(
+  ///       blockUserActions: true,
+  ///       onLongPress: _myLongPress,
+  ///       child: const Text('label'),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// The result semantics node will still have `_myTap`, but the `_myLongPress`
+  /// will be blocked.
+  final bool blockUserActions;
+
+  TextDirection? _getTextDirection(BuildContext context) {
+    if (properties.textDirection != null) {
+      return properties.textDirection;
+    }
+
+    final bool containsText =
+        properties.attributedLabel != null ||
+        properties.label != null ||
+        properties.value != null ||
+        properties.hint != null ||
+        properties.tooltip != null;
+
+    if (!containsText) {
+      return null;
+    }
+
+    return Directionality.maybeOf(context);
+  }
+
+  @override
+  RenderSliverSemanticsAnnotations createRenderObject(BuildContext context) {
+    return RenderSliverSemanticsAnnotations(
+      container: container,
+      explicitChildNodes: explicitChildNodes,
+      excludeSemantics: excludeSemantics,
+      blockUserActions: blockUserActions,
+      properties: properties,
+      textDirection: _getTextDirection(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverSemanticsAnnotations renderObject) {
+    renderObject
+      ..container = container
+      ..explicitChildNodes = explicitChildNodes
+      ..excludeSemantics = excludeSemantics
+      ..blockUserActions = blockUserActions
+      ..properties = properties
+      ..textDirection = _getTextDirection(context);
+  }
+}
+
 // LAYOUT NODES
 
 /// Returns the [AxisDirection] in the given [Axis] in the current
