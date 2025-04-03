@@ -36,6 +36,8 @@ TEST(FlutterThreadSynchronizerTest, WaitForResize) {
   __block BOOL commit1 = NO;
   __block BOOL commit2 = NO;
 
+  // Capturing c++ objects in blocks requires copy constructor, that also applies
+  // to __block variables where the copy is made on heap.
   fml::AutoResetWaitableEvent latch_;
   fml::AutoResetWaitableEvent& latch = latch_;
 

@@ -9,8 +9,8 @@
 
 @implementation FlutterResizeSynchronizer {
   std::atomic_bool _inResize;
-  bool _shuttingDown;
-  bool _didReceiveFrame;
+  BOOL _shuttingDown;
+  BOOL _didReceiveFrame;
   CGSize _contentSize;
 }
 

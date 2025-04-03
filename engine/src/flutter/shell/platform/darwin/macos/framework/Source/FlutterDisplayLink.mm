@@ -65,7 +65,7 @@ void RunOrStopDisplayLink(CVDisplayLinkRef display_link, bool should_be_running)
 }
 
 void DisplayLinkManager::UnregisterDisplayLink(_FlutterDisplayLink* display_link) {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   for (auto entry = entries_.begin(); entry != entries_.end(); ++entry) {
     auto it = std::find(entry->clients.begin(), entry->clients.end(), display_link);
     if (it != entry->clients.end()) {
@@ -87,7 +87,7 @@ void DisplayLinkManager::UnregisterDisplayLink(_FlutterDisplayLink* display_link
 
 void DisplayLinkManager::RegisterDisplayLink(_FlutterDisplayLink* display_link,
                                              CGDirectDisplayID display_id) {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   for (ScreenEntry& entry : entries_) {
     if (entry.display_id == display_id) {
       entry.clients.push_back(display_link);
@@ -184,7 +184,7 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 @synthesize delegate = _delegate;
 
 - (instancetype)initWithView:(NSView*)view {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   if (self = [super init]) {
     self->_view = [[_FlutterDisplayLinkView alloc] initWithFrame:CGRectZero];
     [view addSubview:self->_view];
@@ -203,7 +203,7 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 }
 
 - (void)invalidate {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   // Unregister observer before removing the view to ensure
   // that the viewDidChangeWindow notification is not received
   // while in @synchronized block.
@@ -215,7 +215,7 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 }
 
 - (void)updateScreen {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   DisplayLinkManager::Instance().UnregisterDisplayLink(self);
   std::optional<CGDirectDisplayID> displayId;
   NSScreen* screen = _view.window.screen;
@@ -234,7 +234,7 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 }
 
 - (void)viewDidChangeWindow:(NSNotification*)notification {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   NSView* view = notification.object;
   if (_view == view) {
     [self updateScreen];
@@ -242,7 +242,7 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 }
 
 - (void)windowDidChangeScreen:(NSNotification*)notification {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   NSWindow* window = notification.object;
   if (_view.window == window) {
     [self updateScreen];
@@ -251,7 +251,7 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 
 - (void)didFireWithTimestamp:(CFTimeInterval)timestamp
              targetTimestamp:(CFTimeInterval)targetTimestamp {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   if (!_paused) {
     id<FlutterDisplayLinkDelegate> delegate = _delegate;
     [delegate onDisplayLink:timestamp targetTimestamp:targetTimestamp];
@@ -259,12 +259,12 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 }
 
 - (BOOL)paused {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   return _paused;
 }
 
 - (void)setPaused:(BOOL)paused {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   if (_paused == paused) {
     return;
   }
@@ -273,7 +273,7 @@ static NSString* const kFlutterDisplayLinkViewDidMoveToWindow =
 }
 
 - (CFTimeInterval)nominalOutputRefreshPeriod {
-  FML_DCHECK([NSThread isMainThread]);
+  FML_DCHECK(NSThread.isMainThread);
   CGDirectDisplayID display_id;
   if (_display_id.has_value()) {
     display_id = *_display_id;

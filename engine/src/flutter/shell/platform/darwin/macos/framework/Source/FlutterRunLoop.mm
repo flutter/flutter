@@ -1,30 +1,27 @@
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
-#include "fml/logging.h"
-
 #include <vector>
+#include "fml/logging.h"
 
 namespace {
 struct Task {
   void (^block)(void);
   CFAbsoluteTime target_time;
+
+  Task(void (^block)(void), CFAbsoluteTime target_time) : block(block), target_time(target_time) {}
 };
 
-CFStringRef kFlutterRunLoopMode = CFSTR("FlutterRunLoopMode");
+const CFStringRef kFlutterRunLoopMode = CFSTR("FlutterRunLoopMode");
 
 FlutterRunLoop* mainLoop;
 
 }  // namespace
 
-@implementation FlutterRunLoop (Private)
-
-CFRunLoopRef _runLoop;
-CFRunLoopSourceRef _source;
-CFRunLoopTimerRef _timer;
-std::vector<Task> _tasks;
-
-@end
-
-@implementation FlutterRunLoop
+@implementation FlutterRunLoop {
+  CFRunLoopRef _runLoop;
+  CFRunLoopSourceRef _source;
+  CFRunLoopTimerRef _timer;
+  std::vector<Task> _tasks;
+}
 
 static void Perform(void* info) {
   FlutterRunLoop* runner = (__bridge FlutterRunLoop*)info;
@@ -97,7 +94,7 @@ static void PerformTimer(CFRunLoopTimerRef timer, void* info) {
 
 - (void)performBlock:(void (^)(void))block afterDelay:(NSTimeInterval)delay {
   @synchronized(self) {
-    _tasks.push_back({block, CFAbsoluteTimeGetCurrent() + delay});
+    _tasks.emplace_back(block, CFAbsoluteTimeGetCurrent() + delay);
     if (delay > 0) {
       [self rearmTimer];
     } else {

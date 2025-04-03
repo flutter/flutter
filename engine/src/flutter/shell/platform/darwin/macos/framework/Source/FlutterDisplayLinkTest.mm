@@ -47,11 +47,11 @@ TEST_F(FlutterDisplayLinkTest, ViewAddedToWindowFirst) {
   NSView* view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
   [window setContentView:view];
 
-  __block bool signalled = false;
+  __block BOOL signalled = NO;
 
   TestDisplayLinkDelegate* delegate = [[TestDisplayLinkDelegate alloc]
       initWithBlock:^(CFTimeInterval timestamp, CFTimeInterval targetTimestamp) {
-        signalled = true;
+        signalled = YES;
       }];
 
   FlutterDisplayLink* displayLink = [FlutterDisplayLink displayLinkWithView:view];
@@ -68,11 +68,11 @@ TEST_F(FlutterDisplayLinkTest, ViewAddedToWindowFirst) {
 TEST_F(FlutterDisplayLinkTest, ViewAddedToWindowLater) {
   NSView* view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
 
-  __block bool signalled = false;
+  __block BOOL signalled = NO;
 
   TestDisplayLinkDelegate* delegate = [[TestDisplayLinkDelegate alloc]
       initWithBlock:^(CFTimeInterval timestamp, CFTimeInterval targetTimestamp) {
-        signalled = true;
+        signalled = YES;
       }];
 
   FlutterDisplayLink* displayLink = [FlutterDisplayLink displayLinkWithView:view];
@@ -100,11 +100,11 @@ TEST_F(FlutterDisplayLinkTest, ViewRemovedFromWindow) {
   NSView* view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
   [window setContentView:view];
 
-  __block bool signalled = false;
+  __block BOOL signalled = NO;
 
   TestDisplayLinkDelegate* delegate = [[TestDisplayLinkDelegate alloc]
       initWithBlock:^(CFTimeInterval timestamp, CFTimeInterval targetTimestamp) {
-        signalled = true;
+        signalled = YES;
       }];
 
   FlutterDisplayLink* displayLink = [FlutterDisplayLink displayLinkWithView:view];

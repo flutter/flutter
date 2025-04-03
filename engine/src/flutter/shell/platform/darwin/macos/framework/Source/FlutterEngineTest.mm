@@ -525,6 +525,7 @@ TEST_F(FlutterEngineTest, Compositor) {
                 result:^(id result){
                 }];
 
+  // Wait up to 1 second for Flutter to emit a frame.
   CFAbsoluteTime start = CFAbsoluteTimeGetCurrent();
   CALayer* rootLayer = viewController.flutterView.layer;
   while (rootLayer.sublayers.count == 0) {
@@ -985,7 +986,7 @@ TEST_F(FlutterEngineTest, RemovingViewDisposesCompositorResources) {
   viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
 
   EXPECT_TRUE([engine runWithEntrypoint:@"drawIntoAllViews"]);
-
+  // Wait up to 1 second for Flutter to emit a frame.
   CFTimeInterval start = CACurrentMediaTime();
   while (engine.macOSCompositor->DebugNumViews() == 0) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);

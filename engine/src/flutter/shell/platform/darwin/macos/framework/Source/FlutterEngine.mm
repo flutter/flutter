@@ -678,7 +678,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
           },
   };
 
-  bool mergedPlatformUIThread = false;
+  BOOL mergedPlatformUIThread = NO;
   NSNumber* enableMergedPlatformUIThread =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
   if (enableMergedPlatformUIThread != nil) {
@@ -1561,7 +1561,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
           }
         }
       }
-        afterDelay:(targetTime - (double)engine_time) / 1000000000.0];
+        afterDelay:(targetTime - (double)engine_time) / NSEC_PER_SEC];
 }
 
 // Getter used by test harness, only exposed through the FlutterEngine(Test) category
