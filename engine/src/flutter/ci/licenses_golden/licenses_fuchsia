@@ -1,4 +1,4 @@
-Signature: 1bbb24cd85a32924bf966672eaa73e4f
+Signature: 2fecf345ca2bf74381718cec74c2f411
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -17810,6 +17810,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -17818,10 +17819,13 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl + ../../../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_member_watcher.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/fake-gpio.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/include/lib/driver/fake-gpio/cpp/fake-gpio.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl
@@ -17830,6 +17834,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_member_watcher.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/fake-gpio.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/include/lib/driver/fake-gpio/cpp/fake-gpio.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h
 ----------------------------------------------------------------------------------------------------
