@@ -4190,7 +4190,6 @@ void main() {
   });
 
   testWidgets('Switch activeThumbColor', (WidgetTester tester) async {
-    const Color activeTrackColor = Color(0xffff1200);
     const Color activeThumbColor = Color(0xffff12ff);
 
     Widget buildSwitch({Color? activeColor, Color? activeThumbColor}) {
@@ -4199,7 +4198,7 @@ void main() {
         child: Material(
           child: Center(
             child: Switch(
-              activeColor: activeTrackColor,
+              activeColor: activeColor,
               activeThumbColor: activeThumbColor,
               value: true,
               onChanged: null,
@@ -4208,6 +4207,17 @@ void main() {
         ),
       );
     }
+
+
+    await tester.pumpWidget(buildSwitch(activeColor: activeThumbColor));
+    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
+
+    await tester.pumpWidget(buildSwitch(activeThumbColor: activeThumbColor));
+    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
+  });
+
+  testWidgets('Switch.adaptive activeThumbColor', (WidgetTester tester) async {
+    const Color activeThumbColor = Color(0xffff12ff);
 
     Widget buildSwitchAdaptive({Color? activeColor, Color? activeThumbColor}) {
       return Directionality(
@@ -4215,7 +4225,7 @@ void main() {
         child: Material(
           child: Center(
             child: Switch.adaptive(
-              activeColor: activeTrackColor,
+              activeColor: activeColor,
               activeThumbColor: activeThumbColor,
               value: true,
               onChanged: null,
@@ -4225,20 +4235,10 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildSwitch(activeColor: activeTrackColor));
-    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeTrackColor);
-
-    await tester.pumpWidget(
-      buildSwitch(activeColor: activeTrackColor, activeThumbColor: activeThumbColor),
-    );
+    await tester.pumpWidget(buildSwitchAdaptive(activeColor: activeThumbColor));
     expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
 
-    await tester.pumpWidget(buildSwitchAdaptive(activeColor: activeTrackColor));
-    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeTrackColor);
-
-    await tester.pumpWidget(
-      buildSwitchAdaptive(activeColor: activeTrackColor, activeThumbColor: activeThumbColor),
-    );
+    await tester.pumpWidget(buildSwitchAdaptive(activeThumbColor: activeThumbColor));
     expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
   });
 }
