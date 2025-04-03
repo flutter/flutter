@@ -324,13 +324,19 @@ class HtmlPatternMatcher extends Matcher {
     html.Element pattern,
   ) {
     for (final MapEntry<Object, String> attribute in pattern.attributes.entries) {
-      final String expectedName = attribute.key as String;
+      final (expectedName, expectMissing) = _parseExpectedAttributeName(attribute.key as String);
       final String expectedValue = attribute.value;
       final _Breadcrumbs breadcrumb = parent.attribute(expectedName);
 
       if (expectedName == 'style') {
         // Style is a complex attribute that deserves a special comparison algorithm.
         _matchStyle(parent, mismatches, element, pattern);
+      } else if (expectMissing) {
+        if (element.attributes.containsKey(expectedName)) {
+          mismatches.add(
+            '$breadcrumb: expected attribute $expectedName="${element.attributes[expectedName]}" to be missing but it was present.',
+          );
+        }
       } else {
         if (!element.attributes.containsKey(expectedName)) {
           mismatches.add('$breadcrumb: attribute $expectedName="$expectedValue" missing.');
@@ -345,6 +351,13 @@ class HtmlPatternMatcher extends Matcher {
         }
       }
     }
+  }
+
+  (String name, bool expectMissing) _parseExpectedAttributeName(String attributeName) {
+    if (attributeName.endsWith('--missing')) {
+      return (attributeName.substring(0, attributeName.indexOf('--missing')), true);
+    }
+    return (attributeName, false);
   }
 
   static Map<String, String> parseStyle(html.Element element) {
