@@ -140,6 +140,7 @@ class Switch extends StatelessWidget {
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
+       assert(activeThumbColor == null || activeColor == null),
        activeThumbColor = activeThumbColor ?? activeColor;
 
   /// Creates an adaptive [Switch] based on whether the target platform is iOS
@@ -199,6 +200,7 @@ class Switch extends StatelessWidget {
     this.applyCupertinoTheme,
   }) : assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
+       assert(activeThumbColor == null || activeColor == null),
        _switchType = _SwitchType.adaptive,
        activeThumbColor = activeThumbColor ?? activeColor;
 
