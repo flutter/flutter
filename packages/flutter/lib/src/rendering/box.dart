@@ -2076,7 +2076,7 @@ abstract class RenderBox extends RenderObject {
           ),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
           ),
         ]),
       ),
@@ -2188,7 +2188,7 @@ abstract class RenderBox extends RenderObject {
           ),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
           ),
         ]),
       ),
@@ -2646,7 +2646,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
           ),
         ]);
       }
@@ -2738,7 +2738,7 @@ abstract class RenderBox extends RenderObject {
             ...failures,
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
             ),
           ]);
         }
@@ -2764,7 +2764,7 @@ abstract class RenderBox extends RenderObject {
             ErrorDescription('The constraints used were $constraints.'),
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
             ),
           ]);
         }
@@ -2779,7 +2779,7 @@ abstract class RenderBox extends RenderObject {
         ErrorDescription('The constraints used were $constraints.'),
         ErrorHint(
           'If you are not writing your own RenderBox subclass, then this is not\n'
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
         ),
       ];
 

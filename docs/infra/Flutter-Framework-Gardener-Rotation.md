@@ -174,7 +174,7 @@ The bulk of communication happens on [Discord].
 [flutter-hackers]: https://github.com/orgs/flutter/teams/flutter-hackers
 [golden test build breakage]: /docs/contributing/testing/Writing-a-golden-file-test-for-package-flutter.md#build-breakage
 [new issue]: https://github.com/flutter/flutter/issues/new/choose
-[new infra issue]: https://github.com/flutter/flutter/issues/new?template=6_infrastructure.yml
+[new infra issue]: https://github.com/flutter/flutter/issues/new?template=06_infrastructure.yml
 
 [Framework build dashboard]: https://flutter-dashboard.appspot.com/#/build
 [framework benchmarks]: https://flutter-flutter-perf.skia.org/e/
