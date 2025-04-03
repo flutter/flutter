@@ -373,13 +373,13 @@ workspace:
 - child1
 - child2
 ''');
-      package.childFile('child1/pubspec.yaml')
+      package.childDirectory('child1').childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 name: child1
 resolution: workspace
 ''');
-      package.childFile('child2/pubspec.yaml')
+      package.childDirectory('child2').childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 name: child2
@@ -387,7 +387,7 @@ resolution: workspace
 workspace:
 - example
 ''');
-      package.childFile('child2/example/pubspec.yaml')
+      package.childDirectory('child2').childDirectory('example').childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 name: child2_example

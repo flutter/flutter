@@ -1536,21 +1536,21 @@ workspace:
 - child2
 - child2/example
 ''');
-        directory.childFile('child1/pubspec.yaml')
+        directory.childDirectory('child1').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: child1
 flutter:
 resolution: workspace
 ''');
-        directory.childFile('child2/pubspec.yaml')
+        directory.childDirectory('child2').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: child2
 flutter:
 resolution: workspace
 ''');
-        directory.childFile('child2/example/pubspec.yaml')
+        directory.childDirectory('child2').childDirectory('example').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync('''
 name: child2_example
