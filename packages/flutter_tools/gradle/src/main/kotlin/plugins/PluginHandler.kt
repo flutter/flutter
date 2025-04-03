@@ -49,7 +49,7 @@ class PluginHandler(
     //  https://github.com/flutter/flutter/blob/1c90ed8b64d9ed8ce2431afad8bc6e6d9acc4556/packages/flutter_tools/lib/src/flutter_plugins.dart#L212
 
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
-    internal fun getPluginDependencies(): List<Map<String?, Any?>> {
+    private fun getPluginDependencies(): List<Map<String?, Any?>> {
         if (pluginDependencies == null) {
             val meta: Map<String, Any> =
                 NativePluginLoaderReflectionBridge.getDependenciesMetadata(
@@ -58,7 +58,7 @@ class PluginHandler(
                 )
             // there should be a null check here, skip for now. I think I messed up platform types.
             check(meta["dependencyGraph"] is List<*>)
-            @Suppress("UNCHECKED_CAST") // just for now :)
+            @Suppress("UNCHECKED_CAST")
             pluginDependencies = meta["dependencyGraph"] as List<Map<String?, Any?>>
         }
         return pluginDependencies!!
@@ -142,7 +142,7 @@ class PluginHandler(
         }
     }
 
-    internal fun configurePlugins(engineVersionValue: String) {
+    internal fun configurePlugins(engineVersionValue: String) { // todo
         configureLegacyPluginEachProjects(engineVersionValue)
         val pluginList: List<Map<String?, Any?>> = getPluginList()
         pluginList.forEach { plugin: Map<String?, Any?> ->

@@ -40,7 +40,7 @@ import kotlin.test.assertEquals
 
 class FlutterPluginUtilsTest {
     companion object {
-        val exampleEngineVersion = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
+        const val EXAMPLE_ENGINE_VERSION = "1.0.0-e0676b47c7550ecdc0f0c4fa759201449b2c5f23"
 
         val devDependency: Map<String?, Any?> =
             mapOf(
@@ -887,7 +887,7 @@ class FlutterPluginUtilsTest {
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithoutDevDependency
         val buildType: BuildType = mockk<BuildType>()
-        val engineVersion = exampleEngineVersion
+        val engineVersion = EXAMPLE_ENGINE_VERSION
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
         every { project.hasProperty("local-engine-repo") } returns false
@@ -925,7 +925,7 @@ class FlutterPluginUtilsTest {
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithSingleDevDependency
         val buildType: BuildType = mockk<BuildType>()
-        val engineVersion = exampleEngineVersion
+        val engineVersion = EXAMPLE_ENGINE_VERSION
         every { buildType.name } returns "release"
         every { buildType.isDebuggable } returns false
         every { project.hasProperty("local-engine-repo") } returns false
@@ -979,7 +979,7 @@ class FlutterPluginUtilsTest {
         mockkObject(NativePluginLoaderReflectionBridge)
         every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithSingleDevDependency
         val buildType: BuildType = mockk<BuildType>()
-        val engineVersion = exampleEngineVersion
+        val engineVersion = EXAMPLE_ENGINE_VERSION
         every { buildType.name } returns "debug"
         every { buildType.isDebuggable } returns true
         every { project.hasProperty("local-engine-repo") } returns false

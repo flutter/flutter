@@ -46,7 +46,7 @@ object FlutterPluginConstants {
      * Otherwise, the Play Store will complain that the APK variants have the same version.
      */
     @JvmStatic val ABI_VERSION =
-        mapOf<String, Int>( // Explicit type for clarity, though inferred
+        mapOf<String, Int>(
             ARCH_ARM32 to 1,
             ARCH_ARM64 to 2,
             ARCH_X86 to 3,

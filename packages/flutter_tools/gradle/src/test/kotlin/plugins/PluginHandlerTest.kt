@@ -2,12 +2,16 @@ package com.flutter.gradle.plugins
 
 import com.android.build.gradle.BaseExtension
 import com.flutter.gradle.FlutterExtension
+import com.flutter.gradle.FlutterPluginUtilsTest.Companion.EXAMPLE_ENGINE_VERSION
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.cameraDependency
-import com.flutter.gradle.FlutterPluginUtilsTest.Companion.exampleEngineVersion
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.flutterPluginAndroidLifecycleDependency
+import com.flutter.gradle.FlutterPluginUtilsTest.Companion.pluginListWithDevDependency
+import com.flutter.gradle.FlutterPluginUtilsTest.Companion.pluginListWithoutDevDependency
+import com.flutter.gradle.NativePluginLoaderReflectionBridge
 import io.mockk.called
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
 import org.gradle.api.Action
@@ -15,15 +19,52 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.logging.Logger
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PluginHandlerTest {
+    // getPluginListWithoutDevDependencies
+    @Test
+    fun `getPluginListWithoutDevDependencies removes dev dependencies from list`() {
+        val project = mockk<Project>()
+        val pluginHandler = PluginHandler(project)
+        mockkObject(NativePluginLoaderReflectionBridge)
+        // mock return of NativePluginLoaderReflectionBridge.getPlugins
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithDevDependency
+        // mock method calls that are invoked by the args to NativePluginLoaderReflectionBridge
+        every { project.extraProperties } returns mockk()
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
+        every { project.file(any()) } returns mockk()
+
+        val result = pluginHandler.getPluginListWithoutDevDependencies()
+        assertEquals(pluginListWithoutDevDependency, result)
+    }
+
+    @Test
+    fun `getPluginListWithoutDevDependencies does not modify list without dev dependencies`() {
+        val project = mockk<Project>()
+        val pluginHandler = PluginHandler(project)
+        mockkObject(NativePluginLoaderReflectionBridge)
+        // mock return of NativePluginLoaderReflectionBridge.getPlugins
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns pluginListWithoutDevDependency
+        // mock method calls that are invoked by the args to NativePluginLoaderReflectionBridge
+        every { project.extraProperties } returns mockk()
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
+        every { project.file(any()) } returns mockk()
+
+        val result = pluginHandler.getPluginListWithoutDevDependencies()
+        assertEquals(pluginListWithoutDevDependency, result)
+    }
+
+    // getPluginList skipped as it is a wrapper around a single reflection call
+
     // pluginSupportsAndroidPlatform
     @Test
     fun `pluginSupportsAndroidPlatform returns true when android directory exists with gradle build file`(
@@ -155,7 +196,7 @@ class PluginHandlerTest {
             PluginHandler.configurePluginProject(
                 project = project,
                 pluginObject = pluginWithoutName,
-                engineVersion = exampleEngineVersion
+                engineVersion = EXAMPLE_ENGINE_VERSION
             )
         }
     }
@@ -207,7 +248,7 @@ class PluginHandlerTest {
         PluginHandler.configurePluginProject(
             project = project,
             pluginObject = cameraDependency,
-            engineVersion = exampleEngineVersion
+            engineVersion = EXAMPLE_ENGINE_VERSION
         )
 
         verify { project.afterEvaluate(capture(captureActionSlot)) }
@@ -218,11 +259,15 @@ class PluginHandlerTest {
         verify {
             pluginProject.dependencies.add(
                 "debugApi",
-                "io.flutter:flutter_embedding_debug:$exampleEngineVersion"
+                "io.flutter:flutter_embedding_debug:$EXAMPLE_ENGINE_VERSION"
             )
         }
         verify { project.dependencies.add("debugApi", pluginProject) }
         verify { mockLogger wasNot called }
         verify { mockPluginProjectBuildTypes.addAll(project.extensions.findByType(BaseExtension::class.java)!!.buildTypes) }
     }
+
+    // TODO(gmackall): configurePlugins
+    @Test
+
 }

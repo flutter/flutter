@@ -472,7 +472,7 @@ class FlutterPlugin : Plugin<Project> {
                 }
             }
         }
-        getPluginHandler(projectToAddTasksTo!!).configurePlugins(engineVersion!!)
+        getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
             getPluginHandler(projectToAddTasksTo).getPluginList()
@@ -682,21 +682,9 @@ class FlutterPlugin : Plugin<Project> {
                 ) {
                     dependsOn(compileTask)
                     with(compileTask.assets)
-                    val currentGradleVersion: String = project.gradle.gradleVersion
-                    if (FlutterPluginUtils.compareVersionStrings(
-                            currentGradleVersion,
-                            "8.3"
-                        ) >= 0
-                    ) {
-                        filePermissions {
-                            user {
-                                read = true
-                                write = true
-                            }
-                        }
-                    } else {
-                        fileMode = 420 // corresponds to unix 0644 in base 8
-                    }
+                    // TODO(gmackall): Replace with filePermissions.user.read/write = true once
+                    //   minimum supported Gradle version is 8.3.
+                    fileMode = 420 // corresponds to unix 0644 in base 8
                     if (isUsedAsSubproject) {
                         // TODO(gmackall): above is always false, can delete
                         dependsOn(packageAssets)

@@ -17,8 +17,6 @@ import java.io.File
  */
 
 object NativePluginLoaderReflectionBridge {
-    private var nativePluginLoader: Any? = null
-
     /**
      * An abstraction to hide reflection from calling sites. See ../scripts/native_plugin_loader.gradle.kts.
      */
@@ -26,11 +24,11 @@ object NativePluginLoaderReflectionBridge {
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
     ): List<Map<String?, Any?>> {
-        nativePluginLoader = extraProperties.get("nativePluginLoader")!!
+        val nativePluginLoader = extraProperties.get("nativePluginLoader")!!
 
         @Suppress("UNCHECKED_CAST")
         val pluginList: List<Map<String?, Any?>> =
-            nativePluginLoader!!::class
+            nativePluginLoader::class
                 .members
                 .firstOrNull { it.name == "getPlugins" }
                 ?.call(nativePluginLoader, flutterProjectRoot) as List<Map<String?, Any?>>
@@ -45,11 +43,11 @@ object NativePluginLoaderReflectionBridge {
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
     ): Map<String, Any> {
-        nativePluginLoader = extraProperties.get("nativePluginLoader")!!
+        val nativePluginLoader = extraProperties.get("nativePluginLoader")!!
 
         @Suppress("UNCHECKED_CAST")
         val dependenciesMetadata: Map<String, Any> =
-            nativePluginLoader!!::class
+            nativePluginLoader::class
                 .members
                 .firstOrNull { it.name == "dependenciesMetadata" }
                 ?.call(nativePluginLoader, flutterProjectRoot) as Map<String, Any>
