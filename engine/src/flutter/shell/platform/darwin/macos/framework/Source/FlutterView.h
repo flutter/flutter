@@ -71,6 +71,9 @@
  */
 - (void)didUpdateMouseCursor:(nonnull NSCursor*)cursor;
 
+/**
+ * Called from the controller to unblock resize synchronizer when shutting down.
+ */
 - (void)shutDown;
 
 @end

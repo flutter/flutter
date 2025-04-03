@@ -422,6 +422,7 @@ static void CommonInit(FlutterViewController* controller, FlutterEngine* engine)
   if ([self attached]) {
     [_engine removeViewController:self];
   }
+  [self.flutterView shutDown];
 }
 
 #pragma mark - Public methods
