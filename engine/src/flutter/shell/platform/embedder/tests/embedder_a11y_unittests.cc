@@ -29,9 +29,7 @@ namespace testing {
 using EmbedderA11yTest = testing::EmbedderTest;
 using ::testing::ElementsAre;
 
-#if !defined(OS_FUCHSIA) || (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 constexpr static char kTooltip[] = "tooltip";
-#endif
 
 TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
   {
