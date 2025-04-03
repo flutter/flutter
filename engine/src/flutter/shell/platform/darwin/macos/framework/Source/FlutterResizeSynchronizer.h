@@ -10,6 +10,9 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterRunLoop.h"
 
+/**
+ * Class responsible for coordinating window resize with content update.
+ */
 @interface FlutterResizeSynchronizer : NSObject
 
 /**
