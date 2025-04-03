@@ -162,6 +162,7 @@ class SemanticsFlag {
   static const int _kHasSelectedStateIndex = 1 << 28;
   static const int _kHasRequiredStateIndex = 1 << 29;
   static const int _kIsRequiredIndex = 1 << 30;
+  // WARNING: JavaScript can only go up to 32 bits!
 
   static const SemanticsFlag hasCheckedState = SemanticsFlag._(
     _kHasCheckedStateIndex,
@@ -343,6 +344,8 @@ class LocaleStringAttribute extends StringAttribute {
   }
 }
 
+enum SemanticsValidationResult { none, valid, invalid }
+
 class SemanticsUpdateBuilder {
   SemanticsUpdateBuilder();
 
@@ -385,6 +388,7 @@ class SemanticsUpdateBuilder {
     String? linkUrl,
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
+    SemanticsValidationResult validationResult = SemanticsValidationResult.none,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -428,6 +432,7 @@ class SemanticsUpdateBuilder {
         linkUrl: linkUrl,
         role: role,
         controlsNodes: controlsNodes,
+        validationResult: validationResult,
       ),
     );
   }

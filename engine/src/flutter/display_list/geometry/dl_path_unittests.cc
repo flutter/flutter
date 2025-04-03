@@ -555,6 +555,45 @@ TEST(DisplayListPath, ConstructFromImpellerEqualsConstructFromSkia) {
   EXPECT_EQ(DlPath(path_builder, DlPathFillType::kNonZero), DlPath(sk_path));
 }
 
+TEST(DisplayListPath, IsLineFromSkPath) {
+  SkPath sk_path;
+  sk_path.moveTo(SkPoint::Make(0, 0));
+  sk_path.lineTo(SkPoint::Make(100, 100));
+
+  DlPath path = DlPath(sk_path);
+
+  DlPoint start;
+  DlPoint end;
+  EXPECT_TRUE(path.IsLine(&start, &end));
+  EXPECT_EQ(start, DlPoint::MakeXY(0, 0));
+  EXPECT_EQ(end, DlPoint::MakeXY(100, 100));
+
+  EXPECT_FALSE(DlPath(SkPath::Rect(SkRect::MakeLTRB(0, 0, 100, 100))).IsLine());
+}
+
+TEST(DisplayListPath, IsLineFromImpellerPath) {
+  DlPathBuilder path_builder;
+  path_builder.MoveTo({0, 0});
+  path_builder.LineTo({100, 0});
+  DlPath path = DlPath(path_builder, DlPathFillType::kNonZero);
+
+  DlPoint start;
+  DlPoint end;
+  EXPECT_TRUE(path.IsLine(&start, &end));
+  EXPECT_EQ(start, DlPoint::MakeXY(0, 0));
+  EXPECT_EQ(end, DlPoint::MakeXY(100, 0));
+
+  {
+    DlPathBuilder path_builder;
+    path_builder.MoveTo({0, 0});
+    path_builder.LineTo({100, 0});
+    path_builder.LineTo({100, 100});
+
+    DlPath path = DlPath(path_builder, DlPathFillType::kNonZero);
+    EXPECT_FALSE(path.IsLine());
+  }
+}
+
 namespace {
 class DlPathReceiverMock : public DlPathReceiver {
  public:

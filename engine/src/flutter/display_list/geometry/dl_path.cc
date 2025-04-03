@@ -224,6 +224,16 @@ bool DlPath::IsOval(DlRect* bounds) const {
   return GetSkPath().isOval(ToSkRect(bounds));
 }
 
+bool DlPath::IsLine(DlPoint* start, DlPoint* end) const {
+  SkPoint sk_points[2];
+  if (GetSkPath().isLine(sk_points)) {
+    *start = ToDlPoint(sk_points[0]);
+    *end = ToDlPoint(sk_points[1]);
+    return true;
+  }
+  return false;
+}
+
 bool DlPath::IsRoundRect(DlRoundRect* rrect) const {
   SkRRect sk_rrect;
   bool ret = GetSkPath().isRRect(rrect ? &sk_rrect : nullptr);

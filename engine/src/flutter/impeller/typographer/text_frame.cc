@@ -146,6 +146,17 @@ bool TextFrame::IsFrameComplete() const {
   return bound_values_.size() == run_size;
 }
 
+const Font& TextFrame::GetFont() const {
+  return runs_[0].GetFont();
+}
+
+std::optional<Glyph> TextFrame::AsSingleGlyph() const {
+  if (runs_.size() == 1 && runs_[0].GetGlyphCount() == 1) {
+    return runs_[0].GetGlyphPositions()[0].glyph;
+  }
+  return std::nullopt;
+}
+
 const FrameBounds& TextFrame::GetFrameBounds(size_t index) const {
   FML_DCHECK(index < bound_values_.size());
   return bound_values_[index];
