@@ -1431,6 +1431,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Int32,
       Handle,
       Int32,
+      Int32,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
