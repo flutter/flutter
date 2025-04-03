@@ -196,7 +196,7 @@ TEST_P(AiksTest, MassiveScaleConvertToPath) {
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
-  builder.Scale(25, 25);
+  builder.Scale(16, 16);
   RenderTextInCanvasSkia(
       GetContext(), builder, "HELLO", "Roboto-Regular.ttf",
       TextRenderOptions{.font_size = 16, .position = DlPoint(0, 20)});

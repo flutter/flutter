@@ -1515,11 +1515,10 @@ bool Canvas::AttemptBlurredTextOptimization(
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
-  // TODO(jonahwilliams): we should switch to path rendering based on a more
-  // intelligent metric than just looking at the total canvas scale. Skia uses
-  // the scaled size of the glyph. See also:
-  // https://github.com/flutter/flutter/issues/165583
-  if (GetCurrentTransform().GetMaxBasisLengthXY() > 24) {
+  // This is a somewhat arbitrary cutoff to switch from rasterized glyphs
+  // to path rendering, for both performance and fidelity purposes.
+  Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
+  if (max_scale * text_frame->GetFont().GetMetrics().point_size > 250) {
     std::optional<flutter::DlPath> path = text_frame->GetPath();
     if (path.has_value()) {
       Save(1);
@@ -1537,7 +1536,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(text_frame);
   text_contents->SetForceTextColor(paint.mask_blur_descriptor.has_value());
-  text_contents->SetScale(GetCurrentTransform().GetMaxBasisLengthXY());
+  text_contents->SetScale(max_scale);
   text_contents->SetColor(paint.color);
   text_contents->SetOffset(position);
   text_contents->SetTextProperties(paint.color,                           //
