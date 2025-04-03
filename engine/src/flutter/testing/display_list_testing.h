@@ -235,7 +235,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
    public:
     ~DlPathStreamer();
 
-    DlPathStreamer(DisplayListStreamDispatcher& dispatcher)
+    explicit DlPathStreamer(DisplayListStreamDispatcher& dispatcher)
         : dispatcher_(dispatcher) {}
 
     void RecommendSizes(size_t verb_count, size_t point_count);
