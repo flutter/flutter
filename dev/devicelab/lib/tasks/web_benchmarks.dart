@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show json;
+import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io' as io;
 
 import 'package:logging/logging.dart';
@@ -20,7 +20,8 @@ import '../framework/utils.dart';
 const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
-typedef WebBenchmarkOptions = ({bool useWasm, bool forceSingleThreadedSkwasm});
+typedef WebBenchmarkOptions =
+    ({bool useWasm, bool forceSingleThreadedSkwasm, bool useDdc, bool withHotReload});
 
 Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
@@ -40,7 +41,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         '--no-tree-shake-icons', // local engine builds are frequently out of sync with the Dart Kernel version
         if (benchmarkOptions.useWasm) ...<String>['--wasm', '--no-strip-wasm'],
         '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
-        '--profile',
+        if (benchmarkOptions.useDdc) '--debug' else '--profile',
+        if (benchmarkOptions.useDdc && benchmarkOptions.withHotReload)
+          '--extra-front-end-options=--dartdevc-canary,--dartdevc-module-format=ddc',
         '--no-web-resources-cdn',
         '-t',
         'lib/web_benchmarks.dart',
@@ -184,7 +187,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         }
 
         final String webRendererName;
-        if (benchmarkOptions.useWasm) {
+        if (benchmarkOptions.useDdc) {
+          webRendererName = 'ddc';
+        } else if (benchmarkOptions.useWasm) {
           webRendererName = benchmarkOptions.forceSingleThreadedSkwasm ? 'skwasm_st' : 'skwasm';
         } else {
           webRendererName = 'canvaskit';
