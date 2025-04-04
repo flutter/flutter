@@ -1985,8 +1985,10 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
 
   auto asset_manager = std::make_shared<AssetManager>();
 
+  std::string asset_directory_path =
+      fml::paths::FromURI(params.at("assetDirectory").data());
   if (!asset_manager->PushFront(std::make_unique<DirectoryAssetBundle>(
-          fml::OpenDirectory(params.at("assetDirectory").data(), false,
+          fml::OpenDirectory(asset_directory_path.c_str(), false,
                              fml::FilePermission::kRead),
           false))) {
     // The new asset directory path was invalid.
