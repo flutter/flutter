@@ -1657,6 +1657,9 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       return;
     }
   }
+  if (!reuse_depth) {
+    ++current_depth_;
+  }
 
   // We can render at a depth up to and including the depth of the currently
   // active clips and we will still be clipped out, but we cannot render at
@@ -1680,7 +1683,8 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       // all the previous commands in the active pass).
       auto input_texture = FlipBackdrop(GetGlobalPassPosition(),  //
                                         /*should_remove_texture=*/false,
-                                        /*should_use_onscreen=*/false);
+                                        /*should_use_onscreen=*/false,
+                                        /*post_depth_increment=*/true);
       if (!input_texture) {
         return;
       }
@@ -1701,10 +1705,6 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       entity.SetContents(std::move(contents));
       entity.SetBlendMode(BlendMode::kSrc);
     }
-  }
-
-  if (!reuse_depth) {
-    ++current_depth_;
   }
 
   const std::shared_ptr<RenderPass>& result =
@@ -1732,7 +1732,8 @@ void Canvas::SetBackdropData(
 
 std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
                                               bool should_remove_texture,
-                                              bool should_use_onscreen) {
+                                              bool should_use_onscreen,
+                                              bool post_depth_increment) {
   LazyRenderingConfig rendering_config = std::move(render_passes_.back());
   render_passes_.pop_back();
 
@@ -1833,8 +1834,10 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   // Restore any clips that were recorded before the backdrop filter was
   // applied.
   auto& replay_entities = clip_coverage_stack_.GetReplayEntities();
+  uint64_t current_depth =
+      post_depth_increment ? current_depth_ - 1 : current_depth_;
   for (const auto& replay : replay_entities) {
-    if (replay.clip_depth <= current_depth_) {
+    if (replay.clip_depth <= current_depth) {
       continue;
     }
 
