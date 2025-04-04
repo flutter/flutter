@@ -1391,6 +1391,7 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.black),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.black)),
       tooltipTheme: const TooltipThemeData(height: 100),
+      carouselViewTheme: const CarouselViewThemeData(),
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.start),
       dialogBackgroundColor: Colors.black,
@@ -1509,6 +1510,7 @@ void main() {
       timePickerTheme: const TimePickerThemeData(backgroundColor: Colors.white),
       toggleButtonsTheme: const ToggleButtonsThemeData(textStyle: TextStyle(color: Colors.white)),
       tooltipTheme: const TooltipThemeData(height: 100),
+      carouselViewTheme: const CarouselViewThemeData(),
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: const ButtonBarThemeData(alignment: MainAxisAlignment.end),
       dialogBackgroundColor: Colors.white,
@@ -1843,6 +1845,7 @@ void main() {
       'timePickerTheme',
       'toggleButtonsTheme',
       'tooltipTheme',
+      'carouselViewTheme',
       // DEPRECATED (newest deprecations at the bottom)
       'buttonBarTheme',
       'dialogBackgroundColor',

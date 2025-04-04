@@ -21,6 +21,7 @@ import 'bottom_sheet_theme.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
 import 'card_theme.dart';
+import 'carousel_theme.dart';
 import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
@@ -360,6 +361,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    CarouselViewThemeData? carouselViewTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'Use OverflowBar instead. '
@@ -564,6 +566,7 @@ class ThemeData with Diagnosticable {
     timePickerTheme ??= const TimePickerThemeData();
     toggleButtonsTheme ??= const ToggleButtonsThemeData();
     tooltipTheme ??= const TooltipThemeData();
+    carouselViewTheme ??= const CarouselViewThemeData();
     // DEPRECATED (newest deprecations at the bottom)
     buttonBarTheme ??= const ButtonBarThemeData();
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
@@ -658,6 +661,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme,
       tooltipTheme: tooltipTheme,
+      carouselViewTheme: carouselViewTheme,
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: buttonBarTheme,
       dialogBackgroundColor: dialogBackgroundColor,
@@ -769,6 +773,7 @@ class ThemeData with Diagnosticable {
     required this.timePickerTheme,
     required this.toggleButtonsTheme,
     required this.tooltipTheme,
+    required this.carouselViewTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'Use OverflowBar instead. '
@@ -1435,6 +1440,9 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
+  /// A theme for customizing the appearance and layout of [CarouselView] widgets.
+  final CarouselViewThemeData carouselViewTheme;
+
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   @Deprecated(
     'Use OverflowBar instead. '
@@ -1552,6 +1560,7 @@ class ThemeData with Diagnosticable {
     TimePickerThemeData? timePickerTheme,
     ToggleButtonsThemeData? toggleButtonsTheme,
     TooltipThemeData? tooltipTheme,
+    CarouselViewThemeData? carouselViewTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'Use a ThemeData constructor (.from, .light, or .dark) instead. '
@@ -1670,6 +1679,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
       toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       tooltipTheme: tooltipTheme ?? this.tooltipTheme,
+      carouselViewTheme: carouselViewTheme ?? this.carouselViewTheme,
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: buttonBarTheme ?? _buttonBarTheme,
       dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
@@ -2008,6 +2018,7 @@ class ThemeData with Diagnosticable {
       toggleButtonsTheme:
           ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t)!,
       tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t)!,
+      carouselViewTheme: CarouselViewThemeData.lerp(a.carouselViewTheme, b.carouselViewTheme, t),
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
       dialogBackgroundColor: Color.lerp(a.dialogBackgroundColor, b.dialogBackgroundColor, t)!,
@@ -2108,6 +2119,7 @@ class ThemeData with Diagnosticable {
         other.timePickerTheme == timePickerTheme &&
         other.toggleButtonsTheme == toggleButtonsTheme &&
         other.tooltipTheme == tooltipTheme &&
+        other.carouselViewTheme == carouselViewTheme &&
         // DEPRECATED (newest deprecations at the bottom)
         other.buttonBarTheme == buttonBarTheme &&
         other.dialogBackgroundColor == dialogBackgroundColor &&
@@ -2207,6 +2219,7 @@ class ThemeData with Diagnosticable {
       timePickerTheme,
       toggleButtonsTheme,
       tooltipTheme,
+      carouselViewTheme,
       // DEPRECATED (newest deprecations at the bottom)
       buttonBarTheme,
       dialogBackgroundColor,
@@ -2824,6 +2837,14 @@ class ThemeData with Diagnosticable {
       DiagnosticsProperty<TooltipThemeData>(
         'tooltipTheme',
         tooltipTheme,
+        level: DiagnosticLevel.debug,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<CarouselViewThemeData>(
+        'carouselViewTheme',
+        carouselViewTheme,
+        defaultValue: defaultData.carouselViewTheme,
         level: DiagnosticLevel.debug,
       ),
     );
