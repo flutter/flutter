@@ -80,6 +80,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 }
 
 // TODO(justinmc): Elaborate
+// TODO(justinmc): Remove Page from name?
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation that looks like Android's Shared Element page
 /// transition.
@@ -94,10 +95,7 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
   const PredictiveBackPageSharedElementTransitionsBuilder();
 
   @override
-  DelegatedTransitionBuilder? get delegatedTransition {
-    print('justin get delegatedtransition.');
-    return _delegatedTransition;
-  }
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
 
   static Widget? _delegatedTransition(
     BuildContext context,
@@ -106,7 +104,7 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
     bool allowSnapshotting,
     Widget? child,
   ) {
-    print('justin get delegatedtransition.');
+    print('justin delegatedtransition of PredictiveBackpageSharedBuilder');
     final ModalRoute<Object?>? route = ModalRoute.of(context);
     if (child == null || route is! PageRoute) {
       return child;
@@ -672,7 +670,6 @@ class _PredictiveBackPageSharedElementTransitionState
 
   double calcOpacity() {
     if (widget.isDelegatedTransition) {
-      print('justin calcopacity for delegatedtransition.');
       return 0.7;
     }
 

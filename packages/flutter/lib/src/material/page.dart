@@ -50,8 +50,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 
   @override
   DelegatedTransitionBuilder? get delegatedTransition {
-    print('justin MaterialPageRoute delegatedTranstiion');
-    // TODO(justinmc): The transition seems to not be able to use delegatedTranstiion. Why not? This gets called but the returned delegatedTransition does not get called.
+    // TODO(justinmc): For predictive back, this should be the predictive back transition. But this won't matter if both routes are predictive back enabled routes? It will just use the primary animation of the incoming route, which should be the same as this?
     return MaterialRouteTransitionMixin._delegatedTransition;
   }
 
