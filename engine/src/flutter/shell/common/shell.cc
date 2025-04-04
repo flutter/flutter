@@ -556,6 +556,14 @@ Shell::~Shell() {
 
   io_latch.Wait();
 
+  // After the IO latch signals, there may be pending UI tasks from image
+  // decode that still need to be flushed. These need to execute now before
+  // the platform view is disposed otherwise we may attempt to destroy vulkan
+  // objects after the vulkan context is destroyed.
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread()) {
+    task_runners_.GetUITaskRunner()->FlushAllTasks();
+  }
+
   // The platform view must go last because it may be holding onto platform side
   // counterparts to resources owned by subsystems running on other threads. For
   // example, the NSOpenGLContext on the Mac.
