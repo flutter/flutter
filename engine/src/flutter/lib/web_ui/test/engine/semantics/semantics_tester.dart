@@ -89,6 +89,8 @@ class SemanticsTester {
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
     ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
     ui.Locale? locale,
+    double? minValue,
+    double? maxValue,
   }) {
     // Actions
     if (hasTap ?? false) {
@@ -220,6 +222,8 @@ class SemanticsTester {
       validationResult: validationResult,
       inputType: inputType,
       locale: locale,
+      minValue: minValue ?? 0,
+      maxValue: maxValue ?? 0,
     );
     _nodeUpdates.add(update);
     return update;
