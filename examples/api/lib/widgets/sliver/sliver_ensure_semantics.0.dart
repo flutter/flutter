@@ -38,7 +38,7 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
       ),
       body: Center(
         child: CustomScrollView(
-          semanticChildCount: 52,
+          semanticChildCount: 106,
           slivers: <Widget>[
             SliverEnsureSemantics(
               sliver: SliverToBoxAdapter(
@@ -124,7 +124,7 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
             SliverEnsureSemantics(
               sliver: SliverToBoxAdapter(
                 child: IndexedSemantics(
-                  index: 52,
+                  index: 51,
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -137,7 +137,7 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
             SliverEnsureSemantics(
               sliver: SliverToBoxAdapter(
                 child: IndexedSemantics(
-                  index: 53,
+                  index: 52,
                   child: Card(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -150,7 +150,7 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
             SliverEnsureSemantics(
               sliver: SliverToBoxAdapter(
                 child: IndexedSemantics(
-                  index: 54,
+                  index: 53,
                   child: Semantics(link: true, child: Text('Link #1')),
                 ),
               ),
@@ -158,7 +158,7 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
             SliverEnsureSemantics(
               sliver: SliverToBoxAdapter(
                 child: IndexedSemantics(
-                  index: 55,
+                  index: 54,
                   child: OverflowBar(
                     children: <Widget>[
                       TextButton(onPressed: () {}, child: Text('Button 1')),
@@ -171,7 +171,7 @@ class _SliverEnsureSemanticsExampleState extends State<SliverEnsureSemanticsExam
             SliverEnsureSemantics(
               sliver: SliverToBoxAdapter(
                 child: IndexedSemantics(
-                  index: 56,
+                  index: 55,
                   child: Semantics(link: true, child: Text('Link #2')),
                 ),
               ),
