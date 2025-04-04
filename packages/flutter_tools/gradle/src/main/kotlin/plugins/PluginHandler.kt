@@ -2,7 +2,6 @@ package com.flutter.gradle.plugins
 
 import com.android.builder.model.BuildType
 import com.flutter.gradle.FlutterExtension
-import com.flutter.gradle.FlutterPluginConstants
 import com.flutter.gradle.FlutterPluginUtils
 import com.flutter.gradle.FlutterPluginUtils.addApiDependencies
 import com.flutter.gradle.FlutterPluginUtils.buildModeFor
@@ -18,8 +17,9 @@ import java.io.FileNotFoundException
 import java.nio.charset.StandardCharsets
 
 /**
- * Handles interactions with the plugins used by the Flutter project, such as retrieving them as a
- * list and configuring them as Gradle dependencies of the main Gradle project.
+ * Handles interactions with the flutter plugins (not Gradle plugins) used by the Flutter project,
+ * such as retrieving them as a list and configuring them as Gradle dependencies of the main Gradle
+ * project.
  */
 class PluginHandler(
     val project: Project
@@ -30,9 +30,16 @@ class PluginHandler(
     /**
      * Gets the list of plugins (as map) that support the Android platform.
      *
-     * The map value contains either the plugins `name` (String),
-     * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
+     * The map contains the following key - value pairs:
+     *  `name` - the plugins name (String),
+     *  `path` - it's path (String),
+     *  `dependencies` - a list of its dependencies names (List<String>)
+     *  `dev_dependency` - a boolean indicating whether the plugin is a dev dependency (Boolean)
+     *  `native_build` - a boolean indicating whether the plugin has native code (Boolean)
+     *
+     * This format is defined in packages/flutter_tools/lib/src/flutter_plugins.dart, in the
+     * _createPluginMapOfPlatform method.
+     * See also [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
      */
     internal fun getPluginList(): List<Map<String?, Any?>> {
         if (pluginList == null) {
@@ -56,7 +63,6 @@ class PluginHandler(
                     project.extraProperties,
                     FlutterPluginUtils.getFlutterSourceDirectory(project)
                 )
-            // there should be a null check here, skip for now. I think I messed up platform types.
             check(meta["dependencyGraph"] is List<*>)
             @Suppress("UNCHECKED_CAST")
             pluginDependencies = meta["dependencyGraph"] as List<Map<String?, Any?>>
@@ -171,6 +177,11 @@ class PluginHandler(
 
     companion object {
         /**
+         * Flutter Docs Website URLs for help messages.
+         */
+        const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG = "https://flutter.dev/to/review-gradle-config"
+
+        /**
          * Performs configuration related to the plugin's Gradle [Project], including
          * 1. Adding the plugin itself as a dependency to the main project.
          * 2. Adding the main project's build types to the plugin's build types.
@@ -178,7 +189,7 @@ class PluginHandler(
          *
          * Should only be called on plugins that support the Android platform.
          */
-        internal fun configurePluginProject( // done
+        private fun configurePluginProject( // done
             project: Project,
             pluginObject: Map<String?, Any?>,
             engineVersion: String
@@ -215,7 +226,7 @@ class PluginHandler(
                         "Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher."
                     )
                     project.logger.quiet(
-                        "For more information about build configuration, see ${FlutterPluginConstants.WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG}."
+                        "For more information about build configuration, see ${WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG}."
                     )
                 }
 
@@ -272,7 +283,7 @@ class PluginHandler(
          * A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
          * making the Gradle plugin project A depend on the Gradle plugin project B.
          */
-        internal fun configurePluginDependencies( // done
+        private fun configurePluginDependencies( // done
             project: Project,
             pluginObject: Map<String?, Any?>
         ) {
@@ -299,7 +310,8 @@ class PluginHandler(
                     val dependencyProject =
                         project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
                     pluginProject.afterEvaluate {
-                        pluginProject.dependencies.add("implementation", dependencyProject)
+                        this.dependencies.add("implementation", dependencyProject)
+                        // pluginProject.dependencies.add("implementation", dependencyProject)
                     }
                 }
             }
