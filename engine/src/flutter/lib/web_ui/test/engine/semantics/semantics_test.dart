@@ -4921,7 +4921,7 @@ void _testLoadingSpinner() {
     }
 
     final SemanticsObject object = pumpSemantics();
-    expect(object.semanticRole?.kind, EngineSemanticsRole.progressBar);
+    expect(object.semanticRole?.kind, EngineSemanticsRole.loadingSpinner);
   });
 
   semantics().semanticsEnabled = false;
@@ -4969,6 +4969,8 @@ void updateNode(
   List<String>? controlsNodes,
   ui.SemanticsRole role = ui.SemanticsRole.none,
   ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
+  double minValue = 0.0,
+  double maxValue = 0.0,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -5013,6 +5015,8 @@ void updateNode(
     linkUrl: linkUrl,
     controlsNodes: controlsNodes,
     inputType: inputType,
+    minValue: minValue,
+    maxValue: maxValue,
   );
 }
 
