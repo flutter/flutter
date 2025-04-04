@@ -148,7 +148,7 @@ class PluginHandler(
         }
     }
 
-    internal fun configurePlugins(engineVersionValue: String) { // todo
+    internal fun configurePlugins(engineVersionValue: String) {
         configureLegacyPluginEachProjects(engineVersionValue)
         val pluginList: List<Map<String?, Any?>> = getPluginList()
         pluginList.forEach { plugin: Map<String?, Any?> ->
