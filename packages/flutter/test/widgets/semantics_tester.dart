@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-export 'dart:ui' show SemanticsAction, SemanticsFlag, SemanticsInputType;
+export 'dart:ui' show SemanticsAction, SemanticsFlag;
 export 'package:flutter/rendering.dart' show SemanticsData;
 
 const String _matcherHelp =
