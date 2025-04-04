@@ -7950,6 +7950,8 @@ class Semantics extends _SemanticsBase {
     super.validationResult = SemanticsValidationResult.none,
     super.inputType,
     super.localeForSubtree,
+    super.minValue,
+    super.maxValue,
   });
 
   /// {@macro flutter.widgets.SemanticsBase.fromProperties}
