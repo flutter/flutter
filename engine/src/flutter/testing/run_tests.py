@@ -965,7 +965,7 @@ def uses_package_test_runner(package):
 #
 # The second element of each tuple is a list of additional command line
 # arguments to pass to each of the packages tests.
-def build_dart_host_test_list(build_dir):
+def build_dart_host_test_list():
   dart_host_tests = [
       os.path.join('flutter', 'ci'),
       os.path.join('flutter', 'flutter_frontend_server'),
@@ -983,8 +983,6 @@ def build_dart_host_test_list(build_dir):
       os.path.join('flutter', 'tools', 'pkg', 'engine_repo_tools'),
       os.path.join('flutter', 'tools', 'pkg', 'git_repo_tools'),
   ]
-  if not is_asan(build_dir):
-    dart_host_tests += [os.path.join('flutter', 'tools', 'path_ops', 'dart')]
 
   return dart_host_tests
 
@@ -1335,7 +1333,7 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
 
   if 'dart-host' in types:
     dart_filter = args.dart_host_filter.split(',') if args.dart_host_filter else None
-    dart_host_packages = build_dart_host_test_list(build_dir)
+    dart_host_packages = build_dart_host_test_list()
     tasks = []
     for dart_host_package in dart_host_packages:
       if dart_filter is None or dart_host_package in dart_filter:
