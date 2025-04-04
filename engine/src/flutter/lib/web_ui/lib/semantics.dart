@@ -298,6 +298,9 @@ enum SemanticsRole {
   alert,
 }
 
+// Mirrors engine/src/flutter/lib/ui/semantics.dart
+enum SemanticsInputType { none, text, url, phone, search, email }
+
 // When adding a new StringAttributeType, the classes in these file must be
 // updated as well.
 //  * engine/src/flutter/lib/ui/semantics.dart
@@ -389,6 +392,7 @@ class SemanticsUpdateBuilder {
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    required SemanticsInputType inputType,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -433,6 +437,7 @@ class SemanticsUpdateBuilder {
         role: role,
         controlsNodes: controlsNodes,
         validationResult: validationResult,
+        inputType: inputType,
       ),
     );
   }
