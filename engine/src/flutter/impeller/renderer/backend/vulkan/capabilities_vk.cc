@@ -665,7 +665,7 @@ bool CapabilitiesVK::SupportsTextureToTextureBlits() const {
 
 // |Capabilities|
 bool CapabilitiesVK::SupportsFramebufferFetch() const {
-  return supports_framebuffer_fetch_;
+  return has_framebuffer_fetch_;
 }
 
 // |Capabilities|
