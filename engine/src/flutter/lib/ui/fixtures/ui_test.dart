@@ -235,6 +235,8 @@ void sendSemanticsUpdate() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: null,
+    minValue: 0.0,
+    maxValue: 100.0,
   );
   _semanticsUpdate(builder.build());
 }
@@ -289,6 +291,8 @@ void sendSemanticsUpdateWithRole() {
     controlsNodes: null,
     inputType: SemanticsInputType.none,
     locale: null,
+    minValue: 0.0,
+    maxValue: 100.0,
   );
   _semanticsUpdate(builder.build());
 }

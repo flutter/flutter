@@ -144,6 +144,8 @@ struct SemanticsNode {
   double scrollPosition = std::nan("");
   double scrollExtentMax = std::nan("");
   double scrollExtentMin = std::nan("");
+  double minValue = 0.0;
+  double maxValue = 0.0;
   std::string identifier;
   std::string label;
   StringAttributes labelAttributes;
