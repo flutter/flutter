@@ -236,10 +236,17 @@ Future<void> _runIntegrationToolTests() async {
   );
 }
 
+Future<void> _runWidgetPreviewScaffoldToolTests() async {
+  await runFlutterTest(
+    path.join(_toolsPath, 'test', 'widget_preview_scaffold.shard', 'widget_preview_scaffold'),
+  );
+}
+
 Future<void> _runToolTests() async {
   await selectSubshard(<String, ShardRunner>{
     'general': _runGeneralToolTests,
     'commands': _runCommandsToolTests,
+    'widget_preview_scaffold': _runWidgetPreviewScaffoldToolTests,
   });
 }
 

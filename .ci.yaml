@@ -1589,6 +1589,29 @@ targets:
       - engine/**
       - DEPS
 
+  - name: Linux tool_tests_widget_preview_scaffold
+    recipe: flutter/flutter_drone
+    timeout: 60
+    bringup: true
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "open_jdk", "version": "version:21"}
+        ]
+      shard: tool_tests
+      subshard: widget_preview_scaffold
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
   - name: Linux_android_emu android_engine_vulkan_tests
     recipe: flutter/flutter_drone
     timeout: 60
