@@ -71,7 +71,9 @@ void SemanticsUpdateBuilder::updateNode(
     const std::vector<std::string>& controlsNodes,
     int validationResult,
     int inputType,
-    std::string locale) {
+    std::string locale,
+    double minValue,
+    double maxValue) {
   FML_CHECK(scrollChildren == 0 ||
             (scrollChildren > 0 && childrenInHitTestOrder.data()))
       << "Semantics update contained scrollChildren but did not have "
@@ -92,6 +94,8 @@ void SemanticsUpdateBuilder::updateNode(
   node.scrollPosition = scrollPosition;
   node.scrollExtentMax = scrollExtentMax;
   node.scrollExtentMin = scrollExtentMin;
+  node.minValue = minValue;
+  node.maxValue = maxValue;
   node.rect = SkRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                SafeNarrow(right), SafeNarrow(bottom));
   node.identifier = std::move(identifier);
