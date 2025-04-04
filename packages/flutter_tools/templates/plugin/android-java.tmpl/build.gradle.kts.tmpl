@@ -1,25 +1,16 @@
 group = "{{androidIdentifier}}"
 version = "1.0"
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("com.android.tools.build:gradle:{{agpVersion}}")
-    }
+plugins {
+    id("com.android.library")
 }
 
-rootProject.allprojects {
+allprojects {
     repositories {
         google()
         mavenCentral()
     }
 }
-
-apply plugin: "com.android.library"
 
 android {
     namespace = "{{androidIdentifier}}"
@@ -42,11 +33,12 @@ android {
 
     testOptions {
         unitTests.all {
-            testLogging {
-               events "passed", "skipped", "failed", "standardOut", "standardError"
-               outputs.upToDateWhen {false}
+            it.testLogging {
+               events("passed", "skipped", "failed", "standardOut", "standardError")
                showStandardStreams = true
             }
+            it.outputs.upToDateWhen { false }
+
         }
     }
 }
