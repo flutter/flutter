@@ -872,7 +872,7 @@ TEST_P(AiksTest, SingleIconShadowTest) {
             1u);
 }
 
-TEST_P(AiksTest, LoAndBehold) {
+TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
   DisplayListBuilder builder;
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));

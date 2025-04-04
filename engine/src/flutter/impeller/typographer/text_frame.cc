@@ -4,6 +4,7 @@
 
 #include "impeller/typographer/text_frame.h"
 #include "flutter/display_list/geometry/dl_path.h"  // nogncheck
+#include "fml/status.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/font_glyph_pair.h"
@@ -145,11 +146,11 @@ void TextFrame::ClearFrameBounds() {
   bound_values_.clear();
 }
 
-std::optional<flutter::DlPath> TextFrame::GetPath() const {
+fml::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
   if (path_creator_) {
     return path_creator_();
   }
-  return std::nullopt;
+  return fml::Status(fml::StatusCode::kCancelled, "no path creator specified.");
 }
 
 bool TextFrame::IsFrameComplete() const {

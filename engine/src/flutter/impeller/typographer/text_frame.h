@@ -7,18 +7,21 @@
 
 #include <cstdint>
 
+#include "fml/status_or.h"
 #include "impeller/geometry/rational.h"
 #include "impeller/typographer/glyph.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
 
+// TODO(https://github.com/flutter/flutter/issues/166593): This is required to
+// break a cyclical dependency between display list, impeller, and typographer.
 namespace flutter {
 class DlPath;
 }
 
 namespace impeller {
 
-using PathCreator = std::function<std::optional<flutter::DlPath>()>;
+using PathCreator = std::function<fml::StatusOr<flutter::DlPath>()>;
 
 //------------------------------------------------------------------------------
 /// @brief      Represents a collection of shaped text runs.
@@ -115,7 +118,7 @@ class TextFrame {
 
   const Matrix& GetTransform() const { return transform_; }
 
-  std::optional<flutter::DlPath> GetPath() const;
+  fml::StatusOr<flutter::DlPath> GetPath() const;
 
   Point GetOffset() const;
 

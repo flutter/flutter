@@ -1523,11 +1523,11 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
   if (max_scale * text_frame->GetFont().GetMetrics().point_size >
       kMaxTextScale) {
-    std::optional<flutter::DlPath> path = text_frame->GetPath();
-    if (path.has_value()) {
+    fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
+    if (path.ok()) {
       Save(1);
       Concat(Matrix::MakeTranslation(position));
-      DrawPath(path->GetPath(), paint);
+      DrawPath(path.value().GetPath(), paint);
       Restore();
       return;
     }

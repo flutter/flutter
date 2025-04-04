@@ -8,6 +8,7 @@
 
 #include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/fml/logging.h"
+#include "fml/status.h"
 #include "impeller/typographer/backends/skia/typeface_skia.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
@@ -86,8 +87,12 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
     }
   }
   return std::make_shared<TextFrame>(
-      runs, ToRect(blob->bounds()), has_color, [blob]() {
+      runs, ToRect(blob->bounds()), has_color,
+      [blob]() -> fml::StatusOr<flutter::DlPath> {
         SkPath path = skia::textlayout::Paragraph::GetPath(blob.get());
+        if (path.isEmpty()) {
+          return fml::Status(fml::StatusCode::kCancelled, "No path available");
+        }
         SkPath transformed = path.makeTransform(
             SkMatrix::Translate(blob->bounds().left(), blob->bounds().top()));
         return flutter::DlPath(transformed);
