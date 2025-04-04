@@ -1517,8 +1517,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       isEnabled: isEnabled,
     );
 
-    final bool startThumbSelected = _lastThumbSelection == Thumb.start;
-    final bool endThumbSelected = _lastThumbSelection == Thumb.end;
+    final bool startThumbSelected = _lastThumbSelection == Thumb.start && !hoveringEndThumb;
+    final bool endThumbSelected = _lastThumbSelection == Thumb.end && !hoveringStartThumb;
     final Size resolvedscreenSize = screenSize.isEmpty ? size : screenSize;
 
     if (!_overlayAnimation.isDismissed) {

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine/display.dart';
@@ -47,7 +46,7 @@ class DisplayDprStream {
     } else {
       _dprMediaQuery = domWindow.matchMedia('(resolution: ${_currentDpr}dppx)');
     }
-    _dprMediaQuery.addEventListenerWithOptions(
+    _dprMediaQuery.addEventListener(
       'change',
       createDomEventListener(_onDprMediaQueryChange),
       <String, Object>{
@@ -59,14 +58,14 @@ class DisplayDprStream {
         // listener from the old mediaQuery after we're done with it.
         'once': true,
         'passive': true,
-      },
+      }.toJSAnyDeep,
     );
   }
 
   // Handler of the _dprMediaQuery 'change' event.
   //
   // This calls subscribe again because events are listened to with `once: true`.
-  JSVoid _onDprMediaQueryChange(DomEvent _) {
+  void _onDprMediaQueryChange(DomEvent _) {
     _currentDpr = _display.devicePixelRatio;
     _dprStreamController.add(_currentDpr);
     // Re-subscribe...

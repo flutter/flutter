@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
@@ -839,6 +840,45 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     });
 
+    test('Does not align content in autofill group elements', () {
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        createFlutterConfig('text'),
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // Form elements
+      {
+        final formElement = textEditing!.configuration!.autofillGroup!.formElement;
+        expect(formElement.style.alignContent, isEmpty);
+
+        // Should contain one <input type="text"> and one <input type="submit">
+        expect(formElement.children, hasLength(2));
+
+        final inputElement = formElement.children.first;
+        expect(inputElement.style.alignContent, isEmpty);
+
+        final submitElement = formElement.children.last;
+        expect(submitElement.style.alignContent, isEmpty);
+      }
+
+      // Active element
+      {
+        final DomHTMLElement activeElement = textEditing!.strategy.activeDomElement;
+        expect(activeElement.style.alignContent, isEmpty);
+      }
+    });
+
     test('focus and connection with blur', () async {
       // In all the desktop browsers we are keeping the connection
       // open, keep the text editing element focused if it receives a blur
@@ -1151,7 +1191,9 @@ Future<void> testMain() async {
 
     test('Moves the focus across input elements', () async {
       final List<DomEvent> focusinEvents = <DomEvent>[];
-      final DomEventListener handleFocusIn = createDomEventListener(focusinEvents.add);
+      final DomEventListener handleFocusIn = createDomEventListener((DomEvent event) {
+        focusinEvents.add(event);
+      });
 
       final MethodCall setClient1 = MethodCall('TextInput.setClient', <dynamic>[
         123,
@@ -3582,6 +3624,10 @@ Future<void> testMain() async {
       // though it supports forced-colors. Safari doesn't support forced-colors
       // so this isn't a problem there.
     }, skip: isFirefox || isSafari);
+
+    test('Multi-line text area scrollbars are zero-width', () {
+      expect(createMultilineTextArea().style.scrollbarWidth, 'none');
+    });
   });
 }
 
@@ -3640,8 +3686,8 @@ void cleanTestFlags() {
 
 void checkInputEditingState(DomElement? element, String text, int start, int end) {
   expect(element, isNotNull);
-  expect(domInstanceOfString(element, 'HTMLInputElement'), true);
-  final DomHTMLInputElement input = element! as DomHTMLInputElement;
+  expect(element!.isA<DomHTMLInputElement>(), true);
+  final DomHTMLInputElement input = element as DomHTMLInputElement;
   expect(defaultTextEditingRoot.ownerDocument?.activeElement, input);
   expect(input.value, text);
   expect(input.selectionStart, start);

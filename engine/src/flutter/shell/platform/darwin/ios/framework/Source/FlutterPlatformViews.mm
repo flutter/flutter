@@ -249,6 +249,10 @@ static BOOL _preparedOnce = NO;
   CGRect rectSoFar_;
 }
 
+- (instancetype)initWithFrame:(CGRect)frame {
+  return [self initWithFrame:frame screenScale:[UIScreen mainScreen].scale];
+}
+
 - (instancetype)initWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale {
   if (self = [super initWithFrame:frame]) {
     self.backgroundColor = UIColor.clearColor;
@@ -463,11 +467,12 @@ static BOOL _preparedOnce = NO;
   return self;
 }
 
-- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame screenScale:(CGFloat)screenScale {
+- (FlutterClippingMaskView*)getMaskViewWithFrame:(CGRect)frame {
   FML_DCHECK(self.pool.count <= self.capacity);
   if (self.pool.count == 0) {
     // The pool is empty, alloc a new one.
-    return [[FlutterClippingMaskView alloc] initWithFrame:frame screenScale:screenScale];
+    return [[FlutterClippingMaskView alloc] initWithFrame:frame
+                                              screenScale:UIScreen.mainScreen.scale];
   }
   FlutterClippingMaskView* maskView = [self.pool anyObject];
   maskView.frame = frame;

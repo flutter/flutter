@@ -3,7 +3,6 @@
 ../../../.gitignore
 ../../../.gn
 ../../../AUTHORS
-../../../CODEOWNERS
 ../../../README.md
 ../../../build
 ../../../build_overrides
@@ -16,7 +15,6 @@
 ../../../flutter/.gitignore
 ../../../flutter/.style.yapf
 ../../../flutter/AUTHORS
-../../../flutter/CODEOWNERS
 ../../../flutter/CONTRIBUTING.md
 ../../../flutter/Doxyfile
 ../../../flutter/README.md
@@ -1500,6 +1498,7 @@
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/README.md
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/pubspec.yaml
 ../../../flutter/third_party/dart/runtime/tools/heapsnapshot/test
+../../../flutter/third_party/dart/runtime/tools/profiling/.dart_tool
 ../../../flutter/third_party/dart/runtime/tools/profiling/.gitignore
 ../../../flutter/third_party/dart/runtime/tools/profiling/CHANGELOG.md
 ../../../flutter/third_party/dart/runtime/tools/profiling/README.md
@@ -3633,6 +3632,7 @@
 ../../../flutter/txt/tests
 ../../../flutter/txt/third_party/fonts
 ../../../flutter/web_sdk
+../../../fuchsia/sdk/linux/.build-id
 ../../../fuchsia/sdk/linux/.versions
 ../../../fuchsia/sdk/linux/AUTHORS
 ../../../fuchsia/sdk/linux/NOTICE.fuchsia
@@ -3982,6 +3982,7 @@
 ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_devfs_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_bti_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_mmio_reg_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_object_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_platform_device_cpp/meta.json
