@@ -1780,6 +1780,21 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
 ///
 /// The child sliver may still be excluded from the semantics tree if its [RenderSliver] does
 /// not provide a valid [RenderSliver.semanticBounds].
+///
+/// When using this sliver consider that if this sliver is placed after a lazy sliver like
+/// [SliverList] or [SliverGrid], the estimated total scroll extent may not be accurate. This
+/// can lead to assistive technologies failing to accurately scroll to [SliverEnsureSemantics]
+/// because the total scroll extent is underestimated. In this case you can use a [SliverFixedExtentList],
+/// [SliverVariedExtentList], or [SliverPrototypeExtentList] instead so that the total scroll
+/// extent before [SliverEnsureSemantics] is calculated accurately. For [SliverGrid]s you can
+/// provide a [SliverGridDelegateWithFixedCrossAxisCount], or [SliverGridDelegateWithMaxCrossAxisExtent].
+///
+/// {@tool dartpad}
+/// This example shows how to use [SliverEnsureSemantics] to keep certain headers and lists
+/// available to assistive technologies while they are outside the current viewport and cache extent.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_ensure_semantics.0.dart **
+/// {@end-tool}
 class SliverEnsureSemantics extends SingleChildRenderObjectWidget {
   /// Creates a sliver that ensures its sliver child is included in the semantics tree.
   const SliverEnsureSemantics({super.key, required Widget sliver}) : super(child: sliver);
