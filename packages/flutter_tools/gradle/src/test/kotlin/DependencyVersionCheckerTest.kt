@@ -78,7 +78,7 @@ class DependencyVersionCheckerTest {
 
     @Test
     fun `AGP version in warn range results in warning logs`() {
-        val exampleWarnAgpVersion = AndroidPluginVersion(7, 1, 0)
+        val exampleWarnAgpVersion = AndroidPluginVersion(8, 2, 0)
         val mockProject = MockProjectFactory.createMockProjectWithSpecifiedDependencyVersions(agpVersion = exampleWarnAgpVersion)
 
         val mockExtraPropertiesExtension = mockProject.extra
