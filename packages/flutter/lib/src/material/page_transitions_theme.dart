@@ -800,34 +800,48 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
   ) => DualTransitionBuilder(
     animation: ReverseAnimation(secondaryAnimation),
     forwardBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-      return ColoredBox(
-        color:
-            animation.isAnimating
-                ? backgroundColor ?? Theme.of(context).colorScheme.surface
-                : Colors.transparent,
-        child: FadeTransition(
-          opacity: _fadeInTransition.animate(animation),
-          child: SlideTransition(
-            position: _secondaryForwardTranslationTween.animate(animation),
-            child: child,
-          ),
+      final Widget builder = FadeTransition(
+        opacity: _fadeInTransition.animate(animation),
+        child: SlideTransition(
+          position: _secondaryForwardTranslationTween.animate(animation),
+          child: child,
         ),
       );
+
+      final ModalRoute<dynamic>? route = ModalRoute.of(context);
+      if (route?.opaque ?? true) {
+        return ColoredBox(
+          color:
+              animation.isAnimating
+                  ? backgroundColor ?? Theme.of(context).colorScheme.surface
+                  : Colors.transparent,
+          child: builder,
+        );
+      } else {
+        return builder;
+      }
     },
     reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
-      return ColoredBox(
-        color:
-            animation.isAnimating
-                ? backgroundColor ?? Theme.of(context).colorScheme.surface
-                : Colors.transparent,
-        child: FadeTransition(
-          opacity: _fadeOutTransition.animate(animation),
-          child: SlideTransition(
-            position: _secondaryBackwardTranslationTween.animate(animation),
-            child: child,
-          ),
+      final Widget builder = FadeTransition(
+        opacity: _fadeOutTransition.animate(animation),
+        child: SlideTransition(
+          position: _secondaryBackwardTranslationTween.animate(animation),
+          child: child,
         ),
       );
+
+      final ModalRoute<dynamic>? route = ModalRoute.of(context);
+      if (route?.opaque ?? true) {
+        return ColoredBox(
+          color:
+              animation.isAnimating
+                  ? backgroundColor ?? Theme.of(context).colorScheme.surface
+                  : Colors.transparent,
+          child: builder,
+        );
+      } else {
+        return builder;
+      }
     },
     child: child,
   );
