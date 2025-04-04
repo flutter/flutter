@@ -3626,10 +3626,7 @@ Future<void> testMain() async {
     }, skip: isFirefox || isSafari);
 
     test('Multi-line text area scrollbars are zero-width', () {
-      expect(
-        createMultilineTextArea().style.scrollbarWidth,
-        'none',
-      );
+      expect(createMultilineTextArea().style.scrollbarWidth, 'none');
     });
   });
 }
