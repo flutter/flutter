@@ -153,7 +153,7 @@ class PluginHandler(
     }
 
     internal fun configurePlugins(engineVersionValue: String) {
-        configureLegacyPluginEachProjects(engineVersionValue)
+        // configureLegacyPluginEachProjects(engineVersionValue)
         val pluginList: List<Map<String?, Any?>> = getPluginList()
         pluginList.forEach { plugin: Map<String?, Any?> ->
             configurePluginProject(
@@ -197,7 +197,6 @@ class PluginHandler(
             pluginObject: Map<String?, Any?>,
             engineVersion: String
         ) {
-            // TODO(gmackall): should guard this with a pluginObject.contains().
             val pluginName =
                 requireNotNull(pluginObject["name"] as? String) { "Plugin name must be a string for plugin object: $pluginObject" }
             val pluginProject: Project = project.rootProject.findProject(":$pluginName") ?: return
@@ -313,8 +312,8 @@ class PluginHandler(
                     val dependencyProject =
                         project.rootProject.findProject(":$pluginDependencyName") ?: return@innerForEach
                     pluginProject.afterEvaluate {
-                        this.dependencies.add("implementation", dependencyProject)
-                        // pluginProject.dependencies.add("implementation", dependencyProject)
+                        // this.dependencies.add("implementation", dependencyProject)
+                        pluginProject.dependencies.add("implementation", dependencyProject)
                     }
                 }
             }
