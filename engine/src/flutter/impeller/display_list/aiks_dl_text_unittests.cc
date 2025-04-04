@@ -881,13 +881,18 @@ TEST_P(AiksTest, LoAndBehold) {
   std::vector<Scalar> scales = {4, 8, 16, 24, 32};
   std::vector<Scalar> spacing = {8, 8, 8, 8, 8};
   Scalar space = 16;
+  Scalar x = 0;
   for (auto i = 0u; i < scales.size(); i++) {
     builder.Save();
     builder.Scale(scales[i], scales[i]);
     RenderTextInCanvasSkia(
         GetContext(), builder, "lo", "Roboto-Regular.ttf",
-        TextRenderOptions{.font_size = 16, .position = DlPoint(0, space)});
+        TextRenderOptions{.font_size = 16, .position = DlPoint(x, space)});
     space += spacing[i];
+    if (i == 3) {
+      x = 10;
+      space = 16;
+    }
     builder.Restore();
   }
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
