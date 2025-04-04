@@ -28,7 +28,7 @@ import 'theme.dart';
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable
-class DialogTheme extends InheritedTheme with Diagnosticable {
+class DialogTheme extends InheritedTheme<DialogThemeData, Object?> with Diagnosticable {
   /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
   const DialogTheme({
     super.key,
@@ -296,6 +296,21 @@ class DialogTheme extends InheritedTheme with Diagnosticable {
       DiagnosticsProperty<EdgeInsets>('insetPadding', insetPadding, defaultValue: null),
     );
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    DialogTheme oldWidget,
+    Set<ThemeSelector<DialogThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<DialogThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

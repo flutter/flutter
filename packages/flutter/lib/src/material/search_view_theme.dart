@@ -245,7 +245,7 @@ class SearchViewThemeData with Diagnosticable {
 ///
 ///  * [SearchViewThemeData], which describes the actual configuration of a search view
 ///    theme.
-class SearchViewTheme extends InheritedTheme {
+class SearchViewTheme extends InheritedTheme<SearchViewThemeData, Object?> {
   /// Creates a const theme that controls the configurations for the search view
   /// created by the [SearchAnchor] widget.
   const SearchViewTheme({super.key, required this.data, required super.child});
@@ -274,4 +274,19 @@ class SearchViewTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(SearchViewTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    SearchViewTheme oldWidget,
+    Set<ThemeSelector<SearchViewThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<SearchViewThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
