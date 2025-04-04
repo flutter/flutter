@@ -1779,7 +1779,8 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
 /// the [RenderViewport] when it is outside the current viewport and outside the cache extent.
 ///
 /// The child sliver may still be excluded from the semantics tree if its [RenderSliver] does
-/// not provide a valid [RenderSliver.semanticBounds].
+/// not provide a valid [RenderSliver.semanticBounds]. This sliver does not guarantee its
+/// child sliver is laid out.
 ///
 /// When using this sliver consider that if this sliver is placed after a lazy sliver like
 /// [SliverList] or [SliverGrid], the estimated total scroll extent may not be accurate. This
