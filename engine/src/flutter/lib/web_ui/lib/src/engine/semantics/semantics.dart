@@ -249,6 +249,8 @@ class SemanticsNodeUpdate {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -367,6 +369,12 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsInputType inputType;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final double minValue;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final double maxValue;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -1418,6 +1426,32 @@ class SemanticsObject {
     _dirtyFields |= _validationResultIndex;
   }
 
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  double? get minValue => _minValue;
+  double? _minValue;
+
+  static const int _minValueIndex = 1 << 28;
+
+  /// Whether the [minValue] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isMinValueDirty => _isDirty(_minValueIndex);
+  void _markMinValueDirty() {
+    _dirtyFields |= _minValueIndex;
+  }
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  double? get maxValue => _maxValue;
+  double? _maxValue;
+
+  static const int _maxValueIndex = 1 << 29;
+
+  /// Whether the [maxValue] field has been updated but has not been
+  /// applied to the DOM yet.
+  bool get isMaxValueDirty => _isDirty(_maxValueIndex);
+  void _markMaxValueDirty() {
+    _dirtyFields |= _maxValueIndex;
+  }
+
   /// A unique permanent identifier of the semantics node in the tree.
   final int id;
 
@@ -2036,7 +2070,7 @@ class SemanticsObject {
       EngineSemanticsRole.menuItemRadio => SemanticMenuItemRadio(this),
       EngineSemanticsRole.alert => SemanticAlert(this),
       EngineSemanticsRole.status => SemanticStatus(this),
-      EngineSemanticsRole.progressBar => SementicsProgressBar(this),
+      EngineSemanticsRole.progressBar => SemanticsProgressBar(this),
       EngineSemanticsRole.loadingSpinner => SementicsLoadingSpinner(this),
       EngineSemanticsRole.generic => GenericRole(this),
     };

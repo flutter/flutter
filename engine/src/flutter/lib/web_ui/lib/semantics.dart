@@ -393,6 +393,8 @@ class SemanticsUpdateBuilder {
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
+    required double minValue,
+    required double maxValue,
   }) {
     if (transform.length != 16) {
       throw ArgumentError('transform argument must have 16 entries.');
@@ -438,6 +440,8 @@ class SemanticsUpdateBuilder {
         controlsNodes: controlsNodes,
         validationResult: validationResult,
         inputType: inputType,
+        minValue: minValue,
+        maxValue: maxValue,
       ),
     );
   }

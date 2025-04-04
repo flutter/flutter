@@ -739,6 +739,8 @@ class SemanticsData with Diagnosticable {
     required this.controlsNodes,
     required this.validationResult,
     required this.inputType,
+    required this.minValue,
+    required this.maxValue,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -1010,6 +1012,12 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
+  /// {@macro flutter.semantics.SemanticsNode.maxValue}
+  final double? maxValue;
+
+  /// {@macro flutter.semantics.SemanticsNode.minValue}
+  final double? minValue;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -1082,6 +1090,8 @@ class SemanticsData with Diagnosticable {
         ),
       );
     }
+    properties.add(DoubleProperty('minValue', minValue, defaultValue: null));
+    properties.add(DoubleProperty('maxValue', maxValue, defaultValue: null));
   }
 
   @override
@@ -1117,7 +1127,9 @@ class SemanticsData with Diagnosticable {
         other.validationResult == validationResult &&
         other.inputType == inputType &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
-        setEquals<String>(controlsNodes, other.controlsNodes);
+        setEquals<String>(controlsNodes, other.controlsNodes) &&
+        minValue == other.minValue &&
+        maxValue == other.maxValue;
   }
 
   @override
@@ -1154,6 +1166,8 @@ class SemanticsData with Diagnosticable {
       validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
       inputType,
+      minValue,
+      maxValue,
     ),
   );
 
@@ -1325,6 +1339,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
+    this.minValue,
+    this.maxValue,
     this.validationResult = SemanticsValidationResult.none,
   }) : assert(
          label == null || attributedLabel == null,
@@ -2180,6 +2196,12 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final SemanticsInputType? inputType;
 
+  /// The maximum value of the node.
+  final double? maxValue;
+
+  /// The minimum value of the node.
+  final double? minValue;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -2815,7 +2837,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _headingLevel != config._headingLevel ||
         _linkUrl != config._linkUrl ||
         _role != config.role ||
-        _validationResult != config.validationResult;
+        _validationResult != config.validationResult ||
+        _minValue != config._minValue ||
+        _maxValue != config._maxValue;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -3154,6 +3178,14 @@ class SemanticsNode with DiagnosticableTreeMixin {
   Set<String>? get controlsNodes => _controlsNodes;
   Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
 
+  /// The minimum value of the node.
+  double? get minValue => _minValue;
+  double? _minValue;
+
+  /// The maximum value of the node.
+  double? get maxValue => _maxValue;
+  double? _maxValue;
+
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   SemanticsValidationResult get validationResult => _validationResult;
   SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
@@ -3239,7 +3271,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _controlsNodes = config._controlsNodes;
     _validationResult = config._validationResult;
     _inputType = config._inputType;
-
+    _minValue = config.minValue;
+    _maxValue = config.maxValue;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -3292,6 +3325,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
     SemanticsInputType inputType = _inputType;
+    double? minValue = _minValue;
+    double? maxValue = _maxValue;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3400,6 +3435,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
           controlsNodes = <String>{...controlsNodes!, ...node._controlsNodes!};
         }
 
+        minValue ??= node._minValue;
+        maxValue ??= node._maxValue;
+
         if (validationResult == SemanticsValidationResult.none) {
           validationResult = node._validationResult;
         } else if (validationResult == SemanticsValidationResult.valid) {
@@ -3447,6 +3485,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: controlsNodes,
       validationResult: validationResult,
       inputType: inputType,
+      minValue: minValue,
+      maxValue: maxValue,
     );
   }
 
@@ -3535,6 +3575,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
       controlsNodes: data.controlsNodes?.toList(),
       validationResult: data.validationResult,
       inputType: data.inputType,
+      minValue: data.minValue ?? -1,
+      maxValue: data.maxValue ?? -1,
     );
     _dirty = false;
   }
@@ -3735,6 +3777,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (_inputType != SemanticsInputType.none) {
       properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
     }
+    properties.add(DoubleProperty('minValue', _minValue, defaultValue: null));
+    properties.add(DoubleProperty('maxValue', _maxValue, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -5724,6 +5768,22 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// The maximum value of the node.
+  double? get maxValue => _maxValue;
+  double? _maxValue;
+  set maxValue(double? value) {
+    _maxValue = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The minimum value of the node.
+  double? get minValue => _minValue;
+  double? _minValue;
+  set minValue(double? value) {
+    _minValue = value;
+    _hasBeenAnnotated = true;
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -5822,6 +5882,12 @@ class SemanticsConfiguration {
       return false;
     }
     if (_hasExplicitRole && other._hasExplicitRole) {
+      return false;
+    }
+    if (_minValue != null && other._minValue != null) {
+      return false;
+    }
+    if (_maxValue != null && other._maxValue != null) {
       return false;
     }
     return true;
@@ -5925,6 +5991,8 @@ class SemanticsConfiguration {
         _validationResult = child._validationResult;
       }
     }
+    _minValue ??= child._minValue;
+    _maxValue ??= child._maxValue;
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
@@ -5970,7 +6038,9 @@ class SemanticsConfiguration {
       .._role = _role
       .._controlsNodes = _controlsNodes
       .._validationResult = _validationResult
-      .._inputType = _inputType;
+      .._inputType = _inputType
+      .._minValue = _minValue
+      .._maxValue = _maxValue;
   }
 }
 
