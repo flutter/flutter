@@ -104,6 +104,11 @@ class SemanticIncrementable extends SemanticRole {
   bool _pendingResync = false;
 
   @override
+  void updateValidationResult() {
+    SemanticRole.updateAriaInvalid(_element, semanticsObject.validationResult);
+  }
+
+  @override
   void update() {
     super.update();
 
