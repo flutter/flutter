@@ -49,8 +49,12 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   ) {
     return _PredictiveBackGestureDetector(
       route: route,
-      // TODO(justinmc): No underscores.
-      builder: (BuildContext context, _, __, ___) {
+      builder: (
+        BuildContext context,
+        _PredictiveBackPhase phase,
+        PredictiveBackEvent? startBackEvent,
+        PredictiveBackEvent? currentBackEvent,
+      ) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
@@ -75,7 +79,15 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-// TODO(maRci002): add docs
+// TODO(justinmc): Elaborate
+/// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
+/// transition animation that looks like Android's Shared Element page
+/// transition.
+///
+/// See also:
+///
+///  * [https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition],
+///  which is the native Android docs for this page transition.
 class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// predictive back transition.
