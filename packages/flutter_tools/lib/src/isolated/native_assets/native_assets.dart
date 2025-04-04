@@ -34,33 +34,61 @@ import 'windows/native_assets.dart';
 final class DartBuildResult {
   const DartBuildResult(this.codeAssets, this.dependencies);
 
-  const DartBuildResult.empty() : codeAssets = const <CodeAsset>[], dependencies = const <Uri>[];
+  const DartBuildResult.empty()
+    : codeAssets = const <FlutterCodeAsset>[],
+      dependencies = const <Uri>[];
 
   factory DartBuildResult.fromJson(Map<String, Object?> json) {
     final List<Uri> dependencies = <Uri>[
       for (final Object? encodedUri in json['dependencies']! as List<Object?>)
         Uri.parse(encodedUri! as String),
     ];
-    final List<CodeAsset> codeAssets = <CodeAsset>[
+    final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[
       for (final Object? json in json['code_assets']! as List<Object?>)
-        CodeAsset.fromEncoded(EncodedAsset.fromJson(json! as Map<String, Object?>)),
+        FlutterCodeAsset(
+          codeAsset: CodeAsset.fromEncoded(
+            EncodedAsset.fromJson(
+              (json! as Map<String, Object?>)['asset']! as Map<String, Object?>,
+            ),
+          ),
+          target: Target.fromString((json as Map<String, Object?>)['target']! as String),
+        ),
     ];
     return DartBuildResult(codeAssets, dependencies);
   }
 
-  final List<CodeAsset> codeAssets;
+  final List<FlutterCodeAsset> codeAssets;
   final List<Uri> dependencies;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'dependencies': <Object?>[for (final Uri dep in dependencies) dep.toString()],
-    'code_assets': <Object?>[for (final CodeAsset code in codeAssets) code.encode().toJson()],
+    'code_assets': <Object?>[
+      for (final FlutterCodeAsset code in codeAssets)
+        <String, Object>{
+          'asset': code.codeAsset.encode().toJson(),
+          'target': code.target.toString(),
+        },
+    ],
   };
 
   /// The files that eventually should be bundled with the app.
   List<Uri> get filesToBeBundled => <Uri>[
-    for (final CodeAsset code in codeAssets)
-      if (code.linkMode is DynamicLoadingBundled) code.file!,
+    for (final FlutterCodeAsset code in codeAssets)
+      if (code.codeAsset.linkMode is DynamicLoadingBundled) code.codeAsset.file!,
   ];
+}
+
+/// A [CodeAsset] for a specific [target].
+///
+/// Flutter builds [CodeAsset]s for multiple architectures (on MacOS and iOS).
+/// This class distinguishes the (otherwise identical) [codeAsset]s on different
+/// [target]s. These are then later combined into a single [KernelAsset] before
+/// being added to the native assets manifest.
+class FlutterCodeAsset {
+  FlutterCodeAsset({required this.codeAsset, required this.target});
+
+  final CodeAsset codeAsset;
+  final Target target;
 }
 
 /// Invokes the build of all transitive Dart packages and prepares code assets
@@ -122,7 +150,7 @@ Future<void> installCodeAssets({
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
   final String? codesignIdentity = environmentDefines[kCodesignIdentity];
-  final Map<CodeAsset, KernelAsset> assetTargetLocations = assetTargetLocationsForOS(
+  final Map<FlutterCodeAsset, KernelAsset> assetTargetLocations = assetTargetLocationsForOS(
     targetOS,
     dartBuildResult.codeAssets,
     flutterTester,
@@ -379,18 +407,18 @@ Uri nativeAssetsBuildUri(Uri projectUri, OS os) {
   return projectUri.resolve('$buildDir/native_assets/$os/');
 }
 
-Map<CodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(
-  List<CodeAsset> assets,
+Map<FlutterCodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(
+  List<FlutterCodeAsset> assets,
   Uri? absolutePath,
 ) {
-  return <CodeAsset, KernelAsset>{
-    for (final CodeAsset asset in assets)
+  return <FlutterCodeAsset, KernelAsset>{
+    for (final FlutterCodeAsset asset in assets)
       asset: _targetLocationSingleArchitecture(asset, absolutePath),
   };
 }
 
-KernelAsset _targetLocationSingleArchitecture(CodeAsset asset, Uri? absolutePath) {
-  final LinkMode linkMode = asset.linkMode;
+KernelAsset _targetLocationSingleArchitecture(FlutterCodeAsset asset, Uri? absolutePath) {
+  final LinkMode linkMode = asset.codeAsset.linkMode;
   final KernelAssetPath kernelAssetPath;
   switch (linkMode) {
     case DynamicLoadingSystem _:
@@ -400,7 +428,7 @@ KernelAsset _targetLocationSingleArchitecture(CodeAsset asset, Uri? absolutePath
     case LookupInProcess _:
       kernelAssetPath = KernelAssetInProcess();
     case DynamicLoadingBundled _:
-      final String fileName = asset.file!.pathSegments.last;
+      final String fileName = asset.codeAsset.file!.pathSegments.last;
       Uri uri;
       if (absolutePath != null) {
         // Flutter tester needs full host paths.
@@ -415,16 +443,12 @@ KernelAsset _targetLocationSingleArchitecture(CodeAsset asset, Uri? absolutePath
     default:
       throw Exception('Unsupported asset link mode ${linkMode.runtimeType} in asset $asset');
   }
-  return KernelAsset(
-    id: asset.id,
-    target: Target.fromArchitectureAndOS(asset.architecture, asset.os),
-    path: kernelAssetPath,
-  );
+  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
 }
 
-Map<CodeAsset, KernelAsset> assetTargetLocationsForOS(
+Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsForOS(
   OS targetOS,
-  List<CodeAsset> codeAssets,
+  List<FlutterCodeAsset> codeAssets,
   bool flutterTester,
   Uri buildUri,
 ) {
@@ -450,7 +474,7 @@ Future<void> _copyNativeCodeAssetsForOS(
   Uri buildUri,
   BuildMode buildMode,
   FileSystem fileSystem,
-  Map<CodeAsset, KernelAsset> assetTargetLocations,
+  Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
   String? codesignIdentity,
   bool flutterTester,
 ) async {
@@ -458,9 +482,10 @@ Future<void> _copyNativeCodeAssetsForOS(
   // If a code asset that use a linking mode of [LookupInProcess],
   // [LookupInExecutable] or [DynamicLoadingSystem] do not have anything to
   // bundle as part of the app.
-  assetTargetLocations = <CodeAsset, KernelAsset>{
-    for (final CodeAsset codeAsset in assetTargetLocations.keys)
-      if (codeAsset.linkMode is DynamicLoadingBundled) codeAsset: assetTargetLocations[codeAsset]!,
+  assetTargetLocations = <FlutterCodeAsset, KernelAsset>{
+    for (final FlutterCodeAsset codeAsset in assetTargetLocations.keys)
+      if (codeAsset.codeAsset.linkMode is DynamicLoadingBundled)
+        codeAsset: assetTargetLocations[codeAsset]!,
   };
 
   if (assetTargetLocations.isEmpty) {
@@ -468,7 +493,7 @@ Future<void> _copyNativeCodeAssetsForOS(
   }
 
   globals.logger.printTrace('Copying native assets to ${buildUri.toFilePath()}.');
-  final List<CodeAsset> codeAssets = assetTargetLocations.keys.toList();
+  final List<FlutterCodeAsset> codeAssets = assetTargetLocations.keys.toList();
   switch (targetOS) {
     case OS.windows:
     case OS.linux:
@@ -533,7 +558,7 @@ Future<DartBuildResult> _runDartBuild({
           : architectures.toList().toString();
 
   globals.logger.printTrace('Building native assets for $targetOS $architectureString.');
-  final List<EncodedAsset> assets = <EncodedAsset>[];
+  final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[];
   final Set<Uri> dependencies = <Uri>{};
 
   final EnvironmentType? environmentType;
@@ -566,13 +591,14 @@ Future<DartBuildResult> _runDartBuild({
   final MacOSCodeConfig? macOSConfig =
       targetOS == OS.macOS ? MacOSCodeConfig(targetVersion: targetMacOSVersion) : null;
   for (final Architecture architecture in architectures) {
+    final Target target = Target.fromArchitectureAndOS(architecture, targetOS!);
     final BuildResult? buildResult = await buildRunner.build(
       extensions: <ProtocolExtension>[
         CodeAssetExtension(
           targetArchitecture: architecture,
           linkModePreference: LinkModePreference.dynamic,
           cCompiler: cCompilerConfig,
-          targetOS: targetOS!,
+          targetOS: targetOS,
           android: androidConfig,
           iOS: iosConfig,
           macOS: macOSConfig,
@@ -585,7 +611,7 @@ Future<DartBuildResult> _runDartBuild({
     }
     dependencies.addAll(buildResult.dependencies);
     if (!linkingEnabled) {
-      assets.addAll(buildResult.encodedAssets);
+      codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
     } else {
       final LinkResult? linkResult = await buildRunner.link(
         extensions: <ProtocolExtension>[
@@ -604,19 +630,23 @@ Future<DartBuildResult> _runDartBuild({
       if (linkResult == null) {
         _throwNativeAssetsLinkFailed();
       }
-      assets.addAll(linkResult.encodedAssets);
+      codeAssets.addAll(_filterCodeAssets(linkResult.encodedAssets, target));
       dependencies.addAll(linkResult.dependencies);
     }
   }
 
-  final List<CodeAsset> codeAssets =
-      assets
-          .where((EncodedAsset asset) => asset.type == CodeAsset.type)
-          .map<CodeAsset>(CodeAsset.fromEncoded)
-          .toList();
   globals.logger.printTrace('Building native assets for $targetOS $architectureString done.');
   return DartBuildResult(codeAssets, dependencies.toList());
 }
+
+List<FlutterCodeAsset> _filterCodeAssets(List<EncodedAsset> assets, Target target) =>
+    assets
+        .where((EncodedAsset asset) => asset.isCodeAsset)
+        .map<FlutterCodeAsset>(
+          (EncodedAsset encodedAsset) =>
+              FlutterCodeAsset(codeAsset: encodedAsset.asCodeAsset, target: target),
+        )
+        .toList();
 
 List<Architecture> _architecturesForOS(
   TargetPlatform targetPlatform,
@@ -676,7 +706,7 @@ Architecture _getNativeArchitecture(TargetPlatform targetPlatform) {
 
 Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   Uri buildUri,
-  Map<CodeAsset, KernelAsset> assetTargetLocations,
+  Map<FlutterCodeAsset, KernelAsset> assetTargetLocations,
   BuildMode buildMode,
   FileSystem fileSystem,
 ) async {
@@ -686,8 +716,8 @@ Future<void> _copyNativeCodeAssetsToBundleOnWindowsLinux(
   if (!buildDir.existsSync()) {
     buildDir.createSync(recursive: true);
   }
-  for (final MapEntry<CodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
-    final Uri source = assetMapping.key.file!;
+  for (final MapEntry<FlutterCodeAsset, KernelAsset> assetMapping in assetTargetLocations.entries) {
+    final Uri source = assetMapping.key.codeAsset.file!;
     final Uri target = (assetMapping.value.path as KernelAssetAbsolutePath).uri;
     final Uri targetUri = buildUri.resolveUri(target);
     final String targetFullPath = targetUri.toFilePath();
