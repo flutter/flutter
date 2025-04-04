@@ -247,34 +247,81 @@ class PluginHandlerTest {
         verify { pluginProject.dependencies.add("implementation", pluginDependencyProject) }
     }
 
-    // TODO(gmackall) tests for configureLegacyPluginEachProjects
+    @Test
+    fun `configurePlugins throws IllegalArgumentException when plugin has null dependencies`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
 
-    // TODO(gmackall): convert this to a test of the public api (configurePlugins)
-//    @Test
-//    fun `configurePluginDependencies throws IllegalArgumentException when plugin has null dependencies`() {
-//        val project = mockk<Project>()
-//        val pluginProject = mockk<Project>()
-//        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
-//        val pluginWithNullDependencies: MutableMap<String?, Any?> = cameraDependency.toMutableMap()
-//        pluginWithNullDependencies["dependencies"] = null
-//        every { project.rootProject.findProject(":${pluginWithNullDependencies["name"]}") } returns pluginProject
-//        every {
-//            project.extensions
-//                .findByType(BaseExtension::class.java)!!
-//                .buildTypes
-//                .iterator()
-//        } returns
-//            mutableListOf(
-//                mockBuildType
-//            ).iterator()
-//        every { mockBuildType.name } returns "debug"
-//        every { mockBuildType.isDebuggable } returns true
-//
-//        assertThrows<IllegalArgumentException> {
-//            PluginHandler.configurePluginDependencies(
-//                project = project,
-//                pluginObject = pluginWithNullDependencies
-//            )
-//        }
-//    }
+        // configuration for configureLegacyPluginEachProjects
+        val projectDir = tempDir.resolve("my-plugin")
+        projectDir.toFile().mkdirs()
+        every { project.projectDir } returns projectDir.toFile()
+        val settingsGradle = File(projectDir.parent.toFile(), "settings.gradle")
+        settingsGradle.createNewFile()
+        val mockLogger = mockk<Logger>()
+        every { project.logger } returns mockLogger
+
+        val pluginProject = mockk<Project>()
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        every { pluginProject.hasProperty("local-engine-repo") } returns false
+        every { pluginProject.hasProperty("android") } returns true
+        every { mockBuildType.name } returns "debug"
+        every { mockBuildType.isDebuggable } returns true
+        val pluginWithNullDependencies: MutableMap<String?, Any?> = cameraDependency.toMutableMap()
+        pluginWithNullDependencies["dependencies"] = null
+        every { project.rootProject.findProject(":${pluginWithNullDependencies["name"]}") } returns pluginProject
+        every { pluginProject.extensions.create(any(), any<Class<Any>>()) } returns mockk()
+        every { project.afterEvaluate(any<Action<Project>>()) } returns Unit
+        every { pluginProject.afterEvaluate(any<Action<Project>>()) } returns Unit
+
+        val mockProjectBuildTypes =
+            mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        val mockPluginProjectBuildTypes =
+            mockk<NamedDomainObjectContainer<com.android.build.gradle.internal.dsl.BuildType>>()
+        every { project.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockProjectBuildTypes
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.buildTypes } returns mockPluginProjectBuildTypes
+        every { mockPluginProjectBuildTypes.addAll(any()) } returns true
+        every { pluginProject.configurations.named(any<String>()) } returns mockk()
+        every { pluginProject.dependencies.add(any(), any()) } returns mockk()
+
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .buildTypes
+                .iterator()
+        } returns
+            mutableListOf(
+                mockBuildType
+            ).iterator() andThen
+            mutableListOf( // can't return the same iterator as it is stateful
+                mockBuildType
+            ).iterator() andThen
+            mutableListOf( // and again
+                mockBuildType
+            ).iterator()
+        every { project.dependencies.add(any(), any()) } returns mockk()
+        every { project.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+        every { pluginProject.extensions.findByType(BaseExtension::class.java)!!.compileSdkVersion } returns "android-35"
+
+        val pluginHandler = PluginHandler(project)
+        mockkObject(NativePluginLoaderReflectionBridge)
+        // mock return of NativePluginLoaderReflectionBridge.getPlugins
+        every { NativePluginLoaderReflectionBridge.getPlugins(any(), any()) } returns
+            listOf(
+                pluginWithNullDependencies
+            )
+        // mock method calls that are invoked by the args to NativePluginLoaderReflectionBridge
+        every { project.extraProperties } returns mockk()
+        every { project.extensions.findByType(FlutterExtension::class.java) } returns FlutterExtension()
+        every { project.file(any()) } returns mockk()
+
+        assertThrows<IllegalArgumentException> {
+            pluginHandler.configurePlugins(
+                engineVersionValue = EXAMPLE_ENGINE_VERSION
+            )
+        }
+    }
+
+    // TODO(gmackall) tests for configureLegacyPluginEachProjects
 }
