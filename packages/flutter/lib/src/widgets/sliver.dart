@@ -1773,6 +1773,13 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
 }
 
 /// A sliver that ensures its sliver child is included in the semantics tree.
+///
+/// This sliver ensures that its child sliver is still visited by the [RenderViewport]
+/// when constructing the semantics tree, and is not clipped out of the semantics tree by
+/// the [RenderViewport] when it is outside the current viewport and outside the cache extent.
+///
+/// The child sliver may still be excluded from the semantics tree if its [RenderSliver] does
+/// not provide a valid [RenderSliver.semanticBounds].
 class SliverEnsureSemantics extends SingleChildRenderObjectWidget {
   /// Creates a sliver that ensures its sliver child is included in the semantics tree.
   const SliverEnsureSemantics({super.key, required Widget sliver}) : super(child: sliver);
