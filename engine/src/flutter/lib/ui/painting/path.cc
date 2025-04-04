@@ -202,6 +202,18 @@ void CanvasPath::addRRect(const RRect& rrect) {
   resetVolatility();
 }
 
+void CanvasPath::addRSuperellipse(const RSuperellipse* rsuperellipse) {
+  DlPathBuilder builder;
+  builder.SetConvexity(impeller::Convexity::kConvex);
+  builder.SetBounds(rsuperellipse->bounds());
+  builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
+      rsuperellipse->bounds(), rsuperellipse->radii()));
+  sk_path_.addPath(DlPath(builder.TakePath()).GetSkPath(),
+                   SkPath::kAppend_AddPathMode);
+
+  resetVolatility();
+}
+
 void CanvasPath::addPath(CanvasPath* path, double dx, double dy) {
   if (!path) {
     Dart_ThrowException(ToDart("Path.addPath called with non-genuine Path."));
