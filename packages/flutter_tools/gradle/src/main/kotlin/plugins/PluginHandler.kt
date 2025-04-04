@@ -182,7 +182,7 @@ class PluginHandler(
         /**
          * Flutter Docs Website URLs for help messages.
          */
-        const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG = "https://flutter.dev/to/review-gradle-config"
+        private const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG = "https://flutter.dev/to/review-gradle-config"
 
         /**
          * Performs configuration related to the plugin's Gradle [Project], including

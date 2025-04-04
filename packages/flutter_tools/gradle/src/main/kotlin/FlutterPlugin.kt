@@ -532,7 +532,7 @@ class FlutterPlugin : Plugin<Project> {
             val fileSystemSchemeValue: String? =
                 project.findProperty("filesystem-scheme")?.toString()
             val trackWidgetCreationValue: Boolean =
-                project.findProperty("track-widget-creation")?.toString()?.toBooleanStrictOrNull() ?: true
+                project.findProperty("track-widget-creation")?.toString()?.toBoolean() ?: true
             val frontendServerStarterPathValue: String? =
                 project.findProperty("frontend-server-starter-path")?.toString()
             val extraFrontEndOptionsValue: String? =
@@ -550,9 +550,9 @@ class FlutterPlugin : Plugin<Project> {
             val codeSizeDirectoryValue: String? =
                 project.findProperty("code-size-directory")?.toString()
             val deferredComponentsValue: Boolean =
-                project.findProperty("deferred-components")?.toString()?.toBooleanStrictOrNull() ?: false
+                project.findProperty("deferred-components")?.toString()?.toBoolean() ?: false
             val validateDeferredComponentsValue: Boolean =
-                project.findProperty("validate-deferred-components")?.toString()?.toBooleanStrictOrNull() ?: true
+                project.findProperty("validate-deferred-components")?.toString()?.toBoolean() ?: true
 
             if (FlutterPluginUtils.shouldProjectSplitPerAbi(project)) {
                 variant.outputs.forEach { output ->
