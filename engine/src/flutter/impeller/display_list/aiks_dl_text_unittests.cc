@@ -877,6 +877,7 @@ TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   std::vector<Scalar> scales = {4, 8, 16, 24, 32};
   std::vector<Scalar> spacing = {8, 8, 8, 8, 8};
