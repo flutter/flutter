@@ -364,7 +364,6 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
 
   ScrollNotificationObserverState? _scrollNotificationObserver;
   double _fadeExtent = 0.0;
-  double? _maxHeight;
 
   @override
   void initState() {
