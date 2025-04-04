@@ -179,6 +179,8 @@ impeller_component("entity") {
     "contents/sweep_gradient_contents.h",
     "contents/text_contents.cc",
     "contents/text_contents.h",
+    "contents/text_shadow_cache.cc",
+    "contents/text_shadow_cache.h",
     "contents/texture_contents.cc",
     "contents/texture_contents.h",
     "contents/tiled_texture_contents.cc",
