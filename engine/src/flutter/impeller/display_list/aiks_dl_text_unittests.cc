@@ -872,5 +872,26 @@ TEST_P(AiksTest, SingleIconShadowTest) {
             1u);
 }
 
+TEST_P(AiksTest, LoAndBehold) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+
+  std::vector<Scalar> scales = {4, 8, 16, 24, 32};
+  std::vector<Scalar> spacing = {8, 8, 8, 8, 8};
+  Scalar space = 16;
+  for (auto i = 0u; i < scales.size(); i++) {
+    builder.Save();
+    builder.Scale(scales[i], scales[i]);
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "lo", "Roboto-Regular.ttf",
+        TextRenderOptions{.font_size = 16, .position = DlPoint(0, space)});
+    space += spacing[i];
+    builder.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller
