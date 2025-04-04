@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/typographer/text_frame.h"
+#include "flutter/display_list/geometry/dl_path.h"  // nogncheck
+#include "fml/status.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/font_glyph_pair.h"
@@ -11,8 +13,14 @@ namespace impeller {
 
 TextFrame::TextFrame() = default;
 
-TextFrame::TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color)
-    : runs_(std::move(runs)), bounds_(bounds), has_color_(has_color) {}
+TextFrame::TextFrame(std::vector<TextRun>& runs,
+                     Rect bounds,
+                     bool has_color,
+                     const PathCreator& path_creator)
+    : runs_(std::move(runs)),
+      bounds_(bounds),
+      has_color_(has_color),
+      path_creator_(path_creator) {}
 
 TextFrame::~TextFrame() = default;
 
@@ -136,6 +144,13 @@ void TextFrame::AppendFrameBounds(const FrameBounds& frame_bounds) {
 
 void TextFrame::ClearFrameBounds() {
   bound_values_.clear();
+}
+
+fml::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
+  if (path_creator_) {
+    return path_creator_();
+  }
+  return fml::Status(fml::StatusCode::kCancelled, "no path creator specified.");
 }
 
 bool TextFrame::IsFrameComplete() const {

@@ -190,6 +190,34 @@ TEST_P(AiksTest, ScaledK) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+// This is a test that looks for glyph artifacts we've see.
+TEST_P(AiksTest, MassiveScaleConvertToPath) {
+  Scalar scale = 16.0;
+  auto callback = [&]() -> sk_sp<DisplayList> {
+    if (AiksTest::ImGuiBegin("Controls", nullptr,
+                             ImGuiWindowFlags_AlwaysAutoResize)) {
+      ImGui::SliderFloat("Scale", &scale, 4, 20);
+      ImGui::End();
+    }
+
+    DisplayListBuilder builder;
+    DlPaint paint;
+    paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+    builder.DrawPaint(paint);
+
+    builder.Scale(scale, scale);
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "HELLO", "Roboto-Regular.ttf",
+        TextRenderOptions{.font_size = 16,
+                          .color = (16 * scale >= 250) ? DlColor::kYellow()
+                                                       : DlColor::kOrange(),
+                          .position = DlPoint(0, 20)});
+    return builder.Build();
+  };
+
+  ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
 TEST_P(AiksTest, CanRenderTextFrameWithScalingOverflow) {
   Scalar scale = 60.0;
   Scalar offsetx = -500.0;
@@ -842,6 +870,33 @@ TEST_P(AiksTest, SingleIconShadowTest) {
                 .GetTextShadowCache()
                 .GetCacheSizeForTesting(),
             1u);
+}
+
+TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
+  builder.DrawPaint(paint);
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  std::vector<Scalar> scales = {4, 8, 16, 24, 32};
+  std::vector<Scalar> spacing = {8, 8, 8, 8, 8};
+  Scalar space = 16;
+  Scalar x = 0;
+  for (auto i = 0u; i < scales.size(); i++) {
+    builder.Save();
+    builder.Scale(scales[i], scales[i]);
+    RenderTextInCanvasSkia(
+        GetContext(), builder, "lo", "Roboto-Regular.ttf",
+        TextRenderOptions{.font_size = 16, .position = DlPoint(x, space)});
+    space += spacing[i];
+    if (i == 3) {
+      x = 10;
+      space = 16;
+    }
+    builder.Restore();
+  }
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing
