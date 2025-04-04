@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -439,12 +441,13 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (_maxHeight == null) {
-      _maxHeight ??= context.size?.height;
-    } else if (notification is ScrollUpdateNotification) {
+    if (notification is ScrollUpdateNotification) {
       final double currentHeight = context.size?.height ?? 0.0;
       setState(() {
-        _fadeExtent = _calculateScrollOpacity(currentHeight, _maxHeight!);
+        _fadeExtent = _calculateScrollOpacity(
+          currentHeight,
+          widget.itemSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
+        );
       });
     }
   }
