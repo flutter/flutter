@@ -1696,6 +1696,8 @@ abstract class SemanticsUpdateBuilder {
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
+    required double minValue,
+    required double maxValue,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1773,6 +1775,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     required List<String>? controlsNodes,
     SemanticsValidationResult validationResult = SemanticsValidationResult.none,
     required SemanticsInputType inputType,
+    required double minValue,
+    required double maxValue,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1820,6 +1824,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       controlsNodes,
       validationResult.index,
       inputType.index,
+      minValue,
+      maxValue,
     );
   }
 
@@ -1866,6 +1872,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Handle,
       Int32,
       Int32,
+      Double,
+      Double,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
@@ -1909,6 +1917,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     List<String>? controlsNodes,
     int validationResultIndex,
     int inputType,
+    double minValue,
+    double maxValue,
   );
 
   @override
