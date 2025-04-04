@@ -339,7 +339,7 @@ class DrawerController extends StatefulWidget {
     this.scrimColor,
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
-    this.drawerDismissible = true,
+    this.dismissible = true,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -361,7 +361,7 @@ class DrawerController extends StatefulWidget {
   /// Defaults to true.
   ///
   /// If false, tapping the barrier will not dismiss the drawer.
-  final bool drawerDismissible;
+  final bool dismissible;
 
   /// {@template flutter.material.DrawerController.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
@@ -733,7 +733,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   // On Android, the back button is used to dismiss a modal.
                   excluding: platformHasBackButton,
                   child: GestureDetector(
-                    onTap: widget.drawerDismissible ? close : null,
+                    onTap: widget.dismissible ? close : null,
                     child: Semantics(
                       label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
                       child: drawerScrim,
