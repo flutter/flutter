@@ -9,8 +9,8 @@ import 'semantics.dart';
 /// Uses aria progressbar role to convey this semantic information to the element.
 ///
 /// Screen-readers take advantage of "aria-label" to describe the visual.
-class SementicsProgressBar extends SemanticRole {
-  SementicsProgressBar(SemanticsObject semanticsObject)
+class SemanticsProgressBar extends SemanticRole {
+  SemanticsProgressBar(SemanticsObject semanticsObject)
     : super.withBasics(
         EngineSemanticsRole.progressBar,
         semanticsObject,
@@ -18,10 +18,37 @@ class SementicsProgressBar extends SemanticRole {
       ) {
     setAriaRole('progressbar');
 
-    // Progress indicators in Flutter use values between 0.0 and 1.0
-    setAttribute('aria-valuemin', "0");
-    setAttribute('aria-valuemax', "100");
-    setAttribute('aria-valuenow', semanticsObject.value);
+    // Get the min and max values from semantics object.
+    final double minValue = semanticsObject.minValue ?? 0.0;
+    final double maxValue = semanticsObject.maxValue ?? 100.0;
+
+    // Set ARIA attributes for min, max and current value.
+    setAttribute('aria-valuemin', minValue.toStringAsFixed(2));
+    setAttribute('aria-valuemax', maxValue.toStringAsFixed(2));
+
+    if (semanticsObject.value != null) {
+      setAttribute('aria-valuenow', semanticsObject.value!);
+    }
+  }
+
+  @override
+  void update() {
+    super.update();
+
+    final double minValue = semanticsObject.minValue ?? 0.0;
+    final double maxValue = semanticsObject.maxValue ?? 100.0;
+
+    if (semanticsObject.isMinValueDirty) {
+      setAttribute('aria-valuemin', minValue.toStringAsFixed(2));
+    }
+
+    if (semanticsObject.isMaxValueDirty) {
+      setAttribute('aria-valuemax', maxValue.toStringAsFixed(2));
+    }
+
+    if (semanticsObject.value != null) {
+      setAttribute('aria-valuenow', semanticsObject.value!);
+    }
   }
 
   @override
@@ -35,7 +62,7 @@ class SementicsLoadingSpinner extends SemanticRole {
         EngineSemanticsRole.loadingSpinner,
         semanticsObject,
         preferredLabelRepresentation: LabelRepresentation.ariaLabel,
-      ) {}
+      );
 
   @override
   bool focusAsRouteDefault() => focusable?.focusAsRouteDefault() ?? false;
