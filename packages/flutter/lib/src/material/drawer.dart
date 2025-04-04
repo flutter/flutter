@@ -356,9 +356,11 @@ class DrawerController extends StatefulWidget {
   /// Optional callback that is called when a [Drawer] is opened or closed.
   final DrawerCallback? drawerCallback;
 
-  // If set to false, prevents the barrier behind the [Drawer] from being dismissed.
-  // Defaults to true. The value of this flag also gets inherited by the parent Scaffold,
-  // or can be overridden if a [DrawerController] is extended and this value set accordingly.
+  /// Whether tapping the barrier behind the [Drawer] dismisses it.
+  ///
+  /// Defaults to true.
+  ///
+  /// If false, tapping the barrier will not dismiss the drawer.
   final bool drawerDismissible;
 
   /// {@template flutter.material.DrawerController.dragStartBehavior}
