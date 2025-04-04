@@ -113,35 +113,6 @@ class PluginHandlerTest {
         }
     }
 
-    // TODO(gmackall): convert this to a test of the public api (configurePlugins)
-//    @Test
-//    fun `configurePluginDependencies throws IllegalArgumentException when plugin has null dependencies`() {
-//        val project = mockk<Project>()
-//        val pluginProject = mockk<Project>()
-//        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
-//        val pluginWithNullDependencies: MutableMap<String?, Any?> = cameraDependency.toMutableMap()
-//        pluginWithNullDependencies["dependencies"] = null
-//        every { project.rootProject.findProject(":${pluginWithNullDependencies["name"]}") } returns pluginProject
-//        every {
-//            project.extensions
-//                .findByType(BaseExtension::class.java)!!
-//                .buildTypes
-//                .iterator()
-//        } returns
-//            mutableListOf(
-//                mockBuildType
-//            ).iterator()
-//        every { mockBuildType.name } returns "debug"
-//        every { mockBuildType.isDebuggable } returns true
-//
-//        assertThrows<IllegalArgumentException> {
-//            PluginHandler.configurePluginDependencies(
-//                project = project,
-//                pluginObject = pluginWithNullDependencies
-//            )
-//        }
-//    }
-
     @Test
     fun `configurePlugins throws IllegalArgumentException when plugin has no name`(
         @TempDir tempDir: Path
@@ -275,4 +246,35 @@ class PluginHandlerTest {
 
         verify { pluginProject.dependencies.add("implementation", pluginDependencyProject) }
     }
+
+    // TODO(gmackall) tests for configureLegacyPluginEachProjects
+
+    // TODO(gmackall): convert this to a test of the public api (configurePlugins)
+//    @Test
+//    fun `configurePluginDependencies throws IllegalArgumentException when plugin has null dependencies`() {
+//        val project = mockk<Project>()
+//        val pluginProject = mockk<Project>()
+//        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+//        val pluginWithNullDependencies: MutableMap<String?, Any?> = cameraDependency.toMutableMap()
+//        pluginWithNullDependencies["dependencies"] = null
+//        every { project.rootProject.findProject(":${pluginWithNullDependencies["name"]}") } returns pluginProject
+//        every {
+//            project.extensions
+//                .findByType(BaseExtension::class.java)!!
+//                .buildTypes
+//                .iterator()
+//        } returns
+//            mutableListOf(
+//                mockBuildType
+//            ).iterator()
+//        every { mockBuildType.name } returns "debug"
+//        every { mockBuildType.isDebuggable } returns true
+//
+//        assertThrows<IllegalArgumentException> {
+//            PluginHandler.configurePluginDependencies(
+//                project = project,
+//                pluginObject = pluginWithNullDependencies
+//            )
+//        }
+//    }
 }
