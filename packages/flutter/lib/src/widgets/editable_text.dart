@@ -5563,6 +5563,17 @@ class EditableTextState extends State<EditableText>
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
     };
+    final ui.SemanticsInputType inputType;
+    switch (widget.keyboardType) {
+      case TextInputType.phone:
+        inputType = ui.SemanticsInputType.phone;
+      case TextInputType.url:
+        inputType = ui.SemanticsInputType.url;
+      case TextInputType.emailAddress:
+        inputType = ui.SemanticsInputType.email;
+      default:
+        inputType = ui.SemanticsInputType.text;
+    }
 
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
@@ -5654,6 +5665,7 @@ class EditableTextState extends State<EditableText>
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,
                             child: Semantics(
+                              inputType: inputType,
                               onCopy: _semanticsOnCopy(controls),
                               onCut: _semanticsOnCut(controls),
                               onPaste: _semanticsOnPaste(controls),

@@ -624,6 +624,23 @@ void main() {
       expect(data.controlsNodes, <String>{'abc', 'ghi', 'def'});
     });
 
+    testWidgets('Semantics can set semantics input type', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              inputType: SemanticsInputType.phone,
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      expect(node1.inputType, SemanticsInputType.phone);
+    });
+
     testWidgets('Semantics can set alert rule', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(

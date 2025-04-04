@@ -117,6 +117,22 @@ void testMain() {
       expect(inputElement.disabled, isFalse);
     });
 
+    test('renders text fields with input types', () {
+      const inputTypeEnumToString = <ui.SemanticsInputType, String>{
+        ui.SemanticsInputType.none: 'text',
+        ui.SemanticsInputType.text: 'text',
+        ui.SemanticsInputType.url: 'url',
+        ui.SemanticsInputType.phone: 'tel',
+        ui.SemanticsInputType.search: 'search',
+        ui.SemanticsInputType.email: 'email',
+      };
+      for (final ui.SemanticsInputType type in ui.SemanticsInputType.values) {
+        createTextFieldSemantics(value: 'text', inputType: type);
+
+        expectSemanticsTree(owner(), '<sem><input type="${inputTypeEnumToString[type]}" /></sem>');
+      }
+    });
+
     test('renders a disabled text field', () {
       createTextFieldSemantics(isEnabled: false, value: 'hello');
       expectSemanticsTree(owner(), '''<sem><input /></sem>''');
@@ -498,6 +514,7 @@ SemanticsObject createTextFieldSemantics({
   ui.Rect rect = const ui.Rect.fromLTRB(0, 0, 100, 50),
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
+  ui.SemanticsInputType inputType = ui.SemanticsInputType.text,
 }) {
   final tester = SemanticsTester(owner());
   tester.updateNode(
@@ -516,6 +533,7 @@ SemanticsObject createTextFieldSemantics({
     textDirection: ui.TextDirection.ltr,
     textSelectionBase: textSelectionBase,
     textSelectionExtent: textSelectionExtent,
+    inputType: inputType,
   );
   tester.apply();
   return tester.getSemanticsObject(0);

@@ -247,6 +247,7 @@ class SemanticsNodeUpdate {
     required this.role,
     required this.controlsNodes,
     required this.validationResult,
+    required this.inputType,
   });
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
@@ -362,6 +363,9 @@ class SemanticsNodeUpdate {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final ui.SemanticsValidationResult validationResult;
+
+  /// See [ui.SemanticsUpdateBuilder.updateNode].
+  final ui.SemanticsInputType inputType;
 }
 
 /// Identifies [SemanticRole] implementations.
@@ -1416,6 +1420,8 @@ class SemanticsObject {
   /// The role of this node.
   late ui.SemanticsRole role;
 
+  late ui.SemanticsInputType inputType;
+
   /// List of nodes whose contents are controlled by this node.
   ///
   /// The list contains [identifier]s of those nodes.
@@ -1711,6 +1717,8 @@ class SemanticsObject {
     }
 
     role = update.role;
+
+    inputType = update.inputType;
 
     if (!unorderedListEqual<String>(controlsNodes, update.controlsNodes)) {
       controlsNodes = update.controlsNodes;

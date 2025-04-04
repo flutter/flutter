@@ -122,6 +122,7 @@ class SemanticsTester {
     ui.SemanticsRole? role,
     List<String>? controlsNodes,
     ui.SemanticsValidationResult validationResult = ui.SemanticsValidationResult.none,
+    ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
   }) {
     // Flags
     if (hasCheckedState ?? false) {
@@ -345,6 +346,7 @@ class SemanticsTester {
       role: role ?? ui.SemanticsRole.none,
       controlsNodes: controlsNodes,
       validationResult: validationResult,
+      inputType: inputType,
     );
     _nodeUpdates.add(update);
     return update;
