@@ -344,9 +344,7 @@ void ConicPathComponent::AppendPolylinePoints(
     Scalar scale_factor,
     std::vector<Point>& points) const {
   ToLinearPathComponents(scale_factor, [&points](const Point& point) {
-    if (point != points.back()) {
-      points.emplace_back(point);
-    }
+    points.emplace_back(point);
   });
 }
 
