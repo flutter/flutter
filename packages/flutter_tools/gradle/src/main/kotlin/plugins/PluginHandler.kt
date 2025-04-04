@@ -4,6 +4,7 @@
 
 package com.flutter.gradle.plugins
 
+import androidx.annotation.VisibleForTesting
 import com.android.builder.model.BuildType
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtils
@@ -125,11 +126,7 @@ class PluginHandler(
         }
         // TODO(matanlurey): https://github.com/flutter/flutter/issues/48918.
         project.logger.quiet(
-            """
-            Warning: This project is still reading the deprecated '.flutter-plugins. file.
-            In an upcoming stable release support for this file will be completely removed and your build will fail.
-            See https:/flutter.dev/to/flutter-plugins-configuration.
-            """.trimIndent()
+            legacyFlutterPluginsWarning
         )
         val deps: List<Map<String?, Any?>> = getPluginDependencies()
         val pluginsNameSet = HashSet<String>()
@@ -153,7 +150,7 @@ class PluginHandler(
     }
 
     internal fun configurePlugins(engineVersionValue: String) {
-        // configureLegacyPluginEachProjects(engineVersionValue)
+        configureLegacyPluginEachProjects(engineVersionValue)
         val pluginList: List<Map<String?, Any?>> = getPluginList()
         pluginList.forEach { plugin: Map<String?, Any?> ->
             configurePluginProject(
@@ -183,6 +180,13 @@ class PluginHandler(
          * Flutter Docs Website URLs for help messages.
          */
         private const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG = "https://flutter.dev/to/review-gradle-config"
+
+        @VisibleForTesting internal val legacyFlutterPluginsWarning =
+            """
+            Warning: This project is still reading the deprecated '.flutter-plugins. file.
+            In an upcoming stable release support for this file will be completely removed and your build will fail.
+            See https:/flutter.dev/to/flutter-plugins-configuration.
+            """.trimIndent()
 
         /**
          * Performs configuration related to the plugin's Gradle [Project], including
