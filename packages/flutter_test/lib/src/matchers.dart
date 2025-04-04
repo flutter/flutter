@@ -686,6 +686,7 @@ Matcher matchesSemantics({
   int? maxValueLength,
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  ui.SemanticsInputType? inputType,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
@@ -770,6 +771,7 @@ Matcher matchesSemantics({
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
     validationResult: validationResult,
+    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -882,6 +884,7 @@ Matcher containsSemantics({
   int? maxValueLength,
   int? currentValueLength,
   SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  ui.SemanticsInputType? inputType,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
@@ -966,6 +969,7 @@ Matcher containsSemantics({
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
     validationResult: validationResult,
+    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
@@ -2403,6 +2407,7 @@ class _MatchesSemanticsData extends Matcher {
     required this.maxValueLength,
     required this.currentValueLength,
     required this.validationResult,
+    required this.inputType,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
@@ -2556,6 +2561,7 @@ class _MatchesSemanticsData extends Matcher {
   final int? platformViewId;
   final int? maxValueLength;
   final int? currentValueLength;
+  final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
   final SemanticsValidationResult validationResult;
 
@@ -2602,6 +2608,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (tooltip != null) {
       description.add(' with tooltip: $tooltip');
+    }
+    if (inputType != null) {
+      description.add(' with inputType: $inputType');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> expectedActions =
@@ -2812,6 +2821,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (validationResult != data.validationResult) {
       return failWithDescription(matchState, 'validationResult was: ${data.validationResult}');
+    }
+    if (inputType != null && inputType != data.inputType) {
+      return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];

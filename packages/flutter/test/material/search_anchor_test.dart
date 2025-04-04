@@ -3223,7 +3223,7 @@ void main() {
     expect(controller.value.text, initValue);
   });
 
-  testWidgets('Disabled SearchBar semantics node still contains value', (
+  testWidgets('Disabled SearchBar semantics node still contains value and inputType', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -3236,7 +3236,23 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[],
+        value: 'text',
+        inputType: SemanticsInputType.search,
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('SearchBar semantics node has search input type', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(const MaterialApp(home: Material(child: Center(child: SearchBar()))));
+
+    expect(semantics, includesNodeWith(inputType: SemanticsInputType.search));
     semantics.dispose();
   });
 

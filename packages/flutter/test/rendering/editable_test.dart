@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -133,6 +135,21 @@ void main() {
 
     layout(editable, constraints: constraints);
     expect(editable.size.height, 100);
+  });
+
+  test('has default semantics input type', () {
+    const InlineSpan text = TextSpan(text: 'text');
+    final RenderEditable editable = RenderEditable(
+      textDirection: TextDirection.ltr,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: _FakeEditableTextState(),
+      text: text,
+    );
+    final SemanticsConfiguration config = SemanticsConfiguration();
+    editable.describeSemanticsConfiguration(config);
+    expect(config.inputType, SemanticsInputType.text);
   });
 
   test('Reports the height of the first line when maxLines is 1', () {

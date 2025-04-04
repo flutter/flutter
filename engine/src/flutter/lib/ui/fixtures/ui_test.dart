@@ -235,6 +235,7 @@ void sendSemanticsUpdate() {
     headingLevel: 0,
     linkUrl: '',
     controlsNodes: null,
+    inputType: SemanticsInputType.none,
   );
   _semanticsUpdate(builder.build());
 }
@@ -289,6 +290,7 @@ void sendSemanticsUpdateWithRole() {
     linkUrl: '',
     role: SemanticsRole.tab,
     controlsNodes: null,
+    inputType: SemanticsInputType.none,
   );
   _semanticsUpdate(builder.build());
 }
