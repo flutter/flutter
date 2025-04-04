@@ -3624,6 +3624,13 @@ Future<void> testMain() async {
       // though it supports forced-colors. Safari doesn't support forced-colors
       // so this isn't a problem there.
     }, skip: isFirefox || isSafari);
+
+    test('Multi-line text area scrollbars are zero-width', () {
+      expect(
+        createMultilineTextArea().style.scrollbarWidth,
+        'none',
+      );
+    });
   });
 }
 
