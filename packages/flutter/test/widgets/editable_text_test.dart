@@ -5370,7 +5370,7 @@ void main() {
       isMethodCall(
         'TextInput.setEditableSizeAndTransform',
         arguments: <String, dynamic>{
-          'width': 800,
+          'width': 796.0,
           'height': 140.0,
           'transform': <double>[
             1.0,
@@ -5385,7 +5385,7 @@ void main() {
             0.0,
             1.0,
             0.0,
-            0.0,
+            4.0,
             214.0,
             0.0,
             1.0,
@@ -11123,7 +11123,7 @@ void main() {
 
       // Interact with the field to establish the input connection.
       final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
-      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+      await tester.tapAt(topLeft + const Offset(4.0, 5.0));
       await tester.pump();
 
       // Submit and expect an error from onEditingComplete.
@@ -11156,7 +11156,7 @@ void main() {
 
       // Interact with the field to establish the input connection.
       final Offset topLeft = tester.getTopLeft(find.byType(EditableText));
-      await tester.tapAt(topLeft + const Offset(0.0, 5.0));
+      await tester.tapAt(topLeft + const Offset(4.0, 5.0));
       await tester.pump();
 
       // Submit and expect an error from onSubmitted.
@@ -12573,7 +12573,7 @@ void main() {
       key.currentContext!.findRenderObject(),
       paints..rrect(
         rrect: RRect.fromRectAndRadius(
-          const Rect.fromLTWH(800.5, 1, 3, 12),
+          const Rect.fromLTWH(796.5, 1, 3, 12),
           const Radius.circular(1),
         ),
       ),
