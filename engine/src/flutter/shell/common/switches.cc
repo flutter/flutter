@@ -536,6 +536,16 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
       command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
   settings.impeller_antialiased_lines =
       command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
+#if FML_OS_WIN
+  // Process the EnableMultiWindow switch on Windows.
+  {
+    std::string enable_multi_window_value;
+    if (command_line.GetOptionValue(FlagForSwitch(Switch::EnableMultiWindow),
+                                    &enable_multi_window_value)) {
+      settings.enable_multi_window = "true" == enable_multi_window_value;
+    }
+  }
+#endif  // FML_OS_WIN
 
   return settings;
 }

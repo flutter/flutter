@@ -152,7 +152,7 @@ static void fl_compositor_opengl_unblock_main_thread(FlCompositorOpenGL* self) {
 
     g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
     if (engine != nullptr) {
-      fl_task_runner_release_main_thread(fl_engine_get_task_runner(engine));
+      // fl_task_runner_release_main_thread(fl_engine_get_task_runner(engine));
     }
   }
 }
@@ -491,7 +491,7 @@ static void fl_compositor_opengl_wait_for_frame(FlCompositor* compositor,
     self->blocking_main_thread = true;
     g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
     if (engine != nullptr) {
-      fl_task_runner_block_main_thread(fl_engine_get_task_runner(engine));
+      // fl_task_runner_block_main_thread(fl_engine_get_task_runner(engine));
     }
   }
 }
