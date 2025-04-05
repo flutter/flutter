@@ -66,6 +66,7 @@ class Dialog extends StatelessWidget {
     this.clipBehavior,
     this.shape,
     this.alignment,
+    this.maxWidth,
     this.child,
     this.semanticsRole = SemanticsRole.dialog,
   }) : assert(elevation == null || elevation >= 0.0),
@@ -88,6 +89,7 @@ class Dialog extends StatelessWidget {
        clipBehavior = Clip.none,
        shape = null,
        alignment = null,
+       maxWidth = null,
        _fullscreen = true;
 
   /// {@template flutter.material.dialog.backgroundColor}
@@ -236,6 +238,14 @@ class Dialog extends StatelessWidget {
   /// Defaults to [SemanticsRole.dialog].
   final SemanticsRole semanticsRole;
 
+  /// {@template flutter.material.dialog.maxWidth}
+  ///
+  /// This value is used to determine the maximum width of the dialog.
+  /// [Material3 Guidelines](https://m3.material.io/components/dialogs/specs#6771d107-624e-47cc-b6d8-2b7b620ba2f1) is 560.0 pixels
+  ///
+  /// {@endtemplate}
+  final double? maxWidth;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -259,7 +269,7 @@ class Dialog extends StatelessWidget {
       dialogChild = Align(
         alignment: alignment ?? dialogTheme.alignment ?? defaults.alignment!,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 280.0),
+          constraints: BoxConstraints(minWidth: 280.0, maxWidth: maxWidth ?? 560),
           child: Material(
             color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
@@ -424,6 +434,7 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
+    this.maxWidth,
   });
 
   /// Creates an adaptive [AlertDialog] based on whether the target platform is
@@ -730,6 +741,9 @@ class AlertDialog extends StatelessWidget {
   /// button bar.
   final bool scrollable;
 
+  ///{@macro flutter.material.dialog.maxWidth}
+  final double? maxWidth;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -930,6 +944,7 @@ class AlertDialog extends StatelessWidget {
       alignment: alignment,
       semanticsRole: SemanticsRole.alertDialog,
       child: dialogChild,
+      maxWidth: maxWidth,
     );
   }
 }
