@@ -1301,7 +1301,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   _DropdownRoute<T>? _dropdownRoute;
   Orientation? _lastOrientation;
   FocusNode? _internalNode;
-  FocusNode? get focusNode => widget.focusNode ?? _internalNode;
+  FocusNode get focusNode => widget.focusNode ?? _internalNode!;
   late Map<Type, Action<Intent>> _actionMap;
   bool _isHovering = false;
   bool _hasPrimaryFocus = false;
@@ -1327,22 +1327,22 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         onInvoke: (ButtonActivateIntent intent) => _handleTap(),
       ),
     };
-    focusNode?.addListener(_handleFocusChanged);
+    focusNode.addListener(_handleFocusChanged);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _removeDropdownRoute();
-    focusNode?.removeListener(_handleFocusChanged);
+    focusNode.removeListener(_handleFocusChanged);
     _internalNode?.dispose();
     super.dispose();
   }
 
   void _handleFocusChanged() {
-    if (_hasPrimaryFocus != focusNode!.hasPrimaryFocus) {
+    if (_hasPrimaryFocus != focusNode.hasPrimaryFocus) {
       setState(() {
-        _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
+        _hasPrimaryFocus = focusNode.hasPrimaryFocus;
       });
     }
   }
@@ -1362,8 +1362,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       if (widget.focusNode == null) {
         _internalNode ??= _createFocusNode();
       }
-      _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
-      focusNode!.addListener(_handleFocusChanged);
+      _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+      focusNode.addListener(_handleFocusChanged);
     }
     _updateSelectedIndex();
   }
@@ -1442,7 +1442,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       borderRadius: widget.borderRadius,
     );
 
-    focusNode?.requestFocus();
+    focusNode.requestFocus();
     navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null) {
