@@ -288,7 +288,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   Animation<double> _initAnimation(Curve curve, bool inverted) {
-    Animation<double> result = _controller.drive(CurveTween(curve: curve));
+    Animation<double> result = _controller.drive(CurveTween(curve));
     if (inverted) {
       result = result.drive(Tween<double>(begin: 1.0, end: 0.0));
     }

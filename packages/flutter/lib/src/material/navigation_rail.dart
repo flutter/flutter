@@ -715,7 +715,7 @@ class _RailDestinationState extends State<_RailDestination> {
           );
         } else {
           final Animation<double> labelFadeAnimation = widget.extendedTransitionAnimation.drive(
-            CurveTween(curve: const Interval(0.0, 0.25)),
+            CurveTween(const Interval(0.0, 0.25)),
           );
           applyXOffset = true;
           content = Padding(
@@ -767,7 +767,7 @@ class _RailDestinationState extends State<_RailDestination> {
         final Interval interval =
             widget.selected ? const Interval(0.25, 0.75) : const Interval(0.75, 1.0);
         final Animation<double> labelFadeAnimation = widget.destinationAnimation.drive(
-          CurveTween(curve: interval),
+          CurveTween(interval),
         );
         final double minHeight = material3 ? 0 : widget.minWidth;
         final Widget topSpacing = SizedBox(height: material3 ? 0 : verticalPadding);

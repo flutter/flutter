@@ -267,7 +267,7 @@ class _RallyTabState extends State<_RallyTab> with SingleTickerProviderStateMixi
     super.initState();
     _controller = AnimationController(duration: const Duration(milliseconds: 200), vsync: this);
     _titleSizeAnimation = _controller.view;
-    _titleFadeAnimation = _controller.drive(CurveTween(curve: Curves.easeOut));
+    _titleFadeAnimation = _controller.drive(CurveTween(Curves.easeOut));
     _iconFadeAnimation = _controller.drive(Tween<double>(begin: 0.6, end: 1));
     if (widget.isExpanded) {
       _controller.value = 1;

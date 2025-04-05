@@ -1159,7 +1159,7 @@ void main() {
         ColorTween(begin: color.withAlpha(0), end: color.withAlpha(color.alpha)).chain(
           CurveTween(
             // Correspond to [_kDragSizeFactorLimit].
-            curve: const Interval(0.0, 1.0 / 1.5),
+            const Interval(0.0, 1.0 / 1.5),
           ),
         ),
       );

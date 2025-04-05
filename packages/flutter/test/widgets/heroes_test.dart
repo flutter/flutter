@@ -2988,7 +2988,7 @@ Future<void> main() async {
     final Animatable<Size?> tween = SizeTween(
       begin: const Size(200, 200),
       end: const Size(100, 100),
-    ).chain(CurveTween(curve: Curves.fastOutSlowIn));
+    ).chain(CurveTween(Curves.fastOutSlowIn));
 
     await tester.pumpWidget(
       MaterialApp(

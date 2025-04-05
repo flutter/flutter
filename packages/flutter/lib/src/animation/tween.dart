@@ -541,7 +541,7 @@ class ConstantTween<T> extends Tween<T> {
 ///
 /// ```dart
 /// final Animation<double> animation = _controller.drive(
-///   CurveTween(curve: Curves.ease),
+///   CurveTween(Curves.ease),
 /// );
 /// ```
 /// {@end-tool}
@@ -553,7 +553,7 @@ class ConstantTween<T> extends Tween<T> {
 ///    [AnimationController].
 class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
-  CurveTween({required this.curve});
+  CurveTween(this.curve);
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;

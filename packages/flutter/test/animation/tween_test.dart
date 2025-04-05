@@ -224,7 +224,7 @@ void main() {
   });
 
   test('CurveTween', () {
-    final CurveTween tween = CurveTween(curve: Curves.easeIn);
+    final CurveTween tween = CurveTween(Curves.easeIn);
     expect(tween.transform(0.0), 0.0);
     expect(tween.transform(0.5), 0.31640625);
     expect(tween.transform(1.0), 1.0);

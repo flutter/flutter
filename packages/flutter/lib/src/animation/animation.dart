@@ -294,7 +294,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///
   /// ```dart
   /// final Animatable<Alignment> tween = AlignmentTween(begin: Alignment.topLeft, end: Alignment.topRight)
-  ///   .chain(CurveTween(curve: Curves.easeIn));
+  ///   .chain(CurveTween( Curves.easeIn));
   /// // ...
   /// final Animation<Alignment> alignment2 = _controller.drive(tween);
   /// ```
@@ -307,7 +307,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///
   /// ```dart
   /// Animation<Alignment> alignment3 = _controller
-  ///   .drive(CurveTween(curve: Curves.easeIn))
+  ///   .drive(CurveTween( Curves.easeIn))
   ///   .drive(AlignmentTween(
   ///     begin: Alignment.topLeft,
   ///     end: Alignment.topRight,
