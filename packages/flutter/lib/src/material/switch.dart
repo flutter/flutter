@@ -107,7 +107,12 @@ class Switch extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.activeColor,
+    @Deprecated(
+      'Use activeColor instead. '
+      'This feature was deprecated after v3.31.0-2.0.pre.',
+    )
+    Color? activeColor,
+    Color? activeThumbColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
@@ -134,7 +139,9 @@ class Switch extends StatelessWidget {
   }) : _switchType = _SwitchType.material,
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
-       assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
+       assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
+       assert(activeThumbColor == null || activeColor == null),
+       activeThumbColor = activeThumbColor ?? activeColor;
 
   /// Creates an adaptive [Switch] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -161,7 +168,12 @@ class Switch extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
-    this.activeColor,
+    @Deprecated(
+      'Use activeColor instead. '
+      'This feature was deprecated after v3.31.0-2.0.pre.',
+    )
+    Color? activeColor,
+    Color? activeThumbColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
@@ -188,7 +200,9 @@ class Switch extends StatelessWidget {
     this.applyCupertinoTheme,
   }) : assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-       _switchType = _SwitchType.adaptive;
+       assert(activeThumbColor == null || activeColor == null),
+       _switchType = _SwitchType.adaptive,
+       activeThumbColor = activeThumbColor ?? activeColor;
 
   /// Whether this switch is on or off.
   final bool value;
@@ -217,7 +231,7 @@ class Switch extends StatelessWidget {
   /// ```
   final ValueChanged<bool>? onChanged;
 
-  /// {@template flutter.material.switch.activeColor}
+  /// {@template flutter.material.switch.activeThumbColor}
   /// The color to use when this switch is on.
   /// {@endtemplate}
   ///
@@ -225,7 +239,7 @@ class Switch extends StatelessWidget {
   ///
   /// If [thumbColor] returns a non-null color in the [WidgetState.selected]
   /// state, it will be used instead of this color.
-  final Color? activeColor;
+  final Color? activeThumbColor;
 
   /// {@template flutter.material.switch.activeTrackColor}
   /// The color to use on the track when this switch is on.
@@ -308,7 +322,7 @@ class Switch extends StatelessWidget {
   /// {@end-tool}
   /// {@endtemplate}
   ///
-  /// If null, then the value of [activeColor] is used in the selected
+  /// If null, then the value of [activeThumbColor] is used in the selected
   /// state and [inactiveThumbColor] in the default state. If that is also null,
   /// then the value of [SwitchThemeData.thumbColor] is used. If that is also
   /// null, then the following colors are used:
@@ -357,7 +371,7 @@ class Switch extends StatelessWidget {
   /// | State    | Light theme                     | Dark theme                      |
   /// |----------|---------------------------------|---------------------------------|
   /// | Default  | `Color(0x52000000)`             | `Colors.white30`                |
-  /// | Selected | [activeColor] with alpha `0x80` | [activeColor] with alpha `0x80` |
+  /// | Selected | [activeThumbColor] with alpha `0x80` | [activeThumbColor] with alpha `0x80` |
   /// | Disabled | `Colors.black12`                | `Colors.white10`                |
   final MaterialStateProperty<Color?>? trackColor;
 
@@ -528,7 +542,7 @@ class Switch extends StatelessWidget {
   ///  * [WidgetState.focused].
   /// {@endtemplate}
   ///
-  /// If null, then the value of [activeColor] with alpha
+  /// If null, then the value of [activeThumbColor] with alpha
   /// [kRadialReactionAlpha], [focusColor] and [hoverColor] is used in the
   /// pressed, focused and hovered state. If that is also null,
   /// the value of [SwitchThemeData.overlayColor] is used. If that is
@@ -595,24 +609,24 @@ class Switch extends StatelessWidget {
 
     switch (_switchType) {
       case _SwitchType.material:
-        effectiveActiveThumbColor = activeColor;
+        effectiveActiveThumbColor = activeThumbColor;
       case _SwitchType.adaptive:
         switch (Theme.of(context).platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            effectiveActiveThumbColor = activeColor;
+            effectiveActiveThumbColor = activeThumbColor;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            effectiveActiveTrackColor = activeColor;
+            effectiveActiveTrackColor = activeThumbColor;
         }
     }
     return _MaterialSwitch(
       value: value,
       onChanged: onChanged,
       size: _getSwitchSize(context),
-      activeColor: effectiveActiveThumbColor,
+      activeThumbColor: effectiveActiveThumbColor,
       activeTrackColor: activeTrackColor ?? effectiveActiveTrackColor,
       inactiveThumbColor: inactiveThumbColor,
       inactiveTrackColor: inactiveTrackColor,
@@ -658,7 +672,7 @@ class _MaterialSwitch extends StatefulWidget {
     required this.onChanged,
     required this.size,
     required this.switchType,
-    this.activeColor,
+    this.activeThumbColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
@@ -687,7 +701,7 @@ class _MaterialSwitch extends StatefulWidget {
 
   final bool value;
   final ValueChanged<bool>? onChanged;
-  final Color? activeColor;
+  final Color? activeThumbColor;
   final Color? activeTrackColor;
   final Color? inactiveThumbColor;
   final Color? inactiveTrackColor;
@@ -787,7 +801,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
         return widget.inactiveThumbColor;
       }
       if (states.contains(MaterialState.selected)) {
-        return widget.activeColor;
+        return widget.activeThumbColor;
       }
       return widget.inactiveThumbColor;
     });
