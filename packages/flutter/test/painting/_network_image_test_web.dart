@@ -22,6 +22,17 @@ void runTests() {
     debugRestoreImgElementFactory();
   });
 
+  // Generates a unique URL for use in tests, preventing unintended caching.
+  //
+  // Requests within tests must each have a unique URL; otherwise, responses may
+  // be cached inadvertently. This often leads to subtle, frustrating bugs that
+  // are difficult to debug.
+  //
+  // To ensure uniqueness, provide any object as the key.
+  String uniqueUrl(Object key) {
+    return 'https://www.example.com/images/frame_${identityHashCode(key)}.png';
+  }
+
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest =
         TestHttpRequest()
@@ -35,7 +46,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network('https://www.example.com/images/frame.png', headers: headers);
+    final Image image = Image.network(uniqueUrl(tester.testDescription), headers: headers);
 
     await tester.pumpWidget(image);
 
@@ -57,7 +68,7 @@ void runTests() {
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
     final Image image = Image.network(
-      'https://www.example.com/images/frame2.png',
+      uniqueUrl(tester.testDescription),
       headers: headers,
     );
 
@@ -85,15 +96,16 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
+    final String url = uniqueUrl(tester.testDescription);
     final Image image = Image.network(
-      'https://www.example.com/images/frame3.png',
+      url,
       headers: headers,
     );
 
     await tester.pumpWidget(image);
     expect(
       tester.takeException().toString(),
-      'HTTP request failed, statusCode: 200, https://www.example.com/images/frame3.png',
+      'HTTP request failed, statusCode: 200, $url',
     );
   });
 
@@ -114,7 +126,7 @@ void runTests() {
       throw UnimplementedError();
     };
 
-    const NetworkImage networkImage = NetworkImage('https://www.example.com/images/frame4.png');
+    final NetworkImage networkImage = NetworkImage(uniqueUrl(tester.testDescription));
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -159,8 +171,9 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    const NetworkImage networkImage = NetworkImage(
-      'https://www.example.com/images/frame5.png',
+    final String url = uniqueUrl(tester.testDescription);
+    final NetworkImage networkImage = NetworkImage(
+      url,
       webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
     );
     ImageInfo? imageInfo;
@@ -190,7 +203,7 @@ void runTests() {
     expect(imageInfo, isA<WebImageInfo>());
 
     final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
-    expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame5.png'));
+    expect(webImageInfo.htmlImage.src, equals(url));
   });
 
   testWidgets(
@@ -211,8 +224,8 @@ void runTests() {
         return testImg.getMock() as web_shim.HTMLImageElement;
       };
 
-      const NetworkImage networkImage = NetworkImage(
-        'https://www.example.com/images/frame6.png',
+      final NetworkImage networkImage = NetworkImage(
+        uniqueUrl(tester.testDescription),
         webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
       );
       ImageInfo? imageInfo;
@@ -261,8 +274,9 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    const NetworkImage networkImage = NetworkImage(
-      'https://www.example.com/images/frame7.png',
+    final String url = uniqueUrl(tester.testDescription);
+    final NetworkImage networkImage = NetworkImage(
+      url,
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
     );
     ImageInfo? imageInfo;
@@ -292,7 +306,7 @@ void runTests() {
     expect(imageInfo, isA<WebImageInfo>());
 
     final WebImageInfo webImageInfo = imageInfo! as WebImageInfo;
-    expect(webImageInfo.htmlImage.src, equals('https://www.example.com/images/frame7.png'));
+    expect(webImageInfo.htmlImage.src, equals(url));
   });
 
   testWidgets('When strategy is .prefer, emits a normal image if headers is not null', (
@@ -313,10 +327,10 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    const NetworkImage networkImage = NetworkImage(
-      'https://www.example.com/images/frame8.png',
+    final NetworkImage networkImage = NetworkImage(
+      uniqueUrl(tester.testDescription),
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-      headers: <String, String>{'flutter': 'flutter', 'second': 'second'},
+      headers: const <String, String>{'flutter': 'flutter', 'second': 'second'},
     );
     ImageInfo? imageInfo;
     Object? recordedError;
