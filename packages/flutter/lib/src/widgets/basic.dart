@@ -1725,6 +1725,30 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The origin of the coordinate system (relative to the upper left corner of
   /// this render object) in which to apply the matrix.
   ///
+  /// This offset is applied after any [alignment] transformation.
+  /// In this example the origin appears to be offset from the center of the,
+  /// widget, since [alignment] defaults to [Alignment.center].
+  ///
+  /// ```dart
+  /// Transform.rotate(
+  ///   angle: math.pi,
+  ///   origin: const Offset(100, 100),
+  ///   child: const Text('I am rotating off of the center'),
+  /// )
+  /// ```
+  ///
+  /// In this example, the origin does appear to be offset relative to the
+  /// top-left corner.
+  ///
+  /// ```dart
+  /// Transform.rotate(
+  ///   angle: math.pi,
+  ///   alignment: Alignment.topLeft, // Now the alignment is explicitly set to topLeft.
+  ///   origin: const Offset(100, 100),
+  ///   child: const Text('I am rotating correctly from the center'),
+  /// )
+  /// ```
+  ///
   /// Setting an origin is equivalent to conjugating the transform matrix by a
   /// translation. This property is provided just for convenience.
   final Offset? origin;
