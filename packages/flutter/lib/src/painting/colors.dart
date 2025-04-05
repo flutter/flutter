@@ -95,7 +95,8 @@ class HSVColor {
 
     final double alpha = color.alpha / 0xFF;
     final double hue = _getHue(red, green, blue, max, delta);
-    final double saturation = max == 0.0 ? 0.0 : delta / max;
+    // https://en.wikipedia.org/wiki/HSL_and_HSV#Saturation
+    final double saturation = min == max ? 0.0 : delta / max;
 
     return HSVColor.fromAHSV(alpha, hue, saturation, max);
   }
@@ -266,9 +267,7 @@ class HSLColor {
     final double lightness = (max + min) / 2.0;
     // Saturation can exceed 1.0 with rounding errors, so clamp it.
     final double saturation =
-        lightness == 1.0
-            ? 0.0
-            : clampDouble(delta / (1.0 - (2.0 * lightness - 1.0).abs()), 0.0, 1.0);
+        min == max ? 0.0 : clampDouble(delta / (1.0 - (2.0 * lightness - 1.0).abs()), 0.0, 1.0);
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
