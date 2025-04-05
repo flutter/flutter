@@ -567,10 +567,18 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
         ..curve = Curves.linear
         ..reverseCurve = Curves.linear;
       final double delta = details.primaryDelta! / _trackInnerLength;
-      positionController.value += switch (Directionality.of(context)) {
+      final double newDelta = switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
         TextDirection.ltr => delta,
       };
+
+      final double newPosition = positionController.value + newDelta;
+
+      if ((widget.value && newPosition < 0.5) || (!widget.value && newPosition > 0.5)) {
+        widget.onChanged?.call(!widget.value);
+      } else {
+        positionController.value += newDelta;
+      }
     }
   }
 
