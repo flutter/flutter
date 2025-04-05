@@ -543,7 +543,6 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   set textAlign(String value) => setProperty('text-align', value);
   set font(String value) => setProperty('font', value);
   set cursor(String value) => setProperty('cursor', value);
-  set scrollbarWidth(String value) => setProperty('scrollbar-width', value);
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -605,7 +604,6 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   String get textAlign => getPropertyValue('text-align');
   String get font => getPropertyValue('font');
   String get cursor => getPropertyValue('cursor');
-  String get scrollbarWidth => getPropertyValue('scrollbar-width');
 
   external String getPropertyValue(String property);
 
