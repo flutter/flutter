@@ -5,15 +5,13 @@
 @DefaultAsset('skwasm')
 library skwasm_impl;
 
-import 'dart:_wasm';
 import 'dart:ffi';
-import 'dart:js_interop';
 
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 
-final class RawImage extends Opaque {}
+final class RawAnimatedImage extends Opaque {}
 
-typedef AnimatedImageHandle = Pointer<RawImage>;
+typedef AnimatedImageHandle = Pointer<RawAnimatedImage>;
 
 @Native<AnimatedImageHandle Function(SkDataHandle, Int32, Int32)>(
   symbol: 'animatedImage_create',

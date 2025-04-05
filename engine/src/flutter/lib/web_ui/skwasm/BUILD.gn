@@ -4,7 +4,7 @@
 
 import("//build/toolchain/wasm.gni")
 
-skwasm_variant("skwasm") {
+template("skwasm_variant") {
   wasm_lib(target_name) {
     public_configs = [ "//flutter:config" ]
 
