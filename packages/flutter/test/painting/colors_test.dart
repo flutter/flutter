@@ -457,7 +457,7 @@ void main() {
   test('Wikipedia Examples Table test', () {
     // ignore: always_specify_types
     final colors = <(int, double, double, double, double, double, double, double, double, String)>[
-      // RGB,          r,   g,   b, hue,   v,   l,s(hsv),s(hsl)
+      // RGB,        r,   g,   b, hue,   v,   l,s(hsv),s(hsl)
       (0xFFFFFFFF, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 'white'),
       (0xFF808080, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0.0, 'gray'),
       (0xFF000000, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 'black'),
