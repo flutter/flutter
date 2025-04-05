@@ -19,10 +19,10 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/logging_logger.dart';
 import '../../src/package_config.dart';
+import '../../src/throwing_pub.dart';
 
 final Platform linuxPlatform = FakePlatform(environment: <String, String>{});
 
@@ -53,7 +53,7 @@ void main() {
 name: foo
 ''');
     fileSystem.file('test/foo.dart').createSync(recursive: true);
-    writePackageConfigFile(mainLibName: 'foo', directory: fileSystem.currentDirectory);
+    writePackageConfigFiles(mainLibName: 'foo', directory: fileSystem.currentDirectory);
     residentCompiler = FakeResidentCompiler(fileSystem);
     logger = LoggingLogger();
   });
@@ -80,7 +80,7 @@ name: foo
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => BufferLogger.test(),
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -107,7 +107,7 @@ name: foo
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => BufferLogger.test(),
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -139,7 +139,7 @@ name: foo
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => BufferLogger.test(),
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -179,7 +179,7 @@ name: foo
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => logger,
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -206,7 +206,7 @@ name: foo
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => BufferLogger.test(),
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 
@@ -221,7 +221,7 @@ dependencies:
     sdk: flutter
   a_plugin: 1.0.0
 ''');
-      writePackageConfigFile(
+      writePackageConfigFiles(
         directory: fileSystem.currentDirectory,
         mainLibName: 'foo',
         packages: <String, String>{'a_plugin': '/a_plugin'},
@@ -264,7 +264,7 @@ environment:
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => BufferLogger.test(),
       FeatureFlags: enableExplicitPackageDependencies,
-      Pub: FakePubWithPrimedDeps.new,
+      Pub: ThrowingPub.new,
     },
   );
 }
