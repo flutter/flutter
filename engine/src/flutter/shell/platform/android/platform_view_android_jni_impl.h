@@ -128,6 +128,10 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void hideOverlaySurface2() override;
 
+  void resetOcclusionRects() override;
+
+  void addOcclusionRect(int x, int y, int width, int height) override;
+
   void onEndFrame2() override;
 
  private:

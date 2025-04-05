@@ -75,6 +75,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   TRACE_EVENT0("flutter", "AndroidExternalViewEmbedder2::SubmitFlutterView");
 
   if (!FrameHasPlatformLayers()) {
+    // If we have no platform views, then nothing should be checking the
+    // occlusion rects and we shouldn't need to update them ... right?
     frame->Submit();
     // If the previous frame had platform views, hide the overlay surface.
     if (previous_frame_view_count_ > 0) {
@@ -90,12 +92,11 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
     view_rects[platform_id] = GetViewRect(platform_id, view_params_);
   }
 
-  std::unordered_map<int64_t, SkRect> overlay_layers =
-      SliceViews(frame->Canvas(),     //
-                 composition_order_,  //
-                 slices_,             //
-                 view_rects           //
-      );
+  auto [overlay_layers, occlusion_rects] = SliceViews(frame->Canvas(),     //
+                                                      composition_order_,  //
+                                                      slices_,             //
+                                                      view_rects           //
+  );
 
   // If there is no overlay Surface, initialize one on the platform thread. This
   // will only be done once per application launch, as the singular overlay
@@ -159,10 +160,14 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   }
   frame->Submit();
 
-  task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
-      [&, composition_order = composition_order_, view_params = view_params_,
-       jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
-       slices = std::move(slices_), prev_frame_no_platform_views]() -> void {
+  task_runners_.GetPlatformTaskRunner()->PostTask(
+      fml::MakeCopyable([&, composition_order = composition_order_,     //
+                         view_params = view_params_,                    //
+                         jni_facade = jni_facade_,                      //
+                         device_pixel_ratio = device_pixel_ratio_,      //
+                         occlusion_rects = std::move(occlusion_rects),  //
+                         slices = std::move(slices_),                   //
+                         prev_frame_no_platform_views]() -> void {
         jni_facade->swapTransaction();
 
         if (prev_frame_no_platform_views) {
@@ -182,6 +187,12 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
               params.sizePoints().height() * device_pixel_ratio,
               params.mutatorsStack()  //
           );
+        }
+        // Update occlusion rects.
+        jni_facade_->resetOcclusionRects();
+        for (const DlIRect& rect : occlusion_rects) {
+          jni_facade_->addOcclusionRect(rect.GetX(), rect.GetY(),
+                                        rect.GetWidth(), rect.GetHeight());
         }
         jni_facade_->onEndFrame2();
       }));

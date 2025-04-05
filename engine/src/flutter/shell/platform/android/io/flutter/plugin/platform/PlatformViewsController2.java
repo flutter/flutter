@@ -64,6 +64,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
   private final ArrayList<SurfaceControl.Transaction> pendingTransactions;
   private final ArrayList<SurfaceControl.Transaction> activeTransactions;
+  private final ArrayList<OcclusionRect> occlusionRects;
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
 
@@ -73,6 +74,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     platformViewParent = new SparseArray<>();
     pendingTransactions = new ArrayList<>();
     activeTransactions = new ArrayList<>();
+    occlusionRects = new ArrayList<>();
     motionEventTracker = MotionEventTracker.getInstance();
   }
 
@@ -612,6 +614,18 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
     tx.apply();
+  }
+
+  public void resetOcclusionRects() {
+    occlusionRects.clear();
+  }
+
+  public void addOcclusionRect(int x, int y, int width, int height) {
+    occlusionRects.add(new OcclusionRect(x, y, width, height));
+  }
+
+  public List<OcclusionRect> getOcclusionRects() {
+    return occlusionRects;
   }
 
   //// Message Handler ///////
