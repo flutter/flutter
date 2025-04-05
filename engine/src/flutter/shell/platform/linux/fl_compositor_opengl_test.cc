@@ -30,7 +30,7 @@ TEST(FlCompositorOpenGLTest, BackgroundColor) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
-  fl_compositor_opengl_setup(compositor);
+  fl_compositor_setup(FL_COMPOSITOR(compositor));
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
@@ -145,7 +145,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebuffer) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
-  fl_compositor_opengl_setup(compositor);
+  fl_compositor_setup(FL_COMPOSITOR(compositor));
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
@@ -202,7 +202,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferExtension) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
-  fl_compositor_opengl_setup(compositor);
+  fl_compositor_setup(FL_COMPOSITOR(compositor));
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
@@ -252,7 +252,7 @@ TEST(FlCompositorOpenGLTest, NoBlitFramebuffer) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
-  fl_compositor_opengl_setup(compositor);
+  fl_compositor_setup(FL_COMPOSITOR(compositor));
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
@@ -305,7 +305,7 @@ TEST(FlCompositorOpenGLTest, BlitFramebufferNvidia) {
 
   g_autoptr(FlMockRenderable) renderable = fl_mock_renderable_new();
   g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
-  fl_compositor_opengl_setup(compositor);
+  fl_compositor_setup(FL_COMPOSITOR(compositor));
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   fl_compositor_wait_for_frame(FL_COMPOSITOR(compositor), 1024, 1024);
   FlutterBackingStoreConfig config = {
@@ -359,7 +359,7 @@ TEST(FlCompositorOpenGLTest, MultiView) {
   g_autoptr(FlMockRenderable) secondary_renderable = fl_mock_renderable_new();
 
   g_autoptr(FlCompositorOpenGL) compositor = fl_compositor_opengl_new(engine);
-  fl_compositor_opengl_setup(compositor);
+  fl_compositor_setup(FL_COMPOSITOR(compositor));
   fl_engine_set_implicit_view(engine, FL_RENDERABLE(renderable));
   FlutterViewId view_id =
       fl_engine_add_view(engine, FL_RENDERABLE(secondary_renderable), 1024, 768,
