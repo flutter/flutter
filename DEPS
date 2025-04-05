@@ -244,7 +244,7 @@ deps = {
    Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
 
   'engine/src/flutter/third_party/harfbuzz':
-   Var('chromium_git') + '/external/github.com/harfbuzz/harfbuzz' + '@' + 'ea6a172f84f2cbcfed803b5ae71064c7afb6b5c2',
+   Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'ea6a172f84f2cbcfed803b5ae71064c7afb6b5c2',
 
   'engine/src/flutter/third_party/libcxx':
    Var('llvm_git') + '/llvm-project/libcxx' + '@' + 'bd557f6f764d1e40b62528a13b124ce740624f8f',
