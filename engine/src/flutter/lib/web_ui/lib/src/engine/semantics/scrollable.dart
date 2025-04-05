@@ -66,6 +66,9 @@ class SemanticScrollable extends SemanticRole {
       final int semanticsId = semanticsObject.id;
       final Float64List offsets = Float64List(2);
 
+      // Either SemanticsObject.isVerticalScrollContainer or
+      // SemanticsObject.isHorizontalScrollContainer should be
+      // true otherwise scrollToOffset cannot be called.
       if (semanticsObject.isVerticalScrollContainer) {
         offsets[0] = 0.0;
         offsets[1] = element.scrollTop;
