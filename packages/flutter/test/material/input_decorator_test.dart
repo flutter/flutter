@@ -4829,6 +4829,7 @@ void main() {
         topPadding + floatingLabelHeight + labelInputGap + inputHeight + bottomPadding; // 56.0
     const double fullHeight = containerHeight + helperGap + helperHeight; // 76.0
     const double errorHeight = helperHeight;
+    const double hintHeight = inputHeight;
     // TODO(bleroux): consider changing this padding because, from the M3 specification, it should be 16.
     const double helperStartPadding = 12.0;
     const double counterEndPadding = 12.0;
@@ -5425,6 +5426,40 @@ void main() {
           getDecoratorRect(tester).height,
           closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25),
         );
+      });
+
+      testWidgets('InputDecorationTheme hintMaxLines behaves as default value', (
+        WidgetTester tester,
+      ) async {
+        const int numberOfLines = 2;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationTheme(hintMaxLines: numberOfLines),
+            decoration: const InputDecoration(hintText: threeLines),
+          ),
+        );
+
+        final Rect hintRect = tester.getRect(find.text(threeLines));
+        expect(hintRect.height, closeTo(hintHeight * numberOfLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(topPadding + hintHeight * numberOfLines + bottomPadding, 0.25),
+        );
+      });
+
+      testWidgets('InputDecoration hintMaxLines default expands with hintText', (
+        WidgetTester tester,
+      ) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationTheme(),
+            decoration: const InputDecoration(hintText: threeLines),
+          ),
+        );
+
+        final Size hintSize = tester.getSize(find.byType(InputDecorator));
+        expect(hintSize.height, topPadding + hintHeight * numberOfLines + bottomPadding);
       });
 
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
