@@ -28,6 +28,9 @@ void main() {
     todayForegroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff8)),
     todayBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffff9)),
     todayBorder: BorderSide(width: 3),
+    selectedForegroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff00)),
+    selectedBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff01)),
+    selectedBorder: BorderSide(width: 4),
     yearStyle: TextStyle(fontSize: 13),
     yearForegroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffffa)),
     yearBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffffb)),
@@ -120,6 +123,9 @@ void main() {
     expect(theme.todayForegroundColor, null);
     expect(theme.todayBackgroundColor, null);
     expect(theme.todayBorder, null);
+    expect(theme.selectedForegroundColor, null);
+    expect(theme.selectedBackgroundColor, null);
+    expect(theme.selectedBorder, null);
     expect(theme.yearStyle, null);
     expect(theme.yearForegroundColor, null);
     expect(theme.yearBackgroundColor, null);
@@ -239,6 +245,12 @@ void main() {
       colorScheme.primary.withOpacity(0.38),
     );
     expect(m3.todayBorder, BorderSide(color: colorScheme.primary));
+    expect(m3.selectedForegroundColor?.resolve(<MaterialState>{}), colorScheme.primary);
+    expect(
+      m3.selectedForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}),
+      colorScheme.primary.withOpacity(0.38),
+    );
+    expect(m3.selectedBorder, BorderSide(color: colorScheme.primary));
     expect(m3.yearStyle, textTheme.bodyLarge);
     expect(m3.yearForegroundColor?.resolve(<MaterialState>{}), colorScheme.onSurfaceVariant);
     expect(
@@ -394,6 +406,12 @@ void main() {
       colorScheme.onSurface.withOpacity(0.38),
     );
     expect(m2.todayBorder, BorderSide(color: colorScheme.primary));
+    expect(m2.selectedForegroundColor?.resolve(<MaterialState>{}), colorScheme.primary);
+    expect(
+      m2.selectedForegroundColor?.resolve(<MaterialState>{MaterialState.disabled}),
+      colorScheme.onSurface.withOpacity(0.38),
+    );
+    expect(m2.selectedBorder, BorderSide(color: colorScheme.primary));
     expect(m2.yearStyle, textTheme.bodyLarge);
     expect(m2.rangePickerBackgroundColor, colorScheme.surface);
     expect(m2.rangePickerElevation, 0);
@@ -496,6 +514,9 @@ void main() {
         'todayForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffff8)})',
         'todayBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffff9)})',
         'todayBorder: BorderSide(width: 3.0)',
+        'selectedForegroundColor: WidgetStatePropertyAll(${const Color(0xffffff00)})',
+        'selectedBackgroundColor: WidgetStatePropertyAll(${const Color(0xffffff01)})',
+        'selectedBorder: BorderSide(width: 4.0)',
         'yearStyle: TextStyle(inherit: true, size: 13.0)',
         'yearForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffffa)})',
         'yearBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffffb)})',
@@ -618,20 +639,23 @@ void main() {
     final Text year2023 = tester.widget<Text>(find.text('2023')); // DatePickerDialog.currentDate
     final BoxDecoration year2023Decoration = findTextDecoration(tester, '2023')!;
     expect(year2023.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
-    expect(year2023.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
+    expect(
+      year2023.style?.color,
+      datePickerTheme.selectedForegroundColor?.resolve(<MaterialState>{}),
+    );
     expect(
       year2023Decoration.color,
-      datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}),
+      datePickerTheme.selectedBackgroundColor?.resolve(<MaterialState>{}),
     );
-    expect(year2023Decoration.border?.top.width, datePickerTheme.todayBorder?.width);
-    expect(year2023Decoration.border?.bottom.width, datePickerTheme.todayBorder?.width);
+    expect(year2023Decoration.border?.top.width, datePickerTheme.selectedBorder?.width);
+    expect(year2023Decoration.border?.bottom.width, datePickerTheme.selectedBorder?.width);
     expect(
       year2023Decoration.border?.top.color,
-      datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}),
+      datePickerTheme.selectedForegroundColor?.resolve(<MaterialState>{}),
     );
     expect(
       year2023Decoration.border?.bottom.color,
-      datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}),
+      datePickerTheme.selectedForegroundColor?.resolve(<MaterialState>{}),
     );
 
     // Test the year overlay color.
@@ -995,6 +1019,7 @@ void main() {
       paints
         ..circle() // Today decoration.
         ..circle() // Selected day decoration.
+        ..circle() // Hovered decoration.
         ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered})),
     );
 
@@ -1008,6 +1033,7 @@ void main() {
         paints
           ..circle() // Today decoration.
           ..circle() // Selected day decoration.
+          ..circle() // Hovered decoration.
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
@@ -1018,6 +1044,7 @@ void main() {
         paints
           ..circle() // Today decoration.
           ..circle() // Selected day decoration.
+          ..circle() // Hovered decoration.
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.hovered}))
           ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.pressed})),
       );
@@ -1038,6 +1065,7 @@ void main() {
       paints
         ..circle() // Today decoration.
         ..circle() // Selected day decoration.
+        ..circle() // Hovered decoration.
         ..circle(color: dayOverlayColor.resolve(<MaterialState>{MaterialState.focused})),
     );
   });
