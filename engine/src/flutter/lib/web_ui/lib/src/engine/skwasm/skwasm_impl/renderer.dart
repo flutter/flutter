@@ -333,7 +333,7 @@ class SkwasmRenderer implements Renderer {
     if (contentType == null) {
       throw Exception('Could not determine content type of image from data');
     }
-    final SkwasmImageDecoder baseDecoder = SkwasmImageDecoder(
+    final SkwasmBrowserImageDecoder baseDecoder = SkwasmBrowserImageDecoder(
       contentType: contentType.mimeType,
       dataSource: list.toJS,
       debugSource: 'encoded image bytes',
@@ -360,7 +360,7 @@ class SkwasmRenderer implements Renderer {
     if (contentType == null) {
       throw Exception('Could not determine content type of image at url $uri');
     }
-    final SkwasmImageDecoder decoder = SkwasmImageDecoder(
+    final SkwasmBrowserImageDecoder decoder = SkwasmBrowserImageDecoder(
       contentType: contentType,
       dataSource: response.body,
       debugSource: uri.toString(),
