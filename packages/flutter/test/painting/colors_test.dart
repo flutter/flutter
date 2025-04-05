@@ -457,7 +457,7 @@ void main() {
   test('Wikipedia Examples Table test', () {
     // ignore: always_specify_types
     final colors = <(int, double, double, double, double, double, double, double, double, String)>[
-    // RGB,          r,   g,   b, hue,   v,   l,s(hsv),s(hsl)
+      // RGB,          r,   g,   b, hue,   v,   l,s(hsv),s(hsl)
       (0xFFFFFFFF, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 'white'),
       (0xFF808080, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0.0, 'gray'),
       (0xFF000000, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 'black'),
@@ -466,11 +466,23 @@ void main() {
       (0xFF008000, 0.0, 0.5, 0.0, 120, 0.5, .25, 1.0, 1.0, 'green'),
       (0xFF80FFFF, 0.5, 1.0, 1.0, 180, 1.0, 0.75, 0.5, 1, 'cyan'),
       (0xFF8080FF, 0.5, 0.5, 1.0, 240, 1.0, 0.75, 0.5, 1, 'light purple'),
-      (0xFFBF40BF, 0.75, 0.25, 0.75, 300, .75, .5, 2.0/3, .5, 'mute magenta')
+      (0xFFBF40BF, 0.75, 0.25, 0.75, 300, .75, .5, 2.0 / 3, .5, 'mute magenta'),
     ];
 
-    // ignore: unused_local_variable
-    for (final (int rgb, double r, double g, double b,double hue,double v,double l,double sHSV,double sHSL, String name) in colors) {
+    for (final (
+          int rgb,
+          double r,
+          double g,
+          double b,
+          double hue,
+          double v,
+          double l,
+          double sHSV,
+          double sHSL,
+          // ignore: unused_local_variable
+          String name,
+        )
+        in colors) {
       // debugPrint('Testing color: $name');
       final Color color = Color.from(alpha: 1.0, red: r, green: g, blue: b);
       final Color intColor = Color(rgb);
@@ -482,8 +494,14 @@ void main() {
       expect(color, within<Color>(distance: _doubleColorPrecision, from: intColor));
       expect(hsv.toColor(), within<Color>(distance: _doubleColorPrecision, from: color));
       expect(hsl.toColor(), within<Color>(distance: _doubleColorPrecision, from: color));
-      expect(HSVColor.fromColor(color), within<HSVColor>(distance: _doubleColorPrecision, from: hsv));
-      expect(HSLColor.fromColor(color), within<HSLColor>(distance: _doubleColorPrecision, from: hsl));
+      expect(
+        HSVColor.fromColor(color),
+        within<HSVColor>(distance: _doubleColorPrecision, from: hsv),
+      );
+      expect(
+        HSLColor.fromColor(color),
+        within<HSLColor>(distance: _doubleColorPrecision, from: hsl),
+      );
     }
   });
 
