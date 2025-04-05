@@ -158,4 +158,10 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   ) {
     return transitionsBuilder(context, animation, secondaryAnimation, child);
   }
+
+  // TODO(justinmc): Remove.
+  @override
+  String toString() {
+    return barrierColor == const Color(0xffff0000) ? 'third screen' : 'second screen';
+  }
 }
