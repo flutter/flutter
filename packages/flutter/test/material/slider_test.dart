@@ -4530,8 +4530,9 @@ void main() {
 
       // test tap
       final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
-      await tester.pump();
-      // has no effect as tap is disabled, remains 1.0
+      // expect interaction animation
+      expect(await tester.pumpAndSettle(), greaterThan(1));
+      // has no other effect as tap is disabled, remains 1.0
       expect(value, 1.0);
       expect(logs, <String>['onChangeStart']);
 
@@ -4547,7 +4548,8 @@ void main() {
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged']);
 
       await gesture.up();
-      await tester.pump();
+      // expect release animation
+      expect(await tester.pumpAndSettle(), greaterThan(1));
 
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChangeEnd']);
     });
