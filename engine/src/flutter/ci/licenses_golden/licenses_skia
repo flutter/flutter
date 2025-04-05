@@ -1,4 +1,4 @@
-Signature: 8f4d1b1b61b1d1d97ad871289a82cb5c
+Signature: 176badfb67cacbb74358d841359bbcc4
 
 ====================================================================================================
 LIBRARY: etc1
@@ -400,8 +400,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/fontations_data_factory.md
-FILE: ../../../flutter/third_party/skia/relnotes/skcolorpriv.md
+FILE: ../../../flutter/third_party/skia/relnotes/recorder-ordering-override.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -9878,6 +9877,7 @@ ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.c
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -9892,6 +9892,7 @@ FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h
 FILE: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h
+FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp
