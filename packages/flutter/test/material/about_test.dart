@@ -1876,7 +1876,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     final Text titleText = tester.widget<Text>(find.text('Test Package'));
-    expect(titleText.style?.color, isNot(Colors.black));
+
+    final Color? titleColor = titleText.style?.color;
+    expect(titleColor, isNotNull);
+    expect(titleColor!.computeLuminance(), greaterThan(0.5));
 
     final ThemeData theme = Theme.of(tester.element(find.text('Test Package')));
     expect(titleText.style?.color, equals(theme.textTheme.titleMedium?.color));
@@ -1888,7 +1891,10 @@ void main() {
         ).licensesPackageDetailText(1),
       ),
     );
-    expect(subtitleText.style?.color, isNot(Colors.black));
+
+    final Color? subtitleColor = subtitleText.style?.color;
+    expect(subtitleColor, isNotNull);
+    expect(subtitleColor!.computeLuminance(), greaterThan(0.5));
   });
 }
 
