@@ -1811,7 +1811,7 @@ class RRect extends _RRectLike<RRect> {
 /// a shape formed by replacing the four curved corners of a superellipse with
 /// circular arcs. A (standard) superellipse follows the formula x^n + y^n =
 /// a^n, and while n > 2 gives it rounded corners, they tend to be too sharp and
-/// pronounced.  Replacing them with circular arcs makes the shape feel softer
+/// pronounced. Replacing them with circular arcs makes the shape feel softer
 /// and more natural.
 ///
 /// Visually, a rounded superellipse looks similar to a typical rounded rectangle
