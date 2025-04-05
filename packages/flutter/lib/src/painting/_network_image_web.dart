@@ -91,13 +91,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     image_provider.NetworkImage key,
     image_provider.DecoderBufferCallback decode,
   ) {
-    // Ownership of this controller is handed off to [_loadAsync]; it is that
-    // method's responsibility to close the controller's stream when the image
-    // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
-
     return _ForwardingImageStreamCompleter(
-      _loadAsync(key as NetworkImage, decode, chunkEvents),
+      _loadAsync(key as NetworkImage, decode),
       informationCollector: _imageStreamInformationCollector(key),
       debugLabel: key.url,
     );
@@ -108,13 +103,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     image_provider.NetworkImage key,
     image_provider.ImageDecoderCallback decode,
   ) {
-    // Ownership of this controller is handed off to [_loadAsync]; it is that
-    // method's responsibility to close the controller's stream when the image
-    // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
-
     return _ForwardingImageStreamCompleter(
-      _loadAsync(key as NetworkImage, decode, chunkEvents),
+      _loadAsync(key as NetworkImage, decode),
       informationCollector: _imageStreamInformationCollector(key),
       debugLabel: key.url,
     );
@@ -133,11 +123,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     return collector;
   }
 
-  Future<ImageStreamCompleter> _loadAsync(
-    NetworkImage key,
-    _SimpleDecoderCallback decode,
-    StreamController<ImageChunkEvent> chunkEvents,
-  ) async {
+  Future<ImageStreamCompleter> _loadAsync(NetworkImage key, _SimpleDecoderCallback decode) async {
     assert(key == this);
 
     Future<ImageStreamCompleter> loadViaDecode() async {
@@ -147,7 +133,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // from the wrapping [ForwardingImageStreamCompleter]).
       final ui.Codec codec = await _fetchImageBytes(decode);
       return MultiFrameImageStreamCompleter(
-        chunkEvents: chunkEvents.stream,
         codec: Future<ui.Codec>.value(codec),
         scale: key.scale,
         debugLabel: key.url,
