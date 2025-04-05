@@ -73,6 +73,8 @@ class TaskRunner : public fml::RefCountedThreadSafe<TaskRunner>,
   static void RunNowAndFlushMessages(const fml::RefPtr<fml::TaskRunner>& runner,
                                      const fml::closure& task);
 
+  void FlushAllTasks();
+
  protected:
   explicit TaskRunner(fml::RefPtr<MessageLoopImpl> loop);
 

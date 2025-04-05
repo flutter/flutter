@@ -51,6 +51,8 @@ class MessageLoopImpl : public Wakeable,
 
   virtual TaskQueueId GetTaskQueueId() const;
 
+  void FlushTasks(FlushType type);
+
  protected:
   // Exposed for the embedder shell which allows clients to poll for events
   // instead of dedicating a thread to the message loop.
@@ -68,8 +70,6 @@ class MessageLoopImpl : public Wakeable,
   TaskQueueId queue_id_;
 
   std::atomic_bool terminated_;
-
-  void FlushTasks(FlushType type);
 
   FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
 };

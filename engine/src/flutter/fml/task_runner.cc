@@ -79,4 +79,8 @@ void TaskRunner::RunNowAndFlushMessages(
   }
 }
 
+void TaskRunner::FlushAllTasks() {
+  loop_->FlushTasks(FlushType::kAll);
+}
+
 }  // namespace fml
