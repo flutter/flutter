@@ -68,7 +68,6 @@ SKWASM_EXPORT void animatedImage_decodeNextFrame(SkAnimatedImage* image) {
   image->decodeNextFrame();
 }
 
-SKWASM_EXPORT SkImage* animatedImage_getCurrentFrame(
-    SkAnimatedImage* image) {
+SKWASM_EXPORT SkImage* animatedImage_getCurrentFrame(SkAnimatedImage* image) {
   return image->getCurrentFrame().release();
 }

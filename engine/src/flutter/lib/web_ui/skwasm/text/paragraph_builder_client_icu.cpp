@@ -11,7 +11,7 @@ using namespace skia::textlayout;
 using namespace Skwasm;
 
 SKWASM_EXPORT bool skwasm_isHeavy() {
-    return false;
+  return false;
 }
 
 SKWASM_EXPORT ParagraphBuilder* paragraphBuilder_create(

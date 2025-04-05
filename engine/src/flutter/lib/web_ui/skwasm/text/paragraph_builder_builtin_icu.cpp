@@ -4,20 +4,21 @@
 
 #include "../export.h"
 #include "../wrappers.h"
-#include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
 #include "modules/skunicode/include/SkUnicode_icu.h"
+#include "third_party/skia/modules/skparagraph/include/ParagraphBuilder.h"
 
 using namespace skia::textlayout;
 using namespace Skwasm;
 
 SKWASM_EXPORT bool skwasm_isHeavy() {
-    return true;
+  return true;
 }
 
 SKWASM_EXPORT ParagraphBuilder* paragraphBuilder_create(
     ParagraphStyle* style,
     FlutterFontCollection* collection) {
-  return ParagraphBuilder::make(*style, collection->collection, SkUnicodes::ICU::Make())
+  return ParagraphBuilder::make(*style, collection->collection,
+                                SkUnicodes::ICU::Make())
       .release();
 }
 
@@ -27,15 +28,12 @@ SKWASM_EXPORT Paragraph* paragraphBuilder_build(ParagraphBuilder* builder) {
 
 SKWASM_EXPORT void paragraphBuilder_setGraphemeBreaksUtf16(
     ParagraphBuilder* builder,
-    std::vector<SkUnicode::Position>* breaks) {
-}
+    std::vector<SkUnicode::Position>* breaks) {}
 
 SKWASM_EXPORT void paragraphBuilder_setWordBreaksUtf16(
     ParagraphBuilder* builder,
-    std::vector<SkUnicode::Position>* breaks) {
-}
+    std::vector<SkUnicode::Position>* breaks) {}
 
 SKWASM_EXPORT void paragraphBuilder_setLineBreaksUtf16(
     ParagraphBuilder* builder,
-    std::vector<SkUnicode::LineBreakBefore>* breaks) {
-}
+    std::vector<SkUnicode::LineBreakBefore>* breaks) {}

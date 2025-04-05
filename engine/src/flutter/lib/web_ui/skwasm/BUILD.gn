@@ -62,7 +62,7 @@ template("skwasm_variant") {
     } else {
       sources += [
         "animated_image_stub.cpp",
-        "text/paragraph_builder_client_icu.cpp"
+        "text/paragraph_builder_client_icu.cpp",
       ]
     }
 

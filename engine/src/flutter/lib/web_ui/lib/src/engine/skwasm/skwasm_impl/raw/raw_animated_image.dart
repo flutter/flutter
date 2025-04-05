@@ -25,14 +25,23 @@ external void animatedImageDispose(AnimatedImageHandle handle);
 @Native<Int32 Function(AnimatedImageHandle)>(symbol: 'animatedImage_getFrameCount', isLeaf: true)
 external int animatedImageGetFrameCount(AnimatedImageHandle handle);
 
-@Native<Int32 Function(AnimatedImageHandle)>(symbol: 'animatedImage_getRepetitionCount', isLeaf: true)
+@Native<Int32 Function(AnimatedImageHandle)>(
+  symbol: 'animatedImage_getRepetitionCount',
+  isLeaf: true,
+)
 external int animatedImageGetRepetitionCount(AnimatedImageHandle handle);
 
-@Native<Int32 Function(AnimatedImageHandle)>(symbol: 'animatedImage_getCurrentFrameDurationMilliseconds', isLeaf: true)
+@Native<Int32 Function(AnimatedImageHandle)>(
+  symbol: 'animatedImage_getCurrentFrameDurationMilliseconds',
+  isLeaf: true,
+)
 external int animatedImageGetCurrentFrameDurationMilliseconds(AnimatedImageHandle handle);
 
 @Native<Void Function(AnimatedImageHandle)>(symbol: 'animatedImage_decodeNextFrame', isLeaf: true)
 external void animatedImageDecodeNextFrame(AnimatedImageHandle handle);
 
-@Native<ImageHandle Function(AnimatedImageHandle)>(symbol: 'animatedImage_getCurrentFrame', isLeaf: true)
+@Native<ImageHandle Function(AnimatedImageHandle)>(
+  symbol: 'animatedImage_getCurrentFrame',
+  isLeaf: true,
+)
 external ImageHandle animatedImageGetCurrentFrame(AnimatedImageHandle handle);
