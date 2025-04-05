@@ -323,6 +323,44 @@ void main() {
     expect(output, equals(expectedColors));
   });
 
+  group('HSLColor.fromColor tests', () {
+    test('Pink', () {
+      const Color color = Color.fromARGB(255, 255, 51, 152);
+      final HSLColor hslColor = HSLColor.fromColor(color);
+      expect(hslColor.alpha, 1.0);
+      expect(hslColor.hue, within<double>(distance: .3, from: 330));
+      expect(hslColor.saturation, 1.0);
+      expect(hslColor.lightness, within<double>(distance: _doubleColorPrecision, from: 0.6));
+    });
+
+    test('White', () {
+      const Color color = Color(0xffffffff);
+      final HSLColor hslColor = HSLColor.fromColor(color);
+      expect(hslColor.alpha, 1.0);
+      expect(hslColor.hue, 0.0);
+      expect(hslColor.saturation, 0.0);
+      expect(hslColor.lightness, 1.0);
+    });
+
+    test('Black', () {
+      const Color color = Color(0xff000000);
+      final HSLColor hslColor = HSLColor.fromColor(color);
+      expect(hslColor.alpha, 1.0);
+      expect(hslColor.hue, 0.0);
+      expect(hslColor.saturation, 0.0);
+      expect(hslColor.lightness, 0.0);
+    });
+
+    test('Gray', () {
+      const Color color = Color(0xff808080);
+      final HSLColor hslColor = HSLColor.fromColor(color);
+      expect(hslColor.alpha, 1.0);
+      expect(hslColor.hue, 0.0);
+      expect(hslColor.saturation, 0.0);
+      expect(hslColor.lightness, within<double>(distance: _doubleColorPrecision, from: 0.5));
+    });
+  });
+
   test('HSLColor.lerp identical a,b', () {
     expect(HSLColor.lerp(null, null, 0), null);
     const HSLColor color = HSLColor.fromAHSL(1.0, 0.0, 0.5, 0.5);
