@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'semantic_utils.dart';
 
 void main() {
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
@@ -143,50 +146,71 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgets('Should announce only the first error message when validate returns errors', (
-    WidgetTester tester,
-  ) async {
-    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    children: <Widget>[
-                      TextFormField(validator: (_) => 'First error message'),
-                      TextFormField(validator: (_) => 'Second error message'),
-                    ],
+  for (final _PlatformAnnounceScenario test in <_PlatformAnnounceScenario>[
+    _PlatformAnnounceScenario(
+      isAnnounceSupported: true,
+      testName:
+          'Should announce only the first error message when validate returns errors and isAnnounceSupported = true',
+    ),
+    _PlatformAnnounceScenario(
+      isAnnounceSupported: false,
+      testName:
+          'Should not announce error message when validate returns errors and isAnnounceSupported = false',
+    ),
+  ]) {
+    testWidgets(test.testName, (WidgetTester tester) async {
+      final MockSemanticsService mockSemanticsService = MockSemanticsService();
+      mockSemanticsService.mockIsAnnounceSupported = test.isAnnounceSupported;
+
+      final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: Form(
+                    semanticsService: mockSemanticsService,
+                    key: formKey,
+                    child: Column(
+                      children: <Widget>[
+                        TextFormField(validator: (_) => 'First error message'),
+                        TextFormField(validator: (_) => 'Second error message'),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    formKey.currentState!.reset();
-    await tester.enterText(find.byType(TextFormField).first, '');
-    await tester.pump();
+      );
+      formKey.currentState!.reset();
+      await tester.enterText(find.byType(TextFormField).first, '');
+      await tester.pump();
 
-    // Manually validate.
-    expect(find.text('First error message'), findsNothing);
-    expect(find.text('Second error message'), findsNothing);
-    formKey.currentState!.validate();
-    await tester.pump();
-    expect(find.text('First error message'), findsOneWidget);
-    expect(find.text('Second error message'), findsOneWidget);
+      // Manually validate.
+      expect(find.text('First error message'), findsNothing);
+      expect(find.text('Second error message'), findsNothing);
+      formKey.currentState!.validate();
+      await tester.pump();
+      expect(find.text('First error message'), findsOneWidget);
+      expect(find.text('Second error message'), findsOneWidget);
 
-    final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
-    expect(announcement.message, 'First error message');
-    expect(announcement.textDirection, TextDirection.ltr);
-    expect(announcement.assertiveness, Assertiveness.assertive);
-  });
+      if (test.isAnnounceSupported) {
+        final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
+        expect(announcement.message, 'First error message');
+        expect(announcement.textDirection, TextDirection.ltr);
+        expect(announcement.assertiveness, Assertiveness.assertive);
+      } else {
+        final CapturedAccessibilityAnnouncement? announcement =
+            tester.takeAnnouncements().firstOrNull;
+        expect(announcement, null);
+      }
+    });
+  }
 
   testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
@@ -355,6 +379,8 @@ void main() {
   testWidgets('Should announce error text when validateGranularly is called', (
     WidgetTester tester,
   ) async {
+    final MockSemanticsService mockSemantics = MockSemanticsService();
+    mockSemantics.mockIsAnnounceSupported = true;
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     const String validString = 'Valid string';
     String? validator(String? s) => s == validString ? null : 'error';
@@ -369,6 +395,7 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
+                  semanticsService: mockSemantics,
                   child: ListView(
                     children: <Widget>[
                       TextFormField(
@@ -1588,4 +1615,10 @@ void main() {
       containsSemantics(isTextField: true, validationResult: SemanticsValidationResult.invalid),
     );
   });
+}
+
+class _PlatformAnnounceScenario {
+  _PlatformAnnounceScenario({required this.isAnnounceSupported, required this.testName});
+  final bool isAnnounceSupported;
+  final String testName;
 }
