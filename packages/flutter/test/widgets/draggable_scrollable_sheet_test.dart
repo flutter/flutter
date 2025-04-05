@@ -18,6 +18,7 @@ void main() {
     bool snap = false,
     List<double>? snapSizes,
     Duration? snapAnimationDuration,
+    Curve? snapAnimationCurve,
     double? itemExtent,
     Key? containerKey,
     Key? stackKey,
@@ -44,6 +45,7 @@ void main() {
                 snap: snap,
                 snapSizes: snapSizes,
                 snapAnimationDuration: snapAnimationDuration,
+                snapAnimationCurve: snapAnimationCurve,
                 shouldCloseOnMinExtent: shouldCloseOnMinExtent,
                 builder: (BuildContext context, ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
@@ -527,6 +529,66 @@ void main() {
           containerKey: containerKey,
           snapSizes: <double>[.25, .5, .75, 1.0],
           snapAnimationDuration: snapAnimationDuration,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
+
+      // We are dragging up, but we'll snap down because we're closer to .75 than 1.
+      await tester.drag(find.text('Item 1'), Offset(0, -.35 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.75, precisionErrorTolerance),
+      );
+
+      // Drag up and snap up.
+      await tester.drag(find.text('Item 1'), Offset(0, -.2 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
+
+      // Drag down and snap up.
+      await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(1.0, precisionErrorTolerance),
+      );
+
+      // Drag down and snap down.
+      await tester.drag(find.text('Item 1'), Offset(0, .45 * screenHeight));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+
+      // Fling up with negligible velocity and snap down.
+      await tester.fling(find.text('Item 1'), Offset(0, .1 * screenHeight), 1);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byKey(containerKey)).height / screenHeight,
+        closeTo(.5, precisionErrorTolerance),
+      );
+    }, variant: TargetPlatformVariant.all());
+  }
+
+  for (final Curve? snapAnimationCurve in <Curve?>[Curves.easeOut, Curves.bounceOut]) {
+    testWidgets('Widget snaps to nearest snap target with '
+        'snapAnimationCurve: $snapAnimationCurve', (WidgetTester tester) async {
+      const Key stackKey = ValueKey<String>('stack');
+      const Key containerKey = ValueKey<String>('container');
+      await tester.pumpWidget(
+        boilerplateWidget(
+          null,
+          snap: true,
+          stackKey: stackKey,
+          containerKey: containerKey,
+          snapSizes: <double>[.25, .5, .75, 1.0],
+          snapAnimationCurve: snapAnimationCurve,
         ),
       );
       await tester.pumpAndSettle();
