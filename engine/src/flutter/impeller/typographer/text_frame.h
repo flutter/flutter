@@ -6,12 +6,22 @@
 #define FLUTTER_IMPELLER_TYPOGRAPHER_TEXT_FRAME_H_
 
 #include <cstdint>
+
+#include "fml/status_or.h"
 #include "impeller/geometry/rational.h"
 #include "impeller/typographer/glyph.h"
 #include "impeller/typographer/glyph_atlas.h"
 #include "impeller/typographer/text_run.h"
 
+// TODO(https://github.com/flutter/flutter/issues/166593): This is required to
+// break a cyclical dependency between display list, impeller, and typographer.
+namespace flutter {
+class DlPath;
+}
+
 namespace impeller {
+
+using PathCreator = std::function<fml::StatusOr<flutter::DlPath>()>;
 
 //------------------------------------------------------------------------------
 /// @brief      Represents a collection of shaped text runs.
@@ -25,7 +35,10 @@ class TextFrame {
  public:
   TextFrame();
 
-  TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color);
+  TextFrame(std::vector<TextRun>& runs,
+            Rect bounds,
+            bool has_color,
+            const PathCreator& path_creator = {});
 
   ~TextFrame();
 
@@ -103,11 +116,9 @@ class TextFrame {
 
   Rational GetScale() const;
 
-  TextFrame& operator=(TextFrame&& other) = default;
-
-  TextFrame(const TextFrame& other) = default;
-
   const Matrix& GetTransform() const { return transform_; }
+
+  fml::StatusOr<flutter::DlPath> GetPath() const;
 
   Point GetOffset() const;
 
@@ -128,6 +139,7 @@ class TextFrame {
   std::vector<TextRun> runs_;
   Rect bounds_;
   bool has_color_;
+  const PathCreator path_creator_;
 
   // Data that is cached when rendering the text frame and is only
   // valid for the current atlas generation.
