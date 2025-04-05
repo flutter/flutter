@@ -2576,6 +2576,58 @@ void main() {
     );
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/166642.
+  testWidgets('DropdownButtonFormField can replace focusNode properly', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final UniqueKey buttonKey = UniqueKey();
+    FocusNode focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
+    addTearDown(() => focusNode.dispose());
+
+    Widget buildFormField() => buildFrame(
+      isFormField: true,
+      buttonKey: buttonKey,
+      onChanged: onChanged,
+      focusNode: focusNode,
+      decoration: const InputDecoration(filled: true),
+      focusColor: const Color(0xff00ff00),
+    );
+
+    await tester.pumpWidget(buildFormField());
+    final Color defaultBorderColor =
+        Theme.of(tester.element(find.byType(InputDecorator))).colorScheme.surfaceContainerHighest;
+    expect(
+      findInputDecoratorBorderPainter(),
+      paints..path(style: PaintingStyle.fill, color: defaultBorderColor),
+    );
+
+    // Replace focusNode and request focus.
+    focusNode.dispose();
+    focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
+    focusNode.requestFocus();
+
+    await tester.pumpWidget(buildFormField());
+    await tester.pump(); // Wait for requestFocus to take effect.
+    expect(
+      findInputDecoratorBorderPainter(),
+      paints..path(style: PaintingStyle.fill, color: const Color(0xff00ff00)),
+    );
+
+    // Replace focusNode and request focus.
+    focusNode.dispose();
+    focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
+    focusNode.requestFocus();
+
+    await tester.pumpWidget(buildFormField());
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump(); // Wait for unfocus to take effect.
+    expect(
+      findInputDecoratorBorderPainter(),
+      paints..path(style: PaintingStyle.fill, color: defaultBorderColor),
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/147069.
   testWidgets('DropdownButtonFormField can be hovered', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
