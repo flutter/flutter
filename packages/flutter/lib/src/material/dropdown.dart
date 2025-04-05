@@ -1374,8 +1374,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.focusNode == null) {
-      _internalNode ??= _createFocusNode();
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode?.removeListener(_handleFocusChanged);
+      if (widget.focusNode == null) {
+        _internalNode ??= _createFocusNode();
+      }
+      _hasPrimaryFocus = focusNode!.hasPrimaryFocus;
+      focusNode!.addListener(_handleFocusChanged);
     }
     _updateSelectedIndex();
   }
