@@ -2904,6 +2904,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
         _cupertinoOverrideTheme.textTheme,
         _cupertinoOverrideTheme.barBackgroundColor,
         _cupertinoOverrideTheme.scaffoldBackgroundColor,
+        _cupertinoOverrideTheme.selectionHandleColor ?? _materialTheme.textSelectionTheme.selectionHandleColor,
         _cupertinoOverrideTheme.applyThemeToAll,
       );
 
@@ -2943,6 +2944,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     CupertinoTextThemeData? textTheme,
     Color? barBackgroundColor,
     Color? scaffoldBackgroundColor,
+    Color? selectionHandleColor,
     bool? applyThemeToAll,
   }) {
     return MaterialBasedCupertinoThemeData._(
@@ -2954,6 +2956,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
         textTheme: textTheme,
         barBackgroundColor: barBackgroundColor,
         scaffoldBackgroundColor: scaffoldBackgroundColor,
+        selectionHandleColor: selectionHandleColor,
         applyThemeToAll: applyThemeToAll,
       ),
     );
