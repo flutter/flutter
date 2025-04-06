@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide NetworkImage;
@@ -383,6 +384,42 @@ void runTests() {
     expect(find.byType(RawWebImage), findsOneWidget);
     expect(find.byType(PlatformViewLink), findsOneWidget);
   });
+
+  testWidgets('Does not crash when disposed before 2nd frame', (
+    WidgetTester tester,
+  ) async {
+    final TestHttpRequest testHttpRequest =
+        TestHttpRequest()
+          ..status = 200
+          ..mockEvent = MockEvent('load', web.Event('test error'))
+          ..response = (Uint8List.fromList(kTransparentImage)).buffer;
+
+    httpRequestFactory = () {
+      return testHttpRequest.getMock() as web_shim.XMLHttpRequest;
+    };
+
+    final Completer<void> secondFrameLock = Completer<void>();
+    final Image image = Image(
+      image: _NetworkImageWithTestCodec(
+        uniqueUrl(tester.testDescription),
+        codec: _TwoFrameCodec(
+          onSecondFrame: secondFrameLock.future,
+        ),
+      ),
+    );
+    // The image is mounted, and the 1st frame is displayed.
+    await tester.pumpWidget(image);
+    // Clear the image cache, so that the image completer will be disposed as
+    // soon as the image is unmounted.
+    imageCache.clear();
+    // The image is unmounted, disposing `MultiFrameImageStreamCompleter`.
+    await tester.pumpWidget(Container());
+    // Finish decoding the 2nd frame. If the image completer has been properly
+    // disposed, nothing will happen; otherwise the
+    // `MultiFrameImageStreamCompleter` is still alive and will call
+    // of `_ForwardingImageStreamCompleter.setImage` and causes a crash.
+    secondFrameLock.complete();
+  });
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
@@ -468,4 +505,69 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
     final List<ImageStreamListener> listenersCopy = listeners.toList();
     listenersCopy.forEach(removeListener);
   }
+}
+
+// A [NetworkImage] that, instead of decoding the image stream, always returns
+// the specified `codec` as the image stream.
+class _NetworkImageWithTestCodec extends NetworkImage {
+  const _NetworkImageWithTestCodec(
+    super.url, {
+    required this.codec,
+  });
+
+  final ui.Codec codec;
+
+  @override
+  Future<ui.Codec> instantiateImageCodecWithSize(
+    ui.ImmutableBuffer buffer, {
+    ui.TargetImageSizeCallback? getTargetSize,
+  }) async {
+    return codec;
+  }
+}
+
+// A decoded image that has two frames (_TestFrameInfo), the 2nd of which waits
+// for the completion of `onSecondFrame` before being returned.
+class _TwoFrameCodec implements ui.Codec {
+  _TwoFrameCodec({required this.onSecondFrame});
+
+  int _frameNumber = -1;
+  final Future<void> onSecondFrame;
+
+  @override
+  int get frameCount => 2;
+
+  @override
+  int get repetitionCount => 0;
+
+  @override
+  Future<ui.FrameInfo> getNextFrame() async {
+    _frameNumber += 1;
+    if (_frameNumber == 1) {
+      await onSecondFrame;
+    }
+    return _TestFrameInfo(await createTestImage());
+  }
+
+  @override
+  void dispose() {
+  }
+}
+
+class _TestFrameInfo implements ui.FrameInfo {
+  _TestFrameInfo(this.image);
+
+  @override
+  final Duration duration = Duration.zero;
+
+  @override
+  final ui.Image image;
+}
+
+Future<ui.Image> createTestImage() async {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas recorderCanvas = Canvas(recorder);
+  recorderCanvas.scale(1.0, 1.0);
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImage(1, 1);
 }

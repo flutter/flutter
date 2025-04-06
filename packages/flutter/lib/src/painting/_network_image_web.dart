@@ -130,7 +130,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       // Resolve the Codec before passing it to
       // [MultiFrameImageStreamCompleter] so any errors aren't reported
       // twice (once from the MultiFrameImageStreamCompleter and again
-      // from the wrapping [ForwardingImageStreamCompleter]).
+      // from the wrapping [_ForwardingImageStreamCompleter]).
       final ui.Codec codec = await _fetchImageBytes(decode);
       return MultiFrameImageStreamCompleter(
         codec: Future<ui.Codec>.value(codec),
@@ -272,25 +272,14 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
         if (_disposed) {
           // Add a listener since the delegate completer won't dispose if it never
           // had a listener.
-          value.addListener(ImageStreamListener((_, _) {}));
+          final ImageStreamListener listener = ImageStreamListener((_, _) {});
+          value.addListener(listener);
+          value.removeListener(listener);
           value.maybeDispose();
           return;
         }
         completer = value;
-        handle = completer.keepAlive();
-        completer.addListener(
-          ImageStreamListener(
-            (ImageInfo image, bool synchronousCall) {
-              setImage(image);
-            },
-            onChunk: (ImageChunkEvent event) {
-              reportImageChunkEvent(event);
-            },
-            onError: (Object exception, StackTrace? stackTrace) {
-              reportError(exception: exception, stack: stackTrace);
-            },
-          ),
-        );
+        completer.addListener(listener);
       },
       onError: (Object error, StackTrace stack) {
         reportError(
@@ -307,14 +296,25 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
   final Future<ImageStreamCompleter> task;
   bool resolved = false;
   late final ImageStreamCompleter completer;
-  late final ImageStreamCompleterHandle handle;
 
   bool _disposed = false;
+
+  late final ImageStreamListener listener = ImageStreamListener(
+    (ImageInfo image, bool synchronousCall) {
+      setImage(image);
+    },
+    onChunk: (ImageChunkEvent event) {
+      reportImageChunkEvent(event);
+    },
+    onError: (Object exception, StackTrace? stackTrace) {
+      reportError(exception: exception, stack: stackTrace);
+    },
+  );
 
   @override
   void onDisposed() {
     if (resolved) {
-      handle.dispose();
+      completer.removeListener(listener);
     }
     _disposed = true;
     super.onDisposed();

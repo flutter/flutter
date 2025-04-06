@@ -547,7 +547,7 @@ abstract class ImageProvider<T extends Object> {
       () {
         ImageStreamCompleter result = loadImage(
           key,
-          PaintingBinding.instance.instantiateImageCodecWithSize,
+          instantiateImageCodecWithSize,
         );
         // This check exists as a fallback for backwards compatibility until the
         // deprecated `loadBuffer()` method is removed. Until then, ImageProvider
@@ -564,6 +564,15 @@ abstract class ImageProvider<T extends Object> {
     if (completer != null) {
       stream.setCompleter(completer);
     }
+  }
+
+  @protected
+  Future<ui.Codec> instantiateImageCodecWithSize(
+    ui.ImmutableBuffer buffer, {
+    ui.TargetImageSizeCallback? getTargetSize,
+  }) {
+    print('Before super.instantiateImageCodecWithSize');
+    return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: getTargetSize);
   }
 
   /// Evicts an entry from the image cache.
