@@ -425,6 +425,7 @@ class ListTile extends StatelessWidget {
     this.minTileHeight,
     this.titleAlignment,
     this.internalAddSemanticForOnTap = true,
+    this.statesController,
   }) : assert(!isThreeLine || subtitle != null);
 
   /// A widget to display before the title.
@@ -471,6 +472,19 @@ class ListTile extends StatelessWidget {
   /// whose second child is the metadata text, instead of using the [trailing]
   /// property.
   final Widget? trailing;
+
+  /// {@template flutter.material.inkwell.statesController}
+  /// Represents the interactive "state" of this widget in terms of
+  /// a set of [WidgetState]s, like [WidgetState.pressed] and
+  /// [WidgetState.focused].
+  ///
+  /// Classes based on this one can provide their own
+  /// [WidgetStatesController] to which they've added listeners.
+  /// They can also update the controller's [WidgetStatesController.value]
+  /// however, this may only be done when it's safe to call
+  /// [State.setState], like in an event handler.
+  /// {@endtemplate}
+  final WidgetStatesController? statesController;
 
   /// Whether this list tile is intended to display three lines of text.
   ///
@@ -963,6 +977,7 @@ class ListTile extends StatelessWidget {
       splashColor: splashColor,
       autofocus: autofocus,
       enableFeedback: enableFeedback ?? tileTheme.enableFeedback ?? true,
+      statesController: statesController,
       child: Semantics(
         button: internalAddSemanticForOnTap && (onTap != null || onLongPress != null),
         selected: selected,
@@ -1030,6 +1045,7 @@ class ListTile extends StatelessWidget {
     properties.add(
       DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null),
     );
+    properties.add(DiagnosticsProperty<WidgetStatesController>('statesController', statesController, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<ListTileStyle>('style', style, defaultValue: null));
     properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
