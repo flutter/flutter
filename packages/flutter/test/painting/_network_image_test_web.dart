@@ -407,13 +407,14 @@ void runTests() {
   });
 }
 
-// Generates a unique URL for use in tests, preventing unintended caching.
+// Generates a unique URL based on the provided key, preventing unintended caching.
 //
-// Requests within tests must each have a unique URL; otherwise, responses may
-// be cached inadvertently. This often leads to subtle, frustrating bugs that
-// are difficult to debug.
+// Requests within this file must each have a unique URL; otherwise, responses
+// may be cached inadvertently. This often leads to subtle, frustrating bugs
+// that are difficult to debug.
 //
-// To ensure uniqueness, provide any object as the key.
+// Test cases that only contain one request each can use `tester.description` as
+// the key.
 String _uniqueUrl(Object key) {
   return 'https://www.example.com/images/frame_${identityHashCode(key)}.png';
 }
