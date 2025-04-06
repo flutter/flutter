@@ -430,6 +430,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       }
     } on RPCError catch (err) {
       if (err.code == RPCErrorKind.kServiceDisappeared.code ||
+          err.code == RPCErrorKind.kConnectionDisposed.code ||
           err.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

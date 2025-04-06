@@ -5,22 +5,17 @@
 
 import com.android.build.OutputFile
 import com.android.build.gradle.AbstractAppExtension
-import com.android.tools.r8.P
-import com.flutter.gradle.AppLinkSettings
 import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.PackageAndroidArtifact
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.BaseApplicationNameHandler
-import com.flutter.gradle.Deeplink
 import com.flutter.gradle.DependencyVersionChecker
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginConstants
 import com.flutter.gradle.FlutterTask
 import com.flutter.gradle.FlutterPluginUtils
-import com.flutter.gradle.IntentFilterCheck
-import com.flutter.gradle.VersionUtils
-import groovy.xml.QName
+import com.flutter.gradle.NativePluginLoaderReflectionBridge
 import org.gradle.api.file.Directory
 
 import java.nio.file.Paths
@@ -40,7 +35,6 @@ import org.gradle.internal.os.OperatingSystem
 class FlutterPlugin implements Plugin<Project> {
 
     private final static String propLocalEngineRepo = "local-engine-repo"
-    private final static String propProcessResourcesProvider = "processResourcesProvider"
 
     /**
      * The name prefix for flutter builds. This is used to identify gradle tasks
@@ -121,7 +115,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         // Load shared gradle functions
-        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "groovy", "native_plugin_loader.groovy")
+        project.apply from: Paths.get(flutterRoot.absolutePath, "packages", "flutter_tools", "gradle", "src", "main", "scripts", "native_plugin_loader.gradle.kts")
 
         FlutterExtension extension = project.extensions.create("flutter", FlutterExtension)
         Properties localProperties = new Properties()
@@ -257,125 +251,6 @@ class FlutterPlugin implements Plugin<Project> {
         project.android.buildTypes.all(this.&addFlutterDependencies)
     }
 
-    // Add a task that can be called on Flutter projects that outputs app link related project
-    // settings into a json file.
-    //
-    // See https://developer.android.com/training/app-links/ for more information about app link.
-    //
-    // The json will be saved in path stored in outputPath parameter.
-    //
-    // An example json:
-    // {
-    //   applicationId: "com.example.app",
-    //   deeplinks: [
-    //     {"scheme":"http", "host":"example.com", "path":".*"},
-    //     {"scheme":"https","host":"example.com","path":".*"}
-    //   ]
-    // }
-    //
-    // The output file is parsed and used by devtool.
-    private static void addTasksForOutputsAppLinkSettings(Project project) {
-        AbstractAppExtension android = (AbstractAppExtension) project.extensions.findByName("android")
-        android.applicationVariants.configureEach { variant ->
-            // Warning: The name of this task is used by AndroidBuilder.outputsAppLinkSettings
-            project.tasks.register("output${variant.name.capitalize()}AppLinkSettings") {
-                description "stores app links settings for the given build variant of this Android project into a json file."
-                variant.outputs.configureEach { output ->
-                    // Deeplinks are defined in AndroidManifest.xml and is only available after
-                    // `processResourcesProvider`.
-                    Object processResources = output.hasProperty(propProcessResourcesProvider) ?
-                            output.processResourcesProvider.get() : output.processResources
-                    dependsOn processResources.name
-                }
-                doLast {
-                    AppLinkSettings appLinkSettings = new AppLinkSettings(variant.applicationId)
-                    variant.outputs.configureEach { output ->
-                        Object processResources = output.hasProperty(propProcessResourcesProvider) ?
-                                output.processResourcesProvider.get() : output.processResources
-                        Node manifest = new XmlParser().parse(processResources.manifestFile)
-                        manifest.application.activity.each { activity ->
-                            activity."meta-data".each { metadata ->
-                                boolean nameAttribute = metadata.attributes().find { it.key == 'android:name' }?.value == 'flutter_deeplinking_enabled'
-                                boolean valueAttribute = metadata.attributes().find { it.key == 'android:value' }?.value == 'true'
-                                if (nameAttribute && valueAttribute) {
-                                    appLinkSettings.deeplinkingFlagEnabled = true
-                                }
-                            }
-                            activity."intent-filter".each { appLinkIntent ->
-                                // Print out the host attributes in data tags.
-                                Set<String> schemes = [] as Set<String>
-                                Set<String> hosts = [] as Set<String>
-                                Set<String> paths = [] as Set<String>
-                                IntentFilterCheck intentFilterCheck = new IntentFilterCheck()
-
-                                if (appLinkIntent.attributes().find { it.key == 'android:autoVerify' }?.value == 'true') {
-                                    intentFilterCheck.hasAutoVerify = true
-                                }
-                                appLinkIntent.'action'.each { action ->
-                                    if (action.attributes().find { it.key == 'android:name' }?.value == 'android.intent.action.VIEW') {
-                                        intentFilterCheck.hasActionView = true
-                                    }
-                                }
-                                appLinkIntent.'category'.each { category ->
-                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.DEFAULT') {
-                                        intentFilterCheck.hasDefaultCategory = true
-                                    }
-                                    if (category.attributes().find { it.key == 'android:name' }?.value == 'android.intent.category.BROWSABLE') {
-                                        intentFilterCheck.hasBrowsableCategory = true
-                                    }
-                                }
-                                appLinkIntent.data.each { data ->
-                                    data.attributes().each { entry ->
-                                        if (entry.key instanceof QName) {
-                                            switch (entry.key.getLocalPart()) {
-                                                case "scheme":
-                                                    schemes.add(entry.value)
-                                                    break
-                                                case "host":
-                                                    hosts.add(entry.value)
-                                                    break
-                                                case "pathAdvancedPattern":
-                                                case "pathPattern":
-                                                case "path":
-                                                    paths.add(entry.value)
-                                                    break
-                                                case "pathPrefix":
-                                                    paths.add("${entry.value}.*")
-                                                    break
-                                                case "pathSuffix":
-                                                    paths.add(".*${entry.value}")
-                                                    break
-                                            }
-                                        }
-                                    }
-                                }
-                                if (!hosts.isEmpty() || !paths.isEmpty()) {
-                                    if (schemes.isEmpty()) {
-                                        schemes.add(null)
-                                    }
-                                    if (hosts.isEmpty()) {
-                                        hosts.add(null)
-                                    }
-                                    if (paths.isEmpty()) {
-                                        paths.add('.*')
-                                    }
-                                    schemes.each { scheme ->
-                                        hosts.each { host ->
-                                            paths.each { path ->
-                                                appLinkSettings.deeplinks.add(new Deeplink(scheme, host, path, intentFilterCheck))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    new File(project.getProperty("outputPath")).write(appLinkSettings.toJson().toString())
-                }
-            }
-        }
-    }
-
     /**
      * Adds the dependencies required by the Flutter project.
      * This includes:
@@ -424,7 +299,7 @@ class FlutterPlugin implements Plugin<Project> {
      * and filtered then with the [doesSupportAndroidPlatform] method instead of
      * just using the `plugins.android` list.
      */
-    private void configureLegacyPluginEachProjects(Project project) {
+    static private void configureLegacyPluginEachProjects(Project project) {
         try {
             // Read the contents of the settings.gradle file.
             // Remove block/line comments
@@ -466,11 +341,11 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * The map value contains either the plugins `name` (String),
      * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
      */
     private List<Map<String, Object>> getPluginList(Project project) {
         if (pluginList == null) {
-            pluginList = project.ext.nativePluginLoader.getPlugins(FlutterPluginUtils.getFlutterSourceDirectory(project))
+            pluginList = NativePluginLoaderReflectionBridge.getPlugins(project.ext, FlutterPluginUtils.getFlutterSourceDirectory(project))
         }
         return pluginList
     }
@@ -480,7 +355,7 @@ class FlutterPlugin implements Plugin<Project> {
     /** Gets the plugins dependencies from `.flutter-plugins-dependencies`. */
     private List<Map<String, Object>> getPluginDependencies(Project project) {
         if (pluginDependencies == null) {
-            Map meta = project.ext.nativePluginLoader.getDependenciesMetadata(FlutterPluginUtils.getFlutterSourceDirectory(project))
+            Map meta = NativePluginLoaderReflectionBridge.getDependenciesMetadata(project.ext, FlutterPluginUtils.getFlutterSourceDirectory(project))
             if (meta == null) {
                 pluginDependencies = []
             } else {
@@ -575,7 +450,7 @@ class FlutterPlugin implements Plugin<Project> {
         FlutterPluginUtils.addTaskForJavaVersion(project)
         if (FlutterPluginUtils.isFlutterAppProject(project)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(project)
-            addTasksForOutputsAppLinkSettings(project)
+            FlutterPluginUtils.addTasksForOutputsAppLinkSettings(project)
         }
         List<String> targetPlatforms = FlutterPluginUtils.getTargetPlatforms(project)
         def addFlutterDeps = { variant ->
@@ -718,7 +593,7 @@ class FlutterPlugin implements Plugin<Project> {
             Task copyFlutterAssetsTask = copyFlutterAssetsTaskProvider.get()
             if (!isUsedAsSubproject) {
                 def variantOutput = variant.outputs.first()
-                def processResources = variantOutput.hasProperty(propProcessResourcesProvider) ?
+                def processResources = variantOutput.hasProperty(FlutterPluginConstants.PROP_PROCESS_RESOURCES_PROVIDER) ?
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
             }
@@ -749,7 +624,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
                 Task copyFlutterAssetsTask = addFlutterDeps(variant)
                 BaseVariantOutput variantOutput = variant.outputs.first()
-                ProcessAndroidResources processResources = variantOutput.hasProperty(propProcessResourcesProvider) ?
+                ProcessAndroidResources processResources = variantOutput.hasProperty(FlutterPluginConstants.PROP_PROCESS_RESOURCES_PROVIDER) ?
                     variantOutput.processResourcesProvider.get() : variantOutput.processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
 

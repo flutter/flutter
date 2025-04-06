@@ -26,6 +26,12 @@ abstract class AlignmentGeometry {
   /// const constructors so that they can be used in const expressions.
   const AlignmentGeometry();
 
+  /// Creates an [Alignment].
+  const factory AlignmentGeometry.xy(double x, double y) = Alignment;
+
+  /// Creates a directional alignment, or [AlignmentDirectional].
+  const factory AlignmentGeometry.directional(double start, double y) = AlignmentDirectional;
+
   double get _x;
 
   double get _start;

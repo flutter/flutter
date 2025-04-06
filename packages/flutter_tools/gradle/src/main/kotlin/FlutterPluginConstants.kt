@@ -1,8 +1,15 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
 
 // TODO(gmackall): this should be collapsed back into the core FlutterPlugin once the Groovy to
 //                 kotlin conversion is complete.
 object FlutterPluginConstants {
+    // Strings that define project properties
+    const val PROP_PROCESS_RESOURCES_PROVIDER = "processResourcesProvider"
+
     /** The platforms that can be passed to the `--Ptarget-platform` flag. */
     private const val PLATFORM_ARM32 = "android-arm"
     private const val PLATFORM_ARM64 = "android-arm64"
