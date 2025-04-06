@@ -128,9 +128,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
     Future<ImageStreamCompleter> loadViaDecode() async {
       // Resolve the Codec before passing it to
-      // [MultiFrameImageStreamCompleter] so any errors aren't reported
-      // twice (once from the MultiFrameImageStreamCompleter and again
-      // from the wrapping [_ForwardingImageStreamCompleter]).
+      // `MultiFrameImageStreamCompleter` so any errors aren't reported
+      // twice (once from the `MultiFrameImageStreamCompleter` and again
+      // from the wrapping `_ForwardingImageStreamCompleter`).
       final ui.Codec codec = await _fetchImageBytes(decode);
       return MultiFrameImageStreamCompleter(
         codec: Future<ui.Codec>.value(codec),
