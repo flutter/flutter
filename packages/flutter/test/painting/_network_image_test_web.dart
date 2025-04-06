@@ -377,14 +377,21 @@ void runTests() {
     };
 
     final Completer<void> secondFrameLock = Completer<void>();
-    final Image image = Image(
+    // This is basically a normal NetworkImage, except that the 2nd frame is
+    // delayed.
+    final Image imageThatDelaysSecondFrame = Image(
       image: _NetworkImageWithTestCodec(
         _uniqueUrl(tester.testDescription),
-        codec: _TwoFrameCodec(onSecondFrame: secondFrameLock.future),
+        codec: _TwoFrameCodec(onFrame: (int frameNumber) async {
+          if (frameNumber == 1) {
+            await secondFrameLock.future;
+          }
+        }),
       ),
     );
-    // The image is mounted, and the 1st frame is displayed.
-    await tester.pumpWidget(image);
+
+    // Mount the image, displaying the 1st frame.
+    await tester.pumpWidget(imageThatDelaysSecondFrame);
     // Clear the image cache, so that the image completer will be disposed as
     // soon as the image is unmounted.
     imageCache.clear();
@@ -510,13 +517,17 @@ class _NetworkImageWithTestCodec extends NetworkImage {
   }
 }
 
-// A decoded image that has two frames (_TestFrameInfo), the 2nd of which waits
-// for the completion of `onSecondFrame` before being returned.
-class _TwoFrameCodec implements ui.Codec {
-  _TwoFrameCodec({required this.onSecondFrame});
+typedef _OnFrameCallback = Future<void> Function(int frameNumber);
 
+// An image with two frames (_TestFrameInfo).
+//
+// This codec calls and awaits on the `onFrame` callback before returning each
+// frame, whose argument `frameNumber` is a zero-based index.
+class _TwoFrameCodec implements ui.Codec {
+  _TwoFrameCodec({required this.onFrame});
+
+  final _OnFrameCallback onFrame;
   int _frameNumber = -1;
-  final Future<void> onSecondFrame;
 
   @override
   int get frameCount => 2;
@@ -527,9 +538,7 @@ class _TwoFrameCodec implements ui.Codec {
   @override
   Future<ui.FrameInfo> getNextFrame() async {
     _frameNumber += 1;
-    if (_frameNumber == 1) {
-      await onSecondFrame;
-    }
+    await onFrame(_frameNumber);
     return _TestFrameInfo(await createTestImage());
   }
 
