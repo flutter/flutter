@@ -23,17 +23,6 @@ void runTests() {
     debugRestoreImgElementFactory();
   });
 
-  // Generates a unique URL for use in tests, preventing unintended caching.
-  //
-  // Requests within tests must each have a unique URL; otherwise, responses may
-  // be cached inadvertently. This often leads to subtle, frustrating bugs that
-  // are difficult to debug.
-  //
-  // To ensure uniqueness, provide any object as the key.
-  String uniqueUrl(Object key) {
-    return 'https://www.example.com/images/frame_${identityHashCode(key)}.png';
-  }
-
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest =
         TestHttpRequest()
@@ -47,7 +36,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network(uniqueUrl(tester.testDescription), headers: headers);
+    final Image image = Image.network(_uniqueUrl(tester.testDescription), headers: headers);
 
     await tester.pumpWidget(image);
 
@@ -68,10 +57,7 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final Image image = Image.network(
-      uniqueUrl(tester.testDescription),
-      headers: headers,
-    );
+    final Image image = Image.network(_uniqueUrl(tester.testDescription), headers: headers);
 
     await tester.pumpWidget(image);
     expect(
@@ -97,17 +83,11 @@ void runTests() {
 
     const Map<String, String> headers = <String, String>{'flutter': 'flutter', 'second': 'second'};
 
-    final String url = uniqueUrl(tester.testDescription);
-    final Image image = Image.network(
-      url,
-      headers: headers,
-    );
+    final String url = _uniqueUrl(tester.testDescription);
+    final Image image = Image.network(url, headers: headers);
 
     await tester.pumpWidget(image);
-    expect(
-      tester.takeException().toString(),
-      'HTTP request failed, statusCode: 200, $url',
-    );
+    expect(tester.takeException().toString(), 'HTTP request failed, statusCode: 200, $url');
   });
 
   testWidgets('When strategy is default, emits an error if the image is cross-origin', (
@@ -127,7 +107,7 @@ void runTests() {
       throw UnimplementedError();
     };
 
-    final NetworkImage networkImage = NetworkImage(uniqueUrl(tester.testDescription));
+    final NetworkImage networkImage = NetworkImage(_uniqueUrl(tester.testDescription));
     ImageInfo? imageInfo;
     Object? recordedError;
     Completer<void>? imageCompleter;
@@ -172,7 +152,7 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    final String url = uniqueUrl(tester.testDescription);
+    final String url = _uniqueUrl(tester.testDescription);
     final NetworkImage networkImage = NetworkImage(
       url,
       webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
@@ -226,7 +206,7 @@ void runTests() {
       };
 
       final NetworkImage networkImage = NetworkImage(
-        uniqueUrl(tester.testDescription),
+        _uniqueUrl(tester.testDescription),
         webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
       );
       ImageInfo? imageInfo;
@@ -275,7 +255,7 @@ void runTests() {
       return testImg.getMock() as web_shim.HTMLImageElement;
     };
 
-    final String url = uniqueUrl(tester.testDescription);
+    final String url = _uniqueUrl(tester.testDescription);
     final NetworkImage networkImage = NetworkImage(
       url,
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
@@ -329,7 +309,7 @@ void runTests() {
     };
 
     final NetworkImage networkImage = NetworkImage(
-      uniqueUrl(tester.testDescription),
+      _uniqueUrl(tester.testDescription),
       webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
       headers: const <String, String>{'flutter': 'flutter', 'second': 'second'},
     );
@@ -385,9 +365,7 @@ void runTests() {
     expect(find.byType(PlatformViewLink), findsOneWidget);
   });
 
-  testWidgets('Does not crash when disposed before 2nd frame', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('Does not crash when disposed before 2nd frame', (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest =
         TestHttpRequest()
           ..status = 200
@@ -401,10 +379,8 @@ void runTests() {
     final Completer<void> secondFrameLock = Completer<void>();
     final Image image = Image(
       image: _NetworkImageWithTestCodec(
-        uniqueUrl(tester.testDescription),
-        codec: _TwoFrameCodec(
-          onSecondFrame: secondFrameLock.future,
-        ),
+        _uniqueUrl(tester.testDescription),
+        codec: _TwoFrameCodec(onSecondFrame: secondFrameLock.future),
       ),
     );
     // The image is mounted, and the 1st frame is displayed.
@@ -420,6 +396,17 @@ void runTests() {
     // of `_ForwardingImageStreamCompleter.setImage` and causes a crash.
     secondFrameLock.complete();
   });
+}
+
+// Generates a unique URL for use in tests, preventing unintended caching.
+//
+// Requests within tests must each have a unique URL; otherwise, responses may
+// be cached inadvertently. This often leads to subtle, frustrating bugs that
+// are difficult to debug.
+//
+// To ensure uniqueness, provide any object as the key.
+String _uniqueUrl(Object key) {
+  return 'https://www.example.com/images/frame_${identityHashCode(key)}.png';
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
@@ -510,10 +497,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
 // A [NetworkImage] that, instead of decoding the image stream, always returns
 // the specified `codec` as the image stream.
 class _NetworkImageWithTestCodec extends NetworkImage {
-  const _NetworkImageWithTestCodec(
-    super.url, {
-    required this.codec,
-  });
+  const _NetworkImageWithTestCodec(super.url, {required this.codec});
 
   final ui.Codec codec;
 
@@ -550,8 +534,7 @@ class _TwoFrameCodec implements ui.Codec {
   }
 
   @override
-  void dispose() {
-  }
+  void dispose() {}
 }
 
 class _TestFrameInfo implements ui.FrameInfo {
