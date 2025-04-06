@@ -413,8 +413,8 @@ void runTests() {
 // may be cached inadvertently. This often leads to subtle, frustrating bugs
 // that are difficult to debug.
 //
-// Test cases that only contain one request each can use `tester.description` as
-// the key.
+// Test cases that only contain one request each can use
+// `tester.testDescription` as the key.
 String _uniqueUrl(Object key) {
   return 'https://www.example.com/images/frame_${identityHashCode(key)}.png';
 }
