@@ -382,11 +382,13 @@ void runTests() {
     final Image imageThatDelaysSecondFrame = Image(
       image: _NetworkImageWithTestCodec(
         _uniqueUrl(tester.testDescription),
-        codec: _TwoFrameCodec(onFrame: (int frameNumber) async {
-          if (frameNumber == 1) {
-            await secondFrameLock.future;
-          }
-        }),
+        codec: _TwoFrameCodec(
+          onFrame: (int frameNumber) async {
+            if (frameNumber == 1) {
+              await secondFrameLock.future;
+            }
+          },
+        ),
       ),
     );
 
