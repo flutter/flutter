@@ -727,8 +727,15 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterProject flutterProject,
     PackageConfig packageConfig,
   ) {
-    final String projectName = flutterProject.manifest.appName;
-    final Set<String> packagesToInclude = <String>{if (packagesRegExps.isEmpty) projectName};
+    final Set<String> packagesToInclude = <String>{};
+    if (packagesRegExps.isEmpty) {
+      void addProject(FlutterProject project) {
+        packagesToInclude.add(project.manifest.appName);
+        project.workspaceProjects.forEach(addProject);
+      }
+
+      addProject(flutterProject);
+    }
     try {
       for (final String regExpStr in packagesRegExps) {
         final RegExp regExp = RegExp(regExpStr);
