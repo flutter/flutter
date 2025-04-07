@@ -148,7 +148,9 @@ abstract final class FlutterTestDriver {
     final Completer<void> isolateStarted = Completer<void>();
     _vmService!.onIsolateEvent.listen((Event event) {
       if (event.kind == EventKind.kIsolateStart) {
-        isolateStarted.complete();
+        if (!isolateStarted.isCompleted) {
+          isolateStarted.complete();
+        }
       } else if (event.kind == EventKind.kIsolateExit && event.isolate?.id == _flutterIsolateId) {
         // Hot restarts cause all the isolates to exit, so we need to refresh
         // our idea of what the Flutter isolate ID is.

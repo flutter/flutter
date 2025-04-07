@@ -22,14 +22,14 @@ void main() {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.windows:
           expect(
             theme.builders[platform],
             isNotNull,
             reason: 'theme builder for $platform is null',
           );
         case TargetPlatform.fuchsia:
-        case TargetPlatform.linux:
-        case TargetPlatform.windows:
           expect(
             theme.builders[platform],
             isNull,

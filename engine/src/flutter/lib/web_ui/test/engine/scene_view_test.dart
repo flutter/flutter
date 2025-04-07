@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -21,7 +20,7 @@ void main() {
 }
 
 class StubPictureRenderer implements PictureRenderer {
-  final DomCanvasElement scratchCanvasElement = createDomCanvasElement(width: 500, height: 500);
+  final DomHTMLCanvasElement scratchCanvasElement = createDomCanvasElement(width: 500, height: 500);
 
   @override
   Future<RenderResult> renderPictures(List<ScenePicture> pictures) async {
@@ -29,7 +28,7 @@ class StubPictureRenderer implements PictureRenderer {
     final List<DomImageBitmap> bitmaps = await Future.wait(
       pictures.map((ScenePicture picture) {
         final ui.Rect cullRect = picture.cullRect;
-        final Future<DomImageBitmap> bitmap = createImageBitmap(scratchCanvasElement as JSObject, (
+        final Future<DomImageBitmap> bitmap = createImageBitmap(scratchCanvasElement, (
           x: 0,
           y: 0,
           width: cullRect.width.toInt(),
@@ -229,6 +228,9 @@ class StubPath implements ScenePath {
 
   @override
   void addRRect(ui.RRect rrect) => throw UnimplementedError();
+
+  @override
+  void addRSuperellipse(ui.RSuperellipse rsuperellipse) => throw UnimplementedError();
 
   @override
   void addPath(ui.Path path, ui.Offset offset, {Float64List? matrix4}) =>

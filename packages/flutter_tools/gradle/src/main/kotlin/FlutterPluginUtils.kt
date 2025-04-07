@@ -1,9 +1,18 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
 
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
+import com.android.build.gradle.api.ApplicationVariant
+import com.android.build.gradle.api.BaseVariantOutput
+import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import groovy.lang.Closure
+import groovy.util.Node
+import groovy.util.XmlParser
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -18,6 +27,10 @@ import java.util.Properties
  * A collection of static utility functions used by the Flutter Gradle Plugin.
  */
 object FlutterPluginUtils {
+    private const val MANIFEST_NAME_KEY = "android:name"
+    private const val MANIFEST_VALUE_KEY = "android:value"
+    private const val MANIFEST_VALUE_TRUE = "true"
+
     // Gradle properties. These must correspond to the values used in
     // flutter/packages/flutter_tools/lib/src/android/gradle.dart, and therefore it is not
     // recommended to use these const values in tests.
@@ -399,6 +412,11 @@ object FlutterPluginUtils {
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
+    // TODO: Use find by type and AbstractAppExtension instead. Or delete in favor of getAndroidExtension.
+    //       see https://github.com/flutter/flutter/issues/165882
+    private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
+        project.extensions.findByName("android") as? AbstractAppExtension
+
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
      * `android-` followed by either the numeric version, e.g. `android-35`, or a preview version,
@@ -596,6 +614,23 @@ object FlutterPluginUtils {
             "$flutterSdkRootPath/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
         )
 
+        // AGP defaults to outputting build artifacts in `android/app/.cxx`. This directory is a
+        // build artifact, so we move it from that directory to within Flutter's build directory
+        // to avoid polluting source directories with build artifacts.
+        //
+        // AGP explicitely recommends not setting the buildStagingDirectory to be within a build
+        // directory in
+        // https://developer.android.com/reference/tools/gradle-api/8.3/null/com/android/build/api/dsl/Cmake#buildStagingDirectory(kotlin.Any),
+        // but as we are not actually building anything (and are instead only tricking AGP into
+        // downloading the NDK), it is acceptable for the buildStagingDirectory to be removed
+        // and rebuilt when running clean builds.
+        gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
+            gradleProject.layout.buildDirectory
+                .dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/.cxx")
+                .get()
+                .asFile.path
+        )
+
         // CMake will print warnings when you try to build an empty project.
         // These arguments silence the warnings - our project is intentionally
         // empty.
@@ -673,7 +708,7 @@ object FlutterPluginUtils {
      *
      * The map value contains either the plugins `name` (String),
      * its `path` (String), or its `dependencies` (List<String>).
-     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/groovy/native_plugin_loader.groovy
+     * See [NativePluginLoader#getPlugins] in packages/flutter_tools/gradle/src/main/scripts/native_plugin_loader.gradle.kts
      */
     private fun getPluginListWithoutDevDependencies(pluginList: List<Map<String?, Any?>>): List<Map<String?, Any?>> =
         pluginList.filter { pluginObject -> pluginObject["dev_dependency"] == false }
@@ -848,6 +883,204 @@ object FlutterPluginUtils {
                 }
             }
         }
+    }
+
+    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources =
+        baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
+
+    /**
+     * Adds required tasks for the AppLinkSettings feature.
+     *
+     * Should only be called if the build target is an app, as opposed to an aar/module.
+     *
+     * Add a task that can be called on Flutter projects that outputs app link related project
+     * settings into a json file.
+     * See https://developer.android.com/training/app-links/ for more information about app link.
+     * The json will be saved in path stored in outputPath parameter.
+     *
+     * An example json:
+     *  {
+     *      applicationId: "com.example.app",
+     *          deeplinks: [
+     *              {"scheme":"http", "host":"example.com", "path":".*"},
+     *              {"scheme":"https","host":"example.com","path":".*"}
+     *          ]
+     *  }
+     * The output file is parsed and used by devtool.
+     */
+    @JvmStatic
+    @JvmName("addTasksForOutputsAppLinkSettings")
+    internal fun addTasksForOutputsAppLinkSettings(project: Project) {
+        // Integration test for AppLinkSettings task defined in
+        // flutter/flutter/packages/flutter_tools/test/integration.shard/android_gradle_outputs_app_link_settings_test.dart
+        val android = getAndroidAppExtensionOrNull(project)
+        if (android == null) {
+            project.logger.info("addTasksForOutputsAppLinkSettings called on project without android extension.")
+            return
+        }
+        android.applicationVariants.configureEach {
+            val variant = this
+            project.tasks.register("output${FlutterPluginUtils.capitalize(variant.name)}AppLinkSettings") {
+                val task: Task = this
+                task.description =
+                    "stores app links settings for the given build variant of this Android project into a json file."
+                variant.outputs.configureEach {
+                    val baseVariantOutput: BaseVariantOutput = this
+                    // Deeplinks are defined in AndroidManifest.xml and is only available after
+                    // processResourcesProvider.
+                    dependsOn(findProcessResources(baseVariantOutput))
+                }
+                doLast {
+                    // We are configuring the same object before a doLast and in a doLast.
+                    // without a clear reason why. That is not good.
+                    variant.outputs.configureEach {
+                        val appLinkSettings = createAppLinkSettings(variant, this)
+                        File(project.property("outputPath").toString()).writeText(
+                            appLinkSettings.toJson().toString()
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Extracts app deeplink information from the Android manifest file of a variant then returns
+     * an AppLinkSettings object.
+     *
+     * @param BaseVariantOutput The output of a specific build variant (e.g., debug, release).
+     * @param variant The application variant being processed.
+     */
+    private fun createAppLinkSettings(
+        variant: ApplicationVariant,
+        baseVariantOutput: BaseVariantOutput
+    ): AppLinkSettings {
+        val appLinkSettings = AppLinkSettings(variant.applicationId)
+        // TODO https://github.com/flutter/flutter/issues/165881
+        // Use import groovy.xml.XmlParser instead.
+        // XmlParser is not namespace aware because it makes querying nodes cumbersome.
+        val manifest: Node =
+            XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
+        // The groovy.xml.XmlParser import would use getProperty like
+        // manifest.getProperty("application").let { applicationNode -> ...
+        val applicationNode: Node? =
+            manifest.children().find { node ->
+                node is Node && node.name() == "application"
+            } as Node?
+        if (applicationNode == null) {
+            return appLinkSettings
+        }
+        val activities: List<Node> =
+            applicationNode.children().filterIsInstance<Node>().filter { item ->
+                item.name() == "activity"
+            }
+
+        activities.forEach { activity ->
+            val metaDataItems: List<Node> =
+                activity.children().filterIsInstance<Node>().filter { metaItem ->
+                    metaItem.name() == "meta-data"
+                }
+            metaDataItems.forEach { metaDataItem ->
+                val nameAttribute: Boolean =
+                    metaDataItem.attribute(MANIFEST_NAME_KEY) == "flutter_deeplinking_enabled"
+                val valueAttribute: Boolean =
+                    metaDataItem.attribute(MANIFEST_VALUE_KEY) == MANIFEST_VALUE_TRUE
+                if (nameAttribute && valueAttribute) {
+                    appLinkSettings.deeplinkingFlagEnabled = true
+                }
+            }
+            val intentFilterItems: List<Node> =
+                activity.children().filterIsInstance<Node>().filter { filterItem ->
+                    filterItem.name() == "intent-filter"
+                }
+            intentFilterItems.forEach { appLinkIntent ->
+                // Print out the host attributes in data tags.
+                val schemes: MutableSet<String?> = mutableSetOf()
+                val hosts: MutableSet<String?> = mutableSetOf()
+                val paths: MutableSet<String?> = mutableSetOf()
+                val intentFilterCheck = IntentFilterCheck()
+                if (appLinkIntent.attribute("android:autoVerify") == MANIFEST_VALUE_TRUE) {
+                    intentFilterCheck.hasAutoVerify = true
+                }
+
+                val actionItems: List<Node> =
+                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
+                        item.name() == "action"
+                    }
+                // Any action item causes intentFilterCheck to always be true
+                // and we keep looping instead of exiting out early.
+                // TODO: Exit out early per intent filter action view.
+                actionItems.forEach { action ->
+                    if (action.attribute(MANIFEST_NAME_KEY) == "android.intent.action.VIEW") {
+                        intentFilterCheck.hasActionView = true
+                    }
+                }
+                val categoryItems: List<Node> =
+                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
+                        item.name() == "category"
+                    }
+                categoryItems.forEach { category ->
+                    // TODO: Exit out early per intent filter default category.
+                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.DEFAULT") {
+                        intentFilterCheck.hasDefaultCategory = true
+                    }
+                    // TODO: Exit out early per intent filter browsable category.
+                    if (category.attribute(MANIFEST_NAME_KEY) == "android.intent.category.BROWSABLE") {
+                        intentFilterCheck.hasBrowsableCategory =
+                            true
+                    }
+                }
+                val dataItems: List<Node> =
+                    appLinkIntent.children().filterIsInstance<Node>().filter { item ->
+                        item.name() == "data"
+                    }
+                dataItems.forEach { data ->
+                    data.attributes().forEach { entry ->
+                        when (entry.key) {
+                            "android:scheme" -> schemes.add(entry.value.toString())
+                            "android:host" -> hosts.add(entry.value.toString())
+                            // All path patterns add to paths.
+                            "android:pathAdvancedPattern" ->
+                                paths.add(
+                                    entry.value.toString()
+                                )
+
+                            "android:pathPattern" -> paths.add(entry.value.toString())
+                            "android:path" -> paths.add(entry.value.toString())
+                            "android:pathPrefix" -> paths.add(entry.value.toString() + ".*")
+                            "android:pathSuffix" -> paths.add(".*" + entry.value.toString())
+                        }
+                    }
+                }
+                if (hosts.isNotEmpty() || paths.isNotEmpty()) {
+                    if (schemes.isEmpty()) {
+                        schemes.add(null)
+                    }
+                    if (hosts.isEmpty()) {
+                        hosts.add(null)
+                    }
+                    if (paths.isEmpty()) {
+                        paths.add(".*")
+                    }
+                    // Sets are not ordered this could produce a bug.
+                    schemes.forEach { scheme ->
+                        hosts.forEach { host ->
+                            paths.forEach { path ->
+                                appLinkSettings.deeplinks.add(
+                                    Deeplink(
+                                        scheme,
+                                        host,
+                                        path,
+                                        intentFilterCheck
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return appLinkSettings
     }
 }
 
