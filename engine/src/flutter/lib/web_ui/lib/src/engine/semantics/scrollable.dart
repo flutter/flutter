@@ -183,15 +183,18 @@ class SemanticScrollable extends SemanticRole {
       printWarning('Warning! the rect attribute of semanticsObject is null');
       return;
     }
+    final double? scrollExtentMax = semanticsObject.scrollExtentMax;
+    final double? scrollExtentMin = semanticsObject.scrollExtentMin;
+    assert(scrollExtentMax != null);
+    assert(scrollExtentMin != null);
+    final double scrollExtentTotal =
+        scrollExtentMax! -
+        scrollExtentMin! +
+        (semanticsObject.isVerticalScrollContainer ? rect.height : rect.width);
+    // Place the _scrollOverflowElement at the beginning of the content
+    // and size it based on the total scroll extent so the browser
+    // knows how much scrollable content there is.
     if (semanticsObject.isVerticalScrollContainer) {
-      // Place the _scrollOverflowElement at the beginning of the content
-      // and size it based on the total scroll extent so the browser
-      // knows how much scrollable content there is.
-      final double? scrollExtentMax = semanticsObject.scrollExtentMax;
-      final double? scrollExtentMin = semanticsObject.scrollExtentMin;
-      assert(scrollExtentMax != null);
-      assert(scrollExtentMin != null);
-      final double scrollExtentTotal = scrollExtentMax! - scrollExtentMin! + rect.height;
       _scrollOverflowElement.style
         ..width = '0px'
         ..height = '${scrollExtentTotal}px';
@@ -199,14 +202,6 @@ class SemanticScrollable extends SemanticRole {
         ..verticalScrollAdjustment = element.scrollTop
         ..horizontalScrollAdjustment = 0.0;
     } else if (semanticsObject.isHorizontalScrollContainer) {
-      // Place the _scrollOverflowElement at the beginning of the content
-      // and size it based on the total scroll extent so the browser
-      // knows how much scrollable content there is.
-      final double? scrollExtentMax = semanticsObject.scrollExtentMax;
-      final double? scrollExtentMin = semanticsObject.scrollExtentMin;
-      assert(scrollExtentMax != null);
-      assert(scrollExtentMin != null);
-      final double scrollExtentTotal = scrollExtentMax! - scrollExtentMin! + rect.width;
       _scrollOverflowElement.style
         ..width = '${scrollExtentTotal}px'
         ..height = '0px';
