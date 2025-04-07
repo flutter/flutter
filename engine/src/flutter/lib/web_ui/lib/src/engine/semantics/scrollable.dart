@@ -10,10 +10,10 @@ import 'package:ui/ui.dart' as ui;
 /// Implements vertical and horizontal scrolling functionality for semantics
 /// objects.
 ///
-/// Scrolling is controlled by sending the current dom scroll position in a
+/// Scrolling is controlled by sending the current DOM scroll position in a
 /// [ui.SemanticsAction.scrollToOffset] to the framework where it applies the
-/// value to its scrollable and we receive a [ui.SemanticsUpdate] containing the
-/// new [SemanticsObject.scrollPosition] and child positions.
+/// value to its scrollable and the engine receives a [ui.SemanticsUpdate]
+/// containing the new [SemanticsObject.scrollPosition] and child positions.
 class SemanticScrollable extends SemanticRole {
   SemanticScrollable(SemanticsObject semanticsObject)
     : super.withBasics(
@@ -30,7 +30,7 @@ class SemanticScrollable extends SemanticRole {
   /// Disables browser-driven scrolling in the presence of pointer events.
   GestureModeCallback? _gestureModeListener;
 
-  /// Dom element used to indicate to the browser the total quantity of available
+  /// DOM element used to indicate to the browser the total quantity of available
   /// content under this scrollable area. This element is sized based on the
   /// total scroll extent calculated by scrollExtentMax - scrollExtentMin + rect.height
   /// of the [SemanticsObject] managed by this scrollable.
@@ -38,7 +38,7 @@ class SemanticScrollable extends SemanticRole {
 
   /// Listens to HTML "scroll" gestures detected by the browser.
   ///
-  /// When we detect a "scroll" gesture we send the updated dom scroll position
+  /// When the browser detects a "scroll" gesture we send the updated DOM scroll position
   /// to the framework in a [ui.SemanticsAction.scrollToOffset].
   @visibleForTesting
   DomEventListener? scrollListener;
@@ -96,14 +96,14 @@ class SemanticScrollable extends SemanticRole {
     // On macOS the scrollbar behavior which can be set in the settings application
     // may sometimes insert scrollbars into an application when a peripheral like a
     // mouse or keyboard is plugged in. This causes the clientHeight or clientWidth
-    // of the scrollable dom element to be offset by the width of the scrollbar.
+    // of the scrollable DOM element to be offset by the width of the scrollbar.
     // This causes issues in the vertical scrolling context because the max scroll
     // extent is calculated by the element's scrollHeight - clientHeight, so when
-    // the clientHeight is offset by scrollbar width the browser may think we have
+    // the clientHeight is offset by scrollbar width the browser may there is
     // a greater scroll extent then what is actually available.
     //
-    // We already make the scrollbar transparent so here we set scrollbar-width
-    // to "none" to prevent it from affecting the max scroll extent.
+    // The scrollbar is already made transparent in SemanticsRole._initElement so here
+    // set scrollbar-width to "none" to prevent it from affecting the max scroll extent.
     semanticsObject.element.style.scrollbarWidth = 'none';
 
     _scrollOverflowElement.style
@@ -172,7 +172,6 @@ class SemanticScrollable extends SemanticRole {
     }
   }
 
-  /// Updates the scrollable state of the semantics object.
   void _updateScrollableState() {
     // This value is arbitrary.
     final ui.Rect? rect = semanticsObject.rect;
