@@ -365,7 +365,7 @@ void runTests() {
     expect(find.byType(PlatformViewLink), findsOneWidget);
   });
 
-  testWidgets('Does not crash when disposed between frazmes', (WidgetTester tester) async {
+  testWidgets('Does not crash when disposed between frames', (WidgetTester tester) async {
     final TestHttpRequest testHttpRequest =
         TestHttpRequest()
           ..status = 200
