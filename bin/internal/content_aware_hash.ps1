@@ -1,0 +1,25 @@
+
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# ---------------------------------- NOTE ---------------------------------- #
+#
+# Please keep the logic in this file consistent with the logic in the
+# `content_aware_hash.ps1` script in the same directory to ensure that Flutter
+# continues to work across all platforms!
+#
+# -------------------------------------------------------------------------- #
+
+$ErrorActionPreference = "Stop"
+
+# When called from a submodule hook; these will override `git -C dir`
+$env:GIT_DIR = $null
+$env:GIT_INDEX_FILE = $null
+$env:GIT_WORK_TREE = $null
+
+$progName = Split-Path -parent $MyInvocation.MyCommand.Definition
+$flutterRoot = (Get-Item $progName).parent.parent.FullName
+
+cmd /c 'git -C $flutterRoot ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.*'
+cmd /c 'git -C $flutterRoot ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.* | git hash-object --stdin'
