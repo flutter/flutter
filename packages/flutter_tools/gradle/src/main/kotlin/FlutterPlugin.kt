@@ -81,7 +81,9 @@ class FlutterPlugin : Plugin<Project> {
                 .toFile()
                 .readText()
                 .trim()
-        engineRealm += "/"
+        if (engineRealm!!.isNotEmpty()) {
+            engineRealm += "/"
+        }
 
         // Configure the Maven repository.
         val hostedRepository: String =
