@@ -25,6 +25,7 @@ object FlutterPluginConstants {
     const val INTERMEDIATES_DIR = "intermediates"
     const val FLUTTER_STORAGE_BASE_URL = "FLUTTER_STORAGE_BASE_URL"
     const val DEFAULT_MAVEN_HOST = "https://storage.googleapis.com"
+    const val WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG = "https://flutter.dev/to/review-gradle-config"
 
     /** Maps platforms to ABI architectures. */
     @JvmStatic val PLATFORM_ARCH_MAP =
@@ -41,7 +42,7 @@ object FlutterPluginConstants {
      * Otherwise, the Play Store will complain that the APK variants have the same version.
      */
     @JvmStatic val ABI_VERSION =
-        mapOf<String, Int>(
+        mapOf<String, Int>( // Explicit type for clarity, though inferred
             ARCH_ARM32 to 1,
             ARCH_ARM64 to 2,
             ARCH_X86 to 3,
