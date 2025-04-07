@@ -1802,8 +1802,7 @@ class SliverEnsureSemantics extends SingleChildRenderObjectWidget {
   const SliverEnsureSemantics({super.key, required Widget sliver}) : super(child: sliver);
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderSliverEnsureSemantics();
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverEnsureSemantics();
 }
 
 /// Ensures its sliver child is included in the semantics tree.
