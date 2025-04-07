@@ -103,7 +103,7 @@ void main() {
                   Event.flutterInjectDarwinPlugins(
                     platform: platform.name,
                     isModule: false,
-                    swiftPackageManagerUsed: true,
+                    swiftPackageManagerUsable: true,
                     swiftPackageManagerFeatureEnabled: true,
                     projectDisabledSwiftPackageManager: false,
                     projectHasSwiftPackageManagerIntegration: false,
@@ -164,7 +164,7 @@ void main() {
                     Event.flutterInjectDarwinPlugins(
                       platform: platform.name,
                       isModule: false,
-                      swiftPackageManagerUsed: true,
+                      swiftPackageManagerUsable: true,
                       swiftPackageManagerFeatureEnabled: true,
                       projectDisabledSwiftPackageManager: false,
                       projectHasSwiftPackageManagerIntegration: true,
@@ -227,7 +227,7 @@ void main() {
                     Event.flutterInjectDarwinPlugins(
                       platform: platform.name,
                       isModule: false,
-                      swiftPackageManagerUsed: true,
+                      swiftPackageManagerUsable: true,
                       swiftPackageManagerFeatureEnabled: true,
                       projectDisabledSwiftPackageManager: false,
                       projectHasSwiftPackageManagerIntegration: false,
@@ -308,7 +308,7 @@ void main() {
                     Event.flutterInjectDarwinPlugins(
                       platform: platform.name,
                       isModule: false,
-                      swiftPackageManagerUsed: true,
+                      swiftPackageManagerUsable: true,
                       swiftPackageManagerFeatureEnabled: true,
                       projectDisabledSwiftPackageManager: false,
                       projectHasSwiftPackageManagerIntegration: true,
@@ -394,7 +394,7 @@ void main() {
                     Event.flutterInjectDarwinPlugins(
                       platform: platform.name,
                       isModule: false,
-                      swiftPackageManagerUsed: true,
+                      swiftPackageManagerUsable: true,
                       swiftPackageManagerFeatureEnabled: true,
                       projectDisabledSwiftPackageManager: false,
                       projectHasSwiftPackageManagerIntegration: true,
@@ -459,7 +459,7 @@ void main() {
                   Event.flutterInjectDarwinPlugins(
                     platform: platform.name,
                     isModule: false,
-                    swiftPackageManagerUsed: true,
+                    swiftPackageManagerUsable: true,
                     swiftPackageManagerFeatureEnabled: true,
                     projectDisabledSwiftPackageManager: false,
                     projectHasSwiftPackageManagerIntegration: true,
@@ -520,7 +520,7 @@ void main() {
                   Event.flutterInjectDarwinPlugins(
                     platform: platform.name,
                     isModule: false,
-                    swiftPackageManagerUsed: true,
+                    swiftPackageManagerUsable: true,
                     swiftPackageManagerFeatureEnabled: true,
                     projectDisabledSwiftPackageManager: false,
                     projectHasSwiftPackageManagerIntegration: true,
@@ -569,7 +569,7 @@ void main() {
                   Event.flutterInjectDarwinPlugins(
                     platform: platform.name,
                     isModule: false,
-                    swiftPackageManagerUsed: false,
+                    swiftPackageManagerUsable: false,
                     swiftPackageManagerFeatureEnabled: false,
                     projectDisabledSwiftPackageManager: false,
                     projectHasSwiftPackageManagerIntegration: false,

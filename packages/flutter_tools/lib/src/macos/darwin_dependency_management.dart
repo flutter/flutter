@@ -100,7 +100,7 @@ class DarwinDependencyManagement {
     final Event event = Event.flutterInjectDarwinPlugins(
       platform: platform.name,
       isModule: _project.isModule,
-      swiftPackageManagerUsed: xcodeProject.usesSwiftPackageManager,
+      swiftPackageManagerUsable: xcodeProject.usesSwiftPackageManager,
       swiftPackageManagerFeatureEnabled: _featureFlags.isSwiftPackageManagerEnabled,
       projectDisabledSwiftPackageManager: _project.manifest.disabledSwiftPackageManager,
       projectHasSwiftPackageManagerIntegration:
