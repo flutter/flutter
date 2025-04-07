@@ -1128,9 +1128,10 @@ void FirstPassDispatcher::drawTextFrame(
       (matrix_ * Matrix::MakeTranslation(Point(x, y))).GetMaxBasisLengthXY());
 
   renderer_.GetLazyGlyphAtlas()->AddTextFrame(
-      text_frame,                                       //
-      scale,                                            //
-      Point(x, y),                                      //
+      text_frame,   //
+      scale,        //
+      Point(x, y),  //
+      matrix_,
       (properties.stroke || text_frame->HasColor())     //
           ? std::optional<GlyphProperties>(properties)  //
           : std::nullopt                                //
@@ -1279,6 +1280,9 @@ std::shared_ptr<Texture> DisplayListToTexture(
         impeller::RenderTarget::
             kDefaultColorAttachmentConfig  // color_attachment_config
     );
+  }
+  if (!target.IsValid()) {
+    return nullptr;
   }
 
   SkIRect sk_cull_rect = SkIRect::MakeWH(size.width, size.height);

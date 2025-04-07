@@ -58,7 +58,7 @@ sk_sp<DlImage> DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     SkISize size,
     const SnapshotController::Delegate& delegate) {
-  // Ensure that the current thread has a rendering context.  This must be done
+  // Ensure that the current thread has a rendering context. This must be done
   // before calling GetAiksContext because constructing the AiksContext may
   // invoke graphics APIs.
   std::unique_ptr<Surface> pbuffer_surface;

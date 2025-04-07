@@ -3,6 +3,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# Want to test this script?
+# $ cd dev/tools
+# $ dart test test/update_engine_version_test.dart
 
 # ---------------------------------- NOTE ---------------------------------- #
 #
@@ -14,11 +17,30 @@
 
 set -e
 
+# Allow overriding the intended engine version via FLUTTER_PREBUILT_ENGINE_VERSION.
+#
+# This is for systems, such as Github Actions, where we know ahead of time the
+# base-ref we want to use (to download the engine binaries and avoid trying
+# to compute one below), or for the Dart HH bot, which wants to try the current
+# Flutter framework/engine with a different Dart SDK.
+#
+# This environment variable is EXPERIMENTAL. If you are not on the Flutter infra
+# or Dart infra teams, this code path might be removed at anytime and cease
+# functioning. Please file an issue if you have workflow needs.
+if [ -n "${FLUTTER_PREBUILT_ENGINE_VERSION}" ]; then
+  ENGINE_VERSION="${FLUTTER_PREBUILT_ENGINE_VERSION}"
+fi
+
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 
-# Test for fusion repository
-if [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
-  BRANCH=$(git -C "$FLUTTER_ROOT" rev-parse --abbrev-ref HEAD)
+# On stable, beta, and release tags, the engine.version is tracked by git - do not override it.
+TRACKED_ENGINE="$(git -C "$FLUTTER_ROOT" ls-files bin/internal/engine.version)"
+if [[ -n "$TRACKED_ENGINE" ]]; then
+  exit
+fi
+
+# Test for fusion repository and no environment variable override.
+if [ -z "$ENGINE_VERSION" ] && [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
   # In a fusion repository; the engine.version comes from the git hashes.
   if [ -z "${LUCI_CONTEXT}" ]; then
     set +e
@@ -35,14 +57,12 @@ if [ -f "$FLUTTER_ROOT/DEPS" ] && [ -f "$FLUTTER_ROOT/engine/src/.gn" ]; then
   else
     ENGINE_VERSION=$(git -C "$FLUTTER_ROOT" rev-parse HEAD)
   fi
+fi
 
-  if [[ "$BRANCH" != "stable" && "$BRANCH" != "beta" ]]; then
-    # Write the engine version out so downstream tools know what to look for.
-    echo $ENGINE_VERSION > "$FLUTTER_ROOT/bin/internal/engine.version"
+# Write the engine version out so downstream tools know what to look for.
+echo $ENGINE_VERSION > "$FLUTTER_ROOT/bin/internal/engine.version"
 
-    # The realm on CI is passed in.
-    if [ -n "${FLUTTER_REALM}" ]; then
-      echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/internal/engine.realm"
-    fi
-  fi
+# The realm on CI is passed in.
+if [ -n "${FLUTTER_REALM}" ]; then
+  echo $FLUTTER_REALM > "$FLUTTER_ROOT/bin/internal/engine.realm"
 fi

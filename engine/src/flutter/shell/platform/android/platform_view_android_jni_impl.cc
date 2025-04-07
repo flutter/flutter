@@ -12,8 +12,6 @@
 #include <sstream>
 #include <utility>
 
-#include "impeller/toolkit/android/shadow_realm.h"
-#include "include/android/SkImageAndroid.h"
 #include "unicode/uchar.h"
 
 #include "flutter/assets/directory_asset_bundle.h"
@@ -853,12 +851,6 @@ bool RegisterApi(JNIEnv* env) {
           .name = "nativeUpdateDisplayMetrics",
           .signature = "(J)V",
           .fnPtr = reinterpret_cast<void*>(&UpdateDisplayMetrics),
-      },
-      {
-          .name = "nativeShouldDisableAHB",
-          .signature = "()Z",
-          .fnPtr = reinterpret_cast<void*>(
-              &impeller::android::ShadowRealm::ShouldDisableAHB),
       }};
 
   if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
