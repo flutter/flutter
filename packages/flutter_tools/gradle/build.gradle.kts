@@ -34,7 +34,7 @@ gradlePlugin {
         // The "flutterPlugin" name isn't used anywhere.
         create("flutterPlugin") {
             id = "dev.flutter.flutter-gradle-plugin"
-            implementationClass = "com.flutter.gradle.FlutterPlugin"
+            implementationClass = "FlutterPlugin"
         }
         // The "flutterAppPluginLoaderPlugin" name isn't used anywhere.
         create("flutterAppPluginLoaderPlugin") {
