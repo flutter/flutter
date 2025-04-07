@@ -21,4 +21,9 @@ unset GIT_INDEX_FILE
 unset GIT_WORK_TREE
 
 # Cannot use '*' for files in this command
-git -C "$FLUTTER_ROOT" ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.ps1 bin/internal/content_aware_hash.sh | git hash-object --stdin
+# DEPS: tracks third party dependencies related to building the engine
+# engine: all the code in the engine folder
+# bin/internal/content_aware_hash.ps1: script for calculating the hash on windows
+# bin/internal/content_aware_hash.sh: script for calculating the hash on mac/linux
+# .github/workflows/content-aware-hash.yml: github action for CI/CD hashing
+git -C "$FLUTTER_ROOT" ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.ps1 bin/internal/content_aware_hash.sh .github/workflows/content-aware-hash.yml | git hash-object --stdin
