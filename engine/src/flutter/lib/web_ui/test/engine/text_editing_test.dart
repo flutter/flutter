@@ -840,6 +840,56 @@ Future<void> testMain() async {
       expect(spy.messages, isEmpty);
     });
 
+    test('Does not align content in autofill group elements', () {
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        createFlutterConfig('text'),
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      // Form elements
+      {
+        final formElement = textEditing!.configuration!.autofillGroup!.formElement;
+        expect(formElement.style.alignContent, isEmpty);
+
+        // Should contain one <input type="text"> and one <input type="submit">
+        expect(formElement.children, hasLength(2));
+
+        final inputElement = formElement.children.first;
+        expect(inputElement.style.alignContent, isEmpty);
+
+        final submitElement = formElement.children.last;
+        expect(submitElement.style.alignContent, isEmpty);
+      }
+
+      // Active element
+      {
+        final DomHTMLElement activeElement = textEditing!.strategy.activeDomElement;
+        expect(activeElement.style.alignContent, isEmpty);
+      }
+    });
+
     test('focus and connection with blur', () async {
       // In all the desktop browsers we are keeping the connection
       // open, keep the text editing element focused if it receives a blur
@@ -3585,6 +3635,16 @@ Future<void> testMain() async {
       // though it supports forced-colors. Safari doesn't support forced-colors
       // so this isn't a problem there.
     }, skip: isFirefox || isSafari);
+
+    test('Multi-line text area scrollbars are zero-width', () {
+      final allowedScrollbarWidthValues = <String>[
+        'none',
+        // Safari introduced scrollbarWidth support in 18.2. Older Safari versions
+        // return empty string instead of 'none'.
+        if (isSafari) '',
+      ];
+      expect(allowedScrollbarWidthValues, contains(createMultilineTextArea().style.scrollbarWidth));
+    });
   });
 }
 

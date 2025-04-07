@@ -6,6 +6,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
 import '../platform_dispatcher.dart';
+import '../text_editing/input_type.dart';
 import '../text_editing/text_editing.dart';
 import 'semantics.dart';
 
@@ -229,7 +230,7 @@ class SemanticTextField extends SemanticRole {
   }
 
   DomHTMLTextAreaElement _createMultiLineField() {
-    final textArea = createDomHTMLTextAreaElement();
+    final textArea = createMultilineTextArea();
 
     if (semanticsObject.hasFlag(ui.SemanticsFlag.isObscured)) {
       // -webkit-text-security is not standard, but it's the best we can do.

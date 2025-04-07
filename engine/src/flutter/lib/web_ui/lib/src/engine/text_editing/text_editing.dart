@@ -64,7 +64,6 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
     // For more details, see: https://developer.mozilla.org/en-US/docs/Web/CSS/forced-color-adjust
     ..setProperty('forced-color-adjust', 'none')
     ..whiteSpace = 'pre-wrap'
-    ..alignContent = 'center'
     ..position = 'absolute'
     ..top = '0'
     ..left = '0'
@@ -108,7 +107,6 @@ void _styleAutofillElements(
   final DomCSSStyleDeclaration elementStyle = domElement.style;
   elementStyle
     ..whiteSpace = 'pre-wrap'
-    ..alignContent = 'center'
     ..padding = '0'
     ..opacity = '1'
     ..color = 'transparent'
