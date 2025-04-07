@@ -968,7 +968,7 @@ class EditingState {
   /// selection range on a non-focused element will cause it to request focus.
   ///
   /// If text is in the composing state, the composing range is not updated by
-  /// [isComposing] being `true`.
+  /// [updateSelection] being `true`.
   ///
   /// See also:
   ///
