@@ -18,9 +18,12 @@ import '../image_data.dart';
 import '_test_http_request.dart';
 
 void runTests() {
+  _TestBinding.ensureInitialized();
+
   tearDown(() {
     debugRestoreHttpRequestFactory();
     debugRestoreImgElementFactory();
+    _TestBinding.instance.overrideCodec = null;
   });
 
   testWidgets('loads an image from the network with headers', (WidgetTester tester) async {
@@ -377,23 +380,18 @@ void runTests() {
     };
 
     final Completer<void> secondFrameLock = Completer<void>();
-    // This is basically a normal NetworkImage, except that the 2nd frame is
-    // delayed.
-    final Image imageThatDelaysSecondFrame = Image(
-      image: _NetworkImageWithTestCodec(
-        _uniqueUrl(tester.testDescription),
-        codec: _TwoFrameCodec(
-          onFrame: (int frameNumber) async {
-            if (frameNumber == 1) {
-              await secondFrameLock.future;
-            }
-          },
-        ),
-      ),
+
+    // Override the codec so that the 2nd frame is delayed.
+    _TestBinding.instance.overrideCodec = _TwoFrameCodec(
+      onFrame: (int frameNumber) async {
+        if (frameNumber == 1) {
+          await secondFrameLock.future;
+        }
+      },
     );
 
     // Mount the image, displaying the 1st frame.
-    await tester.pumpWidget(imageThatDelaysSecondFrame);
+    await tester.pumpWidget(Image.network(_uniqueUrl(tester.testDescription)));
     // Clear the image cache, so that the image completer will be disposed as
     // soon as the image is unmounted.
     imageCache.clear();
@@ -404,6 +402,8 @@ void runTests() {
     // `MultiFrameImageStreamCompleter` is still alive and will call
     // of `_ForwardingImageStreamCompleter.setImage` and causes a crash.
     secondFrameLock.complete();
+    expect(imageCache.currentSize, 0);
+    // The test passes if there are no crashes.
   });
 }
 
@@ -417,6 +417,37 @@ void runTests() {
 // `tester.testDescription` as the key.
 String _uniqueUrl(Object key) {
   return 'https://www.example.com/images/frame_${identityHashCode(key)}.png';
+}
+
+// A normal `AutomatedTestWidgetsFlutterBinding` except that it allows certain
+// overrides.
+class _TestBinding extends AutomatedTestWidgetsFlutterBinding {
+  static late final _TestBinding instance;
+  @override
+  void initInstances() {
+    super.initInstances();
+    instance = this;
+  }
+
+  // If this value is not null, then [instantiateImageCodecWithSize] always
+  // return this codec instead of decoding the image stream.
+  ui.Codec? overrideCodec;
+
+  @override
+  Future<ui.Codec> instantiateImageCodecWithSize(
+    ui.ImmutableBuffer buffer, {
+    ui.TargetImageSizeCallback? getTargetSize,
+  }) {
+    if (overrideCodec != null) {
+      return Future<ui.Codec>.value(overrideCodec);
+    }
+    return super.instantiateImageCodecWithSize(buffer, getTargetSize: getTargetSize);
+  }
+
+  static _TestBinding ensureInitialized() {
+    _TestBinding();
+    return _TestBinding.instance;
+  }
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
@@ -501,22 +532,6 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   void dispose() {
     final List<ImageStreamListener> listenersCopy = listeners.toList();
     listenersCopy.forEach(removeListener);
-  }
-}
-
-// A [NetworkImage] that, instead of decoding the image stream, always returns
-// the specified `codec` as the image stream.
-class _NetworkImageWithTestCodec extends NetworkImage {
-  const _NetworkImageWithTestCodec(super.url, {required this.codec});
-
-  final ui.Codec codec;
-
-  @override
-  Future<ui.Codec> instantiateImageCodecWithSize(
-    ui.ImmutableBuffer buffer, {
-    ui.TargetImageSizeCallback? getTargetSize,
-  }) async {
-    return codec;
   }
 }
 
