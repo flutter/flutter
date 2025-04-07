@@ -19,5 +19,6 @@ FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 unset GIT_DIR
 unset GIT_INDEX_FILE
 unset GIT_WORK_TREE
-git -C "$FLUTTER_ROOT" ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.*
-git -C "$FLUTTER_ROOT" ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.* | git hash-object --stdin
+
+# Cannot use '*' for files in this command
+git -C "$FLUTTER_ROOT" ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.ps1 bin/internal/content_aware_hash.sh | git hash-object --stdin

@@ -21,5 +21,5 @@ $env:GIT_WORK_TREE = $null
 $progName = Split-Path -parent $MyInvocation.MyCommand.Definition
 $flutterRoot = (Get-Item $progName).parent.parent.FullName
 
-cmd /c 'git -C $flutterRoot ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.*'
-cmd /c 'git -C $flutterRoot ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.* | git hash-object --stdin'
+# Cannot use '*' for files in this command
+cmd /c "git -C $flutterRoot ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.ps1 bin/internal/content_aware_hash.sh | git hash-object --stdin"
