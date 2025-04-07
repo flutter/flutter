@@ -17,24 +17,21 @@ import java.io.File
  */
 
 object NativePluginLoaderReflectionBridge {
-    private var nativePluginLoader: Any? = null
-
     /**
      * An abstraction to hide reflection from calling sites. See ../scripts/native_plugin_loader.gradle.kts.
      */
-    @JvmStatic
     fun getPlugins(
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
-    ): List<Map<String, Any>> {
-        nativePluginLoader = extraProperties.get("nativePluginLoader")!!
+    ): List<Map<String?, Any?>> {
+        val nativePluginLoader = extraProperties.get("nativePluginLoader")!!
 
         @Suppress("UNCHECKED_CAST")
-        val pluginList: List<Map<String, Any>> =
-            nativePluginLoader!!::class
+        val pluginList: List<Map<String?, Any?>> =
+            nativePluginLoader::class
                 .members
                 .firstOrNull { it.name == "getPlugins" }
-                ?.call(nativePluginLoader, flutterProjectRoot) as List<Map<String, Any>>
+                ?.call(nativePluginLoader, flutterProjectRoot) as List<Map<String?, Any?>>
 
         return pluginList
     }
@@ -42,16 +39,15 @@ object NativePluginLoaderReflectionBridge {
     /**
      * An abstraction to hide reflection from calling sites. See ../scripts/native_plugin_loader.gradle.kts.
      */
-    @JvmStatic
     fun getDependenciesMetadata(
         extraProperties: ExtraPropertiesExtension,
         flutterProjectRoot: File
     ): Map<String, Any> {
-        nativePluginLoader = extraProperties.get("nativePluginLoader")!!
+        val nativePluginLoader = extraProperties.get("nativePluginLoader")!!
 
         @Suppress("UNCHECKED_CAST")
         val dependenciesMetadata: Map<String, Any> =
-            nativePluginLoader!!::class
+            nativePluginLoader::class
                 .members
                 .firstOrNull { it.name == "dependenciesMetadata" }
                 ?.call(nativePluginLoader, flutterProjectRoot) as Map<String, Any>
