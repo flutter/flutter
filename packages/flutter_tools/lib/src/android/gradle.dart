@@ -42,7 +42,7 @@ import 'migrations/top_level_gradle_build_file_migration.dart';
 
 /// The regex to grab variant names from printBuildVariants gradle task
 ///
-/// The task is defined in flutter/packages/flutter_tools/gradle/src/main/groovy/flutter.groovy
+/// The task is defined in flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt
 ///
 /// The expected output from the task should be similar to:
 ///
