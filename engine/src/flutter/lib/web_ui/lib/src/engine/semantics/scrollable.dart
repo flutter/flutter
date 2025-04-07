@@ -104,6 +104,10 @@ class SemanticScrollable extends SemanticRole {
     //
     // The scrollbar is already made transparent in SemanticsRole._initElement so here
     // set scrollbar-width to "none" to prevent it from affecting the max scroll extent.
+    //
+    // Support for scrollbar-width was only added to Safari v18.2+, so versions before
+    // that may still experience overscroll issues when macOS inserts scrollbars
+    // into the application.
     semanticsObject.element.style.scrollbarWidth = 'none';
 
     _scrollOverflowElement.style
