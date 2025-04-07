@@ -120,7 +120,7 @@ class MultilineNoTextInputType extends MultilineInputType {
   String? get inputmodeAttribute => 'none';
 
   @override
-  DomHTMLElement createDomElement() => createDomHTMLTextAreaElement();
+  DomHTMLElement createDomElement() => createMultilineTextArea();
 }
 
 /// Single-line text input type.
@@ -184,5 +184,12 @@ class MultilineInputType extends EngineInputType {
   String? get inputmodeAttribute => null;
 
   @override
-  DomHTMLElement createDomElement() => createDomHTMLTextAreaElement();
+  DomHTMLElement createDomElement() => createMultilineTextArea();
+}
+
+DomHTMLTextAreaElement createMultilineTextArea() {
+  final element = createDomHTMLTextAreaElement();
+  // Scrollbar width affects text layout. This zeroes out the scrollbar width.
+  element.style.scrollbarWidth = 'none';
+  return element;
 }
