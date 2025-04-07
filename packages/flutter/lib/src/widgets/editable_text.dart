@@ -1803,7 +1803,7 @@ class EditableText extends StatefulWidget {
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.widgets.editableText.setCustomSelectionOnFocus}
-  /// Set a custom text selection when focus is given
+  /// Set a custom text selection when focus is given.
   ///
   /// If null, all text will be selected on web and desktop. Everything else will
   /// leave text selection as it was before.
