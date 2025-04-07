@@ -50,6 +50,7 @@ class _${blockName}DefaultsM3 extends DatePickerThemeData {
         // TODO(tahatesser): Update this to use token when gen_defaults
         // supports `CircleBorder` for fully rounded corners.
         dayShape: const WidgetStatePropertyAll<OutlinedBorder>(CircleBorder()),
+        yearShape: const WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
         rangePickerElevation: ${elevation("md.comp.date-picker.modal.range-selection.container")},
         rangePickerShape: ${shape("md.comp.date-picker.modal.range-selection.container")},
       );
