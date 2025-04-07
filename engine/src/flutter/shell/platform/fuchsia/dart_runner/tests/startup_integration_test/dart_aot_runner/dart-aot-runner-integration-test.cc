@@ -17,6 +17,7 @@ namespace {
 // Types imported for the realm_builder library
 using component_testing::ChildOptions;
 using component_testing::ChildRef;
+using component_testing::Dictionary;
 using component_testing::Directory;
 using component_testing::ParentRef;
 using component_testing::Protocol;
@@ -85,6 +86,11 @@ TEST_F(RealmBuilderTest, DartRunnerStartsUp) {
                              Protocol{"fuchsia.vulkan.loader.Loader"},
                              Protocol{"fuchsia.inspect.InspectSink"},
                              Directory{"config-data"}},
+            .source = ParentRef(),
+            .targets = {kDartAotRunnerRef, kDartAotEchoServerRef}});
+
+  realm_builder.AddRoute(
+      Route{.capabilities = {Dictionary{"diagnostics"}},
             .source = ParentRef(),
             .targets = {kDartAotRunnerRef, kDartAotEchoServerRef}});
 

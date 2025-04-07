@@ -21,7 +21,7 @@ import 'package:ui/src/engine.dart';
 /// 5. The finalizer function is called with the SkPaint as the sole argument.
 /// 6. We call `delete` on SkPaint.
 DomFinalizationRegistry _finalizationRegistry = DomFinalizationRegistry(
-  ((ExternalDartReference<UniqueRef<Object>> boxedUniq) => boxedUniq.toDartObject.collect()).toJS,
+  ((ExternalDartReference<UniqueRef<JSObject>> boxedUniq) => boxedUniq.toDartObject.collect()).toJS,
 );
 
 NativeMemoryFinalizationRegistry nativeMemoryFinalizationRegistry =
@@ -30,7 +30,7 @@ NativeMemoryFinalizationRegistry nativeMemoryFinalizationRegistry =
 /// An indirection to [DomFinalizationRegistry] to enable tests provide a
 /// mock implementation of a finalization registry.
 class NativeMemoryFinalizationRegistry {
-  void register(Object owner, UniqueRef<Object> ref) {
+  void register(Object owner, UniqueRef<JSObject> ref) {
     if (browserSupportsFinalizationRegistry) {
       _finalizationRegistry.register(owner.toExternalReference, ref.toExternalReference);
     }
@@ -44,7 +44,7 @@ class NativeMemoryFinalizationRegistry {
 ///
 /// To prevent memory leaks, the underlying C++ object is deleted by the GC if
 /// it wasn't previously disposed of explicitly.
-class UniqueRef<T extends Object> {
+class UniqueRef<T extends JSObject> {
   UniqueRef(Object owner, T nativeObject, this._debugOwnerLabel) {
     _nativeObject = nativeObject;
     if (Instrumentation.enabled) {
@@ -134,7 +134,7 @@ abstract class StackTraceDebugger {
 /// deleted. This is mostly done to prevent memory leaks in production. Well
 /// behaving framework and app code are expected to rely on [ref] and [unref]
 /// for timely collection of resources.
-class CountedRef<R extends StackTraceDebugger, T extends Object> {
+class CountedRef<R extends StackTraceDebugger, T extends JSObject> {
   /// Creates a counted reference.
   CountedRef(T nativeObject, R debugReferrer, String debugLabel) {
     _ref = UniqueRef<T>(this, nativeObject, debugLabel);

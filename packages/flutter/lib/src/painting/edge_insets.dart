@@ -32,6 +32,46 @@ abstract class EdgeInsetsGeometry {
   /// const constructors so that they can be used in const expressions.
   const EdgeInsetsGeometry();
 
+  /// Creates insets where all the offsets are `value`.
+  const factory EdgeInsetsGeometry.all(double value) = EdgeInsets.all;
+
+  /// Creates [EdgeInsets] with only the given values non-zero.
+  const factory EdgeInsetsGeometry.only({double left, double right, double top, double bottom}) =
+      EdgeInsets.only;
+
+  /// Creates [EdgeInsetsDirectional] with only the given values non-zero.
+  const factory EdgeInsetsGeometry.directional({
+    double start,
+    double end,
+    double top,
+    double bottom,
+  }) = EdgeInsetsDirectional.only;
+
+  /// Creates [EdgeInsets] with symmetrical vertical and horizontal offsets.
+  const factory EdgeInsetsGeometry.symmetric({double vertical, double horizontal}) =
+      EdgeInsets.symmetric;
+
+  /// Creates [EdgeInsets] from offsets from the left, top, right, and bottom.
+  const factory EdgeInsetsGeometry.fromLTRB(double left, double top, double right, double bottom) =
+      EdgeInsets.fromLTRB;
+
+  /// Creates [EdgeInsets] that match the given view padding.
+  ///
+  /// If you need the current system padding or view insets in the context of a
+  /// widget, consider using [MediaQuery.paddingOf] to obtain these values
+  /// rather than using the value from a [FlutterView] directly, so that you get
+  /// notified of changes.
+  factory EdgeInsetsGeometry.fromViewPadding(ui.ViewPadding padding, double devicePixelRatio) =
+      EdgeInsets.fromViewPadding;
+
+  /// Creates [EdgeInsetsDirectional] from offsets from the start, top, end, and
+  /// bottom.
+  const factory EdgeInsetsGeometry.fromSTEB(double start, double top, double end, double bottom) =
+      EdgeInsetsDirectional.fromSTEB;
+
+  /// An [EdgeInsets] with zero offsets in each direction.
+  static const EdgeInsetsGeometry zero = EdgeInsets.zero;
+
   double get _bottom;
   double get _end;
   double get _left;

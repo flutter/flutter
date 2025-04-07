@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -441,5 +443,34 @@ void main() {
     );
     final EdgeInsetsDirectional copy = sourceEdgeInsets.copyWith(start: 5.0, top: 6.0);
     expect(copy, const EdgeInsetsDirectional.only(start: 5.0, top: 6.0, bottom: 3.0, end: 4.0));
+  });
+
+  test('EdgeInsetsGeometry factories', () {
+    expect(const EdgeInsetsGeometry.all(10), const EdgeInsets.all(10));
+    expect(
+      const EdgeInsetsGeometry.only(left: 10, top: 20, right: 30, bottom: 40),
+      const EdgeInsets.only(left: 10, top: 20, right: 30, bottom: 40),
+    );
+    expect(
+      const EdgeInsetsGeometry.directional(start: 10, top: 20, end: 30, bottom: 40),
+      const EdgeInsetsDirectional.only(start: 10, top: 20, end: 30, bottom: 40),
+    );
+    expect(
+      const EdgeInsetsGeometry.symmetric(horizontal: 10, vertical: 20),
+      const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+    );
+    expect(
+      const EdgeInsetsGeometry.fromLTRB(10, 20, 30, 40),
+      const EdgeInsets.fromLTRB(10, 20, 30, 40),
+    );
+    expect(
+      EdgeInsetsGeometry.fromViewPadding(ui.ViewPadding.zero, 10),
+      EdgeInsets.fromViewPadding(ui.ViewPadding.zero, 10),
+    );
+    expect(
+      const EdgeInsetsGeometry.fromSTEB(10, 20, 20, 40),
+      const EdgeInsetsDirectional.fromSTEB(10, 20, 20, 40),
+    );
+    expect(EdgeInsetsGeometry.zero, EdgeInsets.zero);
   });
 }

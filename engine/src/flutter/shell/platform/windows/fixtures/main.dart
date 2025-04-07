@@ -467,6 +467,7 @@ Future<void> sendSemanticsTreeInfo() async {
       additionalActions: additionalActions,
       role: ui.SemanticsRole.tab,
       controlsNodes: null,
+      inputType: ui.SemanticsInputType.none,
     );
     return builder.build();
   }

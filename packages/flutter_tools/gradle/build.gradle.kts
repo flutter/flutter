@@ -39,7 +39,7 @@ gradlePlugin {
         // The "flutterAppPluginLoaderPlugin" name isn't used anywhere.
         create("flutterAppPluginLoaderPlugin") {
             id = "dev.flutter.flutter-plugin-loader"
-            implementationClass = "FlutterAppPluginLoaderPlugin"
+            implementationClass = "com.flutter.gradle.FlutterAppPluginLoaderPlugin"
         }
     }
 }
@@ -76,6 +76,6 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("com.android.tools.build:gradle:8.7.3")
-    testImplementation("org.mockito:mockito-core:4.8.0")
+    testImplementation("org.mockito:mockito-core:5.8.0")
     testImplementation("io.mockk:mockk:1.13.16")
 }

@@ -48,6 +48,7 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   settings.enable_validation = p_settings.enable_validation;
   settings.enable_gpu_tracing = p_settings.enable_gpu_tracing;
   settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.flags = p_settings.impeller_flags;
 
   auto context = impeller::ContextVK::Create(std::move(settings));
 

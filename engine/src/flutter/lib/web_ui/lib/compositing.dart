@@ -48,7 +48,7 @@ abstract class SceneBuilder {
     ClipRRectEngineLayer? oldLayer,
   });
   ClipRSuperellipseEngineLayer pushClipRSuperellipse(
-    RSuperellipse rse, {
+    RSuperellipse rsuperellipse, {
     required Clip clipBehavior,
     ClipRSuperellipseEngineLayer? oldLayer,
   });

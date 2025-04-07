@@ -14,6 +14,9 @@
 #include "impeller/renderer/backend/gles/description_gles.h"
 #include "impeller/renderer/backend/gles/gles.h"
 
+/// Enable to allow GLES to push/pop labels for usage in GPU traces
+#define IP_ENABLE_GLES_LABELING false
+
 namespace impeller {
 
 const char* GLErrorToString(GLenum value);

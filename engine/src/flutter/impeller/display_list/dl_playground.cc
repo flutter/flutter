@@ -40,11 +40,6 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
   }
   return Playground::OpenPlaygroundHere(
       [&context, &callback](RenderTarget& render_target) -> bool {
-        static bool wireframe = false;
-        if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
-          wireframe = !wireframe;
-          context.GetContentContext().SetWireframe(wireframe);
-        }
         return RenderToTarget(
             context.GetContentContext(),  //
             render_target,                //

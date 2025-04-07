@@ -55,7 +55,7 @@ class LineMetrics {
   // are before layout and are the base values we calculate from.
   std::map<size_t, RunMetrics> run_metrics;
 
-  LineMetrics();
+  LineMetrics() = default;
 
   LineMetrics(size_t start,
               size_t end,

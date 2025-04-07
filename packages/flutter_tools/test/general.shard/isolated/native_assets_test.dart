@@ -254,10 +254,11 @@ void main() {
           ),
         ),
       );
-      expect(result.codeAssets.map((CodeAsset c) => c.file!.toString()).toList()..sort(), <String>[
-        directSoFile.uri.toString(),
-        linkedSoFile.uri.toString(),
-      ]);
+      expect(
+        result.codeAssets.map((FlutterCodeAsset c) => c.codeAsset.file!.toString()).toList()
+          ..sort(),
+        <String>[directSoFile.uri.toString(), linkedSoFile.uri.toString()],
+      );
     },
   );
 }

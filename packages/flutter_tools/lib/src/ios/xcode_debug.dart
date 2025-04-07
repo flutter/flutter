@@ -269,8 +269,19 @@ class XcodeDebug {
 
   @visibleForTesting
   XcodeAutomationScriptResponse? parseScriptResponse(String results) {
+    // Some users reported text before the json. Trim any text before the opening
+    // curly brace.
+    // Example: `start process_extensions{"status":true,"errorMessage":null,"debugResult":{"completed":false,"status":"running","errorMessage":null}}`
+    final String trimmedResults;
+    final int jsonBeginIndex = results.indexOf('{');
+    if (jsonBeginIndex > -1) {
+      trimmedResults = results.substring(jsonBeginIndex);
+    } else {
+      trimmedResults = results;
+    }
+
     try {
-      final Object decodeResult = json.decode(results) as Object;
+      final Object decodeResult = json.decode(trimmedResults) as Object;
       if (decodeResult is Map<String, Object?>) {
         final XcodeAutomationScriptResponse response = XcodeAutomationScriptResponse.fromJson(
           decodeResult,
@@ -280,10 +291,10 @@ class XcodeDebug {
           return response;
         }
       }
-      _logger.printError('osascript returned unexpected JSON response: $results');
+      _logger.printError('osascript returned unexpected JSON response: $trimmedResults');
       return null;
     } on FormatException {
-      _logger.printError('osascript returned non-JSON response: $results');
+      _logger.printError('osascript returned non-JSON response: $trimmedResults');
       return null;
     }
   }
