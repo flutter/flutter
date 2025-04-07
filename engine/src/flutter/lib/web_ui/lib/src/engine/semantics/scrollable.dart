@@ -123,11 +123,13 @@ class SemanticScrollable extends SemanticRole {
     super.update();
 
     semanticsObject.owner.addOneTimePostUpdateCallback(() {
-      final double? scrollPosition = semanticsObject.scrollPosition;
-      assert(scrollPosition != null);
-      if (scrollPosition != _domScrollPosition) {
-        element.scrollTop = scrollPosition!;
-        _previousDomScrollPosition = _domScrollPosition;
+      if (_canScroll) {
+        final double? scrollPosition = semanticsObject.scrollPosition;
+        assert(scrollPosition != null);
+        if (scrollPosition != _domScrollPosition) {
+          element.scrollTop = scrollPosition!;
+          _previousDomScrollPosition = _domScrollPosition;
+        }
       }
       _updateScrollableState();
       semanticsObject.recomputePositionAndSize();
