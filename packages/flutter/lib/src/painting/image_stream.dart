@@ -508,8 +508,16 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
 
-  /// We must avoid disposing a completer if it has never had a listener, even
-  /// if all [keepAlive] handles get disposed.
+  /// Mark this completer as having had listeners.
+  ///
+  /// Sometimes a listener may never have a listener throughout the lifecycle.
+  /// If so, call this method to explicitly bypass the check of [maybeDispose]
+  /// for proper disposal.
+  void markHadListener() {
+    _hadAtLeastOneListener = true;
+  }
+  // We must avoid disposing a completer if it has never had a listener, even
+  // if all [keepAlive] handles get disposed.
   bool _hadAtLeastOneListener = false;
 
   /// Whether the future listeners added to this completer are initial listeners.
