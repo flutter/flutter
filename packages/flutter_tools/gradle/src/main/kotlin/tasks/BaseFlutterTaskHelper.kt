@@ -72,6 +72,7 @@ object BaseFlutterTaskHelper {
                         .map {
                             "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
                         }
+
                 else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }
             }
         return ruleNames
@@ -111,7 +112,17 @@ object BaseFlutterTaskHelper {
             if (!baseFlutterTask.fastStart!! || baseFlutterTask.buildMode != "debug") {
                 args("-dTargetFile=${baseFlutterTask.targetPath}")
             } else {
-                args("-dTargetFile=${Paths.get(baseFlutterTask.flutterRoot!!.absolutePath, "examples", "splash", "lib", "main.dart")}")
+                args(
+                    "-dTargetFile=${
+                        Paths.get(
+                            baseFlutterTask.flutterRoot!!.absolutePath,
+                            "examples",
+                            "splash",
+                            "lib",
+                            "main.dart"
+                        )
+                    }"
+                )
             }
             args("-dTargetPlatform=android")
             args("-dBuildMode=${baseFlutterTask.buildMode}")
@@ -157,6 +168,6 @@ object BaseFlutterTaskHelper {
     fun buildBundle(baseFlutterTask: BaseFlutterTask) {
         checkPreConditions(baseFlutterTask)
         baseFlutterTask.logging.captureStandardError(LogLevel.ERROR)
-        baseFlutterTask.project.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
+        baseFlutterTask.project.providers.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
     }
 }
