@@ -1143,7 +1143,7 @@ void main() {
       );
     }
 
-    void testTowLine() {
+    void expectTwoLine() {
       expect(
         tester.getRect(find.byType(ListTile).at(0)),
         const Rect.fromLTWH(0.0, 0.0, 800.0, height),
@@ -1170,7 +1170,7 @@ void main() {
       );
     }
 
-    void testThreeLine() {
+    void expectThreeLine() {
       expect(
         tester.getRect(find.byType(ListTile).at(0)),
         const Rect.fromLTWH(0.0, 0.0, 800.0, height),
@@ -1198,13 +1198,13 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame());
-    testTowLine();
+    expectTwoLine();
 
     await tester.pumpWidget(buildFrame(isThreeLine: false));
-    testTowLine();
+    expectTwoLine();
 
     await tester.pumpWidget(buildFrame(isThreeLine: true));
-    testThreeLine();
+    expectThreeLine();
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/165453

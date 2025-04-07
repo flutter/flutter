@@ -4402,7 +4402,7 @@ void main() {
       );
     }
 
-    void testTowLine() {
+    void expectTwoLine() {
       expect(
         tester.getRect(find.byType(ListTile).at(0)),
         const Rect.fromLTWH(0.0, 0.0, 800.0, height),
@@ -4429,7 +4429,7 @@ void main() {
       );
     }
 
-    void testThreeLine() {
+    void expectThreeLine() {
       expect(
         tester.getRect(find.byType(ListTile).at(0)),
         const Rect.fromLTWH(0.0, 0.0, 800.0, height),
@@ -4457,41 +4457,41 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame());
-    testTowLine();
+    expectTwoLine();
 
     await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true));
-    testThreeLine();
+    expectThreeLine();
 
     await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: true));
-    testThreeLine();
+    expectThreeLine();
 
     await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: false));
-    testTowLine();
+    expectTwoLine();
 
     await tester.pumpWidget(buildFrame(isThreeLine: true));
-    testThreeLine();
+    expectThreeLine();
 
     await tester.pumpWidget(buildFrame(themeIsThreeLine: true, isThreeLine: false));
-    testTowLine();
+    expectTwoLine();
 
     await tester.pumpWidget(buildFrame(themeDataIsThreeLine: true, isThreeLine: false));
-    testTowLine();
+    expectTwoLine();
 
     await tester.pumpWidget(
       buildFrame(themeDataIsThreeLine: true, themeIsThreeLine: true, isThreeLine: false),
     );
-    testTowLine();
+    expectTwoLine();
 
     await tester.pumpWidget(buildFrame(themeIsThreeLine: false, isThreeLine: true));
-    testThreeLine();
+    expectThreeLine();
 
     await tester.pumpWidget(buildFrame(themeDataIsThreeLine: false, isThreeLine: true));
-    testThreeLine();
+    expectThreeLine();
 
     await tester.pumpWidget(
       buildFrame(themeDataIsThreeLine: false, themeIsThreeLine: false, isThreeLine: true),
     );
-    testThreeLine();
+    expectThreeLine();
   });
 }
 
