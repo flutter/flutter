@@ -1796,6 +1796,7 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
 ///
 /// ** See code in examples/api/lib/widgets/sliver/sliver_ensure_semantics.0.dart **
 /// {@end-tool}
+// TODO(Renzo-Olivares): Investigate potential solutions for revealing off screen items, https://github.com/flutter/flutter/issues/166703.
 class SliverEnsureSemantics extends SingleChildRenderObjectWidget {
   /// Creates a sliver that ensures its sliver child is included in the semantics tree.
   const SliverEnsureSemantics({super.key, required Widget sliver}) : super(child: sliver);
