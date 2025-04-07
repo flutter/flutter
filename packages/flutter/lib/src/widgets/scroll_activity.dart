@@ -708,9 +708,21 @@ class DrivenScrollActivity extends ScrollActivity {
   Future<void> get done => _completer.future;
 
   void _tick() {
-    if (delegate.setPixels(_controller.value) != 0.0) {
+    if (!applyMoveTo(_controller.value)) {
       delegate.goIdle();
     }
+  }
+
+  /// Move the position to the given location.
+  ///
+  /// If the new position was fully applied, returns true. If there was any
+  /// overflow, returns false.
+  ///
+  /// The default implementation calls [ScrollActivityDelegate.setPixels]
+  /// and returns true if the overflow was zero.
+  @protected
+  bool applyMoveTo(double value) {
+    return delegate.setPixels(value).abs() < precisionErrorTolerance;
   }
 
   void _end() {
