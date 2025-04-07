@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -244,6 +245,33 @@ void main() {
     await tester.tap(find.text('3'));
     expect(lastTapped, equals(3));
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('DrivenScrollActivity.simulation constructor', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(controller: controller, children: children(10)),
+      ),
+    );
+    final ScrollPositionWithSingleContext position =
+        controller.position as ScrollPositionWithSingleContext;
+
+    const double g = 9.8;
+    position.beginActivity(
+      DrivenScrollActivity.simulation(
+        position,
+        vsync: position.context.vsync,
+        GravitySimulation(g, 0, 1000, 0),
+      ),
+    );
+    await tester.pump();
+    expect(position.pixels, 0.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(position.pixels, (1 / 2) * g);
+    await tester.pump(const Duration(seconds: 1));
+    expect(position.pixels, 2 * g);
   });
 
   test('$ScrollActivity dispatches memory events', () async {
