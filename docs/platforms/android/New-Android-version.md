@@ -73,7 +73,7 @@ becomes the industry standard for a few years. As users adopt the new Java LTS v
 directly or as part of the latest Android SDK, we want to update our CI to test against the new Java version
 to identify and address potential compatibility issues.
 
-Upload the new Java Version package to CIPD following the instructions [here](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Uploading-New-Java-Vers◊ion-to-CIPD.md).
+Upload the new Java Version package to CIPD following the instructions [here](/docs/platforms/android/Uploading-New-Java-Version-to-CIPD.md).
 
 Update the usages of the current Java version to the new Java version in CI.
 

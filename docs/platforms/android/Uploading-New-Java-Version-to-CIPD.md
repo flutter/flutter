@@ -1,8 +1,7 @@
 # Uploading New Java Version to CIPD
 
-We store the Java Version package on CIPD because we want to efficiently store and use
-the binaries for testing. For more information read the internal
-docs [here](go/flutter-luci-playbook#remove-duplicated-cipd-tags).
+We store the Java Version package on CIPD for use on CI. For more information read the internal
+docs [here](https://g3doc.corp.google.com/company/teams/chrome/ops/luci/cipd.md?cl=head).
 
 Some links in the instructions below are Google-internal.
 
@@ -19,8 +18,8 @@ Some links in the instructions below are Google-internal.
 
 ### Download the New Java Version and Set Up for CIPD Upload
 
-3. Download the new Java version "compressed
-   archive" [here](https://www.oracle.com/java/technologies/downloads) for the following platforms:
+3. Download the new Java version via OpenJDK (not Oracle's Java for licensing/legal
+   reasons) [here](https://openjdk.org/projects/jdk/) for the following platforms:
    linux-amd64(aka x64), mac-arm64, mac-amd64, and windows-amd64.
 
 4. Download the latest Java version from
