@@ -363,6 +363,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
   ScrollNotificationObserverState? _scrollNotificationObserver;
+  late double _scaledIconSize;
   double _fadeExtent = 0.0;
 
   @override
@@ -445,7 +446,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
       setState(() {
         _fadeExtent = _calculateScrollOpacity(
           currentHeight,
-          widget.itemSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
+          _scaledIconSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
         );
       });
     }
@@ -487,7 +488,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
-    final double scaledIconSize = MediaQuery.textScalerOf(context).scale(widget.itemSize);
+    _scaledIconSize = MediaQuery.textScalerOf(context).scale(widget.itemSize);
 
     // If decoration was not provided, create a decoration with the provided
     // background color and border radius.
@@ -500,7 +501,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
 
     final IconThemeData iconThemeData = IconThemeData(
       color: CupertinoDynamicColor.resolve(widget.itemColor, context),
-      size: scaledIconSize,
+      size: _scaledIconSize,
     );
 
     final Widget prefix = Opacity(
