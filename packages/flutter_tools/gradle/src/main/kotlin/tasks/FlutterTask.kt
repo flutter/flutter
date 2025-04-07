@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.flutter.gradle
+package com.flutter.gradle.tasks
 
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
