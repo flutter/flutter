@@ -284,12 +284,13 @@ static VmaAllocationCreateFlags ToVmaAllocationCreateFlags(StorageMode mode) {
 
 class AllocatedTextureSourceVK final : public TextureSourceVK {
  public:
-  AllocatedTextureSourceVK(const ContextVK& context,
+  AllocatedTextureSourceVK(const std::shared_ptr<Context>& context,
                            const TextureDescriptor& desc,
                            VmaAllocator allocator,
                            vk::Device device,
                            bool supports_memoryless_textures)
-      : TextureSourceVK(desc), resource_(context.GetResourceManager()) {
+      : TextureSourceVK(desc),
+        resource_(ContextVK::Cast(*context).GetResourceManager()) {
     FML_DCHECK(desc.format != PixelFormat::kUnknown);
     vk::StructureChain<vk::ImageCreateInfo, vk::ImageCompressionControlEXT>
         image_info_chain;
@@ -316,7 +317,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
         vk::ImageCompressionFixedRateFlagBitsEXT::eNone};
 
     const auto frc_rate =
-        CapabilitiesVK::Cast(*context.GetCapabilities())
+        CapabilitiesVK::Cast(*context->GetCapabilities())
             .GetSupportedFRCRate(desc.compression_type,
                                  FRCFormatDescriptor{image_info});
     if (frc_rate.has_value()) {
@@ -407,7 +408,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
     resource_.Swap(ImageResource(ImageVMA{allocator, allocation, image},
                                  std::move(image_view),
-                                 std::move(rt_image_view)));
+                                 std::move(rt_image_view), context));
     is_valid_ = true;
   }
 
@@ -429,6 +430,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
  private:
   struct ImageResource {
+    std::shared_ptr<Context> context;
     UniqueImageVMA image;
     vk::UniqueImageView image_view;
     vk::UniqueImageView rt_image_view;
@@ -437,8 +439,10 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
     ImageResource(ImageVMA p_image,
                   vk::UniqueImageView p_image_view,
-                  vk::UniqueImageView p_rt_image_view)
-        : image(p_image),
+                  vk::UniqueImageView p_rt_image_view,
+                  std::shared_ptr<Context> context)
+        : context(std::move(context)),
+          image(p_image),
           image_view(std::move(p_image_view)),
           rt_image_view(std::move(p_rt_image_view)) {}
 
@@ -472,7 +476,7 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
     return nullptr;
   }
   auto source = std::make_shared<AllocatedTextureSourceVK>(
-      ContextVK::Cast(*context),     //
+      context,                       //
       desc,                          //
       allocator_.get(),              //
       device_holder->GetDevice(),    //
