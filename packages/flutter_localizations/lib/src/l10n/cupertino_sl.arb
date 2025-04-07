@@ -38,6 +38,6 @@
   "searchWebButtonLabel": "Iskanje v spletu",
   "shareButtonLabel": "Deli …",
   "clearButtonLabel": "Počisti",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Prekliči",
+  "backButtonLabel": "Nazaj"
 }

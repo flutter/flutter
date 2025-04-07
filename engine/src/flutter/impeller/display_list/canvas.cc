@@ -14,6 +14,7 @@
 #include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/geometry/dl_path.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
@@ -1511,9 +1512,27 @@ bool Canvas::AttemptBlurredTextOptimization(
   }
 }
 
+// If the text point size * max basis XY is larger than this value,
+// render the text as paths (if available) for faster and higher
+// fidelity rendering. This is a somewhat arbitrary cutoff
+static constexpr Scalar kMaxTextScale = 250;
+
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
+  Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
+  if (max_scale * text_frame->GetFont().GetMetrics().point_size >
+      kMaxTextScale) {
+    fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
+    if (path.ok()) {
+      Save(1);
+      Concat(Matrix::MakeTranslation(position));
+      DrawPath(path.value().GetPath(), paint);
+      Restore();
+      return;
+    }
+  }
+
   Entity entity;
   entity.SetClipDepth(GetClipHeight());
   entity.SetBlendMode(paint.blend_mode);
@@ -1521,7 +1540,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(text_frame);
   text_contents->SetForceTextColor(paint.mask_blur_descriptor.has_value());
-  text_contents->SetScale(GetCurrentTransform().GetMaxBasisLengthXY());
+  text_contents->SetScale(max_scale);
   text_contents->SetColor(paint.color);
   text_contents->SetOffset(position);
   text_contents->SetTextProperties(paint.color,                           //

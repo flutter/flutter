@@ -16,6 +16,7 @@ import 'dart:ui'
         Rect,
         SemanticsAction,
         SemanticsFlag,
+        SemanticsInputType,
         SemanticsRole,
         SemanticsUpdate,
         SemanticsUpdateBuilder,
@@ -737,6 +738,7 @@ class SemanticsData with Diagnosticable {
     required this.role,
     required this.controlsNodes,
     required this.validationResult,
+    required this.inputType,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -1005,6 +1007,9 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsProperties.validationResult}
   final SemanticsValidationResult validationResult;
 
+  /// {@macro flutter.semantics.SemanticsNode.inputType}
+  final SemanticsInputType inputType;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -1110,6 +1115,7 @@ class SemanticsData with Diagnosticable {
         other.linkUrl == linkUrl &&
         other.role == role &&
         other.validationResult == validationResult &&
+        other.inputType == inputType &&
         _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
         setEquals<String>(controlsNodes, other.controlsNodes);
   }
@@ -1147,6 +1153,7 @@ class SemanticsData with Diagnosticable {
       role,
       validationResult,
       controlsNodes == null ? null : Object.hashAll(controlsNodes!),
+      inputType,
     ),
   );
 
@@ -1293,6 +1300,9 @@ class SemanticsProperties extends DiagnosticableTree {
     this.textDirection,
     this.sortKey,
     this.tagForChildren,
+    this.role,
+    this.controlsNodes,
+    this.inputType,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -1315,8 +1325,6 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
-    this.role,
-    this.controlsNodes,
     this.validationResult = SemanticsValidationResult.none,
   }) : assert(
          label == null || attributedLabel == null,
@@ -2160,6 +2168,17 @@ class SemanticsProperties extends DiagnosticableTree {
   /// For a list of available validation results, see [SemanticsValidationResult].
   /// {@endtemplate}
   final SemanticsValidationResult validationResult;
+
+  /// {@template flutter.semantics.SemanticsProperties.inputType}
+  /// The input type for of a editable widget.
+  ///
+  /// This property is only used when the subtree represents a text field.
+  ///
+  /// Assistive technologies use this property to provide better information to
+  /// users. For example, screen reader reads out the input type of text field
+  /// when focused.
+  /// {@endtemplate}
+  final SemanticsInputType? inputType;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3139,6 +3158,18 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsValidationResult get validationResult => _validationResult;
   SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
 
+  /// {@template flutter.semantics.SemanticsNode.inputType}
+  /// The input type for of a editable node.
+  ///
+  /// This property is only used when this node represents a text field.
+  ///
+  /// Assistive technologies use this property to provide better information to
+  /// users. For example, screen reader reads out the input type of text field
+  /// when focused.
+  /// {@endtemplate}
+  SemanticsInputType get inputType => _inputType;
+  SemanticsInputType _inputType = _kEmptyConfig.inputType;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
@@ -3207,6 +3238,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _role = config._role;
     _controlsNodes = config._controlsNodes;
     _validationResult = config._validationResult;
+    _inputType = config._inputType;
+
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -3258,6 +3291,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     SemanticsRole role = _role;
     Set<String>? controlsNodes = _controlsNodes;
     SemanticsValidationResult validationResult = _validationResult;
+    SemanticsInputType inputType = _inputType;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3315,6 +3349,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         }
         if (role == SemanticsRole.none) {
           role = node._role;
+        }
+        if (inputType == SemanticsInputType.none) {
+          inputType = node._inputType;
         }
         if (tooltip == '') {
           tooltip = node._tooltip;
@@ -3409,6 +3446,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       role: role,
       controlsNodes: controlsNodes,
       validationResult: validationResult,
+      inputType: inputType,
     );
   }
 
@@ -3496,6 +3534,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       role: data.role,
       controlsNodes: data.controlsNodes?.toList(),
       validationResult: data.validationResult,
+      inputType: data.inputType,
     );
     _dirty = false;
   }
@@ -3693,6 +3732,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
+    if (_inputType != SemanticsInputType.none) {
+      properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
+    }
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -4143,7 +4185,7 @@ class SemanticsOwner extends ChangeNotifier {
         ErrorHint(
           'Consider removing the above invisible SemanticsNodes if they were added by your '
           'RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+          '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
         ),
       ]);
     }());
@@ -5674,6 +5716,14 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// {@macro flutter.semantics.SemanticsProperties.inputType}
+  SemanticsInputType get inputType => _inputType;
+  SemanticsInputType _inputType = SemanticsInputType.none;
+  set inputType(SemanticsInputType value) {
+    _inputType = value;
+    _hasBeenAnnotated = true;
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -5846,6 +5896,9 @@ class SemanticsConfiguration {
     if (_role == SemanticsRole.none) {
       _role = child._role;
     }
+    if (_inputType == SemanticsInputType.none) {
+      _inputType = child._inputType;
+    }
     _attributedHint = _concatAttributedString(
       thisAttributedString: _attributedHint,
       thisTextDirection: textDirection,
@@ -5916,7 +5969,8 @@ class SemanticsConfiguration {
       .._linkUrl = _linkUrl
       .._role = _role
       .._controlsNodes = _controlsNodes
-      .._validationResult = _validationResult;
+      .._validationResult = _validationResult
+      .._inputType = _inputType;
   }
 }
 
