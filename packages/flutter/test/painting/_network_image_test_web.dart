@@ -17,8 +17,14 @@ import 'package:web/web.dart' as web;
 import '../image_data.dart';
 import '_test_http_request.dart';
 
+late final ui.Image testImage;
+
 void runTests() {
   _TestBinding.ensureInitialized();
+
+  setUpAll(() async {
+    testImage = await createTestImage();
+  });
 
   tearDown(() {
     debugRestoreHttpRequestFactory();
@@ -557,7 +563,7 @@ class _TwoFrameCodec implements ui.Codec {
   Future<ui.FrameInfo> getNextFrame() async {
     _frameNumber += 1;
     await onFrame(_frameNumber);
-    return _TestFrameInfo(await createTestImage());
+    return _TestFrameInfo(testImage);
   }
 
   @override
@@ -572,12 +578,4 @@ class _TestFrameInfo implements ui.FrameInfo {
 
   @override
   final ui.Image image;
-}
-
-Future<ui.Image> createTestImage() async {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas recorderCanvas = Canvas(recorder);
-  recorderCanvas.scale(1.0, 1.0);
-  final ui.Picture picture = recorder.endRecording();
-  return picture.toImage(1, 1);
 }
