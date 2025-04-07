@@ -1782,13 +1782,19 @@ class _SliverMainAxisGroupElement extends MultiChildRenderObjectElement {
 /// not provide a valid [RenderSliver.semanticBounds]. This sliver does not guarantee its
 /// child sliver is laid out.
 ///
-/// When using this sliver consider that if this sliver is placed after a lazy sliver like
-/// [SliverList] or [SliverGrid], the estimated total scroll extent may not be accurate. This
-/// can lead to assistive technologies failing to accurately scroll to [SliverEnsureSemantics]
-/// because the total scroll extent is underestimated. In this case you can use a [SliverFixedExtentList],
-/// [SliverVariedExtentList], or [SliverPrototypeExtentList] instead so that the total scroll
-/// extent before [SliverEnsureSemantics] is calculated accurately. For [SliverGrid]s you can
-/// provide a [SliverGridDelegateWithFixedCrossAxisCount], or [SliverGridDelegateWithMaxCrossAxisExtent].
+/// Be mindful when positioning [SliverEnsureSemantics] in a [CustomScrollView] after slivers that build
+/// their children lazily, like [SliverList]. Lazy slivers might underestimate the total scrollable size (scroll
+/// extent) before the [SliverEnsureSemantics] widget. This inaccuracy can cause problems for assistive
+/// technologies (e.g., screen readers), which rely on a correct scroll extent to navigate properly; they
+/// might fail to scroll accurately to the content wrapped by [SliverEnsureSemantics].
+///
+/// To avoid this potential issue and ensure the scroll extent is calculated accurately up to this sliver,
+/// it's recommended to use slivers that can determine their extent precisely beforehand. Instead of
+/// [SliverList], consider using [SliverFixedExtentList], [SliverVariedExtentList], or
+/// [SliverPrototypeExtentList]. If using [SliverGrid], ensure it employs a delegate such as
+/// [SliverGridDelegateWithFixedCrossAxisCount] or [SliverGridDelegateWithMaxCrossAxisExtent].
+/// Using these alternatives guarantees that the scrollable area's size is known accurately, allowing
+/// assistive technologies to function correctly with [SliverEnsureSemantics].
 ///
 /// {@tool dartpad}
 /// This example shows how to use [SliverEnsureSemantics] to keep certain headers and lists
