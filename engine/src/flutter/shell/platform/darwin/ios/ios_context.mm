@@ -21,7 +21,8 @@ IOSContext::~IOSContext() = default;
 std::unique_ptr<IOSContext> IOSContext::Create(
     IOSRenderingAPI api,
     IOSRenderingBackend backend,
-    const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
+    const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch,
+    const Settings& settings) {
   switch (api) {
     case IOSRenderingAPI::kSoftware:
       FML_LOG(IMPORTANT)
@@ -37,7 +38,7 @@ std::unique_ptr<IOSContext> IOSContext::Create(
           FML_LOG(FATAL) << "Impeller opt-out unavailable.";
           return nullptr;
         case IOSRenderingBackend::kImpeller:
-          return std::make_unique<IOSContextMetalImpeller>(is_gpu_disabled_sync_switch);
+          return std::make_unique<IOSContextMetalImpeller>(settings, is_gpu_disabled_sync_switch);
       }
     default:
       break;

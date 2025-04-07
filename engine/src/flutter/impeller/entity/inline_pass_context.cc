@@ -13,7 +13,7 @@
 #include "impeller/entity/entity_pass_target.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
-#include "impeller/renderer/texture_mipmap.h"
+#include "impeller/renderer/texture_util.h"
 
 namespace impeller {
 

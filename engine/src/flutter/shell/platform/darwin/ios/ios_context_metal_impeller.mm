@@ -12,11 +12,20 @@
 FLUTTER_ASSERT_ARC
 
 namespace flutter {
+namespace {
+impeller::Flags SettingsToFlags(const Settings& settings) {
+  return impeller::Flags{
+      .antialiased_lines = settings.impeller_antialiased_lines,
+  };
+}
+}  // namespace
 
 IOSContextMetalImpeller::IOSContextMetalImpeller(
+    const Settings& settings,
     const std::shared_ptr<const fml::SyncSwitch>& is_gpu_disabled_sync_switch)
-    : darwin_context_metal_impeller_(
-          [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch]) {
+    : darwin_context_metal_impeller_([[FlutterDarwinContextMetalImpeller alloc]
+                           init:SettingsToFlags(settings)
+          gpuDisabledSyncSwitch:is_gpu_disabled_sync_switch]) {
   if (darwin_context_metal_impeller_.context) {
     aiks_context_ = std::make_shared<impeller::AiksContext>(
         darwin_context_metal_impeller_.context, impeller::TypographerContextSkia::Make());

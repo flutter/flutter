@@ -67,7 +67,7 @@ constexpr static int64_t kImplicitViewId = 0;
 class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
  public:
   explicit FakeSurfaceProducerSurface(
-      fidl::InterfaceRequest<fuchsia::sysmem::BufferCollectionToken>
+      fidl::InterfaceRequest<fuchsia::sysmem2::BufferCollectionToken>
           sysmem_token_request,
       fuchsia::ui::composition::BufferCollectionImportToken buffer_import_token,
       const SkISize& size)
@@ -124,7 +124,7 @@ class FakeSurfaceProducerSurface : public SurfaceProducerSurface {
       const std::function<void(void)>& on_writes_committed) override {}
 
  private:
-  fidl::InterfaceRequest<fuchsia::sysmem::BufferCollectionToken>
+  fidl::InterfaceRequest<fuchsia::sysmem2::BufferCollectionToken>
       sysmem_token_request_;
   fuchsia::ui::composition::BufferCollectionImportToken buffer_import_token_;
   zx::event acquire_fence_;
@@ -155,13 +155,14 @@ class FakeSurfaceProducer : public SurfaceProducer {
       const SkISize& size) override {
     auto [buffer_export_token, buffer_import_token] =
         BufferCollectionTokenPair::New();
-    fuchsia::sysmem::BufferCollectionTokenHandle sysmem_token;
+    fuchsia::sysmem2::BufferCollectionTokenHandle sysmem_token;
     auto sysmem_token_request = sysmem_token.NewRequest();
 
     fuchsia::ui::composition::RegisterBufferCollectionArgs
         buffer_collection_args;
     buffer_collection_args.set_export_token(std::move(buffer_export_token));
-    buffer_collection_args.set_buffer_collection_token(std::move(sysmem_token));
+    buffer_collection_args.set_buffer_collection_token2(
+        std::move(sysmem_token));
     buffer_collection_args.set_usage(
         fuchsia::ui::composition::RegisterBufferCollectionUsage::DEFAULT);
     flatland_allocator_->RegisterBufferCollection(

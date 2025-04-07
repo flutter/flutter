@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'dart:ui' show Color, lerpDouble;
+import 'dart:ui' show Color, SystemColor, SystemColorPalette, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -32,8 +32,10 @@ import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'drawer_theme.dart';
 import 'dropdown_menu_theme.dart';
+import 'elevated_button.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
+import 'filled_button.dart';
 import 'filled_button_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'icon_button_theme.dart';
@@ -50,6 +52,7 @@ import 'menu_theme.dart';
 import 'navigation_bar_theme.dart';
 import 'navigation_drawer_theme.dart';
 import 'navigation_rail_theme.dart';
+import 'outlined_button.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
@@ -63,6 +66,7 @@ import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'switch_theme.dart';
 import 'tab_bar_theme.dart';
+import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'text_selection_theme.dart';
 import 'text_theme.dart';
@@ -246,6 +250,11 @@ class ThemeData with Diagnosticable {
   /// a component theme parameter like [sliderTheme], [toggleButtonsTheme],
   /// or [bottomNavigationBarTheme].
   ///
+  /// When [useSystemColors] is true and the platform supports system colors, then the system colors
+  /// will be used to override certain theme colors. The [colorScheme], [textTheme],
+  /// [elevatedButtonTheme], [outlinedButtonTheme], [textButtonTheme], [filledButtonTheme], and
+  /// [floatingActionButtonTheme] are overriden by the system colors.
+  ///
   /// See also:
   ///
   ///  * [ThemeData.from], which creates a ThemeData from a [ColorScheme].
@@ -270,6 +279,7 @@ class ThemeData with Diagnosticable {
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     bool? useMaterial3,
+    bool? useSystemColors,
     VisualDensity? visualDensity,
     // COLOR
     ColorScheme? colorScheme,
@@ -387,6 +397,7 @@ class ThemeData with Diagnosticable {
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
     useMaterial3 ??= true;
+    useSystemColors ??= false;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??=
         useMaterial3
@@ -557,7 +568,8 @@ class ThemeData with Diagnosticable {
     buttonBarTheme ??= const ButtonBarThemeData();
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
     indicatorColor ??= colorScheme.secondary == primaryColor ? Colors.white : colorScheme.secondary;
-    return ThemeData.raw(
+
+    ThemeData theme = ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
@@ -651,6 +663,11 @@ class ThemeData with Diagnosticable {
       dialogBackgroundColor: dialogBackgroundColor,
       indicatorColor: indicatorColor,
     );
+
+    if (useSystemColors) {
+      theme = theme._overrideWithSystemColors();
+    }
+    return theme;
   }
 
   /// Create a [ThemeData] given a set of exact values. Most values must be
@@ -1761,6 +1778,115 @@ class ThemeData with Diagnosticable {
       for (final ThemeExtension<dynamic> extension in extensionsIterable)
         extension.type: extension as ThemeExtension<ThemeExtension<dynamic>>,
     });
+  }
+
+  ThemeData _overrideWithSystemColors() {
+    if (!SystemColor.platformProvidesSystemColors) {
+      return this;
+    }
+
+    final SystemColorPalette systemColors =
+        brightness == Brightness.dark ? SystemColor.dark : SystemColor.light;
+
+    ThemeData theme = this;
+
+    theme = theme.copyWith(
+      colorScheme: colorScheme.copyWith(
+        secondary: systemColors.accentColor.value,
+        onSecondary: systemColors.accentColorText.value,
+        surface: systemColors.canvas.value,
+        onSurface: systemColors.canvasText.value,
+      ),
+      textTheme: textTheme.apply(
+        displayColor: systemColors.canvasText.value,
+        bodyColor: systemColors.canvasText.value,
+      ),
+    );
+
+    final bool overrideButtons =
+        systemColors.buttonFace.value != null ||
+        systemColors.buttonBorder.value != null ||
+        systemColors.buttonText.value != null;
+
+    if (overrideButtons) {
+      theme = theme.copyWith(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: systemColors.buttonText.value,
+            backgroundColor: systemColors.buttonFace.value,
+            side:
+                systemColors.buttonBorder.value == null
+                    ? null
+                    : BorderSide(color: systemColors.buttonBorder.value!),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: systemColors.buttonText.value,
+            backgroundColor: systemColors.buttonFace.value,
+            side:
+                systemColors.buttonBorder.value == null
+                    ? null
+                    : BorderSide(color: systemColors.buttonBorder.value!),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: systemColors.buttonText.value,
+            backgroundColor: systemColors.buttonFace.value,
+            side:
+                systemColors.buttonBorder.value == null
+                    ? null
+                    : BorderSide(color: systemColors.buttonBorder.value!),
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            foregroundColor: systemColors.buttonText.value,
+            backgroundColor: systemColors.buttonFace.value,
+            side:
+                systemColors.buttonBorder.value == null
+                    ? null
+                    : BorderSide(color: systemColors.buttonBorder.value!),
+          ),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: systemColors.buttonFace.value,
+          foregroundColor: systemColors.buttonText.value,
+        ),
+      );
+    }
+
+    final bool overrideInputDecoration =
+        systemColors.field.value != null || systemColors.fieldText.value != null;
+
+    if (overrideInputDecoration) {
+      theme = theme.copyWith(
+        inputDecorationTheme: inputDecorationTheme.copyWith(
+          fillColor: systemColors.field.value,
+          labelStyle:
+              inputDecorationTheme.labelStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          hintStyle:
+              inputDecorationTheme.hintStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          helperStyle:
+              inputDecorationTheme.helperStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          prefixStyle:
+              inputDecorationTheme.prefixStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          suffixStyle:
+              inputDecorationTheme.suffixStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          counterStyle:
+              inputDecorationTheme.counterStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+        ),
+      );
+    }
+
+    return theme;
   }
 
   /// Linearly interpolate between two themes.

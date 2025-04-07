@@ -3900,7 +3900,6 @@ TEST_F(DisplayListRendering, DrawTextBlob) {
       // ~12 on top and ~8 on the bottom, so we add 33h & 13v allowed
       // padding to the tolerance
       CanvasCompareTester::DefaultTolerance.addBoundsPadding(33, 13));
-  EXPECT_TRUE(blob->unique());
 #endif  // OS_FUCHSIA
 }
 

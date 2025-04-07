@@ -40,7 +40,8 @@ ShellTestPlatformViewMetal::ShellTestPlatformViewMetal(
   id<MTLDevice> device = nil;
   if (GetSettings().enable_impeller) {
     impeller_context_ =
-        [[FlutterDarwinContextMetalImpeller alloc] init:is_gpu_disabled_sync_switch];
+        [[FlutterDarwinContextMetalImpeller alloc] init:impeller::Flags {}
+                                  gpuDisabledSyncSwitch:is_gpu_disabled_sync_switch];
     FML_CHECK(impeller_context_.context);
     device = impeller_context_.context->GetMTLDevice();
   } else {

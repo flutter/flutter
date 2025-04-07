@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/project.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
@@ -280,6 +282,64 @@ void main() {
       fizzSource.accept(visitor);
 
       expect(visitor.sources.single.path, contains('engine.stamp'));
+    }),
+  );
+
+  test(
+    'can substitute project file',
+    () => testbed.run(() {
+      final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
+      globals.fs.file(path).createSync(recursive: true);
+      final Source pluginsSource = Source.fromProject(
+        (FlutterProject project) => project.flutterPluginsDependenciesFile,
+      );
+      pluginsSource.accept(visitor);
+
+      expect(visitor.sources.single.absolute.path, path);
+      expect(visitor.sources.single, exists);
+    }),
+  );
+
+  test(
+    'can substitute nonexistent project file',
+    () => testbed.run(() {
+      final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
+      final Source pluginsSource = Source.fromProject(
+        (FlutterProject project) => project.flutterPluginsDependenciesFile,
+      );
+      pluginsSource.accept(visitor);
+
+      expect(visitor.sources.single.absolute.path, path);
+      expect(visitor.sources.single, isNot(exists));
+    }),
+  );
+
+  test(
+    'can substitute optional project file',
+    () => testbed.run(() {
+      final String path = globals.fs.file('.flutter-plugins-dependencies').absolute.path;
+      globals.fs.file(path).createSync(recursive: true);
+      final Source pluginsSource = Source.fromProject(
+        (FlutterProject project) => project.flutterPluginsDependenciesFile,
+        optional: true,
+      );
+      pluginsSource.accept(visitor);
+
+      expect(visitor.sources.single.absolute.path, path);
+      expect(visitor.sources.single, exists);
+    }),
+  );
+
+  test(
+    'skips nonexistent optional project file',
+    () => testbed.run(() {
+      final Source pluginsSource = Source.fromProject(
+        (FlutterProject project) => project.flutterPluginsDependenciesFile,
+        optional: true,
+      );
+      pluginsSource.accept(visitor);
+
+      expect(visitor.sources.isEmpty, isTrue);
     }),
   );
 }

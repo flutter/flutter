@@ -179,7 +179,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         'An error occurred when adding Swift Package Manager integration:\n'
         '  $e\n\n'
         'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-        '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n'
+        '  https://github.com/flutter/flutter/issues/new?template=01_activation.yml \n'
         'Consider including a copy of the following files in your bug report:\n'
         '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'
         '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '

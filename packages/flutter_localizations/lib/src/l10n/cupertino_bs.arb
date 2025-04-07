@@ -33,6 +33,6 @@
   "lookUpButtonLabel": "Pogled nagore",
   "searchWebButtonLabel": "Pretraži Web",
   "shareButtonLabel": "Dijeli...",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Otkaži",
+  "backButtonLabel": "Nazad"
 }

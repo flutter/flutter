@@ -9,6 +9,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -1536,6 +1537,9 @@ class SearchBar extends StatefulWidget {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
     return AdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
@@ -1695,36 +1699,39 @@ class _SearchBarState extends State<SearchBar> {
                     Expanded(
                       child: Padding(
                         padding: effectivePadding,
-                        child: TextField(
-                          autofocus: widget.autoFocus,
-                          onTap: widget.onTap,
-                          onTapAlwaysCalled: true,
-                          onTapOutside: widget.onTapOutside,
-                          focusNode: _focusNode,
-                          onChanged: widget.onChanged,
-                          onSubmitted: widget.onSubmitted,
-                          controller: widget.controller,
-                          style: effectiveTextStyle,
-                          enabled: widget.enabled,
-                          decoration: InputDecoration(hintText: widget.hintText).applyDefaults(
-                            InputDecorationTheme(
-                              hintStyle: effectiveHintStyle,
-                              // The configuration below is to make sure that the text field
-                              // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
-                              enabledBorder: InputBorder.none,
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              // Setting `isDense` to true to allow the text field height to be
-                              // smaller than 48.0
-                              isDense: true,
+                        child: Semantics(
+                          inputType: SemanticsInputType.search,
+                          child: TextField(
+                            autofocus: widget.autoFocus,
+                            onTap: widget.onTap,
+                            onTapAlwaysCalled: true,
+                            onTapOutside: widget.onTapOutside,
+                            focusNode: _focusNode,
+                            onChanged: widget.onChanged,
+                            onSubmitted: widget.onSubmitted,
+                            controller: widget.controller,
+                            style: effectiveTextStyle,
+                            enabled: widget.enabled,
+                            decoration: InputDecoration(hintText: widget.hintText).applyDefaults(
+                              InputDecorationTheme(
+                                hintStyle: effectiveHintStyle,
+                                // The configuration below is to make sure that the text field
+                                // in `SearchBar` will not be overridden by the overall `InputDecorationTheme`
+                                enabledBorder: InputBorder.none,
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                contentPadding: EdgeInsets.zero,
+                                // Setting `isDense` to true to allow the text field height to be
+                                // smaller than 48.0
+                                isDense: true,
+                              ),
                             ),
+                            textCapitalization: effectiveTextCapitalization,
+                            textInputAction: widget.textInputAction,
+                            keyboardType: widget.keyboardType,
+                            scrollPadding: widget.scrollPadding,
+                            contextMenuBuilder: widget.contextMenuBuilder,
                           ),
-                          textCapitalization: effectiveTextCapitalization,
-                          textInputAction: widget.textInputAction,
-                          keyboardType: widget.keyboardType,
-                          scrollPadding: widget.scrollPadding,
-                          contextMenuBuilder: widget.contextMenuBuilder,
                         ),
                       ),
                     ),

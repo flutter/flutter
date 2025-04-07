@@ -46,10 +46,12 @@ class SemanticsAction {
   static const int _kSetTextIndex = 1 << 21;
   static const int _kFocusIndex = 1 << 22;
   static const int _kScrollToOffsetIndex = 1 << 23;
-  // READ THIS: if you add an action here, you MUST update the
-  // numSemanticsActions value in testing/dart/semantics_test.dart and
-  // lib/web_ui/test/engine/semantics/semantics_api_test.dart, or tests
-  // will fail.
+  // READ THIS:
+  // - The maximum supported bit index on the web (in JS mode) is 1 << 31.
+  // - If you add an action here, you MUST update the numSemanticsActions value
+  //   in testing/dart/semantics_test.dart and
+  //   lib/web_ui/test/engine/semantics/semantics_api_test.dart, or tests will
+  //   fail.
 
   /// The equivalent of a user briefly tapping the screen with the finger
   /// without moving it.
@@ -504,6 +506,29 @@ enum SemanticsRole {
   alert,
 }
 
+/// Describe the type of data for an input field.
+///
+/// This is typically used to complement text fields.
+enum SemanticsInputType {
+  /// The default for non text field.
+  none,
+
+  /// Describes a generic text field.
+  text,
+
+  /// Describes a url text field.
+  url,
+
+  /// Describes a text field for phone input.
+  phone,
+
+  /// Describes a text field that act as a search box.
+  search,
+
+  /// Describes a text field for email input.
+  email,
+}
+
 /// A Boolean value that can be associated with a semantics node.
 //
 // When changes are made to this class, the equivalent APIs in
@@ -555,6 +580,7 @@ class SemanticsFlag {
   static const int _kIsRequiredIndex = 1 << 30;
   // READ THIS: if you add a flag here, you MUST update the following:
   //
+  // - The maximum supported bit index on the web (in JS mode) is 1 << 31.
   // - Add an appropriately named and documented `static const SemanticsFlag`
   //   field to this class.
   // - Add the new flag to `_kFlagById` in this file.
@@ -936,6 +962,30 @@ class SemanticsFlag {
   String toString() => 'SemanticsFlag.$name';
 }
 
+/// The validation result of a form field.
+///
+/// The type, shape, and correctness of the value is specific to the kind of
+/// form field used. For example, a phone number text field may check that the
+/// value is a properly formatted phone number, and/or that the phone number has
+/// the right area code. A group of radio buttons may validate that the user
+/// selected at least one radio option.
+enum SemanticsValidationResult {
+  /// The node has no validation information attached to it.
+  ///
+  /// This is the default value. Most semantics nodes do not contain validation
+  /// information. Typically, only nodes that are part of an input form - text
+  /// fields, checkboxes, radio buttons, dropdowns - are validated and attach
+  /// validation results to their corresponding semantics nodes.
+  none,
+
+  /// The entered value is valid, and no error should be displayed to the user.
+  valid,
+
+  /// The entered value is invalid, and an error message should be communicated
+  /// to the user.
+  invalid,
+}
+
 // When adding a new StringAttribute, the classes in these files must be
 // updated as well.
 //  * engine/src/flutter/lib/web_ui/lib/semantics.dart
@@ -1154,10 +1204,18 @@ abstract class SemanticsUpdateBuilder {
   /// The `role` describes the role of this node. Defaults to
   /// [SemanticsRole.none] if not set.
   ///
+  /// If `validationResult` is not null, indicates the result of validating a
+  /// form field. If null, indicates that the node is not being validated, or
+  /// that the result is unknown. Form fields that validate user input but do
+  /// not use this argument should use other ways to communicate validation
+  /// errors to the user, such as embedding validation error text in the label.
+  ///
   /// See also:
   ///
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/heading_role
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-level
+  ///  * [SemanticsValidationResult], that describes possible values for the
+  ///    `validationResult` argument.
   void updateNode({
     required int id,
     required int flags,
@@ -1196,6 +1254,8 @@ abstract class SemanticsUpdateBuilder {
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
+    SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    required SemanticsInputType inputType,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1273,6 +1333,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
+    SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    required SemanticsInputType inputType,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1320,6 +1382,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       linkUrl,
       role.index,
       controlsNodes,
+      validationResult.index,
+      inputType.index,
     );
   }
 
@@ -1366,6 +1430,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Handle,
       Int32,
       Handle,
+      Int32,
+      Int32,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
@@ -1409,6 +1475,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     String linkUrl,
     int role,
     List<String>? controlsNodes,
+    int validationResultIndex,
+    int inputType,
   );
 
   @override

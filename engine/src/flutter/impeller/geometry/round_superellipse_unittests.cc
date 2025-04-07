@@ -549,7 +549,8 @@ TEST(RoundSuperellipseTest, ContractAndRequireRadiiAdjustment) {
 
 TEST(RoundSuperellipseTest, NoCornerRoundSuperellipseContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
-  // RRect of bounds with no corners contains corners just barely
+  // Rounded superellipses of bounds with no corners contains corners just
+  // barely.
   auto no_corners = RoundSuperellipse::MakeRectRadii(
       bounds, RoundingRadii::MakeRadii({0.0f, 0.0f}));
 
@@ -571,7 +572,8 @@ TEST(RoundSuperellipseTest, NoCornerRoundSuperellipseContains) {
 
 TEST(RoundSuperellipseTest, TinyCornerContains) {
   Rect bounds = Rect::MakeLTRB(-50.0f, -50.0f, 50.0f, 50.0f);
-  // RRect of bounds with even the tiniest corners does not contain corners
+  // Rounded superellipses of bounds with even the tiniest corners does not
+  // contain corners.
   auto tiny_corners = RoundSuperellipse::MakeRectRadii(
       bounds, RoundingRadii::MakeRadii({0.01f, 0.01f}));
 
