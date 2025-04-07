@@ -1,6 +1,6 @@
 name: widget_preview_scaffold
 description: Scaffolding for Flutter Widget Previews
-publish_to: 'none'
+publish_to: "none"
 version: 0.0.1
 
 environment:

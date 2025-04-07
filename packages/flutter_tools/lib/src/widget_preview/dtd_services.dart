@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dtd/dtd.dart';
-import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:process/process.dart';
 
 import '../artifacts.dart';
@@ -21,15 +20,18 @@ class WidgetPreviewDtdServices {
     required this.logger,
     required this.shutdownHooks,
     required this.dtdLauncher,
-  });
-
-  static const String _kWidgetPreviewService = 'widget_preview';
+  }) {
+    shutdownHooks.addShutdownHook(() async {
+      await _dtd?.close();
+      await dtdLauncher.dispose();
+    });
+  }
 
   final Logger logger;
   final ShutdownHooks shutdownHooks;
   final DtdLauncher dtdLauncher;
 
-  late final DartToolingDaemon _dtd;
+  DartToolingDaemon? _dtd;
 
   /// The [Uri] pointing to the currently connected DTD instance.
   ///
@@ -40,9 +42,6 @@ class WidgetPreviewDtdServices {
   /// Starts DTD in a child process before invoking [connect] with a [Uri] pointing to the new
   /// DTD instance.
   Future<void> launchAndConnect() async {
-    shutdownHooks.addShutdownHook(() async {
-      await dtdLauncher.dispose();
-    });
     // Connect to the new DTD instance.
     await connect(dtdWsUri: await dtdLauncher.launch());
   }
@@ -51,13 +50,8 @@ class WidgetPreviewDtdServices {
   Future<void> connect({required Uri dtdWsUri}) async {
     _dtdUri = dtdWsUri;
     _dtd = await DartToolingDaemon.connect(dtdWsUri);
-    await Future.wait(<Future<void>>[_dtd.registerService(_kWidgetPreviewService, 'ping', _ping)]);
+    // TODO(bkonyi): register services.
     logger.printTrace('Connected to DTD and registered services.');
-  }
-
-  Future<Map<String, Object?>> _ping(Parameters params) async {
-    print('ping!');
-    return const StringResponse('pong').toJson();
   }
 }
 
@@ -93,6 +87,7 @@ class DtdLauncher {
     return dtdUri.future;
   }
 
+  /// Kills the spawned DTD instance.
   Future<void> dispose() async {
     _dtdProcess?.kill();
     _dtdProcess = null;
