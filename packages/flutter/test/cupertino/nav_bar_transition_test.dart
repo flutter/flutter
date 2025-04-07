@@ -1112,7 +1112,7 @@ void main() {
   });
 
   testWidgets(
-    'Bottom CupertinoSliverNavigationBar.bottom clips its contents mid-transition',
+    'CupertinoSliverNavigationBar.bottom clips its contents mid-transition when scrolled',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
