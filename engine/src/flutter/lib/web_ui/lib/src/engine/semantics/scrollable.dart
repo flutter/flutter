@@ -191,7 +191,7 @@ class SemanticScrollable extends SemanticRole {
       final double? scrollExtentMin = semanticsObject.scrollExtentMin;
       assert(scrollExtentMax != null);
       assert(scrollExtentMin != null);
-      final double scrollExtentTotal = scrollExtentMax! - scrollExtentMin! + rect.height.round();
+      final double scrollExtentTotal = scrollExtentMax! - scrollExtentMin! + rect.height;
       _scrollOverflowElement.style
         ..width = '0px'
         ..height = '${scrollExtentTotal}px';
@@ -206,7 +206,7 @@ class SemanticScrollable extends SemanticRole {
       final double? scrollExtentMin = semanticsObject.scrollExtentMin;
       assert(scrollExtentMax != null);
       assert(scrollExtentMin != null);
-      final double scrollExtentTotal = scrollExtentMax! - scrollExtentMin! + rect.width.round();
+      final double scrollExtentTotal = scrollExtentMax! - scrollExtentMin! + rect.width;
       _scrollOverflowElement.style
         ..width = '${scrollExtentTotal}px'
         ..height = '0px';
