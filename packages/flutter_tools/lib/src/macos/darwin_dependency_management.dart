@@ -24,6 +24,7 @@ class DarwinDependencyManagement {
     required CocoaPods cocoapods,
     required SwiftPackageManager swiftPackageManager,
     required FileSystem fileSystem,
+    required FeatureFlags featureFlags,
     required Logger logger,
     required Analytics analytics,
   }) : _project = project,
@@ -31,6 +32,7 @@ class DarwinDependencyManagement {
        _cocoapods = cocoapods,
        _swiftPackageManager = swiftPackageManager,
        _fileSystem = fileSystem,
+       _featureFlags = featureFlags,
        _logger = logger,
        _analytics = analytics;
 
@@ -39,6 +41,7 @@ class DarwinDependencyManagement {
   final CocoaPods _cocoapods;
   final SwiftPackageManager _swiftPackageManager;
   final FileSystem _fileSystem;
+  final FeatureFlags _featureFlags;
   final Logger _logger;
   final Analytics _analytics;
 
@@ -94,12 +97,14 @@ class DarwinDependencyManagement {
       useCocoapods = _plugins.isNotEmpty;
     }
 
-    final Event event = Event.flutterSwiftPackageManager(
+    final Event event = Event.flutterInjectDarwinPlugins(
       platform: platform.name,
+      isModule: _project.isModule,
       swiftPackageManagerUsed: xcodeProject.usesSwiftPackageManager,
-      swiftPackageManagerFeatureEnabled: featureFlags.isSwiftPackageManagerEnabled,
+      swiftPackageManagerFeatureEnabled: _featureFlags.isSwiftPackageManagerEnabled,
       projectDisabledSwiftPackageManager: _project.manifest.disabledSwiftPackageManager,
-      projectHasSwiftPackageManagerIntegration: xcodeProject.flutterPluginSwiftPackageInProjectSettings,
+      projectHasSwiftPackageManagerIntegration:
+          xcodeProject.flutterPluginSwiftPackageInProjectSettings,
       pluginCount: totalCount,
       swiftPackageCount: swiftPackageCount,
       podCount: podCount,
