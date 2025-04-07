@@ -190,12 +190,12 @@ void main() {
     );
 
     const String samplePreviewFile = '''
-@Preview()
-WidgetPreview preview() => const WidgetPreview(child: Text('Foo'));''';
+@Preview(name: 'preview')
+Widget preview() => Text('Foo');''';
 
     const String expectedGeneratedFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:flutter_project/foo.dart' as _i1;import 'package:flutter/widgets.dart';List<WidgetPreview> previews() => [_i1.preview()];''';
+import 'widget_preview.dart' as _i1;import 'package:flutter_project/foo.dart' as _i2;List<_i1.WidgetPreview> previews() => [_i1.WidgetPreview(name: 'preview', builder: () => _i2.preview(), )];''';
 
     testUsingContext(
       'start finds existing previews and injects them into ${PreviewCodeGenerator.generatedPreviewFilePath}',

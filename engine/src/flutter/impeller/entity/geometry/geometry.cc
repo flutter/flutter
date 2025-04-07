@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"

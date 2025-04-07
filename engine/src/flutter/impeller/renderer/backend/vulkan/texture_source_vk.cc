@@ -19,13 +19,11 @@ std::shared_ptr<YUVConversionVK> TextureSourceVK::GetYUVConversion() const {
 }
 
 vk::ImageLayout TextureSourceVK::GetLayout() const {
-  ReaderLock lock(layout_mutex_);
   return layout_;
 }
 
 vk::ImageLayout TextureSourceVK::SetLayoutWithoutEncoding(
     vk::ImageLayout layout) const {
-  WriterLock lock(layout_mutex_);
   const auto old_layout = layout_;
   layout_ = layout;
   return old_layout;
@@ -33,10 +31,6 @@ vk::ImageLayout TextureSourceVK::SetLayoutWithoutEncoding(
 
 fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   const auto old_layout = SetLayoutWithoutEncoding(barrier.new_layout);
-  if (barrier.new_layout == old_layout) {
-    return {};
-  }
-
   vk::ImageMemoryBarrier image_barrier;
   image_barrier.srcAccessMask = barrier.src_access;
   image_barrier.dstAccessMask = barrier.dst_access;
