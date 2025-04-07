@@ -197,13 +197,13 @@ class SemanticScrollable extends SemanticRole {
     if (semanticsObject.isVerticalScrollContainer) {
       _scrollOverflowElement.style
         ..width = '0px'
-        ..height = '${scrollExtentTotal}px';
+        ..height = '${scrollExtentTotal.toStringAsFixed(1)}px';
       semanticsObject
         ..verticalScrollAdjustment = element.scrollTop
         ..horizontalScrollAdjustment = 0.0;
     } else if (semanticsObject.isHorizontalScrollContainer) {
       _scrollOverflowElement.style
-        ..width = '${scrollExtentTotal}px'
+        ..width = '${scrollExtentTotal.toStringAsFixed(1)}px'
         ..height = '0px';
       semanticsObject
         ..verticalScrollAdjustment = 0.0
