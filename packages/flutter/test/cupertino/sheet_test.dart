@@ -4,6 +4,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -1211,5 +1212,39 @@ void main() {
       expect(finalPosition, equals(middlePosition));
       expect(finalPosition, equals(initialPosition));
     });
+  });
+
+  testWidgets('CupertinoSheetTransition handles SystemUiOverlayStyle changes', (
+    WidgetTester tester,
+  ) async {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
+    final Animation<double> secondaryAnimation = Tween<double>(
+      begin: 1,
+      end: 0,
+    ).animate(controller);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: AnimatedBuilder(
+          animation: controller,
+          builder: (BuildContext context, Widget? child) {
+            return CupertinoSheetTransition(
+              primaryRouteAnimation: controller,
+              secondaryRouteAnimation: secondaryAnimation,
+              linearTransition: false,
+              child: const SizedBox(),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.light);
   });
 }
