@@ -30,10 +30,10 @@ void main() {
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
-    testFileSystem = MemoryFileSystem();
+    testFileSystem = MemoryFileSystem.test();
     testLogger = BufferLogger.test();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
-      fs: MemoryFileSystem.test(),
+      fs: testFileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
     );
   });
