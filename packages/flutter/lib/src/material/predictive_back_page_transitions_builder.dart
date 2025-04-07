@@ -559,10 +559,14 @@ class _PredictiveBackPageSharedElementTransitionState
   static const double borderRadius = 32.0;
   static const double extraShiftDistance = 0.1;
 
+  // Eyeballed on a Pixel 9 running Android 16.
+  static const Duration _kDuration = Duration(milliseconds: 200);
+
   @override
   void initState() {
     super.initState();
     commitController = AnimationController(
+      // TODO(justinmc): What is this duration? Pull out and write a comment about where it comes from.
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
@@ -580,7 +584,7 @@ class _PredictiveBackPageSharedElementTransitionState
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       final int droppedPageBackAnimationTime =
-          ui.lerpDouble(0, 800, widget.animation.value)!.floor();
+          ui.lerpDouble(0, 200, widget.animation.value)!.floor();
 
       commitController.duration = Duration(milliseconds: droppedPageBackAnimationTime);
       commitController.forward(from: 0.0);
@@ -612,6 +616,7 @@ class _PredictiveBackPageSharedElementTransitionState
     ).animate(widget.animation).value;
   }
 
+  // TODO(justinmc): Change "calc"" names to "get".
   double _calcCommitXShift() {
     final double screenWidth = MediaQuery.of(context).size.width;
     /*
@@ -657,17 +662,6 @@ class _PredictiveBackPageSharedElementTransitionState
     return Tween<double>(begin: scalePercentage, end: 1.0).animate(widget.animation).value;
   }
 
-  double calcCommitScale() {
-    return Tween<double>(begin: 0.0, end: extraShiftDistance)
-        .animate(
-          CurvedAnimation(
-            parent: commitController,
-            curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
-          ),
-        )
-        .value;
-  }
-
   double calcOpacity() {
     if (widget.isDelegatedTransition) {
       return 0.7;
@@ -680,16 +674,18 @@ class _PredictiveBackPageSharedElementTransitionState
   }
 
   Widget _animatedBuilder(BuildContext context, Widget? child) {
-    final double xShift =
-        widget.phase == _PredictiveBackPhase.commit
-            ? this.xShift + _calcCommitXShift()
-            : this.xShift = _calcXShift();
-    final double yShift =
-        widget.phase == _PredictiveBackPhase.commit ? this.yShift : this.yShift = calcYShift();
-    final double scale =
-        widget.phase == _PredictiveBackPhase.commit
-            ? this.scale - calcCommitScale()
-            : this.scale = calcScale();
+    final double xShift = switch (widget.phase) {
+      _PredictiveBackPhase.commit => this.xShift + _calcCommitXShift(),
+      _ => this.xShift = _calcXShift(),
+    };
+    final double yShift = switch (widget.phase) {
+      _PredictiveBackPhase.commit => this.yShift,
+      _ => this.yShift = calcYShift(),
+    };
+    final double scale = switch (widget.phase) {
+      _PredictiveBackPhase.commit => this.scale,
+      _ => this.scale = calcScale(),
+    };
 
     final double opacity = calcOpacity();
 
