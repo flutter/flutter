@@ -216,6 +216,7 @@ Widget _wrapWithBackground({
   required Color backgroundColor,
   Brightness? brightness,
   required Widget child,
+  Color? destinationBackgroundColor,
   bool updateSystemUiOverlay = true,
   bool enableBackgroundFilterBlur = true,
 }) {
@@ -249,12 +250,34 @@ Widget _wrapWithBackground({
     child: result,
   );
 
+  final bool enabledBlur = backgroundColor.alpha != 0xFF && enableBackgroundFilterBlur;
+  final Color destinationColor =
+      destinationBackgroundColor != null && destinationBackgroundColor.alpha != 0X00
+          ? destinationBackgroundColor
+          : backgroundColor;
+
   return ClipRect(
-    child: BackdropFilter(
-      blendMode: BlendMode.srcATop,
-      enabled: backgroundColor.alpha != 0xFF && enableBackgroundFilterBlur,
-      filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-      child: childWithBackground,
+    child: BackdropGroup(
+      child: Stack(
+        children: <Widget>[
+          // To ensure the srcATop has a layer to blend on, we add this layer below it.
+          // This keeps the navbar from disapearring if rendered over nothing.
+          if (enabledBlur)
+            Positioned.fill(
+              child: BackdropFilter.grouped(
+                blendMode: BlendMode.dstOver,
+                filter: ImageFilter.blur(),
+                child: ColoredBox(color: destinationColor),
+              ),
+            ),
+          BackdropFilter.grouped(
+            blendMode: BlendMode.srcATop,
+            enabled: enabledBlur,
+            filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+            child: childWithBackground,
+          ),
+        ],
+      ),
     ),
   );
 }
@@ -835,6 +858,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     navBar = _wrapWithBackground(
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
+      destinationBackgroundColor: backgroundColor,
       brightness: widget.brightness,
       enableBackgroundFilterBlur: widget.enableBackgroundFilterBlur,
       child: DefaultTextStyle(style: CupertinoTheme.of(context).textTheme.textStyle, child: navBar),
@@ -1525,6 +1549,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
     final Widget navBar = _wrapWithBackground(
       border: effectiveBorder,
       backgroundColor: effectiveBackgroundColor,
+      destinationBackgroundColor: backgroundColor,
       brightness: brightness,
       enableBackgroundFilterBlur: enableBackgroundFilterBlur,
       child: DefaultTextStyle(
@@ -2938,6 +2963,7 @@ class _NavigationBarComponentsTransition {
         // Don't update the system status bar color mid-flight.
         updateSystemUiOverlay: false,
         backgroundColor: bottomBackgroundColor!,
+        destinationBackgroundColor: bottomBackgroundColor,
         border: topBorder,
         child: SizedBox(height: bottomNavBarBox.size.height, width: double.infinity),
       ),
@@ -3197,6 +3223,7 @@ class _NavigationBarComponentsTransition {
         // Don't update the system status bar color mid-flight.
         updateSystemUiOverlay: false,
         backgroundColor: topBackgroundColor!,
+        destinationBackgroundColor: topBackgroundColor,
         border: topBorder,
         child: SizedBox(height: topNavBarBox.size.height, width: double.infinity),
       ),
