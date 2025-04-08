@@ -1385,7 +1385,55 @@ void main() {
     );
 
     testUsingContext(
-      'Catches "Service connection disposed" error',
+      'Catches "Service connection disposed" error by code',
+      () async {
+        final FakeAndroidDevice device =
+            FakeAndroidDevice(id: '1')
+              ..portForwarder = const NoOpDevicePortForwarder()
+              ..onGetLogReader = () => NoOpDeviceLogReader('test');
+        final FakeHotRunner hotRunner = FakeHotRunner();
+        final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()..hotRunner = hotRunner;
+        hotRunner.onAttach = (
+          Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          Completer<void>? appStartedCompleter,
+          bool allowExistingDdsInstance,
+          bool enableDevTools,
+        ) async {
+          await null;
+          throw vm_service.RPCError(
+            'flutter._listViews',
+            vm_service.RPCErrorKind.kConnectionDisposed.code,
+            'dummy text not matched',
+          );
+        };
+
+        testDeviceManager.devices = <Device>[device];
+        testFileSystem.file('lib/main.dart').createSync();
+
+        final AttachCommand command = AttachCommand(
+          hotRunnerFactory: hotRunnerFactory,
+          stdio: stdio,
+          logger: logger,
+          terminal: terminal,
+          signals: signals,
+          platform: platform,
+          processInfo: processInfo,
+          fileSystem: testFileSystem,
+        );
+        await expectLater(
+          createTestCommandRunner(command).run(<String>['attach']),
+          throwsToolExit(message: 'Lost connection to device.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => testFileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'Catches "Service connection disposed" error by text',
       () async {
         final FakeAndroidDevice device =
             FakeAndroidDevice(id: '1')
@@ -1939,6 +1987,7 @@ class FakeMDnsClient extends Fake implements MDnsClient {
     NetworkInterfacesFactory? interfacesFactory,
     int mDnsPort = 5353,
     InternetAddress? mDnsAddress,
+    Function? onError,
   }) async {
     if (osErrorOnStart) {
       throw const OSError('Operation not supported on socket', 102);

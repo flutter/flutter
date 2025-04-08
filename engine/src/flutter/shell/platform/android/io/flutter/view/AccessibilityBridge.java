@@ -303,6 +303,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         /** The Dart application would like the given {@code message} to be announced. */
         @Override
         public void announce(@NonNull String message) {
+          if (Build.VERSION.SDK_INT >= API_LEVELS.API_36) {
+            Log.w(
+                TAG,
+                "Using AnnounceSemanticsEvent for accessibility is deprecated on Android. "
+                    + "Migrate to using semantic properties for a more robust and accessible "
+                    + "user experience. See https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)");
+          }
           rootAccessibilityView.announceForAccessibility(message);
         }
 

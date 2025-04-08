@@ -190,9 +190,9 @@ static inline Scalar ConicSolve(Scalar t,
                                 Scalar p2,
                                 Scalar w) {
   auto u = (1 - t);
-  auto coefficient_p0 = t * t;
+  auto coefficient_p0 = u * u;
   auto coefficient_p1 = 2 * t * u * w;
-  auto coefficient_p2 = u * u;
+  auto coefficient_p2 = t * t;
 
   return ((p0 * coefficient_p0 + p1 * coefficient_p1 + p2 * coefficient_p2) /
           (coefficient_p0 + coefficient_p1 + coefficient_p2));
@@ -331,27 +331,36 @@ Point ConicPathComponent::Solve(Scalar time) const {
   };
 }
 
+void ConicPathComponent::ToLinearPathComponents(Scalar scale_factor,
+                                                const PointProc& proc) const {
+  Scalar line_count = std::ceilf(ComputeConicSubdivisions(scale_factor, *this));
+  for (size_t i = 1; i < line_count; i += 1) {
+    proc(Solve(i / line_count));
+  }
+  proc(p2);
+}
+
 void ConicPathComponent::AppendPolylinePoints(
     Scalar scale_factor,
     std::vector<Point>& points) const {
-  for (auto quad : ToQuadraticPathComponents()) {
-    quad.AppendPolylinePoints(scale_factor, points);
-  }
+  ToLinearPathComponents(scale_factor, [&points](const Point& point) {
+    if (point != points.back()) {
+      points.emplace_back(point);
+    }
+  });
 }
 
 void ConicPathComponent::ToLinearPathComponents(Scalar scale,
                                                 VertexWriter& writer) const {
-  for (auto quad : ToQuadraticPathComponents()) {
-    quad.ToLinearPathComponents(scale, writer);
+  Scalar line_count = std::ceilf(ComputeConicSubdivisions(scale, *this));
+  for (size_t i = 1; i < line_count; i += 1) {
+    writer.Write(Solve(i / line_count));
   }
+  writer.Write(p2);
 }
 
 size_t ConicPathComponent::CountLinearPathComponents(Scalar scale) const {
-  size_t count = 0;
-  for (auto quad : ToQuadraticPathComponents()) {
-    count += quad.CountLinearPathComponents(scale);
-  }
-  return count;
+  return std::ceilf(ComputeConicSubdivisions(scale, *this)) + 2;
 }
 
 std::vector<Point> ConicPathComponent::Extrema() const {

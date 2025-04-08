@@ -45,5 +45,14 @@ void main() {
         isNotNull,
       );
     });
+
+    test('Works with a relative directory', () {
+      final Directory child = fileSystem.currentDirectory.childDirectory('child');
+
+      child.createSync(recursive: true);
+      fileSystem.file('.dart_tool/package_config.json').createSync(recursive: true);
+      fileSystem.currentDirectory = child;
+      expect(findPackageConfigFile(fileSystem.directory('.')), isNotNull);
+    });
   });
 }
