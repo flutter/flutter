@@ -69,8 +69,8 @@ platform_properties:
       dependencies: >-
         [
           {"dependency": "android_sdk", "version": "version:35v1"},
-          {"dependency": "android_virtual_device", "version": "android_35_google_apis_x64.textpb"},
-          {"dependency": "avd_cipd_version", "version": "build_id:8723189955818532721"},
+          {"dependency": "android_virtual_device", "version": "android_36_google_apis_x64.textpb"},
+          {"dependency": "avd_cipd_version", "version": "build_id:8719362231152674241"},
           {"dependency": "open_jdk", "version": "version:21"}
         ]
       os: Ubuntu
@@ -393,6 +393,7 @@ targets:
       task_name: analyzer_benchmark
 
   - name: Linux coverage
+    bringup: true # https://github.com/flutter/flutter/issues/164591
     presubmit: false
     recipe: flutter/coverage
     timeout: 120
@@ -1578,6 +1579,28 @@ targets:
         ]
       shard: tool_tests
       subshard: general
+      tags: >
+        ["framework", "hostonly", "shard", "linux"]
+    runIf:
+      - dev/**
+      - packages/flutter_tools/**
+      - bin/**
+      - .ci.yaml
+      - engine/**
+      - DEPS
+
+  - name: Linux tool_tests_widget_preview_scaffold
+    recipe: flutter/flutter_drone
+    timeout: 60
+    properties:
+      add_recipes_cq: "true"
+      dependencies: >-
+        [
+          {"dependency": "android_sdk", "version": "version:35v1"},
+          {"dependency": "open_jdk", "version": "version:21"}
+        ]
+      shard: tool_tests
+      subshard: widget_preview_scaffold
       tags: >
         ["framework", "hostonly", "shard", "linux"]
     runIf:
@@ -3001,6 +3024,7 @@ targets:
 
   # linux mokey benchmark
   - name: Linux_mokey new_gallery__crane_perf
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/165963
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

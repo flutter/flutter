@@ -1335,20 +1335,6 @@ void Shell::OnEngineUpdateSemantics(int64_t view_id,
 }
 
 // |Engine::Delegate|
-void Shell::OnEngineSetSemanticsTreeEnabled(bool enabled) {
-  FML_DCHECK(is_set_up_);
-  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
-
-  task_runners_.GetPlatformTaskRunner()->RunNowOrPostTask(
-      task_runners_.GetPlatformTaskRunner(),
-      [view = platform_view_->GetWeakPtr(), enabled] {
-        if (view) {
-          view->SetSemanticsTreeEnabled(enabled);
-        }
-      });
-}
-
-// |Engine::Delegate|
 void Shell::OnEngineHandlePlatformMessage(
     std::unique_ptr<PlatformMessage> message) {
   FML_DCHECK(is_set_up_);
@@ -2115,20 +2101,21 @@ void Shell::OnPlatformViewRemoveView(int64_t view_id,
        rasterizer = rasterizer_->GetWeakPtr(),  //
        view_id,                                 //
        callback = std::move(callback)           //
-  ] {
+  ]() mutable {
+        bool removed = false;
         if (engine) {
-          bool removed = engine->RemoveView(view_id);
-          callback(removed);
+          removed = engine->RemoveView(view_id);
         }
-        // Don't wait for the raster task here, which only cleans up memory and
-        // does not affect functionality. Make sure it is done after Dart
-        // removes the view to avoid receiving another rasterization request
-        // that adds back the view record.
-        task_runners.GetRasterTaskRunner()->PostTask([rasterizer, view_id]() {
-          if (rasterizer) {
-            rasterizer->CollectView(view_id);
-          }
-        });
+        task_runners.GetRasterTaskRunner()->PostTask(
+            [rasterizer, view_id, callback = std::move(callback), removed]() {
+              if (rasterizer) {
+                rasterizer->CollectView(view_id);
+              }
+              // Only call the callback after it is known for certain that the
+              // raster thread will not try to use resources associated with
+              // the view.
+              callback(removed);
+            });
       });
 }
 

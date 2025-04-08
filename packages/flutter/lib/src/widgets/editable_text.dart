@@ -2469,14 +2469,19 @@ class EditableTextState extends State<EditableText>
   /// Read-only input fields do not need a connection with the platform since
   /// there's no need for text editing capabilities (e.g. virtual keyboard).
   ///
+  /// On macOS, most of the selection and focus related shortcuts require a
+  /// connection with the platform because appropriate platform selectors are
+  /// sent from the engine and translated into intents. For read-only fields
+  /// those shortcuts should be available (for instance to allow tab traversal).
+  ///
   /// On the web, we always need a connection because we want some browser
   /// functionalities to continue to work on read-only input fields like:
-  ///
   /// - Relevant context menu.
   /// - cmd/ctrl+c shortcut to copy.
   /// - cmd/ctrl+a to select all.
   /// - Changing the selection using a physical keyboard.
-  bool get _shouldCreateInputConnection => kIsWeb || !widget.readOnly;
+  bool get _shouldCreateInputConnection =>
+      kIsWeb || defaultTargetPlatform == TargetPlatform.macOS || !widget.readOnly;
 
   // The time it takes for the floating cursor to snap to the text aligned
   // cursor position after the user has finished placing it.
@@ -5558,6 +5563,17 @@ class EditableTextState extends State<EditableText>
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
     };
+    final ui.SemanticsInputType inputType;
+    switch (widget.keyboardType) {
+      case TextInputType.phone:
+        inputType = ui.SemanticsInputType.phone;
+      case TextInputType.url:
+        inputType = ui.SemanticsInputType.url;
+      case TextInputType.emailAddress:
+        inputType = ui.SemanticsInputType.email;
+      default:
+        inputType = ui.SemanticsInputType.text;
+    }
 
     return _CompositionCallback(
       compositeCallback: _compositeCallback,
@@ -5649,6 +5665,7 @@ class EditableTextState extends State<EditableText>
                           return CompositedTransformTarget(
                             link: _toolbarLayerLink,
                             child: Semantics(
+                              inputType: inputType,
                               onCopy: _semanticsOnCopy(controls),
                               onCut: _semanticsOnCut(controls),
                               onPaste: _semanticsOnPaste(controls),

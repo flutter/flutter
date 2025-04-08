@@ -700,15 +700,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     FrameService.instance.scheduleWarmUpFrame(beginFrame: beginFrame, drawFrame: drawFrame);
   }
 
-  @override
-  void setSemanticsTreeEnabled(bool enabled) {
-    if (!enabled) {
-      for (final EngineFlutterView view in views) {
-        view.semantics.reset();
-      }
-    }
-  }
-
   /// Updates the application's rendering on the GPU with the newly provided
   /// [Scene]. This function must be called within the scope of the
   /// [onBeginFrame] or [onDrawFrame] callbacks being invoked. If this function
@@ -839,11 +830,15 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       return;
     }
     updateLocales(); // First time, for good measure.
-    _onLocaleChangedSubscription = DomSubscription(domWindow, 'languagechange', (DomEvent _) {
-      // Update internal config, then propagate the changes.
-      updateLocales();
-      invokeOnLocaleChanged();
-    });
+    _onLocaleChangedSubscription = DomSubscription(
+      domWindow,
+      'languagechange',
+      createDomEventListener((DomEvent _) {
+        // Update internal config, then propagate the changes.
+        updateLocales();
+        invokeOnLocaleChanged();
+      }),
+    );
   }
 
   /// Removes the [_onLocaleChangedSubscription].
@@ -1088,10 +1083,11 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
       _brightnessMediaQuery.matches ? ui.Brightness.dark : ui.Brightness.light,
     );
 
-    _brightnessMediaQueryListener = createDomEventListener((DomEvent event) {
-      final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
-      _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
-    });
+    _brightnessMediaQueryListener =
+        (DomEvent event) {
+          final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
+          _updatePlatformBrightness(mqEvent.matches! ? ui.Brightness.dark : ui.Brightness.light);
+        }.toJS;
     _brightnessMediaQuery.addListener(_brightnessMediaQueryListener);
   }
 
