@@ -1167,7 +1167,7 @@ void main() {
                         const CupertinoNavigationBar(
                           bottom: PreferredSize(
                             preferredSize: Size.fromHeight(20),
-                            child: Placeholder(),
+                            child: ColoredBox(color: Color(0xffff0000)),
                           ),
                         ),
                       )!,
@@ -1175,7 +1175,7 @@ void main() {
           );
 
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 50));
 
       expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(2));
       expect(find.byIcon(CupertinoIcons.search), findsNWidgets(2));
@@ -1220,7 +1220,7 @@ void main() {
 
       tester.state<NavigatorState>(find.byType(Navigator)).pop();
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump(const Duration(milliseconds: 50));
 
       expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(2));
       expect(find.byIcon(CupertinoIcons.search), findsNWidgets(2));
