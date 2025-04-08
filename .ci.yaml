@@ -327,6 +327,25 @@ platform_properties:
         {
           "sdk_version": "16c5032a"
         }
+  mac_arm64_new_ios:
+    properties:
+      contexts: >-
+        [
+          "osx_sdk_devicelab"
+        ]
+      dependencies: >-
+        [
+          {"dependency": "ruby", "version": "ruby_3.1-pod_1.13"},
+          {"dependency": "apple_signing", "version": "none"}
+        ]
+      os: Mac-15
+      cpu: arm64
+      device_os: iOS-18
+      $flutter/osx_sdk : >-
+        {
+          "sdk_version": "16c5032a"
+        }
+        
   windows:
     properties:
       os: Windows-10
@@ -3513,6 +3532,16 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac"]
+      task_name: animated_advanced_blend_perf_ios__timeline_summary
+
+  - name: Mac_arm64_new_ios animated_advanced_blend_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac", "iphone16"]
       task_name: animated_advanced_blend_perf_ios__timeline_summary
 
   # Uses Impeller.
