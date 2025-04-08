@@ -1127,7 +1127,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _outerPosition?.setParent(_parent ?? PrimaryScrollController.maybeOf(_state.context));
   }
 
-  bool shuldIgnoreEnsureVisible(
+  bool shouldIgnoreEnsureVisible(
     _NestedScrollPosition target, {
     ScrollableState? previousScrollable,
   }) {
