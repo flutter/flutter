@@ -598,23 +598,25 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   PrimaryPointerGestureRecognizer({
     this.deadline,
-    this.preAcceptSlopTolerance = _unsetTouchSlop,
-    this.postAcceptSlopTolerance = _unsetTouchSlop,
+    double? preAcceptSlopTolerance = _unsetTouchSlop,
+    double? postAcceptSlopTolerance = _unsetTouchSlop,
     super.debugOwner,
     super.supportedDevices,
     super.allowedButtonsFilter,
   }) : assert(
          preAcceptSlopTolerance == _unsetTouchSlop ||
-         preAcceptSlopTolerance == null ||
-         preAcceptSlopTolerance >= 0,
+             preAcceptSlopTolerance == null ||
+             preAcceptSlopTolerance >= 0,
          'The preAcceptSlopTolerance must be unspecified, positive, or null',
        ),
        assert(
          postAcceptSlopTolerance == _unsetTouchSlop ||
-         postAcceptSlopTolerance == null ||
-         postAcceptSlopTolerance >= 0,
+             postAcceptSlopTolerance == null ||
+             postAcceptSlopTolerance >= 0,
          'The postAcceptSlopTolerance must be unspecified, positive, or null',
-       );
+       ),
+       _preAcceptSlopTolerance = preAcceptSlopTolerance,
+       _postAcceptSlopTolerance = postAcceptSlopTolerance;
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
@@ -630,7 +632,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
   /// Defaults to 18 logical pixels.
-  final double? preAcceptSlopTolerance;
+  double? get preAcceptSlopTolerance =>
+      _preAcceptSlopTolerance == _unsetTouchSlop ? _defaultTouchSlop : _preAcceptSlopTolerance;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
   /// after the gesture has been accepted.
@@ -640,17 +643,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   ///
   /// Can be null to indicate that the gesture can drift for any distance.
   /// Defaults to 18 logical pixels.
-  final double? postAcceptSlopTolerance;
+  double? get postAcceptSlopTolerance =>
+      _postAcceptSlopTolerance == _unsetTouchSlop ? _defaultTouchSlop : _postAcceptSlopTolerance;
 
-  double? get _preAcceptSlopTolerance =>
-      preAcceptSlopTolerance == _unsetTouchSlop
-          ? _defaultTouchSlop
-          : preAcceptSlopTolerance;
-
-  double? get _postAcceptSlopTolerance =>
-      postAcceptSlopTolerance == _unsetTouchSlop
-          ? _defaultTouchSlop
-          : postAcceptSlopTolerance;
+  final double? _preAcceptSlopTolerance;
+  final double? _postAcceptSlopTolerance;
 
   double get _defaultTouchSlop => gestureSettings?.touchSlop ?? kTouchSlop;
 
@@ -711,11 +708,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       final bool isPreAcceptSlopPastTolerance =
           !_gestureAccepted &&
           preAcceptSlopTolerance != null &&
-          _getGlobalDistance(event) > _preAcceptSlopTolerance!;
+          _getGlobalDistance(event) > preAcceptSlopTolerance!;
       final bool isPostAcceptSlopPastTolerance =
           _gestureAccepted &&
           postAcceptSlopTolerance != null &&
-          _getGlobalDistance(event) > _postAcceptSlopTolerance!;
+          _getGlobalDistance(event) > postAcceptSlopTolerance!;
 
       if (event is PointerMoveEvent &&
           (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {

@@ -199,6 +199,11 @@ void main() {
           );
       addTearDown(nullSlop.dispose);
 
+      // Test getters
+      expect(defaultSlop.preAcceptSlopTolerance, equals(kTouchSlop));
+      expect(setSlop.preAcceptSlopTolerance, equals(5.0));
+      expect(nullSlop.preAcceptSlopTolerance, isNull);
+
       indefinite.addPointer(down);
       defaultSlop.addPointer(down);
       tester.closeArena(5);
