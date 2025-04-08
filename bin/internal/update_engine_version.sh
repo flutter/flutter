@@ -24,6 +24,11 @@
 
 set -e
 
+# When called from a submodule hook; these will override `git -C dir`
+unset GIT_DIR
+unset GIT_INDEX_FILE
+unset GIT_WORK_TREE
+
 FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 
 # Generate a bin/cache directory, which won't initially exist for a fresh checkout.
