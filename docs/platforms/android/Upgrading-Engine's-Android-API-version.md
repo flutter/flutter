@@ -4,7 +4,7 @@ When new Android versions become available, the following steps should be taken 
 
 In `build/config/android/config.gni`, edit `default_android_sdk_version` and `default_android_sdk_build_tools_version` to the new Android version.
 
-**NOTE:** There is an ongoing effort to move the `flutter/buildroot` repo into the `flutter/engine` repo, so this file may have moved by the time you are following these instructions.
+**NOTE:** There is an effort to move the `flutter/buildroot` repo into the `flutter/engine` repo, so this file may have moved by the time you are following these instructions.
 
 ## Upload new SDK and other dependencies to [CIPD](https://chrome-infra-packages.appspot.com/p/flutter/android):
 
