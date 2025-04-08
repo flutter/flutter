@@ -1,7 +1,7 @@
 # Uploading New Java Version to CIPD
 
 We store the Java Version package on CIPD for use on CI. For more information read the internal
-docs [here](https://g3doc.corp.google.com/company/teams/chrome/ops/luci/cipd.md?cl=head).
+docs [here](http://go/luci-cipd).
 
 Some links in the instructions below are Google-internal.
 
