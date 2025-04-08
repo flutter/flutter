@@ -480,6 +480,8 @@ class FlutterPlugin : Plugin<Project> {
                         flutterPlugin,
                         targetPlatforms
                     )
+                    // TODO(gmackall): Migrate to AGPs variant api.
+                    //    https://github.com/flutter/flutter/issues/166550
                     val mergeAssets =
                         projectToAddTasksTo
                             .tasks

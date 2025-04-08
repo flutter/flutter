@@ -22,7 +22,7 @@ private const val FLUTTER_SDK_PATH = "flutterSdkPath"
  * This plugin applies the native plugin loader plugin (../scripts/native_plugin_loader.gradle.kts)
  * and then configures the main project to `include` each of the loaded flutter plugins.
  */
-@Suppress("unused") // This class is used by ../../../build.gradle.kts.
+@Suppress("unused") // This class is used by packages/flutter_tools/gradle/build.gradle.kts.
 class FlutterAppPluginLoaderPlugin : Plugin<Settings> {
     override fun apply(settings: Settings) {
         val flutterProjectRoot: File = settings.settingsDir.parentFile
