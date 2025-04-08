@@ -7,6 +7,7 @@
 
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/rrect.h"
+#include "flutter/lib/ui/painting/rsuperellipse.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
@@ -88,6 +89,7 @@ class CanvasPath : public RefCountedDartWrappable<CanvasPath> {
               double sweepAngle);
   void addPolygon(const tonic::Float32List& points, bool close);
   void addRRect(const RRect& rrect);
+  void addRSuperellipse(const RSuperellipse* rse);
   void addPath(CanvasPath* path, double dx, double dy);
 
   void addPathWithMatrix(CanvasPath* path,

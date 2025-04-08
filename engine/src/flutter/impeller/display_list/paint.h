@@ -37,7 +37,7 @@ struct Paint {
   /// @brief Whether or not a save layer with the provided paint can perform the
   ///        opacity peephole optimization.
   static bool CanApplyOpacityPeephole(const Paint& paint) {
-    return paint.blend_mode == BlendMode::kSourceOver &&
+    return paint.blend_mode == BlendMode::kSrcOver &&
            paint.invert_colors == false &&
            !paint.mask_blur_descriptor.has_value() &&
            paint.image_filter == nullptr && paint.color_filter == nullptr;
@@ -81,7 +81,7 @@ struct Paint {
   Join stroke_join = Join::kMiter;
   Scalar stroke_miter = 4.0;
   Style style = Style::kFill;
-  BlendMode blend_mode = BlendMode::kSourceOver;
+  BlendMode blend_mode = BlendMode::kSrcOver;
   bool invert_colors = false;
 
   std::optional<MaskBlurDescriptor> mask_blur_descriptor;

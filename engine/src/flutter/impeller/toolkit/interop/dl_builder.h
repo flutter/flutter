@@ -110,6 +110,12 @@ class DisplayListBuilder final
 
   void DrawParagraph(const Paragraph& paragraph, Point point);
 
+  void DrawShadow(const Path& path,
+                  const flutter::DlColor& color,
+                  float elevation,
+                  bool occluder_is_transparent,
+                  float device_pixel_ratio);
+
   ScopedObject<DisplayList> Build();
 
  private:

@@ -322,7 +322,7 @@ void main() {
     // callback that reschedules the engine frame.
     warmUpDrawFrame();
     expect(scheduler.hasScheduledFrame, isTrue);
-  });
+  }, skip: true); // Flaky, follow up in https://github.com/flutter/flutter/issues/166470
 
   test('Can schedule futures to completion', () async {
     bool isCompleted = false;

@@ -13,70 +13,71 @@ import 'framework.dart';
 ///
 /// {@tool snippet}
 ///
-/// Functions annotated with `@Preview()` must return a `WidgetPreview`
-/// and be public, top-level functions.
+/// Functions annotated with `@Preview()` must return a `Widget` or
+/// `WidgetBuilder` and be public. This annotation can only be applied
+/// to top-level functions, static methods defined within a class, and
+/// public `Widget` constructors and factories with no required arguments.
 ///
 /// ```dart
-/// @Preview()
-/// WidgetPreview widgetPreview() {
-///   return const WidgetPreview(name: 'Preview 1', child: Text('Foo'));
+/// @Preview(name: 'Top-level preview')
+/// Widget preview() => const Text('Foo');
+///
+/// @Preview(name: 'Builder preview')
+/// WidgetBuilder builderPreview() {
+///   return (BuildContext context) {
+///     return const Text('Builder');
+///   };
+/// }
+///
+/// class MyWidget extends StatelessWidget {
+///   @Preview(name: 'Constructor preview')
+///   const MyWidget.preview({super.key});
+///
+///   @Preview(name: 'Factory constructor preview')
+///   factory MyWidget.factoryPreview() => const MyWidget.preview();
+///
+///   @Preview(name: 'Static preview')
+///   static Widget previewStatic() => const Text('Static');
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return const Text('MyWidget');
+///   }
 /// }
 /// ```
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [WidgetPreview], a data class used to specify widget previews.
 // TODO(bkonyi): link to actual documentation when available.
-class Preview {
+base class Preview {
   /// Annotation used to mark functions that return widget previews.
-  const Preview();
-}
-
-/// Wraps a [Widget], initializing various state and properties to allow for
-/// previewing of the [Widget] in the widget previewer.
-///
-/// WARNING: This interface is not stable and **will change**.
-///
-/// See also:
-///
-///  * [Preview], an annotation class used to mark functions returning widget
-///    previews.
-// TODO(bkonyi): link to actual documentation when available.
-class WidgetPreview {
-  /// Wraps [child] in a [WidgetPreview] instance that applies some set of
-  /// properties.
-  const WidgetPreview({
-    required this.child,
-    this.name,
-    this.width,
-    this.height,
-    this.textScaleFactor,
-  });
+  const Preview({this.name, this.width, this.height, this.textScaleFactor, this.wrapper});
 
   /// A description to be displayed alongside the preview.
   ///
   /// If not provided, no name will be associated with the preview.
   final String? name;
 
-  /// The [Widget] to be rendered in the preview.
-  final Widget child;
-
-  /// Artificial width constraint to be applied to the [child].
+  /// Artificial width constraint to be applied to the previewed widget.
   ///
   /// If not provided, the previewed widget will attempt to set its own width
   /// constraints and may result in an unbounded constraint error.
   final double? width;
 
-  /// Artificial height constraint to be applied to the [child].
+  /// Artificial height constraint to be applied to the previewed widget.
   ///
   /// If not provided, the previewed widget will attempt to set its own height
   /// constraints and may result in an unbounded constraint error.
   final double? height;
 
-  /// Applies font scaling to text within the [child].
+  /// Applies font scaling to text within the previewed widget.
   ///
   /// If not provided, the default text scaling factor provided by [MediaQuery]
   /// will be used.
   final double? textScaleFactor;
+
+  /// Wraps the previewed [Widget] in a [Widget] tree.
+  ///
+  /// This function can be used to perform dependency injection or setup
+  /// additional scaffolding needed to correctly render the preview.
+  // TODO(bkonyi): provide an example.
+  final Widget Function(Widget)? wrapper;
 }

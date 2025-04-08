@@ -12,6 +12,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/darwin/string_range_sanitization.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 
 FLUTTER_ASSERT_ARC
 
@@ -2657,7 +2658,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 
 - (void)hideKeyboardWithoutAnimationAndAvoidCursorDismissUpdate {
   [UIView setAnimationsEnabled:NO];
-  _cachedFirstResponder = UIApplication.sharedApplication.keyWindow.flutterFirstResponder;
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+  _cachedFirstResponder =
+      flutterApplication
+          ? flutterApplication.keyWindow.flutterFirstResponder
+          : self.viewController.flutterWindowSceneIfViewLoaded.keyWindow.flutterFirstResponder;
+
   _activeView.preventCursorDismissWhenResignFirstResponder = YES;
   [_cachedFirstResponder resignFirstResponder];
   _activeView.preventCursorDismissWhenResignFirstResponder = NO;
@@ -2674,8 +2680,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   _keyboardView = keyboardSnap;
   [_keyboardViewContainer addSubview:_keyboardView];
   if (_keyboardViewContainer.superview == nil) {
-    [UIApplication.sharedApplication.delegate.window.rootViewController.view
-        addSubview:_keyboardViewContainer];
+    UIApplication* flutterApplication = FlutterSharedApplication.application;
+    UIView* rootView = flutterApplication
+                           ? flutterApplication.delegate.window.rootViewController.view
+                           : self.viewController.viewIfLoaded.window.rootViewController.view;
+    [rootView addSubview:_keyboardViewContainer];
   }
   _keyboardViewContainer.layer.zPosition = NSIntegerMax;
   _keyboardViewContainer.frame = _keyboardRect;
