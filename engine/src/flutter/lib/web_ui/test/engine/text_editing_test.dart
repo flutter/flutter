@@ -857,6 +857,17 @@ Future<void> testMain() async {
       const show = MethodCall('TextInput.show');
       sendFrameworkMessage(codec.encodeMethodCall(show));
 
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
       // Form elements
       {
         final formElement = textEditing!.configuration!.autofillGroup!.formElement;
@@ -3626,7 +3637,13 @@ Future<void> testMain() async {
     }, skip: isFirefox || isSafari);
 
     test('Multi-line text area scrollbars are zero-width', () {
-      expect(createMultilineTextArea().style.scrollbarWidth, 'none');
+      final allowedScrollbarWidthValues = <String>[
+        'none',
+        // Safari introduced scrollbarWidth support in 18.2. Older Safari versions
+        // return empty string instead of 'none'.
+        if (isSafari) '',
+      ];
+      expect(allowedScrollbarWidthValues, contains(createMultilineTextArea().style.scrollbarWidth));
     });
   });
 }
