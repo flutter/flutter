@@ -33,7 +33,7 @@ class TextPaint {
       final DomCanvasRenderingContext2D context = canvas.context2D;
       context.font = '50px arial';
       context.fillStyle = 'black';
-      context.fillTextCluster(clusterText.cluster, x, y);
+      context.fillTextCluster(clusterText.cluster!, x, y);
     }
   }
 
@@ -49,14 +49,22 @@ class TextPaint {
     WebParagraphDebug.log(
       'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.bounds.width}x${line.bounds.height}',
     );
-    for (int i = line.textRange.start; i < line.textRange.end; i++) {
-      final clusterText = layout.textClusters[i];
-      paintCluster(
-        canvas,
-        clusterText,
-        ui.Offset(-line.bounds.left, line.bounds.top + line.fontBoundingBoxAscent),
-        ui.Offset(x, y),
-      );
+    String v = '';
+    for (int i = 0; i < line.visualRuns.length; ++i) {
+      v += ' $i';
+    }
+    WebParagraphDebug.log('Visual runs (${line.visualRuns.length}):$v');
+
+    for (final BidiRun run in line.visualRuns) {
+      for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
+        final clusterText = layout.textClusters[i];
+        paintCluster(
+          canvas,
+          clusterText,
+          ui.Offset(-line.bounds.left, line.bounds.top + line.fontBoundingBoxAscent),
+          ui.Offset(x, y),
+        );
+      }
     }
   }
 
@@ -66,7 +74,7 @@ class TextPaint {
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
   ) {
-    textContext.fillTextCluster(webTextCluster.cluster, clusterOffset.dx, clusterOffset.dy);
+    textContext.fillTextCluster(webTextCluster.cluster!, clusterOffset.dx, clusterOffset.dy);
 
     final engine.DomImageBitmap bitmap = textCanvas.transferToImageBitmap();
 

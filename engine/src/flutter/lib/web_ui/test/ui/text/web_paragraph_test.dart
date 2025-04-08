@@ -94,7 +94,7 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_rtl_1.png', region: region);
   });
-*/
+
   test('Draw WebParagraph RTL with multiple lines', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
@@ -108,4 +108,59 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
   });
+
+  test('Draw WebParagraph LTR/RTL 1 Line', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+
+    final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
+    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.addText('ABC لم def');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
+  });
+*/
+  test('Draw WebParagraph LTR/RTL multi Line with LTR by default', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      textDirection: TextDirection.ltr,
+      fontFamily: 'Arial',
+      fontSize: 50,
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.addText(
+      'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
+    );
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_canvas_multilined_ltr.png', region: region);
+  });
+  /*
+  test('Draw WebParagraph LTR/RTL multi Line with RTL by default', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      textDirection: TextDirection.rtl,
+      fontFamily: 'Arial',
+      fontSize: 50,
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.addText(
+      'إنالسيطرةعلىاxyz لعالمعباvwx رةقبيحةstu للغاpqr ية-أmno فضلأjkl نأسميهاghi تحسيناdef لعاabc لم',
+    );
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
+  });
+  */
 }

@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/ui.dart' as ui;
 
-import '../dom.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -67,16 +65,6 @@ class TextWrapper {
     bool hardLineBreak = false;
     for (int index = 0; index < _layout.textClusters.length; index++) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
-      /*
-      final DomRectReadOnly box = this._layout.textMetrics!.getActualBoundingBox(
-        cluster.begin,
-        cluster.end,
-      );
-      final List<DomRectReadOnly> rects = this._layout.textMetrics!.getSelectionRects(
-        cluster.begin,
-        cluster.end,
-      );
-      */
       // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
       double widthCluster = cluster.bounds.width;
       hardLineBreak = isHardLineBreak(cluster);
@@ -119,6 +107,7 @@ class TextWrapper {
 
       // Check if we have a (hanging) whitespace which does not affect the line width
       if (isWhitespace(cluster)) {
+        final String whitespaces = _text.substring(cluster.start, cluster.end);
         if (_whitespaces.end < index) {
           // Start a new (empty) whitespace sequence
           _widthText += _widthWhitespaces + _widthLetters;
@@ -165,6 +154,8 @@ class TextWrapper {
         }
 
         // Add the line
+        final String text = _text.substring(_startLine, _whitespaces.start);
+        final String whitespaces = _text.substring(_whitespaces.start, _whitespaces.end);
         _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
           _widthText,
@@ -204,11 +195,11 @@ class TextWrapper {
     if (hardLineBreak) {
       // TODO(jlavrova): Discuss with Mouad
       // Flutter wants to have another (empty) line if \n is the last codepoint in the text
-      final emptyText = ClusterRange(
+      final emptyClusterRange = ClusterRange(
         start: _layout.textClusters.length,
         end: _layout.textClusters.length,
       );
-      _layout.addLine(emptyText, 0.0, emptyText, 0.0, false);
+      _layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false);
     }
 
     if (WebParagraphDebug.logging) {
