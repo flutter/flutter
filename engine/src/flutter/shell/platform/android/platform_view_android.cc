@@ -103,7 +103,6 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
           enable_opengl_gpu_tracing);
     case AndroidRenderingAPI::kImpellerVulkan:
       if (android_vk_context) {
-        FML_LOG(ERROR) << "REUSE";
         return std::move(android_vk_context);
       }
       return std::make_unique<AndroidContextVKImpeller>(settings);
