@@ -47,13 +47,8 @@ class TextPaint {
     // TODO(jlavrova): We need to traverse clusters in the order of visual bidi runs
     // (by line, then by reordered visual runs)
     WebParagraphDebug.log(
-      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.bounds.width}x${line.bounds.height}',
+      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.shift}->${line.bounds.width}x${line.bounds.height}',
     );
-    String v = '';
-    for (int i = 0; i < line.visualRuns.length; ++i) {
-      v += ' $i';
-    }
-    WebParagraphDebug.log('Visual runs (${line.visualRuns.length}):$v');
 
     for (final BidiRun run in line.visualRuns) {
       for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
@@ -61,7 +56,10 @@ class TextPaint {
         paintCluster(
           canvas,
           clusterText,
-          ui.Offset(-line.bounds.left, line.bounds.top + line.fontBoundingBoxAscent),
+          ui.Offset(
+            line.shift - line.bounds.left + run.shift,
+            line.bounds.top + line.fontBoundingBoxAscent,
+          ),
           ui.Offset(x, y),
         );
       }

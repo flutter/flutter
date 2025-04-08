@@ -129,6 +129,7 @@ Future<void> testMain() async {
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
       textDirection: TextDirection.ltr,
+      textAlign: TextAlign.left,
       fontFamily: 'Arial',
       fontSize: 50,
     );
@@ -142,13 +143,14 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_ltr.png', region: region);
   });
-  /*
+
   test('Draw WebParagraph LTR/RTL multi Line with RTL by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
       textDirection: TextDirection.rtl,
+      textAlign: TextAlign.right,
       fontFamily: 'Arial',
       fontSize: 50,
     );
@@ -162,5 +164,4 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
   });
-  */
 }

@@ -14,18 +14,25 @@ import 'paint.dart';
 /// The web implementation of  [ui.ParagraphStyle]
 @immutable
 class WebParagraphStyle implements ui.ParagraphStyle {
-  WebParagraphStyle({ui.TextDirection? textDirection, String? fontFamily, double? fontSize})
-    : _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize),
-      _textDirection = textDirection ?? ui.TextDirection.ltr;
+  WebParagraphStyle({
+    ui.TextDirection? textDirection,
+    ui.TextAlign? textAlign,
+    String? fontFamily,
+    double? fontSize,
+  }) : _defaultTextStyle = WebTextStyle(fontFamily: fontFamily, fontSize: fontSize),
+       _textDirection = textDirection ?? ui.TextDirection.ltr,
+       _textAlign = textAlign ?? ui.TextAlign.left;
 
   final WebTextStyle _defaultTextStyle;
   final ui.TextDirection _textDirection;
+  final ui.TextAlign _textAlign;
 
   WebTextStyle getTextStyle() {
     return _defaultTextStyle;
   }
 
   ui.TextDirection get textDirection => _textDirection;
+  ui.TextAlign get textAlign => _textAlign;
 
   @override
   bool operator ==(Object other) {
@@ -54,6 +61,16 @@ class WebParagraphStyle implements ui.ParagraphStyle {
       return true;
     }());
     return result;
+  }
+
+  ui.TextAlign effectiveAlign() {
+    if (_textAlign == ui.TextAlign.start) {
+      return (_textDirection == ui.TextDirection.ltr) ? ui.TextAlign.left : ui.TextAlign.right;
+    } else if (_textAlign == ui.TextAlign.end) {
+      return (_textDirection == ui.TextDirection.ltr) ? ui.TextAlign.right : ui.TextAlign.left;
+    } else {
+      return _textAlign;
+    }
   }
 }
 

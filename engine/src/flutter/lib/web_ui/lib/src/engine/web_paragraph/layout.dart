@@ -46,10 +46,6 @@ class TextLayout {
   }
 
   void performLayout(double width) {
-    lines.clear();
-    bidiRuns.clear();
-    codeUnitFlags.clear();
-
     extractClusterTexts();
 
     extractBidiRuns();
@@ -58,10 +54,12 @@ class TextLayout {
 
     wrapText(width);
 
-    reorderVisuals();
+    formatLines(width);
   }
 
   void extractUnicodeInfo() {
+    codeUnitFlags.clear();
+
     // TODO(jlavrova): Switch to SkUnicode.CodePointFlags API in CanvasKit
     // Fill out the entire flag list
     for (int i = 0; i <= paragraph.text!.length; ++i) {
@@ -142,6 +140,8 @@ class TextLayout {
   }
 
   void extractBidiRuns() {
+    bidiRuns.clear();
+
     final List<BidiRegion> regions = canvasKit.Bidi.getBidiRegions(
       paragraph.text!,
       paragraph.paragraphStyle.textDirection,
@@ -182,7 +182,8 @@ class TextLayout {
   }
 
   void wrapText(double width) {
-    printClusters();
+    lines.clear();
+
     final TextWrapper wrapper = TextWrapper(paragraph.text!, this);
     _top = 0.0;
     _left = 0.0;
@@ -232,7 +233,7 @@ class TextLayout {
 
     final List<BidiIndex> visuals = canvasKit.Bidi.reorderVisual(Uint8List.fromList(logicalLevels));
 
-    for (final visual in visuals) {
+    for (final BidiIndex visual in visuals) {
       final BidiRun run = bidiRuns[visual.index + firstIndex];
       line.visualRuns.add(BidiRun(intersect(run.clusterRange, textRange), run.bidiLevel));
     }
@@ -258,17 +259,13 @@ class TextLayout {
     }
 
     // We need to take the VISUALLY first cluster (in case of LTR/RTL it could be anywhere)
-    final BidiRun firstVisualRun = line.visualRuns.first;
-    final ExtendedTextCluster firstVisualCluster =
-        (firstVisualRun.bidiLevel % 2) == 0
-            ? textClusters[firstVisualRun.clusterRange.start]
-            : textClusters[firstVisualRun.clusterRange.end - 1];
-    WebParagraphDebug.log(
-      'Line first cluster: [${firstVisualCluster.bounds.left}:${firstVisualCluster.bounds.right})',
-    );
+    // and start placing all the runs in visual order next to each other starting from 0
+    double shift = 0.0;
     for (final BidiRun run in line.visualRuns) {
+      final double oldShift = shift;
+      shift += runWidth(run, shift);
       WebParagraphDebug.log(
-        'run: [${run.clusterRange.start}:${run.clusterRange.end}) ${run.bidiLevel}',
+        'run: [${run.clusterRange.start}:${run.clusterRange.end}) ${run.bidiLevel} $oldShift ${run.shift} $shift',
       );
       for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final ExtendedTextCluster cluster = textClusters[i];
@@ -278,10 +275,10 @@ class TextLayout {
         );
       }
     }
-
-    final double visualyLeft = firstVisualCluster.bounds.left;
+    final BidiRun firstVisualRun = line.visualRuns.first;
+    final double visualyLeft = firstVisualRun.shift;
     line.bounds = ui.Rect.fromLTWH(
-      visualyLeft,
+      0,
       _top,
       textWidth,
       line.fontBoundingBoxAscent + line.fontBoundingBoxDescent,
@@ -294,9 +291,44 @@ class TextLayout {
     _top += line.bounds.height;
   }
 
-  void reorderVisuals() {
-    // TODO(jlavrova): Use bidi API to reorder visual runs for all lines
-    // (maybe breaking these runs by lines in addition)
+  double runWidth(BidiRun run, double shift) {
+    double width = 0.0;
+    for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
+      final ExtendedTextCluster cluster = textClusters[i];
+      width += cluster.bounds.width;
+    }
+    final double left =
+        run.bidiLevel.isEven
+            ? textClusters[run.clusterRange.start].bounds.left
+            : textClusters[run.clusterRange.end - 1].bounds.left;
+    run.shift = shift - left;
+    return width;
+  }
+
+  void formatLines(double width) {
+    // TODO(jlavrova): there is a special case in cpp SkParagraph; we need to decide if we keep it
+    // Special case: clean all text in case of maxWidth == INF & align != left
+    // We had to go through shaping though because we need all the measurement numbers
+
+    final effectiveAlign = paragraph.paragraphStyle.effectiveAlign();
+    for (final TextLine line in lines) {
+      final double delta = width - line.bounds.width;
+      if (delta <= 0) {
+        return;
+      }
+
+      // We do nothing for left align
+      if (effectiveAlign == ui.TextAlign.justify) {
+        // TODO(jlavrova): implement justify
+      } else if (effectiveAlign == ui.TextAlign.right) {
+        line.shift = delta;
+      } else if (effectiveAlign == ui.TextAlign.center) {
+        line.shift = delta / 2;
+      }
+      WebParagraphDebug.log(
+        'aligne: ${paragraph.paragraphStyle.textAlign} effectiveAlign: $effectiveAlign delta: $delta shift: ${line.shift}',
+      );
+    }
   }
 }
 
@@ -322,6 +354,7 @@ class BidiRun {
   BidiRun(this.clusterRange, this.bidiLevel);
   final int bidiLevel;
   final ClusterRange clusterRange;
+  double shift = 0.0;
 }
 
 class TextLine {
@@ -346,4 +379,5 @@ class TextLine {
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
   List<BidiRun> visualRuns = <BidiRun>[];
+  double shift = 0.0;
 }
