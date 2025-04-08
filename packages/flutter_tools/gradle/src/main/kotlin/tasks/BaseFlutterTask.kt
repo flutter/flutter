@@ -132,7 +132,7 @@ open class BaseFlutterTask : DefaultTask() {
     var flavor: String? = null
 
     /**
-     * Gets the dependency file(s) by calling [com.flutter.gradle.BaseFlutterTaskHelper.getDependenciesFiles].
+     * Gets the dependency file(s) by calling [com.flutter.gradle.tasks.BaseFlutterTaskHelper.getDependenciesFiles].
      *
      * @return the dependency file(s) based on the current intermediate directory path.
      */
