@@ -516,6 +516,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
   void markHadListener() {
     _hadAtLeastOneListener = true;
   }
+
   // We must avoid disposing a completer if it has never had a listener, even
   // if all [keepAlive] handles get disposed.
   bool _hadAtLeastOneListener = false;
