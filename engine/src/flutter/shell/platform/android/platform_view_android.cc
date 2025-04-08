@@ -91,6 +91,7 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
 static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     const flutter::TaskRunners& task_runners,
     AndroidRenderingAPI android_rendering_api,
+    std::shared_ptr<AndroidContextVKImpeller> android_vk_context,
     bool enable_opengl_gpu_tracing,
     const AndroidContext::ContextSettings& settings) {
   switch (android_rendering_api) {
@@ -101,6 +102,10 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
           std::make_unique<impeller::egl::Display>(),
           enable_opengl_gpu_tracing);
     case AndroidRenderingAPI::kImpellerVulkan:
+      if (android_vk_context) {
+        FML_LOG(ERROR) << "REUSE";
+        return std::move(android_vk_context);
+      }
       return std::make_unique<AndroidContextVKImpeller>(settings);
     case AndroidRenderingAPI::kSkiaOpenGLES:
       return std::make_unique<AndroidContextGLSkia>(
@@ -115,7 +120,8 @@ PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    AndroidRenderingAPI rendering_api)
+    AndroidRenderingAPI rendering_api,
+    std::shared_ptr<AndroidContextVKImpeller> android_vk_context)
     : PlatformViewAndroid(
           delegate,
           task_runners,
@@ -123,6 +129,7 @@ PlatformViewAndroid::PlatformViewAndroid(
           CreateAndroidContext(
               task_runners,
               rendering_api,
+              std::move(android_vk_context),
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
               CreateContextSettings(delegate.OnPlatformViewGetSettings()))) {}
 
