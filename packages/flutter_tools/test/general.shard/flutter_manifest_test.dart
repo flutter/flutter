@@ -1547,6 +1547,35 @@ flutter:
               args:
                 - deferredComponentArg''');
   });
+
+  testWithoutContext('FlutterManifest can parse workspace', () async {
+    const String manifest = '''
+name: test
+workspace:
+- pkgs/bar
+- pkgs/foo
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.workspace, <String>['pkgs/bar', 'pkgs/foo']);
+  });
+
+  testWithoutContext('FlutterManifest can parse empty workspace', () async {
+    const String manifest = '''
+name: test
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.workspace, isEmpty);
+  });
 }
 
 Matcher matchesManifest({String? appVersion, String? buildName, String? buildNumber}) {

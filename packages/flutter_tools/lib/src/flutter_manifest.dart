@@ -140,6 +140,10 @@ class FlutterManifest {
     return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
   }
 
+  /// List of all the entries in the workspace field of the `pubspec.yaml` file.
+  List<String> get workspace =>
+      (_descriptor['workspace'] as YamlList?)?.cast<String>() ?? <String>[];
+
   // Flag to avoid printing multiple invalid version messages.
   bool _hasShowInvalidVersionMsg = false;
 
@@ -433,7 +437,6 @@ class FlutterManifest {
   /// See also:
   ///
   ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
-  ///   * [generateLocalizations]
   late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;

@@ -82,7 +82,8 @@ class MockDelegate : public PlatformView::Delegate {
   void OnPlatformViewDispatchPlatformMessage(std::unique_ptr<PlatformMessage> message) override {}
   void OnPlatformViewDispatchPointerDataPacket(std::unique_ptr<PointerDataPacket> packet) override {
   }
-  void OnPlatformViewDispatchSemanticsAction(int32_t id,
+  void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
+                                             int32_t node_id,
                                              SemanticsAction action,
                                              fml::MallocMapping args) override {}
   void OnPlatformViewSetSemanticsEnabled(bool enabled) override {}
@@ -2357,6 +2358,43 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
     test_delegate.set_semantics_enabled_calls = 0;
     platform_view.reset();
     XCTAssertEqual(test_delegate.set_semantics_enabled_calls, 0);
+
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+- (void)testResetsAccessibilityElementsOnHotRestart {
+  flutter::MockDelegate mock_delegate;
+  auto thread = std::make_unique<fml::Thread>("AccessibilityBridgeTest");
+  auto thread_task_runner = thread->GetTaskRunner();
+  flutter::TaskRunners runners(/*label=*/self.name.UTF8String,
+                               /*platform=*/thread_task_runner,
+                               /*raster=*/thread_task_runner,
+                               /*ui=*/thread_task_runner,
+                               /*io=*/thread_task_runner);
+  id mockFlutterView = OCMClassMock([FlutterView class]);
+  id mockFlutterViewController = OCMClassMock([FlutterViewController class]);
+  OCMStub([mockFlutterViewController viewIfLoaded]).andReturn(mockFlutterView);
+
+  fml::AutoResetWaitableEvent latch;
+  thread_task_runner->PostTask([&] {
+    auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+        /*delegate=*/mock_delegate,
+        /*rendering_api=*/mock_delegate.settings_.enable_impeller
+            ? flutter::IOSRenderingAPI::kMetal
+            : flutter::IOSRenderingAPI::kSoftware,
+        /*platform_views_controller=*/nil,
+        /*task_runners=*/runners,
+        /*worker_task_runner=*/nil,
+        /*is_gpu_disabled_sync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+    platform_view->SetOwnerViewController(mockFlutterViewController);
+    platform_view->SetSemanticsEnabled(true);
+
+    OCMExpect([mockFlutterView setAccessibilityElements:[OCMArg isNil]]);
+    platform_view->OnPreEngineRestart();
+    OCMVerifyAll(mockFlutterView);
 
     latch.Signal();
   });

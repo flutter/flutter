@@ -93,7 +93,7 @@ Future<void> _testSuccessfulPayloads() async {
     expect(response.hasPayload, isTrue);
     expect(response.payload, isNotNull);
     expect(response.url, '/test_images/');
-    expect(await response.json(), isA<List<Object?>>());
+    expect(((await response.json()) as JSAny?).isA<JSArray>(), isTrue);
   });
 
   test('httpFetch reads data in chunks', () async {
@@ -119,9 +119,7 @@ Future<void> _testSuccessfulPayloads() async {
       expect(response.url, url);
 
       final List<int> result = <int>[];
-      await response.payload.read<JSUint8Array>(
-        (JSUint8Array chunk) => result.addAll(chunk.toDart),
-      );
+      await response.payload.read((JSUint8Array chunk) => result.addAll(chunk.toDart));
       expect(result, hasLength(length));
       expect(result, List<int>.generate(length, (int i) => i & 0xFF));
     }
@@ -154,7 +152,7 @@ Future<void> _testSuccessfulPayloads() async {
 
   test('httpFetchJson fetches json', () async {
     final Object? json = await httpFetchJson('/test_images/');
-    expect(json, isA<List<Object?>>());
+    expect((json as JSAny?).isA<JSArray>(), isTrue);
   });
 }
 

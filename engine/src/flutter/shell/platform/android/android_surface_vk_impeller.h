@@ -7,6 +7,7 @@
 
 #include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/macros.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"

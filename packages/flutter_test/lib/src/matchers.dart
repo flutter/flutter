@@ -685,13 +685,15 @@ Matcher matchesSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
+  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  ui.SemanticsInputType? inputType,
   // Flags //
   bool hasCheckedState = false,
   bool isChecked = false,
   bool isCheckStateMixed = false,
   bool isSelected = false,
-  bool isButton = false,
   bool hasSelectedState = false,
+  bool isButton = false,
   bool isSlider = false,
   bool isKeyboardKey = false,
   bool isLink = false,
@@ -768,11 +770,14 @@ Matcher matchesSemantics({
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    validationResult: validationResult,
+    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
     isCheckStateMixed: isCheckStateMixed,
     isSelected: isSelected,
+    hasSelectedState: hasSelectedState,
     isButton: isButton,
     isSlider: isSlider,
     isKeyboardKey: isKeyboardKey,
@@ -878,11 +883,14 @@ Matcher containsSemantics({
   int? platformViewId,
   int? maxValueLength,
   int? currentValueLength,
+  SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+  ui.SemanticsInputType? inputType,
   // Flags
   bool? hasCheckedState,
   bool? isChecked,
   bool? isCheckStateMixed,
   bool? isSelected,
+  bool? hasSelectedState,
   bool? isButton,
   bool? isSlider,
   bool? isKeyboardKey,
@@ -960,11 +968,14 @@ Matcher containsSemantics({
     customActions: customActions,
     maxValueLength: maxValueLength,
     currentValueLength: currentValueLength,
+    validationResult: validationResult,
+    inputType: inputType,
     // Flags
     hasCheckedState: hasCheckedState,
     isChecked: isChecked,
     isCheckStateMixed: isCheckStateMixed,
     isSelected: isSelected,
+    hasSelectedState: hasSelectedState,
     isButton: isButton,
     isSlider: isSlider,
     isKeyboardKey: isKeyboardKey,
@@ -2395,11 +2406,14 @@ class _MatchesSemanticsData extends Matcher {
     required this.platformViewId,
     required this.maxValueLength,
     required this.currentValueLength,
+    required this.validationResult,
+    required this.inputType,
     // Flags
     required bool? hasCheckedState,
     required bool? isChecked,
     required bool? isCheckStateMixed,
     required bool? isSelected,
+    required bool? hasSelectedState,
     required bool? isButton,
     required bool? isSlider,
     required bool? isKeyboardKey,
@@ -2459,6 +2473,7 @@ class _MatchesSemanticsData extends Matcher {
          if (isChecked != null) SemanticsFlag.isChecked: isChecked,
          if (isCheckStateMixed != null) SemanticsFlag.isCheckStateMixed: isCheckStateMixed,
          if (isSelected != null) SemanticsFlag.isSelected: isSelected,
+         if (hasSelectedState != null) SemanticsFlag.hasSelectedState: hasSelectedState,
          if (isButton != null) SemanticsFlag.isButton: isButton,
          if (isSlider != null) SemanticsFlag.isSlider: isSlider,
          if (isKeyboardKey != null) SemanticsFlag.isKeyboardKey: isKeyboardKey,
@@ -2546,7 +2561,9 @@ class _MatchesSemanticsData extends Matcher {
   final int? platformViewId;
   final int? maxValueLength;
   final int? currentValueLength;
+  final ui.SemanticsInputType? inputType;
   final List<Matcher>? children;
+  final SemanticsValidationResult validationResult;
 
   /// There are three possible states for these two maps:
   ///
@@ -2591,6 +2608,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (tooltip != null) {
       description.add(' with tooltip: $tooltip');
+    }
+    if (inputType != null) {
+      description.add(' with inputType: $inputType');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> expectedActions =
@@ -2659,6 +2679,9 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (hintOverrides != null) {
       description.add(' with custom hints: $hintOverrides');
+    }
+    if (validationResult != SemanticsValidationResult.none) {
+      description.add(' with validation result: $validationResult');
     }
     if (children != null) {
       description.add(' with children:\n  ');
@@ -2795,6 +2818,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (maxValueLength != null && maxValueLength != data.maxValueLength) {
       return failWithDescription(matchState, 'maxValueLength was: ${data.maxValueLength}');
+    }
+    if (validationResult != data.validationResult) {
+      return failWithDescription(matchState, 'validationResult was: ${data.validationResult}');
+    }
+    if (inputType != null && inputType != data.inputType) {
+      return failWithDescription(matchState, 'inputType was: ${data.inputType}');
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> unexpectedActions = <SemanticsAction>[];

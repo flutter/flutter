@@ -884,6 +884,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       currentHighlight = null;
       controller.close();
     } else {
+      filteredEntries = widget.dropdownMenuEntries;
       // close to open
       if (_localTextEditingController!.text.isNotEmpty) {
         _enableFilter = false;
@@ -934,8 +935,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       filteredEntries =
           widget.filterCallback?.call(filteredEntries, _localTextEditingController!.text) ??
           filter(widget.dropdownMenuEntries, _localTextEditingController!);
-    } else {
-      filteredEntries = widget.dropdownMenuEntries;
     }
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 

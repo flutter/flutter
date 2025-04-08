@@ -108,5 +108,33 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, RuntimeEffectWithInvalidSamplerDoesNotCrash) {
+  ScopedValidationDisable disable_validation;
+
+  // Create a sampler that is not usable as an input to the runtime effect.
+  std::vector<flutter::DlColor> colors = {flutter::DlColor::kBlue(),
+                                          flutter::DlColor::kRed()};
+  const float stops[2] = {0.0, 1.0};
+  auto linear = flutter::DlColorSource::MakeLinear({0.0, 0.0}, {300.0, 300.0},
+                                                   2, colors.data(), stops,
+                                                   flutter::DlTileMode::kClamp);
+  std::vector<std::shared_ptr<DlColorSource>> sampler_inputs = {
+      linear,
+  };
+
+  auto uniform_data = std::make_shared<std::vector<uint8_t>>();
+  uniform_data->resize(sizeof(Vector2));
+
+  DlPaint paint;
+  paint.setColorSource(
+      MakeRuntimeEffect(this, "runtime_stage_filter_example.frag.iplr",
+                        uniform_data, sampler_inputs));
+
+  DisplayListBuilder builder;
+  builder.DrawPaint(paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

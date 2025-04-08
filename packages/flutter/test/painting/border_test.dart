@@ -482,6 +482,27 @@ void main() {
     expect((ShapeWithoutInterior() + ShapeWithInterior()).preferPaintInterior, isFalse);
     expect((ShapeWithoutInterior() + ShapeWithoutInterior()).preferPaintInterior, isFalse);
   });
+
+  test('BoxBorder factories', () {
+    const BorderSide side1 = BorderSide();
+    const BorderSide side2 = BorderSide(width: 2);
+    const BorderSide side3 = BorderSide(width: 3);
+    const BorderSide side4 = BorderSide(width: 4);
+    expect(
+      BoxBorder.fromLTRB(left: side1, top: side2, right: side3, bottom: side4),
+      const Border(left: side1, top: side2, right: side3, bottom: side4),
+    );
+    expect(BoxBorder.all(width: 4), Border.all(width: 4));
+    expect(const BoxBorder.fromBorderSide(side3), const Border.fromBorderSide(side3));
+    expect(
+      const BoxBorder.symmetric(horizontal: side2, vertical: side3),
+      const Border.symmetric(horizontal: side2, vertical: side3),
+    );
+    expect(
+      BoxBorder.fromSTEB(start: side1, top: side2, end: side3, bottom: side4),
+      const BorderDirectional(start: side1, top: side2, end: side3, bottom: side4),
+    );
+  });
 }
 
 class ShapeWithInterior extends ShapeBorder {

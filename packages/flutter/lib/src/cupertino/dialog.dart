@@ -1299,7 +1299,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     final List<Widget> children = <Widget>[
       Flexible(
-        child: ClipRRect(
+        child: ClipRSuperellipse(
           borderRadius: const BorderRadius.all(Radius.circular(12.0)),
           child: BackdropFilter(
             filter: ImageFilter.blur(
@@ -1593,24 +1593,30 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
 
   @override
   Widget build(BuildContext context) {
-    late final Color backgroundColor;
-    BorderRadius? borderRadius;
+    late final Widget child;
     if (!widget.isCancel) {
-      backgroundColor = widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor;
-    } else {
-      backgroundColor = widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor;
-      borderRadius = const BorderRadius.all(Radius.circular(_kCornerRadius));
-    }
-    return MetaData(
-      metaData: this,
-      child: Container(
-        decoration: BoxDecoration(
-          color: CupertinoDynamicColor.resolve(backgroundColor, context),
-          borderRadius: borderRadius,
+      child = ColoredBox(
+        color: CupertinoDynamicColor.resolve(
+          widget.pressed ? _kActionSheetPressedColor : _kActionSheetBackgroundColor,
+          context,
         ),
         child: widget.child,
-      ),
-    );
+      );
+    } else {
+      child = DecoratedBox(
+        decoration: ShapeDecoration(
+          shape: const RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.all(Radius.circular(_kCornerRadius)),
+          ),
+          color: CupertinoDynamicColor.resolve(
+            widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,
+            context,
+          ),
+        ),
+        child: widget.child,
+      );
+    }
+    return MetaData(metaData: this, child: child);
   }
 }
 

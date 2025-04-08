@@ -208,7 +208,6 @@ class BuildWebCommand extends BuildSubCommand {
       ];
     }
 
-    final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
@@ -246,7 +245,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
     await webBuilder.buildWeb(
       project,
-      target,
+      targetFile,
       buildInfo,
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
       compilerConfigs: compilerConfigs,
