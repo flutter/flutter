@@ -361,7 +361,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   bool _tapInProgress = false;
 
   void _handleTapDown(TapDownDetails event) {
-    _tapInProgress = true;
+    setState(() {
+      _tapInProgress = true;
+    });
     if (!_buttonHeldDown) {
       _buttonHeldDown = true;
       _animate();
@@ -369,7 +371,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapUp(TapUpDetails event) {
-    _tapInProgress = false;
+    setState(() {
+      _tapInProgress = false;
+    });
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -382,7 +386,9 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapCancel() {
-    _tapInProgress = false;
+    setState(() {
+      _tapInProgress = false;
+    });
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -497,7 +503,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
     final Set<WidgetState> states = <WidgetState>{
       if (!enabled) WidgetState.disabled,
-      if (widget.onPressed != null || widget.onLongPress != null) WidgetState.pressed,
+      if (_tapInProgress) WidgetState.pressed,
       if (isFocused) WidgetState.focused,
     };
     final MouseCursor effectiveMouseCursor =
