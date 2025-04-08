@@ -547,12 +547,20 @@ class _PredictiveBackPageSharedElementTransitionState
     extends State<_PredictiveBackPageSharedElementTransition>
     with SingleTickerProviderStateMixin {
   double xShift = 0;
-  double yShift = 0;
+  double _lastYPosition = 0;
   double _lastScale = 1;
+  // TODO(justinmc): Private names.
   late final AnimationController commitController;
+  late final Animation<double> commitAnimation;
   late final Listenable mergedAnimations;
   late final Animation<double> _opacityAnimation;
   late final Animation<double> _scaleAnimation;
+  late Animation<double> _scaleAnimationCommit;
+  final Tween<double> _scaleTween = Tween<double>(begin: scalePercentage, end: 1.0);
+  late final Animation<Offset> _positionAnimation;
+  late Animation<double> _yAnimationCommit;
+  Animation<double>? _xAnimation;
+  Animation<double>? _xAnimationCommit;
 
   // Constants as per the motion specs
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
@@ -561,9 +569,11 @@ class _PredictiveBackPageSharedElementTransitionState
   static const double margin = 8.0;
   static const double borderRadius = 32.0;
   static const double extraShiftDistance = 0.1;
+  // TODO(justinmc): Faster?
   static const int _kCommitMilliseconds = 200;
 
   double _calcXShift() {
+    // TODO(justinmc): InheritedModel? Extract to build method as just Size?
     final double screenWidth = MediaQuery.of(context).size.width;
     final double xShift = (screenWidth / divisionFactor) - margin;
 
@@ -586,11 +596,13 @@ class _PredictiveBackPageSharedElementTransitionState
         .value;
   }
 
-  double calcYShift() {
-    final double screenHeight = MediaQuery.of(context).size.height;
-
-    final double startTouchY = widget.startBackEvent?.touchOffset?.dy ?? 0;
-    final double currentTouchY = widget.currentBackEvent?.touchOffset?.dy ?? 0;
+  static double _getYPosition(
+    double screenHeight,
+    PredictiveBackEvent? startBackEvent,
+    PredictiveBackEvent? currentBackEvent,
+  ) {
+    final double startTouchY = startBackEvent?.touchOffset?.dy ?? 0;
+    final double currentTouchY = currentBackEvent?.touchOffset?.dy ?? 0;
 
     final double yShiftMax = (screenHeight / divisionFactor) - margin;
 
@@ -603,21 +615,32 @@ class _PredictiveBackPageSharedElementTransitionState
     return easedYShift.clamp(-yShiftMax, yShiftMax);
   }
 
+  double calcYShift() {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    return _getYPosition(screenHeight, widget.startBackEvent, widget.currentBackEvent);
+  }
+
   @override
   void initState() {
     super.initState();
+    // TODO(justinmc): Can commitController be local to this method?
     commitController = AnimationController(
       duration: const Duration(milliseconds: _kCommitMilliseconds),
       vsync: this,
     );
+    commitAnimation = CurvedAnimation(parent: commitController, curve: Curves.easeOut);
 
     mergedAnimations = Listenable.merge(<Listenable>[widget.animation, commitController]);
 
-    _opacityAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: commitController, curve: Curves.easeOut));
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(commitAnimation);
+    // TODO(justinmc): Pull out this tween, and maybe others, to constants.
     _scaleAnimation = Tween<double>(begin: scalePercentage, end: 1.0).animate(widget.animation);
+    _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
+    _positionAnimation = Tween<Offset>(
+      begin: Offset(widget.currentBackEvent?.swipeEdge == SwipeEdge.right ? -xShift : xShift, 0.0),
+      end: Offset.zero,
+    ).animate(widget.animation);
+    _yAnimationCommit = Tween<double>(begin: 0.0, end: _lastYPosition).animate(commitAnimation);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
       commitController.forward(from: 0.0);
@@ -630,6 +653,19 @@ class _PredictiveBackPageSharedElementTransitionState
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       commitController.forward(from: 0.0);
+      // TODO(justinmc): Or reverse?
+      final Animation<double> commitAnimation = CurvedAnimation(
+        parent: commitController,
+        curve: Curves.easeOut,
+      );
+      _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
+      _yAnimationCommit = Tween<double>(begin: _lastYPosition, end: 0.0).animate(commitAnimation);
+      final double screenWidth = MediaQuery.of(context).size.width;
+      _xAnimationCommit = Tween<double>(
+        begin: 0.0,
+        // TODO(justinmc): Something is wrong with x commit. You need to set and use xShift somehow correctly.
+        end: screenWidth * extraShiftDistance + xShift,
+      ).animate(commitAnimation);
     }
   }
 
@@ -641,30 +677,62 @@ class _PredictiveBackPageSharedElementTransitionState
 
   @override
   Widget build(BuildContext context) {
+    // TODO(justinmc): It's a bummer I have to check this when really it's only needed on the first build...
+    if (_xAnimationCommit == null) {
+      final double screenWidth = MediaQuery.of(context).size.width;
+      _xAnimationCommit = Tween<double>(
+        begin: 0.0,
+        end: screenWidth * extraShiftDistance,
+      ).animate(commitAnimation);
+    }
+
+    if (_xAnimation == null) {
+      final double screenWidth = MediaQuery.of(context).size.width;
+      final double xShift = (screenWidth / divisionFactor) - margin;
+      _xAnimation = Tween<double>(
+        begin: widget.currentBackEvent?.swipeEdge == SwipeEdge.right ? -xShift : xShift,
+        end: 0.0,
+      ).animate(widget.animation);
+    }
+
     return AnimatedBuilder(
       animation: mergedAnimations,
       builder: (BuildContext context, Widget? child) {
         // TODO(justinmc): Separate widget or inline?
+        /*
         final double xShift = switch (widget.phase) {
           _PredictiveBackPhase.commit => this.xShift + _calcCommitXShift(),
           _ => this.xShift = _calcXShift(),
         };
         final double yShift = switch (widget.phase) {
-          _PredictiveBackPhase.commit => this.yShift,
-          _ => this.yShift = calcYShift(),
+          _PredictiveBackPhase.commit => this._lastYPosition,
+          _ => this._lastYPosition = calcYShift(),
         };
+        */
 
         final Tween<double> gapTween = Tween<double>(begin: margin, end: 0.0);
         final Tween<double> borderRadiusTween = Tween<double>(begin: borderRadius, end: 0.0);
 
         return Transform.scale(
           scale: switch (widget.phase) {
-            _PredictiveBackPhase.commit => _lastScale,
+            _PredictiveBackPhase.commit => _scaleAnimationCommit.value,
             _ => _lastScale = _scaleAnimation.value,
           },
           child: Transform.translate(
-            offset: Offset(xShift, yShift),
+            //offset: Offset(xShift, yShift),
+            offset: switch (widget.phase) {
+              _PredictiveBackPhase.commit => Offset(
+                _xAnimationCommit!.value,
+                //this.xShift + _calcCommitXShift(),
+                //_lastYPosition,
+                _yAnimationCommit.value,
+              ),
+              //_ => _positionAnimation.value,
+              //_ => Offset(_positionAnimation.value.dx, _lastYPosition = calcYShift  ()),
+              _ => Offset(xShift = _xAnimation!.value, _lastYPosition = calcYShift()),
+            },
             child: Opacity(
+              // TODO(justinmc): Double check that the opacity animation works correctly.
               opacity: _opacityAnimation.value,
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: gapTween.animate(widget.animation).value),
