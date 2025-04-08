@@ -826,7 +826,7 @@ object FlutterPluginUtils {
         //    https://github.com/flutter/flutter/issues/166550
         @Suppress("DEPRECATION")
         val manifest: Node =
-            groovy.util.XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
+            groovy.xml.XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
         val applicationNode: Node? =
             manifest.children().find { node ->
                 node is Node && node.name() == "application"
