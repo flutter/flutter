@@ -163,7 +163,7 @@ class SemanticScrollable extends SemanticRole {
       };
       EngineSemantics.instance.addGestureModeListener(_gestureModeListener!);
 
-      scrollListener = createDomEventListener((_) {
+      scrollListener = createDomEventListener((DomEvent _) {
         if (!_canScroll) {
           return;
         }

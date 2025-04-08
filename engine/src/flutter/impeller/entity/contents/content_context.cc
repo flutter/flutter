@@ -13,6 +13,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
@@ -272,7 +273,8 @@ struct ContentContext::Pipelines {
   Variants<TexturePipeline> texture;
   Variants<TextureStrictSrcPipeline> texture_strict_src;
   Variants<TiledTexturePipeline> tiled_texture;
-  Variants<VerticesUberShader> vertices_uber_shader_;
+  Variants<VerticesUber1Shader> vertices_uber_1_;
+  Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
 #ifdef IMPELLER_ENABLE_OPENGLES
@@ -531,7 +533,8 @@ ContentContext::ContentContext(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
       host_buffer_(HostBuffer::Create(context_->GetResourceAllocator(),
-                                      context_->GetIdleWaiter())) {
+                                      context_->GetIdleWaiter())),
+      text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -668,8 +671,10 @@ ContentContext::ContentContext(
                                                options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
-    pipelines_->vertices_uber_shader_.CreateDefault(*context_, options,
-                                                    {supports_decal});
+    pipelines_->vertices_uber_1_.CreateDefault(*context_, options,
+                                               {supports_decal});
+    pipelines_->vertices_uber_2_.CreateDefault(*context_, options,
+                                               {supports_decal});
 
     const std::array<std::vector<Scalar>, 15> porter_duff_constants =
         GetPorterDuffSpecConstants(supports_decal);
@@ -1421,9 +1426,14 @@ PipelineRef ContentContext::GetFramebufferBlendSoftLightPipeline(
   return GetPipeline(this, pipelines_->framebuffer_blend_softlight, opts);
 }
 
-PipelineRef ContentContext::GetDrawVerticesUberShader(
+PipelineRef ContentContext::GetDrawVerticesUberPipeline(
+    BlendMode blend_mode,
     ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->vertices_uber_shader_, opts);
+  if (blend_mode <= BlendMode::kHardLight) {
+    return GetPipeline(this, pipelines_->vertices_uber_1_, opts);
+  } else {
+    return GetPipeline(this, pipelines_->vertices_uber_2_, opts);
+  }
 }
 
 PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {

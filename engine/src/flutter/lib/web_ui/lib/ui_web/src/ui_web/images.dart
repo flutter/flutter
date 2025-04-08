@@ -28,7 +28,7 @@ Future<ui.Codec> createImageCodecFromUrl(Uri uri, {ImageCodecChunkCallback? chun
 ///
 /// See https://developer.mozilla.org/en-US/docs/Web/API/ImageBitmap
 FutureOr<ui.Image> createImageFromImageBitmap(JSAny imageSource) {
-  if (!domInstanceOfString(imageSource, 'ImageBitmap')) {
+  if (!imageSource.isA<DomImageBitmap>()) {
     throw ArgumentError('Image source $imageSource is not an ImageBitmap.', 'imageSource');
   }
   return renderer.createImageFromImageBitmap(imageSource as DomImageBitmap);

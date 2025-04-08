@@ -21,9 +21,7 @@ class HighContrastSupport {
   final DomMediaQueryList _highContrastMediaQuery = domWindow.matchMedia(
     _highContrastMediaQueryString,
   );
-  late final DomEventListener _onHighContrastChangeListener = createDomEventListener(
-    _onHighContrastChange,
-  );
+  late final DomEventListener _onHighContrastChangeListener = _onHighContrastChange.toJS;
 
   bool get isHighContrastEnabled => _highContrastMediaQuery.matches;
 
@@ -43,7 +41,7 @@ class HighContrastSupport {
     }
   }
 
-  JSVoid _onHighContrastChange(DomEvent event) {
+  void _onHighContrastChange(DomEvent event) {
     final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
     final bool isHighContrastEnabled = mqEvent.matches!;
     for (final HighContrastListener listener in _listeners) {

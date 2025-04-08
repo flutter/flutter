@@ -129,21 +129,28 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         hide: !verboseHelp,
       )
       ..addFlag(
-        kUseFlutterWeb,
-        help: 'Launches the widget preview environment using Flutter Web.',
+        kUseFlutterDesktop,
+        help: '(deprecated) Launches the widget preview environment using Flutter Desktop.',
         hide: !verboseHelp,
       )
       ..addFlag(
         kHeadlessWeb,
         help: 'Launches Chrome in headless mode for testing.',
         hide: !verboseHelp,
+      )
+      ..addOption(
+        kWidgetPreviewScaffoldOutputDir,
+        help:
+            'Generated the widget preview environment scaffolding at a given location '
+            'for testing purposes.',
       );
   }
 
   static const String kWidgetPreviewScaffoldName = 'widget_preview_scaffold';
   static const String kLaunchPreviewer = 'launch-previewer';
-  static const String kUseFlutterWeb = 'web';
+  static const String kUseFlutterDesktop = 'desktop';
   static const String kHeadlessWeb = 'headless-web';
+  static const String kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -159,7 +166,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final bool verboseHelp;
 
-  bool get isWeb => boolArg(kUseFlutterWeb);
+  bool get isWeb => !boolArg(kUseFlutterDesktop);
 
   @override
   final FileSystem fs;
@@ -189,30 +196,36 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final PreviewCodeGenerator _previewCodeGenerator;
-  late final PreviewManifest _previewManifest;
+  late final PreviewManifest _previewManifest = PreviewManifest(
+    logger: logger,
+    rootProject: rootProject,
+    fs: fs,
+    cache: cache,
+  );
 
   /// The currently running instance of the widget preview scaffold.
   AppInstance? _widgetPreviewApp;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Directory widgetPreviewScaffold = rootProject.widgetPreviewScaffold;
-    _previewManifest = PreviewManifest(
-      logger: logger,
-      rootProject: rootProject,
-      fs: fs,
-      cache: cache,
-    );
+    final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
+    final Directory widgetPreviewScaffold =
+        customPreviewScaffoldOutput != null
+            ? fs.directory(customPreviewScaffoldOutput)
+            : rootProject.widgetPreviewScaffold;
 
     // Check to see if a preview scaffold has already been generated. If not,
     // generate one.
-    final bool generateScaffoldProject = _previewManifest.shouldGenerateProject();
+    final bool generateScaffoldProject =
+        customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
     // TODO(bkonyi): can this be moved?
     widgetPreviewScaffold.createSync();
 
     if (generateScaffoldProject) {
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-      logger.printStatus('Creating widget preview scaffolding at: ${widgetPreviewScaffold.path}');
+      logger.printStatus(
+        'Creating widget preview scaffolding at: ${widgetPreviewScaffold.absolute.path}',
+      );
       await generateApp(
         <String>['app', kWidgetPreviewScaffoldName],
         widgetPreviewScaffold,
@@ -230,6 +243,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         overwrite: true,
         generateMetadata: false,
       );
+      if (customPreviewScaffoldOutput != null) {
+        return FlutterCommandResult.success();
+      }
       _previewManifest.generate();
 
       // WARNING: this access of widgetPreviewScaffoldProject needs to happen
@@ -428,6 +444,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       const String? kEmptyRoute = null;
       const bool kEnableHotReload = true;
 
+      // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
+      logger.printStatus('Launching the Widget Preview Scaffold...');
+
       app = await Daemon.createMachineDaemon().appDomain.startApp(
         device,
         widgetPreviewScaffoldProject.directory.path,
@@ -446,7 +465,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
               widgetPreviewScaffoldProject.packageConfig.uri,
             ),
           ),
-          webEnableExposeUrl: false, // TODO(bkonyi): verify
+          webEnableExposeUrl: false,
           webRunHeadless: boolArg(kHeadlessWeb),
         ),
         kEnableHotReload, // hot mode
@@ -457,11 +476,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     } on Exception catch (error) {
       throwToolExit(error.toString());
     }
-    // Immediately perform a hot restart to ensure new previews are loaded into the prebuilt
-    // application.
-    // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-    logger.printStatus('Loading previews into the Widget Preview Scaffold...');
-    await app.restart(fullRestart: true);
+
+    if (!isWeb) {
+      // Immediately perform a hot restart to ensure new previews are loaded into the prebuilt
+      // application.
+      // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
+      logger.printStatus('Loading previews into the Widget Preview Scaffold...');
+      await app.restart(fullRestart: true);
+    }
     // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
     logger.printStatus('Done loading previews.');
     return app;
