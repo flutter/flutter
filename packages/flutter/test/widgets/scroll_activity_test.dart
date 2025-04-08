@@ -62,6 +62,7 @@ void main() {
 
   testWidgets('DrivenScrollActivity allows overriding applyMoveTo', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     final List<ScrollNotification> notifications = <ScrollNotification>[];
     await tester.pumpWidget(
       Directionality(
