@@ -50,7 +50,7 @@ class FlutterPlugin : Plugin<Project> {
 
         val flutterRootSystemVal: String? = System.getenv("FLUTTER_ROOT")
         val flutterRootPath: String =
-            resolveProperty("flutter.sdk", flutterRootSystemVal)
+            resolveFlutterSdkProperty(flutterRootSystemVal)
                 ?: throw GradleException(
                     "Flutter SDK not found. Define location with flutter.sdk in the " +
                         "local.properties file or with a FLUTTER_ROOT environment variable."
@@ -276,10 +276,8 @@ class FlutterPlugin : Plugin<Project> {
     private fun getExecutableNameForPlatform(baseExecutableName: String): String =
         if (OperatingSystem.current().isWindows) "$baseExecutableName.bat" else baseExecutableName
 
-    private fun resolveProperty(
-        propertyName: String,
-        defaultValue: String?
-    ): String? {
+    private fun resolveFlutterSdkProperty(defaultValue: String?): String? {
+        val propertyName = "flutter.sdk"
         if (localProperties == null) {
             localProperties =
                 readPropertiesIfExist(File(project!!.projectDir.parentFile, "local.properties"))
@@ -347,6 +345,9 @@ class FlutterPlugin : Plugin<Project> {
                     try {
                         variantOutput.processResourcesProvider.get()
                     } catch (e: UnknownTaskException) {
+                        // TODO(gmackall): Migrate to AGPs variant api.
+                        //    https://github.com/flutter/flutter/issues/166550
+                        @Suppress("DEPRECATION")
                         variantOutput.processResources
                     }
                 processResources.dependsOn(copyFlutterAssetsTask)
@@ -717,6 +718,9 @@ class FlutterPlugin : Plugin<Project> {
                         try {
                             variant.mergeAssetsProvider.get()
                         } catch (e: IllegalStateException) {
+                            // TODO(gmackall): Migrate to AGPs variant api.
+                            //    https://github.com/flutter/flutter/issues/166550
+                            @Suppress("DEPRECATION")
                             variant.mergeAssets
                         }
                     dependsOn(mergeAssets)
@@ -734,6 +738,9 @@ class FlutterPlugin : Plugin<Project> {
                     try {
                         variantOutput.processResourcesProvider.get()
                     } catch (e: IllegalStateException) {
+                        // TODO(gmackall): Migrate to AGPs variant api.
+                        //    https://github.com/flutter/flutter/issues/166550
+                        @Suppress("DEPRECATION")
                         variantOutput.processResources
                     }
                 processResources.dependsOn(copyFlutterAssetsTask)

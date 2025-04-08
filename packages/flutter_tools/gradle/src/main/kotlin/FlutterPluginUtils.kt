@@ -511,11 +511,8 @@ object FlutterPluginUtils {
                 getCompileSdkFromProject(project).toIntOrNull() ?: Int.MAX_VALUE
 
             var maxPluginCompileSdkVersion = projectCompileSdkVersion
-            // TODO(gmackall): This should be updated to reflect newer templates.
-            // The default for AGP 4.1.0 used in old templates.
-            val ndkVersionIfUnspecified = "21.1.6352462"
             val projectNdkVersion =
-                getAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
+                getAndroidExtension(project).ndkVersion
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
@@ -541,7 +538,7 @@ object FlutterPluginUtils {
                         )
                     }
                     val pluginNdkVersion: String =
-                        getAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
+                        getAndroidExtension(pluginProject).ndkVersion
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
@@ -775,7 +772,7 @@ object FlutterPluginUtils {
         }
         android.applicationVariants.configureEach {
             val variant = this
-            project.tasks.register("output${FlutterPluginUtils.capitalize(variant.name)}AppLinkSettings") {
+            project.tasks.register("output${capitalize(variant.name)}AppLinkSettings") {
                 val task: Task = this
                 task.description =
                     "stores app links settings for the given build variant of this Android project into a json file."
@@ -809,6 +806,7 @@ object FlutterPluginUtils {
      * @param BaseVariantOutput The output of a specific build variant (e.g., debug, release).
      * @param variant The application variant being processed.
      */
+    @Suppress("KDocUnresolvedReference")
     private fun createAppLinkSettings(
         // TODO(gmackall): Migrate to AGPs variant api.
         //    https://github.com/flutter/flutter/issues/166550
@@ -816,7 +814,11 @@ object FlutterPluginUtils {
         @Suppress("DEPRECATION") baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput
     ): AppLinkSettings {
         val appLinkSettings = AppLinkSettings(variant.applicationId)
+
         // XmlParser is not namespace aware because it makes querying nodes cumbersome.
+        // TODO(gmackall): Migrate to AGPs variant api.
+        //    https://github.com/flutter/flutter/issues/166550
+        @Suppress("DEPRECATION")
         val manifest: Node =
             XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
         val applicationNode: Node? =
