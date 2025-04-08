@@ -516,6 +516,7 @@ class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
   }
 }
 
+// TODO(justinmc): Make this the default, what PredictiveBackPageTransitionBuilder does. Preserve the fullscreen animation as non-default.
 /// Android's predictive back page shared element transition.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
 class _PredictiveBackPageSharedElementTransition extends StatefulWidget {
@@ -559,15 +560,16 @@ class _PredictiveBackPageSharedElementTransitionState
   static const double borderRadius = 32.0;
   static const double extraShiftDistance = 0.1;
 
+  // The maximum duration of the commit animation, as if the gesture has not
+  // progressed the animation at all before the commit.
   // Eyeballed on a Pixel 9 running Android 16.
-  static const Duration _kDuration = Duration(milliseconds: 200);
+  static const int _kMaxMilliseconds = 200;
 
   @override
   void initState() {
     super.initState();
     commitController = AnimationController(
-      // TODO(justinmc): What is this duration? Pull out and write a comment about where it comes from.
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: _kMaxMilliseconds),
       vsync: this,
     );
 
@@ -584,7 +586,7 @@ class _PredictiveBackPageSharedElementTransitionState
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       final int droppedPageBackAnimationTime =
-          ui.lerpDouble(0, 200, widget.animation.value)!.floor();
+          ui.lerpDouble(0, _kMaxMilliseconds, widget.animation.value)!.floor();
 
       commitController.duration = Duration(milliseconds: droppedPageBackAnimationTime);
       commitController.forward(from: 0.0);
@@ -616,10 +618,9 @@ class _PredictiveBackPageSharedElementTransitionState
     ).animate(widget.animation).value;
   }
 
-  // TODO(justinmc): Change "calc"" names to "get".
+  // TODO(justinmc): Change "calc"" names to "get". And make private.
   double _calcCommitXShift() {
     final double screenWidth = MediaQuery.of(context).size.width;
-    /*
     return Tween<double>(begin: 0.0, end: screenWidth * extraShiftDistance)
         .animate(
           CurvedAnimation(
@@ -628,17 +629,6 @@ class _PredictiveBackPageSharedElementTransitionState
           ),
         )
         .value;
-    */
-    final double out =
-        Tween<double>(begin: 0.0, end: screenWidth * extraShiftDistance)
-            .animate(
-              CurvedAnimation(
-                parent: commitController,
-                curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
-              ),
-            )
-            .value;
-    return out;
   }
 
   double calcYShift() {
@@ -687,6 +677,7 @@ class _PredictiveBackPageSharedElementTransitionState
       _ => this.scale = calcScale(),
     };
 
+    // TODO(justinmc): Could this use an animation instead of being calculated directly?
     final double opacity = calcOpacity();
 
     final Tween<double> gapTween = Tween<double>(begin: margin, end: 0.0);
