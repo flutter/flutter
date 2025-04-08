@@ -74,7 +74,7 @@ TEST(AllocatorVKTest, MemoryTypeSelectionTwoHeap) {
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(4, properties), -1);
 }
 
-TEST(AllocatorVKTest, ImageResourceKeepsVulkanContextAlive) {
+TEST(AllocatorVKTest, ImageResourceKeepsVulkanDeviceAlive) {
   std::shared_ptr<Texture> texture;
   std::weak_ptr<Allocator> weak_allocator;
   {
@@ -84,6 +84,7 @@ TEST(AllocatorVKTest, ImageResourceKeepsVulkanContextAlive) {
 
     texture = allocator->CreateTexture(TextureDescriptor{
         .storage_mode = StorageMode::kDevicePrivate,
+        .format = PixelFormat::kR8G8B8A8UNormInt,
         .size = {1, 1},
     });
     context->Shutdown();
