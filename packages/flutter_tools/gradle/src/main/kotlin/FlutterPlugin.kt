@@ -294,7 +294,7 @@ class FlutterPlugin : Plugin<Project> {
                 rootProject.subprojects.forEach { subproject ->
                     val gradlew: String =
                         getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                    rootProject.providers.exec {
+                    rootProject.exec {
                         workingDir(rootProject.projectDir)
                         executable(gradlew)
                         args(":${subproject.name}:dependencies", "--write-locks")

@@ -168,6 +168,6 @@ object BaseFlutterTaskHelper {
     fun buildBundle(baseFlutterTask: BaseFlutterTask) {
         checkPreConditions(baseFlutterTask)
         baseFlutterTask.logging.captureStandardError(LogLevel.ERROR)
-        baseFlutterTask.project.providers.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
+        baseFlutterTask.project.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
     }
 }
