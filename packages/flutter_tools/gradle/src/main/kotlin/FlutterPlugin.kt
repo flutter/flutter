@@ -23,6 +23,8 @@ import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Paths
@@ -294,7 +296,8 @@ class FlutterPlugin : Plugin<Project> {
                 rootProject.subprojects.forEach { subproject ->
                     val gradlew: String =
                         getExecutableNameForPlatform("${rootProject.projectDir}/gradlew")
-                    rootProject.exec {
+                    val execOps = rootProject.serviceOf<ExecOperations>()
+                    execOps.exec {
                         workingDir(rootProject.projectDir)
                         executable(gradlew)
                         args(":${subproject.name}:dependencies", "--write-locks")

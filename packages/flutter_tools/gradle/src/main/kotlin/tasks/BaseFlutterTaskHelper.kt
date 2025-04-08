@@ -10,6 +10,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.OutputFiles
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
 import java.nio.file.Paths
 
@@ -168,6 +170,7 @@ object BaseFlutterTaskHelper {
     fun buildBundle(baseFlutterTask: BaseFlutterTask) {
         checkPreConditions(baseFlutterTask)
         baseFlutterTask.logging.captureStandardError(LogLevel.ERROR)
-        baseFlutterTask.project.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
+        val execOps = baseFlutterTask.project.serviceOf<ExecOperations>()
+        execOps.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
     }
 }
