@@ -187,9 +187,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         }
 
         final String webRendererName;
-        if (benchmarkOptions.useDdc) {
-          webRendererName = 'ddc';
-        } else if (benchmarkOptions.useWasm) {
+        if (benchmarkOptions.useWasm) {
           webRendererName = benchmarkOptions.forceSingleThreadedSkwasm ? 'skwasm_st' : 'skwasm';
         } else {
           webRendererName = 'canvaskit';
