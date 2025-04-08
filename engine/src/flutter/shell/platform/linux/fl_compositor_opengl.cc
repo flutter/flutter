@@ -93,11 +93,7 @@ static bool is_supported_driver() {
 
   // Note: List of unsupported vendors due to issue
   // https://github.com/flutter/flutter/issues/152099
-  const char* unsupported_vendors[] = {
-    "NVIDIA",
-    "Vivante Corporation",
-    "ARM"
-  };
+  const char* unsupported_vendors[] = {"NVIDIA", "Vivante Corporation", "ARM"};
 
   for (const char* unsupported : unsupported_vendors) {
     if (strstr(vendor, unsupported) != nullptr) {
