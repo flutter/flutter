@@ -369,7 +369,7 @@ class FormState extends State<Form> {
       }
     }
 
-    if (errorMessage.isNotEmpty) {
+    if (errorMessage.isNotEmpty && defaultTargetPlatform != TargetPlatform.android) {
       final TextDirection directionality = Directionality.of(context);
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         unawaited(
