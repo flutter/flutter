@@ -200,6 +200,65 @@ void main() {
       ),
     );
 
+    testWidgets('ListTile statesController updates states correctly', (WidgetTester tester) async {
+      final WidgetStatesController controller = WidgetStatesController();
+      bool? isPressed;
+      bool? isHovered;
+
+      controller.addListener(() {
+        isPressed = controller.value.contains(WidgetState.pressed);
+        isHovered = controller.value.contains(WidgetState.hovered);
+      });
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: ListTile(
+                title: const Text('ListTile'),
+                statesController: controller,
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await hoverGesture.moveTo(tester.getCenter(find.byType(ListTile)));
+      await tester.pumpAndSettle();
+      expect(isHovered, true);
+
+      await tester.tap(find.byType(ListTile));
+      await tester.pump();
+      expect(isPressed, true);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(isPressed, false);
+
+      await hoverGesture.moveTo(const Offset(0, 0));
+      await tester.pumpAndSettle();
+      expect(isHovered, false);
+    });
+
+    testWidgets('ListTile without statesController works normally', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: ListTile(
+                title: const Text('ListTile'),
+                onTap: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(ListTile), findsOneWidget);
+      await tester.tap(find.byType(ListTile));
+      await tester.pump();
+    });
+
     double left(String text) => tester.getTopLeft(find.text(text)).dx;
     double right(String text) => tester.getTopRight(find.text(text)).dx;
 
