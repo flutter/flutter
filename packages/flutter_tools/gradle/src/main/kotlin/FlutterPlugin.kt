@@ -381,7 +381,7 @@ class FlutterPlugin : Plugin<Project> {
                             filename += "-$abi"
                         }
                         if (variant.flavorName != null && variant.flavorName.isNotEmpty()) {
-                            filename += "-${variant.flavorName.lowercase()}"
+                            filename += "-${FlutterPluginUtils.lowercase(variant.flavorName)}"
                         }
                         filename += "-${FlutterPluginUtils.buildModeFor(variant.buildType)}"
                         projectToAddTasksTo.copy {

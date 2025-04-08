@@ -59,6 +59,13 @@ object FlutterPluginUtils {
     @Suppress("DEPRECATION")
     internal fun capitalize(string: String): String = string.capitalize()
 
+    // Kotlin's toLowerCase function is deprecated, but the suggested replacement is not supported
+    // by the minimum version of Kotlin that we support. Centralize the use to one place, so that
+    // when our minimum version does support the replacement we can replace by changing a single
+    // line.
+    @Suppress("DEPRECATION")
+    internal fun lowercase(string: String): String = string.toLowerCase()
+
     // compareTo implementation of version strings in the format of ints and periods
     // Will not crash on RC candidate strings but considers all RC candidates the same version.
     // Returns -1 if firstString < secondString, 0 if firstString == secondString, 1 if firstString > secondString
