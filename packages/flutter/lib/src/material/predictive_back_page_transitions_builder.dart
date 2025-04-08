@@ -560,11 +560,7 @@ class _PredictiveBackPageSharedElementTransitionState
   static const double margin = 8.0;
   static const double borderRadius = 32.0;
   static const double extraShiftDistance = 0.1;
-
-  // The maximum duration of the commit animation, as if the gesture has not
-  // progressed the animation at all before the commit.
-  // Eyeballed on a Pixel 9 running Android 16.
-  static const int _kMaxMilliseconds = 200;
+  static const int _kCommitMilliseconds = 200;
 
   double _calcXShift() {
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -652,7 +648,7 @@ class _PredictiveBackPageSharedElementTransitionState
   void initState() {
     super.initState();
     commitController = AnimationController(
-      duration: const Duration(milliseconds: _kMaxMilliseconds),
+      duration: const Duration(milliseconds: _kCommitMilliseconds),
       vsync: this,
     );
 
@@ -673,10 +669,6 @@ class _PredictiveBackPageSharedElementTransitionState
     super.didUpdateWidget(oldWidget);
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
-      final int droppedPageBackAnimationTime =
-          ui.lerpDouble(0, _kMaxMilliseconds, widget.animation.value)!.floor();
-
-      commitController.duration = Duration(milliseconds: droppedPageBackAnimationTime);
       commitController.forward(from: 0.0);
     }
   }
