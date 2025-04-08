@@ -270,6 +270,8 @@ class CupertinoListTile extends StatefulWidget {
 
 class _CupertinoListTileState extends State<CupertinoListTile> {
   bool _tapped = false;
+  final GlobalKey trailingKey = GlobalKey();
+  final GlobalKey leadingKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +331,10 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
         child: Row(
           children: <Widget>[
             if (widget.leading case final Widget leading) ...<Widget>[
-              SizedBox.square(dimension: widget.leadingSize, child: Center(child: leading)),
+              SizedBox.square(
+                dimension: widget.leadingSize,
+                child: Center(child: KeyedSubtree(key: leadingKey, child: leading)),
+              ),
               SizedBox(width: widget.leadingToTitle),
             ] else
               SizedBox(height: widget.leadingSize),
@@ -357,7 +362,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
               DefaultTextStyle(style: coloredStyle, maxLines: 1, child: additionalInfo),
               if (widget.trailing != null) const SizedBox(width: _kAdditionalInfoToTrailing),
             ],
-            if (widget.trailing != null) widget.trailing!,
+            if (widget.trailing != null) KeyedSubtree(key: trailingKey, child: widget.trailing!),
           ],
         ),
       ),
