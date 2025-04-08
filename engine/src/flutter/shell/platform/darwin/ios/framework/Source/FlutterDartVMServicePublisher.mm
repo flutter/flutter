@@ -126,10 +126,14 @@ static void DNSSD_API RegistrationCallback(DNSServiceRef sdRef,
   if (errorCode == kDNSServiceErr_NoError) {
     FML_DLOG(INFO) << "FlutterDartVMServicePublisher is ready!";
   } else if (errorCode == kDNSServiceErr_PolicyDenied) {
+    // mDNS on simulators stopped working in macOS 15.4 and will always return
+    // kDNSServiceErr_PolicyDenied. See https://github.com/flutter/flutter/issues/166333.
+#if !(TARGET_IPHONE_SIMULATOR)
     FML_LOG(ERROR)
         << "Could not register as server for FlutterDartVMServicePublisher, permission "
         << "denied. Check your 'Local Network' permissions for this app in the Privacy section of "
         << "the system Settings.";
+#endif  // TARGET_IPHONE_SIMULATOR
   } else {
     FML_LOG(ERROR) << "Could not register as server for FlutterDartVMServicePublisher. Check your "
                       "network settings and relaunch the application.";
