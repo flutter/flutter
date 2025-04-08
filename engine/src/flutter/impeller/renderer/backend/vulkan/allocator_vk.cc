@@ -5,6 +5,7 @@
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 
 #include <memory>
+#include <utility>
 
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/fml/trace_event.h"
@@ -12,6 +13,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/vulkan/capabilities_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
+#include "impeller/renderer/backend/vulkan/device_holder_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "vulkan/vulkan_enums.hpp"
@@ -284,13 +286,12 @@ static VmaAllocationCreateFlags ToVmaAllocationCreateFlags(StorageMode mode) {
 
 class AllocatedTextureSourceVK final : public TextureSourceVK {
  public:
-  AllocatedTextureSourceVK(const std::shared_ptr<Context>& context,
+  AllocatedTextureSourceVK(const ContextVK& context,
                            const TextureDescriptor& desc,
                            VmaAllocator allocator,
                            vk::Device device,
                            bool supports_memoryless_textures)
-      : TextureSourceVK(desc),
-        resource_(ContextVK::Cast(*context).GetResourceManager()) {
+      : TextureSourceVK(desc), resource_(context.GetResourceManager()) {
     FML_DCHECK(desc.format != PixelFormat::kUnknown);
     vk::StructureChain<vk::ImageCreateInfo, vk::ImageCompressionControlEXT>
         image_info_chain;
@@ -317,7 +318,7 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
         vk::ImageCompressionFixedRateFlagBitsEXT::eNone};
 
     const auto frc_rate =
-        CapabilitiesVK::Cast(*context->GetCapabilities())
+        CapabilitiesVK::Cast(*context.GetCapabilities())
             .GetSupportedFRCRate(desc.compression_type,
                                  FRCFormatDescriptor{image_info});
     if (frc_rate.has_value()) {
@@ -406,9 +407,10 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
       return;
     }
 
-    resource_.Swap(ImageResource(ImageVMA{allocator, allocation, image},
-                                 std::move(image_view),
-                                 std::move(rt_image_view), context));
+    resource_.Swap(ImageResource(
+        ImageVMA{allocator, allocation, image}, std::move(image_view),
+        std::move(rt_image_view), context.GetResourceAllocator(),
+        context.GetDeviceHolder()));
     is_valid_ = true;
   }
 
@@ -430,7 +432,8 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
 
  private:
   struct ImageResource {
-    std::shared_ptr<Context> context;
+    std::shared_ptr<DeviceHolderVK> device_holder;
+    std::shared_ptr<Allocator> allocator;
     UniqueImageVMA image;
     vk::UniqueImageView image_view;
     vk::UniqueImageView rt_image_view;
@@ -440,8 +443,10 @@ class AllocatedTextureSourceVK final : public TextureSourceVK {
     ImageResource(ImageVMA p_image,
                   vk::UniqueImageView p_image_view,
                   vk::UniqueImageView p_rt_image_view,
-                  std::shared_ptr<Context> context)
-        : context(std::move(context)),
+                  std::shared_ptr<Allocator> allocator,
+                  std::shared_ptr<DeviceHolderVK> device_holder)
+        : device_holder(std::move(device_holder)),
+          allocator(std::move(allocator)),
           image(p_image),
           image_view(std::move(p_image_view)),
           rt_image_view(std::move(p_rt_image_view)) {}
@@ -476,7 +481,7 @@ std::shared_ptr<Texture> AllocatorVK::OnCreateTexture(
     return nullptr;
   }
   auto source = std::make_shared<AllocatedTextureSourceVK>(
-      context,                       //
+      ContextVK::Cast(*context),     //
       desc,                          //
       allocator_.get(),              //
       device_holder->GetDevice(),    //

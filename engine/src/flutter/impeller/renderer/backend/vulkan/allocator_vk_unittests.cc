@@ -5,10 +5,10 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/base/allocation_size.h"
+#include "impeller/core/allocator.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/allocator_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
@@ -74,6 +74,24 @@ TEST(AllocatorVKTest, MemoryTypeSelectionTwoHeap) {
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(4, properties), -1);
 }
 
+TEST(AllocatorVKTest, ImageResourceKeepsVulkanContextAlive) {
+  std::shared_ptr<Texture> texture;
+  std::weak_ptr<Allocator> weak_allocator;
+  {
+    auto const context = MockVulkanContextBuilder().Build();
+    weak_allocator = context->GetResourceAllocator();
+    auto allocator = context->GetResourceAllocator();
+
+    texture = allocator->CreateTexture(TextureDescriptor{
+        .storage_mode = StorageMode::kDevicePrivate,
+        .size = {1, 1},
+    });
+    context->Shutdown();
+  }
+
+  ASSERT_TRUE(weak_allocator.lock());
+}
+
 #ifdef IMPELLER_DEBUG
 
 TEST(AllocatorVKTest, RecreateSwapchainWhenSizeChanges) {
@@ -98,24 +116,6 @@ TEST(AllocatorVKTest, RecreateSwapchainWhenSizeChanges) {
                 .ConvertTo<MebiBytes>()
                 .GetSize(),
             16u);
-}
-
-TEST(AllocatorVKTest, ImageResourceKeepsVulkanContextAlive) {
-  std::shared_ptr<Texture> texture;
-  std::weak_ptr<Context> weak_context;
-  {
-    auto const context = MockVulkanContextBuilder().Build();
-    weak_context = context;
-    auto allocator = context->GetResourceAllocator();
-
-    texture = allocator->CreateTexture(TextureDescriptor{
-        .storage_mode = StorageMode::kDevicePrivate,
-        .size = {1, 1},
-    });
-    context->Shutdown();
-  }
-
-  ASSERT_TRUE(weak_context.lock());
 }
 
 #endif  // IMPELLER_DEBUG
