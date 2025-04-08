@@ -347,12 +347,18 @@ FlutterMain::SelectedRenderingAPI(const flutter::Settings& settings,
     // checking if it is valid.
     impeller::ScopedValidationDisable disable_validation;
     auto vulkan_backend = std::make_unique<AndroidContextVKImpeller>(
-        AndroidContext::ContextSettings{.enable_validation = false,
-                                        .enable_gpu_tracing = false,
-                                        .quiet = true});
+        AndroidContext::ContextSettings{
+            .enable_validation = false,
+            .enable_gpu_tracing = settings.enable_vulkan_gpu_tracing,
+            .quiet = true});
     if (!vulkan_backend->IsValid()) {
       return std::make_pair(kVulkanUnsupportedFallback, nullptr);
     }
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+    // In debug mode clear out the vulkan context so that we can
+    // recreate one that has VVL and/or GPU tracing.
+    vulkan_backend = nullptr;
+#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
     return std::make_pair(AndroidRenderingAPI::kImpellerVulkan,
                           std::move(vulkan_backend));
   }
