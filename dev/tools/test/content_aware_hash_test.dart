@@ -111,7 +111,7 @@ void main() {
   /// Initializes a blank git repo in [testRoot.root].
   void initGitRepoWithBlankInitialCommit({String? workingPath}) {
     run('git', <String>['init', '--initial-branch', 'master'], workingPath: workingPath);
-    run('git', 'config --local core.autocrlf input'.split(' '));
+    run('git', 'config --local core.autocrlf true'.split(' '));
     run('git', <String>[
       'config',
       '--local',
@@ -134,13 +134,9 @@ void main() {
     run('git', <String>['commit', '--all', '-m', 'changed ${file.basename} to $contents']);
   }
 
-  /// content aware hash
-  /// - works by tracking expected files
-  /// - ignores files that are not tracked
-
   test('generates a hash', () async {
     initGitRepoWithBlankInitialCommit();
-    expect(runContentAwareHash(), processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd'));
+    expect(runContentAwareHash(), processStdout('e9d1f7dc1718dac8e8189791a8073e38abdae1cf'));
   });
 
   group('generates a different hash when', () {
@@ -149,23 +145,19 @@ void main() {
     });
 
     test('DEPS is changed', () async {
-      expect(runContentAwareHash(), processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd'));
       writeFileAndCommit(testRoot.deps, 'deps changed');
-      expect(runContentAwareHash(), processStdout('f344433fcf9a21a29c8794adf6fe359a59b7e0ea'));
+      expect(runContentAwareHash(), processStdout('d31d5bc23cd8808880f3929af83591f8566317f8'));
     });
 
     test('content_aware_hash workflow changes', () async {
-      expect(runContentAwareHash(), processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd'));
       writeFileAndCommit(testRoot.contentAwareHashWorkflow, 'content_aware_hash.yml changed');
-      expect(runContentAwareHash(), processStdout('5195ec5caab278b88d1d5cd7c5b3e43bbb57ac0f'));
+      expect(runContentAwareHash(), processStdout('c66497e13ac553ce9e2b53b1f17a6a1919836350'));
     });
 
     test('content_aware_hash.(sh|ps1) workflow changes', () async {
-      expect(runContentAwareHash(), processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd'));
-
       if (const LocalPlatform().isWindows) {
         writeFileAndCommit(testRoot.contentAwareHashSh, 'content_aware_hash.sh changed');
-        expect(runContentAwareHash(), processStdout('ade98da8ffb1674a46a2c14a9849a6e3ae33df89'));
+        expect(runContentAwareHash(), processStdout('52852fcb0d1b85543a306e970c2773c2aed8651e'));
       } else {
         writeFileAndCommit(testRoot.contentAwareHashPs1, 'content_aware_hash.ps1 changed');
         expect(runContentAwareHash(), processStdout('da6aaf5dbe511a5419e29ae94d559101b7f8c973'));
@@ -173,14 +165,11 @@ void main() {
     });
 
     test('an engine file changes', () async {
-      expect(runContentAwareHash(), processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd'));
       writeFileAndCommit(testRoot.engineReadMe, 'engine file changed');
-      expect(runContentAwareHash(), processStdout('4ed69cffd5eeb6475053a5c566634fd2b5a3d246'));
+      expect(runContentAwareHash(), processStdout('717aacfdabe1828a915da54330e0f623331df393'));
     });
 
     test('a new engine file is added', () async {
-      expect(runContentAwareHash(), processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd'));
-
       final List<String> gibberish = ('_abcdefghijklmnopqrstuvqxyz0123456789' * 20).split('')
         ..shuffle();
       final String newFileName = gibberish.take(20).join();
@@ -192,7 +181,7 @@ void main() {
 
       expect(
         runContentAwareHash(),
-        isNot(processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd')),
+        isNot(processStdout('e9d1f7dc1718dac8e8189791a8073e38abdae1cf')),
       );
     });
 
@@ -201,15 +190,14 @@ void main() {
         testRoot.contentAwareHashPs1.parent.childFile('release-candidate-branch.version'),
         'sup',
       );
-      expect(runContentAwareHash(), processStdout('094933cb0a08fd02f4b448741a9ad9960b02cdda'));
+      expect(runContentAwareHash(), processStdout('e9c7b9eaaffca015df5909f062f21e0e70d5bcdf'));
     });
   });
 
   test('does not hash non-engine files', () async {
     initGitRepoWithBlankInitialCommit();
-    expect(runContentAwareHash(), processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd'));
     testRoot.flutterReadMe.writeAsStringSync('codefu was here');
-    expect(runContentAwareHash(), processStdout('5809e032a98c336b1823ac8b052641b6d9891bbd'));
+    expect(runContentAwareHash(), processStdout('e9d1f7dc1718dac8e8189791a8073e38abdae1cf'));
   });
 }
 
