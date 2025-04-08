@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show LineSplitter, json, utf8;
+import 'dart:convert' show json;
 import 'dart:io' as io;
 
 import 'package:logging/logging.dart';
