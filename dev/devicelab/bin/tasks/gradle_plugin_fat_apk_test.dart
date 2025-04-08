@@ -160,9 +160,6 @@ Future<void> main() async {
         final String modifiedPath = path.join(
           project.rootPath,
           'build',
-          'app',
-          'intermediates',
-          'flutter',
           '.cxx',
         );
         if (Directory(defaultPath).existsSync()) {

@@ -614,7 +614,7 @@ object FlutterPluginUtils {
         // and rebuilt when running clean builds.
         gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
             gradleProject.layout.buildDirectory
-                .dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/.cxx")
+                .dir("../.cxx")
                 .get()
                 .asFile.path
         )
