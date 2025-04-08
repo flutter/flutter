@@ -160,7 +160,7 @@ void main() {
         expect(runContentAwareHash(), processStdout('52852fcb0d1b85543a306e970c2773c2aed8651e'));
       } else {
         writeFileAndCommit(testRoot.contentAwareHashPs1, 'content_aware_hash.ps1 changed');
-        expect(runContentAwareHash(), processStdout('da6aaf5dbe511a5419e29ae94d559101b7f8c973'));
+        expect(runContentAwareHash(), processStdout('1e431435cbd2782de1ccfd98618654ac6426fb6e'));
       }
     });
 
