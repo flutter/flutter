@@ -66,6 +66,19 @@ In the engine, you may follow [Upgrading Engine's Android API version](https://g
 - Example Framework PR: <https://github.com/flutter/flutter/pull/152498>.
 - Example Engine PR: <https://github.com/flutter/engine/pull/54186>.
 
+##### Update Java Version in CI (Only for Java LTS Release)
+
+Every few years Java releases a new Java LTS (long-term support) version, which typically
+becomes the industry standard for a few years. As users adopt the new Java LTS version, either
+directly or as part of the latest Android SDK, we want to update our CI to test against the new Java version
+to identify and address potential compatibility issues.
+
+Upload the new Java Version package to CIPD following the instructions [here](/docs/platforms/android/Uploading-New-Java-Version-to-CIPD.md).
+
+Update the usages of the current Java version to the new Java version in CI.
+
+- Example PR: <https://github.com/flutter/flutter/pull/165210>.
+
 #### Update documentation
 
 Update documentation page to indicate the new API is tested
