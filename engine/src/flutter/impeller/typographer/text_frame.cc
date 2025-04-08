@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "impeller/typographer/text_frame.h"
+#include "flutter/display_list/geometry/dl_path.h"  // nogncheck
+#include "fml/status.h"
 #include "impeller/geometry/scalar.h"
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/font_glyph_pair.h"
@@ -11,8 +13,14 @@ namespace impeller {
 
 TextFrame::TextFrame() = default;
 
-TextFrame::TextFrame(std::vector<TextRun>& runs, Rect bounds, bool has_color)
-    : runs_(std::move(runs)), bounds_(bounds), has_color_(has_color) {}
+TextFrame::TextFrame(std::vector<TextRun>& runs,
+                     Rect bounds,
+                     bool has_color,
+                     const PathCreator& path_creator)
+    : runs_(std::move(runs)),
+      bounds_(bounds),
+      has_color_(has_color),
+      path_creator_(path_creator) {}
 
 TextFrame::~TextFrame() = default;
 
@@ -138,12 +146,30 @@ void TextFrame::ClearFrameBounds() {
   bound_values_.clear();
 }
 
+fml::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
+  if (path_creator_) {
+    return path_creator_();
+  }
+  return fml::Status(fml::StatusCode::kCancelled, "no path creator specified.");
+}
+
 bool TextFrame::IsFrameComplete() const {
   size_t run_size = 0;
   for (const auto& x : runs_) {
     run_size += x.GetGlyphCount();
   }
   return bound_values_.size() == run_size;
+}
+
+const Font& TextFrame::GetFont() const {
+  return runs_[0].GetFont();
+}
+
+std::optional<Glyph> TextFrame::AsSingleGlyph() const {
+  if (runs_.size() == 1 && runs_[0].GetGlyphCount() == 1) {
+    return runs_[0].GetGlyphPositions()[0].glyph;
+  }
+  return std::nullopt;
 }
 
 const FrameBounds& TextFrame::GetFrameBounds(size_t index) const {

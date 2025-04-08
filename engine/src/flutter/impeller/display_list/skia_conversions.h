@@ -19,8 +19,6 @@ Color ToColor(const flutter::DlColor& color);
 impeller::SamplerDescriptor ToSamplerDescriptor(
     const flutter::DlImageSampling options);
 
-BlendMode ToBlendMode(flutter::DlBlendMode mode);
-
 }  // namespace skia_conversions
 }  // namespace impeller
 

@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Søk på nettet",
   "shareButtonLabel": "Del…",
   "clearButtonLabel": "Slett",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Avbryt",
+  "backButtonLabel": "Tilbake"
 }

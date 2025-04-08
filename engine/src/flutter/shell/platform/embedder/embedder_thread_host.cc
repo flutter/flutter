@@ -255,6 +255,7 @@ EmbedderThreadHost::CreateEmbedderManagedThreadHost(
   }
 
   return nullptr;
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 // static

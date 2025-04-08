@@ -4,7 +4,7 @@
 
 import 'package:meta/meta.dart';
 
-import 'package:ui/src/engine/dom.dart' show DomNavigatorExtension, DomWindowExtension, domWindow;
+import 'package:ui/src/engine/dom.dart' show domWindow;
 
 /// The HTML engine used by the current browser.
 enum BrowserEngine {

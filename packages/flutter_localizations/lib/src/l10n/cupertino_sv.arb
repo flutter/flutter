@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Sök på webben",
   "shareButtonLabel": "Dela …",
   "clearButtonLabel": "Rensa",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Avbryt",
+  "backButtonLabel": "Tillbaka"
 }

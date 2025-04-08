@@ -76,6 +76,7 @@ class LocaleInitialization extends Scenario {
           childrenInHitTestOrder: Int32List(0),
           additionalActions: Int32List(0),
           controlsNodes: null,
+          inputType: SemanticsInputType.none,
         );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();
@@ -137,6 +138,7 @@ class LocaleInitialization extends Scenario {
           childrenInHitTestOrder: Int32List(0),
           additionalActions: Int32List(0),
           controlsNodes: null,
+          inputType: SemanticsInputType.none,
         );
 
     final SemanticsUpdate semanticsUpdate = semanticsUpdateBuilder.build();

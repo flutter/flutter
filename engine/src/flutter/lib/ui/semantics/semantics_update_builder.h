@@ -69,7 +69,8 @@ class SemanticsUpdateBuilder
       int headingLevel,
       std::string linkUrl,
       int role,
-      const std::vector<std::string>& controlsNodes);
+      const std::vector<std::string>& controlsNodes,
+      int validationResult);
 
   void updateCustomAction(int id,
                           std::string label,

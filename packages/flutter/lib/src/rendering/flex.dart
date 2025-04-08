@@ -1113,7 +1113,7 @@ class RenderFlex extends RenderBox
             ...addendum,
             ErrorDescription(
               "If none of the above helps enough to fix this problem, please don't hesitate to file a bug:\n"
-              '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+              '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
             ),
           ]);
           return true;

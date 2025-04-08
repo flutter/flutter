@@ -5,7 +5,6 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/overlay_layer_pool.h"
 
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterOverlayView.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 
 namespace flutter {
@@ -23,7 +22,7 @@ void OverlayLayer::UpdateViewState(UIView* flutter_view,
                                    SkRect rect,
                                    int64_t view_id,
                                    int64_t overlay_id) {
-  auto screenScale = ((FlutterView*)flutter_view).screen.scale;
+  auto screenScale = [UIScreen mainScreen].scale;
   // Set the size of the overlay view wrapper.
   // This wrapper view masks the overlay view.
   overlay_view_wrapper.frame = CGRectMake(rect.x() / screenScale, rect.y() / screenScale,
@@ -54,13 +53,13 @@ std::shared_ptr<OverlayLayer> OverlayLayerPool::GetNextLayer() {
 }
 
 void OverlayLayerPool::CreateLayer(const std::shared_ptr<IOSContext>& ios_context,
-                                   MTLPixelFormat pixel_format,
-                                   CGFloat screenScale) {
+                                   MTLPixelFormat pixel_format) {
   FML_DCHECK([[NSThread currentThread] isMainThread]);
   std::shared_ptr<OverlayLayer> layer;
   UIView* overlay_view;
   UIView* overlay_view_wrapper;
 
+  CGFloat screenScale = [UIScreen mainScreen].scale;
   overlay_view = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
                                                        pixelFormat:pixel_format];
   overlay_view_wrapper = [[FlutterOverlayView alloc] initWithContentsScale:screenScale
@@ -72,6 +71,7 @@ void OverlayLayerPool::CreateLayer(const std::shared_ptr<IOSContext>& ios_contex
 
   layer = std::make_shared<OverlayLayer>(overlay_view, overlay_view_wrapper, std::move(ios_surface),
                                          std::move(surface));
+
   // The overlay view wrapper masks the overlay view.
   // This is required to keep the backing surface size unchanged between frames.
   //
