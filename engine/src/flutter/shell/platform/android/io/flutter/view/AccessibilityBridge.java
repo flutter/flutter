@@ -2301,7 +2301,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * analogous concept within Flutter.
    *
    * <p>To see how this {@code SemanticsNode}'s fields correspond to Flutter's semantics system, see
-   * semantics.dart: https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
+   * semantics.dart:
+   * https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
    */
   private static class SemanticsNode {
     private static boolean nullableHasAncestor(
