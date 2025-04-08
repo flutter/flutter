@@ -331,7 +331,6 @@ void Tessellator::TessellateConvexInternal(const PathSource& path,
 
   GLESPathVertexWriter writer(point_buffer, index_buffer);
 
-  // path.WritePolyline(tolerance, writer);
   PathTessellator::PathToFilledVertices(path, writer, tolerance);
 }
 
