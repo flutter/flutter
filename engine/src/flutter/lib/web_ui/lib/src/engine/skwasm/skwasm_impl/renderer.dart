@@ -369,13 +369,28 @@ class SkwasmRenderer implements Renderer {
     if (contentType == null) {
       throw Exception('Could not determine content type of image at url $uri');
     }
-    final SkwasmBrowserImageDecoder decoder = SkwasmBrowserImageDecoder(
-      contentType: contentType,
-      dataSource: response.body,
-      debugSource: uri.toString(),
-    );
-    await decoder.initialize();
-    return decoder;
+    if (browserSupportsImageDecoder) {
+      final SkwasmBrowserImageDecoder decoder = SkwasmBrowserImageDecoder(
+        contentType: contentType,
+        dataSource: response.body,
+        debugSource: uri.toString(),
+      );
+      await decoder.initialize();
+      return decoder;
+    } else {
+      final ByteBuffer buffer = await response.arrayBuffer();
+      final Uint8List data = buffer.asUint8List();
+      final ImageType? parsedContentType = detectImageType(data);
+      if (parsedContentType == null) {
+        throw Exception('Could not determine content type of image from data');
+      }
+      if (parsedContentType.isAnimated) {
+        return SkwasmAnimatedImageDecoder(data);
+      } else {
+        final DomBlob blob = createDomBlob(<ByteBuffer>[buffer]);
+        return SkwasmDomImageDecoder(blob);
+      }
+    }
   }
 
   @override

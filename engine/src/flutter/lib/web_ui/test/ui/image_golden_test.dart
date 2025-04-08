@@ -488,4 +488,46 @@ Future<void> testMain() async {
     codec.dispose();
     return info.image;
   });
+
+  emitImageTests('animated_gif_list', () async {
+    final ByteBuffer data = await httpFetchByteBuffer('/test_images/alphabetAnim.gif');
+    final ui.Codec codec = await renderer.instantiateImageCodec(data.asUint8List());
+    expect(codec.frameCount, 13);
+
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    return info.image;
+  });
+
+  emitImageTests('animated_gif_uri', () async {
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/alphabetAnim.gif'),
+    );
+    expect(codec.frameCount, 13);
+
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    return info.image;
+  });
+
+  emitImageTests('animated_webp_list', () async {
+    final ByteBuffer data = await httpFetchByteBuffer('/test_images/stoplight.webp');
+    final ui.Codec codec = await renderer.instantiateImageCodec(data.asUint8List());
+    expect(codec.frameCount, 3);
+
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    return info.image;
+  });
+
+  emitImageTests('animated_webp_uri', () async {
+    final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
+      Uri(path: '/test_images/stoplight.webp'),
+    );
+    expect(codec.frameCount, 3);
+
+    final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
+    return info.image;
+  });
 }

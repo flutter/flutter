@@ -27,7 +27,7 @@ class SkwasmBrowserImageDecoder extends BrowserImageDecoder {
 }
 
 class SkwasmDomImageDecoder extends HtmlBlobCodec {
-  SkwasmDomImageDecoder(super.blob, this.width, this.height);
+  SkwasmDomImageDecoder(super.blob, [this.width, this.height]);
 
   final int? width;
   final int? height;
@@ -48,7 +48,7 @@ class SkwasmDomImageDecoder extends HtmlBlobCodec {
 }
 
 class SkwasmAnimatedImageDecoder implements ui.Codec {
-  factory SkwasmAnimatedImageDecoder(Uint8List imageData, int? width, int? height) {
+  factory SkwasmAnimatedImageDecoder(Uint8List imageData, [int? width, int? height]) {
     final SkDataHandle data = skDataCreate(imageData.length);
     final Pointer<Int8> dataPointer = skDataGetPointer(data).cast<Int8>();
     for (int i = 0; i < imageData.length; i++) {
