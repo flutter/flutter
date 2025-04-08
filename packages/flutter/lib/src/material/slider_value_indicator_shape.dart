@@ -11,6 +11,219 @@ import 'range_slider_parts.dart';
 import 'slider.dart';
 import 'slider_theme.dart';
 
+/// Base class for slider thumb, thumb overlay, and value indicator shapes.
+///
+/// Create a subclass of this if you would like a custom shape.
+///
+/// All shapes are painted to the same canvas and ordering is important.
+/// The overlay is painted first, then the value indicator, then the thumb.
+///
+/// The thumb painting can be skipped by specifying [noThumb] for
+/// [SliderThemeData.thumbShape].
+///
+/// The overlay painting can be skipped by specifying [noOverlay] for
+/// [SliderThemeData.overlayShape].
+///
+/// See also:
+///
+///  * [RoundSliderThumbShape], which is the default [Slider]'s thumb shape that
+///    paints a solid circle.
+///  * [RoundSliderOverlayShape], which is the default [Slider] and
+///    [RangeSlider]'s overlay shape that paints a transparent circle.
+///  * [PaddleSliderValueIndicatorShape], which is the default [Slider]'s value
+///    indicator shape that paints a custom path with text in it.
+abstract class SliderComponentShape {
+  /// This abstract const constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const SliderComponentShape();
+
+  /// Returns the preferred size of the shape, based on the given conditions.
+  Size getPreferredSize(bool isEnabled, bool isDiscrete);
+
+  /// Paints the shape, taking into account the state passed to it.
+  ///
+  /// {@template flutter.material.SliderComponentShape.paint.context}
+  /// The `context` argument is the same as the one that includes the [Slider]'s
+  /// render box.
+  /// {@endtemplate}
+  ///
+  /// {@template flutter.material.SliderComponentShape.paint.center}
+  /// The `center` argument is the offset for where this shape's center should be
+  /// painted. This offset is relative to the origin of the [context] canvas.
+  /// {@endtemplate}
+  ///
+  /// The `activationAnimation` argument is an animation triggered when the user
+  /// begins to interact with the slider. It reverses when the user stops interacting
+  /// with the slider.
+  ///
+  /// {@template flutter.material.SliderComponentShape.paint.enableAnimation}
+  /// The `enableAnimation` argument is an animation triggered when the [Slider]
+  /// is enabled, and it reverses when the slider is disabled. The [Slider] is
+  /// enabled when [Slider.onChanged] is not null.Use this to paint intermediate
+  /// frames for this shape when the slider changes enabled state.
+  /// {@endtemplate}
+  ///
+  /// {@template flutter.material.SliderComponentShape.paint.isDiscrete}
+  /// The `isDiscrete` argument is true if [Slider.divisions] is non-null. When
+  /// true, the slider will render tick marks on top of the track.
+  /// {@endtemplate}
+  ///
+  /// If the `labelPainter` argument is non-null, then [TextPainter.paint]
+  /// should be called on the `labelPainter` with the location that the label
+  /// should appear. If the `labelPainter` argument is null, then no label was
+  /// supplied to the [Slider].
+  ///
+  /// {@template flutter.material.SliderComponentShape.paint.parentBox}
+  /// The `parentBox` argument is the [RenderBox] of the [Slider]. Its attributes,
+  /// such as size, can be used to assist in painting this shape.
+  /// {@endtemplate}
+  ///
+  /// {@template flutter.material.SliderComponentShape.paint.sliderTheme}
+  /// the `sliderTheme` argument is the theme assigned to the [Slider] that this
+  /// shape belongs to.
+  /// {@endtemplate}
+  ///
+  /// The `textDirection` argument can be used to determine how any extra text
+  /// or graphics (besides the text painted by the `labelPainter`) should be
+  /// positioned. The `labelPainter` already has the [textDirection] set.
+  ///
+  /// The `value` argument is the current parametric value (from 0.0 to 1.0) of
+  /// the slider.
+  ///
+  /// {@template flutter.material.SliderComponentShape.paint.textScaleFactor}
+  /// The `textScaleFactor` argument can be used to determine whether the
+  /// component should paint larger or smaller, depending on whether
+  /// [textScaleFactor] is greater than 1 for larger, and between 0 and 1 for
+  /// smaller. It's usually computed from [MediaQueryData.textScaler].
+  /// {@endtemplate}
+  ///
+  /// {@template flutter.material.SliderComponentShape.paint.sizeWithOverflow}
+  /// The `sizeWithOverflow` argument can be used to determine the bounds the
+  /// drawing of the components that are outside of the regular slider bounds.
+  /// It's the size of the box, whose center is aligned with the slider's
+  /// bounds, that the value indicators must be drawn within. Typically, it is
+  /// bigger than the slider.
+  /// {@endtemplate}
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  });
+
+  /// Special instance of [SliderComponentShape] to skip the thumb drawing.
+  ///
+  /// See also:
+  ///
+  ///  * [SliderThemeData.thumbShape], which is the shape that the [Slider]
+  ///    uses when painting the thumb.
+  static final SliderComponentShape noThumb = _EmptySliderComponentShape();
+
+  /// Special instance of [SliderComponentShape] to skip the overlay drawing.
+  ///
+  /// See also:
+  ///
+  ///  * [SliderThemeData.overlayShape], which is the shape that the [Slider]
+  ///    uses when painting the overlay.
+  static final SliderComponentShape noOverlay = _EmptySliderComponentShape();
+}
+
+/// A special version of [SliderComponentShape] that has a zero size and paints
+/// nothing.
+///
+/// This class is used to create a special instance of a [SliderComponentShape]
+/// that will not paint any component shape. A static reference is stored in
+/// [SliderComponentShape.noThumb] and [SliderComponentShape.noOverlay]. When this value
+/// is specified for [SliderThemeData.thumbShape], the thumb painting is
+/// skipped. When this value is specified for [SliderThemeData.overlayShape],
+/// the overlay painting is skipped.
+class _EmptySliderComponentShape extends SliderComponentShape {
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => Size.zero;
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    // no-op.
+  }
+}
+
+/// The default shape of a [Slider]'s thumb overlay.
+///
+/// The shape of the overlay is a circle with the same center as the thumb, but
+/// with a larger radius. It animates to full size when the thumb is pressed,
+/// and animates back down to size 0 when it is released. It is painted behind
+/// the thumb, and is expected to extend beyond the bounds of the thumb so that
+/// it is visible.
+///
+/// The overlay color is defined by [SliderThemeData.overlayColor].
+///
+/// See also:
+///
+///  * [Slider], which includes an overlay defined by this shape.
+///  * [SliderTheme], which can be used to configure the overlay shape of all
+///    sliders in a widget subtree.
+class RoundSliderOverlayShape extends SliderComponentShape {
+  /// Create a slider thumb overlay that draws a circle.
+  const RoundSliderOverlayShape({this.overlayRadius = 24.0});
+
+  /// The preferred radius of the round thumb shape when enabled.
+  ///
+  /// If it is not provided, then half of the [SliderThemeData.trackHeight] is
+  /// used.
+  final double overlayRadius;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return Size.fromRadius(overlayRadius);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Canvas canvas = context.canvas;
+    final Tween<double> radiusTween = Tween<double>(begin: 0.0, end: overlayRadius);
+
+    canvas.drawCircle(
+      center,
+      radiusTween.evaluate(activationAnimation),
+      Paint()..color = sliderTheme.overlayColor!,
+    );
+  }
+}
+
 /// The default shape of a [Slider]'s value indicator.
 ///
 /// ![A slider widget, consisting of 5 divisions and showing the rectangular slider value indicator shape.](https://flutter.github.io/assets-for-api-docs/assets/material/rectangular_slider_value_indicator_shape.png)

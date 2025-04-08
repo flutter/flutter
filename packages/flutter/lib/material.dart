@@ -159,6 +159,7 @@ export 'src/material/selectable_text.dart';
 export 'src/material/selection_area.dart';
 export 'src/material/shadows.dart';
 export 'src/material/slider.dart';
+export 'src/material/slider_parts.dart';
 export 'src/material/slider_theme.dart';
 export 'src/material/slider_value_indicator_shape.dart';
 export 'src/material/snack_bar.dart';
