@@ -235,6 +235,8 @@ impeller_component("entity") {
     ":modern_entity_shaders",
     "../renderer",
     "../typographer",
+    "//flutter/display_list",
+    "//flutter/skia",
   ]
 
   deps = [ "//flutter/fml" ]

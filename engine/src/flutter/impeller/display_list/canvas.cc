@@ -305,7 +305,7 @@ void Canvas::RestoreToCount(size_t count) {
   }
 }
 
-void Canvas::DrawPath(const Path& path, const Paint& paint) {
+void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
@@ -314,8 +314,9 @@ void Canvas::DrawPath(const Path& path, const Paint& paint) {
     FillPathGeometry geom(path);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
-    StrokePathGeometry geom(path, paint.stroke_width, paint.stroke_miter,
-                            paint.stroke_cap, paint.stroke_join);
+    StrokePathGeometry geom(path.GetPath(), paint.stroke_width,
+                            paint.stroke_miter, paint.stroke_cap,
+                            paint.stroke_join);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
 }
@@ -563,7 +564,7 @@ void Canvas::DrawLine(const Point& p0,
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   if (paint.style == Paint::Style::kStroke) {
-    DrawPath(PathBuilder{}.AddRect(rect).TakePath(), paint);
+    DrawPath(flutter::DlPath(PathBuilder{}.AddRect(rect)), paint);
     return;
   }
 
@@ -593,7 +594,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
 
   if (paint.style == Paint::Style::kStroke) {
     // No stroked ellipses yet
-    DrawPath(PathBuilder{}.AddOval(rect).TakePath(), paint);
+    DrawPath(flutter::DlPath(PathBuilder{}.AddOval(rect)), paint);
     return;
   }
 
@@ -633,7 +634,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
                   .AddRoundRect(round_rect)
                   .SetBounds(rect)
                   .TakePath();
-  DrawPath(path, paint);
+  DrawPath(flutter::DlPath(path), paint);
 }
 
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
@@ -656,7 +657,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
                   .AddRoundSuperellipse(rse)
                   .SetBounds(rse.GetBounds())
                   .TakePath();
-  DrawPath(path, paint);
+  DrawPath(flutter::DlPath(path), paint);
 }
 
 void Canvas::DrawCircle(const Point& center,

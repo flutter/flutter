@@ -5,6 +5,7 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -87,7 +88,7 @@ TEST(TessellatorTest, TessellateConvex) {
     std::vector<uint16_t> indices;
     // Sanity check simple rectangle.
     Tessellator::TessellateConvexInternal(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 10, 10)).TakePath(), points,
+        flutter::DlPath::MakeRect(Rect::MakeLTRB(0, 0, 10, 10)), points,
         indices, 1.0);
 
     // Note: the origin point is repeated but not referenced in the indices
@@ -102,10 +103,9 @@ TEST(TessellatorTest, TessellateConvex) {
     std::vector<Point> points;
     std::vector<uint16_t> indices;
     Tessellator::TessellateConvexInternal(
-        PathBuilder{}
-            .AddRect(Rect::MakeLTRB(0, 0, 10, 10))
-            .AddRect(Rect::MakeLTRB(20, 20, 30, 30))
-            .TakePath(),
+        flutter::DlPath(PathBuilder{}
+                            .AddRect(Rect::MakeLTRB(0, 0, 10, 10))
+                            .AddRect(Rect::MakeLTRB(20, 20, 30, 30))),
         points, indices, 1.0);
 
     std::vector<Point> expected = {{0, 0},   {10, 0},  {10, 10}, {0, 10},
@@ -128,7 +128,8 @@ TEST(TessellatorTest, TessellateConvexUnclosedPath) {
                   .LineTo({100, 100})
                   .LineTo({0, 100})
                   .TakePath();
-  Tessellator::TessellateConvexInternal(path, points, indices, 1.0);
+  Tessellator::TessellateConvexInternal(flutter::DlPath(path), points, indices,
+                                        1.0);
 
   std::vector<Point> expected = {{0, 0}, {100, 0}, {100, 100}, {0, 100}};
   std::vector<uint16_t> expected_indices = {0, 1, 3, 2};
@@ -505,8 +506,8 @@ TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
 
   std::vector<Point> points;
   std::vector<uint16_t> indices;
-  Tessellator::TessellateConvexInternal(builder.TakePath(), points, indices,
-                                        3.0);
+  Tessellator::TessellateConvexInternal(flutter::DlPath(builder), points,
+                                        indices, 3.0);
 
   EXPECT_TRUE(points.empty());
 }

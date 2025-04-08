@@ -6,6 +6,8 @@ import("//flutter/impeller/tools/impeller.gni")
 
 impeller_component("tessellator") {
   sources = [
+    "path_tessellator.cc",
+    "path_tessellator.h",
     "tessellator.cc",
     "tessellator.h",
   ]
