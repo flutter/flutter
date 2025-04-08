@@ -6,14 +6,11 @@ package com.flutter.gradle
 
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
-import com.android.build.gradle.api.ApplicationVariant
-import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.tasks.ProcessAndroidResources
 import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import groovy.lang.Closure
 import groovy.util.Node
-import groovy.util.XmlParser
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -61,6 +58,13 @@ object FlutterPluginUtils {
     @JvmStatic
     @Suppress("DEPRECATION")
     internal fun capitalize(string: String): String = string.capitalize()
+
+    // Kotlin's toLowerCase function is deprecated, but the suggested replacement is not supported
+    // by the minimum version of Kotlin that we support. Centralize the use to one place, so that
+    // when our minimum version does support the replacement we can replace by changing a single
+    // line.
+    @Suppress("DEPRECATION")
+    internal fun lowercase(string: String): String = string.toLowerCase()
 
     // compareTo implementation of version strings in the format of ints and periods
     // Will not crash on RC candidate strings but considers all RC candidates the same version.
@@ -513,11 +517,8 @@ object FlutterPluginUtils {
                 getCompileSdkFromProject(project).toIntOrNull() ?: Int.MAX_VALUE
 
             var maxPluginCompileSdkVersion = projectCompileSdkVersion
-            // TODO(gmackall): This should be updated to reflect newer templates.
-            // The default for AGP 4.1.0 used in old templates.
-            val ndkVersionIfUnspecified = "21.1.6352462"
             val projectNdkVersion =
-                getAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
+                getAndroidExtension(project).ndkVersion
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
@@ -543,14 +544,19 @@ object FlutterPluginUtils {
                         )
                     }
                     val pluginNdkVersion: String =
-                        getAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
+                        getAndroidExtension(pluginProject).ndkVersion
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
                             maxPluginNdkVersion
                         )
                     if (pluginNdkVersion != projectNdkVersion) {
-                        pluginsWithDifferentNdkVersion.add(PluginVersionPair(pluginName, pluginNdkVersion))
+                        pluginsWithDifferentNdkVersion.add(
+                            PluginVersionPair(
+                                pluginName,
+                                pluginNdkVersion
+                            )
+                        )
                     }
 
                     numProcessedPlugins--
@@ -614,7 +620,7 @@ object FlutterPluginUtils {
         // and rebuilt when running clean builds.
         gradleProjectAndroidExtension.externalNativeBuild.cmake.buildStagingDirectory(
             gradleProject.layout.buildDirectory
-                .dir("${FlutterPluginConstants.INTERMEDIATES_DIR}/flutter/.cxx")
+                .dir("../.cxx")
                 .get()
                 .asFile.path
         )
@@ -734,7 +740,10 @@ object FlutterPluginUtils {
         }
     }
 
-    private fun findProcessResources(baseVariantOutput: BaseVariantOutput): ProcessAndroidResources =
+    // TODO(gmackall): Migrate to AGPs variant api.
+    //    https://github.com/flutter/flutter/issues/166550
+    @Suppress("DEPRECATION")
+    private fun findProcessResources(baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput): ProcessAndroidResources =
         baseVariantOutput.processResourcesProvider?.get() ?: baseVariantOutput.processResources
 
     /**
@@ -769,12 +778,15 @@ object FlutterPluginUtils {
         }
         android.applicationVariants.configureEach {
             val variant = this
-            project.tasks.register("output${FlutterPluginUtils.capitalize(variant.name)}AppLinkSettings") {
+            project.tasks.register("output${capitalize(variant.name)}AppLinkSettings") {
                 val task: Task = this
                 task.description =
                     "stores app links settings for the given build variant of this Android project into a json file."
                 variant.outputs.configureEach {
-                    val baseVariantOutput: BaseVariantOutput = this
+                    // TODO(gmackall): Migrate to AGPs variant api.
+                    //    https://github.com/flutter/flutter/issues/166550
+                    @Suppress("DEPRECATION")
+                    val baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput = this
                     // Deeplinks are defined in AndroidManifest.xml and is only available after
                     // processResourcesProvider.
                     dependsOn(findProcessResources(baseVariantOutput))
@@ -800,18 +812,21 @@ object FlutterPluginUtils {
      * @param BaseVariantOutput The output of a specific build variant (e.g., debug, release).
      * @param variant The application variant being processed.
      */
+    @Suppress("KDocUnresolvedReference")
     private fun createAppLinkSettings(
-        variant: ApplicationVariant,
-        baseVariantOutput: BaseVariantOutput
+        // TODO(gmackall): Migrate to AGPs variant api.
+        //    https://github.com/flutter/flutter/issues/166550
+        @Suppress("DEPRECATION") variant: com.android.build.gradle.api.ApplicationVariant,
+        @Suppress("DEPRECATION") baseVariantOutput: com.android.build.gradle.api.BaseVariantOutput
     ): AppLinkSettings {
         val appLinkSettings = AppLinkSettings(variant.applicationId)
-        // TODO https://github.com/flutter/flutter/issues/165881
-        // Use import groovy.xml.XmlParser instead.
+
         // XmlParser is not namespace aware because it makes querying nodes cumbersome.
+        // TODO(gmackall): Migrate to AGPs variant api.
+        //    https://github.com/flutter/flutter/issues/166550
+        @Suppress("DEPRECATION")
         val manifest: Node =
-            XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
-        // The groovy.xml.XmlParser import would use getProperty like
-        // manifest.getProperty("application").let { applicationNode -> ...
+            groovy.xml.XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
         val applicationNode: Node? =
             manifest.children().find { node ->
                 node is Node && node.name() == "application"

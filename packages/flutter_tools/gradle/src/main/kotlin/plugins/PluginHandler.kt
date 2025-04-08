@@ -94,7 +94,7 @@ class PluginHandler(
      *        This is only possible by taking all plugins into account, which
      *        only appear on the `dependencyGraph` and in the `.flutter-plugins` file.
      * So in summary the plugins are currently selected from the `dependencyGraph`
-     * and filtered then with the [doesSupportAndroidPlatform] method instead of
+     * and filtered then with the [pluginSupportsAndroidPlatform] method instead of
      * just using the `plugins.android` list.
      */
     private fun configureLegacyPluginEachProjects(engineVersionValue: String) {
