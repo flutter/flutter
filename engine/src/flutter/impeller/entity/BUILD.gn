@@ -236,7 +236,6 @@ impeller_component("entity") {
     "../renderer",
     "../typographer",
     "//flutter/display_list",
-    "//flutter/skia",
   ]
 
   deps = [ "//flutter/fml" ]
