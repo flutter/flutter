@@ -11,7 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
-import 'sliding_segmented_control_test.dart';
 
 const TextStyle testStyle = TextStyle(fontSize: 10.0, letterSpacing: 0.0);
 
