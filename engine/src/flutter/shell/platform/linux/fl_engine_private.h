@@ -8,12 +8,12 @@
 #include <glib-object.h>
 
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/linux/fl_compositor.h"
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 #include "flutter/shell/platform/linux/fl_keyboard_manager.h"
 #include "flutter/shell/platform/linux/fl_mouse_cursor_handler.h"
 #include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_renderable.h"
-#include "flutter/shell/platform/linux/fl_renderer.h"
 #include "flutter/shell/platform/linux/fl_task_runner.h"
 #include "flutter/shell/platform/linux/fl_text_input_handler.h"
 #include "flutter/shell/platform/linux/fl_windowing_handler.h"
@@ -64,14 +64,14 @@ FlEngine* fl_engine_new_with_binary_messenger(
     FlBinaryMessenger* binary_messenger);
 
 /**
- * fl_engine_get_renderer:
+ * fl_engine_get_compositor:
  * @engine: an #FlEngine.
  *
- * Gets the renderer used by this engine.
+ * Gets the compositor used by this engine.
  *
- * Returns: an #FlRenderer.
+ * Returns: an #FlCompositor.
  */
-FlRenderer* fl_engine_get_renderer(FlEngine* engine);
+FlCompositor* fl_engine_get_compositor(FlEngine* engine);
 
 /**
  * fl_engine_get_opengl_manager:
