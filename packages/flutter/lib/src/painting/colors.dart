@@ -95,8 +95,7 @@ class HSVColor {
 
     final double alpha = color.alpha / 0xFF;
     final double hue = _getHue(red, green, blue, max, delta);
-    // https://en.wikipedia.org/wiki/HSL_and_HSV#Saturation
-    final double saturation = min == max ? 0.0 : delta / max;
+    final double saturation = max == 0.0 ? 0.0 : delta / max;
 
     return HSVColor.fromAHSV(alpha, hue, saturation, max);
   }
