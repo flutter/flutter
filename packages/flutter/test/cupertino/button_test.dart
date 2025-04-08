@@ -970,6 +970,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    addTearDown(focusNode.dispose);
     Widget buildButton({required bool enabled, MouseCursor? cursor}) {
       return CupertinoApp(
         home: Center(
@@ -1020,6 +1021,8 @@ void main() {
         SystemMouseCursors.copy,
       );
     }
+    focusNode.unfocus();
+    await tester.pump();
     await gesture.removePointer();
 
     // Test Pressed State Mouse Cursor
