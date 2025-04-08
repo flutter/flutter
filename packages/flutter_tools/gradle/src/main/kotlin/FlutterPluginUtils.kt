@@ -11,7 +11,6 @@ import com.android.builder.model.BuildType
 import com.flutter.gradle.plugins.PluginHandler
 import groovy.lang.Closure
 import groovy.util.Node
-import groovy.xml.XmlParser
 import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -820,7 +819,7 @@ object FlutterPluginUtils {
         //    https://github.com/flutter/flutter/issues/166550
         @Suppress("DEPRECATION")
         val manifest: Node =
-            XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
+            groovy.util.XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
         val applicationNode: Node? =
             manifest.children().find { node ->
                 node is Node && node.name() == "application"
