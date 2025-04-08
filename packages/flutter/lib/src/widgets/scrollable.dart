@@ -506,6 +506,11 @@ class Scrollable extends StatefulWidget {
     // Also see https://github.com/flutter/flutter/issues/65100
     RenderObject? targetRenderObject;
     ScrollableState? scrollable = Scrollable.maybeOf(context);
+
+    // `NestedScrollView` uses `previousScrollable` to ensure that its
+    // `ensureVisible` can obtain the correct position.
+    //
+    // Also see https://github.com/flutter/flutter/issues/155909
     ScrollableState? previousScrollable;
     while (scrollable != null) {
       final List<Future<void>> newFutures;
