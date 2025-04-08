@@ -548,10 +548,11 @@ class _PredictiveBackPageSharedElementTransitionState
     with SingleTickerProviderStateMixin {
   double xShift = 0;
   double yShift = 0;
-  double scale = 1;
+  double _lastScale = 1;
   late final AnimationController commitController;
   late final Listenable mergedAnimations;
   late final Animation<double> _opacityAnimation;
+  late final Animation<double> _scaleAnimation;
 
   // Constants as per the motion specs
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
@@ -602,48 +603,6 @@ class _PredictiveBackPageSharedElementTransitionState
     return easedYShift.clamp(-yShiftMax, yShiftMax);
   }
 
-  double calcScale() {
-    return Tween<double>(begin: scalePercentage, end: 1.0).animate(widget.animation).value;
-  }
-
-  // TODO(justinmc): Separate widget or inline?
-  Widget _animatedBuilder(BuildContext context, Widget? child) {
-    final double xShift = switch (widget.phase) {
-      _PredictiveBackPhase.commit => this.xShift + _calcCommitXShift(),
-      _ => this.xShift = _calcXShift(),
-    };
-    final double yShift = switch (widget.phase) {
-      _PredictiveBackPhase.commit => this.yShift,
-      _ => this.yShift = calcYShift(),
-    };
-    final double scale = switch (widget.phase) {
-      _PredictiveBackPhase.commit => this.scale,
-      _ => this.scale = calcScale(),
-    };
-
-    final Tween<double> gapTween = Tween<double>(begin: margin, end: 0.0);
-    final Tween<double> borderRadiusTween = Tween<double>(begin: borderRadius, end: 0.0);
-
-    return Transform.scale(
-      scale: scale,
-      child: Transform.translate(
-        offset: Offset(xShift, yShift),
-        child: Opacity(
-          opacity: _opacityAnimation.value,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: gapTween.animate(widget.animation).value),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(
-                borderRadiusTween.animate(widget.animation).value,
-              ),
-              child: child,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -658,6 +617,7 @@ class _PredictiveBackPageSharedElementTransitionState
       begin: 1.0,
       end: 0.0,
     ).animate(CurvedAnimation(parent: commitController, curve: Curves.easeOut));
+    _scaleAnimation = Tween<double>(begin: scalePercentage, end: 1.0).animate(widget.animation);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
       commitController.forward(from: 0.0);
@@ -683,7 +643,42 @@ class _PredictiveBackPageSharedElementTransitionState
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: mergedAnimations,
-      builder: _animatedBuilder,
+      builder: (BuildContext context, Widget? child) {
+        // TODO(justinmc): Separate widget or inline?
+        final double xShift = switch (widget.phase) {
+          _PredictiveBackPhase.commit => this.xShift + _calcCommitXShift(),
+          _ => this.xShift = _calcXShift(),
+        };
+        final double yShift = switch (widget.phase) {
+          _PredictiveBackPhase.commit => this.yShift,
+          _ => this.yShift = calcYShift(),
+        };
+
+        final Tween<double> gapTween = Tween<double>(begin: margin, end: 0.0);
+        final Tween<double> borderRadiusTween = Tween<double>(begin: borderRadius, end: 0.0);
+
+        return Transform.scale(
+          scale: switch (widget.phase) {
+            _PredictiveBackPhase.commit => _lastScale,
+            _ => _lastScale = _scaleAnimation.value,
+          },
+          child: Transform.translate(
+            offset: Offset(xShift, yShift),
+            child: Opacity(
+              opacity: _opacityAnimation.value,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: gapTween.animate(widget.animation).value),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                    borderRadiusTween.animate(widget.animation).value,
+                  ),
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
       child: widget.child,
     );
   }
