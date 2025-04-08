@@ -494,6 +494,12 @@ class CupertinoSlidingSegmentedControl<T extends Object> extends StatefulWidget 
   /// don’t update the value of selectedSegmentIndex after tracking ends.
   ///
   /// Defaults to false.
+  ///
+  /// {@tool dartpad}
+  /// This example shows a [CupertinoSlidingSegmentedControl] with [isMomentary] set to true.
+  ///
+  /// ** See code in examples/api/lib/cupertino/segmented_control/cupertino_sliding_segmented_control.1.dart **
+  /// {@end-tool}
   final bool isMomentary;
 
   @override
