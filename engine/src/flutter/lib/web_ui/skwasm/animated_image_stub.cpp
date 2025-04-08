@@ -21,7 +21,8 @@ SKWASM_EXPORT int animatedImage_getRepetitionCount(void* image) {
   return 0;
 }
 
-SKWASM_EXPORT int animatedImage_getCurrentFrameDuration(void* image) {
+SKWASM_EXPORT int animatedImage_getCurrentFrameDurationMilliseconds(
+    void* image) {
   return 0;
 }
 

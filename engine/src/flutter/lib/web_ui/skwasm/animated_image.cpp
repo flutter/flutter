@@ -40,6 +40,10 @@ SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
     return nullptr;
   }
 
+  if (targetWidth == 0 || targetHeight == 0) {
+    return SkAnimatedImage::Make(std::move(aCodec)).release();
+  }
+
   return SkAnimatedImage::Make(
              std::move(aCodec),
              SkImageInfo::MakeUnknown(targetWidth, targetHeight),

@@ -333,21 +333,30 @@ class SkwasmRenderer implements Renderer {
     if (contentType == null) {
       throw Exception('Could not determine content type of image from data');
     }
-    final SkwasmBrowserImageDecoder baseDecoder = SkwasmBrowserImageDecoder(
-      contentType: contentType.mimeType,
-      dataSource: list.toJS,
-      debugSource: 'encoded image bytes',
-    );
-    await baseDecoder.initialize();
-    if (targetWidth == null && targetHeight == null) {
-      return baseDecoder;
+    if (browserSupportsImageDecoder) {
+      final SkwasmBrowserImageDecoder baseDecoder = SkwasmBrowserImageDecoder(
+        contentType: contentType.mimeType,
+        dataSource: list.toJS,
+        debugSource: 'encoded image bytes',
+      );
+      await baseDecoder.initialize();
+      if (targetWidth == null && targetHeight == null) {
+        return baseDecoder;
+      }
+      return ResizingCodec(
+        baseDecoder,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+        allowUpscaling: allowUpscaling,
+      );
+    } else {
+      if (contentType.isAnimated) {
+        return SkwasmAnimatedImageDecoder(list, targetWidth, targetHeight);
+      } else {
+        final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
+        return SkwasmDomImageDecoder(blob, targetWidth, targetHeight);
+      }
     }
-    return ResizingCodec(
-      baseDecoder,
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
-      allowUpscaling: allowUpscaling,
-    );
   }
 
   @override
