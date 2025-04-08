@@ -17,7 +17,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/painting.dart' show AxisDirection;
+import 'package:flutter/painting.dart' show AxisDirection, axisDirectionIsReversed;
 import 'package:flutter/physics.dart';
 
 import 'binding.dart' show WidgetsBinding;
@@ -580,6 +580,11 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     required bool isScrolling,
     required double velocity,
   }) {
+    final bool isReversed = axisDirectionIsReversed(newPosition.axisDirection);
+    final double oldMin = isReversed ? oldPosition.maxScrollExtent : oldPosition.minScrollExtent;
+    final double oldMax = isReversed ? oldPosition.minScrollExtent : oldPosition.maxScrollExtent;
+    final double newMin = isReversed ? newPosition.maxScrollExtent : newPosition.minScrollExtent;
+    final double newMax = isReversed ? newPosition.minScrollExtent : newPosition.maxScrollExtent;
     bool maintainOverscroll = true;
     bool enforceBoundary = true;
     if (velocity != 0.0) {
@@ -588,8 +593,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
       maintainOverscroll = false;
       enforceBoundary = false;
     }
-    if ((oldPosition.minScrollExtent == newPosition.minScrollExtent) &&
-        (oldPosition.maxScrollExtent == newPosition.maxScrollExtent)) {
+    if (oldMin == newMin && oldMax == newMax) {
       // If the extents haven't changed then ignore overscroll.
       maintainOverscroll = false;
     }
@@ -598,10 +602,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
       // been adjusted to expect new overscroll, so don't try to
       // maintain the relative overscroll.
       maintainOverscroll = false;
-      if (oldPosition.minScrollExtent.isFinite &&
-          oldPosition.maxScrollExtent.isFinite &&
-          newPosition.minScrollExtent.isFinite &&
-          newPosition.maxScrollExtent.isFinite) {
+      if (oldMin.isFinite && oldMax.isFinite && newMin.isFinite && newMax.isFinite) {
         // In addition, if the position changed then we don't enforce the new
         // boundary if both the new and previous boundaries are entirely finite.
         // A common case where the position changes while one
@@ -611,8 +612,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
         enforceBoundary = false;
       }
     }
-    if ((oldPosition.pixels < oldPosition.minScrollExtent) ||
-        (oldPosition.pixels > oldPosition.maxScrollExtent)) {
+    if ((oldPosition.pixels < oldMin) || (oldPosition.pixels > oldMax)) {
       // If the old position was out of range, then we should
       // not try to keep the new position in range.
       enforceBoundary = false;
@@ -624,15 +624,13 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
       //    reason for this condition is that when new content is added, keeping
       //    the same overscroll would mean that instead of showing it to the user,
       //    all of it is being skipped by jumping right to the max extent.
-      if (oldPosition.pixels < oldPosition.minScrollExtent &&
-          newPosition.minScrollExtent > oldPosition.minScrollExtent) {
-        final double oldDelta = oldPosition.minScrollExtent - oldPosition.pixels;
-        return newPosition.minScrollExtent - oldDelta;
+      if (oldPosition.pixels < oldMin && newMin > oldMin) {
+        final double oldDelta = oldMin - oldPosition.pixels;
+        return newMin - oldDelta;
       }
-      if (oldPosition.pixels > oldPosition.maxScrollExtent &&
-          newPosition.maxScrollExtent < oldPosition.maxScrollExtent) {
-        final double oldDelta = oldPosition.pixels - oldPosition.maxScrollExtent;
-        return newPosition.maxScrollExtent + oldDelta;
+      if (oldPosition.pixels > oldMax && newMax < oldMax) {
+        final double oldDelta = oldPosition.pixels - oldMax;
+        return newMax + oldDelta;
       }
     }
     // If we're not forcing the overscroll, defer to other physics.
@@ -644,7 +642,7 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
     );
     if (enforceBoundary) {
       // ...but if they put us out of range then reinforce the boundary.
-      result = clampDouble(result, newPosition.minScrollExtent, newPosition.maxScrollExtent);
+      result = clampDouble(result, newMin, newMax);
     }
     return result;
   }
