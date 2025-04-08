@@ -301,13 +301,7 @@ class PathFillWriter : public PathPruner {
   PathFillWriter(impeller::PathVertexWriter& writer, Scalar scale)
       : PathPruner(false), writer_(writer), scale_(scale) {}
 
-  void BeginContour(Point origin) override {
-    // We should always receive an EndContour call from the pruner if
-    // we've started a contour, so we don't need to do anything now
-    // even though this method implies that we will eventually receive
-    // an end. All of the work with adjusting indices for contours
-    // will occur in the EndContour method.
-  }
+  void BeginContour(Point origin) override { writer_.Write(origin); }
 
   void RecordLine(Point p1, Point p2) override { writer_.Write(p2); }
 

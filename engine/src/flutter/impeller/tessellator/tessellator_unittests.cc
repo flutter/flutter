@@ -117,7 +117,7 @@ TEST(TessellatorTest, TessellateConvex) {
   }
 }
 
-// Filled Paths without an explicit close should still be closed
+// Filled Paths without an explicit close should still be closed implicitly
 TEST(TessellatorTest, TessellateConvexUnclosedPath) {
   std::vector<Point> points;
   std::vector<uint16_t> indices;
@@ -131,7 +131,8 @@ TEST(TessellatorTest, TessellateConvexUnclosedPath) {
   Tessellator::TessellateConvexInternal(flutter::DlPath(path), points, indices,
                                         1.0);
 
-  std::vector<Point> expected = {{0, 0}, {100, 0}, {100, 100}, {0, 100}};
+  std::vector<Point> expected = {
+      {0, 0}, {100, 0}, {100, 100}, {0, 100}, {0, 0}};
   std::vector<uint16_t> expected_indices = {0, 1, 3, 2};
   EXPECT_EQ(points, expected);
   EXPECT_EQ(indices, expected_indices);
@@ -498,8 +499,8 @@ TEST(TessellatorTest, FilledRoundRectTessellationVertices) {
 }
 
 TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
-  // This path is not technically empty (it has a size in one dimension),
-  // but is otherwise completely flat.
+  // This path is not technically empty (it has a size in one dimension), but
+  // it contains only move commands and no actual path segment definitions.
   PathBuilder builder;
   builder.MoveTo({0, 0});
   builder.MoveTo({10, 10}, /*relative=*/true);
