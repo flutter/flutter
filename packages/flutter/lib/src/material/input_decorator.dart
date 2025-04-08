@@ -271,6 +271,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
 // slides upwards a little when it first appears.
 class _HelperError extends StatefulWidget {
   const _HelperError({
+    required this.semanticsService,
     this.textAlign,
     this.helper,
     this.helperText,
@@ -282,6 +283,7 @@ class _HelperError extends StatefulWidget {
     this.errorMaxLines,
   });
 
+  final SemanticsService semanticsService;
   final TextAlign? textAlign;
   final Widget? helper;
   final String? helperText;
@@ -391,6 +393,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     assert(widget.error != null || widget.errorText != null);
     return Semantics(
       container: true,
+      liveRegion: !widget.semanticsService.isAnnounceSupported(),
       child: FadeTransition(
         opacity: _controller,
         child: FractionalTranslation(
@@ -2497,6 +2500,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       errorText: decoration.errorText,
       errorStyle: _getErrorStyle(themeData, defaults),
       errorMaxLines: decoration.errorMaxLines,
+      semanticsService: decoration.semanticsService,
     );
 
     Widget? counter;
@@ -2773,6 +2777,7 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
+    this.semanticsService = const DefaultSemanticsService(),
   }) : assert(
          !(label != null && labelText != null),
          'Declaring both label and labelText is not supported.',
@@ -2838,6 +2843,7 @@ class InputDecoration {
     this.border = InputBorder.none,
     this.enabled = true,
     this.constraints,
+    this.semanticsService = const DefaultSemanticsService(),
   }) : icon = null,
        iconColor = null,
        label = null,
@@ -3794,6 +3800,9 @@ class InputDecoration {
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
+  /// The semantic service to use when triggering announcements.
+  final SemanticsService semanticsService;
+
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   InputDecoration copyWith({
@@ -3853,6 +3862,7 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
+    SemanticsService? semanticsService,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3911,6 +3921,7 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
+      semanticsService: semanticsService ?? this.semanticsService,
     );
   }
 

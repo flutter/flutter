@@ -29,6 +29,7 @@ import '../widgets/editable_text_utils.dart';
 import '../widgets/feedback_tester.dart';
 import '../widgets/live_text_utils.dart';
 import '../widgets/process_text_utils.dart';
+import '../widgets/semantic_utils.dart';
 import '../widgets/semantics_tester.dart';
 import '../widgets/text_selection_toolbar_utils.dart';
 
@@ -8892,53 +8893,66 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('InputDecoration errorText semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-    final TextEditingController controller = _textEditingController();
-    final Key key = UniqueKey();
+  for (final bool isAnnounceSupported in <bool>[true, false]) {
+    testWidgets('InputDecoration errorText semantics (isAnnounceSupported=$isAnnounceSupported)', (
+      WidgetTester tester,
+    ) async {
+      final MockSemanticsService mockSemanticsService = MockSemanticsService();
+      mockSemanticsService.mockIsAnnounceSupported = isAnnounceSupported;
 
-    await tester.pumpWidget(
-      overlay(
-        child: TextField(
-          key: key,
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-            errorText: 'oh no!',
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final TextEditingController controller = _textEditingController();
+      final Key key = UniqueKey();
+
+      await tester.pumpWidget(
+        overlay(
+          child: TextField(
+            key: key,
+            controller: controller,
+            decoration: InputDecoration(
+              semanticsService: mockSemanticsService,
+              labelText: 'label',
+              hintText: 'hint',
+              errorText: 'oh no!',
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      semantics,
-      hasSemantics(
-        TestSemantics.root(
-          children: <TestSemantics>[
-            TestSemantics.rootChild(
-              label: 'label',
-              textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isTextField,
-                SemanticsFlag.hasEnabledState,
-                SemanticsFlag.isEnabled,
-              ],
-              children: <TestSemantics>[
-                TestSemantics(label: 'oh no!', textDirection: TextDirection.ltr),
-              ],
-            ),
-          ],
+      expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
+            children: <TestSemantics>[
+              TestSemantics.rootChild(
+                label: 'label',
+                textDirection: TextDirection.ltr,
+                actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                flags: <SemanticsFlag>[
+                  SemanticsFlag.isTextField,
+                  SemanticsFlag.hasEnabledState,
+                  SemanticsFlag.isEnabled,
+                ],
+                children: <TestSemantics>[
+                  TestSemantics(
+                    label: 'oh no!',
+                    textDirection: TextDirection.ltr,
+                    flags: <SemanticsFlag>[if (!isAnnounceSupported) SemanticsFlag.isLiveRegion],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          ignoreTransform: true,
+          ignoreRect: true,
+          ignoreId: true,
         ),
-        ignoreTransform: true,
-        ignoreRect: true,
-        ignoreId: true,
-      ),
-    );
+      );
 
-    semantics.dispose();
-  });
+      semantics.dispose();
+      debugDefaultTargetPlatformOverride = null;
+    });
+  }
 
   testWidgets('floating label does not overlap with value at large textScaleFactors', (
     WidgetTester tester,
