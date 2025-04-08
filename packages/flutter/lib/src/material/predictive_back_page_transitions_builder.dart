@@ -551,6 +551,7 @@ class _PredictiveBackPageSharedElementTransitionState
   double scale = 1;
   late final AnimationController commitController;
   late final Listenable mergedAnimations;
+  late final Animation<double> _opacityAnimation;
 
   // Constants as per the motion specs
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
@@ -564,49 +565,6 @@ class _PredictiveBackPageSharedElementTransitionState
   // progressed the animation at all before the commit.
   // Eyeballed on a Pixel 9 running Android 16.
   static const int _kMaxMilliseconds = 200;
-
-  @override
-  void initState() {
-    super.initState();
-    commitController = AnimationController(
-      duration: const Duration(milliseconds: _kMaxMilliseconds),
-      vsync: this,
-    );
-
-    mergedAnimations = Listenable.merge(<Listenable>[widget.animation, commitController]);
-
-    if (widget.phase == _PredictiveBackPhase.commit) {
-      commitController.forward(from: 0.0);
-    }
-  }
-
-  @override
-  void didUpdateWidget(_PredictiveBackPageSharedElementTransition oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
-      final int droppedPageBackAnimationTime =
-          ui.lerpDouble(0, _kMaxMilliseconds, widget.animation.value)!.floor();
-
-      commitController.duration = Duration(milliseconds: droppedPageBackAnimationTime);
-      commitController.forward(from: 0.0);
-    }
-  }
-
-  @override
-  void dispose() {
-    commitController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: mergedAnimations,
-      builder: _animatedBuilder,
-      child: widget.child,
-    );
-  }
 
   double _calcXShift() {
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -652,17 +610,7 @@ class _PredictiveBackPageSharedElementTransitionState
     return Tween<double>(begin: scalePercentage, end: 1.0).animate(widget.animation).value;
   }
 
-  double calcOpacity() {
-    if (widget.isDelegatedTransition) {
-      return 0.7;
-    }
-
-    return Tween<double>(
-      begin: 1.0,
-      end: 0.0,
-    ).animate(CurvedAnimation(parent: commitController, curve: Curves.easeOut)).value;
-  }
-
+  // TODO(justinmc): Separate widget or inline?
   Widget _animatedBuilder(BuildContext context, Widget? child) {
     final double xShift = switch (widget.phase) {
       _PredictiveBackPhase.commit => this.xShift + _calcCommitXShift(),
@@ -677,9 +625,6 @@ class _PredictiveBackPageSharedElementTransitionState
       _ => this.scale = calcScale(),
     };
 
-    // TODO(justinmc): Could this use an animation instead of being calculated directly?
-    final double opacity = calcOpacity();
-
     final Tween<double> gapTween = Tween<double>(begin: margin, end: 0.0);
     final Tween<double> borderRadiusTween = Tween<double>(begin: borderRadius, end: 0.0);
 
@@ -688,7 +633,7 @@ class _PredictiveBackPageSharedElementTransitionState
       child: Transform.translate(
         offset: Offset(xShift, yShift),
         child: Opacity(
-          opacity: opacity,
+          opacity: _opacityAnimation.value,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: gapTween.animate(widget.animation).value),
             child: ClipRRect(
@@ -700,6 +645,54 @@ class _PredictiveBackPageSharedElementTransitionState
           ),
         ),
       ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    commitController = AnimationController(
+      duration: const Duration(milliseconds: _kMaxMilliseconds),
+      vsync: this,
+    );
+
+    mergedAnimations = Listenable.merge(<Listenable>[widget.animation, commitController]);
+
+    _opacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: commitController, curve: Curves.easeOut));
+
+    if (widget.phase == _PredictiveBackPhase.commit) {
+      commitController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_PredictiveBackPageSharedElementTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
+      final int droppedPageBackAnimationTime =
+          ui.lerpDouble(0, _kMaxMilliseconds, widget.animation.value)!.floor();
+
+      commitController.duration = Duration(milliseconds: droppedPageBackAnimationTime);
+      commitController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    commitController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: mergedAnimations,
+      builder: _animatedBuilder,
+      child: widget.child,
     );
   }
 }
