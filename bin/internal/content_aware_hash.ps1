@@ -27,4 +27,4 @@ $flutterRoot = (Get-Item $progName).parent.parent.FullName
 # bin/internal/content_aware_hash.ps1: script for calculating the hash on windows
 # bin/internal/content_aware_hash.sh: script for calculating the hash on mac/linux
 # .github/workflows/content-aware-hash.yml: github action for CI/CD hashing
-cmd /c "git -C $flutterRoot ls-tree HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.ps1 bin/internal/content_aware_hash.sh .github/workflows/content-aware-hash.yml | git hash-object --stdin"
+cmd /c "git -C ""$flutterRoot"" ls-tree --format ""%(objectname) %(path)"" HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.ps1 bin/internal/content_aware_hash.sh .github/workflows/content-aware-hash.yml | git hash-object --stdin"

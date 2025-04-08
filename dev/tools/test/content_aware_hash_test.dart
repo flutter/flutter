@@ -111,6 +111,7 @@ void main() {
   /// Initializes a blank git repo in [testRoot.root].
   void initGitRepoWithBlankInitialCommit({String? workingPath}) {
     run('git', <String>['init', '--initial-branch', 'master'], workingPath: workingPath);
+    run('git', 'config --local core.autocrlf input'.split(' '));
     run('git', <String>[
       'config',
       '--local',
