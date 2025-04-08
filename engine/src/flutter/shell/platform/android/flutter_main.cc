@@ -350,7 +350,15 @@ FlutterMain::SelectedRenderingAPI(const flutter::Settings& settings,
         AndroidContext::ContextSettings{
             .enable_validation = false,
             .enable_gpu_tracing = settings.enable_vulkan_gpu_tracing,
-            .quiet = true});
+            .enable_surface_control = settings.enable_surface_control,
+            .quiet = true,
+            .impeller_flags =
+                {
+                    .lazy_shader_mode =
+                        settings.impeller_enable_lazy_shader_mode,
+                    .antialiased_lines = settings.impeller_antialiased_lines,
+                },
+        });
     if (!vulkan_backend->IsValid()) {
       return std::make_pair(kVulkanUnsupportedFallback, nullptr);
     }
