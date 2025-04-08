@@ -249,6 +249,7 @@ void main() {
 
   testWidgets('DrivenScrollActivity.simulation constructor', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
