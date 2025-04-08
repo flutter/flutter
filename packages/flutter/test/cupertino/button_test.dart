@@ -971,19 +971,15 @@ void main() {
   ) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
     Widget buildButton({required bool enabled, MouseCursor? cursor}) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return CupertinoApp(
-            home: Center(
-              child: CupertinoButton(
-                focusNode: focusNode,
-                onPressed: enabled ? () {} : null,
-                mouseCursor: cursor,
-                child: const Text('Tap Me'),
-              ),
-            ),
-          );
-        },
+      return CupertinoApp(
+        home: Center(
+          child: CupertinoButton(
+            focusNode: focusNode,
+            onPressed: enabled ? () {} : null,
+            mouseCursor: cursor,
+            child: const Text('Tap Me'),
+          ),
+        ),
       );
     }
 
