@@ -193,7 +193,7 @@ class CheckboxListTile extends StatelessWidget {
     this.tileColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.secondary,
     this.selected = false,
@@ -209,7 +209,7 @@ class CheckboxListTile extends StatelessWidget {
     this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null),
-       assert(!isThreeLine || subtitle != null);
+       assert(isThreeLine != true || subtitle != null);
 
   /// Creates a combination of a list tile and a platform adaptive checkbox.
   ///
@@ -255,7 +255,7 @@ class CheckboxListTile extends StatelessWidget {
     this.internalAddSemanticForOnTap = false,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null),
-       assert(!isThreeLine || subtitle != null);
+       assert(isThreeLine != true || subtitle != null);
 
   /// Whether this checkbox is checked.
   final bool? value;
@@ -397,11 +397,8 @@ class CheckboxListTile extends StatelessWidget {
   /// Typically an [Icon] widget.
   final Widget? secondary;
 
-  /// Whether this list tile is intended to display three lines of text.
-  ///
-  /// If false, the list tile is treated as having one line if the subtitle is
-  /// null and treated as having two lines if the subtitle is non-null.
-  final bool isThreeLine;
+  /// {@macro flutter.material.ListTile.isThreeLine}
+  final bool? isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
   ///
