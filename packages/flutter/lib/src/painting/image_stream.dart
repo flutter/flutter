@@ -512,6 +512,11 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// if all [keepAlive] handles get disposed.
   bool _hadAtLeastOneListener = false;
 
+  /// Tracks if any listener with an onError callback was ever added.
+  /// Used to prevent reporting errors even if the listener is removed
+  /// before the error occurs, if an errorBuilder was intended.
+  bool _hadErrorHandlerListener = false;
+
   /// Whether the future listeners added to this completer are initial listeners.
   ///
   /// This can be set to true when an [ImageStream] adds its initial listeners to
@@ -538,6 +543,13 @@ abstract class ImageStreamCompleter with Diagnosticable {
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
     _hadAtLeastOneListener = true;
+
+    // Track if any listener capable of handling errors was ever added.
+    // The Image widget's listener always provides a non-null onError.
+    if (listener.onError != null) {
+      _hadErrorHandlerListener = true;
+    }
+
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
@@ -829,7 +841,12 @@ abstract class ImageStreamCompleter with Diagnosticable {
       }
     }
     if (!handled) {
-      FlutterError.reportError(_currentError!);
+      // If the error wasn't already handled by a listener, report it UNLESS
+      // an error handler listener was ever attached (meaning an errorBuilder
+      // was likely provided) and might have been removed prematurely.
+      if (!_hadErrorHandlerListener) {
+        FlutterError.reportError(_currentError!);
+      }
     }
   }
 

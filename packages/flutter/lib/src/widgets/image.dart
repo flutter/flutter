@@ -1185,22 +1185,33 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
       _imageStreamListener = ImageStreamListener(
         _handleImageFrame,
         onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
-        onError:
-            widget.errorBuilder != null || kDebugMode
-                ? (Object error, StackTrace? stackTrace) {
-                  setState(() {
-                    _lastException = error;
-                    _lastStack = stackTrace;
-                  });
-                  assert(() {
-                    if (widget.errorBuilder == null) {
-                      // ignore: only_throw_errors, since we're just proxying the error.
-                      throw error; // Ensures the error message is printed to the console.
-                    }
-                    return true;
-                  }());
-                }
-                : null,
+        // Keep onError non-null to always catch errors and update state.
+        onError: (Object error, StackTrace? stackTrace) {
+          // Always update the local state so build() can potentially use it.
+          setState(() {
+            _lastException = error;
+            _lastStack = stackTrace;
+          });
+
+          // If no user-provided errorBuilder exists, report the error here.
+          // This ensures errors are logged when not explicitly handled by the user.
+          // The ImageStreamCompleter's final report will be suppressed if needed
+          // by the _hadErrorHandlerListener logic (because this onError is non-null).
+          if (widget.errorBuilder == null) {
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stackTrace,
+                library: 'image resource service',
+                context: ErrorDescription('while resolving an image'),
+                // Matches the default reporting silent=true for network/load errors
+                silent: true,
+              ),
+            );
+          }
+          // NOTE: This listener now never throws. If it runs, it implicitly
+          // marks 'handled = true' in ImageStreamCompleter.reportError's loop.
+        },
       );
     }
     return _imageStreamListener!;
