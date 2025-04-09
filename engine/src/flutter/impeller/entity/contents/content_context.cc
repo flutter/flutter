@@ -933,6 +933,13 @@ PipelineRef ContentContext::GetCachedRuntimeEffectPipeline(
 
 void ContentContext::ClearCachedRuntimeEffectPipeline(
     const std::string& unique_entrypoint_name) const {
+#ifdef IMPELLER_DEBUG
+  // destroying in-use pipleines is a validation error.
+  const auto& idle_waiter = GetContext()->GetIdleWaiter();
+  if (idle_waiter) {
+    idle_waiter->WaitIdle();
+  }
+#endif  // IMPELLER_DEBUG
   for (auto it = runtime_effect_pipelines_.begin();
        it != runtime_effect_pipelines_.end();) {
     if (it->first.unique_entrypoint_name == unique_entrypoint_name) {
