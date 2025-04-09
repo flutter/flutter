@@ -111,7 +111,8 @@ void main() {
   /// Initializes a blank git repo in [testRoot.root].
   void initGitRepoWithBlankInitialCommit({String? workingPath}) {
     run('git', <String>['init', '--initial-branch', 'master'], workingPath: workingPath);
-    run('git', 'config --local core.autocrlf true'.split(' '));
+    // autocrlf is very important for tests to work on windows.
+    run('git', 'config --local core.autocrlf true'.split(' '), workingPath: workingPath);
     run('git', <String>[
       'config',
       '--local',
@@ -136,7 +137,7 @@ void main() {
 
   test('generates a hash', () async {
     initGitRepoWithBlankInitialCommit();
-    expect(runContentAwareHash(), processStdout('e9d1f7dc1718dac8e8189791a8073e38abdae1cf'));
+    expect(runContentAwareHash(), processStdout('eb4bfafe997ec78b3ac8134fbac3eb105ae19155'));
   });
 
   group('generates a different hash when', () {
@@ -146,27 +147,12 @@ void main() {
 
     test('DEPS is changed', () async {
       writeFileAndCommit(testRoot.deps, 'deps changed');
-      expect(runContentAwareHash(), processStdout('d31d5bc23cd8808880f3929af83591f8566317f8'));
-    });
-
-    test('content_aware_hash workflow changes', () async {
-      writeFileAndCommit(testRoot.contentAwareHashWorkflow, 'content_aware_hash.yml changed');
-      expect(runContentAwareHash(), processStdout('c66497e13ac553ce9e2b53b1f17a6a1919836350'));
-    });
-
-    test('content_aware_hash.(sh|ps1) workflow changes', () async {
-      if (const LocalPlatform().isWindows) {
-        writeFileAndCommit(testRoot.contentAwareHashSh, 'content_aware_hash.sh changed');
-        expect(runContentAwareHash(), processStdout('52852fcb0d1b85543a306e970c2773c2aed8651e'));
-      } else {
-        writeFileAndCommit(testRoot.contentAwareHashPs1, 'content_aware_hash.ps1 changed');
-        expect(runContentAwareHash(), processStdout('1e431435cbd2782de1ccfd98618654ac6426fb6e'));
-      }
+      expect(runContentAwareHash(), processStdout('38703cae8a58bd0e7e93342bddd20634b069e608'));
     });
 
     test('an engine file changes', () async {
       writeFileAndCommit(testRoot.engineReadMe, 'engine file changed');
-      expect(runContentAwareHash(), processStdout('717aacfdabe1828a915da54330e0f623331df393'));
+      expect(runContentAwareHash(), processStdout('f92b9d9ee03d3530c750235a2fd8559a68d21eac'));
     });
 
     test('a new engine file is added', () async {
@@ -190,14 +176,14 @@ void main() {
         testRoot.contentAwareHashPs1.parent.childFile('release-candidate-branch.version'),
         'sup',
       );
-      expect(runContentAwareHash(), processStdout('e9c7b9eaaffca015df5909f062f21e0e70d5bcdf'));
+      expect(runContentAwareHash(), processStdout('f34e6ca2d4dfafc20a5eb23d616df764cbbe937d'));
     });
   });
 
   test('does not hash non-engine files', () async {
     initGitRepoWithBlankInitialCommit();
     testRoot.flutterReadMe.writeAsStringSync('codefu was here');
-    expect(runContentAwareHash(), processStdout('e9d1f7dc1718dac8e8189791a8073e38abdae1cf'));
+    expect(runContentAwareHash(), processStdout('eb4bfafe997ec78b3ac8134fbac3eb105ae19155'));
   });
 }
 
@@ -221,9 +207,6 @@ final class _FlutterRootUnderTest {
       ),
       contentAwareHashSh: root.childFile(
         fileSystem.path.joinAll('bin/internal/content_aware_hash.sh'.split('/')),
-      ),
-      contentAwareHashWorkflow: root.childFile(
-        fileSystem.path.joinAll('.github/workflows/content-aware-hash.yml'.split('/')),
       ),
       engineReadMe: root.childFile(fileSystem.path.joinAll('engine/README.md'.split('/'))),
       deps: root.childFile(fileSystem.path.join('DEPS')),
@@ -253,7 +236,6 @@ final class _FlutterRootUnderTest {
     required this.deps,
     required this.contentAwareHashPs1,
     required this.contentAwareHashSh,
-    required this.contentAwareHashWorkflow,
     required this.engineReadMe,
     required this.flutterReadMe,
   });
@@ -263,7 +245,6 @@ final class _FlutterRootUnderTest {
   final File deps;
   final File contentAwareHashPs1;
   final File contentAwareHashSh;
-  final File contentAwareHashWorkflow;
   final File engineReadMe;
   final File flutterReadMe;
 
@@ -272,7 +253,6 @@ final class _FlutterRootUnderTest {
     deps.copySyncRecursive(testRoot.deps.path);
     contentAwareHashPs1.copySyncRecursive(testRoot.contentAwareHashPs1.path);
     contentAwareHashSh.copySyncRecursive(testRoot.contentAwareHashSh.path);
-    contentAwareHashWorkflow.copySyncRecursive(testRoot.contentAwareHashWorkflow.path);
     engineReadMe.copySyncRecursive(testRoot.engineReadMe.path);
     flutterReadMe.copySyncRecursive(testRoot.flutterReadMe.path);
   }

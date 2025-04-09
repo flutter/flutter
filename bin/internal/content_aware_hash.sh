@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 # Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -26,4 +25,4 @@ unset GIT_WORK_TREE
 # bin/internal/content_aware_hash.ps1: script for calculating the hash on windows
 # bin/internal/content_aware_hash.sh: script for calculating the hash on mac/linux
 # .github/workflows/content-aware-hash.yml: github action for CI/CD hashing
-git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" HEAD DEPS engine bin/internal/release-candidate-branch.version bin/internal/content_aware_hash.ps1 bin/internal/content_aware_hash.sh .github/workflows/content-aware-hash.yml | git hash-object --stdin
+git -C "$FLUTTER_ROOT" ls-tree --format "%(objectname) %(path)" HEAD DEPS engine bin/internal/release-candidate-branch.version | git hash-object --stdin
