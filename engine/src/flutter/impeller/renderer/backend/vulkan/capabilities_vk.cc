@@ -520,11 +520,11 @@ bool CapabilitiesVK::SetPhysicalDevice(
     default_color_format_ = PixelFormat::kUnknown;
   }
 
-  if (HasSuitableDepthStencilFormat(device, vk::Format::eD32SfloatS8Uint)) {
-    default_depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
-  } else if (HasSuitableDepthStencilFormat(device,
-                                           vk::Format::eD24UnormS8Uint)) {
+  if (HasSuitableDepthStencilFormat(device, vk::Format::eD24UnormS8Uint)) {
     default_depth_stencil_format_ = PixelFormat::kD24UnormS8Uint;
+  } else if (HasSuitableDepthStencilFormat(device,
+                                           vk::Format::eD32SfloatS8Uint)) {
+    default_depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
   } else {
     default_depth_stencil_format_ = PixelFormat::kUnknown;
   }
