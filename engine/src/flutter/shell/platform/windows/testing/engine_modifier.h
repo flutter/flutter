@@ -43,6 +43,11 @@ class EngineModifier {
     engine_->views_[kImplicitViewId] = view;
   }
 
+  /// Associate a view with a view id.
+  void SetViewById(FlutterWindowsView* view, FlutterViewId viewId) {
+    engine_->views_[viewId] = view;
+  }
+
   /// Reset the start_time field that is used to align vsync events.
   void SetStartTime(uint64_t start_time_nanos) {
     engine_->start_time_ = std::chrono::nanoseconds(start_time_nanos);
@@ -80,6 +85,14 @@ class EngineModifier {
 
   void SetPlatformViewPlugin(std::unique_ptr<PlatformViewPlugin>&& manager) {
     engine_->platform_view_plugin_ = std::move(manager);
+  }
+
+  void OnViewFocusChangeRequest(const FlutterViewFocusChangeRequest* request) {
+    engine_->OnViewFocusChangeRequest(request);
+  }
+
+  void SetNextViewId(FlutterViewId view_id) {
+    engine_->next_view_id_ = view_id;
   }
 
  private:

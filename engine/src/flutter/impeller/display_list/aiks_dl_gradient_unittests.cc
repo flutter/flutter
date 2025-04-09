@@ -685,9 +685,14 @@ TEST_P(AiksTest, CanRenderConicalGradient) {
     builder.Save();
     builder.Translate((i % 3) * size, i / 3 * size);
     paint.setColorSource(DlColorSource::MakeConical(
-        std::get<2>(array[i]), std::get<3>(array[i]), std::get<0>(array[i]),
-        std::get<1>(array[i]), stops.size(), colors.data(), stops.data(),
-        DlTileMode::kClamp));
+        /*start_center=*/std::get<2>(array[i]),
+        /*start_radius=*/std::get<3>(array[i]),
+        /*end_center=*/std::get<0>(array[i]),
+        /*end_radius=*/std::get<1>(array[i]),
+        /*stop_count=*/stops.size(),
+        /*colors=*/colors.data(),
+        /*stops=*/stops.data(),
+        /*tile_mode=*/DlTileMode::kClamp));
     builder.DrawRect(DlRect::MakeXYWH(0, 0, size, size), paint);
     builder.Restore();
   }

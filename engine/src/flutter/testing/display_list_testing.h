@@ -35,6 +35,12 @@ namespace flutter::testing {
     const sk_sp<const DisplayList>& b) {
   return DisplayListsNE_Verbose(a.get(), b.get());
 }
+class DlVerbosePath {
+ public:
+  explicit DlVerbosePath(const DlPath& path) : path(path) {}
+
+  const DlPath& path;
+};
 
 }  // namespace flutter::testing
 
@@ -44,8 +50,6 @@ extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DisplayList& display_list);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlPaint& paint);
-extern std::ostream& operator<<(std::ostream& os,
-                                const flutter::DlBlendMode& mode);
 extern std::ostream& operator<<(std::ostream& os, const flutter::DlClipOp& op);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlPointMode& op);
@@ -78,6 +82,10 @@ extern std::ostream& operator<<(std::ostream& os,
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DisplayListOpCategory& category);
 extern std::ostream& operator<<(std::ostream& os, const flutter::DlPath& path);
+extern std::ostream& operator<<(std::ostream& os,
+                                const flutter::testing::DlVerbosePath& path);
+extern std::ostream& operator<<(std::ostream& os,
+                                const flutter::DlPathFillType& type);
 extern std::ostream& operator<<(std::ostream& os,
                                 const flutter::DlImageFilter& type);
 extern std::ostream& operator<<(std::ostream& os,
@@ -135,6 +143,9 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void clipRoundRect(const DlRoundRect& rrect,
                      DlClipOp clip_op,
                      bool is_aa) override;
+  void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                             DlClipOp clip_op,
+                             bool is_aa) override;
   void clipPath(const DlPath& path, DlClipOp clip_op, bool is_aa) override;
 
   void drawColor(DlColor color, DlBlendMode mode) override;
@@ -150,6 +161,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void drawRoundRect(const DlRoundRect& rrect) override;
   void drawDiffRoundRect(const DlRoundRect& outer,
                          const DlRoundRect& inner) override;
+  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override;
   void drawPath(const DlPath& path) override;
   void drawArc(const DlRect& oval_bounds,
                DlScalar start_degrees,
@@ -202,6 +214,7 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   void out(const DlColorFilter* filter);
   void out(const DlImageFilter& filter);
   void out(const DlImageFilter* filter);
+  void out(const DlVerbosePath& path);
 
  private:
   std::ostream& os_;
@@ -217,6 +230,29 @@ class DisplayListStreamDispatcher final : public DlOpReceiver {
   std::ostream& out_array(std::string name, int count, const T array[]);
 
   std::ostream& startl();
+
+  class DlPathStreamer : public DlPathReceiver {
+   public:
+    ~DlPathStreamer();
+
+    explicit DlPathStreamer(DisplayListStreamDispatcher& dispatcher)
+        : dispatcher_(dispatcher) {}
+
+    void RecommendSizes(size_t verb_count, size_t point_count);
+    void RecommendBounds(const DlRect& bounds);
+    void SetPathInfo(DlPathFillType fill_type, bool is_convex);
+    void MoveTo(const DlPoint& p2);
+    void LineTo(const DlPoint& p2);
+    void QuadTo(const DlPoint& cp, const DlPoint& p2);
+    bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight);
+    void CubicTo(const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2);
+    void Close();
+
+   private:
+    DisplayListStreamDispatcher& dispatcher_;
+    bool done_with_info_ = false;
+  };
+  friend class DlPathStreamer;
 };
 
 class DisplayListGeneralReceiver : public DlOpReceiver {
@@ -382,6 +418,18 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
         break;
     }
   }
+  void clipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                             DlClipOp clip_op,
+                             bool is_aa) override {
+    switch (clip_op) {
+      case DlClipOp::kIntersect:
+        RecordByType(DisplayListOpType::kClipIntersectRoundSuperellipse);
+        break;
+      case DlClipOp::kDifference:
+        RecordByType(DisplayListOpType::kClipDifferenceRoundSuperellipse);
+        break;
+    }
+  }
   void clipPath(const DlPath& path, DlClipOp clip_op, bool is_aa) override {
     switch (clip_op) {
       case DlClipOp::kIntersect:
@@ -434,6 +482,9 @@ class DisplayListGeneralReceiver : public DlOpReceiver {
   void drawDiffRoundRect(const DlRoundRect& outer,
                          const DlRoundRect& inner) override {
     RecordByType(DisplayListOpType::kDrawDiffRoundRect);
+  }
+  void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override {
+    RecordByType(DisplayListOpType::kDrawRoundSuperellipse);
   }
   void drawPath(const DlPath& path) override {
     RecordByType(DisplayListOpType::kDrawPath);

@@ -14,11 +14,6 @@
 #include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/display_list/image/dl_image.h"
 
-#include "third_party/skia/include/core/SkM44.h"
-#include "third_party/skia/include/core/SkMatrix.h"
-#include "third_party/skia/include/core/SkPath.h"
-#include "third_party/skia/include/core/SkRRect.h"
-#include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
 
 #include "impeller/typographer/text_frame.h"
@@ -85,6 +80,9 @@ class DlCanvas {
   virtual void ClipRoundRect(const DlRoundRect& rrect,
                              DlClipOp clip_op = DlClipOp::kIntersect,
                              bool is_aa = false) = 0;
+  virtual void ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                     DlClipOp clip_op = DlClipOp::kIntersect,
+                                     bool is_aa = false) = 0;
   virtual void ClipPath(const DlPath& path,
                         DlClipOp clip_op = DlClipOp::kIntersect,
                         bool is_aa = false) = 0;
@@ -125,6 +123,8 @@ class DlCanvas {
   virtual void DrawDiffRoundRect(const DlRoundRect& outer,
                                  const DlRoundRect& inner,
                                  const DlPaint& paint) = 0;
+  virtual void DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                     const DlPaint& paint) = 0;
   virtual void DrawPath(const DlPath& path, const DlPaint& paint) = 0;
   virtual void DrawArc(const DlRect& bounds,
                        DlScalar start,
@@ -210,203 +210,6 @@ class DlCanvas {
                                     float elevation,
                                     DlScalar dpr,
                                     const DlMatrix& ctm);
-
-  // -----------------------------------------------------------------
-  // SkObject Compatibility section - deprecated...
-  // -----------------------------------------------------------------
-
-  SkISize GetBaseLayerSize() const {
-    return ToSkISize(GetBaseLayerDimensions());
-  }
-
-  void SaveLayer(const SkRect* bounds,
-                 const DlPaint* paint = nullptr,
-                 const DlImageFilter* backdrop = nullptr,
-                 std::optional<int64_t> backdrop_id = std::nullopt) {
-    SaveLayer(ToOptDlRect(bounds), paint, backdrop, backdrop_id);
-  }
-
-  void Transform(const SkMatrix& matrix) { Transform(ToDlMatrix(matrix)); }
-  void Transform(const SkM44& m44) { Transform(ToDlMatrix(m44)); }
-  void SetTransform(const SkMatrix* matrix) {
-    if (matrix) {
-      SetTransform(*matrix);
-    }
-  }
-  void SetTransform(const SkM44* matrix44) {
-    if (matrix44) {
-      SetTransform(*matrix44);
-    }
-  }
-  void SetTransform(const SkMatrix& matrix) {
-    SetTransform(ToDlMatrix(matrix));
-  }
-  void SetTransform(const SkM44& m44) { SetTransform(ToDlMatrix(m44)); }
-
-  /// Returns the 4x4 full perspective transform representing all transform
-  /// operations executed so far in this DisplayList within the enclosing
-  /// save stack.
-  SkM44 GetTransformFullPerspective() const { return ToSkM44(GetMatrix()); }
-  /// Returns the 3x3 partial perspective transform representing all transform
-  /// operations executed so far in this DisplayList within the enclosing
-  /// save stack.
-  SkMatrix GetTransform() const { return ToSkMatrix(GetMatrix()); }
-
-  void ClipRect(const SkRect& rect,
-                DlClipOp clip_op = DlClipOp::kIntersect,
-                bool is_aa = false) {
-    ClipRect(ToDlRect(rect), clip_op, is_aa);
-  }
-  void ClipOval(const SkRect& bounds,
-                DlClipOp clip_op = DlClipOp::kIntersect,
-                bool is_aa = false) {
-    ClipOval(ToDlRect(bounds), clip_op, is_aa);
-  }
-  void ClipRRect(const SkRRect& rrect,
-                 DlClipOp clip_op = DlClipOp::kIntersect,
-                 bool is_aa = false) {
-    ClipRoundRect(ToDlRoundRect(rrect), clip_op, is_aa);
-  }
-  void ClipPath(const SkPath& path,
-                DlClipOp clip_op = DlClipOp::kIntersect,
-                bool is_aa = false) {
-    ClipPath(DlPath(path), clip_op, is_aa);
-  }
-
-  SkRect GetDestinationClipBounds() const {
-    return ToSkRect(GetDestinationClipCoverage());
-  }
-  SkRect GetLocalClipBounds() const { return ToSkRect(GetLocalClipCoverage()); }
-  bool QuickReject(const SkRect& bounds) const {
-    return QuickReject(ToDlRect(bounds));
-  }
-
-  void DrawLine(const SkPoint& p0, const SkPoint& p1, const DlPaint& paint) {
-    DrawLine(ToDlPoint(p0), ToDlPoint(p1), paint);
-  }
-  void DrawRect(const SkRect& rect, const DlPaint& paint) {
-    DrawRect(ToDlRect(rect), paint);
-  }
-  void DrawOval(const SkRect& bounds, const DlPaint& paint) {
-    DrawOval(ToDlRect(bounds), paint);
-  }
-  void DrawCircle(const SkPoint& center,
-                  DlScalar radius,
-                  const DlPaint& paint) {
-    DrawCircle(ToDlPoint(center), radius, paint);
-  }
-  void DrawRRect(const SkRRect& rrect, const DlPaint& paint) {
-    DrawRoundRect(ToDlRoundRect(rrect), paint);
-  }
-  void DrawDRRect(const SkRRect& outer,
-                  const SkRRect& inner,
-                  const DlPaint& paint) {
-    DrawDiffRoundRect(ToDlRoundRect(outer), ToDlRoundRect(inner), paint);
-  }
-  void DrawPath(const SkPath& path, const DlPaint& paint) {
-    DrawPath(DlPath(path), paint);
-  }
-  void DrawArc(const SkRect& bounds,
-               DlScalar start,
-               DlScalar sweep,
-               bool useCenter,
-               const DlPaint& paint) {
-    DrawArc(ToDlRect(bounds), start, sweep, useCenter, paint);
-  }
-  void DrawPoints(DlPointMode mode,
-                  uint32_t count,
-                  const SkPoint pts[],
-                  const DlPaint& paint) {
-    DrawPoints(mode, count, ToDlPoints(pts), paint);
-  }
-  void DrawImage(const sk_sp<DlImage>& image,
-                 const SkPoint& point,
-                 DlImageSampling sampling,
-                 const DlPaint* paint = nullptr) {
-    DrawImage(image, ToDlPoint(point), sampling, paint);
-  }
-  void DrawImageRect(
-      const sk_sp<DlImage>& image,
-      const SkRect& src,
-      const SkRect& dst,
-      DlImageSampling sampling,
-      const DlPaint* paint = nullptr,
-      DlSrcRectConstraint constraint = DlSrcRectConstraint::kFast) {
-    DrawImageRect(image, ToDlRect(src), ToDlRect(dst), sampling, paint,
-                  constraint);
-  }
-  void DrawImageRect(
-      const sk_sp<DlImage>& image,
-      const SkIRect& src,
-      const SkRect& dst,
-      DlImageSampling sampling,
-      const DlPaint* paint = nullptr,
-      DlSrcRectConstraint constraint = DlSrcRectConstraint::kFast) {
-    DrawImageRect(image, ToDlRect(src), ToDlRect(dst), sampling, paint,
-                  constraint);
-  }
-  void DrawImageRect(
-      const sk_sp<DlImage>& image,
-      const SkRect& dst,
-      DlImageSampling sampling,
-      const DlPaint* paint = nullptr,
-      DlSrcRectConstraint constraint = DlSrcRectConstraint::kFast) {
-    DrawImageRect(image, image->GetBounds(), ToDlRect(dst), sampling, paint,
-                  constraint);
-  }
-  void DrawImageNine(const sk_sp<DlImage>& image,
-                     const SkIRect& center,
-                     const SkRect& dst,
-                     DlFilterMode filter,
-                     const DlPaint* paint = nullptr) {
-    DrawImageNine(image, ToDlIRect(center), ToDlRect(dst), filter, paint);
-  }
-  void DrawShadow(const SkPath& path,
-                  const DlColor color,
-                  const DlScalar elevation,
-                  bool transparent_occluder,
-                  DlScalar dpr) {
-    DrawShadow(DlPath(path), color, elevation, transparent_occluder, dpr);
-  }
-
-  static SkRect ComputeShadowBounds(const SkPath& path,
-                                    float elevation,
-                                    DlScalar dpr,
-                                    const SkMatrix& ctm) {
-    return ToSkRect(
-        ComputeShadowBounds(DlPath(path), elevation, dpr, ToDlMatrix(ctm)));
-  }
-
-#define ENABLE_DL_CANVAS_BACKWARDS_COMPATIBILITY \
-  using DlCanvas::GetBaseLayerSize;              \
-                                                 \
-  using DlCanvas::SaveLayer;                     \
-                                                 \
-  using DlCanvas::Transform;                     \
-  using DlCanvas::SetTransform;                  \
-  using DlCanvas::GetTransformFullPerspective;   \
-  using DlCanvas::GetTransform;                  \
-                                                 \
-  using DlCanvas::ClipRect;                      \
-  using DlCanvas::ClipOval;                      \
-  using DlCanvas::ClipPath;                      \
-                                                 \
-  using DlCanvas::GetDestinationClipBounds;      \
-  using DlCanvas::GetLocalClipBounds;            \
-  using DlCanvas::QuickReject;                   \
-                                                 \
-  using DlCanvas::DrawLine;                      \
-  using DlCanvas::DrawRect;                      \
-  using DlCanvas::DrawOval;                      \
-  using DlCanvas::DrawCircle;                    \
-  using DlCanvas::DrawPath;                      \
-  using DlCanvas::DrawArc;                       \
-  using DlCanvas::DrawPoints;                    \
-  using DlCanvas::DrawImage;                     \
-  using DlCanvas::DrawImageRect;                 \
-  using DlCanvas::DrawImageNine;                 \
-  using DlCanvas::DrawAtlas;                     \
-  using DlCanvas::DrawShadow;
 };
 
 class DlAutoCanvasRestore {

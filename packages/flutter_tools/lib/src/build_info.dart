@@ -917,7 +917,7 @@ const String kAndroidArchs = 'AndroidArchs';
 ///
 /// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
 ///
-/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+/// This is passed in by the Flutter Gradle plugin's invocation of `flutter assemble`.
 ///
 /// For more info, see:
 /// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
@@ -965,6 +965,22 @@ const String kBuildName = 'BuildName';
 
 /// The app flavor to build.
 const String kFlavor = 'Flavor';
+
+/// Environment variable of the flavor to be set in dartDefines to be accessed
+/// by the [appFlavor] service.
+const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
+
+/// The Xcode configuration used to build the project.
+const String kXcodeConfiguration = 'Configuration';
+
+/// The Xcode build setting SRCROOT. Identifies the directory containing the
+/// Xcode target's source files.
+const String kSrcRoot = 'SrcRoot';
+
+/// The Xcode build setting TARGET_DEVICE_OS_VERSION. The iOS version of the
+/// target device. Only available if a specific device is being targeted during
+/// the build.
+const String kTargetDeviceOSVersion = 'TargetDeviceOSVersion';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';

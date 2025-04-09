@@ -78,20 +78,21 @@ static size_t GetVKClearValues(
 SharedHandleVK<vk::RenderPass> RenderPassVK::CreateVKRenderPass(
     const ContextVK& context,
     const SharedHandleVK<vk::RenderPass>& recycled_renderpass,
-    const std::shared_ptr<CommandBufferVK>& command_buffer) const {
+    const std::shared_ptr<CommandBufferVK>& command_buffer,
+    bool is_swapchain) const {
   RenderPassBuilderVK builder;
 
   render_target_.IterateAllColorAttachments([&](size_t bind_point,
                                                 const ColorAttachment&
                                                     attachment) -> bool {
     builder.SetColorAttachment(
-        bind_point,                                                          //
-        attachment.texture->GetTextureDescriptor().format,                   //
-        attachment.texture->GetTextureDescriptor().sample_count,             //
-        attachment.load_action,                                              //
-        attachment.store_action,                                             //
-        /*current_layout=*/TextureVK::Cast(*attachment.texture).GetLayout()  //
-    );
+        bind_point,                                                           //
+        attachment.texture->GetTextureDescriptor().format,                    //
+        attachment.texture->GetTextureDescriptor().sample_count,              //
+        attachment.load_action,                                               //
+        attachment.store_action,                                              //
+        /*current_layout=*/TextureVK::Cast(*attachment.texture).GetLayout(),  //
+        /*is_swapchain=*/is_swapchain);
     return true;
   });
 
@@ -151,12 +152,24 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
         TextureVK::Cast(*resolve_image_vk_).GetCachedRenderPass();
     recycled_framebuffer =
         TextureVK::Cast(*resolve_image_vk_).GetCachedFramebuffer();
+  } else {
+    recycled_render_pass =
+        TextureVK::Cast(*color_image_vk_).GetCachedRenderPass();
+    recycled_framebuffer =
+        TextureVK::Cast(*color_image_vk_).GetCachedFramebuffer();
   }
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
-  render_pass_ =
-      CreateVKRenderPass(vk_context, recycled_render_pass, command_buffer_);
+  bool is_swapchain = false;
+  if (resolve_image_vk_) {
+    is_swapchain = TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage();
+  } else {
+    is_swapchain = TextureVK::Cast(*color_image_vk_).IsSwapchainImage();
+  }
+
+  render_pass_ = CreateVKRenderPass(vk_context, recycled_render_pass,
+                                    command_buffer_, is_swapchain);
   if (!render_pass_) {
     VALIDATION_LOG << "Could not create renderpass.";
     is_valid_ = false;
@@ -180,8 +193,9 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_).SetCachedFramebuffer(framebuffer);
     TextureVK::Cast(*resolve_image_vk_).SetCachedRenderPass(render_pass_);
-    TextureVK::Cast(*resolve_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+  } else {
+    TextureVK::Cast(*color_image_vk_).SetCachedFramebuffer(framebuffer);
+    TextureVK::Cast(*color_image_vk_).SetCachedRenderPass(render_pass_);
   }
 
   std::array<vk::ClearValue, kMaxAttachments> clears;
@@ -200,7 +214,9 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_)
-        .SetLayoutWithoutEncoding(vk::ImageLayout::eGeneral);
+        .SetLayoutWithoutEncoding(
+            is_swapchain ? vk::ImageLayout::eGeneral
+                         : vk::ImageLayout::eShaderReadOnlyOptimal);
   }
   if (color_image_vk_) {
     TextureVK::Cast(*color_image_vk_)
@@ -340,6 +356,10 @@ void RenderPassVK::SetCommandLabel(std::string_view label) {
 
 // |RenderPass|
 void RenderPassVK::SetStencilReference(uint32_t value) {
+  if (current_stencil_ == value) {
+    return;
+  }
+  current_stencil_ = value;
   command_buffer_vk_.setStencilReference(
       vk::StencilFaceFlagBits::eVkStencilFrontAndBack, value);
 }
@@ -485,7 +505,8 @@ fml::Status RenderPassVK::Draw() {
   const auto& pipeline_vk = PipelineVK::Cast(*pipeline_);
 
   auto descriptor_result = command_buffer_->AllocateDescriptorSets(
-      pipeline_vk.GetDescriptorSetLayout(), context_vk);
+      pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
+      context_vk);
   if (!descriptor_result.ok()) {
     return fml::Status(fml::StatusCode::kAborted,
                        "Could not allocate descriptor sets.");
@@ -654,29 +675,6 @@ bool RenderPassVK::BindResource(ShaderStage stage,
 
 bool RenderPassVK::OnEncodeCommands(const Context& context) const {
   command_buffer_->GetCommandBuffer().endRenderPass();
-
-  // If this render target will be consumed by a subsequent render pass,
-  // perform a layout transition to a shader read state.
-  const std::shared_ptr<Texture>& result_texture =
-      resolve_image_vk_ ? resolve_image_vk_ : color_image_vk_;
-  if (result_texture->GetTextureDescriptor().usage &
-      TextureUsage::kShaderRead) {
-    BarrierVK barrier;
-    barrier.cmd_buffer = command_buffer_vk_;
-    barrier.src_access = vk::AccessFlagBits::eColorAttachmentWrite |
-                         vk::AccessFlagBits::eTransferWrite;
-    barrier.src_stage = vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                        vk::PipelineStageFlagBits::eTransfer;
-    barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-    barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
-
-    barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-
-    if (!TextureVK::Cast(*result_texture).SetLayout(barrier)) {
-      return false;
-    }
-  }
-
   return true;
 }
 

@@ -83,6 +83,9 @@ class Geometry {
   static std::unique_ptr<Geometry> MakeRoundRect(const Rect& rect,
                                                  const Size& radii);
 
+  static std::unique_ptr<Geometry> MakeRoundSuperellipse(const Rect& rect,
+                                                         Scalar corner_radius);
+
   virtual GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                            const Entity& entity,
                                            RenderPass& pass) const = 0;
@@ -116,7 +119,6 @@ class Geometry {
     return 1.0;
   }
 
- protected:
   static GeometryResult ComputePositionGeometry(
       const ContentContext& renderer,
       const Tessellator::VertexGenerator& generator,

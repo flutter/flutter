@@ -91,8 +91,8 @@ class WebTestsSuite {
 
   /// Coarse-grained integration tests running on the Web.
   Future<void> webLongRunningTestsRunner() async {
-    final String engineVersionFile = path.join(flutterRoot, 'bin', 'internal', 'engine.version');
-    final String engineRealmFile = path.join(flutterRoot, 'bin', 'internal', 'engine.realm');
+    final String engineVersionFile = path.join(flutterRoot, 'bin', 'cache', 'engine.stamp');
+    final String engineRealmFile = path.join(flutterRoot, 'bin', 'cache', 'engine.realm');
     final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
     final String engineRealm = File(engineRealmFile).readAsStringSync().trim();
     if (engineRealm.isNotEmpty) {

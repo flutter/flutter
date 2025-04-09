@@ -11,7 +11,6 @@
 
 #if FML_OS_ANDROID
 #include "impeller/renderer/backend/vulkan/swapchain/ahb/ahb_swapchain_vk.h"
-#include "impeller/toolkit/android/shadow_realm.h"
 #endif  // FML_OS_ANDROID
 
 namespace impeller {

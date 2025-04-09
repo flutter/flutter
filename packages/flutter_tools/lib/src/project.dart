@@ -131,6 +131,16 @@ class FlutterProject {
   /// The manifest of the example sub-project of this project.
   final FlutterManifest _exampleManifest;
 
+  /// List of [FlutterProject]s corresponding to the workspace entries.
+  List<FlutterProject> get workspaceProjects =>
+      manifest.workspace
+          .map(
+            (String entry) => FlutterProject.fromDirectory(
+              directory.childDirectory(directory.fileSystem.path.normalize(entry)),
+            ),
+          )
+          .toList();
+
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
   /// Gradle group ID.
@@ -325,9 +335,13 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
+  ///
+  /// If [releaseMode] is `true`, platform-specific tooling and metadata generated
+  /// may apply optimizations or changes that are only specific to release builds,
+  /// such as not including dev-only dependencies.
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
-    bool? releaseMode,
+    required bool releaseMode,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -345,7 +359,12 @@ class FlutterProject {
 
   /// Applies template files and generates project files and plugin
   /// registrants for app and module projects only for the specified platforms.
+  ///
+  /// If [releaseMode] is `true`, platform-specific tooling and metadata generated
+  /// may apply optimizations or changes that are only specific to release builds,
+  /// such as not including dev-only dependencies.
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required bool releaseMode,
     bool androidPlatform = false,
     bool iosPlatform = false,
     bool linuxPlatform = false,
@@ -353,7 +372,6 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
-    bool? releaseMode,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;

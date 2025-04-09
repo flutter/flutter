@@ -3390,6 +3390,94 @@ void main() {
 
     await gesture.removePointer();
   });
+
+  testWidgets('Tooltip should pass its default text style down to widget spans', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          key: tooltipKey,
+          richMessage: const WidgetSpan(child: Text(tooltipText)),
+          child: Container(width: 100.0, height: 100.0, color: Colors.green[500]),
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2));
+
+    final Finder defaultTextStyle = find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(DefaultTextStyle),
+    );
+    final DefaultTextStyle textStyle = tester.widget<DefaultTextStyle>(defaultTextStyle.first);
+    expect(textStyle.style.color, Colors.white);
+    expect(textStyle.style.fontFamily, 'Roboto');
+    expect(textStyle.style.decoration, TextDecoration.none);
+    expect(
+      textStyle.style.debugLabel,
+      '((englishLike bodyMedium 2021).merge((blackMountainView bodyMedium).apply)).copyWith',
+    );
+  });
+
+  testWidgets('Tooltip should apply provided text style to rich messages', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    const TextStyle expectedTextStyle = TextStyle(color: Colors.orange);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Tooltip(
+          key: tooltipKey,
+          richMessage: const TextSpan(text: tooltipText),
+          textStyle: expectedTextStyle,
+          child: Container(width: 100.0, height: 100.0, color: Colors.green[500]),
+        ),
+      ),
+    );
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2));
+
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style!;
+    final Finder defaultTextStyleFinder = find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(DefaultTextStyle),
+    );
+    final TextStyle defaultTextStyle =
+        tester.widget<DefaultTextStyle>(defaultTextStyleFinder.first).style;
+    expect(textStyle, same(expectedTextStyle));
+    expect(defaultTextStyle, same(expectedTextStyle));
+  });
+
+  testWidgets('Tooltip respects and prefers the given constraints over theme constraints', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
+    const BoxConstraints themeConstraints = BoxConstraints.tightFor(width: 300, height: 150);
+    const BoxConstraints tooltipConstraints = BoxConstraints.tightFor(width: 500, height: 250);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(tooltipTheme: const TooltipThemeData(constraints: themeConstraints)),
+        home: Tooltip(
+          key: tooltipKey,
+          message: tooltipText,
+          constraints: tooltipConstraints,
+          padding: EdgeInsets.zero,
+          child: const ColoredBox(color: Colors.green),
+        ),
+      ),
+    );
+
+    tooltipKey.currentState?.ensureTooltipVisible();
+    await tester.pump(const Duration(seconds: 2));
+
+    final Finder textAncestors = find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byWidgetPredicate((_) => true),
+    );
+    expect(tester.element(textAncestors.first).size, equals(tooltipConstraints.biggest));
+  });
 }
 
 Future<void> setWidgetForTooltipMode(

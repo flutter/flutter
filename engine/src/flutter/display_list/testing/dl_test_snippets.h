@@ -170,6 +170,8 @@ constexpr DlRect kTestBounds = DlRect::MakeLTRB(10, 10, 50, 60);
 constexpr SkRect kTestSkBounds = SkRect::MakeLTRB(10, 10, 50, 60);
 static const DlRoundRect kTestRRect =
     DlRoundRect::MakeRectXY(kTestBounds, 5, 5);
+static const DlRoundSuperellipse kTestRSuperellipse =
+    DlRoundSuperellipse::MakeRectXY(kTestBounds, 3, 3);
 static const SkRRect kTestSkRRect = SkRRect::MakeRectXY(kTestSkBounds, 5, 5);
 static const SkRRect kTestRRectRect = SkRRect::MakeRect(kTestSkBounds);
 static const DlRoundRect kTestInnerRRect =
@@ -201,7 +203,7 @@ static const std::shared_ptr<DlVertices> kTestVertices2 =
 
 static sk_sp<DisplayList> MakeTestDisplayList(int w, int h, SkColor color) {
   DisplayListBuilder builder;
-  builder.DrawRect(SkRect::MakeWH(w, h), DlPaint(DlColor(color)));
+  builder.DrawRect(DlRect::MakeWH(w, h), DlPaint(DlColor(color)));
   return builder.Build();
 }
 static sk_sp<DisplayList> TestDisplayList1 =

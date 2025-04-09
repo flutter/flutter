@@ -957,15 +957,7 @@ class _DialPainter extends CustomPainter {
     required this.textDirection,
     required this.selectedValue,
   }) : super(repaint: PaintingBinding.instance.systemFonts) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/material.dart',
-        className: '$_DialPainter',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('material', '_DialPainter', this));
   }
 
   final List<_TappableLabel> primaryLabels;
@@ -982,9 +974,7 @@ class _DialPainter extends CustomPainter {
   final int selectedValue;
 
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     for (final _TappableLabel label in primaryLabels) {
       label.painter.dispose();
     }

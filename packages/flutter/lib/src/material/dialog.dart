@@ -1395,6 +1395,12 @@ Widget _buildMaterialDialogTransitions(
 /// [TraversalEdgeBehavior.closedLoop] is used, because it's typical for dialogs
 /// to allow users to cycle through dialog widgets without leaving the dialog.
 ///
+/// {@template flutter.material.dialog.requestFocus}
+/// The `requestFocus` argument is used to specify whether the dialog should
+/// request focus when shown.
+/// {@endtemplate}
+/// {@macro flutter.widgets.navigator.Route.requestFocus}
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// If the application has multiple [Navigator] objects, it may be necessary to
@@ -1459,6 +1465,8 @@ Future<T?> showDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  bool? requestFocus,
+  AnimationStyle? animationStyle,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1484,6 +1492,8 @@ Future<T?> showDialog<T>({
       themes: themes,
       anchorPoint: anchorPoint,
       traversalEdgeBehavior: traversalEdgeBehavior ?? TraversalEdgeBehavior.closedLoop,
+      requestFocus: requestFocus,
+      animationStyle: animationStyle,
     ),
   );
 }
@@ -1507,6 +1517,8 @@ Future<T?> showAdaptiveDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   TraversalEdgeBehavior? traversalEdgeBehavior,
+  bool? requestFocus,
+  AnimationStyle? animationStyle,
 }) {
   final ThemeData theme = Theme.of(context);
   switch (theme.platform) {
@@ -1525,6 +1537,8 @@ Future<T?> showAdaptiveDialog<T>({
         routeSettings: routeSettings,
         anchorPoint: anchorPoint,
         traversalEdgeBehavior: traversalEdgeBehavior,
+        requestFocus: requestFocus,
+        animationStyle: animationStyle,
       );
     case TargetPlatform.iOS:
     case TargetPlatform.macOS:
@@ -1536,6 +1550,7 @@ Future<T?> showAdaptiveDialog<T>({
         useRootNavigator: useRootNavigator,
         anchorPoint: anchorPoint,
         routeSettings: routeSettings,
+        requestFocus: requestFocus,
       );
   }
 }
@@ -1617,7 +1632,9 @@ class DialogRoute<T> extends RawDialogRoute<T> {
     super.requestFocus,
     super.anchorPoint,
     super.traversalEdgeBehavior,
-  }) : super(
+    AnimationStyle? animationStyle,
+  }) : _animationStyle = animationStyle,
+       super(
          pageBuilder: (
            BuildContext buildContext,
            Animation<double> animation,
@@ -1631,16 +1648,21 @@ class DialogRoute<T> extends RawDialogRoute<T> {
            return dialog;
          },
          barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
-         transitionDuration: const Duration(milliseconds: 150),
+         transitionDuration: animationStyle?.duration ?? const Duration(milliseconds: 150),
          transitionBuilder: _buildMaterialDialogTransitions,
        );
 
   CurvedAnimation? _curvedAnimation;
+  final AnimationStyle? _animationStyle;
 
   void _setAnimation(Animation<double> animation) {
     if (_curvedAnimation?.parent != animation) {
       _curvedAnimation?.dispose();
-      _curvedAnimation = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      _curvedAnimation = CurvedAnimation(
+        parent: animation,
+        curve: _animationStyle?.curve ?? Curves.easeOut,
+        reverseCurve: _animationStyle?.reverseCurve ?? Curves.easeOut,
+      );
     }
   }
 

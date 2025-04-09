@@ -23,7 +23,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: lightTheme ? ThemeData.light() : ThemeData.dark(),
+      theme: lightTheme ? ThemeData() : ThemeData.dark(),
       title: 'Advanced Layout',
       home:
           scrollMode == ScrollMode.complex

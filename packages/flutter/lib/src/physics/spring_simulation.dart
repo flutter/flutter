@@ -43,6 +43,44 @@ class SpringDescription {
     double ratio = 1.0,
   }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 
+  /// Creates a [SpringDescription] based on a desired animation duration and
+  /// bounce.
+  ///
+  /// This provides an intuitive way to define a spring based on its visual
+  /// properties, [duration] and [bounce]. Check the properties' documentation
+  /// for their definition.
+  ///
+  /// This constructor produces the same result as SwiftUI's
+  /// `spring(duration:bounce:blendDuration:)` animation.
+  ///
+  /// {@tool snippet}
+  /// ```dart
+  /// final SpringDescription spring = SpringDescription.withDurationAndBounce(
+  ///   duration: const Duration(milliseconds: 300),
+  ///   bounce: 0.3,
+  /// );
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  /// * [SpringDescription], which creates a spring by explicitly providing
+  /// physical parameters.
+  /// * [SpringDescription.withDampingRatio], which creates a spring with a
+  ///   damping ratio and other physical parameters.
+  factory SpringDescription.withDurationAndBounce({
+    Duration duration = const Duration(milliseconds: 500),
+    double bounce = 0.0,
+  }) {
+    assert(duration.inMilliseconds > 0, 'Duration must be positive');
+    final double durationInSeconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
+    const double mass = 1.0;
+    final double stiffness = (4 * math.pi * math.pi * mass) / math.pow(durationInSeconds, 2);
+    final double dampingRatio = bounce > 0 ? (1.0 - bounce) : (1 / (bounce + 1));
+    final double damping = dampingRatio * 2.0 * math.sqrt(mass * stiffness);
+
+    return SpringDescription(mass: mass, stiffness: stiffness, damping: damping);
+  }
+
   /// The mass of the spring (m).
   ///
   /// The units are arbitrary, but all springs within a system should use
@@ -77,6 +115,43 @@ class SpringDescription {
   /// used for the value of the [mass] property, and T is the time unit used for
   /// driving the [SpringSimulation].
   final double damping;
+
+  /// The duration parameter used in [SpringDescription.withDurationAndBounce].
+  ///
+  /// This value defines the perceptual duration of the spring, controlling
+  /// its overall pace. It is approximately equal to the time it takes for
+  /// the spring to settle, but for highly bouncy springs, it instead
+  /// corresponds to the oscillation period.
+  ///
+  /// This duration does not represent the exact time for the spring to stop
+  /// moving. For example, when [bounce] is 1, the spring oscillates
+  /// indefinitely, even though [duration] has a finite value. To determine
+  /// when the motion has effectively stopped within a certain tolerance,
+  /// use [SpringSimulation.isDone].
+  ///
+  /// Defaults to 0.5 seconds.
+  Duration get duration {
+    final double durationInSeconds = math.sqrt((4 * math.pi * math.pi * mass) / stiffness);
+    final int milliseconds = (durationInSeconds * Duration.millisecondsPerSecond).round();
+    return Duration(milliseconds: milliseconds);
+  }
+
+  /// The bounce parameter used in [SpringDescription.withDurationAndBounce].
+  ///
+  /// This value controls how bouncy the spring is:
+  ///
+  ///  * A value of 0 results in a critically damped spring with no oscillation.
+  ///  * Values between 0 and 1 produce underdamping, where the spring oscillates a few times
+  ///    before settling. A value of 1 represents an undamped spring that
+  ///    oscillates indefinitely.
+  ///  * Negative values indicate overdamping, where the motion is slow and
+  ///    resistive, like moving through a thick fluid.
+  ///
+  /// Defaults to 0.
+  double get bounce {
+    final double dampingRatio = damping / (2.0 * math.sqrt(mass * stiffness));
+    return dampingRatio < 1.0 ? (1.0 - dampingRatio) : ((1 / dampingRatio) - 1);
+  }
 
   @override
   String toString() =>
@@ -289,7 +364,7 @@ class _UnderdampedSolution implements _SpringSolution {
     final double w =
         math.sqrt(4.0 * spring.mass * spring.stiffness - spring.damping * spring.damping) /
         (2.0 * spring.mass);
-    final double r = -(spring.damping / 2.0 * spring.mass);
+    final double r = -(spring.damping / 2.0 / spring.mass);
     final double c1 = distance;
     final double c2 = (velocity - r * distance) / w;
     return _UnderdampedSolution.withArgs(w, r, c1, c2);

@@ -275,6 +275,9 @@ class UserMessages {
   String get gtkLibrariesMissing =>
       'GTK 3.0 development libraries are required for Linux development.\n'
       'They are likely available from your distribution (e.g.: apt install libgtk-3-dev)';
+  String get eglinfoMissing =>
+      "Unable to access driver information using 'eglinfo'.\n"
+      'It is likely available from your distribution (e.g.: apt install mesa-utils)';
 
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) =>

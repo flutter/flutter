@@ -25,7 +25,7 @@ id<MTLBuffer> DeviceBufferMTL::GetMTLBuffer() const {
 uint8_t* DeviceBufferMTL::OnGetContents() const {
 #if !FML_OS_IOS
   if (storage_mode_ != MTLStorageModeShared &&
-      storage_mode_ != MTLResourceStorageModeManaged) {
+      storage_mode_ != MTLStorageModeManaged) {
     return nullptr;
   }
 #else

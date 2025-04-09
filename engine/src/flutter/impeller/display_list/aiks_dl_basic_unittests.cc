@@ -339,7 +339,7 @@ TEST_P(AiksTest, CanSaveLayerStandalone) {
   DlPaint alpha;
   alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
-  builder.SaveLayer(nullptr, &alpha);
+  builder.SaveLayer(std::nullopt, &alpha);
 
   builder.DrawCircle(DlPoint(125, 125), 125, red);
 
@@ -938,6 +938,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
 
   // Scale
   {
+    builder.Save();
     builder.Translate(100, 0);
     builder.Scale(100, 100);
     DlPaint paint;
@@ -948,6 +949,23 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
         DlImageSampling::kNearestNeighbor, &matrix));
 
     builder.DrawRect(DlRect::MakeLTRB(0, 0, 1, 1), paint);
+    builder.Restore();
+  }
+
+  // Perspective
+  {
+    builder.Save();
+    builder.Translate(150, 150);
+    DlPaint paint;
+
+    DlMatrix matrix =
+        DlMatrix::MakePerspective(Radians{0.5}, ISize{200, 200}, 0.05, 1);
+    paint.setColorSource(DlColorSource::MakeImage(
+        texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
+        DlImageSampling::kNearestNeighbor, &matrix));
+
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 200, 200), paint);
+    builder.Restore();
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -972,7 +990,7 @@ TEST_P(AiksTest, SubpassWithClearColorOptimization) {
 
   paint.setColor(DlColor::kBlue());
   paint.setBlendMode(DlBlendMode::kDstOver);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.Restore();
 
   // This playground should appear blank on CI since we are only drawing
@@ -992,7 +1010,7 @@ TEST_P(AiksTest, MatrixImageFilterDoesntCullWhenTranslatedFromOffscreen) {
   DlMatrix translate = DlMatrix::MakeTranslation({300, 0});
   paint.setImageFilter(
       DlImageFilter::MakeMatrix(translate, DlImageSampling::kLinear));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   DlPaint circle_paint;
   circle_paint.setColor(DlColor::kGreen());
@@ -1015,7 +1033,7 @@ TEST_P(AiksTest,
   paint.setImageFilter(DlImageFilter::MakeMatrix(
       DlMatrix::MakeTranslation({300, 0}) * DlMatrix::MakeScale({2, 2, 1}),
       DlImageSampling::kNearestNeighbor));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
 
   DlPaint circle_paint;
   circle_paint.setColor(DlColor::kGreen());
@@ -1038,7 +1056,7 @@ TEST_P(AiksTest, ClearColorOptimizationWhenSubpassIsBiggerThanParentPass) {
 
   paint.setImageFilter(DlImageFilter::MakeMatrix(DlMatrix::MakeScale({2, 2, 1}),
                                                  DlImageSampling::kLinear));
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   // Draw a rectangle that would fully cover the parent pass size, but not
   // the subpass that it is rendered in.
   paint.setColor(DlColor::kGreen());
@@ -1061,7 +1079,7 @@ TEST_P(AiksTest, EmptySaveLayerIgnoresPaint) {
   builder.DrawPaint(paint);
   builder.ClipRect(DlRect::MakeXYWH(100, 100, 200, 200));
   paint.setColor(DlColor::kBlue());
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1076,7 +1094,7 @@ TEST_P(AiksTest, EmptySaveLayerRendersWithClear) {
 
   DlPaint paint;
   paint.setBlendMode(DlBlendMode::kClear);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
@@ -1144,7 +1162,7 @@ TEST_P(AiksTest, CoordinateConversionsAreCorrect) {
     DlPaint alpha;
     alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
-    builder.SaveLayer(nullptr, &alpha);
+    builder.SaveLayer(std::nullopt, &alpha);
 
     DlPaint paint;
     paint.setColor(DlColor::kRed());
@@ -1365,7 +1383,7 @@ TEST_P(AiksTest, SaveLayerDrawsBehindSubsequentEntities) {
   builder.Translate(10, 10);
 
   DlPaint save_paint;
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
 
   paint.setColor(DlColor::kGreen());
   builder.DrawRect(rect, paint);
@@ -1453,7 +1471,7 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
 
   auto texture = DlImageImpeller::Make(CreateTextureForFixture("boston.jpg"));
   auto draw_image_layer = [&builder, &texture](const DlPaint& paint) {
-    builder.SaveLayer(nullptr, &paint);
+    builder.SaveLayer(std::nullopt, &paint);
     builder.DrawImage(texture, DlPoint(), DlImageSampling::kLinear);
     builder.Restore();
   };
@@ -1503,7 +1521,7 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
 
   // Should render a green square in the middle of a blue circle.
   DlPaint paint;
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   {
     builder.Translate(100, 100);
     paint.setColor(DlColor::kBlue());
@@ -1535,7 +1553,7 @@ TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
 
   DlPaint paint;
   paint.setImageFilter(filter);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   {
     DlPaint paint;
     paint.setColor(DlColor::kRed());
@@ -1614,7 +1632,7 @@ TEST_P(AiksTest, BackdropFilterOverUnclosedClip) {
     builder.SaveLayer(std::nullopt, nullptr, image_filter.get());
   }
   builder.Restore();
-  builder.DrawCircle(SkPoint{100, 100}, 100,
+  builder.DrawCircle(DlPoint(100, 100), 100,
                      DlPaint().setColor(DlColor::kAqua()));
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

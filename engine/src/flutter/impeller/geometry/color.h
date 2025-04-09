@@ -18,16 +18,16 @@
 
 #define IMPELLER_FOR_EACH_BLEND_MODE(V) \
   V(Clear)                              \
-  V(Source)                             \
-  V(Destination)                        \
-  V(SourceOver)                         \
-  V(DestinationOver)                    \
-  V(SourceIn)                           \
-  V(DestinationIn)                      \
-  V(SourceOut)                          \
-  V(DestinationOut)                     \
-  V(SourceATop)                         \
-  V(DestinationATop)                    \
+  V(Src)                                \
+  V(Dst)                                \
+  V(SrcOver)                            \
+  V(DstOver)                            \
+  V(SrcIn)                              \
+  V(DstIn)                              \
+  V(SrcOut)                             \
+  V(DstOut)                             \
+  V(SrcATop)                            \
+  V(DstATop)                            \
   V(Xor)                                \
   V(Plus)                               \
   V(Modulate)                           \
@@ -59,16 +59,16 @@ enum class BlendMode : uint8_t {
   // The following blend modes are able to be used as pipeline blend modes or
   // via `BlendFilterContents`.
   kClear = 0,
-  kSource,
-  kDestination,
-  kSourceOver,
-  kDestinationOver,
-  kSourceIn,
-  kDestinationIn,
-  kSourceOut,
-  kDestinationOut,
-  kSourceATop,
-  kDestinationATop,
+  kSrc,
+  kDst,
+  kSrcOver,
+  kDstOver,
+  kSrcIn,
+  kDstIn,
+  kSrcOut,
+  kDstOut,
+  kSrcATop,
+  kDstATop,
   kXor,
   kPlus,
   kModulate,
@@ -92,7 +92,8 @@ enum class BlendMode : uint8_t {
   kColor,
   kLuminosity,
 
-  kLast = kLuminosity,
+  kLastMode = kLuminosity,
+  kDefaultMode = kSrcOver,
 };
 
 const char* BlendModeToString(BlendMode blend_mode);
@@ -926,6 +927,12 @@ namespace std {
 inline std::ostream& operator<<(std::ostream& out, const impeller::Color& c) {
   out << "(" << c.red << ", " << c.green << ", " << c.blue << ", " << c.alpha
       << ")";
+  return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out,
+                                const impeller::BlendMode& mode) {
+  out << "BlendMode::k" << BlendModeToString(mode);
   return out;
 }
 

@@ -58,7 +58,8 @@ void ComputePassVK::SetPipeline(
   pipeline_layout_ = pipeline_vk.GetPipelineLayout();
 
   auto descriptor_result = command_buffer_->AllocateDescriptorSets(
-      pipeline_vk.GetDescriptorSetLayout(), ContextVK::Cast(*context_));
+      pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
+      ContextVK::Cast(*context_));
   if (!descriptor_result.ok()) {
     return;
   }

@@ -83,7 +83,7 @@ TEST_P(DisplayListTest, CanDrawTextWithSaveLayer) {
   flutter::DlPaint save_paint;
   float alpha = 0.5;
   save_paint.setAlpha(static_cast<uint8_t>(255 * alpha));
-  builder.SaveLayer(nullptr, &save_paint);
+  builder.SaveLayer(std::nullopt, &save_paint);
   builder.DrawTextBlob(SkTextBlob::MakeFromString("Hello with half alpha",
                                                   CreateTestFontOfSize(100)),
                        100, 300, flutter::DlPaint(flutter::DlColor::kRed()));
@@ -514,7 +514,7 @@ TEST_P(DisplayListTest, IgnoreMaskFilterWhenSavingLayer) {
   auto filter = flutter::DlBlurMaskFilter(flutter::DlBlurStyle::kNormal, 10.0f);
   flutter::DlPaint paint;
   paint.setMaskFilter(&filter);
-  builder.SaveLayer(nullptr, &paint);
+  builder.SaveLayer(std::nullopt, &paint);
   builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(100, 100),
                     flutter::DlImageSampling::kNearestNeighbor);
   builder.Restore();
@@ -994,7 +994,7 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
     flutter::DlPaint paint;
 
     if (enable_savelayer) {
-      builder.SaveLayer(nullptr, nullptr);
+      builder.SaveLayer(std::nullopt, nullptr);
     }
     {
       auto content_scale = GetContentScale();
@@ -1175,7 +1175,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
   flutter::DisplayListBuilder builder;
 
   {
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(100, 100);
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kRed());
@@ -1186,7 +1186,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.Restore();
   }
   {
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(300, 100);
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kBlue().withAlpha(127));
@@ -1197,7 +1197,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.Restore();
   }
   {
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(100, 300);
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kRed());
@@ -1208,7 +1208,7 @@ TEST_P(DisplayListTest, CanBlendDstOverAndDstCorrectly) {
     builder.Restore();
   }
   {
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(300, 300);
     flutter::DlPaint paint;
     paint.setColor(flutter::DlColor::kBlue().withAlpha(127));
