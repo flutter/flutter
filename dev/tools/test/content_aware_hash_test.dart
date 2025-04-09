@@ -75,8 +75,14 @@ void main() {
       }
     }
 
-    // Make a slim copy of the flutterRoo
+    // Make a slim copy of the flutterRoot.
     flutterRoot.copyTo(testRoot);
+
+    // Generate blank files for what otherwise would exist in the engine.
+    testRoot
+      ..engineReadMe.createSync(recursive: true)
+      ..flutterReadMe.createSync(recursive: true)
+      ..deps.createSync(recursive: true);
   });
 
   tearDown(() {
@@ -137,7 +143,7 @@ void main() {
 
   test('generates a hash', () async {
     initGitRepoWithBlankInitialCommit();
-    expect(runContentAwareHash(), processStdout('eb4bfafe997ec78b3ac8134fbac3eb105ae19155'));
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 
   group('generates a different hash when', () {
@@ -147,12 +153,12 @@ void main() {
 
     test('DEPS is changed', () async {
       writeFileAndCommit(testRoot.deps, 'deps changed');
-      expect(runContentAwareHash(), processStdout('38703cae8a58bd0e7e93342bddd20634b069e608'));
+      expect(runContentAwareHash(), processStdout('f049fdcd4300c8c0d5041b5e35b3d11c2d289bdf'));
     });
 
     test('an engine file changes', () async {
       writeFileAndCommit(testRoot.engineReadMe, 'engine file changed');
-      expect(runContentAwareHash(), processStdout('f92b9d9ee03d3530c750235a2fd8559a68d21eac'));
+      expect(runContentAwareHash(), processStdout('49e58f425cb039e745614d7ea10c369387c43681'));
     });
 
     test('a new engine file is added', () async {
@@ -176,14 +182,14 @@ void main() {
         testRoot.contentAwareHashPs1.parent.childFile('release-candidate-branch.version'),
         'sup',
       );
-      expect(runContentAwareHash(), processStdout('f34e6ca2d4dfafc20a5eb23d616df764cbbe937d'));
+      expect(runContentAwareHash(), processStdout('3b81cd2164f26a8db3271d46c7022c159193417d'));
     });
   });
 
   test('does not hash non-engine files', () async {
     initGitRepoWithBlankInitialCommit();
     testRoot.flutterReadMe.writeAsStringSync('codefu was here');
-    expect(runContentAwareHash(), processStdout('eb4bfafe997ec78b3ac8134fbac3eb105ae19155'));
+    expect(runContentAwareHash(), processStdout('3bbeb6a394378478683ece4f8e8663c42f8dc814'));
   });
 }
 
@@ -250,11 +256,8 @@ final class _FlutterRootUnderTest {
 
   /// Copies files under test to the [testRoot].
   void copyTo(_FlutterRootUnderTest testRoot) {
-    deps.copySyncRecursive(testRoot.deps.path);
     contentAwareHashPs1.copySyncRecursive(testRoot.contentAwareHashPs1.path);
     contentAwareHashSh.copySyncRecursive(testRoot.contentAwareHashSh.path);
-    engineReadMe.copySyncRecursive(testRoot.engineReadMe.path);
-    flutterReadMe.copySyncRecursive(testRoot.flutterReadMe.path);
   }
 }
 
