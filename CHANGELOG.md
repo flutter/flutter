@@ -29,6 +29,7 @@ INTERNAL NOTE
 ### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)
 - [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Impeller,
   All platforms, Text that is scaled over 48x renders incorrectly.
+- [flutter/165818](https://github.com/flutter/flutter/pull/165818) - Unset `GIT_DIR` to enable flutter tool calls in githooks
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
