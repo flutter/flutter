@@ -197,7 +197,8 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
           image_color_source->vertical_tile_mode());
       auto sampler_descriptor =
           skia_conversions::ToSamplerDescriptor(image_color_source->sampling());
-      auto effect_transform = image_color_source->matrix();
+      // See https://github.com/flutter/flutter/issues/165205
+      flutter::DlMatrix effect_transform = image_color_source->matrix().To3x3();
 
       auto contents = std::make_shared<TiledTextureContents>();
       contents->SetOpacityFactor(color.alpha);

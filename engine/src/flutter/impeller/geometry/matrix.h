@@ -247,6 +247,19 @@ struct Matrix {
     // clang-format on
   }
 
+  // Converts the second row/col to identity to make this an equivalent
+  // to a Skia 3x3 Matrix.
+  constexpr Matrix To3x3() const {
+    // clang-format off
+    return Matrix(
+      m[0], m[1], 0,  m[3],
+      m[4], m[5], 0,  m[7],
+      0, 0, 1, 0,
+      m[12], m[13], 0, m[15]
+    );
+    // clang-format on
+  }
+
   constexpr Matrix Translate(const Vector3& t) const {
     // clang-format off
     return Matrix(m[0], m[1], m[2], m[3],

@@ -938,6 +938,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
 
   // Scale
   {
+    builder.Save();
     builder.Translate(100, 0);
     builder.Scale(100, 100);
     DlPaint paint;
@@ -948,6 +949,23 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
         DlImageSampling::kNearestNeighbor, &matrix));
 
     builder.DrawRect(DlRect::MakeLTRB(0, 0, 1, 1), paint);
+    builder.Restore();
+  }
+
+  // Perspective
+  {
+    builder.Save();
+    builder.Translate(150, 150);
+    DlPaint paint;
+
+    DlMatrix matrix =
+        DlMatrix::MakePerspective(Radians{0.5}, ISize{200, 200}, 0.05, 1);
+    paint.setColorSource(DlColorSource::MakeImage(
+        texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
+        DlImageSampling::kNearestNeighbor, &matrix));
+
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 200, 200), paint);
+    builder.Restore();
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

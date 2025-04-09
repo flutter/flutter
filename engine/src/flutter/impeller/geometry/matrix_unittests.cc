@@ -313,5 +313,14 @@ TEST(MatrixTest, MakeScaleTranslate) {
       Matrix::MakeTranslation({0, 0, 0}) * Matrix::MakeScale({0, 0, 0})));
 }
 
+TEST(MatrixTest, To3x3) {
+  Matrix x(1.0, 0.0, 4.0, 0.0,    //
+           0.0, 1.0, 4.0, 0.0,    //
+           6.0, 5.0, 111.0, 7.0,  //
+           0.0, 0.0, 9.0, 1.0);
+
+  EXPECT_TRUE(MatrixNear(x.To3x3(), Matrix()));
+}
+
 }  // namespace testing
 }  // namespace impeller
