@@ -546,8 +546,8 @@ class _PredictiveBackPageSharedElementTransition extends StatefulWidget {
 class _PredictiveBackPageSharedElementTransitionState
     extends State<_PredictiveBackPageSharedElementTransition>
     with SingleTickerProviderStateMixin {
-  double xShift = 0;
-  double _lastYPosition = 0;
+  double _lastXDrag = 0;
+  double _lastYDrag = 0;
   double _lastScale = 1;
   // TODO(justinmc): Private names.
   late final AnimationController commitController;
@@ -558,9 +558,8 @@ class _PredictiveBackPageSharedElementTransitionState
   late Animation<double> _scaleAnimationCommit;
   final Tween<double> _scaleTween = Tween<double>(begin: scalePercentage, end: 1.0);
   late final Animation<Offset> _positionAnimation;
-  late Animation<double> _yAnimationCommit;
   Animation<double>? _xAnimation;
-  Animation<double>? _xAnimationCommit;
+  Animation<Offset>? _commitAnimation;
 
   // Constants as per the motion specs
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
@@ -569,8 +568,13 @@ class _PredictiveBackPageSharedElementTransitionState
   static const double margin = 8.0;
   static const double borderRadius = 32.0;
   static const double extraShiftDistance = 0.1;
-  // TODO(justinmc): Faster?
-  static const int _kCommitMilliseconds = 200;
+
+  // Eyeballed on a Pixel 9 running Android 16.
+  static const int _kCommitMilliseconds = 100;
+
+  // In the rare case that this widget is first built in the middle of a commit
+  // gesture.
+  static const double _defaultScreenWidth = 1000.0;
 
   static double _getYPosition(
     double screenHeight,
@@ -592,10 +596,14 @@ class _PredictiveBackPageSharedElementTransitionState
   }
 
   // TODO(justinmc): Change "calc"" names to "get". And make private.
+  // This isn't done as an animation because it's based on the vertical drag
+  // amount, not the progression of the back gesture like widget.animation is.
   double calcYShift() {
     final double screenHeight = MediaQuery.of(context).size.height;
     return _getYPosition(screenHeight, widget.startBackEvent, widget.currentBackEvent);
   }
+
+  // TODO(justinmc): Should have a delegatedTransition. The incoming route on a back has three animations: x translation, scale, and a dimming of its colors (opacity I think). Dimming also happens in dark mode, it gets even darker.
 
   @override
   void initState() {
@@ -614,10 +622,12 @@ class _PredictiveBackPageSharedElementTransitionState
     _scaleAnimation = Tween<double>(begin: scalePercentage, end: 1.0).animate(widget.animation);
     _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
     _positionAnimation = Tween<Offset>(
-      begin: Offset(widget.currentBackEvent?.swipeEdge == SwipeEdge.right ? -xShift : xShift, 0.0),
+      begin: Offset(
+        widget.currentBackEvent?.swipeEdge == SwipeEdge.right ? -_lastXDrag : _lastXDrag,
+        0.0,
+      ),
       end: Offset.zero,
     ).animate(widget.animation);
-    _yAnimationCommit = Tween<double>(begin: 0.0, end: _lastYPosition).animate(commitAnimation);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
       commitController.forward(from: 0.0);
@@ -636,12 +646,11 @@ class _PredictiveBackPageSharedElementTransitionState
         curve: Curves.easeOut,
       );
       _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
-      _yAnimationCommit = Tween<double>(begin: _lastYPosition, end: 0.0).animate(commitAnimation);
       // TODO(justinmc): InheritedModel? Extract to build method as just Size?
       final double screenWidth = MediaQuery.of(context).size.width;
-      _xAnimationCommit = Tween<double>(
-        begin: xShift,
-        end: screenWidth * extraShiftDistance,
+      _commitAnimation = Tween<Offset>(
+        begin: Offset(_lastXDrag, _lastYDrag),
+        end: Offset(screenWidth * extraShiftDistance, 0.0),
       ).animate(commitAnimation);
     }
   }
@@ -654,15 +663,15 @@ class _PredictiveBackPageSharedElementTransitionState
 
   @override
   Widget build(BuildContext context) {
-    // TODO(justinmc): It's a bummer I have to check this when really it's only needed on the first build...
-    if (_xAnimationCommit == null) {
+    // In the rare case that this widget is built for the first time during an
+    // active commit gesture.
+    if (_commitAnimation == null) {
       final double screenWidth = MediaQuery.of(context).size.width;
-      _xAnimationCommit = Tween<double>(
-        begin: 0.0,
-        end: screenWidth * extraShiftDistance,
+      _commitAnimation = Tween<Offset>(
+        begin: Offset.zero,
+        end: Offset(screenWidth * extraShiftDistance, 0.0),
       ).animate(commitAnimation);
     }
-
     if (_xAnimation == null) {
       final double screenWidth = MediaQuery.of(context).size.width;
       final double xShift = (screenWidth / divisionFactor) - margin;
@@ -696,13 +705,9 @@ class _PredictiveBackPageSharedElementTransitionState
             _ => _lastScale = _scaleAnimation.value,
           },
           child: Transform.translate(
-            //offset: Offset(xShift, yShift),
             offset: switch (widget.phase) {
-              _PredictiveBackPhase.commit => Offset(
-                _xAnimationCommit!.value,
-                _yAnimationCommit.value,
-              ),
-              _ => Offset(xShift = _xAnimation!.value, _lastYPosition = calcYShift()),
+              _PredictiveBackPhase.commit => _commitAnimation!.value,
+              _ => Offset(_lastXDrag = _xAnimation!.value, _lastYDrag = calcYShift()),
             },
             child: Opacity(
               // TODO(justinmc): Double check that the opacity animation works correctly.
