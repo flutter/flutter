@@ -324,8 +324,8 @@ class ClipRSuperellipseOperation implements LayerOperation {
 
   @override
   PlatformViewStyling createPlatformViewStyling() {
-    // TODO(dkwingsmt): Properly implement RSuperellipse on Web instead of falling
-    // back to RRect.  https://github.com/flutter/flutter/issues/163718
+    // Instead of using paths to clip PlatformViews, fallback to RRect for a
+    // similar but much cheaper result.
     return PlatformViewStyling(clip: PlatformViewRRectClip(rsuperellipse.toApproximateRRect()));
   }
 

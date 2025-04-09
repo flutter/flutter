@@ -1189,7 +1189,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   static const RSuperellipse zero = RSuperellipse._raw();
 
   bool contains(Offset point) {
-    return _RoundSuperellipseParam.makeRSuperellipse(this).contains(point);
+    return RoundSuperellipseParam.makeRSuperellipse(this).contains(point);
   }
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {

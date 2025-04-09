@@ -154,7 +154,7 @@ class Octant {
     }
 
     final double ratio = a * 2 / radius;
-    final double g = _RoundSuperellipseParam.kGapFactor * radius;
+    final double g = RoundSuperellipseParam.kGapFactor * radius;
 
     final (double n, double xJOverA) = _computeNAndXj(ratio);
     final double xJ = xJOverA * a;
@@ -275,7 +275,7 @@ class Quadrant {
   );
 }
 
-class _RoundSuperellipseParam {
+class RoundSuperellipseParam {
   static const double kGapFactor = 0.29289321881; // 1-cos(pi/4)
 
   final Quadrant topRight;
@@ -284,7 +284,7 @@ class _RoundSuperellipseParam {
   final Quadrant topLeft;
   final bool allCornersSame;
 
-  _RoundSuperellipseParam({
+  RoundSuperellipseParam({
     required this.topRight,
     required this.bottomRight,
     required this.bottomLeft,
@@ -292,9 +292,9 @@ class _RoundSuperellipseParam {
     required this.allCornersSame,
   });
 
-  factory _RoundSuperellipseParam.makeRSuperellipse(RSuperellipse r) {
+  factory RoundSuperellipseParam.makeRSuperellipse(RSuperellipse r) {
     if (_areAllCornersSame(r) && r.trRadiusX != 0 && r.trRadiusY != 0) {
-      return _RoundSuperellipseParam(
+      return RoundSuperellipseParam(
         topRight: Quadrant.computeQuadrant(r.center, Offset(r.right, r.top), r.trRadius),
         topLeft: Quadrant.zero,
         bottomLeft: Quadrant.zero,
@@ -308,7 +308,7 @@ class _RoundSuperellipseParam {
     final double bottomSplit = _split(r.left, r.right, r.blRadiusX, r.brRadiusX);
     final double leftSplit = _split(r.top, r.bottom, r.tlRadiusY, r.blRadiusY);
 
-    return _RoundSuperellipseParam(
+    return RoundSuperellipseParam(
       topRight: Quadrant.computeQuadrant(
         Offset(topSplit, rightSplit),
         Offset(r.right, r.top),
@@ -333,8 +333,8 @@ class _RoundSuperellipseParam {
     );
   }
 
-  void addToPath(Path pathBuilder) {
-    final builder = _RSuperellipsePathBuilder(pathBuilder);
+  void addToPath(Path path) {
+    final builder = _RSuperellipsePathBuilder(path);
 
     final Offset start =
         topRight.offset +
@@ -342,7 +342,7 @@ class _RoundSuperellipseParam {
           topRight.signedScale.width,
           topRight.signedScale.height,
         );
-    pathBuilder.moveTo(start.dx, start.dy);
+    path.moveTo(start.dx, start.dy);
 
     if (allCornersSame) {
       builder.addQuadrant(topRight, false, Offset(1, 1));
@@ -356,8 +356,8 @@ class _RoundSuperellipseParam {
       builder.addQuadrant(topLeft, true);
     }
 
-    pathBuilder.lineTo(start.dx, start.dy);
-    pathBuilder.close();
+    path.lineTo(start.dx, start.dy);
+    path.close();
   }
 
   bool contains(Offset point) {
@@ -372,9 +372,9 @@ class _RoundSuperellipseParam {
 }
 
 class _RSuperellipsePathBuilder {
-  final Path builder;
+  const _RSuperellipsePathBuilder(this.path);
 
-  const _RSuperellipsePathBuilder(this.builder);
+  final Path path;
 
   void addQuadrant(Quadrant param, bool reverse, [Offset scaleSign = const Offset(1, 1)]) {
     final _Transform transform = _composite(
@@ -454,11 +454,11 @@ class _RSuperellipsePathBuilder {
   }
 
   void _cubicTo(Offset p2, Offset p3, Offset p4) {
-    builder.cubicTo(p2.dx, p2.dy, p3.dx, p3.dy, p4.dx, p4.dy);
+    path.cubicTo(p2.dx, p2.dy, p3.dx, p3.dy, p4.dx, p4.dy);
   }
 
   void _lineTo(Offset p) {
-    builder.lineTo(p.dx, p.dy);
+    path.lineTo(p.dx, p.dy);
   }
 
   static (double, double) _superellipseBezierFactors(double n) {
