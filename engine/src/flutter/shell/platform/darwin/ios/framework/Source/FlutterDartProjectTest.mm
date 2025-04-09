@@ -248,8 +248,7 @@ FLUTTER_ASSERT_ARC
 
   auto settings = FLTDefaultSettingsForBundle(nil, mockProcessInfo);
 
-  XCTAssertEqual(settings.dart_flags.size(), 1u);
-  XCTAssertEqual(settings.dart_flags[0], "--enable-flutter-gpu");
+  XCTAssertTrue(settings.enable_flutter_gpu);
   [mockMainBundle stopMocking];
 }
 
