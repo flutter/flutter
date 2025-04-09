@@ -1110,7 +1110,9 @@ void main() {
     expect(mockCodec.disposed, true);
   });
 
-  testWidgets('ImageStream that has never had any listeners can be disposed', (WidgetTester tester) async {
+  testWidgets('ImageStream that has never had any listeners can be disposed', (
+    WidgetTester tester,
+  ) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 2;
     mockCodec.repetitionCount = -1;
