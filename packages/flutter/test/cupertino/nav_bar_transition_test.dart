@@ -1230,7 +1230,6 @@ void main() {
       );
       await tester.pumpAndSettle();
     },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
   );
 
   testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
