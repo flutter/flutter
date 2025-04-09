@@ -5,6 +5,7 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/base/allocation_size.h"
+#include "impeller/core/allocator.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
@@ -71,6 +72,25 @@ TEST(AllocatorVKTest, MemoryTypeSelectionTwoHeap) {
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(2, properties), 1);
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(3, properties), 1);
   EXPECT_EQ(AllocatorVK::FindMemoryTypeIndex(4, properties), -1);
+}
+
+TEST(AllocatorVKTest, ImageResourceKeepsVulkanDeviceAlive) {
+  std::shared_ptr<Texture> texture;
+  std::weak_ptr<Allocator> weak_allocator;
+  {
+    auto const context = MockVulkanContextBuilder().Build();
+    weak_allocator = context->GetResourceAllocator();
+    auto allocator = context->GetResourceAllocator();
+
+    texture = allocator->CreateTexture(TextureDescriptor{
+        .storage_mode = StorageMode::kDevicePrivate,
+        .format = PixelFormat::kR8G8B8A8UNormInt,
+        .size = {1, 1},
+    });
+    context->Shutdown();
+  }
+
+  ASSERT_TRUE(weak_allocator.lock());
 }
 
 #ifdef IMPELLER_DEBUG
