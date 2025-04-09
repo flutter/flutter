@@ -4363,7 +4363,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/165453
-  testWidgets('ListTile isThreeLine ', (WidgetTester tester) async {
+  testWidgets('ListTile isThreeLine', (WidgetTester tester) async {
     const double height = 300;
     const double avatarTop = 130.0;
     const double placeholderTop = 138.0;

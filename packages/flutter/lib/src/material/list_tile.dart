@@ -482,6 +482,11 @@ class ListTile extends StatelessWidget {
   ///
   /// When using a [Text] widget for [title] and [subtitle], you can enforce
   /// line limits using [Text.maxLines].
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
   final bool? isThreeLine;
 
   /// {@template flutter.material.ListTile.dense}
