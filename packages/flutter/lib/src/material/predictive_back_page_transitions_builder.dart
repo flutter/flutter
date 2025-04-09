@@ -546,20 +546,6 @@ class _PredictiveBackPageSharedElementTransition extends StatefulWidget {
 class _PredictiveBackPageSharedElementTransitionState
     extends State<_PredictiveBackPageSharedElementTransition>
     with SingleTickerProviderStateMixin {
-  double _lastXDrag = 0.0;
-  double _lastYDrag = 0.0;
-  double _lastScale = 1.0;
-  // TODO(justinmc): Private names.
-  late final AnimationController commitController;
-  late final Animation<double> commitAnimation;
-  late final Listenable mergedAnimations;
-  late final Animation<double> _opacityAnimation;
-  late final Animation<double> _scaleAnimation;
-  late Animation<double> _scaleAnimationCommit;
-  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
-  late Animation<double> _xAnimation;
-  late Animation<Offset> _commitPositionAnimation;
-
   // Constants as per the motion specs
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
   static const double _kMinScale = 0.90;
@@ -574,6 +560,24 @@ class _PredictiveBackPageSharedElementTransitionState
 
   // Eyeballed on a Pixel 9 running Android 16.
   static const int _kCommitMilliseconds = 100;
+
+  final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
+  final Tween<double> _gapTween = Tween<double>(begin: _kMargin, end: 0.0);
+  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
+  final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
+
+  late final AnimationController _commitController;
+  late final Animation<double> _commitAnimation;
+  late final Listenable _mergedAnimations;
+  late final Animation<double> _opacityAnimation;
+  late final Animation<double> _scaleAnimation;
+  late Animation<double> _scaleCommitAnimation;
+  late Animation<double> _xAnimation;
+  late Animation<Offset> _positionCommitAnimation;
+
+  double _lastXDrag = 0.0;
+  double _lastYDrag = 0.0;
+  double _lastScale = 1.0;
 
   // This isn't done as an animation because it's based on the vertical drag
   // amount, not the progression of the back gesture like widget.animation is.
@@ -596,30 +600,28 @@ class _PredictiveBackPageSharedElementTransitionState
     return Tween<Offset>(
       begin: Offset(_lastXDrag, _lastYDrag),
       end: Offset(screenWidth * _kYPositionFactor, 0.0),
-    ).animate(commitAnimation);
+    ).animate(_commitAnimation);
   }
 
-  // TODO(justinmc): Should have a delegatedTransition. The incoming route on a back has three animations: x translation, scale, and a dimming of its colors (opacity I think). Dimming also happens in dark mode, it gets even darker.
+  // TODO(justinmc): Should have a delegatedTransition.
+  // See https://github.com/flutter/flutter/issues/153577.
 
   @override
   void initState() {
     super.initState();
-    // TODO(justinmc): Can commitController be local to this method?
-    commitController = AnimationController(
+
+    _commitController = AnimationController(
       duration: const Duration(milliseconds: _kCommitMilliseconds),
       vsync: this,
     );
-    commitAnimation = CurvedAnimation(parent: commitController, curve: Curves.easeOut);
-
-    mergedAnimations = Listenable.merge(<Listenable>[widget.animation, commitController]);
-
-    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(commitAnimation);
-    // TODO(justinmc): Pull out this tween, and maybe others, to constants.
-    _scaleAnimation = Tween<double>(begin: _kMinScale, end: 1.0).animate(widget.animation);
-    _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
+    _commitAnimation = CurvedAnimation(parent: _commitController, curve: Curves.easeOut);
+    _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
+    _opacityAnimation = _opacityTween.animate(_commitAnimation);
+    _scaleAnimation = _scaleTween.animate(widget.animation);
+    _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
-      commitController.forward(from: 0.0);
+      _commitController.forward(from: 0.0);
     }
   }
 
@@ -628,16 +630,10 @@ class _PredictiveBackPageSharedElementTransitionState
     super.didUpdateWidget(oldWidget);
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
-      commitController.forward(from: 0.0);
-      // TODO(justinmc): Or reverse?
-      final Animation<double> commitAnimation = CurvedAnimation(
-        parent: commitController,
-        curve: Curves.easeOut,
-      );
-      _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
-      // TODO(justinmc): InheritedModel? Extract to build method as just Size?
+      _commitController.forward(from: 0.0);
+      _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
       final double screenWidth = MediaQuery.sizeOf(context).width;
-      _commitPositionAnimation = _getCommitPositionAnimation(screenWidth);
+      _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
     }
   }
 
@@ -656,48 +652,40 @@ class _PredictiveBackPageSharedElementTransitionState
       end: 0.0,
     ).animate(widget.animation);
 
-    _commitPositionAnimation = _getCommitPositionAnimation(screenWidth);
+    _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
   }
 
   @override
   void dispose() {
-    commitController.dispose();
+    _commitController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: mergedAnimations,
+      animation: _mergedAnimations,
       builder: (BuildContext context, Widget? child) {
-        // TODO(justinmc): Separate widget or inline?
-        final Tween<double> gapTween = Tween<double>(begin: _kMargin, end: 0.0);
-        final Tween<double> borderRadiusTween = Tween<double>(
-          begin: _kDeviceBorderRadius,
-          end: 0.0,
-        );
-
         return Transform.scale(
           scale: switch (widget.phase) {
-            _PredictiveBackPhase.commit => _scaleAnimationCommit.value,
+            _PredictiveBackPhase.commit => _scaleCommitAnimation.value,
             _ => _lastScale = _scaleAnimation.value,
           },
           child: Transform.translate(
             offset: switch (widget.phase) {
-              _PredictiveBackPhase.commit => _commitPositionAnimation.value,
+              _PredictiveBackPhase.commit => _positionCommitAnimation.value,
               _ => Offset(
                 _lastXDrag = _xAnimation.value,
                 _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
               ),
             },
             child: Opacity(
-              // TODO(justinmc): Double check that the opacity animation works correctly.
               opacity: _opacityAnimation.value,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: gapTween.animate(widget.animation).value),
+                padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(widget.animation)),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(
-                    borderRadiusTween.animate(widget.animation).value,
+                    _borderRadiusTween.evaluate(widget.animation),
                   ),
                   child: child,
                 ),
