@@ -5,8 +5,6 @@
 /// @docImport 'page.dart';
 library;
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -104,7 +102,6 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
     bool allowSnapshotting,
     Widget? child,
   ) {
-    print('justin delegatedtransition of PredictiveBackpageSharedBuilder');
     final ModalRoute<Object?>? route = ModalRoute.of(context);
     if (child == null || route is! PageRoute) {
       return child;
@@ -603,8 +600,11 @@ class _PredictiveBackPageSharedElementTransitionState
     ).animate(_commitAnimation);
   }
 
-  // TODO(justinmc): Should have a delegatedTransition.
-  // See https://github.com/flutter/flutter/issues/153577.
+  // TODO(justinmc): Should have a delegatedTransition. The incoming route on a
+  // back has three animations: x translation, scale, and a dimming of its
+  // colors (opacity I think). Dimming also happens in dark mode, it gets even
+  // darker.
+  // https://github.com/flutter/flutter/issues/153577
 
   @override
   void initState() {

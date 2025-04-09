@@ -154,7 +154,6 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
     bool allowSnapshotting,
     Widget? child,
   ) {
-    print('justin material route _delegatedTransition.');
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     final TargetPlatform platform = Theme.of(context).platform;
     final DelegatedTransitionBuilder? themeDelegatedTransition = theme.delegatedTransition(
