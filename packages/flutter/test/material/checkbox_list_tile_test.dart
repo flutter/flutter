@@ -1455,7 +1455,7 @@ void main() {
 
   testWidgets('CheckboxListTile.adaptive isThreeLine', (WidgetTester tester) async {
     const double height = 300;
-    const double switchTop = 130.0;
+    const double switchTop = 128.0;
 
     Widget buildFrame({bool? themeDataIsThreeLine, bool? themeIsThreeLine, bool? isThreeLine}) {
       return MaterialApp(
@@ -1500,16 +1500,16 @@ void main() {
         const Rect.fromLTWH(0.0, 0.0, 800.0, height),
       );
       expect(
-        tester.getRect(find.byType(Switch).at(0)),
-        const Rect.fromLTWH(800.0 - 40.0 - 24.0, switchTop, 40.0, 40.0),
+        tester.getRect(find.byType(Checkbox).at(0)),
+        const Rect.fromLTWH(800.0 - 44.0 - 24.0, switchTop, 44.0, 44.0),
       );
       expect(
         tester.getRect(find.byType(CheckboxListTile).at(1)),
         const Rect.fromLTWH(0.0, height, 800.0, 72.0),
       );
       expect(
-        tester.getRect(find.byType(Switch).at(1)),
-        const Rect.fromLTWH(800.0 - 40.0 - 24.0, height + 16, 40.0, 40.0),
+        tester.getRect(find.byType(Checkbox).at(1)),
+        const Rect.fromLTWH(800.0 - 44.0 - 24.0, height + 14, 44.0, 44.0),
       );
     }
 
@@ -1520,7 +1520,7 @@ void main() {
       );
       expect(
         tester.getRect(find.byType(Checkbox).at(0)),
-        const Rect.fromLTWH(800.0 - 40.0 - 24.0, 8.0, 40.0, 40.0),
+        const Rect.fromLTWH(800.0 - 44.0 - 24.0, 8.0, 44.0, 44.0),
       );
       expect(
         tester.getRect(find.byType(CheckboxListTile).at(1)),
@@ -1528,7 +1528,7 @@ void main() {
       );
       expect(
         tester.getRect(find.byType(Checkbox).at(1)),
-        const Rect.fromLTWH(800.0 - 40.0 - 24.0, height + 8.0, 40.0, 40.0),
+        const Rect.fromLTWH(800.0 - 44.0 - 24.0, height + 8.0, 44.0, 44.0),
       );
     }
 
