@@ -955,7 +955,7 @@ class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedTheme(
-      data: toggle ? ThemeData.dark() : ThemeData.light(),
+      data: toggle ? ThemeData.dark() : ThemeData(),
       duration: duration,
       onEnd: widget.callback,
       child: child,

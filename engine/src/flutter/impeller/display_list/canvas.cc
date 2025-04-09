@@ -9,8 +9,13 @@
 #include <unordered_map>
 #include <utility>
 
+#include "display_list/effects/color_filters/dl_blend_color_filter.h"
+#include "display_list/effects/color_filters/dl_matrix_color_filter.h"
+#include "display_list/effects/dl_color_filter.h"
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_image_filter.h"
+#include "display_list/geometry/dl_path.h"
+#include "display_list/image/dl_image.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/base/validation.h"
@@ -24,8 +29,10 @@
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/line_contents.h"
 #include "impeller/entity/contents/solid_rrect_blur_contents.h"
 #include "impeller/entity/contents/text_contents.h"
+#include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/vertices_contents.h"
 #include "impeller/entity/geometry/circle_geometry.h"
@@ -43,11 +50,18 @@
 #include "impeller/geometry/color.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/path_builder.h"
+#include "impeller/geometry/rstransform.h"
 #include "impeller/renderer/command_buffer.h"
 
 namespace impeller {
 
 namespace {
+
+bool IsPipelineBlendOrMatrixFilter(const flutter::DlColorFilter* filter) {
+  return filter->type() == flutter::DlColorFilterType::kMatrix ||
+         (filter->type() == flutter::DlColorFilterType::kBlend &&
+          filter->asBlend()->mode() <= Entity::kLastPipelineBlendMode);
+}
 
 static bool UseColorSourceContents(
     const std::shared_ptr<VerticesGeometry>& vertices,
@@ -85,7 +99,7 @@ static void ApplyFramebufferBlend(Entity& entity) {
   contents->SetChildContents(src_contents);
   contents->SetBlendMode(entity.GetBlendMode());
   entity.SetContents(std::move(contents));
-  entity.SetBlendMode(BlendMode::kSource);
+  entity.SetBlendMode(BlendMode::kSrc);
 }
 
 /// @brief Create the subpass restore contents, appling any filters or opacity
@@ -155,8 +169,10 @@ static std::unique_ptr<EntityPassTarget> CreateRenderTarget(
   }
 
   return std::make_unique<EntityPassTarget>(
-      target, renderer.GetDeviceCapabilities().SupportsReadFromResolve(),
-      renderer.GetDeviceCapabilities().SupportsImplicitResolvingMSAA());
+      target,                                                           //
+      renderer.GetDeviceCapabilities().SupportsReadFromResolve(),       //
+      renderer.GetDeviceCapabilities().SupportsImplicitResolvingMSAA()  //
+  );
 }
 
 }  // namespace
@@ -314,6 +330,78 @@ void Canvas::DrawPaint(const Paint& paint) {
   AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
 }
 
+// Optimization: if the texture has a color filter that is a simple
+// porter-duff blend or matrix filter, then instead of performing a save layer
+// we should swap out the shader for the porter duff blend shader and avoid a
+// saveLayer. This can only be done for imageRects without a strict source
+// rect, as the porter duff shader does not support this feature. This
+// optimization is important for Flame.
+bool Canvas::AttemptColorFilterOptimization(
+    const std::shared_ptr<Texture>& image,
+    Rect source,
+    Rect dest,
+    const Paint& paint,
+    const SamplerDescriptor& sampler,
+    SourceRectConstraint src_rect_constraint) {
+  if (src_rect_constraint == SourceRectConstraint::kStrict ||  //
+      !paint.color_filter ||                                   //
+      paint.image_filter != nullptr ||                         //
+      paint.invert_colors ||                                   //
+      paint.mask_blur_descriptor.has_value() ||                //
+      !IsPipelineBlendOrMatrixFilter(paint.color_filter)) {
+    return false;
+  }
+
+  if (paint.color_filter->type() == flutter::DlColorFilterType::kBlend) {
+    const flutter::DlBlendColorFilter* blend_filter =
+        paint.color_filter->asBlend();
+    DrawImageRectAtlasGeometry geometry = DrawImageRectAtlasGeometry(
+        /*texture=*/image,
+        /*source=*/source,
+        /*destination=*/dest,
+        /*color=*/skia_conversions::ToColor(blend_filter->color()),
+        /*blend_mode=*/blend_filter->mode(),
+        /*desc=*/sampler);
+
+    auto atlas_contents = std::make_shared<AtlasContents>();
+    atlas_contents->SetGeometry(&geometry);
+    atlas_contents->SetAlpha(paint.color.alpha);
+
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+    entity.SetContents(atlas_contents);
+
+    AddRenderEntityToCurrentPass(entity);
+  } else {
+    const flutter::DlMatrixColorFilter* matrix_filter =
+        paint.color_filter->asMatrix();
+
+    DrawImageRectAtlasGeometry geometry = DrawImageRectAtlasGeometry(
+        /*texture=*/image,
+        /*source=*/source,
+        /*destination=*/dest,
+        /*color=*/Color::Khaki(),            // ignored
+        /*blend_mode=*/BlendMode::kSrcOver,  // ignored
+        /*desc=*/sampler);
+
+    auto atlas_contents = std::make_shared<ColorFilterAtlasContents>();
+    atlas_contents->SetGeometry(&geometry);
+    atlas_contents->SetAlpha(paint.color.alpha);
+    impeller::ColorMatrix color_matrix;
+    matrix_filter->get_matrix(color_matrix.array);
+    atlas_contents->SetMatrix(color_matrix);
+
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+    entity.SetContents(atlas_contents);
+
+    AddRenderEntityToCurrentPass(entity);
+  }
+  return true;
+}
+
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Size corner_radii,
                                      const Paint& paint) {
@@ -374,8 +462,7 @@ bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
            FilterContents::BlurStyle::kNormal &&
        paint.image_filter) ||
       (paint.mask_blur_descriptor->style == FilterContents::BlurStyle::kSolid &&
-       (!rrect_color.IsOpaque() ||
-        paint.blend_mode != BlendMode::kSourceOver))) {
+       (!rrect_color.IsOpaque() || paint.blend_mode != BlendMode::kSrcOver))) {
     Rect render_bounds = rect;
     if (paint.mask_blur_descriptor->style !=
         FilterContents::BlurStyle::kInner) {
@@ -460,9 +547,19 @@ void Canvas::DrawLine(const Point& p0,
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
 
-  LineGeometry geom(p0, p1, paint.stroke_width, paint.stroke_cap);
-  AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint,
-                                          /*reuse_depth=*/reuse_depth);
+  auto geometry = std::make_unique<LineGeometry>(p0, p1, paint.stroke_width,
+                                                 paint.stroke_cap);
+
+  if (renderer_.GetContext()->GetFlags().antialiased_lines &&
+      !paint.color_filter && !paint.invert_colors && !paint.image_filter &&
+      !paint.mask_blur_descriptor.has_value() && !paint.color_source) {
+    auto contents = LineContents::Make(std::move(geometry), paint.color);
+    entity.SetContents(std::move(contents));
+    AddRenderEntityToCurrentPass(entity, reuse_depth);
+  } else {
+    AddRenderEntityWithFiltersToCurrentPass(entity, geometry.get(), paint,
+                                            /*reuse_depth=*/reuse_depth);
+  }
 }
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
@@ -693,8 +790,8 @@ void Canvas::DrawImage(const std::shared_ptr<Texture>& image,
     return;
   }
 
-  const auto source = Rect::MakeSize(image->GetSize());
-  const auto dest = source.Shift(offset);
+  const Rect source = Rect::MakeSize(image->GetSize());
+  const Rect dest = source.Shift(offset);
 
   DrawImageRect(image, source, dest, paint, sampler);
 }
@@ -709,8 +806,7 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
     return;
   }
 
-  auto size = image->GetSize();
-
+  ISize size = image->GetSize();
   if (size.IsEmpty()) {
     return;
   }
@@ -720,6 +816,12 @@ void Canvas::DrawImageRect(const std::shared_ptr<Texture>& image,
   if (!clipped_source) {
     return;
   }
+
+  if (AttemptColorFilterOptimization(image, source, dest, paint, sampler,
+                                     src_rect_constraint)) {
+    return;
+  }
+
   if (*clipped_source != source) {
     Scalar sx = dest.GetWidth() / source.GetWidth();
     Scalar sy = dest.GetHeight() / source.GetHeight();
@@ -766,7 +868,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   // of Skia's SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER flag, which
   // is enabled when the Flutter engine builds Skia.
   if (!paint.color_source) {
-    blend_mode = BlendMode::kDestination;
+    blend_mode = BlendMode::kDst;
   }
 
   Entity entity;
@@ -780,7 +882,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   }
 
   // If the blend mode is destination don't bother to bind or create a texture.
-  if (blend_mode == BlendMode::kDestination) {
+  if (blend_mode == BlendMode::kDst) {
     auto contents = std::make_shared<VerticesSimpleBlendContents>();
     contents->SetBlendMode(blend_mode);
     contents->SetAlpha(paint.color.alpha);
@@ -1326,7 +1428,7 @@ bool Canvas::Restore() {
             element_entity.GetBlendMode(), inputs);
         contents->SetCoverageHint(element_entity.GetCoverage());
         element_entity.SetContents(std::move(contents));
-        element_entity.SetBlendMode(BlendMode::kSource);
+        element_entity.SetBlendMode(BlendMode::kSrc);
       }
     }
 
@@ -1366,9 +1468,71 @@ bool Canvas::Restore() {
   return true;
 }
 
+bool Canvas::AttemptBlurredTextOptimization(
+    const std::shared_ptr<TextFrame>& text_frame,
+    const std::shared_ptr<TextContents>& text_contents,
+    Entity& entity,
+    const Paint& paint) {
+  if (!paint.mask_blur_descriptor.has_value() ||  //
+      paint.image_filter != nullptr ||            //
+      paint.color_filter != nullptr ||            //
+      paint.invert_colors) {
+    return false;
+  }
+
+  // TODO(bdero): This mask blur application is a hack. It will always wind up
+  //              doing a gaussian blur that affects the color source itself
+  //              instead of just the mask. The color filter text support
+  //              needs to be reworked in order to interact correctly with
+  //              mask filters.
+  //              https://github.com/flutter/flutter/issues/133297
+  std::shared_ptr<FilterContents> filter =
+      paint.mask_blur_descriptor->CreateMaskBlur(
+          FilterInput::Make(text_contents),
+          /*is_solid_color=*/true, GetCurrentTransform());
+
+  std::optional<Glyph> maybe_glyph = text_frame->AsSingleGlyph();
+  int64_t identifier = maybe_glyph.has_value()
+                           ? maybe_glyph.value().index
+                           : reinterpret_cast<int64_t>(text_frame.get());
+  TextShadowCache::TextShadowCacheKey cache_key(
+      /*p_max_basis=*/entity.GetTransform().GetMaxBasisLengthXY(),
+      /*p_identifier=*/identifier,
+      /*p_is_single_glyph=*/maybe_glyph.has_value(),
+      /*p_font=*/text_frame->GetFont(),
+      /*p_sigma=*/paint.mask_blur_descriptor->sigma);
+
+  std::optional<Entity> result = renderer_.GetTextShadowCache().Lookup(
+      renderer_, entity, filter, cache_key);
+  if (result.has_value()) {
+    AddRenderEntityToCurrentPass(result.value(), /*reuse_depth=*/false);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// If the text point size * max basis XY is larger than this value,
+// render the text as paths (if available) for faster and higher
+// fidelity rendering. This is a somewhat arbitrary cutoff
+static constexpr Scalar kMaxTextScale = 250;
+
 void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
                            Point position,
                            const Paint& paint) {
+  Scalar max_scale = GetCurrentTransform().GetMaxBasisLengthXY();
+  if (max_scale * text_frame->GetFont().GetMetrics().point_size >
+      kMaxTextScale) {
+    fml::StatusOr<flutter::DlPath> path = text_frame->GetPath();
+    if (path.ok()) {
+      Save(1);
+      Concat(Matrix::MakeTranslation(position));
+      DrawPath(path.value().GetPath(), paint);
+      Restore();
+      return;
+    }
+  }
+
   Entity entity;
   entity.SetClipDepth(GetClipHeight());
   entity.SetBlendMode(paint.blend_mode);
@@ -1376,7 +1540,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   auto text_contents = std::make_shared<TextContents>();
   text_contents->SetTextFrame(text_frame);
   text_contents->SetForceTextColor(paint.mask_blur_descriptor.has_value());
-  text_contents->SetScale(GetCurrentTransform().GetMaxBasisLengthXY());
+  text_contents->SetScale(max_scale);
   text_contents->SetColor(paint.color);
   text_contents->SetOffset(position);
   text_contents->SetTextProperties(paint.color,                           //
@@ -1390,15 +1554,12 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
   entity.SetTransform(GetCurrentTransform() *
                       Matrix::MakeTranslation(position));
 
-  // TODO(bdero): This mask blur application is a hack. It will always wind up
-  //              doing a gaussian blur that affects the color source itself
-  //              instead of just the mask. The color filter text support
-  //              needs to be reworked in order to interact correctly with
-  //              mask filters.
-  //              https://github.com/flutter/flutter/issues/133297
-  entity.SetContents(paint.WithFilters(paint.WithMaskBlur(
-      std::move(text_contents), true, GetCurrentTransform())));
+  if (AttemptBlurredTextOptimization(text_frame, text_contents, entity,
+                                     paint)) {
+    return;
+  }
 
+  entity.SetContents(paint.WithFilters(std::move(text_contents)));
   AddRenderEntityToCurrentPass(entity, false);
 }
 
@@ -1489,9 +1650,9 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       Matrix::MakeTranslation(Vector3(-GetGlobalPassPosition())) *
       entity.GetTransform());
   entity.SetInheritedOpacity(transform_stack_.back().distributed_opacity);
-  if (entity.GetBlendMode() == BlendMode::kSourceOver &&
+  if (entity.GetBlendMode() == BlendMode::kSrcOver &&
       entity.GetContents()->IsOpaque(entity.GetTransform())) {
-    entity.SetBlendMode(BlendMode::kSource);
+    entity.SetBlendMode(BlendMode::kSrc);
   }
 
   // If the entity covers the current render target and is a solid color, then
@@ -1558,7 +1719,7 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       auto contents =
           ColorFilterContents::MakeBlend(entity.GetBlendMode(), inputs);
       entity.SetContents(std::move(contents));
-      entity.SetBlendMode(BlendMode::kSource);
+      entity.SetBlendMode(BlendMode::kSrc);
     }
   }
 
@@ -1678,7 +1839,7 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
 
   Entity msaa_backdrop_entity;
   msaa_backdrop_entity.SetContents(std::move(msaa_backdrop_contents));
-  msaa_backdrop_entity.SetBlendMode(BlendMode::kSource);
+  msaa_backdrop_entity.SetBlendMode(BlendMode::kSrc);
   msaa_backdrop_entity.SetClipDepth(std::numeric_limits<uint32_t>::max());
   if (!msaa_backdrop_entity.Render(renderer_, current_render_pass)) {
     VALIDATION_LOG << "Failed to render MSAA backdrop entity.";
@@ -1708,8 +1869,8 @@ bool Canvas::SupportsBlitToOnscreen() const {
   return renderer_.GetContext()
              ->GetCapabilities()
              ->SupportsTextureToTextureBlits() &&
-         renderer_.GetContext()->GetBackendType() !=
-             Context::BackendType::kOpenGLES;
+         renderer_.GetContext()->GetBackendType() ==
+             Context::BackendType::kMetal;
 }
 
 bool Canvas::BlitToOnscreen(bool is_onscreen) {
@@ -1718,7 +1879,6 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
   auto offscreen_target = render_passes_.back()
                               .inline_pass_context->GetPassTarget()
                               .GetRenderTarget();
-
   if (SupportsBlitToOnscreen()) {
     auto blit_pass = command_buffer->CreateBlitPass();
     blit_pass->AddCopy(offscreen_target.GetRenderTargetTexture(),
@@ -1740,7 +1900,7 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
 
       Entity entity;
       entity.SetContents(contents);
-      entity.SetBlendMode(BlendMode::kSource);
+      entity.SetBlendMode(BlendMode::kSrc);
 
       if (!entity.Render(renderer_, *render_pass)) {
         VALIDATION_LOG << "Failed to render EntityPass root blit.";
@@ -1762,6 +1922,24 @@ bool Canvas::BlitToOnscreen(bool is_onscreen) {
   }
 }
 
+bool Canvas::EnsureFinalMipmapGeneration() const {
+  if (!render_target_.GetRenderTargetTexture()->NeedsMipmapGeneration()) {
+    return true;
+  }
+  std::shared_ptr<CommandBuffer> cmd_buffer =
+      renderer_.GetContext()->CreateCommandBuffer();
+  if (!cmd_buffer) {
+    return false;
+  }
+  std::shared_ptr<BlitPass> blit_pass = cmd_buffer->CreateBlitPass();
+  if (!blit_pass) {
+    return false;
+  }
+  blit_pass->GenerateMipmap(render_target_.GetRenderTargetTexture());
+  blit_pass->EncodeCommands();
+  return renderer_.GetContext()->EnqueueCommandBuffer(std::move(cmd_buffer));
+}
+
 void Canvas::EndReplay() {
   FML_DCHECK(render_passes_.size() == 1u);
   render_passes_.back().inline_pass_context->GetRenderPass();
@@ -1775,7 +1953,9 @@ void Canvas::EndReplay() {
   if (requires_readback_) {
     BlitToOnscreen(/*is_onscreen_=*/is_onscreen_);
   }
-
+  if (!EnsureFinalMipmapGeneration()) {
+    VALIDATION_LOG << "Failed to generate onscreen mipmaps.";
+  }
   if (!renderer_.GetContext()->FlushCommandBuffers()) {
     // Not much we can do.
     VALIDATION_LOG << "Failed to submit command buffers";

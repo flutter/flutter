@@ -91,6 +91,10 @@ class EngineModifier {
     engine_->OnViewFocusChangeRequest(request);
   }
 
+  void SetNextViewId(FlutterViewId view_id) {
+    engine_->next_view_id_ = view_id;
+  }
+
  private:
   FlutterWindowsEngine* engine_;
 

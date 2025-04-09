@@ -214,7 +214,6 @@ void main() {
               TextStyle(fontSize: 25, color: Color(0xff0000ff)),
             ),
           ),
-          useMaterial3: true,
         ),
         home: Scaffold(
           bottomNavigationBar: Center(
@@ -368,8 +367,8 @@ Material _barMaterial(WidgetTester tester) {
 
 ShapeDecoration? _indicator(WidgetTester tester) {
   return tester
-          .firstWidget<Container>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
+          .firstWidget<Ink>(
+            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;

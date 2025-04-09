@@ -486,6 +486,7 @@ class FlutterVmService {
       return await service.getVM();
     } on vm_service.RPCError catch (err) {
       if (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          err.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           err.message.contains('Service connection disposed')) {
         globals.printTrace('VmService.getVm call failed: $err');
         return null;
@@ -507,6 +508,7 @@ class FlutterVmService {
       // Swallow the exception here and let the shutdown logic elsewhere deal
       // with cleaning up.
       if (e.code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
+          e.code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
           e.message.contains('Service connection disposed')) {
         return null;
       }
@@ -560,21 +562,6 @@ class FlutterVmService {
       }
     }
 
-    // TODO(andrewkolos): this is to assist in troubleshooting
-    //  https://github.com/flutter/flutter/issues/152220 and should be reverted
-    //  once this issue is resolved.
-    final StreamSubscription<String> onReceiveSubscription = service.onReceive.listen((
-      String message,
-    ) {
-      globals.logger.printTrace('runInView VM service onReceive listener received "$message"');
-      final dynamic messageAsJson = jsonDecode(message);
-      // ignore: avoid_dynamic_calls -- Temporary code.
-      final dynamic messageKind = messageAsJson['params']?['event']?['kind'];
-      if (messageKind == 'IsolateRunnable') {
-        globals.logger.printTrace('Received IsolateRunnable event from onReceive.');
-      }
-    });
-
     final Future<void> onRunnable = service.onIsolateEvent.firstWhere((vm_service.Event event) {
       return event.kind == vm_service.EventKind.kIsolateRunnable;
     });
@@ -587,7 +574,6 @@ class FlutterVmService {
       },
     );
     await onRunnable;
-    await onReceiveSubscription.cancel();
   }
 
   Future<String> flutterDebugDumpApp({required String isolateId}) async {
@@ -684,7 +670,7 @@ class FlutterVmService {
     );
   }
 
-  Future<Map<String, Object?>?> flutterReassemble({required String isolateId}) {
+  Future<Map<String, Object?>?> flutterReassemble({required String? isolateId}) {
     return invokeFlutterExtensionRpcRaw('ext.flutter.reassemble', isolateId: isolateId);
   }
 
@@ -792,6 +778,7 @@ class FlutterVmService {
       // disappears while handling a request, return null.
       if ((err.code == vm_service.RPCErrorKind.kMethodNotFound.code) ||
           (err.code == vm_service.RPCErrorKind.kServiceDisappeared.code) ||
+          (err.code == vm_service.RPCErrorKind.kConnectionDisposed.code) ||
           (err.message.contains('Service connection disposed'))) {
         return null;
       }
@@ -803,12 +790,12 @@ class FlutterVmService {
   /// available, returns null.
   Future<Map<String, Object?>?> invokeFlutterExtensionRpcRaw(
     String method, {
-    required String isolateId,
+    required String? isolateId,
     Map<String, Object?>? args,
   }) async {
     final vm_service.Response? response = await _checkedCallServiceExtension(
       method,
-      args: <String, Object?>{'isolateId': isolateId, ...?args},
+      args: <String, Object?>{if (isolateId != null) 'isolateId': isolateId, ...?args},
     );
     return response?.json;
   }

@@ -119,7 +119,6 @@ class Geometry {
     return 1.0;
   }
 
- protected:
   static GeometryResult ComputePositionGeometry(
       const ContentContext& renderer,
       const Tessellator::VertexGenerator& generator,

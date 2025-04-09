@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package com.flutter.gradle
 
 import androidx.annotation.VisibleForTesting
@@ -87,7 +91,7 @@ object DependencyVersionChecker {
 
     @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_1_1
 
-    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 3, 1)
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 3, 0)
 
     @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(7, 0, 0)
 
@@ -164,9 +168,9 @@ object DependencyVersionChecker {
         }
     }
 
-    private fun generateAssembleTaskName(it: Variant) = "$ASSEMBLE_PREFIX${it.name.capitalize()}"
+    private fun generateAssembleTaskName(it: Variant) = "$ASSEMBLE_PREFIX${FlutterPluginUtils.capitalize(it.name)}"
 
-    private fun generateMinSdkCheckTaskName(it: Variant) = "${it.name.capitalize()}$MIN_SDK_CHECK_TASK_POSTFIX"
+    private fun generateMinSdkCheckTaskName(it: Variant) = "${FlutterPluginUtils.capitalize(it.name)}$MIN_SDK_CHECK_TASK_POSTFIX"
 
     private fun getMinSdkVersion(
         project: Project,

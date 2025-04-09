@@ -18,11 +18,6 @@
 // The FlutterView for this view controller.
 @property(nonatomic, readonly, nullable) FlutterView* flutterView;
 
-/**
- * The text input plugin that handles text editing state for text fields.
- */
-@property(nonatomic, readonly, nonnull) FlutterTextInputPlugin* textInputPlugin;
-
 @property(nonatomic, readonly) std::weak_ptr<flutter::AccessibilityBridgeMac> accessibilityBridge;
 
 /**
@@ -37,8 +32,7 @@
  * before being used, and must be set up only once until detachFromEngine:.
  */
 - (void)setUpWithEngine:(nonnull FlutterEngine*)engine
-         viewIdentifier:(FlutterViewIdentifier)viewIdentifier
-     threadSynchronizer:(nonnull FlutterThreadSynchronizer*)threadSynchronizer;
+         viewIdentifier:(FlutterViewIdentifier)viewIdentifier;
 
 /**
  * Reset the `engine` and `id` of this controller.

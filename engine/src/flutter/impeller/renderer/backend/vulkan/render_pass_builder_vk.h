@@ -34,7 +34,8 @@ class RenderPassBuilderVK {
       SampleCount sample_count,
       LoadAction load_action,
       StoreAction store_action,
-      vk::ImageLayout current_layout = vk::ImageLayout::eUndefined);
+      vk::ImageLayout current_layout = vk::ImageLayout::eUndefined,
+      bool is_swapchain = false);
 
   RenderPassBuilderVK& SetDepthStencilAttachment(PixelFormat format,
                                                  SampleCount sample_count,

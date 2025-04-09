@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
-import 'dart:typed_data' show ByteData, Uint8List;
+import 'dart:typed_data' show ByteData, Float64List, Int32List, Uint8List;
 import 'dart:ui' as ui;
 
 // Signals a waiting latch in the native test.
@@ -403,4 +403,76 @@ external void notifyEngineId(int? handle);
 @pragma('vm:entry-point')
 void testEngineId() {
   notifyEngineId(ui.PlatformDispatcher.instance.engineId);
+}
+
+@pragma('vm:entry-point')
+Future<void> sendSemanticsTreeInfo() async {
+  // Wait until semantics are enabled.
+  if (!ui.PlatformDispatcher.instance.semanticsEnabled) {
+    await semanticsChanged;
+  }
+
+  final Iterable<ui.FlutterView> views = ui.PlatformDispatcher.instance.views;
+  final ui.FlutterView view1 = views.firstWhere(
+    (final ui.FlutterView view) => view != ui.PlatformDispatcher.instance.implicitView,
+  );
+  final ui.FlutterView view2 = views.firstWhere(
+    (final ui.FlutterView view) =>
+        view != view1 && view != ui.PlatformDispatcher.instance.implicitView,
+  );
+
+  ui.SemanticsUpdate createSemanticsUpdate(int nodeId) {
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    final Float64List transform = Float64List(16);
+    final Int32List childrenInTraversalOrder = Int32List(0);
+    final Int32List childrenInHitTestOrder = Int32List(0);
+    final Int32List additionalActions = Int32List(0);
+    // Identity matrix 4x4.
+    transform[0] = 1;
+    transform[5] = 1;
+    transform[10] = 1;
+    builder.updateNode(
+      id: nodeId,
+      flags: 0,
+      actions: 0,
+      maxValueLength: 0,
+      currentValueLength: 0,
+      textSelectionBase: -1,
+      textSelectionExtent: -1,
+      platformViewId: -1,
+      scrollChildren: 0,
+      scrollIndex: 0,
+      scrollPosition: 0,
+      scrollExtentMax: 0,
+      scrollExtentMin: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 10, 10),
+      elevation: 0,
+      thickness: 0,
+      identifier: 'identifier',
+      label: 'label',
+      labelAttributes: const <ui.StringAttribute>[],
+      value: 'value',
+      valueAttributes: const <ui.StringAttribute>[],
+      increasedValue: 'increasedValue',
+      increasedValueAttributes: const <ui.StringAttribute>[],
+      decreasedValue: 'decreasedValue',
+      decreasedValueAttributes: const <ui.StringAttribute>[],
+      hint: 'hint',
+      hintAttributes: const <ui.StringAttribute>[],
+      tooltip: 'tooltip',
+      textDirection: ui.TextDirection.ltr,
+      transform: transform,
+      childrenInTraversalOrder: childrenInTraversalOrder,
+      childrenInHitTestOrder: childrenInHitTestOrder,
+      additionalActions: additionalActions,
+      role: ui.SemanticsRole.tab,
+      controlsNodes: null,
+      inputType: ui.SemanticsInputType.none,
+    );
+    return builder.build();
+  }
+
+  view1.updateSemantics(createSemanticsUpdate(view1.viewId + 1));
+  view2.updateSemantics(createSemanticsUpdate(view2.viewId + 1));
+  signal();
 }

@@ -204,7 +204,7 @@ abstract class ShortcutActivator {
   ///
   /// If provided, trigger keys can be used as a first-pass filter for incoming
   /// events in order to optimize lookups, as [Intent]s are stored in a [Map]
-  /// and indexed by trigger keys. It is up to the individual implementors of
+  /// and indexed by trigger keys. It is up to the individual implementers of
   /// this interface to decide if they ignore triggers or not.
   ///
   /// Subclasses should make sure that the return value of this method does not

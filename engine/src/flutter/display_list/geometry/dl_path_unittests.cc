@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/geometry/dl_path.h"
+
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/testing/dl_test_mock_path_receiver.h"
 #include "flutter/third_party/skia/include/core/SkRRect.h"
 
 namespace flutter {
@@ -551,6 +553,449 @@ TEST(DisplayListPath, ConstructFromImpellerEqualsConstructFromSkia) {
   sk_path.close();
 
   EXPECT_EQ(DlPath(path_builder, DlPathFillType::kNonZero), DlPath(sk_path));
+}
+
+TEST(DisplayListPath, IsLineFromSkPath) {
+  SkPath sk_path;
+  sk_path.moveTo(SkPoint::Make(0, 0));
+  sk_path.lineTo(SkPoint::Make(100, 100));
+
+  DlPath path = DlPath(sk_path);
+
+  DlPoint start;
+  DlPoint end;
+  EXPECT_TRUE(path.IsLine(&start, &end));
+  EXPECT_EQ(start, DlPoint::MakeXY(0, 0));
+  EXPECT_EQ(end, DlPoint::MakeXY(100, 100));
+
+  EXPECT_FALSE(DlPath(SkPath::Rect(SkRect::MakeLTRB(0, 0, 100, 100))).IsLine());
+}
+
+TEST(DisplayListPath, IsLineFromImpellerPath) {
+  DlPathBuilder path_builder;
+  path_builder.MoveTo({0, 0});
+  path_builder.LineTo({100, 0});
+  DlPath path = DlPath(path_builder, DlPathFillType::kNonZero);
+
+  DlPoint start;
+  DlPoint end;
+  EXPECT_TRUE(path.IsLine(&start, &end));
+  EXPECT_EQ(start, DlPoint::MakeXY(0, 0));
+  EXPECT_EQ(end, DlPoint::MakeXY(100, 0));
+
+  {
+    DlPathBuilder path_builder;
+    path_builder.MoveTo({0, 0});
+    path_builder.LineTo({100, 0});
+    path_builder.LineTo({100, 100});
+
+    DlPath path = DlPath(path_builder, DlPathFillType::kNonZero);
+    EXPECT_FALSE(path.IsLine());
+  }
+}
+
+namespace {
+using ::testing::AtMost;
+using ::testing::Return;
+}  // namespace
+
+TEST(DisplayListPath, DispatchSkiaPathEvenOdd) {
+  SkPath path;
+
+  path.setFillType(SkPathFillType::kEvenOdd);
+  path.moveTo(100, 200);
+  path.lineTo(101, 201);
+  path.quadTo(110, 202, 102, 210);
+  path.conicTo(150, 240, 250, 140, 0.5);
+  path.cubicTo(300, 300, 350, 300, 300, 350);
+  path.close();
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                  //
+      EXPECT_CALL(mock_receiver, RecommendSizes(6u, 9u))  //
+          .Times(AtMost(1));
+  all_recommendations +=
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 140, 350, 350)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kOdd, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(101, 201)));
+    EXPECT_CALL(mock_receiver, QuadTo(DlPoint(110, 202), DlPoint(102, 210)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(350, 300),
+                                       DlPoint(300, 350)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  DlPath(path).Dispatch(mock_receiver);
+}
+
+TEST(DisplayListPath, DispatchSkiaPathNonZero) {
+  SkPath path;
+
+  path.setFillType(SkPathFillType::kWinding);
+  path.moveTo(100, 200);
+  path.lineTo(101, 201);
+  path.quadTo(110, 202, 102, 210);
+  path.conicTo(150, 240, 250, 140, 0.5);
+  path.cubicTo(300, 300, 350, 300, 300, 350);
+  path.close();
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                  //
+      EXPECT_CALL(mock_receiver, RecommendSizes(6u, 9u))  //
+          .Times(AtMost(1));
+  all_recommendations +=  //
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 140, 350, 350)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(101, 201)));
+    EXPECT_CALL(mock_receiver, QuadTo(DlPoint(110, 202), DlPoint(102, 210)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(350, 300),
+                                       DlPoint(300, 350)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  DlPath(path).Dispatch(mock_receiver);
+}
+
+TEST(DisplayListPath, DispatchSkiaPathConvex) {
+  SkPath path;
+
+  path.setFillType(SkPathFillType::kWinding);
+  // Keep it simple - a triangle is obviously convex
+  path.moveTo(100, 200);
+  path.lineTo(200, 200);
+  path.lineTo(100, 300);
+  path.close();
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                  //
+      EXPECT_CALL(mock_receiver, RecommendSizes(4u, 3u))  //
+          .Times(AtMost(1));
+  all_recommendations +=  //
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 200, 200, 300)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, true));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(200, 200)));
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 300)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  DlPath(path).Dispatch(mock_receiver);
+}
+
+TEST(DisplayListPath, DispatchImpellerPathEvenOdd) {
+  DlPathBuilder path_builder;
+
+  path_builder.MoveTo(DlPoint(100, 200));
+  path_builder.LineTo(DlPoint(101, 201));
+  path_builder.QuadraticCurveTo(DlPoint(110, 202), DlPoint(102, 210));
+  path_builder.ConicCurveTo(DlPoint(150, 240), DlPoint(250, 140), 0.5);
+  path_builder.CubicCurveTo(DlPoint(300, 300), DlPoint(350, 300),
+                            DlPoint(300, 350));
+  path_builder.Close();
+
+  DlPath path(path_builder, DlPathFillType::kOdd);
+  // Impeller computes tight bounds so it is difficult to hard-code the
+  // answer for the bounds of the above path...
+  auto bounds = path.GetBounds();
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendSizes(7u, 19u))  //
+          .Times(AtMost(1));
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendBounds(bounds))  //
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kOdd, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(101, 201)));
+    EXPECT_CALL(mock_receiver, QuadTo(DlPoint(110, 202), DlPoint(102, 210)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(350, 300),
+                                       DlPoint(300, 350)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  path.Dispatch(mock_receiver);
+}
+
+TEST(DisplayListPath, DispatchImpellerPathNonZero) {
+  DlPathBuilder path_builder;
+
+  path_builder.MoveTo(DlPoint(100, 200));
+  path_builder.LineTo(DlPoint(101, 201));
+  path_builder.QuadraticCurveTo(DlPoint(110, 202), DlPoint(102, 210));
+  path_builder.ConicCurveTo(DlPoint(150, 240), DlPoint(250, 140), 0.5);
+  path_builder.CubicCurveTo(DlPoint(300, 300), DlPoint(350, 300),
+                            DlPoint(300, 350));
+  path_builder.Close();
+
+  DlPath path(path_builder, DlPathFillType::kNonZero);
+  // Impeller computes tight bounds so it is difficult to hard-code the
+  // answer for the bounds of the above path...
+  auto bounds = path.GetBounds();
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendSizes(7u, 19u))  //
+          .Times(AtMost(1));
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendBounds(bounds))  //
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(101, 201)));
+    EXPECT_CALL(mock_receiver, QuadTo(DlPoint(110, 202), DlPoint(102, 210)));
+    EXPECT_CALL(mock_receiver,
+                ConicTo(DlPoint(150, 240), DlPoint(250, 140), 0.5f))
+        .WillOnce(Return(true));
+    EXPECT_CALL(mock_receiver, CubicTo(DlPoint(300, 300), DlPoint(350, 300),
+                                       DlPoint(300, 350)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  path.Dispatch(mock_receiver);
+}
+
+TEST(DisplayListPath, DispatchImpellerPathConvexUnspecified) {
+  DlPathBuilder path_builder;
+
+  // Keep it simple - a triangle is obviously convex
+  path_builder.MoveTo(DlPoint(100, 200));
+  path_builder.LineTo(DlPoint(200, 200));
+  path_builder.LineTo(DlPoint(100, 300));
+  path_builder.Close();
+
+  DlPath path(path_builder, DlPathFillType::kNonZero);
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendSizes(5u, 10u))  //
+          .Times(AtMost(1));
+  all_recommendations +=  //
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 200, 200, 300)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, false));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(200, 200)));
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 300)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  path.Dispatch(mock_receiver);
+}
+
+TEST(DisplayListPath, DispatchImpellerPathConvexSpecified) {
+  DlPathBuilder path_builder;
+
+  // Keep it simple - a triangle is obviously convex
+  path_builder.MoveTo(DlPoint(100, 200));
+  path_builder.LineTo(DlPoint(200, 200));
+  path_builder.LineTo(DlPoint(100, 300));
+  path_builder.Close();
+  path_builder.SetConvexity(impeller::Convexity::kConvex);
+
+  DlPath path(path_builder, DlPathFillType::kNonZero);
+
+  ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+  // Recommendations must happen before any of the path segments is dispatched
+  ::testing::ExpectationSet all_recommendations;
+  all_recommendations +=                                   //
+      EXPECT_CALL(mock_receiver, RecommendSizes(5u, 10u))  //
+          .Times(AtMost(1));
+  all_recommendations +=  //
+      EXPECT_CALL(mock_receiver,
+                  RecommendBounds(DlRect::MakeLTRB(100, 200, 200, 300)))
+          .Times(AtMost(1));
+  EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, true));
+
+  {
+    ::testing::InSequence sequence;
+
+    EXPECT_CALL(mock_receiver, MoveTo(DlPoint(100, 200)))
+        .After(all_recommendations);
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(200, 200)));
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 300)));
+    // Closing LineTo added implicitly to return to first point
+    EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
+    EXPECT_CALL(mock_receiver, Close());
+  }
+
+  path.Dispatch(mock_receiver);
+}
+
+TEST(DisplayListPath, DispatchSkiaPathConicToQuads) {
+  // If we execute conicTo with a weight of exactly 1.0, SkPath will turn
+  // it into a quadTo, so we avoid that by using 0.999
+  SkScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f - kEhCloseEnough,
+  };
+
+  for (SkScalar weight : weights) {
+    SkPath sk_path;
+    sk_path.moveTo(10, 10);
+    sk_path.conicTo(20, 10, 20, 20, weight);
+
+    std::array<DlPoint, 5> i_points;
+    impeller::ConicPathComponent i_conic(DlPoint(10, 10), DlPoint(20, 10),
+                                         DlPoint(20, 20), weight);
+    i_conic.SubdivideToQuadraticPoints(i_points);
+
+    ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+    // Recommendations must happen before any of the path segments is dispatched
+    ::testing::ExpectationSet all_recommendations;
+    all_recommendations +=                                  //
+        EXPECT_CALL(mock_receiver, RecommendSizes(2u, 3u))  //
+            .Times(AtMost(1));
+    all_recommendations +=
+        EXPECT_CALL(mock_receiver,
+                    RecommendBounds(DlRect::MakeLTRB(10, 10, 20, 20)))
+            .Times(AtMost(1));
+    EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, true));
+
+    {
+      ::testing::InSequence sequence;
+
+      EXPECT_CALL(mock_receiver, MoveTo(DlPoint(10, 10)))
+          .After(all_recommendations);
+      EXPECT_CALL(mock_receiver,
+                  ConicTo(DlPoint(20, 10), DlPoint(20, 20), weight))
+          .WillOnce(Return(false));
+      EXPECT_CALL(mock_receiver, QuadTo(i_points[1], i_points[2]));
+      EXPECT_CALL(mock_receiver, QuadTo(i_points[3], i_points[4]));
+    }
+
+    DlPath(sk_path).Dispatch(mock_receiver);
+  }
+}
+
+TEST(DisplayListPath, DispatchImpellerPathConicToQuads) {
+  // If we execute conicTo with a weight of exactly 1.0, SkPath will turn
+  // it into a quadTo, so we avoid that by using 0.999
+  DlScalar weights[4] = {
+      0.02f,
+      0.5f,
+      SK_ScalarSqrt2 * 0.5f,
+      1.0f - kEhCloseEnough,
+  };
+
+  for (DlScalar weight : weights) {
+    DlPathBuilder path_builder;
+    path_builder.MoveTo(DlPoint(10, 10));
+    path_builder.ConicCurveTo(DlPoint(20, 10), DlPoint(20, 20), weight);
+
+    std::array<DlPoint, 5> i_points;
+    impeller::ConicPathComponent i_conic(DlPoint(10, 10), DlPoint(20, 10),
+                                         DlPoint(20, 20), weight);
+    i_conic.SubdivideToQuadraticPoints(i_points);
+
+    ::testing::StrictMock<DlPathReceiverMock> mock_receiver;
+
+    // Recommendations must happen before any of the path segments is dispatched
+    ::testing::ExpectationSet all_recommendations;
+    all_recommendations +=                                  //
+        EXPECT_CALL(mock_receiver, RecommendSizes(2u, 6u))  //
+            .Times(AtMost(1));
+    all_recommendations +=
+        EXPECT_CALL(mock_receiver,
+                    RecommendBounds(DlRect::MakeLTRB(10, 10, 20, 20)))
+            .Times(AtMost(1));
+    EXPECT_CALL(mock_receiver, SetPathInfo(DlPathFillType::kNonZero, false));
+
+    {
+      ::testing::InSequence sequence;
+
+      EXPECT_CALL(mock_receiver, MoveTo(DlPoint(10, 10)))
+          .After(all_recommendations);
+      EXPECT_CALL(mock_receiver,
+                  ConicTo(DlPoint(20, 10), DlPoint(20, 20), weight))
+          .WillOnce(Return(false));
+      EXPECT_CALL(mock_receiver, QuadTo(i_points[1], i_points[2]));
+      EXPECT_CALL(mock_receiver, QuadTo(i_points[3], i_points[4]));
+    }
+
+    DlPath(path_builder).Dispatch(mock_receiver);
+  }
 }
 
 #ifndef NDEBUG

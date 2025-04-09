@@ -87,7 +87,7 @@ import 'theme.dart';
 /// As a result, when the first visible item is completely off-screen, the
 /// following items will follow the same layout as before. Using [CarouselView.weighted]
 /// helps build the multi-browse, hero, center-aligned hero and full-screen layouts,
-/// as indicated in [Carousel sepcs](https://m3.material.io/components/carousel/specs).
+/// as indicated in [Carousel specs](https://m3.material.io/components/carousel/specs).
 ///
 /// The [CarouselController] is used to control the
 /// [CarouselController.initialItem], which determines the first fully expanded
@@ -106,6 +106,15 @@ import 'theme.dart';
 /// {@tool dartpad}
 /// Here is an example to show different carousel layouts that [CarouselView]
 /// and [CarouselView.weighted] can build.
+///
+/// On desktop and web running on desktop platforms, dragging to scroll with a mouse
+/// is disabled by default to align with natural behavior.
+///
+/// To further align expected behavior like this, mouse input can scroll horizontally
+/// by pressing the shift key while scrolling with the mouse wheel.
+///
+/// This key-driven behavior is dictated by the [ScrollBehavior.pointerAxisModifiers],
+/// while [ScrollBehavior.dragDevices] manages what devices can drag a scrollable.
 ///
 /// ** See code in examples/api/lib/material/carousel/carousel.0.dart **
 /// {@end-tool}

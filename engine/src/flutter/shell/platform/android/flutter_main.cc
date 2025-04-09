@@ -31,7 +31,8 @@
 
 namespace flutter {
 
-constexpr int kMinimumAndroidApiLevelForVulkan = 29;
+constexpr int kMinimumAndroidApiLevelForImpeller = 29;
+constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 31;
 
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
@@ -301,14 +302,14 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
 #endif
 
   if (settings.enable_impeller) {
-    // Vulkan must only be used on API level 29+, as older API levels do not
+    // Impeller must only be used on API level 29+, as older API levels do not
     // have requisite features to support platform views.
     //
     // Even if this check returns true, Impeller may determine it cannot use
     // Vulkan for some other reason, such as a missing required extension or
-    // feature.
-    if (api_level < kMinimumAndroidApiLevelForVulkan) {
-      return kVulkanUnsupportedFallback;
+    // feature. In these cases it will use OpenGLES.
+    if (api_level < kMinimumAndroidApiLevelForImpeller) {
+      return AndroidRenderingAPI::kSkiaOpenGLES;
     }
     char product_model[PROP_VALUE_MAX];
     __system_property_get("ro.product.model", product_model);
@@ -321,10 +322,13 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     if (strcmp(product_model, kAndroidHuawei) == 0) {
       // Avoid using Vulkan on Huawei as AHB imports do not
       // consistently work.
+      return kVulkanUnsupportedFallback;
     }
 
-    if (__system_property_find("ro.vendor.mediatek.platform") != nullptr) {
-      // Probably MediaTek. Avoid Vulkan.
+    if (api_level < kMinimumAndroidApiLevelForMediaTekVulkan &&
+        __system_property_find("ro.vendor.mediatek.platform") != nullptr) {
+      // Probably MediaTek. Avoid Vulkan if older than 34 to work around
+      // crashes when importing AHB.
       return kVulkanUnsupportedFallback;
     }
 

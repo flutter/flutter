@@ -103,6 +103,10 @@ size_t Path::GetComponentCount(std::optional<ComponentType> type) const {
   return count;
 }
 
+size_t Path::GetPointCount() const {
+  return data_->points.size();
+}
+
 FillType Path::GetFillType() const {
   return data_->fill;
 }

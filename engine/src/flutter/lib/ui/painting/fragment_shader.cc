@@ -66,9 +66,15 @@ void ReusableFragmentShader::SetImageSampler(Dart_Handle index_handle,
       tonic::DartConverter<CanvasImage*>::FromDart(image_handle);
   if (index >= samplers_.size()) {
     Dart_ThrowException(tonic::ToDart("Sampler index out of bounds"));
+    return;
+  }
+  if (!image || !image->image()) {
+    Dart_ThrowException(tonic::ToDart("Image has been disposed"));
+    return;
   }
   if (!image->image()->isUIThreadSafe()) {
     Dart_ThrowException(tonic::ToDart("Image is not thread-safe"));
+    return;
   }
 
   // TODO(115794): Once the DlImageSampling enum is replaced, expose the

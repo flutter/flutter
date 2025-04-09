@@ -4489,6 +4489,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (_properties.image != null) {
       config.isImage = _properties.image!;
     }
+    if (_properties.isRequired != null) {
+      config.isRequired = _properties.isRequired;
+    }
     if (_properties.identifier != null) {
       config.identifier = _properties.identifier!;
     }
@@ -4542,6 +4545,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     }
     if (_properties.controlsNodes != null) {
       config.controlsNodes = _properties.controlsNodes;
+    }
+    if (config.validationResult != _properties.validationResult) {
+      config.validationResult = _properties.validationResult;
+    }
+
+    if (_properties.inputType != null) {
+      config.inputType = _properties.inputType!;
     }
 
     // Registering _perform* as action handlers instead of the user provided

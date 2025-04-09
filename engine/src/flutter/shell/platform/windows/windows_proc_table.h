@@ -57,6 +57,19 @@ class WindowsProcTable {
   // https://learn.microsoft.com/windows/win32/api/dwmapi/nf-dwmapi-dwmflush
   virtual HRESULT DwmFlush() const;
 
+  // Loads the specified cursor resource from the executable (.exe) file
+  // associated with an application instance.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-loadcursorw
+  virtual HCURSOR LoadCursor(HINSTANCE instance, LPCWSTR cursor_name) const;
+
+  // Sets the cursor shape.
+  //
+  // See:
+  // https://learn.microsoft.com/windows/win32/api/winuser/nf-winuser-setcursor
+  virtual HCURSOR SetCursor(HCURSOR cursor) const;
+
  private:
   using GetPointerType_ = BOOL __stdcall(UINT32 pointerId,
                                          POINTER_INPUT_TYPE* pointerType);

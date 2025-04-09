@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:test/bootstrap/browser.dart';
@@ -21,7 +22,8 @@ Future<void> testMain() async {
 
   Future<List<String>> createTestFiles() async {
     final HttpFetchResponse listingResponse = await httpFetch('/test_images/');
-    List<String> testFiles = (await listingResponse.json() as List<dynamic>).cast<String>();
+    List<String> testFiles =
+        ((await listingResponse.json() as JSAny?).dartify()! as List<Object?>).cast<String>();
     testFiles = testFiles.map((String baseName) => '/test_images/$baseName').toList();
 
     // Sanity-check the test file list. If suddenly test files are moved or

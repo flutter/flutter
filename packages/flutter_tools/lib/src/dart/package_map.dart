@@ -24,8 +24,8 @@ Future<PackageConfig> currentPackageConfig() async {
 // TODO(sigurdm): Only call this once per run - and read in from BuildInfo.
 File? findPackageConfigFile(Directory dir) {
   final FileSystem fileSystem = dir.fileSystem;
+  Directory candidateDir = fileSystem.directory(fileSystem.path.normalize(dir.absolute.path));
 
-  Directory candidateDir = fileSystem.directory(dir.path).absolute;
   while (true) {
     final File candidatePackageConfigFile = candidateDir
         .childDirectory('.dart_tool')
