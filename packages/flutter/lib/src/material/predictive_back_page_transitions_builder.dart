@@ -572,30 +572,6 @@ class _PredictiveBackPageSharedElementTransitionState
   // TODO(justinmc): Faster?
   static const int _kCommitMilliseconds = 200;
 
-  double _calcXShift() {
-    // TODO(justinmc): InheritedModel? Extract to build method as just Size?
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final double xShift = (screenWidth / divisionFactor) - margin;
-
-    return Tween<double>(
-      begin: widget.currentBackEvent?.swipeEdge == SwipeEdge.right ? -xShift : xShift,
-      end: 0.0,
-    ).animate(widget.animation).value;
-  }
-
-  // TODO(justinmc): Change "calc"" names to "get". And make private.
-  double _calcCommitXShift() {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    return Tween<double>(begin: 0.0, end: screenWidth * extraShiftDistance)
-        .animate(
-          CurvedAnimation(
-            parent: commitController,
-            curve: const Interval(0.3, 1.0, curve: Curves.easeOut),
-          ),
-        )
-        .value;
-  }
-
   static double _getYPosition(
     double screenHeight,
     PredictiveBackEvent? startBackEvent,
@@ -615,6 +591,7 @@ class _PredictiveBackPageSharedElementTransitionState
     return easedYShift.clamp(-yShiftMax, yShiftMax);
   }
 
+  // TODO(justinmc): Change "calc"" names to "get". And make private.
   double calcYShift() {
     final double screenHeight = MediaQuery.of(context).size.height;
     return _getYPosition(screenHeight, widget.startBackEvent, widget.currentBackEvent);
@@ -660,11 +637,11 @@ class _PredictiveBackPageSharedElementTransitionState
       );
       _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
       _yAnimationCommit = Tween<double>(begin: _lastYPosition, end: 0.0).animate(commitAnimation);
+      // TODO(justinmc): InheritedModel? Extract to build method as just Size?
       final double screenWidth = MediaQuery.of(context).size.width;
       _xAnimationCommit = Tween<double>(
-        begin: 0.0,
-        // TODO(justinmc): Something is wrong with x commit. You need to set and use xShift somehow correctly.
-        end: screenWidth * extraShiftDistance + xShift,
+        begin: xShift,
+        end: screenWidth * extraShiftDistance,
       ).animate(commitAnimation);
     }
   }
@@ -723,12 +700,8 @@ class _PredictiveBackPageSharedElementTransitionState
             offset: switch (widget.phase) {
               _PredictiveBackPhase.commit => Offset(
                 _xAnimationCommit!.value,
-                //this.xShift + _calcCommitXShift(),
-                //_lastYPosition,
                 _yAnimationCommit.value,
               ),
-              //_ => _positionAnimation.value,
-              //_ => Offset(_positionAnimation.value.dx, _lastYPosition = calcYShift  ()),
               _ => Offset(xShift = _xAnimation!.value, _lastYPosition = calcYShift()),
             },
             child: Opacity(
