@@ -104,12 +104,6 @@ bool DlImageImpeller::isUIThreadSafe() const {
 }
 
 // |DlImage|
-SkISize DlImageImpeller::dimensions() const {
-  const auto size = texture_ ? texture_->GetSize() : ISize{};
-  return SkISize::Make(size.width, size.height);
-}
-
-// |DlImage|
 flutter::DlISize DlImageImpeller::GetSize() const {
   // texture |GetSize()| returns a 64-bit size, but we need a 32-bit size,
   // so we need to convert to DlISize (the 32-bit variant) either way.
