@@ -556,28 +556,30 @@ class _PredictiveBackPageSharedElementTransitionState
   late final Animation<double> _opacityAnimation;
   late final Animation<double> _scaleAnimation;
   late Animation<double> _scaleAnimationCommit;
-  final Tween<double> _scaleTween = Tween<double>(begin: scalePercentage, end: 1.0);
+  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
   late Animation<double> _xAnimation;
   late Animation<Offset> _commitPositionAnimation;
 
   // Constants as per the motion specs
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
-  static const double scalePercentage = 0.90;
+  static const double _kMinScale = 0.90;
   static const double _kDivisionFactor = 20.0;
   static const double _kMargin = 8.0;
-  static const double borderRadius = 32.0;
-  static const double extraShiftDistance = 0.1;
+  static const double _kYPositionFactor = 0.1;
+
+  // Ideally this would match the curvature of the physical Android device being
+  // used. Since that seems impossible, this value is a best guess at a value
+  // that looks reasonable on most devices.
+  static const double _kDeviceBorderRadius = 32.0;
 
   // Eyeballed on a Pixel 9 running Android 16.
   static const int _kCommitMilliseconds = 100;
 
-  static double _getYPosition(
-    double screenHeight,
-    PredictiveBackEvent? startBackEvent,
-    PredictiveBackEvent? currentBackEvent,
-  ) {
-    final double startTouchY = startBackEvent?.touchOffset?.dy ?? 0;
-    final double currentTouchY = currentBackEvent?.touchOffset?.dy ?? 0;
+  // This isn't done as an animation because it's based on the vertical drag
+  // amount, not the progression of the back gesture like widget.animation is.
+  double _getYPosition(double screenHeight) {
+    final double startTouchY = widget.startBackEvent?.touchOffset?.dy ?? 0;
+    final double currentTouchY = widget.currentBackEvent?.touchOffset?.dy ?? 0;
 
     final double yShiftMax = (screenHeight / _kDivisionFactor) - _kMargin;
 
@@ -590,18 +592,10 @@ class _PredictiveBackPageSharedElementTransitionState
     return easedYShift.clamp(-yShiftMax, yShiftMax);
   }
 
-  // TODO(justinmc): Change "calc"" names to "get". And make private.
-  // This isn't done as an animation because it's based on the vertical drag
-  // amount, not the progression of the back gesture like widget.animation is.
-  double calcYShift() {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    return _getYPosition(screenHeight, widget.startBackEvent, widget.currentBackEvent);
-  }
-
   Animation<Offset> _getCommitPositionAnimation(double screenWidth) {
     return Tween<Offset>(
       begin: Offset(_lastXDrag, _lastYDrag),
-      end: Offset(screenWidth * extraShiftDistance, 0.0),
+      end: Offset(screenWidth * _kYPositionFactor, 0.0),
     ).animate(commitAnimation);
   }
 
@@ -621,7 +615,7 @@ class _PredictiveBackPageSharedElementTransitionState
 
     _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(commitAnimation);
     // TODO(justinmc): Pull out this tween, and maybe others, to constants.
-    _scaleAnimation = Tween<double>(begin: scalePercentage, end: 1.0).animate(widget.animation);
+    _scaleAnimation = Tween<double>(begin: _kMinScale, end: 1.0).animate(widget.animation);
     _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
@@ -642,7 +636,7 @@ class _PredictiveBackPageSharedElementTransitionState
       );
       _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
       // TODO(justinmc): InheritedModel? Extract to build method as just Size?
-      final double screenWidth = MediaQuery.of(context).size.width;
+      final double screenWidth = MediaQuery.sizeOf(context).width;
       _commitPositionAnimation = _getCommitPositionAnimation(screenWidth);
     }
   }
@@ -650,8 +644,7 @@ class _PredictiveBackPageSharedElementTransitionState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // TODO(justinmc): InheritedModel?
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
 
     final double xShift = (screenWidth / _kDivisionFactor) - _kMargin;
     _xAnimation = Tween<double>(
@@ -679,7 +672,10 @@ class _PredictiveBackPageSharedElementTransitionState
       builder: (BuildContext context, Widget? child) {
         // TODO(justinmc): Separate widget or inline?
         final Tween<double> gapTween = Tween<double>(begin: _kMargin, end: 0.0);
-        final Tween<double> borderRadiusTween = Tween<double>(begin: borderRadius, end: 0.0);
+        final Tween<double> borderRadiusTween = Tween<double>(
+          begin: _kDeviceBorderRadius,
+          end: 0.0,
+        );
 
         return Transform.scale(
           scale: switch (widget.phase) {
@@ -689,7 +685,10 @@ class _PredictiveBackPageSharedElementTransitionState
           child: Transform.translate(
             offset: switch (widget.phase) {
               _PredictiveBackPhase.commit => _commitPositionAnimation.value,
-              _ => Offset(_lastXDrag = _xAnimation.value, _lastYDrag = calcYShift()),
+              _ => Offset(
+                _lastXDrag = _xAnimation.value,
+                _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
+              ),
             },
             child: Opacity(
               // TODO(justinmc): Double check that the opacity animation works correctly.
