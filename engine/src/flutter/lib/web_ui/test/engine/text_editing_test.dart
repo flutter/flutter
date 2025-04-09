@@ -585,6 +585,56 @@ Future<void> testMain() async {
       expect(editingStrategy.domElement!.style.width, '10px');
       expect(editingStrategy.domElement!.style.height, '10px');
     });
+
+    test('closes input connection when window/iframe loses focus', () async {
+      final PlatformMessagesSpy spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
+
+      spy.tearDown();
+    });
+
+    test('keeps focus within window/iframe when the focus moves within the flutter view', () async {
+      final PlatformMessagesSpy spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final flutterView =
+          EnginePlatformDispatcher.instance.viewManager.findViewForElement(
+            textEditing.strategy.domElement,
+          )!;
+      flutterView.dom.rootElement.focusWithoutScroll();
+
+      expect(spy.messages, isEmpty);
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      spy.tearDown();
+    });
   });
 
   group('$HybridTextEditing', () {
