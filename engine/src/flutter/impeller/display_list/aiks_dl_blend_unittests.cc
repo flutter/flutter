@@ -928,7 +928,6 @@ TEST_P(AiksTest, EmulatedAdvancedBlendRestore) {
 
   builder.DrawPaint(DlPaint(DlColor::kWhite()));
   builder.Save();
-  builder.ClipRect(DlRect::MakeLTRB(101, 101, 399, 301));
   builder.ClipRect(DlRect::MakeLTRB(100, 100, 400, 300));
 
   // Draw should apply the clip, even though it is an advanced blend.
