@@ -5,9 +5,7 @@
 import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/deferred_component.dart';
 import '../base/file_system.dart';
@@ -26,8 +24,6 @@ import '../linux/build_linux.dart';
 import '../macos/build_macos.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
-import '../widget_preview/dtd_services.dart';
 import '../widget_preview/preview_code_generator.dart';
 import '../widget_preview/preview_detector.dart';
 import '../widget_preview/preview_manifest.dart';
@@ -45,8 +41,6 @@ class WidgetPreviewCommand extends FlutterCommand {
     required Platform platform,
     required ShutdownHooks shutdownHooks,
     required OperatingSystemUtils os,
-    required ProcessManager processManager,
-    required Artifacts artifacts,
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
@@ -58,8 +52,6 @@ class WidgetPreviewCommand extends FlutterCommand {
         platform: platform,
         shutdownHooks: shutdownHooks,
         os: os,
-        processManager: processManager,
-        artifacts: artifacts,
       ),
     );
     addSubcommand(
@@ -126,8 +118,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     required this.platform,
     required this.shutdownHooks,
     required this.os,
-    required this.processManager,
-    required this.artifacts,
   }) {
     addPubOptions();
     argParser
@@ -162,9 +152,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   static const String kHeadlessWeb = 'headless-web';
   static const String kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
 
-  /// Environment variable used to pass the DTD URI to the widget preview scaffold.
-  static const String kWidgetPreviewDtdUriEnvVar = 'WIDGET_PREVIEW_DTD_URI';
-
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     // Ensure the Flutter Web SDK is installed.
@@ -198,10 +185,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   final OperatingSystemUtils os;
 
-  final ProcessManager processManager;
-
-  final Artifacts artifacts;
-
   late final FlutterProject rootProject = getRootProject();
 
   late final PreviewDetector _previewDetector = PreviewDetector(
@@ -218,12 +201,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     rootProject: rootProject,
     fs: fs,
     cache: cache,
-  );
-
-  late final WidgetPreviewDtdServices _dtdService = WidgetPreviewDtdServices(
-    logger: logger,
-    shutdownHooks: shutdownHooks,
-    dtdLauncher: DtdLauncher(logger: logger, artifacts: artifacts, processManager: processManager),
   );
 
   /// The currently running instance of the widget preview scaffold.
@@ -307,7 +284,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       shutdownHooks.addShutdownHook(() async {
         await _widgetPreviewApp?.stop();
       });
-      await configureDtd();
       _widgetPreviewApp = await runPreviewEnvironment(
         widgetPreviewScaffoldProject: rootProject.widgetPreviewScaffoldProject,
       );
@@ -331,31 +307,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // TODO(bkonyi): trigger hot reload or restart?
     logger.printStatus('Changes to pubspec.yaml detected.');
     _populatePreviewPubspec(rootProject: rootProject);
-  }
-
-  /// Configures the Dart Tooling Daemon connection.
-  ///
-  /// If --dtd-uri is provided, the existing DTD instance will be used. If the tool fails to
-  /// connect to this URI, it will start its own DTD instance.
-  ///
-  /// If --dtd-uri is not provided, a DTD instance managed by the tool will be started.
-  Future<void> configureDtd() async {
-    final String? existingDtdUriStr = stringArg(FlutterGlobalOptions.kDtdUrl, global: true);
-    Uri? existingDtdUri;
-    try {
-      if (existingDtdUriStr != null) {
-        existingDtdUri = Uri.parse(existingDtdUriStr);
-      }
-    } on FormatException {
-      logger.printWarning('Failed to parse value of --dtd-uri: $existingDtdUriStr.');
-    }
-    if (existingDtdUri == null) {
-      logger.printTrace('Launching a fresh DTD instance...');
-      await _dtdService.launchAndConnect();
-    } else {
-      logger.printTrace('Connecting to existing DTD instance at: $existingDtdUri...');
-      await _dtdService.connect(dtdWsUri: existingDtdUri);
-    }
   }
 
   /// Builds the application binary for the widget preview scaffold the first
@@ -506,12 +457,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             BuildMode.debug,
             null,
             treeShakeIcons: false,
-            // Provide the DTD connection information directly to the preview scaffold.
-            // This could, in theory, be provided via a follow up call to a service extension
-            // registered by the preview scaffold, but there's some uncertainty around how service
-            // extensions will work with Flutter web embedded in VSCode without a Chrome debugger
-            // connection.
-            dartDefines: <String>['$kWidgetPreviewDtdUriEnvVar=${_dtdService.dtdUri}'],
             extraFrontEndOptions:
                 isWeb ? <String>['--dartdevc-canary', '--dartdevc-module-format=ddc'] : null,
             packageConfigPath: widgetPreviewScaffoldProject.packageConfig.path,
@@ -654,7 +599,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         if (offline) '--offline',
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
-        'dtd',
         'flutter_lints',
         'stack_trace',
       ],

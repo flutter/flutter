@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -48,8 +47,6 @@ void main() {
           platform: platform,
           processManager: processManager,
         ),
-        processManager: FakeProcessManager.any(),
-        artifacts: Artifacts.test(fileSystem: fileSystem),
       );
       rootProject = FakeFlutterProject(
         projectRoot: 'some_project',
