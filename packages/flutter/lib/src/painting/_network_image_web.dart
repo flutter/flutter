@@ -270,7 +270,6 @@ class _ForwardingImageStreamCompleter extends ImageStreamCompleter {
       (ImageStreamCompleter value) {
         resolved = true;
         if (_disposed) {
-          value.markHadListener();
           value.maybeDispose();
           return;
         }
