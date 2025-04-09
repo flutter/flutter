@@ -1701,6 +1701,55 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/165867.
+  testWidgets('Keyboard navigation only traverses filtered entries', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            requestFocusOnTap: true,
+            enableFilter: true,
+            controller: controller,
+            dropdownMenuEntries: const <DropdownMenuEntry<TestMenu>>[
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Good Match 1'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Bad Match 1'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu2, label: 'Good Match 2'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu3, label: 'Bad Match 2'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu4, label: 'Good Match 3'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu5, label: 'Bad Match 3'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Filter the entries to only show the ones with 'Good Match'.
+    await tester.enterText(find.byType(TextField), 'Good Match');
+    await tester.pump();
+
+    // Since the first entry is already highlighted, navigate to the second item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 2');
+
+    // Navigate to the third item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 3');
+
+    // Navigate back to the first item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 1');
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/147253.
   testWidgets('Default search prioritises the current highlight', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
