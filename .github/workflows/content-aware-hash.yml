@@ -19,7 +19,7 @@ jobs:
 
       - name: Generate Hash
         run: |
-          engine_content_hash=$(git ls-tree HEAD DEPS bin/internal/release-candidate-branch.version engine | git hash-object --stdin)
+          engine_content_hash=$(bin/internal/content_aware_hash.sh)
           # test notice annotation for retrival from api
           echo "::notice ::{\"engine_content_hash\": \"${engine_content_hash}\"}"
           # test summary writing
