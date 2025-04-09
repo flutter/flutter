@@ -39,12 +39,16 @@ void main() {
   testWidgets('largeTitle is aligned with asymmetrical actions', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
-        home: CupertinoNavigationBar.large(
-          leading: CupertinoButton(onPressed: null, child: Text('Something')),
-          largeTitle: Text('Title'),
+        home: CupertinoPageScaffold(
+          child: CupertinoNavigationBar.large(
+            leading: CupertinoButton(onPressed: null, child: Text('Something')),
+            largeTitle: Text('Title'),
+          ),
         ),
       ),
     );
+    print(tester.getCenter(find.text('Title')));
+    print(tester.getCenter(find.text('Something')));
 
     expect(tester.getCenter(find.text('Title')).dx, greaterThan(110.0));
     expect(tester.getCenter(find.text('Title')).dx, lessThan(111.0));
