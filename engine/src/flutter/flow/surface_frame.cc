@@ -7,6 +7,7 @@
 #include <limits>
 #include <utility>
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 
