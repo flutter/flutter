@@ -615,13 +615,6 @@ Future<DartBuildResult> _runDartBuild({
     }
     dependencies.addAll(buildResult.dependencies);
     codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
-    print('buildResult');
-    print(
-      _filterCodeAssets(
-        buildResult.encodedAssets,
-        target,
-      ).map((e) => '${e.target} ${e.codeAsset.id}').join('\n'),
-    );
     if (linkingEnabled) {
       final LinkResult? linkResult = await buildRunner.link(
         extensions: <ProtocolExtension>[
@@ -640,13 +633,6 @@ Future<DartBuildResult> _runDartBuild({
       if (linkResult == null) {
         _throwNativeAssetsLinkFailed();
       }
-      print('linkResult');
-      print(
-        _filterCodeAssets(
-          linkResult.encodedAssets,
-          target,
-        ).map((e) => '${e.target} ${e.codeAsset.id}').join('\n'),
-      );
       codeAssets.addAll(_filterCodeAssets(linkResult.encodedAssets, target));
       dependencies.addAll(linkResult.dependencies);
     }
