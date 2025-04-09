@@ -2257,8 +2257,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
+    final VisualDensity visualDensity = decoration.visualDensity ?? themeData.visualDensity;
     final InputDecorationTheme defaults =
-        Theme.of(context).useMaterial3
+        themeData.useMaterial3
             ? _InputDecoratorDefaultsM3(context)
             : _InputDecoratorDefaultsM2(context);
     final InputDecorationTheme inputDecorationTheme = themeData.inputDecorationTheme;
@@ -2422,7 +2423,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 child: ConstrainedBox(
                   constraints:
                       decoration.prefixIconConstraints ??
-                      themeData.visualDensity.effectiveConstraints(
+                      visualDensity.effectiveConstraints(
                         const BoxConstraints(
                           minWidth: kMinInteractiveDimension,
                           minHeight: kMinInteractiveDimension,
@@ -2460,7 +2461,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
                 child: ConstrainedBox(
                   constraints:
                       decoration.suffixIconConstraints ??
-                      themeData.visualDensity.effectiveConstraints(
+                      visualDensity.effectiveConstraints(
                         const BoxConstraints(
                           minWidth: kMinInteractiveDimension,
                           minHeight: kMinInteractiveDimension,
@@ -2596,7 +2597,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         alignLabelWithHint: decoration.alignLabelWithHint ?? false,
         isDense: decoration.isDense,
         isEmpty: isEmpty,
-        visualDensity: themeData.visualDensity,
+        visualDensity: visualDensity,
         maintainHintSize: maintainHintSize,
         icon: icon,
         input: input,
@@ -2773,6 +2774,7 @@ class InputDecoration {
     this.semanticCounterText,
     this.alignLabelWithHint,
     this.constraints,
+    this.visualDensity,
   }) : assert(
          !(label != null && labelText != null),
          'Declaring both label and labelText is not supported.',
@@ -2880,7 +2882,8 @@ class InputDecoration {
        floatingLabelBehavior = floatingLabelBehavior,
        // ignore: prefer_initializing_formals, (can't use initializing formals for a deprecated parameter).
        floatingLabelAlignment = floatingLabelAlignment,
-       alignLabelWithHint = false;
+       alignLabelWithHint = false,
+       visualDensity = null;
 
   /// An icon to show before the input field and outside of the decoration's
   /// container.
@@ -3794,6 +3797,32 @@ class InputDecoration {
   /// a default height based on text size.
   final BoxConstraints? constraints;
 
+  /// Defines how compact the decoration's layout will be.
+  ///
+  /// The vertical aspect of the default or user-specified [contentPadding] is adjusted
+  /// automatically based on [visualDensity].
+  ///
+  /// When the visual density is [VisualDensity.compact], the vertical aspect of
+  /// [contentPadding] is reduced by 8 pixels.
+  ///
+  /// When the visual density is [VisualDensity.comfortable], the vertical aspect of
+  /// [contentPadding] is reduced by 4 pixels.
+  ///
+  /// When the visual density is [VisualDensity.standard] vertical aspect of
+  /// [contentPadding] is not changed.
+  ///
+  /// If null, then the ambient [ThemeData.inputDecorationTheme]'s
+  /// [InputDecorationTheme.visualDensity] will be used. If that is null then
+  /// [ThemeData.visualDensity] will be used.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all widgets
+  ///    within a [Theme].
+  ///  * [InputDecorationTheme.visualDensity], which can override this setting for a
+  ///    given decorator.
+  final VisualDensity? visualDensity;
+
   /// Creates a copy of this input decoration with the given fields replaced
   /// by the new values.
   InputDecoration copyWith({
@@ -3853,6 +3882,7 @@ class InputDecoration {
     String? semanticCounterText,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
+    VisualDensity? visualDensity,
   }) {
     return InputDecoration(
       icon: icon ?? this.icon,
@@ -3911,6 +3941,7 @@ class InputDecoration {
       semanticCounterText: semanticCounterText ?? this.semanticCounterText,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
+      visualDensity: visualDensity ?? this.visualDensity,
     );
   }
 
@@ -3954,6 +3985,7 @@ class InputDecoration {
       border: border ?? theme.border,
       alignLabelWithHint: alignLabelWithHint ?? theme.alignLabelWithHint,
       constraints: constraints ?? theme.constraints,
+      visualDensity: visualDensity ?? theme.visualDensity,
     );
   }
 
@@ -4021,7 +4053,8 @@ class InputDecoration {
         other.enabled == enabled &&
         other.semanticCounterText == semanticCounterText &&
         other.alignLabelWithHint == alignLabelWithHint &&
-        other.constraints == constraints;
+        other.constraints == constraints &&
+        other.visualDensity == visualDensity;
   }
 
   @override
@@ -4083,6 +4116,7 @@ class InputDecoration {
       semanticCounterText,
       alignLabelWithHint,
       constraints,
+      visualDensity,
     ];
     return Object.hashAll(values);
   }
@@ -4142,6 +4176,7 @@ class InputDecoration {
       if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
       if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
       if (constraints != null) 'constraints: $constraints',
+      if (visualDensity != null) 'visualDensity: $visualDensity',
     ];
     return 'InputDecoration(${description.join(', ')})';
   }
@@ -4196,6 +4231,7 @@ class InputDecorationTheme with Diagnosticable {
     this.border,
     this.alignLabelWithHint = false,
     this.constraints,
+    this.visualDensity,
   });
 
   /// {@macro flutter.material.inputDecoration.labelStyle}
@@ -4283,9 +4319,9 @@ class InputDecorationTheme with Diagnosticable {
   /// [InputDecoration.helperText], [InputDecoration.errorText], and
   /// [InputDecoration.counterText].
   ///
-  /// By default the [contentPadding] reflects [isDense] and the type of the
-  /// [border]. If [isCollapsed] is true then [contentPadding] is
-  /// [EdgeInsets.zero].
+  /// By default the [contentPadding] reflects [visualDensity], [isDense] and
+  /// the type of the [border]. If [isCollapsed] is true then [contentPadding]
+  /// is [EdgeInsets.zero].
   final EdgeInsetsGeometry? contentPadding;
 
   /// Whether the decoration is the same size as the input field.
@@ -4601,6 +4637,30 @@ class InputDecorationTheme with Diagnosticable {
   ///    given decorator.
   final BoxConstraints? constraints;
 
+  /// Defines how compact the decoration's layout will be.
+  ///
+  /// The vertical aspect of the default or user-specified [contentPadding] is adjusted
+  /// automatically based on [visualDensity].
+  ///
+  /// When the visual density is [VisualDensity.compact], the vertical aspect of
+  /// [contentPadding] is reduced by 8 pixels.
+  ///
+  /// When the visual density is [VisualDensity.comfortable], the vertical aspect of
+  /// [contentPadding] is reduced by 4 pixels.
+  ///
+  /// When the visual density is [VisualDensity.standard] vertical aspect of
+  /// [contentPadding] is not changed.
+  ///
+  /// If null, defaults to [ThemeData.visualDensity].
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [visualDensity] for all widgets
+  ///    within a [Theme].
+  ///  * [InputDecoration.visualDensity], which can override this setting for a
+  ///    given decorator.
+  final VisualDensity? visualDensity;
+
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   InputDecorationTheme copyWith({
@@ -4639,6 +4699,7 @@ class InputDecorationTheme with Diagnosticable {
     InputBorder? border,
     bool? alignLabelWithHint,
     BoxConstraints? constraints,
+    VisualDensity? visualDensity,
   }) {
     return InputDecorationTheme(
       labelStyle: labelStyle ?? this.labelStyle,
@@ -4676,6 +4737,7 @@ class InputDecorationTheme with Diagnosticable {
       border: border ?? this.border,
       alignLabelWithHint: alignLabelWithHint ?? this.alignLabelWithHint,
       constraints: constraints ?? this.constraints,
+      visualDensity: visualDensity ?? this.visualDensity,
     );
   }
 
@@ -4722,6 +4784,7 @@ class InputDecorationTheme with Diagnosticable {
       enabledBorder: enabledBorder ?? inputDecorationTheme.enabledBorder,
       border: border ?? inputDecorationTheme.border,
       constraints: constraints ?? inputDecorationTheme.constraints,
+      visualDensity: visualDensity ?? inputDecorationTheme.visualDensity,
     );
   }
 
@@ -4763,6 +4826,7 @@ class InputDecorationTheme with Diagnosticable {
       alignLabelWithHint,
       constraints,
       hintFadeDuration,
+      visualDensity,
     ),
   );
 
@@ -4810,7 +4874,8 @@ class InputDecorationTheme with Diagnosticable {
         other.border == border &&
         other.alignLabelWithHint == alignLabelWithHint &&
         other.constraints == constraints &&
-        other.disabledBorder == disabledBorder;
+        other.disabledBorder == disabledBorder &&
+        other.visualDensity == visualDensity;
   }
 
   @override
@@ -5008,6 +5073,13 @@ class InputDecorationTheme with Diagnosticable {
         'constraints',
         constraints,
         defaultValue: defaultTheme.constraints,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<VisualDensity>(
+        'visualDensity',
+        visualDensity,
+        defaultValue: defaultTheme.visualDensity,
       ),
     );
   }
