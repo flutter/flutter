@@ -1528,7 +1528,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
     if (path.ok()) {
       Save(1);
       Concat(Matrix::MakeTranslation(position));
-      DrawPath(path.value().GetPath(), paint);
+      DrawPath(path.value(), paint);
       Restore();
       return;
     }
