@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'controls.dart';
-import 'dtd_services.dart';
 import 'generated_preview.dart';
 import 'utils.dart';
 import 'widget_preview.dart';
@@ -411,8 +410,6 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
-  // TODO(bkonyi): store somewhere.
-  await WidgetPreviewScaffoldDtdServices().connect();
   runApp(_WidgetPreviewScaffold());
 }
 
