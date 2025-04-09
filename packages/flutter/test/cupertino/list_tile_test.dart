@@ -494,4 +494,49 @@ void main() {
 
     expect(tester.takeException(), null);
   });
+
+  testWidgets('Leading and trailing animate on listtile long press', (WidgetTester tester) async {
+    bool value = false;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CupertinoListTile(
+                title: const Text(''),
+                onTap:
+                    () => setState(() {
+                      value = !value;
+                    }),
+                leading: CupertinoSwitch(value: value, onChanged: (_) {}),
+                trailing: CupertinoSwitch(value: value, onChanged: (_) {}),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    final CurvedAnimation firstPosition =
+        (tester.state(find.byType(CupertinoSwitch).first) as dynamic).position as CurvedAnimation;
+    final CurvedAnimation lastPosition =
+        (tester.state(find.byType(CupertinoSwitch).last) as dynamic).position as CurvedAnimation;
+
+    expect(firstPosition.value, 0.0);
+    expect(lastPosition.value, 0.0);
+
+    await tester.longPress(find.byType(CupertinoListTile));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 65));
+
+    expect(firstPosition.value, greaterThan(0.0));
+    expect(lastPosition.value, greaterThan(0.0));
+
+    expect(firstPosition.value, lessThan(1.0));
+    expect(lastPosition.value, lessThan(1.0));
+
+    await tester.pumpAndSettle();
+    expect(firstPosition.value, 1.0);
+    expect(lastPosition.value, 1.0);
+  });
 }
