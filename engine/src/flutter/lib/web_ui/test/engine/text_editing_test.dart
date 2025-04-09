@@ -610,31 +610,61 @@ Future<void> testMain() async {
       spy.tearDown();
     });
 
-    test('keeps focus within window/iframe when the focus moves within the flutter view', () async {
-      final PlatformMessagesSpy spy = PlatformMessagesSpy();
-      spy.setUp();
+    test(
+      'keeps focus within window/iframe when the focus moves within the flutter view in Chrome but not Safari',
+      () async {
+        final PlatformMessagesSpy spy = PlatformMessagesSpy();
+        spy.setUp();
 
-      textEditing.configuration = singlelineConfig;
+        textEditing.configuration = singlelineConfig;
 
-      final showCompleter = Completer<void>();
-      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
-      await showCompleter.future;
+        final showCompleter = Completer<void>();
+        textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+        await showCompleter.future;
 
-      expect(textEditing.isEditing, isTrue);
+        // The "setSizeAndTransform" message has to be here before we call
+        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+        // we don't put the input element into the DOM until we get its correct
+        // dimensions from the framework.
+        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        );
+        textEditing.channel.handleTextInput(
+          codec.encodeMethodCall(setSizeAndTransform),
+          (ByteData? data) {},
+        );
 
-      expect(domDocument.activeElement, textEditing.strategy.domElement);
+        expect(textEditing.isEditing, isTrue);
 
-      final flutterView =
-          EnginePlatformDispatcher.instance.viewManager.findViewForElement(
-            textEditing.strategy.domElement,
-          )!;
-      flutterView.dom.rootElement.focusWithoutScroll();
+        expect(domDocument.activeElement, textEditing.strategy.domElement);
 
-      expect(spy.messages, isEmpty);
-      expect(domDocument.activeElement, textEditing.strategy.domElement);
+        final flutterView =
+            EnginePlatformDispatcher.instance.viewManager.findViewForElement(
+              textEditing.strategy.domElement,
+            )!;
 
-      spy.tearDown();
-    });
+        flutterView.dom.rootElement.focusWithoutScroll();
+        expect(spy.messages, isEmpty);
+
+        if (isSafari) {
+          // In Safari the web engine does not respond to blur, so there's no
+          // expectation that the input element keep focus.
+          expect(domDocument.activeElement, flutterView.dom.rootElement);
+        } else if (isFirefox) {
+          // This is a mysterious behavior in Firefox. Even though the engine does
+          // call <input>.focus() the browser doesn't move focus to the target
+          // element. This only happens in the test harness. When testing
+          // manually, Firefox happily moves focus to the input element.
+          expect(domDocument.activeElement, flutterView.dom.rootElement);
+        } else {
+          expect(domDocument.activeElement, textEditing.strategy.domElement);
+        }
+
+        spy.tearDown();
+      },
+    );
   });
 
   group('$HybridTextEditing', () {

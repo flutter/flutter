@@ -1547,7 +1547,7 @@ abstract class DefaultTextEditingStrategy
       // If the focus stays within the same FlutterView, ensure the focus stays
       // on the input element.
 
-      // TODO(issues/166857): the motivation/reasoning behind this remains murky.
+      // TODO(166857): the motivation/reasoning behind this remains murky.
       // It's unclear why, if the browser wants to remove focus from the input,
       // we must insist that it stays on the element. This could lead to
       // different elements/widgets fighting over who gets the focus, or resist
