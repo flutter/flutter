@@ -332,8 +332,36 @@ Future<ui.Codec> skiaInstantiateWebImageCodec(
   String url,
   ui_web.ImageCodecChunkCallback? chunkCallback,
 ) async {
-  final Uint8List list = await fetchImage(url, chunkCallback);
-  return skiaInstantiateImageCodec(list);
+  final CkImageElementCodec imageElementCodec = CkImageElementCodec(
+    url,
+    chunkCallback: chunkCallback,
+  );
+  try {
+    await imageElementCodec.decode();
+    return imageElementCodec;
+  } on ImageCodecException {
+    imageElementCodec.dispose();
+    final Uint8List list = await fetchImage(url, chunkCallback);
+    final ImageType imageType = tryDetectImageType(list, url);
+    if (browserSupportsImageDecoder) {
+      return CkBrowserImageDecoder.create(
+        data: list,
+        contentType: imageType.mimeType,
+        debugSource: url,
+      );
+    } else {
+      final DomBlob blob = createDomBlob(<ByteBuffer>[list.buffer]);
+      final CkImageBlobCodec codec = CkImageBlobCodec(blob, chunkCallback: chunkCallback);
+
+      try {
+        await codec.decode();
+        return codec;
+      } on ImageCodecException {
+        codec.dispose();
+        return CkAnimatedImage.decodeFromBytes(list, url);
+      }
+    }
+  }
 }
 
 /// Sends a request to fetch image data.
