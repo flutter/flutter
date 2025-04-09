@@ -615,7 +615,7 @@ class FlutterTesterOptions():
       command_args.append('--disable-observatory')
 
     if self.enable_impeller:
-      command_args += ['--enable-impeller']
+      command_args += ['--enable-impeller', '--enable-flutter-gpu']
     else:
       command_args += ['--no-enable-impeller']
 

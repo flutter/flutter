@@ -225,6 +225,8 @@ struct Settings {
   bool enable_impeller = false;
 #endif
 
+  bool enable_flutter_gpu = false;
+
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;
 
