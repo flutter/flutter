@@ -56,9 +56,6 @@ The script(s) that compute (and test the computation of) the engine version:
 - [`bin/internal/update_engine_version.sh`](../../bin/internal/update_engine_version.sh)
 - [`bin/internal/update_engine_version.ps1`](../../bin/internal/update_engine_version.ps1)
 - [`dev/tools/test/update_engine_version_test.dart`](../../dev/tools/test/update_engine_version_test.dart)
-- [`bin/internal/content_aware_hash.sh`](../../bin/internal/content_aware_hash.sh)
-- [`bin/internal/content_aware_hash.ps1`](../../bin/internal/content_aware_hash.ps1)
-- [`dev/tools/test/content_aware_hash_test.dart`](../../dev/tools/test/content_aware_hash_test.dart)
 
 The tool uses the engine version in the following locations:
 
