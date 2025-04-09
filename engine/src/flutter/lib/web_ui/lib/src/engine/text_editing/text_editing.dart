@@ -1546,13 +1546,14 @@ abstract class DefaultTextEditingStrategy
     } else if (_viewForElement(willGainFocusElement) == activeDomElementView) {
       // If the focus stays within the same FlutterView, ensure the focus stays
       // on the input element.
-      // WARNING: the motivation/reasoning behind this remains murky. It's
-      // unclear why, if the browser wants to remove focus from the input, we
-      // must insist that it stays on the element. This could lead to different
-      // elements/widgets fighting over who gets the focus, or resist to user's
-      // request to move focus elsewhere, which can be super-annoying UX. We
-      // should reevaluate what it is we're trying to do here. Perhaps there's a
-      // bette way.
+
+      // TODO(issues/166857): the motivation/reasoning behind this remains murky.
+      // It's unclear why, if the browser wants to remove focus from the input,
+      // we must insist that it stays on the element. This could lead to
+      // different elements/widgets fighting over who gets the focus, or resist
+      // to user's request to move focus elsewhere, which can be super-annoying
+      // UX. We should reevaluate what it is we're trying to do here. Perhaps
+      // there's a better way.
       moveFocusToActiveDomElement();
     }
   }
