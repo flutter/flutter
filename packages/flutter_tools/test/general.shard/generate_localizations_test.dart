@@ -1671,7 +1671,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
       // If only the types of the template had been inferred,
       // and not for the translation there would be a mismatch:
       // in this case `num` for count and `null` (the default), which is incompatible
-      // and `getSyntheticGeneratedFileContent` would throw an exception.
+      // and `getGeneratedFileContent` would throw an exception.
       //
       // This test ensures that both template and locale can be equally partially defined
       // in the arb.
@@ -1700,7 +1700,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
   }
 }''',
           });
-          expect(getSyntheticGeneratedFileContent(locale: 'en'), isA<String>());
+          expect(getGeneratedFileContent(locale: 'en'), isA<String>());
         },
       );
     });
