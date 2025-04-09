@@ -4,7 +4,7 @@ When new Android versions become available, the following steps should be taken 
 
 In `build/config/android/config.gni`, edit `default_android_sdk_version` and `default_android_sdk_build_tools_version` to the new Android version.
 
-**NOTE:** There is an effort to move the `flutter/buildroot` repo into the `flutter/engine` repo, so this file may have moved by the time you are following these instructions.
+**NOTE:** There is an ongoing effort to move the `flutter/buildroot` repo into the `flutter/engine` repo, so this file may have moved by the time you are following these instructions.
 
 ## Upload new SDK and other dependencies to [CIPD](https://chrome-infra-packages.appspot.com/p/flutter/android):
 
@@ -31,7 +31,7 @@ Typically, `<your-android-dir>` is in your home directory under `~/Library/Andro
 ### Update the compile and target SDK versions we use
 
 Modify the following files as described:
-* `DEPS`:  Roll buildroot hash to that of the PR you used to [update the buildroot](#update-the-buildroot)
+* `DEPS`: Roll buildroot hash to that of the PR you used to [update the buildroot](#update-the-buildroot)
 * `DEPS`: Change the version parameter under `flutter/android/sdk/all/${{platform}}` to the newly uploaded CIPD version tag, e.g. `'version': 'version:30r2'`
 * `tools/javadoc/gen_javadoc.py`: Bump the reference to `android-XX` in `classpath` to the latest version.
 * `tools/cipd/android_embedding_bundle/build.gradle`: Bump `compileSdkVersion XX` to the latest version.
