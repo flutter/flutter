@@ -171,7 +171,7 @@ static std::ostream& operator<<(std::ostream& os, const SkRect& rect) {
 
 extern std::ostream& operator<<(std::ostream& os, const DlPath& path) {
   return os << "DlPath("
-            << "bounds: " << path.GetSkBounds()
+            << "bounds: " << path.GetBounds()
             // should iterate over verbs and coordinates...
             << ")";
 }
@@ -982,7 +982,7 @@ void DisplayListStreamDispatcher::drawDisplayList(
     const sk_sp<DisplayList> display_list, DlScalar opacity) {
   startl() << "drawDisplayList("
            << "ID: " << display_list->unique_id() << ", "
-           << "bounds: " << display_list->bounds() << ", "
+           << "bounds: " << display_list->GetBounds() << ", "
            << "opacity: " << opacity
            << ");" << std::endl;
 }

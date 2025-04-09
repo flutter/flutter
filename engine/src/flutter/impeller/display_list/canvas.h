@@ -12,7 +12,8 @@
 #include <utility>
 #include <vector>
 
-#include "display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -187,7 +188,7 @@ class Canvas {
 
   void Rotate(Radians radians);
 
-  void DrawPath(const Path& path, const Paint& paint);
+  void DrawPath(const flutter::DlPath& path, const Paint& paint);
 
   void DrawPaint(const Paint& paint);
 

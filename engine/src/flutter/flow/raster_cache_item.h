@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "flutter/display_list/dl_canvas.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/flow/raster_cache_key.h"
 
 namespace flutter {

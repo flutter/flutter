@@ -12,7 +12,7 @@
 
 namespace impeller {
 
-FillPathGeometry::FillPathGeometry(const Path& path,
+FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
                                    std::optional<Rect> inner_rect)
     : path_(path), inner_rect_(inner_rect) {}
 
@@ -24,8 +24,8 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     RenderPass& pass) const {
   auto& host_buffer = renderer.GetTransientsBuffer();
 
-  const auto& bounding_box = path_.GetBoundingBox();
-  if (bounding_box.has_value() && bounding_box->IsEmpty()) {
+  const auto& bounding_box = path_.GetBounds();
+  if (bounding_box.IsEmpty()) {
     return GeometryResult{
         .type = PrimitiveType::kTriangle,
         .vertex_buffer =
@@ -58,9 +58,8 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
 }
 
 GeometryResult::Mode FillPathGeometry::GetResultMode() const {
-  const auto& bounding_box = path_.GetBoundingBox();
-  if (path_.IsConvex() ||
-      (bounding_box.has_value() && bounding_box->IsEmpty())) {
+  const auto& bounding_box = path_.GetBounds();
+  if (path_.IsConvex() || bounding_box.IsEmpty()) {
     return GeometryResult::Mode::kNormal;
   }
 
@@ -76,7 +75,7 @@ GeometryResult::Mode FillPathGeometry::GetResultMode() const {
 
 std::optional<Rect> FillPathGeometry::GetCoverage(
     const Matrix& transform) const {
-  return path_.GetTransformedBoundingBox(transform);
+  return path_.GetBounds().TransformAndClipBounds(transform);
 }
 
 bool FillPathGeometry::CoversArea(const Matrix& transform,

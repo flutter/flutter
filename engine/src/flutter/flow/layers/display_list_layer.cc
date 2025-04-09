@@ -72,7 +72,7 @@ bool DisplayListLayer::Compare(DiffContext::Statistics& statistics,
   const auto op_bytes_1 = dl1->bytes();
   const auto op_bytes_2 = dl2->bytes();
   if (op_cnt_1 != op_cnt_2 || op_bytes_1 != op_bytes_2 ||
-      dl1->bounds() != dl2->bounds()) {
+      dl1->GetBounds() != dl2->GetBounds()) {
     statistics.AddNewPicture();
     return false;
   }

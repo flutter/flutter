@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <numeric>
 #include "display_list/dl_paint.h"
+#include "display_list/geometry/dl_geometry_conversions.h"
 #include "fml/logging.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
 #include "include/core/SkMatrix.h"

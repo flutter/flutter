@@ -223,6 +223,7 @@
 ../../../flutter/impeller/shader_archive/shader_archive_unittests.cc
 ../../../flutter/impeller/tessellator/dart/.dart_tool
 ../../../flutter/impeller/tessellator/dart/pubspec.yaml
+../../../flutter/impeller/tessellator/path_tessellator_unittests.cc
 ../../../flutter/impeller/tessellator/tessellator_unittests.cc
 ../../../flutter/impeller/toolkit/android/README.md
 ../../../flutter/impeller/toolkit/android/toolkit_android_unittests.cc

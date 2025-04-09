@@ -235,6 +235,7 @@ impeller_component("entity") {
     ":modern_entity_shaders",
     "../renderer",
     "../typographer",
+    "//flutter/display_list",
   ]
 
   deps = [ "//flutter/fml" ]

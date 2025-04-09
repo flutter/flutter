@@ -7,6 +7,7 @@
 #include "gtest/gtest.h"
 
 #include "flutter/display_list/testing/dl_test_mock_path_receiver.h"
+#include "flutter/third_party/skia/include/core/SkPath.h"
 #include "flutter/third_party/skia/include/core/SkRRect.h"
 
 namespace flutter {
@@ -31,14 +32,13 @@ TEST(DisplayListPath, DefaultConstruction) {
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   is_closed = false;
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  EXPECT_FALSE(path.IsSkRect(nullptr, &is_closed));
+  EXPECT_FALSE(path.IsRect(nullptr));
+  EXPECT_FALSE(path.IsRect(nullptr, &is_closed));
   EXPECT_FALSE(is_closed);
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
+  EXPECT_FALSE(path.IsOval(nullptr));
+  EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   EXPECT_EQ(path.GetBounds(), DlRect());
-  EXPECT_EQ(path.GetSkBounds(), SkRect());
 }
 
 TEST(DisplayListPath, ConstructFromEmptySkiaPath) {
@@ -61,14 +61,13 @@ TEST(DisplayListPath, ConstructFromEmptySkiaPath) {
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   is_closed = false;
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  EXPECT_FALSE(path.IsSkRect(nullptr, &is_closed));
+  EXPECT_FALSE(path.IsRect(nullptr));
+  EXPECT_FALSE(path.IsRect(nullptr, &is_closed));
   EXPECT_FALSE(is_closed);
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
+  EXPECT_FALSE(path.IsOval(nullptr));
+  EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   EXPECT_EQ(path.GetBounds(), DlRect());
-  EXPECT_EQ(path.GetSkBounds(), SkRect());
 }
 
 TEST(DisplayListPath, ConstructFromEmptyImpellerPath) {
@@ -92,14 +91,13 @@ TEST(DisplayListPath, ConstructFromEmptyImpellerPath) {
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   is_closed = false;
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  EXPECT_FALSE(path.IsSkRect(nullptr, &is_closed));
+  EXPECT_FALSE(path.IsRect(nullptr));
+  EXPECT_FALSE(path.IsRect(nullptr, &is_closed));
   EXPECT_FALSE(is_closed);
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
+  EXPECT_FALSE(path.IsOval(nullptr));
+  EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   EXPECT_EQ(path.GetBounds(), DlRect());
-  EXPECT_EQ(path.GetSkBounds(), SkRect());
 }
 
 TEST(DisplayListPath, CopyConstruct) {
@@ -122,14 +120,13 @@ TEST(DisplayListPath, CopyConstruct) {
   EXPECT_FALSE(path2.IsRoundRect(nullptr));
 
   is_closed = false;
-  EXPECT_FALSE(path2.IsSkRect(nullptr));
-  EXPECT_FALSE(path2.IsSkRect(nullptr, &is_closed));
+  EXPECT_FALSE(path2.IsRect(nullptr));
+  EXPECT_FALSE(path2.IsRect(nullptr, &is_closed));
   EXPECT_FALSE(is_closed);
-  EXPECT_TRUE(path2.IsSkOval(nullptr));
-  EXPECT_FALSE(path2.IsSkRRect(nullptr));
+  EXPECT_TRUE(path2.IsOval(nullptr));
+  EXPECT_FALSE(path2.IsRoundRect(nullptr));
 
   EXPECT_EQ(path2.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_EQ(path2.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20));
 }
 
 TEST(DisplayListPath, ConstructFromVolatile) {
@@ -153,14 +150,13 @@ TEST(DisplayListPath, ConstructFromVolatile) {
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   is_closed = false;
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  EXPECT_FALSE(path.IsSkRect(nullptr, &is_closed));
+  EXPECT_FALSE(path.IsRect(nullptr));
+  EXPECT_FALSE(path.IsRect(nullptr, &is_closed));
   EXPECT_FALSE(is_closed);
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
+  EXPECT_FALSE(path.IsOval(nullptr));
+  EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   EXPECT_EQ(path.GetBounds(), DlRect());
-  EXPECT_EQ(path.GetSkBounds(), SkRect());
 }
 
 TEST(DisplayListPath, VolatileBecomesNonVolatile) {
@@ -258,14 +254,13 @@ TEST(DisplayListPath, EmbeddingSharedReference) {
       EXPECT_FALSE(path_.IsRoundRect(nullptr));
 
       is_closed = false;
-      EXPECT_FALSE(path_.IsSkRect(nullptr)) << label;
-      EXPECT_FALSE(path_.IsSkRect(nullptr, &is_closed)) << label;
+      EXPECT_FALSE(path_.IsRect(nullptr)) << label;
+      EXPECT_FALSE(path_.IsRect(nullptr, &is_closed)) << label;
       EXPECT_FALSE(is_closed) << label;
-      EXPECT_TRUE(path_.IsSkOval(nullptr)) << label;
-      EXPECT_FALSE(path_.IsSkRRect(nullptr)) << label;
+      EXPECT_TRUE(path_.IsOval(nullptr)) << label;
+      EXPECT_FALSE(path_.IsRoundRect(nullptr)) << label;
 
       EXPECT_EQ(path_.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20)) << label;
-      EXPECT_EQ(path_.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20)) << label;
       return path_.IsConverted();
     };
 
@@ -306,17 +301,7 @@ TEST(DisplayListPath, ConstructFromRect) {
   EXPECT_FALSE(path.IsOval(nullptr));
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
-  is_closed = false;
-  EXPECT_TRUE(path.IsSkRect(nullptr));
-  SkRect sk_rect;
-  EXPECT_TRUE(path.IsSkRect(&sk_rect, &is_closed));
-  EXPECT_EQ(sk_rect, SkRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_TRUE(is_closed);
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
-
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_EQ(path.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20));
 }
 
 TEST(DisplayListPath, ConstructFromDlPathBuilderRect) {
@@ -347,17 +332,7 @@ TEST(DisplayListPath, ConstructFromDlPathBuilderRect) {
   EXPECT_FALSE(path.IsOval(nullptr));
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
-  is_closed = false;
-  EXPECT_TRUE(path.IsSkRect(nullptr));
-  SkRect sk_rect;
-  EXPECT_TRUE(path.IsSkRect(&sk_rect, &is_closed));
-  EXPECT_EQ(sk_rect, SkRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_TRUE(is_closed);
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
-
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_EQ(path.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20));
 }
 
 TEST(DisplayListPath, ConstructFromOval) {
@@ -378,15 +353,7 @@ TEST(DisplayListPath, ConstructFromOval) {
   EXPECT_EQ(dl_bounds, DlRect::MakeLTRB(10, 10, 20, 20));
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  EXPECT_TRUE(path.IsSkOval(nullptr));
-  SkRect sk_bounds;
-  EXPECT_TRUE(path.IsSkOval(&sk_bounds));
-  EXPECT_EQ(sk_bounds, SkRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
-
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_EQ(path.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20));
 }
 
 TEST(DisplayListPath, ConstructFromDlPathBuilderOval) {
@@ -417,17 +384,7 @@ TEST(DisplayListPath, ConstructFromDlPathBuilderOval) {
   // EXPECT_EQ(dl_bounds, DlRect::MakeLTRB(10, 10, 20, 20));
   EXPECT_FALSE(path.IsRoundRect(nullptr));
 
-  // Skia path, used for these tests,  doesn't recognize ovals created
-  // by PathBuilder
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  // EXPECT_TRUE(path.IsSkOval(nullptr));
-  // SkRect sk_bounds;
-  // EXPECT_TRUE(path.IsSkOval(&sk_bounds));
-  // EXPECT_EQ(sk_bounds, SkRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
-
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_EQ(path.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20));
 }
 
 TEST(DisplayListPath, ConstructFromRRect) {
@@ -451,16 +408,7 @@ TEST(DisplayListPath, ConstructFromRRect) {
   EXPECT_EQ(roundrect,
             DlRoundRect::MakeRectXY(DlRect::MakeLTRB(10, 10, 20, 20), 1, 2));
 
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  EXPECT_TRUE(path.IsSkRRect(nullptr));
-  SkRRect rrect2;
-  EXPECT_TRUE(path.IsSkRRect(&rrect2));
-  EXPECT_EQ(rrect2,
-            SkRRect::MakeRectXY(SkRect::MakeLTRB(10, 10, 20, 20), 1, 2));
-
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_EQ(path.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20));
 }
 
 TEST(DisplayListPath, ConstructFromDlPathBuilderRoundRect) {
@@ -493,18 +441,7 @@ TEST(DisplayListPath, ConstructFromDlPathBuilderRoundRect) {
   // EXPECT_EQ(roundrect,
   //           DlRoundRect::MakeRectXY(DlRect::MakeLTRB(10, 10, 20, 20), 1, 2));
 
-  // Skia path, used for these tests,  doesn't recognize round rects created
-  // by PathBuilder
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  // EXPECT_TRUE(path.IsSkRRect(nullptr));
-  // SkRRect rrect2;
-  // EXPECT_TRUE(path.IsSkRRect(&rrect2));
-  // EXPECT_EQ(rrect2,
-  //           SkRRect::MakeRectXY(SkRect::MakeLTRB(10, 10, 20, 20), 1, 2));
-
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_EQ(path.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20));
 }
 
 TEST(DisplayListPath, ConstructFromPath) {
@@ -529,12 +466,9 @@ TEST(DisplayListPath, ConstructFromPath) {
 
   EXPECT_FALSE(path.IsRect(nullptr));
   EXPECT_FALSE(path.IsOval(nullptr));
-  EXPECT_FALSE(path.IsSkRect(nullptr));
-  EXPECT_FALSE(path.IsSkOval(nullptr));
-  EXPECT_FALSE(path.IsSkRRect(nullptr));
+  EXPECT_FALSE(path.IsRoundRect(nullptr));
 
   EXPECT_EQ(path.GetBounds(), DlRect::MakeLTRB(10, 10, 20, 20));
-  EXPECT_EQ(path.GetSkBounds(), SkRect::MakeLTRB(10, 10, 20, 20));
 }
 
 TEST(DisplayListPath, ConstructFromImpellerEqualsConstructFromSkia) {
@@ -639,6 +573,7 @@ TEST(DisplayListPath, DispatchSkiaPathEvenOdd) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
     EXPECT_CALL(mock_receiver, Close());
   }
+  EXPECT_CALL(mock_receiver, PathEnd());
 
   DlPath(path).Dispatch(mock_receiver);
 }
@@ -683,6 +618,7 @@ TEST(DisplayListPath, DispatchSkiaPathNonZero) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
     EXPECT_CALL(mock_receiver, Close());
   }
+  EXPECT_CALL(mock_receiver, PathEnd());
 
   DlPath(path).Dispatch(mock_receiver);
 }
@@ -721,6 +657,7 @@ TEST(DisplayListPath, DispatchSkiaPathConvex) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
     EXPECT_CALL(mock_receiver, Close());
   }
+  EXPECT_CALL(mock_receiver, PathEnd());
 
   DlPath(path).Dispatch(mock_receiver);
 }
@@ -769,6 +706,7 @@ TEST(DisplayListPath, DispatchImpellerPathEvenOdd) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
     EXPECT_CALL(mock_receiver, Close());
   }
+  EXPECT_CALL(mock_receiver, PathEnd());
 
   path.Dispatch(mock_receiver);
 }
@@ -817,6 +755,7 @@ TEST(DisplayListPath, DispatchImpellerPathNonZero) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
     EXPECT_CALL(mock_receiver, Close());
   }
+  EXPECT_CALL(mock_receiver, PathEnd());
 
   path.Dispatch(mock_receiver);
 }
@@ -856,6 +795,7 @@ TEST(DisplayListPath, DispatchImpellerPathConvexUnspecified) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
     EXPECT_CALL(mock_receiver, Close());
   }
+  EXPECT_CALL(mock_receiver, PathEnd());
 
   path.Dispatch(mock_receiver);
 }
@@ -896,6 +836,7 @@ TEST(DisplayListPath, DispatchImpellerPathConvexSpecified) {
     EXPECT_CALL(mock_receiver, LineTo(DlPoint(100, 200)));
     EXPECT_CALL(mock_receiver, Close());
   }
+  EXPECT_CALL(mock_receiver, PathEnd());
 
   path.Dispatch(mock_receiver);
 }
@@ -944,6 +885,7 @@ TEST(DisplayListPath, DispatchSkiaPathConicToQuads) {
       EXPECT_CALL(mock_receiver, QuadTo(i_points[1], i_points[2]));
       EXPECT_CALL(mock_receiver, QuadTo(i_points[3], i_points[4]));
     }
+    EXPECT_CALL(mock_receiver, PathEnd());
 
     DlPath(sk_path).Dispatch(mock_receiver);
   }
@@ -993,6 +935,7 @@ TEST(DisplayListPath, DispatchImpellerPathConicToQuads) {
       EXPECT_CALL(mock_receiver, QuadTo(i_points[1], i_points[2]));
       EXPECT_CALL(mock_receiver, QuadTo(i_points[3], i_points[4]));
     }
+    EXPECT_CALL(mock_receiver, PathEnd());
 
     DlPath(path_builder).Dispatch(mock_receiver);
   }
