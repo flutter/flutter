@@ -425,6 +425,18 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     // Do not visit children in [_keepAliveBucket].
   }
 
+  @override
+  Rect get semanticBounds {
+    // If we laid out the first child but this sliver is not visible, we report the
+    // semantic bounds of this sliver as the bounds of the first child. This is necessary
+    // for accessibility technologies to reach this sliver even when it is outside
+    // the current viewport and cache extent.
+    if (geometry != null && !geometry!.visible && firstChild != null && firstChild!.hasSize) {
+      return firstChild!.paintBounds;
+    }
+    return super.semanticBounds;
+  }
+
   /// Called during layout to create and add the child with the given index and
   /// scroll offset.
   ///
