@@ -511,6 +511,7 @@ TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
                                         indices, 3.0);
 
   EXPECT_TRUE(points.empty());
+  EXPECT_TRUE(indices.empty());
 }
 
 #if !NDEBUG

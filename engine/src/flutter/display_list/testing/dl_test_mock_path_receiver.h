@@ -11,6 +11,7 @@
 
 namespace flutter {
 namespace testing {
+
 class DlPathReceiverMock : public DlPathReceiver {
  public:
   MOCK_METHOD(void,

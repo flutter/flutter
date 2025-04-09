@@ -11,6 +11,12 @@ namespace {
 using Point = impeller::Point;
 using Scalar = impeller::Scalar;
 
+using SegmentReceiver = impeller::PathTessellator::SegmentReceiver;
+using VertexWriter = impeller::PathTessellator::VertexWriter;
+using Quad = impeller::PathTessellator::Quad;
+using Conic = impeller::PathTessellator::Conic;
+using Cubic = impeller::PathTessellator::Cubic;
+
 /// Base class for all utility path receivers in this file. It prunes
 /// empty contours and degenerate path segments so that all path
 /// tessellator receivers will operate on the same data.
@@ -28,7 +34,8 @@ using Scalar = impeller::Scalar;
 /// if we controlled the entire process from end to end.
 class PathPruner : public impeller::PathReceiver {
  public:
-  explicit PathPruner(bool is_stroking = false) : is_stroking_(is_stroking) {}
+  explicit PathPruner(SegmentReceiver& receiver, bool is_stroking = false)
+      : receiver_(receiver), is_stroking_(is_stroking) {}
 
   void SetPathInfo(impeller::FillType fill_type, bool is_convex) override {}
 
@@ -38,7 +45,7 @@ class PathPruner : public impeller::PathReceiver {
         // If we had actual path segments, but none of them went anywhere
         // (i.e. they never generated any points) then we have to record a
         // 0-length line so that stroker can draw "cap boxes"
-        RecordLine(contour_origin_, contour_origin_);
+        receiver_.RecordLine(contour_origin_, contour_origin_);
       }
     } else {  // !is_stroking_
       if (current_point_ != contour_origin_) {
@@ -48,13 +55,13 @@ class PathPruner : public impeller::PathReceiver {
         // origin then we must have encountered both segments and points.
         FML_DCHECK(contour_has_segments_);
         FML_DCHECK(contour_has_points_);
-        RecordLine(current_point_, contour_origin_);
+        receiver_.RecordLine(current_point_, contour_origin_);
       }
     }
     if (contour_has_segments_) {
       // contour_has_segments_ implies we have called BeginContour at some
       // point in time, so we need to end it as we've "moved on".
-      EndContour(contour_origin_, false);
+      receiver_.EndContour(contour_origin_, false);
     }
     contour_origin_ = current_point_ = p2;
     contour_has_segments_ = contour_has_points_ = false;
@@ -66,7 +73,7 @@ class PathPruner : public impeller::PathReceiver {
   void LineTo(const Point& p2) override {
     SegmentEncountered();
     if (p2 != current_point_) {
-      RecordLine(current_point_, p2);
+      receiver_.RecordLine(current_point_, p2);
       current_point_ = p2;
       contour_has_points_ = true;
     }
@@ -78,7 +85,7 @@ class PathPruner : public impeller::PathReceiver {
       LineTo(p2);
     } else {
       SegmentEncountered();
-      RecordQuad(current_point_, cp, p2);
+      receiver_.RecordQuad(current_point_, cp, p2);
       current_point_ = p2;
       contour_has_points_ = true;
     }
@@ -91,7 +98,7 @@ class PathPruner : public impeller::PathReceiver {
       LineTo(p2);
     } else {
       SegmentEncountered();
-      RecordConic(current_point_, cp, p2, weight);
+      receiver_.RecordConic(current_point_, cp, p2, weight);
       current_point_ = p2;
       contour_has_points_ = true;
     }
@@ -108,7 +115,7 @@ class PathPruner : public impeller::PathReceiver {
       // case that it will happen. Checking for simplifying to a QuadTo
       // would involve computing the intersection point of the control
       // polygon edges which is too expensive to be worth the benefit.
-      RecordCubic(current_point_, cp1, cp2, p2);
+      receiver_.RecordCubic(current_point_, cp1, cp2, p2);
       current_point_ = p2;
       contour_has_points_ = true;
     }
@@ -122,17 +129,17 @@ class PathPruner : public impeller::PathReceiver {
     if (is_stroking_) {
       if (!contour_has_points_) {
         FML_DCHECK(contour_has_segments_);
-        RecordLine(current_point_, contour_origin_);
+        receiver_.RecordLine(current_point_, contour_origin_);
         contour_has_points_ = true;
       }
     } else {  // !is_stroking_
       if (current_point_ != contour_origin_) {
         FML_DCHECK(contour_has_segments_);
         FML_DCHECK(contour_has_points_);
-        RecordLine(current_point_, contour_origin_);
+        receiver_.RecordLine(current_point_, contour_origin_);
       }
     }
-    EndContour(contour_origin_, true);
+    receiver_.EndContour(contour_origin_, true);
     // The following mirrors the actions of MoveTo - we remain open to
     // recording a new contour from this origin point as if we had had
     // a MoveTo, but we perform no other processing that a MoveTo implies.
@@ -147,56 +154,20 @@ class PathPruner : public impeller::PathReceiver {
     if (!is_stroking_ && current_point_ != contour_origin_) {
       FML_DCHECK(contour_has_segments_);
       FML_DCHECK(contour_has_points_);
-      RecordLine(current_point_, contour_origin_);
+      receiver_.RecordLine(current_point_, contour_origin_);
     }
     if (contour_has_segments_) {
-      EndContour(contour_origin_, false);
+      receiver_.EndContour(contour_origin_, false);
     }
   }
 
- protected:
-  // These methods are for the path tessellating sub-classes to receive
-  // normalized path segments.
-  // For ease of implementation/sub-classing, each path segment method
-  // delivers a complete definition of the segment, including the previous
-  // "current point"
-
-  /// Every set of path segments will be surrounded by a Begin/EndContour
-  /// pair with the same origin point.
-  virtual void BeginContour(Point origin) = 0;
-
-  /// Guaranteed to be non-degenerate except in the single case of stroking
-  /// where we have a MoveTo followed by any number of degenerate (single
-  /// point, going nowhere) path segments.
-  /// p1 will always be the last recorded point.
-  virtual void RecordLine(Point p1, Point p2) = 0;
-
-  /// Guaranteed to be non-degenerate (not a line).
-  /// p1 will always be the last recorded point.
-  virtual void RecordQuad(Point p1, Point cp, Point p2) = 0;
-
-  /// Guaranteed to be non-degenerate (not a quad or line)
-  /// p1 will always be the last recorded point.
-  virtual void RecordConic(Point p1, Point cp, Point p2, Scalar weight) = 0;
-
-  /// Guaranteed to be trivially non-degenerate (not all 4 points the same).
-  /// p1 will always be the last recorded point.
-  virtual void RecordCubic(Point p1, Point cp1, Point cp2, Point p2) = 0;
-
-  /// Every set of path segments will be surrounded by a Begin/EndContour
-  /// pair with the same origin point.
-  /// The boolean indicates if the path was closed as the result of an
-  /// explicit PathReceiver::Close invocation which tells a stroking
-  /// sub-class whether to use end caps or a "join to first segment".
-  /// Contours which are closed by a MoveTo will supply "false".
-  virtual void EndContour(Point origin, bool with_close) = 0;
-
  private:
+  SegmentReceiver& receiver_;
   const bool is_stroking_;
 
   void SegmentEncountered() {
     if (!contour_has_segments_) {
-      BeginContour(contour_origin_);
+      receiver_.BeginContour(contour_origin_);
       contour_has_segments_ = true;
     }
   }
@@ -207,10 +178,9 @@ class PathPruner : public impeller::PathReceiver {
   Point current_point_;
 };
 
-class StorageCounter : public PathPruner {
+class StorageCounter : public SegmentReceiver {
  public:
-  explicit StorageCounter(impeller::Scalar scale)
-      : PathPruner(false), scale_(scale) {}
+  explicit StorageCounter(impeller::Scalar scale) : scale_(scale) {}
 
   void BeginContour(Point origin) override {
     // This is a new contour
@@ -253,53 +223,10 @@ class StorageCounter : public PathPruner {
   Scalar scale_;
 };
 
-struct Quad {
-  Point p1;
-  Point cp;
-  Point p2;
-
-  Point Solve(Scalar t) {
-    Scalar u = 1.0f - t;
-    return p1 * u * u + 2 * cp * u * t + p2 * t * t;
-  }
-};
-
-struct Conic {
-  Point p1;
-  Point cp;
-  Point p2;
-  Scalar weight;
-
-  Point Solve(Scalar t) {
-    Scalar u = 1.0f - t;
-    Scalar coeff_1 = u * u;
-    Scalar coeff_c = 2 * u * t * weight;
-    Scalar coeff_2 = t * t;
-
-    return (p1 * coeff_1 + cp * coeff_c + p2 * coeff_2) /
-           (coeff_1 + coeff_c + coeff_2);
-  }
-};
-
-struct Cubic {
-  Point p1;
-  Point cp1;
-  Point cp2;
-  Point p2;
-
-  Point Solve(Scalar t) {
-    Scalar u = 1.0f - t;
-    return p1 * u * u * u +       //
-           3 * cp1 * u * u * t +  //
-           3 * cp2 * u * t * t +  //
-           p2 * t * t * t;
-  }
-};
-
-class PathFillWriter : public PathPruner {
+class PathFillWriter : public SegmentReceiver {
  public:
-  PathFillWriter(impeller::PathVertexWriter& writer, Scalar scale)
-      : PathPruner(false), writer_(writer), scale_(scale) {}
+  PathFillWriter(VertexWriter& writer, Scalar scale)
+      : writer_(writer), scale_(scale) {}
 
   void BeginContour(Point origin) override { writer_.Write(origin); }
 
@@ -339,7 +266,7 @@ class PathFillWriter : public PathPruner {
   }
 
  private:
-  impeller::PathVertexWriter& writer_;
+  VertexWriter& writer_;
   Scalar scale_;
 };
 
@@ -347,19 +274,27 @@ class PathFillWriter : public PathPruner {
 
 namespace impeller {
 
+void PathTessellator::PathToFilledSegments(const PathSource& path,
+                                           SegmentReceiver& receiver) {
+  PathPruner pruner(receiver, false);
+  path.Dispatch(pruner);
+}
+
 std::pair<size_t, size_t> PathTessellator::CountFillStorage(
     const PathSource& path,
     Scalar scale) {
   StorageCounter counter(scale);
-  path.Dispatch(counter);
+  PathPruner pruner(counter, false);
+  path.Dispatch(pruner);
   return {counter.GetPointCount(), counter.GetContourCount()};
 }
 
 void PathTessellator::PathToFilledVertices(const PathSource& path,
-                                           PathVertexWriter& writer,
+                                           VertexWriter& writer,
                                            Scalar scale) {
   PathFillWriter path_writer(writer, scale);
-  path.Dispatch(path_writer);
+  PathPruner pruner(path_writer, false);
+  path.Dispatch(pruner);
 }
 
 }  // namespace impeller

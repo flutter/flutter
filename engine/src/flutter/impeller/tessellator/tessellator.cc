@@ -13,7 +13,7 @@
 namespace {
 /// @brief A vertex writer that generates a triangle fan and requires primitive
 /// restart.
-class FanPathVertexWriter : public impeller::PathVertexWriter {
+class FanPathVertexWriter : public impeller::PathTessellator::VertexWriter {
  public:
   explicit FanPathVertexWriter(impeller::Point* point_buffer,
                                uint16_t* index_buffer)
@@ -45,7 +45,7 @@ class FanPathVertexWriter : public impeller::PathVertexWriter {
 
 /// @brief A vertex writer that generates a triangle strip and requires
 ///        primitive restart.
-class StripPathVertexWriter : public impeller::PathVertexWriter {
+class StripPathVertexWriter : public impeller::PathTessellator::VertexWriter {
  public:
   explicit StripPathVertexWriter(impeller::Point* point_buffer,
                                  uint16_t* index_buffer)
@@ -96,7 +96,7 @@ class StripPathVertexWriter : public impeller::PathVertexWriter {
 };
 
 /// @brief A vertex writer that has no hardware requirements.
-class GLESPathVertexWriter : public impeller::PathVertexWriter {
+class GLESPathVertexWriter : public impeller::PathTessellator::VertexWriter {
  public:
   explicit GLESPathVertexWriter(std::vector<impeller::Point>& points,
                                 std::vector<uint16_t>& indices)
