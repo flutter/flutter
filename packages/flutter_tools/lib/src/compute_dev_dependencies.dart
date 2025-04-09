@@ -18,7 +18,13 @@ Future<Set<String>> computeExclusiveDevDependencies(
   required Logger logger,
   required FlutterProject project,
 }) async {
-  final Map<String, Object?> jsonResult = await pub.deps(project);
+  final Map<String, Object?>? jsonResult = await pub.deps(project);
+
+  // Avoid crashing if dart pub deps is not ready.
+  // See https://github.com/flutter/flutter/issues/166648.
+  if (jsonResult == null) {
+    return <String>{};
+  }
 
   Never fail([String? reason]) {
     logger.printTrace(const JsonEncoder.withIndent('  ').convert(jsonResult));

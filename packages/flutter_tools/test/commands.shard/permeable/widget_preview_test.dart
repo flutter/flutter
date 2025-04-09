@@ -6,6 +6,7 @@ import 'dart:io' as io show IOOverrides;
 
 import 'package:args/command_runner.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -80,6 +81,8 @@ void main() {
           logger: logger,
           platform: platform,
         ),
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
       ),
     );
     await runner.run(<String>['widget-preview', ...arguments]);

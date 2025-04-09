@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.flutter.gradle
+package com.flutter.gradle.tasks
 
 import androidx.annotation.VisibleForTesting
 import org.gradle.api.Action
@@ -10,6 +10,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.OutputFiles
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
 import java.nio.file.Paths
 
@@ -72,6 +74,7 @@ object BaseFlutterTaskHelper {
                         .map {
                             "android_aot_deferred_components_bundle_${baseFlutterTask.buildMode}_$it"
                         }
+
                 else -> baseFlutterTask.targetPlatformValues!!.map { "android_aot_bundle_${baseFlutterTask.buildMode}_$it" }
             }
         return ruleNames
@@ -111,7 +114,17 @@ object BaseFlutterTaskHelper {
             if (!baseFlutterTask.fastStart!! || baseFlutterTask.buildMode != "debug") {
                 args("-dTargetFile=${baseFlutterTask.targetPath}")
             } else {
-                args("-dTargetFile=${Paths.get(baseFlutterTask.flutterRoot!!.absolutePath, "examples", "splash", "lib", "main.dart")}")
+                args(
+                    "-dTargetFile=${
+                        Paths.get(
+                            baseFlutterTask.flutterRoot!!.absolutePath,
+                            "examples",
+                            "splash",
+                            "lib",
+                            "main.dart"
+                        )
+                    }"
+                )
             }
             args("-dTargetPlatform=android")
             args("-dBuildMode=${baseFlutterTask.buildMode}")
@@ -157,6 +170,7 @@ object BaseFlutterTaskHelper {
     fun buildBundle(baseFlutterTask: BaseFlutterTask) {
         checkPreConditions(baseFlutterTask)
         baseFlutterTask.logging.captureStandardError(LogLevel.ERROR)
-        baseFlutterTask.project.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
+        val execOps = baseFlutterTask.project.serviceOf<ExecOperations>()
+        execOps.exec(createExecSpecActionFromTask(baseFlutterTask = baseFlutterTask))
     }
 }

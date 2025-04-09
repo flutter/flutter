@@ -43,7 +43,7 @@ void main() {
     );
   });
 
-  testWithoutContext('fails on non-zero exit code', () async {
+  testWithoutContext('returns null on non-zero exit code', () async {
     final BufferLogger logger = BufferLogger.test();
     final MemoryFileSystem fileSystem = MemoryFileSystem.test();
     final ProcessManager processManager = _dartPubDepsFails(
@@ -62,14 +62,8 @@ void main() {
     );
 
     await expectLater(
-      () => pub.deps(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
-      throwsA(
-        isA<StateError>().having(
-          (StateError e) => e.message,
-          'message',
-          contains('dart pub --suppress-analytics deps --json failed'),
-        ),
-      ),
+      pub.deps(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
+      completion(isNull),
     );
   });
 

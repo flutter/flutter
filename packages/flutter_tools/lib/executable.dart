@@ -258,6 +258,8 @@ List<FlutterCommand> generateCommands({required bool verboseHelp, required bool 
         platform: globals.platform,
         shutdownHooks: globals.shutdownHooks,
         os: globals.os,
+        processManager: globals.processManager,
+        artifacts: globals.artifacts!,
       ),
       UpgradeCommand(verboseHelp: verboseHelp),
       SymbolizeCommand(stdio: globals.stdio, fileSystem: globals.fs),

@@ -1,5 +1,10 @@
-package com.flutter.gradle
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
+package com.flutter.gradle.tasks
+
+import com.flutter.gradle.DependencyVersionChecker
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -8,6 +13,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.logging.LoggingManager
+import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.ExecOperations
 import org.gradle.process.ExecSpec
 import org.gradle.process.ProcessForkOptions
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -539,7 +546,9 @@ class BaseFlutterTaskHelperTest {
         val baseFlutterTask = mockk<BaseFlutterTask>()
         val mockLoggingManager = mockk<LoggingManager>()
         val mockFile = mockk<File>()
-        val mockProject = mockk<Project>()
+        // Mocking the serviceOf() extension below requires us to specify this internal type
+        // unfortunately.
+        val mockProject = mockk<org.gradle.api.internal.project.ProjectInternal>()
 
         // When baseFlutterTask.sourceDir is null, an exception is thrown. We mock its return value
         // before creating a BaseFlutterTaskHelper object.
@@ -549,7 +558,11 @@ class BaseFlutterTaskHelperTest {
         every { baseFlutterTask.logging } returns mockLoggingManager
         every { mockLoggingManager.captureStandardError(any()) } returns mockLoggingManager
         every { baseFlutterTask.project } returns mockProject
-        every { mockProject.exec(any<Action<ExecSpec>>()) } returns mockk()
+        val mockExecOperations = mockk<ExecOperations>()
+        every {
+            mockProject.serviceOf<ExecOperations>()
+        } returns mockExecOperations
+        every { mockExecOperations.exec(any<Action<ExecSpec>>()) } returns mockk()
 
         BaseFlutterTaskHelper.buildBundle(baseFlutterTask)
     }
