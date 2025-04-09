@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.flutter.gradle
+package com.flutter.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
@@ -132,7 +132,7 @@ open class BaseFlutterTask : DefaultTask() {
     var flavor: String? = null
 
     /**
-     * Gets the dependency file(s) by calling [com.flutter.gradle.BaseFlutterTaskHelper.getDependenciesFiles].
+     * Gets the dependency file(s) by calling [com.flutter.gradle.tasks.BaseFlutterTaskHelper.getDependenciesFiles].
      *
      * @return the dependency file(s) based on the current intermediate directory path.
      */
