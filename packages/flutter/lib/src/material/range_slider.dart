@@ -392,10 +392,10 @@ class RangeSlider extends StatefulWidget {
 
   /// Determines the padding around the [RangeSlider].
   ///
-  /// If specified, this padding overrides the default vertical padding of
-  /// the [RangeSlider], defaults to the height of the overlay shape, and the
-  /// horizontal padding, defaults to the width of the thumb shape or
-  /// overlay shape, whichever is larger.
+  /// If specified, this padding overrides the vertical padding and the
+  /// horizontal padding of the [RangeSlider]. By default, the vertical padding
+  /// is the height of the overlay shape, and the horizontal padding is the
+  /// larger size between the width of the thumb shape and overlay shape.
   final EdgeInsetsGeometry? padding;
 
   // Touch width for the tap boundary of the slider thumbs.
