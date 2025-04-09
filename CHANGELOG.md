@@ -32,6 +32,7 @@ INTERNAL NOTE
   blurs.
 - [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Impeller,
   All platforms, Text that is scaled over 48x renders incorrectly.
+- [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Update CI configurations and tests to use Xcode 16 and iOS 18 simulator.
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
