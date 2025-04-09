@@ -43,6 +43,14 @@ abstract class RenderProxySliver extends RenderSliver
   }
 
   @override
+  Rect get semanticBounds {
+    if (child != null) {
+      return child!.semanticBounds;
+    }
+    return super.semanticBounds;
+  }
+
+  @override
   void setupParentData(RenderObject child) {
     if (child.parentData is! SliverPhysicalParentData) {
       child.parentData = SliverPhysicalParentData();

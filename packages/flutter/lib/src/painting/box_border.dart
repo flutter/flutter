@@ -24,9 +24,11 @@ import 'edge_insets.dart';
 /// interpolated or animated. The [Border] class cannot interpolate between
 /// different shapes.
 enum BoxShape {
-  /// An axis-aligned, 2D rectangle. May have rounded corners (described by a
-  /// [BorderRadius]). The edges of the rectangle will match the edges of the box
-  /// into which the [Border] or [BoxDecoration] is painted.
+  /// An axis-aligned rectangle, optionally with rounded corners.
+  ///
+  /// The amount of corner rounding, if any, is determined by the border radius
+  /// specified by classes such as [BoxDecoration] or [Border]. The rectangle's
+  /// edges match those of the box in which it is painted.
   ///
   /// See also:
   ///
