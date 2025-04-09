@@ -98,7 +98,7 @@ class ZoomControls extends StatelessWidget {
 
 /// A button that triggers a "soft" restart of a previewed widget.
 ///
-/// A soft restart simply removes the previewed widget from the widget tree for a frame before
+/// A soft restart removes the previewed widget from the widget tree for a frame before
 /// re-inserting it on the next frame. This has the effect of re-running local initializers in
 /// State objects, which normally requires a hot restart to accomplish in a normal application.
 class SoftRestartButton extends StatelessWidget {
