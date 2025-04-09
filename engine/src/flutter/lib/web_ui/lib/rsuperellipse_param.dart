@@ -77,8 +77,10 @@ bool _octantContains(Octant param, Offset p) {
 }
 
 bool _cornerContains(Quadrant param, Offset p, [bool checkQuadrant = true]) {
-  final Offset plainOffset = p - param.offset;
-  Offset normOffset = Offset(plainOffset.dx / param.signedScale.width, plainOffset.dy / param.signedScale.height);
+  Offset normOffset = (p - param.offset).scale(
+    1 / param.signedScale.width,
+    1 / param.signedScale.height,
+  );
   if (checkQuadrant) {
     if (normOffset.dx < 0 || normOffset.dy < 0) {
       return true;
@@ -97,9 +99,18 @@ bool _cornerContains(Quadrant param, Offset p, [bool checkQuadrant = true]) {
       _octantContains(param.right, _flip(normOffset - param.right.offset));
 }
 
-bool _areAllCornersSame(RSuperellipse rsuperellipse) {
-  // TODO
-  return false;
+const double kEhCloseEnough = 1e-3;
+bool ScalarNearlyEqual(double x, double y) {
+  return (x - y).abs() <= kEhCloseEnough;
+}
+
+bool _areAllCornersSame(RSuperellipse r) {
+  return ScalarNearlyEqual(r.tlRadiusX, r.trRadiusX) &&
+      ScalarNearlyEqual(r.tlRadiusX, r.brRadiusX) &&
+      ScalarNearlyEqual(r.tlRadiusX, r.blRadiusX) &&
+      ScalarNearlyEqual(r.tlRadiusY, r.trRadiusY) &&
+      ScalarNearlyEqual(r.tlRadiusY, r.brRadiusY) &&
+      ScalarNearlyEqual(r.tlRadiusY, r.blRadiusY);
 }
 
 double AngleTo(Offset a, Offset b) {
@@ -126,9 +137,20 @@ class Octant {
     required this.circleMaxAngle,
   });
 
+  const Octant.square({required Offset offset, required double se_a})
+    : this(
+        offset: offset,
+        se_a: se_a,
+        se_n: 0,
+        se_max_theta: 0,
+        circleStart: Offset.zero,
+        circleCenter: Offset.zero,
+        circleMaxAngle: 0,
+      );
+
   factory Octant.computeOctant(Offset center, double a, double radius) {
     if (radius <= 0) {
-      return Octant.zero;
+      return Octant.square(offset: center, se_a: a);
     }
 
     final double ratio = a * 2 / radius;
@@ -145,8 +167,7 @@ class Octant {
 
     final Offset pointM = Offset(a - g, a - g);
     final Offset pointJ = Offset(xJ, yJ);
-    final Offset circleCenter =
-              radius == 0 ? pointM : _findCircleCenter(pointJ, pointM, R);
+    final Offset circleCenter = radius == 0 ? pointM : _findCircleCenter(pointJ, pointM, R);
     final double circleMaxAngle =
         radius == 0 ? 0 : AngleTo(pointM - circleCenter, pointJ - circleCenter);
 
@@ -228,10 +249,13 @@ class Quadrant {
 
     final double normRadius = radii.shortestSide;
     final Size forwardScale = normRadius == 0 ? Size(1, 1) : radii / normRadius;
-    final Size normHalfSize = Size(cornerVector.dx.abs() / forwardScale.width,
-    cornerVector.dy.abs() / forwardScale.height);
-    final Size signedScale = _replaceNaNWithOne(Size(
-      cornerVector.dx / normHalfSize.width, cornerVector.dy / normHalfSize.height));
+    final Size normHalfSize = Size(
+      cornerVector.dx.abs() / forwardScale.width,
+      cornerVector.dy.abs() / forwardScale.height,
+    );
+    final Size signedScale = _replaceNaNWithOne(
+      Size(cornerVector.dx / normHalfSize.width, cornerVector.dy / normHalfSize.height),
+    );
 
     final double c = normHalfSize.width - normHalfSize.height;
 
@@ -314,7 +338,10 @@ class _RoundSuperellipseParam {
 
     final Offset start =
         topRight.offset +
-         (topRight.top.offset + Offset(0, topRight.top.se_a)).scale(topRight.signedScale.width, topRight.signedScale.height);
+        (topRight.top.offset + Offset(0, topRight.top.se_a)).scale(
+          topRight.signedScale.width,
+          topRight.signedScale.height,
+        );
     pathBuilder.moveTo(start.dx, start.dy);
 
     if (allCornersSame) {
@@ -349,14 +376,11 @@ class _RSuperellipsePathBuilder {
 
   const _RSuperellipsePathBuilder(this.builder);
 
-  void addQuadrant(
-    Quadrant param,
-    bool reverse, [
-    Offset scaleSign = const Offset(1, 1),
-  ]) {
-    final _Transform transform = _composite(_translate(param.offset), _scale(
-       scaleSign.scale(param.signedScale.width, param.signedScale.height)
-      ));
+  void addQuadrant(Quadrant param, bool reverse, [Offset scaleSign = const Offset(1, 1)]) {
+    final _Transform transform = _composite(
+      _translate(param.offset),
+      _scale(scaleSign.scale(param.signedScale.width, param.signedScale.height)),
+    );
     if (param.top.se_n < 2 || param.right.se_n < 2) {
       final _Transform transformOctant = _composite(transform, _translate(param.top.offset));
       _lineTo(transformOctant(Offset(param.top.se_a, param.top.se_a)));
@@ -381,7 +405,8 @@ class _RSuperellipsePathBuilder {
     final Offset end = param.circleStart;
     final Offset startTangent = Offset(1, 0);
     final Offset circleStartVector = param.circleStart - param.circleCenter;
-    final Offset endTangent = Offset(-circleStartVector.dy, circleStartVector.dx) / circleStartVector.distance;
+    final Offset endTangent =
+        Offset(-circleStartVector.dy, circleStartVector.dx) / circleStartVector.distance;
 
     final (double startFactor, double endFactor) = _superellipseBezierFactors(param.se_n);
 
@@ -410,12 +435,7 @@ class _RSuperellipsePathBuilder {
     ];
   }
 
-  void _addOctant(
-    Octant param,
-    bool reverse,
-    bool flip,
-    _Transform externalTransform,
-  ) {
+  void _addOctant(Octant param, bool reverse, bool flip, _Transform externalTransform) {
     _Transform transform = _composite(externalTransform, _translate(param.offset));
     if (flip) {
       transform = _composite(transform, _flip);
