@@ -557,10 +557,8 @@ class _PredictiveBackPageSharedElementTransitionState
   late final Animation<double> _scaleAnimation;
   late Animation<double> _scaleAnimationCommit;
   final Tween<double> _scaleTween = Tween<double>(begin: scalePercentage, end: 1.0);
-  late final Animation<double> _xAnimation;
-  Animation<Offset>? _commitPositionAnimation;
-
-  double? _screenWidth;
+  late Animation<double> _xAnimation;
+  late Animation<Offset> _commitPositionAnimation;
 
   // Constants as per the motion specs
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
@@ -598,6 +596,13 @@ class _PredictiveBackPageSharedElementTransitionState
   double calcYShift() {
     final double screenHeight = MediaQuery.of(context).size.height;
     return _getYPosition(screenHeight, widget.startBackEvent, widget.currentBackEvent);
+  }
+
+  Animation<Offset> _getCommitPositionAnimation(double screenWidth) {
+    return Tween<Offset>(
+      begin: Offset(_lastXDrag, _lastYDrag),
+      end: Offset(screenWidth * extraShiftDistance, 0.0),
+    ).animate(commitAnimation);
   }
 
   // TODO(justinmc): Should have a delegatedTransition. The incoming route on a back has three animations: x translation, scale, and a dimming of its colors (opacity I think). Dimming also happens in dark mode, it gets even darker.
@@ -638,10 +643,7 @@ class _PredictiveBackPageSharedElementTransitionState
       _scaleAnimationCommit = Tween<double>(begin: _lastScale, end: 1.0).animate(commitAnimation);
       // TODO(justinmc): InheritedModel? Extract to build method as just Size?
       final double screenWidth = MediaQuery.of(context).size.width;
-      _commitPositionAnimation = Tween<Offset>(
-        begin: Offset(_lastXDrag, _lastYDrag),
-        end: Offset(screenWidth * extraShiftDistance, 0.0),
-      ).animate(commitAnimation);
+      _commitPositionAnimation = _getCommitPositionAnimation(screenWidth);
     }
   }
 
@@ -650,6 +652,7 @@ class _PredictiveBackPageSharedElementTransitionState
     super.didChangeDependencies();
     // TODO(justinmc): InheritedModel?
     final double screenWidth = MediaQuery.of(context).size.width;
+
     final double xShift = (screenWidth / _kDivisionFactor) - _kMargin;
     _xAnimation = Tween<double>(
       begin: switch (widget.currentBackEvent?.swipeEdge) {
@@ -659,6 +662,8 @@ class _PredictiveBackPageSharedElementTransitionState
       },
       end: 0.0,
     ).animate(widget.animation);
+
+    _commitPositionAnimation = _getCommitPositionAnimation(screenWidth);
   }
 
   @override
@@ -669,16 +674,6 @@ class _PredictiveBackPageSharedElementTransitionState
 
   @override
   Widget build(BuildContext context) {
-    // In the rare case that this widget is built for the first time during an
-    // active commit gesture.
-    if (_commitPositionAnimation == null) {
-      final double screenWidth = MediaQuery.of(context).size.width;
-      _commitPositionAnimation = Tween<Offset>(
-        begin: Offset.zero,
-        end: Offset(screenWidth * extraShiftDistance, 0.0),
-      ).animate(commitAnimation);
-    }
-
     return AnimatedBuilder(
       animation: mergedAnimations,
       builder: (BuildContext context, Widget? child) {
@@ -693,7 +688,7 @@ class _PredictiveBackPageSharedElementTransitionState
           },
           child: Transform.translate(
             offset: switch (widget.phase) {
-              _PredictiveBackPhase.commit => _commitPositionAnimation!.value,
+              _PredictiveBackPhase.commit => _commitPositionAnimation.value,
               _ => Offset(_lastXDrag = _xAnimation.value, _lastYDrag = calcYShift()),
             },
             child: Opacity(
