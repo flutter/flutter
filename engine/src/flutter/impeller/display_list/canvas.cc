@@ -306,7 +306,7 @@ void Canvas::RestoreToCount(size_t count) {
   }
 }
 
-void Canvas::DrawPath(const Path& path, const Paint& paint) {
+void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
@@ -315,8 +315,9 @@ void Canvas::DrawPath(const Path& path, const Paint& paint) {
     FillPathGeometry geom(path);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
-    StrokePathGeometry geom(path, paint.stroke_width, paint.stroke_miter,
-                            paint.stroke_cap, paint.stroke_join);
+    StrokePathGeometry geom(path.GetPath(), paint.stroke_width,
+                            paint.stroke_miter, paint.stroke_cap,
+                            paint.stroke_join);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
 }
@@ -564,7 +565,7 @@ void Canvas::DrawLine(const Point& p0,
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   if (paint.style == Paint::Style::kStroke) {
-    DrawPath(PathBuilder{}.AddRect(rect).TakePath(), paint);
+    DrawPath(flutter::DlPath(PathBuilder{}.AddRect(rect)), paint);
     return;
   }
 
@@ -594,7 +595,7 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
 
   if (paint.style == Paint::Style::kStroke) {
     // No stroked ellipses yet
-    DrawPath(PathBuilder{}.AddOval(rect).TakePath(), paint);
+    DrawPath(flutter::DlPath(PathBuilder{}.AddOval(rect)), paint);
     return;
   }
 
@@ -634,7 +635,7 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
                   .AddRoundRect(round_rect)
                   .SetBounds(rect)
                   .TakePath();
-  DrawPath(path, paint);
+  DrawPath(flutter::DlPath(path), paint);
 }
 
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
@@ -657,7 +658,7 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
                   .AddRoundSuperellipse(rse)
                   .SetBounds(rse.GetBounds())
                   .TakePath();
-  DrawPath(path, paint);
+  DrawPath(flutter::DlPath(path), paint);
 }
 
 void Canvas::DrawCircle(const Point& center,
@@ -1527,7 +1528,7 @@ void Canvas::DrawTextFrame(const std::shared_ptr<TextFrame>& text_frame,
     if (path.ok()) {
       Save(1);
       Concat(Matrix::MakeTranslation(position));
-      DrawPath(path.value().GetPath(), paint);
+      DrawPath(path.value(), paint);
       Restore();
       return;
     }
@@ -1676,10 +1677,10 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       return;
     }
   }
-
   if (!reuse_depth) {
     ++current_depth_;
   }
+
   // We can render at a depth up to and including the depth of the currently
   // active clips and we will still be clipped out, but we cannot render at
   // a depth that is greater than the current clips or we will not be clipped.
@@ -1700,7 +1701,10 @@ void Canvas::AddRenderEntityToCurrentPass(Entity& entity, bool reuse_depth) {
       // to the render target texture so far need to execute before it's bound
       // for blending (otherwise the blend pass will end up executing before
       // all the previous commands in the active pass).
-      auto input_texture = FlipBackdrop(GetGlobalPassPosition());
+      auto input_texture = FlipBackdrop(GetGlobalPassPosition(),  //
+                                        /*should_remove_texture=*/false,
+                                        /*should_use_onscreen=*/false,
+                                        /*post_depth_increment=*/true);
       if (!input_texture) {
         return;
       }
@@ -1748,7 +1752,8 @@ void Canvas::SetBackdropData(
 
 std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
                                               bool should_remove_texture,
-                                              bool should_use_onscreen) {
+                                              bool should_use_onscreen,
+                                              bool post_depth_increment) {
   LazyRenderingConfig rendering_config = std::move(render_passes_.back());
   render_passes_.pop_back();
 
@@ -1849,8 +1854,10 @@ std::shared_ptr<Texture> Canvas::FlipBackdrop(Point global_pass_position,
   // Restore any clips that were recorded before the backdrop filter was
   // applied.
   auto& replay_entities = clip_coverage_stack_.GetReplayEntities();
+  uint64_t current_depth =
+      post_depth_increment ? current_depth_ - 1 : current_depth_;
   for (const auto& replay : replay_entities) {
-    if (replay.clip_depth <= current_depth_) {
+    if (replay.clip_depth <= current_depth) {
       continue;
     }
 

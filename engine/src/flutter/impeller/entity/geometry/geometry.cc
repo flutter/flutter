@@ -61,7 +61,7 @@ GeometryResult::Mode Geometry::GetResultMode() const {
 std::unique_ptr<Geometry> Geometry::MakeFillPath(
     const Path& path,
     std::optional<Rect> inner_rect) {
-  return std::make_unique<FillPathGeometry>(path, inner_rect);
+  return std::make_unique<FillPathGeometry>(flutter::DlPath(path), inner_rect);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
