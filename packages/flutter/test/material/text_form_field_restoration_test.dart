@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Textformfield restorationId is passed to inner TextField', (
+  testWidgets('TextFormField restorationId is passed to inner TextField', (
     WidgetTester tester,
   ) async {
     final GlobalKey<FormFieldState<String>> formState = GlobalKey<FormFieldState<String>>();
@@ -32,7 +32,7 @@ void main() {
     expect(textField.restorationId, restorationId);
   });
 
-  testWidgets('Textformfield value is restorable', (WidgetTester tester) async {
+  testWidgets('TextFormField value is restorable', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> formState = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
