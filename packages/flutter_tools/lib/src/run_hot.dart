@@ -1201,6 +1201,7 @@ class HotRunner extends ResidentRunner {
         final Uri deviceAssetsDirectoryUri = device.devFS!.baseUri!.resolveUri(
           globals.fs.path.toUri(getAssetBuildDirectory()),
         );
+        globals.printStatus('deviceAssetsDirectoryUri: $deviceAssetsDirectoryUri');
         await Future.wait<void>(
           views.map<Future<void>>(
             (FlutterView view) => device.vmService!.setAssetDirectory(
