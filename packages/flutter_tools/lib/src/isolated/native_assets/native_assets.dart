@@ -89,6 +89,10 @@ class FlutterCodeAsset {
 
   final CodeAsset codeAsset;
   final Target target;
+
+  @override
+  String toString() =>
+      'FlutterCodeAsset(codeAsset: ${codeAsset.id} ${codeAsset.file}, target: $target)';
 }
 
 /// Invokes the build of all transitive Dart packages and prepares code assets
@@ -610,9 +614,8 @@ Future<DartBuildResult> _runDartBuild({
       _throwNativeAssetsBuildFailed();
     }
     dependencies.addAll(buildResult.dependencies);
-    if (!linkingEnabled) {
-      codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
-    } else {
+    codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
+    if (linkingEnabled) {
       final LinkResult? linkResult = await buildRunner.link(
         extensions: <ProtocolExtension>[
           CodeAssetExtension(

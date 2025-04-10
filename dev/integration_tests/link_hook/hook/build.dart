@@ -46,7 +46,7 @@ void main(List<String> args) async {
     // Send the asset to hook/link.dart or immediately for bundling.
     output.assets.code.add(
       caughtOutput.assets.code.single,
-      linkInPackage: input.config.linkingEnabled ? 'link_hook' : null,
+      routing: input.config.linkingEnabled ? const ToLinkHook('link_hook') : const ToAppBundle(),
     );
   });
 }
