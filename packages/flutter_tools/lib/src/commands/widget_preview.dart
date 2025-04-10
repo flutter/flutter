@@ -137,6 +137,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         kHeadlessWeb,
         help: 'Launches Chrome in headless mode for testing.',
         hide: !verboseHelp,
+      )
+      ..addOption(
+        kWidgetPreviewScaffoldOutputDir,
+        help:
+            'Generated the widget preview environment scaffolding at a given location '
+            'for testing purposes.',
       );
   }
 
@@ -144,6 +150,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   static const String kLaunchPreviewer = 'launch-previewer';
   static const String kUseFlutterDesktop = 'desktop';
   static const String kHeadlessWeb = 'headless-web';
+  static const String kWidgetPreviewScaffoldOutputDir = 'scaffold-output-dir';
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -189,30 +196,36 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   );
 
   late final PreviewCodeGenerator _previewCodeGenerator;
-  late final PreviewManifest _previewManifest;
+  late final PreviewManifest _previewManifest = PreviewManifest(
+    logger: logger,
+    rootProject: rootProject,
+    fs: fs,
+    cache: cache,
+  );
 
   /// The currently running instance of the widget preview scaffold.
   AppInstance? _widgetPreviewApp;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final Directory widgetPreviewScaffold = rootProject.widgetPreviewScaffold;
-    _previewManifest = PreviewManifest(
-      logger: logger,
-      rootProject: rootProject,
-      fs: fs,
-      cache: cache,
-    );
+    final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
+    final Directory widgetPreviewScaffold =
+        customPreviewScaffoldOutput != null
+            ? fs.directory(customPreviewScaffoldOutput)
+            : rootProject.widgetPreviewScaffold;
 
     // Check to see if a preview scaffold has already been generated. If not,
     // generate one.
-    final bool generateScaffoldProject = _previewManifest.shouldGenerateProject();
+    final bool generateScaffoldProject =
+        customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
     // TODO(bkonyi): can this be moved?
     widgetPreviewScaffold.createSync();
 
     if (generateScaffoldProject) {
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
-      logger.printStatus('Creating widget preview scaffolding at: ${widgetPreviewScaffold.path}');
+      logger.printStatus(
+        'Creating widget preview scaffolding at: ${widgetPreviewScaffold.absolute.path}',
+      );
       await generateApp(
         <String>['app', kWidgetPreviewScaffoldName],
         widgetPreviewScaffold,
@@ -230,6 +243,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         overwrite: true,
         generateMetadata: false,
       );
+      if (customPreviewScaffoldOutput != null) {
+        return FlutterCommandResult.success();
+      }
       _previewManifest.generate();
 
       // WARNING: this access of widgetPreviewScaffoldProject needs to happen
@@ -299,6 +315,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// The resulting binary is used to speed up subsequent widget previewer launches
   /// by acting as a basic scaffold to load previews into using hot reload / restart.
   Future<void> initialBuild({required FlutterProject widgetPreviewScaffoldProject}) async {
+    // Generate initial package_config.json, otherwise the build will fail.
+    await pub.get(
+      context: PubContext.create,
+      project: widgetPreviewScaffoldProject,
+      offline: offline,
+      outputMode: PubOutputMode.summaryOnly,
+    );
+
     // TODO(bkonyi): handle error case where desktop device isn't enabled.
     await widgetPreviewScaffoldProject.ensureReadyForPlatformSpecificTooling(
       releaseMode: false,
@@ -306,14 +330,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       macOSPlatform: platform.isMacOS && !isWeb,
       windowsPlatform: platform.isWindows && !isWeb,
       webPlatform: isWeb,
-    );
-
-    // Generate initial package_config.json, otherwise the build will fail.
-    await pub.get(
-      context: PubContext.create,
-      project: widgetPreviewScaffoldProject,
-      offline: offline,
-      outputMode: PubOutputMode.summaryOnly,
     );
 
     if (isWeb) {
@@ -561,6 +577,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // Adds a path dependency on the parent project so previews can be
     // imported directly into the preview scaffold.
     const String pubAdd = 'add';
+    // Use `json.encode` to handle escapes correctly.
+    final String pathDescriptor = json.encode(<String, Object?>{
+      // `pub add` interprets relative paths relative to the current directory.
+      'path': rootProject.directory.fileSystem.path.relative(rootProject.directory.path),
+    });
+
     await pub.interactively(
       <String>[
         pubAdd,
@@ -568,15 +590,21 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
         // Ensure the path using POSIX separators, otherwise the "path_not_posix" check will fail.
-        '${rootProject.manifest.appName}:{"path":${rootProject.directory.path.replaceAll(r"\", "/")}}',
+        '${rootProject.manifest.appName}:$pathDescriptor',
       ],
       context: PubContext.pubAdd,
       command: pubAdd,
       touchesPackageConfig: true,
     );
 
-    // Adds a dependency on flutter_lints, which is referenced by the
-    // analysis_options.yaml generated by the 'app' template.
+    // Adds dependencies on:
+    //   - dtd, which is used to connect to the Dart Tooling Daemon to establish communication
+    //     with other developer tools.
+    //   - flutter_lints, which is referenced by the analysis_options.yaml generated by the 'app'
+    //     template.
+    //   - stack_trace, which is used to generate terse stack traces for displaying errors thrown
+    //     by widgets being previewed.
+    //   - url_launcher, which is used to open a browser to the preview documentation.
     await pub.interactively(
       <String>[
         pubAdd,
@@ -585,6 +613,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         widgetPreviewScaffoldProject.directory.path,
         'flutter_lints',
         'stack_trace',
+        'url_launcher',
       ],
       context: PubContext.pubAdd,
       command: pubAdd,

@@ -84,7 +84,7 @@ void main() {
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
-          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         ),
       );
@@ -248,16 +248,16 @@ void main() {
           ),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
             codeAssets: <CodeAsset>[
-              makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
               makeCodeAsset('linked', linkedSoFile.uri, DynamicLoadingBundled()),
             ],
           ),
         ),
       );
-      expect(result.codeAssets.map((CodeAsset c) => c.file!.toString()).toList()..sort(), <String>[
-        directSoFile.uri.toString(),
-        linkedSoFile.uri.toString(),
-      ]);
+      expect(
+        result.codeAssets.map((FlutterCodeAsset c) => c.codeAsset.file!.toString()).toList()
+          ..sort(),
+        <String>[directSoFile.uri.toString(), linkedSoFile.uri.toString()],
+      );
     },
   );
 }
