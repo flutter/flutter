@@ -456,6 +456,7 @@ void PlatformViewAndroid::RegisterExternalTexture(
           surface_texture,                              //
           jni_facade_                                   //
           ));
+      break;
     case AndroidRenderingAPI::kImpellerAutoselect:
       FML_CHECK(false);
       break;
