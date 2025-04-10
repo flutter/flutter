@@ -385,3 +385,29 @@ Dart_Handle InternalFlutterGpu_ShaderLibrary_GetShader(
   }
   return tonic::ToDart(shader.get());
 }
+
+Dart_Handle InternalFlutterGpu_ShaderLibrary_InitializeWithBytes(
+    Dart_Handle wrapper,
+    uint32_t bufferLength,
+    uint8_t* buffer) {
+  // GETTING IMPELLER CONTEXT
+  std::optional<std::string> out_error;
+  auto impeller_context = flutter::gpu::Context::GetDefaultContext(out_error);
+  if (out_error.has_value()) {
+    return tonic::ToDart(out_error.value());
+  }
+  auto mapping = std::make_unique<fml::MallocMapping>(
+      fml::MallocMapping::Copy(buffer, bufferLength));
+
+  auto shader_library = flutter::gpu::ShaderLibrary::MakeFromFlatbuffer(
+      impeller_context->GetBackendType(), std::move(mapping));
+
+  // Dart_TypedDataReleaseData(bytes);
+
+  if (!shader_library) {
+    return tonic::ToDart("Failed to create ShaderLibrary from bytes.");
+  }
+
+  shader_library->AssociateWithDartWrapper(wrapper);
+  return Dart_Null();
+}

@@ -16,6 +16,15 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
     return lib;
   }
 
+  static ShaderLibrary? fromBytes(Pointer<Uint8> ptr, int bufferLength) {
+    final lib = ShaderLibrary._();
+    final error = lib._initializeWithBytes(bufferLength, ptr);
+    if (error != null) {
+      throw Exception("Failed to initialize ShaderLibrary: ${error}");
+    }
+    return lib;
+  }
+
   ShaderLibrary._();
 
   // Hold a Dart-side reference to shaders in the library as they're wrapped for
@@ -45,4 +54,9 @@ base class ShaderLibrary extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_ShaderLibrary_GetShader',
   )
   external Shader? _getShader(String shaderName, Shader shaderWrapper);
+
+  @Native<Handle Function(Handle, Uint32, Pointer<Uint8>)>(
+    symbol: 'InternalFlutterGpu_ShaderLibrary_InitializeWithBytes',
+  )
+  external String? _initializeWithBytes(int bufferLength, Pointer<Uint8> ptr);
 }
