@@ -134,7 +134,7 @@ class CanvasKitCanvas implements ui.Canvas {
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
     assert(rsuperellipseIsValid(rsuperellipse));
     final ui.Path path = ui.Path();
-    ui.RoundSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(path);
+    ui.RSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(path);
     clipPath(path, doAntiAlias: doAntiAlias);
   }
 
@@ -211,7 +211,7 @@ class CanvasKitCanvas implements ui.Canvas {
   void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
     assert(rsuperellipseIsValid(rsuperellipse));
     final ui.Path path = ui.Path();
-    ui.RoundSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(path);
+    ui.RSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(path);
     drawPath(path, paint);
   }
 

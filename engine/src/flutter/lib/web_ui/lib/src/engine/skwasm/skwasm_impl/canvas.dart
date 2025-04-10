@@ -137,7 +137,7 @@ class SkwasmCanvas implements SceneCanvas {
   @override
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
     final ui.Path path = ui.Path();
-    ui.RoundSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(path);
+    ui.RSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(path);
     clipPath(path, doAntiAlias: doAntiAlias);
   }
 
@@ -186,7 +186,7 @@ class SkwasmCanvas implements SceneCanvas {
   @override
   void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
     final ui.Path path = ui.Path();
-    ui.RoundSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(path);
+    ui.RSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(path);
     drawPath(path, paint);
   }
 

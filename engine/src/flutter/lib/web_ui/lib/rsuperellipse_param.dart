@@ -154,7 +154,7 @@ class Octant {
     }
 
     final double ratio = a * 2 / radius;
-    final double g = RoundSuperellipseParam.kGapFactor * radius;
+    final double g = RSuperellipseParam.kGapFactor * radius;
 
     final (double n, double xJOverA) = _computeNAndXj(ratio);
     final double xJ = xJOverA * a;
@@ -275,7 +275,7 @@ class Quadrant {
   );
 }
 
-class RoundSuperellipseParam {
+class RSuperellipseParam {
   static const double kGapFactor = 0.29289321881; // 1-cos(pi/4)
 
   final Quadrant topRight;
@@ -284,7 +284,7 @@ class RoundSuperellipseParam {
   final Quadrant topLeft;
   final bool allCornersSame;
 
-  RoundSuperellipseParam({
+  RSuperellipseParam({
     required this.topRight,
     required this.bottomRight,
     required this.bottomLeft,
@@ -292,9 +292,9 @@ class RoundSuperellipseParam {
     required this.allCornersSame,
   });
 
-  factory RoundSuperellipseParam.makeRSuperellipse(RSuperellipse r) {
+  factory RSuperellipseParam.makeRSuperellipse(RSuperellipse r) {
     if (_areAllCornersSame(r) && r.trRadiusX != 0 && r.trRadiusY != 0) {
-      return RoundSuperellipseParam(
+      return RSuperellipseParam(
         topRight: Quadrant.computeQuadrant(r.center, Offset(r.right, r.top), r.trRadius),
         topLeft: Quadrant.zero,
         bottomLeft: Quadrant.zero,
@@ -308,7 +308,7 @@ class RoundSuperellipseParam {
     final double bottomSplit = _split(r.left, r.right, r.blRadiusX, r.brRadiusX);
     final double leftSplit = _split(r.top, r.bottom, r.tlRadiusY, r.blRadiusY);
 
-    return RoundSuperellipseParam(
+    return RSuperellipseParam(
       topRight: Quadrant.computeQuadrant(
         Offset(topSplit, rightSplit),
         Offset(r.right, r.top),
