@@ -40,7 +40,8 @@ class RuntimeEffectContents final : public ColorSourceContents {
   static BufferView EmplaceVulkanUniform(
       const std::shared_ptr<const std::vector<uint8_t>>& input_data,
       HostBuffer& host_buffer,
-      const RuntimeUniformDescription& uniform);
+      const RuntimeUniformDescription& uniform,
+      size_t minimum_uniform_alignment);
 
  private:
   bool RegisterShader(const ContentContext& renderer) const;

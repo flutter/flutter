@@ -640,6 +640,9 @@ bool CapabilitiesVK::SetPhysicalDevice(
     supports_external_fence_and_semaphore_ = true;
   }
 
+  minimum_uniform_alignment_ =
+      device_properties_.limits.minUniformBufferOffsetAlignment;
+
   return true;
 }
 
@@ -716,6 +719,10 @@ CapabilitiesVK::GetPhysicalDeviceProperties() const {
 
 PixelFormat CapabilitiesVK::GetDefaultGlyphAtlasFormat() const {
   return PixelFormat::kR8UNormInt;
+}
+
+size_t CapabilitiesVK::GetMinimumUniformAlignment() const {
+  return minimum_uniform_alignment_;
 }
 
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {

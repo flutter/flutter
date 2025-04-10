@@ -131,7 +131,11 @@ class CapabilitiesGLES final
   // |Capabilities|
   PixelFormat GetDefaultGlyphAtlasFormat() const override;
 
+  // |Capabilities|
   ISize GetMaximumRenderPassAttachmentSize() const override;
+
+  // |Capabilities|
+  size_t GetMinimumUniformAlignment() const override;
 
  private:
   bool supports_texture_to_texture_blits_ = false;

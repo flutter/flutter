@@ -1847,7 +1847,8 @@ TEST_P(EntityTest, RuntimeEffectSetsRightSizeWhenUniformIsStruct) {
 
   auto buffer_view = RuntimeEffectContents::EmplaceVulkanUniform(
       uniform_data, GetContentContext()->GetTransientsBuffer(),
-      runtime_stage->GetUniforms()[0]);
+      runtime_stage->GetUniforms()[0],
+      GetContentContext()->GetTransientsBuffer().GetMinimumUniformAlignment());
 
   // 16 bytes:
   //   8 bytes for iResolution
@@ -2538,8 +2539,9 @@ TEST_P(EntityTest, GiantLineStripPathAllocation) {
   ContentContext content_context(GetContext(), /*typographer_context=*/nullptr);
   Entity entity;
 
-  auto host_buffer = HostBuffer::Create(GetContext()->GetResourceAllocator(),
-                                        GetContext()->GetIdleWaiter());
+  auto host_buffer = HostBuffer::Create(
+      GetContext()->GetResourceAllocator(), GetContext()->GetIdleWaiter(),
+      GetContext()->GetCapabilities()->GetMinimumUniformAlignment());
   auto tessellator = Tessellator();
 
   auto vertex_buffer = tessellator.GenerateLineStrip(path, *host_buffer, 1.0);

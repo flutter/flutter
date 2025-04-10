@@ -235,4 +235,8 @@ ISize CapabilitiesGLES::GetMaximumRenderPassAttachmentSize() const {
   return max_texture_size;
 }
 
+size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {
+  return 256;
+}
+
 }  // namespace impeller

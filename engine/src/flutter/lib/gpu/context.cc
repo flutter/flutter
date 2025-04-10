@@ -9,7 +9,6 @@
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
-#include "impeller/core/platform.h"
 #include "impeller/renderer/context.h"
 #include "tonic/converter/dart_converter.h"
 
@@ -121,7 +120,7 @@ extern int InternalFlutterGpu_Context_GetDefaultDepthStencilFormat(
 
 extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
     flutter::gpu::Context* wrapper) {
-  return impeller::DefaultUniformAlignment();
+  return wrapper->GetContext()->GetCapabilities()->GetMinimumUniformAlignment();
 }
 
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(

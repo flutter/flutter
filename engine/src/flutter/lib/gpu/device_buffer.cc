@@ -10,7 +10,6 @@
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
-#include "impeller/core/platform.h"
 #include "impeller/core/range.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 #include "tonic/converter/dart_converter.h"
