@@ -66,7 +66,6 @@ class Dialog extends StatelessWidget {
     this.clipBehavior,
     this.shape,
     this.alignment,
-    this.maxWidth,
     this.child,
     this.semanticsRole = SemanticsRole.dialog,
   }) : assert(elevation == null || elevation >= 0.0),
@@ -89,7 +88,6 @@ class Dialog extends StatelessWidget {
        clipBehavior = Clip.none,
        shape = null,
        alignment = null,
-       maxWidth = null,
        _fullscreen = true;
 
   /// {@template flutter.material.dialog.backgroundColor}
@@ -238,14 +236,6 @@ class Dialog extends StatelessWidget {
   /// Defaults to [SemanticsRole.dialog].
   final SemanticsRole semanticsRole;
 
-  /// {@template flutter.material.dialog.maxWidth}
-  ///
-  /// This value is used to determine the maximum width of the dialog.
-  /// [Material3 Guidelines](https://m3.material.io/components/dialogs/specs#6771d107-624e-47cc-b6d8-2b7b620ba2f1) is 560.0 pixels
-  ///
-  /// {@endtemplate}
-  final double? maxWidth;
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -258,6 +248,8 @@ class Dialog extends StatelessWidget {
             ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
             : _DialogDefaultsM2(context);
 
+    final BoxConstraints constraints = defaults.constraints ?? const BoxConstraints(minHeight: 280.0);
+
     Widget dialogChild;
 
     if (_fullscreen) {
@@ -269,7 +261,7 @@ class Dialog extends StatelessWidget {
       dialogChild = Align(
         alignment: alignment ?? dialogTheme.alignment ?? defaults.alignment!,
         child: ConstrainedBox(
-          constraints: BoxConstraints(minWidth: 280.0, maxWidth: maxWidth ?? 560),
+          constraints: constraints,
           child: Material(
             color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
@@ -434,7 +426,6 @@ class AlertDialog extends StatelessWidget {
     this.shape,
     this.alignment,
     this.scrollable = false,
-    this.maxWidth,
   });
 
   /// Creates an adaptive [AlertDialog] based on whether the target platform is
@@ -741,9 +732,6 @@ class AlertDialog extends StatelessWidget {
   /// button bar.
   final bool scrollable;
 
-  ///{@macro flutter.material.dialog.maxWidth}
-  final double? maxWidth;
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -944,7 +932,6 @@ class AlertDialog extends StatelessWidget {
       alignment: alignment,
       semanticsRole: SemanticsRole.alertDialog,
       child: dialogChild,
-      maxWidth: maxWidth,
     );
   }
 }
@@ -1759,6 +1746,7 @@ class _DialogDefaultsM3 extends DialogThemeData {
         elevation: 6.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
         clipBehavior: Clip.none,
+        constraints: const BoxConstraints(minWidth: 280.0, maxWidth: 560.0),
       );
 
   final BuildContext context;
@@ -1785,6 +1773,9 @@ class _DialogDefaultsM3 extends DialogThemeData {
 
   @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
+
+  @override
+  BoxConstraints? get constraints => const BoxConstraints(maxWidth: 560.0);
 }
 // dart format on
 
