@@ -62,6 +62,10 @@ const Duration _kExpand = Duration(milliseconds: 200);
 ///
 /// Remember to dispose of the [ExpansionTileController] when it is no longer
 /// needed. This will ensure we discard any resources used by the object.
+@Deprecated(
+  'Use ExpansibleController instead. '
+  'This feature was deprecated after v3.31.0-0.1.pre.',
+)
 typedef ExpansionTileController = ExpansibleController;
 
 /// A single-line [ListTile] with an expansion arrow icon that expands or collapses

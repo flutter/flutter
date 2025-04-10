@@ -4,6 +4,8 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/navigator_utils.dart';
@@ -810,8 +812,73 @@ void main() {
     await tester.pumpAndSettle();
 
     final Finder clipRRectFinder = find.byType(ClipRRect);
-    final Rect clipRect = tester.getRect(clipRRectFinder);
-    expect(clipRect.center, equals(const Offset(400, 300)));
+    expect(clipRRectFinder, findsNothing);
+  });
+
+  testWidgets('Sheet transition does not interfere after popping', (WidgetTester tester) async {
+    final GlobalKey homeKey = GlobalKey();
+    final GlobalKey sheetKey = GlobalKey();
+    final GlobalKey popupMenuButtonKey = GlobalKey();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: CupertinoPageScaffold(
+          key: homeKey,
+          child: CupertinoListTile(
+            onTap: () {
+              showCupertinoSheet<void>(
+                context: homeKey.currentContext!,
+                pageBuilder: (BuildContext context) {
+                  return CupertinoPageScaffold(
+                    key: sheetKey,
+                    child: const Center(child: Text('Page 2')),
+                  );
+                },
+              );
+            },
+            title: const Text('ListItem 0'),
+            trailing: Material(
+              type: MaterialType.transparency,
+              child: PopupMenuButton<int>(
+                key: popupMenuButtonKey,
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(child: Text('Item 0')),
+                    const PopupMenuItem<int>(child: Text('Item 1')),
+                  ];
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('ListItem 0'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsOneWidget);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(100, 200));
+    await gesture.moveBy(const Offset(0, 350));
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('ListItem 0'), findsOneWidget);
+
+    await tester.tap(find.byKey(popupMenuButtonKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 0'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   group('drag dismiss gesture', () {
@@ -1145,5 +1212,39 @@ void main() {
       expect(finalPosition, equals(middlePosition));
       expect(finalPosition, equals(initialPosition));
     });
+  });
+
+  testWidgets('CupertinoSheetTransition handles SystemUiOverlayStyle changes', (
+    WidgetTester tester,
+  ) async {
+    final AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+    addTearDown(controller.dispose);
+
+    final Animation<double> secondaryAnimation = Tween<double>(
+      begin: 1,
+      end: 0,
+    ).animate(controller);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: AnimatedBuilder(
+          animation: controller,
+          builder: (BuildContext context, Widget? child) {
+            return CupertinoSheetTransition(
+              primaryRouteAnimation: controller,
+              secondaryRouteAnimation: secondaryAnimation,
+              linearTransition: false,
+              child: const SizedBox(),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(SystemChrome.latestStyle!.statusBarBrightness, Brightness.dark);
+    expect(SystemChrome.latestStyle!.statusBarIconBrightness, Brightness.light);
   });
 }

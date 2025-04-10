@@ -146,7 +146,7 @@ TEST(AndroidShellHolder, Create) {
   settings.enable_software_rendering = false;
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES, nullptr);
   EXPECT_NE(holder.get(), nullptr);
   EXPECT_TRUE(holder->IsValid());
   EXPECT_NE(holder->GetPlatformView().get(), nullptr);
@@ -160,7 +160,7 @@ TEST(AndroidShellHolder, HandlePlatformMessage) {
   settings.enable_software_rendering = false;
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES, nullptr);
   EXPECT_NE(holder.get(), nullptr);
   EXPECT_TRUE(holder->IsValid());
   EXPECT_NE(holder->GetPlatformView().get(), nullptr);

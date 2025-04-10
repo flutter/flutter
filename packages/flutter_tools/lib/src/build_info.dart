@@ -917,7 +917,7 @@ const String kAndroidArchs = 'AndroidArchs';
 ///
 /// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
 ///
-/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+/// This is passed in by the Flutter Gradle plugin's invocation of `flutter assemble`.
 ///
 /// For more info, see:
 /// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
