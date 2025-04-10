@@ -558,7 +558,7 @@ class TimePickerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for time picker properties that are not
 /// given an explicit non-null value.
-class TimePickerTheme extends InheritedTheme {
+class TimePickerTheme extends InheritedTheme<TimePickerThemeData, Object?> {
   /// Creates a time picker theme that controls the configurations for
   /// time pickers displayed in its widget subtree.
   const TimePickerTheme({super.key, required this.data, required super.child});
@@ -589,4 +589,19 @@ class TimePickerTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TimePickerTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    TimePickerTheme oldWidget,
+    Set<ThemeSelector<TimePickerThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<TimePickerThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -49,7 +49,7 @@ import 'theme.dart';
 ///    theme.
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class ChipTheme extends InheritedTheme {
+class ChipTheme extends InheritedTheme<ChipThemeData, Object?> {
   /// Applies the given theme [data] to [child].
   const ChipTheme({super.key, required this.data, required super.child});
 
@@ -99,6 +99,21 @@ class ChipTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ChipTheme oldWidget,
+    Set<ThemeSelector<ChipThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ChipThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// Holds the color, shape, and text styles for a Material Design chip theme.

@@ -302,7 +302,7 @@ bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
 ///
 ///  * [ScrollbarThemeData], which describes the configuration of a
 ///    scrollbar theme.
-class ScrollbarTheme extends InheritedTheme {
+class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData, Object?> {
   /// Constructs a scrollbar theme that configures all descendant [Scrollbar]
   /// widgets.
   const ScrollbarTheme({super.key, required this.data, required super.child});
@@ -331,4 +331,19 @@ class ScrollbarTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ScrollbarTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ScrollbarTheme oldWidget,
+    Set<ThemeSelector<ScrollbarThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ScrollbarThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

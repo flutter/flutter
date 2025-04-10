@@ -139,6 +139,17 @@ class Theme extends StatelessWidget {
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
   }
 
+  /// Evaluates [ThemeSelector.select] using [data] provided by the
+  /// nearest ancestor [Theme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static V select<V>(BuildContext context, ThemeSelector<ThemeData, V> selector) {
+    final ThemeData theme =
+        InheritedModel.inheritFrom<_InheritedTheme>(context, aspect: selector)!.theme.data;
+    return selector.select(theme);
+  }
+
   // The inherited themes in widgets library can not infer their values from
   // Theme in material library. Wraps the child with these inherited themes to
   // overrides their values directly.
@@ -218,7 +229,7 @@ class Theme extends StatelessWidget {
   }
 }
 
-class _InheritedTheme extends InheritedTheme {
+class _InheritedTheme extends InheritedTheme<ThemeData, Object?> {
   const _InheritedTheme({required this.theme, required super.child});
 
   final Theme theme;
@@ -230,6 +241,21 @@ class _InheritedTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    _InheritedTheme oldWidget,
+    Set<ThemeSelector<ThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.theme.data);
+      final Object? newValue = selector.select(theme.data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// An interpolation between two [ThemeData]s.

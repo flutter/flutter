@@ -73,7 +73,7 @@ class MenuBarThemeData extends MenuThemeData {
 /// * [SubmenuButton], a button that manages a submenu that uses these
 ///   properties.
 /// * [MenuBar], a widget that creates a menu bar that can use [SubmenuButton]s.
-class MenuBarTheme extends InheritedTheme {
+class MenuBarTheme extends InheritedTheme<MenuBarThemeData, Object?> {
   /// Creates a theme that controls the configurations for [MenuBar] and
   /// [MenuItemButton] in its widget subtree.
   const MenuBarTheme({super.key, required this.data, required super.child});
@@ -111,4 +111,19 @@ class MenuBarTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(MenuBarTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    MenuBarTheme oldWidget,
+    Set<ThemeSelector<MenuBarThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<MenuBarThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

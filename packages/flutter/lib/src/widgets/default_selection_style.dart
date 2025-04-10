@@ -25,7 +25,7 @@ import 'inherited_theme.dart';
 /// See also:
 ///  * [TextSelectionTheme]: which also creates a [DefaultSelectionStyle] for
 ///    the subtree.
-class DefaultSelectionStyle extends InheritedTheme {
+class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle, Object?> {
   /// Creates a default selection style widget that specifies the selection
   /// properties for all widgets below it in the widget tree.
   const DefaultSelectionStyle({
@@ -126,6 +126,21 @@ class DefaultSelectionStyle extends InheritedTheme {
     return cursorColor != oldWidget.cursorColor ||
         selectionColor != oldWidget.selectionColor ||
         mouseCursor != oldWidget.mouseCursor;
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    DefaultSelectionStyle oldWidget,
+    Set<ThemeSelector<DefaultSelectionStyle, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<DefaultSelectionStyle, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget);
+      final Object? newValue = selector.select(this);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

@@ -357,7 +357,7 @@ class ListTileThemeData with Diagnosticable {
 ///
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
-class ListTileTheme extends InheritedTheme {
+class ListTileTheme extends InheritedTheme<ListTileThemeData, Object?> {
   /// Creates a list tile theme that defines the color and style parameters for
   /// descendant [ListTile]s.
   ///
@@ -646,4 +646,19 @@ class ListTileTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ListTileTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ListTileTheme oldWidget,
+    Set<ThemeSelector<ListTileThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ListTileThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.select(oldWidget.data);
+      final Object? newValue = selector.select(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
