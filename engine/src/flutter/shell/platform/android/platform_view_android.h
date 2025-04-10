@@ -20,7 +20,6 @@
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
-#include "shell/platform/android/android_context_vk_impeller.h"
 #include "shell/platform/android/image_external_texture.h"
 
 namespace flutter {
@@ -45,12 +44,10 @@ class PlatformViewAndroid final : public PlatformView {
  public:
   static bool Register(JNIEnv* env);
 
-  PlatformViewAndroid(
-      PlatformView::Delegate& delegate,
-      const flutter::TaskRunners& task_runners,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      AndroidRenderingAPI rendering_api,
-      std::shared_ptr<AndroidContextVKImpeller> android_vk_context);
+  PlatformViewAndroid(PlatformView::Delegate& delegate,
+                      const flutter::TaskRunners& task_runners,
+                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+                      AndroidRenderingAPI rendering_api);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates a new PlatformViewAndroid but using an existing

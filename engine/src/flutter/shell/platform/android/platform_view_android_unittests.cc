@@ -21,9 +21,9 @@ TEST(AndroidPlatformView, DISABLED_SelectsVulkanBasedOnApiLevel) {
   settings.enable_software_rendering = false;
   settings.enable_impeller = true;
 
-  EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 29).first,
+  EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 29),
             AndroidRenderingAPI::kImpellerVulkan);
-  EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 24).first,
+  EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 24),
             AndroidRenderingAPI::kImpellerOpenGLES);
 }
 

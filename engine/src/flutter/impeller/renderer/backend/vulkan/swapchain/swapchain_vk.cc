@@ -45,6 +45,17 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     return nullptr;
   }
 
+  vk::AndroidSurfaceCreateInfoKHR surface_info;
+  surface_info.setWindow(window.GetHandle());
+  auto [result, surface] =
+      ContextVK::Cast(*context).GetInstance().createAndroidSurfaceKHRUnique(
+          surface_info);
+  if (result != vk::Result::eSuccess) {
+    VALIDATION_LOG << "Could not create KHR Android Surface: "
+                   << vk::to_string(result);
+    return nullptr;
+  }
+
   // Use AHB Swapchains if they are opted in.
   if (ContextVK::Cast(*context).GetShouldEnableSurfaceControlSwapchain() &&
       AHBSwapchainVK::IsAvailableOnPlatform() &&
@@ -54,6 +65,7 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
         context,             //
         window.GetHandle(),  //
         cb,                  //
+        surface,             //
         window.GetSize(),    //
         enable_msaa          //
         ));
@@ -64,17 +76,6 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
       VALIDATION_LOG
           << "Could not create AHB swapchain. Falling back to KHR variant.";
     }
-  }
-
-  vk::AndroidSurfaceCreateInfoKHR surface_info;
-  surface_info.setWindow(window.GetHandle());
-  auto [result, surface] =
-      ContextVK::Cast(*context).GetInstance().createAndroidSurfaceKHRUnique(
-          surface_info);
-  if (result != vk::Result::eSuccess) {
-    VALIDATION_LOG << "Could not create KHR Android Surface: "
-                   << vk::to_string(result);
-    return nullptr;
   }
 
   // Fallback to KHR swapchains if AHB swapchains aren't available.

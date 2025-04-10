@@ -21,7 +21,6 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/thread_host.h"
-#include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/android_display.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
@@ -83,8 +82,7 @@ static PlatformData GetDefaultPlatformData() {
 AndroidShellHolder::AndroidShellHolder(
     const flutter::Settings& settings,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    AndroidRenderingAPI android_rendering_api,
-    std::unique_ptr<AndroidContextVKImpeller> android_vk_context)
+    AndroidRenderingAPI android_rendering_api)
     : settings_(settings),
       jni_facade_(jni_facade),
       android_rendering_api_(android_rendering_api) {
@@ -115,18 +113,14 @@ AndroidShellHolder::AndroidShellHolder(
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
   AndroidRenderingAPI rendering_api = android_rendering_api_;
-  std::shared_ptr<AndroidContextVKImpeller> shared_vk_context =
-      std::move(android_vk_context);
   Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [&jni_facade, &weak_platform_view, rendering_api,
-       shared_vk_context](Shell& shell) {
+      [&jni_facade, &weak_platform_view, rendering_api](Shell& shell) {
         std::unique_ptr<PlatformViewAndroid> platform_view_android;
         platform_view_android = std::make_unique<PlatformViewAndroid>(
             shell,                   // delegate
             shell.GetTaskRunners(),  // task runners
             jni_facade,              // JNI interop
-            rendering_api,           // rendering API
-            shared_vk_context        // android vk
+            rendering_api            // rendering API
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
