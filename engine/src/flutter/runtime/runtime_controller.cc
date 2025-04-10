@@ -70,6 +70,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
                                        context_.deterministic_rendering_enabled,
                                        context_.concurrent_task_runner,
                                        context_.enable_impeller,
+                                       context_.enable_flutter_gpu,
                                        context_.runtime_stage_backend};
   auto result =
       std::make_unique<RuntimeController>(p_client,                      //

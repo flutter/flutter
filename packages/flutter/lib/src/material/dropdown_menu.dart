@@ -1417,6 +1417,17 @@ class _RenderDropdownMenuBody extends RenderBox
     }
     return false;
   }
+
+  // Children except the text field (first child) are laid out for measurement purpose but not painted.
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      if (child == firstChild) {
+        visitor(renderObjectChild);
+      }
+    });
+  }
 }
 
 // Hand coded defaults. These will be updated once we have tokens/spec.
