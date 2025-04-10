@@ -333,7 +333,15 @@ class RSuperellipseParam {
     );
   }
 
-  void addToPath(Path path) {
+  Path? _cachedPath;
+  T makePath<T extends Path>(T Function() pathCreater) {
+    if (_cachedPath == null) {
+      _cachedPath = addToPath(pathCreater());
+    }
+    return _cachedPath! as T;
+  }
+
+  Path addToPath(Path path) {
     final builder = _RSuperellipsePathBuilder(path);
 
     final Offset start =
@@ -358,6 +366,7 @@ class RSuperellipseParam {
 
     path.lineTo(start.dx, start.dy);
     path.close();
+    return path;
   }
 
   bool contains(Offset point) {

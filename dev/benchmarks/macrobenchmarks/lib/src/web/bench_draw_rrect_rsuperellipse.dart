@@ -6,7 +6,7 @@ import 'dart:ui';
 
 import 'recorder.dart';
 
-typedef _Draw = void Function(Canvas canvas, Rect rect, Radius radius, Paint paint);
+typedef _Draw = void Function(Canvas canvas, int key, Rect rect, Radius radius, Paint paint);
 
 /// Repeatedly paints a grid of rounded rectangles or rounded superellipses.
 ///
@@ -16,9 +16,9 @@ class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
   BenchDrawRRectRSuperellipse.drawRRect() : _draw = _drawRRect, super(name: drawRRectName);
 
   /// A variant of the benchmark that draws rounded superellipses.
-  BenchDrawRRectRSuperellipse.drawRSuperellipse()
-    : _draw = _drawRSuperellipse,
-      super(name: drawRSuperellipseName);
+  BenchDrawRRectRSuperellipse.drawRSuperellipse() : super(name: drawRSuperellipseName) {
+    _draw = _drawRSuperellipseCached;
+  }
 
   static const String drawRRectName = 'draw_rrect';
   static const String drawRSuperellipseName = 'draw_rsuperellipse';
@@ -29,14 +29,29 @@ class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
   /// Number of columns in the grid.
   static const int kColumns = 40;
 
-  final _Draw _draw;
+  late final _Draw _draw;
 
-  static void _drawRRect(Canvas canvas, Rect rect, Radius radius, Paint paint) {
+  static void _drawRRect(Canvas canvas, int key, Rect rect, Radius radius, Paint paint) {
     canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), paint);
   }
 
-  static void _drawRSuperellipse(Canvas canvas, Rect rect, Radius radius, Paint paint) {
+  static void _drawRSuperellipseCacheless(
+    Canvas canvas,
+    int key,
+    Rect rect,
+    Radius radius,
+    Paint paint,
+  ) {
     canvas.drawRSuperellipse(RSuperellipse.fromRectAndRadius(rect, radius), paint);
+  }
+
+  final Map<int, RSuperellipse> _cache = <int, RSuperellipse>{};
+  void _drawRSuperellipseCached(Canvas canvas, int key, Rect rect, Radius radius, Paint paint) {
+    final RSuperellipse rsuperellipse = _cache.putIfAbsent(
+      key,
+      () => RSuperellipse.fromRectAndRadius(rect, radius).computed(),
+    );
+    canvas.drawRSuperellipse(rsuperellipse, paint);
   }
 
   /// Counter used to offset the rendered rsuperellipse to make them wobble.
@@ -63,6 +78,7 @@ class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
         final double radius = maxRadius / kColumns * col;
         _draw(
           canvas,
+          row * kColumns + col,
           Offset((wobbleCounter - 5).abs(), 0) & rectSize,
           Radius.circular(radius),
           _paint,

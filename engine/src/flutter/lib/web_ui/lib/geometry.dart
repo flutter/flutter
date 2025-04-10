@@ -1130,7 +1130,35 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     super.blRadiusX = 0.0,
     super.blRadiusY = 0.0,
     super.uniformRadii = false,
-  });
+    RSuperellipseParam? param = null,
+  }) : _param = param;
+
+  RSuperellipseParam param() {
+    if (_param != null) {
+      return _param;
+    }
+    return RSuperellipseParam.makeRSuperellipse(this);
+  }
+
+  final RSuperellipseParam? _param;
+  RSuperellipse computed() {
+    return RSuperellipse._raw(
+      left: left,
+      top: top,
+      right: right,
+      bottom: bottom,
+      tlRadiusX: tlRadiusX,
+      tlRadiusY: tlRadiusY,
+      trRadiusX: trRadiusX,
+      trRadiusY: trRadiusY,
+      brRadiusX: brRadiusX,
+      brRadiusY: brRadiusY,
+      blRadiusX: blRadiusX,
+      blRadiusY: blRadiusY,
+      uniformRadii: webOnlyUniformRadii,
+      param: RSuperellipseParam.makeRSuperellipse(this),
+    );
+  }
 
   @override
   RSuperellipse _create({
@@ -1189,7 +1217,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   static const RSuperellipse zero = RSuperellipse._raw();
 
   bool contains(Offset point) {
-    return RoundSuperellipseParam.makeRSuperellipse(this).contains(point);
+    return RSuperellipseParam.makeRSuperellipse(this).contains(point);
   }
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
