@@ -364,6 +364,14 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// The resulting binary is used to speed up subsequent widget previewer launches
   /// by acting as a basic scaffold to load previews into using hot reload / restart.
   Future<void> initialBuild({required FlutterProject widgetPreviewScaffoldProject}) async {
+    // Generate initial package_config.json, otherwise the build will fail.
+    await pub.get(
+      context: PubContext.create,
+      project: widgetPreviewScaffoldProject,
+      offline: offline,
+      outputMode: PubOutputMode.summaryOnly,
+    );
+
     // TODO(bkonyi): handle error case where desktop device isn't enabled.
     await widgetPreviewScaffoldProject.ensureReadyForPlatformSpecificTooling(
       releaseMode: false,
@@ -371,14 +379,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
       macOSPlatform: platform.isMacOS && !isWeb,
       windowsPlatform: platform.isWindows && !isWeb,
       webPlatform: isWeb,
-    );
-
-    // Generate initial package_config.json, otherwise the build will fail.
-    await pub.get(
-      context: PubContext.create,
-      project: widgetPreviewScaffoldProject,
-      offline: offline,
-      outputMode: PubOutputMode.summaryOnly,
     );
 
     if (isWeb) {
@@ -632,6 +632,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // Adds a path dependency on the parent project so previews can be
     // imported directly into the preview scaffold.
     const String pubAdd = 'add';
+    // Use `json.encode` to handle escapes correctly.
+    final String pathDescriptor = json.encode(<String, Object?>{
+      // `pub add` interprets relative paths relative to the current directory.
+      'path': rootProject.directory.fileSystem.path.relative(rootProject.directory.path),
+    });
+
     await pub.interactively(
       <String>[
         pubAdd,
@@ -639,7 +645,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
         '--directory',
         widgetPreviewScaffoldProject.directory.path,
         // Ensure the path using POSIX separators, otherwise the "path_not_posix" check will fail.
-        '${rootProject.manifest.appName}:{"path":${rootProject.directory.path.replaceAll(r"\", "/")}}',
+        '${rootProject.manifest.appName}:$pathDescriptor',
       ],
       context: PubContext.pubAdd,
       command: pubAdd,
