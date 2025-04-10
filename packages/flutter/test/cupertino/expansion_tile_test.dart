@@ -122,55 +122,51 @@ void main() {
     expect(find.text('Content'), findsNothing);
   });
 
-  testWidgets(
-    'Default expansion animation and icon rotation',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const CupertinoApp(
-          home: Center(
-            child: RepaintBoundary(
-              child: CupertinoExpansionTile(
-                title: Text('Title'),
-                child: SizedBox(height: 50.0, child: ColoredBox(color: Color(0xffff0000))),
-              ),
+  testWidgets('Default expansion animation and icon rotation', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: RepaintBoundary(
+            child: CupertinoExpansionTile(
+              title: Text('Title'),
+              child: SizedBox(height: 50.0, child: ColoredBox(color: Color(0xffff0000))),
             ),
           ),
         ),
-      );
+      ),
+    );
 
-      await expectLater(
-        find.byType(CupertinoExpansionTile),
-        matchesGoldenFile('expansion_tile.default.collapsed.png'),
-      );
+    await expectLater(
+      find.byType(CupertinoExpansionTile),
+      matchesGoldenFile('expansion_tile.default.collapsed.png'),
+    );
 
-      await tester.tap(find.text('Title'));
-      await tester.pump();
+    await tester.tap(find.text('Title'));
+    await tester.pump();
 
-      // Pump until halfway through the animation.
-      await tester.pump(const Duration(milliseconds: 125));
-      await expectLater(
-        find.byType(CupertinoExpansionTile),
-        matchesGoldenFile('expansion_tile.default.forward.png'),
-      );
+    // Pump until halfway through the animation.
+    await tester.pump(const Duration(milliseconds: 125));
+    await expectLater(
+      find.byType(CupertinoExpansionTile),
+      matchesGoldenFile('expansion_tile.default.forward.png'),
+    );
 
-      await tester.pumpAndSettle();
-      await expectLater(
-        find.byType(CupertinoExpansionTile),
-        matchesGoldenFile('expansion_tile.default.expanded.png'),
-      );
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(CupertinoExpansionTile),
+      matchesGoldenFile('expansion_tile.default.expanded.png'),
+    );
 
-      await tester.tap(find.text('Title'));
-      await tester.pump();
+    await tester.tap(find.text('Title'));
+    await tester.pump();
 
-      // Pump until halfway through the animation.
-      await tester.pump(const Duration(milliseconds: 125));
-      await expectLater(
-        find.byType(CupertinoExpansionTile),
-        matchesGoldenFile('expansion_tile.default.reverse.png'),
-      );
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
-  );
+    // Pump until halfway through the animation.
+    await tester.pump(const Duration(milliseconds: 125));
+    await expectLater(
+      find.byType(CupertinoExpansionTile),
+      matchesGoldenFile('expansion_tile.default.reverse.png'),
+    );
+  });
 
   testWidgets('Expansion animation in scroll mode', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -208,5 +204,5 @@ void main() {
       matchesGoldenFile('expansion_tile.scroll_mode.reverse.png'),
     );
     await tester.pumpAndSettle();
-  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+  });
 }
