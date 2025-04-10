@@ -23,7 +23,6 @@ class FlutterMain {
   static FlutterMain& Get();
 
   const flutter::Settings& GetSettings() const;
-
   flutter::AndroidRenderingAPI GetAndroidRenderingAPI();
 
   static AndroidRenderingAPI SelectedRenderingAPI(
