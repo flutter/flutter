@@ -645,6 +645,18 @@ Future<void> testMain() async {
         region: const ui.Rect.fromLTWH(0, 0, 10 * 50, 10 * 50),
       );
     });
+
+    test('push pop balance enfocement is consistent', () async {
+      final sceneBuilder = ui.SceneBuilder();
+      // Normally pop() must follow a previously non-popped layer push. However,
+      // the Flutter engine chooses to be lenient and allows calling pop() with
+      // no layers.
+      sceneBuilder.pop();
+
+      // Just checking that a scene can be built without crashing after a stray
+      // pop() from above.
+      sceneBuilder.build();
+    });
   });
 }
 

@@ -472,11 +472,12 @@ class EngineSceneBuilder implements ui.SceneBuilder {
 
   @override
   void pop() {
-    final PictureEngineLayer layer = currentBuilder.build();
     final LayerBuilder? parentBuilder = currentBuilder.parent;
     if (parentBuilder == null) {
-      throw StateError('Popped too many times.');
+      // Root layer. Nothing to pop.
+      return;
     }
+    final PictureEngineLayer layer = currentBuilder.build();
     currentBuilder = parentBuilder;
     currentBuilder.mergeLayer(layer);
   }
