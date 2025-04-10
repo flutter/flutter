@@ -62,6 +62,7 @@ enum ExpansionTileTransitionMode {
 ///  * [ExpansionTile], the Material Design equivalent.
 ///  * [CupertinoListSection], useful for creating an expansion tile [child].
 ///  * [CupertinoListTile], the header of a [CupertinoExpansionTile].
+///  * <https://developer.apple.com/design/human-interface-guidelines/disclosure-controls/>
 class CupertinoExpansionTile extends StatefulWidget {
   /// Creates a single-line [CupertinoListTile] with an expansion arrow icon
   /// that expands or collapses the tile to reveal or hide the [child].
@@ -73,7 +74,9 @@ class CupertinoExpansionTile extends StatefulWidget {
     this.transitionMode = ExpansionTileTransitionMode.fade,
   });
 
-  /// A [title] is used to convey the central information. Usually a [Text].
+  /// Used to convey the central information.
+  ///
+  /// Usually a [Text].
   final Widget title;
 
   /// Programmatically expands and collapses the [CupertinoExpansionTile].
@@ -101,7 +104,7 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   final OverlayPortalController _fadeController = OverlayPortalController();
   static final Animatable<double> _quarterTween = Tween<double>(begin: 0.0, end: 0.25);
 
-  late ExpansibleController _tileController;
+  late final ExpansibleController _tileController;
   late Animation<double> _iconTurns;
   late Offset _headerOffset;
 

@@ -63,6 +63,34 @@ void main() {
     controller.dispose();
   });
 
+  testWidgets('Controller can set the tile to be initially expanded', (WidgetTester tester) async {
+    final ExpansibleController controller = ExpansibleController();
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoExpansionTile(
+            controller: controller,
+            title: const Text('Title'),
+            child: const Text('Content'),
+          ),
+        ),
+      ),
+    );
+
+    controller.expand();
+    await tester.pump();
+
+    expect(controller.isExpanded, isTrue);
+    expect(find.text('Content'), findsOneWidget);
+
+    await tester.tap(find.text('Title'));
+    await tester.pump();
+    expect(controller.isExpanded, isFalse);
+    expect(find.text('Content'), findsNothing);
+
+    controller.dispose();
+  });
+
   testWidgets('Nested expansion tile', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
