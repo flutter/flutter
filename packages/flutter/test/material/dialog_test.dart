@@ -2890,6 +2890,56 @@ void main() {
     expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
     expect(focusNode.hasFocus, true);
   });
+
+  group('constraints', () {
+    testWidgets('Material3 - Default constraints are max width 560',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildAppWithDialog(
+          const AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            title: Text('Title'),
+            content: SizedBox(
+              width: 1000,
+              height: 100,
+            ),
+          ),
+          theme: ThemeData(
+            useMaterial3: true,
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(tester.getSize(find.byType(SizedBox)).width, 560);
+    });
+
+    testWidgets('Material2 - No default constraints',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildAppWithDialog(
+          const AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            title: Text('Title'),
+            content: SizedBox(
+              width: 700,
+              height: 100,
+            ),
+          ),
+          theme: ThemeData(
+            useMaterial3: false,
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+
+      expect(tester.getSize(find.byType(SizedBox)).width, 700);
+    });
+  });
 }
 
 @pragma('vm:entry-point')
