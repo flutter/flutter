@@ -1382,11 +1382,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
             // if needed.
             Expanded(
               child: Stack(
-                // Ideally this should be baseline aligned. However that comes at
-                // the cost of the ability to compute the intrinsic dimensions of
-                // this widget.
-                // See also https://github.com/flutter/flutter/issues/13715.
-                alignment: AlignmentDirectional.center,
                 textDirection: widget.textDirection,
                 children: <Widget>[if (placeholder != null) placeholder, editableText],
               ),
