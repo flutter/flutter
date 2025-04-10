@@ -9,19 +9,20 @@
 namespace impeller {
 
 AHBTexturePoolVK::AHBTexturePoolVK(std::weak_ptr<Context> context,
-                                   android::HardwareBufferDescriptor desc)
-    : context_(std::move(context)), desc_(desc) {
+                                   android::HardwareBufferDescriptor desc,
+                                   size_t max_entries)
+    : context_(std::move(context)), desc_(desc), max_entries_(max_entries) {
   if (!desc_.IsAllocatable()) {
     VALIDATION_LOG << "Swapchain image is not allocatable.";
     return;
   }
-  // Create at least one swapchain image to validate the allocation
-  // can succeed.
-  std::shared_ptr<AHBTextureSourceVK> texture = CreateTexture();
-  if (!texture->IsValid()) {
-    return;
+  for (auto i = 0u; i < max_entries_; i++) {
+    auto texture = CreateTexture();
+    if (!texture->IsValid()) {
+      return;
+    }
+    pool_.emplace_back(std::move(texture));
   }
-  pool_.emplace_back(std::move(texture));
   is_valid_ = true;
 }
 
@@ -48,6 +49,7 @@ void AHBTexturePoolVK::Push(std::shared_ptr<AHBTextureSourceVK> texture,
   }
   Lock lock(pool_mutex_);
   pool_.push_back(PoolEntry{std::move(texture), std::move(render_ready_fence)});
+  PerformGCLocked();
 }
 
 std::shared_ptr<AHBTextureSourceVK> AHBTexturePoolVK::CreateTexture() const {
@@ -75,6 +77,21 @@ std::shared_ptr<AHBTextureSourceVK> AHBTexturePoolVK::CreateTexture() const {
   }
 
   return ahb_texture_source;
+}
+
+void AHBTexturePoolVK::PerformGC() {
+  Lock lock(pool_mutex_);
+  PerformGCLocked();
+}
+
+void AHBTexturePoolVK::PerformGCLocked() {
+  while (!pool_.empty() && (pool_.size() > max_entries_)) {
+    // Buffers are pushed to the back of the queue and popped from the front.
+    // The ones at the back should be given the most time for their fences to
+    // signal. If we are going to get rid of textures, they might as well be the
+    // newest ones since their fences will take the longest to signal.
+    pool_.pop_back();
+  }
 }
 
 bool AHBTexturePoolVK::IsValid() const {
