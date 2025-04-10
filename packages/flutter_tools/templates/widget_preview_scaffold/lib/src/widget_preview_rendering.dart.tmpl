@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'package:stack_trace/stack_trace.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'controls.dart';
 import 'generated_preview.dart';
@@ -79,15 +80,6 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
         .map((frame) => frame.location.length)
         .fold(0, math.max);
 
-    final TextStyle linkTextStyle = fixBlurryText(
-      TextStyle(
-        decoration: TextDecoration.underline,
-        // TODO(bkonyi): this color scheme is from DevTools and should be responsive
-        // to changes in the previewer theme.
-        color: const Color(0xFF1976D2),
-      ),
-    );
-
     // Print out the stack trace nicely formatted.
     return frames.map<TextSpan>((frame) {
       if (frame is UnparsedFrame) return TextSpan(text: '$frame\n');
@@ -108,6 +100,50 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
         ],
       );
     }).toList();
+  }
+}
+
+/// Displayed when no @Preview() annotations are detected in the project.
+///
+/// Links to documentation.
+class NoPreviewsDetectedWidget extends StatelessWidget {
+  const NoPreviewsDetectedWidget({super.key});
+
+  // TODO(bkonyi): update with actual documentation on flutter.dev.
+  static Uri documentationUrl = Uri.https(
+    'github.com',
+    'flutter/flutter/blob/master/packages/flutter/'
+        'lib/src/widgets/widget_preview.dart',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(bkonyi): base this on the current color theme (dark vs light)
+    final style = fixBlurryText(TextStyle(color: Colors.black));
+    return Center(
+      child: Column(
+        children: <Widget>[
+          Text(
+            'No previews detected',
+            style: style.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const VerticalSpacer(),
+          Text('Read more about getting started with widget previews at:'),
+          Text.rich(
+            TextSpan(
+              text: documentationUrl.toString(),
+              style: linkTextStyle,
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () {
+                      launchUrl(documentationUrl);
+                    },
+            ),
+            style: style,
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -444,13 +480,17 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
-  runApp(_WidgetPreviewScaffold());
+  runApp(WidgetPreviewScaffold(previews: previews));
 }
 
 /// Define the Enum for Layout Types
 enum LayoutType { gridView, listView }
 
-class _WidgetPreviewScaffold extends StatelessWidget {
+class WidgetPreviewScaffold extends StatelessWidget {
+  WidgetPreviewScaffold({super.key, required this.previews});
+
+  final List<WidgetPreview> Function() previews;
+
   // Positioning values for positioning the previewer
   final double _previewLeftPadding = 60.0;
   final double _previewRightPadding = 20.0;
@@ -555,16 +595,7 @@ class _WidgetPreviewScaffold extends StatelessWidget {
     if (previewList.isEmpty) {
       previewView = Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(
-            // TODO: consider including details on how to get started
-            // with Widget Previews.
-            child: Text(
-              'No previews available',
-              style: fixBlurryText(TextStyle(color: Colors.white)),
-            ),
-          ),
-        ],
+        children: <Widget>[NoPreviewsDetectedWidget()],
       );
     } else {
       previewView = LayoutBuilder(
