@@ -52,7 +52,7 @@ in the `config_name` under `properties`:
     properties:
       config_name: mac_android_aot_engine
       $flutter/osx_sdk : >-
-        { "sdk_version": "15a240d" }
+        { "sdk_version": "16c5032a" }
 
 ```
 
