@@ -2375,6 +2375,27 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: static_path_tessellation_perf__timeline_summary
 
+
+  # Uses Impeller.
+  - name: Linux_pixel_7pro dynamic_path_stroke_tessellation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: dynamic_path_stroke_tessellation_perf__timeline_summary
+
+  # Uses Impeller.
+  - name: Linux_pixel_7pro static_path_stroke_tessellation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: static_path_stroke_tessellation_perf__timeline_summary
+
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
     recipe: devicelab/devicelab_drone
@@ -3599,6 +3620,24 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: dynamic_path_tessellation_perf_ios__timeline_summary
+
+  - name: Mac_ios static_path_stroke_tessellation_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: static_path_stroke_tessellation_perf_ios__timeline_summary
+
+  - name: Mac_ios dynamic_path_stroke_tessellation_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: dynamic_path_stroke_tessellation_perf_ios__timeline_summary
 
   - name: Staging_build_linux analyze
     presubmit: false
