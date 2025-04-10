@@ -271,12 +271,14 @@ TaskFunction createFlutterGalleryStartupTest({
   String target = 'lib/main.dart',
   Map<String, String>? runEnvironment,
   bool enableLazyShaderMode = false,
+  bool enableHCPP = false,
 }) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
     runEnvironment: runEnvironment,
     enableLazyShaderMode: enableLazyShaderMode,
+    enableHCPP: enableHCPP,
   ).run;
 }
 
@@ -895,11 +897,13 @@ class StartupTest {
     this.target = 'lib/main.dart',
     this.runEnvironment,
     this.enableLazyShaderMode = false,
+    this.enableHCPP = false,
   });
 
   final String testDirectory;
   final bool reportMetrics;
   final bool enableLazyShaderMode;
+  final bool enableHCPP;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -912,6 +916,9 @@ class StartupTest {
 
       if (enableLazyShaderMode) {
         _addLazyShaderMode(testDirectory);
+      }
+      if (enableHCPP) {
+        _addSurfaceControlSupportToManifest(testDirectory);
       }
 
       try {
