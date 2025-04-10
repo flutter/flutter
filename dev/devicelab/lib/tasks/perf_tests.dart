@@ -701,6 +701,28 @@ TaskFunction createPathTessellationDynamicPerfTest() {
   ).run;
 }
 
+TaskFunction createPathStrokeTessellationStaticPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'stroke_tessellation_perf_static',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_stroke_tessellation_static_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createPathStrokeTessellationDynamicPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'stroke_tessellation_perf_dynamic',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_stroke_tessellation_dynamic_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({bool? enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',

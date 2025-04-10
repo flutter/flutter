@@ -105,6 +105,8 @@
 /dev/devicelab/bin/tasks/draw_atlas_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/static_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/dynamic_path_tessellation_perf__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/static_path_stroke_tessellation_perf__timeline_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_impeller__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/complex_layout_scroll_perf_impeller_gles__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/rrect_blur_perf__timeline_summary.dart @gaaclarke @flutter/engine
@@ -229,6 +231,8 @@
 /dev/devicelab/bin/tasks/draw_atlas_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/static_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
 /dev/devicelab/bin/tasks/dynamic_path_tessellation_perf_ios__timeline_summary.dart @jonahwilliams @flutter/engine
+/dev/devicelab/bin/tasks/static_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
+/dev/devicelab/bin/tasks/dynamic_path_stroke_tessellation_perf_ios__timeline_summary.dart @flar @flutter/engine
 /dev/devicelab/bin/tasks/rrect_blur_perf_ios__timeline_summary.dart @gaaclarke @flutter/engine
 
 ## Host only DeviceLab tests
