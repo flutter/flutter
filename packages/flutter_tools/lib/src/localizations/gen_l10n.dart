@@ -1269,7 +1269,7 @@ class LocalizationsGenerator {
             .replaceAll('@(name)', message.resourceId)
             .replaceAll(
               '@(message)',
-              "'${generateString(node.children.map((Node child) => child.value!).join())}'",
+              "'${generateString(node.children.map((Node child) => child.value).join())}'",
             );
       }
 
