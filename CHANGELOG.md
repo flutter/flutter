@@ -27,9 +27,12 @@ INTERNAL NOTE
 ## Flutter 3.29 Changes
 
 ### [3.29.3](https://github.com/flutter/flutter/releases/tag/3.29.3)
-- [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Impeller,
-  All platforms, Text that is scaled over 48x renders incorrectly.
+- [flutter/163421](https://github.com/flutter/flutter/issues/163421) - Impeller,
+  Android, Fixes Android Emulator crash when navigating to routes with backdrop
+  blurs.
+- [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Impeller, All platforms, Text that is scaled over 48x renders incorrectly.
 - [flutter/163627](https://github.com/flutter/flutter/pull/163627) - Fix issue where placeholder types in ARB localizations weren't used for type inference, causing a possible type mismatch with the placeholder field defined in the template.
+- [flutter/165166](https://github.com/flutter/flutter/pull/165166) - Update CI configurations and tests to use Xcode 16 and iOS 18 simulator.
 
 ### [3.29.2](https://github.com/flutter/flutter/releases/tag/3.29.2)
 
