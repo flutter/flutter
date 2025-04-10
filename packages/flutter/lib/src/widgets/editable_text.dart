@@ -1051,7 +1051,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.autocorrect}
   /// Whether to enable autocorrection.
   ///
-  /// Defaults to true, false on iOS if [autofillHints] contains password related hints.
+  /// False on iOS if [autofillHints] contains password-related hints, otherwise true.
   /// {@endtemplate}
   final bool autocorrect;
 
