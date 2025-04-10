@@ -1347,13 +1347,13 @@ void main() {
       return MaterialApp(
         key: UniqueKey(),
         theme:
-        themeDataIsThreeLine != null
-            ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
-            : null,
+            themeDataIsThreeLine != null
+                ? ThemeData(listTileTheme: ListTileThemeData(isThreeLine: themeDataIsThreeLine))
+                : null,
         home: Material(
           child: ListTileTheme(
             data:
-            themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
             child: ListView(
               children: <Widget>[
                 CheckboxListTile(
@@ -1463,14 +1463,14 @@ void main() {
         theme: ThemeData(
           platform: TargetPlatform.iOS,
           listTileTheme:
-          themeDataIsThreeLine != null
-              ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
-              : null,
+              themeDataIsThreeLine != null
+                  ? ListTileThemeData(isThreeLine: themeDataIsThreeLine)
+                  : null,
         ),
         home: Material(
           child: ListTileTheme(
             data:
-            themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
+                themeIsThreeLine != null ? ListTileThemeData(isThreeLine: themeIsThreeLine) : null,
             child: ListView(
               children: <Widget>[
                 CheckboxListTile.adaptive(
