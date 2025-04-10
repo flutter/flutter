@@ -205,6 +205,8 @@ class _SettingsIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0x60F84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
 
@@ -214,6 +216,8 @@ class _SettingsIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0xFFF84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
 
@@ -223,6 +227,8 @@ class _SettingsIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0xFFF84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
   }
@@ -259,6 +265,8 @@ class _CameraIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0xFFF84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
 
@@ -268,6 +276,8 @@ class _CameraIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0x60F84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
   }
@@ -301,6 +311,8 @@ class _CalendarIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0x60F84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
 
@@ -310,6 +322,8 @@ class _CalendarIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0xFFF84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
   }
@@ -343,6 +357,8 @@ class _ConversationIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0x60F84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
 
@@ -352,6 +368,8 @@ class _ConversationIconPainter extends CustomPainter {
       Paint()
         ..color = const Color(0xFFF84F39)
         ..style = paintStyle
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round
         ..strokeWidth = 2.0,
     );
   }
@@ -383,6 +401,8 @@ class _GeometryIconPainter extends CustomPainter {
         Paint()
           ..color = const Color(0xFFF84F39)
           ..style = paintStyle
+          ..strokeJoin = StrokeJoin.round
+          ..strokeCap = StrokeCap.round
           ..strokeWidth = 2.0;
     final Rect frame = Offset.zero & size;
     canvas.drawDRRect(
