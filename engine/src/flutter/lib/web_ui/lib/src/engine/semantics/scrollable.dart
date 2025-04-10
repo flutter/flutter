@@ -195,11 +195,11 @@ class SemanticScrollable extends SemanticRole {
         (semanticsObject.isVerticalScrollContainer ? rect.height : rect.width);
     // Place the _scrollOverflowElement at the beginning of the content
     // and size it based on the total scroll extent so the browser
-    // knows how much scrollable content there is. The cross axis size
-    // should be non-zero so it is taken into account in the scrollable
-    // elements scrollHeight.
+    // knows how much scrollable content there is.
     if (semanticsObject.isVerticalScrollContainer) {
       _scrollOverflowElement.style
+        // The cross axis size should be non-zero so it is taken into
+        // account in the scrollable elements scrollHeight.
         ..width = '1px'
         ..height = '${scrollExtentTotal.toStringAsFixed(1)}px';
       semanticsObject
@@ -208,6 +208,8 @@ class SemanticScrollable extends SemanticRole {
     } else if (semanticsObject.isHorizontalScrollContainer) {
       _scrollOverflowElement.style
         ..width = '${scrollExtentTotal.toStringAsFixed(1)}px'
+        // The cross axis size should be non-zero so it is taken into
+        // account in the scrollable elements scrollHeight.
         ..height = '1px';
       semanticsObject
         ..verticalScrollAdjustment = 0.0
