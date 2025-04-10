@@ -33,7 +33,7 @@ println "=========================================="
 
 android {
   namespace 'io.flutter.app.test'
-  compileSdk 35
+  compileSdk 36
 
   defaultConfig {
     minSdkVersion 21
