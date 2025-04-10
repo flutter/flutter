@@ -1862,10 +1862,26 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   MediaQueryData? _parentData;
   MediaQueryData? _data;
 
+  void _updateSemanticsEnabled() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateData();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    if (kIsWeb) {
+      // Workaround: Registering this listener ensures that MediaQuery is updated
+      // when SemanticsEnabled changes.
+      // On the web, semanticsEnabled is reflected in accessibleNavigation.
+      //
+      // https://github.com/flutter/flutter/issues/67571
+      // https://github.com/flutter/flutter/issues/134980
+      WidgetsBinding.instance.addSemanticsEnabledListener(_updateSemanticsEnabled);
+    }
   }
 
   @override
@@ -1943,6 +1959,9 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    if (kIsWeb) {
+      WidgetsBinding.instance.removeSemanticsEnabledListener(_updateSemanticsEnabled);
+    }
     super.dispose();
   }
 
