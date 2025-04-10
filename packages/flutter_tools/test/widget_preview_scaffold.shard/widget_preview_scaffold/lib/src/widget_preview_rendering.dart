@@ -118,12 +118,18 @@ class WidgetPreviewWidget extends StatefulWidget {
   final WidgetPreview preview;
 
   @override
-  State<WidgetPreviewWidget> createState() => _WidgetPreviewWidgetState();
+  State<WidgetPreviewWidget> createState() => WidgetPreviewWidgetState();
 }
 
-class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
+class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   final transformationController = TransformationController();
   final deviceOrientation = ValueNotifier<Orientation>(Orientation.portrait);
+  final softRestartListenable = ValueNotifier<bool>(false);
+  final key = GlobalKey();
+
+  /// Returns the last size of the previewed widget.
+  Size get lastChildSize =>
+      (key.currentContext!.findRenderObject() as RenderBox).size;
 
   @override
   void initState() {
@@ -141,19 +147,41 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     );
 
     bool errorThrownDuringTreeConstruction = false;
-    Widget preview;
-    // Catch any unhandled exceptions and display an error widget instead of taking
-    // down the entire preview environment.
-    try {
-      preview = widget.preview.builder();
-    } on Object catch (error, stackTrace) {
-      errorThrownDuringTreeConstruction = true;
-      preview = _WidgetPreviewErrorWidget(
-        error: error,
-        stackTrace: stackTrace,
-        size: maxSizeConstraints.biggest,
-      );
-    }
+
+    // Wrap the previewed widget with a ValueListenableBuilder responsible for performing a "soft"
+    // restart.
+    //
+    // A soft restart simply removes the previewed widget from the widget tree for a frame before
+    // re-inserting it on the next frame. This has the effect of re-running local initializers in
+    // State objects, which normally requires a hot restart to accomplish in a normal application.
+    Widget preview = ValueListenableBuilder<bool>(
+      valueListenable: softRestartListenable,
+      builder: (context, performRestart, _) {
+        try {
+          final previewWidget = Container(
+            key: key,
+            child: widget.preview.builder(),
+          );
+          if (performRestart) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Trigger a rebuild on the next frame to re-insert previewWidget.
+              softRestartListenable.value = false;
+            }, debugLabel: 'Soft Restart');
+            return SizedBox.fromSize(size: lastChildSize);
+          }
+          return previewWidget;
+        } on Object catch (error, stackTrace) {
+          // Catch any unhandled exceptions and display an error widget instead of taking
+          // down the entire preview environment.
+          errorThrownDuringTreeConstruction = true;
+          return _WidgetPreviewErrorWidget(
+            error: error,
+            stackTrace: stackTrace,
+            size: maxSizeConstraints.biggest,
+          );
+        }
+      },
+    );
 
     preview = _WidgetPreviewWrapper(
       previewerConstraints: maxSizeConstraints,
@@ -185,12 +213,18 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
         const VerticalSpacer(),
         Row(
           mainAxisSize: MainAxisSize.min,
+          // If an unhandled exception was caught and we're displaying an error
+          // widget, these controls should be disabled.
+          // TODO(bkonyi): improve layout of controls.
           children: [
             ZoomControls(
               transformationController: transformationController,
-              // If an unhandled exception was caught and we're displaying an error
-              // widget, these controls should be disabled.
               enabled: !errorThrownDuringTreeConstruction,
+            ),
+            const SizedBox(width: 30),
+            SoftRestartButton(
+              enabled: !errorThrownDuringTreeConstruction,
+              softRestartListenable: softRestartListenable,
             ),
           ],
         ),
