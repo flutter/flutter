@@ -81,7 +81,7 @@ export class FlutterEntrypointLoader {
    * which is bound to the correct instance of the FlutterEntrypointLoader by
    * the FlutterLoader object.
    *
-   * @param {Function} engineInitializer @see https://github.com/flutter/engine/blob/main/lib/web_ui/lib/src/engine/js_interop/js_loader.dart#L42
+   * @param {Function} engineInitializer @see https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/lib/src/engine/js_interop/js_loader.dart#L42
    */
   didCreateEngineInitializer(engineInitializer) {
     if (typeof this._didCreateEngineInitializerResolve === "function") {

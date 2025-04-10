@@ -39,7 +39,7 @@ source on a supported platform (see:
 run at all outside of a valid repository setup.
 
 [architectural layers]: https://docs.flutter.dev/resources/architectural-overview#architectural-layers
-[setting up the engine development environment]: https://github.com/flutter/engine/blob/main/docs/contributing/Setting-up-the-Engine-development-environment.md
+[setting up the engine development environment]: https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md
 
 It is recommended to add `et` to your `PATH` by adding the [`bin` folder][]:
 

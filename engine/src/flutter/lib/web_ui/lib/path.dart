@@ -4,7 +4,7 @@
 
 part of ui;
 
-// For documentation see https://github.com/flutter/engine/blob/main/lib/ui/painting.dart
+// For documentation see https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/painting.dart
 
 abstract class Path {
   factory Path() => engine.renderer.createPath();

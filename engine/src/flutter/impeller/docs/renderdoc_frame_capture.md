@@ -5,10 +5,10 @@
 1. First step is to set up RenderDoc. Follow the [quickstart instructions](https://renderdoc.org/docs/getting_started/quick_start.html).
    For the purposes of this guide it is assumed that you are able to get RenderDoc running.
    If the RenderDoc installed from your package manager crashes on startup, consider [building from source](https://github.com/baldurk/renderdoc/blob/v1.x/docs/CONTRIBUTING/Compiling.md).
-   
+
 2. The next step would be to run the application you wish the capture the frames of.
    Typically these would be one of the [playground tests](https://github.com/flutter/engine/tree/main/impeller/playground),
-   for example [those in entity_unittests.cc](https://github.com/flutter/engine/blob/main/impeller/entity/entity_unittests.cc).
+   for example [those in entity_unittests.cc](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/entity/entity_unittests.cc).
    To build these, do:
 
    ```bash
@@ -49,4 +49,4 @@
 
 _See also:_
 
- * [Learning to Read GPU Frame Captures](https://github.com/flutter/engine/blob/main/impeller/docs/read_frame_captures.md)
+ * [Learning to Read GPU Frame Captures](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/docs/read_frame_captures.md)

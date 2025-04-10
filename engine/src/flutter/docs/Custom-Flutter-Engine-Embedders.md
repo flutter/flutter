@@ -12,8 +12,8 @@ This is a very low level API and is not suitable for beginners.
     * The binary is not stripped and contains debug information. Embedders are advised to strip the binary before deployment.
   * The Windows buildbot uploads the artifacts to a known location. Access it here [`https://storage.googleapis.com/flutter_infra_release/flutter/FLUTTER_HASH/windows-x64/windows-x64-embedder.zip`](https://storage.googleapis.com/flutter_infra_release/flutter/e672b006cb34c921db85b8e2f482ed3144a4574b/windows-x64/windows-x64-embedder.zip)
     * Replace `FLUTTER_HASH` with the SHA of the Flutter commit you wish to use.
-* The Flutter engine API has no platform specific dependencies, has a stable ABI and is available in its entirety in a [single C header file available here](https://github.com/flutter/engine/blob/master/engine/src/flutter/shell/platform/embedder/embedder.h).
-* To use as a guide, you may use [this example embedder that uses GLFW](https://github.com/flutter/engine/blob/master/engine/src/flutter/examples/glfw/FlutterEmbedderGLFW.cc) for window management and rendering.
+* The Flutter engine API has no platform specific dependencies, has a stable ABI and is available in its entirety in a [single C header file available here](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/embedder/embedder.h).
+* To use as a guide, you may use [this example embedder that uses GLFW](https://github.com/flutter/flutter/blob/main/engine/src/flutter/examples/glfw/FlutterEmbedderGLFW.cc) for window management and rendering.
 
 While we do not object to teams creating custom builds of the Flutter engine for their purposes, we do not support this configuration. Not supporting it means that we do not commit to any timelines for fixing bugs that may come up in such a configuration, even for customers for which we would usually be willing to make commitments (see the [Issue Hygiene](../contributing/issue_hygiene/README.md) page). It also means that we encourage teams to view such configurations as short-term solutions only and encourage teams to transition away from such configurations at the earliest possible opportunity.
 

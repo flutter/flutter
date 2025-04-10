@@ -2104,7 +2104,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
   }
 
   // Must match SemanticsActions in semantics.dart
-  // https://github.com/flutter/engine/blob/main/lib/ui/semantics.dart
+  // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
   public enum Action {
     TAP(1 << 0),
     LONG_PRESS(1 << 1),
@@ -2147,7 +2147,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
           & Action.SHOW_ON_SCREEN.value;
 
   // Must match SemanticsFlag in semantics.dart
-  // https://github.com/flutter/engine/blob/main/lib/ui/semantics.dart
+  // https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
   /* Package */ enum Flag {
     HAS_CHECKED_STATE(1 << 0),
     IS_CHECKED(1 << 1),
@@ -2301,7 +2301,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
    * analogous concept within Flutter.
    *
    * <p>To see how this {@code SemanticsNode}'s fields correspond to Flutter's semantics system, see
-   * semantics.dart: https://github.com/flutter/engine/blob/main/lib/ui/semantics.dart
+   * semantics.dart:
+   * https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/semantics.dart
    */
   private static class SemanticsNode {
     private static boolean nullableHasAncestor(
