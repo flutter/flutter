@@ -92,6 +92,7 @@ void main() {
   });
 
   testWidgets('Nested expansion tile', (WidgetTester tester) async {
+    const Duration infinitesimalDuration = Duration(microseconds: 1);
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -106,19 +107,23 @@ void main() {
     expect(find.text('Content'), findsNothing);
 
     await tester.tap(find.text('Outer'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
     expect(find.text('Content'), findsNothing);
 
     await tester.tap(find.text('Inner'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
     expect(find.text('Content'), findsOneWidget);
 
     await tester.tap(find.text('Inner'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
     expect(find.text('Content'), findsNothing);
 
     await tester.tap(find.text('Outer'));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
     expect(find.text('Content'), findsNothing);
   });
 
