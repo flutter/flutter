@@ -216,6 +216,11 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
                                              : flutter::Settings::MergedPlatformUIThread::kDisabled;
   }
 
+  NSNumber* enableFlutterGPU = [mainBundle objectForInfoDictionaryKey:@"FLTEnableFlutterGPU"];
+  if (enableFlutterGPU != nil) {
+    settings.enable_flutter_gpu = enableFlutterGPU.boolValue;
+  }
+
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   // There are no ownership concerns here as all mappings are owned by the
   // embedder and not the engine.

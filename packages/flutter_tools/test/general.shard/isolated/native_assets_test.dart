@@ -84,7 +84,7 @@ void main() {
         fileSystem: fileSystem,
         buildRunner: FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['bar'],
-          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
         ),
       );
@@ -248,7 +248,6 @@ void main() {
           ),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
             codeAssets: <CodeAsset>[
-              makeCodeAsset('direct', directSoFile.uri, DynamicLoadingBundled()),
               makeCodeAsset('linked', linkedSoFile.uri, DynamicLoadingBundled()),
             ],
           ),

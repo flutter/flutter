@@ -299,7 +299,7 @@ flutter run --local-web-sdk=wasm_release -d chrome
 flutter test --local-web-sdk=wasm_release test/path/to/your_test.dart
 ```
 
-For testing the engine again use [felt](https://github.com/flutter/engine/blob/main/lib/web_ui/README.md) tool
+For testing the engine again use [felt](https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/web_ui/README.md) tool
 this time with felt_windows.bat.
 
 ```

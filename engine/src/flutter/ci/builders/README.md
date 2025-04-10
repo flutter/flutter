@@ -35,14 +35,14 @@ The [engine orchestrator recipe](https://flutter.googlesource.com/recipes/+/refs
 reads each file in that directory, shards their builds, collects artifacts and
 uploads them to the Google Cloud Storage bucket.
 
-The [.ci.yaml file](https://github.com/flutter/engine/blob/main/.ci.yaml) at the
+The [.ci.yaml file](https://github.com/flutter/flutter/blob/main/engine/src/flutter/.ci.yaml) at the
 root of the `flutter/engine` repository puts all the components together.
 Builds are specified in that file using a property pointing to the build definition
 file to be used by engine\_v2 recipes. Full documentation of the `.ci.yaml` file format
 can be found [in the Cocoon repository here](https://github.com/flutter/cocoon/blob/main/CI_YAML.md).
 
 The following is a sample build configuration referencing
-[android\_aot\_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_android_aot_engine.json)
+[android\_aot\_engine.json](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_android_aot_engine.json)
 in the `config_name` under `properties`:
 
 ```yaml
@@ -243,7 +243,7 @@ in builders that do not need it.
 #### GN
 
 A list of strings representing flags passed to the
-[tools/gn](https://github.com/flutter/engine/blob/main/tools/gn) script. The strings can be in the form of “--flag=value” or
+[tools/gn](https://github.com/flutter/flutter/blob/main/engine/src/flutter/tools/gn) script. The strings can be in the form of “--flag=value” or
 “--flag” followed by “value”.
 
 ```json
@@ -276,7 +276,7 @@ and “target” which is a list of strings with the Ninja targets to build.
 In the example above the ninja command will use the configuration for
 host\_debug and will build artifacts and embedder targets as described
 by the
-[flutter/build/archives/BUILD.gn](https://github.com/flutter/engine/blob/main/build/archives/BUILD.gn)
+[flutter/build/archives/BUILD.gn](https://github.com/flutter/flutter/blob/main/engine/src/flutter/build/archives/BUILD.gn)
 file.
 
 #### Tests

@@ -338,7 +338,8 @@ class Canvas {
   /// supports framebuffer fetch.
   std::shared_ptr<Texture> FlipBackdrop(Point global_pass_position,
                                         bool should_remove_texture = false,
-                                        bool should_use_onscreen = false);
+                                        bool should_use_onscreen = false,
+                                        bool post_depth_increment = false);
 
   bool BlitToOnscreen(bool is_onscreen = false);
 

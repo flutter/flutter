@@ -53,8 +53,7 @@ class AHBTexturePoolVK {
   ///                            in the pool.
   ///
   explicit AHBTexturePoolVK(std::weak_ptr<Context> context,
-                            android::HardwareBufferDescriptor desc,
-                            size_t max_entries = 3u);
+                            android::HardwareBufferDescriptor desc);
 
   ~AHBTexturePoolVK();
 
@@ -97,23 +96,12 @@ class AHBTexturePoolVK {
   void Push(std::shared_ptr<AHBTextureSourceVK> texture,
             fml::UniqueFD render_ready_fence);
 
-  //----------------------------------------------------------------------------
-  /// @brief      Perform an explicit GC of the pool items. This happens
-  ///             implicitly when a texture source us pushed into the pool but
-  ///             one may be necessary explicitly if there is no push back into
-  ///             the pool for a long time.
-  ///
-  void PerformGC();
-
  private:
   const std::weak_ptr<Context> context_;
   const android::HardwareBufferDescriptor desc_;
-  const size_t max_entries_;
   bool is_valid_ = false;
   Mutex pool_mutex_;
   std::deque<PoolEntry> pool_ IPLR_GUARDED_BY(pool_mutex_);
-
-  void PerformGCLocked() IPLR_REQUIRES(pool_mutex_);
 
   std::shared_ptr<AHBTextureSourceVK> CreateTexture() const;
 };
