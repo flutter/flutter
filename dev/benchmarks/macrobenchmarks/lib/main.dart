@@ -69,8 +69,10 @@ class MacrobenchmarksApp extends StatelessWidget {
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
-        kPathTessellationRouteName: (BuildContext context) => const PathTessellationPage(paintStyle: PaintingStyle.fill),
-        kPathStrokeTessellationRouteName: (BuildContext context) => const PathTessellationPage(paintStyle: PaintingStyle.stroke),
+        kPathTessellationRouteName:
+            (BuildContext context) => const PathTessellationPage(paintStyle: PaintingStyle.fill),
+        kPathStrokeTessellationRouteName:
+            (BuildContext context) => const PathTessellationPage(paintStyle: PaintingStyle.stroke),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),

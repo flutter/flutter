@@ -41,7 +41,10 @@ class _PathTessellationPageState extends State<PathTessellationPage>
                 return Container(
                   margin: const EdgeInsets.all(1.0),
                   decoration: BoxDecoration(color: Colors.white.withOpacity(0.2)),
-                  child: IconRow(iconSize: (30 + 0.5 * (index % 10)) * scale, paintStyle: widget.paintStyle),
+                  child: IconRow(
+                    iconSize: (30 + 0.5 * (index % 10)) * scale,
+                    paintStyle: widget.paintStyle,
+                  ),
                 );
               },
               itemCount: 200,
@@ -66,7 +69,10 @@ class _PathTessellationPageState extends State<PathTessellationPage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    SizedBox(height: 100, child: IconRow(iconSize: 55.0 * scale, paintStyle: widget.paintStyle)),
+                    SizedBox(
+                      height: 100,
+                      child: IconRow(iconSize: 55.0 * scale, paintStyle: widget.paintStyle),
+                    ),
                     MaterialButton(
                       textColor: Colors.white,
                       key: const Key('animate_button'), // this key is used by the driver test
@@ -194,19 +200,31 @@ class _SettingsIconPainter extends CustomPainter {
 
     Path path;
     path = _path1.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0x60F84F39)
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0x60F84F39)
         ..style = paintStyle
-        ..strokeWidth = 2.0);
+        ..strokeWidth = 2.0,
+    );
 
     path = _path2.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0xFFF84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xFFF84F39)
+        ..style = paintStyle
+        ..strokeWidth = 2.0,
+    );
 
     path = _path3.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0xFFF84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xFFF84F39)
+        ..style = paintStyle
+        ..strokeWidth = 2.0,
+    );
   }
 
   static final Path _path1 = _pathFromString(
@@ -236,14 +254,22 @@ class _CameraIconPainter extends CustomPainter {
 
     Path path;
     path = _path1.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0xFFF84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xFFF84F39)
+        ..style = paintStyle
+        ..strokeWidth = 2.0,
+    );
 
     path = _path2.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0x60F84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0x60F84F39)
+        ..style = paintStyle
+        ..strokeWidth = 2.0,
+    );
   }
 
   static final Path _path1 = _pathFromString(
@@ -270,14 +296,22 @@ class _CalendarIconPainter extends CustomPainter {
 
     Path path;
     path = _path1.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0x60F84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0x60F84F39)
+        ..style = paintStyle
+        ..strokeWidth = 2.0,
+    );
 
     path = _path2.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0xFFF84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xFFF84F39)
+        ..style = paintStyle
+        ..strokeWidth = 2.0,
+    );
   }
 
   static final Path _path1 = _pathFromString(
@@ -304,14 +338,22 @@ class _ConversationIconPainter extends CustomPainter {
 
     Path path;
     path = _path1.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0x60F84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0x60F84F39)
+        ..style = paintStyle
+        ..strokeWidth = 2.0,
+    );
 
     path = _path2.transform(scale.storage)..fillType = PathFillType.evenOdd;
-    canvas.drawPath(path, Paint()..color = const Color(0xFFF84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xFFF84F39)
+        ..style = paintStyle
+        ..strokeWidth = 2.0,
+    );
   }
 
   static final Path _path1 = _pathFromString(
@@ -337,9 +379,11 @@ class _GeometryIconPainter extends CustomPainter {
     const Size size = Size(20, 20);
     canvas.scale(canvasSize.width / size.width, canvasSize.height / size.height);
 
-    final Paint paint = Paint()..color = const Color(0xFFF84F39)
-      ..style = paintStyle
-      ..strokeWidth = 2.0;
+    final Paint paint =
+        Paint()
+          ..color = const Color(0xFFF84F39)
+          ..style = paintStyle
+          ..strokeWidth = 2.0;
     final Rect frame = Offset.zero & size;
     canvas.drawDRRect(
       RRect.fromRectAndRadius(frame, const Radius.elliptical(5, 4)),
