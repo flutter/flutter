@@ -45,6 +45,27 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     return nullptr;
   }
 
+  // Use AHB Swapchains if they are opted in.
+  if (ContextVK::Cast(*context).GetShouldEnableSurfaceControlSwapchain() &&
+      AHBSwapchainVK::IsAvailableOnPlatform()) {
+    CreateTransactionCB callback =
+        android_get_device_api_level() >= 34 ? cb : CreateTransactionCB({});
+    auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
+        context,             //
+        window.GetHandle(),  //
+        callback,            //
+        window.GetSize(),    //
+        enable_msaa          //
+        ));
+
+    if (ahb_swapchain->IsValid()) {
+      return ahb_swapchain;
+        } else {
+          VALIDATION_LOG
+              << "Could not create AHB swapchain. Falling back to KHR variant.";
+        }
+  }
+
   vk::AndroidSurfaceCreateInfoKHR surface_info;
   surface_info.setWindow(window.GetHandle());
   auto [result, surface] =
@@ -54,28 +75,6 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
     VALIDATION_LOG << "Could not create KHR Android Surface: "
                    << vk::to_string(result);
     return nullptr;
-  }
-
-  // Use AHB Swapchains if they are opted in.
-  if (ContextVK::Cast(*context).GetShouldEnableSurfaceControlSwapchain() &&
-      AHBSwapchainVK::IsAvailableOnPlatform() &&
-      android_get_device_api_level() >= 34) {
-    FML_LOG(WARNING) << "Using Android SurfaceControl Swapchain.";
-    auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
-        context,             //
-        window.GetHandle(),  //
-        cb,                  //
-        surface,             //
-        window.GetSize(),    //
-        enable_msaa          //
-        ));
-
-    if (ahb_swapchain->IsValid()) {
-      return ahb_swapchain;
-    } else {
-      VALIDATION_LOG
-          << "Could not create AHB swapchain. Falling back to KHR variant.";
-    }
   }
 
   // Fallback to KHR swapchains if AHB swapchains aren't available.
