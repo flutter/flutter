@@ -12,6 +12,15 @@ TextStyle fixBlurryText(TextStyle style) {
   );
 }
 
+final TextStyle linkTextStyle = fixBlurryText(
+  TextStyle(
+    decoration: TextDecoration.underline,
+    // TODO(bkonyi): this color scheme is from DevTools and should be responsive
+    // to changes in the previewer theme.
+    color: const Color(0xFF1976D2),
+  ),
+);
+
 /// A basic vertical spacer.
 class VerticalSpacer extends StatelessWidget {
   /// Creates a basic vertical spacer.

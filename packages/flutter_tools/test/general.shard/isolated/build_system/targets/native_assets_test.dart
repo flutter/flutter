@@ -202,7 +202,6 @@ void main() {
       final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
         packagesWithNativeAssetsResult: <String>['foo'],
         buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-          codeAssets: codeAssets,
           dependencies: <Uri>[Uri.file('src/foo.c')],
         ),
         linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
@@ -270,7 +269,6 @@ void main() {
         final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
           packagesWithNativeAssetsResult: <String>['foo'],
           buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
-            codeAssets: codeAssets,
             dependencies: <Uri>[Uri.file('src/foo.c')],
           ),
           linkResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(codeAssets: codeAssets),
