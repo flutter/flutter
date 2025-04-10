@@ -76,8 +76,6 @@ FLUTTER_ASSERT_ARC
 }
 
 - (void)publishServiceProtocolPort:(NSURL*)url {
-  // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-  FML_LOG(INFO) << "Publish Service Protocol Port";
   DNSServiceFlags flags = kDNSServiceFlagsDefault;
 #if TARGET_IPHONE_SIMULATOR
   // Simulator needs to use local loopback explicitly to work.

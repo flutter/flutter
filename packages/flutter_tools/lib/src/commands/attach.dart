@@ -22,8 +22,6 @@ import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
-import '../globals.dart';
-import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -320,7 +318,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         timeout: const Duration(seconds: 30),
         slowWarningCallback: () {
           // On iOS we rely on mDNS to find Dart VM Service.
-          if (platform.isMacOS && device is IOSSimulator) {
+          if (device is IOSSimulator) {
             // mDNS on simulators stopped working in macOS 15.4.
             // See https://github.com/flutter/flutter/issues/166333.
             return 'The Dart VM Service was not discovered after 30 seconds. '
