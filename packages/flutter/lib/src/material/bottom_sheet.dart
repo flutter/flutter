@@ -1134,9 +1134,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
         ColorTween(
           begin: barrierColor.withValues(alpha: 0.0),
           end: barrierColor, // changedInternalState is called if barrierColor updates
-        ).chain(
-          CurveTween(curve: barrierCurve),
-        ), // changedInternalState is called if barrierCurve updates
+        ).chain(CurveTween(barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
       return AnimatedModalBarrier(
         color: color,

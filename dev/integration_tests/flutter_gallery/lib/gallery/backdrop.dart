@@ -172,7 +172,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   static final Animatable<double> _frontOpacityTween = Tween<double>(
     begin: 0.2,
     end: 1.0,
-  ).chain(CurveTween(curve: const Interval(0.0, 0.4, curve: Curves.easeInOut)));
+  ).chain(CurveTween(const Interval(0.0, 0.4, curve: Curves.easeInOut)));
 
   @override
   void initState() {

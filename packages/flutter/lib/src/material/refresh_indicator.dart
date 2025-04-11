@@ -397,7 +397,7 @@ class RefreshIndicatorState extends State<RefreshIndicator>
         ColorTween(
           begin: color.withAlpha(0),
           end: color.withAlpha(color.alpha),
-        ).chain(CurveTween(curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit))),
+        ).chain(CurveTween(const Interval(0.0, 1.0 / _kDragSizeFactorLimit))),
       );
     }
   }

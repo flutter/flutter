@@ -192,9 +192,9 @@ class InkRipple extends InteractiveInkFeature {
   /// material [Theme], or [ButtonStyle].
   static const InteractiveInkFeatureFactory splashFactory = _InkRippleFactory();
 
-  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
+  static final Animatable<double> _easeCurveTween = CurveTween(Curves.ease);
   static final Animatable<double> _fadeOutIntervalTween = CurveTween(
-    curve: const Interval(_kFadeOutIntervalStart, 1.0),
+    const Interval(_kFadeOutIntervalStart, 1.0),
   );
 
   @override

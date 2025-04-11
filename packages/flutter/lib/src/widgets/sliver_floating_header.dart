@@ -235,12 +235,10 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
               _ => childExtent,
             },
           ).chain(
-            CurveTween(
-              curve: switch (direction) {
-                ScrollDirection.forward => animationStyle?.curve ?? Curves.easeInOut,
-                _ => animationStyle?.reverseCurve ?? Curves.easeInOut,
-              },
-            ),
+            CurveTween(switch (direction) {
+              ScrollDirection.forward => animationStyle?.curve ?? Curves.easeInOut,
+              _ => animationStyle?.reverseCurve ?? Curves.easeInOut,
+            }),
           ),
         );
         snapController!.forward(from: 0.0);
