@@ -56,6 +56,8 @@ void main() {
       foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f)),
     ),
     locale: Locale('en'),
+    subHeaderForegroundColor: Color(0xffffff8f),
+    toggleButtonTextStyle: TextStyle(fontSize: 13),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -141,6 +143,8 @@ void main() {
     expect(theme.cancelButtonStyle, null);
     expect(theme.confirmButtonStyle, null);
     expect(theme.locale, null);
+    expect(theme.subHeaderForegroundColor, null);
+    expect(theme.toggleButtonTextStyle, null);
   });
 
   testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
@@ -296,6 +300,11 @@ void main() {
       equalsIgnoringHashCodes(TextButton.styleFrom().toString()),
     );
     expect(m3.locale, null);
+    expect(m3.subHeaderForegroundColor, colorScheme.onSurface.withOpacity(0.60));
+    expect(
+      m3.toggleButtonTextStyle,
+      textTheme.titleSmall?.apply(color: m3.subHeaderForegroundColor),
+    );
   });
 
   testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
@@ -451,6 +460,11 @@ void main() {
     );
     expect(m2.locale, null);
     expect(m2.yearShape?.resolve(<MaterialState>{}), const StadiumBorder());
+    expect(m2.subHeaderForegroundColor, colorScheme.onSurface.withOpacity(0.60));
+    expect(
+      m2.toggleButtonTextStyle,
+      textTheme.titleSmall?.apply(color: m2.subHeaderForegroundColor),
+    );
   });
 
   testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -519,6 +533,8 @@ void main() {
         'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff6f)}))',
         'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff7f)}))',
         'locale: en',
+        'toggleButtonTextStyle: TextStyle(inherit: true, size: 13.0)',
+        'subHeaderForegroundColor: ${const Color(0xffffff8f)}',
       ]),
     );
   });
@@ -590,6 +606,13 @@ void main() {
           ),
     );
     expect(day24Shape.side.width, datePickerTheme.todayBorder?.width);
+
+    // Test the toggle mode button style.
+    final Text january2023 = tester.widget<Text>(find.text('January 2023'));
+    expect(january2023.style?.fontSize, datePickerTheme.toggleButtonTextStyle?.fontSize);
+    expect(january2023.style?.color, datePickerTheme.subHeaderForegroundColor);
+    final Icon arrowIcon = tester.widget<Icon>(find.byIcon(Icons.arrow_drop_down));
+    expect(arrowIcon.color, datePickerTheme.subHeaderForegroundColor);
 
     // Test the day overlay color.
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
@@ -1312,4 +1335,58 @@ void main() {
       datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}),
     );
   });
+
+  testWidgets('Toggle button uses DatePickerTheme.toggleButtonTextStyle.color when it is defined', (
+    WidgetTester tester,
+  ) async {
+    const Color toggleButtonTextColor = Color(0xff00ff00);
+    const Color subHeaderForegroundColor = Color(0xffff0000);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          datePickerTheme: const DatePickerThemeData(
+            toggleButtonTextStyle: TextStyle(color: toggleButtonTextColor),
+            subHeaderForegroundColor: subHeaderForegroundColor,
+          ),
+        ),
+        home: DatePickerDialog(
+          initialDate: DateTime(2023, DateTime.january, 25),
+          firstDate: DateTime(2022),
+          lastDate: DateTime(2024, DateTime.december, 31),
+          currentDate: DateTime(2023, DateTime.january, 24),
+        ),
+      ),
+    );
+
+    final Text toggleButtonText = tester.widget(find.text('January 2023'));
+    expect(toggleButtonText.style?.color, toggleButtonTextColor);
+  });
+
+  testWidgets(
+    'Toggle button uses DatePickerTheme.subHeaderForegroundColor when DatePickerTheme.toggleButtonTextStyle.color is not defined',
+    (WidgetTester tester) async {
+      const Color subHeaderForegroundColor = Color(0xffff0000);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            datePickerTheme: const DatePickerThemeData(
+              toggleButtonTextStyle: TextStyle(),
+              subHeaderForegroundColor: subHeaderForegroundColor,
+            ),
+          ),
+          home: DatePickerDialog(
+            initialDate: DateTime(2023, DateTime.january, 25),
+            firstDate: DateTime(2022),
+            lastDate: DateTime(2024, DateTime.december, 31),
+            currentDate: DateTime(2023, DateTime.january, 24),
+          ),
+        ),
+      );
+
+      final Text toggleButtonText = tester.widget(find.text('January 2023'));
+      expect(toggleButtonText.style?.color, subHeaderForegroundColor);
+    },
+  );
 }
