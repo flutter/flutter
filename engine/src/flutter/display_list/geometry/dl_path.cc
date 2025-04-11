@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/geometry/dl_path.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/geometry/path_builder.h"
@@ -243,24 +244,16 @@ bool DlPath::IsRoundRect(DlRoundRect* rrect) const {
   return ret;
 }
 
-bool DlPath::IsSkRect(SkRect* rect, bool* is_closed) const {
-  return GetSkPath().isRect(rect, is_closed);
-}
-
-bool DlPath::IsSkOval(SkRect* bounds) const {
-  return GetSkPath().isOval(bounds);
-}
-
-bool DlPath::IsSkRRect(SkRRect* rrect) const {
-  return GetSkPath().isRRect(rrect);
-}
-
 bool DlPath::Contains(const DlPoint& point) const {
   return GetSkPath().contains(point.x, point.y);
 }
 
-SkRect DlPath::GetSkBounds() const {
-  return GetSkPath().getBounds();
+DlPathFillType DlPath::GetFillType() const {
+  auto& path = data_->path;
+  if (path.has_value()) {
+    return path.value().GetFillType();
+  }
+  return ToDlFillType(GetSkPath().getFillType());
 }
 
 DlRect DlPath::GetBounds() const {
@@ -430,6 +423,7 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
   if (subpath_needs_close) {
     receiver.Close();
   }
+  receiver.PathEnd();
 }
 
 namespace {
@@ -538,6 +532,7 @@ void DlPath::DispatchFromSkiaPath(const SkPath& path,
         break;
     }
   } while (verb != SkPath::Verb::kDone_Verb);
+  receiver.PathEnd();
 }
 
 }  // namespace flutter

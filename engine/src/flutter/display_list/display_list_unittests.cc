@@ -666,7 +666,7 @@ TEST_F(DisplayListTest, OOBSaveLayerContentCulledWithBlurFilter) {
   EXPECT_EQ(display_list->op_count(), 2u);
   EXPECT_EQ(display_list->total_depth(), 1u);
 
-  EXPECT_TRUE(display_list->bounds().isEmpty()) << display_list->bounds();
+  EXPECT_TRUE(display_list->GetBounds().IsEmpty()) << display_list->GetBounds();
 }
 
 TEST_F(DisplayListTest, OOBSaveLayerContentCulledWithMatrixFilter) {
@@ -696,7 +696,7 @@ TEST_F(DisplayListTest, OOBSaveLayerContentCulledWithMatrixFilter) {
   EXPECT_EQ(display_list->op_count(), 2u);
   EXPECT_EQ(display_list->total_depth(), 1u);
 
-  EXPECT_TRUE(display_list->bounds().isEmpty()) << display_list->bounds();
+  EXPECT_TRUE(display_list->GetBounds().IsEmpty()) << display_list->GetBounds();
 }
 
 TEST_F(DisplayListTest, SingleOpSizes) {
@@ -749,7 +749,7 @@ TEST_F(DisplayListTest, SingleOpDisplayListsRecapturedAreEqual) {
       ASSERT_EQ(copy->op_count(true), dl->op_count(true)) << desc;
       ASSERT_EQ(copy->bytes(true), dl->bytes(true)) << desc;
       ASSERT_EQ(copy->total_depth(), dl->total_depth()) << desc;
-      ASSERT_EQ(copy->bounds(), dl->bounds()) << desc;
+      ASSERT_EQ(copy->GetBounds(), dl->GetBounds()) << desc;
       ASSERT_TRUE(copy->Equals(*dl)) << desc;
       ASSERT_TRUE(dl->Equals(*copy)) << desc;
     }
@@ -780,7 +780,7 @@ TEST_F(DisplayListTest, SingleOpDisplayListsRecapturedByIndexAreEqual) {
       ASSERT_EQ(copy->op_count(true), dl->op_count(true)) << desc;
       ASSERT_EQ(copy->bytes(true), dl->bytes(true)) << desc;
       ASSERT_EQ(copy->total_depth(), dl->total_depth()) << desc;
-      ASSERT_EQ(copy->bounds(), dl->bounds()) << desc;
+      ASSERT_EQ(copy->GetBounds(), dl->GetBounds()) << desc;
       ASSERT_TRUE(copy->Equals(*dl)) << desc;
       ASSERT_TRUE(dl->Equals(*copy)) << desc;
     }
@@ -810,7 +810,7 @@ TEST_F(DisplayListTest, SingleOpDisplayListsCompareToEachOther) {
           ASSERT_EQ(listA->op_count(true), listB->op_count(true)) << desc;
           ASSERT_EQ(listA->bytes(true), listB->bytes(true)) << desc;
           EXPECT_EQ(listA->total_depth(), listB->total_depth()) << desc;
-          ASSERT_EQ(listA->bounds(), listB->bounds()) << desc;
+          ASSERT_EQ(listA->GetBounds(), listB->GetBounds()) << desc;
           ASSERT_TRUE(listA->Equals(*listB)) << desc;
           ASSERT_TRUE(listB->Equals(*listA)) << desc;
         } else {
@@ -840,7 +840,7 @@ TEST_F(DisplayListTest, SingleOpDisplayListsAreEqualWithOrWithoutRtree) {
       ASSERT_EQ(dl1->op_count(true), dl2->op_count(true)) << desc;
       ASSERT_EQ(dl1->bytes(true), dl2->bytes(true)) << desc;
       EXPECT_EQ(dl1->total_depth(), dl2->total_depth()) << desc;
-      ASSERT_EQ(dl1->bounds(), dl2->bounds()) << desc;
+      ASSERT_EQ(dl1->GetBounds(), dl2->GetBounds()) << desc;
       ASSERT_EQ(dl1->total_depth(), dl2->total_depth()) << desc;
       ASSERT_TRUE(DisplayListsEQ_Verbose(dl1, dl2)) << desc;
       ASSERT_TRUE(DisplayListsEQ_Verbose(dl2, dl2)) << desc;
@@ -1845,7 +1845,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
   }
   sk_sp<DisplayList> display_list = builder.Build();
   // Prior to the fix, the bounds were empty.
-  EXPECT_FALSE(display_list->bounds().isEmpty());
+  EXPECT_FALSE(display_list->GetBounds().IsEmpty());
   // These are just inside and outside of the expected bounds, but
   // testing float values can be flaky wrt minor changes in the bounds
   // calculations. If these lines have to be revised too often as the DL
@@ -1861,7 +1861,7 @@ TEST_F(DisplayListTest, FlutterSvgIssue661BoundsWereEmpty) {
   EXPECT_EQ(DlIRect::RoundOut(display_list->GetBounds()),
             DlIRect::MakeWH(100, 100));
   EXPECT_EQ(display_list->op_count(), 19u);
-  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 392u);
+  EXPECT_EQ(display_list->bytes(), sizeof(DisplayList) + 408u);
   EXPECT_EQ(display_list->total_depth(), 3u);
 }
 
@@ -3454,7 +3454,7 @@ TEST_F(DisplayListTest, NopOperationsOmittedFromRecords) {
           }
           ASSERT_EQ(list->op_count(), expected_op_count) << name;
           EXPECT_EQ(list->total_depth(), expected_total_depth) << name;
-          ASSERT_TRUE(list->bounds().isEmpty()) << name;
+          ASSERT_TRUE(list->GetBounds().IsEmpty()) << name;
         };
     run_one_test(
         name + " DrawColor",

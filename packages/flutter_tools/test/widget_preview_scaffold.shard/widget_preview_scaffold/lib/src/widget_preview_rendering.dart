@@ -11,8 +11,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'package:stack_trace/stack_trace.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'controls.dart';
+import 'dtd_services.dart';
 import 'generated_preview.dart';
 import 'utils.dart';
 import 'widget_preview.dart';
@@ -79,15 +81,6 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
         .map((frame) => frame.location.length)
         .fold(0, math.max);
 
-    final TextStyle linkTextStyle = fixBlurryText(
-      TextStyle(
-        decoration: TextDecoration.underline,
-        // TODO(bkonyi): this color scheme is from DevTools and should be responsive
-        // to changes in the previewer theme.
-        color: const Color(0xFF1976D2),
-      ),
-    );
-
     // Print out the stack trace nicely formatted.
     return frames.map<TextSpan>((frame) {
       if (frame is UnparsedFrame) return TextSpan(text: '$frame\n');
@@ -111,18 +104,68 @@ class _WidgetPreviewErrorWidget extends StatelessWidget {
   }
 }
 
+/// Displayed when no @Preview() annotations are detected in the project.
+///
+/// Links to documentation.
+class NoPreviewsDetectedWidget extends StatelessWidget {
+  const NoPreviewsDetectedWidget({super.key});
+
+  // TODO(bkonyi): update with actual documentation on flutter.dev.
+  static Uri documentationUrl = Uri.https(
+    'github.com',
+    'flutter/flutter/blob/master/packages/flutter/'
+        'lib/src/widgets/widget_preview.dart',
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(bkonyi): base this on the current color theme (dark vs light)
+    final style = fixBlurryText(TextStyle(color: Colors.black));
+    return Center(
+      child: Column(
+        children: <Widget>[
+          Text(
+            'No previews detected',
+            style: style.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const VerticalSpacer(),
+          Text('Read more about getting started with widget previews at:'),
+          Text.rich(
+            TextSpan(
+              text: documentationUrl.toString(),
+              style: linkTextStyle,
+              recognizer:
+                  TapGestureRecognizer()
+                    ..onTap = () {
+                      launchUrl(documentationUrl);
+                    },
+            ),
+            style: style,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class WidgetPreviewWidget extends StatefulWidget {
   const WidgetPreviewWidget({super.key, required this.preview});
 
   final WidgetPreview preview;
 
   @override
-  State<WidgetPreviewWidget> createState() => _WidgetPreviewWidgetState();
+  State<WidgetPreviewWidget> createState() => WidgetPreviewWidgetState();
 }
 
-class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
+class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   final transformationController = TransformationController();
   final deviceOrientation = ValueNotifier<Orientation>(Orientation.portrait);
+  final softRestartListenable = ValueNotifier<bool>(false);
+  final key = GlobalKey();
+
+  /// Returns the last size of the previewed widget.
+  Size get lastChildSize =>
+      (key.currentContext!.findRenderObject() as RenderBox).size;
 
   @override
   void initState() {
@@ -140,19 +183,41 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     );
 
     bool errorThrownDuringTreeConstruction = false;
-    Widget preview;
-    // Catch any unhandled exceptions and display an error widget instead of taking
-    // down the entire preview environment.
-    try {
-      preview = widget.preview.builder();
-    } on Object catch (error, stackTrace) {
-      errorThrownDuringTreeConstruction = true;
-      preview = _WidgetPreviewErrorWidget(
-        error: error,
-        stackTrace: stackTrace,
-        size: maxSizeConstraints.biggest,
-      );
-    }
+
+    // Wrap the previewed widget with a ValueListenableBuilder responsible for performing a "soft"
+    // restart.
+    //
+    // A soft restart simply removes the previewed widget from the widget tree for a frame before
+    // re-inserting it on the next frame. This has the effect of re-running local initializers in
+    // State objects, which normally requires a hot restart to accomplish in a normal application.
+    Widget preview = ValueListenableBuilder<bool>(
+      valueListenable: softRestartListenable,
+      builder: (context, performRestart, _) {
+        try {
+          final previewWidget = Container(
+            key: key,
+            child: widget.preview.builder(),
+          );
+          if (performRestart) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              // Trigger a rebuild on the next frame to re-insert previewWidget.
+              softRestartListenable.value = false;
+            }, debugLabel: 'Soft Restart');
+            return SizedBox.fromSize(size: lastChildSize);
+          }
+          return previewWidget;
+        } on Object catch (error, stackTrace) {
+          // Catch any unhandled exceptions and display an error widget instead of taking
+          // down the entire preview environment.
+          errorThrownDuringTreeConstruction = true;
+          return _WidgetPreviewErrorWidget(
+            error: error,
+            stackTrace: stackTrace,
+            size: maxSizeConstraints.biggest,
+          );
+        }
+      },
+    );
 
     preview = _WidgetPreviewWrapper(
       previewerConstraints: maxSizeConstraints,
@@ -184,12 +249,18 @@ class _WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
         const VerticalSpacer(),
         Row(
           mainAxisSize: MainAxisSize.min,
+          // If an unhandled exception was caught and we're displaying an error
+          // widget, these controls should be disabled.
+          // TODO(bkonyi): improve layout of controls.
           children: [
             ZoomControls(
               transformationController: transformationController,
-              // If an unhandled exception was caught and we're displaying an error
-              // widget, these controls should be disabled.
               enabled: !errorThrownDuringTreeConstruction,
+            ),
+            const SizedBox(width: 30),
+            SoftRestartButton(
+              enabled: !errorThrownDuringTreeConstruction,
+              softRestartListenable: softRestartListenable,
             ),
           ],
         ),
@@ -410,11 +481,115 @@ class PreviewAssetBundle extends PlatformAssetBundle {
 /// the preview scaffold project which prevents us from being able to use hot
 /// restart to iterate on this file.
 Future<void> mainImpl() async {
-  runApp(_WidgetPreviewScaffold());
+  // TODO(bkonyi): store somewhere.
+  await WidgetPreviewScaffoldDtdServices().connect();
+  runApp(WidgetPreviewScaffold(previews: previews));
 }
 
-class _WidgetPreviewScaffold extends StatelessWidget {
-  const _WidgetPreviewScaffold();
+/// Define the Enum for Layout Types
+enum LayoutType { gridView, listView }
+
+class WidgetPreviewScaffold extends StatelessWidget {
+  WidgetPreviewScaffold({super.key, required this.previews});
+
+  final List<WidgetPreview> Function() previews;
+
+  // Positioning values for positioning the previewer
+  final double _previewLeftPadding = 60.0;
+  final double _previewRightPadding = 20.0;
+
+  // Positioning values for the toggle layout buttons
+  final double _toggleButtonsTopPadding = 20.0;
+  final double _toggleButtonsLeftPadding = 20.0;
+
+  // Spacing values for the grid layout
+  final double _gridSpacing = 8.0;
+  final double _gridRunSpacing = 8.0;
+
+  // Notifier to manage layout state, default to GridView
+  final ValueNotifier<LayoutType> _selectedLayout = ValueNotifier<LayoutType>(
+    LayoutType.gridView,
+  );
+
+  // Function to toggle layouts based on enum value
+  void _toggleLayout(LayoutType layout) {
+    _selectedLayout.value = layout;
+  }
+
+  Widget _buildGridViewFlex(List<WidgetPreview> previewList) {
+    return SingleChildScrollView(
+      child: Wrap(
+        spacing: _gridSpacing,
+        runSpacing: _gridRunSpacing,
+        alignment: WrapAlignment.start,
+        children: <Widget>[
+          for (final WidgetPreview preview in previewList)
+            WidgetPreviewWidget(preview: preview),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVerticalListView(List<WidgetPreview> previewList) {
+    return ListView.builder(
+      itemCount: previewList.length,
+      itemBuilder: (context, index) {
+        final preview = previewList[index];
+        return Center(child: WidgetPreviewWidget(preview: preview));
+      },
+    );
+  }
+
+  Widget _displayToggleLayoutButtons() {
+    return Positioned(
+      top: _toggleButtonsTopPadding,
+      left: _toggleButtonsLeftPadding,
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          children: [
+            ValueListenableBuilder<LayoutType>(
+              valueListenable: _selectedLayout,
+              builder: (context, selectedLayout, _) {
+                return Column(
+                  children: [
+                    IconButton(
+                      onPressed: () => _toggleLayout(LayoutType.gridView),
+                      icon: Icon(Icons.grid_on),
+                      color:
+                          selectedLayout == LayoutType.gridView
+                              ? Colors.blue
+                              : Colors.black,
+                    ),
+                    IconButton(
+                      onPressed: () => _toggleLayout(LayoutType.listView),
+                      icon: Icon(Icons.view_list),
+                      color:
+                          selectedLayout == LayoutType.listView
+                              ? Colors.blue
+                              : Colors.black,
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _displayPreviewer(Widget previewView) {
+    return Positioned.fill(
+      left: _previewLeftPadding,
+      right: _previewRightPadding,
+      child: Container(padding: EdgeInsets.all(8.0), child: previewView),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -423,42 +598,41 @@ class _WidgetPreviewScaffold extends StatelessWidget {
     if (previewList.isEmpty) {
       previewView = Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Center(
-            // TODO: consider including details on how to get started
-            // with Widget Previews.
-            child: Text(
-              'No previews available',
-              style: fixBlurryText(TextStyle(color: Colors.white)),
-            ),
-          ),
-        ],
+        children: <Widget>[NoPreviewsDetectedWidget()],
       );
     } else {
       previewView = LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           return WidgetPreviewerWindowConstraints(
             constraints: constraints,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  for (final WidgetPreview preview in previewList)
-                    WidgetPreviewWidget(preview: preview),
-                ],
-              ),
+            child: ValueListenableBuilder<LayoutType>(
+              valueListenable: _selectedLayout,
+              builder: (context, selectedLayout, _) {
+                return switch (selectedLayout) {
+                  LayoutType.gridView => _buildGridViewFlex(previewList),
+                  LayoutType.listView => _buildVerticalListView(previewList),
+                };
+              },
             ),
           );
         },
       );
     }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Material(
         color: Colors.transparent,
         child: DefaultAssetBundle(
           bundle: PreviewAssetBundle(),
-          child: previewView,
+          child: Stack(
+            children: [
+              // Display the previewer
+              _displayPreviewer(previewView),
+              // Display the layout toggle buttons
+              _displayToggleLayoutButtons(),
+            ],
+          ),
         ),
       ),
     );
