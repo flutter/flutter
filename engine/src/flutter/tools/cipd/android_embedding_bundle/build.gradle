@@ -33,7 +33,7 @@ allprojects {
 apply plugin: "com.android.application"
 
 android {
-  compileSdk 35
+  compileSdk 36
 }
 
 configurations {
