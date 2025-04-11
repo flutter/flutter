@@ -215,10 +215,9 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
       if (android_vulkan_context) {
         return android_vulkan_context;
       } else {
-        return std::make_unique<AndroidContextGLSkia>(
-            fml::MakeRefCounted<AndroidEnvironmentGL>(),  //
-            task_runners                                  //
-        );
+        return std::make_unique<AndroidContextGLImpeller>(
+            std::make_unique<impeller::egl::Display>(),
+            enable_opengl_gpu_tracing);
       }
   }
   FML_UNREACHABLE();

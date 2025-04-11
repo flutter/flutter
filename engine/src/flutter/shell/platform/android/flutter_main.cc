@@ -245,15 +245,12 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     int api_level) {
   if (settings.enable_software_rendering) {
     if (settings.enable_impeller) {
-      FML_LOG(ERROR)
+      FML_CHECK(!settings.enable_impeller)
           << "Impeller does not support software rendering. Either disable "
              "software rendering or disable impeller.";
-      return AndroidRenderingAPI::kImpellerAutoselect;
     }
     return AndroidRenderingAPI::kSoftware;
   }
-  constexpr AndroidRenderingAPI kVulkanUnsupportedFallback =
-      AndroidRenderingAPI::kImpellerOpenGLES;
 
   // Debug/Profile only functionality for testing a specific
   // backend configuration.
