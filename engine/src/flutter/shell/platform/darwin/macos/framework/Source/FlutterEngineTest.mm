@@ -150,18 +150,18 @@ TEST_F(FlutterEngineTest, HasNonNullExecutableName) {
   ASSERT_FALSE(executable_name.empty());
 
   // Block until notified by the Dart test of the value of Platform.executable.
-  BOOL signalled = NO;
+  BOOL signaled = NO;
   AddNativeCallback("NotifyStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       const auto dart_string = tonic::DartConverter<std::string>::FromDart(
                           Dart_GetNativeArgument(args, 0));
                       EXPECT_EQ(executable_name, dart_string);
-                      signalled = YES;
+                      signaled = YES;
                     }));
 
   // Launch the test entrypoint.
   EXPECT_TRUE([engine runWithEntrypoint:@"executableNameNotNull"]);
 
-  while (!signalled) {
+  while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
   }
 }
@@ -205,9 +205,9 @@ TEST_F(FlutterEngineTest, MessengerSend) {
 
 TEST_F(FlutterEngineTest, CanLogToStdout) {
   // Block until completion of print statement.
-  BOOL signalled = NO;
+  BOOL signaled = NO;
   AddNativeCallback("SignalNativeTest",
-                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signalled = YES; }));
+                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signaled = YES; }));
 
   // Replace stdout stream buffer with our own.
   StreamCapture stdout_capture(&std::cout);
@@ -217,7 +217,7 @@ TEST_F(FlutterEngineTest, CanLogToStdout) {
   EXPECT_TRUE([engine runWithEntrypoint:@"canLogToStdout"]);
   ASSERT_TRUE(engine.running);
 
-  while (!signalled) {
+  while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
   }
 
@@ -231,7 +231,7 @@ TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
   FlutterEngine* engine = GetFlutterEngine();
 
   // Latch to ensure the entire layer tree has been generated and presented.
-  BOOL signalled = NO;
+  BOOL signaled = NO;
   AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       CALayer* rootLayer = engine.viewController.flutterView.layer;
                       EXPECT_TRUE(rootLayer.backgroundColor != nil);
@@ -240,7 +240,7 @@ TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
                             [NSColor colorWithCGColor:rootLayer.backgroundColor];
                         EXPECT_EQ(actualBackgroundColor, [NSColor blackColor]);
                       }
-                      signalled = YES;
+                      signaled = YES;
                     }));
 
   // Launch the test entrypoint.
@@ -253,7 +253,7 @@ TEST_F(FlutterEngineTest, DISABLED_BackgroundIsBlack) {
   [viewController loadView];
   viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
 
-  while (!signalled) {
+  while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
   }
 }
@@ -262,7 +262,7 @@ TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
   FlutterEngine* engine = GetFlutterEngine();
 
   // Latch to ensure the entire layer tree has been generated and presented.
-  BOOL signalled = NO;
+  BOOL signaled = NO;
   AddNativeCallback("SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       CALayer* rootLayer = engine.viewController.flutterView.layer;
                       EXPECT_TRUE(rootLayer.backgroundColor != nil);
@@ -271,7 +271,7 @@ TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
                             [NSColor colorWithCGColor:rootLayer.backgroundColor];
                         EXPECT_EQ(actualBackgroundColor, [NSColor whiteColor]);
                       }
-                      signalled = YES;
+                      signaled = YES;
                     }));
 
   // Launch the test entrypoint.
@@ -285,7 +285,7 @@ TEST_F(FlutterEngineTest, DISABLED_CanOverrideBackgroundColor) {
   viewController.flutterView.frame = CGRectMake(0, 0, 800, 600);
   viewController.flutterView.backgroundColor = [NSColor whiteColor];
 
-  while (!signalled) {
+  while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
   }
 }
@@ -879,7 +879,7 @@ TEST_F(FlutterEngineTest, ResponseFromBackgroundThread) {
 TEST_F(FlutterEngineTest, CanGetEngineForId) {
   FlutterEngine* engine = GetFlutterEngine();
 
-  BOOL signalled = NO;
+  BOOL signaled = NO;
   std::optional<int64_t> engineId;
   AddNativeCallback("NotifyEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
                       const auto argument = Dart_GetNativeArgument(args, 0);
@@ -887,11 +887,11 @@ TEST_F(FlutterEngineTest, CanGetEngineForId) {
                         const auto id = tonic::DartConverter<int64_t>::FromDart(argument);
                         engineId = id;
                       }
-                      signalled = YES;
+                      signaled = YES;
                     }));
 
   EXPECT_TRUE([engine runWithEntrypoint:@"testEngineId"]);
-  while (!signalled) {
+  while (!signaled) {
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, YES);
   }
 
