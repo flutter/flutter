@@ -198,7 +198,7 @@ class SwitchListTile extends StatelessWidget {
     this.tileColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.contentPadding,
     this.secondary,
@@ -214,7 +214,7 @@ class SwitchListTile extends StatelessWidget {
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-       assert(!isThreeLine || subtitle != null);
+       assert(isThreeLine != true || subtitle != null);
 
   /// Creates a Material [ListTile] with an adaptive [Switch], following
   /// Material design's
@@ -256,7 +256,7 @@ class SwitchListTile extends StatelessWidget {
     this.tileColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.contentPadding,
     this.secondary,
@@ -269,7 +269,7 @@ class SwitchListTile extends StatelessWidget {
     this.hoverColor,
     this.internalAddSemanticForOnTap = false,
   }) : _switchListTileType = _SwitchListTileType.adaptive,
-       assert(!isThreeLine || subtitle != null),
+       assert(isThreeLine != true || subtitle != null),
        assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
@@ -460,9 +460,10 @@ class SwitchListTile extends StatelessWidget {
 
   /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If false, the list tile is treated as having one line if the subtitle is
-  /// null and treated as having two lines if the subtitle is non-null.
-  final bool isThreeLine;
+  /// If null, the value from [ListTileThemeData.isThreeLine] is used.
+  /// If that is also null, the value from the [ListTileThemeData] returned by [ThemeData.listTileTheme] is used.
+  /// If still null, the default value is `false`.
+  final bool? isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
   ///
