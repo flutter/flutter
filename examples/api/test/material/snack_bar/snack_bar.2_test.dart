@@ -146,4 +146,26 @@ void main() {
       isNull,
     );
   });
+
+  testWidgets('SnackBar does not clip outer widget', (
+      WidgetTester tester,
+      ) async {
+    await tester.pumpWidget(const example.SnackBarExampleApp());
+
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.widgetWithText(AppBar, 'SnackBar Sample'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Show Snackbar'));
+    await tester.pump();
+
+    expect(find.text('Awesome SnackBar!'), findsOneWidget);
+    expect(find.widgetWithText(SnackBarAction, 'Action'), findsOneWidget);
+    expect(
+      find.ancestor(
+        of: find.byType(Dismissible),
+        matching: find.byType(ClipRect),
+      ),
+      findsNothing,
+    );
+  });
 }
