@@ -67,13 +67,9 @@ static constexpr const char* kBLC[] = {
 
 }  // anonymous namespace
 
-FlutterMain::FlutterMain(
-    const flutter::Settings& settings,
-    flutter::AndroidRenderingAPI android_rendering_api,
-    std::unique_ptr<AndroidContextVKImpeller> android_vk_context)
-    : settings_(settings),
-      android_rendering_api_(android_rendering_api),
-      cached_context_(std::move(android_vk_context)) {}
+FlutterMain::FlutterMain(const flutter::Settings& settings,
+                         flutter::AndroidRenderingAPI android_rendering_api)
+    : settings_(settings), android_rendering_api_(android_rendering_api) {}
 
 FlutterMain::~FlutterMain() = default;
 
@@ -128,7 +124,7 @@ void FlutterMain::Init(JNIEnv* env,
   // android_get_device_api_level() is only available on API 24 and greater, and
   // Flutter still supports 21, 22, and 23.
 
-  auto [android_rendering_api, android_context_vk] =
+  AndroidRenderingAPI android_rendering_api =
       SelectedRenderingAPI(settings, api_level);
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
@@ -200,8 +196,7 @@ void FlutterMain::Init(JNIEnv* env,
 
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
-  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api,
-                                       std::move(android_context_vk)));
+  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api));
   g_flutter_main->SetupDartVMServiceUriCallback(env);
 }
 
@@ -281,14 +276,14 @@ bool FlutterMain::IsKnownBadSOC(std::string_view hardware) {
 }
 
 // static
-std::pair<AndroidRenderingAPI, std::unique_ptr<AndroidContextVKImpeller>>
-FlutterMain::SelectedRenderingAPI(const flutter::Settings& settings,
-                                  int api_level) {
+AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
+    const flutter::Settings& settings,
+    int api_level) {
   if (settings.enable_software_rendering) {
     FML_CHECK(!settings.enable_impeller)
         << "Impeller does not support software rendering. Either disable "
            "software rendering or disable impeller.";
-    return std::make_pair(AndroidRenderingAPI::kSoftware, nullptr);
+    return AndroidRenderingAPI::kSoftware;
   }
   constexpr AndroidRenderingAPI kVulkanUnsupportedFallback =
       AndroidRenderingAPI::kImpellerOpenGLES;
@@ -298,11 +293,11 @@ FlutterMain::SelectedRenderingAPI(const flutter::Settings& settings,
 #ifndef FLUTTER_RELEASE
   if (settings.requested_rendering_backend == "opengles" &&
       settings.enable_impeller) {
-    return std::make_pair(AndroidRenderingAPI::kImpellerOpenGLES, nullptr);
+    return AndroidRenderingAPI::kImpellerOpenGLES;
   }
   if (settings.requested_rendering_backend == "vulkan" &&
       settings.enable_impeller) {
-    return std::make_pair(AndroidRenderingAPI::kImpellerVulkan, nullptr);
+    return AndroidRenderingAPI::kImpellerVulkan;
   }
 #endif
 
@@ -314,68 +309,49 @@ FlutterMain::SelectedRenderingAPI(const flutter::Settings& settings,
     // Vulkan for some other reason, such as a missing required extension or
     // feature. In these cases it will use OpenGLES.
     if (api_level < kMinimumAndroidApiLevelForImpeller) {
-      return std::make_pair(AndroidRenderingAPI::kSkiaOpenGLES, nullptr);
+      return AndroidRenderingAPI::kSkiaOpenGLES;
     }
     char product_model[PROP_VALUE_MAX];
     __system_property_get("ro.product.model", product_model);
     if (IsDeviceEmulator(product_model)) {
       // Avoid using Vulkan on known emulators.
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
+      return kVulkanUnsupportedFallback;
     }
 
     __system_property_get("ro.com.google.clientidbase", product_model);
     if (strcmp(product_model, kAndroidHuawei) == 0) {
       // Avoid using Vulkan on Huawei as AHB imports do not
       // consistently work.
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
+      return kVulkanUnsupportedFallback;
     }
 
     if (api_level < kMinimumAndroidApiLevelForMediaTekVulkan &&
         __system_property_find("ro.vendor.mediatek.platform") != nullptr) {
       // Probably MediaTek. Avoid Vulkan if older than 34 to work around
       // crashes when importing AHB.
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
+      return kVulkanUnsupportedFallback;
     }
 
     __system_property_get("ro.product.board", product_model);
     if (IsKnownBadSOC(product_model)) {
       // Avoid using Vulkan on known bad SoCs.
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
+      return kVulkanUnsupportedFallback;
     }
 
     // Determine if Vulkan is supported by creating a Vulkan context and
     // checking if it is valid.
     impeller::ScopedValidationDisable disable_validation;
     auto vulkan_backend = std::make_unique<AndroidContextVKImpeller>(
-        AndroidContext::ContextSettings{
-            .enable_validation = false,
-            .enable_gpu_tracing = settings.enable_vulkan_gpu_tracing,
-            .enable_surface_control = settings.enable_surface_control,
-            .quiet = true,
-            .impeller_flags =
-                {
-                    .lazy_shader_mode =
-                        settings.impeller_enable_lazy_shader_mode,
-                    .antialiased_lines = settings.impeller_antialiased_lines,
-                },
-        });
+        AndroidContext::ContextSettings{.enable_validation = false,
+                                        .enable_gpu_tracing = false,
+                                        .quiet = true});
     if (!vulkan_backend->IsValid()) {
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
+      return kVulkanUnsupportedFallback;
     }
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-    // In debug mode clear out the vulkan context so that we can
-    // recreate one that has VVL and/or GPU tracing.
-    vulkan_backend = nullptr;
-#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-    return std::make_pair(AndroidRenderingAPI::kImpellerVulkan,
-                          std::move(vulkan_backend));
+    return AndroidRenderingAPI::kImpellerVulkan;
   }
 
-  return std::make_pair(AndroidRenderingAPI::kSkiaOpenGLES, nullptr);
-}
-
-std::unique_ptr<AndroidContextVKImpeller> FlutterMain::TakeCachedContext() {
-  return std::move(cached_context_);
+  return AndroidRenderingAPI::kSkiaOpenGLES;
 }
 
 }  // namespace flutter
