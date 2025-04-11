@@ -1433,6 +1433,47 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/166067.
+  testWidgets('CarouselView should not crash when using PageStorageKey', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return const <Widget>[SliverAppBar()];
+            },
+            body: CustomScrollView(
+              key: const PageStorageKey<String>('key1'),
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 50),
+                    child: CarouselView.weighted(
+                      flexWeights: const <int>[1, 2],
+                      consumeMaxWeight: false,
+                      children: List<Widget>.generate(20, (int index) {
+                        return ColoredBox(
+                          color: Colors.primaries[index % Colors.primaries.length].withValues(
+                            alpha: 0.8,
+                          ),
+                          child: const SizedBox.expand(),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   group('CarouselController.animateToItem', () {
     testWidgets('CarouselView.weighted horizontal, not reversed, flexWeights [7,1]', (
       WidgetTester tester,
