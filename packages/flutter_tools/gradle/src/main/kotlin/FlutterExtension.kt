@@ -20,7 +20,7 @@ import org.gradle.api.GradleException
 @Suppress("unused") // The values in this class are used in Flutter developers app-level build.gradle file.
 open class FlutterExtension {
     /** Sets the compileSdkVersion used by default in Flutter app projects. */
-    val compileSdkVersion: Int = 35
+    val compileSdkVersion: Int = 36
 
     /** Sets the minSdkVersion used by default in Flutter app projects. */
     val minSdkVersion: Int = 21
@@ -31,7 +31,7 @@ open class FlutterExtension {
      *
      * See https://developer.android.com/guide/topics/manifest/uses-sdk-element.
      */
-    val targetSdkVersion: Int = 35
+    val targetSdkVersion: Int = 36
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
