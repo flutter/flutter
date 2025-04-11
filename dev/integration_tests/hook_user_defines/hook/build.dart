@@ -8,7 +8,7 @@ import 'package:native_toolchain_c/native_toolchain_c.dart';
 
 void main(List<String> args) async {
   await build(args, (BuildInput input, BuildOutputBuilder output) async {
-    final dynamic magicValue = input.userDefines['magic_value'];
+    final Object? magicValue = input.userDefines['magic_value'];
     if (magicValue is! int) {
       throw ArgumentError('User-define `magic_value` must be an integer, found: $magicValue.');
     }
