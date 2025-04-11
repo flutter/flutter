@@ -5,6 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 ///
 /// @docImport 'proxy_box.dart';
+/// @docImport 'proxy_sliver.dart';
 /// @docImport 'sliver_fill.dart';
 /// @docImport 'sliver_grid.dart';
 /// @docImport 'sliver_list.dart';
@@ -1306,6 +1307,28 @@ List<DiagnosticsNode> _debugCompareFloats(
 /// than zero, then it should override [childCrossAxisPosition]. For example
 /// [RenderSliverGrid] overrides this method.
 abstract class RenderSliver extends RenderObject {
+  /// Whether this sliver should be included in the semantics tree.
+  ///
+  /// This value is used by [RenderViewportBase] to ensure a sliver is
+  /// included in the semantics tree regardless of its geometry.
+  ///
+  /// A [RenderSliver] should override this value to `true` to ensure
+  /// its child is included in the semantics tree. For example if your
+  /// sliver is under a [RenderViewport] you may want to wrap it with
+  /// a [SliverEnsureSemantics] to ensure that:
+  ///
+  /// 1. It is still visited by [RenderViewportBase.visitChildrenForSemantics]
+  /// regardless of its geometry. This includes cases where your sliver is outside
+  /// the current viewport and cache extent.
+  /// 2. Its semantic information is not clipped out by the [RenderViewport] in
+  /// [RenderViewportBase.describeSemanticsClip] or [RenderViewportBase.describeApproximatePaintClip].
+  ///
+  /// If a given [RenderSliver] does not provide a valid [semanticBounds] it will still
+  /// be dropped from the semantics tree.
+  ///
+  /// Defaults to `false`.
+  bool get ensureSemantics => false;
+
   // layout input
   @override
   SliverConstraints get constraints => super.constraints as SliverConstraints;
