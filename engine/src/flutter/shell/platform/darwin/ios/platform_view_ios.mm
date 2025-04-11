@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include <memory>
+#include "shell/platform/darwin/ios/ios_text_input.h"
 
 #include <utility>
 
@@ -50,7 +51,8 @@ PlatformViewIOS::PlatformViewIOS(PlatformView::Delegate& delegate,
       platform_views_controller_(platform_views_controller),
       accessibility_bridge_([this](bool enabled) { PlatformView::SetSemanticsEnabled(enabled); }),
       platform_message_handler_(
-          new PlatformMessageHandlerIos(task_runners.GetPlatformTaskRunner())) {}
+          new PlatformMessageHandlerIos(task_runners.GetPlatformTaskRunner())),
+      text_input_connection_factory_(std::make_shared<IOSTextInputConnectionFactory>()) {}
 
 PlatformViewIOS::PlatformViewIOS(
     PlatformView::Delegate& delegate,
@@ -258,6 +260,10 @@ void PlatformViewIOS::ScopedObserver::reset(id<NSObject> observer) {
     }
     observer_ = observer;
   }
+}
+
+std::shared_ptr<TextInputConnectionFactory> PlatformViewIOS::GetTextInputConnectionFactory() const {
+  return text_input_connection_factory_;
 }
 
 }  // namespace flutter

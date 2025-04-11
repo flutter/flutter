@@ -14,6 +14,7 @@
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/constants.h"
 #include "flutter/common/graphics/persistent_cache.h"
+#include "flutter/common/input/text_input_connection.h"
 #include "flutter/fml/base32.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/icu_util.h"
@@ -65,19 +66,22 @@ std::unique_ptr<Engine> CreateEngine(
     const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
+    const std::shared_ptr<TextInputConnectionFactory>&
+        text_input_connection_factory,
     impeller::RuntimeStageBackend runtime_stage_backend) {
-  return std::make_unique<Engine>(delegate,             //
-                                  dispatcher_maker,     //
-                                  vm,                   //
-                                  isolate_snapshot,     //
-                                  task_runners,         //
-                                  platform_data,        //
-                                  settings,             //
-                                  std::move(animator),  //
-                                  io_manager,           //
-                                  unref_queue,          //
-                                  snapshot_delegate,    //
-                                  gpu_disabled_switch,  //
+  return std::make_unique<Engine>(delegate,                       //
+                                  dispatcher_maker,               //
+                                  vm,                             //
+                                  isolate_snapshot,               //
+                                  task_runners,                   //
+                                  platform_data,                  //
+                                  settings,                       //
+                                  std::move(animator),            //
+                                  io_manager,                     //
+                                  unref_queue,                    //
+                                  text_input_connection_factory,  //
+                                  snapshot_delegate,              //
+                                  gpu_disabled_switch,            //
                                   runtime_stage_backend);
 }
 
@@ -319,7 +323,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          &weak_io_manager_future,                         //
                          &snapshot_delegate_future,                       //
                          &unref_queue_future,                             //
-                         &on_create_engine,
+                         &on_create_engine,                               //
+                         text_input_connection_factory =
+                             platform_view->GetTextInputConnectionFactory(),  //
                          runtime_stage_backend = DetermineRuntimeStageBackend(
                              platform_view->GetImpellerContext())]() mutable {
         TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
@@ -343,6 +349,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
             unref_queue_future.get(),             //
             snapshot_delegate_future.get(),       //
             shell->is_gpu_disabled_sync_switch_,  //
+            text_input_connection_factory,        //
             runtime_stage_backend                 //
             ));
       }));
@@ -596,6 +603,8 @@ std::unique_ptr<Shell> Shell::Spawn(
           const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
           fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
           const std::shared_ptr<fml::SyncSwitch>& is_gpu_disabled_sync_switch,
+          const std::shared_ptr<TextInputConnectionFactory>&
+              text_input_connection_factory,
           impeller::RuntimeStageBackend runtime_stage_backend) {
         return engine->Spawn(
             /*delegate=*/delegate,

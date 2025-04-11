@@ -10,6 +10,7 @@
 #include <string_view>
 #include <unordered_map>
 
+#include "common/input/text_input_connection.h"
 #include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/common/graphics/texture.h"
 #include "flutter/common/settings.h"
@@ -130,6 +131,8 @@ class Shell final : public PlatformView::Delegate,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
+      const std::shared_ptr<TextInputConnectionFactory>
+          text_input_connection_factory,
       impeller::RuntimeStageBackend runtime_stage_type)>
       EngineCreateCallback;
 

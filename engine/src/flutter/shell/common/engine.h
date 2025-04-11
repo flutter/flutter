@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 
+#include "common/input/text_input_connection.h"
 #include "flutter/assets/asset_manager.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/macros.h"
@@ -349,6 +350,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          std::unique_ptr<Animator> animator,
          const fml::WeakPtr<IOManager>& io_manager,
          const std::shared_ptr<FontCollection>& font_collection,
+         const std::shared_ptr<TextInputConnectionFactory>&
+             input_connection_factory,
          std::unique_ptr<RuntimeController> runtime_controller,
          const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch);
 
@@ -404,6 +407,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          std::unique_ptr<Animator> animator,
          fml::WeakPtr<IOManager> io_manager,
          const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
+         const std::shared_ptr<TextInputConnectionFactory>&
+             input_connection_factory,
          fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
          const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
          impeller::RuntimeStageBackend runtime_stage_type =
@@ -1081,6 +1086,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::shared_ptr<AssetManager> asset_manager_;
   std::shared_ptr<FontCollection> font_collection_;
   std::shared_ptr<NativeAssetsManager> native_assets_manager_;
+  std::shared_ptr<TextInputConnectionFactory> text_input_connection_factory_;
   const std::unique_ptr<ImageDecoder> image_decoder_;
   ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;

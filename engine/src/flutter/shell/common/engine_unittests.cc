@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/common/input/text_input_connection.h"
 #include "flutter/shell/common/engine.h"
 
 #include <cstring>
@@ -22,6 +23,28 @@
 namespace flutter {
 
 namespace {
+
+class FakeTextInputConnection : public TextInputConnection {
+ public:
+  FakeTextInputConnection() = default;
+
+  ~FakeTextInputConnection() override {}
+
+  std::string GetCurrentText() override { return ""; }
+
+  void SetCurrentText(std::string_view text) override {}
+};
+
+class FakeTextInputConnectionFactory : public TextInputConnectionFactory {
+ public:
+  FakeTextInputConnectionFactory() = default;
+
+  ~FakeTextInputConnectionFactory() override {}
+
+  std::shared_ptr<TextInputConnection> CreateTextInputConnection() override {
+    return std::make_shared<FakeTextInputConnection>();
+  }
+};
 
 class FontManifestAssetResolver : public AssetResolver {
  public:
@@ -254,6 +277,8 @@ TEST_F(EngineTest, Create) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(runtime_controller_),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
     EXPECT_TRUE(engine);
@@ -276,6 +301,8 @@ TEST_F(EngineTest, DispatchPlatformMessageUnknown) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
@@ -303,6 +330,8 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRoute) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
@@ -337,6 +366,8 @@ TEST_F(EngineTest, DispatchPlatformMessageInitialRouteIgnored) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
@@ -370,6 +401,8 @@ TEST_F(EngineTest, SpawnSharesFontLibrary) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
@@ -398,6 +431,8 @@ TEST_F(EngineTest, SpawnWithCustomInitialRoute) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
@@ -426,6 +461,8 @@ TEST_F(EngineTest, SpawnWithCustomSettings) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
@@ -467,6 +504,8 @@ TEST_F(EngineTest, PassesLoadDartDeferredLibraryErrorToRuntime) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
@@ -495,6 +534,8 @@ TEST_F(EngineTest, SpawnedEngineInheritsAssetManager) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/std::make_shared<FontCollection>(),
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 
@@ -534,6 +575,8 @@ TEST_F(EngineTest, UpdateAssetManagerWithEqualManagers) {
         /*animator=*/std::move(animator_),
         /*io_manager=*/io_manager_,
         /*font_collection=*/mock_font_collection,
+        /*text_input_connection_factory=*/
+        std::make_shared<FakeTextInputConnectionFactory>(),
         /*runtime_controller=*/std::move(mock_runtime_controller),
         /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
 

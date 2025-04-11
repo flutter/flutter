@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 
+#include "common/input/text_input_connection.h"
 #include "flutter/common/graphics/texture.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
@@ -976,6 +977,11 @@ class PlatformView {
   ///
   /// @param[in]  request  The request to change the focus state of the view.
   virtual void RequestViewFocusChange(const ViewFocusChangeRequest& request);
+
+  virtual std::shared_ptr<TextInputConnectionFactory>
+  GetTextInputConnectionFactory() const {
+    return nullptr;
+  }
 
  protected:
   // This is the only method called on the raster task runner.

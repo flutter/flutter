@@ -9,6 +9,7 @@
 #include <string>
 #include <utility>
 
+#include "flutter/common/input/text_input_connection.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/build_config.h"
@@ -50,6 +51,8 @@ class UIDartState : public tonic::DartState {
             fml::RefPtr<SkiaUnrefQueue> unref_queue,
             fml::WeakPtr<ImageDecoder> image_decoder,
             fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+            std::shared_ptr<TextInputConnectionFactory>
+                text_input_connection_factory,
             std::string advisory_script_uri,
             std::string advisory_script_entrypoint,
             bool deterministic_rendering_enabled,
@@ -82,6 +85,8 @@ class UIDartState : public tonic::DartState {
     /// bytes as input, this is used to find and create image generators, which
     /// can then be used for image decoding.
     fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry;
+
+    std::shared_ptr<TextInputConnectionFactory> text_input_connection_factory;
 
     /// The advisory script URI (only used for debugging). This does not affect
     /// the code being run in the isolate in any way.
@@ -147,6 +152,8 @@ class UIDartState : public tonic::DartState {
   fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
 
   fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry() const;
+
+  TextInputConnectionFactory& GetTextInputConnectionFactory() const;
 
   std::shared_ptr<IsolateNameServer> GetIsolateNameServer() const;
 

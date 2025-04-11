@@ -3784,3 +3784,47 @@ FutureOr<void> _sendFontChangeMessage() async {
 
 @Native<Void Function(Handle, Handle, Handle)>(symbol: 'FontCollection::LoadFontFromList')
 external void _loadFontFromList(Uint8List list, _Callback<void> callback, String fontFamily);
+
+///
+///
+
+base class TextInputModel extends NativeFieldWrapperClass1 {
+  static TextInputModel create() {
+    return TextInputModel._();
+  }
+
+  TextInputModel._() {
+    _constructor();
+  }
+
+  String getCurrentText() {
+    return _getCurrentText();
+  }
+
+  void setCurrentText(String value) {
+    _setCurrentText(value);
+  }
+
+  void dispose() {
+    _dispose();
+  }
+
+  void setUpdateCallback(void Function() cb) {
+    _setUpdateCallback(cb);
+  }
+
+  @Native<Void Function(Handle)>(symbol: 'TextInputModel::Create')
+  external void _constructor();
+
+  @Native<Handle Function(Handle)>(symbol: 'TextInputModel::getCurrentText')
+  external String _getCurrentText();
+
+  @Native<Void Function(Handle, Handle)>(symbol: 'TextInputModel::setCurrentText')
+  external void _setCurrentText(String value);
+
+  @Native<Void Function(Handle, Handle)>(symbol: 'TextInputModel::setUpdateCallback')
+  external void _setUpdateCallback(void Function() cb);
+
+  @Native<Void Function(Handle)>(symbol: 'TextInputModel::dispose')
+  external void _dispose();
+}

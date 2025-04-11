@@ -65,6 +65,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
                                        context_.unref_queue,
                                        std::move(image_decoder),
                                        std::move(image_generator_registry),
+                                       context_.text_input_connection_factory,
                                        advisory_script_uri,
                                        advisory_script_entrypoint,
                                        context_.deterministic_rendering_enabled,
