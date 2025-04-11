@@ -239,7 +239,7 @@ class CheckboxListTile extends StatelessWidget {
     this.tileColor,
     this.title,
     this.subtitle,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.secondary,
     this.selected = false,
