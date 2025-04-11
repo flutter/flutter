@@ -507,6 +507,27 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
+  testWidgets('CircularProgressIndicator with custom animation controller', (
+    WidgetTester tester,
+  ) async {
+    late AnimationController controller;
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          controller = AnimationController(vsync: tester, duration: const Duration(seconds: 2));
+
+          return MaterialApp(
+            home: Scaffold(body: Center(child: CircularProgressIndicator(controller: controller))),
+          );
+        },
+      ),
+    );
+
+    await tester.pump();
+    expect(controller.value, 0.0);
+  });
+
   testWidgets('LinearProgressIndicator with indicatorBorderRadius', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
