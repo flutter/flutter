@@ -32,12 +32,14 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   final Uri projectUri = FlutterProject.current().directory.uri;
   final String runPackageName =
       buildInfo.packageConfig.packages.firstWhere((Package p) => p.root == projectUri).name;
+  final String pubspecPath = projectUri.resolve('pubspec.yaml').toFilePath();
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     buildInfo.packageConfigPath,
     buildInfo.packageConfig,
     globals.fs,
     globals.logger,
     runPackageName,
+    pubspecPath,
   );
 
   if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {
