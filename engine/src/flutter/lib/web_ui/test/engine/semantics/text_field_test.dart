@@ -283,6 +283,8 @@ void testMain() {
         'text': 'updated',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState), testTextEditing);
 
@@ -351,7 +353,7 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
       // The input will have focus after editing state is set and semantics updated.
-      strategy.setEditingState(EditingState(text: 'foo'));
+      strategy.setEditingState(EditingState(text: 'foo', baseOffset: 0, extentOffset: 0));
 
       // NOTE: at this point some browsers, e.g. some versions of Safari will
       //       have set the focus on the editing element as a result of setting

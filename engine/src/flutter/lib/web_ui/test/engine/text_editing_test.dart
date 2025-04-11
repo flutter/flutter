@@ -691,6 +691,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -722,6 +724,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -815,6 +819,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -904,6 +910,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1002,6 +1010,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1055,6 +1065,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1107,6 +1119,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1159,6 +1173,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1218,6 +1234,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
         150,
@@ -1264,6 +1282,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1321,6 +1341,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1342,6 +1364,8 @@ Future<void> testMain() async {
         'text': 'xyz',
         'selectionBase': 0,
         'selectionExtent': 2,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState2));
 
@@ -1372,6 +1396,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1424,6 +1450,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1497,6 +1525,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1545,6 +1575,8 @@ Future<void> testMain() async {
         'text': '',
         'selectionBase': 0,
         'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1581,6 +1613,8 @@ Future<void> testMain() async {
         'text': '',
         'selectionBase': 0,
         'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1614,6 +1648,8 @@ Future<void> testMain() async {
         'text': '',
         'selectionBase': 0,
         'selectionExtent': 0,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1652,7 +1688,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1713,7 +1755,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1781,7 +1829,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1843,6 +1897,8 @@ Future<void> testMain() async {
         'text': 'xyz',
         'selectionBase': 1,
         'selectionExtent': 2,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -1867,6 +1923,8 @@ Future<void> testMain() async {
         'text': 'xyz',
         'selectionBase': -1,
         'selectionExtent': -1,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState2));
 
@@ -1887,6 +1945,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1950,6 +2010,8 @@ Future<void> testMain() async {
         'text': '',
         'selectionBase': -1,
         'selectionExtent': -1,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -2007,6 +2069,8 @@ Future<void> testMain() async {
         'text': 'Hello world',
         'selectionBase': 9,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -2072,6 +2136,8 @@ Future<void> testMain() async {
         'text': 'Hello world',
         'selectionBase': 9,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -2153,6 +2219,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState1));
 
@@ -2247,8 +2315,8 @@ Future<void> testMain() async {
         'text': 'foo\nbar',
         'selectionBase': 2,
         'selectionExtent': 3,
-        'composingBase': null,
-        'composingExtent': null,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
       checkTextAreaEditingState(textarea, 'foo\nbar', 2, 3);
@@ -2476,8 +2544,8 @@ Future<void> testMain() async {
         'text': '1\n2\n3\n4\n',
         'selectionBase': 8,
         'selectionExtent': 8,
-        'composingBase': null,
-        'composingExtent': null,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
       checkTextAreaEditingState(textarea, '1\n2\n3\n4\n', 8, 8);
@@ -3170,18 +3238,24 @@ Future<void> testMain() async {
 
     test('Fix flipped base and extent offsets', () {
       expect(
-        EditingState(baseOffset: 10, extentOffset: 4),
-        EditingState(baseOffset: 4, extentOffset: 10),
+        EditingState(text: '', baseOffset: 10, extentOffset: 4),
+        EditingState(text: '', baseOffset: 4, extentOffset: 10),
       );
 
       expect(
         EditingState.fromFrameworkMessage(<String, dynamic>{
+          'text': '',
           'selectionBase': 10,
           'selectionExtent': 4,
+          'composingBase': -1,
+          'composingExtent': -1,
         }),
         EditingState.fromFrameworkMessage(<String, dynamic>{
+          'text': '',
           'selectionBase': 4,
           'selectionExtent': 10,
+          'composingBase': -1,
+          'composingExtent': -1,
         }),
       );
     });
@@ -3189,7 +3263,13 @@ Future<void> testMain() async {
     test('Sets default composing offsets if none given', () {
       final EditingState editingState = EditingState(text: 'Test', baseOffset: 2, extentOffset: 4);
       final EditingState editingStateFromFrameworkMsg = EditingState.fromFrameworkMessage(
-        <String, dynamic>{'selectionBase': 10, 'selectionExtent': 4},
+        <String, dynamic>{
+          'text': '',
+          'selectionBase': 10,
+          'selectionExtent': 4,
+          'composingBase': -1,
+          'composingExtent': -1,
+        },
       );
 
       expect(editingState.composingBaseOffset, -1);
@@ -3200,8 +3280,16 @@ Future<void> testMain() async {
     });
 
     test('Correctly identifies min and max offsets', () {
-      final EditingState flippedEditingState = EditingState(baseOffset: 10, extentOffset: 4);
-      final EditingState normalEditingState = EditingState(baseOffset: 2, extentOffset: 6);
+      final EditingState flippedEditingState = EditingState(
+        text: '',
+        baseOffset: 10,
+        extentOffset: 4,
+      );
+      final EditingState normalEditingState = EditingState(
+        text: '',
+        baseOffset: 2,
+        extentOffset: 6,
+      );
 
       expect(flippedEditingState.minOffset, 4);
       expect(flippedEditingState.maxOffset, 10);
@@ -3313,8 +3401,16 @@ Future<void> testMain() async {
       });
 
       test('Takes flipped base and extent offsets into account', () {
-        final EditingState flippedEditingState = EditingState(baseOffset: 10, extentOffset: 4);
-        final EditingState normalEditingState = EditingState(baseOffset: 4, extentOffset: 10);
+        final EditingState flippedEditingState = EditingState(
+          text: '',
+          baseOffset: 10,
+          extentOffset: 4,
+        );
+        final EditingState normalEditingState = EditingState(
+          text: '',
+          baseOffset: 4,
+          extentOffset: 10,
+        );
 
         expect(normalEditingState, flippedEditingState);
 
@@ -3323,14 +3419,23 @@ Future<void> testMain() async {
 
       test('takes composition range into account', () {
         final EditingState editingState1 = EditingState(
+          text: '',
+          baseOffset: 0,
+          extentOffset: 0,
           composingBaseOffset: 1,
           composingExtentOffset: 2,
         );
         final EditingState editingState2 = EditingState(
+          text: '',
+          baseOffset: 0,
+          extentOffset: 0,
           composingBaseOffset: 1,
           composingExtentOffset: 2,
         );
         final EditingState editingState3 = EditingState(
+          text: '',
+          baseOffset: 0,
+          extentOffset: 0,
           composingBaseOffset: 4,
           composingExtentOffset: 8,
         );
