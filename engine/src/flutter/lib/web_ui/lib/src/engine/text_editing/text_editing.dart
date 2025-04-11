@@ -958,18 +958,25 @@ class EditingState {
   /// elements can have their text selection range set. Attempting to set
   /// selection range on a non-focused element will cause it to request focus.
   ///
+  /// If text is in the composing state, the composing range is not updated by
+  /// [updateSelection] being `true`.
+  ///
   /// See also:
   ///
   ///  * [applyTextToDomElement], which is used for non-focused elements.
-  void applyToDomElement(DomHTMLElement? domElement) {
+  void applyToDomElement(DomHTMLElement? domElement, {bool updateSelection = true}) {
     if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
       final DomHTMLInputElement element = domElement as DomHTMLInputElement;
       element.value = text;
-      element.setSelectionRange(minOffset, maxOffset);
+      if (updateSelection) {
+        element.setSelectionRange(minOffset, maxOffset);
+      }
     } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
       final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
       element.value = text;
-      element.setSelectionRange(minOffset, maxOffset);
+      if (updateSelection) {
+        element.setSelectionRange(minOffset, maxOffset);
+      }
     } else {
       throw UnsupportedError(
         'Unsupported DOM element type: <${domElement?.tagName}> (${domElement.runtimeType})',
@@ -1146,7 +1153,7 @@ class GloballyPositionedTextEditingStrategy extends DefaultTextEditingStrategy {
       // Set the last editing state if it exists, this is critical for a
       // users ongoing work to continue uninterrupted when there is an update to
       // the transform.
-      lastEditingState?.applyToDomElement(domElement);
+      lastEditingState?.applyToDomElement(domElement, updateSelection: !isComposing);
       // On Chrome, when a form is focused, it opens an autofill menu
       // immediately.
       // Flutter framework sends `setEditableSizeAndTransform` for informing
@@ -1197,7 +1204,7 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
       // the transform.
       // If domElement is not focused cursor location will not be correct.
       moveFocusToActiveDomElement();
-      lastEditingState?.applyToDomElement(activeDomElement);
+      lastEditingState?.applyToDomElement(activeDomElement, updateSelection: !isComposing);
     }
   }
 
@@ -1455,7 +1462,7 @@ abstract class DefaultTextEditingStrategy
     if (!isEnabled || !editingState!.isValid) {
       return;
     }
-    lastEditingState!.applyToDomElement(domElement);
+    lastEditingState!.applyToDomElement(domElement, updateSelection: !isComposing);
   }
 
   void placeElement() {
@@ -1958,7 +1965,7 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     // Set the last editing state if it exists, this is critical for a
     // users ongoing work to continue uninterrupted when there is an update to
     // the transform.
-    lastEditingState?.applyToDomElement(activeDomElement);
+    lastEditingState?.applyToDomElement(activeDomElement, updateSelection: !isComposing);
   }
 }
 
