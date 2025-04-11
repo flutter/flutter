@@ -131,19 +131,19 @@ TEST_F(WindowsTest, LaunchHeadlessEngine) {
   ASSERT_NE(engine, nullptr);
 
   std::string view_ids;
-  bool signalled = false;
+  bool signaled = false;
   context.AddNativeFunction(
       "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         auto handle = Dart_GetNativeArgument(args, 0);
         ASSERT_FALSE(Dart_IsError(handle));
         view_ids = tonic::DartConverter<std::string>::FromDart(handle);
-        signalled = true;
+        signaled = true;
       }));
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
-  while (!signalled) {
+  while (!signaled) {
     PumpMessage();
   }
 
@@ -217,16 +217,16 @@ TEST_F(WindowsTest, VerifyNativeFunction) {
   WindowsConfigBuilder builder(context);
   builder.SetDartEntrypoint("verifyNativeFunction");
 
-  bool signalled = false;
+  bool signaled = false;
   auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signalled = true; });
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signaled = true; });
   context.AddNativeFunction("Signal", native_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
   // Wait until signal has been called.
-  while (!signalled) {
+  while (!signaled) {
     PumpMessage();
   }
 }
@@ -239,11 +239,11 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithParameters) {
   builder.SetDartEntrypoint("verifyNativeFunctionWithParameters");
 
   bool bool_value = false;
-  bool signalled = false;
+  bool signaled = false;
   auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
     auto handle = Dart_GetNativeBooleanArgument(args, 0, &bool_value);
     ASSERT_FALSE(Dart_IsError(handle));
-    signalled = true;
+    signaled = true;
   });
   context.AddNativeFunction("SignalBoolValue", native_entry);
 
@@ -251,7 +251,7 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithParameters) {
   ASSERT_NE(controller, nullptr);
 
   // Wait until signalBoolValue has been called.
-  while (!signalled) {
+  while (!signaled) {
     PumpMessage();
   }
   EXPECT_TRUE(bool_value);
@@ -264,12 +264,12 @@ TEST_F(WindowsTest, PlatformExecutable) {
   builder.SetDartEntrypoint("readPlatformExecutable");
 
   std::string executable_name;
-  bool signalled = false;
+  bool signaled = false;
   auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
     auto handle = Dart_GetNativeArgument(args, 0);
     ASSERT_FALSE(Dart_IsError(handle));
     executable_name = tonic::DartConverter<std::string>::FromDart(handle);
-    signalled = true;
+    signaled = true;
   });
   context.AddNativeFunction("SignalStringValue", native_entry);
 
@@ -277,7 +277,7 @@ TEST_F(WindowsTest, PlatformExecutable) {
   ASSERT_NE(controller, nullptr);
 
   // Wait until signalStringValue has been called.
-  while (!signalled) {
+  while (!signaled) {
     PumpMessage();
   }
   EXPECT_EQ(executable_name, "flutter_windows_unittests.exe");
