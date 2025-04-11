@@ -1187,7 +1187,7 @@ void main() {
       expect(find.byType(CupertinoSwitch), findsNothing);
 
       final Switch adaptiveSwitch = tester.widget(find.byType(Switch));
-      expect(adaptiveSwitch.activeThumbColor, activeTrackColor, reason: 'on ${platform.name}');
+      expect(adaptiveSwitch.activeColor, activeTrackColor, reason: 'on ${platform.name}');
       expect(adaptiveSwitch.inactiveTrackColor, inactiveTrackColor, reason: 'on ${platform.name}');
       expect(
         adaptiveSwitch.thumbColor?.resolve(<MaterialState>{}),
@@ -4189,56 +4189,443 @@ void main() {
     expect(tester.getSize(find.byType(Switch)), const Size(60.0, 56.0));
   });
 
-  testWidgets('Switch activeThumbColor', (WidgetTester tester) async {
-    const Color activeThumbColor = Color(0xffff12ff);
+  testWidgets('Material2 - Switch activeThumbColor', (WidgetTester tester) async {
+    const Color activeColor = Color(0xffff6600);
+    const Color activeThumbColor = Color(0xffff0000);
 
+    bool value = false;
     Widget buildSwitch({Color? activeColor, Color? activeThumbColor}) {
-      return Directionality(
-        textDirection: TextDirection.rtl,
-        child: Material(
-          child: Center(
-            child: Switch(
-              activeColor: activeColor,
-              activeThumbColor: activeThumbColor,
-              value: true,
-              onChanged: null,
-            ),
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: activeColor,
+                    activeThumbColor: activeThumbColor,
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       );
     }
 
-    await tester.pumpWidget(buildSwitch(activeColor: activeThumbColor));
+    await tester.pumpWidget(
+      buildSwitch(activeThumbColor: activeThumbColor, activeColor: activeColor),
+    );
+
     expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
 
-    await tester.pumpWidget(buildSwitch(activeThumbColor: activeThumbColor));
-    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+          color: Colors.blue[500],
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
+        ..rrect(color: const Color(0x00000000))
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: Colors.yellow[500]),
+    );
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+    await tester.pump();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+          color: Colors.green[500],
+          rrect: RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0)),
+        )
+        ..rrect(color: const Color(0x00000000))
+        ..rrect(color: const Color(0x33000000))
+        ..rrect(color: const Color(0x24000000))
+        ..rrect(color: const Color(0x1f000000))
+        ..rrect(color: activeThumbColor),
+    );
   });
 
-  testWidgets('Switch.adaptive activeThumbColor', (WidgetTester tester) async {
-    const Color activeThumbColor = Color(0xffff12ff);
+  testWidgets('Material3 - Switch activeThumbColor', (WidgetTester tester) async {
+    const Color activeColor = Color(0xffff6600);
+    const Color activeThumbColor = Color(0xffff0000);
 
-    Widget buildSwitchAdaptive({Color? activeColor, Color? activeThumbColor}) {
-      return Directionality(
-        textDirection: TextDirection.rtl,
-        child: Material(
-          child: Center(
-            child: Switch.adaptive(
-              activeColor: activeColor,
-              activeThumbColor: activeThumbColor,
-              value: true,
-              onChanged: null,
-            ),
+    final ThemeData themeData = ThemeData();
+    final ColorScheme colors = themeData.colorScheme;
+
+    bool value = false;
+    Widget buildSwitch({Color? activeColor, Color? activeThumbColor}) {
+      return MaterialApp(
+        theme: themeData,
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: activeColor,
+                    activeThumbColor: activeThumbColor,
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
           ),
         ),
       );
     }
 
-    await tester.pumpWidget(buildSwitchAdaptive(activeColor: activeThumbColor));
+    await tester.pumpWidget(
+      buildSwitch(activeThumbColor: activeThumbColor, activeColor: activeColor),
+    );
+
     expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
 
-    await tester.pumpWidget(buildSwitchAdaptive(activeThumbColor: activeThumbColor));
-    expect(tester.widget<Switch>(find.byType(Switch)).activeThumbColor, activeThumbColor);
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+          style: PaintingStyle.fill,
+          color: Colors.blue[500],
+          rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+        )
+        ..rrect(style: PaintingStyle.stroke, color: colors.outline)
+        ..rrect(color: Colors.yellow[500]),
+    );
+    await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+    await tester.pump();
+
+    expect(
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+          style: PaintingStyle.fill,
+          color: Colors.green[500],
+          rrect: RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0)),
+        )
+        ..rrect()
+        ..rrect(color: activeThumbColor), // thumb color
+    );
+  });
+
+  testWidgets('Material2 - Switch.adaptive(Cupertino) will not be affected by activeThumbColor', (
+    WidgetTester tester,
+  ) async {
+    bool value = false;
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform, useMaterial3: false),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeThumbColor: Colors.brown[500],
+                    activeColor: Colors.red[500],
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
+      value = false;
+      final RRect trackRRect =
+          platform == TargetPlatform.iOS
+              ? RRect.fromLTRBR(4.0, 8.5, 55.0, 39.5, const Radius.circular(15.5))
+              : RRect.fromLTRBR(4.0, 4.5, 55.0, 35.5, const Radius.circular(15.5));
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.blue[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000))
+          ..rrect(color: Colors.yellow[500]),
+      );
+
+      await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+      await tester.pump();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.green[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000))
+          ..rrect(color: Colors.white),
+      );
+    }
+  });
+
+  testWidgets('Material2 - Switch.adaptive(Material) activeThumbColor', (
+    WidgetTester tester,
+  ) async {
+    const Color activeThumbColor = Color(0xffff0000);
+    bool value = false;
+
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform, useMaterial3: false),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: Colors.red[500],
+                    activeThumbColor: activeThumbColor,
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
+      value = false;
+      final RRect trackRRect =
+          platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
+              ? RRect.fromLTRBR(13.0, 17.0, 46.0, 31.0, const Radius.circular(7.0))
+              : RRect.fromLTRBR(13.0, 13.0, 46.0, 27.0, const Radius.circular(7.0));
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.blue[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x33000000))
+          ..rrect(color: const Color(0x24000000))
+          ..rrect(color: const Color(0x1f000000))
+          ..rrect(color: Colors.yellow[500]),
+      );
+
+      await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+      await tester.pump();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.green[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x33000000))
+          ..rrect(color: const Color(0x24000000))
+          ..rrect(color: const Color(0x1f000000))
+          ..rrect(color: activeThumbColor),
+      );
+    }
+  });
+
+  testWidgets('Material3 - Switch.adaptive(Cupertino) will not be affected by activeThumbColor', (
+    WidgetTester tester,
+  ) async {
+    bool value = false;
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform, useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: Colors.red[500],
+                    activeThumbColor: Colors.brown[500],
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.iOS,
+      TargetPlatform.macOS,
+    ]) {
+      value = false;
+      final RRect trackRRect =
+          platform == TargetPlatform.iOS
+              ? RRect.fromLTRBR(4.5, 8.5, 55.5, 39.5, const Radius.circular(15.5))
+              : RRect.fromLTRBR(4.5, 4.5, 55.5, 35.5, const Radius.circular(15.5));
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.blue[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000))
+          ..rrect(color: Colors.yellow[500]),
+      );
+
+      await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+      await tester.pump();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(color: Colors.green[500], rrect: trackRRect)
+          ..rrect(color: const Color(0x00000000))
+          ..rrect(color: const Color(0x26000000))
+          ..rrect(color: const Color(0x0f000000))
+          ..rrect(color: const Color(0x0a000000))
+          ..rrect(color: Colors.white),
+      );
+    }
+  });
+
+  testWidgets('Material3 - Switch.adaptive(Material) activeThumbColor', (
+    WidgetTester tester,
+  ) async {
+    const Color activeThumbColor = Color(0xffff0000);
+    bool value = false;
+
+    final ColorScheme colors = ThemeData(useMaterial3: true).colorScheme;
+    Widget buildFrame(TargetPlatform platform) {
+      return MaterialApp(
+        theme: ThemeData(platform: platform, useMaterial3: true),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: Switch.adaptive(
+                    dragStartBehavior: DragStartBehavior.down,
+                    value: value,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        value = newValue;
+                      });
+                    },
+                    activeColor: Colors.red[500],
+                    activeThumbColor: activeThumbColor,
+                    activeTrackColor: Colors.green[500],
+                    inactiveThumbColor: Colors.yellow[500],
+                    inactiveTrackColor: Colors.blue[500],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TargetPlatform platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.fuchsia,
+      TargetPlatform.linux,
+      TargetPlatform.windows,
+    ]) {
+      value = false;
+      final RRect trackRRect =
+          platform == TargetPlatform.fuchsia || platform == TargetPlatform.android
+              ? RRect.fromLTRBR(4.0, 8.0, 56.0, 40.0, const Radius.circular(16.0))
+              : RRect.fromLTRBR(4.0, 4.0, 56.0, 36.0, const Radius.circular(16.0));
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle();
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(style: PaintingStyle.fill, color: Colors.blue[500], rrect: trackRRect)
+          ..rrect(style: PaintingStyle.stroke, color: colors.outline)
+          ..rrect(color: Colors.yellow[500]),
+      );
+      await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
+      await tester.pump();
+
+      expect(
+        Material.of(tester.element(find.byType(Switch))),
+        paints
+          ..rrect(style: PaintingStyle.fill, color: Colors.green[500], rrect: trackRRect)
+          ..rrect()
+          ..rrect(color: activeThumbColor),
+      );
+    }
   });
 }
 

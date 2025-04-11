@@ -108,11 +108,11 @@ class Switch extends StatelessWidget {
     required this.value,
     required this.onChanged,
     @Deprecated(
-      'Use activeColor instead. '
+      'Use activeThumbColor instead. '
       'This feature was deprecated after v3.31.0-2.0.pre.',
     )
-    Color? activeColor,
-    Color? activeThumbColor,
+    this.activeColor,
+    this.activeThumbColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
@@ -139,9 +139,7 @@ class Switch extends StatelessWidget {
   }) : _switchType = _SwitchType.material,
        applyCupertinoTheme = false,
        assert(activeThumbImage != null || onActiveThumbImageError == null),
-       assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-       assert(activeThumbColor == null || activeColor == null),
-       activeThumbColor = activeThumbColor ?? activeColor;
+       assert(inactiveThumbImage != null || onInactiveThumbImageError == null);
 
   /// Creates an adaptive [Switch] based on whether the target platform is iOS
   /// or macOS, following Material design's
@@ -169,11 +167,11 @@ class Switch extends StatelessWidget {
     required this.value,
     required this.onChanged,
     @Deprecated(
-      'Use activeColor instead. '
+      'Use activeThumbColor instead. '
       'This feature was deprecated after v3.31.0-2.0.pre.',
     )
-    Color? activeColor,
-    Color? activeThumbColor,
+    this.activeColor,
+    this.activeThumbColor,
     this.activeTrackColor,
     this.inactiveThumbColor,
     this.inactiveTrackColor,
@@ -200,9 +198,7 @@ class Switch extends StatelessWidget {
     this.applyCupertinoTheme,
   }) : assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
-       assert(activeThumbColor == null || activeColor == null),
-       _switchType = _SwitchType.adaptive,
-       activeThumbColor = activeThumbColor ?? activeColor;
+       _switchType = _SwitchType.adaptive;
 
   /// Whether this switch is on or off.
   final bool value;
@@ -230,6 +226,20 @@ class Switch extends StatelessWidget {
   /// )
   /// ```
   final ValueChanged<bool>? onChanged;
+
+  /// {@template flutter.material.switch.activeColor}
+  /// The color to use when this switch is on.
+  /// {@endtemplate}
+  ///
+  /// Defaults to [ColorScheme.secondary].
+  ///
+  /// If [thumbColor] returns a non-null color in the [WidgetState.selected]
+  /// state, it will be used instead of this color.
+  @Deprecated(
+    'Use activeThumbColor instead. '
+    'This feature was deprecated after v3.31.0-2.0.pre.',
+  )
+  final Color? activeColor;
 
   /// {@template flutter.material.switch.activeThumbColor}
   /// The color to use when this switch is on.
@@ -606,20 +616,19 @@ class Switch extends StatelessWidget {
   Widget build(BuildContext context) {
     Color? effectiveActiveThumbColor;
     Color? effectiveActiveTrackColor;
-
     switch (_switchType) {
       case _SwitchType.material:
-        effectiveActiveThumbColor = activeThumbColor;
+        effectiveActiveThumbColor = activeThumbColor ?? activeColor;
       case _SwitchType.adaptive:
         switch (Theme.of(context).platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            effectiveActiveThumbColor = activeThumbColor;
+            effectiveActiveThumbColor = activeThumbColor ?? activeColor;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
-            effectiveActiveTrackColor = activeThumbColor;
+            effectiveActiveTrackColor = activeColor;
         }
     }
     return _MaterialSwitch(
