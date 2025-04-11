@@ -352,7 +352,7 @@ Dart_Isolate DartIsolate::CreatePlatformIsolate(Dart_Handle entry_point,
       }
       old_task_observer_add(key, callback);
     });
-    return fml::TaskQueueId::Invalid();
+    return platform_task_runner->GetTaskQueueId();
   };
 
   UIDartState::Context context(task_runners);
