@@ -504,8 +504,7 @@ void main() {
     await expectLater(
       localEngineLocator.findEnginePath(localHostEngine: localEngine.path),
       throwsToolExit(
-        message:
-            'You must specify --local-engine if you are using --local-engine-host.',
+        message: 'You must specify --local-engine if you are using --local-engine-host.',
       ),
     );
   });
