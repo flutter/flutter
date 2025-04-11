@@ -105,6 +105,7 @@ void main() {
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
               '-dTargetDeviceOSVersion=',
+              '-dDevDependenciesEnabled=',
               'debug_ios_bundle_flutter_assets',
             ],
           ),
@@ -139,6 +140,7 @@ void main() {
       const String treeShake = 'true';
       const String srcRoot = '/path/to/project';
       const String iOSVersion = '18.3.1';
+      const String devDependenciesEnabled = 'true';
       final TestContext context = TestContext(
         <String>['build'],
         <String, String>{
@@ -162,6 +164,7 @@ void main() {
           'TREE_SHAKE_ICONS': treeShake,
           'SRCROOT': srcRoot,
           'TARGET_DEVICE_OS_VERSION': iOSVersion,
+          'FLUTTER_DEV_DEPENDENCIES_ENABLED': devDependenciesEnabled,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -188,6 +191,7 @@ void main() {
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dSrcRoot=$srcRoot',
               '-dTargetDeviceOSVersion=$iOSVersion',
+              '-dDevDependenciesEnabled=$devDependenciesEnabled',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_ios_bundle_flutter_assets',
             ],
@@ -312,6 +316,7 @@ void main() {
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
               '-dTargetDeviceOSVersion=',
+              '-dDevDependenciesEnabled=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -342,6 +347,7 @@ void main() {
       const String treeShake = 'true';
       const String srcRoot = '/path/to/project';
       const String iOSVersion = '18.3.1';
+      const String devDependenciesEnabled = 'true';
       final TestContext context = TestContext(
         <String>['prepare'],
         <String, String>{
@@ -365,6 +371,7 @@ void main() {
           'TREE_SHAKE_ICONS': treeShake,
           'SRCROOT': srcRoot,
           'TARGET_DEVICE_OS_VERSION': iOSVersion,
+          'FLUTTER_DEV_DEPENDENCIES_ENABLED': devDependenciesEnabled,
         },
         commands: <FakeCommand>[
           FakeCommand(
@@ -391,6 +398,7 @@ void main() {
               '--ExtraFrontEndOptions=$extraFrontEndOptions',
               '-dSrcRoot=$srcRoot',
               '-dTargetDeviceOSVersion=$iOSVersion',
+              '-dDevDependenciesEnabled=$devDependenciesEnabled',
               '-dPreBuildAction=PrepareFramework',
               '-dCodesignIdentity=$expandedCodeSignIdentity',
               'release_unpack_ios',
@@ -444,6 +452,7 @@ void main() {
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
               '-dTargetDeviceOSVersion=',
+              '-dDevDependenciesEnabled=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -497,6 +506,7 @@ void main() {
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
               '-dTargetDeviceOSVersion=',
+              '-dDevDependenciesEnabled=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],
@@ -549,6 +559,7 @@ void main() {
               '--ExtraFrontEndOptions=',
               '-dSrcRoot=',
               '-dTargetDeviceOSVersion=',
+              '-dDevDependenciesEnabled=',
               '-dPreBuildAction=PrepareFramework',
               'debug_unpack_ios',
             ],

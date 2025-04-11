@@ -149,6 +149,7 @@ Future<void> buildMacOS({
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
+    featureFlags: featureFlags,
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );

@@ -2816,6 +2816,82 @@ flutter:
         },
       );
     });
+
+    group('flutterPluginsListHasDevDependencies', () {
+      testWithoutContext('throws if file does not exist', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        expect(
+          () => flutterPluginsListHasDevDependencies(pluginsFile),
+          throwsA(isA<FileSystemException>()),
+        );
+      });
+
+      testWithoutContext('throws if file is malformed', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('This is not JSON');
+
+        expect(
+          () => flutterPluginsListHasDevDependencies(pluginsFile),
+          throwsA(isA<FormatException>()),
+        );
+      });
+
+      testWithoutContext('Returns false if has no dependencies', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('''
+{
+  "plugins": {}
+}
+''');
+        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
+      });
+
+      testWithoutContext('Returns false if has no dev dependencies', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "foo_package",
+        "dev_dependency": false
+      }
+    ]
+  }
+}
+''');
+
+        expect(flutterPluginsListHasDevDependencies(pluginsFile), isFalse);
+      });
+
+      testWithoutContext('Returns true if has dev dependencies', () {
+        final MemoryFileSystem fileSystem = MemoryFileSystem.test();
+        final File pluginsFile = fileSystem.file('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "foo_package",
+        "dev_dependency": true
+      }
+    ]
+  }
+}
+''');
+
+        expect(flutterPluginsListHasDevDependencies(pluginsFile), isTrue);
+      });
+    });
   });
 
   testUsingContext(

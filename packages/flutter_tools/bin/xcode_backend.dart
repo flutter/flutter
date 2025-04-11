@@ -456,6 +456,7 @@ class Context {
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
       '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
       '-dTargetDeviceOSVersion=${environment['TARGET_DEVICE_OS_VERSION'] ?? ''}',
+      '-dDevDependenciesEnabled=${environment['FLUTTER_DEV_DEPENDENCIES_ENABLED'] ?? ''}',
     ]);
 
     if (command == 'prepare') {
