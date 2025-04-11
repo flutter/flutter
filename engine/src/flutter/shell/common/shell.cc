@@ -1814,10 +1814,10 @@ bool Shell::OnServiceProtocolRunInView(
 
   std::string main_script_path =
       fml::paths::FromURI(params.at("mainScript").data());
-  FML_DLOG(INFO) << "OnServiceProtocolRunInView AssetDir: " << params.at("assetDirectory").data();
-  FML_DLOG(INFO) << "OnServiceProtocolRunInView AssetDirPath: " << asset_directory_path.c_str();
   std::string asset_directory_path =
       fml::paths::FromURI(params.at("assetDirectory").data());
+  FML_DLOG(INFO) << "OnServiceProtocolRunInView AssetDir: " << params.at("assetDirectory").data();
+  FML_DLOG(INFO) << "OnServiceProtocolRunInView AssetDirPath: " << asset_directory_path.c_str();
 
   auto main_script_file_mapping =
       std::make_unique<fml::FileMapping>(fml::OpenFile(
