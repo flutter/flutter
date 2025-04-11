@@ -99,19 +99,19 @@ class SensitiveContentService {
   Future<void> setContentSensitivity(ContentSensitivity contentSensitivity) async {
     await sensitiveContentChannel.invokeMethod<void>(
       'SensitiveContent.setContentSensitivity',
-      contentSensitivity.name,
+      contentSensitivity.index,
     );
   }
 
   /// Gets content sensitivity level of the app window (Android `View`) that contains
   /// the app's widget tree.
   Future<ContentSensitivity> getContentSensitivity() async {
-    final String? result = await sensitiveContentChannel.invokeMethod<String>(
+    final int? result = await sensitiveContentChannel.invokeMethod<int>(
       'SensitiveContent.getContentSensitivity',
     );
 
     final ContentSensitivity contentSensitivity = ContentSensitivity.values.firstWhere(
-      (ContentSensitivity cs) => cs.name == result && cs != ContentSensitivity._unknown,
+      (ContentSensitivity cs) => cs.index == result && cs != ContentSensitivity._unknown,
       orElse:
           () =>
               throw UnsupportedError(

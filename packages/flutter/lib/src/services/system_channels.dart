@@ -592,7 +592,7 @@ abstract final class SystemChannels {
   ///     should set for the relevant Flutter view.
   ///
   ///  * `getContentSensitivity`: Gets the content sensitivity level of the Flutter Android View
-  ///     containing the widget tree, which will be the name of one of the [ContentSensitivity] levels.
+  ///     containing the widget tree, which will be the index of one of the [ContentSensitivity] levels.
   ///
   ///  * `isSupported`: Returns whether or not setting content sensitivity levels is supported on the
   ///     device.
