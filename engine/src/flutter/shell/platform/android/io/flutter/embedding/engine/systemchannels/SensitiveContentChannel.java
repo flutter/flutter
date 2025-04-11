@@ -28,8 +28,7 @@ public class SensitiveContentChannel {
    *
    * <p>See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
    */
-  @VisibleForTesting
-  public static final int AUTO_SENSITIVE_CONTENT_SENSITIVITY = 0;
+  @VisibleForTesting public static final int AUTO_SENSITIVE_CONTENT_SENSITIVITY = 0;
 
   /**
    * Flutter ContentSensitivity.sensitive index that represents Android's
@@ -49,8 +48,8 @@ public class SensitiveContentChannel {
   @VisibleForTesting public static final int NOT_SENSITIVE_CONTENT_SENSITIVITY = 2;
 
   /**
-   * Flutter ContentSensitivity._unknown index that represents a content sensitivity setting that the
-   * Flutter SensitiveContent widget does not recognize.
+   * Flutter ContentSensitivity._unknown index that represents a content sensitivity setting that
+   * the Flutter SensitiveContent widget does not recognize.
    */
   @VisibleForTesting public static final int UNKNOWN_CONTENT_SENSITIVITY = 3;
 
