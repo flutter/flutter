@@ -638,3 +638,54 @@ TEST(FlWindowingHandlerTest, DestroyUnknownWindow) {
 
   fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
+
+TEST(FlWindowingHandlerTest, WindowDestroyed) {
+  flutter::testing::fl_ensure_gtk_init();
+  ::testing::NiceMock<flutter::testing::MockWindow> mock_window;
+
+  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+
+  g_autoptr(FlEngine) engine =
+      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+  g_autoptr(FlWindowingHandler) handler = fl_windowing_handler_new(engine);
+
+  g_autoptr(FlValue) create_args = make_create_regular_args(800, 600);
+
+  static int64_t view_id = -1;
+  fl_mock_binary_messenger_invoke_standard_method(
+      messenger, "flutter/windowing", "createRegular", create_args,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        int64_t* view_id = static_cast<int64_t*>(user_data);
+        *view_id = parse_create_regular_response(response);
+      },
+      &view_id);
+  EXPECT_GT(view_id, 0);
+
+  GtkWindow* window = fl_windowing_handler_get_window(handler, view_id);
+  EXPECT_NE(window, nullptr);
+
+  static gboolean on_window_destroyed_called = FALSE;
+  fl_mock_binary_messenger_set_standard_method_channel(
+      messenger, "flutter/windowing",
+      [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,
+         FlValue* args, gpointer user_data) {
+        EXPECT_STREQ(name, "onWindowDestroyed");
+        EXPECT_EQ(fl_value_get_type(args), FL_VALUE_TYPE_MAP);
+        FlValue* view_id_value = fl_value_lookup_string(args, "viewId");
+        EXPECT_NE(view_id_value, nullptr);
+        EXPECT_EQ(fl_value_get_type(view_id_value), FL_VALUE_TYPE_INT);
+        EXPECT_EQ(fl_value_get_int(view_id_value), view_id);
+
+        on_window_destroyed_called = TRUE;
+
+        return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+      },
+      nullptr);
+
+  fl_gtk_widget_destroy(GTK_WIDGET(window));
+
+  EXPECT_TRUE(on_window_destroyed_called);
+
+  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+}
