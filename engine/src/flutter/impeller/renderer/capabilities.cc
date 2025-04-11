@@ -96,6 +96,11 @@ class StandardCapabilities final : public Capabilities {
     return supports_extended_range_formats_;
   }
 
+  // |Capabilities|
+  size_t GetMinimumUniformAlignment() const override {
+    return minimum_uniform_alignment_;
+  }
+
  private:
   StandardCapabilities(bool supports_offscreen_msaa,
                        bool supports_ssbo,
@@ -112,7 +117,8 @@ class StandardCapabilities final : public Capabilities {
                        PixelFormat default_stencil_format,
                        PixelFormat default_depth_stencil_format,
                        PixelFormat default_glyph_atlas_format,
-                       ISize default_maximum_render_pass_attachment_size)
+                       ISize default_maximum_render_pass_attachment_size,
+                       size_t minimum_uniform_alignment)
       : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
         supports_texture_to_texture_blits_(supports_texture_to_texture_blits),
@@ -130,7 +136,8 @@ class StandardCapabilities final : public Capabilities {
         default_depth_stencil_format_(default_depth_stencil_format),
         default_glyph_atlas_format_(default_glyph_atlas_format),
         default_maximum_render_pass_attachment_size_(
-            default_maximum_render_pass_attachment_size) {}
+            default_maximum_render_pass_attachment_size),
+        minimum_uniform_alignment_(minimum_uniform_alignment) {}
 
   friend class CapabilitiesBuilder;
 
@@ -150,6 +157,7 @@ class StandardCapabilities final : public Capabilities {
   PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
   ISize default_maximum_render_pass_attachment_size_ = ISize(1, 1);
+  size_t minimum_uniform_alignment_ = 256;
 
   StandardCapabilities(const StandardCapabilities&) = delete;
 
@@ -252,25 +260,32 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsExtendedRangeFormats(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetMinimumUniformAlignment(
+    size_t value) {
+  minimum_uniform_alignment_ = value;
+  return *this;
+}
+
 std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-  return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(  //
-      supports_offscreen_msaa_,                                           //
-      supports_ssbo_,                                                     //
-      supports_texture_to_texture_blits_,                                 //
-      supports_framebuffer_fetch_,                                        //
-      supports_compute_,                                                  //
-      supports_compute_subgroups_,                                        //
-      supports_read_from_resolve_,                                        //
-      supports_decal_sampler_address_mode_,                               //
-      supports_device_transient_textures_,                                //
-      supports_triangle_fan_,                                             //
-      supports_extended_range_formats_,                                   //
-      default_color_format_.value_or(PixelFormat::kUnknown),              //
-      default_stencil_format_.value_or(PixelFormat::kUnknown),            //
-      default_depth_stencil_format_.value_or(PixelFormat::kUnknown),      //
-      default_glyph_atlas_format_.value_or(PixelFormat::kUnknown),        //
-      default_maximum_render_pass_attachment_size_.value_or(ISize{1, 1})  //
+  return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(   //
+      supports_offscreen_msaa_,                                            //
+      supports_ssbo_,                                                      //
+      supports_texture_to_texture_blits_,                                  //
+      supports_framebuffer_fetch_,                                         //
+      supports_compute_,                                                   //
+      supports_compute_subgroups_,                                         //
+      supports_read_from_resolve_,                                         //
+      supports_decal_sampler_address_mode_,                                //
+      supports_device_transient_textures_,                                 //
+      supports_triangle_fan_,                                              //
+      supports_extended_range_formats_,                                    //
+      default_color_format_.value_or(PixelFormat::kUnknown),               //
+      default_stencil_format_.value_or(PixelFormat::kUnknown),             //
+      default_depth_stencil_format_.value_or(PixelFormat::kUnknown),       //
+      default_glyph_atlas_format_.value_or(PixelFormat::kUnknown),         //
+      default_maximum_render_pass_attachment_size_.value_or(ISize{1, 1}),  //
+      minimum_uniform_alignment_                                           //
       ));
 }
 

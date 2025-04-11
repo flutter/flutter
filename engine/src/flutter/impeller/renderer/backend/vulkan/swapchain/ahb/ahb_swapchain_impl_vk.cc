@@ -199,7 +199,8 @@ bool AHBSwapchainImplVK::Present(
     return false;
   }
 
-  android::SurfaceTransaction transaction = cb_();
+  android::SurfaceTransaction transaction =
+      (cb_) ? cb_() : impeller::android::SurfaceTransaction();
   if (!transaction.SetContents(control.get(),               //
                                texture->GetBackingStore(),  //
                                present_ready->CreateFD()    //

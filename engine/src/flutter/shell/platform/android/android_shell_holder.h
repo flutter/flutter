@@ -15,7 +15,6 @@
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
-#include "shell/platform/android/android_context_vk_impeller.h"
 
 namespace flutter {
 
@@ -38,11 +37,9 @@ namespace flutter {
 ///
 class AndroidShellHolder {
  public:
-  AndroidShellHolder(
-      const flutter::Settings& settings,
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-      AndroidRenderingAPI android_rendering_api,
-      std::unique_ptr<AndroidContextVKImpeller> android_vk_context = nullptr);
+  AndroidShellHolder(const flutter::Settings& settings,
+                     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+                     AndroidRenderingAPI android_rendering_api);
 
   ~AndroidShellHolder();
 
