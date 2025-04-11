@@ -30,7 +30,8 @@ vk::ImageLayout TextureSourceVK::SetLayoutWithoutEncoding(
 }
 
 fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
-  const auto old_layout = SetLayoutWithoutEncoding(barrier.new_layout);
+  const vk::ImageLayout old_layout =
+      SetLayoutWithoutEncoding(barrier.new_layout);
   vk::ImageMemoryBarrier image_barrier;
   image_barrier.srcAccessMask = barrier.src_access;
   image_barrier.dstAccessMask = barrier.dst_access;
@@ -40,8 +41,9 @@ fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   image_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
   image_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
   image_barrier.subresourceRange.aspectMask = ToImageAspectFlags(desc_.format);
-  image_barrier.subresourceRange.baseMipLevel = 0u;
-  image_barrier.subresourceRange.levelCount = desc_.mip_count;
+  image_barrier.subresourceRange.baseMipLevel = barrier.base_mip_level;
+  image_barrier.subresourceRange.levelCount =
+      desc_.mip_count - barrier.base_mip_level;
   image_barrier.subresourceRange.baseArrayLayer = 0u;
   image_barrier.subresourceRange.layerCount = ToArrayLayerCount(desc_.type);
 

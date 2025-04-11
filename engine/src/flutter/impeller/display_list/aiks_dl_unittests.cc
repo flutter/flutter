@@ -1122,10 +1122,7 @@ TEST_P(AiksTest, DisplayListToTextureAllocationFailure) {
   EXPECT_EQ(texture, nullptr);
 }
 
-TEST_P(AiksTest, DisplayListToTextureWithMipGenerationOnGLES) {
-  if (GetBackend() != PlaygroundBackend::kOpenGLES) {
-    GTEST_SKIP() << "Only relevant for GLES";
-  }
+TEST_P(AiksTest, DisplayListToTextureWithMipGeneration) {
   DisplayListBuilder builder;
 
   std::shared_ptr<DlImageFilter> filter =
