@@ -21,9 +21,6 @@ class AndroidContextGLImpeller : public AndroidContext {
   // |AndroidContext|
   bool IsValid() const override;
 
-  // |AndroidContext|
-  AndroidRenderingAPI RenderingApi() const override;
-
   bool ResourceContextMakeCurrent(impeller::egl::Surface* offscreen_surface);
   bool ResourceContextClearCurrent();
   std::unique_ptr<impeller::egl::Surface> CreateOffscreenSurface();

@@ -21,9 +21,6 @@ class AndroidContextVKImpeller : public AndroidContext {
   // |AndroidContext|
   bool IsValid() const override;
 
-  // |AndroidContext|
-  AndroidRenderingAPI RenderingApi() const override;
-
  private:
   fml::RefPtr<fml::NativeLibrary> vulkan_dylib_;
   bool is_valid_ = false;
