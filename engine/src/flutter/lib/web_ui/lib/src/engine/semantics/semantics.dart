@@ -2485,6 +2485,7 @@ class EngineSemantics {
     final PlatformConfiguration newConfiguration = EnginePlatformDispatcher.instance.configuration
         .copyWith(accessibilityFeatures: original.copyWith(accessibleNavigation: value));
     EnginePlatformDispatcher.instance.configuration = newConfiguration;
+    EnginePlatformDispatcher.instance.invokeOnAccessibilityFeaturesChanged();
 
     _semanticsEnabled = value;
 
