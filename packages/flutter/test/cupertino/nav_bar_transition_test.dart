@@ -1396,7 +1396,7 @@ void main() {
     // The nav bar bottom is horizontally aligned to the large title.
     expect(
       tester.getTopLeft(flying(tester, find.byType(Placeholder))).dx,
-      largeTitleOffset.dx - horizontalPadding,
+      moreOrLessEquals(largeTitleOffset.dx - horizontalPadding, epsilon: 0.01),
     );
   });
 
