@@ -12,6 +12,7 @@ enum class AndroidRenderingAPI {
   kSoftware,
   kImpellerOpenGLES,
   kImpellerVulkan,
+  kImpellerAutoselect,
   kSkiaOpenGLES
 };
 
