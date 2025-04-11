@@ -1569,7 +1569,13 @@ class PopupMenuButton<T> extends StatefulWidget {
 /// of your button state.
 class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   bool _isMenuExpanded = false;
+  RelativeRect? _lastPosition;
+
   RelativeRect _positionBuilder(BuildContext _, BoxConstraints constraints) {
+    if (!mounted) {
+      return _lastPosition ?? RelativeRect.fromSize(Rect.zero, constraints.biggest);
+    }
+
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final RenderBox overlay =
@@ -1599,7 +1605,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       Offset.zero & overlay.size,
     );
 
-    return position;
+    return _lastPosition = position;
   }
 
   /// A method to show a popup menu with the items supplied to
