@@ -156,7 +156,6 @@ GetActualRenderingAPIForImpeller(
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
           .enable_gpu_tracing = settings.enable_gpu_tracing,
           .enable_surface_control = settings.enable_surface_control,
-          .quiet = true,
           .impeller_flags =
               {
                   .lazy_shader_mode = settings.impeller_flags.lazy_shader_mode,
