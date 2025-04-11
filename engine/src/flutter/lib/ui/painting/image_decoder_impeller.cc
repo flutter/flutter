@@ -176,7 +176,8 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
         base_image_info.makeWH(decode_size.width(), decode_size.height())
             .makeColorType(
                 ChooseCompatibleColorType(base_image_info.colorType()))
-            .makeAlphaType(alpha_type);
+            .makeAlphaType(alpha_type)
+            .makeColorSpace(SkColorSpace::MakeSRGB());
   }
 
   const auto pixel_format = ToPixelFormat(image_info.colorType());
