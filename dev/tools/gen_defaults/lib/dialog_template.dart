@@ -48,6 +48,9 @@ class _${blockName}DefaultsM3 extends DialogThemeData {
 
   @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
+
+  @override
+  BoxConstraints? get constraints => const BoxConstraints(minHeight: 280.0, maxWidth: 560.0);
 }
 ''';
 }

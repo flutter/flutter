@@ -1774,9 +1774,6 @@ class _DialogDefaultsM3 extends DialogThemeData {
 
   @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
-
-  @override
-  BoxConstraints? get constraints => const BoxConstraints(maxWidth: 560.0);
 }
 // dart format on
 
