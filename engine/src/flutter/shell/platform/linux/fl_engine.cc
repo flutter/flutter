@@ -25,6 +25,7 @@
 #include "flutter/shell/platform/linux/fl_settings_handler.h"
 #include "flutter/shell/platform/linux/fl_texture_gl_private.h"
 #include "flutter/shell/platform/linux/fl_texture_registrar_private.h"
+#include "flutter/shell/platform/linux/fl_windowing.h"
 #include "flutter/shell/platform/linux/fl_windowing_handler.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
 
@@ -65,6 +66,8 @@ struct _FlEngine {
 
   // Implements the flutter/windowing channel.
   FlWindowingHandler* windowing_handler;
+
+  FlWindowingController* windowing_controller;
 
   // Process keyboard events.
   FlKeyboardManager* keyboard_manager;
@@ -490,6 +493,7 @@ static void fl_engine_dispose(GObject* object) {
   g_clear_object(&self->settings_handler);
   g_clear_object(&self->platform_handler);
   g_clear_object(&self->windowing_handler);
+  g_clear_object(&self->windowing_controller);
   g_clear_object(&self->keyboard_manager);
   g_clear_object(&self->text_input_handler);
   g_clear_object(&self->keyboard_handler);
@@ -571,6 +575,7 @@ static FlEngine* fl_engine_new_full(FlDartProject* project,
   self->mouse_cursor_handler =
       fl_mouse_cursor_handler_new(self->binary_messenger);
   self->windowing_handler = fl_windowing_handler_new(self);
+  self->windowing_controller = fl_windowing_controller_new(self);
 
   return self;
 }
@@ -636,6 +641,7 @@ gboolean fl_engine_start(FlEngine* self, GError** error) {
   FlutterCustomTaskRunners custom_task_runners = {};
   custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
   custom_task_runners.platform_task_runner = &platform_task_runner;
+  custom_task_runners.ui_task_runner = &platform_task_runner;
 
   g_autoptr(GPtrArray) command_line_args =
       g_ptr_array_new_with_free_func(g_free);
@@ -1319,6 +1325,11 @@ void fl_engine_request_app_exit(FlEngine* self) {
 FlWindowingHandler* fl_engine_get_windowing_handler(FlEngine* self) {
   g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
   return self->windowing_handler;
+}
+
+FlWindowingController* fl_engine_get_windowing_controller(FlEngine* self) {
+  g_return_val_if_fail(FL_IS_ENGINE(self), nullptr);
+  return self->windowing_controller;
 }
 
 FlKeyboardManager* fl_engine_get_keyboard_manager(FlEngine* self) {
