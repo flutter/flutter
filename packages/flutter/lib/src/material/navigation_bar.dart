@@ -1493,3 +1493,73 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
 // dart format on
 
 // END GENERATED TOKEN PROPERTIES - NavigationBar
+
+// BEGIN GENERATED TOKEN PROPERTIES - NavigationBar
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
+  _NavigationBarDefaultsM3(this.context)
+    : super(
+        height: 80.0,
+        elevation: 3.0,
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      );
+
+  final BuildContext context;
+  late final ColorScheme _colors = Theme.of(context).colorScheme;
+  late final TextTheme _textTheme = Theme.of(context).textTheme;
+
+  @override
+  Color? get backgroundColor => _colors.surfaceContainer;
+
+  @override
+  Color? get shadowColor => Colors.transparent;
+
+  @override
+  Color? get surfaceTintColor => Colors.transparent;
+
+  @override
+  MaterialStateProperty<IconThemeData?>? get iconTheme {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      return IconThemeData(
+        size: 24.0,
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
+            ? _colors.onSecondaryContainer
+            : _colors.onSurfaceVariant,
+      );
+    });
+  }
+
+  @override
+  Color? get indicatorColor => _colors.secondaryContainer;
+
+  @override
+  ShapeBorder? get indicatorShape => const StadiumBorder();
+
+  @override
+  MaterialStateProperty<TextStyle?>? get labelTextStyle {
+    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    final TextStyle style = _textTheme.labelMedium!;
+      return style.apply(
+        color: states.contains(MaterialState.disabled)
+          ? _colors.onSurfaceVariant.withOpacity(0.38)
+          : states.contains(MaterialState.selected)
+            ? _colors.onSurface
+            : _colors.onSurfaceVariant
+      );
+    });
+  }
+
+  @override
+  EdgeInsetsGeometry? get labelPadding => const EdgeInsets.only(top: 4);
+}
+// dart format on
+
+// END GENERATED TOKEN PROPERTIES - NavigationBar
