@@ -1732,4 +1732,57 @@ void main() {
       ],
     ),
   );
+
+  testWidgets(
+    'MediaQueryData.accessibleNavigation toggled when semantics are enabled on the web',
+    (WidgetTester tester) async {
+      addTearDown(() => tester.platformDispatcher.clearAllTestValues());
+      addTearDown(() => tester.view.reset());
+
+      tester.platformDispatcher.clearAllTestValues();
+
+      late MediaQueryData data;
+      MediaQueryData? outerData;
+      int rebuildCount = 0;
+      await tester.pumpWidget(
+        wrapWithView: false,
+        Builder(
+          builder: (BuildContext context) {
+            outerData = MediaQuery.maybeOf(context);
+            return MediaQuery.fromView(
+              view: tester.view,
+              child: Builder(
+                builder: (BuildContext context) {
+                  rebuildCount++;
+                  data = MediaQuery.of(context);
+                  return View(view: tester.view, child: const SizedBox());
+                },
+              ),
+            );
+          },
+        ),
+      );
+
+      expect(outerData, isNull);
+      expect(tester.binding.semanticsEnabled, isFalse);
+      expect(data.accessibleNavigation, isFalse);
+      expect(rebuildCount, 1);
+
+      // On actual browsers, `SemanticsBinding.instance.ensureSemantics()` will make
+      //`platformDispatcher.accessibilityFeatures.accessibleNavigation` true
+      tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(
+        accessibleNavigation: true,
+      );
+      final SemanticsHandle handler = tester.ensureSemantics();
+      await tester.pump();
+
+      expect(tester.binding.semanticsEnabled, isTrue);
+      expect(data.accessibleNavigation, isTrue);
+      expect(rebuildCount, 2);
+
+      handler.dispose();
+    },
+    semanticsEnabled: false,
+    skip: !isBrowser, // [intended] This is a Browser-specific test.
+  );
 }
