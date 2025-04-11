@@ -65,9 +65,9 @@ mergeInto(LibraryManager.library, {
       };
       skwasm_postMessage = function(message, transfers, threadId) {
         if (threadId) {
-          _wasmWorkers[threadId].postMessage(message, transfers);
+          _wasmWorkers[threadId].postMessage(message, { transfer: transfers } );
         } else {
-          postMessage(message, transfers);
+          postMessage(message, { transfer: transfers });
         }
       };
     }
