@@ -526,7 +526,7 @@ object FlutterPluginUtils {
             //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
             @Suppress("USELESS_ELVIS")
             val projectNdkVersion: String =
-                getAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
+                getAndroidExtension(project).ndkVersion // ?: ndkVersionIfUnspecified
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
@@ -557,7 +557,7 @@ object FlutterPluginUtils {
                     //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
                     @Suppress("USELESS_ELVIS")
                     val pluginNdkVersion: String =
-                        getAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
+                        getAndroidExtension(pluginProject).ndkVersion // ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
