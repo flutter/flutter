@@ -1987,10 +1987,10 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
 
   auto asset_manager = std::make_shared<AssetManager>();
 
-  FML_DLOG(INFO) << "OnServiceProtocolSetAssetBundlePath AssetDir: " << params.at("assetDirectory").data();
-  FML_DLOG(INFO) << "OnServiceProtocolSetAssetBundlePath AssetDirPath: " << asset_directory_path.c_str();
   std::string asset_directory_path =
       fml::paths::FromURI(params.at("assetDirectory").data());
+  FML_DLOG(INFO) << "OnServiceProtocolSetAssetBundlePath AssetDir: " << params.at("assetDirectory").data();
+  FML_DLOG(INFO) << "OnServiceProtocolSetAssetBundlePath AssetDirPath: " << asset_directory_path.c_str();
   if (!asset_manager->PushFront(std::make_unique<DirectoryAssetBundle>(
           fml::OpenDirectory(asset_directory_path.c_str(), false,
                              fml::FilePermission::kRead),
