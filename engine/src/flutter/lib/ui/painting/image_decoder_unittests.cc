@@ -462,7 +462,8 @@ TEST_F(ImageDecoderFixtureTest, ImpellerNullColorspace) {
           /*supports_wide_gamut=*/true, capabilities, allocator);
   ASSERT_TRUE(decompressed.has_value());
   EXPECT_EQ(decompressed->image_info.colorType(), kRGBA_8888_SkColorType);
-  EXPECT_EQ(decompressed->image_info.colorSpace(), SkColorSpace::MakeSRGB());
+  EXPECT_EQ(decompressed->image_info.colorSpace(),
+            SkColorSpace::MakeSRGB().get());
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
@@ -495,7 +496,8 @@ TEST_F(ImageDecoderFixtureTest, ImpellerPixelConversion32F) {
 
   ASSERT_TRUE(decompressed.has_value());
   EXPECT_EQ(decompressed->image_info.colorType(), kRGBA_F16_SkColorType);
-  EXPECT_EQ(decompressed->image_info.colorSpace(), SkColorSpace::MakeSRGB());
+  EXPECT_EQ(decompressed->image_info.colorSpace(),
+            SkColorSpace::MakeSRGB().get());
 #endif  // IMPELLER_SUPPORTS_RENDERING
 }
 
