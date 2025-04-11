@@ -69,7 +69,10 @@ class MacrobenchmarksApp extends StatelessWidget {
         kLargeImageChangerRouteName: (BuildContext context) => const LargeImageChangerPage(),
         kLargeImagesRouteName: (BuildContext context) => const LargeImagesPage(),
         kTextRouteName: (BuildContext context) => const TextPage(),
-        kPathTessellationRouteName: (BuildContext context) => const PathTessellationPage(),
+        kPathTessellationRouteName:
+            (BuildContext context) => const PathTessellationPage(paintStyle: PaintingStyle.fill),
+        kPathStrokeTessellationRouteName:
+            (BuildContext context) => const PathTessellationPage(paintStyle: PaintingStyle.stroke),
         kFullscreenTextRouteName: (BuildContext context) => const TextFieldPage(),
         kAnimatedPlaceholderRouteName: (BuildContext context) => const AnimatedPlaceholderPage(),
         kClipperCacheRouteName: (BuildContext context) => const ClipperCachePage(),
@@ -186,6 +189,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Path Tessellation'),
             onPressed: () {
               Navigator.pushNamed(context, kPathTessellationRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kPathStrokeTessellationRouteName),
+            child: const Text('Path Stroke Tessellation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPathStrokeTessellationRouteName);
             },
           ),
           ElevatedButton(

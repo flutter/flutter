@@ -272,10 +272,10 @@ extensions:
     # Flutter and Dart extensions.
     - Dart-Code.dart-code
     # Supports C/C++ in the engine.
-    # See https://github.com/flutter/engine/blob/main/docs/contributing/Setting-up-the-Engine-development-environment.md#vscode-with-cc-intellisense-cc
+    # See https://github.com/flutter/flutter/blob/main/engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md#vscode-with-cc-intellisense-cc
     - llvm-vs-code-extensions.vscode-clangd
     # Auto-formats C/C++ code.
-    # https://github.com/flutter/engine/blob/main/CONTRIBUTING.md#cc
+    # https://github.com/flutter/flutter/blob/main/engine/src/flutter/CONTRIBUTING.md#cc
     - xaver.clang-format
 launch:
   version: 0.2.0
