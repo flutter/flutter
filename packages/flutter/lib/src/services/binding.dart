@@ -59,7 +59,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     );
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
-    platformDispatcher.onViewFocusChange = handleViewFocusChanged;
+    platformDispatcher.onSupportsShowingSystemContextMenuChange;
+    platformDispatcher
+      ..onSupportsShowingSystemContextMenuChange = handleSupportsShowingSystemContextMenuChanged
+      ..onViewFocusChange = handleViewFocusChanged;
     TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
     initializationComplete();
@@ -405,6 +408,10 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   @protected
   @mustCallSuper
   void handleViewFocusChanged(ui.ViewFocusEvent event) {}
+
+  // TODO(justinmc): Docs.
+  @protected
+  void handleSupportsShowingSystemContextMenuChanged() {}
 
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
     final String method = methodCall.method;

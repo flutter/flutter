@@ -1142,6 +1142,16 @@ class PlatformDispatcher {
   bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu;
   bool _supportsShowingSystemContextMenu = false;
 
+  // TODO(justinmc): Styleguide says this should be "handle", not "on"...
+  VoidCallback? get onSupportsShowingSystemContextMenuChange =>
+      _onSupportsShowingSystemContextMenuChange;
+  VoidCallback? _onSupportsShowingSystemContextMenuChange;
+  Zone _onSupportsShowingSystemContextMenuChangeZone = Zone.root;
+  set onSupportsShowingSystemContextMenuChange(VoidCallback? callback) {
+    _onSupportsShowingSystemContextMenuChange = callback;
+    _onSupportsShowingSystemContextMenuChangeZone = Zone.current;
+  }
+
   /// Whether briefly displaying the characters as you type in obscured text
   /// fields is enabled in system settings.
   ///
@@ -1213,7 +1223,13 @@ class PlatformDispatcher {
     final bool? supportsShowingSystemContextMenu =
         data['supportsShowingSystemContextMenu'] as bool?;
     if (supportsShowingSystemContextMenu != null) {
-      _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
+      if (supportsShowingSystemContextMenu != _supportsShowingSystemContextMenu) {
+        _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
+        _invoke(
+          onSupportsShowingSystemContextMenuChange,
+          _onSupportsShowingSystemContextMenuChangeZone,
+        );
+      }
     } else {
       _supportsShowingSystemContextMenu = false;
     }
