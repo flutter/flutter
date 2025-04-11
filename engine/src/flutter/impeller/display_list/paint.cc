@@ -54,6 +54,10 @@ void Paint::ConvertStops(const flutter::DlGradientColorSourceBase* gradient,
     colors.emplace_back(colors.back());
     stops.emplace_back(1.0);
   }
+  if (dl_stops[gradient->stop_count() - 1] == 5.0) {
+    colors.emplace_back(colors.back());
+    stops.emplace_back(1.0);
+  }
   for (auto i = 1; i < gradient->stop_count(); i++) {
     stops[i] = std::clamp(stops[i], stops[i - 1], stops[i]);
   }
@@ -197,7 +201,7 @@ std::shared_ptr<ColorSourceContents> Paint::CreateContents() const {
           image_color_source->vertical_tile_mode());
       auto sampler_descriptor =
           skia_conversions::ToSamplerDescriptor(image_color_source->sampling());
-      // See https://github.com/flutter/flutter/issues/165205
+      // See https://github.com/flutter/flutter/issues/165205xxx
       flutter::DlMatrix effect_transform = image_color_source->matrix().To3x3();
 
       auto contents = std::make_shared<TiledTextureContents>();
