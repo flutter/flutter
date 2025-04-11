@@ -2143,6 +2143,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     changedInternalState();
   }
 
+  // TODO(justinmc): The delegatedTransition isnt used until here, after the pop happens. To be able to use some kind of delegated predictive back transition during the gesture, I'll have to build some infrastructure for that.
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     if (nextRoute is ModalRoute<T> &&

@@ -47,12 +47,17 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   ) {
     return _PredictiveBackGestureDetector(
       route: route,
-      builder: (BuildContext context) {
+      builder: (
+        BuildContext context,
+        _PredictiveBackPhase phase,
+        PredictiveBackEvent? startBackEvent,
+        PredictiveBackEvent? currentBackEvent,
+      ) {
         // Only do a predictive back transition when the user is performing a
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
         if (route.popGestureInProgress) {
-          return _PredictiveBackPageTransition(
+          return _PredictiveBackPageFullScreenTransition(
             animation: animation,
             secondaryAnimation: secondaryAnimation,
             getIsCurrent: () => route.isCurrent,
@@ -72,11 +77,215 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
+// TODO(justinmc): Elaborate
+// TODO(justinmc): Remove Page from name?
+/// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
+/// transition animation that looks like Android's Shared Element page
+/// transition.
+///
+/// See also:
+///
+///  * [https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition],
+///  which is the native Android docs for this page transition.
+class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsBuilder {
+  /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
+  /// predictive back transition.
+  const PredictiveBackPageSharedElementTransitionsBuilder();
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  static Widget? _delegatedTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) {
+    final ModalRoute<Object?>? route = ModalRoute.of(context);
+    if (child == null || route is! PageRoute) {
+      return child;
+    }
+
+    return _PredictiveBackGestureListener(
+      route: route,
+      builder: (
+        BuildContext context,
+        _PredictiveBackPhase phase,
+        PredictiveBackEvent? startBackEvent,
+        PredictiveBackEvent? currentBackEvent,
+      ) {
+        // Only do a predictive back transition when the user is performing a
+        // pop gesture. Otherwise, for things like button presses or other
+        // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
+        if (route.popGestureInProgress) {
+          return _PredictiveBackPageSharedElementTransition(
+            isDelegatedTransition: true,
+            animation: animation,
+            phase: phase,
+            secondaryAnimation: secondaryAnimation,
+            startBackEvent: startBackEvent,
+            currentBackEvent: currentBackEvent,
+            child: child,
+          );
+        }
+
+        return child;
+      },
+    );
+  }
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return _PredictiveBackGestureDetector(
+      route: route,
+      builder: (
+        BuildContext context,
+        _PredictiveBackPhase phase,
+        PredictiveBackEvent? startBackEvent,
+        PredictiveBackEvent? currentBackEvent,
+      ) {
+        // Only do a predictive back transition when the user is performing a
+        // pop gesture. Otherwise, for things like button presses or other
+        // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
+        if (route.popGestureInProgress) {
+          return _PredictiveBackPageSharedElementTransition(
+            isDelegatedTransition: false,
+            animation: animation,
+            phase: phase,
+            secondaryAnimation: secondaryAnimation,
+            startBackEvent: startBackEvent,
+            currentBackEvent: currentBackEvent,
+            child: child,
+          );
+        }
+
+        return const ZoomPageTransitionsBuilder().buildTransitions(
+          route,
+          context,
+          animation,
+          secondaryAnimation,
+          child,
+        );
+      },
+    );
+  }
+}
+
+typedef _PredictiveBackGestureDetectorWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      _PredictiveBackPhase phase,
+      PredictiveBackEvent? startBackEvent,
+      PredictiveBackEvent? currentBackEvent,
+    );
+
+enum _PredictiveBackPhase { idle, start, update, commit, cancel }
+
+class _PredictiveBackGestureListener extends StatefulWidget {
+  const _PredictiveBackGestureListener({required this.builder, required this.route});
+
+  final _PredictiveBackGestureDetectorWidgetBuilder builder;
+  final PageRoute<dynamic> route;
+
+  @override
+  State<_PredictiveBackGestureListener> createState() => _PredictiveBackGestureListenerState();
+}
+
+class _PredictiveBackGestureListenerState extends State<_PredictiveBackGestureListener>
+    with WidgetsBindingObserver {
+  _PredictiveBackPhase get phase => _phase;
+  _PredictiveBackPhase _phase = _PredictiveBackPhase.idle;
+  set phase(_PredictiveBackPhase phase) {
+    if (_phase != phase && mounted) {
+      setState(() => _phase = phase);
+    }
+  }
+
+  /// The back event when the gesture first started.
+  PredictiveBackEvent? get startBackEvent => _startBackEvent;
+  PredictiveBackEvent? _startBackEvent;
+  set startBackEvent(PredictiveBackEvent? startBackEvent) {
+    if (_startBackEvent != startBackEvent && mounted) {
+      setState(() => _startBackEvent = startBackEvent);
+    }
+  }
+
+  /// The most recent back event during the gesture.
+  PredictiveBackEvent? get currentBackEvent => _currentBackEvent;
+  PredictiveBackEvent? _currentBackEvent;
+  set currentBackEvent(PredictiveBackEvent? currentBackEvent) {
+    if (_currentBackEvent != currentBackEvent && mounted) {
+      setState(() => _currentBackEvent = currentBackEvent);
+    }
+  }
+
+  // Begin WidgetsBindingObserver.
+
+  @override
+  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    phase = _PredictiveBackPhase.start;
+
+    final bool gestureInProgress = !backEvent.isButtonEvent && widget.route.popGestureEnabled;
+    if (!gestureInProgress) {
+      return false;
+    }
+
+    startBackEvent = currentBackEvent = backEvent;
+    return true;
+  }
+
+  @override
+  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    phase = _PredictiveBackPhase.update;
+    currentBackEvent = backEvent;
+  }
+
+  @override
+  void handleCancelBackGesture() {
+    phase = _PredictiveBackPhase.cancel;
+    startBackEvent = currentBackEvent = null;
+  }
+
+  @override
+  void handleCommitBackGesture() {
+    phase = _PredictiveBackPhase.commit;
+    startBackEvent = currentBackEvent = null;
+  }
+
+  // End WidgetsBindingObserver.
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final _PredictiveBackPhase effectivePhase =
+        widget.route.popGestureInProgress ? phase : _PredictiveBackPhase.idle;
+    return widget.builder(context, effectivePhase, startBackEvent, currentBackEvent);
+  }
+}
+
 class _PredictiveBackGestureDetector extends StatefulWidget {
   const _PredictiveBackGestureDetector({required this.route, required this.builder});
 
-  final WidgetBuilder builder;
-  final PredictiveBackRoute route;
+  final _PredictiveBackGestureDetectorWidgetBuilder builder;
+  final PageRoute<dynamic> route;
 
   @override
   State<_PredictiveBackGestureDetector> createState() => _PredictiveBackGestureDetectorState();
@@ -89,14 +298,20 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
     return widget.route.isCurrent && widget.route.popGestureEnabled;
   }
 
+  _PredictiveBackPhase get phase => _phase;
+  _PredictiveBackPhase _phase = _PredictiveBackPhase.idle;
+  set phase(_PredictiveBackPhase phase) {
+    if (_phase != phase && mounted) {
+      setState(() => _phase = phase);
+    }
+  }
+
   /// The back event when the gesture first started.
   PredictiveBackEvent? get startBackEvent => _startBackEvent;
   PredictiveBackEvent? _startBackEvent;
   set startBackEvent(PredictiveBackEvent? startBackEvent) {
     if (_startBackEvent != startBackEvent && mounted) {
-      setState(() {
-        _startBackEvent = startBackEvent;
-      });
+      setState(() => _startBackEvent = startBackEvent);
     }
   }
 
@@ -105,9 +320,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
   PredictiveBackEvent? _currentBackEvent;
   set currentBackEvent(PredictiveBackEvent? currentBackEvent) {
     if (_currentBackEvent != currentBackEvent && mounted) {
-      setState(() {
-        _currentBackEvent = currentBackEvent;
-      });
+      setState(() => _currentBackEvent = currentBackEvent);
     }
   }
 
@@ -115,6 +328,8 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    phase = _PredictiveBackPhase.start;
+
     final bool gestureInProgress = !backEvent.isButtonEvent && _isEnabled;
     if (!gestureInProgress) {
       return false;
@@ -127,18 +342,24 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    phase = _PredictiveBackPhase.update;
+
     widget.route.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
     currentBackEvent = backEvent;
   }
 
   @override
   void handleCancelBackGesture() {
+    phase = _PredictiveBackPhase.cancel;
+
     widget.route.handleCancelBackGesture();
     startBackEvent = currentBackEvent = null;
   }
 
   @override
   void handleCommitBackGesture() {
+    phase = _PredictiveBackPhase.commit;
+
     widget.route.handleCommitBackGesture();
     startBackEvent = currentBackEvent = null;
   }
@@ -159,13 +380,18 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context);
+    final _PredictiveBackPhase effectivePhase =
+        widget.route.popGestureInProgress ? phase : _PredictiveBackPhase.idle;
+    return widget.builder(context, effectivePhase, startBackEvent, currentBackEvent);
   }
 }
 
-/// Android's predictive back page transition.
-class _PredictiveBackPageTransition extends StatelessWidget {
-  const _PredictiveBackPageTransition({
+// TODO(justinmc): This one needs some work if we keep it. See the animations at
+// the link below.
+/// Android's predictive back page transition for full screen surfaces.
+/// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
+class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
+  const _PredictiveBackPageFullScreenTransition({
     required this.animation,
     required this.secondaryAnimation,
     required this.getIsCurrent,
@@ -283,6 +509,192 @@ class _PredictiveBackPageTransition extends StatelessWidget {
       animation: secondaryAnimation,
       builder: _secondaryAnimatedBuilder,
       child: AnimatedBuilder(animation: animation, builder: _primaryAnimatedBuilder, child: child),
+    );
+  }
+}
+
+// TODO(justinmc): Make this the default, what PredictiveBackPageTransitionBuilder does. Preserve the fullscreen animation as non-default.
+/// Android's predictive back page shared element transition.
+/// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
+class _PredictiveBackPageSharedElementTransition extends StatefulWidget {
+  const _PredictiveBackPageSharedElementTransition({
+    required this.isDelegatedTransition,
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.phase,
+    required this.startBackEvent,
+    required this.currentBackEvent,
+    required this.child,
+  });
+
+  final bool isDelegatedTransition;
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final _PredictiveBackPhase phase;
+  final PredictiveBackEvent? startBackEvent;
+  final PredictiveBackEvent? currentBackEvent;
+  final Widget child;
+
+  @override
+  State<_PredictiveBackPageSharedElementTransition> createState() =>
+      _PredictiveBackPageSharedElementTransitionState();
+}
+
+class _PredictiveBackPageSharedElementTransitionState
+    extends State<_PredictiveBackPageSharedElementTransition>
+    with SingleTickerProviderStateMixin {
+  // Constants as per the motion specs
+  // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
+  static const double _kMinScale = 0.90;
+  static const double _kDivisionFactor = 20.0;
+  static const double _kMargin = 8.0;
+  static const double _kYPositionFactor = 0.1;
+
+  // Ideally this would match the curvature of the physical Android device being
+  // used. Since that seems impossible, this value is a best guess at a value
+  // that looks reasonable on most devices.
+  static const double _kDeviceBorderRadius = 32.0;
+
+  // Eyeballed on a Pixel 9 running Android 16.
+  static const int _kCommitMilliseconds = 100;
+
+  final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
+  final Tween<double> _gapTween = Tween<double>(begin: _kMargin, end: 0.0);
+  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
+  final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
+
+  late final AnimationController _commitController;
+  late final Animation<double> _commitAnimation;
+  late final Listenable _mergedAnimations;
+  late final Animation<double> _opacityAnimation;
+  late final Animation<double> _scaleAnimation;
+  late Animation<double> _scaleCommitAnimation;
+  late Animation<double> _xAnimation;
+  late Animation<Offset> _positionCommitAnimation;
+
+  double _lastXDrag = 0.0;
+  double _lastYDrag = 0.0;
+  double _lastScale = 1.0;
+
+  // This isn't done as an animation because it's based on the vertical drag
+  // amount, not the progression of the back gesture like widget.animation is.
+  double _getYPosition(double screenHeight) {
+    final double startTouchY = widget.startBackEvent?.touchOffset?.dy ?? 0;
+    final double currentTouchY = widget.currentBackEvent?.touchOffset?.dy ?? 0;
+
+    final double yShiftMax = (screenHeight / _kDivisionFactor) - _kMargin;
+
+    final double rawYShift = currentTouchY - startTouchY;
+    final double easedYShift =
+        Curves.easeOut.transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
+        rawYShift.sign *
+        yShiftMax;
+
+    return easedYShift.clamp(-yShiftMax, yShiftMax);
+  }
+
+  Animation<Offset> _getCommitPositionAnimation(double screenWidth) {
+    return Tween<Offset>(
+      begin: Offset(_lastXDrag, _lastYDrag),
+      end: Offset(screenWidth * _kYPositionFactor, 0.0),
+    ).animate(_commitAnimation);
+  }
+
+  // TODO(justinmc): Should have a delegatedTransition. The incoming route on a
+  // back has three animations: x translation, scale, and a dimming of its
+  // colors (opacity I think). Dimming also happens in dark mode, it gets even
+  // darker.
+  // https://github.com/flutter/flutter/issues/153577
+
+  @override
+  void initState() {
+    super.initState();
+
+    _commitController = AnimationController(
+      duration: const Duration(milliseconds: _kCommitMilliseconds),
+      vsync: this,
+    );
+    _commitAnimation = CurvedAnimation(parent: _commitController, curve: Curves.easeOut);
+    _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
+    _opacityAnimation = _opacityTween.animate(_commitAnimation);
+    _scaleAnimation = _scaleTween.animate(widget.animation);
+    _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
+
+    if (widget.phase == _PredictiveBackPhase.commit) {
+      _commitController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_PredictiveBackPageSharedElementTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
+      _commitController.forward(from: 0.0);
+      _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
+      final double screenWidth = MediaQuery.sizeOf(context).width;
+      _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+
+    final double xShift = (screenWidth / _kDivisionFactor) - _kMargin;
+    _xAnimation = Tween<double>(
+      begin: switch (widget.currentBackEvent?.swipeEdge) {
+        SwipeEdge.left => xShift,
+        SwipeEdge.right => -xShift,
+        null => xShift,
+      },
+      end: 0.0,
+    ).animate(widget.animation);
+
+    _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
+  }
+
+  @override
+  void dispose() {
+    _commitController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _mergedAnimations,
+      builder: (BuildContext context, Widget? child) {
+        return Transform.scale(
+          scale: switch (widget.phase) {
+            _PredictiveBackPhase.commit => _scaleCommitAnimation.value,
+            _ => _lastScale = _scaleAnimation.value,
+          },
+          child: Transform.translate(
+            offset: switch (widget.phase) {
+              _PredictiveBackPhase.commit => _positionCommitAnimation.value,
+              _ => Offset(
+                _lastXDrag = _xAnimation.value,
+                _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
+              ),
+            },
+            child: Opacity(
+              opacity: _opacityAnimation.value,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(widget.animation)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                    _borderRadiusTween.evaluate(widget.animation),
+                  ),
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: widget.child,
     );
   }
 }
