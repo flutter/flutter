@@ -312,6 +312,7 @@ abstract mixin class WidgetsBindingObserver {
   void didChangeTextScaleFactor() {}
 
   // TODO(justinmc): Docs.
+  /// Handles a change in supportsShowingSystemContextMenuChanged.
   void didChangeSupportsShowingSystemContextMenu() {}
 
   /// Called when the platform brightness changes.

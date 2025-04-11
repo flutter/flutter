@@ -410,6 +410,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void handleViewFocusChanged(ui.ViewFocusEvent event) {}
 
   // TODO(justinmc): Docs.
+  /// Handles a change in supportsShowingSystemContextMenuChanged.
   @protected
   void handleSupportsShowingSystemContextMenuChanged() {}
 
