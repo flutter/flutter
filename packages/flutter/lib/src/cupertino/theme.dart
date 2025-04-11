@@ -394,6 +394,7 @@ class CupertinoThemeData extends NoDefaultCupertinoThemeData with Diagnosticable
 ///
 ///  * [CupertinoThemeData], which uses reasonable default values for
 ///    unspecified theme properties.
+@immutable
 class NoDefaultCupertinoThemeData {
   /// Creates a [NoDefaultCupertinoThemeData] styling specification.
   ///
@@ -541,6 +542,35 @@ class NoDefaultCupertinoThemeData {
       applyThemeToAll: applyThemeToAll ?? this.applyThemeToAll,
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is NoDefaultCupertinoThemeData &&
+        other.brightness == brightness &&
+        other.primaryColor == primaryColor &&
+        other.primaryContrastingColor == primaryContrastingColor &&
+        other.textTheme == textTheme &&
+        other.barBackgroundColor == barBackgroundColor &&
+        other.scaffoldBackgroundColor == scaffoldBackgroundColor &&
+        other.applyThemeToAll == applyThemeToAll;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    brightness,
+    primaryColor,
+    primaryContrastingColor,
+    textTheme,
+    barBackgroundColor,
+    scaffoldBackgroundColor,
+    applyThemeToAll,
+  );
 }
 
 @immutable
