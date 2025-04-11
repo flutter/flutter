@@ -1732,6 +1732,27 @@ class _DialogDefaultsM2 extends DialogThemeData {
   EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;
 }
 
+
+// BEGIN GENERATED TOKEN PROPERTIES - DialogFullscreen
+
+// Do not edit by hand. The code between the "BEGIN GENERATED" and
+// "END GENERATED" comments are generated from data in the Material
+// Design token database by the script:
+//   dev/tools/gen_defaults/bin/gen_defaults.dart.
+
+// dart format off
+class _DialogFullscreenDefaultsM3 extends DialogThemeData {
+  const _DialogFullscreenDefaultsM3(this.context): super(clipBehavior: Clip.none);
+
+  final BuildContext context;
+
+  @override
+  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
+}
+// dart format on
+
+// END GENERATED TOKEN PROPERTIES - DialogFullscreen
+
 // BEGIN GENERATED TOKEN PROPERTIES - Dialog
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
@@ -1747,7 +1768,6 @@ class _DialogDefaultsM3 extends DialogThemeData {
         elevation: 6.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0))),
         clipBehavior: Clip.none,
-        constraints: const BoxConstraints(minWidth: 280.0, maxWidth: 560.0),
       );
 
   final BuildContext context;
@@ -1774,27 +1794,10 @@ class _DialogDefaultsM3 extends DialogThemeData {
 
   @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
+
+  @override
+  BoxConstraints? get constraints => const BoxConstraints(minHeight: 280.0, maxWidth: 560.0);
 }
 // dart format on
 
 // END GENERATED TOKEN PROPERTIES - Dialog
-
-// BEGIN GENERATED TOKEN PROPERTIES - DialogFullscreen
-
-// Do not edit by hand. The code between the "BEGIN GENERATED" and
-// "END GENERATED" comments are generated from data in the Material
-// Design token database by the script:
-//   dev/tools/gen_defaults/bin/gen_defaults.dart.
-
-// dart format off
-class _DialogFullscreenDefaultsM3 extends DialogThemeData {
-  const _DialogFullscreenDefaultsM3(this.context): super(clipBehavior: Clip.none);
-
-  final BuildContext context;
-
-  @override
-  Color? get backgroundColor => Theme.of(context).colorScheme.surface;
-}
-// dart format on
-
-// END GENERATED TOKEN PROPERTIES - DialogFullscreen
