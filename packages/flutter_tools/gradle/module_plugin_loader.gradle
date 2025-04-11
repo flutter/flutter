@@ -8,7 +8,7 @@
 import java.nio.file.Paths
 
 File pathToThisDirectory = buildscript.sourceFile.parentFile
-apply from: Paths.get(pathToThisDirectory.absolutePath, "src", "main", "groovy", "native_plugin_loader.groovy")
+apply from: Paths.get(pathToThisDirectory.absolutePath, "src", "main", "scripts", "native_plugin_loader.gradle.kts")
 
 def moduleProjectRoot = project(':flutter').projectDir.parentFile.parentFile
 

@@ -53,6 +53,7 @@ ScopedObject<Context> ContextVK::Create(const Settings& settings) {
   impeller_settings.enable_validation = true;
   sContextVKProcAddressCallback = settings.instance_proc_address_callback;
   impeller_settings.proc_address_callback = ContextVKGetInstanceProcAddress;
+  impeller_settings.flags = impeller::Flags{};
   auto impeller_context =
       impeller::ContextVK::Create(std::move(impeller_settings));
   sContextVKProcAddressCallback = nullptr;

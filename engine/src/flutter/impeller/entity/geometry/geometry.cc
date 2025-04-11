@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
@@ -60,7 +61,7 @@ GeometryResult::Mode Geometry::GetResultMode() const {
 std::unique_ptr<Geometry> Geometry::MakeFillPath(
     const Path& path,
     std::optional<Rect> inner_rect) {
-  return std::make_unique<FillPathGeometry>(path, inner_rect);
+  return std::make_unique<FillPathGeometry>(flutter::DlPath(path), inner_rect);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,

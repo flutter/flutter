@@ -9,6 +9,7 @@
 #include <optional>
 
 #include "flutter/fml/command_line.h"
+#include "impeller/base/flags.h"
 
 namespace impeller {
 
@@ -33,6 +34,8 @@ struct PlaygroundSwitches {
   bool use_angle = false;
 
   bool enable_wide_gamut = false;
+
+  Flags flags;
 
   PlaygroundSwitches();
 

@@ -5,22 +5,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const String text = 'Hello World! How are you? Life is good!';
-const String alternativeText = 'Everything is awesome!!';
-
 void main() {
-  testWidgets('TextField restoration', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(restorationScopeId: 'app', home: TestWidget()));
+  testWidgets('TextFormField restorationId is passed to inner TextField', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<FormFieldState<String>> formState = GlobalKey<FormFieldState<String>>();
+    const String restorationId = 'text_form_field';
 
-    await restoreAndVerify(tester);
-  });
-
-  testWidgets('TextField restoration with external controller', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(restorationScopeId: 'root', home: TestWidget(useExternal: true)),
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Material(
+          child: TextFormField(
+            key: formState,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            restorationId: restorationId,
+            initialValue: 'foo',
+          ),
+        ),
+      ),
     );
 
-    await restoreAndVerify(tester);
+    expect(find.byType(TextField), findsOne);
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.restorationId, restorationId);
+  });
+
+  testWidgets('TextFormField value is restorable', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> formState = GlobalKey<FormFieldState<String>>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Material(
+          child: TextFormField(
+            key: formState,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            restorationId: 'text_form_field',
+            initialValue: 'foo',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('foo'), findsOne);
+    expect(find.text('bar'), findsNothing);
+
+    await tester.enterText(find.byKey(formState), 'bar');
+    await tester.pumpAndSettle();
+
+    expect(find.text('foo'), findsNothing);
+    expect(find.text('bar'), findsOne);
+
+    final TestRestorationData data = await tester.getRestorationData();
+    await tester.restartAndRestore();
+
+    expect(find.text('foo'), findsNothing);
+    expect(find.text('bar'), findsOne);
+
+    formState.currentState!.reset();
+
+    expect(find.text('foo'), findsOne);
+    expect(find.text('bar'), findsNothing);
+
+    await tester.restoreFrom(data);
+
+    expect(find.text('foo'), findsNothing);
+    expect(find.text('bar'), findsOne);
   });
 
   testWidgets('State restoration (No Form ancestor) - onUserInteraction error text validation', (
@@ -159,87 +211,4 @@ void main() {
       await checkErrorText('');
     },
   );
-}
-
-Future<void> restoreAndVerify(WidgetTester tester) async {
-  expect(find.text(text), findsNothing);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
-
-  await tester.enterText(find.byType(TextFormField), text);
-  await skipPastScrollingAnimation(tester);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
-
-  await tester.drag(find.byType(Scrollable), const Offset(0, -80));
-  await skipPastScrollingAnimation(tester);
-
-  expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
-
-  await tester.restartAndRestore();
-
-  expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
-
-  final TestRestorationData data = await tester.getRestorationData();
-
-  await tester.enterText(find.byType(TextFormField), alternativeText);
-  await skipPastScrollingAnimation(tester);
-  await tester.drag(find.byType(Scrollable), const Offset(0, 80));
-  await skipPastScrollingAnimation(tester);
-
-  expect(find.text(text), findsNothing);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, isNot(60));
-
-  await tester.restoreFrom(data);
-
-  expect(find.text(text), findsOneWidget);
-  expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 60);
-}
-
-class TestWidget extends StatefulWidget {
-  const TestWidget({super.key, this.useExternal = false});
-
-  final bool useExternal;
-
-  @override
-  TestWidgetState createState() => TestWidgetState();
-}
-
-class TestWidgetState extends State<TestWidget> with RestorationMixin {
-  final RestorableTextEditingController controller = RestorableTextEditingController();
-
-  @override
-  String get restorationId => 'widget';
-
-  @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
-    registerForRestoration(controller, 'controller');
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      child: Align(
-        child: SizedBox(
-          width: 50,
-          child: TextFormField(
-            restorationId: 'text',
-            maxLines: 3,
-            controller: widget.useExternal ? controller.value : null,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 200));
 }

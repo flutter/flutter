@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_CONTEXT_ANDROID_CONTEXT_H_
 
 #include "flutter/fml/macros.h"
+#include "flutter/impeller/base/flags.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -26,6 +27,7 @@ class AndroidContext {
     bool enable_gpu_tracing = false;
     bool enable_surface_control = false;
     bool quiet = false;
+    impeller::Flags impeller_flags;
   };
 
   AndroidRenderingAPI RenderingApi() const;

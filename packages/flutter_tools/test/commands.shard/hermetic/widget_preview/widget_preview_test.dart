@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -47,6 +48,8 @@ void main() {
           platform: platform,
           processManager: processManager,
         ),
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(fileSystem: fileSystem),
       );
       rootProject = FakeFlutterProject(
         projectRoot: 'some_project',
@@ -59,6 +62,8 @@ void main() {
       'can create a pubspec.yaml for the preview scaffold including root project assets',
       () {
         final FlutterManifest root = rootProject.manifest;
+        final FlutterManifest emptyPreviewManifest =
+            rootProject.widgetPreviewScaffoldProject.manifest;
         final FlutterManifest updated = command.buildPubspec(
           rootManifest: rootProject.manifest,
           widgetPreviewManifest: rootProject.widgetPreviewScaffoldProject.manifest,
@@ -73,9 +78,28 @@ void main() {
           expect(updatedEntry, WidgetPreviewStartCommand.transformAssetsEntry(rootEntry));
         }
 
-        expect(updated.fonts.length, root.fonts.length);
-        for (int i = 0; i < root.fonts.length; ++i) {
-          final Font rootFont = root.fonts[i];
+        final int emptyPreviewFontCount = emptyPreviewManifest.fonts.length;
+        final int expectedFontCount = root.fonts.length + emptyPreviewFontCount;
+        expect(updated.fonts.length, expectedFontCount);
+
+        // Verify that the updated preview scaffold pubspec includes fonts needed by
+        // the previewer.
+        for (int i = 0; i < emptyPreviewFontCount; ++i) {
+          final Font defaultPreviewerFont = emptyPreviewManifest.fonts[i];
+          final Font updatedFont = updated.fonts[i];
+          expect(updatedFont.familyName, defaultPreviewerFont.familyName);
+          expect(updatedFont.fontAssets.length, defaultPreviewerFont.fontAssets.length);
+          for (int j = 0; j < defaultPreviewerFont.fontAssets.length; ++j) {
+            final FontAsset rootFontAsset = defaultPreviewerFont.fontAssets[j];
+            final FontAsset updatedFontAsset = updatedFont.fontAssets[j];
+            expect(updatedFontAsset.descriptor, rootFontAsset.descriptor);
+          }
+        }
+
+        // Verify fonts from the root project are included in the updated preview
+        // scaffold pubspec.
+        for (int i = emptyPreviewFontCount; i < expectedFontCount; ++i) {
+          final Font rootFont = root.fonts[i - emptyPreviewFontCount];
           final Font updatedFont = updated.fonts[i];
           expect(updatedFont.familyName, rootFont.familyName);
           expect(updatedFont.fontAssets.length, rootFont.fontAssets.length);

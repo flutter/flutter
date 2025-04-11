@@ -240,8 +240,8 @@ target for each operating system.
 
 ## Adding tests to presubmit
 
-Flutter's DeviceLab has a limited capacity in presubmit. File an infra ticket
-to investigate feasibility of adding a test to presubmit.
+Flutter's DeviceLab has a limited capacity in presubmit. File a `team-infra`
+issue to investigate feasibility of adding a test to presubmit.
 
 ## Migrating to build and test model
 
