@@ -1768,6 +1768,11 @@ void main() {
       expect(data.accessibleNavigation, isFalse);
       expect(rebuildCount, 1);
 
+      // On actual browsers, `SemanticsBinding.instance.ensureSemantics()` will make
+      //`platformDispatcher.accessibilityFeatures.accessibleNavigation` true
+      tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(
+        accessibleNavigation: true,
+      );
       final SemanticsHandle handler = tester.ensureSemantics();
       await tester.pump();
 
