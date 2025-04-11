@@ -95,6 +95,7 @@ void main() {
     expect(dialogThemeData.barrierColor, null);
     expect(dialogThemeData.insetPadding, null);
     expect(dialogThemeData.clipBehavior, null);
+    expect(dialogThemeData.constraints, null);
 
     const DialogTheme dialogTheme = DialogTheme(data: DialogThemeData(), child: SizedBox());
     expect(dialogTheme.backgroundColor, null);
@@ -110,6 +111,7 @@ void main() {
     expect(dialogTheme.barrierColor, null);
     expect(dialogTheme.insetPadding, null);
     expect(dialogTheme.clipBehavior, null);
+    expect(dialogThemeData.constraints, null);
   });
 
   testWidgets('Default DialogThemeData debugFillProperties', (WidgetTester tester) async {
@@ -141,6 +143,7 @@ void main() {
       barrierColor: Color(0xff000005),
       insetPadding: EdgeInsets.all(20.0),
       clipBehavior: Clip.antiAlias,
+      constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
     ).debugFillProperties(builder);
     final List<String> description =
         builder.properties
@@ -161,6 +164,7 @@ void main() {
       'barrierColor: ${const Color(0xff000005)}',
       'insetPadding: EdgeInsets.all(20.0)',
       'clipBehavior: Clip.antiAlias',
+      'constraints: BoxConstraints(280.0<=w<=560.0, 0.0<=h<=Infinity)',
     ]);
   });
 
