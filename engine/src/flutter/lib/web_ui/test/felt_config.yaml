@@ -163,6 +163,11 @@ test-suites:
     run-config: firefox
     artifact-deps: [ canvaskit ]
 
+  - name: firefox-dart2wasm-skwasm-ui
+    test-bundle: dart2wasm-skwasm-ui
+    run-config: firefox
+    artifact-deps: [ skwasm ]
+
   - name: safari-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
     run-config: safari
@@ -178,10 +183,25 @@ test-suites:
     run-config: safari
     artifact-deps: [ canvaskit ]
 
+  - name: safari-dart2wasm-canvaskit-engine
+    test-bundle: dart2wasm-canvaskit-engine
+    run-config: safari
+    artifact-deps: [ canvaskit ]
+
+  - name: safari-dart2wasm-skwasm-ui
+    test-bundle: dart2wasm-skwasm-ui
+    run-config: safari
+    artifact-deps: [ skwasm ]
+
   - name: chrome-dart2wasm-canvaskit-engine
     test-bundle: dart2wasm-canvaskit-engine
     run-config: chrome
     artifact-deps: [ canvaskit_chromium ]
+
+  - name: firefox-dart2wasm-canvaskit-engine
+    test-bundle: dart2wasm-canvaskit-engine
+    run-config: firefox
+    artifact-deps: [ canvaskit ]
 
   - name: chrome-coi-dart2wasm-skwasm-ui
     test-bundle: dart2wasm-skwasm-ui
