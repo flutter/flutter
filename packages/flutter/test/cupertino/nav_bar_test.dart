@@ -16,6 +16,12 @@ import '../widgets/semantics_tester.dart';
 
 int count = 0;
 
+void setWindowToPortrait(WidgetTester tester, {Size size = const Size(390.0, 850.0)}) {
+  tester.view.physicalSize = size;
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   testWidgets('Middle still in center with asymmetrical actions', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -305,6 +311,7 @@ void main() {
   });
 
   testWidgets('Can specify custom brightness', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoNavigationBar(
@@ -498,6 +505,7 @@ void main() {
   });
 
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -573,6 +581,7 @@ void main() {
   });
 
   testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
+    setWindowToPortrait(tester, size: const Size(800, 1800));
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     final Key segmentedControlsKey = UniqueKey();
@@ -629,6 +638,7 @@ void main() {
   testWidgets(
     'User specified middle is only visible when sliver is collapsed if alwaysShowMiddle is false',
     (WidgetTester tester) async {
+      setWindowToPortrait(tester);
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       await tester.pumpWidget(
@@ -682,6 +692,7 @@ void main() {
   );
 
   testWidgets('Small title can be overridden', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     await tester.pumpWidget(
@@ -1171,6 +1182,7 @@ void main() {
   });
 
   testWidgets('Sliver large title golden', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     await tester.pumpWidget(
       CupertinoApp(
         home: RepaintBoundary(
@@ -1736,6 +1748,7 @@ void main() {
     (WidgetTester tester) async {
       const Text trailingText = Text('Bar Button');
       const Text titleText = Text('Large Title');
+      setWindowToPortrait(tester);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -1874,6 +1887,7 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar magnifies upon over-scroll and shrinks back once over-scroll ends',
     (WidgetTester tester) async {
+      setWindowToPortrait(tester, size: const Size(800, 1800));
       const Text titleText = Text('Large Title');
 
       await tester.pumpWidget(
@@ -1985,6 +1999,7 @@ void main() {
     const double largeTitleHeight = 44.0;
     const double bottomHeight = 10.0;
     final ScrollController controller = ScrollController();
+    setWindowToPortrait(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2042,6 +2057,7 @@ void main() {
     const double persistentHeight = 44.0;
     const double largeTitleHeight = 44.0;
     const double bottomHeight = 10.0;
+    setWindowToPortrait(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2119,6 +2135,7 @@ void main() {
   ) async {
     const double bottomHeight = 10.0;
     const double bottomDisplacement = 96.0;
+    setWindowToPortrait(tester);
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -2166,6 +2183,7 @@ void main() {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       const double largeTitleHeight = 52.0;
+      setWindowToPortrait(tester);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2212,6 +2230,7 @@ void main() {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       const double largeTitleHeight = 52.0;
+      setWindowToPortrait(tester);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2258,6 +2277,7 @@ void main() {
       addTearDown(scrollController.dispose);
       const double largeTitleHeight = 52.0;
       const double bottomHeight = 100.0;
+      setWindowToPortrait(tester);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2323,6 +2343,7 @@ void main() {
       addTearDown(scrollController.dispose);
       const double largeTitleHeight = 52.0;
       const double bottomHeight = 100.0;
+      setWindowToPortrait(tester);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2392,6 +2413,7 @@ void main() {
       addTearDown(scrollController.dispose);
       const double largeTitleHeight = 52.0;
       const double bottomHeight = 100.0;
+      setWindowToPortrait(tester);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2459,6 +2481,7 @@ void main() {
       final ScrollController scrollController = ScrollController();
       addTearDown(scrollController.dispose);
       const double largeTitleHeight = 52.0;
+      setWindowToPortrait(tester);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2542,6 +2565,7 @@ void main() {
   testWidgets('CupertinoSliverNavigationBar.search field collapses nav bar on tap', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await tester.pumpWidget(
       const CupertinoApp(
         home: CustomScrollView(
@@ -2609,8 +2633,7 @@ void main() {
   });
 
   testWidgets('CupertinoSliverNavigationBar.search golden tests', (WidgetTester tester) async {
-    await tester.binding.setSurfaceSize(const Size(390, 850));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+    setWindowToPortrait(tester);
     await tester.pumpWidget(
       const CupertinoApp(
         home: RepaintBoundary(
@@ -2672,6 +2695,7 @@ void main() {
   });
 
   testWidgets('onSearchableBottomTap callback', (WidgetTester tester) async {
+    setWindowToPortrait(tester);
     const Color activeSearchColor = Color(0x0000000A);
     const Color inactiveSearchColor = Color(0x0000000B);
     bool isSearchActive = false;
@@ -2750,6 +2774,7 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar.search large title and cancel buttons fade during search animation',
     (WidgetTester tester) async {
+      setWindowToPortrait(tester);
       await tester.pumpWidget(
         const CupertinoApp(
           home: CustomScrollView(

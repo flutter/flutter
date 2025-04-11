@@ -1165,7 +1165,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    isLarge = MediaQuery.of(context).orientation != Orientation.landscape;
+    isLarge = MediaQuery.orientationOf(context) != Orientation.landscape;
     final Tween<double> largeTitleHeightTween = Tween<double>(
       begin: isLarge ? _kNavBarLargeTitleHeightExtension : 0.0,
       end: 0.0,
