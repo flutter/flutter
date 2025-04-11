@@ -495,6 +495,7 @@ void main() {
     expect(editableText.cursorWidth, 2.0);
     expect(editableText.cursorHeight, isNull);
     expect(editableText.textHeightBehavior, isNull);
+    expect(editableText.hintLocales, isNull);
   });
 
   testWidgets('when backgroundCursorColor is updated, RenderEditable should be updated', (
@@ -1271,6 +1272,39 @@ void main() {
       tester.testTextInput.setClientArgs!['enableIMEPersonalizedLearning'],
       enableIMEPersonalizedLearning,
     );
+  });
+
+  testWidgets('hintLocales is sent to the engine', (WidgetTester tester) async {
+    const List<Locale> hintLocales = <Locale>[Locale('en'), Locale('fr')];
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              hintLocales: hintLocales,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    await tester.idle();
+
+    // hintLocales is sent to the engine as a list of language tags.
+    final List<String> localesLanguageTags =
+        hintLocales.map((Locale locale) => locale.toLanguageTag()).toList();
+    expect(tester.testTextInput.setClientArgs!['hintLocales'], localesLanguageTags);
   });
 
   group('smartDashesType and smartQuotesType', () {
