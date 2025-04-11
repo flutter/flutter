@@ -15,6 +15,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matcher/matcher.dart';
 
 import 'semantics_tester.dart';
 
@@ -514,6 +515,84 @@ void main() {
       expect(attributedLabel.attributes[0].range, const TextRange(start: 0, end: 5));
       expect(attributedLabel.attributes[1] is SpellOutStringAttribute, isTrue);
       expect(attributedLabel.attributes[1].range, const TextRange(start: 15, end: 17));
+    });
+
+    testWidgets('Semantics with attributedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Semantics(
+            attributedValue: AttributedString('test value'),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Semantics with attributedDecreasedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Semantics(
+            attributedDecreasedValue: AttributedString('test value'),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Semantics with attributedIncreasedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Semantics(
+            attributedIncreasedValue: AttributedString('test value'),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Semantics with decreasedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Semantics(
+            decreasedValue: 'test value',
+            child: const Placeholder(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Semantics with increasedValue should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Semantics(
+            increasedValue: 'test value',
+            child: const Placeholder(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Semantics with attributedHint should be recognized as containing text and not fail',
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Semantics(
+            attributedHint: AttributedString('test value'),
+            child: const Placeholder(),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
     });
   });
 
