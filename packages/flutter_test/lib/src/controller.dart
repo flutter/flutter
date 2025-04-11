@@ -2279,6 +2279,20 @@ abstract class WidgetController {
   ///
   /// The handle must be disposed at the end of the test.
   SemanticsHandle ensureSemantics() {
+    if (kIsWeb) {
+      // Emulate enable process of semantics in web_ui
+      // https://github.com/flutter/engine/pull/33576
+      final AccessibilityFeatures accessibilityFeatures = platformDispatcher.accessibilityFeatures;
+      platformDispatcher.accessibilityFeaturesTestValue = FakeAccessibilityFeatures(
+        accessibleNavigation: true,
+        invertColors: accessibilityFeatures.invertColors,
+        disableAnimations: accessibilityFeatures.disableAnimations,
+        boldText: accessibilityFeatures.boldText,
+        reduceMotion: accessibilityFeatures.reduceMotion,
+        highContrast: accessibilityFeatures.highContrast,
+        onOffSwitchLabels: accessibilityFeatures.onOffSwitchLabels,
+      );
+    }
     return binding.ensureSemantics();
   }
 
