@@ -248,7 +248,8 @@ class Dialog extends StatelessWidget {
             ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
             : _DialogDefaultsM2(context);
 
-    final BoxConstraints constraints = defaults.constraints ?? const BoxConstraints(minHeight: 280.0);
+    final BoxConstraints constraints =
+        defaults.constraints ?? const BoxConstraints(minHeight: 280.0);
 
     Widget dialogChild;
 
