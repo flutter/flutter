@@ -755,6 +755,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
+        featureFlags: featureFlags,
         targetOverride: bundle.defaultMainPath,
       );
     }
@@ -971,6 +972,7 @@ class MacOSProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
+        featureFlags: featureFlags,
         useMacOSConfig: true,
       );
     }
