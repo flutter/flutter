@@ -565,12 +565,7 @@ void main() {
       'Semantics with decreasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Semantics(
-              decreasedValue: 'test value',
-              child: const Placeholder(),
-            ),
-          ),
+          MaterialApp(home: Semantics(decreasedValue: 'test value', child: const Placeholder())),
         );
         expect(tester.takeException(), isNull);
       },
@@ -580,12 +575,7 @@ void main() {
       'Semantics with increasedValue should be recognized as containing text and not fail',
       (WidgetTester tester) async {
         await tester.pumpWidget(
-          MaterialApp(
-            home: Semantics(
-              increasedValue: 'test value',
-              child: const Placeholder(),
-            ),
-          ),
+          MaterialApp(home: Semantics(increasedValue: 'test value', child: const Placeholder())),
         );
         expect(tester.takeException(), isNull);
       },
