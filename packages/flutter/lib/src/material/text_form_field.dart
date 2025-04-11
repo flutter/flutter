@@ -163,6 +163,7 @@ class TextFormField extends FormField<String> {
     Brightness? keyboardAppearance,
     EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
     bool? enableInteractiveSelection,
+    SetCustomSelectionOnFocus? setCustomSelectionOnFocus,
     TextSelectionControls? selectionControls,
     InputCounterWidgetBuilder? buildCounter,
     ScrollPhysics? scrollPhysics,
@@ -283,6 +284,7 @@ class TextFormField extends FormField<String> {
                keyboardAppearance: keyboardAppearance,
                enableInteractiveSelection:
                    enableInteractiveSelection ?? (!obscureText || !readOnly),
+               setCustomSelectionOnFocus: setCustomSelectionOnFocus,
                selectionControls: selectionControls,
                buildCounter: buildCounter,
                autofillHints: autofillHints,
