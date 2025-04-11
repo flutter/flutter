@@ -4,7 +4,8 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, ValueListenable;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -159,7 +160,13 @@ class WidgetPreviewWidget extends StatefulWidget {
 
 class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   final transformationController = TransformationController();
-  final deviceOrientation = ValueNotifier<Orientation>(Orientation.portrait);
+
+  // Set the initial preview brightness based on the platform default or the
+  // value explicitly specified for the preview.
+  late final brightnessListenable = ValueNotifier<Brightness>(
+    widget.preview.brightness ?? MediaQuery.platformBrightnessOf(context),
+  );
+
   final softRestartListenable = ValueNotifier<bool>(false);
   final key = GlobalKey();
 
@@ -170,6 +177,15 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didUpdateWidget(WidgetPreviewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // TODO(bkonyi): do we always want to reset the brightness if the user has
+    // manually changed it via the UI?
+    brightnessListenable.value =
+        widget.preview.brightness ?? MediaQuery.platformBrightnessOf(context);
   }
 
   @override
@@ -196,7 +212,11 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
         try {
           final previewWidget = Container(
             key: key,
-            child: widget.preview.builder(),
+            child: WidgetPreviewTheming(
+              theme: widget.preview.theme,
+              brightnessListenable: brightnessListenable,
+              child: widget.preview.builder(),
+            ),
           );
           if (performRestart) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -258,6 +278,11 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
               enabled: !errorThrownDuringTreeConstruction,
             ),
             const SizedBox(width: 30),
+            BrightnessToggleButton(
+              enabled: !errorThrownDuringTreeConstruction,
+              brightnessListenable: brightnessListenable,
+            ),
+            const SizedBox(width: 10),
             SoftRestartButton(
               enabled: !errorThrownDuringTreeConstruction,
               softRestartListenable: softRestartListenable,
@@ -297,6 +322,51 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
     }
 
     return mediaQueryData;
+  }
+}
+
+/// Applies theming defined in [theme] to [child].
+class WidgetPreviewTheming extends StatelessWidget {
+  const WidgetPreviewTheming({
+    super.key,
+    required this.theme,
+    required this.brightnessListenable,
+    required this.child,
+  });
+
+  final Widget child;
+
+  /// The currently selected [Brightness] value.
+  ///
+  /// This value can be toggled via the previewer UI, which should trigger a
+  /// rebuild of the preview with the updated theme.
+  final ValueListenable<Brightness> brightnessListenable;
+
+  /// The set of themes to be applied to [child].
+  final PreviewThemeData? theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Brightness>(
+      valueListenable: brightnessListenable,
+      builder: (context, brightness, _) {
+        final themeData = theme;
+        if (themeData == null) {
+          return child;
+        }
+        final (materialTheme, cupertinoTheme) = themeData.themeForBrightness(
+          brightness,
+        );
+        Widget result = child;
+        if (materialTheme != null) {
+          result = Theme(data: materialTheme, child: result);
+        }
+        if (cupertinoTheme != null) {
+          result = CupertinoTheme(data: cupertinoTheme, child: result);
+        }
+        return result;
+      },
+    );
   }
 }
 

@@ -77,59 +77,80 @@ class PreviewCodeGenerator {
               ]))
             .build();
     final Library lib = Library(
-      (LibraryBuilder b) => b.body.addAll(<Spec>[
-        Method((MethodBuilder b) {
-          final List<Expression> previewExpressions = <Expression>[];
-          for (final MapEntry<PreviewPath, List<PreviewDetails>>(
-                key: (path: String _, :Uri uri),
-                value: List<PreviewDetails> previewMethods,
-              )
-              in previews.entries) {
-            for (final PreviewDetails preview in previewMethods) {
-              Expression previewWidget = refer(
-                preview.functionName,
-                uri.toString(),
-              ).call(<Expression>[]);
-
-              if (preview.isBuilder) {
-                previewWidget = refer(
-                  'Builder',
-                  'package:flutter/widgets.dart',
-                ).newInstance(<Expression>[], <String, Expression>{'builder': previewWidget});
-              }
-              if (preview.hasWrapper) {
-                previewWidget = refer(
-                  preview.wrapper!,
-                  preview.wrapperLibraryUri,
-                ).call(<Expression>[previewWidget]);
-              }
-              previewWidget =
-                  Method((MethodBuilder previewBuilder) {
-                    previewBuilder.body = previewWidget.code;
-                  }).closure;
-              previewExpressions.add(
-                refer(
-                  'WidgetPreview',
-                  'widget_preview.dart',
-                ).newInstance(<Expression>[], <String, Expression>{
-                  if (preview.name != null) PreviewDetails.kName: refer(preview.name!).expression,
-                  ...?_buildDoubleParameters(key: PreviewDetails.kHeight, property: preview.height),
-                  ...?_buildDoubleParameters(key: PreviewDetails.kWidth, property: preview.width),
-                  ...?_buildDoubleParameters(
-                    key: PreviewDetails.kTextScaleFactor,
-                    property: preview.textScaleFactor,
-                  ),
-                  'builder': previewWidget,
-                }),
-              );
-            }
-          }
+      (LibraryBuilder b) =>
           b
-            ..body = literalList(previewExpressions).code
-            ..name = 'previews'
-            ..returns = returnType;
-        }),
-      ]),
+            //..directives.addAll(<Directive>[Directive.import('package:flutter/foundation.dart')])
+            ..body.addAll(<Spec>[
+              Method((MethodBuilder b) {
+                final List<Expression> previewExpressions = <Expression>[];
+                for (final MapEntry<PreviewPath, List<PreviewDetails>>(
+                      key: (path: String _, :Uri uri),
+                      value: List<PreviewDetails> previewMethods,
+                    )
+                    in previews.entries) {
+                  for (final PreviewDetails preview in previewMethods) {
+                    Expression previewWidget = refer(
+                      preview.functionName,
+                      uri.toString(),
+                    ).call(<Expression>[]);
+
+                    if (preview.isBuilder) {
+                      previewWidget = refer(
+                        'Builder',
+                        'package:flutter/widgets.dart',
+                      ).newInstance(<Expression>[], <String, Expression>{'builder': previewWidget});
+                    }
+
+                    if (preview.hasWrapper) {
+                      previewWidget = refer(
+                        preview.wrapper!,
+                        preview.wrapperLibraryUri,
+                      ).call(<Expression>[previewWidget]);
+                    }
+                    previewWidget =
+                        Method((MethodBuilder previewBuilder) {
+                          previewBuilder.body = previewWidget.code;
+                        }).closure;
+                    previewExpressions.add(
+                      refer(
+                        'WidgetPreview',
+                        'widget_preview.dart',
+                      ).newInstance(<Expression>[], <String, Expression>{
+                        if (preview.name != null)
+                          PreviewDetails.kName: refer(preview.name!).expression,
+                        ...?_buildDoubleParameters(
+                          key: PreviewDetails.kHeight,
+                          property: preview.height,
+                        ),
+                        ...?_buildDoubleParameters(
+                          key: PreviewDetails.kWidth,
+                          property: preview.width,
+                        ),
+                        ...?_buildDoubleParameters(
+                          key: PreviewDetails.kTextScaleFactor,
+                          property: preview.textScaleFactor,
+                        ),
+                        if (preview.theme != null)
+                          PreviewDetails.kTheme: refer(
+                            preview.theme!,
+                            preview.themeLibraryUri,
+                          ).call(<Expression>[]),
+                        if (preview.brightness != null)
+                          PreviewDetails.kBrightness: refer(
+                            preview.brightness!,
+                            preview.brightnessLibraryUri ?? 'package:flutter/foundation.dart',
+                          ),
+                        'builder': previewWidget,
+                      }),
+                    );
+                  }
+                }
+                b
+                  ..body = literalList(previewExpressions).code
+                  ..name = 'previews'
+                  ..returns = returnType;
+              }),
+            ]),
     );
     final DartEmitter emitter = DartEmitter.scoped(useNullSafetySyntax: true);
     final File generatedPreviewFile = fs.file(
