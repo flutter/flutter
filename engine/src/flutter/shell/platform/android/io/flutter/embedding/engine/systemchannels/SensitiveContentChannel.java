@@ -23,36 +23,36 @@ public class SensitiveContentChannel {
   private static final String TAG = "SensitiveContentChannel";
 
   /**
-   * Flutter ContentSensitivity.autoSensitive name that represents Android's
+   * Flutter ContentSensitivity.autoSensitive index that represents Android's
    * `View.CONTENT_SENSITIVITY_AUTO` setting.
    *
    * <p>See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_AUTO.
    */
   @VisibleForTesting
-  public static final String AUTO_SENSITIVE_CONTENT_SENSITIVITY = "autoSensitive";
+  public static final int AUTO_SENSITIVE_CONTENT_SENSITIVITY = 0;
 
   /**
-   * Flutter ContentSensitivity.sensitive name that represents Android's
+   * Flutter ContentSensitivity.sensitive index that represents Android's
    * `View.CONTENT_SENSITIVITY_SENSITIVE` setting.
    *
    * <p>See https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_SENSITIVE.
    */
-  @VisibleForTesting public static final String SENSITIVE_CONTENT_SENSITIVITY = "sensitive";
+  @VisibleForTesting public static final int SENSITIVE_CONTENT_SENSITIVITY = 1;
 
   /**
-   * Flutter ContentSensitivity.notSensitive name that represents Android's
+   * Flutter ContentSensitivity.notSensitive index that represents Android's
    * `View.CONTENT_SENSITIVITY_NOT_SENSITIVE` setting.
    *
    * <p>See
    * https://developer.android.com/reference/android/view/View#CONTENT_SENSITIVITY_NOT_SENSITIVE.
    */
-  @VisibleForTesting public static final String NOT_SENSITIVE_CONTENT_SENSITIVITY = "notSensitive";
+  @VisibleForTesting public static final int NOT_SENSITIVE_CONTENT_SENSITIVITY = 2;
 
   /**
-   * Flutter ContentSensitivity._unknown name that represents a content sensitivity setting that the
+   * Flutter ContentSensitivity._unknown index that represents a content sensitivity setting that the
    * Flutter SensitiveContent widget does not recognize.
    */
-  @VisibleForTesting public static final String UNKNOWN_CONTENT_SENSITIVITY = "_unknown";
+  @VisibleForTesting public static final int UNKNOWN_CONTENT_SENSITIVITY = 3;
 
   public final MethodChannel channel;
   private SensitiveContentMethodHandler sensitiveContentMethodHandler;
@@ -71,10 +71,10 @@ public class SensitiveContentChannel {
           Log.v(TAG, "Received '" + method + "' message.");
           switch (method) {
             case "SensitiveContent.setContentSensitivity":
-              final String contentSensitivityLevelStr = call.arguments();
+              final int contentSensitivityLevel = call.arguments();
               try {
                 sensitiveContentMethodHandler.setContentSensitivity(
-                    deserializeContentSensitivity(contentSensitivityLevelStr));
+                    deserializeContentSensitivity(contentSensitivityLevel));
               } catch (IllegalStateException | IllegalArgumentException e) {
                 result.error("error", e.getMessage(), null);
               }
@@ -106,8 +106,8 @@ public class SensitiveContentChannel {
   // SensitiveContentMethodHandler because it must ensure a device is API 35+ before
   // doing so to avoid exceptions on other devices.
   @SuppressLint({"InlinedApi"})
-  private int deserializeContentSensitivity(String contentSensitivityName) {
-    switch (contentSensitivityName) {
+  private int deserializeContentSensitivity(int contentSensitivityIndex) {
+    switch (contentSensitivityIndex) {
       case AUTO_SENSITIVE_CONTENT_SENSITIVITY:
         return View.CONTENT_SENSITIVITY_AUTO;
       case SENSITIVE_CONTENT_SENSITIVITY:
@@ -116,8 +116,8 @@ public class SensitiveContentChannel {
         return View.CONTENT_SENSITIVITY_NOT_SENSITIVE;
       default:
         throw new IllegalArgumentException(
-            "contentSensitivityName "
-                + contentSensitivityName
+            "contentSensitivityIndex "
+                + contentSensitivityIndex
                 + " not known to the SensitiveContentChannel.");
     }
   }
@@ -128,7 +128,7 @@ public class SensitiveContentChannel {
   // SensitiveContentMethodHandler because it must ensure a device is API 35+ before
   // doing so to avoid exceptions on other devices.
   @SuppressLint({"InlinedApi"})
-  private String serializeContentSensitivity(int contentSensitivityValue) {
+  private int serializeContentSensitivity(int contentSensitivityValue) {
     switch (contentSensitivityValue) {
       case View.CONTENT_SENSITIVITY_AUTO:
         return AUTO_SENSITIVE_CONTENT_SENSITIVITY;
