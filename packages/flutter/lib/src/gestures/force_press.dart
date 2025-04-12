@@ -47,11 +47,8 @@ enum _ForceState {
 class ForcePressDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureForcePressStartCallback],
   /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
-  ForcePressDetails({
-    required this.globalPosition,
-    Offset? localPosition,
-    required this.pressure,
-  }) : localPosition = localPosition ?? globalPosition;
+  ForcePressDetails({required this.globalPosition, Offset? localPosition, required this.pressure})
+    : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
   @override

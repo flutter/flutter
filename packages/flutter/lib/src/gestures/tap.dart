@@ -76,11 +76,8 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates a [TapUpDetails] data object.
-  TapUpDetails({
-    this.globalPosition = Offset.zero,
-    Offset? localPosition,
-    required this.kind,
-  }) : localPosition = localPosition ?? globalPosition;
+  TapUpDetails({this.globalPosition = Offset.zero, Offset? localPosition, required this.kind})
+    : localPosition = localPosition ?? globalPosition;
 
   /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
   @override
