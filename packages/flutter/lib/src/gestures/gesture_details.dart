@@ -30,7 +30,7 @@ abstract interface class PositionedGestureDetails {
   /// {@endtemplate}
   final Offset globalPosition;
 
-  /// {@template flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  /// {@template flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer interacts with the screen.
   ///
