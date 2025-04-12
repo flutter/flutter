@@ -264,7 +264,7 @@ void RenderPassMTL::SetCommandLabel(std::string_view label) {
 
 // |RenderPass|
 void RenderPassMTL::SetStencilReference(uint32_t value) {
-  [encoder_ setStencilReferenceValue:value];
+  pass_bindings_.SetStencilRef(value);
 }
 
 // |RenderPass|
