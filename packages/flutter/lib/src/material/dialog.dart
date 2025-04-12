@@ -1732,7 +1732,6 @@ class _DialogDefaultsM2 extends DialogThemeData {
   EdgeInsetsGeometry? get actionsPadding => EdgeInsets.zero;
 }
 
-
 // BEGIN GENERATED TOKEN PROPERTIES - DialogFullscreen
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
