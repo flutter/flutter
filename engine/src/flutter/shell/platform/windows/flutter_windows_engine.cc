@@ -303,7 +303,7 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
       FlutterUIThreadPolicy::RunOnSeparateThread) {
     custom_task_runners.ui_task_runner = &platform_task_runner;
   } else {
-    FML_LOG(WARNING) << "Running with unmerged platform and UI thread. This "
+    FML_LOG(WARNING) << "Running with unmerged platform and UI threads. This "
                         "will be removed in future.";
   }
 
