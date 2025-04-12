@@ -13,8 +13,8 @@ import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
 import 'events.dart';
+import 'gesture_details.dart';
 import 'monodrag.dart';
-import 'positioned_details.dart';
 import 'recognizer.dart';
 import 'scale.dart';
 import 'tap.dart';
@@ -80,14 +80,22 @@ typedef GestureTapDragDownCallback = void Function(TapDragDownDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragDownDetails extends PositionedGestureDetails {
+class TapDragDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureTapDragDownCallback].
-  const TapDragDownDetails({
-    required super.globalPosition,
-    required super.localPosition,
+  TapDragDownDetails({
+    required this.globalPosition,
+    required this.localPosition,
     this.kind,
     required this.consecutiveTapCount,
   });
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
@@ -99,6 +107,8 @@ class TapDragDownDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
   }
@@ -123,14 +133,22 @@ typedef GestureTapDragUpCallback = void Function(TapDragUpDetails details);
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpDetails extends PositionedGestureDetails {
+class TapDragUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureTapDragUpCallback].
   TapDragUpDetails({
-    required super.globalPosition,
-    required super.localPosition,
+    required this.globalPosition,
+    required this.localPosition,
     required this.kind,
     required this.consecutiveTapCount,
   });
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind kind;
@@ -142,6 +160,8 @@ class TapDragUpDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
   }
@@ -166,15 +186,23 @@ typedef GestureTapDragStartCallback = void Function(TapDragStartDetails details)
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragStartDetails extends PositionedGestureDetails {
+class TapDragStartDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureTapDragStartCallback].
   TapDragStartDetails({
-    required super.globalPosition,
-    required super.localPosition,
+    required this.globalPosition,
+    required this.localPosition,
     this.sourceTimeStamp,
     this.kind,
     required this.consecutiveTapCount,
   });
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -192,6 +220,8 @@ class TapDragStartDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));
@@ -217,14 +247,14 @@ typedef GestureTapDragUpdateCallback = void Function(TapDragUpdateDetails detail
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragEndDetails], the details for [GestureTapDragEndCallback].
-class TapDragUpdateDetails extends PositionedGestureDetails {
+class TapDragUpdateDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureTapDragUpdateCallback].
   ///
   /// If [primaryDelta] is non-null, then its value must match one of the
   /// coordinates of [delta] and the other coordinate must be zero.
   TapDragUpdateDetails({
-    required super.globalPosition,
-    required super.localPosition,
+    required this.globalPosition,
+    required this.localPosition,
     this.sourceTimeStamp,
     this.delta = Offset.zero,
     this.primaryDelta,
@@ -237,6 +267,14 @@ class TapDragUpdateDetails extends PositionedGestureDetails {
              (primaryDelta == delta.dx && delta.dy == 0.0) ||
              (primaryDelta == delta.dy && delta.dx == 0.0),
        );
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -293,6 +331,8 @@ class TapDragUpdateDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
     properties.add(DoubleProperty('primaryDelta', primaryDelta));
@@ -322,10 +362,10 @@ typedef GestureTapDragEndCallback = void Function(TapDragEndDetails endDetails);
 ///  * [TapDragUpDetails], the details for [GestureTapDragUpCallback].
 ///  * [TapDragStartDetails], the details for [GestureTapDragStartCallback].
 ///  * [TapDragUpdateDetails], the details for [GestureTapDragUpdateCallback].
-class TapDragEndDetails extends PositionedGestureDetails {
+class TapDragEndDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureTapDragEndCallback].
   TapDragEndDetails({
-    super.globalPosition = Offset.zero,
+    this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,
@@ -335,7 +375,15 @@ class TapDragEndDetails extends PositionedGestureDetails {
              primaryVelocity == velocity.pixelsPerSecond.dx ||
              primaryVelocity == velocity.pixelsPerSecond.dy,
        ),
-       super(localPosition: localPosition ?? globalPosition);
+       localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -361,6 +409,8 @@ class TapDragEndDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
     properties.add(DoubleProperty('primaryVelocity', primaryVelocity));
     properties.add(IntProperty('consecutiveTapCount', consecutiveTapCount));

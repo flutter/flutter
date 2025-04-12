@@ -13,8 +13,8 @@ import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'events.dart';
+import 'gesture_details.dart';
 import 'pointer_router.dart';
-import 'positioned_details.dart';
 import 'recognizer.dart';
 import 'tap.dart';
 
@@ -618,18 +618,26 @@ typedef GestureSerialTapDownCallback = void Function(SerialTapDownDetails detail
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapDown] callback.
-class SerialTapDownDetails extends PositionedGestureDetails {
+class SerialTapDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureSerialTapDownCallback].
   ///
   /// The `count` argument must be greater than zero.
-  const SerialTapDownDetails({
-    super.globalPosition = Offset.zero,
+  SerialTapDownDetails({
+    this.globalPosition = Offset.zero,
     Offset? localPosition,
     required this.kind,
     this.buttons = 0,
     this.count = 1,
   }) : assert(count > 0),
-       super(localPosition: localPosition ?? globalPosition);
+       localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind kind;
@@ -656,6 +664,8 @@ class SerialTapDownDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
     properties.add(IntProperty('buttons', buttons));
     properties.add(IntProperty('count', count));
@@ -706,17 +716,25 @@ typedef GestureSerialTapUpCallback = void Function(SerialTapUpDetails details);
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapUp] callback.
-class SerialTapUpDetails extends PositionedGestureDetails {
+class SerialTapUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureSerialTapUpCallback].
   ///
   /// The `count` argument must be greater than zero.
   const SerialTapUpDetails({
-    super.globalPosition = Offset.zero,
+    this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
     this.count = 1,
   }) : assert(count > 0),
-       super(localPosition: localPosition ?? globalPosition);
+       localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
@@ -736,6 +754,8 @@ class SerialTapUpDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
     properties.add(IntProperty('count', count));
   }

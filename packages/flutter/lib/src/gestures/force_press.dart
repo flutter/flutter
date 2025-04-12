@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'events.dart';
-import 'positioned_details.dart';
+import 'gesture_details.dart';
 import 'recognizer.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
@@ -44,14 +44,22 @@ enum _ForceState {
 ///  * [ForcePressGestureRecognizer.onStart], [ForcePressGestureRecognizer.onPeak],
 ///    [ForcePressGestureRecognizer.onEnd], and [ForcePressGestureRecognizer.onUpdate]
 ///    which use [ForcePressDetails].
-class ForcePressDetails extends PositionedGestureDetails {
+class ForcePressDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureForcePressStartCallback],
   /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
-  const ForcePressDetails({
-    required super.globalPosition,
+  ForcePressDetails({
+    required this.globalPosition,
     Offset? localPosition,
     required this.pressure,
-  }) : super(localPosition: localPosition ?? globalPosition);
+  }) : localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The pressure of the pointer on the screen.
   final double pressure;
@@ -59,6 +67,8 @@ class ForcePressDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DoubleProperty('pressure', pressure));
   }
 }

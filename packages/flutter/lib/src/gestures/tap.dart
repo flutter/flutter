@@ -12,7 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
-import 'positioned_details.dart';
+import 'gesture_details.dart';
 import 'recognizer.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
@@ -29,10 +29,18 @@ export 'events.dart' show PointerCancelEvent, PointerDownEvent, PointerEvent, Po
 ///
 ///  * [GestureDetector.onTapDown], which receives this information.
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
-class TapDownDetails extends PositionedGestureDetails {
+class TapDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureTapDownCallback].
-  const TapDownDetails({super.globalPosition = Offset.zero, Offset? localPosition, this.kind})
-    : super(localPosition: localPosition ?? globalPosition);
+  TapDownDetails({this.globalPosition = Offset.zero, Offset? localPosition, this.kind})
+    : localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
@@ -40,6 +48,8 @@ class TapDownDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
   }
 }
@@ -64,13 +74,21 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 ///
 ///  * [GestureDetector.onTapUp], which receives this information.
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
-class TapUpDetails extends PositionedGestureDetails {
+class TapUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates a [TapUpDetails] data object.
-  const TapUpDetails({
-    required this.kind,
-    super.globalPosition = Offset.zero,
+  TapUpDetails({
+    this.globalPosition = Offset.zero,
     Offset? localPosition,
-  }) : super(localPosition: localPosition ?? globalPosition);
+    required this.kind,
+  }) : localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind kind;
@@ -78,6 +96,8 @@ class TapUpDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
   }
 }

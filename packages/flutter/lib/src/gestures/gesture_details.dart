@@ -4,9 +4,6 @@
 
 import 'dart:ui' show Offset;
 
-import 'package:flutter/foundation.dart'
-    show DiagnosticPropertiesBuilder, Diagnosticable, DiagnosticsProperty;
-
 /// An abstract class representing gesture details that include positional information.
 ///
 /// This class serve as a common interface for gesture details that involve positional data,
@@ -19,26 +16,28 @@ import 'package:flutter/foundation.dart'
 ///   // Handle the positional information of the gesture details.
 /// }
 /// ```
-abstract class PositionedGestureDetails with Diagnosticable {
+abstract interface class PositionedGestureDetails {
   /// Creates details with positions.
   const PositionedGestureDetails({required this.globalPosition, required this.localPosition});
 
+  /// {@template flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
   /// The global position at which the pointer interacts with the screen.
   ///
   /// See also:
   ///
   ///  * [localPosition], which is the [globalPosition] transformed to the
   ///    coordinate space of the event receiver.
+  /// {@endtemplate}
   final Offset globalPosition;
 
+  /// {@template flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
   /// The local position in the coordinate system of the event receiver at
   /// which the pointer interacts with the screen.
+  ///
+  /// See also:
+  ///
+  ///  * [globalPosition], which is the global position at which the pointer
+  ///    interacts with the screen.
+  /// {@endtemplate}
   final Offset localPosition;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
-    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
-  }
 }

@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import 'constants.dart';
 import 'events.dart';
-import 'positioned_details.dart';
+import 'gesture_details.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
@@ -110,13 +110,21 @@ typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details)
 ///    passes these details.
 ///  * [LongPressGestureRecognizer.onTertiaryLongPressDown], whose callback
 ///    passes these details.
-class LongPressDownDetails extends PositionedGestureDetails {
+class LongPressDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressDownCallback].
   ///
   /// If the `localPosition` argument is not specified, it will default to the
   /// global position.
-  const LongPressDownDetails({super.globalPosition = Offset.zero, Offset? localPosition, this.kind})
-    : super(localPosition: localPosition ?? globalPosition);
+  const LongPressDownDetails({this.globalPosition = Offset.zero, Offset? localPosition, this.kind})
+    : localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
@@ -124,6 +132,8 @@ class LongPressDownDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
   }
 }
@@ -135,10 +145,25 @@ class LongPressDownDetails extends PositionedGestureDetails {
 ///  * [LongPressGestureRecognizer.onLongPressStart], which uses [GestureLongPressStartCallback].
 ///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback]
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback].
-class LongPressStartDetails extends PositionedGestureDetails {
+class LongPressStartDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressStartCallback].
-  const LongPressStartDetails({super.globalPosition = Offset.zero, Offset? localPosition})
-    : super(localPosition: localPosition ?? globalPosition);
+  const LongPressStartDetails({this.globalPosition = Offset.zero, Offset? localPosition})
+    : localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+  }
 }
 
 /// Details for callbacks that use [GestureLongPressMoveUpdateCallback].
@@ -148,15 +173,23 @@ class LongPressStartDetails extends PositionedGestureDetails {
 ///  * [LongPressGestureRecognizer.onLongPressMoveUpdate], which uses [GestureLongPressMoveUpdateCallback].
 ///  * [LongPressEndDetails], the details for [GestureLongPressEndCallback]
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
-class LongPressMoveUpdateDetails extends PositionedGestureDetails {
+class LongPressMoveUpdateDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
-  const LongPressMoveUpdateDetails({
-    super.globalPosition = Offset.zero,
+  LongPressMoveUpdateDetails({
+    this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
     Offset? localOffsetFromOrigin,
-  }) : localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin,
-       super(localPosition: localPosition ?? globalPosition);
+  }) : localPosition = localPosition ?? globalPosition,
+       localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// A delta offset from the point where the long press drag initially contacted
   /// the screen to the point where the pointer is currently located (the
@@ -171,6 +204,8 @@ class LongPressMoveUpdateDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Offset>('offsetFromOrigin', offsetFromOrigin));
     properties.add(DiagnosticsProperty<Offset>('localOffsetFromOrigin', localOffsetFromOrigin));
   }
@@ -183,13 +218,21 @@ class LongPressMoveUpdateDetails extends PositionedGestureDetails {
 ///  * [LongPressGestureRecognizer.onLongPressEnd], which uses [GestureLongPressEndCallback].
 ///  * [LongPressMoveUpdateDetails], the details for [GestureLongPressMoveUpdateCallback].
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
-class LongPressEndDetails extends PositionedGestureDetails {
+class LongPressEndDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressEndCallback].
   const LongPressEndDetails({
-    super.globalPosition = Offset.zero,
+    this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.velocity = Velocity.zero,
-  }) : super(localPosition: localPosition ?? globalPosition);
+  }) : localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The pointer's velocity when it stopped contacting the screen.
   ///
@@ -199,6 +242,8 @@ class LongPressEndDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
   }
 }

@@ -7,7 +7,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
-import 'positioned_details.dart';
+import 'gesture_details.dart';
 import 'velocity_tracker.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
@@ -22,10 +22,25 @@ export 'velocity_tracker.dart' show Velocity;
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragDownDetails extends PositionedGestureDetails {
+class DragDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureDragDownCallback].
-  const DragDownDetails({super.globalPosition = Offset.zero, Offset? localPosition})
-    : super(localPosition: localPosition ?? globalPosition);
+  DragDownDetails({this.globalPosition = Offset.zero, Offset? localPosition})
+    : localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+  }
 }
 
 /// Signature for when a pointer has contacted the screen and might begin to
@@ -44,14 +59,22 @@ typedef GestureDragDownCallback = void Function(DragDownDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragStartDetails extends PositionedGestureDetails {
+class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureDragStartCallback].
-  const DragStartDetails({
-    super.globalPosition = Offset.zero,
+  DragStartDetails({
+    this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.sourceTimeStamp,
     this.kind,
-  }) : super(localPosition: localPosition ?? globalPosition);
+  }) : localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -69,6 +92,8 @@ class DragStartDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
   }
@@ -92,13 +117,13 @@ typedef GestureDragStartCallback = void Function(DragStartDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragEndDetails], the details for [GestureDragEndCallback].
-class DragUpdateDetails extends PositionedGestureDetails {
+class DragUpdateDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureDragUpdateCallback].
   ///
   /// If [primaryDelta] is non-null, then its value must match one of the
   /// coordinates of [delta] and the other coordinate must be zero.
   DragUpdateDetails({
-    required super.globalPosition,
+    required this.globalPosition,
     Offset? localPosition,
     this.sourceTimeStamp,
     this.delta = Offset.zero,
@@ -108,7 +133,15 @@ class DragUpdateDetails extends PositionedGestureDetails {
              (primaryDelta == delta.dx && delta.dy == 0.0) ||
              (primaryDelta == delta.dy && delta.dx == 0.0),
        ),
-       super(localPosition: localPosition ?? globalPosition);
+       localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -142,6 +175,8 @@ class DragUpdateDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Duration?>('sourceTimeStamp', sourceTimeStamp));
     properties.add(DiagnosticsProperty<Offset>('delta', delta));
     properties.add(DoubleProperty('primaryDelta', primaryDelta));
@@ -167,14 +202,14 @@ typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 ///  * [DragDownDetails], the details for [GestureDragDownCallback].
 ///  * [DragStartDetails], the details for [GestureDragStartCallback].
 ///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
-class DragEndDetails extends PositionedGestureDetails {
+class DragEndDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
   /// If [primaryVelocity] is non-null, its value must match one of the
   /// coordinates of `velocity.pixelsPerSecond` and the other coordinate
   /// must be zero.
   DragEndDetails({
-    super.globalPosition = Offset.zero,
+    this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.velocity = Velocity.zero,
     this.primaryVelocity,
@@ -183,7 +218,15 @@ class DragEndDetails extends PositionedGestureDetails {
              (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0) ||
              (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
        ),
-       super(localPosition: localPosition ?? globalPosition);
+       localPosition = localPosition ?? globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
+  final Offset globalPosition;
+
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
+  final Offset localPosition;
 
   /// The velocity the pointer was moving when it stopped contacting the screen.
   ///
@@ -205,6 +248,8 @@ class DragEndDetails extends PositionedGestureDetails {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
     properties.add(DiagnosticsProperty<Velocity>('velocity', velocity));
     properties.add(DoubleProperty('primaryVelocity', primaryVelocity));
   }
