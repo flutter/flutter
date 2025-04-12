@@ -88,7 +88,7 @@ class IconButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [IconButton]'s defaults.
 ///  * [ThemeData.iconButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
-class IconButtonTheme extends InheritedTheme {
+class IconButtonTheme extends InheritedTheme<IconButtonThemeData, Object?> {
   /// Create a [IconButtonTheme].
   const IconButtonTheme({super.key, required this.data, required super.child});
 
@@ -99,6 +99,15 @@ class IconButtonTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [IconButtonTheme] widget, then
   /// [ThemeData.iconButtonTheme] is used.
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final ButtonStyle? style = IconButtonTheme.select(
+  ///   context,
+  ///   (IconButtonThemeData data) => data.style,
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -111,6 +120,19 @@ class IconButtonTheme extends InheritedTheme {
     return buttonTheme?.data ?? Theme.of(context).iconButtonTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [IconButtonTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(IconButtonThemeData) selector) {
+    final ThemeSelector<IconButtonThemeData, T> themeSelector =
+        ThemeSelector<IconButtonThemeData, T>.from(selector);
+    final IconButtonThemeData theme =
+        InheritedModel.inheritFrom<IconButtonTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return IconButtonTheme(data: data, child: child);
@@ -118,4 +140,19 @@ class IconButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(IconButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    IconButtonTheme oldWidget,
+    Set<ThemeSelector<IconButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<IconButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

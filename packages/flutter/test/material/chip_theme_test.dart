@@ -1521,6 +1521,68 @@ void main() {
 
     expect(getChipRenderBox(), paints..drrect(color: colorScheme.primary));
   });
+
+  testWidgets('ChipTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late ChipThemeData? themeData;
+
+    // Define two distinct styles to test changes.
+    const ChipThemeData themeData1 = ChipThemeData(backgroundColor: Colors.red);
+    const ChipThemeData themeData2 = ChipThemeData(backgroundColor: Colors.blue);
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the style property.
+        themeData = ChipTheme.select(context, (ChipThemeData theme) => theme);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with themeData1.
+    await tester.pumpWidget(
+      MaterialApp(home: ChipTheme(data: themeData1, child: singletonThemeSubtree)),
+    );
+
+    expect(buildCount, 1);
+    expect(themeData, themeData1);
+
+    // Rebuild with a change to a non-selected property (labelStyle).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChipTheme(
+          data: ChipThemeData(
+            backgroundColor: themeData1.backgroundColor, // Selected property unchanged
+            labelStyle: themeData2.labelStyle, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(themeData, themeData1);
+
+    // Rebuild with a change to the selected property (backgroundColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ChipTheme(
+          data: ChipThemeData(
+            backgroundColor: themeData2.backgroundColor, // Selected property changed
+            labelStyle: themeData2.labelStyle,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(themeData, themeData2);
+  });
 }
 
 class _MaterialStateOutlinedBorder extends StadiumBorder implements MaterialStateOutlinedBorder {

@@ -215,6 +215,71 @@ void main() {
       equals(Colors.blueGrey),
     );
   });
+
+  testWidgets('MenuBarTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late MenuStyle? style;
+
+    // Define two distinct styles to test changes.
+    const MenuStyle style1 = MenuStyle(
+      backgroundColor: MaterialStatePropertyAll<Color>(Colors.red),
+    );
+    const MenuStyle style2 = MenuStyle(
+      backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue),
+    );
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the style property.
+        style = MenuBarTheme.select(context, (MenuBarThemeData theme) => theme.style);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with style1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuBarTheme(
+          data: const MenuBarThemeData(style: style1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(style, style1);
+
+    // Rebuild with the same style object but potentially different internal properties
+    // (though in this case, MenuStyle is immutable, so this is just for demonstration).
+    // We expect no rebuild because the style object itself hasn't changed identity.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuBarTheme(
+          data: const MenuBarThemeData(style: style1), // Same style object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+    expect(style, style1);
+
+    // Rebuild with a different style object.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MenuBarTheme(
+          data: const MenuBarThemeData(style: style2), // Different style object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property (style object) changed.
+    expect(buildCount, 2);
+    expect(style, style2);
+  });
 }
 
 List<Widget> createTestMenus({

@@ -301,7 +301,7 @@ class NavigationRailThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [NavigationRail] properties that are not
 /// given an explicit non-null value.
-class NavigationRailTheme extends InheritedTheme {
+class NavigationRailTheme extends InheritedTheme<NavigationRailThemeData, Object?> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationRailThemeData] properties for a [NavigationRail].
   const NavigationRailTheme({super.key, required this.data, required super.child});
@@ -316,6 +316,15 @@ class NavigationRailTheme extends InheritedTheme {
   /// If there is no enclosing [NavigationRailTheme] widget, then
   /// [ThemeData.navigationRailTheme] is used.
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = NavigationRailTheme.select(
+  ///   context,
+  ///   (NavigationRailThemeData data) => data.backgroundColor,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -327,6 +336,19 @@ class NavigationRailTheme extends InheritedTheme {
     return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [NavigationRailThemeData]
+  /// in the closest [NavigationRailTheme] ancestor of the given [context].
+  ///
+  /// If there is no [NavigationRailTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.navigationRailTheme] is used.
+  static T select<T>(BuildContext context, T Function(NavigationRailThemeData) selector) {
+    final ThemeSelector<NavigationRailThemeData, T> themeSelector =
+        ThemeSelector<NavigationRailThemeData, T>.from(selector);
+    final NavigationRailThemeData theme =
+        InheritedModel.inheritFrom<NavigationRailTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return NavigationRailTheme(data: data, child: child);
@@ -334,4 +356,19 @@ class NavigationRailTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(NavigationRailTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    NavigationRailTheme oldWidget,
+    Set<ThemeSelector<NavigationRailThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<NavigationRailThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

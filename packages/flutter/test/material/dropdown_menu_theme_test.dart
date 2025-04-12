@@ -413,4 +413,76 @@ void main() {
     expect(material.shape, const RoundedRectangleBorder());
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
+
+  testWidgets('DropdownMenuTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late TextStyle? textStyle;
+
+    // Define two distinct text styles to test changes.
+    const TextStyle style1 = TextStyle(color: Colors.red);
+    const TextStyle style2 = TextStyle(color: Colors.blue);
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the textStyle property.
+        textStyle = DropdownMenuTheme.select(
+          context,
+          (DropdownMenuThemeData theme) => theme.textStyle,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with style1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DropdownMenuTheme(
+          data: const DropdownMenuThemeData(textStyle: style1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(textStyle, style1);
+
+    // Rebuild with a change to a non-selected property (menuStyle).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DropdownMenuTheme(
+          data: const DropdownMenuThemeData(
+            textStyle: style1, // Selected property unchanged
+            menuStyle: MenuStyle(
+              backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
+            ), // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(textStyle, style1);
+
+    // Rebuild with a change to the selected property (textStyle).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DropdownMenuTheme(
+          data: const DropdownMenuThemeData(
+            textStyle: style2, // Selected property changed
+            menuStyle: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.green)),
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(textStyle, style2);
+  });
 }

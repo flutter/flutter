@@ -155,4 +155,74 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBR(28, -2, 86, 18, const Radius.circular(10)), color: green),
     );
   });
+
+  testWidgets('BadgeTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? backgroundColor;
+
+    // Define two distinct colors to test changes.
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the backgroundColor property.
+        backgroundColor = BadgeTheme.select(
+          context,
+          (BadgeThemeData theme) => theme.backgroundColor,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BadgeTheme(
+          data: const BadgeThemeData(backgroundColor: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(backgroundColor, color1);
+
+    // Rebuild with a change to a non-selected property (textColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BadgeTheme(
+          data: const BadgeThemeData(
+            backgroundColor: color1, // Selected property unchanged
+            textColor: color2, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(backgroundColor, color1);
+
+    // Rebuild with a change to the selected property (backgroundColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BadgeTheme(
+          data: const BadgeThemeData(
+            backgroundColor: color2, // Selected property changed
+            textColor: color2,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(backgroundColor, color2);
+  });
 }

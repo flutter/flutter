@@ -228,4 +228,74 @@ void main() {
     expect(drawerButtonIconText.text.style!.color, green);
     expect(endDrawerButtonIconText.text.style!.color, green);
   });
+
+  testWidgets('ActionIconTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late WidgetBuilder? backButtonIconBuilder;
+
+    // Define two distinct builders to test changes.
+    Widget builder1(BuildContext context) => const Icon(Icons.arrow_back);
+    Widget builder2(BuildContext context) => const Icon(Icons.arrow_back_ios);
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the backButtonIconBuilder property.
+        backButtonIconBuilder = ActionIconTheme.select(
+          context,
+          (ActionIconThemeData theme) => theme.backButtonIconBuilder,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with builder1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ActionIconTheme(
+          data: ActionIconThemeData(backButtonIconBuilder: builder1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(backButtonIconBuilder, builder1);
+
+    // Rebuild with a change to a non-selected property (closeButtonIconBuilder).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ActionIconTheme(
+          data: ActionIconThemeData(
+            backButtonIconBuilder: builder1, // Selected property unchanged
+            closeButtonIconBuilder: builder2, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(backButtonIconBuilder, builder1);
+
+    // Rebuild with a change to the selected property (backButtonIconBuilder).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ActionIconTheme(
+          data: ActionIconThemeData(
+            backButtonIconBuilder: builder2, // Selected property changed
+            closeButtonIconBuilder: builder2,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(backButtonIconBuilder, builder2);
+  });
 }

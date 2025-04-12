@@ -320,6 +320,73 @@ void main() {
       });
     });
   });
+
+  testWidgets('DividerTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? color;
+
+    // Define two distinct colors to test changes.
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the color property.
+        color = DividerTheme.select(context, (DividerThemeData theme) => theme.color);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DividerTheme(
+          data: const DividerThemeData(color: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(color, color1);
+
+    // Rebuild with a change to a non-selected property (space).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DividerTheme(
+          data: const DividerThemeData(
+            color: color1, // Selected property unchanged
+            space: 10.0, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(color, color1);
+
+    // Rebuild with a change to the selected property (color).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DividerTheme(
+          data: const DividerThemeData(
+            color: color2, // Selected property changed
+            space: 10.0,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(color, color2);
+  });
 }
 
 DividerThemeData _dividerTheme() {

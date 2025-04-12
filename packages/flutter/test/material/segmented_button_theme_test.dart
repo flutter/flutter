@@ -575,4 +575,68 @@ void main() {
       expect(getOverlayColor(tester), paints..rect(color: overlayColor.withOpacity(0.1)));
     },
   );
+
+  testWidgets('SegmentedButtonTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late ButtonStyle? style;
+
+    // Define two distinct styles to test changes.
+    final ButtonStyle style1 = SegmentedButton.styleFrom(backgroundColor: Colors.red);
+    final ButtonStyle style2 = SegmentedButton.styleFrom(backgroundColor: Colors.blue);
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the style property.
+        style = SegmentedButtonTheme.select(
+          context,
+          (SegmentedButtonThemeData theme) => theme.style,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with style1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SegmentedButtonTheme(
+          data: SegmentedButtonThemeData(style: style1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(style, style1);
+
+    // Rebuild with the same style object but potentially different internal properties
+    // (though in this case, ButtonStyle is immutable, so this is just for demonstration).
+    // We expect no rebuild because the style object itself hasn't changed identity.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SegmentedButtonTheme(
+          data: SegmentedButtonThemeData(style: style1), // Same style object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+    expect(style, style1);
+
+    // Rebuild with a different style object.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SegmentedButtonTheme(
+          data: SegmentedButtonThemeData(style: style2), // Different style object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property (style object) changed.
+    expect(buildCount, 2);
+    expect(style, style2);
+  });
 }

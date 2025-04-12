@@ -3472,6 +3472,76 @@ void main() {
       }
     });
   });
+
+  testWidgets('SliderTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? activeTrackColor;
+
+    // Define two distinct colors to test changes.
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the activeTrackColor property.
+        activeTrackColor = SliderTheme.select(
+          context,
+          (SliderThemeData theme) => theme.activeTrackColor,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SliderTheme(
+          data: const SliderThemeData(activeTrackColor: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(activeTrackColor, color1);
+
+    // Rebuild with a change to a non-selected property (trackHeight).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SliderTheme(
+          data: const SliderThemeData(
+            activeTrackColor: color1, // Selected property unchanged
+            trackHeight: 10.0, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(activeTrackColor, color1);
+
+    // Rebuild with a change to the selected property (activeTrackColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SliderTheme(
+          data: const SliderThemeData(
+            activeTrackColor: color2, // Selected property changed
+            trackHeight: 10.0,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(activeTrackColor, color2);
+  });
 }
 
 class RoundedRectSliderTrackShapeWithCustomAdditionalActiveTrackHeight

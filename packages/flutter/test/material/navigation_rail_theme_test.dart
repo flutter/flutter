@@ -301,6 +301,76 @@ void main() {
     expect(description[9], 'indicatorColor: ${const Color(0x00000096)}');
     expect(description[10], 'indicatorShape: CircleBorder(BorderSide(width: 0.0, style: none))');
   });
+
+  testWidgets('NavigationRailTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? backgroundColor;
+
+    // Define two distinct colors to test changes.
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the backgroundColor property.
+        backgroundColor = NavigationRailTheme.select(
+          context,
+          (NavigationRailThemeData theme) => theme.backgroundColor,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NavigationRailTheme(
+          data: const NavigationRailThemeData(backgroundColor: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(backgroundColor, color1);
+
+    // Rebuild with a change to a non-selected property (elevation).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NavigationRailTheme(
+          data: const NavigationRailThemeData(
+            backgroundColor: color1, // Selected property unchanged
+            elevation: 5.0, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(backgroundColor, color1);
+
+    // Rebuild with a change to the selected property (backgroundColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NavigationRailTheme(
+          data: const NavigationRailThemeData(
+            backgroundColor: color2, // Selected property changed
+            elevation: 5.0,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(backgroundColor, color2);
+  });
 }
 
 List<NavigationRailDestination> _destinations() {

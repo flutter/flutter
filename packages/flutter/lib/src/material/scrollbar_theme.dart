@@ -302,7 +302,7 @@ bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
 ///
 ///  * [ScrollbarThemeData], which describes the configuration of a
 ///    scrollbar theme.
-class ScrollbarTheme extends InheritedTheme {
+class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData, Object?> {
   /// Constructs a scrollbar theme that configures all descendant [Scrollbar]
   /// widgets.
   const ScrollbarTheme({super.key, required this.data, required super.child});
@@ -312,6 +312,15 @@ class ScrollbarTheme extends InheritedTheme {
 
   /// Returns the configuration [data] from the closest [ScrollbarTheme]
   /// ancestor. If there is no ancestor, it returns [ThemeData.scrollbarTheme].
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Radius? radius = ScrollbarTheme.select(
+  ///   context,
+  ///   (ScrollbarThemeData data) => data.radius,
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -324,6 +333,19 @@ class ScrollbarTheme extends InheritedTheme {
     return scrollbarTheme?.data ?? Theme.of(context).scrollbarTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [ScrollbarThemeData]
+  /// in the closest [ScrollbarTheme] ancestor of the given [context].
+  ///
+  /// If there is no [ScrollbarTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.scrollbarTheme] is used.
+  static T select<T>(BuildContext context, T Function(ScrollbarThemeData) selector) {
+    final ThemeSelector<ScrollbarThemeData, T> themeSelector =
+        ThemeSelector<ScrollbarThemeData, T>.from(selector);
+    final ScrollbarThemeData theme =
+        InheritedModel.inheritFrom<ScrollbarTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ScrollbarTheme(data: data, child: child);
@@ -331,4 +353,19 @@ class ScrollbarTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ScrollbarTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ScrollbarTheme oldWidget,
+    Set<ThemeSelector<ScrollbarThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ScrollbarThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

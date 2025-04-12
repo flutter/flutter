@@ -71,6 +71,9 @@ class Theme extends StatelessWidget {
   /// Defaults to [ThemeData.fallback] if there is no [Theme] in the given
   /// build context.
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes.
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -137,6 +140,18 @@ class Theme extends StatelessWidget {
             ).materialTheme
             : _kFallbackTheme);
     return ThemeData.localize(theme, theme.typography.geometryThemeFor(category));
+  }
+
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [Theme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(ThemeData) selector) {
+    final ThemeSelector<ThemeData, T> themeSelector = ThemeSelector<ThemeData, T>.from(selector);
+    final ThemeData theme =
+        InheritedModel.inheritFrom<_InheritedTheme>(context, aspect: themeSelector)!.theme.data;
+    return themeSelector.selectFrom(theme);
   }
 
   // The inherited themes in widgets library can not infer their values from
@@ -218,7 +233,7 @@ class Theme extends StatelessWidget {
   }
 }
 
-class _InheritedTheme extends InheritedTheme {
+class _InheritedTheme extends InheritedTheme<ThemeData, Object?> {
   const _InheritedTheme({required this.theme, required super.child});
 
   final Theme theme;
@@ -230,6 +245,21 @@ class _InheritedTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    _InheritedTheme oldWidget,
+    Set<ThemeSelector<ThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.theme.data);
+      final Object? newValue = selector.selectFrom(theme.data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// An interpolation between two [ThemeData]s.

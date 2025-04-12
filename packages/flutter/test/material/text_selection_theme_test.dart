@@ -351,4 +351,65 @@ void main() {
     expect(style.selectionColor, themeSelectionColor);
     expect(style.cursorColor, themeCursorColor);
   });
+
+  testWidgets('TextSelectionTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? cursorColor;
+
+    // Define two distinct colors to test changes
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the cursorColor property
+        cursorColor = TextSelectionTheme.select(
+          context,
+          (TextSelectionThemeData theme) => theme.cursorColor,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TextSelectionTheme(
+          data: const TextSelectionThemeData(cursorColor: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(cursorColor, color1);
+
+    // Rebuild with the same color
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TextSelectionTheme(
+          data: const TextSelectionThemeData(cursorColor: color1), // Same color
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+    expect(cursorColor, color1);
+
+    // Rebuild with a different color
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TextSelectionTheme(
+          data: const TextSelectionThemeData(cursorColor: color2), // Different color
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 2);
+    expect(cursorColor, color2);
+  });
 }

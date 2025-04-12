@@ -155,7 +155,7 @@ class CarouselViewThemeData with Diagnosticable {
 ///  * [CarouselViewThemeData], which describes the actual configuration of a carousel
 ///    theme.
 ///  * [Theme], which controls the overall theme inheritance.
-class CarouselViewTheme extends InheritedTheme {
+class CarouselViewTheme extends InheritedTheme<CarouselViewThemeData, Object?> {
   /// Creates a carousel theme that configures all descendant [CarouselView] widgets.
   const CarouselViewTheme({super.key, required this.data, required super.child});
 
@@ -171,6 +171,19 @@ class CarouselViewTheme extends InheritedTheme {
     return inheritedTheme?.data ?? Theme.of(context).carouselViewTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [CarouselViewTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(CarouselViewThemeData) selector) {
+    final ThemeSelector<CarouselViewThemeData, T> themeSelector =
+        ThemeSelector<CarouselViewThemeData, T>.from(selector);
+    final CarouselViewThemeData theme =
+        InheritedModel.inheritFrom<CarouselViewTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   /// Wraps the given [child] with a [CarouselViewTheme] containing the [data].
   @override
   Widget wrap(BuildContext context, Widget child) {
@@ -180,4 +193,19 @@ class CarouselViewTheme extends InheritedTheme {
   /// Returns true if the [data] fields of the two themes are different.
   @override
   bool updateShouldNotify(CarouselViewTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    CarouselViewTheme oldWidget,
+    Set<ThemeSelector<CarouselViewThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<CarouselViewThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

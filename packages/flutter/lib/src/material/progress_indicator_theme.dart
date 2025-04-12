@@ -308,7 +308,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
 /// )
 /// ```
 /// {@end-tool}
-class ProgressIndicatorTheme extends InheritedTheme {
+class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData, Object?> {
   /// Creates a theme that controls the configurations for [ProgressIndicator]
   /// widgets.
   const ProgressIndicatorTheme({super.key, required this.data, required super.child});
@@ -330,6 +330,28 @@ class ProgressIndicatorTheme extends InheritedTheme {
     return progressIndicatorTheme?.data ?? Theme.of(context).progressIndicatorTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [ProgressIndicatorThemeData]
+  /// in the closest [ProgressIndicatorTheme] ancestor of the given [context].
+  ///
+  /// If there is no [ProgressIndicatorTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.progressIndicatorTheme] is used.
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? color = ProgressIndicatorTheme.select(
+  ///   context,
+  ///   (ProgressIndicatorThemeData data) => data.color,
+  /// );
+  /// ```
+  static T select<T>(BuildContext context, T Function(ProgressIndicatorThemeData) selector) {
+    final ThemeSelector<ProgressIndicatorThemeData, T> themeSelector =
+        ThemeSelector<ProgressIndicatorThemeData, T>.from(selector);
+    final ProgressIndicatorThemeData theme =
+        InheritedModel.inheritFrom<ProgressIndicatorTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ProgressIndicatorTheme(data: data, child: child);
@@ -337,4 +359,19 @@ class ProgressIndicatorTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ProgressIndicatorTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ProgressIndicatorTheme oldWidget,
+    Set<ThemeSelector<ProgressIndicatorThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ProgressIndicatorThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -402,6 +402,52 @@ void main() {
     expect(() => Icon(Icons.abc, opticalSize: -0.1), throwsAssertionError);
     expect(() => Icon(Icons.abc, opticalSize: 0), throwsAssertionError);
   });
+
+  testWidgets('IconTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late double size;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        size = IconTheme.select(context, (IconThemeData theme) => theme.size!);
+
+        return const Placeholder();
+      },
+    );
+
+    await tester.pumpWidget(
+      IconTheme(
+        data: const IconThemeData(size: 10.0, color: Colors.red),
+        child: singletonThemeSubtree,
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(size, 10.0);
+
+    await tester.pumpWidget(
+      IconTheme(
+        data: const IconThemeData(size: 10.0, color: Colors.blue),
+        child: singletonThemeSubtree,
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(size, 10.0);
+
+    await tester.pumpWidget(
+      IconTheme(
+        data: const IconThemeData(size: 20.0, color: Colors.blue),
+        child: singletonThemeSubtree,
+      ),
+    );
+
+    expect(buildCount, 2);
+    expect(size, 20.0);
+  });
 }
 
 final class _TextDoubler extends TextScaler {

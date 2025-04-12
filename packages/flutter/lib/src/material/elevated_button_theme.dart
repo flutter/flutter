@@ -94,7 +94,7 @@ class ElevatedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [ElevatedButton]'s defaults.
 ///  * [ThemeData.elevatedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [ElevatedButton]s below the overall [Theme].
-class ElevatedButtonTheme extends InheritedTheme {
+class ElevatedButtonTheme extends InheritedTheme<ElevatedButtonThemeData, Object?> {
   /// Create a [ElevatedButtonTheme].
   const ElevatedButtonTheme({super.key, required this.data, required super.child});
 
@@ -105,6 +105,15 @@ class ElevatedButtonTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [ElevatedButtonTheme] widget, then
   /// [ThemeData.elevatedButtonTheme] is used.
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final WidgetStateProperty<Color?>? backgroundColor = ElevatedButtonTheme.select(
+  ///   context,
+  ///   (ElevatedButtonThemeData data) => data.style?.backgroundColor,
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -117,6 +126,19 @@ class ElevatedButtonTheme extends InheritedTheme {
     return buttonTheme?.data ?? Theme.of(context).elevatedButtonTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ElevatedButtonTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(ElevatedButtonThemeData) selector) {
+    final ThemeSelector<ElevatedButtonThemeData, T> themeSelector =
+        ThemeSelector<ElevatedButtonThemeData, T>.from(selector);
+    final ElevatedButtonThemeData theme =
+        InheritedModel.inheritFrom<ElevatedButtonTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ElevatedButtonTheme(data: data, child: child);
@@ -124,4 +146,19 @@ class ElevatedButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ElevatedButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ElevatedButtonTheme oldWidget,
+    Set<ThemeSelector<ElevatedButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ElevatedButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

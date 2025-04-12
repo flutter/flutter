@@ -475,4 +475,65 @@ void main() {
       expect(iconStyle(tester, Icons.add).color, foregroundColor);
     },
   );
+
+  testWidgets('ElevatedButtonTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late ButtonStyle? style;
+
+    // Define two distinct styles to test changes.
+    final ButtonStyle style1 = ElevatedButton.styleFrom(backgroundColor: Colors.red);
+    final ButtonStyle style2 = ElevatedButton.styleFrom(backgroundColor: Colors.blue);
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the style property.
+        style = ElevatedButtonTheme.select(context, (ElevatedButtonThemeData theme) => theme.style);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with style1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ElevatedButtonTheme(
+          data: ElevatedButtonThemeData(style: style1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(style, style1);
+
+    // Rebuild with the same style object but potentially different internal properties
+    // (though in this case, ButtonStyle is immutable, so this is just for demonstration).
+    // We expect no rebuild because the style object itself hasn't changed identity.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ElevatedButtonTheme(
+          data: ElevatedButtonThemeData(style: style1), // Same style object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+    expect(style, style1);
+
+    // Rebuild with a different style object.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ElevatedButtonTheme(
+          data: ElevatedButtonThemeData(style: style2), // Different style object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property (style object) changed.
+    expect(buildCount, 2);
+    expect(style, style2);
+  });
 }

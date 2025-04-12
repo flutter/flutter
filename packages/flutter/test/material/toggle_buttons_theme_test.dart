@@ -585,4 +585,62 @@ void main() {
         ..path(style: PaintingStyle.stroke, color: disabledBorderColor, strokeWidth: customWidth),
     );
   });
+
+  testWidgets('ToggleButtonsTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? color;
+
+    // Define two distinct colors to test changes
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the color property
+        color = ToggleButtonsTheme.select(context, (ToggleButtonsThemeData theme) => theme.color);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ToggleButtonsTheme(
+          data: const ToggleButtonsThemeData(color: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(color, color1);
+
+    // Rebuild with the same color
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ToggleButtonsTheme(
+          data: const ToggleButtonsThemeData(color: color1), // Same color
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+    expect(color, color1);
+
+    // Rebuild with a different color
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ToggleButtonsTheme(
+          data: const ToggleButtonsThemeData(color: color2), // Different color
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 2);
+    expect(color, color2);
+  });
 }

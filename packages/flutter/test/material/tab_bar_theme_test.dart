@@ -1739,6 +1739,60 @@ void main() {
         rrect: RRect.fromRectAndRadius(tester.getRect(findInkWell), const Radius.circular(radius)),
       ),
     );
+
     gesture.removePointer();
+  });
+
+  testWidgets('TabBarTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? theme;
+
+    // Define two distinct themes to test changes
+    const TabBarThemeData theme1 = TabBarThemeData(labelColor: Colors.red);
+    const TabBarThemeData theme2 = TabBarThemeData(labelColor: Colors.blue);
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the theme property
+        theme = TabBarTheme.select(context, (TabBarThemeData theme) => theme.labelColor);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with theme1
+    await tester.pumpWidget(
+      MaterialApp(home: TabBarTheme(data: theme1, child: singletonThemeSubtree)),
+    );
+
+    expect(buildCount, 1);
+    expect(theme, theme1.labelColor);
+
+    // Rebuild with the same theme object
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TabBarTheme(
+          data: theme1, // Same theme object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+    expect(theme, theme1.labelColor);
+
+    // Rebuild with a different theme object
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TabBarTheme(
+          data: theme2, // Different theme object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 2);
+    expect(theme, theme2.labelColor);
   });
 }

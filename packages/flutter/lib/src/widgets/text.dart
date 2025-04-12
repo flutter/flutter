@@ -21,6 +21,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'default_selection_style.dart';
 import 'framework.dart';
+import 'inherited_model.dart';
 import 'inherited_theme.dart';
 import 'media_query.dart';
 import 'selectable_region.dart';
@@ -47,7 +48,7 @@ import 'selection_container.dart';
 ///    smoothly over a given duration.
 ///  * [DefaultTextStyleTransition], which takes a provided [Animation] to
 ///    animate changes in text style smoothly over time.
-class DefaultTextStyle extends InheritedTheme {
+class DefaultTextStyle extends InheritedTheme<DefaultTextStyle, Object?> {
   /// Creates a default text style for the given subtree.
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
@@ -176,6 +177,15 @@ class DefaultTextStyle extends InheritedTheme {
   /// If no such instance exists, returns an instance created by
   /// [DefaultTextStyle.fallback], which contains fallback values.
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final TextStyle? style = DefaultTextStyle.select(
+  ///   context,
+  ///   (DefaultTextStyle data) => data.style,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -184,6 +194,19 @@ class DefaultTextStyle extends InheritedTheme {
   static DefaultTextStyle of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultTextStyle>() ??
         const DefaultTextStyle.fallback();
+  }
+
+  /// Evaluates [ThemeSelector.selectFrom] using data provided by the
+  /// nearest ancestor [DefaultTextStyle] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(DefaultTextStyle) selector) {
+    final ThemeSelector<DefaultTextStyle, T> themeSelector =
+        ThemeSelector<DefaultTextStyle, T>.from(selector);
+    final DefaultTextStyle theme =
+        InheritedModel.inheritFrom<DefaultTextStyle>(context, aspect: themeSelector)!;
+    return themeSelector.selectFrom(theme);
   }
 
   @override
@@ -242,6 +265,21 @@ class DefaultTextStyle extends InheritedTheme {
       ),
     );
   }
+
+  @override
+  bool updateShouldNotifyDependent(
+    DefaultTextStyle oldWidget,
+    Set<ThemeSelector<DefaultTextStyle, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<DefaultTextStyle, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget);
+      final Object? newValue = selector.selectFrom(this);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 class _NullWidget extends StatelessWidget {
@@ -268,7 +306,7 @@ class _NullWidget extends StatelessWidget {
 ///
 ///  * [DefaultTextStyle], which defines a [TextStyle] to apply to descendant
 ///    [Text] widgets.
-class DefaultTextHeightBehavior extends InheritedTheme {
+class DefaultTextHeightBehavior extends InheritedTheme<TextHeightBehavior, TextHeightBehavior> {
   /// Creates a default text height behavior for the given subtree.
   const DefaultTextHeightBehavior({
     super.key,
@@ -362,6 +400,14 @@ class DefaultTextHeightBehavior extends InheritedTheme {
         defaultValue: null,
       ),
     );
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    DefaultTextHeightBehavior oldWidget,
+    Set<ThemeSelector<ui.TextHeightBehavior, ui.TextHeightBehavior>> dependencies,
+  ) {
+    return textHeightBehavior != oldWidget.textHeightBehavior;
   }
 }
 

@@ -73,7 +73,7 @@ class MenuBarThemeData extends MenuThemeData {
 /// * [SubmenuButton], a button that manages a submenu that uses these
 ///   properties.
 /// * [MenuBar], a widget that creates a menu bar that can use [SubmenuButton]s.
-class MenuBarTheme extends InheritedTheme {
+class MenuBarTheme extends InheritedTheme<MenuBarThemeData, Object?> {
   /// Creates a theme that controls the configurations for [MenuBar] and
   /// [MenuItemButton] in its widget subtree.
   const MenuBarTheme({super.key, required this.data, required super.child});
@@ -84,6 +84,9 @@ class MenuBarTheme extends InheritedTheme {
   /// Returns the closest instance of this class's [data] value that encloses
   /// the given context. If there is no ancestor, it returns
   /// [ThemeData.menuBarTheme].
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes.
   ///
   /// Typical usage is as follows:
   ///
@@ -104,6 +107,19 @@ class MenuBarTheme extends InheritedTheme {
     return menuBarTheme?.data ?? Theme.of(context).menuBarTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [MenuBarTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(MenuBarThemeData) selector) {
+    final ThemeSelector<MenuBarThemeData, T> themeSelector =
+        ThemeSelector<MenuBarThemeData, T>.from(selector);
+    final MenuBarThemeData theme =
+        InheritedModel.inheritFrom<MenuBarTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return MenuBarTheme(data: data, child: child);
@@ -111,4 +127,19 @@ class MenuBarTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(MenuBarTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    MenuBarTheme oldWidget,
+    Set<ThemeSelector<MenuBarThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<MenuBarThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

@@ -1133,6 +1133,69 @@ void main() {
       expect(theme.primaryContrastingColor, CupertinoColors.destructiveRed);
     });
   });
+
+  testWidgets('Theme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? primaryColor;
+
+    // Define two distinct colors to test changes.
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the primaryColor property.
+        primaryColor = Theme.select(context, (ThemeData theme) => theme.primaryColor);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(data: ThemeData(primaryColor: Colors.red), child: singletonThemeSubtree),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(primaryColor, color1);
+
+    // Rebuild with a change to a non-selected property (accentColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(
+            primaryColor: Colors.red, // Selected property unchanged
+            colorScheme: const ColorScheme.light(
+              secondary: Colors.green,
+            ), // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(primaryColor, color1);
+
+    // Rebuild with a change to the selected property (primaryColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(primaryColor: Colors.blue), // Selected property changed
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(primaryColor, color2);
+  });
 }
 
 int testBuildCalled = 0;

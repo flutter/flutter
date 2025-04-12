@@ -358,7 +358,7 @@ class ListTileThemeData with Diagnosticable {
 ///
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
-class ListTileTheme extends InheritedTheme {
+class ListTileTheme extends InheritedTheme<ListTileThemeData, Object?> {
   /// Creates a list tile theme that defines the color and style parameters for
   /// descendant [ListTile]s.
   ///
@@ -548,6 +548,15 @@ class ListTileTheme extends InheritedTheme {
   /// If there is no enclosing [ListTileTheme] widget, then
   /// [ThemeData.listTileTheme] is used (see [Theme.of]).
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? tileColor = ListTileTheme.select(
+  ///   context,
+  ///   (ListTileThemeData data) => data.tileColor,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -556,6 +565,19 @@ class ListTileTheme extends InheritedTheme {
   static ListTileThemeData of(BuildContext context) {
     final ListTileTheme? result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
     return result?.data ?? Theme.of(context).listTileTheme;
+  }
+
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ListTileTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(ListTileThemeData) selector) {
+    final ThemeSelector<ListTileThemeData, T> themeSelector =
+        ThemeSelector<ListTileThemeData, T>.from(selector);
+    final ListTileThemeData theme =
+        InheritedModel.inheritFrom<ListTileTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
   }
 
   /// Creates a list tile theme that controls the color and style parameters for
@@ -647,4 +669,19 @@ class ListTileTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ListTileTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ListTileTheme oldWidget,
+    Set<ThemeSelector<ListTileThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ListTileThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

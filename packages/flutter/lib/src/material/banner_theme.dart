@@ -171,7 +171,7 @@ class MaterialBannerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [MaterialBanner] properties that are not
 /// given an explicit non-null value.
-class MaterialBannerTheme extends InheritedTheme {
+class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData, Object?> {
   /// Creates a banner theme that controls the configurations for
   /// [MaterialBanner]s in its widget subtree.
   const MaterialBannerTheme({super.key, this.data, required super.child});
@@ -185,6 +185,15 @@ class MaterialBannerTheme extends InheritedTheme {
   /// If there is no ancestor, it returns [ThemeData.bannerTheme]. Applications
   /// can assume that the returned value will not be null.
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = MaterialBannerTheme.select(
+  ///   context,
+  ///   (MaterialBannerThemeData data) => data.backgroundColor!,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -196,6 +205,19 @@ class MaterialBannerTheme extends InheritedTheme {
     return bannerTheme?.data ?? Theme.of(context).bannerTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [MaterialBannerTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T? select<T>(BuildContext context, T Function(MaterialBannerThemeData) selector) {
+    final ThemeSelector<MaterialBannerThemeData, T> themeSelector =
+        ThemeSelector<MaterialBannerThemeData, T>.from(selector);
+    final MaterialBannerThemeData? theme =
+        InheritedModel.inheritFrom<MaterialBannerTheme>(context, aspect: themeSelector)?.data;
+    return theme == null ? null : themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return MaterialBannerTheme(data: data, child: child);
@@ -203,4 +225,19 @@ class MaterialBannerTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(MaterialBannerTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    MaterialBannerTheme oldWidget,
+    Set<ThemeSelector<MaterialBannerThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<MaterialBannerThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = oldWidget.data == null ? null : selector.selectFrom(oldWidget.data!);
+      final Object? newValue = data == null ? null : selector.selectFrom(data!);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

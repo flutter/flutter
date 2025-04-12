@@ -150,4 +150,71 @@ void main() {
     expect(fooText, findsNWidgets(2));
     expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
   });
+
+  testWidgets('ButtonTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late double minWidth;
+
+    // Define two distinct values to test changes.
+    const double width1 = 100.0;
+    const double width2 = 150.0;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the minWidth property.
+        minWidth = ButtonTheme.select(context, (ButtonThemeData theme) => theme.minWidth);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with width1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ButtonTheme.fromButtonThemeData(
+          data: const ButtonThemeData(minWidth: width1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(minWidth, width1);
+
+    // Rebuild with a change to a non-selected property (height).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ButtonTheme.fromButtonThemeData(
+          data: const ButtonThemeData(
+            minWidth: width1, // Selected property unchanged
+            height: 50.0, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(minWidth, width1);
+
+    // Rebuild with a change to the selected property (minWidth).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ButtonTheme.fromButtonThemeData(
+          data: const ButtonThemeData(
+            minWidth: width2, // Selected property changed
+            height: 50.0,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(minWidth, width2);
+  });
 }

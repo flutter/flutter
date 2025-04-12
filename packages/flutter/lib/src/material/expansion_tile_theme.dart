@@ -254,7 +254,7 @@ class ExpansionTileThemeData with Diagnosticable {
 ///  * [ExpansionTileThemeData], which is used to configure this theme.
 ///  * [ThemeData.expansionTileTheme], which can be used to override the default
 ///    [ExpansionTileTheme] for [ExpansionTile]s below the overall [Theme].
-class ExpansionTileTheme extends InheritedTheme {
+class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData, Object?> {
   /// Applies the given theme [data] to [child].
   const ExpansionTileTheme({super.key, required this.data, required super.child});
 
@@ -267,6 +267,16 @@ class ExpansionTileTheme extends InheritedTheme {
   /// If there is no enclosing [ExpansionTileTheme] widget, then
   /// [ThemeData.expansionTileTheme] is used.
   ///
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = ExpansionTileTheme.select(
+  ///   context,
+  ///   (ExpansionTileThemeData data) => data.backgroundColor,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -278,6 +288,19 @@ class ExpansionTileTheme extends InheritedTheme {
     return inheritedTheme?.data ?? Theme.of(context).expansionTileTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [ExpansionTileTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(ExpansionTileThemeData) selector) {
+    final ThemeSelector<ExpansionTileThemeData, T> themeSelector =
+        ThemeSelector<ExpansionTileThemeData, T>.from(selector);
+    final ExpansionTileThemeData theme =
+        InheritedModel.inheritFrom<ExpansionTileTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return ExpansionTileTheme(data: data, child: child);
@@ -285,4 +308,19 @@ class ExpansionTileTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(ExpansionTileTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    ExpansionTileTheme oldWidget,
+    Set<ThemeSelector<ExpansionTileThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<ExpansionTileThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

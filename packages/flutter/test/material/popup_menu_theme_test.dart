@@ -752,6 +752,73 @@ void main() {
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), cursor);
     });
   });
+
+  testWidgets('PopupMenuTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late TextStyle? textStyle;
+
+    // Define two distinct text styles to test changes.
+    const TextStyle style1 = TextStyle(color: Colors.red);
+    const TextStyle style2 = TextStyle(color: Colors.blue);
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the textStyle property.
+        textStyle = PopupMenuTheme.select(context, (PopupMenuThemeData theme) => theme.textStyle);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with style1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PopupMenuTheme(
+          data: const PopupMenuThemeData(textStyle: style1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(textStyle, style1);
+
+    // Rebuild with a change to a non-selected property (mouseCursor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PopupMenuTheme(
+          data: const PopupMenuThemeData(
+            textStyle: style1, // Selected property unchanged
+            position: PopupMenuPosition.over, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(textStyle, style1);
+
+    // Rebuild with a change to the selected property (textStyle).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PopupMenuTheme(
+          data: const PopupMenuThemeData(
+            textStyle: style2, // Selected property changed
+            position: PopupMenuPosition.over,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(textStyle, style2);
+  });
 }
 
 Set<MaterialState> enabled = <MaterialState>{};

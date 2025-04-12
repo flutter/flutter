@@ -20,7 +20,7 @@ import 'theme.dart';
 ///  * [TabBarThemeData], which describes the actual configuration of a switch
 ///    theme.
 @immutable
-class TabBarTheme extends InheritedTheme with Diagnosticable {
+class TabBarTheme extends InheritedTheme<TabBarThemeData, Object?> with Diagnosticable {
   /// Creates a tab bar theme that can be used with [ThemeData.tabBarTheme].
   const TabBarTheme({
     super.key,
@@ -310,9 +310,38 @@ class TabBarTheme extends InheritedTheme with Diagnosticable {
   @override
   bool updateShouldNotify(TabBarTheme oldWidget) => data != oldWidget.data;
 
+  /// Returns the value of the field specified by [selector] from the [TabBarThemeData]
+  /// in the closest [TabBarTheme] ancestor of the given [context].
+  ///
+  /// If there is no [TabBarTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.tabBarTheme] is used.
+  static T select<T>(BuildContext context, T Function(TabBarThemeData) selector) {
+    final ThemeSelector<TabBarThemeData, T> themeSelector = ThemeSelector<TabBarThemeData, T>.from(
+      selector,
+    );
+    final TabBarThemeData theme =
+        InheritedModel.inheritFrom<TabBarTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return TabBarTheme(data: data, child: child);
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    TabBarTheme oldWidget,
+    Set<ThemeSelector<TabBarThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<TabBarThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

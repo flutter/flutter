@@ -141,7 +141,7 @@ class TextSelectionThemeData with Diagnosticable {
 ///
 /// This widget also creates a [DefaultSelectionStyle] for its subtree with
 /// [data].
-class TextSelectionTheme extends InheritedTheme {
+class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData, Object?> {
   /// Creates a text selection theme widget that specifies the text
   /// selection properties for all widgets below it in the widget tree.
   const TextSelectionTheme({super.key, required this.data, required Widget child})
@@ -171,6 +171,15 @@ class TextSelectionTheme extends InheritedTheme {
   /// there is no ancestor, it returns [ThemeData.textSelectionTheme].
   /// Applications can assume that the returned value will not be null.
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? cursorColor = TextSelectionTheme.select(
+  ///   context,
+  ///   (TextSelectionThemeData data) => data.cursorColor,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -182,6 +191,19 @@ class TextSelectionTheme extends InheritedTheme {
     return selectionTheme?.data ?? Theme.of(context).textSelectionTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [TextSelectionTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(TextSelectionThemeData) selector) {
+    final ThemeSelector<TextSelectionThemeData, T> themeSelector =
+        ThemeSelector<TextSelectionThemeData, T>.from(selector);
+    final TextSelectionThemeData theme =
+        InheritedModel.inheritFrom<TextSelectionTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return TextSelectionTheme(data: data, child: child);
@@ -189,6 +211,21 @@ class TextSelectionTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TextSelectionTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    TextSelectionTheme oldWidget,
+    Set<ThemeSelector<TextSelectionThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<TextSelectionThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 class _NullWidget extends Widget {

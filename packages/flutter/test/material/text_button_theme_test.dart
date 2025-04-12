@@ -480,4 +480,62 @@ void main() {
       expect(iconStyle(tester, Icons.add).color, foregroundColor);
     },
   );
+
+  testWidgets('TextButtonTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late ButtonStyle? style;
+
+    // Define two distinct styles to test changes
+    final ButtonStyle style1 = TextButton.styleFrom(backgroundColor: Colors.red);
+    final ButtonStyle style2 = TextButton.styleFrom(backgroundColor: Colors.blue);
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the style property
+        style = TextButtonTheme.select(context, (TextButtonThemeData theme) => theme.style);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with style1
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TextButtonTheme(
+          data: TextButtonThemeData(style: style1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(style, style1);
+
+    // Rebuild with the same style object
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TextButtonTheme(
+          data: TextButtonThemeData(style: style1), // Same style object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+    expect(style, style1);
+
+    // Rebuild with a different style object
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TextButtonTheme(
+          data: TextButtonThemeData(style: style2), // Different style object
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 2);
+    expect(style, style2);
+  });
 }

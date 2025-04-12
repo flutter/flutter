@@ -991,6 +991,67 @@ void main() {
 
     expect(tester.getSize(findBorderPainter().first), const Size(96.0, 70.0));
   });
+
+  testWidgets('TimePickerTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? backgroundColor;
+
+    // Define two distinct colors to test changes
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the backgroundColor property
+        backgroundColor = TimePickerTheme.select(
+          context,
+          (TimePickerThemeData theme) => theme.backgroundColor,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TimePickerTheme(
+          data: const TimePickerThemeData(backgroundColor: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(backgroundColor, color1);
+
+    // Rebuild with the same color
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TimePickerTheme(
+          data: const TimePickerThemeData(backgroundColor: color1), // Same color
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+    expect(buildCount, 1);
+    expect(backgroundColor, color1);
+
+    // Rebuild with a different color
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TimePickerTheme(
+          data: const TimePickerThemeData(backgroundColor: color2), // Different color
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 2);
+    expect(backgroundColor, color2);
+  });
 }
 
 final Color _selectedColor = Colors.green[100]!;

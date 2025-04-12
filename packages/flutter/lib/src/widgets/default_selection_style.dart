@@ -10,6 +10,7 @@ library;
 
 import 'basic.dart';
 import 'framework.dart';
+import 'inherited_model.dart';
 import 'inherited_theme.dart';
 
 // Examples can assume:
@@ -25,7 +26,7 @@ import 'inherited_theme.dart';
 /// See also:
 ///  * [TextSelectionTheme]: which also creates a [DefaultSelectionStyle] for
 ///    the subtree.
-class DefaultSelectionStyle extends InheritedTheme {
+class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle, Object?> {
   /// Creates a default selection style widget that specifies the selection
   /// properties for all widgets below it in the widget tree.
   const DefaultSelectionStyle({
@@ -101,6 +102,15 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// If no such instance exists, returns an instance created by
   /// [DefaultSelectionStyle.fallback], which contains fallback values.
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? cursorColor = DefaultSelectionStyle.select(
+  ///   context,
+  ///   (DefaultSelectionStyle data) => data.cursorColor,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -109,6 +119,19 @@ class DefaultSelectionStyle extends InheritedTheme {
   static DefaultSelectionStyle of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultSelectionStyle>() ??
         const DefaultSelectionStyle.fallback();
+  }
+
+  /// Evaluates [ThemeSelector.selectFrom] using data provided by the
+  /// nearest ancestor [DefaultSelectionStyle] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(DefaultSelectionStyle) selector) {
+    final ThemeSelector<DefaultSelectionStyle, T> themeSelector =
+        ThemeSelector<DefaultSelectionStyle, T>.from(selector);
+    final DefaultSelectionStyle theme =
+        InheritedModel.inheritFrom<DefaultSelectionStyle>(context, aspect: themeSelector)!;
+    return themeSelector.selectFrom(theme);
   }
 
   @override
@@ -126,6 +149,21 @@ class DefaultSelectionStyle extends InheritedTheme {
     return cursorColor != oldWidget.cursorColor ||
         selectionColor != oldWidget.selectionColor ||
         mouseCursor != oldWidget.mouseCursor;
+  }
+
+  @override
+  bool updateShouldNotifyDependent(
+    DefaultSelectionStyle oldWidget,
+    Set<ThemeSelector<DefaultSelectionStyle, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<DefaultSelectionStyle, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget);
+      final Object? newValue = selector.selectFrom(this);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

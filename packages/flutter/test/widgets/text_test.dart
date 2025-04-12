@@ -1702,6 +1702,52 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('DefaultTextStyle.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late double fontSize;
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        fontSize = DefaultTextStyle.select(
+          context,
+          (DefaultTextStyle theme) => theme.style.fontSize!,
+        );
+        return const Placeholder();
+      },
+    );
+
+    await tester.pumpWidget(
+      DefaultTextStyle(style: const TextStyle(fontSize: 14), child: singletonThemeSubtree),
+    );
+
+    expect(buildCount, 1);
+    expect(fontSize, 14);
+
+    await tester.pumpWidget(
+      DefaultTextStyle(
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        child: singletonThemeSubtree,
+      ),
+    );
+
+    // No rebuild because the fontWeight property is not part of the selector.
+    expect(buildCount, 1);
+    expect(fontSize, 14);
+
+    await tester.pumpWidget(
+      DefaultTextStyle(
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        child: singletonThemeSubtree,
+      ),
+    );
+
+    // Rebuild because the fontSize property is part of the selector.
+    expect(buildCount, 2);
+    expect(fontSize, 16);
+  });
 }
 
 Future<void> _pumpTextWidget({

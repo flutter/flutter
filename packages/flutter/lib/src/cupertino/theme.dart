@@ -66,6 +66,9 @@ class CupertinoTheme extends StatelessWidget {
   ///
   /// Resolves all the colors defined in that [CupertinoThemeData] against the
   /// given [BuildContext] on a best-effort basis.
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes.
   static CupertinoThemeData of(BuildContext context) {
     final InheritedCupertinoTheme? inheritedTheme =
         context.dependOnInheritedWidgetOfExactType<InheritedCupertinoTheme>();
@@ -114,6 +117,19 @@ class CupertinoTheme extends StatelessWidget {
     return inheritedTheme?.theme.data.brightness ?? MediaQuery.maybePlatformBrightnessOf(context);
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [CupertinoTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(CupertinoThemeData) selector) {
+    final ThemeSelector<CupertinoThemeData, T> themeSelector =
+        ThemeSelector<CupertinoThemeData, T>.from(selector);
+    final InheritedCupertinoTheme? inheritedTheme =
+        InheritedModel.inheritFrom<InheritedCupertinoTheme>(context, aspect: themeSelector);
+    return themeSelector.selectFrom(inheritedTheme?.theme.data ?? const CupertinoThemeData());
+  }
+
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
@@ -135,7 +151,7 @@ class CupertinoTheme extends StatelessWidget {
 }
 
 /// Provides a [CupertinoTheme] to all descendents.
-class InheritedCupertinoTheme extends InheritedTheme {
+class InheritedCupertinoTheme extends InheritedTheme<CupertinoThemeData, Object?> {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
   /// descendents.
   const InheritedCupertinoTheme({super.key, required this.theme, required super.child});
@@ -150,6 +166,21 @@ class InheritedCupertinoTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(InheritedCupertinoTheme oldWidget) => theme.data != oldWidget.theme.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    InheritedCupertinoTheme oldWidget,
+    Set<ThemeSelector<CupertinoThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<CupertinoThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.theme.data);
+      final Object? newValue = selector.selectFrom(theme.data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 /// Styling specifications for a [CupertinoTheme].

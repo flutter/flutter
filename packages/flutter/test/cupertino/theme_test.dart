@@ -290,4 +290,65 @@ void main() {
 
   currentBrightness = Brightness.dark;
   group('dark colors', dynamicColorsTestGroup);
+
+  testWidgets('CupertinoTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? primaryColor;
+
+    // Define two distinct colors to test changes.
+    const Color color1 = CupertinoColors.systemRed;
+    const Color color2 = CupertinoColors.systemBlue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the primaryColor property.
+        primaryColor = CupertinoTheme.select(
+          context,
+          (CupertinoThemeData theme) => theme.primaryColor,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1.
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(primaryColor: color1),
+        home: singletonThemeSubtree,
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(primaryColor, color1);
+
+    // Rebuild with a change to a non-selected property (barBackgroundColor).
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          primaryColor: color1, // Selected property unchanged
+          barBackgroundColor: CupertinoColors.systemGreen, // Non-selected property changed
+        ),
+        home: singletonThemeSubtree,
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(primaryColor, color1);
+
+    // Rebuild with a change to the selected property (primaryColor).
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(primaryColor: color2), // Selected property changed
+        home: singletonThemeSubtree,
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(primaryColor, color2);
+  });
 }

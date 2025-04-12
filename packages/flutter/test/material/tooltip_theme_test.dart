@@ -1546,6 +1546,49 @@ void main() {
     );
     expect(tester.element(textAncestors.first).size, equals(themeConstraints.biggest));
   });
+
+  testWidgets('TooltipTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late double height;
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        height = TooltipTheme.select(context, (TooltipThemeData theme) => theme.height!);
+        return const Placeholder();
+      },
+    );
+
+    await tester.pumpWidget(
+      TooltipTheme(data: const TooltipThemeData(height: 15.0), child: singletonThemeSubtree),
+    );
+
+    expect(buildCount, 1);
+    expect(height, 15.0);
+
+    await tester.pumpWidget(
+      TooltipTheme(
+        data: const TooltipThemeData(height: 15.0, padding: EdgeInsets.all(20.0)),
+        child: singletonThemeSubtree,
+      ),
+    );
+
+    // No rebuild because the padding property is not part of the selector.
+    expect(buildCount, 1);
+    expect(height, 15.0);
+
+    await tester.pumpWidget(
+      TooltipTheme(
+        data: const TooltipThemeData(height: 20.0, padding: EdgeInsets.all(20.0)),
+        child: singletonThemeSubtree,
+      ),
+    );
+
+    // Rebuild because the height property is part of the selector.
+    expect(buildCount, 2);
+    expect(height, 20.0);
+  });
 }
 
 SemanticsNode findDebugSemantics(RenderObject object) {

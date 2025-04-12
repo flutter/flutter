@@ -163,7 +163,7 @@ class BadgeThemeData with Diagnosticable {
 ///
 /// Values specified here override the defaults for [Badge] properties which
 /// are not given an explicit non-null value.
-class BadgeTheme extends InheritedTheme {
+class BadgeTheme extends InheritedTheme<BadgeThemeData, Object?> {
   /// Creates a theme that overrides the default color parameters for [Badge]s
   /// in this widget's subtree.
   const BadgeTheme({super.key, required this.data, required super.child});
@@ -176,6 +176,15 @@ class BadgeTheme extends InheritedTheme {
   /// If there is no enclosing [BadgeTheme] widget, then
   /// [ThemeData.badgeTheme] is used.
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = BadgeTheme.select(
+  ///   context,
+  ///   (BadgeThemeData data) => data.backgroundColor,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -186,6 +195,20 @@ class BadgeTheme extends InheritedTheme {
     return badgeTheme?.data ?? Theme.of(context).badgeTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [BadgeTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(BadgeThemeData) selector) {
+    final ThemeSelector<BadgeThemeData, T> themeSelector = ThemeSelector<BadgeThemeData, T>.from(
+      selector,
+    );
+    final BadgeThemeData theme =
+        InheritedModel.inheritFrom<BadgeTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return BadgeTheme(data: data, child: child);
@@ -193,4 +216,19 @@ class BadgeTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(BadgeTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    BadgeTheme oldWidget,
+    Set<ThemeSelector<BadgeThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<BadgeThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

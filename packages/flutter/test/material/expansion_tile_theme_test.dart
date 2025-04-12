@@ -447,4 +447,75 @@ void main() {
 
     expect(getHeight(expansionTileKey), 158.0);
   });
+
+  testWidgets('ExpansionTileTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? backgroundColor;
+
+    // Define two distinct colors to test changes.
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the backgroundColor property.
+        backgroundColor = ExpansionTileTheme.select(
+          context,
+          (ExpansionTileThemeData theme) => theme.backgroundColor,
+        );
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExpansionTileTheme(
+          data: const ExpansionTileThemeData(backgroundColor: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(backgroundColor, color1);
+
+    // Rebuild with a change to a non-selected property (elevation).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExpansionTileTheme(
+          data: const ExpansionTileThemeData(
+            backgroundColor: color1, // Selected property unchanged
+            // elevation: 5.0, // ExpansionTileThemeData does not have elevation
+            iconColor: color2, // Use a different property for testing
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(backgroundColor, color1);
+
+    // Rebuild with a change to the selected property (backgroundColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExpansionTileTheme(
+          data: const ExpansionTileThemeData(
+            backgroundColor: color2, // Selected property changed
+            iconColor: color2,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(backgroundColor, color2);
+  });
 }

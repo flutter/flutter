@@ -103,7 +103,7 @@ class MenuButtonThemeData with Diagnosticable {
 /// * [ThemeData.menuButtonTheme], which can be used to override the default
 ///   [ButtonStyle] for [MenuItemButton]s and [SubmenuButton]s below the overall
 ///   [Theme].
-class MenuButtonTheme extends InheritedTheme {
+class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData, Object?> {
   /// Create a [MenuButtonTheme].
   const MenuButtonTheme({super.key, required this.data, required super.child});
 
@@ -114,6 +114,15 @@ class MenuButtonTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [MenuButtonTheme] widget, then
   /// [ThemeData.menuButtonTheme] is used.
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final WidgetStateProperty<Color?>? backgroundColor = MenuButtonTheme.select(
+  ///   context,
+  ///   (MenuButtonThemeData data) => data.style?.backgroundColor,
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -126,6 +135,19 @@ class MenuButtonTheme extends InheritedTheme {
     return buttonTheme?.data ?? Theme.of(context).menuButtonTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [MenuButtonThemeData]
+  /// in the closest [MenuButtonTheme] ancestor of the given [context].
+  ///
+  /// If there is no [MenuButtonTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.menuButtonTheme] is used.
+  static T select<T>(BuildContext context, T Function(MenuButtonThemeData) selector) {
+    final ThemeSelector<MenuButtonThemeData, T> themeSelector =
+        ThemeSelector<MenuButtonThemeData, T>.from(selector);
+    final MenuButtonThemeData theme =
+        InheritedModel.inheritFrom<MenuButtonTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return MenuButtonTheme(data: data, child: child);
@@ -133,4 +155,19 @@ class MenuButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(MenuButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    MenuButtonTheme oldWidget,
+    Set<ThemeSelector<MenuButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<MenuButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

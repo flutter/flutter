@@ -257,7 +257,7 @@ class PopupMenuThemeData with Diagnosticable {
 ///
 /// Values specified here are used for popup menu properties that are not
 /// given an explicit non-null value.
-class PopupMenuTheme extends InheritedTheme {
+class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData, Object?> {
   /// Creates a popup menu theme that controls the configurations for
   /// popup menus in its widget subtree.
   const PopupMenuTheme({super.key, required this.data, required super.child});
@@ -268,6 +268,15 @@ class PopupMenuTheme extends InheritedTheme {
   /// The closest instance of this class's [data] value that encloses the given
   /// context. If there is no ancestor, it returns [ThemeData.popupMenuTheme].
   /// Applications can assume that the returned value will not be null.
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? color = PopupMenuTheme.select(
+  ///   context,
+  ///   (PopupMenuThemeData data) => data.color,
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -280,6 +289,19 @@ class PopupMenuTheme extends InheritedTheme {
     return popupMenuTheme?.data ?? Theme.of(context).popupMenuTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [PopupMenuThemeData]
+  /// in the closest [PopupMenuTheme] ancestor of the given [context].
+  ///
+  /// If there is no [PopupMenuTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.popupMenuTheme] is used.
+  static T select<T>(BuildContext context, T Function(PopupMenuThemeData) selector) {
+    final ThemeSelector<PopupMenuThemeData, T> themeSelector =
+        ThemeSelector<PopupMenuThemeData, T>.from(selector);
+    final PopupMenuThemeData theme =
+        InheritedModel.inheritFrom<PopupMenuTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return PopupMenuTheme(data: data, child: child);
@@ -287,4 +309,19 @@ class PopupMenuTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(PopupMenuTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    PopupMenuTheme oldWidget,
+    Set<ThemeSelector<PopupMenuThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<PopupMenuThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

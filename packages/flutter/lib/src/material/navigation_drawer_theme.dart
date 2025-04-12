@@ -234,7 +234,7 @@ class NavigationDrawerThemeData with Diagnosticable {
 ///
 ///  * [ThemeData.navigationDrawerTheme], which describes the
 ///    [NavigationDrawerThemeData] in the overall theme for the application.
-class NavigationDrawerTheme extends InheritedTheme {
+class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData, Object?> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationDrawerThemeData] properties for a [NavigationDrawer].
   const NavigationDrawerTheme({super.key, required this.data, required super.child});
@@ -247,10 +247,32 @@ class NavigationDrawerTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [NavigationDrawerTheme] widget, then
   /// [ThemeData.navigationDrawerTheme] is used.
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = NavigationDrawerTheme.select(
+  ///   context,
+  ///   (NavigationDrawerThemeData data) => data.backgroundColor,
+  /// );
+  /// ```
   static NavigationDrawerThemeData of(BuildContext context) {
     final NavigationDrawerTheme? navigationDrawerTheme =
         context.dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
     return navigationDrawerTheme?.data ?? Theme.of(context).navigationDrawerTheme;
+  }
+
+  /// Returns the value of the field specified by [selector] from the [NavigationDrawerThemeData]
+  /// in the closest [NavigationDrawerTheme] ancestor of the given [context].
+  ///
+  /// If there is no [NavigationDrawerTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.navigationDrawerTheme] is used.
+  static T select<T>(BuildContext context, T Function(NavigationDrawerThemeData) selector) {
+    final ThemeSelector<NavigationDrawerThemeData, T> themeSelector =
+        ThemeSelector<NavigationDrawerThemeData, T>.from(selector);
+    final NavigationDrawerThemeData theme =
+        InheritedModel.inheritFrom<NavigationDrawerTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
   }
 
   @override
@@ -260,4 +282,19 @@ class NavigationDrawerTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(NavigationDrawerTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    NavigationDrawerTheme oldWidget,
+    Set<ThemeSelector<NavigationDrawerThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<NavigationDrawerThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

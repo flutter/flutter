@@ -1318,6 +1318,73 @@ void main() {
       const Rect.fromLTWH(800.0 - 24.0 - 24.0, height + 8.0, 24.0, 24.0),
     );
   });
+
+  testWidgets('ListTileTheme.select only rebuilds when the selected property changes', (
+    WidgetTester tester,
+  ) async {
+    int buildCount = 0;
+    late Color? tileColor;
+
+    // Define two distinct colors to test changes.
+    const Color color1 = Colors.red;
+    const Color color2 = Colors.blue;
+
+    final Widget singletonThemeSubtree = Builder(
+      builder: (BuildContext context) {
+        buildCount++;
+        // Select the tileColor property.
+        tileColor = ListTileTheme.select(context, (ListTileThemeData theme) => theme.tileColor);
+        return const Placeholder();
+      },
+    );
+
+    // Initial build with color1.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListTileTheme(
+          data: const ListTileThemeData(tileColor: color1),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    expect(buildCount, 1);
+    expect(tileColor, color1);
+
+    // Rebuild with a change to a non-selected property (selectedTileColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListTileTheme(
+          data: const ListTileThemeData(
+            tileColor: color1, // Selected property unchanged
+            selectedTileColor: color2, // Non-selected property changed
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect no rebuild because the selected property didn't change.
+    expect(buildCount, 1);
+    expect(tileColor, color1);
+
+    // Rebuild with a change to the selected property (tileColor).
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ListTileTheme(
+          data: const ListTileThemeData(
+            tileColor: color2, // Selected property changed
+            selectedTileColor: color2,
+          ),
+          child: singletonThemeSubtree,
+        ),
+      ),
+    );
+
+    // Expect rebuild because the selected property changed.
+    expect(buildCount, 2);
+    expect(tileColor, color2);
+  });
 }
 
 RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {

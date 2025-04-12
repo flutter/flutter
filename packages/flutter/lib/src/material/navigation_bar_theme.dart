@@ -270,7 +270,7 @@ class NavigationBarThemeData with Diagnosticable {
 ///
 ///  * [ThemeData.navigationBarTheme], which describes the
 ///    [NavigationBarThemeData] in the overall theme for the application.
-class NavigationBarTheme extends InheritedTheme {
+class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData, Object?> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationBarThemeData] properties for a [NavigationBar].
   const NavigationBarTheme({super.key, required this.data, required super.child});
@@ -284,6 +284,15 @@ class NavigationBarTheme extends InheritedTheme {
   /// If there is no enclosing [NavigationBarTheme] widget, then
   /// [ThemeData.navigationBarTheme] is used.
   ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final Color? backgroundColor = NavigationBarTheme.select(
+  ///   context,
+  ///   (NavigationBarThemeData data) => data.backgroundColor,
+  /// );
+  /// ```
+  ///
   /// Typical usage is as follows:
   ///
   /// ```dart
@@ -295,6 +304,19 @@ class NavigationBarTheme extends InheritedTheme {
     return navigationBarTheme?.data ?? Theme.of(context).navigationBarTheme;
   }
 
+  /// Returns the value of the field specified by [selector] from the [NavigationBarThemeData]
+  /// in the closest [NavigationBarTheme] ancestor of the given [context].
+  ///
+  /// If there is no [NavigationBarTheme] ancestor, or the theme data has no value for
+  /// the specified field, then the value from [ThemeData.navigationBarTheme] is used.
+  static T select<T>(BuildContext context, T Function(NavigationBarThemeData) selector) {
+    final ThemeSelector<NavigationBarThemeData, T> themeSelector =
+        ThemeSelector<NavigationBarThemeData, T>.from(selector);
+    final NavigationBarThemeData theme =
+        InheritedModel.inheritFrom<NavigationBarTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return NavigationBarTheme(data: data, child: child);
@@ -302,4 +324,19 @@ class NavigationBarTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(NavigationBarTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    NavigationBarTheme oldWidget,
+    Set<ThemeSelector<NavigationBarThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<NavigationBarThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

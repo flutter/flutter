@@ -90,7 +90,7 @@ class TextButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [TextButton]'s defaults.
 ///  * [ThemeData.textButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [TextButton]s below the overall [Theme].
-class TextButtonTheme extends InheritedTheme {
+class TextButtonTheme extends InheritedTheme<TextButtonThemeData, Object?> {
   /// Create a [TextButtonTheme].
   const TextButtonTheme({super.key, required this.data, required super.child});
 
@@ -101,6 +101,15 @@ class TextButtonTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [TextButtonTheme] widget, then
   /// [ThemeData.textButtonTheme] is used.
+  ///
+  /// For specific theme properties, consider using [select],
+  /// which will only rebuild widget when the selected property changes:
+  /// ```dart
+  /// final ButtonStyle? style = TextButtonTheme.select(
+  ///   context,
+  ///   (TextButtonThemeData data) => data.style,
+  /// );
+  /// ```
   ///
   /// Typical usage is as follows:
   ///
@@ -113,6 +122,19 @@ class TextButtonTheme extends InheritedTheme {
     return buttonTheme?.data ?? Theme.of(context).textButtonTheme;
   }
 
+  /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
+  /// nearest ancestor [TextButtonTheme] widget, and returns the result.
+  ///
+  /// When this value changes, a notification is sent to the [context]
+  /// to trigger an update.
+  static T select<T>(BuildContext context, T Function(TextButtonThemeData) selector) {
+    final ThemeSelector<TextButtonThemeData, T> themeSelector =
+        ThemeSelector<TextButtonThemeData, T>.from(selector);
+    final TextButtonThemeData theme =
+        InheritedModel.inheritFrom<TextButtonTheme>(context, aspect: themeSelector)!.data;
+    return themeSelector.selectFrom(theme);
+  }
+
   @override
   Widget wrap(BuildContext context, Widget child) {
     return TextButtonTheme(data: data, child: child);
@@ -120,4 +142,19 @@ class TextButtonTheme extends InheritedTheme {
 
   @override
   bool updateShouldNotify(TextButtonTheme oldWidget) => data != oldWidget.data;
+
+  @override
+  bool updateShouldNotifyDependent(
+    TextButtonTheme oldWidget,
+    Set<ThemeSelector<TextButtonThemeData, Object?>> dependencies,
+  ) {
+    for (final ThemeSelector<TextButtonThemeData, Object?> selector in dependencies) {
+      final Object? oldValue = selector.selectFrom(oldWidget.data);
+      final Object? newValue = selector.selectFrom(data);
+      if (oldValue != newValue) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
