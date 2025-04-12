@@ -8,13 +8,11 @@ import("//flutter/testing/testing.gni")
 
 source_set("input") {
   sources = [
-    "text_input_connection.h",
     "text_input_connection.cc",
+    "text_input_connection.h",
   ]
 
-  deps = [
-    "//flutter/fml",
-  ]
+  deps = [ "//flutter/fml" ]
 
   public_configs = [ "//flutter:config" ]
 }
