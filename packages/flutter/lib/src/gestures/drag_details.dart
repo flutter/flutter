@@ -85,10 +85,6 @@ class DragStartDetails with Diagnosticable implements PositionedGestureDetails {
   /// The kind of the device that initiated the event.
   final PointerDeviceKind? kind;
 
-  // TODO(ianh): Expose the current position, so that you can have a no-jump
-  // drag even when disambiguating (though of course it would lag the finger
-  // instead).
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
