@@ -8,6 +8,7 @@
 #include <functional>
 
 #include "flow/embedded_views.h"
+#include "flutter/common/input/text_input_connection.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -150,6 +151,13 @@ class PlatformViewEmbedder final : public PlatformView {
 
   // |PlatformView|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
+
+  // |PlatformView|
+  std::shared_ptr<TextInputConnectionFactory> GetTextInputConnectionFactory()
+      const override {
+    FML_LOG(ERROR) << "PlatformViewEmbedder";
+    return nullptr;
+  }
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };

@@ -35,17 +35,16 @@ void UiTextInputModel::setCurrentText(const std::string& value) {
 }
 
 void UiTextInputModel::setUpdateCallback(Dart_Handle callback) {
-  update_callback_ = std::make_unique<tonic::DartPersistentValue>(
-      tonic::DartState::Current(), callback);
+  update_callback_.Set(tonic::DartState::Current(), callback);
+
   connection_->SetUpdateCallback([&] {
-    UIDartState::ThrowIfUIOperationsProhibited();
     std::shared_ptr<tonic::DartState> dart_state =
-        update_callback_->dart_state().lock();
+        update_callback_.dart_state().lock();
     if (!dart_state) {
       return;
     }
     tonic::DartState::Scope scope(dart_state);
-    tonic::DartInvoke(update_callback_->value(), {});
+    tonic::DartInvoke(update_callback_.value(), {});
   });
 }
 

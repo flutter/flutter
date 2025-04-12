@@ -1,0 +1,20 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+import("//flutter/shell/config.gni")
+import("//flutter/testing/testing.gni")
+
+source_set("input") {
+  sources = [
+    "text_input_connection.h",
+    "text_input_connection.cc",
+  ]
+
+  deps = [
+    "//flutter/fml",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+}

@@ -3813,18 +3813,18 @@ base class TextInputModel extends NativeFieldWrapperClass1 {
     _setUpdateCallback(cb);
   }
 
-  @Native<Void Function(Handle)>(symbol: 'TextInputModel::Create')
+  @Native<Void Function(Handle)>(symbol: 'UiTextInputModel::Create')
   external void _constructor();
 
-  @Native<Handle Function(Handle)>(symbol: 'TextInputModel::getCurrentText')
+  @Native<Handle Function(Pointer<Void>)>(symbol: 'UiTextInputModel::getCurrentText')
   external String _getCurrentText();
 
-  @Native<Void Function(Handle, Handle)>(symbol: 'TextInputModel::setCurrentText')
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'UiTextInputModel::setCurrentText')
   external void _setCurrentText(String value);
 
-  @Native<Void Function(Handle, Handle)>(symbol: 'TextInputModel::setUpdateCallback')
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'UiTextInputModel::setUpdateCallback')
   external void _setUpdateCallback(void Function() cb);
 
-  @Native<Void Function(Handle)>(symbol: 'TextInputModel::dispose')
+  @Native<Void Function(Pointer<Void>)>(symbol: 'UiTextInputModel::dispose')
   external void _dispose();
 }

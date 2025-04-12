@@ -32,7 +32,7 @@ class UiTextInputModel : public RefCountedDartWrappable<UiTextInputModel> {
 
  private:
   std::shared_ptr<TextInputConnection> connection_;
-  std::unique_ptr<tonic::DartPersistentValue> update_callback_;
+  tonic::DartPersistentValue update_callback_;
 
   UiTextInputModel(const UiTextInputModel&) = delete;
   UiTextInputModel(UiTextInputModel&&) = delete;
