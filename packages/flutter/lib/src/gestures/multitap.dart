@@ -720,7 +720,7 @@ class SerialTapUpDetails with Diagnosticable implements PositionedGestureDetails
   /// Creates details for a [GestureSerialTapUpCallback].
   ///
   /// The `count` argument must be greater than zero.
-  const SerialTapUpDetails({
+  SerialTapUpDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,

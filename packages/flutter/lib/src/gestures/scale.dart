@@ -96,7 +96,7 @@ class _PointerPanZoomData {
 /// Details for [GestureScaleStartCallback].
 class ScaleStartDetails with Diagnosticable {
   /// Creates details for [GestureScaleStartCallback].
-  const ScaleStartDetails({
+  ScaleStartDetails({
     this.focalPoint = Offset.zero,
     Offset? localFocalPoint,
     this.pointerCount = 0,
@@ -159,7 +159,7 @@ class ScaleUpdateDetails with Diagnosticable {
   ///
   /// The [scale], [horizontalScale], and [verticalScale] arguments must be
   /// greater than or equal to zero.
-  const ScaleUpdateDetails({
+  ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
     Offset? localFocalPoint,
     this.scale = 1.0,
