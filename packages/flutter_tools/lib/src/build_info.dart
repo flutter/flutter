@@ -996,6 +996,9 @@ const String kXcodeAction = 'Action';
 /// to the BUILT_PRODUCTS_DIR prior to the build.
 const String kXcodePreAction = 'PreBuildAction';
 
+// Whether the last Flutter tool invocation enabled dev dependencies.
+const String kDevDependenciesEnabled = 'DevDependenciesEnabled';
+
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
 
