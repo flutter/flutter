@@ -63,6 +63,7 @@ Future<LocalizationsGenerator> generateLocalizations({
             outputPathString: options.outputDir,
             classNameString: options.outputClass,
             preferredSupportedLocales: options.preferredSupportedLocales,
+            enableFormatting: options.format,
             headerString: options.header,
             headerFile: options.headerFile,
             useDeferredLoading: options.useDeferredLoading,
@@ -541,6 +542,7 @@ class LocalizationsGenerator {
     required String outputFileString,
     required String classNameString,
     List<String>? preferredSupportedLocales,
+    required bool enableFormatting,
     String? headerString,
     String? headerFile,
     bool useDeferredLoading = false,
@@ -579,6 +581,7 @@ class LocalizationsGenerator {
       templateArbFile: templateArbFileFromFileName(templateArbFileName, inputDirectory),
       baseOutputFile: outputDirectory.childFile(outputFileString),
       preferredSupportedLocales: preferredSupportedLocalesFromLocales(preferredSupportedLocales),
+      enableFormatting: enableFormatting,
       header: headerFromFile(headerString, headerFile, inputDirectory),
       useDeferredLoading: useDeferredLoading,
       untranslatedMessagesFile: _untranslatedMessagesFileFromPath(
@@ -609,6 +612,7 @@ class LocalizationsGenerator {
     required this.baseOutputFile,
     required this.className,
     this.preferredSupportedLocales = const <LocaleInfo>[],
+    required this.enableFormatting,
     this.header = '',
     this.useDeferredLoading = false,
     required this.inputsAndOutputsListFile,
@@ -716,6 +720,10 @@ class LocalizationsGenerator {
   /// The supported locales as found in the arb files located in
   /// [inputDirectory].
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
+
+  /// Whether `dart format` should be applied to the generated Dart localization
+  /// file.
+  final bool enableFormatting;
 
   /// The header to be prepended to the generated Dart localization file.
   final String header;
@@ -1084,6 +1092,7 @@ class LocalizationsGenerator {
 
     return classFileTemplate
         .replaceAll('@(header)', header.isEmpty ? '' : '$header\n\n')
+        .replaceAll('@(format)', enableFormatting ? 'on' : 'off')
         .replaceAll('@(language)', describeLocale(locale.toString()))
         .replaceAll('@(baseClass)', className)
         .replaceAll('@(fileName)', fileName)
@@ -1229,6 +1238,7 @@ class LocalizationsGenerator {
 
     return fileTemplate
         .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
+        .replaceAll('@(format)', enableFormatting ? 'on' : 'off')
         .replaceAll('@(class)', className)
         .replaceAll(
           '@(methods)',
