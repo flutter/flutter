@@ -76,7 +76,6 @@ void main() {
   late MemoryFileSystem fs;
   late BufferLogger logger;
   late Artifacts artifacts;
-  late ProcessManager processManager;
   late String defaultL10nPathString;
   late String syntheticPackagePath;
   late String syntheticL10nPackagePath;
@@ -86,6 +85,7 @@ void main() {
     String? yamlFile,
     String? outputPathString,
     String? outputFileString,
+    bool enableFormatting = true,
     String? headerString,
     String? headerFile,
     String? untranslatedMessagesFile,
@@ -117,6 +117,7 @@ void main() {
         templateArbFileName: defaultTemplateArbFileName,
         outputFileString: outputFileString ?? defaultOutputFileString,
         classNameString: defaultClassNameString,
+        enableFormatting: enableFormatting,
         headerString: headerString,
         headerFile: headerFile,
         logger: logger,
@@ -152,7 +153,6 @@ void main() {
     fs = MemoryFileSystem.test();
     logger = BufferLogger.test();
     artifacts = Artifacts.test();
-    processManager = FakeProcessManager.empty();
 
     defaultL10nPathString = fs.path.join('lib', 'l10n');
     syntheticPackagePath = fs.path.join('.dart_tool', 'flutter_gen');
@@ -757,7 +757,7 @@ flutter:
         projectDir: projectDir,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
     });
 
@@ -780,7 +780,7 @@ flutter:
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
     });
 
@@ -809,7 +809,7 @@ flutter:
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(generator.inputDirectory.path, '/lib/l10n/');
@@ -836,6 +836,7 @@ import 'package:intl/intl.dart' as intl;
 import 'bar.dart';
 
 // ignore_for_file: type=lint
+// dart format on
 
 /// The translations for English (`en`).
 class FooEn extends Foo {
@@ -880,7 +881,7 @@ flutter:
             projectDir: fs.currentDirectory,
             dependenciesDir: fs.currentDirectory,
             artifacts: artifacts,
-            processManager: processManager,
+            processManager: FakeProcessManager.any(),
           ),
           throwsToolExit(
             message:
@@ -916,7 +917,7 @@ flutter:\r
           projectDir: fs.currentDirectory,
           dependenciesDir: fs.currentDirectory,
           artifacts: artifacts,
-          processManager: processManager,
+          processManager: FakeProcessManager.any(),
         );
         final String content = getInPackageGeneratedFileContent(locale: 'en');
         expect(content, contains('\r\n'));
@@ -940,7 +941,7 @@ flutter:\r
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
@@ -949,6 +950,7 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
+// dart format on
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
@@ -973,7 +975,7 @@ class AppLocalizationsEn extends AppLocalizations {
         projectDir: fs.currentDirectory,
         dependenciesDir: fs.currentDirectory,
         artifacts: artifacts,
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
       );
 
       expect(fs.file('/lib/l10n/app_localizations_en.dart').readAsStringSync(), '''
@@ -984,6 +986,7 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
+// dart format on
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {

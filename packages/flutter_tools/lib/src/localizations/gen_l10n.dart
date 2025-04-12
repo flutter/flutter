@@ -92,11 +92,12 @@ Future<LocalizationsGenerator> generateLocalizations({
       return generator;
     }
     final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final List<String> command = <String>[dartBinary, 'format', ...formatFileList];
+    final List<String> args = <String>['format', ...formatFileList, ...options.formatArgs];
+    final List<String> command = <String>[dartBinary, ...args];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
       throw ProcessException(dartBinary, command, '''
-`dart format` failed with exit code ${result.exitCode}
+`dart ${args.join(' ')}` failed with exit code ${result.exitCode}
 
 stdout:\n${result.stdout}\n
 stderr:\n${result.stderr}''', result.exitCode);
@@ -542,7 +543,7 @@ class LocalizationsGenerator {
     required String outputFileString,
     required String classNameString,
     List<String>? preferredSupportedLocales,
-    required bool enableFormatting,
+    bool enableFormatting = true,
     String? headerString,
     String? headerFile,
     bool useDeferredLoading = false,
