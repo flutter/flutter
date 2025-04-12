@@ -1490,7 +1490,6 @@ flutter:
           FontAsset(Uri(path: 'assetUri'), weight: 100, style: 'normal'),
         ]),
       ],
-      models: <Uri>[Uri(path: 'modelUri')],
       shaders: <Uri>[Uri(path: 'shaderUri')],
       deferredComponents: <DeferredComponent>[
         DeferredComponent(
@@ -1535,8 +1534,6 @@ flutter:
           asset: assetUri
   shaders:
     - shaderUri
-  models:
-    - modelUri
   deferred-components:
     - name: deferredComponent
       libraries:
@@ -1549,6 +1546,35 @@ flutter:
             - package: package:deferredComponent
               args:
                 - deferredComponentArg''');
+  });
+
+  testWithoutContext('FlutterManifest can parse workspace', () async {
+    const String manifest = '''
+name: test
+workspace:
+- pkgs/bar
+- pkgs/foo
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.workspace, <String>['pkgs/bar', 'pkgs/foo']);
+  });
+
+  testWithoutContext('FlutterManifest can parse empty workspace', () async {
+    const String manifest = '''
+name: test
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.workspace, isEmpty);
   });
 }
 

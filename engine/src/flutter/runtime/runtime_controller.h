@@ -20,6 +20,7 @@
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/pointer_data_packet_converter.h"
+#include "flutter/lib/ui/window/view_focus.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/platform_data.h"
 #include "flutter/runtime/platform_isolate_manager.h"
@@ -155,6 +156,8 @@ class RuntimeController : public PlatformConfigurationClient,
   /// @param[in]  dart_entrypoint_args     Arguments passed as a List<String>
   ///                                      to Dart's entrypoint function.
   /// @param[in]  isolate_configuration    The isolate configuration
+  /// @param[in]  engine_id.               Engine identifier to be passed to the
+  ///                                      platform dispatcher.
   ///
   /// @return     If the isolate could be launched and guided to the
   ///             `DartIsolate::Phase::Running` phase.
@@ -166,7 +169,8 @@ class RuntimeController : public PlatformConfigurationClient,
       std::optional<std::string> dart_entrypoint_library,
       const std::vector<std::string>& dart_entrypoint_args,
       std::unique_ptr<IsolateConfiguration> isolate_configuration,
-      std::shared_ptr<NativeAssetsManager> native_assets_manager);
+      std::shared_ptr<NativeAssetsManager> native_assets_manager,
+      std::optional<int64_t> engine_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Clone the runtime controller. Launching an isolate with a
@@ -223,6 +227,13 @@ class RuntimeController : public PlatformConfigurationClient,
   ///             is not running, then the pending view creation (if any) is
   ///             cancelled and the return value is always false.
   bool RemoveView(int64_t view_id);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notify the isolate that the focus state of a native view has
+  ///             changed.
+  ///
+  /// @param[in]  event  The focus event describing the change.
+  bool SendViewFocusEvent(const ViewFocusEvent& event);
 
   //----------------------------------------------------------------------------
   /// @brief      Forward the specified viewport metrics to the running isolate.
@@ -479,7 +490,8 @@ class RuntimeController : public PlatformConfigurationClient,
   /// @brief      Dispatch the semantics action to the specified accessibility
   ///             node.
   ///
-  /// @param[in]  node_id The identified of the accessibility node.
+  /// @param[in]  view_id The identifier of the view.
+  /// @param[in]  node_id The identifier of the accessibility node.
   /// @param[in]  action  The semantics action to perform on the specified
   ///                     accessibility node.
   /// @param[in]  args    Optional data that applies to the specified action.
@@ -487,7 +499,8 @@ class RuntimeController : public PlatformConfigurationClient,
   /// @return     If the semantics action was dispatched. This may fail if an
   ///             isolate is not running.
   ///
-  bool DispatchSemanticsAction(int32_t node_id,
+  bool DispatchSemanticsAction(int64_t view_id,
+                               int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -655,6 +668,12 @@ class RuntimeController : public PlatformConfigurationClient,
     return root_isolate_;
   }
 
+  void FlushMicrotaskQueue() {
+    if (auto isolate = root_isolate_.lock()) {
+      isolate->FlushMicrotasksNow();
+    }
+  }
+
   std::shared_ptr<PlatformIsolateManager> GetPlatformIsolateManager() override {
     return platform_isolate_manager_;
   }
@@ -750,7 +769,7 @@ class RuntimeController : public PlatformConfigurationClient,
               double height) override;
 
   // |PlatformConfigurationClient|
-  void UpdateSemantics(SemanticsUpdate* update) override;
+  void UpdateSemantics(int64_t view_id, SemanticsUpdate* update) override;
 
   // |PlatformConfigurationClient|
   void HandlePlatformMessage(std::unique_ptr<PlatformMessage> message) override;
@@ -778,6 +797,9 @@ class RuntimeController : public PlatformConfigurationClient,
   // |PlatformConfigurationClient|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const override;
+
+  // |PlatformConfigurationClient|
+  void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };

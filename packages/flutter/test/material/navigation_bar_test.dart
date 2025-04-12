@@ -231,7 +231,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // M3 settings from the token database.
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       _buildWidget(
         NavigationBar(
@@ -329,7 +329,6 @@ void main() {
             DefaultWidgetsLocalizations.delegate,
           ],
           child: MaterialApp(
-            theme: ThemeData(useMaterial3: true),
             home: Navigator(
               onGenerateRoute: (RouteSettings settings) {
                 return MaterialPageRoute<void>(
@@ -460,6 +459,7 @@ void main() {
           destinations: const <Widget>[
             NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC'),
             NavigationDestination(icon: Icon(Icons.access_alarm), label: 'Alarm'),
+            NavigationDestination(icon: Icon(Icons.abc), label: 'ABC'),
           ],
         ),
       );
@@ -470,10 +470,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
+        isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -481,9 +485,27 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+      ),
+    );
+    expect(
+      tester.getSemantics(find.text('ABC')),
+      matchesSemantics(
+        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        isButton: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -494,9 +516,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -504,12 +530,57 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 3'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
+        isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
+      ),
+    );
+    expect(
+      tester.getSemantics(find.text('ABC')),
+      matchesSemantics(
+        label: 'ABC${kIsWeb ? '' : '\nTab 3 of 3'}',
+        textDirection: TextDirection.ltr,
+        isFocusable: true,
+        isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
+        hasTapAction: true,
+        hasFocusAction: true,
+      ),
+    );
+  });
+  testWidgets('Navigation bar disabled semantics', (WidgetTester tester) async {
+    Widget widget({int selectedIndex = 0}) {
+      return _buildWidget(
+        NavigationBar(
+          selectedIndex: selectedIndex,
+          destinations: const <Widget>[
+            NavigationDestination(icon: Icon(Icons.ac_unit), label: 'AC', enabled: false),
+            NavigationDestination(icon: Icon(Icons.ac_unit), label: 'Another'),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(widget());
+
+    expect(
+      tester.getSemantics(find.text('AC')),
+      matchesSemantics(
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
+        textDirection: TextDirection.ltr,
+        isSelected: true,
+        hasSelectedState: true,
+        hasEnabledState: true,
+        isButton: true,
       ),
     );
   });
@@ -533,10 +604,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
         isSelected: true,
+        isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -544,9 +619,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -557,9 +636,13 @@ void main() {
     expect(
       tester.getSemantics(find.text('AC')),
       matchesSemantics(
-        label: 'AC\nTab 1 of 2',
+        label: 'AC${kIsWeb ? '' : '\nTab 1 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        isButton: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -567,10 +650,14 @@ void main() {
     expect(
       tester.getSemantics(find.text('Alarm')),
       matchesSemantics(
-        label: 'Alarm\nTab 2 of 2',
+        label: 'Alarm${kIsWeb ? '' : '\nTab 2 of 2'}',
         textDirection: TextDirection.ltr,
         isFocusable: true,
+        hasEnabledState: true,
+        hasSelectedState: true,
+        isEnabled: true,
         isSelected: true,
+        isButton: true,
         hasTapAction: true,
         hasFocusAction: true,
       ),
@@ -610,7 +697,6 @@ void main() {
 
     Widget buildWidget({NavigationDestinationLabelBehavior? labelBehavior}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           bottomNavigationBar: Center(
             child: NavigationBar(
@@ -812,7 +898,6 @@ void main() {
 
     Widget buildWidget({NavigationDestinationLabelBehavior? labelBehavior}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Scaffold(
           bottomNavigationBar: Center(
             child: NavigationBar(
@@ -873,7 +958,6 @@ void main() {
 
     Widget buildNavigationBar() {
       return MaterialApp(
-        theme: ThemeData.light(),
         home: Scaffold(
           bottomNavigationBar: Center(
             child: NavigationBar(
@@ -1632,8 +1716,8 @@ Material _getMaterial(WidgetTester tester) {
 
 ShapeDecoration? _getIndicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Container>(
-            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Container)),
+          .firstWidget<Ink>(
+            find.descendant(of: find.byType(FadeTransition), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;

@@ -290,6 +290,13 @@ class Shell final : public PlatformView::Delegate,
   void NotifyLowMemoryWarning() const;
 
   //----------------------------------------------------------------------------
+  /// @brief      Used by embedders to flush the microtask queue. Required
+  ///             when running with merged platform and UI threads, in which
+  ///             case the embedder is responsible for flushing the microtask
+  ///             queue.
+  void FlushMicrotaskQueue() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Used by embedders to check if all shell subcomponents are
   ///             initialized. It is the embedder's responsibility to make this
   ///             call before accessing any other shell method. A shell that is
@@ -582,6 +589,9 @@ class Shell final : public PlatformView::Delegate,
                                 RemoveViewCallback callback) override;
 
   // |PlatformView::Delegate|
+  void OnPlatformViewSendViewFocusEvent(const ViewFocusEvent& event) override;
+
+  // |PlatformView::Delegate|
   void OnPlatformViewSetViewportMetrics(
       int64_t view_id,
       const ViewportMetrics& metrics) override;
@@ -595,7 +605,8 @@ class Shell final : public PlatformView::Delegate,
       std::unique_ptr<PointerDataPacket> packet) override;
 
   // |PlatformView::Delegate|
-  void OnPlatformViewDispatchSemanticsAction(int32_t node_id,
+  void OnPlatformViewDispatchSemanticsAction(int64_t view_id,
+                                             int32_t node_id,
                                              SemanticsAction action,
                                              fml::MallocMapping args) override;
 
@@ -656,6 +667,7 @@ class Shell final : public PlatformView::Delegate,
 
   // |Engine::Delegate|
   void OnEngineUpdateSemantics(
+      int64_t view_id,
       SemanticsNodeUpdates update,
       CustomAccessibilityActionUpdates actions) override;
 
@@ -694,6 +706,9 @@ class Shell final : public PlatformView::Delegate,
   // |Engine::Delegate|
   double GetScaledFontSize(double unscaled_font_size,
                            int configuration_id) const override;
+
+  // |Engine::Delegate|
+  void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
 
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;

@@ -38,6 +38,8 @@ class EmbedderEngine {
 
   bool CollectShell();
 
+  void CollectThreadHost();
+
   const TaskRunners& GetTaskRunners() const;
 
   bool NotifyCreated();
@@ -66,7 +68,8 @@ class EmbedderEngine {
 
   bool SetAccessibilityFeatures(int32_t flags);
 
-  bool DispatchSemanticsAction(int node_id,
+  bool DispatchSemanticsAction(int64_t view_id,
+                               int node_id,
                                flutter::SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -88,7 +91,7 @@ class EmbedderEngine {
   Shell& GetShell();
 
  private:
-  const std::unique_ptr<EmbedderThreadHost> thread_host_;
+  std::unique_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
   RunConfiguration run_configuration_;
   std::unique_ptr<ShellArgs> shell_args_;

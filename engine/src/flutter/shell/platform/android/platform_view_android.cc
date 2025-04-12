@@ -5,9 +5,11 @@
 #include "flutter/shell/platform/android/platform_view_android.h"
 
 #include <android/api-level.h>
+#include <sys/system_properties.h>
 #include <memory>
 #include <utility>
 
+#include "common/settings.h"
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
@@ -15,6 +17,7 @@
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
@@ -24,12 +27,14 @@
 #include "flutter/shell/platform/android/surface_texture_external_texture_gl_skia.h"
 #include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 #include "fml/logging.h"
+#include "impeller/display_list/aiks_context.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
 #endif
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_response_android.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
@@ -39,22 +44,130 @@
 namespace flutter {
 
 namespace {
+
+static const constexpr char* kAndroidHuawei = "android-huawei";
+
+/// These are SoCs that crash when using AHB imports.
+static constexpr const char* kBLC[] = {
+    // Most Exynos Series SoC
+    "exynos7870",  //
+    "exynos7880",  //
+    "exynos7872",  //
+    "exynos7884",  //
+    "exynos7885",  //
+    "exynos8890",  //
+    "exynos8895",  //
+    "exynos7904",  //
+    "exynos9609",  //
+    "exynos9610",  //
+    "exynos9611",  //
+    "exynos9810"   //
+};
+
+static bool IsDeviceEmulator(std::string_view product_model) {
+  return std::string(product_model).find("gphone") != std::string::npos;
+}
+
+static bool IsKnownBadSOC(std::string_view hardware) {
+  // TODO(jonahwilliams): if the list gets too long (> 16), convert
+  // to a hash map first.
+  for (const auto& board : kBLC) {
+    if (strcmp(board, hardware.data()) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+static constexpr int kMinAPILevelHCPP = 34;
+static constexpr int64_t kImplicitViewId = 0;
+
 AndroidContext::ContextSettings CreateContextSettings(
     const Settings& p_settings) {
   AndroidContext::ContextSettings settings;
   settings.enable_gpu_tracing = p_settings.enable_vulkan_gpu_tracing;
   settings.enable_validation = p_settings.enable_vulkan_validation;
   settings.enable_surface_control = p_settings.enable_surface_control;
+  settings.impeller_flags.lazy_shader_mode =
+      p_settings.impeller_enable_lazy_shader_mode;
+  settings.impeller_flags.antialiased_lines =
+      p_settings.impeller_antialiased_lines;
   return settings;
 }
 }  // namespace
 
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
-    bool enable_impeller)
-    : android_context_(context), enable_impeller_(enable_impeller) {}
+    bool enable_impeller,
+    bool lazy_shader_mode)
+    : android_context_(context),
+      enable_impeller_(enable_impeller),
+      lazy_shader_mode_(lazy_shader_mode) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
+
+static std::unique_ptr<AndroidContextVKImpeller>
+GetActualRenderingAPIForImpeller(
+    int api_level,
+    const AndroidContext::ContextSettings& settings) {
+  constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 31;
+
+  // have requisite features to support platform views.
+  //
+  // Even if this check returns true, Impeller may determine it cannot use
+  // Vulkan for some other reason, such as a missing required extension or
+  // feature. In these cases it will use OpenGLES.
+  char product_model[PROP_VALUE_MAX];
+  __system_property_get("ro.product.model", product_model);
+  if (IsDeviceEmulator(product_model)) {
+    // Avoid using Vulkan on known emulators.
+    return nullptr;
+  }
+
+  __system_property_get("ro.com.google.clientidbase", product_model);
+  if (strcmp(product_model, kAndroidHuawei) == 0) {
+    // Avoid using Vulkan on Huawei as AHB imports do not
+    // consistently work.
+    return nullptr;
+  }
+
+  if (api_level < kMinimumAndroidApiLevelForMediaTekVulkan &&
+      __system_property_find("ro.vendor.mediatek.platform") != nullptr) {
+    // Probably MediaTek. Avoid Vulkan if older than 34 to work around
+    // crashes when importing AHB.
+    return nullptr;
+  }
+
+  __system_property_get("ro.product.board", product_model);
+  if (IsKnownBadSOC(product_model)) {
+    // Avoid using Vulkan on known bad SoCs.
+    return nullptr;
+  }
+
+  // Determine if Vulkan is supported by creating a Vulkan context and
+  // checking if it is valid.
+  impeller::ScopedValidationDisable disable_validation;
+  auto vulkan_backend = std::make_unique<AndroidContextVKImpeller>(
+      AndroidContext::ContextSettings{
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+          .enable_validation = settings.enable_validation,
+#else
+          .enable_validation = false,
+#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+          .enable_gpu_tracing = settings.enable_gpu_tracing,
+          .enable_surface_control = settings.enable_surface_control,
+          .impeller_flags =
+              {
+                  .lazy_shader_mode = settings.impeller_flags.lazy_shader_mode,
+                  .antialiased_lines =
+                      settings.impeller_flags.antialiased_lines,
+              },
+      });
+  if (!vulkan_backend->IsValid()) {
+    return nullptr;
+  }
+  return vulkan_backend;
+}
 
 std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
   switch (android_context_->RenderingApi()) {
@@ -69,12 +182,13 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
     case AndroidRenderingAPI::kImpellerVulkan:
       return std::make_unique<AndroidSurfaceVKImpeller>(
           std::static_pointer_cast<AndroidContextVKImpeller>(android_context_));
+    case AndroidRenderingAPI::kImpellerAutoselect:
+      FML_CHECK(false);
   }
   FML_UNREACHABLE();
 }
 
 static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
-    bool use_software_rendering,
     const flutter::TaskRunners& task_runners,
     AndroidRenderingAPI android_rendering_api,
     bool enable_opengl_gpu_tracing,
@@ -93,6 +207,17 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
           fml::MakeRefCounted<AndroidEnvironmentGL>(),  //
           task_runners                                  //
       );
+    case AndroidRenderingAPI::kImpellerAutoselect:
+      // Determine if we're using GL or Vulkan.
+      auto android_vulkan_context = GetActualRenderingAPIForImpeller(
+          android_get_device_api_level(), settings);
+      if (android_vulkan_context) {
+        return android_vulkan_context;
+      } else {
+        return std::make_unique<AndroidContextGLImpeller>(
+            std::make_unique<impeller::egl::Display>(),
+            enable_opengl_gpu_tracing);
+      }
   }
   FML_UNREACHABLE();
 }
@@ -101,15 +226,14 @@ PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    bool use_software_rendering)
+    AndroidRenderingAPI rendering_api)
     : PlatformViewAndroid(
           delegate,
           task_runners,
           jni_facade,
           CreateAndroidContext(
-              use_software_rendering,
               task_runners,
-              delegate.OnPlatformViewGetSettings().android_rendering_api,
+              rendering_api,
               delegate.OnPlatformViewGetSettings().enable_opengl_gpu_tracing,
               CreateContextSettings(delegate.OnPlatformViewGetSettings()))) {}
 
@@ -127,12 +251,22 @@ PlatformViewAndroid::PlatformViewAndroid(
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
     surface_factory_ = std::make_shared<AndroidSurfaceFactoryImpl>(
-        android_context_,                                     //
-        delegate.OnPlatformViewGetSettings().enable_impeller  //
+        android_context_,                                      //
+        delegate.OnPlatformViewGetSettings().enable_impeller,  //
+        delegate.OnPlatformViewGetSettings()
+            .impeller_enable_lazy_shader_mode  //
     );
     android_surface_ = surface_factory_->CreateSurface();
+    android_use_new_platform_view_ =
+        android_context->RenderingApi() ==
+            AndroidRenderingAPI::kImpellerVulkan &&
+        (android_get_device_api_level() >= kMinAPILevelHCPP) &&
+        delegate.OnPlatformViewGetSettings().enable_surface_control &&
+        impeller::ContextVK::Cast(*android_context->GetImpellerContext())
+            .GetShouldEnableSurfaceControlSwapchain();
     FML_CHECK(android_surface_ && android_surface_->IsValid())
-        << "Could not create an OpenGL, Vulkan or Software surface to set up "
+        << "Could not create an OpenGL, Vulkan or Software surface to set "
+           "up "
            "rendering.";
   }
 }
@@ -148,8 +282,8 @@ void PlatformViewAndroid::NotifyCreated(
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetRasterTaskRunner(),
         [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window)]() {
-          surface->SetNativeWindow(native_window);
+         native_window = std::move(native_window), jni_facade = jni_facade_]() {
+          surface->SetNativeWindow(native_window, jni_facade);
           latch.Signal();
         });
     latch.Wait();
@@ -165,9 +299,9 @@ void PlatformViewAndroid::NotifySurfaceWindowChanged(
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetRasterTaskRunner(),
         [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window)]() {
+         native_window = std::move(native_window), jni_facade = jni_facade_]() {
           surface->TeardownOnScreenContext();
-          surface->SetNativeWindow(native_window);
+          surface->SetNativeWindow(native_window, jni_facade);
           latch.Signal();
         });
     latch.Wait();
@@ -253,13 +387,15 @@ void PlatformViewAndroid::OnPreEngineRestart() const {
 }
 
 void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
-                                                  jint id,
+                                                  jint node_id,
                                                   jint action,
                                                   jobject args,
                                                   jint args_position) {
+  // TODO(team-android): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
   if (env->IsSameObject(args, NULL)) {
     PlatformView::DispatchSemanticsAction(
-        id, static_cast<flutter::SemanticsAction>(action),
+        kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),
         fml::MallocMapping());
     return;
   }
@@ -268,12 +404,13 @@ void PlatformViewAndroid::DispatchSemanticsAction(JNIEnv* env,
   auto args_vector = fml::MallocMapping::Copy(args_data, args_position);
 
   PlatformView::DispatchSemanticsAction(
-      id, static_cast<flutter::SemanticsAction>(action),
+      kImplicitViewId, node_id, static_cast<flutter::SemanticsAction>(action),
       std::move(args_vector));
 }
 
 // |PlatformView|
 void PlatformViewAndroid::UpdateSemantics(
+    int64_t view_id,
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
   platform_view_android_delegate_.UpdateSemantics(update, actions);
@@ -317,34 +454,42 @@ void PlatformViewAndroid::RegisterExternalTexture(
           surface_texture,                              //
           jni_facade_                                   //
           ));
+      break;
+    case AndroidRenderingAPI::kImpellerAutoselect:
+      FML_CHECK(false);
+      break;
   }
 }
 
 void PlatformViewAndroid::RegisterImageTexture(
     int64_t texture_id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry) {
+    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
+    ImageExternalTexture::ImageLifecycle lifecycle) {
   switch (android_context_->RenderingApi()) {
     case AndroidRenderingAPI::kImpellerOpenGLES:
       // Impeller GLES.
       RegisterTexture(std::make_shared<ImageExternalTextureGLImpeller>(
           std::static_pointer_cast<impeller::ContextGLES>(
               android_context_->GetImpellerContext()),
-          texture_id, image_texture_entry, jni_facade_));
+          texture_id, image_texture_entry, jni_facade_, lifecycle));
       break;
     case AndroidRenderingAPI::kSkiaOpenGLES:
       // Legacy GL.
       RegisterTexture(std::make_shared<ImageExternalTextureGLSkia>(
           std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
-          texture_id, image_texture_entry, jni_facade_));
+          texture_id, image_texture_entry, jni_facade_, lifecycle));
       break;
     case AndroidRenderingAPI::kImpellerVulkan:
       RegisterTexture(std::make_shared<ImageExternalTextureVKImpeller>(
           std::static_pointer_cast<impeller::ContextVK>(
               android_context_->GetImpellerContext()),
-          texture_id, image_texture_entry, jni_facade_));
+          texture_id, image_texture_entry, jni_facade_, lifecycle));
       break;
     case AndroidRenderingAPI::kSoftware:
       FML_LOG(INFO) << "Software rendering does not support external textures.";
+      break;
+    case AndroidRenderingAPI::kImpellerAutoselect:
+      FML_CHECK(false);
       break;
   }
 }
@@ -366,6 +511,10 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
+  if (android_use_new_platform_view_) {
+    return std::make_shared<AndroidExternalViewEmbedder2>(
+        *android_context_, jni_facade_, surface_factory_, task_runners_);
+  }
   return std::make_shared<AndroidExternalViewEmbedder>(
       *android_context_, jni_facade_, surface_factory_, task_runners_);
 }
@@ -481,4 +630,9 @@ double PlatformViewAndroid::GetScaledFontSize(double unscaled_font_size,
   return jni_facade_->FlutterViewGetScaledFontSize(unscaled_font_size,
                                                    configuration_id);
 }
+
+bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
+  return android_use_new_platform_view_;
+}
+
 }  // namespace flutter

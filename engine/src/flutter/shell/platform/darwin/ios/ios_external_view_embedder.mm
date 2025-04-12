@@ -59,10 +59,8 @@ PostPrerollResult IOSExternalViewEmbedder::PostPrerollAction(
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::PostPrerollAction");
   FML_CHECK(platform_views_controller_);
-  BOOL impeller_enabled = ios_context_->GetBackend() != IOSRenderingBackend::kSkia;
   PostPrerollResult result =
-      [platform_views_controller_ postPrerollActionWithThreadMerger:raster_thread_merger
-                                                    impellerEnabled:impeller_enabled];
+      [platform_views_controller_ postPrerollActionWithThreadMerger:raster_thread_merger];
   return result;
 }
 
@@ -85,9 +83,7 @@ void IOSExternalViewEmbedder::SubmitFlutterView(
   // Properly support multi-view in the future.
   FML_DCHECK(flutter_view_id == kFlutterImplicitViewId);
   FML_CHECK(platform_views_controller_);
-  [platform_views_controller_ submitFrame:std::move(frame)
-                           withIosContext:ios_context_
-                                grContext:context];
+  [platform_views_controller_ submitFrame:std::move(frame) withIosContext:ios_context_];
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::DidSubmitFrame");
 }
 
@@ -96,20 +92,13 @@ void IOSExternalViewEmbedder::EndFrame(
     bool should_resubmit_frame,
     const fml::RefPtr<fml::RasterThreadMerger>& raster_thread_merger) {
   TRACE_EVENT0("flutter", "IOSExternalViewEmbedder::EndFrame");
-  BOOL impeller_enabled = ios_context_->GetBackend() != IOSRenderingBackend::kSkia;
   [platform_views_controller_ endFrameWithResubmit:should_resubmit_frame
-                                      threadMerger:raster_thread_merger
-                                   impellerEnabled:impeller_enabled];
+                                      threadMerger:raster_thread_merger];
 }
 
 // |ExternalViewEmbedder|
 bool IOSExternalViewEmbedder::SupportsDynamicThreadMerging() {
-// TODO(jonahwilliams): remove this once Software backend is removed for iOS Sim.
-#if FML_OS_IOS_SIMULATOR
-  return true;
-#else
-  return ios_context_->GetBackend() == IOSRenderingBackend::kSkia;
-#endif  // FML_OS_IOS_SIMULATOR
+  return false;
 }
 
 // |ExternalViewEmbedder|

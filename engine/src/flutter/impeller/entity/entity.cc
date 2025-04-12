@@ -106,9 +106,8 @@ bool Entity::SetInheritedOpacity(Scalar alpha) {
   if (alpha >= 1.0) {
     return true;
   }
-  if (blend_mode_ == BlendMode::kSource &&
-      contents_->IsOpaque(GetTransform())) {
-    blend_mode_ = BlendMode::kSourceOver;
+  if (blend_mode_ == BlendMode::kSrc && contents_->IsOpaque(GetTransform())) {
+    blend_mode_ = BlendMode::kSrcOver;
   }
   contents_->SetInheritedOpacity(alpha);
   return true;
@@ -128,12 +127,12 @@ std::optional<Color> Entity::AsBackgroundColor(ISize target_size) const {
 bool Entity::IsBlendModeDestructive(BlendMode blend_mode) {
   switch (blend_mode) {
     case BlendMode::kClear:
-    case BlendMode::kSource:
-    case BlendMode::kSourceIn:
-    case BlendMode::kDestinationIn:
-    case BlendMode::kSourceOut:
-    case BlendMode::kDestinationOut:
-    case BlendMode::kDestinationATop:
+    case BlendMode::kSrc:
+    case BlendMode::kSrcIn:
+    case BlendMode::kDstIn:
+    case BlendMode::kSrcOut:
+    case BlendMode::kDstOut:
+    case BlendMode::kDstATop:
     case BlendMode::kXor:
     case BlendMode::kModulate:
       return true;

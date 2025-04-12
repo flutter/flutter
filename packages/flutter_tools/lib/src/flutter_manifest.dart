@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'localizations/gen_l10n.dart' as gen_l10n;
+/// @docImport 'localizations/gen_l10n.dart';
 library;
 
 import 'package:meta/meta.dart';
@@ -15,9 +15,6 @@ import 'base/logger.dart';
 import 'base/utils.dart';
 import 'globals.dart' as globals;
 import 'plugins.dart';
-
-/// Whether or not Impeller Scene 3D model import is enabled.
-const bool kIs3dSceneSupported = true;
 
 const Set<String> _kValidPluginPlatforms = <String>{
   'android',
@@ -81,7 +78,6 @@ class FlutterManifest {
     List<AssetsEntry>? assets,
     List<Font>? fonts,
     List<Uri>? shaders,
-    List<Uri>? models,
     List<DeferredComponent>? deferredComponents,
   }) {
     final FlutterManifest copy = FlutterManifest._(logger: _logger);
@@ -103,12 +99,6 @@ class FlutterManifest {
     if (shaders != null && shaders.isNotEmpty) {
       copy._flutterDescriptor['shaders'] = YamlList.wrap(
         shaders.map((Uri uri) => uri.toString()).toList(),
-      );
-    }
-
-    if (models != null && models.isNotEmpty) {
-      copy._flutterDescriptor['models'] = YamlList.wrap(
-        models.map((Uri uri) => uri.toString()).toList(),
       );
     }
 
@@ -149,6 +139,10 @@ class FlutterManifest {
     final YamlMap? dependencies = _descriptor['dependencies'] as YamlMap?;
     return dependencies != null ? <String>{...dependencies.keys.cast<String>()} : <String>{};
   }
+
+  /// List of all the entries in the workspace field of the `pubspec.yaml` file.
+  List<String> get workspace =>
+      (_descriptor['workspace'] as YamlList?)?.cast<String>() ?? <String>[];
 
   // Flag to avoid printing multiple invalid version messages.
   bool _hasShowInvalidVersionMsg = false;
@@ -407,8 +401,6 @@ class FlutterManifest {
   }
 
   late final List<Uri> shaders = _extractAssetUris('shaders', 'Shader');
-  late final List<Uri> models =
-      kIs3dSceneSupported ? _extractAssetUris('models', 'Model') : <Uri>[];
 
   List<Uri> _extractAssetUris(String key, String singularName) {
     if (!_flutterDescriptor.containsKey(key)) {
@@ -445,7 +437,6 @@ class FlutterManifest {
   /// See also:
   ///
   ///   * [Deprecate and remove synthethic `package:flutter_gen`](https://github.com/flutter/flutter/issues/102983)
-  ///   * [gen_l10n.generateLocalizations]
   late final bool generateLocalizations = _flutterDescriptor['generate'] == true;
 
   String? get defaultFlavor => _flutterDescriptor['default-flavor'] as String?;
@@ -571,18 +562,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
             'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
           );
         }
-      case 'models':
-        if (yamlValue is! YamlList) {
-          errors.add(
-            'Expected "$yamlKey" to be a list, but got $yamlValue (${yamlValue.runtimeType}).',
-          );
-        } else if (yamlValue.isEmpty) {
-          break;
-        } else if (yamlValue[0] is! String) {
-          errors.add(
-            'Expected "$yamlKey" to be a list of strings, but the first element is $yamlValue (${yamlValue.runtimeType}).',
-          );
-        }
       case 'fonts':
         if (yamlValue is! YamlList) {
           errors.add(
@@ -664,7 +643,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
 
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
-      // ignore: avoid_dynamic_calls
       errors.add(
         'Expected $context to be a list of $typeAlias, but element at index $i was a ${yamlList[i].runtimeType}.',
       );
@@ -682,7 +660,6 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
     for (int i = 0; i < yamlList.length; i++) {
       final Object? valueMap = yamlList[i];
       if (valueMap is! YamlMap) {
-        // ignore: avoid_dynamic_calls
         errors.add(
           'Expected the $i element in "${kvp.key}" to be a map, but got ${yamlList[i]} (${yamlList[i].runtimeType}).',
         );

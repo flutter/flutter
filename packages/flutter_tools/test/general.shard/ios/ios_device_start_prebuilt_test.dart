@@ -521,7 +521,7 @@ void main() {
             '--disable-service-auth-codes',
             '--disable-vm-service-publication',
             '--start-paused',
-            '--dart-flags="--foo,--null_assertions"',
+            '--dart-flags="--foo"',
             '--use-test-fonts',
             '--enable-checked-mode',
             '--verify-entry-points',
@@ -533,9 +533,7 @@ void main() {
             '--trace-allowlist="foo"',
             '--trace-skia-allowlist="skia.a,skia.b"',
             '--endless-trace-buffer',
-            '--dump-skp-on-shader-compilation',
             '--verbose-logging',
-            '--cache-sksl',
             '--purge-persistent-cache',
             '--enable-impeller=false',
             '--enable-embedder-api',
@@ -587,12 +585,9 @@ void main() {
         traceSystrace: true,
         traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
-        dumpSkpOnShaderCompilation: true,
-        cacheSkSL: true,
         purgePersistentCache: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.disabled,
-        nullAssertions: true,
         enableEmbedderApi: true,
       ),
       platformArgs: <String, dynamic>{},
@@ -1103,6 +1098,75 @@ void main() {
         },
         overrides: <Type, Generator>{
           MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(returnsNull: true),
+        },
+      );
+
+      testUsingContext(
+        'IOSDevice.startApp prints guided message when iOS 18.4 crashes due to JIT',
+        () async {
+          final FileSystem fileSystem = MemoryFileSystem.test();
+          final FakeProcessManager processManager = FakeProcessManager.empty();
+
+          final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
+              .childDirectory('flutter_empty_xcode.rand0');
+          final Directory bundleLocation = fileSystem.currentDirectory;
+          final IOSDevice device = setUpIOSDevice(
+            sdkVersion: '18.4',
+            processManager: processManager,
+            fileSystem: fileSystem,
+            isCoreDevice: true,
+            coreDeviceControl: FakeIOSCoreDeviceControl(),
+            xcodeDebug: FakeXcodeDebug(
+              expectedProject: XcodeDebugProject(
+                scheme: 'Runner',
+                xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
+                xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+                hostAppProjectName: 'Runner',
+              ),
+              expectedDeviceId: '123',
+              expectedLaunchArguments: <String>['--enable-dart-profiling'],
+              expectedBundlePath: bundleLocation.path,
+            ),
+          );
+          final IOSApp iosApp = PrebuiltIOSApp(
+            projectBundleId: 'app',
+            bundleName: 'Runner',
+            uncompressedBundle: bundleLocation,
+            applicationPackage: bundleLocation,
+          );
+          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+          device.portForwarder = const NoOpDevicePortForwarder();
+          device.setLogReader(iosApp, deviceLogReader);
+
+          // Start writing messages to the log reader.
+          Timer.run(() {
+            deviceLogReader.addLine(kJITCrashFailureMessage);
+          });
+
+          final Completer<void> completer = Completer<void>();
+          // device.startApp() asynchronously calls throwToolExit, so we
+          // catch it in a zone.
+          unawaited(
+            runZoned<Future<void>?>(
+              () {
+                unawaited(
+                  device.startApp(
+                    iosApp,
+                    prebuiltApplication: true,
+                    debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+                    platformArgs: <String, dynamic>{},
+                  ),
+                );
+                return null;
+              },
+              onError: (Object error, StackTrace stack) {
+                expect(error.toString(), contains(jITCrashFailureInstructions('iOS 18.4')));
+                completer.complete();
+              },
+            ),
+          );
+          await completer.future;
         },
       );
     });

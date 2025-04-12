@@ -39,7 +39,10 @@ impeller_component("typographer") {
         [ "//flutter/third_party/abseil-cpp/absl/container:flat_hash_map" ]
   }
 
-  deps = [ "//flutter/fml" ]
+  deps = [
+    "//flutter/fml",
+    "//flutter/skia",
+  ]
 }
 
 impeller_component("typographer_unittests") {
@@ -51,6 +54,6 @@ impeller_component("typographer_unittests") {
     "../playground:playground_test",
     "backends/skia:typographer_skia_backend",
     "//flutter/display_list/testing:display_list_testing",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
 }

@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/ui_dart_state.h"
 
-#include <iostream>
 #include <utility>
 
 #include "flutter/fml/message_loop.h"
@@ -12,15 +11,6 @@
 #include "flutter/lib/ui/window/platform_message.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_message_handler.h"
-
-#if defined(FML_OS_ANDROID)
-#include <android/log.h>
-#elif defined(FML_OS_IOS)
-extern "C" {
-// Cannot import the syslog.h header directly because of macro collision.
-extern void syslog(int, const char*, ...);
-}
-#endif
 
 using tonic::ToDart;
 
@@ -41,6 +31,7 @@ UIDartState::Context::Context(
     bool deterministic_rendering_enabled,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
     bool enable_impeller,
+    bool enable_flutter_gpu,
     impeller::RuntimeStageBackend runtime_stage_backend)
     : task_runners(task_runners),
       snapshot_delegate(std::move(snapshot_delegate)),
@@ -53,6 +44,7 @@ UIDartState::Context::Context(
       deterministic_rendering_enabled(deterministic_rendering_enabled),
       concurrent_task_runner(std::move(concurrent_task_runner)),
       enable_impeller(enable_impeller),
+      enable_flutter_gpu(enable_flutter_gpu),
       runtime_stage_backend(runtime_stage_backend) {}
 
 UIDartState::UIDartState(
@@ -89,6 +81,10 @@ bool UIDartState::IsDeterministicRenderingEnabled() const {
 
 bool UIDartState::IsImpellerEnabled() const {
   return context_.enable_impeller;
+}
+
+bool UIDartState::IsFlutterGPUEnabled() const {
+  return context_.enable_impeller && context_.enable_flutter_gpu;
 }
 
 impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
@@ -219,26 +215,6 @@ void UIDartState::LogMessage(const std::string& tag,
                              const std::string& message) const {
   if (log_message_callback_) {
     log_message_callback_(tag, message);
-  } else {
-    // Fall back to previous behavior if unspecified.
-#if defined(FML_OS_ANDROID)
-    __android_log_print(ANDROID_LOG_INFO, tag.c_str(), "%.*s",
-                        static_cast<int>(message.size()), message.c_str());
-#elif defined(FML_OS_IOS)
-    std::stringstream stream;
-    if (!tag.empty()) {
-      stream << tag << ": ";
-    }
-    stream << message;
-    std::string log = stream.str();
-    syslog(1 /* LOG_ALERT */, "%.*s", static_cast<int>(log.size()),
-           log.c_str());
-#else
-    if (!tag.empty()) {
-      std::cout << tag << ": ";
-    }
-    std::cout << message << std::endl;
-#endif
   }
 }
 

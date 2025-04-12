@@ -41,7 +41,8 @@ static std::shared_ptr<impeller::ContextMTL> CreateImpellerContext() {
                                              impeller_framebuffer_blend_shaders_length),
   };
   auto sync_switch = std::make_shared<fml::SyncSwitch>(false);
-  return impeller::ContextMTL::Create(shader_mappings, sync_switch, "Impeller Library");
+  return impeller::ContextMTL::Create(impeller::Flags{}, shader_mappings, sync_switch,
+                                      "Impeller Library");
 }
 
 @interface TestExternalTexture : NSObject <FlutterTexture>
@@ -136,7 +137,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestTextureResolution) {
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
   DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
@@ -190,7 +191,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTexture) {
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
   DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
@@ -244,7 +245,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA) {
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
   DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
@@ -298,7 +299,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA2) {
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
   DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
@@ -346,7 +347,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateUnsupportedExternalTextur
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
   DlSkCanvasAdapter canvas(gpuSurface->getCanvas());
   flutter::Texture::PaintContext context{
@@ -398,7 +399,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestTextureResolutionImpeller) {
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
 
   DisplayListBuilder builder;
@@ -448,7 +449,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureImpeller) 
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
 
   DisplayListBuilder builder;
@@ -501,7 +502,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVAImpell
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
 
   DisplayListBuilder builder;
@@ -551,7 +552,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateExternalTextureYUVA2Impel
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
 
   DisplayListBuilder builder;
@@ -595,7 +596,7 @@ TEST_F(FlutterEmbedderExternalTextureTest, TestPopulateUnsupportedExternalTextur
   // Render the texture.
   std::unique_ptr<flutter::Texture> texture =
       std::make_unique<EmbedderExternalTextureMetal>(texture_id, callback);
-  SkRect bounds = SkRect::MakeWH(info.width(), info.height());
+  DlRect bounds = DlRect::MakeWH(info.width(), info.height());
   DlImageSampling sampling = DlImageSampling::kNearestNeighbor;
 
   DisplayListBuilder builder;

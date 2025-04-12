@@ -1229,4 +1229,157 @@ void main() {
     expect(inputDecorator.isFocused, true);
     expect(inputDecorator.decoration.errorText, 'Required');
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/135292.
+  testWidgets('Widget returned by errorBuilder is shown', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButtonFormField<String>(
+            items:
+                menuItems.map((String value) {
+                  return DropdownMenuItem<String>(value: value, child: Text(value));
+                }).toList(),
+            onChanged: onChanged,
+            autovalidateMode: AutovalidateMode.always,
+            validator: (String? v) => 'Required',
+            errorBuilder: (BuildContext context, String errorText) => Text('**$errorText**'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.text('**Required**'), findsOneWidget);
+  });
+
+  testWidgets('ButtonTheme.alignedDropdown does not affect the field content position', (
+    WidgetTester tester,
+  ) async {
+    Widget buildFrame({required bool alignedDropdown, required TextDirection textDirection}) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: ButtonTheme(
+            alignedDropdown: alignedDropdown,
+            child: Material(
+              child: DropdownButtonFormField<String>(
+                value: menuItems.first,
+                items:
+                    menuItems.map((String value) {
+                      return DropdownMenuItem<String>(value: value, child: Text(value));
+                    }).toList(),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Finder findSelectedValue = find.text(menuItems.first).first;
+
+    await tester.pumpWidget(buildFrame(alignedDropdown: false, textDirection: TextDirection.ltr));
+    Rect contentRectForUnalignedDropdown = tester.getRect(findSelectedValue);
+
+    // When alignedDropdown is true, the content should be at the same position.
+    await tester.pumpWidget(buildFrame(alignedDropdown: true, textDirection: TextDirection.ltr));
+    expect(tester.getRect(findSelectedValue), contentRectForUnalignedDropdown);
+
+    await tester.pumpWidget(buildFrame(alignedDropdown: false, textDirection: TextDirection.rtl));
+    contentRectForUnalignedDropdown = tester.getRect(findSelectedValue);
+
+    // When alignedDropdown is true, the content should be at the same position.
+    await tester.pumpWidget(buildFrame(alignedDropdown: true, textDirection: TextDirection.rtl));
+    expect(tester.getRect(findSelectedValue), contentRectForUnalignedDropdown);
+  });
+
+  testWidgets('isValid returns false when forceErrorText is set and changes error display', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
+    const String forceErrorText = 'Forcing error.';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: ListView(
+                    children: <Widget>[
+                      DropdownButtonFormField<String>(
+                        key: fieldKey1,
+                        items:
+                            menuItems.map((String value) {
+                              return DropdownMenuItem<String>(value: value, child: Text(value));
+                            }).toList(),
+                        onChanged: null,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                      DropdownButtonFormField<String>(
+                        key: fieldKey2,
+                        items:
+                            menuItems.map((String value) {
+                              return DropdownMenuItem<String>(value: value, child: Text(value));
+                            }).toList(),
+                        forceErrorText: forceErrorText,
+                        onChanged: onChanged,
+                        autovalidateMode: AutovalidateMode.disabled,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(fieldKey1.currentState!.isValid, isTrue);
+    expect(fieldKey1.currentState!.hasError, isFalse);
+    expect(fieldKey2.currentState!.isValid, isFalse);
+    expect(fieldKey2.currentState!.hasError, isTrue);
+  });
+
+  testWidgets('forceErrorText overrides InputDecoration.error when both are provided', (
+    WidgetTester tester,
+  ) async {
+    const String forceErrorText = 'Forcing error';
+    const String decorationErrorText = 'Decoration';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: DropdownButtonFormField<String>(
+                    items:
+                        menuItems.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(value: value, child: Text(value));
+                        }).toList(),
+                    decoration: const InputDecoration(errorText: decorationErrorText),
+                    forceErrorText: forceErrorText,
+                    onChanged: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(forceErrorText), findsOne);
+    expect(find.text(decorationErrorText), findsNothing);
+  });
 }

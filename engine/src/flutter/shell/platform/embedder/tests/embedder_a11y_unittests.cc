@@ -29,9 +29,14 @@ namespace testing {
 using EmbedderA11yTest = testing::EmbedderTest;
 using ::testing::ElementsAre;
 
+#if !defined(OS_FUCHSIA) || (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
 constexpr static char kTooltip[] = "tooltip";
+#endif
 
 TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
+#else
   {
     auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
     EmbedderConfigBuilder builder(context);
@@ -91,13 +96,13 @@ TEST_F(EmbedderTest, CannotProvideMultipleSemanticsCallbacks) {
     ASSERT_FALSE(engine.is_valid());
     engine.reset();
   }
+#endif
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
-
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
@@ -269,14 +274,13 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV3Callbacks) {
   result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_3.Wait();
-#endif  // OS_FUCHSIA
+#endif
 }
 
 TEST_F(EmbedderA11yTest, A11yStringAttributes) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
-
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
@@ -389,14 +393,13 @@ TEST_F(EmbedderA11yTest, A11yStringAttributes) {
   signal_native_latch.Wait();
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   semantics_update_latch.Wait();
-#endif  // OS_FUCHSIA
+#endif
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
-#if defined(OS_FUCHSIA)
-  GTEST_SKIP() << "This test crashes on Fuchsia. https://fxbug.dev/87493 ";
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
 #else
-
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
@@ -566,10 +569,13 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV2Callbacks) {
   result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_3.Wait();
-#endif  // OS_FUCHSIA
+#endif
 }
 
 TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
+#else
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
 
   fml::AutoResetWaitableEvent signal_native_latch;
@@ -765,6 +771,185 @@ TEST_F(EmbedderA11yTest, A11yTreeIsConsistentUsingV1Callbacks) {
   result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
   ASSERT_EQ(result, FlutterEngineResult::kSuccess);
   notify_semantics_enabled_latch_3.Wait();
+#endif
+}
+
+TEST_F(EmbedderA11yTest, A11yTreesAreConsistentWithMultipleViews) {
+#if defined(OS_FUCHSIA) && (FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DEBUG)
+  GTEST_SKIP() << "Dart_LoadELF is not implemented on Fuchsia.";
+#else
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+
+  fml::AutoResetWaitableEvent signal_native_latch;
+
+  // Called by the Dart text fixture on the UI thread to signal that the C++
+  // unittest should resume.
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(([&signal_native_latch](Dart_NativeArguments) {
+        signal_native_latch.Signal();
+      })));
+
+  // Called by test fixture on UI thread to pass data back to this test.
+  NativeEntry notify_semantics_enabled_callback;
+  context.AddNativeCallback(
+      "NotifySemanticsEnabled",
+      CREATE_NATIVE_ENTRY(
+          ([&notify_semantics_enabled_callback](Dart_NativeArguments args) {
+            ASSERT_NE(notify_semantics_enabled_callback, nullptr);
+            notify_semantics_enabled_callback(args);
+          })));
+
+  NativeEntry notify_accessibility_features_callback;
+  context.AddNativeCallback(
+      "NotifyAccessibilityFeatures",
+      CREATE_NATIVE_ENTRY((
+          [&notify_accessibility_features_callback](Dart_NativeArguments args) {
+            ASSERT_NE(notify_accessibility_features_callback, nullptr);
+            notify_accessibility_features_callback(args);
+          })));
+
+  int num_times_set_semantics_update_callback2_called = 0;
+  fml::AutoResetWaitableEvent semantics_update_latch;
+  context.SetSemanticsUpdateCallback2(
+      [&](const FlutterSemanticsUpdate2* update) {
+        num_times_set_semantics_update_callback2_called++;
+        ASSERT_EQ(size_t(1), update->node_count);
+
+        for (size_t i = 0; i < update->node_count; i++) {
+          const FlutterSemanticsNode2* node = update->nodes[i];
+
+          // The node ID should be the view_id + 1
+          ASSERT_EQ(node->id, update->view_id + 1);
+          ASSERT_EQ(1.0, node->transform.scaleX);
+          ASSERT_EQ(2.0, node->transform.skewX);
+          ASSERT_EQ(3.0, node->transform.transX);
+          ASSERT_EQ(4.0, node->transform.skewY);
+          ASSERT_EQ(5.0, node->transform.scaleY);
+          ASSERT_EQ(6.0, node->transform.transY);
+          ASSERT_EQ(7.0, node->transform.pers0);
+          ASSERT_EQ(8.0, node->transform.pers1);
+          ASSERT_EQ(9.0, node->transform.pers2);
+          ASSERT_EQ(std::strncmp(kTooltip, node->tooltip, sizeof(kTooltip) - 1),
+                    0);
+        }
+
+        if (num_times_set_semantics_update_callback2_called == 3) {
+          semantics_update_latch.Signal();
+        }
+      });
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetDartEntrypoint("a11y_main_multi_view");
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // 1: Wait for initial notifySemanticsEnabled(false).
+  fml::AutoResetWaitableEvent notify_semantics_enabled_latch;
+  notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
+    ASSERT_FALSE(enabled);
+    notify_semantics_enabled_latch.Signal();
+  };
+  notify_semantics_enabled_latch.Wait();
+
+  const int64_t first_view_id = 1;
+  const int64_t second_view_id = 2;
+
+  // 2. Add the first view and wait for the add view callback.
+  FlutterWindowMetricsEvent window_metrics_event;
+  window_metrics_event.struct_size = sizeof(FlutterWindowMetricsEvent);
+  window_metrics_event.width = 100;
+  window_metrics_event.height = 100;
+  window_metrics_event.pixel_ratio = 1.0;
+  window_metrics_event.left = 0;
+  window_metrics_event.top = 0;
+  window_metrics_event.physical_view_inset_top = 0.0;
+  window_metrics_event.physical_view_inset_right = 0.0;
+  window_metrics_event.physical_view_inset_bottom = 0.0;
+  window_metrics_event.physical_view_inset_left = 0.0;
+  window_metrics_event.display_id = 0;
+  window_metrics_event.view_id = first_view_id;
+
+  FlutterAddViewInfo add_view_info;
+  add_view_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_view_info.view_id = first_view_id;
+  add_view_info.view_metrics = &window_metrics_event;
+  fml::AutoResetWaitableEvent notify_add_view_latch;
+  add_view_info.user_data = &notify_add_view_latch;
+  add_view_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    EXPECT_TRUE(result->added);
+    auto latch =
+        reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data);
+    latch->Signal();
+  };
+  FlutterEngineAddView(engine.get(), &add_view_info);
+  notify_add_view_latch.Wait();
+
+  // 3. Add the second view and wait for the add view callback.
+  add_view_info.view_id = second_view_id;
+  window_metrics_event.view_id = second_view_id;
+  add_view_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    EXPECT_TRUE(result->added);
+    auto latch =
+        reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data);
+    latch->Signal();
+  };
+  FlutterEngineAddView(engine.get(), &add_view_info);
+  notify_add_view_latch.Wait();
+
+  // Prepare notifyAccessibilityFeatures callback.
+  fml::AutoResetWaitableEvent notify_features_latch;
+  notify_accessibility_features_callback = [&](Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
+    ASSERT_FALSE(enabled);
+    notify_features_latch.Signal();
+  };
+
+  // 4: Enable semantics. Wait for notifySemanticsEnabled(true).
+  fml::AutoResetWaitableEvent notify_semantics_enabled_latch_2;
+  notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
+    ASSERT_TRUE(enabled);
+    notify_semantics_enabled_latch_2.Signal();
+  };
+  auto result = FlutterEngineUpdateSemanticsEnabled(engine.get(), true);
+  ASSERT_EQ(result, FlutterEngineResult::kSuccess);
+  notify_semantics_enabled_latch_2.Wait();
+
+  // 5: Wait for notifyAccessibilityFeatures (reduce_motion == false)
+  notify_features_latch.Wait();
+
+  // 6: Wait for UpdateSemantics callback on platform (current) thread.
+  // for all pending updates. Expect that it is called 3 times (once for
+  // the implicit view and two more times for the views that were manually
+  // added).
+  signal_native_latch.Wait();
+  fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
+  semantics_update_latch.Wait();
+  EXPECT_EQ(num_times_set_semantics_update_callback2_called, 3);
+
+  // 7: Disable semantics. Wait for NotifySemanticsEnabled(false).
+  fml::AutoResetWaitableEvent notify_semantics_enabled_latch_3;
+  notify_semantics_enabled_callback = [&](Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    bool enabled =
+        ::tonic::DartConverter<bool>::FromArguments(args, 0, exception);
+    ASSERT_FALSE(enabled);
+    notify_semantics_enabled_latch_3.Signal();
+  };
+  result = FlutterEngineUpdateSemanticsEnabled(engine.get(), false);
+  ASSERT_EQ(result, FlutterEngineResult::kSuccess);
+  notify_semantics_enabled_latch_3.Wait();
+#endif
 }
 
 }  // namespace testing

@@ -451,7 +451,7 @@ def to_gn_args(args):
     gn_args['is_clang'] = True
   else:
     gn_args['is_clang'] = args.clang
-  if args.slimpeller:
+  if args.target_os == 'ios' or args.slimpeller:
     gn_args['skia_enable_graphite'] = False
     gn_args['skia_enable_ganesh'] = False
     gn_args['slimpeller'] = True
@@ -629,6 +629,14 @@ def to_gn_args(args):
   if args.arm_float_abi:
     gn_args['arm_float_abi'] = args.arm_float_abi
 
+  if args.dart_dynamic_modules:
+    if not args.prebuilt_dart_sdk:
+      print('--dart-dynamic-modules can only be used with --no-prebuilt-dart-sdk')
+    gn_args['dart_dynamic_modules'] = True
+
+  if args.no_enable_unittests:
+    gn_args['dart_dynamic_modules'] = False
+
   # If we have a prebuilt for the Dart SDK for the target architecture, then
   # use it instead of building a new one.
   if args.prebuilt_dart_sdk:
@@ -666,7 +674,12 @@ def to_gn_args(args):
   if args.build_embedder_examples is not None:
     gn_args['build_embedder_examples'] = args.build_embedder_examples
 
-  gn_args['stripped_symbols'] = args.stripped
+  if args.stripped is True:
+    gn_args['stripped_symbols'] = True
+  elif args.stripped is False:
+    gn_args['stripped_symbols'] = False
+  else:
+    gn_args['stripped_symbols'] = args.target_os != 'android'
 
   if args.msan:
     gn_args['is_msan'] = True
@@ -1113,7 +1126,6 @@ def parse_args(args):
 
   parser.add_argument(
       '--stripped',
-      default=True,
       action='store_true',
       help='Strip debug symbols from the output. This defaults to true and has no effect on iOS.'
   )
@@ -1135,6 +1147,17 @@ def parse_args(args):
       default=False,
       action='store_true',
       help='Use mallinfo2 to collect malloc stats.'
+  )
+
+  parser.add_argument(
+      '--dart-dynamic-modules',
+      default=False,
+      action='store_true',
+      help='Whether to include the Dart dynamic module interpreter in the Dart '
+      'sdk build. Must be used with --no-prebuilt-dart-sdk.'
+  )
+  parser.add_argument(
+      '--no-dart-dynamic-modules', dest='dart-dynamic-modules', action='store_false'
   )
 
   # Impeller flags.

@@ -55,7 +55,7 @@ class BuildSystemConfig {
 /// be either an md5 hash of the file contents or a timestamp.
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
-/// later are safe to evaluate before invoking the [buildAction]. For example,
+/// latter are safe to evaluate before invoking the [buildAction]. For example,
 /// a wildcard output pattern requires the outputs to exist before it can
 /// glob files correctly.
 ///
@@ -449,7 +449,7 @@ class Environment {
   static const String kProjectDirectory = '{PROJECT_DIR}';
 
   /// The [Source] value which is substituted with the path to the directory
-  /// that contains `.dart_tool/package_config.json1`.
+  /// that contains `.dart_tool/package_config.json`.
   /// That is the grand-parent of [BuildInfo.packageConfigPath].
   static const String kWorkspaceDirectory = '{WORKSPACE_DIR}';
 
@@ -639,15 +639,20 @@ class FlutterBuildSystem extends BuildSystem {
     // We also remove files under .dart_tool, since these are intermediaries
     // and don't need to be tracked by external systems.
     {
+      bool isUnconditionalFile(String path) {
+        return switch (_fileSystem.path.basename(path)) {
+          '.flutter-plugins' || '.flutter-plugins-dependencies' => true,
+          _ when _fileSystem.path.extension(path) == '.xcconfig' => true,
+          _ when _fileSystem.path.split(path).contains('.dart_tool') => true,
+          _ => false,
+        };
+      }
+
       buildInstance.inputFiles.removeWhere((String path, File file) {
-        return path.contains('.flutter-plugins') ||
-            path.contains('xcconfig') ||
-            path.contains('.dart_tool');
+        return isUnconditionalFile(path);
       });
       buildInstance.outputFiles.removeWhere((String path, File file) {
-        return path.contains('.flutter-plugins') ||
-            path.contains('xcconfig') ||
-            path.contains('.dart_tool');
+        return isUnconditionalFile(path);
       });
     }
     trackSharedBuildDirectory(environment, _fileSystem, buildInstance.outputFiles);

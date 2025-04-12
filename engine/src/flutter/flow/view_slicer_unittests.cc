@@ -19,12 +19,12 @@ void AddSliceOfSize(
   slices[id] = std::make_unique<DisplayListEmbedderViewSlice>(rect);
   DlPaint paint;
   paint.setColor(DlColor::kBlack());
-  slices[id]->canvas()->DrawRect(rect, paint);
+  slices[id]->canvas()->DrawRect(ToDlRect(rect), paint);
 }
 }  // namespace
 
 TEST(ViewSlicerTest, CanSlicerNonOverlappingViews) {
-  DisplayListBuilder builder(SkRect::MakeLTRB(0, 0, 100, 100));
+  DisplayListBuilder builder(DlRect::MakeLTRB(0, 0, 100, 100));
 
   std::vector<int64_t> composition_order = {1};
   std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices;
@@ -40,7 +40,7 @@ TEST(ViewSlicerTest, CanSlicerNonOverlappingViews) {
 }
 
 TEST(ViewSlicerTest, IgnoresFractionalOverlaps) {
-  DisplayListBuilder builder(SkRect::MakeLTRB(0, 0, 100, 100));
+  DisplayListBuilder builder(DlRect::MakeLTRB(0, 0, 100, 100));
 
   std::vector<int64_t> composition_order = {1};
   std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices;
@@ -56,7 +56,7 @@ TEST(ViewSlicerTest, IgnoresFractionalOverlaps) {
 }
 
 TEST(ViewSlicerTest, ComputesOverlapWith1PV) {
-  DisplayListBuilder builder(SkRect::MakeLTRB(0, 0, 100, 100));
+  DisplayListBuilder builder(DlRect::MakeLTRB(0, 0, 100, 100));
 
   std::vector<int64_t> composition_order = {1};
   std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices;
@@ -76,7 +76,7 @@ TEST(ViewSlicerTest, ComputesOverlapWith1PV) {
 }
 
 TEST(ViewSlicerTest, ComputesOverlapWith2PV) {
-  DisplayListBuilder builder(SkRect::MakeLTRB(0, 0, 100, 100));
+  DisplayListBuilder builder(DlRect::MakeLTRB(0, 0, 100, 100));
 
   std::vector<int64_t> composition_order = {1, 2};
   std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices;
@@ -104,7 +104,7 @@ TEST(ViewSlicerTest, ComputesOverlapWith2PV) {
 }
 
 TEST(ViewSlicerTest, OverlappingTwoPVs) {
-  DisplayListBuilder builder(SkRect::MakeLTRB(0, 0, 100, 100));
+  DisplayListBuilder builder(DlRect::MakeLTRB(0, 0, 100, 100));
 
   std::vector<int64_t> composition_order = {1, 2};
   std::unordered_map<int64_t, std::unique_ptr<EmbedderViewSlice>> slices;

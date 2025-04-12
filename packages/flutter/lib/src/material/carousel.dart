@@ -87,7 +87,7 @@ import 'theme.dart';
 /// As a result, when the first visible item is completely off-screen, the
 /// following items will follow the same layout as before. Using [CarouselView.weighted]
 /// helps build the multi-browse, hero, center-aligned hero and full-screen layouts,
-/// as indicated in [Carousel sepcs](https://m3.material.io/components/carousel/specs).
+/// as indicated in [Carousel specs](https://m3.material.io/components/carousel/specs).
 ///
 /// The [CarouselController] is used to control the
 /// [CarouselController.initialItem], which determines the first fully expanded
@@ -106,6 +106,15 @@ import 'theme.dart';
 /// {@tool dartpad}
 /// Here is an example to show different carousel layouts that [CarouselView]
 /// and [CarouselView.weighted] can build.
+///
+/// On desktop and web running on desktop platforms, dragging to scroll with a mouse
+/// is disabled by default to align with natural behavior.
+///
+/// To further align expected behavior like this, mouse input can scroll horizontally
+/// by pressing the shift key while scrolling with the mouse wheel.
+///
+/// This key-driven behavior is dictated by the [ScrollBehavior.pointerAxisModifiers],
+/// while [ScrollBehavior.dragDevices] manages what devices can drag a scrollable.
 ///
 /// ** See code in examples/api/lib/material/carousel/carousel.0.dart **
 /// {@end-tool}
@@ -579,6 +588,10 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
 
   // This implements the [itemExtentBuilder] callback.
   double _buildItemExtent(int index, SliverLayoutDimensions currentLayoutDimensions) {
+    if (maxExtent == 0.0) {
+      return maxExtent;
+    }
+
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
 
     // Calculate how many items have been completely scroll off screen.
@@ -641,6 +654,10 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     double itemExtent,
     int index,
   ) {
+    if (maxExtent == 0.0) {
+      return maxExtent;
+    }
+
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
 
     // If there is not enough space to place the last visible item but the remaining
@@ -673,6 +690,10 @@ class _RenderSliverFixedExtentCarousel extends RenderSliverFixedExtentBoxAdaptor
     )
     double itemExtent,
   ) {
+    if (maxExtent == 0.0) {
+      return 0;
+    }
+
     final int firstVisibleIndex = (constraints.scrollOffset / maxExtent).floor();
     return math.max(firstVisibleIndex, 0);
   }
@@ -1533,6 +1554,63 @@ class CarouselController extends ScrollController {
     if (_carouselState == anchor) {
       _carouselState = null;
     }
+  }
+
+  /// Animates the controlled carousel to the given item index.
+  ///
+  /// For [CarouselView], this will scroll the carousel so the item at [index] becomes
+  /// the leading item.
+  ///
+  /// If the [index] is less than 0, the carousel will scroll to the first item.
+  /// If the [index] is greater than the number of items, the carousel will scroll
+  /// to the last item.
+  ///
+  /// For [CarouselView.weighted], animates to make the item at [index] occupy the primary,
+  /// most prominent position determined by the largest weight in `flexWeights`.
+  ///
+  /// The animation uses the provided [Duration] and [Curve]. The returned [Future]
+  /// completes when the animation finishes.
+  ///
+  /// The [Duration] defaults to 300 milliseconds and [Curve] defaults to [Curves.ease].
+  ///
+  /// Does nothing if the carousel is not attached to this controller.
+  Future<void> animateToItem(
+    int index, {
+    Duration duration = const Duration(milliseconds: 300),
+    Curve curve = Curves.ease,
+  }) async {
+    if (!hasClients || _carouselState == null) {
+      return;
+    }
+
+    final bool hasFlexWeights = _carouselState!._flexWeights?.isNotEmpty ?? false;
+    index = index.clamp(0, _carouselState!.widget.children.length - 1);
+
+    await Future.wait<void>(<Future<void>>[
+      for (final _CarouselPosition position in positions.cast<_CarouselPosition>())
+        position.animateTo(
+          _getTargetOffset(position, index, hasFlexWeights),
+          duration: duration,
+          curve: curve,
+        ),
+    ]);
+  }
+
+  double _getTargetOffset(_CarouselPosition position, int index, bool hasFlexWeights) {
+    if (!hasFlexWeights) {
+      return index * _carouselState!._itemExtent!;
+    }
+
+    final _CarouselViewState carouselState = _carouselState!;
+    final List<int> weights = carouselState._flexWeights!;
+    final int totalWeight = weights.reduce((int a, int b) => a + b);
+    final double dimension = position.viewportDimension;
+
+    final int maxWeightIndex = weights.indexOf(weights.max);
+    int leadingIndex = carouselState._consumeMaxWeight ? index : index - maxWeightIndex;
+    leadingIndex = leadingIndex.clamp(0, _carouselState!.widget.children.length - 1);
+
+    return dimension * (weights.first / totalWeight) * leadingIndex;
   }
 
   @override

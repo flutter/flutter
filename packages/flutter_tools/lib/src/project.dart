@@ -131,6 +131,16 @@ class FlutterProject {
   /// The manifest of the example sub-project of this project.
   final FlutterManifest _exampleManifest;
 
+  /// List of [FlutterProject]s corresponding to the workspace entries.
+  List<FlutterProject> get workspaceProjects =>
+      manifest.workspace
+          .map(
+            (String entry) => FlutterProject.fromDirectory(
+              directory.childDirectory(directory.fileSystem.path.normalize(entry)),
+            ),
+          )
+          .toList();
+
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
   /// Gradle group ID.
@@ -326,13 +336,12 @@ class FlutterProject {
   ///
   /// Will not create project platform directories if they do not already exist.
   ///
-  /// If [allowedPlugins] is non-null, all plugins with method channels in the
-  /// project's pubspec.yaml will be validated to be in that set, or else a
-  /// [ToolExit] will be thrown.
+  /// If [releaseMode] is `true`, platform-specific tooling and metadata generated
+  /// may apply optimizations or changes that are only specific to release builds,
+  /// such as not including dev-only dependencies.
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
-    Iterable<String>? allowedPlugins,
-    bool? releaseMode,
+    required bool releaseMode,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
@@ -344,14 +353,18 @@ class FlutterProject {
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
-      allowedPlugins: allowedPlugins,
       releaseMode: releaseMode,
     );
   }
 
   /// Applies template files and generates project files and plugin
   /// registrants for app and module projects only for the specified platforms.
+  ///
+  /// If [releaseMode] is `true`, platform-specific tooling and metadata generated
+  /// may apply optimizations or changes that are only specific to release builds,
+  /// such as not including dev-only dependencies.
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required bool releaseMode,
     bool androidPlatform = false,
     bool iosPlatform = false,
     bool linuxPlatform = false,
@@ -359,8 +372,6 @@ class FlutterProject {
     bool windowsPlatform = false,
     bool webPlatform = false,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
-    Iterable<String>? allowedPlugins,
-    bool? releaseMode,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
@@ -391,7 +402,6 @@ class FlutterProject {
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
       windowsPlatform: windowsPlatform,
-      allowedPlugins: allowedPlugins,
       releaseMode: releaseMode,
     );
   }
@@ -635,6 +645,18 @@ class AndroidProject extends FlutterProjectPlatform {
     }
 
     return hostAppGradleRoot.childFile('AndroidManifest.xml');
+  }
+
+  File get generatedPluginRegistrantFile {
+    return hostAppGradleRoot
+        .childDirectory('app')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('io')
+        .childDirectory('flutter')
+        .childDirectory('plugins')
+        .childFile('GeneratedPluginRegistrant.java');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');

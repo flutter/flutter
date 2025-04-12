@@ -202,6 +202,231 @@ TEST_F(EmbedderTest, ImplicitViewNotNull) {
 
 std::atomic_size_t EmbedderTestTaskRunner::sEmbedderTaskRunnerIdentifiers = {};
 
+TEST_F(EmbedderTest, CanSpecifyCustomUITaskRunner) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto ui_task_runner = CreateNewThread("test_ui_thread");
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  static std::mutex engine_mutex;
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_ui_task_runner(
+      ui_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+  EmbedderTestTaskRunner test_platform_task_runner(
+      platform_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+
+  fml::AutoResetWaitableEvent signal_latch_ui;
+  fml::AutoResetWaitableEvent signal_latch_platform;
+
+  context.AddNativeCallback(
+      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        // Assert that the UI isolate is running on platform thread.
+        ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+        signal_latch_ui.Signal();
+      }));
+
+  platform_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto ui_task_runner_description =
+        test_ui_task_runner.GetFlutterTaskRunnerDescription();
+    const auto platform_task_runner_description =
+        test_platform_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetUITaskRunner(&ui_task_runner_description);
+    builder.SetPlatformTaskRunner(&platform_task_runner_description);
+    builder.SetDartEntrypoint("canSpecifyCustomUITaskRunner");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          ASSERT_TRUE(platform_task_runner->RunsTasksOnCurrentThread());
+          signal_latch_platform.Signal();
+        });
+    {
+      std::scoped_lock lock(engine_mutex);
+      engine = builder.InitializeEngine();
+    }
+    ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch_ui.Wait();
+  signal_latch_platform.Wait();
+
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_task_runner->PostTask([&] {
+    engine.reset();
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+}
+
+TEST_F(EmbedderTest, IgnoresStaleTasks) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto ui_task_runner = CreateNewThread("test_ui_thread");
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  static std::mutex engine_mutex;
+  UniqueEngine engine;
+  FlutterEngine engine_ptr;
+
+  EmbedderTestTaskRunner test_ui_task_runner(
+      ui_task_runner, [&](FlutterTask task) {
+        // The check for engine.is_valid() is intentionally absent here.
+        // FlutterEngineRunTask must be able to detect and ignore stale tasks
+        // without crashing even if the engine pointer is not null.
+        // Because the engine is destroyed on platform thread,
+        // relying solely on engine.is_valid() in UI thread is not safe.
+        FlutterEngineRunTask(engine_ptr, &task);
+      });
+  EmbedderTestTaskRunner test_platform_task_runner(
+      platform_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+
+  fml::AutoResetWaitableEvent init_latch;
+
+  platform_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto ui_task_runner_description =
+        test_ui_task_runner.GetFlutterTaskRunnerDescription();
+    const auto platform_task_runner_description =
+        test_platform_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetUITaskRunner(&ui_task_runner_description);
+    builder.SetPlatformTaskRunner(&platform_task_runner_description);
+    {
+      std::scoped_lock lock(engine_mutex);
+      engine = builder.InitializeEngine();
+    }
+    init_latch.Signal();
+  });
+
+  init_latch.Wait();
+  engine_ptr = engine.get();
+
+  auto flutter_engine = reinterpret_cast<EmbedderEngine*>(engine.get());
+
+  // Schedule task on UI thread that will likely run after the engine has shut
+  // down.
+  flutter_engine->GetTaskRunners().GetUITaskRunner()->PostDelayedTask(
+      []() {}, fml::TimeDelta::FromMilliseconds(50));
+
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_task_runner->PostTask([&] {
+    engine.reset();
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+
+  // Ensure that the schedule task indeed runs.
+  kill_latch.Reset();
+  ui_task_runner->PostDelayedTask([&]() { kill_latch.Signal(); },
+                                  fml::TimeDelta::FromMilliseconds(50));
+  kill_latch.Wait();
+}
+
+TEST_F(EmbedderTest, MergedPlatformUIThread) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto task_runner = CreateNewThread("test_thread");
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_task_runner(task_runner, [&](FlutterTask task) {
+    if (!engine.is_valid()) {
+      return;
+    }
+    FlutterEngineRunTask(engine.get(), &task);
+  });
+
+  fml::AutoResetWaitableEvent signal_latch_ui;
+  fml::AutoResetWaitableEvent signal_latch_platform;
+
+  context.AddNativeCallback(
+      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        // Assert that the UI isolate is running on platform thread.
+        ASSERT_TRUE(task_runner->RunsTasksOnCurrentThread());
+        signal_latch_ui.Signal();
+      }));
+
+  task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto task_runner_description =
+        test_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetUITaskRunner(&task_runner_description);
+    builder.SetPlatformTaskRunner(&task_runner_description);
+    builder.SetDartEntrypoint("mergedPlatformUIThread");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          ASSERT_TRUE(task_runner->RunsTasksOnCurrentThread());
+          signal_latch_platform.Signal();
+        });
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch_ui.Wait();
+  signal_latch_platform.Wait();
+
+  fml::AutoResetWaitableEvent kill_latch;
+  task_runner->PostTask([&] {
+    engine.reset();
+    task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+}
+
+TEST_F(EmbedderTest, UITaskRunnerFlushesMicrotasks) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto ui_task_runner = CreateNewThread("test_ui_thread");
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_task_runner(
+      // Assert that the UI isolate is running on platform thread.
+      ui_task_runner, [&](FlutterTask task) {
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+
+  fml::AutoResetWaitableEvent signal_latch;
+
+  context.AddNativeCallback(
+      "SignalNativeTest", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+        signal_latch.Signal();
+      }));
+
+  ui_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto task_runner_description =
+        test_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetUITaskRunner(&task_runner_description);
+    builder.SetDartEntrypoint("uiTaskRunnerFlushesMicrotasks");
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  signal_latch.Wait();
+
+  fml::AutoResetWaitableEvent kill_latch;
+  ui_task_runner->PostTask([&] {
+    engine.reset();
+    ui_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+}
+
 TEST_F(EmbedderTest, CanSpecifyCustomPlatformTaskRunner) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   fml::AutoResetWaitableEvent latch;
@@ -1424,6 +1649,102 @@ TEST_F(EmbedderTest, CanRemoveView) {
   ASSERT_EQ(message, "View IDs: [0]");
 }
 
+// Regression test for:
+// https://github.com/flutter/flutter/issues/164564
+TEST_F(EmbedderTest, RemoveViewCallbackIsInvokedAfterRasterThreadIsDone) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  std::mutex engine_mutex;
+  UniqueEngine engine;
+  auto render_thread = CreateNewThread("custom_render_thread");
+  EmbedderTestTaskRunner render_task_runner(
+      render_thread, [&](FlutterTask task) {
+        std::scoped_lock engine_lock(engine_mutex);
+        if (engine.is_valid()) {
+          ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+        }
+      });
+
+  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetDartEntrypoint("remove_view_callback_too_early");
+  builder.SetRenderTaskRunner(
+      &render_task_runner.GetFlutterTaskRunnerDescription());
+
+  fml::AutoResetWaitableEvent ready_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+
+  {
+    std::scoped_lock lock(engine_mutex);
+    engine = builder.InitializeEngine();
+  }
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  fml::AutoResetWaitableEvent add_view_latch;
+  // Add view 123.
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = 123;
+
+  FlutterAddViewInfo add_info = {};
+  add_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_info.view_id = 123;
+  add_info.view_metrics = &metrics;
+  add_info.user_data = &add_view_latch;
+  add_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    ASSERT_TRUE(result->added);
+    auto add_view_latch =
+        reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data);
+    add_view_latch->Signal();
+  };
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_info), kSuccess);
+  add_view_latch.Wait();
+
+  std::atomic_bool view_available = true;
+
+  // Simulate pending rasterization task scheduled before view removal request
+  // that accesses view resources.
+  fml::AutoResetWaitableEvent raster_thread_latch;
+  render_thread->PostTask([&] {
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    // View must be available.
+    EXPECT_TRUE(view_available);
+    raster_thread_latch.Signal();
+  });
+
+  fml::AutoResetWaitableEvent remove_view_latch;
+  FlutterRemoveViewInfo remove_view_info = {};
+  remove_view_info.struct_size = sizeof(FlutterRemoveViewInfo);
+  remove_view_info.view_id = 123;
+  remove_view_info.user_data = &remove_view_latch;
+  remove_view_info.remove_view_callback =
+      [](const FlutterRemoveViewResult* result) {
+        ASSERT_TRUE(result->removed);
+        auto remove_view_latch =
+            reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data);
+        remove_view_latch->Signal();
+      };
+
+  // Remove the view and wait until the callback is called.
+  ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &remove_view_info), kSuccess);
+  remove_view_latch.Wait();
+
+  // After FlutterEngineRemoveViewCallback is called it should be safe to
+  // remove view - raster thread must not be accessing any view resources.
+  view_available = false;
+  raster_thread_latch.Wait();
+
+  FlutterEngineDeinitialize(engine.get());
+}
+
 //------------------------------------------------------------------------------
 /// The implicit view is a special view that the engine and framework assume
 /// can *always* be rendered to. Test that this view cannot be removed.
@@ -1818,6 +2139,124 @@ TEST_F(EmbedderTest, CanRenderMultipleViews) {
 
   latch0.Wait();
   latch123.Wait();
+}
+
+bool operator==(const FlutterViewFocusChangeRequest& lhs,
+                const FlutterViewFocusChangeRequest& rhs) {
+  return lhs.view_id == rhs.view_id && lhs.state == rhs.state &&
+         lhs.direction == rhs.direction;
+}
+
+TEST_F(EmbedderTest, SendsViewFocusChangeRequest) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto platform_task_runner = CreateNewThread("test_platform_thread");
+  UniqueEngine engine;
+  static std::mutex engine_mutex;
+  EmbedderTestTaskRunner test_platform_task_runner(
+      platform_task_runner, [&](FlutterTask task) {
+        std::scoped_lock lock(engine_mutex);
+        if (!engine.is_valid()) {
+          return;
+        }
+        FlutterEngineRunTask(engine.get(), &task);
+      });
+  fml::CountDownLatch latch(3);
+  std::vector<FlutterViewFocusChangeRequest> received_requests;
+  platform_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    builder.SetSurface(SkISize::Make(1, 1));
+    builder.SetDartEntrypoint("testSendViewFocusChangeRequest");
+    const auto platform_task_runner_description =
+        test_platform_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetPlatformTaskRunner(&platform_task_runner_description);
+    builder.SetViewFocusChangeRequestCallback(
+        [&](const FlutterViewFocusChangeRequest* request) {
+          EXPECT_TRUE(platform_task_runner->RunsTasksOnCurrentThread());
+          received_requests.push_back(*request);
+          latch.CountDown();
+        });
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  latch.Wait();
+
+  std::vector<FlutterViewFocusChangeRequest> expected_requests{
+      {.view_id = 1, .state = kUnfocused, .direction = kUndefined},
+      {.view_id = 2, .state = kFocused, .direction = kForward},
+      {.view_id = 3, .state = kFocused, .direction = kBackward},
+  };
+
+  ASSERT_EQ(received_requests.size(), expected_requests.size());
+  for (size_t i = 0; i < received_requests.size(); ++i) {
+    ASSERT_TRUE(received_requests[i] == expected_requests[i]);
+  }
+
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_task_runner->PostTask(fml::MakeCopyable([&]() mutable {
+    std::scoped_lock lock(engine_mutex);
+    engine.reset();
+
+    // There may still be pending tasks on the platform thread that were queued
+    // by the test_task_runner.  Signal the latch after these tasks have been
+    // consumed.
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  }));
+  kill_latch.Wait();
+}
+
+TEST_F(EmbedderTest, CanSendViewFocusEvent) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetDartEntrypoint("testSendViewFocusEvent");
+
+  fml::AutoResetWaitableEvent latch;
+  std::string last_event;
+
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&latch](Dart_NativeArguments args) { latch.Signal(); }));
+  context.AddNativeCallback("NotifyStringValue",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              const auto message_from_dart =
+                                  tonic::DartConverter<std::string>::FromDart(
+                                      Dart_GetNativeArgument(args, 0));
+                              last_event = message_from_dart;
+                              latch.Signal();
+                            }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  // Wait until the focus change handler is attached.
+  latch.Wait();
+  latch.Reset();
+
+  FlutterViewFocusEvent event1{
+      .struct_size = sizeof(FlutterViewFocusEvent),
+      .view_id = 1,
+      .state = kFocused,
+      .direction = kUndefined,
+  };
+  FlutterEngineResult result =
+      FlutterEngineSendViewFocusEvent(engine.get(), &event1);
+  ASSERT_EQ(result, kSuccess);
+  latch.Wait();
+  ASSERT_EQ(last_event,
+            "1 ViewFocusState.focused ViewFocusDirection.undefined");
+
+  FlutterViewFocusEvent event2{
+      .struct_size = sizeof(FlutterViewFocusEvent),
+      .view_id = 2,
+      .state = kUnfocused,
+      .direction = kBackward,
+  };
+  latch.Reset();
+  result = FlutterEngineSendViewFocusEvent(engine.get(), &event2);
+  ASSERT_EQ(result, kSuccess);
+  latch.Wait();
+  ASSERT_EQ(last_event,
+            "2 ViewFocusState.unfocused ViewFocusDirection.backward");
 }
 
 //------------------------------------------------------------------------------
@@ -2438,10 +2877,10 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
 }
 
 #if defined(__clang_analyzer__)
-#define TEST_VM_SNAPSHOT_DATA nullptr
-#define TEST_VM_SNAPSHOT_INSTRUCTIONS nullptr
-#define TEST_ISOLATE_SNAPSHOT_DATA nullptr
-#define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS nullptr
+#define TEST_VM_SNAPSHOT_DATA "vm_data"
+#define TEST_VM_SNAPSHOT_INSTRUCTIONS "vm_instructions"
+#define TEST_ISOLATE_SNAPSHOT_DATA "isolate_data"
+#define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS "isolate_instructions"
 #endif
 
 //------------------------------------------------------------------------------

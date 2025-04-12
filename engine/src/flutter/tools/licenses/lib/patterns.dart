@@ -362,10 +362,10 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     fileIndex: 5,
     pattern: RegExp(
       kIndent +
-                  // The " \* " is needed to ensure that both copyright lines start with
-                  // the comment decoration in the captured match, otherwise it won't be
-                  // stripped from the second line when generating output.
-                  r'((?: \* Copyright \(C\) 2017 ARM, Inc.\n)?'
+          // The " \* " is needed to ensure that both copyright lines start with
+          // the comment decoration in the captured match, otherwise it won't be
+          // stripped from the second line when generating output.
+          r'((?: \* Copyright \(C\) 2017 ARM, Inc.\n)?'
                   r'Copyright .+(The .+ Authors)(?:\. +All rights reserved\.)?)\n'
                   r'Use of this source code is governed by a BSD-style license that can be\n'
                   r'found in the Chromium source repository ([^ ]+) file.'
@@ -503,22 +503,6 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     ),
   ),
 
-  // BoringSSL
-  LicenseFileReferencePattern(
-    firstPrefixIndex: 1,
-    indentPrefixIndex: 2,
-    fileIndex: 3,
-    pattern: RegExp(
-      kIndent +
-          r'Licensed under the OpenSSL license \(the "License"\)\. You may not use '
-                  r'this file except in compliance with the License\. You can obtain a copy '
-                  r'in the file (LICENSE) in the source distribution or at '
-                  r'https://www\.openssl\.org/source/license\.html'
-              .replaceAll(' ', _linebreak),
-      multiLine: true,
-    ),
-  ),
-
   // Seen in Microsoft files
   LicenseFileReferencePattern(
     firstPrefixIndex: 1,
@@ -554,16 +538,6 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
 final List<RegExp> csReferencesByType = <RegExp>[
   // used with _tryReferenceByType
   // groups 1 and 2 are the prefix, group 3 is the license type
-  RegExp(
-    kIndent +
-        r'Written by Andy Polyakov <appro@openssl\.org> for the OpenSSL '
-                r'project\. The module is, however, dual licensed under (OpenSSL) and '
-                r'CRYPTOGAMS licenses depending on where you obtain it\. For further '
-                r'details see http://www\.openssl\.org/~appro/cryptogams/\. '
-                r'Permission to use under GPL terms is granted\.'
-            .replaceAll(' ', _linebreak),
-    multiLine: true,
-  ),
 
   // MPL
   // fallback_root_certificates
@@ -583,9 +557,9 @@ final List<RegExp> csReferencesByType = <RegExp>[
   // BoringSSL
   RegExp(
     kIndent +
-        r'Rights for redistribution and usage in source and binary forms are '
-                r'granted according to the (OpenSSL) license\. Warranty of any kind is '
-                r'disclaimed\.'
+        r'Implemented by Andy Polyakov <appro@fy\.chalmers\.se> for the (OpenSSL) project\. '
+                r'Rights for redistribution and usage in source and binary forms are '
+                r'granted according to the License\. Warranty of any kind is disclaimed. '
             .replaceAll(' ', _linebreak),
     multiLine: true,
   ),
@@ -661,6 +635,10 @@ final List<LicenseReferencePattern> csReferencesByIdentifyingReference = <Licens
   // used with _tryReferenceByIdentifyingReference
   LicenseReferencePattern(
     pattern: RegExp(kIndent + r'For terms of use, see ([^ \n]+)', multiLine: true),
+  ),
+
+  LicenseReferencePattern(
+    pattern: RegExp(kIndent + r'For terms of use and license, see ([^ \n]+)', multiLine: true),
   ),
 
   LicenseReferencePattern(
@@ -996,51 +974,52 @@ final List<RegExp> csTemplateLicenses = <RegExp>[
         (r'(?:(?:\1\2?(?: *| -*))? *\n)*' // A version with "// -------" between sections was seen in ffx_spd, hence the -*.
             +
             r'|'
-                r'\1\2 '
-                r'The above copyright notice and this permission notice'
-                r'(?: \(including the next paragraph\))? '
-                r'shall be included in all copies or substantial portions '
-                r'of the (?:Software|Materials)\.'
-                r'|'
-                r'\1\2 '
-                r'The above copyright notice including the dates of first publication and either this '
-                r'permission notice or a reference to .+ shall be '
-                r'included in all copies or substantial portions of the Software.'
-                r'|'
-                r'\1\2 '
-                r'In addition, the following condition applies:'
-                r'|'
-                r'\1\2 '
-                r'All redistributions must retain an intact copy of this copyright notice and disclaimer\.'
-                r'|'
-                r'\1\2 '
-                r'MODIFICATIONS TO THIS FILE MAY MEAN IT NO LONGER ACCURATELY REFLECTS KHRONOS '
-                r'STANDARDS. THE UNMODIFIED, NORMATIVE VERSIONS OF KHRONOS SPECIFICATIONS AND '
-                r'HEADER INFORMATION ARE LOCATED AT https://www\.khronos\.org/registry/'
-                r'|'
-                r'\1\2 '
-                r'THE (?:SOFTWARE|MATERIALS) (?:IS|ARE) PROVIDED "AS -? IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS '
-                r'OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, '
-                r'FITNESS FOR A PARTICULAR PURPOSE AND NON-?INFRINGEMENT\. IN NO EVENT SHALL '
-                r'.+(?: .+)? BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER '
-                r'IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,(?: )?OUT OF OR IN '
-                r'CONNECTION WITH THE (?:SOFTWARE|MATERIALS) OR THE USE OR OTHER DEALINGS IN THE (?:SOFTWARE|MATERIALS)\.'
-                r'|'
-                r'\1\2 '
-                r'THE (?:SOFTWARE|MATERIALS) (?:IS|ARE) PROVIDED "AS -? IS" AND WITHOUT WARRANTY OF ANY KIND, '
-                r'EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY '
-                r'OR FITNESS FOR A PARTICULAR PURPOSE\.'
-                r'|'
-                r'\1\2 '
-                r'IN NO EVENT SHALL .+ BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL '
-                r'DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, '
-                r'WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING '
-                r'OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE\.'
-                r'|'
-                r'\1\2 '
-                r'Except as contained in this notice, the name of .+ shall not '
-                r'be used in advertising or otherwise to promote the sale, use or other dealings in '
-                r'this Software without prior written authorization from .+\.'.replaceAll(' ', _linebreak)) +
+                    r'\1\2 '
+                    r'The above copyright notice and this permission notice'
+                    r'(?: \(including the next paragraph\))? '
+                    r'shall be included in all copies or substantial portions '
+                    r'of the (?:Software|Materials)\.'
+                    r'|'
+                    r'\1\2 '
+                    r'The above copyright notice including the dates of first publication and either this '
+                    r'permission notice or a reference to .+ shall be '
+                    r'included in all copies or substantial portions of the Software.'
+                    r'|'
+                    r'\1\2 '
+                    r'In addition, the following condition applies:'
+                    r'|'
+                    r'\1\2 '
+                    r'All redistributions must retain an intact copy of this copyright notice and disclaimer\.'
+                    r'|'
+                    r'\1\2 '
+                    r'MODIFICATIONS TO THIS FILE MAY MEAN IT NO LONGER ACCURATELY REFLECTS KHRONOS '
+                    r'STANDARDS. THE UNMODIFIED, NORMATIVE VERSIONS OF KHRONOS SPECIFICATIONS AND '
+                    r'HEADER INFORMATION ARE LOCATED AT https://www\.khronos\.org/registry/'
+                    r'|'
+                    r'\1\2 '
+                    r'THE (?:SOFTWARE|MATERIALS) (?:IS|ARE) PROVIDED "AS -? IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS '
+                    r'OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, '
+                    r'FITNESS FOR A PARTICULAR PURPOSE AND NON-?INFRINGEMENT\. IN NO EVENT SHALL '
+                    r'.+(?: .+)? BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER '
+                    r'IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,(?: )?OUT OF OR IN '
+                    r'CONNECTION WITH THE (?:SOFTWARE|MATERIALS) OR THE USE OR OTHER DEALINGS IN THE (?:SOFTWARE|MATERIALS)\.'
+                    r'|'
+                    r'\1\2 '
+                    r'THE (?:SOFTWARE|MATERIALS) (?:IS|ARE) PROVIDED "AS -? IS" AND WITHOUT WARRANTY OF ANY KIND, '
+                    r'EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY '
+                    r'OR FITNESS FOR A PARTICULAR PURPOSE\.'
+                    r'|'
+                    r'\1\2 '
+                    r'IN NO EVENT SHALL .+ BE LIABLE FOR ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL '
+                    r'DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, '
+                    r'WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING '
+                    r'OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE\.'
+                    r'|'
+                    r'\1\2 '
+                    r'Except as contained in this notice, the name of .+ shall not '
+                    r'be used in advertising or otherwise to promote the sale, use or other dealings in '
+                    r'this Software without prior written authorization from .+\.'
+                .replaceAll(' ', _linebreak)) +
         r')*',
     multiLine: true,
     caseSensitive: false,
@@ -1425,6 +1404,72 @@ final List<RegExp> csNoticeLicenses = <RegExp>[
           _linebreak,
         )) +
         r'))+',
+    multiLine: true,
+    caseSensitive: false,
+  ),
+
+  // License used by inplace_function.h in vulkan-validation-layers.
+  // See https://github.com/WG21-SG14/SG14/issues/174
+  RegExp(
+    kIndent +
+        r'Boost Software License - Version 1\.0 - August 17th, 2003\n' +
+        r' \*\n' +
+        (r'\1\2Permission is hereby granted, free of charge, to any person or '
+                r'organization obtaining a copy of the software and accompanying '
+                r'documentation covered by this license \(the "Software"\) to use, '
+                r'reproduce, display, distribute, execute, and transmit the Software, and '
+                r'to prepare derivative works of the Software, and to permit third-parties '
+                r'to whom the Software is furnished to do so, all subject to the following:\n'
+            .replaceAll(' ', _linebreak)) +
+        r' \*\n' +
+        (r'\1\2The copyright notices in the Software and this entire statement, '
+                r'including the above license grant, this restriction and the following '
+                r'disclaimer, must be included in all copies of the Software, in whole or '
+                r'in part, and all derivative works of the Software, unless such copies or '
+                r'derivative works are solely in the form of machine-executable object '
+                r'code generated by a source language processor\.\n'
+            .replaceAll(' ', _linebreak)) +
+        r' \*\n' +
+        (r'\1\2THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, '
+                r'EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF '
+                r'MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND '
+                r'NON-INFRINGEMENT\. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR ANYONE '
+                r'DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR OTHER LIABILITY, '
+                r'WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN '
+                r'CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE '
+                r'SOFTWARE\.'
+            .replaceAll(' ', _linebreak)),
+    multiLine: true,
+    caseSensitive: false,
+  ),
+
+  // Seen in libcxx std::format headers
+  RegExp(
+    kIndent +
+        (r'Distributed under the Terms of Use in https://www\.unicode\.org/copyright\.html\. '
+                r'Permission is hereby granted, free of charge, to any person obtaining '
+                r'a copy of the Unicode data files and any associated documentation '
+                r'\(the "Data Files"\) or Unicode software and any associated documentation '
+                r'\(the "Software"\) to deal in the Data Files or Software '
+                r'without restriction, including without limitation the rights to use, '
+                r'copy, modify, merge, publish, distribute, and/or sell copies of '
+                r'the Data Files or Software, and to permit persons to whom the Data Files '
+                r'or Software are furnished to do so, provided that either '
+                r'\(a\) this copyright and permission notice appear with all copies '
+                r'of the Data Files or Software, or '
+                r'\(b\) this copyright and permission notice appear in associated '
+                r'Documentation\. '
+                r'THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF '
+                r'ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE '
+                r'WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND '
+                r'NONINFRINGEMENT OF THIRD PARTY RIGHTS\. '
+                r'IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS '
+                r'NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL '
+                r'DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, '
+                r'DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER '
+                r'TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR '
+                r'PERFORMANCE OF THE DATA FILES OR SOFTWARE\. '
+            .replaceAll(' ', _linebreak)),
     multiLine: true,
     caseSensitive: false,
   ),

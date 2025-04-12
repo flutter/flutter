@@ -252,7 +252,7 @@ $_simpleLoaderScript
     // We should have written a file containing all the scripts that need to be
     // reloaded into the page. This is then read when a hot restart is triggered
     // in DDC via the `\$dartReloadModifiedModules` callback.
-    let restartScripts = currentUri + '.restartScripts';
+    let restartScripts = _currentDirectory + 'restart_scripts.json';
 
     if (!window.\$dartReloadModifiedModules) {
       window.\$dartReloadModifiedModules = (function(appName, callback) {
@@ -269,11 +269,6 @@ $_simpleLoaderScript
               if (script.id == null) continue;
               var src = _currentDirectory + script.src.toString();
               var oldSrc = window.\$dartLoader.moduleIdToUrl.get(script.id);
-              // Only compare the search parameters which contain the cache
-              // busting portion of the uri. The path might be different if the
-              // script is loaded from a different application on the page.
-              if (window.\$dartLoader.moduleIdToUrl.has(script.id) &&
-                  new URL(oldSrc).search == new URL(src).search) continue;
 
               // We might actually load from a different uri, delete the old one
               // just to be sure.
@@ -463,44 +458,12 @@ document.addEventListener('dart-app-ready', function (e) {
 ''';
 }
 
-// TODO(srujzs): Delete this once it's no longer used internally.
-String generateDDCMainModule({
-  required String entrypoint,
-  required bool nullAssertions,
-  required bool nativeNullAssertions,
-  String? exportedMain,
-}) {
-  final String entrypointMainName = exportedMain ?? entrypoint.split('.')[0];
-  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
-  return '''
-/* ENTRYPOINT_EXTENTION_MARKER */
-
-(function() {
-  // Flutter Web uses a generated main entrypoint, which shares app and module names.
-  let appName = "$entrypoint";
-  let moduleName = "$entrypoint";
-
-  // Use a dummy UUID since multi-apps are not supported on Flutter Web.
-  let uuid = "00000000-0000-0000-0000-000000000000";
-
-  let child = {};
-  child.main = function() {
-    let dart = self.dart_library.import('dart_sdk', appName).dart;
-    dart.nonNullAsserts($nullAssertions);
-    dart.nativeNonNullAsserts($nativeNullAssertions);
-    self.dart_library.start(appName, uuid, moduleName, "$entrypointMainName");
-  }
-
-  /* MAIN_EXTENSION_MARKER */
-  child.main();
-})();
-''';
-}
+const String _onLoadEndCallback = r'$onLoadEndCallback';
 
 String generateDDCLibraryBundleMainModule({
   required String entrypoint,
-  required bool nullAssertions,
   required bool nativeNullAssertions,
+  required String onLoadEndBootstrap,
 }) {
   // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
@@ -511,19 +474,33 @@ String generateDDCLibraryBundleMainModule({
 
   dartDevEmbedder.debugger.registerDevtoolsFormatter();
 
-  let child = {};
-  child.main = function() {
-    let sdkOptions = {
-      nonNullAsserts: $nullAssertions,
-      nativeNonNullAsserts: $nativeNullAssertions,
-    };
-    dartDevEmbedder.runMain(appName, sdkOptions);
+  // Set up a final script that lets us know when all scripts have been loaded.
+  // Only then can we call the main method.
+  let onLoadEndSrc = '$onLoadEndBootstrap';
+  window.\$dartLoader.loadConfig.bootstrapScript = {
+    src: onLoadEndSrc,
+    id: onLoadEndSrc,
+  };
+  window.\$dartLoader.loadConfig.tryLoadBootstrapScript = true;
+  // Should be called by $onLoadEndBootstrap once all the scripts have been
+  // loaded.
+  window.$_onLoadEndCallback = function() {
+    let child = {};
+    child.main = function() {
+      let sdkOptions = {
+        nativeNonNullAsserts: $nativeNullAssertions,
+      };
+      dartDevEmbedder.runMain(appName, sdkOptions);
+    }
+    /* MAIN_EXTENSION_MARKER */
+    child.main();
   }
-
-  /* MAIN_EXTENSION_MARKER */
-  child.main();
 })();
 ''';
+}
+
+String generateDDCLibraryBundleOnLoadEndBootstrap() {
+  return '''window.$_onLoadEndCallback();''';
 }
 
 /// Generate a synthetic main module which captures the application's main
@@ -540,7 +517,6 @@ String generateDDCLibraryBundleMainModule({
 /// this object is the module.
 String generateMainModule({
   required String entrypoint,
-  required bool nullAssertions,
   required bool nativeNullAssertions,
   String bootstrapModule = 'main_module.bootstrap',
   String loaderRootDirectory = '',
@@ -556,7 +532,6 @@ require.config({
 define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._debugger.registerDevtoolsFormatter();
-  dart_sdk.dart.nonNullAsserts($nullAssertions);
   dart_sdk.dart.nativeNonNullAsserts($nativeNullAssertions);
 
   // See the generateMainModule doc comment.

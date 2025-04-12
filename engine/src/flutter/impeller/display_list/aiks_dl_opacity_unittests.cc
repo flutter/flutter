@@ -24,7 +24,7 @@ TEST_P(AiksTest, DrawOpacityPeephole) {
   DlPaint alpha;
   alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
-  builder.SaveLayer(nullptr, &alpha);
+  builder.SaveLayer(std::nullopt, &alpha);
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 100, 100), green);
   builder.Restore();
 
@@ -44,7 +44,7 @@ TEST_P(AiksTest, CanRenderGroupOpacity) {
   DlPaint alpha;
   alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
-  builder.SaveLayer(nullptr, &alpha);
+  builder.SaveLayer(std::nullopt, &alpha);
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 100, 100), red);
   builder.DrawRect(DlRect::MakeXYWH(200, 200, 100, 100), green);
   builder.DrawRect(DlRect::MakeXYWH(400, 400, 100, 100), blue);

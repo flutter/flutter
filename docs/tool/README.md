@@ -167,7 +167,7 @@ and `local-engine`, which specifies which build of the engine to use.
 
 **Important:** before building your local engine, you should ensure that your engine feature branch is based on the
 same upstream version of the engine that the Flutter SDK/flutter tool has pinned. You can find the engine version
-that the Flutter SDK has pinned at `flutter/bin/internal/engine.version`.
+that the Flutter SDK has pinned at `bin/cache/engine.stamp`.
 
 A typical invocation would be: `--local-engine-src-path /path/to/engine/src --local-engine=android_debug_unopt --local-engine-host=host_debug_unopt`.
 
@@ -176,13 +176,6 @@ If your engine is in a directory called `engine` that is a peer to the framework
 You can also set the environment variable `$FLUTTER_ENGINE` instead of specifying `--local-engine-src-path`.
 
 The `--local-engine` should specify the build of the engine to use, e.g. a profile build for Android, a debug build for Android, or whatever. It must match the other arguments provided to the tool, e.g. don't use the `android_debug_unopt` build when you specify `--release`, since the Debug build expects to compile and run Dart code in a JIT environment, while `--release` implies a Release build which uses AOT compilation.
-
-<!-- TODO(matanl): https://github.com/flutter/flutter/issues/132245, update this. -->
-
-> ⚠️ **WARNING**: As of [#132245](https://github.com/flutter/flutter/issues/132245), `--local-engine-host` will be mandatory.
->
-> If you're currently relying on the host engine being implicitly defined, you will need to update your workflow to explicitly specify the host engine.
-> For example, if you're currently running `flutter run --local-engine=android_debug_unopt`, you will need to run `flutter run --local-engine=android_debug_unopt --local-engine-host=host_debug_unopt` instead.
 
 If you've modified the public API of `dart:ui` in your local build of the engine
 and you need to be able to analyze the framework code with the new API,
@@ -194,7 +187,7 @@ with. A typical example would be:
 ```yaml
 dependency_overrides:
   sky_engine:
-    path: /path/to/flutter/engine/out/host_debug/gen/dart-pkg/sky_engine
+    path: /path/to/flutter/engine/src/out/host_debug/gen/dart-pkg/sky_engine
 ```
 
 Replace `host_debug` with the actual build that you want to use (similar to `--local-engine`, but typically

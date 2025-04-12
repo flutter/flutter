@@ -179,7 +179,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         'An error occurred when adding Swift Package Manager integration:\n'
         '  $e\n\n'
         'Swift Package Manager is currently an experimental feature, please file a bug at\n'
-        '  https://github.com/flutter/flutter/issues/new?template=1_activation.yml \n'
+        '  https://github.com/flutter/flutter/issues/new?template=01_activation.yml \n'
         'Consider including a copy of the following files in your bug report:\n'
         '  ${_platform.name}/Runner.xcodeproj/project.pbxproj\n'
         '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '
@@ -311,18 +311,18 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 $newContent
       </PreActions>
 ''';
-      final String? buildActionEntries =
+      String? buildAction =
           schemeLines.where((String line) => line.contains('<BuildActionEntries>')).firstOrNull;
-      if (buildActionEntries == null) {
-        throw Exception(
-          'Failed to parse ${schemeFile.basename}: Could not find BuildActionEntries.',
-        );
-      } else {
-        newScheme = schemeContent.replaceFirst(
-          buildActionEntries,
-          '$newContent$buildActionEntries',
-        );
+      if (buildAction == null) {
+        // If there are no BuildActionEntries, append before end of BuildAction.
+        buildAction =
+            schemeLines.where((String line) => line.contains('</BuildAction>')).firstOrNull;
+
+        if (buildAction == null) {
+          throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildAction.');
+        }
       }
+      newScheme = schemeContent.replaceFirst(buildAction, '$newContent$buildAction');
     }
 
     schemeFile.writeAsStringSync(newScheme);

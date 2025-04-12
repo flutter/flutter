@@ -200,7 +200,7 @@ bool ReactorGLES::RegisterCleanupCallback(const HandleGLES& handle,
   return false;
 }
 
-HandleGLES ReactorGLES::CreateUntrackedHandle(HandleType type) {
+HandleGLES ReactorGLES::CreateUntrackedHandle(HandleType type) const {
   FML_DCHECK(CanReactOnCurrentThread());
   auto new_handle = HandleGLES::Create(type);
   std::optional<ReactorGLES::GLStorage> gl_handle =
@@ -374,7 +374,7 @@ bool ReactorGLES::FlushOps() {
 
 void ReactorGLES::SetupDebugGroups() {
   // Setup of a default active debug group: Filter everything in.
-  if (proc_table_->DebugMessageControlKHR.IsAvailable()) {
+  if (can_set_debug_labels_) {
     proc_table_->DebugMessageControlKHR(GL_DONT_CARE,  // source
                                         GL_DONT_CARE,  // type
                                         GL_DONT_CARE,  // severity

@@ -93,6 +93,13 @@ class WindowBindingHandlerDelegate {
                      bool was_down,
                      KeyEventCallback callback) = 0;
 
+  /// Notifies the delegate that the backing window has received or
+  /// lost focus.
+  ///
+  /// Typically called by currently configured WindowBindingHandler.
+  virtual void OnFocus(FlutterViewFocusState focus_state,
+                       FlutterViewFocusDirection direction) = 0;
+
   // Notifies the delegate that IME composing mode has begun.
   //
   // Triggered when the user begins editing composing text using a multi-step

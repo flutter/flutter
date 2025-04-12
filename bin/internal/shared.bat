@@ -21,7 +21,7 @@ SET stamp_path=%cache_dir%\flutter_tools.stamp
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET engine_stamp=%cache_dir%\engine-dart-sdk.stamp
-SET engine_version_path=%FLUTTER_ROOT%\bin\internal\engine.version
+SET engine_version_path=%cache_dir%\engine.stamp
 SET dart=%dart_sdk_path%\bin\dart.exe
 
 REM Ensure that bin/cache exists.
@@ -145,6 +145,7 @@ GOTO :after_subroutine
         ECHO        Either pwsh.exe or PowerShell.exe must be in your PATH. 1>&2
         EXIT 1
     )
+    SET /A dart_sdk_retries+=1
     ECHO Checking Dart SDK version... 1>&2
     SET update_dart_bin=%FLUTTER_ROOT%\bin\internal\update_dart_sdk.ps1
     REM Escape apostrophes from the executable path
@@ -157,7 +158,13 @@ GOTO :after_subroutine
     IF "%ERRORLEVEL%" EQU "2" (
       EXIT 1
     )
+    SET max_dart_sdk_retries=3
     IF "%ERRORLEVEL%" NEQ "0" (
+      IF "%dart_sdk_retries%" EQU "%max_dart_sdk_retries%" (
+        ECHO Error: Unable to update Dart SDK after %max_dart_sdk_retries% retries. 1>&2
+        DEL "%engine_stamp%"
+        EXIT 1
+      )
       ECHO Error: Unable to update Dart SDK. Retrying... 1>&2
       timeout /t 5 /nobreak
       GOTO :do_sdk_update_and_snapshot

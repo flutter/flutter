@@ -48,7 +48,7 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   auto command_line = flutter::CommandLineFromNSProcessInfo(processInfoOrNil);
 
   // Precedence:
-  // 1. Settings from the specified NSBundle (except for enable-impeller).
+  // 1. Settings from the specified NSBundle.
   // 2. Settings passed explicitly via command-line arguments.
   // 3. Settings from the NSBundle with the default bundle ID.
   // 4. Settings from the main NSBundle and default values.
@@ -177,6 +177,9 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   settings.enable_wide_gamut = enableWideGamut;
 #endif
 
+  NSNumber* nsAntialiasLines = [mainBundle objectForInfoDictionaryKey:@"FLTAntialiasLines"];
+  settings.impeller_antialiased_lines = (nsAntialiasLines ? nsAntialiasLines.boolValue : NO);
+
   settings.warn_on_impeller_opt_out = true;
 
   NSNumber* enableTraceSystrace = [mainBundle objectForInfoDictionaryKey:@"FLTTraceSystrace"];
@@ -207,6 +210,11 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
       [mainBundle objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
   if (enableMergedPlatformUIThread != nil) {
     settings.merged_platform_ui_thread = enableMergedPlatformUIThread.boolValue;
+  }
+
+  NSNumber* enableFlutterGPU = [mainBundle objectForInfoDictionaryKey:@"FLTEnableFlutterGPU"];
+  if (enableFlutterGPU != nil) {
+    settings.enable_flutter_gpu = enableFlutterGPU.boolValue;
   }
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
@@ -401,10 +409,6 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
 
 - (BOOL)isWideGamutEnabled {
   return _settings.enable_wide_gamut;
-}
-
-- (BOOL)isImpellerEnabled {
-  return _settings.enable_impeller;
 }
 
 @end

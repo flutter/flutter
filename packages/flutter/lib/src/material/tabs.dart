@@ -209,12 +209,9 @@ class Tab extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    return Semantics(
-      role: SemanticsRole.tab,
-      child: SizedBox(
-        height: height ?? calculatedHeight,
-        child: Center(widthFactor: 1.0, child: label),
-      ),
+    return SizedBox(
+      height: height ?? calculatedHeight,
+      child: Center(widthFactor: 1.0, child: label),
     );
   }
 
@@ -483,15 +480,7 @@ class _IndicatorPainter extends CustomPainter {
     required this.indicatorAnimation,
     required this.textDirection,
   }) : super(repaint: controller.animation) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/material.dart',
-        className: '$_IndicatorPainter',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('material', '_IndicatorPainter', this));
     if (old != null) {
       saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
     }
@@ -524,9 +513,7 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     _painter?.dispose();
   }
 
@@ -586,27 +573,10 @@ class _IndicatorPainter extends CustomPainter {
     _painter ??= indicator.createBoxPainter(markNeedsPaint);
 
     final double value = controller.animation!.value;
-    final int to =
-        controller.indexIsChanging
-            ? controller.index
-            : switch (textDirection) {
-              TextDirection.ltr => value.ceil(),
-              TextDirection.rtl => value.floor(),
-            }.clamp(0, maxTabIndex);
-    final int from =
-        controller.indexIsChanging
-            ? controller.previousIndex
-            : switch (textDirection) {
-              TextDirection.ltr => (to - 1),
-              TextDirection.rtl => (to + 1),
-            }.clamp(0, maxTabIndex);
-    final Rect toRect = indicatorRect(size, to);
-    final Rect fromRect = indicatorRect(size, from);
-    _currentRect = Rect.lerp(fromRect, toRect, (value - from).abs());
 
     _currentRect = switch (indicatorAnimation) {
-      TabIndicatorAnimation.linear => _currentRect,
-      TabIndicatorAnimation.elastic => _applyElasticEffect(fromRect, toRect, _currentRect!),
+      TabIndicatorAnimation.linear => _applyLinearEffect(size: size, value: value),
+      TabIndicatorAnimation.elastic => _applyElasticEffect(size: size, value: value),
     };
 
     assert(_currentRect != null);
@@ -628,6 +598,17 @@ class _IndicatorPainter extends CustomPainter {
     _painter!.paint(canvas, _currentRect!.topLeft, configuration);
   }
 
+  /// Applies the linear effect to the indicator.
+  Rect? _applyLinearEffect({required Size size, required double value}) {
+    final double index = controller.index.toDouble();
+    final bool ltr = index > value;
+    final int from = (ltr ? value.floor() : value.ceil()).clamp(0, maxTabIndex);
+    final int to = (ltr ? from + 1 : from - 1).clamp(0, maxTabIndex);
+    final Rect fromRect = indicatorRect(size, from);
+    final Rect toRect = indicatorRect(size, to);
+    return Rect.lerp(fromRect, toRect, (value - from).abs());
+  }
+
   // Ease out sine (decelerating).
   double decelerateInterpolation(double fraction) {
     return math.sin((fraction * math.pi) / 2.0);
@@ -639,20 +620,38 @@ class _IndicatorPainter extends CustomPainter {
   }
 
   /// Applies the elastic effect to the indicator.
-  Rect _applyElasticEffect(Rect fromRect, Rect toRect, Rect currentRect) {
+  Rect? _applyElasticEffect({required Size size, required double value}) {
+    final double index = controller.index.toDouble();
+    double progressLeft = (index - value).abs();
+
+    final int to =
+        progressLeft == 0.0 || !controller.indexIsChanging
+            ? switch (textDirection) {
+              TextDirection.ltr => value.ceil(),
+              TextDirection.rtl => value.floor(),
+            }.clamp(0, maxTabIndex)
+            : controller.index;
+    final int from =
+        progressLeft == 0.0 || !controller.indexIsChanging
+            ? switch (textDirection) {
+              TextDirection.ltr => (to - 1),
+              TextDirection.rtl => (to + 1),
+            }.clamp(0, maxTabIndex)
+            : controller.previousIndex;
+    final Rect toRect = indicatorRect(size, to);
+    final Rect fromRect = indicatorRect(size, from);
+    final Rect rect = Rect.lerp(fromRect, toRect, (value - from).abs())!;
+
     // If the tab animation is completed, there is no need to stretch the indicator
     // This only works for the tab change animation via tab index, not when
     // dragging a [TabBarView], but it's still ok, to avoid unnecessary calculations.
     if (controller.animation!.isCompleted) {
-      return currentRect;
+      return rect;
     }
 
-    final double index = controller.index.toDouble();
-    final double value = controller.animation!.value;
     final double tabChangeProgress;
 
     if (controller.indexIsChanging) {
-      double progressLeft = (index - value).abs();
       final int tabsDelta = (controller.index - controller.previousIndex).abs();
       if (tabsDelta != 0) {
         progressLeft /= tabsDelta;
@@ -664,7 +663,7 @@ class _IndicatorPainter extends CustomPainter {
 
     // If the animation has finished, there is no need to apply the stretch effect.
     if (tabChangeProgress == 1.0) {
-      return currentRect;
+      return rect;
     }
 
     final double leftFraction;
@@ -701,7 +700,7 @@ class _IndicatorPainter extends CustomPainter {
       };
     }
 
-    return Rect.fromLTRB(lerpRectLeft, currentRect.top, lerpRectRight, currentRect.bottom);
+    return Rect.fromLTRB(lerpRectLeft, rect.top, lerpRectRight, rect.bottom);
   }
 
   @override
@@ -845,6 +844,15 @@ class _TabBarScrollController extends ScrollController {
   }
 }
 
+/// Signature for [TabBar] callbacks that report that an underlying value has
+/// changed for a given [Tab] at `index`.
+///
+/// Used for [TabBar.onHover] and [TabBar.onFocusChange] callbacks The provided
+/// `value` being true indicates focus has been gained, or a pointer has hovered
+/// over the tab, with false indicated focus has been lost or the pointer has
+/// exited hovering.
+typedef TabValueChanged<T> = void Function(T value, int index);
+
 /// A Material Design primary tab bar.
 ///
 /// Primary tabs are placed at the top of the content pane under a top app bar.
@@ -933,6 +941,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.mouseCursor,
     this.enableFeedback,
     this.onTap,
+    this.onHover,
+    this.onFocusChange,
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
@@ -986,6 +996,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.mouseCursor,
     this.enableFeedback,
     this.onTap,
+    this.onHover,
+    this.onFocusChange,
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
@@ -1253,6 +1265,46 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// callbacks should not make changes to the TabController since that would
   /// interfere with the default tap handler.
   final ValueChanged<int>? onTap;
+
+  /// An optional callback that's called when a [Tab]'s hover state in the
+  /// [TabBar] changes.
+  ///
+  /// Called when a pointer enters or exits the ink response area of the [Tab].
+  ///
+  /// The value passed to the callback is true if a pointer has entered the
+  /// [Tab] at `index` and false if a pointer has exited.
+  ///
+  /// When hover is moved from one tab directly to another, this will be called
+  /// twice. First to represent hover exiting the initial tab, and then second
+  /// for the pointer entering hover over the next tab.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to customize a [Tab] in response to hovering over a
+  /// [TabBar].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.onHover.dart **
+  /// {@end-tool}
+  final TabValueChanged<bool>? onHover;
+
+  /// An optional callback that's called when a [Tab]'s focus state in the
+  /// [TabBar] changes.
+  ///
+  /// Called when the node fo the [Tab] at `index` gains or loses focus.
+  ///
+  /// The value passed to the callback is true if the node has gained focus for
+  /// the [Tab] at `index` and false if focus has been lost.
+  ///
+  /// When focus is moved from one tab directly to another, this will be called
+  /// twice. First to represent focus being lost by the initially focused tab,
+  /// and then second for the next tab gaining focus.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to customize a [Tab] based on focus traversal in
+  /// enclosing [TabBar].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.onFocusChange.dart **
+  /// {@end-tool}
+  final TabValueChanged<bool>? onFocusChange;
 
   /// How the [TabBar]'s scroll view should respond to user input.
   ///
@@ -1896,6 +1948,12 @@ class _TabBarState extends State<TabBar> {
         onTap: () {
           _handleTap(index);
         },
+        onHover: (bool value) {
+          widget.onHover?.call(value, index);
+        },
+        onFocusChange: (bool value) {
+          widget.onFocusChange?.call(value, index);
+        },
         enableFeedback: widget.enableFeedback ?? true,
         overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor ?? defaultOverlay,
         splashFactory: widget.splashFactory ?? tabBarTheme.splashFactory ?? _defaults.splashFactory,
@@ -1909,6 +1967,7 @@ class _TabBarState extends State<TabBar> {
             children: <Widget>[
               wrappedTabs[index],
               Semantics(
+                role: SemanticsRole.tab,
                 selected: index == _currentIndex,
                 label:
                     kIsWeb ? null : localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
@@ -1924,6 +1983,8 @@ class _TabBarState extends State<TabBar> {
 
     Widget tabBar = Semantics(
       role: SemanticsRole.tabBar,
+      container: true,
+      explicitChildNodes: true,
       child: CustomPaint(
         painter: _indicatorPainter,
         child: _TabStyle(
@@ -2569,7 +2630,7 @@ class _TabsDefaultsM2 extends TabBarThemeData {
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
-  late final bool isDark = Theme.of(context).brightness == Brightness.dark;
+  late final bool isDark = Theme.brightnessOf(context) == Brightness.dark;
   late final Color primaryColor = isDark ? Colors.grey[900]! : Colors.blue;
   final bool isScrollable;
 

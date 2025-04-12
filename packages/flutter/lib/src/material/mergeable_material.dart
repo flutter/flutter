@@ -146,15 +146,7 @@ class _AnimationTuple {
     required this.endAnimation,
     required this.gapAnimation,
   }) {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/material.dart',
-        className: '$_AnimationTuple',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('material', '_AnimationTuple', this));
   }
 
   final AnimationController controller;
@@ -165,9 +157,7 @@ class _AnimationTuple {
 
   @mustCallSuper
   void dispose() {
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     controller.dispose();
     startAnimation.dispose();
     endAnimation.dispose();

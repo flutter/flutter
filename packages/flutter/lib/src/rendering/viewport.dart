@@ -314,7 +314,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
     childrenInPaintOrder
         .where(
-          (RenderSliver sliver) => sliver.geometry!.visible || sliver.geometry!.cacheExtent > 0.0,
+          (RenderSliver sliver) =>
+              sliver.geometry!.visible ||
+              sliver.geometry!.cacheExtent > 0.0 ||
+              sliver.ensureSemantics,
         )
         .forEach(visitor);
   }
@@ -671,6 +674,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   Rect? describeApproximatePaintClip(RenderSliver child) {
+    if (child.ensureSemantics && !(child.geometry!.visible || child.geometry!.cacheExtent > 0.0)) {
+      // Return null here so we don't end up clipping out a semantics node rect
+      // for a sliver child when we explicitly want it to be included in the semantics tree.
+      return null;
+    }
+
     switch (clipBehavior) {
       case Clip.none:
         return null;
@@ -716,7 +725,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  Rect describeSemanticsClip(RenderSliver? child) {
+  Rect? describeSemanticsClip(RenderSliver? child) {
+    if (child != null &&
+        child.ensureSemantics &&
+        !(child.geometry!.visible || child.geometry!.cacheExtent > 0.0)) {
+      // Return null here so we don't end up clipping out a semantics node rect
+      // for a sliver child when we explicitly want it to be included in the semantics tree.
+      return null;
+    }
     if (_calculatedCacheExtent == null) {
       return semanticBounds;
     }

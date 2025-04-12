@@ -32,6 +32,7 @@ void main() {
     yearForegroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffffa)),
     yearBackgroundColor: MaterialStatePropertyAll<Color>(Color(0xfffffffb)),
     yearOverlayColor: MaterialStatePropertyAll<Color>(Color(0xfffffffc)),
+    yearShape: MaterialStatePropertyAll<OutlinedBorder>(RoundedRectangleBorder()),
     rangePickerBackgroundColor: Color(0xfffffffd),
     rangePickerElevation: 7,
     rangePickerShadowColor: Color(0xfffffffe),
@@ -55,6 +56,8 @@ void main() {
       foregroundColor: MaterialStatePropertyAll<Color>(Color(0xffffff7f)),
     ),
     locale: Locale('en'),
+    subHeaderForegroundColor: Color(0xffffff8f),
+    toggleButtonTextStyle: TextStyle(fontSize: 13),
   );
 
   Material findDialogMaterial(WidgetTester tester) {
@@ -69,11 +72,11 @@ void main() {
     );
   }
 
-  BoxDecoration? findTextDecoration(WidgetTester tester, String date) {
+  ShapeDecoration? findTextDecoration(WidgetTester tester, String date) {
     final Container container = tester.widget<Container>(
       find.ancestor(of: find.text(date), matching: find.byType(Container)).first,
     );
-    return container.decoration as BoxDecoration?;
+    return container.decoration as ShapeDecoration?;
   }
 
   ShapeDecoration? findDayDecoration(WidgetTester tester, String day) {
@@ -140,6 +143,8 @@ void main() {
     expect(theme.cancelButtonStyle, null);
     expect(theme.confirmButtonStyle, null);
     expect(theme.locale, null);
+    expect(theme.subHeaderForegroundColor, null);
+    expect(theme.toggleButtonTextStyle, null);
   });
 
   testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
@@ -150,7 +155,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Builder(
           builder: (BuildContext context) {
             m3 = DatePickerTheme.defaults(context);
@@ -296,6 +300,11 @@ void main() {
       equalsIgnoringHashCodes(TextButton.styleFrom().toString()),
     );
     expect(m3.locale, null);
+    expect(m3.subHeaderForegroundColor, colorScheme.onSurface.withOpacity(0.60));
+    expect(
+      m3.toggleButtonTextStyle,
+      textTheme.titleSmall?.apply(color: m3.subHeaderForegroundColor),
+    );
   });
 
   testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
@@ -450,6 +459,12 @@ void main() {
       equalsIgnoringHashCodes(TextButton.styleFrom().toString()),
     );
     expect(m2.locale, null);
+    expect(m2.yearShape?.resolve(<MaterialState>{}), const StadiumBorder());
+    expect(m2.subHeaderForegroundColor, colorScheme.onSurface.withOpacity(0.60));
+    expect(
+      m2.toggleButtonTextStyle,
+      textTheme.titleSmall?.apply(color: m2.subHeaderForegroundColor),
+    );
   });
 
   testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
@@ -501,6 +516,7 @@ void main() {
         'yearForegroundColor: WidgetStatePropertyAll(${const Color(0xfffffffa)})',
         'yearBackgroundColor: WidgetStatePropertyAll(${const Color(0xfffffffb)})',
         'yearOverlayColor: WidgetStatePropertyAll(${const Color(0xfffffffc)})',
+        'yearShape: WidgetStatePropertyAll(RoundedRectangleBorder(BorderSide(width: 0.0, style: none), BorderRadius.zero))',
         'rangePickerBackgroundColor: ${const Color(0xfffffffd)}',
         'rangePickerElevation: 7.0',
         'rangePickerShadowColor: ${const Color(0xfffffffe)}',
@@ -517,6 +533,8 @@ void main() {
         'cancelButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff6f)}))',
         'confirmButtonStyle: ButtonStyle#00000(foregroundColor: WidgetStatePropertyAll(${const Color(0xffffff7f)}))',
         'locale: en',
+        'toggleButtonTextStyle: TextStyle(inherit: true, size: 13.0)',
+        'subHeaderForegroundColor: ${const Color(0xffffff8f)}',
       ]),
     );
   });
@@ -526,7 +544,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(datePickerTheme: datePickerTheme, useMaterial3: true),
+        theme: ThemeData(datePickerTheme: datePickerTheme),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
@@ -589,6 +607,13 @@ void main() {
     );
     expect(day24Shape.side.width, datePickerTheme.todayBorder?.width);
 
+    // Test the toggle mode button style.
+    final Text january2023 = tester.widget<Text>(find.text('January 2023'));
+    expect(january2023.style?.fontSize, datePickerTheme.toggleButtonTextStyle?.fontSize);
+    expect(january2023.style?.color, datePickerTheme.subHeaderForegroundColor);
+    final Icon arrowIcon = tester.widget<Icon>(find.byIcon(Icons.arrow_drop_down));
+    expect(arrowIcon.color, datePickerTheme.subHeaderForegroundColor);
+
     // Test the day overlay color.
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere(
       (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
@@ -608,30 +633,28 @@ void main() {
     await tester.pumpAndSettle();
 
     final Text year2022 = tester.widget<Text>(find.text('2022'));
-    final BoxDecoration year2022Decoration = findTextDecoration(tester, '2022')!;
+    final ShapeDecoration year2022Decoration = findTextDecoration(tester, '2022')!;
     expect(year2022.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
     expect(year2022.style?.color, datePickerTheme.yearForegroundColor?.resolve(<MaterialState>{}));
     expect(
       year2022Decoration.color,
       datePickerTheme.yearBackgroundColor?.resolve(<MaterialState>{}),
     );
+    expect(year2022Decoration.shape, datePickerTheme.yearShape?.resolve(<MaterialState>{}));
 
     final Text year2023 = tester.widget<Text>(find.text('2023')); // DatePickerDialog.currentDate
-    final BoxDecoration year2023Decoration = findTextDecoration(tester, '2023')!;
+    final ShapeDecoration year2023Decoration = findTextDecoration(tester, '2023')!;
     expect(year2023.style?.fontSize, datePickerTheme.yearStyle?.fontSize);
     expect(year2023.style?.color, datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}));
     expect(
       year2023Decoration.color,
       datePickerTheme.todayBackgroundColor?.resolve(<MaterialState>{}),
     );
-    expect(year2023Decoration.border?.top.width, datePickerTheme.todayBorder?.width);
-    expect(year2023Decoration.border?.bottom.width, datePickerTheme.todayBorder?.width);
+    final RoundedRectangleBorder roundedRectangleBorder =
+        year2023Decoration.shape as RoundedRectangleBorder;
+    expect(roundedRectangleBorder.side.width, datePickerTheme.todayBorder?.width);
     expect(
-      year2023Decoration.border?.top.color,
-      datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}),
-    );
-    expect(
-      year2023Decoration.border?.bottom.color,
+      roundedRectangleBorder.side.color,
       datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}),
     );
 
@@ -661,7 +684,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(datePickerTheme: datePickerTheme, useMaterial3: true),
+        theme: ThemeData(datePickerTheme: datePickerTheme),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
@@ -712,7 +735,7 @@ void main() {
   testWidgets('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(datePickerTheme: datePickerTheme, useMaterial3: true),
+        theme: ThemeData(datePickerTheme: datePickerTheme),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
@@ -852,7 +875,7 @@ void main() {
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(datePickerTheme: datePickerTheme, useMaterial3: true),
+          theme: ThemeData(datePickerTheme: datePickerTheme),
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: Material(
@@ -892,7 +915,6 @@ void main() {
     }) {
       return MaterialApp(
         theme: ThemeData(
-          useMaterial3: true,
           inputDecorationTheme: inputDecorationTheme,
           datePickerTheme: datePickerTheme,
         ),
@@ -1064,10 +1086,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          datePickerTheme: DatePickerThemeData(yearOverlayColor: yearOverlayColor),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(datePickerTheme: DatePickerThemeData(yearOverlayColor: yearOverlayColor)),
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
@@ -1146,7 +1165,6 @@ void main() {
           datePickerTheme: DatePickerThemeData(
             rangeSelectionOverlayColor: rangeSelectionOverlayColor,
           ),
-          useMaterial3: true,
         ),
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -1212,4 +1230,163 @@ void main() {
       );
     }
   });
+
+  testWidgets('YearPicker maintains default year shape at textScaleFactor 1, 1.5, 2', (
+    WidgetTester tester,
+  ) async {
+    double textScaleFactor = 1.0;
+    Widget buildFrame() {
+      return MaterialApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: textScaleFactor,
+              maxScaleFactor: textScaleFactor,
+              child: Scaffold(
+                body: YearPicker(
+                  currentDate: DateTime(2025),
+                  firstDate: DateTime(2021),
+                  lastDate: DateTime(2030),
+                  selectedDate: DateTime(2025),
+                  onChanged: (DateTime value) {},
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    // Find container whose child is text 2025.
+    final Finder yearContainer =
+        find.ancestor(of: find.text('2025'), matching: find.byType(Container)).first;
+
+    expect(
+      tester.renderObject(yearContainer),
+      paints..rrect(
+        rrect: RRect.fromLTRBR(0.5, 0.5, 71.5, 35.5, const Radius.circular(17.5)),
+        color: const Color(0xFF6750A4),
+      ),
+    );
+
+    textScaleFactor = 1.5;
+    await tester.pumpWidget(buildFrame());
+
+    expect(
+      tester.renderObject(yearContainer),
+      paints..rrect(
+        rrect: RRect.fromLTRBR(0.5, 0.5, 107.5, 51.5, const Radius.circular(25.5)),
+        color: const Color(0xFF6750A4),
+      ),
+    );
+
+    textScaleFactor = 2;
+    await tester.pumpWidget(buildFrame());
+
+    expect(
+      tester.renderObject(yearContainer),
+      paints..rrect(
+        rrect: RRect.fromLTRBR(0.5, 0.5, 143.5, 51.5, const Radius.circular(25.5)),
+        color: const Color(0xFF6750A4),
+      ),
+    );
+  });
+
+  testWidgets('YearPicker applies shape from DatePickerThemeData.yearShape correctly', (
+    WidgetTester tester,
+  ) async {
+    const OutlinedBorder yearShpae = CircleBorder();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          datePickerTheme: datePickerTheme.copyWith(
+            yearShape: MaterialStateProperty.all<OutlinedBorder>(yearShpae),
+          ),
+        ),
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: Center(
+              child: YearPicker(
+                currentDate: DateTime(2025),
+                firstDate: DateTime(2021),
+                lastDate: DateTime(2030),
+                selectedDate: DateTime(2025),
+                onChanged: (DateTime value) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final ShapeDecoration year2022Decoration = findTextDecoration(tester, '2022')!;
+    final OutlinedBorder year2022roundedRectangleBorder = year2022Decoration.shape as CircleBorder;
+    expect(year2022roundedRectangleBorder.side.width, 0.0);
+    expect(year2022roundedRectangleBorder.side.color, yearShpae.side.color);
+
+    final ShapeDecoration year2025Decoration = findTextDecoration(tester, '2025')!;
+    final OutlinedBorder year2022RoundedRectangleBorder = year2025Decoration.shape as CircleBorder;
+    expect(year2022RoundedRectangleBorder.side.width, datePickerTheme.todayBorder?.width);
+    expect(
+      year2022RoundedRectangleBorder.side.color,
+      datePickerTheme.todayForegroundColor?.resolve(<MaterialState>{}),
+    );
+  });
+
+  testWidgets('Toggle button uses DatePickerTheme.toggleButtonTextStyle.color when it is defined', (
+    WidgetTester tester,
+  ) async {
+    const Color toggleButtonTextColor = Color(0xff00ff00);
+    const Color subHeaderForegroundColor = Color(0xffff0000);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          datePickerTheme: const DatePickerThemeData(
+            toggleButtonTextStyle: TextStyle(color: toggleButtonTextColor),
+            subHeaderForegroundColor: subHeaderForegroundColor,
+          ),
+        ),
+        home: DatePickerDialog(
+          initialDate: DateTime(2023, DateTime.january, 25),
+          firstDate: DateTime(2022),
+          lastDate: DateTime(2024, DateTime.december, 31),
+          currentDate: DateTime(2023, DateTime.january, 24),
+        ),
+      ),
+    );
+
+    final Text toggleButtonText = tester.widget(find.text('January 2023'));
+    expect(toggleButtonText.style?.color, toggleButtonTextColor);
+  });
+
+  testWidgets(
+    'Toggle button uses DatePickerTheme.subHeaderForegroundColor when DatePickerTheme.toggleButtonTextStyle.color is not defined',
+    (WidgetTester tester) async {
+      const Color subHeaderForegroundColor = Color(0xffff0000);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            datePickerTheme: const DatePickerThemeData(
+              toggleButtonTextStyle: TextStyle(),
+              subHeaderForegroundColor: subHeaderForegroundColor,
+            ),
+          ),
+          home: DatePickerDialog(
+            initialDate: DateTime(2023, DateTime.january, 25),
+            firstDate: DateTime(2022),
+            lastDate: DateTime(2024, DateTime.december, 31),
+            currentDate: DateTime(2023, DateTime.january, 24),
+          ),
+        ),
+      );
+
+      final Text toggleButtonText = tester.widget(find.text('January 2023'));
+      expect(toggleButtonText.style?.color, subHeaderForegroundColor);
+    },
+  );
 }

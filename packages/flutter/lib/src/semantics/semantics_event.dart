@@ -83,6 +83,15 @@ abstract class SemanticsEvent {
 ///
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
+///
+/// ### Android
+/// Android has [deprecated announcement events][1] due to its disruptive
+/// behavior with TalkBack forcing it to clear its speech queue and speak the
+/// provided text. Instead, use mechanisms like [Semantics] to implicitly
+/// trigger announcements.
+///
+/// [1]: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)
+///
 class AnnounceSemanticsEvent extends SemanticsEvent {
   /// Constructs an event that triggers an announcement by the platform.
   const AnnounceSemanticsEvent(

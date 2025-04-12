@@ -211,7 +211,6 @@ void main() {
     const String title = 'Medium AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: MediaQuery.withClampedTextScaling(
           minScaleFactor: textScaleFactor,
           maxScaleFactor: textScaleFactor,
@@ -248,7 +247,6 @@ void main() {
     const String title = 'Large AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: MediaQuery.withClampedTextScaling(
           minScaleFactor: textScaleFactor,
           maxScaleFactor: textScaleFactor,
@@ -282,7 +280,6 @@ void main() {
     const String title = 'Medium AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: MediaQuery.withClampedTextScaling(
           minScaleFactor: textScaleFactor,
           maxScaleFactor: textScaleFactor,
@@ -319,7 +316,6 @@ void main() {
     const String title = 'Large AppBar';
     Widget buildAppBar({double textScaleFactor = 1.0}) {
       return MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: MediaQuery.withClampedTextScaling(
           minScaleFactor: textScaleFactor,
           maxScaleFactor: textScaleFactor,
@@ -1217,7 +1213,7 @@ void main() {
   });
 
   testWidgets('Material3 - SliverAppBar.medium defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 112;
 
@@ -1300,7 +1296,7 @@ void main() {
   });
 
   testWidgets('Material3 - SliverAppBar.large defaults', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 152;
 
@@ -2162,7 +2158,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/158158.
   testWidgets('SliverAppBar should update TabBar before TabBar build', (WidgetTester tester) async {
-    final List<Tab> tabs = <Tab>[];
+    final List<Tab> tabs = <Tab>[const Tab(text: 'initial tab')];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -2179,7 +2175,7 @@ void main() {
                           child: const Text('Add Tab'),
                           onPressed: () {
                             setState(() {
-                              tabs.add(Tab(text: 'Tab ${tabs.length + 1}'));
+                              tabs.add(Tab(text: 'Tab ${tabs.length}'));
                             });
                           },
                         ),
@@ -2195,7 +2191,8 @@ void main() {
       ),
     );
 
-    // Initializes with zero tabs.
+    // Initializes with only initial tabs.
+    expect(find.text('initial tab'), findsOneWidget);
     expect(find.text('Tab 1'), findsNothing);
     expect(find.text('Tab 2'), findsNothing);
 

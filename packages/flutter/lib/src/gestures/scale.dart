@@ -101,6 +101,7 @@ class ScaleStartDetails with Diagnosticable {
     Offset? localFocalPoint,
     this.pointerCount = 0,
     this.sourceTimeStamp,
+    this.kind,
   }) : localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The initial focal point of the pointers in contact with the screen.
@@ -135,6 +136,12 @@ class ScaleStartDetails with Diagnosticable {
   ///
   /// Could be null if triggered from proxied events such as accessibility.
   final Duration? sourceTimeStamp;
+
+  /// The kind of the device that initiated the event.
+  ///
+  /// If multiple pointers are touching the screen, the kind of the pointer
+  /// device that first initiated the event is used.
+  final PointerDeviceKind? kind;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -787,6 +794,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
             localFocalPoint: _localFocalPoint,
             pointerCount: pointerCount,
             sourceTimeStamp: _initialEventTimestamp,
+            kind:
+                _pointerQueue.isNotEmpty
+                    ? getKindForPointer(_pointerQueue.first)
+                    : _pointerPanZooms.isNotEmpty
+                    ? getKindForPointer(_pointerPanZooms.keys.first)
+                    : null,
           ),
         );
       });
