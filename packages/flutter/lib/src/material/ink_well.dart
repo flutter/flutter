@@ -365,18 +365,36 @@ class InkResponse extends StatelessWidget {
   final GestureLongPressCallback? onLongPress;
 
   /// Called when the user taps this part of the material with a secondary button.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapCallback? onSecondaryTap;
 
   /// Called when the user taps down on this part of the material with a
   /// secondary button.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapDownCallback? onSecondaryTapDown;
 
   /// Called when the user releases a secondary button tap that was started on
   /// this part of the material. [onSecondaryTap] is called immediately after.
+  ///
+  /// See also:
+  ///
+  ///  * [onSecondaryTap], a handler triggered right after this one that doesn't
+  ///    pass any details about the tap.
+  ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapUpCallback? onSecondaryTapUp;
 
   /// Called when the user cancels a secondary button tap that was started on
   /// this part of the material.
+  ///
+  /// See also:
+  ///
+  ///  * [kSecondaryButton], the button this callback responds to.
   final GestureTapCallback? onSecondaryTapCancel;
 
   /// Called when this part of the material either becomes highlighted or stops

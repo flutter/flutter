@@ -638,6 +638,10 @@ final List<LicenseReferencePattern> csReferencesByIdentifyingReference = <Licens
   ),
 
   LicenseReferencePattern(
+    pattern: RegExp(kIndent + r'For terms of use and license, see ([^ \n]+)', multiLine: true),
+  ),
+
+  LicenseReferencePattern(
     pattern: RegExp(kIndent + r'License & terms of use: ([^ \n]+)', multiLine: true),
   ),
 
@@ -1434,6 +1438,37 @@ final List<RegExp> csNoticeLicenses = <RegExp>[
                 r'WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN '
                 r'CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE '
                 r'SOFTWARE\.'
+            .replaceAll(' ', _linebreak)),
+    multiLine: true,
+    caseSensitive: false,
+  ),
+
+  // Seen in libcxx std::format headers
+  RegExp(
+    kIndent +
+        (r'Distributed under the Terms of Use in https://www\.unicode\.org/copyright\.html\. '
+                r'Permission is hereby granted, free of charge, to any person obtaining '
+                r'a copy of the Unicode data files and any associated documentation '
+                r'\(the "Data Files"\) or Unicode software and any associated documentation '
+                r'\(the "Software"\) to deal in the Data Files or Software '
+                r'without restriction, including without limitation the rights to use, '
+                r'copy, modify, merge, publish, distribute, and/or sell copies of '
+                r'the Data Files or Software, and to permit persons to whom the Data Files '
+                r'or Software are furnished to do so, provided that either '
+                r'\(a\) this copyright and permission notice appear with all copies '
+                r'of the Data Files or Software, or '
+                r'\(b\) this copyright and permission notice appear in associated '
+                r'Documentation\. '
+                r'THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF '
+                r'ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE '
+                r'WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND '
+                r'NONINFRINGEMENT OF THIRD PARTY RIGHTS\. '
+                r'IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS '
+                r'NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL '
+                r'DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, '
+                r'DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER '
+                r'TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR '
+                r'PERFORMANCE OF THE DATA FILES OR SOFTWARE\. '
             .replaceAll(' ', _linebreak)),
     multiLine: true,
     caseSensitive: false,

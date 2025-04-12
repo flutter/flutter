@@ -755,6 +755,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
+        featureFlags: featureFlags,
         targetOverride: bundle.defaultMainPath,
       );
     }
@@ -893,6 +894,9 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
+      fileSystem: globals.fs,
+      fileSystemUtils: globals.fsUtils,
+      plistParser: globals.plistParser,
     );
 
     final String projectName = parent.manifest.appName;
@@ -968,6 +972,7 @@ class MacOSProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
+        featureFlags: featureFlags,
         useMacOSConfig: true,
       );
     }

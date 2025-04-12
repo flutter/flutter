@@ -79,7 +79,7 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   };
 
   auto context = impeller::ContextGLES::Create(
-      std::move(proc_table),
+      impeller::Flags{}, std::move(proc_table),
       is_gles3 ? gles3_shader_mappings : gles2_shader_mappings,
       enable_gpu_tracing);
   if (!context) {
@@ -251,6 +251,10 @@ bool AndroidContextGLImpeller::OnscreenContextClearCurrent() {
 std::unique_ptr<impeller::egl::Surface>
 AndroidContextGLImpeller::CreateOnscreenSurface(EGLNativeWindowType window) {
   return display_->CreateWindowSurface(*onscreen_config_, window);
+}
+
+AndroidRenderingAPI AndroidContextGLImpeller::RenderingApi() const {
+  return AndroidRenderingAPI::kImpellerOpenGLES;
 }
 
 }  // namespace flutter

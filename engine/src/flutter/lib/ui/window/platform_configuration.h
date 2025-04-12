@@ -92,9 +92,10 @@ class PlatformConfigurationClient {
   //--------------------------------------------------------------------------
   /// @brief      Receives an updated semantics tree from the Framework.
   ///
+  /// @param[in] viewId The identifier of the view to update.
   /// @param[in] update The updated semantic tree to apply.
   ///
-  virtual void UpdateSemantics(SemanticsUpdate* update) = 0;
+  virtual void UpdateSemantics(int64_t viewId, SemanticsUpdate* update) = 0;
 
   //--------------------------------------------------------------------------
   /// @brief      When the Flutter application has a message to send to the
@@ -451,12 +452,14 @@ class PlatformConfiguration final {
   ///             originates on the platform view and has been forwarded to the
   ///             platform configuration here by the engine.
   ///
+  /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node.
   /// @param[in]  action  The accessibility related action performed on the
   ///                     node of the specified ID.
   /// @param[in]  args    Optional data that applies to the specified action.
   ///
-  void DispatchSemanticsAction(int32_t node_id,
+  void DispatchSemanticsAction(int64_t view_id,
+                               int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -620,7 +623,7 @@ class PlatformConfigurationNativeApi {
                      double width,
                      double height);
 
-  static void UpdateSemantics(SemanticsUpdate* update);
+  static void UpdateSemantics(int64_t viewId, SemanticsUpdate* update);
 
   static void SetNeedsReportTimings(bool value);
 

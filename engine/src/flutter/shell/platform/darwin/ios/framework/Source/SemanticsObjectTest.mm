@@ -614,6 +614,41 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue([object.accessibilityLabel isEqualToString:@"label\ntooltip"]);
 }
 
+- (void)testSemanticsObjectContainerAccessibilityFrameCoversEntireScreen {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode parent;
+  parent.id = 0;
+  parent.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+
+  flutter::SemanticsNode child;
+  child.id = 1;
+  child.actions = static_cast<int32_t>(flutter::SemanticsAction::kTap);
+  child.rect = SkRect::MakeXYWH(0, 0, 100, 100);
+  parent.childrenInTraversalOrder.push_back(1);
+
+  FlutterSemanticsObject* parentObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                    uid:0];
+  [parentObject setSemanticsNode:&parent];
+
+  FlutterSemanticsObject* childObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                   uid:1];
+  [childObject setSemanticsNode:&child];
+
+  parentObject.children = @[ childObject ];
+  [parentObject accessibilityBridgeDidFinishUpdate];
+  [childObject accessibilityBridgeDidFinishUpdate];
+
+  SemanticsObjectContainer* container =
+      static_cast<SemanticsObjectContainer*>(parentObject.accessibilityContainer);
+
+  XCTAssertTrue(childObject.accessibilityRespondsToUserInteraction);
+  XCTAssertTrue(CGRectEqualToRect(container.accessibilityFrame, UIScreen.mainScreen.bounds));
+}
+
 - (void)testFlutterSemanticsObjectAttributedStringsDoNotCrashWhenEmpty {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;

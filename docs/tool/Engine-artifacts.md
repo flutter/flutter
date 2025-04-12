@@ -9,10 +9,6 @@ for Android, iOS, and so-on).
 
 ![An example of cached engine artifacts](https://github.com/user-attachments/assets/47c45971-5c5c-4a01-8239-8af0b98cabb8)
 
-> [!NOTE]
->
-> This process is changing, see [#163986](https://github.com/flutter/flutter/issues/163896).
-
 When using a _released_ version of Flutter, i.e. from a channel such as `stable`,
 [`bin/internal/engine.version`](../../bin/internal/engine.version) is set to the
 git commit SHA for a merged commit in `https://github.com/flutter/flutter`, where
@@ -60,6 +56,9 @@ The script(s) that compute (and test the computation of) the engine version:
 - [`bin/internal/update_engine_version.sh`](../../bin/internal/update_engine_version.sh)
 - [`bin/internal/update_engine_version.ps1`](../../bin/internal/update_engine_version.ps1)
 - [`dev/tools/test/update_engine_version_test.dart`](../../dev/tools/test/update_engine_version_test.dart)
+- [`bin/internal/content_aware_hash.sh`](../../bin/internal/content_aware_hash.sh)
+- [`bin/internal/content_aware_hash.ps1`](../../bin/internal/content_aware_hash.ps1)
+- [`dev/tools/test/content_aware_hash_test.dart`](../../dev/tools/test/content_aware_hash_test.dart)
 
 The tool uses the engine version in the following locations:
 

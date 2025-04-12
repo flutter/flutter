@@ -403,7 +403,7 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
   const auto size = src.GetTextureDescriptor().size;
   uint32_t mip_count = src.GetTextureDescriptor().mip_count;
 
-  if (mip_count < 2u || workarounds_.broken_mipmap_generation) {
+  if (mip_count < 2u) {
     return true;
   }
 
@@ -478,6 +478,9 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
 
     width = width / 2;
     height = height / 2;
+    if (width <= 1 || height <= 1) {
+      break;
+    }
 
     // offsets[0] is origin.
     blit.dstOffsets[1].x = std::max<int32_t>(width, 1u);
