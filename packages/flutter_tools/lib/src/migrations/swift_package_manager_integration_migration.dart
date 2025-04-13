@@ -76,11 +76,6 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// Existing macOS identifier for Runner PBXProject.
   static const String _macosProjectIdentifier = '33CC10E52044A3C60003C045';
 
-  /// The pattern that will match the BlueprintIdentifier for an xcscheme file.
-  static final RegExp _schemeBlueprintIdentifier = RegExp(
-    r'\s*BlueprintIdentifier\s=\s"([A-Z0-9]+)"',
-  );
-
   /// Existing identifier for a PBXNativeTarget that is a unit testing bundle.
   static const String _unitTestBundleIdentifier = 'com.apple.product-type.bundle.unit-test';
 
@@ -238,6 +233,101 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     return SchemeInfo(schemeName: scheme, schemeFile: schemeFile, schemeContent: schemeContent);
   }
 
+  /// Parse the given [schemeContent] and extract the `BuildableName`, `BlueprintName` and `ReferencedContainer`
+  /// of the `BuildableReference` for the Runner target.
+  (String buildableName, String blueprintName, String referencedContainer) _parseSchemeFile(
+    String schemeFileName,
+    String schemeContent,
+  ) {
+    final XmlDocument document;
+
+    try {
+      document = XmlDocument.parse(schemeContent);
+    } on XmlException catch (exception) {
+      throw Exception('Failed to parse $schemeFileName: Invalid xml: $schemeContent\n$exception');
+    }
+
+    final XmlNode schemeNode;
+
+    try {
+      schemeNode = document.rootElement;
+    } on StateError {
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find Scheme for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    final XmlElement? launchActionNode = schemeNode.getElement('LaunchAction');
+
+    if (launchActionNode == null) {
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find LaunchAction for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    final XmlNode? buildableProductRunnable = launchActionNode.getElement(
+      'BuildableProductRunnable',
+    );
+
+    if (buildableProductRunnable == null) {
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find BuildableProductRunnable for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    final XmlNode? buildableReference = buildableProductRunnable.getElement('BuildableReference');
+
+    if (buildableReference == null) {
+      // TODO(vashworth): The BuildableReference references a native target, not the project
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find BuildableReference '
+        'for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    final String? blueprintIdentifier = buildableReference.getAttribute('BlueprintIdentifier');
+
+    if (blueprintIdentifier == null) {
+      // TODO(vashworth): The BuildableReference references a native target, not the project
+      throw Exception(
+        'Failed to parse $schemeFileName: Could not find BlueprintIdentifier '
+        'for ${_xcodeProject.hostAppProjectName}.',
+      );
+    }
+
+    if (blueprintIdentifier != _runnerNativeTargetIdentifier) {
+      throw Exception(
+        'The scheme "$schemeFileName" references a custom target, which requires a manual migration.\n'
+        'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
+        'for instructions on how to migrate custom targets.',
+      );
+    }
+
+    final String? buildableName = buildableReference.getAttribute('BuildableName');
+
+    if (buildableName == null) {
+      throw Exception('Failed to parse $schemeFileName: Could not find BuildableName.');
+    }
+
+    final String? blueprintName = buildableReference.getAttribute('BlueprintName');
+
+    if (blueprintName == null) {
+      throw Exception('Failed to parse $schemeFileName: Could not find BlueprintName.');
+    }
+
+    final String? referencedContainer = buildableReference.getAttribute('ReferencedContainer');
+
+    if (referencedContainer == null) {
+      throw Exception('Failed to parse $schemeFileName: Could not find ReferencedContainer.');
+    }
+
+    return (
+      'BuildableName = "$buildableName"',
+      'BlueprintName = "$blueprintName"',
+      'ReferencedContainer = "$referencedContainer"',
+    );
+  }
+
   bool _isSchemeMigrated(SchemeInfo schemeInfo) {
     if (schemeInfo.schemeContent.contains('Run Prepare Flutter Framework Script')) {
       return true;
@@ -261,54 +351,13 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     //     BlueprintName = "Runner"
     //     ReferencedContainer = "container:Runner.xcodeproj">
     // </BuildableReference>
+    final (
+      String buildableName,
+      String blueprintName,
+      String referencedContainer,
+    ) = _parseSchemeFile(schemeFile.basename, schemeContent);
+
     final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
-    int index = -1;
-    String? blueprintIdentifier;
-
-    // Find both the index of the BlueprintIdentifier line and the BlueprintIdentifier itself.
-    for (int lineIndex = 0; lineIndex < schemeLines.length; lineIndex++) {
-      final String line = schemeLines[lineIndex];
-      final String? blueprintIdentifierMatch = _schemeBlueprintIdentifier.firstMatch(line)?[1];
-
-      if (blueprintIdentifierMatch != null) {
-        blueprintIdentifier = blueprintIdentifierMatch;
-        index = lineIndex;
-        break;
-      }
-    }
-
-    if (index == -1 || index + 3 >= schemeLines.length) {
-      // TODO(vashworth): The BuildableReference references a native target, not the project
-      throw Exception(
-        'Failed to parse ${schemeFile.basename}: Could not find BuildableReference '
-        'for ${_xcodeProject.hostAppProjectName}.',
-      );
-    }
-
-    if (blueprintIdentifier != null && blueprintIdentifier != _runnerNativeTargetIdentifier) {
-      throw Exception(
-        'The scheme "${schemeFile.basename}" references a custom target, which requires a manual migration.\n'
-        'See https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-custom-xcode-target '
-        'for instructions on how to migrate custom targets.',
-      );
-    }
-
-    final String buildableName = schemeLines[index + 1].trim();
-    if (!buildableName.contains('BuildableName')) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BuildableName.');
-    }
-
-    final String blueprintName = schemeLines[index + 2].trim();
-    if (!blueprintName.contains('BlueprintName')) {
-      throw Exception('Failed to parse ${schemeFile.basename}: Could not find BlueprintName.');
-    }
-
-    final String referencedContainer = schemeLines[index + 3].trim();
-    if (!referencedContainer.contains('ReferencedContainer')) {
-      throw Exception(
-        'Failed to parse ${schemeFile.basename}: Could not find ReferencedContainer.',
-      );
-    }
 
     schemeInfo.backupSchemeFile = schemeFile.parent.childFile('${schemeFile.basename}.backup');
     schemeFile.copySync(schemeInfo.backupSchemeFile!.path);
@@ -331,7 +380,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "$blueprintIdentifier"
+                     BlueprintIdentifier = "$_runnerNativeTargetIdentifier"
                      $buildableName
                      $blueprintName
                      $referencedContainer
