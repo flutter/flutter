@@ -253,4 +253,8 @@ AndroidContextGLImpeller::CreateOnscreenSurface(EGLNativeWindowType window) {
   return display_->CreateWindowSurface(*onscreen_config_, window);
 }
 
+AndroidRenderingAPI AndroidContextGLImpeller::RenderingApi() const {
+  return AndroidRenderingAPI::kImpellerOpenGLES;
+}
+
 }  // namespace flutter

@@ -15,13 +15,6 @@ AHBTexturePoolVK::AHBTexturePoolVK(std::weak_ptr<Context> context,
     VALIDATION_LOG << "Swapchain image is not allocatable.";
     return;
   }
-  // Create at least one swapchain image to validate the allocation
-  // can succeed.
-  std::shared_ptr<AHBTextureSourceVK> texture = CreateTexture();
-  if (!texture->IsValid()) {
-    return;
-  }
-  pool_.emplace_back(std::move(texture));
   is_valid_ = true;
 }
 

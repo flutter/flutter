@@ -47,13 +47,13 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
 
   // Use AHB Swapchains if they are opted in.
   if (ContextVK::Cast(*context).GetShouldEnableSurfaceControlSwapchain() &&
-      AHBSwapchainVK::IsAvailableOnPlatform() &&
-      android_get_device_api_level() >= 34) {
-    FML_LOG(WARNING) << "Using Android SurfaceControl Swapchain.";
+      AHBSwapchainVK::IsAvailableOnPlatform()) {
+    CreateTransactionCB callback =
+        android_get_device_api_level() >= 34 ? cb : CreateTransactionCB({});
     auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
         context,             //
         window.GetHandle(),  //
-        cb,                  //
+        callback,            //
         window.GetSize(),    //
         enable_msaa          //
         ));
