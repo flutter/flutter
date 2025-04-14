@@ -14,7 +14,7 @@ void main() {
     return find.descendant(
       of: find.byType(MaterialApp),
       matching: find.byWidgetPredicate(
-        (Widget w) => '${w.runtimeType}' == '_PredictiveBackPageTransition',
+        (Widget w) => '${w.runtimeType}' == '_PredictiveBackSharedElementPageTransition',
       ),
     );
   }
