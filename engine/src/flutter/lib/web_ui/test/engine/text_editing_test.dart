@@ -1998,7 +1998,7 @@ Future<void> testMain() async {
 
     test('Do not update composingBase and composingExtent while composing Text', () {
       showKeyboard(inputType: 'text');
-      // 'text' is input as a composing target
+      // 'text' is input as a composing target.
       editingStrategy!.composingText = 'test';
       sendFrameworkMessage(
         codec.encodeMethodCall(
@@ -2010,7 +2010,7 @@ Future<void> testMain() async {
         ),
       );
 
-      // 'text' is composed as Japanese, and baseOffset and extentOffset are updated
+      // 'text' is composed as Japanese, and baseOffset and extentOffset are updated.
       final EditingState editingState = EditingState(text: 'test', baseOffset: 0, extentOffset: 1);
       editingStrategy!.setEditingState(editingState);
 
