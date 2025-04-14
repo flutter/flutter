@@ -30,7 +30,7 @@ void main() {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             return setContentSensitivityCompleter.future;
           } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-            return Future<String>.value(defaultContentSensitivitySetting.name);
+            return Future<int>.value(defaultContentSensitivitySetting.index);
           } else if (methodCall.method == 'SensitiveContent.isSupported') {
             return Future<bool>.value(true);
           } else {
@@ -77,7 +77,7 @@ void main() {
             }
             return Future<void>.value();
           } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-            return Future<String>.value(defaultContentSensitivitySetting.name);
+            return Future<int>.value(defaultContentSensitivitySetting.index);
           } else if (methodCall.method == 'SensitiveContent.isSupported') {
             return Future<bool>.value(true);
           } else {

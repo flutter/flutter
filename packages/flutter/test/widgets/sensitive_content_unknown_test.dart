@@ -16,8 +16,8 @@ void main() {
         SystemChannels.sensitiveContent,
         (MethodCall methodCall) async {
           if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-            // The enum name for ContentSensitivity._unknown.
-            return '_unknown';
+            // Return the enum index for ContentSensitivity._unknown.
+            return 3;
           } else if (methodCall.method == 'SensitiveContent.isSupported') {
             return true;
           }

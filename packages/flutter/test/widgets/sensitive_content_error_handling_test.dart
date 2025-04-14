@@ -28,13 +28,14 @@ void main() {
         (MethodCall methodCall) async {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
-            if (setContentSensitivityCall == 1 && methodCall.arguments == 'sensitive') {
+            if (setContentSensitivityCall == 1 &&
+                methodCall.arguments == ContentSensitivity.sensitive.index) {
               // In the first call to set content sensitivity, throw platform exception to test
               // SensitiveContentHost.register behavior.
               throw PlatformException(code: 'test exception');
             }
           } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-            return 'autoSensitive';
+            return ContentSensitivity.autoSensitive.index;
           } else if (methodCall.method == 'SensitiveContent.isSupported') {
             return true;
           }
@@ -63,13 +64,14 @@ void main() {
         (MethodCall methodCall) async {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
-            if (setContentSensitivityCall == 2 && methodCall.arguments == 'autoSensitive') {
+            if (setContentSensitivityCall == 2 &&
+                methodCall.arguments == ContentSensitivity.autoSensitive.index) {
               // In the second call to set content sensitivity, throw platform exception to test
               // SensitiveContentHost.unregister behavior.
               throw PlatformException(code: 'test exception');
             }
           } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-            return 'autoSensitive';
+            return ContentSensitivity.autoSensitive.index;
           } else if (methodCall.method == 'SensitiveContent.isSupported') {
             return true;
           }
@@ -109,13 +111,14 @@ void main() {
         (MethodCall methodCall) async {
           if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
             setContentSensitivityCall += 1;
-            if (setContentSensitivityCall == 2 && methodCall.arguments == 'autoSensitive') {
+            if (setContentSensitivityCall == 2 &&
+                methodCall.arguments == ContentSensitivity.autoSensitive.index) {
               // In the second call to set content sensitivity, throw platform exception to test
               // SensitiveContentHost.unregister behavior.
               throw PlatformException(code: 'test exception');
             }
           } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-            return 'autoSensitive';
+            return ContentSensitivity.autoSensitive.index;
           } else if (methodCall.method == 'SensitiveContent.isSupported') {
             return true;
           }
