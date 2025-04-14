@@ -32,7 +32,6 @@
 namespace flutter {
 
 constexpr int kMinimumAndroidApiLevelForImpeller = 29;
-constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 31;
 
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
@@ -46,34 +45,11 @@ namespace {
 
 fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
-static const constexpr char* kAndroidHuawei = "android-huawei";
-
-/// These are SoCs that crash when using AHB imports.
-static constexpr const char* kBLC[] = {
-    // Most Exynos Series SoC
-    "exynos7870",  //
-    "exynos7880",  //
-    "exynos7872",  //
-    "exynos7884",  //
-    "exynos7885",  //
-    "exynos8890",  //
-    "exynos8895",  //
-    "exynos7904",  //
-    "exynos9609",  //
-    "exynos9610",  //
-    "exynos9611",  //
-    "exynos9810"   //
-};
-
 }  // anonymous namespace
 
-FlutterMain::FlutterMain(
-    const flutter::Settings& settings,
-    flutter::AndroidRenderingAPI android_rendering_api,
-    std::unique_ptr<AndroidContextVKImpeller> android_vk_context)
-    : settings_(settings),
-      android_rendering_api_(android_rendering_api),
-      cached_context_(std::move(android_vk_context)) {}
+FlutterMain::FlutterMain(const flutter::Settings& settings,
+                         flutter::AndroidRenderingAPI android_rendering_api)
+    : settings_(settings), android_rendering_api_(android_rendering_api) {}
 
 FlutterMain::~FlutterMain() = default;
 
@@ -128,7 +104,7 @@ void FlutterMain::Init(JNIEnv* env,
   // android_get_device_api_level() is only available on API 24 and greater, and
   // Flutter still supports 21, 22, and 23.
 
-  auto [android_rendering_api, android_context_vk] =
+  AndroidRenderingAPI android_rendering_api =
       SelectedRenderingAPI(settings, api_level);
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
@@ -137,6 +113,7 @@ void FlutterMain::Init(JNIEnv* env,
       break;
     case AndroidRenderingAPI::kImpellerOpenGLES:
     case AndroidRenderingAPI::kImpellerVulkan:
+    case AndroidRenderingAPI::kImpellerAutoselect:
       settings.enable_impeller = true;
       break;
   }
@@ -200,8 +177,7 @@ void FlutterMain::Init(JNIEnv* env,
 
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
-  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api,
-                                       std::move(android_context_vk)));
+  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api));
   g_flutter_main->SetupDartVMServiceUriCallback(env);
 }
 
@@ -264,118 +240,37 @@ bool FlutterMain::Register(JNIEnv* env) {
 }
 
 // static
-bool FlutterMain::IsDeviceEmulator(std::string_view product_model) {
-  return std::string(product_model).find("gphone") != std::string::npos;
-}
-
-// static
-bool FlutterMain::IsKnownBadSOC(std::string_view hardware) {
-  // TODO(jonahwilliams): if the list gets too long (> 16), convert
-  // to a hash map first.
-  for (const auto& board : kBLC) {
-    if (strcmp(board, hardware.data()) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// static
-std::pair<AndroidRenderingAPI, std::unique_ptr<AndroidContextVKImpeller>>
-FlutterMain::SelectedRenderingAPI(const flutter::Settings& settings,
-                                  int api_level) {
+AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
+    const flutter::Settings& settings,
+    int api_level) {
   if (settings.enable_software_rendering) {
-    FML_CHECK(!settings.enable_impeller)
-        << "Impeller does not support software rendering. Either disable "
-           "software rendering or disable impeller.";
-    return std::make_pair(AndroidRenderingAPI::kSoftware, nullptr);
+    if (settings.enable_impeller) {
+      FML_CHECK(!settings.enable_impeller)
+          << "Impeller does not support software rendering. Either disable "
+             "software rendering or disable impeller.";
+    }
+    return AndroidRenderingAPI::kSoftware;
   }
-  constexpr AndroidRenderingAPI kVulkanUnsupportedFallback =
-      AndroidRenderingAPI::kImpellerOpenGLES;
 
   // Debug/Profile only functionality for testing a specific
   // backend configuration.
 #ifndef FLUTTER_RELEASE
   if (settings.requested_rendering_backend == "opengles" &&
       settings.enable_impeller) {
-    return std::make_pair(AndroidRenderingAPI::kImpellerOpenGLES, nullptr);
+    return AndroidRenderingAPI::kImpellerOpenGLES;
   }
   if (settings.requested_rendering_backend == "vulkan" &&
       settings.enable_impeller) {
-    return std::make_pair(AndroidRenderingAPI::kImpellerVulkan, nullptr);
+    return AndroidRenderingAPI::kImpellerVulkan;
   }
 #endif
 
-  if (settings.enable_impeller) {
-    // Impeller must only be used on API level 29+, as older API levels do not
-    // have requisite features to support platform views.
-    //
-    // Even if this check returns true, Impeller may determine it cannot use
-    // Vulkan for some other reason, such as a missing required extension or
-    // feature. In these cases it will use OpenGLES.
-    if (api_level < kMinimumAndroidApiLevelForImpeller) {
-      return std::make_pair(AndroidRenderingAPI::kSkiaOpenGLES, nullptr);
-    }
-    char product_model[PROP_VALUE_MAX];
-    __system_property_get("ro.product.model", product_model);
-    if (IsDeviceEmulator(product_model)) {
-      // Avoid using Vulkan on known emulators.
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
-    }
-
-    __system_property_get("ro.com.google.clientidbase", product_model);
-    if (strcmp(product_model, kAndroidHuawei) == 0) {
-      // Avoid using Vulkan on Huawei as AHB imports do not
-      // consistently work.
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
-    }
-
-    if (api_level < kMinimumAndroidApiLevelForMediaTekVulkan &&
-        __system_property_find("ro.vendor.mediatek.platform") != nullptr) {
-      // Probably MediaTek. Avoid Vulkan if older than 34 to work around
-      // crashes when importing AHB.
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
-    }
-
-    __system_property_get("ro.product.board", product_model);
-    if (IsKnownBadSOC(product_model)) {
-      // Avoid using Vulkan on known bad SoCs.
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
-    }
-
-    // Determine if Vulkan is supported by creating a Vulkan context and
-    // checking if it is valid.
-    impeller::ScopedValidationDisable disable_validation;
-    auto vulkan_backend = std::make_unique<AndroidContextVKImpeller>(
-        AndroidContext::ContextSettings{
-            .enable_validation = false,
-            .enable_gpu_tracing = settings.enable_vulkan_gpu_tracing,
-            .enable_surface_control = settings.enable_surface_control,
-            .quiet = true,
-            .impeller_flags =
-                {
-                    .lazy_shader_mode =
-                        settings.impeller_enable_lazy_shader_mode,
-                    .antialiased_lines = settings.impeller_antialiased_lines,
-                },
-        });
-    if (!vulkan_backend->IsValid()) {
-      return std::make_pair(kVulkanUnsupportedFallback, nullptr);
-    }
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-    // In debug mode clear out the vulkan context so that we can
-    // recreate one that has VVL and/or GPU tracing.
-    vulkan_backend = nullptr;
-#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-    return std::make_pair(AndroidRenderingAPI::kImpellerVulkan,
-                          std::move(vulkan_backend));
+  if (settings.enable_impeller &&
+      api_level >= kMinimumAndroidApiLevelForImpeller) {
+    return AndroidRenderingAPI::kImpellerAutoselect;
   }
 
-  return std::make_pair(AndroidRenderingAPI::kSkiaOpenGLES, nullptr);
-}
-
-std::unique_ptr<AndroidContextVKImpeller> FlutterMain::TakeCachedContext() {
-  return std::move(cached_context_);
+  return AndroidRenderingAPI::kSkiaOpenGLES;
 }
 
 }  // namespace flutter
