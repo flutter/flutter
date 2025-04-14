@@ -5,8 +5,9 @@
 /// @docImport 'media_query.dart';
 library;
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/src/cupertino/theme.dart';
+import 'package:flutter/src/material/theme.dart';
+import 'package:flutter/widgets.dart';
 
 /// Annotation used to mark functions that return a widget preview.
 ///
