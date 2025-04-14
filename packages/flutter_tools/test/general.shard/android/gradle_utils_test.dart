@@ -708,6 +708,52 @@ dependencies {
       }
     });
 
+    group('validates gradle/kotlin versions', () {
+      final List<GradleKotlinTestData> testData = <GradleKotlinTestData>[
+        // Values too new.
+        GradleKotlinTestData(true, gradleVersion: '99.99', kgpVersion: '3.0'),
+
+        // Template versions of Gradle/AGP.
+        GradleKotlinTestData(
+          true,
+          gradleVersion: templateDefaultGradleVersion,
+          kgpVersion: templateKotlinGradlePluginVersion
+        ),
+
+        // Gradle version at edge of support window.
+        GradleKotlinTestData(true, gradleVersion: '8.3', kgpVersion: '2.0'),
+        GradleKotlinTestData(true, gradleVersion: '8.3', kgpVersion: '2.1.0'),
+        GradleKotlinTestData(true, gradleVersion: '8.3', kgpVersion: '1.9.20'),
+        // Kotlin version at the edge of support window.
+        GradleKotlinTestData(false, gradleVersion: '8.1', kgpVersion: '2.0'),
+        GradleKotlinTestData(false, gradleVersion: '7.3', kgpVersion: '2.0'),
+        GradleKotlinTestData(true, gradleVersion: '8.3.1', kgpVersion: '2.0'),
+        GradleKotlinTestData(true, gradleVersion: '8.12', kgpVersion: '2.0'),
+        // Null values:
+        // ignore: avoid_redundant_argument_values
+        GradleKotlinTestData(false, gradleVersion: '7.2', kgpVersion: null),
+        // ignore: avoid_redundant_argument_values
+        GradleKotlinTestData(true, gradleVersion: '8.3', kgpVersion: null),
+        // ignore: avoid_redundant_argument_values
+        GradleKotlinTestData(true, gradleVersion: '8.5.1', kgpVersion: null),
+        // ignore: avoid_redundant_argument_values
+        GradleKotlinTestData(false, gradleVersion: null, kgpVersion: null),
+      ];
+      for (final GradleKotlinTestData data in testData) {
+        test('(gradle, agp): (${data.gradleVersion}, ${data.kgpVersion})', () {
+          expect(
+            validateGradleAndKotlin(
+              BufferLogger.test(),
+              gradleV: data.gradleVersion,
+              kgpV: data.kgpVersion,
+            ),
+            data.validPair ? isTrue : isFalse,
+            reason: 'G: ${data.gradleVersion}, AGP: ${data.kgpVersion}',
+          );
+        });
+      }
+    });
+
     group('Parse gradle version from distribution url', () {
       testWithoutContext('null distribution url returns null version', () {
         expect(parseGradleVersionFromDistributionUrl(null), null);
@@ -1370,6 +1416,13 @@ class GradleAgpTestData {
   GradleAgpTestData(this.validPair, {this.gradleVersion, this.agpVersion});
   final String? gradleVersion;
   final String? agpVersion;
+  final bool validPair;
+}
+
+class GradleKotlinTestData {
+  GradleKotlinTestData(this.validPair, {this.gradleVersion, this.kgpVersion});
+  final String? gradleVersion;
+  final String? kgpVersion;
   final bool validPair;
 }
 

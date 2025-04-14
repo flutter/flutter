@@ -386,6 +386,43 @@ String _formatParseWarning(String content) {
       ' and if one does not exist file a new issue.';
 }
 
+// Validate that Gradle and Kotlin are compatible with each other.
+//
+// Returns true if versions are compatible.
+// Null Gradle version returns false.
+// If compatibility cannot be evaluated returns false.
+// If versions are newer than the max known version a warning is logged and true
+// returned.
+//
+// Kotlin k2 can require gradle 8.3.
+// https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations.
+bool validateGradleAndKotlin(Logger logger, {required String? gradleV, required String? kgpV}) {
+  if (gradleV == null) {
+    logger.printTrace('Gradle version unknown ($gradleV).');
+    return false;
+  }
+
+  // If gradle is newer than 8.3 all kotlin versions are supported.
+  if (isWithinVersionRange(gradleV, min: '8.3', max: '100.00')) {
+    if (isWithinVersionRange(gradleV, min: maxKnownAndSupportedGradleVersion, max: '100.00')) {
+      logger.printTrace(
+        'Newer than known gradle version ($gradleV).'
+        '\n Treating as valid configuration.',
+      );
+    }
+    return true;
+  } else { // Gradle is pre 8.3.
+    if (kgpV == null) {
+      logger.printTrace('KGP version unknown ($kgpV).');
+      return false;
+    }
+
+    // If kotlin is past 2.0 then k2 can have issues.
+    // https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations.
+    return isWithinVersionRange(kgpV, min: '2.0', max: '100.00', inclusiveMin: false);
+  }
+}
+
 // Validate that Gradle version and AGP are compatible with each other.
 //
 // Returns true if versions are compatible.
