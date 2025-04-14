@@ -517,8 +517,16 @@ object FlutterPluginUtils {
                 getCompileSdkFromProject(project).toIntOrNull() ?: Int.MAX_VALUE
 
             var maxPluginCompileSdkVersion = projectCompileSdkVersion
-            val projectNdkVersion =
-                getAndroidExtension(project).ndkVersion
+            // TODO(gmackall): This should be updated to reflect newer templates.
+            // The default for AGP 4.1.0 used in old templates.
+            val ndkVersionIfUnspecified = "21.1.6352462"
+
+            // TODO(gmackall): We can remove this elvis when our minimum AGP is >= 8.2.
+            //  This value (ndkVersion) is nullable on AGP versions below that.
+            //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
+            @Suppress("USELESS_ELVIS")
+            val projectNdkVersion: String =
+                getAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
@@ -543,8 +551,13 @@ object FlutterPluginUtils {
                             )
                         )
                     }
+
+                    // TODO(gmackall): We can remove this elvis when our minimum AGP is >= 8.2.
+                    //  This value (ndkVersion) is nullable on AGP versions below that.
+                    //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
+                    @Suppress("USELESS_ELVIS")
                     val pluginNdkVersion: String =
-                        getAndroidExtension(pluginProject).ndkVersion
+                        getAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
