@@ -30,13 +30,16 @@ class SliverNavBarExample extends StatelessWidget {
       child: CustomScrollView(
         // A list of sliver widgets.
         slivers: <Widget>[
-           const CupertinoSliverNavigationBar(
+          const CupertinoSliverNavigationBar(
             leading: Icon(CupertinoIcons.person_2),
             // This title is visible in both collapsed and expanded states.
             // When the "middle" parameter is omitted, the widget provided
             // in the "largeTitle" parameter is used instead in the collapsed state.
             largeTitle: Text('Contacts'),
-            bottom: PreferredSize(preferredSize: Size.fromHeight(100), child: Text('Bottom Widget')),
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(100),
+              child: Text('Bottom Widget'),
+            ),
             trailing: Icon(CupertinoIcons.add_circled),
           ),
           // This widget fills the remaining space in the viewport.
