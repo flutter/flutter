@@ -17,6 +17,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'colors.dart';
 import 'constants.dart';
 import 'interface_level.dart';
@@ -1076,6 +1077,7 @@ class CupertinoActionSheet extends StatefulWidget {
     this.messageScrollController,
     this.actionScrollController,
     this.cancelButton,
+    this.focusColor,
   }) : assert(
          actions != null || title != null || message != null || cancelButton != null,
          'An action sheet must have a non-null value for at least one of the following arguments: '
@@ -1112,6 +1114,9 @@ class CupertinoActionSheet extends StatefulWidget {
   /// Defaults to null, which means the [CupertinoActionSheet] will create an
   /// action scroll controller internally.
   final ScrollController? actionScrollController;
+
+  /// {@macro flutter.cupertino.CupertinoActionSheetAction.focusColor}
+  final Color? focusColor;
 
   /// The optional cancel button that is grouped separately from the other
   /// actions.
@@ -1205,13 +1210,16 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: _ActionSheetButtonBackground(
-        isCancel: true,
-        pressed: _pressedIndex == _kCancelButtonIndex,
-        onPressStateChange: (bool state) {
-          _onPressedUpdate(_kCancelButtonIndex, state);
-        },
-        child: widget.cancelButton!,
+      child: CupertinoTraversalGroup(
+        focusColor: widget.focusColor,
+        child: _ActionSheetButtonBackground(
+          isCancel: true,
+          pressed: _pressedIndex == _kCancelButtonIndex,
+          onPressStateChange: (bool state) {
+            _onPressedUpdate(_kCancelButtonIndex, state);
+          },
+          child: widget.cancelButton!,
+        ),
       ),
     );
   }
@@ -1315,6 +1323,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               contentSection: _buildContent(context),
               actions: widget.actions ?? List<Widget>.empty(),
               dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
+              focusColor: widget.focusColor,
             ),
           ),
         ),
@@ -1418,11 +1427,14 @@ class CupertinoActionSheetAction extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// The color to use for the focus highlight for keyboard interactions.
+  /// {@template flutter.cupertino.CupertinoActionSheetAction.focusColor}
+  /// The color of the background that highlights active focus.
   ///
-  /// Defaults to a slightly transparent [CupertinoColors.activeBlue]. Slightly
-  /// transparent in this context means [kCupertinoButtonTintedOpacityLight] for
-  /// light mode and [kCupertinoButtonTintedOpacityDark] for dark mode.
+  /// A transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
+  /// [kCupertinoButtonTintedOpacityDark] (dark mode) is automatically applied to this color.
+  ///
+  /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue].
+  /// {@endtemplate}
   final Color? focusColor;
 
   /// The widget below this widget in the tree.
@@ -1849,6 +1861,7 @@ class _ActionSheetActionSection extends StatelessWidget {
         ),
       );
     }
+
     return CupertinoScrollbar(
       controller: scrollController,
       child: SingleChildScrollView(
@@ -1868,6 +1881,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
     required this.actions,
     required this.contentSection,
     required this.dividerColor,
+    required this.focusColor,
   });
 
   final int? pressedIndex;
@@ -1876,6 +1890,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
   final List<Widget> actions;
   final Widget? contentSection;
   final Color dividerColor;
+  final Color? focusColor;
 
   Widget _scrolledActionsSection(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(
@@ -1884,13 +1899,20 @@ class _ActionSheetMainSheet extends StatelessWidget {
     );
     return _OverscrollBackground(
       color: backgroundColor,
-      child: _ActionSheetActionSection(
-        actions: actions,
-        scrollController: scrollController,
-        dividerColor: dividerColor,
-        backgroundColor: backgroundColor,
-        pressedIndex: pressedIndex,
-        onPressedUpdate: onPressedUpdate,
+      child: CupertinoTraversalGroup(
+        borderRadius: CupertinoTraversalGroup.defaultBorderRadius.copyWith(
+          topLeft: Radius.zero,
+          topRight: Radius.zero,
+        ),
+        focusColor: focusColor,
+        child: _ActionSheetActionSection(
+          actions: actions,
+          scrollController: scrollController,
+          dividerColor: dividerColor,
+          backgroundColor: backgroundColor,
+          pressedIndex: pressedIndex,
+          onPressedUpdate: onPressedUpdate,
+        ),
       ),
     );
   }
@@ -1918,6 +1940,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
     if (contentSection == null) {
       return _scrolledActionsSection(context);
     }
+
     return _PriorityColumn(
       top: contentSection!,
       bottom: _dividerAndActionsSection(context),
@@ -2163,6 +2186,94 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
           decoration: BoxDecoration(color: CupertinoDynamicColor.resolve(backgroundColor, context)),
           child: widget.child,
         ),
+      ),
+    );
+  }
+}
+
+///  {@template flutter.cupertino.CupertinoTraversalGroup}
+/// A wrapper around [FocusTraversalGroup] to apply a Cupertino-style focus border
+/// around its child when any of child focus nodes gain focus.
+///
+/// The focus border is drawn using a border color specified by [focusColor] and
+/// is rounded by a border radius specified by [borderRadius].
+///
+///  See also:
+///
+/// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
+/// {@endtemplate}
+class CupertinoTraversalGroup extends StatefulWidget {
+  /// {@macro flutter.cupertino.CupertinoTraversalGroup}
+  const CupertinoTraversalGroup({
+    this.borderRadius,
+    this.focusColor,
+    required this.child,
+    super.key,
+  });
+
+  /// The radius of the border that highlights active focus.
+  ///
+  /// When [borderRadius] is null, it defaults to [CupertinoTraversalGroup.defaultBorderRadius]
+  final BorderRadiusGeometry? borderRadius;
+
+  /// The color of the border that highlights active focus.
+  ///
+  /// A opacity of [kCupertinoFocusColorOpacity], brightness of [kCupertinoFocusColorBrightness]
+  /// and saturation of [kCupertinoFocusColorSaturation] is automatically applied to this color.
+  ///
+  /// When [focusColor] is null, the widget defaults to [CupertinoColors.activeBlue]
+  final Color? focusColor;
+
+  /// The child to draw the focused border around.
+  ///
+  /// Since [CupertinoTraversalGroup] can't request focus to itself, this [child] should
+  /// contain widget(s) that can request focus.
+  final Widget child;
+
+  /// The default radius of the border that highlights active focus.
+  static BorderRadius get defaultBorderRadius => kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!;
+
+  @override
+  State<CupertinoTraversalGroup> createState() => CupertinoTraversalGroupState();
+}
+
+/// {@macro flutter.cupertino.CupertinoTraversalGroup}
+class CupertinoTraversalGroupState extends State<CupertinoTraversalGroup> {
+  bool _childHasFocus = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color effectiveFocusOutlineColor =
+        HSLColor.fromColor(
+              (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
+                kCupertinoFocusColorOpacity,
+              ),
+            )
+            .withLightness(kCupertinoFocusColorBrightness)
+            .withSaturation(kCupertinoFocusColorSaturation)
+            .toColor();
+
+    return FocusTraversalGroup(
+      onFocusChange: (bool hasFocus) {
+        setState(() {
+          _childHasFocus = hasFocus;
+        });
+      },
+      child: DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          borderRadius: widget.borderRadius ?? CupertinoTraversalGroup.defaultBorderRadius,
+          border:
+              _childHasFocus
+                  ? Border.fromBorderSide(
+                    BorderSide(
+                      color: effectiveFocusOutlineColor,
+                      width: 3.5,
+                    ),
+                  )
+                  : null,
+        ),
+        child: widget.child,
       ),
     );
   }
