@@ -12,6 +12,8 @@ import 'package:flutter/widgets.dart';
 
 import 'page_transitions_theme.dart';
 
+// TODO(justinmc): OK the border radius animation was there for a reason. It pops in now on the emulator.
+
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation that looks like the default page transition used on
 /// Android U and above when using predictive back.
@@ -166,99 +168,6 @@ typedef _PredictiveBackGestureDetectorWidgetBuilder =
     );
 
 enum _PredictiveBackPhase { idle, start, update, commit, cancel }
-
-class _PredictiveBackGestureListener extends StatefulWidget {
-  const _PredictiveBackGestureListener({required this.builder, required this.route});
-
-  final _PredictiveBackGestureDetectorWidgetBuilder builder;
-  final PageRoute<dynamic> route;
-
-  @override
-  State<_PredictiveBackGestureListener> createState() => _PredictiveBackGestureListenerState();
-}
-
-class _PredictiveBackGestureListenerState extends State<_PredictiveBackGestureListener>
-    with WidgetsBindingObserver {
-  _PredictiveBackPhase get phase => _phase;
-  _PredictiveBackPhase _phase = _PredictiveBackPhase.idle;
-  set phase(_PredictiveBackPhase phase) {
-    if (_phase != phase && mounted) {
-      setState(() => _phase = phase);
-    }
-  }
-
-  /// The back event when the gesture first started.
-  PredictiveBackEvent? get startBackEvent => _startBackEvent;
-  PredictiveBackEvent? _startBackEvent;
-  set startBackEvent(PredictiveBackEvent? startBackEvent) {
-    if (_startBackEvent != startBackEvent && mounted) {
-      setState(() => _startBackEvent = startBackEvent);
-    }
-  }
-
-  /// The most recent back event during the gesture.
-  PredictiveBackEvent? get currentBackEvent => _currentBackEvent;
-  PredictiveBackEvent? _currentBackEvent;
-  set currentBackEvent(PredictiveBackEvent? currentBackEvent) {
-    if (_currentBackEvent != currentBackEvent && mounted) {
-      setState(() => _currentBackEvent = currentBackEvent);
-    }
-  }
-
-  // Begin WidgetsBindingObserver.
-
-  @override
-  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
-    phase = _PredictiveBackPhase.start;
-
-    final bool gestureInProgress = !backEvent.isButtonEvent && widget.route.popGestureEnabled;
-    if (!gestureInProgress) {
-      return false;
-    }
-
-    startBackEvent = currentBackEvent = backEvent;
-    return true;
-  }
-
-  @override
-  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
-    phase = _PredictiveBackPhase.update;
-    currentBackEvent = backEvent;
-  }
-
-  @override
-  void handleCancelBackGesture() {
-    phase = _PredictiveBackPhase.cancel;
-    startBackEvent = currentBackEvent = null;
-  }
-
-  @override
-  void handleCommitBackGesture() {
-    phase = _PredictiveBackPhase.commit;
-    startBackEvent = currentBackEvent = null;
-  }
-
-  // End WidgetsBindingObserver.
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final _PredictiveBackPhase effectivePhase =
-        widget.route.popGestureInProgress ? phase : _PredictiveBackPhase.idle;
-    return widget.builder(context, effectivePhase, startBackEvent, currentBackEvent);
-  }
-}
 
 class _PredictiveBackGestureDetector extends StatefulWidget {
   const _PredictiveBackGestureDetector({required this.route, required this.builder});
