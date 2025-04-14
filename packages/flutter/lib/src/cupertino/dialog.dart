@@ -1115,7 +1115,7 @@ class CupertinoActionSheet extends StatefulWidget {
   /// action scroll controller internally.
   final ScrollController? actionScrollController;
 
-  /// {@macro flutter.cupertino.CupertinoActionSheetAction.focusColor}
+  /// {@macro flutter.cupertino.CupertinoTraversalGroup.focusColor}
   final Color? focusColor;
 
   /// The optional cancel button that is grouped separately from the other
@@ -1427,14 +1427,12 @@ class CupertinoActionSheetAction extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
-  /// {@template flutter.cupertino.CupertinoActionSheetAction.focusColor}
   /// The color of the background that highlights active focus.
   ///
   /// A transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
   /// [kCupertinoButtonTintedOpacityDark] (dark mode) is automatically applied to this color.
   ///
   /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue].
-  /// {@endtemplate}
   final Color? focusColor;
 
   /// The widget below this widget in the tree.
@@ -1448,13 +1446,7 @@ class CupertinoActionSheetAction extends StatefulWidget {
 
 class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     implements _SlideTarget {
-  late bool _isFocused;
-
-  @override
-  void initState() {
-    super.initState();
-    _isFocused = false;
-  }
+  bool _isFocused = false;
 
   // |_SlideTarget|
   @override
@@ -2191,14 +2183,14 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
   }
 }
 
-///  {@template flutter.cupertino.CupertinoTraversalGroup}
+/// {@template flutter.cupertino.CupertinoTraversalGroup}
 /// A wrapper around [FocusTraversalGroup] to apply a Cupertino-style focus border
 /// around its child when any of child focus nodes gain focus.
 ///
 /// The focus border is drawn using a border color specified by [focusColor] and
 /// is rounded by a border radius specified by [borderRadius].
 ///
-///  See also:
+/// See also:
 ///
 /// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
 /// {@endtemplate}
@@ -2216,12 +2208,14 @@ class CupertinoTraversalGroup extends StatefulWidget {
   /// When [borderRadius] is null, it defaults to [CupertinoTraversalGroup.defaultBorderRadius]
   final BorderRadiusGeometry? borderRadius;
 
-  /// The color of the border that highlights active focus.
+  /// {@template flutter.cupertino.CupertinoTraversalGroup.focusColor}
+  /// The color of the traversal group border that highlights active focus.
   ///
   /// A opacity of [kCupertinoFocusColorOpacity], brightness of [kCupertinoFocusColorBrightness]
   /// and saturation of [kCupertinoFocusColorSaturation] is automatically applied to this color.
   ///
   /// When [focusColor] is null, the widget defaults to [CupertinoColors.activeBlue]
+  /// {@endtemplate}
   final Color? focusColor;
 
   /// The child to draw the focused border around.
