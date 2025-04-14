@@ -95,12 +95,12 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
 ///
 ///  * [PredictiveBackPageTransitionsBuilder], which is the default Android
 ///    predictive back page transition.
-///  * [https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces],
+///  * https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces,
 ///    which is the native Android docs for this page transition.
-class PredictiveBackFullScreenPageTransitionsBuilder extends PageTransitionsBuilder {
+class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// shared element predictive back transition.
-  const PredictiveBackFullScreenPageTransitionsBuilder();
+  const PredictiveBackFullscreenPageTransitionsBuilder();
 
   @override
   Widget buildTransitions<T>(
@@ -122,7 +122,7 @@ class PredictiveBackFullScreenPageTransitionsBuilder extends PageTransitionsBuil
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
         if (route.popGestureInProgress) {
-          return _PredictiveBackFullScreenPageTransition(
+          return _PredictiveBackFullscreenPageTransition(
             animation: animation,
             secondaryAnimation: secondaryAnimation,
             getIsCurrent: () => route.isCurrent,
@@ -352,8 +352,8 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
 /// Android's predictive back page transition for full screen surfaces.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
-class _PredictiveBackFullScreenPageTransition extends StatefulWidget {
-  const _PredictiveBackFullScreenPageTransition({
+class _PredictiveBackFullscreenPageTransition extends StatefulWidget {
+  const _PredictiveBackFullscreenPageTransition({
     required this.animation,
     required this.secondaryAnimation,
     required this.getIsCurrent,
@@ -366,12 +366,12 @@ class _PredictiveBackFullScreenPageTransition extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_PredictiveBackFullScreenPageTransition> createState() =>
-      _PredictiveBackFullScreenPageTransitionState();
+  State<_PredictiveBackFullscreenPageTransition> createState() =>
+      _PredictiveBackFullscreenPageTransitionState();
 }
 
-class _PredictiveBackFullScreenPageTransitionState
-    extends State<_PredictiveBackFullScreenPageTransition> {
+class _PredictiveBackFullscreenPageTransitionState
+    extends State<_PredictiveBackFullscreenPageTransition> {
   // These values were eyeballed to match the native predictive back animation
   // on a Pixel 2 running Android API 34.
   static const double _scaleFullyOpened = 1.0;
