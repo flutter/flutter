@@ -61,6 +61,7 @@ distributionUrl=https\://services.gradle.org/distributions/gradle-GRADLE_REPLACE
 
 const String gradleReplacementString = 'GRADLE_REPLACE_ME';
 final RegExp flutterCompileSdkString = RegExp(r'flutter\.compileSdkVersion|flutter\.compileSdk');
+final RegExp flutterMinSdkString = RegExp(r'flutter\.minSdkVersion|flutter\.minSdk');
 
 /// A simple class containing a Kotlin, Gradle, and AGP version.
 class VersionTuple {
@@ -69,12 +70,14 @@ class VersionTuple {
     required this.gradleVersion,
     required this.kotlinVersion,
     this.compileSdkVersion,
+    this.minSdkVersion,
   });
 
   String agpVersion;
   String gradleVersion;
   String kotlinVersion;
   String? compileSdkVersion;
+  String? minSdkVersion;
 
   @override
   String toString() {
@@ -108,13 +111,21 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
 
       final String appPath = '${innerTempDir.absolute.path}/dependency_checker_app';
 
+      final File appGradleBuild = getAndroidBuildFile(
+        localFileSystem.path.join(appPath, 'android', 'app'),
+      );
       if (versions.compileSdkVersion != null) {
-        final File appGradleBuild = getAndroidBuildFile(
-          localFileSystem.path.join(appPath, 'android', 'app'),
-        );
         final String appBuildContent = appGradleBuild.readAsStringSync().replaceFirst(
           flutterCompileSdkString,
           versions.compileSdkVersion!,
+        );
+        appGradleBuild.writeAsStringSync(appBuildContent);
+      }
+
+      if (versions.minSdkVersion != null) {
+        final String appBuildContent = appGradleBuild.readAsStringSync().replaceFirst(
+          flutterMinSdkString,
+          versions.minSdkVersion!,
         );
         appGradleBuild.writeAsStringSync(appBuildContent);
       }
@@ -143,6 +154,13 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
           .replaceFirst(agpReplacementString, versions.agpVersion)
           .replaceFirst(kgpReplacementString, versions.kotlinVersion);
       await gradleSettingsFile.writeAsString(settingsContent, flush: true);
+
+      section('Add a dependency on a plugin');
+      await flutter(
+        'pub',
+        options: <String>['add', 'shared_preferences_android:2.4.7'], // Chosen randomly.
+        workingDirectory: appPath,
+      );
 
       // Ensure that gradle files exists from templates.
       section(
