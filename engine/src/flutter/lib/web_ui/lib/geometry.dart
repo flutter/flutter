@@ -1241,7 +1241,11 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   static final RSuperellipse zero = RSuperellipse._raw();
 
   bool contains(Offset point) {
-    return _param.contains(point);
+    if (!_param.isInitialized) {
+      _param.init(this);
+    }
+    final Offset center = this.center;
+    return _param.contains(Offset((point.dx - center.dx) / width, (point.dy - center.dy) / height));
   }
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {

@@ -48,7 +48,10 @@ class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
   final Map<int, RSuperellipse> _cache = <int, RSuperellipse>{};
   void _drawRSuperellipseCached(Canvas canvas, int key, Rect rect, Radius radius, Paint paint) {
     final RSuperellipse rsuperellipse = RSuperellipse.fromRectAndRadius(rect, radius);
-    final RSuperellipse cache = _cache.putIfAbsent(key, () => rsuperellipse);
+    final RSuperellipse cache = _cache.putIfAbsent(
+      key,
+      () => rsuperellipse,
+    );
     canvas.drawRSuperellipse(rsuperellipse, paint, maybeCache: cache);
   }
 
