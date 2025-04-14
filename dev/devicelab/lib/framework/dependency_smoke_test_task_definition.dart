@@ -144,13 +144,6 @@ Future<TaskResult> buildFlutterApkWithSpecifiedDependencyVersions({
           .replaceFirst(kgpReplacementString, versions.kotlinVersion);
       await gradleSettingsFile.writeAsString(settingsContent, flush: true);
 
-      section('Add a dependency on a plugin');
-      await flutter(
-        'pub',
-        options: <String>['add', 'shared_preferences_android:2.4.9'], // Chosen randomly.
-        workingDirectory: appPath,
-      );
-
       // Ensure that gradle files exists from templates.
       section(
         "Ensure 'flutter build apk' succeeds with Gradle ${versions.gradleVersion}, AGP ${versions.agpVersion}, and Kotlin ${versions.kotlinVersion}",
