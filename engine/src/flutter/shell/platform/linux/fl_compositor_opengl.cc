@@ -87,8 +87,8 @@ G_DEFINE_TYPE(FlCompositorOpenGL,
               fl_compositor_opengl,
               fl_compositor_get_type())
 
-// Check if running on supported driver.
-static bool is_supported_driver() {
+// Check if running on driver supporting blit.
+static gboolean driver_supports_blit() {
   const gchar* vendor = reinterpret_cast<const gchar*>(glGetString(GL_VENDOR));
 
   // Note: List of unsupported vendors due to issue
@@ -97,10 +97,10 @@ static bool is_supported_driver() {
 
   for (const char* unsupported : unsupported_vendors) {
     if (strstr(vendor, unsupported) != nullptr) {
-      return false;
+      return FALSE;
     }
   }
-  return true;
+  return TRUE;
 }
 
 // Returns the log for the given OpenGL shader. Must be freed by the caller.
@@ -587,7 +587,7 @@ void fl_compositor_opengl_setup(FlCompositorOpenGL* self) {
   g_return_if_fail(FL_IS_COMPOSITOR_OPENGL(self));
 
   self->has_gl_framebuffer_blit =
-      is_supported_driver() &&
+      driver_supports_blit() &&
       (epoxy_gl_version() >= 30 ||
        epoxy_has_gl_extension("GL_EXT_framebuffer_blit"));
 
