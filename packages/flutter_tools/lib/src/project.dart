@@ -695,8 +695,8 @@ class AndroidProject extends FlutterProjectPlatform {
   }
 
   /// Ensures Java SDK is compatible with the project's Gradle version and
-  /// the project's Gradle version is compatible with the AGP version used
-  /// in build.gradle.
+  /// the project's Gradle version is compatible with the AGP version and
+  /// kotlin version used in build.gradle.
   Future<CompatibilityResult> hasValidJavaGradleAgpVersions() async {
     final String? gradleVersion = await gradle.getGradleVersion(
       hostAppGradleRoot,
@@ -705,6 +705,10 @@ class AndroidProject extends FlutterProjectPlatform {
     );
     final String? agpVersion = gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
     final String? javaVersion = versionToParsableString(globals.java?.version);
+    final String? kgpVersion = await gradle.getKotlinVersion(
+      hostAppGradleRoot,
+      globals.logger,
+      globals.processManager);
 
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
@@ -719,6 +723,12 @@ class AndroidProject extends FlutterProjectPlatform {
       globals.logger,
       javaV: javaVersion,
       gradleV: gradleVersion,
+    );
+
+    final bool compatibleGradleKotlin = gradle.validateGradleAndKotlin(
+      globals.logger,
+      gradleV: gradleVersion,
+      kgpV: kgpVersion,
     );
 
     // Begin description formatting.
@@ -745,7 +755,16 @@ See the link below for more information:
 $javaGradleCompatUrl
 ''';
     }
-    return CompatibilityResult(compatibleJavaGradle && compatibleGradleAgp, description);
+    if (!compatibleGradleKotlin) {
+      description = '''
+${compatibleGradleKotlin ? '' : description}
+Incompatible Gradle/Kotlin versions.
+Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion\n
+See the link below for more information:
+  https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations
+''';
+    }
+    return CompatibilityResult(compatibleJavaGradle && compatibleGradleAgp && compatibleGradleKotlin, description);
   }
 
   bool get isUsingGradle {

@@ -576,7 +576,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: Version(17, 0, 2));
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.list(<FakeCommand>[createGradleVersionCommand('8.0', '1.9.1')]);
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -604,7 +604,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.list(<FakeCommand>[createGradleVersionCommand('6.7.1', '1.3.72')]);
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -632,7 +632,7 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.list(<FakeCommand>[createGradleVersionCommand('7.3.3', '1.9.1')]);
         java = FakeJava(version: Version(11, 0, 14));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -664,7 +664,7 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.any();
         java = FakeJava(version: Version.parse(javaV));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -709,7 +709,7 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.any();
         java = FakeJava(version: Version(17, 0, 2));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -747,7 +747,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: Version(11, 0, 2));
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.any();
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -786,7 +786,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: Version(11, 0, 2));
-        processManager = FakeProcessManager.empty();
+        processManager = FakeProcessManager.any();
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -1977,6 +1977,28 @@ flutter:
     androidPackage: com.example
 ''');
   return FlutterProject.fromDirectory(directory);
+}
+
+FakeCommand createGradleVersionCommand(String gradleV, String kotlinV) {
+  return FakeCommand(
+            command: <String>['gradle', '--version'],
+            stdout: '''
+/*
+
+------------------------------------------------------------
+Gradle $gradleV
+------------------------------------------------------------
+
+Build time:   2022-11-25 13:35:10 UTC
+Revision:     daece9dbc5b79370cc8e4fd6fe4b2cd400e150a8
+
+Kotlin:       $kotlinV
+Groovy:       3.0.13
+Ant:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021
+JVM:          17.0.6 (Homebrew 17.0.6+0)
+OS:           Mac OS X 13.2.1 aarch64
+''',
+          );
 }
 
 /// Executes the [testMethod] in a context where the file system

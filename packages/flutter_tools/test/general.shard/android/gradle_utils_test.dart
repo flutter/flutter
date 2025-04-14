@@ -729,6 +729,9 @@ dependencies {
         GradleKotlinTestData(false, gradleVersion: '7.3', kgpVersion: '2.0'),
         GradleKotlinTestData(true, gradleVersion: '8.3.1', kgpVersion: '2.0'),
         GradleKotlinTestData(true, gradleVersion: '8.12', kgpVersion: '2.0'),
+        // "Normal" versions.
+        GradleKotlinTestData(true, gradleVersion: '7.3.3', kgpVersion: '1.9.0'),
+        GradleKotlinTestData(false, gradleVersion: '7.3.3', kgpVersion: '2.1.1'),
         // Null values:
         // ignore: avoid_redundant_argument_values
         GradleKotlinTestData(false, gradleVersion: '7.2', kgpVersion: null),

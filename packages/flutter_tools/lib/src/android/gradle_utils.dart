@@ -125,6 +125,7 @@ final RegExp tooOldMinSdkVersionMatch = RegExp(
 );
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
+// Flag to print the versions for gradle, kotlin, groovy, etc.
 const String gradleVersionFlag = r'--version';
 
 // Directory under android/ that gradle uses to store gradle information.
@@ -288,7 +289,7 @@ Future<String?> getGradleVersion(
   }
   // System installed Gradle version.
   if (processManager.canRun('gradle')) {
-    final String gradleVersionVerbose =
+    final String gradleVersionsVerbose =
         (await processManager.run(<String>['gradle', gradleVersionFlag])).stdout as String;
     // Expected format:
     /*
@@ -311,10 +312,59 @@ OS:           Mac OS X 13.2.1 aarch64
     // Outer parentheticals `Gradle (...)` denote a grouping used to extract
     // the version number.
     final RegExp gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
-    final RegExpMatch? version = gradleVersionRegex.firstMatch(gradleVersionVerbose);
+    final RegExpMatch? version = gradleVersionRegex.firstMatch(gradleVersionsVerbose);
     if (version == null) {
       // Most likely a bug in our parse implementation/regex.
-      logger.printWarning(_formatParseWarning(gradleVersionVerbose));
+      logger.printWarning(_formatParseWarning(gradleVersionsVerbose));
+      return null;
+    }
+    return version.group(1);
+  } else {
+    logger.printTrace('Could not run system gradle');
+    return null;
+  }
+}
+
+/// Returns the Kotlin Gradle Plugin (AGP) version that the current project
+/// depends on when found, null otherwise.
+/// [directory] should be an android directory with a build.gradle file.
+Future<String?> getKotlinVersion(
+  Directory androidDirectory,
+  Logger logger,
+  ProcessManager processManager,
+) async {
+  // If running gradle becomes a performance problem then consider file regular expression evaluation
+  // similar to agp version finding. Avoiding that in the initial implemention because
+  // it is fragile and complex.
+  // System installed Gradle version.
+  if (processManager.canRun('gradle')) {
+    final String gradleVersionsVerbose =
+        (await processManager.run(<String>['gradle', gradleVersionFlag])).stdout as String;
+    // Expected format:
+    /*
+
+------------------------------------------------------------
+Gradle 7.6
+------------------------------------------------------------
+
+Build time:   2022-11-25 13:35:10 UTC
+Revision:     daece9dbc5b79370cc8e4fd6fe4b2cd400e150a8
+
+Kotlin:       1.7.10
+Groovy:       3.0.13
+Ant:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021
+JVM:          17.0.6 (Homebrew 17.0.6+0)
+OS:           Mac OS X 13.2.1 aarch64
+    */
+    // Observation shows that the version can have 2 or 3 numbers.
+    // Inner parentheticals `(\.\d+)?` denote the optional third value.
+    // Outer parentheticals `Gradle (...)` denote a grouping used to extract
+    // the version number.
+    final RegExp kotlinVersionRegex = RegExp(r'Kotlin:\s+(\d+\.\d+(?:\.\d+)?)');
+    final RegExpMatch? version = kotlinVersionRegex.firstMatch(gradleVersionsVerbose);
+    if (version == null) {
+      // Most likely a bug in our parse implementation/regex.
+      logger.printWarning(_formatParseWarning(gradleVersionsVerbose, type: 'kotlin'));
       return null;
     }
     return version.group(1);
@@ -378,8 +428,8 @@ String? getAgpVersion(Directory androidDirectory, Logger logger) {
   return null;
 }
 
-String _formatParseWarning(String content) {
-  return 'Could not parse gradle version from: \n'
+String _formatParseWarning(String content, {String type = 'gradle'}) {
+  return 'Could not parse $type version from: \n'
       '$content \n'
       'If there is a version please look for an existing bug '
       'https://github.com/flutter/flutter/issues/'
@@ -419,7 +469,7 @@ bool validateGradleAndKotlin(Logger logger, {required String? gradleV, required 
 
     // If kotlin is past 2.0 then k2 can have issues.
     // https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations.
-    return isWithinVersionRange(kgpV, min: '2.0', max: '100.00', inclusiveMin: false);
+    return isWithinVersionRange(kgpV, min: '0.0', max: '2.0', inclusiveMax: false);
   }
 }
 
