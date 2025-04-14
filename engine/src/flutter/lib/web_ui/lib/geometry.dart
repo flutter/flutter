@@ -406,29 +406,7 @@ class Radius {
 }
 
 abstract class _RRectLike<T extends _RRectLike<T>> {
-  const _RRectLike({
-    required this.left,
-    required this.top,
-    required this.right,
-    required this.bottom,
-    required this.tlRadiusX,
-    required this.tlRadiusY,
-    required this.trRadiusX,
-    required this.trRadiusY,
-    required this.brRadiusX,
-    required this.brRadiusY,
-    required this.blRadiusX,
-    required this.blRadiusY,
-    required bool uniformRadii,
-  }) : assert(tlRadiusX >= 0),
-       assert(tlRadiusY >= 0),
-       assert(trRadiusX >= 0),
-       assert(trRadiusY >= 0),
-       assert(brRadiusX >= 0),
-       assert(brRadiusY >= 0),
-       assert(blRadiusX >= 0),
-       assert(blRadiusY >= 0),
-       webOnlyUniformRadii = uniformRadii;
+  const _RRectLike();
 
   T _create({
     required double left,
@@ -445,24 +423,24 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     required double blRadiusY,
   });
 
-  final double left;
-  final double top;
-  final double right;
-  final double bottom;
-  final double tlRadiusX;
-  final double tlRadiusY;
+  double get left;
+  double get top;
+  double get right;
+  double get bottom;
+  double get tlRadiusX;
+  double get tlRadiusY;
   Radius get tlRadius => Radius.elliptical(tlRadiusX, tlRadiusY);
-  final double trRadiusX;
-  final double trRadiusY;
+  double get trRadiusX;
+  double get trRadiusY;
   Radius get trRadius => Radius.elliptical(trRadiusX, trRadiusY);
-  final double brRadiusX;
-  final double brRadiusY;
+  double get brRadiusX;
+  double get brRadiusY;
   Radius get brRadius => Radius.elliptical(brRadiusX, brRadiusY);
-  final double blRadiusX;
-  final double blRadiusY;
-  // webOnly
-  final bool webOnlyUniformRadii;
+  double get blRadiusX;
+  double get blRadiusY;
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
+  // webOnly
+  bool get webOnlyUniformRadii;
 
   T shift(Offset offset) {
     return _create(
@@ -736,6 +714,30 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
 }
 
 class RRect extends _RRectLike<RRect> {
+  const RRect._raw({
+    this.left = 0,
+    this.top = 0,
+    this.right = 0,
+    this.bottom = 0,
+    this.tlRadiusX = 0,
+    this.tlRadiusY = 0,
+    this.trRadiusX = 0,
+    this.trRadiusY = 0,
+    this.brRadiusX = 0,
+    this.brRadiusY = 0,
+    this.blRadiusX = 0,
+    this.blRadiusY = 0,
+    bool uniformRadii = false,
+  }) : assert(tlRadiusX >= 0),
+       assert(tlRadiusY >= 0),
+       assert(trRadiusX >= 0),
+       assert(trRadiusY >= 0),
+       assert(brRadiusX >= 0),
+       assert(brRadiusY >= 0),
+       assert(blRadiusX >= 0),
+       assert(blRadiusY >= 0),
+       webOnlyUniformRadii = uniformRadii;
+
   const RRect.fromLTRBXY(
     double left,
     double top,
@@ -871,21 +873,32 @@ class RRect extends _RRectLike<RRect> {
              topLeft.x == bottomRight.y,
        );
 
-  const RRect._raw({
-    super.left = 0.0,
-    super.top = 0.0,
-    super.right = 0.0,
-    super.bottom = 0.0,
-    super.tlRadiusX = 0.0,
-    super.tlRadiusY = 0.0,
-    super.trRadiusX = 0.0,
-    super.trRadiusY = 0.0,
-    super.brRadiusX = 0.0,
-    super.brRadiusY = 0.0,
-    super.blRadiusX = 0.0,
-    super.blRadiusY = 0.0,
-    super.uniformRadii = false,
-  });
+  @override
+  final double left;
+  @override
+  final double top;
+  @override
+  final double right;
+  @override
+  final double bottom;
+  @override
+  final double tlRadiusX;
+  @override
+  final double tlRadiusY;
+  @override
+  final double trRadiusX;
+  @override
+  final double trRadiusY;
+  @override
+  final double brRadiusX;
+  @override
+  final double brRadiusY;
+  @override
+  final double blRadiusX;
+  @override
+  final double blRadiusY;
+  @override
+  final bool webOnlyUniformRadii;
 
   @override
   RRect _create({
@@ -980,7 +993,85 @@ class RRect extends _RRectLike<RRect> {
   }
 }
 
+class _Radii {
+  const _Radii.unified({
+    required double width,
+    required double height,
+    required double tlRadiusX,
+    required double tlRadiusY,
+    required double trRadiusX,
+    required double trRadiusY,
+    required double brRadiusX,
+    required double brRadiusY,
+    required double blRadiusX,
+    required double blRadiusY,
+  }) : tlRadiusX = tlRadiusX / width,
+       tlRadiusY = tlRadiusY / height,
+       trRadiusX = trRadiusX / width,
+       trRadiusY = trRadiusY / height,
+       brRadiusX = brRadiusX / width,
+       brRadiusY = brRadiusY / height,
+       blRadiusX = blRadiusX / width,
+       blRadiusY = blRadiusY / height;
+
+  final double tlRadiusX;
+  final double tlRadiusY;
+  Radius get tlRadius => Radius.elliptical(tlRadiusX, tlRadiusY);
+  final double trRadiusX;
+  final double trRadiusY;
+  Radius get trRadius => Radius.elliptical(trRadiusX, trRadiusY);
+  final double brRadiusX;
+  final double brRadiusY;
+  Radius get brRadius => Radius.elliptical(brRadiusX, brRadiusY);
+  final double blRadiusX;
+  final double blRadiusY;
+  Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
+
+  bool nearlyEqualTo(_Radii b, double tolerance) {
+    bool ScalarNearlyEqual(double x, double y) {
+      return (x - y).abs() <= tolerance;
+    }
+
+    return ScalarNearlyEqual(tlRadiusX, b.tlRadiusX) &&
+        ScalarNearlyEqual(tlRadiusY, b.tlRadiusY) &&
+        ScalarNearlyEqual(trRadiusX, b.trRadiusX) &&
+        ScalarNearlyEqual(trRadiusY, b.trRadiusY) &&
+        ScalarNearlyEqual(blRadiusX, b.blRadiusX) &&
+        ScalarNearlyEqual(blRadiusY, b.blRadiusY) &&
+        ScalarNearlyEqual(brRadiusX, b.brRadiusX) &&
+        ScalarNearlyEqual(brRadiusY, b.brRadiusY);
+  }
+}
+
 class RSuperellipse extends _RRectLike<RSuperellipse> {
+  RSuperellipse._raw({
+    this.left = 0.0,
+    this.top = 0.0,
+    this.right = 0.0,
+    this.bottom = 0.0,
+    double tlRadiusX = 0.0,
+    double tlRadiusY = 0.0,
+    double trRadiusX = 0.0,
+    double trRadiusY = 0.0,
+    double brRadiusX = 0.0,
+    double brRadiusY = 0.0,
+    double blRadiusX = 0.0,
+    double blRadiusY = 0.0,
+    bool uniformRadii = false,
+  }) : _unitifiedRadii = _Radii.unified(
+         width: right - left,
+         height: bottom - top,
+         tlRadiusX: tlRadiusX,
+         tlRadiusY: tlRadiusY,
+         trRadiusX: trRadiusX,
+         trRadiusY: trRadiusY,
+         brRadiusX: brRadiusX,
+         brRadiusY: brRadiusY,
+         blRadiusX: blRadiusX,
+         blRadiusY: blRadiusY,
+       ),
+       webOnlyUniformRadii = uniformRadii;
+
   RSuperellipse.fromLTRBXY(
     double left,
     double top,
@@ -1116,60 +1207,34 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
              topLeft.x == bottomRight.y,
        );
 
-  RSuperellipse._raw({
-    super.left = 0.0,
-    super.top = 0.0,
-    super.right = 0.0,
-    super.bottom = 0.0,
-    super.tlRadiusX = 0.0,
-    super.tlRadiusY = 0.0,
-    super.trRadiusX = 0.0,
-    super.trRadiusY = 0.0,
-    super.brRadiusX = 0.0,
-    super.brRadiusY = 0.0,
-    super.blRadiusX = 0.0,
-    super.blRadiusY = 0.0,
-    super.uniformRadii = false,
-  });
+  @override
+  final double left;
+  @override
+  final double top;
+  @override
+  final double right;
+  @override
+  final double bottom;
+  @override
+  double get tlRadiusX => _unitifiedRadii.tlRadiusX * width;
+  @override
+  double get tlRadiusY => _unitifiedRadii.tlRadiusY * height;
+  @override
+  double get trRadiusX => _unitifiedRadii.trRadiusX * width;
+  @override
+  double get trRadiusY => _unitifiedRadii.trRadiusY * height;
+  @override
+  double get blRadiusX => _unitifiedRadii.blRadiusX * width;
+  @override
+  double get blRadiusY => _unitifiedRadii.blRadiusY * height;
+  @override
+  double get brRadiusX => _unitifiedRadii.brRadiusX * width;
+  @override
+  double get brRadiusY => _unitifiedRadii.brRadiusY * height;
+  @override
+  final bool webOnlyUniformRadii;
 
-  RSuperellipse _unified() {
-    final double w = width;
-    final double h = height;
-    return RSuperellipse._raw(
-      left: -0.5,
-      top: -0.5,
-      right: 0.5,
-      bottom: 0.5,
-      tlRadiusX: tlRadiusX / w,
-      tlRadiusY: tlRadiusY / h,
-      trRadiusX: trRadiusX / w,
-      trRadiusY: trRadiusY / h,
-      brRadiusX: brRadiusX / w,
-      brRadiusY: brRadiusY / h,
-      blRadiusX: blRadiusX / w,
-      blRadiusY: blRadiusY / h,
-      uniformRadii: webOnlyUniformRadii,
-    );
-  }
-
-  bool _radiusNearlyEqualTo(RSuperellipse b, double tolerance) {
-    bool ScalarNearlyEqual(double x, double y) {
-      return (x - y).abs() <= tolerance;
-    }
-
-    final double widthA = width;
-    final double heightA = height;
-    final double widthB = b.height;
-    final double heightB = b.height;
-    return ScalarNearlyEqual(tlRadiusX, b.tlRadiusX) &&
-        ScalarNearlyEqual(tlRadiusY, b.tlRadiusY) &&
-        ScalarNearlyEqual(trRadiusX, b.trRadiusX) &&
-        ScalarNearlyEqual(trRadiusY, b.trRadiusY) &&
-        ScalarNearlyEqual(blRadiusX, b.blRadiusX) &&
-        ScalarNearlyEqual(blRadiusY, b.blRadiusY) &&
-        ScalarNearlyEqual(brRadiusX, b.brRadiusX) &&
-        ScalarNearlyEqual(brRadiusY, b.brRadiusY);
-  }
+  final _Radii _unitifiedRadii;
 
   final RSuperellipseParam _param = RSuperellipseParam();
 

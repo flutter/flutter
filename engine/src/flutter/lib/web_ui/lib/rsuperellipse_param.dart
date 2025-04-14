@@ -104,7 +104,7 @@ bool ScalarNearlyEqual(double x, double y) {
   return (x - y).abs() <= kEhCloseEnough;
 }
 
-bool _areAllCornersSame(RSuperellipse r) {
+bool _areAllCornersSame(_Radii r) {
   return ScalarNearlyEqual(r.tlRadiusX, r.trRadiusX) &&
       ScalarNearlyEqual(r.tlRadiusX, r.brRadiusX) &&
       ScalarNearlyEqual(r.tlRadiusX, r.blRadiusX) &&
@@ -314,21 +314,24 @@ class RSuperellipseParam {
     if (maybeCache != null &&
         maybeCache._param.isInitialized &&
         (identical(target, maybeCache) ||
-            target._unified()._radiusNearlyEqualTo(maybeCache._unified(), 1e-6))) {
+            target._unitifiedRadii.nearlyEqualTo(maybeCache._unitifiedRadii, 1e-6))) {
       _cachedPath = maybeCache._param._cachedPath;
     } else {
-      final RSuperellipse unified = target._unified();
       _cachedPath = Path();
-      _buildPath(_cachedPath!, unified);
+      _buildPath(_cachedPath!, target._unitifiedRadii);
     }
   }
 
-  static void _buildPath(Path path, RSuperellipse r) {
-    final double topSplit = _split(r.left, r.right, r.tlRadiusX, r.trRadiusX);
-    final double rightSplit = _split(r.top, r.bottom, r.trRadiusY, r.brRadiusY);
+  static void _buildPath(Path path, _Radii r) {
+    const double left = -0.5;
+    const double right = 0.5;
+    const double top = -0.5;
+    const double bottom = 0.5;
+    final double topSplit = _split(left, right, r.tlRadiusX, r.trRadiusX);
+    final double rightSplit = _split(top, bottom, r.trRadiusY, r.brRadiusY);
     final Quadrant topRight = Quadrant.computeQuadrant(
       Offset(topSplit, rightSplit),
-      Offset(r.right, r.top),
+      const Offset(right, top),
       r.trRadius,
     );
 
@@ -347,13 +350,13 @@ class RSuperellipseParam {
       builder.addQuadrant(topRight, false, Offset(-1, -1));
       builder.addQuadrant(topRight, true, Offset(-1, 1));
     } else {
-      final double bottomSplit = _split(r.left, r.right, r.blRadiusX, r.brRadiusX);
-      final double leftSplit = _split(r.top, r.bottom, r.tlRadiusY, r.blRadiusY);
+      final double bottomSplit = _split(left, right, r.blRadiusX, r.brRadiusX);
+      final double leftSplit = _split(top, bottom, r.tlRadiusY, r.blRadiusY);
       builder.addQuadrant(topRight, false);
       builder.addQuadrant(
         Quadrant.computeQuadrant(
           Offset(bottomSplit, rightSplit),
-          Offset(r.right, r.bottom),
+          const Offset(right, bottom),
           r.brRadius,
         ),
         true,
@@ -361,13 +364,13 @@ class RSuperellipseParam {
       builder.addQuadrant(
         Quadrant.computeQuadrant(
           Offset(bottomSplit, leftSplit),
-          Offset(r.left, r.bottom),
+          const Offset(left, bottom),
           r.blRadius,
         ),
         false,
       );
       builder.addQuadrant(
-        Quadrant.computeQuadrant(Offset(topSplit, leftSplit), Offset(r.left, r.top), r.tlRadius),
+        Quadrant.computeQuadrant(Offset(topSplit, leftSplit), const Offset(left, top), r.tlRadius),
         true,
       );
     }
