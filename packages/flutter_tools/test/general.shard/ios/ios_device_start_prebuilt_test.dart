@@ -951,7 +951,10 @@ void main() {
           expect(launchResult.hasVmService, true);
           expect(await device.stopApp(iosApp), true);
         },
-        overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery()},
+        // If mDNS is not the only method of discovery, it shouldn't throw on error.
+        overrides: <Type, Generator>{
+          MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(allowThrowOnError: false),
+        },
       );
 
       group('IOSDevice.startApp attaches in debug mode via device logging', () {
@@ -1239,8 +1242,9 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 }
 
 class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
-  FakeMDnsVmServiceDiscovery({this.returnsNull = false});
+  FakeMDnsVmServiceDiscovery({this.returnsNull = false, this.allowThrowOnError = true});
   bool returnsNull;
+  bool allowThrowOnError;
 
   Completer<void> completer = Completer<void>();
   @override
@@ -1252,11 +1256,13 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     int? deviceVmservicePort,
     bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
+    bool throwOnError = true,
   }) async {
     completer.complete();
     if (returnsNull) {
       return null;
     }
+    expect(throwOnError, allowThrowOnError);
 
     return Uri.tryParse('http://0.0.0.0:1234');
   }

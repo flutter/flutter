@@ -664,6 +664,47 @@ void main() {
         skip: !globals.platform.isMacOS,
       );
 
+      test(
+        'On macOS, tool prints a helpful message when mDNS lookup throws an uncaught SocketException',
+        () async {
+          final MDnsClient client = FakeMDnsClient(
+            <PtrResourceRecord>[],
+            <String, List<SrvResourceRecord>>{},
+            uncaughtSocketExceptionOnLookup: true,
+          );
+
+          final BufferLogger logger = BufferLogger.test();
+
+          final MDnsVmServiceDiscovery portDiscovery = MDnsVmServiceDiscovery(
+            mdnsClient: client,
+            logger: logger,
+            analytics: const NoOpAnalytics(),
+          );
+
+          final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
+            client,
+            throwOnError: false,
+          );
+
+          expect(result, isNull);
+          expect(
+            logger.errorText,
+            contains(
+              'Flutter could not connect to the Dart VM service.\n'
+              '\n'
+              'Please ensure your IDE or terminal app has permission to access '
+              'devices on the local network. This allows Flutter to connect to '
+              'the Dart VM.\n'
+              '\n'
+              'You can grant this permission in System Settings > Privacy & '
+              'Security > Local Network.\n',
+            ),
+          );
+        },
+        // [intended] This tool exit message only works for macOS
+        skip: !globals.platform.isMacOS,
+      );
+
       testWithoutContext('Correctly builds VM Service URI with hostVmservicePort == 0', () async {
         final MDnsClient client = FakeMDnsClient(
           <PtrResourceRecord>[PtrResourceRecord('foo', future, domainName: 'bar')],
