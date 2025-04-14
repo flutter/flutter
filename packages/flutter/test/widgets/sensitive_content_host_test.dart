@@ -31,11 +31,11 @@ void main() {
         if (methodCall.method == 'SensitiveContent.setContentSensitivity') {
           setContentSensitivityArgs.add(
             ContentSensitivity.values.firstWhere(
-              (ContentSensitivity cs) => cs.name == methodCall.arguments as String,
+              (ContentSensitivity cs) => cs.index == methodCall.arguments as int,
             ),
           );
         } else if (methodCall.method == 'SensitiveContent.getContentSensitivity') {
-          return defaultContentSensitivitySetting.name;
+          return defaultContentSensitivitySetting.index;
         } else if (methodCall.method == 'SensitiveContent.isSupported') {
           return true;
         }
