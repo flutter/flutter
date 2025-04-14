@@ -13,6 +13,7 @@
 #include "impeller/core/host_buffer.h"
 #include "impeller/core/vertex_buffer.h"
 #include "impeller/geometry/path.h"
+#include "impeller/geometry/path_source.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/trig.h"
 
@@ -186,7 +187,7 @@ class Tessellator {
   ///                        the path for rendering.
   ///
   /// @return A vertex buffer containing all data from the provided curve.
-  VertexBuffer TessellateConvex(const Path& path,
+  VertexBuffer TessellateConvex(const PathSource& path,
                                 HostBuffer& host_buffer,
                                 Scalar tolerance,
                                 bool supports_primitive_restart = false,
@@ -217,7 +218,7 @@ class Tessellator {
   ///
   /// This method only exists for the ease of benchmarking without using the
   /// real allocator needed by the [host_buffer].
-  static void TessellateConvexInternal(const Path& path,
+  static void TessellateConvexInternal(const PathSource& path,
                                        std::vector<Point>& point_buffer,
                                        std::vector<uint16_t>& index_buffer,
                                        Scalar tolerance);
