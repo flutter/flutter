@@ -365,6 +365,190 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
   }
 }
 
+// TODO(justinmc): Bug: Do two backs back to back really fast.
+/// Android's predictive back page shared element transition.
+/// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
+class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
+  const _PredictiveBackSharedElementPageTransition({
+    required this.isDelegatedTransition,
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.phase,
+    required this.startBackEvent,
+    required this.currentBackEvent,
+    required this.child,
+  });
+
+  final bool isDelegatedTransition;
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final _PredictiveBackPhase phase;
+  final PredictiveBackEvent? startBackEvent;
+  final PredictiveBackEvent? currentBackEvent;
+  final Widget child;
+
+  @override
+  State<_PredictiveBackSharedElementPageTransition> createState() =>
+      _PredictiveBackSharedElementPageTransitionState();
+}
+
+class _PredictiveBackSharedElementPageTransitionState
+    extends State<_PredictiveBackSharedElementPageTransition>
+    with SingleTickerProviderStateMixin {
+  // Constants as per the motion specs
+  // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
+  static const double _kMinScale = 0.90;
+  static const double _kDivisionFactor = 20.0;
+  static const double _kMargin = 8.0;
+  static const double _kYPositionFactor = 0.1;
+
+  // Ideally this would match the curvature of the physical Android device being
+  // used. Since that seems impossible, this value is a best guess at a value
+  // that looks reasonable on most devices.
+  static const double _kDeviceBorderRadius = 32.0;
+
+  // Eyeballed on a Pixel 9 running Android 16.
+  static const int _kCommitMilliseconds = 100;
+
+  final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
+  final Tween<double> _gapTween = Tween<double>(begin: _kMargin, end: 0.0);
+  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
+  final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
+
+  late final AnimationController _commitController;
+  late final Animation<double> _commitAnimation;
+  late final Listenable _mergedAnimations;
+  late final Animation<double> _opacityAnimation;
+  late final Animation<double> _scaleAnimation;
+  late Animation<double> _scaleCommitAnimation;
+  late Animation<double> _xAnimation;
+  late Animation<Offset> _positionCommitAnimation;
+
+  double _lastXDrag = 0.0;
+  double _lastYDrag = 0.0;
+  double _lastScale = 1.0;
+
+  // This isn't done as an animation because it's based on the vertical drag
+  // amount, not the progression of the back gesture like widget.animation is.
+  double _getYPosition(double screenHeight) {
+    final double startTouchY = widget.startBackEvent?.touchOffset?.dy ?? 0;
+    final double currentTouchY = widget.currentBackEvent?.touchOffset?.dy ?? 0;
+
+    final double yShiftMax = (screenHeight / _kDivisionFactor) - _kMargin;
+
+    final double rawYShift = currentTouchY - startTouchY;
+    final double easedYShift =
+        Curves.easeOut.transform(clampDouble(rawYShift.abs() / screenHeight, 0.0, 1.0)) *
+        rawYShift.sign *
+        yShiftMax;
+
+    return clampDouble(easedYShift, -yShiftMax, yShiftMax);
+  }
+
+  Animation<Offset> _getCommitPositionAnimation(double screenWidth) {
+    return Tween<Offset>(
+      begin: Offset(_lastXDrag, _lastYDrag),
+      end: Offset(screenWidth * _kYPositionFactor, 0.0),
+    ).animate(_commitAnimation);
+  }
+
+  // TODO(justinmc): Should have a delegatedTransition to animate the incoming
+  // route regardless of its page transition.
+  // https://github.com/flutter/flutter/issues/153577
+
+  @override
+  void initState() {
+    super.initState();
+
+    _commitController = AnimationController(
+      duration: const Duration(milliseconds: _kCommitMilliseconds),
+      vsync: this,
+    );
+    _commitAnimation = CurvedAnimation(parent: _commitController, curve: Curves.easeOut);
+    _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
+    _opacityAnimation = _opacityTween.animate(_commitAnimation);
+    _scaleAnimation = _scaleTween.animate(widget.animation);
+    _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
+
+    if (widget.phase == _PredictiveBackPhase.commit) {
+      _commitController.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_PredictiveBackSharedElementPageTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
+      _commitController.forward(from: 0.0);
+      _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
+      final double screenWidth = MediaQuery.sizeOf(context).width;
+      _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+
+    final double xShift = (screenWidth / _kDivisionFactor) - _kMargin;
+    _xAnimation = Tween<double>(
+      begin: switch (widget.currentBackEvent?.swipeEdge) {
+        SwipeEdge.left => xShift,
+        SwipeEdge.right => -xShift,
+        null => xShift,
+      },
+      end: 0.0,
+    ).animate(widget.animation);
+
+    _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
+  }
+
+  @override
+  void dispose() {
+    _commitController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _mergedAnimations,
+      builder: (BuildContext context, Widget? child) {
+        return Transform.scale(
+          scale: switch (widget.phase) {
+            _PredictiveBackPhase.commit => _scaleCommitAnimation.value,
+            _ => _lastScale = _scaleAnimation.value,
+          },
+          child: Transform.translate(
+            offset: switch (widget.phase) {
+              _PredictiveBackPhase.commit => _positionCommitAnimation.value,
+              _ => Offset(
+                _lastXDrag = _xAnimation.value,
+                _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
+              ),
+            },
+            child: Opacity(
+              opacity: _opacityAnimation.value,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(widget.animation)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(
+                    _borderRadiusTween.evaluate(widget.animation),
+                  ),
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
 /// Android's predictive back page transition for full screen surfaces.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
 class _PredictiveBackFullscreenPageTransition extends StatefulWidget {
@@ -524,193 +708,6 @@ class _PredictiveBackFullscreenPageTransitionState
         builder: _primaryAnimatedBuilder,
         child: widget.child,
       ),
-    );
-  }
-}
-
-// TODO(justinmc): Bug: Do two backs back to back really fast.
-// TODO(justinmc): Make this the default, what PredictiveBackPageTransitionBuilder does. Preserve the fullscreen animation as non-default.
-/// Android's predictive back page shared element transition.
-/// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
-class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
-  const _PredictiveBackSharedElementPageTransition({
-    required this.isDelegatedTransition,
-    required this.animation,
-    required this.secondaryAnimation,
-    required this.phase,
-    required this.startBackEvent,
-    required this.currentBackEvent,
-    required this.child,
-  });
-
-  final bool isDelegatedTransition;
-  final Animation<double> animation;
-  final Animation<double> secondaryAnimation;
-  final _PredictiveBackPhase phase;
-  final PredictiveBackEvent? startBackEvent;
-  final PredictiveBackEvent? currentBackEvent;
-  final Widget child;
-
-  @override
-  State<_PredictiveBackSharedElementPageTransition> createState() =>
-      _PredictiveBackSharedElementPageTransitionState();
-}
-
-class _PredictiveBackSharedElementPageTransitionState
-    extends State<_PredictiveBackSharedElementPageTransition>
-    with SingleTickerProviderStateMixin {
-  // Constants as per the motion specs
-  // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
-  static const double _kMinScale = 0.90;
-  static const double _kDivisionFactor = 20.0;
-  static const double _kMargin = 8.0;
-  static const double _kYPositionFactor = 0.1;
-
-  // Ideally this would match the curvature of the physical Android device being
-  // used. Since that seems impossible, this value is a best guess at a value
-  // that looks reasonable on most devices.
-  static const double _kDeviceBorderRadius = 32.0;
-
-  // Eyeballed on a Pixel 9 running Android 16.
-  static const int _kCommitMilliseconds = 100;
-
-  final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
-  final Tween<double> _gapTween = Tween<double>(begin: _kMargin, end: 0.0);
-  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
-  final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
-
-  late final AnimationController _commitController;
-  late final Animation<double> _commitAnimation;
-  late final Listenable _mergedAnimations;
-  late final Animation<double> _opacityAnimation;
-  late final Animation<double> _scaleAnimation;
-  late Animation<double> _scaleCommitAnimation;
-  late Animation<double> _xAnimation;
-  late Animation<Offset> _positionCommitAnimation;
-
-  double _lastXDrag = 0.0;
-  double _lastYDrag = 0.0;
-  double _lastScale = 1.0;
-
-  // This isn't done as an animation because it's based on the vertical drag
-  // amount, not the progression of the back gesture like widget.animation is.
-  double _getYPosition(double screenHeight) {
-    final double startTouchY = widget.startBackEvent?.touchOffset?.dy ?? 0;
-    final double currentTouchY = widget.currentBackEvent?.touchOffset?.dy ?? 0;
-
-    final double yShiftMax = (screenHeight / _kDivisionFactor) - _kMargin;
-
-    final double rawYShift = currentTouchY - startTouchY;
-    final double easedYShift =
-        Curves.easeOut.transform(clampDouble(rawYShift.abs() / screenHeight, 0.0, 1.0)) *
-        rawYShift.sign *
-        yShiftMax;
-
-    return clampDouble(easedYShift, -yShiftMax, yShiftMax);
-  }
-
-  Animation<Offset> _getCommitPositionAnimation(double screenWidth) {
-    return Tween<Offset>(
-      begin: Offset(_lastXDrag, _lastYDrag),
-      end: Offset(screenWidth * _kYPositionFactor, 0.0),
-    ).animate(_commitAnimation);
-  }
-
-  // TODO(justinmc): Should have a delegatedTransition. The incoming route on a
-  // back has three animations: x translation, scale, and a dimming of its
-  // colors (opacity I think). Dimming also happens in dark mode, it gets even
-  // darker.
-  // https://github.com/flutter/flutter/issues/153577
-
-  @override
-  void initState() {
-    super.initState();
-
-    _commitController = AnimationController(
-      duration: const Duration(milliseconds: _kCommitMilliseconds),
-      vsync: this,
-    );
-    _commitAnimation = CurvedAnimation(parent: _commitController, curve: Curves.easeOut);
-    _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
-    _opacityAnimation = _opacityTween.animate(_commitAnimation);
-    _scaleAnimation = _scaleTween.animate(widget.animation);
-    _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
-
-    if (widget.phase == _PredictiveBackPhase.commit) {
-      _commitController.forward(from: 0.0);
-    }
-  }
-
-  @override
-  void didUpdateWidget(_PredictiveBackSharedElementPageTransition oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
-      _commitController.forward(from: 0.0);
-      _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
-      final double screenWidth = MediaQuery.sizeOf(context).width;
-      _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
-    }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-
-    final double xShift = (screenWidth / _kDivisionFactor) - _kMargin;
-    _xAnimation = Tween<double>(
-      begin: switch (widget.currentBackEvent?.swipeEdge) {
-        SwipeEdge.left => xShift,
-        SwipeEdge.right => -xShift,
-        null => xShift,
-      },
-      end: 0.0,
-    ).animate(widget.animation);
-
-    _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
-  }
-
-  @override
-  void dispose() {
-    _commitController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _mergedAnimations,
-      builder: (BuildContext context, Widget? child) {
-        return Transform.scale(
-          scale: switch (widget.phase) {
-            _PredictiveBackPhase.commit => _scaleCommitAnimation.value,
-            _ => _lastScale = _scaleAnimation.value,
-          },
-          child: Transform.translate(
-            offset: switch (widget.phase) {
-              _PredictiveBackPhase.commit => _positionCommitAnimation.value,
-              _ => Offset(
-                _lastXDrag = _xAnimation.value,
-                _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
-              ),
-            },
-            child: Opacity(
-              opacity: _opacityAnimation.value,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(widget.animation)),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    _borderRadiusTween.evaluate(widget.animation),
-                  ),
-                  child: child,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-      child: widget.child,
     );
   }
 }
