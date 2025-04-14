@@ -204,10 +204,10 @@ final class PreviewDetails {
         _textScaleFactor = source;
       case kWrapper:
         _wrapper = source;
-        _wrapperLibraryUri = (node.expression as SimpleIdentifier).element!.library2!.identifier;
+        _wrapperLibraryUri = libraryUri;
       case kTheme:
         _theme = source;
-        _themeLibraryUri = (node.expression as SimpleIdentifier).element!.library2!.identifier;
+        _themeLibraryUri = libraryUri;
       case kBrightness:
         _brightness = source;
         _brightnessLibraryUri = libraryUri;
