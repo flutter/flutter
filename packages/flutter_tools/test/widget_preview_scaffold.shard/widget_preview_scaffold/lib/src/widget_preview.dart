@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'dart:ui';
+
+import 'package:flutter/widgets.dart';
 
 /// Wraps a [Widget], initializing various state and properties to allow for
 /// previewing of the [Widget] in the widget previewer.
