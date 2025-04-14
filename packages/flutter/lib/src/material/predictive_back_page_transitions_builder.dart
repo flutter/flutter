@@ -410,7 +410,6 @@ class _PredictiveBackSharedElementPageTransitionState
   // Eyeballed on a Pixel 9 running Android 16.
   static const int _kCommitMilliseconds = 100;
 
-  final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
   final Tween<double> _gapTween = Tween<double>(begin: _kMargin, end: 0.0);
   final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
@@ -534,9 +533,7 @@ class _PredictiveBackSharedElementPageTransitionState
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(widget.animation)),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    _borderRadiusTween.evaluate(widget.animation),
-                  ),
+                  borderRadius: BorderRadius.circular(_kDeviceBorderRadius),
                   child: child,
                 ),
               ),
@@ -653,7 +650,6 @@ class _PredictiveBackFullscreenPageTransitionState
     _secondaryPositionTween = Tween<Offset>(begin: Offset(xShift, 0.0), end: Offset.zero);
   }
 
-  // TODO(justinmc): Rounded corners.
   Widget _secondaryAnimatedBuilder(BuildContext context, Widget? child) {
     final bool isCurrent = widget.getIsCurrent();
 
@@ -706,7 +702,12 @@ class _PredictiveBackFullscreenPageTransitionState
       child: AnimatedBuilder(
         animation: widget.animation,
         builder: _primaryAnimatedBuilder,
-        child: widget.child,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(
+            _PredictiveBackSharedElementPageTransitionState._kDeviceBorderRadius,
+          ),
+          child: widget.child,
+        ),
       ),
     );
   }
