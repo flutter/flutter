@@ -112,12 +112,17 @@ void main() {
         packageConfigFile,
         logger: environment.logger,
       );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
         runPackageName,
+        pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(result.compiler, Uri.file('/some/path/to/clang'));
