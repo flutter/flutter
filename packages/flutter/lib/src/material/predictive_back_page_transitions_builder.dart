@@ -438,7 +438,7 @@ class _PredictiveBackPageFullScreenTransitionState
   static const double _xShiftAdjustment = 8.0;
   static const Duration _commitDuration = Duration(milliseconds: 100);
 
-    // The position of the outgoing route before and after commit.
+  // The position of the outgoing route before and after commit.
   late Animatable<Offset> _primaryPositionTween;
 
   // The opacity of the outgoing route before commit.
@@ -634,7 +634,7 @@ class _PredictiveBackPageSharedElementTransitionState
         rawYShift.sign *
         yShiftMax;
 
-    return easedYShift.clamp(-yShiftMax, yShiftMax);
+    return clampDouble(easedYShift, -yShiftMax, yShiftMax);
   }
 
   Animation<Offset> _getCommitPositionAnimation(double screenWidth) {
