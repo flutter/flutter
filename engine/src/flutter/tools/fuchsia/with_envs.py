@@ -18,7 +18,7 @@ def Main():
     Executes the test-scripts with required environment variables. It acts like
     /usr/bin/env, but provides some extra functionality to dynamically set up
     the environment variables.
-    """
+  """
   # Ensures the signals can be correctly forwarded to the subprocesses.
   catch_sigterm()
 
@@ -31,6 +31,9 @@ def Main():
   os.environ['FUCHSIA_SDK_ROOT'] = os.path.join(os.environ['SRC_ROOT'], 'fuchsia/sdk/linux/')
   os.environ['FUCHSIA_GN_SDK_ROOT'] = os.path.join(
       os.environ['SRC_ROOT'], 'flutter/tools/fuchsia/gn-sdk/src'
+  )
+  os.environ['FUCHSIA_READELF'] = os.path.join(
+      os.environ['SRC_ROOT'], 'flutter/buildtools/linux-x64/clang/bin/llvm-readelf'
   )
 
   if os.getenv('DOWNLOAD_FUCHSIA_SDK') == 'True':
