@@ -79,7 +79,6 @@ class PreviewCodeGenerator {
     final Library lib = Library(
       (LibraryBuilder b) =>
           b
-            //..directives.addAll(<Directive>[Directive.import('package:flutter/foundation.dart')])
             ..body.addAll(<Spec>[
               Method((MethodBuilder b) {
                 final List<Expression> previewExpressions = <Expression>[];
