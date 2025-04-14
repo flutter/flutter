@@ -26,6 +26,8 @@ import 'page_transitions_theme.dart';
 ///
 /// See also:
 ///
+///  * [PredictiveBackFullscreenPageTransitionsBuilder], which is another
+///    variant of Android's predictive back page transitition.
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
 ///    that's similar to the one provided by Android O.
 ///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
@@ -34,6 +36,8 @@ import 'page_transitions_theme.dart';
 ///    that's similar to the one provided in Android Q.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
+///  * https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition,
+///    which is the Android spec for this page transition.
 class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// predictive back transition.
@@ -59,10 +63,13 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
         if (route.popGestureInProgress) {
-          return _PredictiveBackPageFullScreenTransition(
+          return _PredictiveBackSharedElementPageTransition(
+            isDelegatedTransition: true,
             animation: animation,
+            phase: phase,
             secondaryAnimation: secondaryAnimation,
-            getIsCurrent: () => route.isCurrent,
+            startBackEvent: startBackEvent,
+            currentBackEvent: currentBackEvent,
             child: child,
           );
         }
@@ -79,70 +86,21 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-// TODO(justinmc): Replace PredictiveBackPageTransitionsBuilder with this. Create a new PredictiveBackFullscreenPageTransitionsBuilder.
 // TODO(justinmc): Elaborate
-// TODO(justinmc): Remove Page from name?
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation that looks like Android's Shared Element page
 /// transition.
 ///
 /// See also:
 ///
-///  * [https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition],
-///  which is the native Android docs for this page transition.
-class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsBuilder {
+///  * [PredictiveBackPageTransitionsBuilder], which is the default Android
+///    predictive back page transition.
+///  * [https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces],
+///    which is the native Android docs for this page transition.
+class PredictiveBackFullScreenPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
-  /// predictive back transition.
-  const PredictiveBackPageSharedElementTransitionsBuilder();
-
-  @override
-  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
-
-  static Widget? _delegatedTransition(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    bool allowSnapshotting,
-    Widget? child,
-  ) {
-    final ModalRoute<Object?>? route = ModalRoute.of(context);
-    if (child == null || route is! PageRoute) {
-      return child;
-    }
-
-    return _PredictiveBackGestureListener(
-      route: route,
-      builder: (
-        BuildContext context,
-        _PredictiveBackPhase phase,
-        PredictiveBackEvent? startBackEvent,
-        PredictiveBackEvent? currentBackEvent,
-      ) {
-        // Only do a predictive back transition when the user is performing a
-        // pop gesture. Otherwise, for things like button presses or other
-        // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
-        if (route.popGestureInProgress) {
-          return _PredictiveBackPageFullScreenTransition(
-            animation: animation,
-            secondaryAnimation: secondaryAnimation,
-            getIsCurrent: () => route.isCurrent,
-            child: child,
-          );
-          return _PredictiveBackPageSharedElementTransition(
-            isDelegatedTransition: true,
-            animation: animation,
-            phase: phase,
-            secondaryAnimation: secondaryAnimation,
-            startBackEvent: startBackEvent,
-            currentBackEvent: currentBackEvent,
-            child: child,
-          );
-        }
-
-        return child;
-      },
-    );
-  }
+  /// shared element predictive back transition.
+  const PredictiveBackFullScreenPageTransitionsBuilder();
 
   @override
   Widget buildTransitions<T>(
@@ -164,19 +122,10 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
         if (route.popGestureInProgress) {
-          return _PredictiveBackPageFullScreenTransition(
+          return _PredictiveBackFullScreenPageTransition(
             animation: animation,
             secondaryAnimation: secondaryAnimation,
             getIsCurrent: () => route.isCurrent,
-            child: child,
-          );
-          return _PredictiveBackPageSharedElementTransition(
-            isDelegatedTransition: false,
-            animation: animation,
-            phase: phase,
-            secondaryAnimation: secondaryAnimation,
-            startBackEvent: startBackEvent,
-            currentBackEvent: currentBackEvent,
             child: child,
           );
         }
@@ -401,12 +350,10 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
   }
 }
 
-// TODO(justinmc): This one needs some work if we keep it. See the animations at
-// the link below.
 /// Android's predictive back page transition for full screen surfaces.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
-class _PredictiveBackPageFullScreenTransition extends StatefulWidget {
-  _PredictiveBackPageFullScreenTransition({
+class _PredictiveBackFullScreenPageTransition extends StatefulWidget {
+  const _PredictiveBackFullScreenPageTransition({
     required this.animation,
     required this.secondaryAnimation,
     required this.getIsCurrent,
@@ -419,12 +366,12 @@ class _PredictiveBackPageFullScreenTransition extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_PredictiveBackPageFullScreenTransition> createState() =>
-      _PredictiveBackPageFullScreenTransitionState();
+  State<_PredictiveBackFullScreenPageTransition> createState() =>
+      _PredictiveBackFullScreenPageTransitionState();
 }
 
-class _PredictiveBackPageFullScreenTransitionState
-    extends State<_PredictiveBackPageFullScreenTransition> {
+class _PredictiveBackFullScreenPageTransitionState
+    extends State<_PredictiveBackFullScreenPageTransition> {
   // These values were eyeballed to match the native predictive back animation
   // on a Pixel 2 running Android API 34.
   static const double _scaleFullyOpened = 1.0;
@@ -476,6 +423,7 @@ class _PredictiveBackPageFullScreenTransitionState
     ]);
   }
 
+  // TODO(justinmc): clean up the secondary animation.
   // TODO(justinmc): Rounded corners.
   Widget _secondaryAnimatedBuilder(BuildContext context, Widget? child) {
     final Size size = MediaQuery.sizeOf(context);
@@ -560,8 +508,8 @@ class _PredictiveBackPageFullScreenTransitionState
 // TODO(justinmc): Make this the default, what PredictiveBackPageTransitionBuilder does. Preserve the fullscreen animation as non-default.
 /// Android's predictive back page shared element transition.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
-class _PredictiveBackPageSharedElementTransition extends StatefulWidget {
-  const _PredictiveBackPageSharedElementTransition({
+class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
+  const _PredictiveBackSharedElementPageTransition({
     required this.isDelegatedTransition,
     required this.animation,
     required this.secondaryAnimation,
@@ -580,12 +528,12 @@ class _PredictiveBackPageSharedElementTransition extends StatefulWidget {
   final Widget child;
 
   @override
-  State<_PredictiveBackPageSharedElementTransition> createState() =>
-      _PredictiveBackPageSharedElementTransitionState();
+  State<_PredictiveBackSharedElementPageTransition> createState() =>
+      _PredictiveBackSharedElementPageTransitionState();
 }
 
-class _PredictiveBackPageSharedElementTransitionState
-    extends State<_PredictiveBackPageSharedElementTransition>
+class _PredictiveBackSharedElementPageTransitionState
+    extends State<_PredictiveBackSharedElementPageTransition>
     with SingleTickerProviderStateMixin {
   // Constants as per the motion specs
   // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#motion-specs
@@ -670,7 +618,7 @@ class _PredictiveBackPageSharedElementTransitionState
   }
 
   @override
-  void didUpdateWidget(_PredictiveBackPageSharedElementTransition oldWidget) {
+  void didUpdateWidget(_PredictiveBackSharedElementPageTransition oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
