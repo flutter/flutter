@@ -122,6 +122,12 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
         if (route.popGestureInProgress) {
+          return _PredictiveBackPageFullScreenTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            getIsCurrent: () => route.isCurrent,
+            child: child,
+          );
           return _PredictiveBackPageSharedElementTransition(
             isDelegatedTransition: true,
             animation: animation,
@@ -158,6 +164,12 @@ class PredictiveBackPageSharedElementTransitionsBuilder extends PageTransitionsB
         // pop gesture. Otherwise, for things like button presses or other
         // programmatic navigation, fall back to ZoomPageTransitionsBuilder.
         if (route.popGestureInProgress) {
+          return _PredictiveBackPageFullScreenTransition(
+            animation: animation,
+            secondaryAnimation: secondaryAnimation,
+            getIsCurrent: () => route.isCurrent,
+            child: child,
+          );
           return _PredictiveBackPageSharedElementTransition(
             isDelegatedTransition: false,
             animation: animation,
@@ -393,36 +405,84 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 // the link below.
 /// Android's predictive back page transition for full screen surfaces.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
-class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
-  const _PredictiveBackPageFullScreenTransition({
+class _PredictiveBackPageFullScreenTransition extends StatefulWidget {
+  _PredictiveBackPageFullScreenTransition({
     required this.animation,
     required this.secondaryAnimation,
     required this.getIsCurrent,
     required this.child,
   });
 
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final ValueGetter<bool> getIsCurrent;
+  final Widget child;
+
+  @override
+  State<_PredictiveBackPageFullScreenTransition> createState() =>
+      _PredictiveBackPageFullScreenTransitionState();
+}
+
+class _PredictiveBackPageFullScreenTransitionState
+    extends State<_PredictiveBackPageFullScreenTransition> {
   // These values were eyeballed to match the native predictive back animation
   // on a Pixel 2 running Android API 34.
   static const double _scaleFullyOpened = 1.0;
   static const double _scaleStartTransition = 0.95;
+  // TODO(justinmc): Better naming.
   static const double _opacityFullyOpened = 1.0;
   static const double _opacityStartTransition = 0.95;
   static const double _weightForStartState = 65.0;
   static const double _weightForEndState = 35.0;
   static const double _screenWidthDivisionFactor = 20.0;
   static const double _xShiftAdjustment = 8.0;
+  static const Duration _commitDuration = Duration(milliseconds: 100);
 
-  final Animation<double> animation;
-  final Animation<double> secondaryAnimation;
-  final ValueGetter<bool> getIsCurrent;
-  final Widget child;
+    // The position of the outgoing route before and after commit.
+  late Animatable<Offset> _primaryPositionTween;
 
+  // The opacity of the outgoing route before commit.
+  final Animatable<double> _primaryOpacityTween = Tween<double>(
+    begin: _opacityStartTransition,
+    end: _opacityFullyOpened,
+  );
+
+  // The scale of the outgoing route before and after commit.
+  final Animatable<double> _primaryScaleTween = TweenSequence<double>(<TweenSequenceItem<double>>[
+    TweenSequenceItem<double>(
+      tween: Tween<double>(begin: _scaleFullyOpened, end: _scaleFullyOpened),
+      weight: _weightForStartState,
+    ),
+    TweenSequenceItem<double>(
+      tween: Tween<double>(begin: _scaleStartTransition, end: _scaleFullyOpened),
+      weight: _weightForEndState,
+    ),
+  ]);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final double xShift = (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
+    _primaryPositionTween = TweenSequence<Offset>(<TweenSequenceItem<Offset>>[
+      TweenSequenceItem<Offset>(
+        tween: Tween<Offset>(begin: Offset.zero, end: Offset.zero),
+        weight: _weightForStartState,
+      ),
+      TweenSequenceItem<Offset>(
+        tween: Tween<Offset>(begin: Offset(xShift, 0.0), end: Offset.zero),
+        weight: _weightForEndState,
+      ),
+    ]);
+  }
+
+  // TODO(justinmc): Rounded corners.
   Widget _secondaryAnimatedBuilder(BuildContext context, Widget? child) {
     final Size size = MediaQuery.sizeOf(context);
     final double screenWidth = size.width;
     final double xShift = (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
 
-    final bool isCurrent = getIsCurrent();
+    final bool isCurrent = widget.getIsCurrent();
     final Tween<double> xShiftTween =
         isCurrent ? ConstantTween<double>(0) : Tween<double>(begin: xShift, end: 0);
     final Animatable<double> scaleTween =
@@ -438,6 +498,7 @@ class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
                 weight: _weightForEndState,
               ),
             ]);
+    // TODO(justinmc): Pull these tweens out into instance variables.
     final Animatable<double> fadeTween =
         isCurrent
             ? ConstantTween<double>(_opacityFullyOpened)
@@ -453,55 +514,30 @@ class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
             ]);
 
     return Transform.translate(
-      offset: Offset(xShiftTween.animate(secondaryAnimation).value, 0),
+      offset: Offset(xShiftTween.animate(widget.secondaryAnimation).value, 0),
       child: Transform.scale(
-        scale: scaleTween.animate(secondaryAnimation).value,
-        child: Opacity(opacity: fadeTween.animate(secondaryAnimation).value, child: child),
+        scale: scaleTween.animate(widget.secondaryAnimation).value,
+        child: Opacity(opacity: fadeTween.evaluate(widget.secondaryAnimation), child: child),
       ),
     );
   }
 
   Widget _primaryAnimatedBuilder(BuildContext context, Widget? child) {
-    final Size size = MediaQuery.sizeOf(context);
-    final double screenWidth = size.width;
-    final double xShift = (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
-
-    final Animatable<double> xShiftTween = TweenSequence<double>(<TweenSequenceItem<double>>[
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.0, end: 0.0),
-        weight: _weightForStartState,
-      ),
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: xShift, end: 0.0),
-        weight: _weightForEndState,
-      ),
-    ]);
-    final Animatable<double> scaleTween = TweenSequence<double>(<TweenSequenceItem<double>>[
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: _scaleFullyOpened, end: _scaleFullyOpened),
-        weight: _weightForStartState,
-      ),
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: _scaleStartTransition, end: _scaleFullyOpened),
-        weight: _weightForEndState,
-      ),
-    ]);
-    final Animatable<double> fadeTween = TweenSequence<double>(<TweenSequenceItem<double>>[
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: 0.0, end: 0.0),
-        weight: _weightForStartState,
-      ),
-      TweenSequenceItem<double>(
-        tween: Tween<double>(begin: _opacityStartTransition, end: _opacityFullyOpened),
-        weight: _weightForEndState,
-      ),
-    ]);
-
     return Transform.translate(
-      offset: Offset(xShiftTween.animate(animation).value, 0),
+      offset: _primaryPositionTween.evaluate(widget.animation),
       child: Transform.scale(
-        scale: scaleTween.animate(animation).value,
-        child: Opacity(opacity: fadeTween.animate(animation).value, child: child),
+        scale: _primaryScaleTween.evaluate(widget.animation),
+        // A slight change in opacity before reaching the commit point.
+        child: Opacity(
+          opacity: _primaryOpacityTween.evaluate(widget.animation),
+          // A sudden fadeout at the commit point, driven by time and not the
+          // gesture.
+          child: AnimatedOpacity(
+            opacity: widget.animation.value < (_weightForStartState / 100) ? 0.0 : 1.0,
+            duration: _commitDuration,
+            child: child,
+          ),
+        ),
       ),
     );
   }
@@ -509,9 +545,13 @@ class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: secondaryAnimation,
+      animation: widget.secondaryAnimation,
       builder: _secondaryAnimatedBuilder,
-      child: AnimatedBuilder(animation: animation, builder: _primaryAnimatedBuilder, child: child),
+      child: AnimatedBuilder(
+        animation: widget.animation,
+        builder: _primaryAnimatedBuilder,
+        child: widget.child,
+      ),
     );
   }
 }
