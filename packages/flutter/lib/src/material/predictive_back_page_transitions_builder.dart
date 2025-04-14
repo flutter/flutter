@@ -5,6 +5,8 @@
 /// @docImport 'page.dart';
 library;
 
+import 'dart:ui' show clampDouble;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -77,6 +79,7 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
+// TODO(justinmc): Replace PredictiveBackPageTransitionsBuilder with this. Create a new PredictiveBackFullscreenPageTransitionsBuilder.
 // TODO(justinmc): Elaborate
 // TODO(justinmc): Remove Page from name?
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
@@ -513,6 +516,7 @@ class _PredictiveBackPageFullScreenTransition extends StatelessWidget {
   }
 }
 
+// TODO(justinmc): Bug: Do two backs back to back really fast.
 // TODO(justinmc): Make this the default, what PredictiveBackPageTransitionBuilder does. Preserve the fullscreen animation as non-default.
 /// Android's predictive back page shared element transition.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
@@ -586,7 +590,7 @@ class _PredictiveBackPageSharedElementTransitionState
 
     final double rawYShift = currentTouchY - startTouchY;
     final double easedYShift =
-        Curves.easeOut.transform((rawYShift.abs() / screenHeight).clamp(0.0, 1.0)) *
+        Curves.easeOut.transform(clampDouble(rawYShift.abs() / screenHeight, 0.0, 1.0)) *
         rawYShift.sign *
         yShiftMax;
 
