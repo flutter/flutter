@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 
 /// Wraps a [Widget], initializing various state and properties to allow for

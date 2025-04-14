@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'media_query.dart';
+/// @docImport 'package:/flutter/cupertino.dart';
+/// @docImport 'package:/flutter/material.dart';
 library;
 
-import 'package:flutter/src/cupertino/theme.dart';
-import 'package:flutter/src/material/theme.dart';
+import 'package:flutter/cupertino.dart' show CupertinoThemeData;
+import 'package:flutter/material.dart' show Brightness, ThemeData;
 import 'package:flutter/widgets.dart';
 
 /// Annotation used to mark functions that return a widget preview.

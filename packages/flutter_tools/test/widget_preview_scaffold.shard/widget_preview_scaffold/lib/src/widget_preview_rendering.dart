@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widget_previews.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -115,7 +116,7 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
   static Uri documentationUrl = Uri.https(
     'github.com',
     'flutter/flutter/blob/master/packages/flutter/'
-        'lib/src/widgets/widget_preview.dart',
+        'lib/src/widget_previews/widget_previews.dart',
   );
 
   @override
