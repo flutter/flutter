@@ -1,4 +1,4 @@
-Signature: cc725eafbe8e250a9e1b21014c199c05
+Signature: f7ec975d461e5339fd06f9e8214a7155
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -17664,6 +17664,12 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/time.h + .
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/globally-ordered-region.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/globally-ordered-region.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/region.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/register.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/region.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/register.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
@@ -17777,6 +17783,12 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/globally-ordered-region.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/globally-ordered-region.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/region.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/register.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/region.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/register.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml
