@@ -175,17 +175,30 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       (key.currentContext!.findRenderObject() as RenderBox).size;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didUpdateWidget(WidgetPreviewWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // TODO(bkonyi): do we always want to reset the brightness if the user has
-    // manually changed it via the UI?
-    brightnessListenable.value =
-        widget.preview.brightness ?? MediaQuery.platformBrightnessOf(context);
+
+    final previousBrightness = oldWidget.preview.brightness;
+    final newBrightness = widget.preview.brightness;
+    final currentBrightness = brightnessListenable.value;
+    final systemBrightness = MediaQuery.platformBrightnessOf(context);
+
+    // No initial brightness was previously defined.
+    if (previousBrightness == null && newBrightness != null) {
+      if (currentBrightness == systemBrightness) {
+        // If the current brightness is different than the system brightness, the user has manually
+        // changed the brightness through the UI, so don't change it automatically.
+        brightnessListenable.value = newBrightness;
+      }
+    }
+    // Changing the initial brightness to either a new initial brightness or system brightness.
+    else if (previousBrightness != null) {
+      // If the current brightness is different than the initial brightness, the user has manually
+      // changed the brightness through the UI, so don't change it automatically.
+      if (currentBrightness == previousBrightness) {
+        brightnessListenable.value = newBrightness ?? systemBrightness;
+      }
+    }
   }
 
   @override
@@ -214,7 +227,6 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
             key: key,
             child: WidgetPreviewTheming(
               theme: widget.preview.theme,
-              brightnessListenable: brightnessListenable,
               child: widget.preview.builder(),
             ),
           );
@@ -248,7 +260,11 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       ),
     );
 
-    preview = MediaQuery(data: _buildMediaQueryOverride(), child: preview);
+    preview = WidgetPreviewMediaQueryOverride(
+      preview: widget.preview,
+      brightnessListenable: brightnessListenable,
+      child: preview,
+    );
 
     preview = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,27 +318,6 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       ),
     );
   }
-
-  MediaQueryData _buildMediaQueryOverride() {
-    var mediaQueryData = MediaQuery.of(context);
-
-    if (widget.preview.textScaleFactor != null) {
-      mediaQueryData = mediaQueryData.copyWith(
-        textScaler: TextScaler.linear(widget.preview.textScaleFactor!),
-      );
-    }
-
-    var size = Size(
-      widget.preview.width ?? mediaQueryData.size.width,
-      widget.preview.height ?? mediaQueryData.size.height,
-    );
-
-    if (widget.preview.width != null || widget.preview.height != null) {
-      mediaQueryData = mediaQueryData.copyWith(size: size);
-    }
-
-    return mediaQueryData;
-  }
 }
 
 /// Applies theming defined in [theme] to [child].
@@ -330,43 +325,94 @@ class WidgetPreviewTheming extends StatelessWidget {
   const WidgetPreviewTheming({
     super.key,
     required this.theme,
-    required this.brightnessListenable,
     required this.child,
   });
 
   final Widget child;
-
-  /// The currently selected [Brightness] value.
-  ///
-  /// This value can be toggled via the previewer UI, which should trigger a
-  /// rebuild of the preview with the updated theme.
-  final ValueListenable<Brightness> brightnessListenable;
 
   /// The set of themes to be applied to [child].
   final PreviewThemeData? theme;
 
   @override
   Widget build(BuildContext context) {
+    final themeData = theme;
+    if (themeData == null) {
+      return child;
+    }
+    final (materialTheme, cupertinoTheme) = themeData.themeForBrightness(
+      MediaQuery.platformBrightnessOf(context),
+    );
+    Widget result = child;
+    if (materialTheme != null) {
+      result = Theme(data: materialTheme, child: result);
+    }
+    if (cupertinoTheme != null) {
+      result = CupertinoTheme(data: cupertinoTheme, child: result);
+    }
+    return result;
+  }
+}
+
+/// Wraps the previewed [child] with the correct [MediaQueryData] overrides
+/// based on [preview] and the current device [Brightness].
+class WidgetPreviewMediaQueryOverride extends StatelessWidget {
+  const WidgetPreviewMediaQueryOverride({
+    super.key,
+    required this.preview,
+    required this.brightnessListenable,
+    required this.child,
+  });
+
+  /// The preview specification used to render the preview.
+  final WidgetPreview preview;
+
+  /// The currently set brightness for this preview instance.
+  final ValueListenable<Brightness> brightnessListenable;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     return ValueListenableBuilder<Brightness>(
       valueListenable: brightnessListenable,
       builder: (context, brightness, _) {
-        final themeData = theme;
-        if (themeData == null) {
-          return child;
-        }
-        final (materialTheme, cupertinoTheme) = themeData.themeForBrightness(
-          brightness,
+        return MediaQuery(
+          data: _buildMediaQueryOverride(
+            context: context,
+            brightness: brightness,
+          ),
+          // Use mediaQueryPreview instead of preview to avoid capturing preview
+          // and creating an infinite loop.
+          child: child,
         );
-        Widget result = child;
-        if (materialTheme != null) {
-          result = Theme(data: materialTheme, child: result);
-        }
-        if (cupertinoTheme != null) {
-          result = CupertinoTheme(data: cupertinoTheme, child: result);
-        }
-        return result;
       },
     );
+  }
+
+  MediaQueryData _buildMediaQueryOverride({
+    required BuildContext context,
+    required Brightness brightness,
+  }) {
+    var mediaQueryData = MediaQuery.of(
+      context,
+    ).copyWith(platformBrightness: brightness);
+
+    if (preview.textScaleFactor != null) {
+      mediaQueryData = mediaQueryData.copyWith(
+        textScaler: TextScaler.linear(preview.textScaleFactor!),
+      );
+    }
+
+    var size = Size(
+      preview.width ?? mediaQueryData.size.width,
+      preview.height ?? mediaQueryData.size.height,
+    );
+
+    if (preview.width != null || preview.height != null) {
+      mediaQueryData = mediaQueryData.copyWith(size: size);
+    }
+
+    return mediaQueryData;
   }
 }
 
