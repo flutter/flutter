@@ -99,20 +99,6 @@ bool _cornerContains(Quadrant param, Offset p, [bool checkQuadrant = true]) {
       _octantContains(param.right, _flip(normOffset - param.right.offset));
 }
 
-const double kEhCloseEnough = 1e-3;
-bool ScalarNearlyEqual(double x, double y) {
-  return (x - y).abs() <= kEhCloseEnough;
-}
-
-bool _areAllCornersSame(_Radii r) {
-  return ScalarNearlyEqual(r.tlRadiusX, r.trRadiusX) &&
-      ScalarNearlyEqual(r.tlRadiusX, r.brRadiusX) &&
-      ScalarNearlyEqual(r.tlRadiusX, r.blRadiusX) &&
-      ScalarNearlyEqual(r.tlRadiusY, r.trRadiusY) &&
-      ScalarNearlyEqual(r.tlRadiusY, r.brRadiusY) &&
-      ScalarNearlyEqual(r.tlRadiusY, r.blRadiusY);
-}
-
 double AngleTo(Offset a, Offset b) {
   return math.atan2(a.dx * b.dy - a.dy * b.dx, a.dx * b.dx + a.dy * b.dy);
 }
@@ -310,19 +296,20 @@ class RSuperellipseParam {
   }
 
   void init(RSuperellipse target, [RSuperellipse? maybeCache]) {
-    bool canUseCache = false;
+    if (_cachedPath != null) {
+      return;
+    }
     if (maybeCache != null &&
         maybeCache._param.isInitialized &&
-        (identical(target, maybeCache) ||
-            target._unitifiedRadii.nearlyEqualTo(maybeCache._unitifiedRadii, 1e-6))) {
+        target._unitifiedRadii.nearlyEqualTo(maybeCache._unitifiedRadii, 1e-6)) {
       _cachedPath = maybeCache._param._cachedPath;
     } else {
       _cachedPath = Path();
-      _buildPath(_cachedPath!, target._unitifiedRadii);
+      _buildPath(_cachedPath!, target._unitifiedRadii, target.webOnlyUniformRadii);
     }
   }
 
-  static void _buildPath(Path path, _Radii r) {
+  static void _buildPath(Path path, _Radii r, bool uniformRadii) {
     const double left = -0.5;
     const double right = 0.5;
     const double top = -0.5;
@@ -344,7 +331,7 @@ class RSuperellipseParam {
     path.moveTo(start.dx, start.dy);
 
     final builder = _RSuperellipsePathBuilder(path);
-    if (_areAllCornersSame(r) && r.trRadiusX != 0 && r.trRadiusY != 0) {
+    if (uniformRadii) {
       builder.addQuadrant(topRight, false, Offset(1, 1));
       builder.addQuadrant(topRight, true, Offset(1, -1));
       builder.addQuadrant(topRight, false, Offset(-1, -1));

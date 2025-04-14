@@ -1028,6 +1028,9 @@ class _Radii {
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
 
   bool nearlyEqualTo(_Radii b, double tolerance) {
+    if (identical(this, b)) {
+      return true;
+    }
     bool ScalarNearlyEqual(double x, double y) {
       return (x - y).abs() <= tolerance;
     }
@@ -1092,7 +1095,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
-        uniformRadii: radiusX == radiusY,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromLTRBR(double left, double top, double right, double bottom, Radius radius)
@@ -1109,7 +1112,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
-        uniformRadii: radius.x == radius.y,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromRectXY(Rect rect, double radiusX, double radiusY)
@@ -1126,7 +1129,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
-        uniformRadii: radiusX == radiusY,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromRectAndRadius(Rect rect, Radius radius)
@@ -1143,7 +1146,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
-        uniformRadii: radius.x == radius.y,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromLTRBAndCorners(
@@ -1169,13 +1172,12 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
          uniformRadii:
-             topLeft.x == topLeft.y &&
              topLeft.x == topRight.x &&
-             topLeft.x == topRight.y &&
+             topLeft.y == topRight.y &&
              topLeft.x == bottomLeft.x &&
-             topLeft.x == bottomLeft.y &&
+             topLeft.y == bottomLeft.y &&
              topLeft.x == bottomRight.x &&
-             topLeft.x == bottomRight.y,
+             topLeft.y == bottomRight.y,
        );
 
   RSuperellipse.fromRectAndCorners(
