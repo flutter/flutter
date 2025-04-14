@@ -143,6 +143,10 @@ declare_args() {
   # Compile for Address Sanitizer to find memory bugs.
   is_asan = false
 
+  # Compile with HWAddress Sanitizer to find memory bugs.
+  # Requires ARM64 hardware
+  is_hwasan = false
+
   # Compile for Leak Sanitizer to find leaks.
   is_lsan = false
 
