@@ -47,11 +47,9 @@ class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
 
   final Map<int, RSuperellipse> _cache = <int, RSuperellipse>{};
   void _drawRSuperellipseCached(Canvas canvas, int key, Rect rect, Radius radius, Paint paint) {
-    final RSuperellipse rsuperellipse = _cache.putIfAbsent(
-      key,
-      () => RSuperellipse.fromRectAndRadius(rect, radius).computed(),
-    );
-    canvas.drawRSuperellipse(rsuperellipse, paint);
+    final RSuperellipse rsuperellipse = RSuperellipse.fromRectAndRadius(rect, radius);
+    final RSuperellipse cache = _cache.putIfAbsent(key, () => rsuperellipse);
+    canvas.drawRSuperellipse(rsuperellipse, paint, maybeCache: cache);
   }
 
   /// Counter used to offset the rendered rsuperellipse to make them wobble.

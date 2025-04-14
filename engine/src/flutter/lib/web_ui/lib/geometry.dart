@@ -981,7 +981,7 @@ class RRect extends _RRectLike<RRect> {
 }
 
 class RSuperellipse extends _RRectLike<RSuperellipse> {
-  const RSuperellipse.fromLTRBXY(
+  RSuperellipse.fromLTRBXY(
     double left,
     double top,
     double right,
@@ -1116,7 +1116,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
              topLeft.x == bottomRight.y,
        );
 
-  const RSuperellipse._raw({
+  RSuperellipse._raw({
     super.left = 0.0,
     super.top = 0.0,
     super.right = 0.0,
@@ -1130,34 +1130,58 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     super.blRadiusX = 0.0,
     super.blRadiusY = 0.0,
     super.uniformRadii = false,
-    RSuperellipseParam? param = null,
-  }) : _param = param;
+  });
 
-  RSuperellipseParam param() {
-    if (_param != null) {
-      return _param;
-    }
-    return RSuperellipseParam.makeRSuperellipse(this);
+  RSuperellipse _unified() {
+    final double w = width;
+    final double h = height;
+    return RSuperellipse._raw(
+      left: -0.5,
+      top: -0.5,
+      right: 0.5,
+      bottom: 0.5,
+      tlRadiusX: tlRadiusX / w,
+      tlRadiusY: tlRadiusY / h,
+      trRadiusX: trRadiusX / w,
+      trRadiusY: trRadiusY / h,
+      brRadiusX: brRadiusX / w,
+      brRadiusY: brRadiusY / h,
+      blRadiusX: blRadiusX / w,
+      blRadiusY: blRadiusY / h,
+      uniformRadii: webOnlyUniformRadii,
+    );
   }
 
-  final RSuperellipseParam? _param;
-  RSuperellipse computed() {
-    return RSuperellipse._raw(
-      left: left,
-      top: top,
-      right: right,
-      bottom: bottom,
-      tlRadiusX: tlRadiusX,
-      tlRadiusY: tlRadiusY,
-      trRadiusX: trRadiusX,
-      trRadiusY: trRadiusY,
-      brRadiusX: brRadiusX,
-      brRadiusY: brRadiusY,
-      blRadiusX: blRadiusX,
-      blRadiusY: blRadiusY,
-      uniformRadii: webOnlyUniformRadii,
-      param: RSuperellipseParam.makeRSuperellipse(this),
+  bool _radiusNearlyEqualTo(RSuperellipse b, double tolerance) {
+    bool ScalarNearlyEqual(double x, double y) {
+      return (x - y).abs() <= tolerance;
+    }
+
+    final double widthA = width;
+    final double heightA = height;
+    final double widthB = b.height;
+    final double heightB = b.height;
+    return ScalarNearlyEqual(tlRadiusX, b.tlRadiusX) &&
+        ScalarNearlyEqual(tlRadiusY, b.tlRadiusY) &&
+        ScalarNearlyEqual(trRadiusX, b.trRadiusX) &&
+        ScalarNearlyEqual(trRadiusY, b.trRadiusY) &&
+        ScalarNearlyEqual(blRadiusX, b.blRadiusX) &&
+        ScalarNearlyEqual(blRadiusY, b.blRadiusY) &&
+        ScalarNearlyEqual(brRadiusX, b.brRadiusX) &&
+        ScalarNearlyEqual(brRadiusY, b.brRadiusY);
+  }
+
+  final RSuperellipseParam _param = RSuperellipseParam();
+
+  Path addToPath(Path path, [RSuperellipse? maybeCache]) {
+    _param.init(this, maybeCache);
+    assert(_param.isInitialized);
+    path.addPath(
+      _param.getPath(),
+      Offset.zero,
+      matrix4: RSuperellipseParam.scaleTranslateMatrix4(Size(width, height), center),
     );
+    return path;
   }
 
   @override
@@ -1214,10 +1238,10 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     );
   }
 
-  static const RSuperellipse zero = RSuperellipse._raw();
+  static final RSuperellipse zero = RSuperellipse._raw();
 
   bool contains(Offset point) {
-    return RSuperellipseParam.makeRSuperellipse(this).contains(point);
+    return _param.contains(point);
   }
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {

@@ -109,7 +109,7 @@ class CkPath implements ScenePath {
 
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
-    ui.RSuperellipseParam.makeRSuperellipse(rsuperellipse).addToPath(this);
+    rsuperellipse.addToPath(this);
   }
 
   @override

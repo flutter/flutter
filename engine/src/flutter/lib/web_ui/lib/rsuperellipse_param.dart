@@ -278,71 +278,59 @@ class Quadrant {
 class RSuperellipseParam {
   static const double kGapFactor = 0.29289321881; // 1-cos(pi/4)
 
-  final Quadrant topRight;
-  final Quadrant bottomRight;
-  final Quadrant bottomLeft;
-  final Quadrant topLeft;
-  final bool allCornersSame;
+  static Float64List scaleTranslateMatrix4(Size size, Offset offset) {
+    final Float64List transform = Float64List(16);
+    transform[0] = size.width;
+    // transform[1] = 0;
+    // transform[2] = 0;
+    // transform[3] = 0;
 
-  RSuperellipseParam({
-    required this.topRight,
-    required this.bottomRight,
-    required this.bottomLeft,
-    required this.topLeft,
-    required this.allCornersSame,
-  });
+    // transform[4] = 0;
+    transform[5] = size.height;
+    // transform[6] = 0;
+    // transform[7] = 0;
 
-  factory RSuperellipseParam.makeRSuperellipse(RSuperellipse r) {
-    if (_areAllCornersSame(r) && r.trRadiusX != 0 && r.trRadiusY != 0) {
-      return RSuperellipseParam(
-        topRight: Quadrant.computeQuadrant(r.center, Offset(r.right, r.top), r.trRadius),
-        topLeft: Quadrant.zero,
-        bottomLeft: Quadrant.zero,
-        bottomRight: Quadrant.zero,
-        allCornersSame: true,
-      );
-    }
+    // transform[8] = 0;
+    // transform[9] = 0;
+    transform[10] = 1;
+    // transform[11] = 0;
 
-    final double topSplit = _split(r.left, r.right, r.tlRadiusX, r.trRadiusX);
-    final double rightSplit = _split(r.top, r.bottom, r.trRadiusY, r.brRadiusY);
-    final double bottomSplit = _split(r.left, r.right, r.blRadiusX, r.brRadiusX);
-    final double leftSplit = _split(r.top, r.bottom, r.tlRadiusY, r.blRadiusY);
-
-    return RSuperellipseParam(
-      topRight: Quadrant.computeQuadrant(
-        Offset(topSplit, rightSplit),
-        Offset(r.right, r.top),
-        r.trRadius,
-      ),
-      bottomRight: Quadrant.computeQuadrant(
-        Offset(bottomSplit, rightSplit),
-        Offset(r.right, r.bottom),
-        r.brRadius,
-      ),
-      bottomLeft: Quadrant.computeQuadrant(
-        Offset(bottomSplit, leftSplit),
-        Offset(r.left, r.bottom),
-        r.blRadius,
-      ),
-      topLeft: Quadrant.computeQuadrant(
-        Offset(topSplit, leftSplit),
-        Offset(r.left, r.top),
-        r.tlRadius,
-      ),
-      allCornersSame: false,
-    );
+    transform[12] = offset.dx;
+    transform[13] = offset.dy;
+    // transform[14] = 0;
+    // transform[15] = 0;
+    return transform;
   }
 
   Path? _cachedPath;
-  T makePath<T extends Path>(T Function() pathCreater) {
-    if (_cachedPath == null) {
-      _cachedPath = addToPath(pathCreater());
-    }
-    return _cachedPath! as T;
+  bool get isInitialized => _cachedPath != null;
+  Path getPath() {
+    assert(_cachedPath != null);
+    return _cachedPath!;
   }
 
-  Path addToPath(Path path) {
-    final builder = _RSuperellipsePathBuilder(path);
+  void init(RSuperellipse target, [RSuperellipse? maybeCache]) {
+    bool canUseCache = false;
+    if (maybeCache != null &&
+        maybeCache._param.isInitialized &&
+        (identical(target, maybeCache) ||
+            target._unified()._radiusNearlyEqualTo(maybeCache._unified(), 1e-6))) {
+      _cachedPath = maybeCache._param._cachedPath;
+    } else {
+      final RSuperellipse unified = target._unified();
+      _cachedPath = Path();
+      _buildPath(_cachedPath!, unified);
+    }
+  }
+
+  static void _buildPath(Path path, RSuperellipse r) {
+    final double topSplit = _split(r.left, r.right, r.tlRadiusX, r.trRadiusX);
+    final double rightSplit = _split(r.top, r.bottom, r.trRadiusY, r.brRadiusY);
+    final Quadrant topRight = Quadrant.computeQuadrant(
+      Offset(topSplit, rightSplit),
+      Offset(r.right, r.top),
+      r.trRadius,
+    );
 
     final Offset start =
         topRight.offset +
@@ -352,31 +340,45 @@ class RSuperellipseParam {
         );
     path.moveTo(start.dx, start.dy);
 
-    if (allCornersSame) {
+    final builder = _RSuperellipsePathBuilder(path);
+    if (_areAllCornersSame(r) && r.trRadiusX != 0 && r.trRadiusY != 0) {
       builder.addQuadrant(topRight, false, Offset(1, 1));
       builder.addQuadrant(topRight, true, Offset(1, -1));
       builder.addQuadrant(topRight, false, Offset(-1, -1));
       builder.addQuadrant(topRight, true, Offset(-1, 1));
     } else {
+      final double bottomSplit = _split(r.left, r.right, r.blRadiusX, r.brRadiusX);
+      final double leftSplit = _split(r.top, r.bottom, r.tlRadiusY, r.blRadiusY);
       builder.addQuadrant(topRight, false);
-      builder.addQuadrant(bottomRight, true);
-      builder.addQuadrant(bottomLeft, false);
-      builder.addQuadrant(topLeft, true);
+      builder.addQuadrant(
+        Quadrant.computeQuadrant(
+          Offset(bottomSplit, rightSplit),
+          Offset(r.right, r.bottom),
+          r.brRadius,
+        ),
+        true,
+      );
+      builder.addQuadrant(
+        Quadrant.computeQuadrant(
+          Offset(bottomSplit, leftSplit),
+          Offset(r.left, r.bottom),
+          r.blRadius,
+        ),
+        false,
+      );
+      builder.addQuadrant(
+        Quadrant.computeQuadrant(Offset(topSplit, leftSplit), Offset(r.left, r.top), r.tlRadius),
+        true,
+      );
     }
 
     path.lineTo(start.dx, start.dy);
     path.close();
-    return path;
   }
 
   bool contains(Offset point) {
-    if (allCornersSame) {
-      return _cornerContains(topRight, point, false);
-    }
-    return _cornerContains(topRight, point) &&
-        _cornerContains(bottomRight, point) &&
-        _cornerContains(bottomLeft, point) &&
-        _cornerContains(topLeft, point);
+    assert(_cachedPath != null, 'Must call init() first.');
+    return _cachedPath!.contains(point);
   }
 }
 
