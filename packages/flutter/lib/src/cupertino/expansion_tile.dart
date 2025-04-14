@@ -106,7 +106,6 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
 
   late final ExpansibleController _tileController;
   late Animation<double> _iconTurns;
-  late Offset _headerOffset;
 
   @override
   void initState() {
@@ -151,15 +150,12 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   }
 
   void _onHeaderTap() {
-    final RenderBox headerBox = _headerKey.currentContext!.findRenderObject()! as RenderBox;
-    _headerOffset = headerBox.localToGlobal(Offset.zero);
-    _fadeController.show();
-
     if (_tileController.isExpanded) {
       _tileController.collapse();
     } else {
       _tileController.expand();
     }
+    _fadeController.show();
   }
 
   Widget _buildHeader(BuildContext context, Animation<double> animation) {
@@ -201,9 +197,14 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
         return OverlayPortal(
           controller: _fadeController,
           overlayChildBuilder: (BuildContext context) {
+            final BuildContext headerContext = _headerKey.currentContext!;
+            final RenderBox overlay =
+                Overlay.of(headerContext).context.findRenderObject()! as RenderBox;
+            final RenderBox headerBox = headerContext.findRenderObject()! as RenderBox;
+            final Offset headerOffset = headerBox.localToGlobal(Offset.zero, ancestor: overlay);
             return Positioned(
-              top: _headerOffset.dy + _kHeaderHeight,
-              left: _headerOffset.dx,
+              top: headerOffset.dy + _kHeaderHeight,
+              left: headerOffset.dx,
               child: ConstrainedBox(
                 constraints: constraints,
                 child: Visibility(

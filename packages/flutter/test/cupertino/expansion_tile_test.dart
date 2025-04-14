@@ -12,6 +12,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const Duration expansionDuration = Duration(milliseconds: 250);
+  const Duration infinitesimalDuration = Duration(microseconds: 1);
   testWidgets('Toggles expansion on tap', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
@@ -92,7 +94,6 @@ void main() {
   });
 
   testWidgets('Nested expansion tile', (WidgetTester tester) async {
-    const Duration infinitesimalDuration = Duration(microseconds: 1);
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -108,22 +109,22 @@ void main() {
 
     await tester.tap(find.text('Outer'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
+    await tester.pump(expansionDuration + infinitesimalDuration);
     expect(find.text('Content'), findsNothing);
 
     await tester.tap(find.text('Inner'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
+    await tester.pump(expansionDuration + infinitesimalDuration);
     expect(find.text('Content'), findsOneWidget);
 
     await tester.tap(find.text('Inner'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
+    await tester.pump(expansionDuration + infinitesimalDuration);
     expect(find.text('Content'), findsNothing);
 
     await tester.tap(find.text('Outer'));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 250) + infinitesimalDuration);
+    await tester.pump(expansionDuration + infinitesimalDuration);
     expect(find.text('Content'), findsNothing);
   });
 
@@ -150,7 +151,7 @@ void main() {
     await tester.pump();
 
     // Pump until halfway through the animation.
-    await tester.pump(const Duration(milliseconds: 125));
+    await tester.pump(expansionDuration ~/ 2);
     await expectLater(
       find.byType(CupertinoExpansionTile),
       matchesGoldenFile('expansion_tile.default.forward.png'),
@@ -166,7 +167,7 @@ void main() {
     await tester.pump();
 
     // Pump until halfway through the animation.
-    await tester.pump(const Duration(milliseconds: 125));
+    await tester.pump(expansionDuration ~/ 2);
     await expectLater(
       find.byType(CupertinoExpansionTile),
       matchesGoldenFile('expansion_tile.default.reverse.png'),
@@ -192,7 +193,7 @@ void main() {
     await tester.pump();
 
     // Pump until halfway through the animation.
-    await tester.pump(const Duration(milliseconds: 125));
+    await tester.pump(expansionDuration ~/ 2);
     await expectLater(
       find.byType(CupertinoExpansionTile),
       matchesGoldenFile('expansion_tile.scroll_mode.forward.png'),
@@ -203,7 +204,7 @@ void main() {
     await tester.pump();
 
     // Pump until halfway through the animation.
-    await tester.pump(const Duration(milliseconds: 125));
+    await tester.pump(expansionDuration ~/ 2);
     await expectLater(
       find.byType(CupertinoExpansionTile),
       matchesGoldenFile('expansion_tile.scroll_mode.reverse.png'),
