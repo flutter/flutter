@@ -401,16 +401,11 @@ class _PredictiveBackFullscreenPageTransitionState
   static const double _xShiftAdjustment = 8.0;
   static const Duration _commitDuration = Duration(milliseconds: 100);
 
-  // The position of the outgoing route before and after commit.
-  late Animatable<Offset> _primaryPositionTween;
-
-  // The opacity of the outgoing route before commit.
   final Animatable<double> _primaryOpacityTween = Tween<double>(
     begin: _opacityStartTransition,
     end: _opacityFullyOpened,
   );
 
-  // The scale of the outgoing route before and after commit.
   final Animatable<double> _primaryScaleTween = TweenSequence<double>(<TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: _scaleStart, end: _scaleStart),
@@ -421,6 +416,38 @@ class _PredictiveBackFullscreenPageTransitionState
       weight: _weightPostCommit,
     ),
   ]);
+
+  final ConstantTween<double> _secondaryScaleTweenCurrent = ConstantTween<double>(_scaleStart);
+  final TweenSequence<double> _secondaryTweenScale =
+      TweenSequence<double>(<TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: _scaleCommit, end: _scaleStart),
+          weight: _weightPreCommit,
+        ),
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: _scaleStart, end: _scaleStart),
+          weight: _weightPostCommit,
+        ),
+      ]);
+
+  final ConstantTween<double> _secondaryOpacityTweenCurrent = ConstantTween<double>(
+    _opacityFullyOpened,
+  );
+  final TweenSequence<double> _secondaryOpacityTween =
+      TweenSequence<double>(<TweenSequenceItem<double>>[
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: _opacityFullyOpened, end: _opacityStartTransition),
+          weight: _weightPreCommit,
+        ),
+        TweenSequenceItem<double>(
+          tween: Tween<double>(begin: _opacityFullyOpened, end: _opacityFullyOpened),
+          weight: _weightPostCommit,
+        ),
+      ]);
+
+  late Animatable<Offset> _primaryPositionTween;
+  late Animatable<Offset> _secondaryPositionTween;
+  late Animatable<Offset> _secondaryCurrentPositionTween;
 
   @override
   void didChangeDependencies() {
@@ -437,51 +464,32 @@ class _PredictiveBackFullscreenPageTransitionState
         weight: _weightPostCommit,
       ),
     ]);
+
+    _secondaryCurrentPositionTween = ConstantTween<Offset>(Offset.zero);
+    _secondaryPositionTween = Tween<Offset>(begin: Offset(xShift, 0.0), end: Offset.zero);
   }
 
-  // TODO(justinmc): clean up the secondary animation.
   // TODO(justinmc): Rounded corners.
   Widget _secondaryAnimatedBuilder(BuildContext context, Widget? child) {
-    final Size size = MediaQuery.sizeOf(context);
-    final double screenWidth = size.width;
-    final double xShift = (screenWidth / _screenWidthDivisionFactor) - _xShiftAdjustment;
-
     final bool isCurrent = widget.getIsCurrent();
-    final Tween<double> xShiftTween =
-        isCurrent ? ConstantTween<double>(0) : Tween<double>(begin: xShift, end: 0);
-    final Animatable<double> scaleTween =
-        isCurrent
-            ? ConstantTween<double>(_scaleStart)
-            : TweenSequence<double>(<TweenSequenceItem<double>>[
-              TweenSequenceItem<double>(
-                tween: Tween<double>(begin: _scaleCommit, end: _scaleStart),
-                weight: _weightPreCommit,
-              ),
-              TweenSequenceItem<double>(
-                tween: Tween<double>(begin: _scaleStart, end: _scaleStart),
-                weight: _weightPostCommit,
-              ),
-            ]);
-    // TODO(justinmc): Pull these tweens out into instance variables.
-    final Animatable<double> fadeTween =
-        isCurrent
-            ? ConstantTween<double>(_opacityFullyOpened)
-            : TweenSequence<double>(<TweenSequenceItem<double>>[
-              TweenSequenceItem<double>(
-                tween: Tween<double>(begin: _opacityFullyOpened, end: _opacityStartTransition),
-                weight: _weightPreCommit,
-              ),
-              TweenSequenceItem<double>(
-                tween: Tween<double>(begin: _opacityFullyOpened, end: _opacityFullyOpened),
-                weight: _weightPostCommit,
-              ),
-            ]);
 
     return Transform.translate(
-      offset: Offset(xShiftTween.animate(widget.secondaryAnimation).value, 0),
+      offset:
+          isCurrent
+              ? _secondaryCurrentPositionTween.evaluate(widget.secondaryAnimation)
+              : _secondaryPositionTween.evaluate(widget.secondaryAnimation),
       child: Transform.scale(
-        scale: scaleTween.animate(widget.secondaryAnimation).value,
-        child: Opacity(opacity: fadeTween.evaluate(widget.secondaryAnimation), child: child),
+        scale:
+            isCurrent
+                ? _secondaryScaleTweenCurrent.evaluate(widget.secondaryAnimation)
+                : _secondaryTweenScale.evaluate(widget.secondaryAnimation),
+        child: Opacity(
+          opacity:
+              isCurrent
+                  ? _secondaryOpacityTweenCurrent.evaluate(widget.secondaryAnimation)
+                  : _secondaryOpacityTween.evaluate(widget.secondaryAnimation),
+          child: child,
+        ),
       ),
     );
   }
