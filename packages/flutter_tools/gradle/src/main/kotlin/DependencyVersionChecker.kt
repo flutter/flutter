@@ -14,6 +14,12 @@ import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.extra
 import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
+/**
+ * Warns or errors on version ranges of dependencies required to build a flutter Android app.
+ *
+ * For code that evaluates if dependencies are compatible with each other see
+ * packages/flutter_tools/lib/src/android/gradle_utils.dart.
+ */
 object DependencyVersionChecker {
     // Logging constants.
     @VisibleForTesting internal const val GRADLE_NAME: String = "Gradle"
