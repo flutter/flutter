@@ -1238,15 +1238,10 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
 
   final RSuperellipseParam _param = RSuperellipseParam();
 
-  Path addToPath(Path path, [RSuperellipse? maybeCache]) {
+  Path getNormalizedPath([RSuperellipse? maybeCache]) {
     _param.init(this, maybeCache);
     assert(_param.isInitialized);
-    path.addPath(
-      _param.getPath(),
-      Offset.zero,
-      matrix4: RSuperellipseParam.scaleTranslateMatrix4(Size(width, height), center),
-    );
-    return path;
+    return _param.getPath();
   }
 
   @override
