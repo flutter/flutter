@@ -16,9 +16,9 @@ import 'page_transitions_theme.dart';
 /// transition animation that looks like the default page transition used on
 /// Android U and above when using predictive back.
 ///
-/// Currently predictive back is only supported on Android U and above, and if
-/// this [PageTransitionsBuilder] is used by any other platform, it will fall
-/// back to [ZoomPageTransitionsBuilder].
+/// Predictive back is only supported on Android U and above, and if this
+/// [PageTransitionsBuilder] is used by any other platform, it will fall back to
+/// [ZoomPageTransitionsBuilder].
 ///
 /// When used on Android U and above, animates along with the back gesture to
 /// reveal the destination route. Can be canceled by dragging back towards the
@@ -28,16 +28,17 @@ import 'page_transitions_theme.dart';
 ///
 ///  * [PredictiveBackFullscreenPageTransitionsBuilder], which is another
 ///    variant of Android's predictive back page transitition.
-///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android O.
-///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
-///    that's similar to the one provided by Android P.
 ///  * [ZoomPageTransitionsBuilder], which defines the default page transition
 ///    that's similar to the one provided in Android Q.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android P.
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android O.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
 ///  * https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition,
-///    which is the Android spec for this page transition.
+///    which is the Android spec for this page transition, called the Shared
+///    Element page transition.
 class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
   /// predictive back transition.
@@ -86,20 +87,34 @@ class PredictiveBackPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-// TODO(justinmc): Elaborate
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
-/// transition animation that looks like Android's Shared Element page
-/// transition.
+/// transition animation that looks like Android's Full Screen page transition.
+///
+/// Predictive back is only supported on Android U and above, and if this
+/// [PageTransitionsBuilder] is used by any other platform, it will fall back to
+/// [ZoomPageTransitionsBuilder].
+///
+/// When used on Android U and above, animates along with the back gesture to
+/// reveal the destination route. Can be canceled by dragging back towards the
+/// edge of the screen.
 ///
 /// See also:
 ///
 ///  * [PredictiveBackPageTransitionsBuilder], which is the default Android
 ///    predictive back page transition.
+///  * [ZoomPageTransitionsBuilder], which defines the default page transition
+///    that's similar to the one provided in Android Q.
+///  * [OpenUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android P.
+///  * [FadeUpwardsPageTransitionsBuilder], which defines a page transition
+///    that's similar to the one provided by Android O.
+///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
+///    transition that matches native iOS page transitions.
 ///  * https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces,
 ///    which is the native Android docs for this page transition.
 class PredictiveBackFullscreenPageTransitionsBuilder extends PageTransitionsBuilder {
   /// Creates an instance of a [PageTransitionsBuilder] that matches Android U's
-  /// shared element predictive back transition.
+  /// full screen predictive back transition.
   const PredictiveBackFullscreenPageTransitionsBuilder();
 
   @override
