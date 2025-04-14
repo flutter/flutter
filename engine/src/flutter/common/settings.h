@@ -225,8 +225,16 @@ struct Settings {
   bool enable_impeller = false;
 #endif
 
+  bool enable_flutter_gpu = false;
+
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;
+
+  // Whether to lazily initialize impeller PSO state.
+  bool impeller_enable_lazy_shader_mode = false;
+
+  // An experimental mode that antialiases lines.
+  bool impeller_antialiased_lines = false;
 
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;

@@ -20,6 +20,7 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/testing/testing.h"
 #include "fml/synchronization/count_down_latch.h"
+#include "gtest/gtest.h"
 #include "imgui.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/device_buffer.h"
@@ -30,6 +31,7 @@
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/geometry/scalar.h"
+#include "impeller/playground/playground.h"
 
 namespace impeller {
 namespace testing {
@@ -76,6 +78,7 @@ TEST_P(AiksTest, CollapsedDrawPaintInSubpassBackdropFilter) {
 
 TEST_P(AiksTest, ColorMatrixFilterSubpassCollapseOptimization) {
   DisplayListBuilder builder(DlRect::MakeSize(GetWindowSize()));
+  builder.DrawPaint(DlPaint().setColor(DlColor::kWhite()));
 
   const float matrix[20] = {
       -1.0, 0,    0,    1.0, 0,  //
@@ -1117,6 +1120,24 @@ TEST_P(AiksTest, DisplayListToTextureAllocationFailure) {
       DisplayListToTexture(builder.Build(), ISize{0, 0}, aiks_context);
 
   EXPECT_EQ(texture, nullptr);
+}
+
+TEST_P(AiksTest, DisplayListToTextureWithMipGeneration) {
+  DisplayListBuilder builder;
+
+  std::shared_ptr<DlImageFilter> filter =
+      DlImageFilter::MakeBlur(8, 8, DlTileMode::kClamp);
+  builder.SaveLayer(std::nullopt, nullptr, filter.get());
+  builder.Restore();
+
+  AiksContext aiks_context(GetContext(), nullptr);
+  // Use intentionally invalid dimensions that would trigger an allocation
+  // failure.
+  auto texture =
+      DisplayListToTexture(builder.Build(), ISize{10, 10}, aiks_context,
+                           /*reset_host_buffer=*/true, /*generate_mips=*/true);
+
+  EXPECT_FALSE(texture->NeedsMipmapGeneration());
 }
 
 }  // namespace testing

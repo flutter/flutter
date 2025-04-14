@@ -212,8 +212,8 @@ TEST_P(AiksTest, CanRenderImageRect) {
   DisplayListBuilder builder;
   auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
 
-  DlISize image_half_size = DlISize(image->dimensions().fWidth * 0.5f,
-                                    image->dimensions().fHeight * 0.5f);
+  DlISize image_half_size =
+      DlISize(image->GetSize().width * 0.5f, image->GetSize().height * 0.5f);
 
   // Render the bottom right quarter of the source image in a stretched rect.
   auto source_rect = DlRect::MakeSize(image_half_size);
@@ -232,8 +232,8 @@ TEST_P(AiksTest, DrawImageRectSrcOutsideBounds) {
 
   // Use a source rect that is partially outside the bounds of the image.
   auto source_rect = DlRect::MakeXYWH(
-      image->dimensions().fWidth * 0.25f, image->dimensions().fHeight * 0.4f,
-      image->dimensions().fWidth, image->dimensions().fHeight);
+      image->GetSize().width * 0.25f, image->GetSize().height * 0.4f,
+      image->GetSize().width, image->GetSize().height);
 
   auto dest_rect = DlRect::MakeXYWH(100, 100, 600, 600);
 
@@ -880,8 +880,7 @@ TEST_P(AiksTest, CanDrawPerspectiveTransformWithClips) {
         auto image =
             DlImageImpeller::Make(CreateTextureForFixture("airplane.jpg"));
         auto position =
-            -DlPoint(image->dimensions().fWidth, image->dimensions().fHeight) *
-            0.5;
+            -DlPoint(image->GetSize().width, image->GetSize().height) * 0.5;
         builder.DrawImage(image, position, {});
       }
       builder.Restore();  // Restore oval intersect clip.
@@ -938,6 +937,7 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
 
   // Scale
   {
+    builder.Save();
     builder.Translate(100, 0);
     builder.Scale(100, 100);
     DlPaint paint;
@@ -948,6 +948,23 @@ TEST_P(AiksTest, ImageColorSourceEffectTransform) {
         DlImageSampling::kNearestNeighbor, &matrix));
 
     builder.DrawRect(DlRect::MakeLTRB(0, 0, 1, 1), paint);
+    builder.Restore();
+  }
+
+  // Perspective
+  {
+    builder.Save();
+    builder.Translate(150, 150);
+    DlPaint paint;
+
+    DlMatrix matrix =
+        DlMatrix::MakePerspective(Radians{0.5}, ISize{200, 200}, 0.05, 1);
+    paint.setColorSource(DlColorSource::MakeImage(
+        texture, DlTileMode::kRepeat, DlTileMode::kRepeat,
+        DlImageSampling::kNearestNeighbor, &matrix));
+
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 200, 200), paint);
+    builder.Restore();
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));

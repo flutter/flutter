@@ -116,7 +116,7 @@ void main() {
 
   testWidgets('Slider defaults', (WidgetTester tester) async {
     debugDisableShadows = false;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final ColorScheme colorScheme = theme.colorScheme;
     const double trackHeight = 4.0;
     final Color activeTrackColor = Color(colorScheme.primary.value);
@@ -2236,7 +2236,7 @@ void main() {
   testWidgets('Default value indicator color', (WidgetTester tester) async {
     debugDisableShadows = false;
     try {
-      final ThemeData theme = ThemeData(useMaterial3: true, platform: TargetPlatform.android);
+      final ThemeData theme = ThemeData(platform: TargetPlatform.android);
       Widget buildApp(
         String value, {
         double sliderValue = 0.5,
@@ -2776,6 +2776,153 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBR(398.0, 8.0, 800.0, 12.0, const Radius.circular(2.0)))
         // Active track.
         ..rrect(rrect: RRect.fromLTRBR(0.0, 7.0, 402.0, 13.0, const Radius.circular(3.0))),
+    );
+  });
+
+  testWidgets('SliderThemeData.padding can override the default RangeSlider padding', (
+    WidgetTester tester,
+  ) async {
+    Widget buildRangeSlider({EdgeInsetsGeometry? padding}) {
+      return MaterialApp(
+        theme: ThemeData(sliderTheme: SliderThemeData(padding: padding)),
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: RangeSlider(
+                values: const RangeValues(0, 1.0),
+                onChanged: (RangeValues values) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox sliderRenderBox() {
+      return tester.allRenderObjects.firstWhere(
+            (RenderObject object) => object.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          as RenderBox;
+    }
+
+    // Test RangeSlider height and tracks spacing with zero padding.
+    await tester.pumpWidget(buildRangeSlider(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+
+    // The height equals to the default thumb height.
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            790.0,
+            8.0,
+            790.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 792.0, 13.0, const Radius.circular(2.0))),
+    );
+
+    // Test RangeSlider height and tracks spacing with directional padding.
+    const double startPadding = 100;
+    const double endPadding = 20;
+    await tester.pumpWidget(
+      buildRangeSlider(
+        padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(sliderRenderBox().size, const Size(800 - startPadding - endPadding, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            670.0,
+            8.0,
+            670.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 672.0, 13.0, const Radius.circular(2.0))),
+    );
+
+    // Test RangeSlider height and tracks spacing with top and bottom padding.
+    const double topPadding = 100;
+    const double bottomPadding = 20;
+    const double trackHeight = 20;
+    await tester.pumpWidget(
+      buildRangeSlider(
+        padding: const EdgeInsetsDirectional.only(top: topPadding, bottom: bottomPadding),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.byType(RangeSlider)),
+      const Size(800, topPadding + trackHeight + bottomPadding),
+    );
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            790.0,
+            8.0,
+            790.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 792.0, 13.0, const Radius.circular(2.0))),
     );
   });
 

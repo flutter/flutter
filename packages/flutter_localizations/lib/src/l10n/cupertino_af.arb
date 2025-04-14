@@ -28,6 +28,6 @@
   "searchWebButtonLabel": "Deursoek web",
   "shareButtonLabel": "Deel …",
   "clearButtonLabel": "Vee uit",
-  "cancelButtonLabel": "Cancel",
-  "backButtonLabel": "Back"
+  "cancelButtonLabel": "Kanselleer",
+  "backButtonLabel": "Terug"
 }

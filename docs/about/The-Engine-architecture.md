@@ -266,7 +266,7 @@ this task runner.
 There are two different ways to create Flutter engines which has ramifications
 on how threading is managed across multiple Flutter engines. Flutter engines can
 be instantiated directly or through the FlutterEngineGroup APIs
-[[ios](https://github.com/flutter/engine/blob/main/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h),
+[[ios](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngineGroup.h),
 [android](https://api.flutter.dev/javadoc/io/flutter/embedding/engine/FlutterEngineGroup.html)].
 If an engine is instantiated directly, it gets its own engine threads and [dart isolate
 group](https://dart.dev/language/concurrency#performance-and-isolate-groups).

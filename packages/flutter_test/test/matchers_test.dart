@@ -731,6 +731,8 @@ void main() {
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
+        inputType: ui.SemanticsInputType.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -748,6 +750,7 @@ void main() {
           hasCheckedState: true,
           isChecked: true,
           isCheckStateMixed: true,
+          hasSelectedState: true,
           isSelected: true,
           isButton: true,
           isSlider: true,
@@ -773,6 +776,8 @@ void main() {
           hasImplicitScrolling: true,
           hasExpandedState: true,
           isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1031,6 +1036,8 @@ void main() {
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
+        inputType: ui.SemanticsInputType.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1072,6 +1079,8 @@ void main() {
           hasImplicitScrolling: true,
           hasExpandedState: true,
           isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
           /* Actions */
           hasTapAction: true,
           hasLongPressAction: true,
@@ -1128,6 +1137,8 @@ void main() {
         linkUrl: null,
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
+        inputType: ui.SemanticsInputType.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 
@@ -1169,6 +1180,8 @@ void main() {
           hasImplicitScrolling: false,
           hasExpandedState: false,
           isExpanded: false,
+          hasRequiredState: false,
+          isRequired: false,
           /* Actions */
           hasTapAction: false,
           hasLongPressAction: false,
@@ -1232,6 +1245,8 @@ void main() {
         linkUrl: null,
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
+        inputType: ui.SemanticsInputType.none,
       );
       final _FakeSemanticsNode emptyNode = _FakeSemanticsNode(emptyData);
 
@@ -1264,6 +1279,8 @@ void main() {
         linkUrl: Uri(path: 'l'),
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
+        inputType: ui.SemanticsInputType.none,
       );
       final _FakeSemanticsNode fullNode = _FakeSemanticsNode(fullData);
 
@@ -1352,6 +1369,8 @@ void main() {
         linkUrl: null,
         role: ui.SemanticsRole.none,
         controlsNodes: null,
+        validationResult: SemanticsValidationResult.none,
+        inputType: ui.SemanticsInputType.none,
       );
       final _FakeSemanticsNode node = _FakeSemanticsNode(data);
 

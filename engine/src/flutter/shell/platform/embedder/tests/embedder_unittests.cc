@@ -1649,6 +1649,102 @@ TEST_F(EmbedderTest, CanRemoveView) {
   ASSERT_EQ(message, "View IDs: [0]");
 }
 
+// Regression test for:
+// https://github.com/flutter/flutter/issues/164564
+TEST_F(EmbedderTest, RemoveViewCallbackIsInvokedAfterRasterThreadIsDone) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  std::mutex engine_mutex;
+  UniqueEngine engine;
+  auto render_thread = CreateNewThread("custom_render_thread");
+  EmbedderTestTaskRunner render_task_runner(
+      render_thread, [&](FlutterTask task) {
+        std::scoped_lock engine_lock(engine_mutex);
+        if (engine.is_valid()) {
+          ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
+        }
+      });
+
+  builder.SetSurface(SkISize::Make(1, 1));
+  builder.SetDartEntrypoint("remove_view_callback_too_early");
+  builder.SetRenderTaskRunner(
+      &render_task_runner.GetFlutterTaskRunnerDescription());
+
+  fml::AutoResetWaitableEvent ready_latch;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready_latch](Dart_NativeArguments args) { ready_latch.Signal(); }));
+
+  {
+    std::scoped_lock lock(engine_mutex);
+    engine = builder.InitializeEngine();
+  }
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+  ASSERT_TRUE(engine.is_valid());
+
+  ready_latch.Wait();
+
+  fml::AutoResetWaitableEvent add_view_latch;
+  // Add view 123.
+  FlutterWindowMetricsEvent metrics = {};
+  metrics.struct_size = sizeof(FlutterWindowMetricsEvent);
+  metrics.width = 800;
+  metrics.height = 600;
+  metrics.pixel_ratio = 1.0;
+  metrics.view_id = 123;
+
+  FlutterAddViewInfo add_info = {};
+  add_info.struct_size = sizeof(FlutterAddViewInfo);
+  add_info.view_id = 123;
+  add_info.view_metrics = &metrics;
+  add_info.user_data = &add_view_latch;
+  add_info.add_view_callback = [](const FlutterAddViewResult* result) {
+    ASSERT_TRUE(result->added);
+    auto add_view_latch =
+        reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data);
+    add_view_latch->Signal();
+  };
+  ASSERT_EQ(FlutterEngineAddView(engine.get(), &add_info), kSuccess);
+  add_view_latch.Wait();
+
+  std::atomic_bool view_available = true;
+
+  // Simulate pending rasterization task scheduled before view removal request
+  // that accesses view resources.
+  fml::AutoResetWaitableEvent raster_thread_latch;
+  render_thread->PostTask([&] {
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    // View must be available.
+    EXPECT_TRUE(view_available);
+    raster_thread_latch.Signal();
+  });
+
+  fml::AutoResetWaitableEvent remove_view_latch;
+  FlutterRemoveViewInfo remove_view_info = {};
+  remove_view_info.struct_size = sizeof(FlutterRemoveViewInfo);
+  remove_view_info.view_id = 123;
+  remove_view_info.user_data = &remove_view_latch;
+  remove_view_info.remove_view_callback =
+      [](const FlutterRemoveViewResult* result) {
+        ASSERT_TRUE(result->removed);
+        auto remove_view_latch =
+            reinterpret_cast<fml::AutoResetWaitableEvent*>(result->user_data);
+        remove_view_latch->Signal();
+      };
+
+  // Remove the view and wait until the callback is called.
+  ASSERT_EQ(FlutterEngineRemoveView(engine.get(), &remove_view_info), kSuccess);
+  remove_view_latch.Wait();
+
+  // After FlutterEngineRemoveViewCallback is called it should be safe to
+  // remove view - raster thread must not be accessing any view resources.
+  view_available = false;
+  raster_thread_latch.Wait();
+
+  FlutterEngineDeinitialize(engine.get());
+}
+
 //------------------------------------------------------------------------------
 /// The implicit view is a special view that the engine and framework assume
 /// can *always* be rendered to. Test that this view cannot be removed.
@@ -2781,10 +2877,10 @@ TEST_F(EmbedderTest, CanLaunchAndShutdownWithAValidElfSource) {
 }
 
 #if defined(__clang_analyzer__)
-#define TEST_VM_SNAPSHOT_DATA nullptr
-#define TEST_VM_SNAPSHOT_INSTRUCTIONS nullptr
-#define TEST_ISOLATE_SNAPSHOT_DATA nullptr
-#define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS nullptr
+#define TEST_VM_SNAPSHOT_DATA "vm_data"
+#define TEST_VM_SNAPSHOT_INSTRUCTIONS "vm_instructions"
+#define TEST_ISOLATE_SNAPSHOT_DATA "isolate_data"
+#define TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS "isolate_instructions"
 #endif
 
 //------------------------------------------------------------------------------

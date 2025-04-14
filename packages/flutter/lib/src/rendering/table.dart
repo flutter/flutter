@@ -4,7 +4,6 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/semantics.dart';
@@ -607,7 +606,189 @@ class RenderTable extends RenderBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.role = SemanticsRole.table;
+    config.isSemanticBoundary = true;
     config.explicitChildNodes = true;
+  }
+
+  final Map<int, _Index> _idToIndexMap = <int, _Index>{};
+  final Map<int, SemanticsNode> _cachedRows = <int, SemanticsNode>{};
+  final Map<_Index, SemanticsNode> _cachedCells = <_Index, SemanticsNode>{};
+
+  /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
+  ///
+  /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
+  /// And if a cell has mutiple semantics node or has a different semantic role, we create
+  /// a new semantics node to wrap it.
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    final List<SemanticsNode> rows = <SemanticsNode>[];
+
+    final List<List<List<SemanticsNode>>> rawCells = List<List<List<SemanticsNode>>>.generate(
+      _rows,
+      (int rowIndex) =>
+          List<List<SemanticsNode>>.generate(_columns, (int columnIndex) => <SemanticsNode>[]),
+    );
+
+    Rect rectWithOffset(SemanticsNode node) {
+      final Offset offset =
+          (node.transform != null ? MatrixUtils.getAsTranslation(node.transform!) : null) ??
+          Offset.zero;
+      return node.rect.shift(offset);
+    }
+
+    int findRowIndex(double top) {
+      for (int i = _rowTops.length - 1; i >= 0; i--) {
+        if (_rowTops[i] <= top) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    int findColumnIndex(double left) {
+      if (_columnLefts == null) {
+        return -1;
+      }
+      for (int i = _columnLefts!.length - 1; i >= 0; i--) {
+        if (_columnLefts!.elementAt(i) <= left) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    void shiftTransform(SemanticsNode node, double dx, double dy) {
+      final Matrix4? previousTransform = node.transform;
+      final Offset offset =
+          (previousTransform != null ? MatrixUtils.getAsTranslation(previousTransform) : null) ??
+          Offset.zero;
+      final Matrix4 newTransform = Matrix4.translationValues(offset.dx + dx, offset.dy + dy, 0);
+      node.transform = newTransform;
+    }
+
+    for (final SemanticsNode child in children) {
+      if (_idToIndexMap.containsKey(child.id)) {
+        final _Index index = _idToIndexMap[child.id]!;
+        final int y = index.y;
+        final int x = index.x;
+        if (y < _rows && x < _columns) {
+          rawCells[y][x].add(child);
+        }
+      } else {
+        final Rect rect = rectWithOffset(child);
+        final int y = findRowIndex(rect.top);
+        final int x = findColumnIndex(rect.left);
+        if (y != -1 && x != -1) {
+          rawCells[y][x].add(child);
+        }
+      }
+    }
+
+    for (int y = 0; y < _rows; y++) {
+      final Rect rowBox = getRowBox(y);
+      // Skip row if it's empty
+      if (rowBox.height == 0) {
+        continue;
+      }
+
+      final SemanticsNode newRow =
+          _cachedRows[y] ??
+          (_cachedRows[y] = SemanticsNode(
+            showOnScreen: () {
+              showOnScreen(descendant: this, rect: rowBox);
+            },
+          ));
+
+      // The list of cells of this Row.
+      final List<SemanticsNode> cells = <SemanticsNode>[];
+
+      for (int x = 0; x < columns; x++) {
+        final List<SemanticsNode> rawChildrens = rawCells[y][x];
+        if (rawChildrens.isEmpty) {
+          continue;
+        }
+
+        // If the cell has multiple children or the only child is not a cell or columnHeader,
+        // create a new semantic node with role cell to wrap it.
+        // This can happen when the cell has a different semantic role, or the cell doesn't have a semantic
+        // role because user is not using the `TableCell` widget.
+        final bool addCellWrapper =
+            rawChildrens.length > 1 ||
+            (rawChildrens.single.role != SemanticsRole.cell &&
+                rawChildrens.single.role != SemanticsRole.columnHeader);
+
+        final SemanticsNode cell =
+            addCellWrapper
+                ? (_cachedCells[_Index(y, x)] ??
+                    (_cachedCells[_Index(y, x)] =
+                        SemanticsNode()..updateWith(
+                          config: SemanticsConfiguration()..role = SemanticsRole.cell,
+                          childrenInInversePaintOrder: rawChildrens,
+                        )))
+                : rawChildrens.single;
+
+        final double cellWidth =
+            x == _columns - 1
+                ? rowBox.width - _columnLefts!.elementAt(x)
+                : _columnLefts!.elementAt(x + 1) - _columnLefts!.elementAt(x);
+
+        // Skip cell if it's invisible
+        if (cellWidth <= 0.0) {
+          continue;
+        }
+        // Add wrapper transform
+        if (addCellWrapper) {
+          cell
+            ..transform = Matrix4.translationValues(_columnLefts!.elementAt(x), 0, 0)
+            ..rect = Rect.fromLTWH(0, 0, cellWidth, rowBox.height);
+        }
+        for (final SemanticsNode child in rawChildrens) {
+          _idToIndexMap[child.id] = _Index(y, x);
+
+          // Shift child transform.
+          final Rect localRect = rectWithOffset(child);
+          // The rect should satisfy 0 <= localRect.top < localRect.bottom <= rowBox.height
+          final double dy = localRect.top >= rowBox.height ? -_rowTops.elementAt(y) : 0.0;
+
+          // if addCellWrapper is true, the rect is relative to the cell
+          // The rect should satisfy 0 <= localRect.left < localRect.right <= cellWidth
+          // if addCellWrapper is false, the rect is relative to the raw
+          // The rect should satisfy _columnLefts!.elementAt(x) <= localRect.left < localRect.right <= _columnLefts!.elementAt(x+1)
+          final double dx =
+              addCellWrapper
+                  ? ((localRect.left >= cellWidth) ? -_columnLefts!.elementAt(x) : 0.0)
+                  : (localRect.right <= _columnLefts!.elementAt(x)
+                      ? _columnLefts!.elementAt(x)
+                      : 0.0);
+
+          if (dx != 0 || dy != 0) {
+            shiftTransform(child, dx, dy);
+          }
+        }
+
+        cell.indexInParent = x;
+        cells.add(cell);
+      }
+
+      newRow
+        ..updateWith(
+          config:
+              SemanticsConfiguration()
+                ..indexInParent = y
+                ..role = SemanticsRole.row,
+          childrenInInversePaintOrder: cells,
+        )
+        ..transform = Matrix4.translationValues(rowBox.left, rowBox.top, 0)
+        ..rect = Rect.fromLTWH(0, 0, rowBox.width, rowBox.height);
+
+      rows.add(newRow);
+    }
+
+    node.updateWith(config: config, childrenInInversePaintOrder: rows);
   }
 
   /// Replaces the children of this table with the given cells.
@@ -1374,4 +1555,11 @@ class RenderTable extends RenderBox {
             ),
     ];
   }
+}
+
+/// Index for a cell.
+class _Index {
+  _Index(this.y, this.x);
+  int y;
+  int x;
 }

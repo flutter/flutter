@@ -226,6 +226,7 @@ void main() {
         tempDir.path,
         '--project-name=testapp',
       ], workingDirectory: tempDir.path);
+      printOnFailure('Created testapp in $tempDir');
       expect(result, const ProcessResultMatcher());
       // Adds intent filters for app links
       final String androidManifestPath = fileSystem.path.join(

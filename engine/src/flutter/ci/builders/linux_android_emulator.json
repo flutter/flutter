@@ -30,6 +30,8 @@
             "ninja": {
                 "config": "ci/android_emulator_debug_x64",
                 "targets": [
+                    "flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
+                    "flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests",
                     "flutter/impeller/toolkit/android:unittests",
                     "flutter/shell/platform/android:flutter_shell_native_unittests"
                 ]
@@ -97,6 +99,8 @@
             "ninja": {
                 "config": "ci/android_emulator_debug_x86",
                 "targets": [
+                    "flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
+                    "flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests",
                     "flutter/impeller/toolkit/android:unittests",
                     "flutter/shell/platform/android:flutter_shell_native_unittests"
                 ]

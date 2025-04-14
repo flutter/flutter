@@ -300,6 +300,16 @@ DEF_SWITCH(DisableMergedPlatformUIThread,
 DEF_SWITCH(EnableAndroidSurfaceControl,
            "enable-surface-control",
            "Enable the SurfaceControl backed swapchain when supported.")
+DEF_SWITCH(EnableFlutterGPU,
+           "enable-flutter-gpu",
+           "Whether Flutter GPU is enabled.")
+DEF_SWITCH(ImpellerLazyShaderMode,
+           "impeller-lazy-shader-mode",
+           "Whether to defer initialization of all required PSOs for the "
+           "Impeller backend. Defaults to false.")
+DEF_SWITCH(ImpellerAntialiasLines,
+           "impeller-antialias-lines",
+           "Experimental flag to test drawing lines with antialiasing.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

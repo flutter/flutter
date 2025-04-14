@@ -34,45 +34,68 @@ inline Point Flip(Point a) {
 // The columns represent the following variabls respectively:
 //
 //  * n
-//  * sin(thetaJ)
+//  * k_xJ, which is defined as 1 / (1 - xJ / a)
 //
 // For definition of the variables, see ComputeOctant.
 constexpr Scalar kPrecomputedVariables[][2] = {
-    /*ratio=2.00*/ {2.00000000, 0.117205737},
-    /*ratio=2.02*/ {2.03999083, 0.117205737},
-    /*ratio=2.04*/ {2.07976152, 0.119418745},
-    /*ratio=2.06*/ {2.11195967, 0.136274515},
-    /*ratio=2.08*/ {2.14721808, 0.141289310},
-    /*ratio=2.10*/ {2.18349805, 0.143410679},
-    /*ratio=2.12*/ {2.21858213, 0.146668334},
-    /*ratio=2.14*/ {2.24861661, 0.154985392},
-    /*ratio=2.16*/ {2.28146030, 0.158932848},
-    /*ratio=2.18*/ {2.30842385, 0.168182439},
-    /*ratio=2.20*/ {2.33888662, 0.172911853},
-    /*ratio=2.22*/ {2.36937163, 0.177039959},
-    /*ratio=2.24*/ {2.40317673, 0.177839181},
-    /*ratio=2.26*/ {2.42840031, 0.185615110},
-    /*ratio=2.28*/ {2.45838300, 0.188905374},
-    /*ratio=2.30*/ {2.48660575, 0.193273145}};
-constexpr Scalar kRatioStepInverse = 50;  // = 1 / 0.02
+    /*ratio=2.00*/ {2.00000000, 1.13276676},
+    /*ratio=2.10*/ {2.18349805, 1.20311921},
+    /*ratio=2.20*/ {2.33888662, 1.28698796},
+    /*ratio=2.30*/ {2.48660575, 1.36351941},
+    /*ratio=2.40*/ {2.62226596, 1.44717976},
+    /*ratio=2.50*/ {2.75148990, 1.53385819},
+    /*ratio=3.00*/ {3.36298265, 1.98288283},
+    /*ratio=3.50*/ {4.08649929, 2.23811846},
+    /*ratio=4.00*/ {4.85481134, 2.47563463},
+    /*ratio=4.50*/ {5.62945551, 2.72948597},
+    /*ratio=5.00*/ {6.43023796, 2.98020421}};
+
+constexpr Scalar kMinRatio = 2.00;
+
+// The curve is split into 3 parts:
+// * The first part uses a denser look up table.
+// * The second part uses a sparser look up table.
+// * The third part uses a straight line.
+constexpr Scalar kFirstStepInverse = 10;  // = 1 / 0.10
+constexpr Scalar kFirstMaxRatio = 2.50;
+constexpr Scalar kFirstNumRecords = 6;
+
+constexpr Scalar kSecondStepInverse = 2;  // = 1 / 0.50
+constexpr Scalar kSecondMaxRatio = 5.00;
+
+constexpr Scalar kThirdNSlope = 1.559599389;
+constexpr Scalar kThirdKxjSlope = 0.522807185;
 
 constexpr size_t kNumRecords =
     sizeof(kPrecomputedVariables) / sizeof(kPrecomputedVariables[0]);
-constexpr Scalar kMinRatio = 2.00f;
-constexpr Scalar kMaxRatio = kMinRatio + (kNumRecords - 1) / kRatioStepInverse;
 
-// Linear interpolation for `kPrecomputedVariables`.
-//
-// The `column` is a 0-based index that decides the target variable.
-Scalar LerpPrecomputedVariable(size_t column, Scalar ratio) {
-  Scalar steps = std::clamp<Scalar>((ratio - kMinRatio) * kRatioStepInverse, 0,
-                                    kNumRecords - 1);
+// Compute the `n` and `xJ / a` for the given ratio.
+std::array<Scalar, 2> ComputeNAndXj(Scalar ratio) {
+  if (ratio > kSecondMaxRatio) {
+    Scalar n = kThirdNSlope * (ratio - kSecondMaxRatio) +
+               kPrecomputedVariables[kNumRecords - 1][0];
+    Scalar k_xJ = kThirdKxjSlope * (ratio - kSecondMaxRatio) +
+                  kPrecomputedVariables[kNumRecords - 1][1];
+    return {n, 1 - 1 / k_xJ};
+  }
+  ratio = std::clamp(ratio, kMinRatio, kSecondMaxRatio);
+  Scalar steps;
+  if (ratio < kFirstMaxRatio) {
+    steps = (ratio - kMinRatio) * kFirstStepInverse;
+  } else {
+    steps =
+        (ratio - kFirstMaxRatio) * kSecondStepInverse + kFirstNumRecords - 1;
+  }
+
   size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
                                    kNumRecords - 2);
   Scalar frac = steps - left;
 
-  return (1 - frac) * kPrecomputedVariables[left][column] +
-         frac * kPrecomputedVariables[left + 1][column];
+  Scalar n = (1 - frac) * kPrecomputedVariables[left][0] +
+             frac * kPrecomputedVariables[left + 1][0];
+  Scalar k_xJ = (1 - frac) * kPrecomputedVariables[left][1] +
+                frac * kPrecomputedVariables[left + 1][1];
+  return {n, 1 - 1 / k_xJ};
 }
 
 // Find the center of the circle that passes the given two points and have the
@@ -101,53 +124,51 @@ Point FindCircleCenter(Point a, Point b, Scalar r) {
 // Compute parameters for a square-like rounded superellipse with a symmetrical
 // radius.
 RoundSuperellipseParam::Octant ComputeOctant(Point center,
-                                             Scalar half_size,
+                                             Scalar a,
                                              Scalar radius) {
   /* The following figure shows the first quadrant of a square-like rounded
-   * superellipse. The target arc consists of the "stretch" (AB), a
-   * superellipsoid arc (BJ), and a circular arc (JM).
+   * superellipse.
    *
-   *     straight   superelipse
-   *          ↓     ↓
-   *        A    B       J    circular arc
-   *        ---------...._   ↙
-   *        |    |      /  `⟍ M
-   *        |    |     /    ⟋ ⟍
-   *        |    |    /  ⟋     \
-   *        |    |   / ⟋        |
-   *        |    |  ᜱD          |
-   *        |    | /             |
-   *    ↑   +----+ S             |
-   *    s   |    |               |
-   *    ↓   +----+---------------| A'
+   *              superelipse
+   *        A     ↓            circular arc
+   *        ---------...._J   ↙
+   *        |           /   `⟍ M (where x=y)
+   *        |          /     ⟋ ⟍
+   *        |         /   ⟋     \
+   *        |        / ⟋         |
+   *        |       ᜱD           |
+   *        |     ⟋              |
+   *        |  ⟋                 |
+   *        |⟋                   |
+   *        +--------------------| A'
    *       O
-   *        ← s →
-   *        ←---- half_size -----→
+   *        ←-------- a ---------→
    */
 
-  Scalar ratio =
-      radius == 0 ? kMaxRatio : std::min(half_size * 2 / radius, kMaxRatio);
-  Scalar a = ratio * radius / 2;
-  Scalar s = half_size - a;
+  if (radius <= 0) {
+    return RoundSuperellipseParam::Octant{
+        .offset = center,
+
+        .se_a = a,
+        .se_n = 0,
+    };
+  }
+
+  Scalar ratio = a * 2 / radius;
   Scalar g = RoundSuperellipseParam::kGapFactor * radius;
 
-  Scalar n = LerpPrecomputedVariable(0, ratio);
-  Scalar sin_thetaJ = radius == 0 ? 0 : LerpPrecomputedVariable(1, ratio);
+  auto precomputed_vars = ComputeNAndXj(ratio);
+  Scalar n = precomputed_vars[0];
+  Scalar xJ = precomputed_vars[1] * a;
+  Scalar yJ = pow(1 - pow(precomputed_vars[1], n), 1 / n) * a;
+  Scalar max_theta = asinf(pow(precomputed_vars[1], n / 2));
 
-  Scalar sin_thetaJ_sq = sin_thetaJ * sin_thetaJ;
-  Scalar cos_thetaJ_sq = 1 - sin_thetaJ_sq;
-  Scalar tan_thetaJ_sq = sin_thetaJ_sq / cos_thetaJ_sq;
-
-  Scalar xJ = a * pow(sin_thetaJ_sq, 1 / n);
-  Scalar yJ = a * pow(cos_thetaJ_sq, 1 / n);
-  Scalar tan_phiJ = pow(tan_thetaJ_sq, (n - 1) / n);
+  Scalar tan_phiJ = pow(xJ / yJ, n - 1);
   Scalar d = (xJ - tan_phiJ * yJ) / (1 - tan_phiJ);
   Scalar R = (a - d - g) * sqrt(2);
 
-  Point pointA{0, half_size};
-  Point pointM{half_size - g, half_size - g};
-  Point pointS{s, s};
-  Point pointJ = Point{xJ, yJ} + pointS;
+  Point pointM{a - g, a - g};
+  Point pointJ = Point{xJ, yJ};
   Point circle_center =
       radius == 0 ? pointM : FindCircleCenter(pointJ, pointM, R);
   Radians circle_max_angle =
@@ -157,12 +178,9 @@ RoundSuperellipseParam::Octant ComputeOctant(Point center,
   return RoundSuperellipseParam::Octant{
       .offset = center,
 
-      .edge_mid = pointA,
-
-      .se_center = pointS,
       .se_a = a,
       .se_n = n,
-      .se_max_theta = asin(sin_thetaJ),
+      .se_max_theta = max_theta,
 
       .circle_start = pointJ,
       .circle_center = circle_center,
@@ -225,13 +243,9 @@ bool OctantContains(const RoundSuperellipseParam::Octant& param,
   if (p.x < 0 || p.y < 0 || p.y < p.x) {
     return true;
   }
-  // Check if the point is within the stretch segment.
-  if (p.x <= param.se_center.x) {
-    return p.y <= param.edge_mid.y;
-  }
   // Check if the point is within the superellipsoid segment.
   if (p.x <= param.circle_start.x) {
-    Point p_se = (p - param.se_center) / param.se_a;
+    Point p_se = p / param.se_a;
     return powf(p_se.x, param.se_n) + powf(p_se.y, param.se_n) <= 1;
   }
   Scalar circle_radius =
@@ -265,46 +279,245 @@ bool CornerContains(const RoundSuperellipseParam::Quadrant& param,
   } else {
     norm_point = norm_point.Abs();
   }
+  if (param.top.se_n < 2 || param.right.se_n < 2) {
+    // A rectangular corner. The top and left sides contain the borders
+    // while the bottom and right sides don't (see `Rect.contains`).
+    Scalar x_delta = param.right.offset.x + param.right.se_a - norm_point.x;
+    Scalar y_delta = param.top.offset.y + param.top.se_a - norm_point.y;
+    bool x_within = x_delta > 0 || (x_delta == 0 && param.signed_scale.x < 0);
+    bool y_within = y_delta > 0 || (y_delta == 0 && param.signed_scale.y < 0);
+    return x_within && y_within;
+  }
   return OctantContains(param.top, norm_point - param.top.offset) &&
          OctantContains(param.right, Flip(norm_point - param.right.offset));
 }
 
+class RoundSuperellipseBuilder {
+ public:
+  explicit RoundSuperellipseBuilder(PathBuilder& builder) : builder_(builder) {}
+
+  // Draws an arc representing 1/4 of a rounded superellipse.
+  //
+  // If `reverse` is false, the resulting arc spans from 0 to pi/2, moving
+  // clockwise starting from the positive Y-axis. Otherwise it moves from pi/2
+  // to 0.
+  void AddQuadrant(const RoundSuperellipseParam::Quadrant& param,
+                   bool reverse,
+                   Point scale_sign = Point(1, 1)) {
+    auto transform = Matrix::MakeTranslateScale(param.signed_scale * scale_sign,
+                                                param.offset);
+    if (param.top.se_n < 2 || param.right.se_n < 2) {
+      builder_.LineTo(transform * (param.top.offset +
+                                   Point(param.top.se_a, param.top.se_a)));
+      if (!reverse) {
+        builder_.LineTo(transform *
+                        (param.top.offset + Point(param.top.se_a, 0)));
+      } else {
+        builder_.LineTo(transform *
+                        (param.top.offset + Point(0, param.top.se_a)));
+      }
+      return;
+    }
+    if (!reverse) {
+      AddOctant(param.top, /*reverse=*/false, /*flip=*/false, transform);
+      AddOctant(param.right, /*reverse=*/true, /*flip=*/true, transform);
+    } else {
+      AddOctant(param.right, /*reverse=*/false, /*flip=*/true, transform);
+      AddOctant(param.top, /*reverse=*/true, /*flip=*/false, transform);
+    }
+  }
+
+ private:
+  std::array<Point, 4> SuperellipseArcPoints(
+      const RoundSuperellipseParam::Octant& param) {
+    Point start = {0, param.se_a};
+    const Point& end = param.circle_start;
+    constexpr Point start_tangent = {1, 0};
+    Point circle_start_vector = param.circle_start - param.circle_center;
+    Point end_tangent =
+        Point{-circle_start_vector.y, circle_start_vector.x}.Normalize();
+
+    std::array<Scalar, 2> factors = SuperellipseBezierFactors(param.se_n);
+
+    return std::array<Point, 4>{
+        start, start + start_tangent * factors[0] * param.se_a,
+        end + end_tangent * factors[1] * param.se_a, end};
+  };
+
+  std::array<Point, 4> CircularArcPoints(
+      const RoundSuperellipseParam::Octant& param) {
+    Point start_vector = param.circle_start - param.circle_center;
+    Point end_vector =
+        start_vector.Rotate(Radians(-param.circle_max_angle.radians));
+    Point circle_end = param.circle_center + end_vector;
+    Point start_tangent = Point{start_vector.y, -start_vector.x}.Normalize();
+    Point end_tangent = Point{-end_vector.y, end_vector.x}.Normalize();
+    Scalar bezier_factor = std::tan(param.circle_max_angle.radians / 4) * 4 / 3;
+    Scalar radius = start_vector.GetLength();
+
+    return std::array<Point, 4>{
+        param.circle_start,
+        param.circle_start + start_tangent * bezier_factor * radius,
+        circle_end + end_tangent * bezier_factor * radius, circle_end};
+  };
+
+  // Draws an arc representing 1/8 of a rounded superellipse.
+  //
+  // If `reverse` is false, the resulting arc spans from 0 to pi/4, moving
+  // clockwise starting from the positive Y-axis. Otherwise it moves from pi/4
+  // to 0.
+  //
+  // If `flip` is true, all points have their X and Y coordinates swapped,
+  // effectively mirrowing each point by the y=x line.
+  //
+  // All points are transformed by `external_transform` after the optional
+  // flipping before being used as control points for the cubic curves.
+  void AddOctant(const RoundSuperellipseParam::Octant& param,
+                 bool reverse,
+                 bool flip,
+                 const Matrix& external_transform) {
+    Matrix transform =
+        external_transform * Matrix::MakeTranslation(param.offset);
+    if (flip) {
+      transform = transform * kFlip;
+    }
+
+    auto circle_points = CircularArcPoints(param);
+    auto se_points = SuperellipseArcPoints(param);
+
+    if (!reverse) {
+      builder_.CubicCurveTo(transform * se_points[1], transform * se_points[2],
+                            transform * se_points[3]);
+      builder_.CubicCurveTo(transform * circle_points[1],
+                            transform * circle_points[2],
+                            transform * circle_points[3]);
+    } else {
+      builder_.CubicCurveTo(transform * circle_points[2],
+                            transform * circle_points[1],
+                            transform * circle_points[0]);
+      builder_.CubicCurveTo(transform * se_points[2], transform * se_points[1],
+                            transform * se_points[0]);
+    }
+  };
+
+  // Get the Bezier factor for the superellipse arc in a rounded superellipse.
+  //
+  // The result will be assigned to output, where [0] will be the factor for the
+  // starting tangent and [1] for the ending tangent.
+  //
+  // These values are computed by brute-force searching for the minimal distance
+  // on a rounded superellipse and are not for general purpose superellipses.
+  std::array<Scalar, 2> SuperellipseBezierFactors(Scalar n) {
+    constexpr Scalar kPrecomputedVariables[][2] = {
+        /*n=2.0*/ {0.01339448, 0.05994973},
+        /*n=3.0*/ {0.13664115, 0.13592082},
+        /*n=4.0*/ {0.24545546, 0.14099516},
+        /*n=5.0*/ {0.32353151, 0.12808021},
+        /*n=6.0*/ {0.39093068, 0.11726264},
+        /*n=7.0*/ {0.44847800, 0.10808278},
+        /*n=8.0*/ {0.49817452, 0.10026175},
+        /*n=9.0*/ {0.54105583, 0.09344429},
+        /*n=10.0*/ {0.57812578, 0.08748984},
+        /*n=11.0*/ {0.61050961, 0.08224722},
+        /*n=12.0*/ {0.63903989, 0.07759639},
+        /*n=13.0*/ {0.66416338, 0.07346530},
+        /*n=14.0*/ {0.68675338, 0.06974996},
+        /*n=15.0*/ {0.70678034, 0.06529512}};
+    constexpr size_t kNumRecords =
+        sizeof(kPrecomputedVariables) / sizeof(kPrecomputedVariables[0]);
+    constexpr Scalar kStep = 1.00f;
+    constexpr Scalar kMinN = 2.00f;
+    constexpr Scalar kMaxN = kMinN + (kNumRecords - 1) * kStep;
+
+    if (n >= kMaxN) {
+      // Heuristic formula derived from fitting.
+      return {1.07f - expf(1.307649835) * powf(n, -0.8568516731),
+              -0.01f + expf(-0.9287690322) * powf(n, -0.6120901398)};
+    }
+
+    Scalar steps = std::clamp<Scalar>((n - kMinN) / kStep, 0, kNumRecords - 1);
+    size_t left = std::clamp<size_t>(static_cast<size_t>(std::floor(steps)), 0,
+                                     kNumRecords - 2);
+    Scalar frac = steps - left;
+
+    return std::array<Scalar, 2>{(1 - frac) * kPrecomputedVariables[left][0] +
+                                     frac * kPrecomputedVariables[left + 1][0],
+                                 (1 - frac) * kPrecomputedVariables[left][1] +
+                                     frac * kPrecomputedVariables[left + 1][1]};
+  }
+
+  PathBuilder& builder_;
+
+  // A matrix that swaps the coordinates of a point.
+  // clang-format off
+  static constexpr Matrix kFlip = Matrix(
+    0.0f, 1.0f, 0.0f, 0.0f,
+    1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.0f, 0.0f, 1.0f);
+  // clang-format on
+};
+
 }  // namespace
 
 RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
-    const Rect& bounds_,
-    const RoundingRadii& radii_) {
-  if (radii_.AreAllCornersSame()) {
+    const Rect& bounds,
+    const RoundingRadii& radii) {
+  if (radii.AreAllCornersSame() && !radii.top_left.IsEmpty()) {
+    // Having four empty corners indicate a rectangle, which needs special
+    // treatment on border containment and therefore is not `all_corners_same`.
     return RoundSuperellipseParam{
-        .top_right = ComputeQuadrant(bounds_.GetCenter(), bounds_.GetRightTop(),
-                                     radii_.top_right),
+        .top_right = ComputeQuadrant(bounds.GetCenter(), bounds.GetRightTop(),
+                                     radii.top_right),
         .all_corners_same = true,
     };
   }
-  Scalar top_split = Split(bounds_.GetLeft(), bounds_.GetRight(),
-                           radii_.top_left.width, radii_.top_right.width);
-  Scalar right_split =
-      Split(bounds_.GetTop(), bounds_.GetBottom(), radii_.top_right.height,
-            radii_.bottom_right.height);
+  Scalar top_split = Split(bounds.GetLeft(), bounds.GetRight(),
+                           radii.top_left.width, radii.top_right.width);
+  Scalar right_split = Split(bounds.GetTop(), bounds.GetBottom(),
+                             radii.top_right.height, radii.bottom_right.height);
   Scalar bottom_split =
-      Split(bounds_.GetLeft(), bounds_.GetRight(), radii_.bottom_left.width,
-            radii_.bottom_right.width);
-  Scalar left_split = Split(bounds_.GetTop(), bounds_.GetBottom(),
-                            radii_.top_left.height, radii_.bottom_left.height);
+      Split(bounds.GetLeft(), bounds.GetRight(), radii.bottom_left.width,
+            radii.bottom_right.width);
+  Scalar left_split = Split(bounds.GetTop(), bounds.GetBottom(),
+                            radii.top_left.height, radii.bottom_left.height);
 
   return RoundSuperellipseParam{
       .top_right = ComputeQuadrant(Point{top_split, right_split},
-                                   bounds_.GetRightTop(), radii_.top_right),
+                                   bounds.GetRightTop(), radii.top_right),
       .bottom_right =
           ComputeQuadrant(Point{bottom_split, right_split},
-                          bounds_.GetRightBottom(), radii_.bottom_right),
-      .bottom_left =
-          ComputeQuadrant(Point{bottom_split, left_split},
-                          bounds_.GetLeftBottom(), radii_.bottom_left),
+                          bounds.GetRightBottom(), radii.bottom_right),
+      .bottom_left = ComputeQuadrant(Point{bottom_split, left_split},
+                                     bounds.GetLeftBottom(), radii.bottom_left),
       .top_left = ComputeQuadrant(Point{top_split, left_split},
-                                  bounds_.GetLeftTop(), radii_.top_left),
+                                  bounds.GetLeftTop(), radii.top_left),
       .all_corners_same = false,
   };
+}
+
+void RoundSuperellipseParam::AddToPath(PathBuilder& path_builder) const {
+  RoundSuperellipseBuilder builder(path_builder);
+
+  Point start = top_right.offset +
+                top_right.signed_scale *
+                    (top_right.top.offset + Point(0, top_right.top.se_a));
+  path_builder.MoveTo(start);
+
+  if (all_corners_same) {
+    builder.AddQuadrant(top_right, /*reverse=*/false, Point(1, 1));
+    builder.AddQuadrant(top_right, /*reverse=*/true, Point(1, -1));
+    builder.AddQuadrant(top_right, /*reverse=*/false, Point(-1, -1));
+    builder.AddQuadrant(top_right, /*reverse=*/true, Point(-1, 1));
+  } else {
+    builder.AddQuadrant(top_right, /*reverse=*/false);
+    builder.AddQuadrant(bottom_right, /*reverse=*/true);
+    builder.AddQuadrant(bottom_left, /*reverse=*/false);
+    builder.AddQuadrant(top_left, /*reverse=*/true);
+  }
+
+  path_builder.LineTo(start);
+  path_builder.Close();
 }
 
 bool RoundSuperellipseParam::Contains(const Point& point) const {

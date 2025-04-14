@@ -24,6 +24,7 @@ import '../exceptions.dart';
 import '../tools/shader_compiler.dart';
 import 'assets.dart';
 import 'common.dart';
+import 'darwin.dart';
 import 'icon_tree_shaker.dart';
 import 'native_assets.dart';
 
@@ -444,14 +445,9 @@ abstract class IosLLDBInit extends Target {
   ];
 
   @override
-  List<Source> get outputs {
-    final FlutterProject flutterProject = FlutterProject.current();
-    final String lldbInitFilePath = flutterProject.ios.lldbInitFile.path.replaceFirst(
-      flutterProject.directory.path,
-      '{PROJECT_DIR}/',
-    );
-    return <Source>[Source.pattern(lldbInitFilePath)];
-  }
+  List<Source> get outputs => <Source>[
+    Source.fromProject((FlutterProject project) => project.ios.lldbInitFile),
+  ];
 
   @override
   List<Target> get dependencies => <Target>[];
@@ -503,11 +499,13 @@ abstract class IosLLDBInit extends Target {
     // an error.
     final String? srcRoot = environment.defines[kSrcRoot];
     if (srcRoot == null) {
-      throw MissingDefineException(kSdkRoot, name);
+      environment.logger.printError('Failed to find $srcRoot');
+      return;
     }
     final Directory xcodeProjectDir = environment.fileSystem.directory(srcRoot);
     if (!xcodeProjectDir.existsSync()) {
-      throw Exception('Failed to find ${xcodeProjectDir.path}');
+      environment.logger.printError('Failed to find ${xcodeProjectDir.path}');
+      return;
     }
 
     bool anyLLDBInitFound = false;
@@ -522,14 +520,20 @@ abstract class IosLLDBInit extends Target {
     if (!anyLLDBInitFound) {
       final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
       if (flutterProject.isModule) {
-        throwToolExit(
-          'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+        // We use print here to make sure Xcode adds the message to the build logs. See
+        // https://developer.apple.com/documentation/xcode/running-custom-scripts-during-a-build#Log-errors-and-warnings-from-your-script
+        // ignore: avoid_print
+        print(
+          'warning: Debugging Flutter on new iOS versions requires an LLDB Init File. To '
           'ensure debug mode works, please run "flutter build ios --config-only" '
           'in your Flutter project and follow the instructions to add the file.',
         );
       } else {
-        throwToolExit(
-          'Debugging Flutter on new iOS versions requires an LLDB Init File. To '
+        // We use print here to make sure Xcode adds the message to the build logs. See
+        // https://developer.apple.com/documentation/xcode/running-custom-scripts-during-a-build#Log-errors-and-warnings-from-your-script
+        // ignore: avoid_print
+        print(
+          'warning: Debugging Flutter on new iOS versions requires an LLDB Init File. To '
           'ensure debug mode works, please run "flutter build ios --config-only" '
           'in your Flutter project and automatically add the files.',
         );
@@ -547,6 +551,37 @@ class DebugIosLLDBInit extends IosLLDBInit {
 
   @override
   BuildMode get buildMode => BuildMode.debug;
+}
+
+class CheckDevDependenciesIos extends CheckDevDependencies {
+  const CheckDevDependenciesIos();
+
+  @override
+  String get name => 'check_dev_dependencies_ios';
+
+  @override
+  List<Source> get inputs {
+    return <Source>[
+      ...super.inputs,
+      const Source.pattern(
+        '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/ios.dart',
+      ),
+
+      // The generated Xcode properties file contains
+      // the FLUTTER_DEV_DEPENDENCIES_ENABLED configuration.
+      // This target should re-run whenever that value changes.
+      Source.fromProject((FlutterProject project) => project.ios.generatedXcodePropertiesFile),
+    ];
+  }
+
+  @override
+  String get debugBuildCommand => 'flutter build ios --config-only --debug';
+
+  @override
+  String get profileBuildCommand => 'flutter build ios --config-only --profile';
+
+  @override
+  String get releaseBuildCommand => 'flutter build ios --config-only --release';
 }
 
 /// The base class for all iOS bundle targets.
@@ -701,6 +736,7 @@ class DebugIosApplicationBundle extends IosAssetBundle {
 
   @override
   List<Target> get dependencies => <Target>[
+    const CheckDevDependenciesIos(),
     const DebugUniversalFramework(),
     const DebugIosLLDBInit(),
     ...super.dependencies,
@@ -732,7 +768,11 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'profile_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    CheckDevDependenciesIos(),
+    AotAssemblyProfile(),
+    InstallCodeAssets(),
+  ];
 }
 
 /// Build a release iOS application bundle.
@@ -743,7 +783,11 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   String get name => 'release_ios_bundle_flutter_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[AotAssemblyRelease(), InstallCodeAssets()];
+  List<Target> get dependencies => const <Target>[
+    CheckDevDependenciesIos(),
+    AotAssemblyRelease(),
+    InstallCodeAssets(),
+  ];
 
   @override
   Future<void> build(Environment environment) async {

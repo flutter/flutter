@@ -10,10 +10,7 @@
 
 #include "impeller/base/backend_cast.h"
 #include "impeller/base/thread.h"
-#include "impeller/core/texture.h"
 #include "impeller/renderer/backend/vulkan/device_holder_vk.h"
-#include "impeller/renderer/backend/vulkan/formats_vk.h"
-#include "impeller/renderer/backend/vulkan/pipeline_cache_vk.h"
 #include "impeller/renderer/backend/vulkan/sampler_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
@@ -33,6 +30,7 @@ class PipelineVK final
       const PipelineDescriptor& desc,
       const std::shared_ptr<DeviceHolderVK>& device_holder,
       const std::weak_ptr<PipelineLibrary>& weak_library,
+      PipelineKey pipeline_key,
       std::shared_ptr<SamplerVK> immutable_sampler = {});
 
   // |Pipeline|
@@ -46,6 +44,8 @@ class PipelineVK final
 
   std::shared_ptr<PipelineVK> CreateVariantForImmutableSamplers(
       const std::shared_ptr<SamplerVK>& immutable_sampler) const;
+
+  PipelineKey GetPipelineKey() const { return pipeline_key_; }
 
  private:
   friend class PipelineLibraryVK;
@@ -62,6 +62,7 @@ class PipelineVK final
   vk::UniquePipelineLayout layout_;
   vk::UniqueDescriptorSetLayout descriptor_set_layout_;
   std::shared_ptr<SamplerVK> immutable_sampler_;
+  const PipelineKey pipeline_key_;
   mutable Mutex immutable_sampler_variants_mutex_;
   mutable ImmutableSamplerVariants immutable_sampler_variants_ IPLR_GUARDED_BY(
       immutable_sampler_variants_mutex_);
@@ -74,6 +75,7 @@ class PipelineVK final
              vk::UniqueRenderPass render_pass,
              vk::UniquePipelineLayout layout,
              vk::UniqueDescriptorSetLayout descriptor_set_layout,
+             PipelineKey pipeline_key,
              std::shared_ptr<SamplerVK> immutable_sampler);
 
   // |Pipeline|

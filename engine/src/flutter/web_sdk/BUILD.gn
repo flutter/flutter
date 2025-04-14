@@ -176,12 +176,13 @@ template("_kernel_worker") {
       if (is_win) {
         ext = ".exe"
       }
-      dart = rebase_path("$host_prebuilt_dart_sdk/bin/dart$ext", root_out_dir)
+      dartaot = rebase_path("$host_prebuilt_dart_sdk/bin/dartaotruntime$ext",
+                            root_out_dir)
       kernel_worker = rebase_path(
-              "$host_prebuilt_dart_sdk/bin/snapshots/kernel_worker.dart.snapshot")
+              "$host_prebuilt_dart_sdk/bin/snapshots/kernel_worker_aot.dart.snapshot")
 
       args = [
-               dart,
+               dartaot,
                kernel_worker,
              ] + invoker.args
     }
@@ -413,7 +414,6 @@ if (!is_fuchsia) {
         "//flutter/third_party/canvaskit:canvaskit_chromium_group",
         "//flutter/third_party/canvaskit:canvaskit_group",
         "//flutter/third_party/canvaskit:skwasm_group",
-        "//flutter/third_party/canvaskit:skwasm_st_group",
       ]
     }
     deps += [ "//flutter/lib/web_ui/flutter_js" ]
@@ -438,9 +438,6 @@ if (!is_fuchsia) {
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.js",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.js.symbols",
         "$root_out_dir/flutter_web_sdk/canvaskit/skwasm.wasm",
-        "$root_out_dir/flutter_web_sdk/canvaskit/skwasm_st.js",
-        "$root_out_dir/flutter_web_sdk/canvaskit/skwasm_st.js.symbols",
-        "$root_out_dir/flutter_web_sdk/canvaskit/skwasm_st.wasm",
       ]
     }
 

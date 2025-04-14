@@ -197,6 +197,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
         // image_callback is associated with the Dart isolate and must be
         // deleted on the UI thread.
         image_callback.reset();
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
       });
 
   // Kick things off on the raster rask runner.
@@ -223,6 +224,7 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
       }));
 
   return Dart_Null();
+  // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
 }
 
 }  // namespace flutter

@@ -13,6 +13,20 @@
 @class FlutterTextField;
 
 /**
+ * Delegate for FlutterTextInputPlugin. Implemented by FlutterEngine.
+ */
+@protocol FlutterTextInputPluginDelegate
+
+/**
+ * Returns the FlutterViewController for the given view identifier.
+ */
+- (FlutterViewController*)viewControllerForIdentifier:(FlutterViewIdentifier)viewIdentifier;
+
+@property(nonatomic, readonly) id<FlutterBinaryMessenger> binaryMessenger;
+
+@end
+
+/**
  * A plugin to handle text input.
  *
  * Responsible for bridging the native macOS text input system with the Flutter framework text
@@ -34,9 +48,15 @@
 @property(nonatomic, weak) FlutterTextField* client;
 
 /**
+ * Returns the view controller text input plugin is currently attached to,
+ * nil if not attached to any view controller.
+ */
+@property(nonatomic, readonly, weak) FlutterViewController* currentViewController;
+
+/**
  * Initializes a text input plugin that coordinates key event handling with |viewController|.
  */
-- (instancetype)initWithViewController:(FlutterViewController*)viewController;
+- (instancetype)initWithDelegate:(id<FlutterTextInputPluginDelegate>)delegate;
 
 /**
  * Whether this plugin is the first responder of this NSWindow.

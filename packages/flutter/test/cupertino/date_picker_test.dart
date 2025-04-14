@@ -17,8 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../impeller_test_helpers.dart';
-
 // TODO(yjbanov): on the web text rendered with perspective produces flaky goldens: https://github.com/flutter/flutter/issues/110785
 final bool skipPerspectiveTextGoldens = isBrowser && isSkwasm;
 
@@ -1611,7 +1609,7 @@ void main() {
           matchesGoldenFile('date_picker_test.datetime.drag.png'),
         );
       }
-    }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+    });
 
     testWidgets('DatePicker displays the date in correct order', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1761,7 +1759,7 @@ void main() {
         matchesGoldenFile('timer_picker_test.datetime.drag.png'),
       );
     }
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+  });
 
   testWidgets('TimerPicker only changes hour label after scrolling stops', (
     WidgetTester tester,
@@ -2487,6 +2485,87 @@ void main() {
     expect(testWidth, equals(largestWidth));
     expect(widths.indexOf(largestWidth), equals(1));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/39998
+
+  test('showTimeSeparator is only supported in time or dateAndTime mode', () async {
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.time,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeparator: true,
+      ),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(onDateTimeChanged: (DateTime _) {}, showTimeSeparator: true),
+      returnsNormally,
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeparator: true,
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains('showTimeSeparator is only supported in time or dateAndTime modes'),
+        ),
+      ),
+    );
+
+    expect(
+      () => CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.monthYear,
+        onDateTimeChanged: (DateTime _) {},
+        showTimeSeparator: true,
+      ),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message ?? 'Unknown error',
+          'message',
+          contains('showTimeSeparator is only supported in time or dateAndTime modes'),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Time separator widget should be rendered when flag is set to true', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            onDateTimeChanged: (DateTime dateTime) {},
+            showTimeSeparator: true,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(':'), findsOneWidget);
+  });
+
+  testWidgets('Time separator widget should not be rendered when flag is set to false', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            onDateTimeChanged: (DateTime _) {},
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text(':'), findsNothing);
+  });
 
   // Regression test for https://github.com/flutter/flutter/issues/161773
   testWidgets('CupertinoDatePicker date value baseline alignment', (WidgetTester tester) async {

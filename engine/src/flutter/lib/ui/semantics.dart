@@ -46,10 +46,12 @@ class SemanticsAction {
   static const int _kSetTextIndex = 1 << 21;
   static const int _kFocusIndex = 1 << 22;
   static const int _kScrollToOffsetIndex = 1 << 23;
-  // READ THIS: if you add an action here, you MUST update the
-  // numSemanticsActions value in testing/dart/semantics_test.dart and
-  // lib/web_ui/test/engine/semantics/semantics_api_test.dart, or tests
-  // will fail.
+  // READ THIS:
+  // - The maximum supported bit index on the web (in JS mode) is 1 << 31.
+  // - If you add an action here, you MUST update the numSemanticsActions value
+  //   in testing/dart/semantics_test.dart and
+  //   lib/web_ui/test/engine/semantics/semantics_api_test.dart, or tests will
+  //   fail.
 
   /// The equivalent of a user briefly tapping the screen with the finger
   /// without moving it.
@@ -412,21 +414,44 @@ enum SemanticsRole {
 
   /// A input field with a dropdown list box attached.
   ///
-  /// For example, a [DropDownMenu]
+  /// For example, a [DropdownMenu]
   comboBox,
 
-  /// Contains a list of [menu]s.
+  /// A presentation of [menu] that usually remains visible and is usually
+  /// presented horizontally.
   ///
   /// For example, a [MenuBar].
   menuBar,
 
-  /// A button that opens a dropdown that contains multiple [menuItem]s.
+  /// A permanently visible list of controls or a widget that can be made to
+  /// open and close.
   ///
-  /// For example, a [MenuAnchor] or [DropDownButton].
+  /// For example, a [MenuAnchor] or [DropdownButton].
   menu,
 
-  /// A item in a dropdown created by [menu] or [comboBox].
+  /// An item in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItemCheckbox], a menu item with a checkbox. The [menuItemCheckbox]
+  ///  can also be used within [menu] and [menuBar].
+  /// * [menuItemRadio], a menu item with a radio button. This role is used by
+  /// [menu] or [menuBar] as well.
   menuItem,
+
+  /// An item with a checkbox in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItem] and [menuItemRadio] for menu related roles.
+  menuItemCheckbox,
+
+  /// An item with a radio button in a dropdown created by [menu] or [menuBar].
+  ///
+  /// See also:
+  ///
+  /// * [menuItem] and [menuItemCheckbox] for menu related roles.
+  menuItemRadio,
 
   /// A container to display multiple [listItem]s in vertical or horizontal
   /// layout.
@@ -462,6 +487,46 @@ enum SemanticsRole {
 
   /// A group of radio buttons.
   radioGroup,
+
+  /// A component to provide advisory information that is not important to
+  /// justify an [alert].
+  ///
+  /// For example, a loading message for a web page.
+  status,
+
+  /// A component to provide important and usually time-sensitive information.
+  ///
+  /// The alert role should only be used for information that requires the
+  /// user's immediate attention, for example:
+  ///
+  /// * An invalid value was entered into a form field.
+  /// * The user's login session is about to expire.
+  /// * The connection to the server was lost so local changes will not be
+  ///   saved.
+  alert,
+}
+
+/// Describe the type of data for an input field.
+///
+/// This is typically used to complement text fields.
+enum SemanticsInputType {
+  /// The default for non text field.
+  none,
+
+  /// Describes a generic text field.
+  text,
+
+  /// Describes a url text field.
+  url,
+
+  /// Describes a text field for phone input.
+  phone,
+
+  /// Describes a text field that act as a search box.
+  search,
+
+  /// Describes a text field for email input.
+  email,
 }
 
 /// A Boolean value that can be associated with a semantics node.
@@ -511,8 +576,11 @@ class SemanticsFlag {
   static const int _kHasExpandedStateIndex = 1 << 26;
   static const int _kIsExpandedIndex = 1 << 27;
   static const int _kHasSelectedStateIndex = 1 << 28;
+  static const int _kHasRequiredStateIndex = 1 << 29;
+  static const int _kIsRequiredIndex = 1 << 30;
   // READ THIS: if you add a flag here, you MUST update the following:
   //
+  // - The maximum supported bit index on the web (in JS mode) is 1 << 31.
   // - Add an appropriately named and documented `static const SemanticsFlag`
   //   field to this class.
   // - Add the new flag to `_kFlagById` in this file.
@@ -823,6 +891,28 @@ class SemanticsFlag {
   ///   * [SemanticsFlag.hasExpandedState], which enables an expanded/collapsed state.
   static const SemanticsFlag isExpanded = SemanticsFlag._(_kIsExpandedIndex, 'isExpanded');
 
+  /// The semantics node has the quality of either being required or not.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.isRequired], which controls whether the node is required.
+  static const SemanticsFlag hasRequiredState = SemanticsFlag._(
+    _kHasRequiredStateIndex,
+    'hasRequiredState',
+  );
+
+  /// Whether a semantics node is required.
+  ///
+  /// If true, user input is required on the semantics node before a form can
+  /// be submitted.
+  ///
+  /// For example, a login form requires its email text field to be non-empty.
+  ///
+  /// See also:
+  ///
+  ///   * [SemanticsFlag.hasRequiredState], which enables a required state state.
+  static const SemanticsFlag isRequired = SemanticsFlag._(_kIsRequiredIndex, 'isRequired');
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -856,6 +946,8 @@ class SemanticsFlag {
     _kIsCheckStateMixedIndex: isCheckStateMixed,
     _kHasExpandedStateIndex: hasExpandedState,
     _kIsExpandedIndex: isExpanded,
+    _kHasRequiredStateIndex: hasRequiredState,
+    _kIsRequiredIndex: isRequired,
   };
 
   // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
@@ -868,6 +960,30 @@ class SemanticsFlag {
 
   @override
   String toString() => 'SemanticsFlag.$name';
+}
+
+/// The validation result of a form field.
+///
+/// The type, shape, and correctness of the value is specific to the kind of
+/// form field used. For example, a phone number text field may check that the
+/// value is a properly formatted phone number, and/or that the phone number has
+/// the right area code. A group of radio buttons may validate that the user
+/// selected at least one radio option.
+enum SemanticsValidationResult {
+  /// The node has no validation information attached to it.
+  ///
+  /// This is the default value. Most semantics nodes do not contain validation
+  /// information. Typically, only nodes that are part of an input form - text
+  /// fields, checkboxes, radio buttons, dropdowns - are validated and attach
+  /// validation results to their corresponding semantics nodes.
+  none,
+
+  /// The entered value is valid, and no error should be displayed to the user.
+  valid,
+
+  /// The entered value is invalid, and an error message should be communicated
+  /// to the user.
+  invalid,
 }
 
 // When adding a new StringAttribute, the classes in these files must be
@@ -1088,10 +1204,18 @@ abstract class SemanticsUpdateBuilder {
   /// The `role` describes the role of this node. Defaults to
   /// [SemanticsRole.none] if not set.
   ///
+  /// If `validationResult` is not null, indicates the result of validating a
+  /// form field. If null, indicates that the node is not being validated, or
+  /// that the result is unknown. Form fields that validate user input but do
+  /// not use this argument should use other ways to communicate validation
+  /// errors to the user, such as embedding validation error text in the label.
+  ///
   /// See also:
   ///
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/heading_role
   ///  * https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Attributes/aria-level
+  ///  * [SemanticsValidationResult], that describes possible values for the
+  ///    `validationResult` argument.
   void updateNode({
     required int id,
     required int flags,
@@ -1130,6 +1254,8 @@ abstract class SemanticsUpdateBuilder {
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
+    SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    required SemanticsInputType inputType,
   });
 
   /// Update the custom semantics action associated with the given `id`.
@@ -1207,6 +1333,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     String linkUrl = '',
     SemanticsRole role = SemanticsRole.none,
     required List<String>? controlsNodes,
+    SemanticsValidationResult validationResult = SemanticsValidationResult.none,
+    required SemanticsInputType inputType,
   }) {
     assert(_matrix4IsValid(transform));
     assert(
@@ -1254,6 +1382,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       linkUrl,
       role.index,
       controlsNodes,
+      validationResult.index,
+      inputType.index,
     );
   }
 
@@ -1300,6 +1430,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
       Handle,
       Int32,
       Handle,
+      Int32,
+      Int32,
     )
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
@@ -1343,6 +1475,8 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     String linkUrl,
     int role,
     List<String>? controlsNodes,
+    int validationResultIndex,
+    int inputType,
   );
 
   @override
