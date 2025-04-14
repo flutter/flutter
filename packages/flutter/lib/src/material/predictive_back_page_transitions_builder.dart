@@ -387,15 +387,16 @@ class _PredictiveBackFullscreenPageTransition extends StatefulWidget {
 
 class _PredictiveBackFullscreenPageTransitionState
     extends State<_PredictiveBackFullscreenPageTransition> {
-  // These values were eyeballed to match the native predictive back animation
-  // on a Pixel 2 running Android API 34.
-  static const double _scaleFullyOpened = 1.0;
-  static const double _scaleStartTransition = 0.95;
-  // TODO(justinmc): Better naming.
+  // These values were eyeballed to match the Android spec for the Full Screen
+  // page transition:
+  // https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#full-screen-surfaces
+  static const double _scaleStart = 1.0;
+  static const double _scaleCommit = 0.95;
   static const double _opacityFullyOpened = 1.0;
   static const double _opacityStartTransition = 0.95;
-  static const double _weightForStartState = 65.0;
-  static const double _weightForEndState = 35.0;
+  static const double _commitAt = 0.65;
+  static const double _weightPreCommit = _commitAt;
+  static const double _weightPostCommit = 1 - _weightPreCommit;
   static const double _screenWidthDivisionFactor = 20.0;
   static const double _xShiftAdjustment = 8.0;
   static const Duration _commitDuration = Duration(milliseconds: 100);
@@ -412,12 +413,12 @@ class _PredictiveBackFullscreenPageTransitionState
   // The scale of the outgoing route before and after commit.
   final Animatable<double> _primaryScaleTween = TweenSequence<double>(<TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
-      tween: Tween<double>(begin: _scaleFullyOpened, end: _scaleFullyOpened),
-      weight: _weightForStartState,
+      tween: Tween<double>(begin: _scaleStart, end: _scaleStart),
+      weight: _weightPreCommit,
     ),
     TweenSequenceItem<double>(
-      tween: Tween<double>(begin: _scaleStartTransition, end: _scaleFullyOpened),
-      weight: _weightForEndState,
+      tween: Tween<double>(begin: _scaleCommit, end: _scaleStart),
+      weight: _weightPostCommit,
     ),
   ]);
 
@@ -429,11 +430,11 @@ class _PredictiveBackFullscreenPageTransitionState
     _primaryPositionTween = TweenSequence<Offset>(<TweenSequenceItem<Offset>>[
       TweenSequenceItem<Offset>(
         tween: Tween<Offset>(begin: Offset.zero, end: Offset.zero),
-        weight: _weightForStartState,
+        weight: _weightPreCommit,
       ),
       TweenSequenceItem<Offset>(
         tween: Tween<Offset>(begin: Offset(xShift, 0.0), end: Offset.zero),
-        weight: _weightForEndState,
+        weight: _weightPostCommit,
       ),
     ]);
   }
@@ -450,15 +451,15 @@ class _PredictiveBackFullscreenPageTransitionState
         isCurrent ? ConstantTween<double>(0) : Tween<double>(begin: xShift, end: 0);
     final Animatable<double> scaleTween =
         isCurrent
-            ? ConstantTween<double>(_scaleFullyOpened)
+            ? ConstantTween<double>(_scaleStart)
             : TweenSequence<double>(<TweenSequenceItem<double>>[
               TweenSequenceItem<double>(
-                tween: Tween<double>(begin: _scaleStartTransition, end: _scaleFullyOpened),
-                weight: _weightForStartState,
+                tween: Tween<double>(begin: _scaleCommit, end: _scaleStart),
+                weight: _weightPreCommit,
               ),
               TweenSequenceItem<double>(
-                tween: Tween<double>(begin: _scaleFullyOpened, end: _scaleFullyOpened),
-                weight: _weightForEndState,
+                tween: Tween<double>(begin: _scaleStart, end: _scaleStart),
+                weight: _weightPostCommit,
               ),
             ]);
     // TODO(justinmc): Pull these tweens out into instance variables.
@@ -468,11 +469,11 @@ class _PredictiveBackFullscreenPageTransitionState
             : TweenSequence<double>(<TweenSequenceItem<double>>[
               TweenSequenceItem<double>(
                 tween: Tween<double>(begin: _opacityFullyOpened, end: _opacityStartTransition),
-                weight: _weightForStartState,
+                weight: _weightPreCommit,
               ),
               TweenSequenceItem<double>(
                 tween: Tween<double>(begin: _opacityFullyOpened, end: _opacityFullyOpened),
-                weight: _weightForEndState,
+                weight: _weightPostCommit,
               ),
             ]);
 
@@ -496,7 +497,7 @@ class _PredictiveBackFullscreenPageTransitionState
           // A sudden fadeout at the commit point, driven by time and not the
           // gesture.
           child: AnimatedOpacity(
-            opacity: widget.animation.value < (_weightForStartState / 100) ? 0.0 : 1.0,
+            opacity: widget.animation.value < _commitAt ? 0.0 : 1.0,
             duration: _commitDuration,
             child: child,
           ),
