@@ -22,6 +22,8 @@
   "lastPageTooltip": "An leathanach deiridh",
   "showMenuTooltip": "Taispeáin an roghchlár",
   "scrimLabel": "Scrioma",
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "HH:mm",
   "bottomSheetLabel": "Bileog Íochtarach",
   "scrimOnTapHint": "Dún $modalRouteContentName",
   "aboutListTileTitle": "Maidir le $applicationName",
