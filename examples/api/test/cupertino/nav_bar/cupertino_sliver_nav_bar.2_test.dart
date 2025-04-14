@@ -9,10 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset dragUp = Offset(0.0, -150.0);
 
 void main() {
-
-  testWidgets('CupertinoSliverNavigationBar bottom widget', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('CupertinoSliverNavigationBar bottom widget', (WidgetTester tester) async {
     await tester.pumpWidget(const example.SliverNavBarApp());
 
     final Finder preferredSize = find.byType(PreferredSize);
