@@ -8,6 +8,7 @@ import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
@@ -89,6 +90,10 @@ class FlutterCodeAsset {
 
   final CodeAsset codeAsset;
   final Target target;
+
+  @override
+  String toString() =>
+      'FlutterCodeAsset(codeAsset: ${codeAsset.id} ${codeAsset.file}, target: $target)';
 }
 
 /// Invokes the build of all transitive Dart packages and prepares code assets
@@ -207,8 +212,10 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.fileSystem,
     this.logger,
     this.runPackageName,
+    this.pubspecPath,
   );
 
+  final String pubspecPath;
   final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
@@ -247,11 +254,18 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     runPackageName,
   );
 
+  late final Map<String, Map<String, Object?>?> userDefines = () {
+    final String pubspecContents = fileSystem.file(pubspecPath).readAsStringSync();
+    final YamlMap pubspec = loadYaml(pubspecContents) as YamlMap;
+    return NativeAssetsBuildRunner.readHooksUserDefinesFromPubspec(pubspec);
+  }();
+
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
     logger: _logger,
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
     packageLayout: packageLayout,
+    userDefines: userDefines,
   );
 
   @override
@@ -610,9 +624,8 @@ Future<DartBuildResult> _runDartBuild({
       _throwNativeAssetsBuildFailed();
     }
     dependencies.addAll(buildResult.dependencies);
-    if (!linkingEnabled) {
-      codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
-    } else {
+    codeAssets.addAll(_filterCodeAssets(buildResult.encodedAssets, target));
+    if (linkingEnabled) {
       final LinkResult? linkResult = await buildRunner.link(
         extensions: <ProtocolExtension>[
           CodeAssetExtension(

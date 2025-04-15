@@ -67,6 +67,7 @@ class DatePickerThemeData with Diagnosticable {
     this.yearForegroundColor,
     this.yearBackgroundColor,
     this.yearOverlayColor,
+    this.yearShape,
     this.rangePickerBackgroundColor,
     this.rangePickerElevation,
     this.rangePickerShadowColor,
@@ -83,6 +84,8 @@ class DatePickerThemeData with Diagnosticable {
     this.cancelButtonStyle,
     this.confirmButtonStyle,
     this.locale,
+    this.toggleButtonTextStyle,
+    this.subHeaderForegroundColor,
   });
 
   /// Overrides the default value of [Dialog.backgroundColor].
@@ -251,6 +254,19 @@ class DatePickerThemeData with Diagnosticable {
   /// or pressed.
   final WidgetStateProperty<Color?>? yearOverlayColor;
 
+  /// Overrides the default shape used to paint the shape decoration of the
+  /// year labels in the list of the year picker.
+  ///
+  /// If the selected year is the current year, the provided shape with the
+  /// value of [todayBackgroundColor] is used to paint the shape decoration of
+  /// the year label and the value of [todayBorder] and [todayForegroundColor] is
+  /// used to paint the border.
+  ///
+  /// If the selected year is not the current year, the provided shape with the
+  /// value of [yearBackgroundColor] is used to paint the shape decoration of
+  /// the year label.
+  final WidgetStateProperty<OutlinedBorder?>? yearShape;
+
   /// Overrides the default [Scaffold.backgroundColor] for
   /// [DateRangePickerDialog].
   final Color? rangePickerBackgroundColor;
@@ -359,6 +375,16 @@ class DatePickerThemeData with Diagnosticable {
   /// picker. It defaults to the ambient locale provided by [Localizations].
   final Locale? locale;
 
+  /// Overrides the default text style used for the text of toggle mode button.
+  ///
+  /// If no [TextStyle.color] is given, [subHeaderForegroundColor] will be used.
+  final TextStyle? toggleButtonTextStyle;
+
+  /// Overrides the default color used for text labels and icons of sub header foreground.
+  ///
+  /// This is used in [TextStyle.color] property of [toggleButtonTextStyle] if no color is given.
+  final Color? subHeaderForegroundColor;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DatePickerThemeData copyWith({
@@ -384,6 +410,7 @@ class DatePickerThemeData with Diagnosticable {
     WidgetStateProperty<Color?>? yearForegroundColor,
     WidgetStateProperty<Color?>? yearBackgroundColor,
     WidgetStateProperty<Color?>? yearOverlayColor,
+    WidgetStateProperty<OutlinedBorder?>? yearShape,
     Color? rangePickerBackgroundColor,
     double? rangePickerElevation,
     Color? rangePickerShadowColor,
@@ -400,6 +427,8 @@ class DatePickerThemeData with Diagnosticable {
     ButtonStyle? cancelButtonStyle,
     ButtonStyle? confirmButtonStyle,
     Locale? locale,
+    TextStyle? toggleButtonTextStyle,
+    Color? subHeaderForegroundColor,
   }) {
     return DatePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -424,6 +453,7 @@ class DatePickerThemeData with Diagnosticable {
       yearForegroundColor: yearForegroundColor ?? this.yearForegroundColor,
       yearBackgroundColor: yearBackgroundColor ?? this.yearBackgroundColor,
       yearOverlayColor: yearOverlayColor ?? this.yearOverlayColor,
+      yearShape: yearShape ?? this.yearShape,
       rangePickerBackgroundColor: rangePickerBackgroundColor ?? this.rangePickerBackgroundColor,
       rangePickerElevation: rangePickerElevation ?? this.rangePickerElevation,
       rangePickerShadowColor: rangePickerShadowColor ?? this.rangePickerShadowColor,
@@ -444,6 +474,8 @@ class DatePickerThemeData with Diagnosticable {
       cancelButtonStyle: cancelButtonStyle ?? this.cancelButtonStyle,
       confirmButtonStyle: confirmButtonStyle ?? this.confirmButtonStyle,
       locale: locale ?? this.locale,
+      toggleButtonTextStyle: toggleButtonTextStyle ?? this.toggleButtonTextStyle,
+      subHeaderForegroundColor: subHeaderForegroundColor ?? this.subHeaderForegroundColor,
     );
   }
 
@@ -520,6 +552,12 @@ class DatePickerThemeData with Diagnosticable {
         t,
         Color.lerp,
       ),
+      yearShape: WidgetStateProperty.lerp<OutlinedBorder?>(
+        a?.yearShape,
+        b?.yearShape,
+        t,
+        OutlinedBorder.lerp,
+      ),
       rangePickerBackgroundColor: Color.lerp(
         a?.rangePickerBackgroundColor,
         b?.rangePickerBackgroundColor,
@@ -569,6 +607,12 @@ class DatePickerThemeData with Diagnosticable {
       cancelButtonStyle: ButtonStyle.lerp(a?.cancelButtonStyle, b?.cancelButtonStyle, t),
       confirmButtonStyle: ButtonStyle.lerp(a?.confirmButtonStyle, b?.confirmButtonStyle, t),
       locale: t < 0.5 ? a?.locale : b?.locale,
+      toggleButtonTextStyle: TextStyle.lerp(a?.toggleButtonTextStyle, b?.toggleButtonTextStyle, t),
+      subHeaderForegroundColor: Color.lerp(
+        a?.subHeaderForegroundColor,
+        b?.subHeaderForegroundColor,
+        t,
+      ),
     );
   }
 
@@ -606,6 +650,7 @@ class DatePickerThemeData with Diagnosticable {
     yearForegroundColor,
     yearBackgroundColor,
     yearOverlayColor,
+    yearShape,
     rangePickerBackgroundColor,
     rangePickerElevation,
     rangePickerShadowColor,
@@ -622,6 +667,8 @@ class DatePickerThemeData with Diagnosticable {
     cancelButtonStyle,
     confirmButtonStyle,
     locale,
+    toggleButtonTextStyle,
+    subHeaderForegroundColor,
   ]);
 
   @override
@@ -652,6 +699,7 @@ class DatePickerThemeData with Diagnosticable {
         other.yearForegroundColor == yearForegroundColor &&
         other.yearBackgroundColor == yearBackgroundColor &&
         other.yearOverlayColor == yearOverlayColor &&
+        other.yearShape == yearShape &&
         other.rangePickerBackgroundColor == rangePickerBackgroundColor &&
         other.rangePickerElevation == rangePickerElevation &&
         other.rangePickerShadowColor == rangePickerShadowColor &&
@@ -667,7 +715,9 @@ class DatePickerThemeData with Diagnosticable {
         other.inputDecorationTheme == inputDecorationTheme &&
         other.cancelButtonStyle == cancelButtonStyle &&
         other.confirmButtonStyle == confirmButtonStyle &&
-        other.locale == locale;
+        other.locale == locale &&
+        other.toggleButtonTextStyle == toggleButtonTextStyle &&
+        other.subHeaderForegroundColor == subHeaderForegroundColor;
   }
 
   @override
@@ -766,6 +816,13 @@ class DatePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(
+      DiagnosticsProperty<WidgetStateProperty<OutlinedBorder?>>(
+        'yearShape',
+        yearShape,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
       ColorProperty('rangePickerBackgroundColor', rangePickerBackgroundColor, defaultValue: null),
     );
     properties.add(
@@ -841,6 +898,16 @@ class DatePickerThemeData with Diagnosticable {
       ),
     );
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'toggleButtonTextStyle',
+        toggleButtonTextStyle,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      ColorProperty('subHeaderForegroundColor', subHeaderForegroundColor, defaultValue: null),
+    );
   }
 }
 
@@ -943,6 +1010,7 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
         elevation: 24.0,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4.0))),
         dayShape: const WidgetStatePropertyAll<OutlinedBorder>(CircleBorder()),
+        yearShape: const WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
         rangePickerElevation: 0.0,
         rangePickerShape: const RoundedRectangleBorder(),
       );
@@ -955,6 +1023,13 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
 
   @override
   Color? get headerBackgroundColor => _isDark ? _colors.surface : _colors.primary;
+
+  @override
+  Color? get subHeaderForegroundColor => _colors.onSurface.withOpacity(0.60);
+
+  @override
+  TextStyle? get toggleButtonTextStyle =>
+      _textTheme.titleSmall?.apply(color: subHeaderForegroundColor);
 
   @override
   ButtonStyle get cancelButtonStyle {
@@ -1100,7 +1175,6 @@ class _DatePickerDefaultsM2 extends DatePickerThemeData {
         return null;
       });
 }
-
 // BEGIN GENERATED TOKEN PROPERTIES - DatePicker
 
 // Do not edit by hand. The code between the "BEGIN GENERATED" and
@@ -1117,6 +1191,7 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
         // TODO(tahatesser): Update this to use token when gen_defaults
         // supports `CircleBorder` for fully rounded corners.
         dayShape: const WidgetStatePropertyAll<OutlinedBorder>(CircleBorder()),
+        yearShape: const WidgetStatePropertyAll<OutlinedBorder>(StadiumBorder()),
         rangePickerElevation: 0.0,
         rangePickerShape: const RoundedRectangleBorder(),
       );
@@ -1128,6 +1203,14 @@ class _DatePickerDefaultsM3 extends DatePickerThemeData {
 
   @override
   Color? get backgroundColor => _colors.surfaceContainerHigh;
+
+  @override
+  Color? get subHeaderForegroundColor => _colors.onSurface.withOpacity(0.60);
+
+  @override
+  TextStyle? get toggleButtonTextStyle => _textTheme.titleSmall?.apply(
+    color: subHeaderForegroundColor,
+  );
 
   @override
   ButtonStyle get cancelButtonStyle {

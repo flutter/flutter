@@ -7,7 +7,7 @@ engine binaries.
 
 Flutter engine binaries are built with GN and ninja, referencing pre-defined
 configurations such as ci/builders
-[JSON files](https://github.com/flutter/engine/blob/main/ci/builders/mac_host_engine.json).
+[JSON files](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_host_engine.json).
 During flutter releases, engineers need to code sign mac engine binaries to
 assure users that they come from a known source, have not been tampered with,
 and should not be quarantined by Gatekeepers.
@@ -25,7 +25,7 @@ signed without entitlements.
 
 1.  BUILD.gn files: files that include build rules of GN targets. An example is
     the
-    [BUILD.gn file of flutter engine](https://github.com/flutter/engine/blob/main/BUILD.gn).
+    [BUILD.gn file of flutter engine](https://github.com/flutter/flutter/blob/main/engine/src/flutter/BUILD.gn).
 2.  leaf node of an engine binary: the minimal gn target that could produce such
     an engine binary. That is, this target does not have any dependencies on
     other gn targets that could build this engine binary.
@@ -44,9 +44,9 @@ Generally, there are two ways to generate an engine binary:
 To distinguish between the two, an engine binary is built through global
 generator if it is listed in the `archives` -> `destination` field of the
 builder JSON
-([mac_ios_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_ios_engine.json)
+([mac_ios_engine.json](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_ios_engine.json)
 or
-[mac_host_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_host_engine.json)).
+[mac_host_engine.json](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_host_engine.json)).
 For example, `darwin-x64/FlutterEmbedder.framework.zip`. Whereas binaries built
 with BUILD.gn files are listed among the `builds` field of the JSON file. For
 example, `darwin-x64/artifacts.zip`. We will provide examples for both
@@ -137,15 +137,15 @@ engine artifact.
     field.
 
 You can reference the
-[BUILD.gn file of impellerc](https://github.com/flutter/engine/blob/main/impeller/compiler/BUILD.gn).
+[BUILD.gn file of impellerc](https://github.com/flutter/flutter/blob/main/engine/src/flutter/impeller/compiler/BUILD.gn).
 
 ### To add / update code signing metadata in global generator files:
 
 1.  Find the generator script path listed under `generators` -> `tasks` ->
     `script` of the ci/builder JSON files
-    ([mac_ios_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_ios_engine.json)
+    ([mac_ios_engine.json](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_ios_engine.json)
     or
-    [mac_host_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_host_engine.json)).
+    [mac_host_engine.json](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_host_engine.json)).
 
     The generator script related to iOS is located at
     `sky/tools/create_ios_framework.py`, and generator script related to
@@ -174,7 +174,7 @@ Suppose `Flutter.xcframework/ios-arm64/Flutter.framework/Flutter` is a binary
 that exist in a zip bundle called `ios/artifacts.zip`.
 
 1.  Following step 1, in
-    [mac_ios_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_ios_engine.json),
+    [mac_ios_engine.json](https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/mac_ios_engine.json),
     it builds the artifact with the
     `flutter/sky/tools/create_ios_framework.py` script.
 
@@ -185,7 +185,7 @@ that exist in a zip bundle called `ios/artifacts.zip`.
     `ios_file_without_entitlements` variable.
 
 You can reference the generator script
-[create_ios_framework.py](https://github.com/flutter/engine/blob/main/sky/tools/create_ios_framework.py).
+[create_ios_framework.py](https://github.com/flutter/flutter/blob/main/engine/src/flutter/sky/tools/create_ios_framework.py).
 
 ## Code signing artifacts other than flutter engine binaries
 

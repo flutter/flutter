@@ -4,6 +4,7 @@
 
 #include "flutter/lib/ui/painting/image_encoding_impeller.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "fml/status.h"
 #include "impeller/core/device_buffer.h"
@@ -143,10 +144,10 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
     return;
   }
 
-  auto dimensions = dl_image->dimensions();
+  auto dimensions = dl_image->GetSize();
   auto color_type = ToSkColorType(texture->GetTextureDescriptor().format);
 
-  if (dimensions.isEmpty()) {
+  if (dimensions.IsEmpty()) {
     encode_task(fml::Status(fml::StatusCode::kFailedPrecondition,
                             "Image dimensions were empty."));
     return;
@@ -185,7 +186,8 @@ void ImageEncodingImpeller::ConvertDlImageToSkImage(
       return;
     }
     buffer->Invalidate();
-    auto sk_image = ConvertBufferToSkImage(buffer, color_type, dimensions);
+    auto sk_image =
+        ConvertBufferToSkImage(buffer, color_type, ToSkISize(dimensions));
     encode_task(sk_image);
   };
 

@@ -14,7 +14,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': 'a7da13848085143e730dc3ea946ba8b4d2176ea2',
+  'skia_revision': '76cb5d4fba27b92393f63efbbb4311d9ac229838',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -211,7 +211,7 @@ vars = {
   # The version / instance id of the cipd:chromium/fuchsia/test-scripts which
   # will be used altogether with fuchsia-sdk to setup the build / test
   # environment.
-  'fuchsia_test_scripts_version': 'FZdRtNwH7jmADecj60ClOK69AHHnfTvvuwKLUgY0_AoC',
+  'fuchsia_test_scripts_version': 'mApUsju36efRytN4WFdopPYMfYgAI8ODzTmYq3zNEqsC',
 
   # The version / instance id of the cipd:chromium/fuchsia/gn-sdk which will be
   # used altogether with fuchsia-sdk to generate gn based build rules.
@@ -244,7 +244,7 @@ deps = {
    Var('flutter_git') + '/third_party/rapidjson' + '@' + 'ef3564c5c8824989393b87df25355baf35ff544b',
 
   'engine/src/flutter/third_party/harfbuzz':
-   Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'ea8f97c615f0ba17dc25013ef67dbd6bfaaa76f2',
+   Var('flutter_git') + '/third_party/harfbuzz' + '@' + 'ea6a172f84f2cbcfed803b5ae71064c7afb6b5c2',
 
   'engine/src/flutter/third_party/libcxx':
    Var('llvm_git') + '/llvm-project/libcxx' + '@' + 'bd557f6f764d1e40b62528a13b124ce740624f8f',
@@ -813,7 +813,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'vYisSsIgqw0mqFRVJxScJ5ygIU_t0l6yvA6WNas8rtgC'
+        'version': '91RIHvX0YC3wzD7qjbMedDs-zeXWJQMLcjwj6PKjR00C'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
