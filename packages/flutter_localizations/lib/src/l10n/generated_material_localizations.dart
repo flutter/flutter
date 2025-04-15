@@ -16661,6 +16661,502 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.frenchCanadian;
 }
 
+/// The translations for Irish (`ga`).
+class MaterialLocalizationGa extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Irish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationGa({
+    super.localeName = 'ga',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get aboutListTileTitleRaw => r'Maidir le $applicationName';
+
+  @override
+  String get alertDialogLabel => 'Foláireamh';
+
+  @override
+  String get anteMeridiemAbbreviation => 'R.N.';
+
+  @override
+  String get backButtonTooltip => 'Siar';
+
+  @override
+  String get bottomSheetLabel => 'Bileog Íochtarach';
+
+  @override
+  String get calendarModeButtonLabel => 'Athraigh go féilire';
+
+  @override
+  String get cancelButtonLabel => 'Cealaigh';
+
+  @override
+  String get clearButtonTooltip => 'Glan an téacs';
+
+  @override
+  String get closeButtonLabel => 'Dún';
+
+  @override
+  String get closeButtonTooltip => 'Dún';
+
+  @override
+  String get collapsedHint => 'Leathnaithe';
+
+  @override
+  String get collapsedIconTapHint => 'Leathnaigh';
+
+  @override
+  String get continueButtonLabel => 'Lean ar aghaidh';
+
+  @override
+  String get copyButtonLabel => 'Cóipeáil';
+
+  @override
+  String get currentDateLabel => 'Inniu';
+
+  @override
+  String get cutButtonLabel => 'Gearr';
+
+  @override
+  String get dateHelpText => 'll/mm/bbbb';
+
+  @override
+  String get dateInputLabel => 'Cuir Isteach Dáta';
+
+  @override
+  String get dateOutOfRangeLabel => 'Lasmuigh den raon.';
+
+  @override
+  String get datePickerHelpText => 'Roghnaigh dáta';
+
+  @override
+  String get dateRangeEndDateSemanticLabelRaw => r'Dáta deiridh $fullDate';
+
+  @override
+  String get dateRangeEndLabel => 'Dáta Deiridh';
+
+  @override
+  String get dateRangePickerHelpText => 'Roghnaigh raon';
+
+  @override
+  String get dateRangeStartDateSemanticLabelRaw => r'Dáta tosaigh $fullDate';
+
+  @override
+  String get dateRangeStartLabel => 'Dáta Tosaigh';
+
+  @override
+  String get dateSeparator => '/';
+
+  @override
+  String get deleteButtonTooltip => 'Scrios';
+
+  @override
+  String get dialModeButtonLabel => 'Athraigh go mód roghnóra aghaidh an chloig';
+
+  @override
+  String get dialogLabel => 'Dialóg';
+
+  @override
+  String get drawerLabel => 'Roghchlár nascleanúna';
+
+  @override
+  String get expandedHint => 'Laghdaithe';
+
+  @override
+  String get expandedIconTapHint => 'Laghdaigh';
+
+  @override
+  String get expansionTileCollapsedHint => 'tapáil faoi dhó chun leathnú';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Leathnaigh chun tuilleadh sonraí a fháil';
+
+  @override
+  String get expansionTileExpandedHint => 'tapáil faoi dhó chun laghdú';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Laghdaigh';
+
+  @override
+  String get firstPageTooltip => 'An chéad leathanach';
+
+  @override
+  String get hideAccountsLabel => 'Folaigh cuntais';
+
+  @override
+  String get inputDateModeButtonLabel => 'Athraigh go hionchur';
+
+  @override
+  String get inputTimeModeButtonLabel => 'Athraigh go mód ionchuir téacs';
+
+  @override
+  String get invalidDateFormatLabel => 'Formáid neamhbhailí.';
+
+  @override
+  String get invalidDateRangeLabel => 'Raon neamhbhailí.';
+
+  @override
+  String get invalidTimeLabel => 'Cuir isteach am bailí';
+
+  @override
+  String get keyboardKeyAlt => 'Alt';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyBackspace => 'Cúlspás';
+
+  @override
+  String get keyboardKeyCapsLock => 'Glas Ceannlitreacha';
+
+  @override
+  String get keyboardKeyChannelDown => 'Cainéal Síos';
+
+  @override
+  String get keyboardKeyChannelUp => 'Cainéal Suas';
+
+  @override
+  String get keyboardKeyControl => 'Ctrl';
+
+  @override
+  String get keyboardKeyDelete => 'Del';
+
+  @override
+  String get keyboardKeyEject => 'Caith amach';
+
+  @override
+  String get keyboardKeyEnd => 'End';
+
+  @override
+  String get keyboardKeyEscape => 'Esc';
+
+  @override
+  String get keyboardKeyFn => 'Fn';
+
+  @override
+  String get keyboardKeyHome => 'Baile';
+
+  @override
+  String get keyboardKeyInsert => 'Insert';
+
+  @override
+  String get keyboardKeyMeta => 'Meta';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'Ordú';
+
+  @override
+  String get keyboardKeyMetaWindows => 'Win';
+
+  @override
+  String get keyboardKeyNumLock => 'Uimhirghlas';
+
+  @override
+  String get keyboardKeyNumpad0 => 'Num 0';
+
+  @override
+  String get keyboardKeyNumpad1 => 'Num 1';
+
+  @override
+  String get keyboardKeyNumpad2 => 'Num 2';
+
+  @override
+  String get keyboardKeyNumpad3 => 'Num 3';
+
+  @override
+  String get keyboardKeyNumpad4 => 'Num 4';
+
+  @override
+  String get keyboardKeyNumpad5 => 'Num 5';
+
+  @override
+  String get keyboardKeyNumpad6 => 'Num 6';
+
+  @override
+  String get keyboardKeyNumpad7 => 'Num 7';
+
+  @override
+  String get keyboardKeyNumpad8 => 'Num 8';
+
+  @override
+  String get keyboardKeyNumpad9 => 'Num 9';
+
+  @override
+  String get keyboardKeyNumpadAdd => 'Num +';
+
+  @override
+  String get keyboardKeyNumpadComma => 'Num ,';
+
+  @override
+  String get keyboardKeyNumpadDecimal => 'Num .';
+
+  @override
+  String get keyboardKeyNumpadDivide => 'Num /';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
+
+  @override
+  String get keyboardKeyNumpadEqual => 'Num =';
+
+  @override
+  String get keyboardKeyNumpadMultiply => 'Num *';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => 'Num (';
+
+  @override
+  String get keyboardKeyNumpadParenRight => 'Num )';
+
+  @override
+  String get keyboardKeyNumpadSubtract => 'Num -';
+
+  @override
+  String get keyboardKeyPageDown => 'PgDown';
+
+  @override
+  String get keyboardKeyPageUp => 'PgUp';
+
+  @override
+  String get keyboardKeyPower => 'Cumhacht';
+
+  @override
+  String get keyboardKeyPowerOff => 'Múch';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Priontáil Scáileán';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scrollghlas';
+
+  @override
+  String get keyboardKeySelect => 'Roghnaigh';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
+  String get keyboardKeySpace => 'Space';
+
+  @override
+  String get lastPageTooltip => 'An leathanach deiridh';
+
+  @override
+  String? get licensesPackageDetailTextFew => r'$licenseCount cheadúnas';
+
+  @override
+  String? get licensesPackageDetailTextMany => r'$licenseCount gceadúnas';
+
+  @override
+  String? get licensesPackageDetailTextOne => 'Aon cheadúnas amháin';
+
+  @override
+  String get licensesPackageDetailTextOther => r'$licenseCount ceadúnas';
+
+  @override
+  String? get licensesPackageDetailTextTwo => r'$licenseCount cheadúnas';
+
+  @override
+  String? get licensesPackageDetailTextZero => null;
+
+  @override
+  String get licensesPageTitle => 'Ceadúnais';
+
+  @override
+  String get lookUpButtonLabel => 'Cuardaigh';
+
+  @override
+  String get menuBarMenuLabel => 'Roghchlár an bharra roghchláir';
+
+  @override
+  String get menuDismissLabel => 'Ruaig an roghchlár';
+
+  @override
+  String get modalBarrierDismissLabel => 'Ruaig';
+
+  @override
+  String get moreButtonTooltip => 'Tuilleadh';
+
+  @override
+  String get nextMonthTooltip => 'An chéad mhí eile';
+
+  @override
+  String get nextPageTooltip => 'An chéad leathanach eile';
+
+  @override
+  String get okButtonLabel => 'Ceart go leor';
+
+  @override
+  String get openAppDrawerTooltip => 'Oscail an roghchlár nascleanúna';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow de $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de thuairim is $rowCount';
+
+  @override
+  String get pasteButtonLabel => 'Greamaigh';
+
+  @override
+  String get popupMenuLabel => 'Roghchlár aníos';
+
+  @override
+  String get postMeridiemAbbreviation => 'I.N.';
+
+  @override
+  String get previousMonthTooltip => 'An mhí roimhe';
+
+  @override
+  String get previousPageTooltip => 'An leathanach roimhe seo';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'Athnuaigh';
+
+  @override
+  String? get remainingTextFieldCharacterCountFew => r'$remainingCount charachtar fágtha';
+
+  @override
+  String? get remainingTextFieldCharacterCountMany => r'$remainingCount gcarachtar fágtha';
+
+  @override
+  String? get remainingTextFieldCharacterCountOne => 'Aon charachtar amháin fágtha';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount carachtar fágtha';
+
+  @override
+  String? get remainingTextFieldCharacterCountTwo => r'$remainingCount charachtar fágtha';
+
+  @override
+  String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'Bog síos';
+
+  @override
+  String get reorderItemLeft => 'Bog ar chlé';
+
+  @override
+  String get reorderItemRight => 'Bog ar dheis';
+
+  @override
+  String get reorderItemToEnd => 'Bog chuig an deireadh';
+
+  @override
+  String get reorderItemToStart => 'Bog chuig an tús';
+
+  @override
+  String get reorderItemUp => 'Bog suas';
+
+  @override
+  String get rowsPerPageTitle => 'Rónna in aghaidh an leathanaigh:';
+
+  @override
+  String get saveButtonLabel => 'Sábháil';
+
+  @override
+  String get scanTextButtonLabel => 'Scan téacs';
+
+  @override
+  String get scrimLabel => 'Scrioma';
+
+  @override
+  String get scrimOnTapHintRaw => r'Dún $modalRouteContentName';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => 'Cuardaigh';
+
+  @override
+  String get searchWebButtonLabel => 'Cuardaigh an Gréasán';
+
+  @override
+  String get selectAllButtonLabel => 'Roghnaigh gach rud';
+
+  @override
+  String get selectYearSemanticsLabel => 'Roghnaigh bliain';
+
+  @override
+  String get selectedDateLabel => 'Roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleFew => r'$selectedRowCount mhír roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleMany => r'$selectedRowCount mír roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleOne => 'Aon mhír amháin roghnaithe';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount mír roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleTwo => r'$selectedRowCount mhír roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Comhroinn';
+
+  @override
+  String get showAccountsLabel => 'Taispeáin cuntais';
+
+  @override
+  String get showMenuTooltip => 'Taispeáin an roghchlár';
+
+  @override
+  String get signedInLabel => 'Sínithe isteach';
+
+  @override
+  String get tabLabelRaw => r'Cluaisín $tabIndex de $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+
+  @override
+  String get timePickerDialHelpText => 'Roghnaigh am';
+
+  @override
+  String get timePickerHourLabel => 'Uair';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'Roghnaigh uaireanta';
+
+  @override
+  String get timePickerInputHelpText => 'Cuir isteach am';
+
+  @override
+  String get timePickerMinuteLabel => 'Nóiméad';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'Roghnaigh nóiméid';
+
+  @override
+  String get unspecifiedDate => 'Dáta';
+
+  @override
+  String get unspecifiedDateRange => 'Raon Dátaí';
+
+  @override
+  String get viewLicensesButtonLabel => 'Féach ar cheadúnais';
+}
+
 /// The translations for Galician (`gl`).
 class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Galician.
@@ -46044,6 +46540,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'fi', // Finnish
   'fil', // Filipino Pilipino
   'fr', // French
+  'ga', // Irish
   'gl', // Galician
   'gsw', // Swiss German Alemannic Alsatian
   'gu', // Gujarati
@@ -46137,6 +46634,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
 ///  * `fr` - French (plus one country variation)
+///  * `ga` - Irish
 ///  * `gl` - Galician
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `gu` - Gujarati
@@ -46331,6 +46829,8 @@ GlobalMaterialLocalizations? getMaterialTranslation(
       }
       return MaterialLocalizationFr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
+    case 'ga':
+      return MaterialLocalizationGa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gl':
       return MaterialLocalizationGl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gsw':
