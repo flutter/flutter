@@ -104,13 +104,24 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
   final OverlayPortalController _fadeController = OverlayPortalController();
   static final Animatable<double> _quarterTween = Tween<double>(begin: 0.0, end: 0.25);
 
-  late final ExpansibleController _tileController;
+  late ExpansibleController _tileController;
   late Animation<double> _iconTurns;
 
   @override
   void initState() {
     super.initState();
     _tileController = widget.controller ?? ExpansibleController();
+  }
+
+  @override
+  void didUpdateWidget(CupertinoExpansionTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      if (oldWidget.controller == null) {
+        _tileController.dispose();
+      }
+      _tileController = widget.controller ?? ExpansibleController();
+    }
   }
 
   @override
