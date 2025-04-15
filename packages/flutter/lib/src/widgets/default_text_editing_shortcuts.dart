@@ -972,6 +972,14 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
             const DoNothingAndStopPropagationTextIntent(),
         const SingleActivator(LogicalKeyboardKey.keyA, meta: true):
             const DoNothingAndStopPropagationTextIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true):
+            const DoNothingAndStopPropagationTextIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true):
+            const DoNothingAndStopPropagationTextIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true):
+            const DoNothingAndStopPropagationTextIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true):
+            const DoNothingAndStopPropagationTextIntent(),
       };
 
   static const Map<ShortcutActivator, Intent> _commonDisablingTextShortcuts =
