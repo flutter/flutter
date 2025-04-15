@@ -281,11 +281,11 @@ class RSuperellipseParam {
       _cachedPath = maybeCache._param._cachedPath;
     } else {
       _cachedPath = Path();
-      _buildPath(_cachedPath!, target._shape, target.webOnlyUniformRadii);
+      _buildPath(_cachedPath!, target._shape);
     }
   }
 
-  static void _buildPath(Path path, _Shape r, bool uniformRadii) {
+  static void _buildPath(Path path, _Shape r) {
     final double left = -r.width / 2;
     final double right = r.width / 2;
     final double top = -r.height / 2;
@@ -307,7 +307,7 @@ class RSuperellipseParam {
     path.moveTo(start.dx, start.dy);
 
     final builder = _RSuperellipsePathBuilder(path);
-    if (uniformRadii) {
+    if (r.uniformRadii) {
       builder.addQuadrant(topRight, false, Offset(1, 1));
       builder.addQuadrant(topRight, true, Offset(1, -1));
       builder.addQuadrant(topRight, false, Offset(-1, -1));
