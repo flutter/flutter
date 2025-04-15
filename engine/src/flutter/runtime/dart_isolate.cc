@@ -1377,20 +1377,9 @@ std::weak_ptr<DartIsolate> DartIsolate::GetWeakIsolatePtr() {
   return std::static_pointer_cast<DartIsolate>(shared_from_this());
 }
 
-void DartIsolate::SetOwnerToPlatformThread() {
-  const TaskRunners& task_runners = GetTaskRunners();
-  FML_DCHECK(task_runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
-
-  fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners.GetPlatformTaskRunner(), [&latch, dart_isolate = isolate()] {
-        {
-          tonic::DartIsolateScope isolate_scope(dart_isolate);
-          Dart_SetCurrentThreadOwnsIsolate();
-        }
-        latch.Signal();
-      });
-  latch.Wait();
+void DartIsolate::SetOwnerToCurrentThread() {
+  tonic::DartIsolateScope isolate_scope(isolate());
+  Dart_SetCurrentThreadOwnsIsolate();
 }
 
 void DartIsolate::AddIsolateShutdownCallback(const fml::closure& closure) {

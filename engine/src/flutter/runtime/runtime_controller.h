@@ -679,7 +679,7 @@ class RuntimeController : public PlatformConfigurationClient,
     return platform_isolate_manager_;
   }
 
-  void SetRootIsolateOwnerToPlatformThread();
+  void SetRootIsolateOwnerToCurrentThread();
 
   //--------------------------------------------------------------------------
   /// @brief      Shuts down all registered platform isolates. Must be called

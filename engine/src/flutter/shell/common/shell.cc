@@ -572,9 +572,13 @@ Shell::~Shell() {
       Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
     // Move the UI task runner back to its original thread to enable shutdown of
     // that thread.
-    fml::MessageLoopTaskQueues::GetInstance()->Unmerge(
-        task_runners_.GetPlatformTaskRunner()->GetTaskQueueId(),
-        task_runners_.GetUITaskRunner()->GetTaskQueueId());
+    auto task_queues = fml::MessageLoopTaskQueues::GetInstance();
+    auto platform_queue_id =
+        task_runners_.GetPlatformTaskRunner()->GetTaskQueueId();
+    auto ui_queue_id = task_runners_.GetUITaskRunner()->GetTaskQueueId();
+    if (task_queues->Owns(platform_queue_id, ui_queue_id)) {
+      task_queues->Unmerge(platform_queue_id, ui_queue_id);
+    }
   }
 }
 
@@ -584,6 +588,16 @@ std::unique_ptr<Shell> Shell::Spawn(
     const CreateCallback<PlatformView>& on_create_platform_view,
     const CreateCallback<Rasterizer>& on_create_rasterizer) const {
   FML_DCHECK(task_runners_.IsValid());
+
+  if (settings_.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+    // Spawning engines that share the same task runners can result in
+    // deadlocks when the UI task runner is moved to the platform thread.
+    FML_LOG(ERROR) << "MergedPlatformUIThread::kMergeAfterLaunch does not "
+                      "support spawning";
+    return nullptr;
+  }
+
   // It's safe to store this value since it is set on the platform thread.
   bool is_gpu_disabled = false;
   GetIsGpuDisabledSyncSwitch()->Execute(

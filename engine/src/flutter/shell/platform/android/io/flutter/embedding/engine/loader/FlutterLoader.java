@@ -370,8 +370,6 @@ public class FlutterLoader {
         }
         if (metaData.getBoolean(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY, false)) {
           shellArgs.add("--merged-platform-ui-thread=disabled");
-        } else {
-          shellArgs.add("--merged-platform-ui-thread=mergeAfterLaunch");
         }
         if (metaData.getBoolean(ENABLE_FLUTTER_GPU, false)) {
           shellArgs.add("--enable-flutter-gpu");

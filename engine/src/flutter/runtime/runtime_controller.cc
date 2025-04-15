@@ -677,10 +677,10 @@ void RuntimeController::ShutdownPlatformIsolates() {
   platform_isolate_manager_->ShutdownPlatformIsolates();
 }
 
-void RuntimeController::SetRootIsolateOwnerToPlatformThread() {
+void RuntimeController::SetRootIsolateOwnerToCurrentThread() {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
   if (root_isolate) {
-    root_isolate->SetOwnerToPlatformThread();
+    root_isolate->SetOwnerToCurrentThread();
   }
 }
 

@@ -240,6 +240,19 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
     }
   };
 
+  if (settings_.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+    // Queue a task to the UI task runner that sets the owner of the root
+    // isolate.  This task runs after the thread merge and will therefore be
+    // executed on the platform thread.  The task will run before any tasks
+    // queued by LaunchRootIsolate that execute the app's Dart code.
+    task_runners_.GetUITaskRunner()->PostTask([engine = GetWeakPtr()]() {
+      if (engine) {
+        engine->runtime_controller_->SetRootIsolateOwnerToCurrentThread();
+      }
+    });
+  }
+
   if (!runtime_controller_->LaunchRootIsolate(
           settings_,                                 //
           root_isolate_create_callback,              //
@@ -264,10 +277,13 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
   if (settings_.merged_platform_ui_thread ==
       Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
     // Move the UI task runner to the platform thread.
-    runtime_controller_->SetRootIsolateOwnerToPlatformThread();
-    fml::MessageLoopTaskQueues::GetInstance()->Merge(
+    bool success = fml::MessageLoopTaskQueues::GetInstance()->Merge(
         task_runners_.GetPlatformTaskRunner()->GetTaskQueueId(),
         task_runners_.GetUITaskRunner()->GetTaskQueueId());
+    if (!success) {
+      FML_LOG(ERROR)
+          << "Unable to move the UI task runner to the platform thread";
+    }
   }
 
   return Engine::RunStatus::Success;
