@@ -1,5 +1,7 @@
 # How `flutter` fetches engine artifacts
 
+[flutter.dev/to/engine-artifacts](https://flutter.dev/to/engine-artifacts)
+
 While in the same repository, the `flutter` (tool), which is used to run and
 test the framework, needs to know how to download the engine artifacts for the
 current platform and target device. Engine artifacts include `dart` (the
@@ -48,6 +50,22 @@ stateDiagram-v2
     UseReleaseFile --> [*]: Done
     UseMergeBase --> [*]: Done
 ```
+
+## Flutter CI/CD Testing
+
+On Cocoon (Flutter's internal CI/CD) we _often_ set
+`FLUTTER_PREBUILT_ENGINE_VERSION` to the following:
+
+| Branch                    | Presubmit    | Merge Queue        | Postsubmit         |
+| ------------------------- | ------------ | ------------------ | ------------------ |
+| `main`                    | `commit.sha` | _Uses normal flow_ | _Uses normal flow_ |
+| `flutter-x.x-candidate.x` | `commit.sha` | N/A[^1]            | `commit.sha`       |
+
+> NOTE: `engine.version` is intentionally ignored in release candidate
+> post-submit builds. See
+> [#167010](https://github.com/flutter/flutter/issues/167010).
+
+[^1]: Release candidates do not use a merge queue.
 
 ## References
 
