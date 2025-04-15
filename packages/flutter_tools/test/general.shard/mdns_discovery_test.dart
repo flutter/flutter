@@ -610,9 +610,9 @@ void main() {
 
           expect(
             () async => portDiscovery.firstMatchingVmService(client),
-            throwsToolExit(
+            throwsMissingLocalNetworkPermissionsException(
               message:
-                  'Flutter could not connect to the Dart VM service.\n'
+                  'Flutter could not access the local network.\n'
                   '\n'
                   'Please ensure your IDE or terminal app has permission to access '
                   'devices on the local network. This allows Flutter to connect to '
@@ -647,9 +647,9 @@ void main() {
 
           expect(
             () async => portDiscovery.firstMatchingVmService(client),
-            throwsToolExit(
+            throwsMissingLocalNetworkPermissionsException(
               message:
-                  'Flutter could not connect to the Dart VM service.\n'
+                  'Flutter could not access the local network.\n'
                   '\n'
                   'Please ensure your IDE or terminal app has permission to access '
                   'devices on the local network. This allows Flutter to connect to '
@@ -681,23 +681,18 @@ void main() {
             analytics: const NoOpAnalytics(),
           );
 
-          final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
-            client,
-            throwOnError: false,
-          );
-
-          expect(result, isNull);
           expect(
-            logger.errorText,
-            contains(
-              'Flutter could not connect to the Dart VM service.\n'
-              '\n'
-              'Please ensure your IDE or terminal app has permission to access '
-              'devices on the local network. This allows Flutter to connect to '
-              'the Dart VM.\n'
-              '\n'
-              'You can grant this permission in System Settings > Privacy & '
-              'Security > Local Network.\n',
+            () async => portDiscovery.firstMatchingVmService(client),
+            throwsMissingLocalNetworkPermissionsException(
+              message:
+                  'Flutter could not access the local network.\n'
+                  '\n'
+                  'Please ensure your IDE or terminal app has permission to access '
+                  'devices on the local network. This allows Flutter to connect to '
+                  'the Dart VM.\n'
+                  '\n'
+                  'You can grant this permission in System Settings > Privacy & '
+                  'Security > Local Network.\n',
             ),
           );
         },
@@ -1292,4 +1287,19 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
+}
+
+Matcher throwsMissingLocalNetworkPermissionsException({Pattern? message}) {
+  TypeMatcher<MissingLocalNetworkPermissionsException> result =
+      const TypeMatcher<MissingLocalNetworkPermissionsException>();
+
+  if (message != null) {
+    result = result.having(
+      (MissingLocalNetworkPermissionsException e) => e.message,
+      'message',
+      contains(message),
+    );
+  }
+
+  return throwsA(result);
 }

@@ -952,10 +952,145 @@ void main() {
           expect(await device.stopApp(iosApp), true);
         },
         // If mDNS is not the only method of discovery, it shouldn't throw on error.
-        overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(allowThrowOnError: false),
-        },
+        overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery()},
       );
+
+      group('If mDNS throws', () {
+        late FakeMDnsVmServiceDiscovery mdnsDiscovery;
+        late BufferLogger logger;
+        setUp(() {
+          mdnsDiscovery = FakeMDnsVmServiceDiscovery(
+            throwMissingLocalNetworkPermissionsException: true,
+          );
+          logger = BufferLogger.test();
+        });
+
+        testUsingContext(
+          'IOSDevice.startApp attaches in debug mode via device logging',
+          () async {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final FakeProcessManager processManager = FakeProcessManager.empty();
+
+            final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
+                .childDirectory('flutter_empty_xcode.rand0');
+            final Directory bundleLocation = fileSystem.currentDirectory;
+            final IOSDevice device = setUpIOSDevice(
+              processManager: processManager,
+              fileSystem: fileSystem,
+              logger: logger,
+              isCoreDevice: true,
+              coreDeviceControl: FakeIOSCoreDeviceControl(),
+              xcodeDebug: FakeXcodeDebug(
+                expectedProject: XcodeDebugProject(
+                  scheme: 'Runner',
+                  xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory(
+                    'Runner.xcworkspace',
+                  ),
+                  xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+                  hostAppProjectName: 'Runner',
+                ),
+                expectedDeviceId: '123',
+                expectedLaunchArguments: <String>['--enable-dart-profiling'],
+                expectedBundlePath: bundleLocation.path,
+              ),
+            );
+            final IOSApp iosApp = PrebuiltIOSApp(
+              projectBundleId: 'app',
+              bundleName: 'Runner',
+              uncompressedBundle: bundleLocation,
+              applicationPackage: bundleLocation,
+            );
+            final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+            device.portForwarder = const NoOpDevicePortForwarder();
+            device.setLogReader(iosApp, deviceLogReader);
+
+            unawaited(
+              mdnsDiscovery.completer.future.whenComplete(() {
+                // Start writing messages to the log reader.
+                Timer.run(() {
+                  deviceLogReader.addLine('Foo');
+                  deviceLogReader.addLine(
+                    'The Dart VM service is listening on http://127.0.0.1:456',
+                  );
+                });
+              }),
+            );
+
+            final LaunchResult launchResult = await device.startApp(
+              iosApp,
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+              platformArgs: <String, dynamic>{},
+            );
+
+            expect(launchResult.started, true);
+            expect(launchResult.hasVmService, true);
+            expect(await device.stopApp(iosApp), true);
+            expect(logger.errorText, contains('MissingLocalNetworkPermissionsException'));
+          },
+          overrides: <Type, Generator>{
+            MDnsVmServiceDiscovery: () => mdnsDiscovery,
+            Logger: () => logger,
+          },
+        );
+
+        testUsingContext(
+          'throws if device logging is unavailable (wireless debugging)',
+          () async {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final FakeProcessManager processManager = FakeProcessManager.empty();
+
+            final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
+                .childDirectory('flutter_empty_xcode.rand0');
+            final Directory bundleLocation = fileSystem.currentDirectory;
+            final IOSDevice device = setUpIOSDevice(
+              processManager: processManager,
+              fileSystem: fileSystem,
+              isCoreDevice: true,
+              coreDeviceControl: FakeIOSCoreDeviceControl(),
+              xcodeDebug: FakeXcodeDebug(
+                expectedProject: XcodeDebugProject(
+                  scheme: 'Runner',
+                  xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory(
+                    'Runner.xcworkspace',
+                  ),
+                  xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+                  hostAppProjectName: 'Runner',
+                ),
+                expectedDeviceId: '123',
+                expectedLaunchArguments: <String>[
+                  '--enable-dart-profiling',
+                  '--vm-service-host=0.0.0.0',
+                ],
+                expectedBundlePath: bundleLocation.path,
+              ),
+              interfaceType: DeviceConnectionInterface.wireless,
+            );
+            final IOSApp iosApp = PrebuiltIOSApp(
+              projectBundleId: 'app',
+              bundleName: 'Runner',
+              uncompressedBundle: bundleLocation,
+              applicationPackage: bundleLocation,
+            );
+            final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+
+            device.portForwarder = const NoOpDevicePortForwarder();
+            device.setLogReader(iosApp, deviceLogReader);
+
+            expect(
+              () async => device.startApp(
+                iosApp,
+                prebuiltApplication: true,
+                debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+                platformArgs: <String, dynamic>{},
+              ),
+              throwsA(isA<MissingLocalNetworkPermissionsException>()),
+            );
+          },
+          overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => mdnsDiscovery},
+        );
+      });
 
       group('IOSDevice.startApp attaches in debug mode via device logging', () {
         late FakeMDnsVmServiceDiscovery mdnsDiscovery;
@@ -963,62 +1098,70 @@ void main() {
           mdnsDiscovery = FakeMDnsVmServiceDiscovery(returnsNull: true);
         });
 
-        testUsingContext('when mDNS fails', () async {
-          final FileSystem fileSystem = MemoryFileSystem.test();
-          final FakeProcessManager processManager = FakeProcessManager.empty();
+        testUsingContext(
+          'when mDNS returns null',
+          () async {
+            final FileSystem fileSystem = MemoryFileSystem.test();
+            final FakeProcessManager processManager = FakeProcessManager.empty();
 
-          final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
-              .childDirectory('flutter_empty_xcode.rand0');
-          final Directory bundleLocation = fileSystem.currentDirectory;
-          final IOSDevice device = setUpIOSDevice(
-            processManager: processManager,
-            fileSystem: fileSystem,
-            isCoreDevice: true,
-            coreDeviceControl: FakeIOSCoreDeviceControl(),
-            xcodeDebug: FakeXcodeDebug(
-              expectedProject: XcodeDebugProject(
-                scheme: 'Runner',
-                xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory('Runner.xcworkspace'),
-                xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
-                hostAppProjectName: 'Runner',
+            final Directory temporaryXcodeProjectDirectory = fileSystem.systemTempDirectory
+                .childDirectory('flutter_empty_xcode.rand0');
+            final Directory bundleLocation = fileSystem.currentDirectory;
+            final IOSDevice device = setUpIOSDevice(
+              processManager: processManager,
+              fileSystem: fileSystem,
+              isCoreDevice: true,
+              coreDeviceControl: FakeIOSCoreDeviceControl(),
+              xcodeDebug: FakeXcodeDebug(
+                expectedProject: XcodeDebugProject(
+                  scheme: 'Runner',
+                  xcodeWorkspace: temporaryXcodeProjectDirectory.childDirectory(
+                    'Runner.xcworkspace',
+                  ),
+                  xcodeProject: temporaryXcodeProjectDirectory.childDirectory('Runner.xcodeproj'),
+                  hostAppProjectName: 'Runner',
+                ),
+                expectedDeviceId: '123',
+                expectedLaunchArguments: <String>['--enable-dart-profiling'],
+                expectedBundlePath: bundleLocation.path,
               ),
-              expectedDeviceId: '123',
-              expectedLaunchArguments: <String>['--enable-dart-profiling'],
-              expectedBundlePath: bundleLocation.path,
-            ),
-          );
-          final IOSApp iosApp = PrebuiltIOSApp(
-            projectBundleId: 'app',
-            bundleName: 'Runner',
-            uncompressedBundle: bundleLocation,
-            applicationPackage: bundleLocation,
-          );
-          final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
+            );
+            final IOSApp iosApp = PrebuiltIOSApp(
+              projectBundleId: 'app',
+              bundleName: 'Runner',
+              uncompressedBundle: bundleLocation,
+              applicationPackage: bundleLocation,
+            );
+            final FakeDeviceLogReader deviceLogReader = FakeDeviceLogReader();
 
-          device.portForwarder = const NoOpDevicePortForwarder();
-          device.setLogReader(iosApp, deviceLogReader);
+            device.portForwarder = const NoOpDevicePortForwarder();
+            device.setLogReader(iosApp, deviceLogReader);
 
-          unawaited(
-            mdnsDiscovery.completer.future.whenComplete(() {
-              // Start writing messages to the log reader.
-              Timer.run(() {
-                deviceLogReader.addLine('Foo');
-                deviceLogReader.addLine('The Dart VM service is listening on http://127.0.0.1:456');
-              });
-            }),
-          );
+            unawaited(
+              mdnsDiscovery.completer.future.whenComplete(() {
+                // Start writing messages to the log reader.
+                Timer.run(() {
+                  deviceLogReader.addLine('Foo');
+                  deviceLogReader.addLine(
+                    'The Dart VM service is listening on http://127.0.0.1:456',
+                  );
+                });
+              }),
+            );
 
-          final LaunchResult launchResult = await device.startApp(
-            iosApp,
-            prebuiltApplication: true,
-            debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-            platformArgs: <String, dynamic>{},
-          );
+            final LaunchResult launchResult = await device.startApp(
+              iosApp,
+              prebuiltApplication: true,
+              debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+              platformArgs: <String, dynamic>{},
+            );
 
-          expect(launchResult.started, true);
-          expect(launchResult.hasVmService, true);
-          expect(await device.stopApp(iosApp), true);
-        }, overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => mdnsDiscovery});
+            expect(launchResult.started, true);
+            expect(launchResult.hasVmService, true);
+            expect(await device.stopApp(iosApp), true);
+          },
+          overrides: <Type, Generator>{MDnsVmServiceDiscovery: () => mdnsDiscovery},
+        );
       });
 
       testUsingContext(
@@ -1242,9 +1385,12 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 }
 
 class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
-  FakeMDnsVmServiceDiscovery({this.returnsNull = false, this.allowThrowOnError = true});
+  FakeMDnsVmServiceDiscovery({
+    this.returnsNull = false,
+    this.throwMissingLocalNetworkPermissionsException = false,
+  });
   bool returnsNull;
-  bool allowThrowOnError;
+  bool throwMissingLocalNetworkPermissionsException;
 
   Completer<void> completer = Completer<void>();
   @override
@@ -1256,13 +1402,14 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     int? deviceVmservicePort,
     bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
-    bool throwOnError = true,
   }) async {
     completer.complete();
     if (returnsNull) {
       return null;
     }
-    expect(throwOnError, allowThrowOnError);
+    if (throwMissingLocalNetworkPermissionsException) {
+      throw MissingLocalNetworkPermissionsException('MissingLocalNetworkPermissionsException');
+    }
 
     return Uri.tryParse('http://0.0.0.0:1234');
   }
