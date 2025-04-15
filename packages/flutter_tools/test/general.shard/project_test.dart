@@ -695,6 +695,12 @@ dependencies {
             expect(value.description, contains(RegExp(gradleV)));
             // On kgp/gradle eror print help url and kgp versions
             expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp('KGP/Gradle')));
+            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+            // On agp/kgp error print help url and agp and kgp versions
+            expect(value.description, contains(RegExp(agpV)));
+            expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp('AGP/KGP')));
             expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
           },
           java: java,
@@ -818,6 +824,48 @@ dependencies {
             expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
             expect(value.description, contains(RegExp(kgpV)));
             expect(value.description, contains(RegExp(gradleV)));
+          },
+          java: java,
+          androidStudio: androidStudio,
+          processManager: processManager,
+          androidSdk: androidSdk,
+        );
+      });
+      group('_', () {
+        const String gradleV = '8.9';
+        const String agpV = '8.7.2';
+        const String kgpV = '2.0.20';
+
+        final FakeProcessManager processManager;
+        final Java java;
+        final AndroidStudio androidStudio;
+        final FakeAndroidSdkWithDir androidSdk;
+        final FileSystem fileSystem = getFileSystemForPlatform();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
+        java = FakeJava(version: Version(17, 0, 2));
+        androidStudio = FakeAndroidStudio();
+        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
+        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
+        _testInMemory(
+          'incompatible agp/kgp only',
+          () async {
+            final FlutterProject? project = await configureGradleAgpForTest(
+              gradleV: gradleV,
+              agpV: agpV,
+            );
+            final CompatibilityResult value =
+                await project!.android.hasValidJavaGradleAgpVersions();
+            expect(value.success, isFalse);
+            // Should not have the valid string.
+            expect(
+              value.description,
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+            );
+            // On gradle/agp error print help url and java and gradle versions.
+            expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp(agpV)));
+            expect(value.description, contains(RegExp('AGP/KGP')));
+            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
           },
           java: java,
           androidStudio: androidStudio,

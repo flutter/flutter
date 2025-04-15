@@ -737,6 +737,12 @@ class AndroidProject extends FlutterProjectPlatform {
       kgpV: kgpVersion,
     );
 
+    final bool compatibleAgpKgp = gradle.validateAgpAndKgp(
+      globals.logger,
+      agpV: agpVersion,
+      kgpV: kgpVersion,
+    );
+
     // Begin description formatting.
     if (!compatibleGradleAgp) {
       final String gradleDescription =
@@ -764,14 +770,23 @@ $javaGradleCompatUrl
     if (!compatibleKgpGradle) {
       description = '''
 ${compatibleGradleAgp ? '' : description}
-Incompatible Gradle/Kotlin versions.
+Incompatible KGP/Gradle versions.
 Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion\n
 See the link below for more information:
   $kgpCompatUrl
 ''';
     }
+    if (!compatibleAgpKgp) {
+      description = '''
+${compatibleGradleAgp ? '' : description}
+Incompatible AGP/KGP versions.
+AGP Version: $agpVersion, KGP Version: $kgpVersion\n
+See the link below for more information:
+  $kgpCompatUrl
+''';
+    }
     return CompatibilityResult(
-      compatibleJavaGradle && compatibleGradleAgp && compatibleKgpGradle,
+      compatibleJavaGradle && compatibleGradleAgp && compatibleKgpGradle && compatibleAgpKgp,
       description,
     );
   }
