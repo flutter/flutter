@@ -267,12 +267,11 @@ class MDnsVmServiceDiscovery {
       if (!globals.platform.isMacOS) {
         rethrow;
       }
-      if (throwOnError) {
-        _logger.printTrace(stackTrace.toString());
 
+      _logger.printTrace(stackTrace.toString());
+      if (throwOnError) {
         throwToolExit(missingLocalNetworkPermissionsInstructions(e.toString()));
       } else {
-        _logger.printTrace(stackTrace.toString());
         _logger.printError(missingLocalNetworkPermissionsInstructions(e.toString()));
         return <MDnsVmServiceDiscoveryResult>[];
       }
