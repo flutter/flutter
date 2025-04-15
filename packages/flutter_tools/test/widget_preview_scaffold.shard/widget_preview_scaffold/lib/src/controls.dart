@@ -124,3 +124,39 @@ class SoftRestartButton extends StatelessWidget {
     softRestartListenable.value = true;
   }
 }
+
+extension on Brightness {
+  Brightness get invert => isLight ? Brightness.dark : Brightness.light;
+  bool get isLight => this == Brightness.light;
+}
+
+/// A button that toggles the current theme brightness.
+class BrightnessToggleButton extends StatelessWidget {
+  const BrightnessToggleButton({
+    super.key,
+    required this.enabled,
+    required this.brightnessListenable,
+  });
+
+  final ValueNotifier<Brightness> brightnessListenable;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Brightness>(
+      valueListenable: brightnessListenable,
+      builder: (context, brightness, _) {
+        final brightness = brightnessListenable.value;
+        return _WidgetPreviewIconButton(
+          tooltip: 'Switch to ${brightness.isLight ? 'dark' : 'light'} mode',
+          onPressed: enabled ? _toggleBrightness : null,
+          icon: brightness.isLight ? Icons.dark_mode : Icons.light_mode,
+        );
+      },
+    );
+  }
+
+  void _toggleBrightness() {
+    brightnessListenable.value = brightnessListenable.value.invert;
+  }
+}

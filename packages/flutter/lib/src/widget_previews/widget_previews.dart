@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'media_query.dart';
+/// @docImport 'package:/flutter/cupertino.dart';
+/// @docImport 'package:/flutter/material.dart';
 library;
 
-import 'framework.dart';
+import 'package:flutter/cupertino.dart' show CupertinoThemeData;
+import 'package:flutter/material.dart' show Brightness, ThemeData;
+import 'package:flutter/widgets.dart';
 
 /// Annotation used to mark functions that return a widget preview.
 ///
@@ -46,10 +49,21 @@ import 'framework.dart';
 /// }
 /// ```
 /// {@end-tool}
+///
+/// **Important Note:** all values provided to the `@Preview()` annotation must
+/// be constant and non-private.
 // TODO(bkonyi): link to actual documentation when available.
 base class Preview {
   /// Annotation used to mark functions that return widget previews.
-  const Preview({this.name, this.width, this.height, this.textScaleFactor, this.wrapper});
+  const Preview({
+    this.name,
+    this.width,
+    this.height,
+    this.textScaleFactor,
+    this.wrapper,
+    this.theme,
+    this.brightness,
+  });
 
   /// A description to be displayed alongside the preview.
   ///
@@ -78,6 +92,58 @@ base class Preview {
   ///
   /// This function can be used to perform dependency injection or setup
   /// additional scaffolding needed to correctly render the preview.
+  ///
+  /// Note: this must be a reference to a static, public function defined as
+  /// either a top-level function or static member in a class.
   // TODO(bkonyi): provide an example.
   final Widget Function(Widget)? wrapper;
+
+  /// A callback to return Material and Cupertino theming data to be applied
+  /// to the previewed [Widget].
+  ///
+  /// Note: this must be a reference to a static, public function defined as
+  /// either a top-level function or static member in a class.
+  final PreviewThemeData Function()? theme;
+
+  /// Sets the initial theme brightness.
+  ///
+  /// If not provided, the current system default brightness will be used.
+  final Brightness? brightness;
+}
+
+/// A collection of [ThemeData] and [CupertinoThemeData] instances for use in
+/// widget previews.
+base class PreviewThemeData {
+  /// Creates a collection of [ThemeData] and [CupertinoThemeData] instances
+  /// for use in widget previews.
+  ///
+  /// If a theme isn't provided for a specific configuration, no theme data
+  /// will be applied and the default theme will be used.
+  const PreviewThemeData({
+    this.materialLight,
+    this.materialDark,
+    this.cupertinoLight,
+    this.cupertinoDark,
+  });
+
+  /// The Material [ThemeData] to apply when light mode is enabled.
+  final ThemeData? materialLight;
+
+  /// The Material [ThemeData] to apply when dark mode is enabled.
+  final ThemeData? materialDark;
+
+  /// The Cupertino [CupertinoThemeData] to apply when light mode is enabled.
+  final CupertinoThemeData? cupertinoLight;
+
+  /// The Cupertino [CupertinoThemeData] to apply when dark mode is enabled.
+  final CupertinoThemeData? cupertinoDark;
+
+  /// Returns the pair of [ThemeData] and [CupertinoThemeData] corresponding to
+  /// the value of [brightness].
+  (ThemeData?, CupertinoThemeData?) themeForBrightness(Brightness brightness) {
+    if (brightness == Brightness.light) {
+      return (materialLight, cupertinoLight);
+    }
+    return (materialDark, cupertinoDark);
+  }
 }
