@@ -327,7 +327,7 @@ class _PredictiveBackSharedElementPageTransitionState
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
 
   late final AnimationController _commitController;
-  late final Animation<double> _commitAnimation;
+  late final CurvedAnimation _commitAnimation;
   late final Listenable _mergedAnimations;
   late final Animation<double> _opacityAnimation;
   late final Animation<double> _scaleAnimation;
@@ -419,6 +419,7 @@ class _PredictiveBackSharedElementPageTransitionState
   @override
   void dispose() {
     _commitController.dispose();
+    _commitAnimation.dispose();
     super.dispose();
   }
 
