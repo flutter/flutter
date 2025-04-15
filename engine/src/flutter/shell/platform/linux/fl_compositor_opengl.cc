@@ -93,10 +93,16 @@ static gboolean driver_supports_blit() {
 
   // Note: List of unsupported vendors due to issue
   // https://github.com/flutter/flutter/issues/152099
-  const char* unsupported_vendors[] = {"NVIDIA", "Vivante Corporation", "ARM"};
+  const char* unsupported_vendors_exact[] = {"Vivante Corporation", "ARM"};
+  const char* unsupported_vendors_fuzzy[] = {"NVIDIA"};
 
-  for (const char* unsupported : unsupported_vendors) {
+  for (const char* unsupported : unsupported_vendors_fuzzy) {
     if (strstr(vendor, unsupported) != nullptr) {
+      return FALSE;
+    }
+  }
+  for (const char* unsupported : unsupported_vendors_exact) {
+    if (strcmp(vendor, unsupported) == 0) {
       return FALSE;
     }
   }
