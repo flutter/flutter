@@ -99,7 +99,7 @@ bool _cornerContains(Quadrant param, Offset p, [bool checkQuadrant = true]) {
       _octantContains(param.right, _flip(normOffset - param.right.offset));
 }
 
-double AngleTo(Offset a, Offset b) {
+double _angleTo(Offset a, Offset b) {
   return math.atan2(a.dx * b.dy - a.dy * b.dx, a.dx * b.dx + a.dy * b.dy);
 }
 
@@ -155,7 +155,7 @@ class Octant {
     final Offset pointJ = Offset(xJ, yJ);
     final Offset circleCenter = radius == 0 ? pointM : _findCircleCenter(pointJ, pointM, R);
     final double circleMaxAngle =
-        radius == 0 ? 0 : AngleTo(pointM - circleCenter, pointJ - circleCenter);
+        radius == 0 ? 0 : _angleTo(pointM - circleCenter, pointJ - circleCenter);
 
     return Octant(
       offset: center,
@@ -281,11 +281,22 @@ class RSuperellipseParam {
       _cachedPath = maybeCache._param._cachedPath;
     } else {
       _cachedPath = Path();
-      _buildPath(_cachedPath!, target._shape);
+      _RSuperellipsePathBuilder(_cachedPath!).buildPath(target._shape);
     }
   }
 
-  static void _buildPath(Path path, _Shape r) {
+  bool contains(Offset point) {
+    assert(_cachedPath != null, 'Must call init() first.');
+    return _cachedPath!.contains(point);
+  }
+}
+
+class _RSuperellipsePathBuilder {
+  const _RSuperellipsePathBuilder(this.path);
+
+  final Path path;
+
+  void buildPath(_Shape r) {
     final double left = -r.width / 2;
     final double right = r.width / 2;
     final double top = -r.height / 2;
@@ -306,17 +317,16 @@ class RSuperellipseParam {
         );
     path.moveTo(start.dx, start.dy);
 
-    final builder = _RSuperellipsePathBuilder(path);
     if (r.uniformRadii) {
-      builder.addQuadrant(topRight, false, Offset(1, 1));
-      builder.addQuadrant(topRight, true, Offset(1, -1));
-      builder.addQuadrant(topRight, false, Offset(-1, -1));
-      builder.addQuadrant(topRight, true, Offset(-1, 1));
+      _addQuadrant(topRight, false, Offset(1, 1));
+      _addQuadrant(topRight, true, Offset(1, -1));
+      _addQuadrant(topRight, false, Offset(-1, -1));
+      _addQuadrant(topRight, true, Offset(-1, 1));
     } else {
       final double bottomSplit = _split(left, right, r.blRadiusX, r.brRadiusX);
       final double leftSplit = _split(top, bottom, r.tlRadiusY, r.blRadiusY);
-      builder.addQuadrant(topRight, false);
-      builder.addQuadrant(
+      _addQuadrant(topRight, false);
+      _addQuadrant(
         Quadrant.computeQuadrant(
           Offset(bottomSplit, rightSplit),
           Offset(right, bottom),
@@ -324,11 +334,11 @@ class RSuperellipseParam {
         ),
         true,
       );
-      builder.addQuadrant(
+      _addQuadrant(
         Quadrant.computeQuadrant(Offset(bottomSplit, leftSplit), Offset(left, bottom), r.blRadius),
         false,
       );
-      builder.addQuadrant(
+      _addQuadrant(
         Quadrant.computeQuadrant(Offset(topSplit, leftSplit), Offset(left, top), r.tlRadius),
         true,
       );
@@ -338,18 +348,7 @@ class RSuperellipseParam {
     path.close();
   }
 
-  bool contains(Offset point) {
-    assert(_cachedPath != null, 'Must call init() first.');
-    return _cachedPath!.contains(point);
-  }
-}
-
-class _RSuperellipsePathBuilder {
-  const _RSuperellipsePathBuilder(this.path);
-
-  final Path path;
-
-  void addQuadrant(Quadrant param, bool reverse, [Offset scaleSign = const Offset(1, 1)]) {
+  void _addQuadrant(Quadrant param, bool reverse, [Offset scaleSign = const Offset(1, 1)]) {
     final _Transform transform = _composite(
       _translate(param.offset),
       _scale(scaleSign.scale(param.signedScale.width, param.signedScale.height)),
