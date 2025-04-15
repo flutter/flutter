@@ -277,24 +277,24 @@ class RSuperellipseParam {
     }
     if (maybeCache != null &&
         maybeCache._param.isInitialized &&
-        target._unitifiedRadii.nearlyEqualTo(maybeCache._unitifiedRadii, 1e-6)) {
+        target._shape.nearlyEqualTo(maybeCache._shape, 1e-6)) {
       _cachedPath = maybeCache._param._cachedPath;
     } else {
       _cachedPath = Path();
-      _buildPath(_cachedPath!, target._unitifiedRadii, target.webOnlyUniformRadii);
+      _buildPath(_cachedPath!, target._shape, target.webOnlyUniformRadii);
     }
   }
 
-  static void _buildPath(Path path, _Radii r, bool uniformRadii) {
-    const double left = -0.5;
-    const double right = 0.5;
-    const double top = -0.5;
-    const double bottom = 0.5;
+  static void _buildPath(Path path, _Shape r, bool uniformRadii) {
+    final double left = -r.width / 2;
+    final double right = r.width / 2;
+    final double top = -r.height / 2;
+    final double bottom = r.height / 2;
     final double topSplit = _split(left, right, r.tlRadiusX, r.trRadiusX);
     final double rightSplit = _split(top, bottom, r.trRadiusY, r.brRadiusY);
     final Quadrant topRight = Quadrant.computeQuadrant(
       Offset(topSplit, rightSplit),
-      const Offset(right, top),
+      Offset(right, top),
       r.trRadius,
     );
 
@@ -319,21 +319,17 @@ class RSuperellipseParam {
       builder.addQuadrant(
         Quadrant.computeQuadrant(
           Offset(bottomSplit, rightSplit),
-          const Offset(right, bottom),
+          Offset(right, bottom),
           r.brRadius,
         ),
         true,
       );
       builder.addQuadrant(
-        Quadrant.computeQuadrant(
-          Offset(bottomSplit, leftSplit),
-          const Offset(left, bottom),
-          r.blRadius,
-        ),
+        Quadrant.computeQuadrant(Offset(bottomSplit, leftSplit), Offset(left, bottom), r.blRadius),
         false,
       );
       builder.addQuadrant(
-        Quadrant.computeQuadrant(Offset(topSplit, leftSplit), const Offset(left, top), r.tlRadius),
+        Quadrant.computeQuadrant(Offset(topSplit, leftSplit), Offset(left, top), r.tlRadius),
         true,
       );
     }

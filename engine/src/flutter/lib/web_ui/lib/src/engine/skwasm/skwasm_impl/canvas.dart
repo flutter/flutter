@@ -136,12 +136,7 @@ class SkwasmCanvas implements SceneCanvas {
 
   @override
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, {bool doAntiAlias = true}) {
-    final ui.Offset center = rsuperellipse.center;
-    save();
-    translate(center.dx, center.dy);
-    scale(rsuperellipse.width, rsuperellipse.height);
-    clipPath(rsuperellipse.getNormalizedPath(), doAntiAlias: doAntiAlias);
-    restore();
+    clipPath(rsuperellipse.getPath(), doAntiAlias: doAntiAlias);
   }
 
   @override
@@ -192,15 +187,7 @@ class SkwasmCanvas implements SceneCanvas {
     ui.Paint paint, {
     ui.RSuperellipse? maybeCache,
   }) {
-    final ui.Path path =
-        ui.Path()
-          ..addPath(
-            rsuperellipse.getNormalizedPath(maybeCache),
-            ui.Offset.zero,
-            matrix4: rsuperellipse.getTransform(),
-          )
-          ..close();
-    drawPath(path, paint);
+    drawPath(rsuperellipse.getPath(maybeCache), paint);
   }
 
   @override

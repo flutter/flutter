@@ -53,12 +53,7 @@ class CkCanvas {
   }
 
   void clipRSuperellipse(ui.RSuperellipse rsuperellipse, bool doAntiAlias) {
-    final ui.Offset center = rsuperellipse.center;
-    save();
-    translate(center.dx, center.dy);
-    scale(rsuperellipse.width, rsuperellipse.height);
-    clipPath(rsuperellipse.getNormalizedPath() as CkPath, doAntiAlias);
-    restore();
+    clipPath(rsuperellipse.getPath() as CkPath, doAntiAlias);
   }
 
   void clipRect(ui.Rect rect, ui.ClipOp clipOp, bool doAntiAlias) {

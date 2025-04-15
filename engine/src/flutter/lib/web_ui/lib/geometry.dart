@@ -993,8 +993,8 @@ class RRect extends _RRectLike<RRect> {
   }
 }
 
-class _Radii {
-  const _Radii.unified({
+class _Shape {
+  const _Shape({
     required double width,
     required double height,
     required double tlRadiusX,
@@ -1005,15 +1005,19 @@ class _Radii {
     required double brRadiusY,
     required double blRadiusX,
     required double blRadiusY,
-  }) : tlRadiusX = tlRadiusX / width,
-       tlRadiusY = tlRadiusY / height,
-       trRadiusX = trRadiusX / width,
-       trRadiusY = trRadiusY / height,
-       brRadiusX = brRadiusX / width,
-       brRadiusY = brRadiusY / height,
-       blRadiusX = blRadiusX / width,
-       blRadiusY = blRadiusY / height;
+  }) : width = width,
+       height = height,
+       tlRadiusX = tlRadiusX,
+       tlRadiusY = tlRadiusY,
+       trRadiusX = trRadiusX,
+       trRadiusY = trRadiusY,
+       brRadiusX = brRadiusX,
+       brRadiusY = brRadiusY,
+       blRadiusX = blRadiusX,
+       blRadiusY = blRadiusY;
 
+  final double width;
+  final double height;
   final double tlRadiusX;
   final double tlRadiusY;
   Radius get tlRadius => Radius.elliptical(tlRadiusX, tlRadiusY);
@@ -1027,7 +1031,7 @@ class _Radii {
   final double blRadiusY;
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
 
-  bool nearlyEqualTo(_Radii b, double tolerance) {
+  bool nearlyEqualTo(_Shape b, double tolerance) {
     if (identical(this, b)) {
       return true;
     }
@@ -1035,7 +1039,9 @@ class _Radii {
       return (x - y).abs() <= tolerance;
     }
 
-    return ScalarNearlyEqual(tlRadiusX, b.tlRadiusX) &&
+    return ScalarNearlyEqual(width, b.width) &&
+        ScalarNearlyEqual(height, b.height) &&
+        ScalarNearlyEqual(tlRadiusX, b.tlRadiusX) &&
         ScalarNearlyEqual(tlRadiusY, b.tlRadiusY) &&
         ScalarNearlyEqual(trRadiusX, b.trRadiusX) &&
         ScalarNearlyEqual(trRadiusY, b.trRadiusY) &&
@@ -1050,8 +1056,8 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   RSuperellipse._raw({
     this.left = 0.0,
     this.top = 0.0,
-    this.right = 0.0,
-    this.bottom = 0.0,
+    double right = 0.0,
+    double bottom = 0.0,
     double tlRadiusX = 0.0,
     double tlRadiusY = 0.0,
     double trRadiusX = 0.0,
@@ -1061,7 +1067,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     double blRadiusX = 0.0,
     double blRadiusY = 0.0,
     bool uniformRadii = false,
-  }) : _unitifiedRadii = _Radii.unified(
+  }) : _shape = _Shape(
          width: right - left,
          height: bottom - top,
          tlRadiusX: tlRadiusX,
@@ -1214,36 +1220,37 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   @override
   final double top;
   @override
-  final double right;
+  double get right => left + _shape.width;
   @override
-  final double bottom;
+  double get bottom => top + _shape.height;
   @override
-  double get tlRadiusX => _unitifiedRadii.tlRadiusX * width;
+  double get tlRadiusX => _shape.tlRadiusX;
   @override
-  double get tlRadiusY => _unitifiedRadii.tlRadiusY * height;
+  double get tlRadiusY => _shape.tlRadiusY;
   @override
-  double get trRadiusX => _unitifiedRadii.trRadiusX * width;
+  double get trRadiusX => _shape.trRadiusX;
   @override
-  double get trRadiusY => _unitifiedRadii.trRadiusY * height;
+  double get trRadiusY => _shape.trRadiusY;
   @override
-  double get blRadiusX => _unitifiedRadii.blRadiusX * width;
+  double get blRadiusX => _shape.blRadiusX;
   @override
-  double get blRadiusY => _unitifiedRadii.blRadiusY * height;
+  double get blRadiusY => _shape.blRadiusY;
   @override
-  double get brRadiusX => _unitifiedRadii.brRadiusX * width;
+  double get brRadiusX => _shape.brRadiusX;
   @override
-  double get brRadiusY => _unitifiedRadii.brRadiusY * height;
+  double get brRadiusY => _shape.brRadiusY;
   @override
   final bool webOnlyUniformRadii;
 
-  final _Radii _unitifiedRadii;
-
+  final _Shape _shape;
   final RSuperellipseParam _param = RSuperellipseParam();
 
-  Path getNormalizedPath([RSuperellipse? maybeCache]) {
+  Path getPath([RSuperellipse? maybeCache, Path? basePath]) {
     _param.init(this, maybeCache);
     assert(_param.isInitialized);
-    return _param.getPath();
+    final Path path = basePath ?? Path();
+    path.addPath(_param.getPath(), center);
+    return path;
   }
 
   Float64List getTransform() {
