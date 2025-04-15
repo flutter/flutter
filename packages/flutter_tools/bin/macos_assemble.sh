@@ -142,6 +142,7 @@ BuildApp() {
     "-dAction=${ACTION}"
     "-dFrontendServerStarterPath=${FRONTEND_SERVER_STARTER_PATH}"
     "-dConfiguration=${CONFIGURATION}"
+    "-dDevDependenciesEnabled=${FLUTTER_DEV_DEPENDENCIES_ENABLED}"
     "--DartDefines=${DART_DEFINES}"
     "--ExtraGenSnapshotOptions=${EXTRA_GEN_SNAPSHOT_OPTIONS}"
     "--ExtraFrontEndOptions=${EXTRA_FRONT_END_OPTIONS}"

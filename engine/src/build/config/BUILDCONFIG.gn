@@ -143,6 +143,10 @@ declare_args() {
   # Compile for Address Sanitizer to find memory bugs.
   is_asan = false
 
+  # Compile with HWAddress Sanitizer to find memory bugs.
+  # Requires ARM64 hardware
+  is_hwasan = false
+
   # Compile for Leak Sanitizer to find leaks.
   is_lsan = false
 
@@ -319,7 +323,7 @@ default_library_type = "static_library"
 
 # These Sanitizers all imply using the Clang compiler. On Windows they either
 # don't work or work differently.
-using_sanitizer = !is_win && (is_asan || is_lsan || is_tsan || is_msan)
+using_sanitizer = !is_win && (is_asan || is_hwasan || is_lsan || is_tsan || is_msan)
 if (!is_clang && using_sanitizer) {
   is_clang = true
 }
@@ -413,7 +417,7 @@ if (symbol_level == -1) {
   # size is paramount.
   if (is_debug || (!is_linux && !is_wasm)) {
     symbol_level = 2
-  } else if (is_asan || is_lsan || is_tsan || is_msan) {
+  } else if (is_asan || is_hwasan || is_lsan || is_tsan || is_msan) {
     # Sanitizers require symbols for filename suppressions to work.
     symbol_level = 1
   } else {

@@ -6,6 +6,7 @@
 
 #include <cmath>
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/ui_dart_state.h"

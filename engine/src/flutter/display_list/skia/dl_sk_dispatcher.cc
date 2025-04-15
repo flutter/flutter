@@ -8,6 +8,7 @@
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_types.h"
 #include "flutter/fml/trace_event.h"
@@ -294,7 +295,8 @@ void DlSkCanvasDispatcher::drawDisplayList(
   if (combined_opacity < SK_Scalar1 &&
       !display_list->can_apply_group_opacity()) {
     TRACE_EVENT0("flutter", "Canvas::saveLayer");
-    canvas_->saveLayerAlphaf(&display_list->bounds(), combined_opacity);
+    canvas_->saveLayerAlphaf(ToSkRect(&display_list->GetBounds()),
+                             combined_opacity);
     combined_opacity = SK_Scalar1;
   } else {
     canvas_->save();
@@ -304,7 +306,7 @@ void DlSkCanvasDispatcher::drawDisplayList(
   // display_list from the current environment.
   DlSkCanvasDispatcher dispatcher(canvas_, combined_opacity);
   if (display_list->rtree()) {
-    display_list->Dispatch(dispatcher, canvas_->getLocalClipBounds());
+    display_list->Dispatch(dispatcher, ToDlRect(canvas_->getLocalClipBounds()));
   } else {
     display_list->Dispatch(dispatcher);
   }

@@ -11,6 +11,7 @@
 
 namespace flutter {
 namespace testing {
+
 class DlPathReceiverMock : public DlPathReceiver {
  public:
   MOCK_METHOD(void,
@@ -34,6 +35,7 @@ class DlPathReceiverMock : public DlPathReceiver {
               (const DlPoint& cp1, const DlPoint& cp2, const DlPoint& p2),
               (override));
   MOCK_METHOD(void, Close, (), (override));
+  MOCK_METHOD(void, PathEnd, (), (override));
 };
 
 }  // namespace testing

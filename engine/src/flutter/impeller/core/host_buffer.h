@@ -9,12 +9,10 @@
 #include <array>
 #include <functional>
 #include <memory>
-#include <string>
 #include <type_traits>
 
 #include "impeller/core/allocator.h"
 #include "impeller/core/buffer_view.h"
-#include "impeller/core/platform.h"
 
 namespace impeller {
 
@@ -29,7 +27,8 @@ class HostBuffer {
  public:
   static std::shared_ptr<HostBuffer> Create(
       const std::shared_ptr<Allocator>& allocator,
-      const std::shared_ptr<const IdleWaiter>& idle_waiter);
+      const std::shared_ptr<const IdleWaiter>& idle_waiter,
+      size_t minimum_uniform_alignment);
 
   ~HostBuffer();
 
@@ -47,7 +46,7 @@ class HostBuffer {
             class = std::enable_if_t<std::is_standard_layout_v<UniformType>>>
   [[nodiscard]] BufferView EmplaceUniform(const UniformType& uniform) {
     const auto alignment =
-        std::max(alignof(UniformType), DefaultUniformAlignment());
+        std::max(alignof(UniformType), GetMinimumUniformAlignment());
     return Emplace(reinterpret_cast<const void*>(&uniform),  // buffer
                    sizeof(UniformType),                      // size
                    alignment                                 // alignment
@@ -70,7 +69,7 @@ class HostBuffer {
   [[nodiscard]] BufferView EmplaceStorageBuffer(
       const StorageBufferType& buffer) {
     const auto alignment =
-        std::max(alignof(StorageBufferType), DefaultUniformAlignment());
+        std::max(alignof(StorageBufferType), GetMinimumUniformAlignment());
     return Emplace(&buffer,                    // buffer
                    sizeof(StorageBufferType),  // size
                    alignment                   // alignment
@@ -118,6 +117,9 @@ class HostBuffer {
   ///
   BufferView Emplace(size_t length, size_t align, const EmplaceProc& cb);
 
+  /// Retrieve the minimum uniform buffer alignment in bytes.
+  size_t GetMinimumUniformAlignment() const;
+
   //----------------------------------------------------------------------------
   /// @brief Resets the contents of the HostBuffer to nothing so it can be
   ///        reused.
@@ -156,7 +158,8 @@ class HostBuffer {
   [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
 
   explicit HostBuffer(const std::shared_ptr<Allocator>& allocator,
-                      const std::shared_ptr<const IdleWaiter>& idle_waiter);
+                      const std::shared_ptr<const IdleWaiter>& idle_waiter,
+                      size_t minimum_uniform_alignment);
 
   HostBuffer(const HostBuffer&) = delete;
 
@@ -169,6 +172,7 @@ class HostBuffer {
   size_t current_buffer_ = 0u;
   size_t offset_ = 0u;
   size_t frame_index_ = 0u;
+  size_t minimum_uniform_alignment_ = 0u;
 };
 
 }  // namespace impeller

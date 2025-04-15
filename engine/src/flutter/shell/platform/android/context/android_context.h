@@ -30,7 +30,7 @@ class AndroidContext {
     impeller::Flags impeller_flags;
   };
 
-  AndroidRenderingAPI RenderingApi() const;
+  virtual AndroidRenderingAPI RenderingApi() const;
 
   virtual bool IsValid() const;
 

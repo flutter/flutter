@@ -7,7 +7,7 @@
 /// uploads the engine to cloud storage. The documentation and spec for the
 /// format is at:
 ///
-///    https://github.com/flutter/engine/blob/main/ci/builders/README.md
+///    https://github.com/flutter/flutter/blob/main/engine/src/flutter/ci/builders/README.md
 ///
 /// The code in this library is *not* used by CI to run these configurations.
 /// Rather, that code executes these configs on CI is part of the "engine_v2"

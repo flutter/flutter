@@ -21,6 +21,10 @@
 #include "impeller/geometry/size.h"
 #include "impeller/toolkit/interop/impeller.h"
 
+#include "flutter/third_party/skia/include/core/SkM44.h"
+#include "flutter/third_party/skia/include/core/SkPath.h"
+#include "flutter/third_party/skia/include/core/SkRRect.h"
+
 namespace impeller::interop {
 
 constexpr std::optional<SkRect> ToSkiaType(const ImpellerRect* rect) {

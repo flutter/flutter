@@ -6,6 +6,7 @@
 
 #include <list>
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/geometry/dl_region.h"
 #include "flutter/fml/logging.h"
 #include "third_party/skia/include/core/SkBBHFactory.h"

@@ -4,6 +4,7 @@
 
 #include "flutter/benchmarking/benchmarking.h"
 
+#include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -98,7 +99,7 @@ static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
 template <class... Args>
 static void BM_Convex(benchmark::State& state, Args&&... args) {
   auto args_tuple = std::make_tuple(std::move(args)...);
-  auto path = std::get<Path>(args_tuple);
+  auto path = flutter::DlPath(std::get<Path>(args_tuple));
 
   size_t point_count = 0u;
   size_t single_point_count = 0u;

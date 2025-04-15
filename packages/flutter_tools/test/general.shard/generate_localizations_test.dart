@@ -3499,4 +3499,33 @@ String helloNameAndAge({required String name, required int age}) {
   '''),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/165794.
+  testWithoutContext('handles missing placeholders gracefully', () async {
+    const String en = r'''
+    {
+      "test": "No placeholder in here"
+    }''';
+
+    const String da = r'''
+    {
+      "test": "Placeholder in here {value}",
+      "@test": {
+        "placeholders": {
+          "value": {
+            "type": "String"
+          }
+        }
+      }
+    }
+    ''';
+
+    setupLocalizations(<String, String>{'en': en, 'da': da});
+
+    final String localizationsFile = getSyntheticGeneratedFileContent(locale: 'en');
+    expect(
+      localizationsFile,
+      containsIgnoringWhitespace(r'''String get test => 'No placeholder in here'''),
+    );
+  });
 }

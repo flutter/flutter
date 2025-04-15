@@ -271,12 +271,14 @@ TaskFunction createFlutterGalleryStartupTest({
   String target = 'lib/main.dart',
   Map<String, String>? runEnvironment,
   bool enableLazyShaderMode = false,
+  bool enableHCPP = false,
 }) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
     runEnvironment: runEnvironment,
     enableLazyShaderMode: enableLazyShaderMode,
+    enableHCPP: enableHCPP,
   ).run;
 }
 
@@ -699,6 +701,28 @@ TaskFunction createPathTessellationDynamicPerfTest() {
   ).run;
 }
 
+TaskFunction createPathStrokeTessellationStaticPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'stroke_tessellation_perf_static',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_stroke_tessellation_static_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
+TaskFunction createPathStrokeTessellationDynamicPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'stroke_tessellation_perf_dynamic',
+    enableImpeller: true,
+    testDriver: 'test_driver/path_stroke_tessellation_dynamic_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({bool? enableImpeller}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -895,11 +919,13 @@ class StartupTest {
     this.target = 'lib/main.dart',
     this.runEnvironment,
     this.enableLazyShaderMode = false,
+    this.enableHCPP = false,
   });
 
   final String testDirectory;
   final bool reportMetrics;
   final bool enableLazyShaderMode;
+  final bool enableHCPP;
   final String target;
   final Map<String, String>? runEnvironment;
 
@@ -912,6 +938,9 @@ class StartupTest {
 
       if (enableLazyShaderMode) {
         _addLazyShaderMode(testDirectory);
+      }
+      if (enableHCPP) {
+        _addSurfaceControlSupportToManifest(testDirectory);
       }
 
       try {

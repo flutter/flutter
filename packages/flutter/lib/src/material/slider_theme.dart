@@ -2195,8 +2195,7 @@ mixin BaseRangeSliderTrackShape {
     assert(sliderTheme.rangeThumbShape != null);
     assert(sliderTheme.overlayShape != null);
     assert(sliderTheme.trackHeight != null);
-    final double thumbWidth =
-        sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete).width;
+    final Size thumbSize = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
     final double overlayWidth =
         sliderTheme.overlayShape!.getPreferredSize(isEnabled, isDiscrete).width;
     double trackHeight = sliderTheme.trackHeight!;
@@ -2210,9 +2209,16 @@ mixin BaseRangeSliderTrackShape {
       trackHeight = 0;
     }
 
-    final double trackLeft = offset.dx + math.max(overlayWidth / 2, thumbWidth / 2);
+    final double trackLeft =
+        offset.dx +
+        (sliderTheme.padding == null
+            ? math.max(overlayWidth / 2, thumbSize.width / 2)
+            : (thumbSize.width / 2));
     final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
-    final double trackRight = trackLeft + parentBox.size.width - math.max(thumbWidth, overlayWidth);
+    final double trackRight =
+        trackLeft +
+        parentBox.size.width -
+        (sliderTheme.padding == null ? math.max(thumbSize.width, overlayWidth) : (thumbSize.width));
     final double trackBottom = trackTop + trackHeight;
     // If the parentBox's size less than slider's size the trackRight will be less than trackLeft, so switch them.
     return Rect.fromLTRB(

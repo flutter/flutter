@@ -34,13 +34,15 @@ abstract class DartBuild extends Target {
     } else {
       final TargetPlatform targetPlatform = _getTargetPlatformFromEnvironment(environment, name);
 
+      final File packageConfigFile = fileSystem.file(environment.packageConfigPath);
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
-        fileSystem.file(environment.packageConfigPath),
+        packageConfigFile,
         logger: environment.logger,
       );
       final Uri projectUri = environment.projectDir.uri;
       final String? runPackageName =
           packageConfig.packages.where((Package p) => p.root == projectUri).firstOrNull?.name;
+      final String pubspecPath = packageConfigFile.uri.resolve('../pubspec.yaml').toFilePath();
       final FlutterNativeAssetsBuildRunner buildRunner =
           _buildRunner ??
           FlutterNativeAssetsBuildRunnerImpl(
@@ -49,6 +51,7 @@ abstract class DartBuild extends Target {
             fileSystem,
             environment.logger,
             runPackageName!,
+            pubspecPath,
           );
       result = await runFlutterSpecificDartBuild(
         environmentDefines: environment.defines,

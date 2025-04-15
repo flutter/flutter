@@ -55,7 +55,7 @@ ShellIOManager::ShellIOManager(
       is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)),
       impeller_context_(std::move(impeller_context)),
       weak_factory_(this) {
-  if (!resource_context_) {
+  if (!resource_context_ && !impeller_context) {
 #ifndef OS_FUCHSIA
     FML_DLOG(WARNING) << "The IO manager was initialized without a resource "
                          "context. Async texture uploads will be disabled. "

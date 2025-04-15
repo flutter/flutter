@@ -6,8 +6,164 @@
 #include <cstdint>
 #include <cstring>
 
-#include "impeller/core/device_buffer.h"
-#include "impeller/geometry/path_component.h"
+#include "flutter/impeller/core/device_buffer.h"
+#include "flutter/impeller/geometry/path_component.h"
+#include "flutter/impeller/tessellator/path_tessellator.h"
+
+namespace {
+/// @brief A vertex writer that generates a triangle fan and requires primitive
+/// restart.
+class FanPathVertexWriter : public impeller::PathTessellator::VertexWriter {
+ public:
+  explicit FanPathVertexWriter(impeller::Point* point_buffer,
+                               uint16_t* index_buffer)
+      : point_buffer_(point_buffer), index_buffer_(index_buffer) {}
+
+  ~FanPathVertexWriter() = default;
+
+  size_t GetIndexCount() const { return index_count_; }
+  size_t GetPointCount() const { return count_; }
+
+  void EndContour() override {
+    if (count_ == 0) {
+      return;
+    }
+    index_buffer_[index_count_++] = 0xFFFF;
+  }
+
+  void Write(impeller::Point point) override {
+    index_buffer_[index_count_++] = count_;
+    point_buffer_[count_++] = point;
+  }
+
+ private:
+  size_t count_ = 0;
+  size_t index_count_ = 0;
+  impeller::Point* point_buffer_ = nullptr;
+  uint16_t* index_buffer_ = nullptr;
+};
+
+/// @brief A vertex writer that generates a triangle strip and requires
+///        primitive restart.
+class StripPathVertexWriter : public impeller::PathTessellator::VertexWriter {
+ public:
+  explicit StripPathVertexWriter(impeller::Point* point_buffer,
+                                 uint16_t* index_buffer)
+      : point_buffer_(point_buffer), index_buffer_(index_buffer) {}
+
+  ~StripPathVertexWriter() = default;
+
+  size_t GetIndexCount() const { return index_count_; }
+  size_t GetPointCount() const { return count_; }
+
+  void EndContour() override {
+    if (count_ == 0u || contour_start_ == count_ - 1) {
+      // Empty or first contour.
+      return;
+    }
+
+    size_t start = contour_start_;
+    size_t end = count_ - 1;
+
+    index_buffer_[index_count_++] = start;
+
+    size_t a = start + 1;
+    size_t b = end;
+    while (a < b) {
+      index_buffer_[index_count_++] = a;
+      index_buffer_[index_count_++] = b;
+      a++;
+      b--;
+    }
+    if (a == b) {
+      index_buffer_[index_count_++] = a;
+    }
+
+    contour_start_ = count_;
+    index_buffer_[index_count_++] = 0xFFFF;
+  }
+
+  void Write(impeller::Point point) override {
+    point_buffer_[count_++] = point;
+  }
+
+ private:
+  size_t count_ = 0;
+  size_t index_count_ = 0;
+  size_t contour_start_ = 0;
+  impeller::Point* point_buffer_ = nullptr;
+  uint16_t* index_buffer_ = nullptr;
+};
+
+/// @brief A vertex writer that has no hardware requirements.
+class GLESPathVertexWriter : public impeller::PathTessellator::VertexWriter {
+ public:
+  explicit GLESPathVertexWriter(std::vector<impeller::Point>& points,
+                                std::vector<uint16_t>& indices)
+      : points_(points), indices_(indices) {}
+
+  ~GLESPathVertexWriter() = default;
+
+  void EndContour() override {
+    if (points_.size() == 0u || contour_start_ == points_.size() - 1) {
+      // Empty or first contour.
+      return;
+    }
+
+    auto start = contour_start_;
+    auto end = points_.size() - 1;
+    // All filled paths are drawn as if they are closed, but if
+    // there is an explicit close then a lineTo to the origin
+    // is inserted. This point isn't strictly necesary to
+    // correctly render the shape and can be dropped.
+    if (points_[end] == points_[start]) {
+      end--;
+    }
+
+    // Triangle strip break for subsequent contours
+    if (contour_start_ != 0) {
+      auto back = indices_.back();
+      indices_.push_back(back);
+      indices_.push_back(start);
+      indices_.push_back(start);
+
+      // If the contour has an odd number of points, insert an extra point when
+      // bridging to the next contour to preserve the correct triangle winding
+      // order.
+      if (previous_contour_odd_points_) {
+        indices_.push_back(start);
+      }
+    } else {
+      indices_.push_back(start);
+    }
+
+    size_t a = start + 1;
+    size_t b = end;
+    while (a < b) {
+      indices_.push_back(a);
+      indices_.push_back(b);
+      a++;
+      b--;
+    }
+    if (a == b) {
+      indices_.push_back(a);
+      previous_contour_odd_points_ = false;
+    } else {
+      previous_contour_odd_points_ = true;
+    }
+    contour_start_ = points_.size();
+  }
+
+  void Write(impeller::Point point) override { points_.push_back(point); }
+
+ private:
+  bool previous_contour_odd_points_ = false;
+  size_t contour_start_ = 0u;
+  std::vector<impeller::Point>& points_;
+  std::vector<uint16_t>& indices_;
+};
+
+}  // namespace
 
 namespace impeller {
 
@@ -37,14 +193,15 @@ Path::Polyline Tessellator::CreateTempPolyline(const Path& path,
   return polyline;
 }
 
-VertexBuffer Tessellator::TessellateConvex(const Path& path,
+VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
                                            HostBuffer& host_buffer,
                                            Scalar tolerance,
                                            bool supports_primitive_restart,
                                            bool supports_triangle_fan) {
   if (supports_primitive_restart) {
     // Primitive Restart.
-    const auto [point_count, contour_count] = path.CountStorage(tolerance);
+    const auto [point_count, contour_count] =
+        PathTessellator::CountFillStorage(path, tolerance);
     BufferView point_buffer = host_buffer.Emplace(
         nullptr, sizeof(Point) * point_count, alignof(Point));
     BufferView index_buffer = host_buffer.Emplace(
@@ -52,13 +209,15 @@ VertexBuffer Tessellator::TessellateConvex(const Path& path,
         alignof(uint16_t));
 
     if (supports_triangle_fan) {
-      FanVertexWriter writer(
+      FanPathVertexWriter writer(
           reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
                                    point_buffer.GetRange().offset),
           reinterpret_cast<uint16_t*>(
               index_buffer.GetBuffer()->OnGetContents() +
               index_buffer.GetRange().offset));
-      path.WritePolyline(tolerance, writer);
+      PathTessellator::PathToFilledVertices(path, writer, tolerance);
+      FML_DCHECK(writer.GetPointCount() <= point_count);
+      FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
       point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
       index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
 
@@ -69,13 +228,15 @@ VertexBuffer Tessellator::TessellateConvex(const Path& path,
           .index_type = IndexType::k16bit,
       };
     } else {
-      StripVertexWriter writer(
+      StripPathVertexWriter writer(
           reinterpret_cast<Point*>(point_buffer.GetBuffer()->OnGetContents() +
                                    point_buffer.GetRange().offset),
           reinterpret_cast<uint16_t*>(
               index_buffer.GetBuffer()->OnGetContents() +
               index_buffer.GetRange().offset));
-      path.WritePolyline(tolerance, writer);
+      PathTessellator::PathToFilledVertices(path, writer, tolerance);
+      FML_DCHECK(writer.GetPointCount() <= point_count);
+      FML_DCHECK(writer.GetIndexCount() <= (point_count + contour_count));
       point_buffer.GetBuffer()->Flush(point_buffer.GetRange());
       index_buffer.GetBuffer()->Flush(index_buffer.GetRange());
 
@@ -161,16 +322,16 @@ VertexBuffer Tessellator::GenerateLineStrip(const Path& path,
   };
 }
 
-void Tessellator::TessellateConvexInternal(const Path& path,
+void Tessellator::TessellateConvexInternal(const PathSource& path,
                                            std::vector<Point>& point_buffer,
                                            std::vector<uint16_t>& index_buffer,
                                            Scalar tolerance) {
   point_buffer.clear();
   index_buffer.clear();
 
-  GLESVertexWriter writer(point_buffer, index_buffer);
+  GLESPathVertexWriter writer(point_buffer, index_buffer);
 
-  path.WritePolyline(tolerance, writer);
+  PathTessellator::PathToFilledVertices(path, writer, tolerance);
 }
 
 static constexpr int kPrecomputedDivisionCount = 1024;

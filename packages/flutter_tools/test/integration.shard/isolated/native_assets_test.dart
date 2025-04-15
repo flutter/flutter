@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This test exercises the embedding of the native assets mapping in dill files.
-// An initial dill file is created by `flutter assemble` and used for running
-// the application. This dill must contain the mapping.
-// When doing hot reload, this mapping must stay in place.
-// When doing a hot restart, a new dill file is pushed. This dill file must also
-// contain the native assets mapping.
-// When doing a hot reload, this mapping must stay in place.
+// This test exercises dynamic libraries added to a flutter app or package.
+// It covers:
+//  * `flutter run`, including hot reload and hot restart
+//  * `flutter test`
+//  * `flutter build`
 
 @Timeout(Duration(minutes: 10))
 library;

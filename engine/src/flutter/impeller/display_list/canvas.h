@@ -12,7 +12,8 @@
 #include <utility>
 #include <vector>
 
-#include "display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
@@ -187,7 +188,7 @@ class Canvas {
 
   void Rotate(Radians radians);
 
-  void DrawPath(const Path& path, const Paint& paint);
+  void DrawPath(const flutter::DlPath& path, const Paint& paint);
 
   void DrawPaint(const Paint& paint);
 
@@ -337,7 +338,8 @@ class Canvas {
   /// supports framebuffer fetch.
   std::shared_ptr<Texture> FlipBackdrop(Point global_pass_position,
                                         bool should_remove_texture = false,
-                                        bool should_use_onscreen = false);
+                                        bool should_use_onscreen = false,
+                                        bool post_depth_increment = false);
 
   bool BlitToOnscreen(bool is_onscreen = false);
 

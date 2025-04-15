@@ -125,6 +125,10 @@ config("compiler") {
       cflags += [ "-fsanitize=address" ]
       ldflags += [ "-fsanitize=address" ]
     }
+    if (is_hwasan && is_android && current_cpu == "arm64") {
+      cflags += [ "-fsanitize=hwaddress" ]
+      ldflags += [ "-fsanitize=hwaddress" ]
+    }
     if (is_lsan) {
       cflags += [ "-fsanitize=leak" ]
       ldflags += [ "-fsanitize=leak" ]
