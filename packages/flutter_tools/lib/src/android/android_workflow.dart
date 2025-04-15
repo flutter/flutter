@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show File;
 
+import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -17,6 +19,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'java.dart';
 
@@ -58,6 +61,51 @@ class AndroidWorkflow implements Workflow {
 
   @override
   bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
+}
+
+Future<String?> getEmulatorVersion(String androidSdkDirectoryPath) async {
+  String emulatorExecutable;
+  if (globals.platform.isWindows) {
+    emulatorExecutable = path.join(androidSdkDirectoryPath, 'emulator', 'emulator.exe');
+  } else {
+    emulatorExecutable = path.join(androidSdkDirectoryPath, 'emulator', 'emulator');
+  }
+
+  final File emulatorFile = File(emulatorExecutable);
+  if (!emulatorFile.existsSync()) {
+    return null;
+  }
+
+  try {
+    final ProcessResult result = await Process.run(emulatorExecutable, <String>['-version']);
+
+    if (result.exitCode != 0) {
+      return null;
+    }
+
+    final String output = result.stdout.toString().trim();
+
+    final String versionLine = output
+        .split('\n')
+        .firstWhere(
+          (String line) => line.contains('Android emulator version'),
+          orElse: () => '', // Return an empty string if no matching line is found
+        );
+
+    if (versionLine.isNotEmpty) {
+      final RegExp regex = RegExp(r'Android emulator version\s+(.*)');
+      final Match? match = regex.firstMatch(versionLine);
+      if (match != null && match.groupCount >= 1) {
+        return match.group(1)?.trim();
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } on Exception catch (e, _) {
+    return null;
+  }
 }
 
 /// A validator that checks if the Android SDK and Java SDK are available and
@@ -155,6 +203,7 @@ class AndroidValidator extends DoctorValidator {
     }
 
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
+    messages.add(ValidationMessage('Emulator version ${await getEmulatorVersion(androidSdk.directory.path) ?? 'unknown'}'));
 
     _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {
