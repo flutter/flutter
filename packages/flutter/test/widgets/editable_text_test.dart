@@ -16212,10 +16212,9 @@ void main() {
       skip: !kIsWeb, // [intended]
     );
 
-    testWidgets('when setCustomSelectionOnFocus is set', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/163399.
+    // Regression test for https://github.com/flutter/flutter/issues/163399.
+    testWidgets('when selectAllOnFocus is turned off', (WidgetTester tester) async {
       controller.text = 'Text';
-      const TextSelection expectedSelection = TextSelection.collapsed(offset: 2);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -16226,7 +16225,7 @@ void main() {
             style: Typography.material2018().black.titleMedium!,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
-            setCustomSelectionOnFocus: () => expectedSelection,
+            selectAllOnFocus: false,
           ),
         ),
       );
@@ -16239,7 +16238,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pumpAndSettle();
       expect(focusNode.hasFocus, isTrue);
-      expect(controller.selection, expectedSelection);
+      expect(controller.selection, initialSelection);
     }, variant: TargetPlatformVariant.all());
 
     // Regression test for https://github.com/flutter/flutter/issues/156078.

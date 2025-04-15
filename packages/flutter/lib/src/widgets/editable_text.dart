@@ -87,9 +87,6 @@ typedef SelectionChangedCallback =
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
-/// Signature for a function that determines the selection when focus is given
-typedef SetCustomSelectionOnFocus = TextSelection Function();
-
 /// Signature for a widget builder that builds a context menu for the given
 /// [EditableTextState].
 ///
@@ -885,7 +882,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     bool? enableInteractiveSelection,
-    this.setCustomSelectionOnFocus,
+    bool? selectAllOnFocus,
     this.scrollController,
     this.scrollPhysics,
     this.autocorrectionTextRectColor,
@@ -927,6 +924,7 @@ class EditableText extends StatefulWidget {
        ),
        assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        enableInteractiveSelection = enableInteractiveSelection ?? (!readOnly || !obscureText),
+       selectAllOnFocus = selectAllOnFocus ?? defaultSelectAllOnFocus,
        toolbarOptions =
            selectionControls is TextSelectionHandleControls && toolbarOptions == null
                ? ToolbarOptions.empty
@@ -1802,13 +1800,14 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   bool get selectionEnabled => enableInteractiveSelection;
 
-  /// {@template flutter.widgets.editableText.setCustomSelectionOnFocus}
-  /// Set a custom text selection when focus is given.
+  /// {@template flutter.widgets.editableText.selectAllOnFocus}
+  /// Whether or not this field should highlight all text when gaining focus on
+  /// web or desktop.
   ///
-  /// If null, all text will be selected on web and desktop. Everything else will
-  /// leave text selection as it was before.
+  /// By default this will highlight the text field on web and desktop, and can
+  /// only be turned off on those two platforms.
   /// {@endtemplate}
-  final SetCustomSelectionOnFocus? setCustomSelectionOnFocus;
+  final bool selectAllOnFocus;
 
   /// {@template flutter.widgets.editableText.autofillHints}
   /// A list of strings that helps the autofill service identify the type of this
@@ -2048,6 +2047,21 @@ class EditableText extends StatefulWidget {
   static const bool defaultStylusHandwritingEnabled = true;
 
   bool get _userSelectionEnabled => enableInteractiveSelection && (!readOnly || !obscureText);
+
+  /// The default value for [selectAllOnFocus].
+  static bool get defaultSelectAllOnFocus {
+    if (kIsWeb) {
+      return true;
+    }
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => false,
+      TargetPlatform.iOS => false,
+      TargetPlatform.fuchsia => false,
+      TargetPlatform.linux => true,
+      TargetPlatform.macOS => true,
+      TargetPlatform.windows => true,
+    };
+  }
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
   /// platform's default selection menu for an editable field.
@@ -4636,8 +4650,7 @@ class EditableTextState extends State<EditableText>
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
-      final TextSelection? updatedSelection =
-          widget.setCustomSelectionOnFocus?.call() ?? _adjustedSelectionWhenFocused();
+      final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
       if (updatedSelection != null) {
         _handleSelectionChanged(updatedSelection, null);
       }
@@ -4657,6 +4670,7 @@ class EditableTextState extends State<EditableText>
       TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
     };
     final bool shouldSelectAll =
+        widget.selectAllOnFocus &&
         widget.selectionEnabled &&
         (kIsWeb || isDesktop) &&
         !_isMultiline &&
