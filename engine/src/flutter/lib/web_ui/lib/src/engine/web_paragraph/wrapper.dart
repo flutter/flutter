@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
-
+import 'dart:math';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -63,7 +63,7 @@ class TextWrapper {
     startNewLine(0, 0.0);
 
     bool hardLineBreak = false;
-    for (int index = 0; index < _layout.textClusters.length; index++) {
+    for (int index = 0; index < _layout.textClusters.length - 1; index++) {
       final ExtendedTextCluster cluster = _layout.textClusters[index];
       // TODO(jlavrova): This is a temporary simplification, needs to be addressed later
       double widthCluster = cluster.bounds.width;
@@ -173,12 +173,12 @@ class TextWrapper {
     }
 
     // Assume a soft line break at the end of the text
-    if (_whitespaces.end != _layout.textClusters.length) {
+    if (_whitespaces.end < _layout.textClusters.length - 1) {
       // We have letters at the end, make them into a word
       _widthText += _widthWhitespaces;
       _whitespaces = ClusterRange(
-        start: _layout.textClusters.length,
-        end: _layout.textClusters.length,
+        start: _layout.textClusters.length - 1,
+        end: _layout.textClusters.length - 1,
       );
       _widthWhitespaces = 0.0;
       _widthText += _widthLetters;
@@ -192,16 +192,18 @@ class TextWrapper {
       hardLineBreak,
     );
 
+    // TODO(jlavrova): Discuss with Mouad
+    // Flutter wants to have another (empty) line if \n is the last codepoint in the text
+    // This empty line gets in a way of detecting line visual runs (there isn't any)
+    /*
     if (hardLineBreak) {
-      // TODO(jlavrova): Discuss with Mouad
-      // Flutter wants to have another (empty) line if \n is the last codepoint in the text
       final emptyClusterRange = ClusterRange(
-        start: _layout.textClusters.length,
-        end: _layout.textClusters.length,
+        start: _layout.textClusters.length - 1,
+        end: _layout.textClusters.length - 1,
       );
       _layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false);
     }
-
+    */
     if (WebParagraphDebug.logging) {
       for (int i = 0; i < _layout.lines.length; ++i) {
         final TextLine line = _layout.lines[i];

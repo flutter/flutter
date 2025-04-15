@@ -141,9 +141,9 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 10000));
 
     final List<TextLine> lines = paragraph.lines;
-    expect(lines.length, 4);
-    for (int i = 0; i < 4; i++) {
-      expect(lines[i].whitespacesRange.width, i != 3 ? 1 : 0);
+    expect(lines.length, 3);
+    for (int i = 0; i < 3; i++) {
+      expect(lines[i].whitespacesRange.width, 1);
       expect(lines[i].textRange.width, 0);
       expect(lines[i].hardLineBreak, i != 3);
     }

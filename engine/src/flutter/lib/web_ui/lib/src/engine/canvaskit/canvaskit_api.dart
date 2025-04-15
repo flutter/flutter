@@ -135,6 +135,8 @@ extension CanvasKitExtension on CanvasKit {
 
   external BidiNamespace get Bidi;
 
+  external CodeUnitsNamespace get CodeUnits;
+
   external SkParagraphBuilderNamespace get ParagraphBuilder;
 
   external SkParagraphStyle ParagraphStyle(SkParagraphStyleProperties properties);
@@ -2786,15 +2788,35 @@ class BidiNamespace {}
 extension BidiNamespaceExtention on BidiNamespace {
   @JS('getBidiRegions')
   external JSArray<JSAny?> _getBidiRegions(JSString text, SkTextDirection dir);
-
   List<BidiRegion> getBidiRegions(String text, ui.TextDirection dir) =>
       _getBidiRegions(text.toJS, toSkTextDirection(dir)).toDart.cast<BidiRegion>();
 
   @JS('reorderVisual')
   external JSArray<JSAny?> _reorderVisual(JSUint8Array visuals);
-
   List<BidiIndex> reorderVisual(Uint8List visuals) =>
       _reorderVisual(visuals.toJS).toDart.cast<BidiIndex>();
+}
+
+@JS()
+@anonymous
+@staticInterop
+class CodeUnitInfo {}
+
+extension CodeUnitInfoExtension on CodeUnitInfo {
+  @JS('flags')
+  external JSNumber get _flags;
+  int get flags => _flags.toDartInt;
+}
+
+@JS()
+@anonymous
+@staticInterop
+class CodeUnitsNamespace {}
+
+extension CodeUnitsNamespaceExtention on CodeUnitsNamespace {
+  @JS('compute')
+  external JSArray<JSAny?> _compute(JSString text);
+  List<CodeUnitInfo> compute(String text) => _compute(text.toJS).toDart.cast<CodeUnitInfo>();
 }
 
 @JS()

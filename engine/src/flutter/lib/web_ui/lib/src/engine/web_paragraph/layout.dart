@@ -13,7 +13,6 @@ import '../dom.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'paragraph.dart';
-import 'unicode_properties.dart';
 import 'wrapper.dart';
 
 /// A single canvas2d context to use for all text information.
@@ -60,11 +59,12 @@ class TextLayout {
   void extractUnicodeInfo() {
     codeUnitFlags.clear();
 
-    // TODO(jlavrova): Switch to SkUnicode.CodePointFlags API in CanvasKit
-    // Fill out the entire flag list
-    for (int i = 0; i <= paragraph.text!.length; ++i) {
-      codeUnitFlags.add(CodeUnitFlags(CodeUnitFlags.kNoCodeUnitFlag));
+    final List<CodeUnitInfo> flags = canvasKit.CodeUnits.compute(paragraph.text!);
+    assert(flags.length == (paragraph.text!.length + 1));
+    for (final CodeUnitInfo flag in flags) {
+      codeUnitFlags.add(CodeUnitFlags(flag.flags));
     }
+
     // Get the information from the browser
     final engine.SegmentationResult result = engine.segmentText(paragraph.text!);
 
@@ -85,10 +85,6 @@ class TextLayout {
         codeUnitFlags[lineBreak].hardLineBreak = true;
       }
     }
-    // Add whitespaces
-    for (int i = 0; i < paragraph.text!.length; ++i) {
-      codeUnitFlags[i].whitespace = UnicodeProperties.isWhitespace(paragraph.text!.codeUnitAt(i));
-    }
   }
 
   void extractClusterTexts() {
@@ -97,9 +93,6 @@ class TextLayout {
       final String text = paragraph.text!.substring(
         styledBlock.textRange.start,
         styledBlock.textRange.end,
-      );
-      WebParagraphDebug.log(
-        '[${styledBlock.textRange.start}:${styledBlock.textRange.end}): "$text"',
       );
       textContext.font =
           '${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
@@ -116,7 +109,9 @@ class TextLayout {
           rects.first.width,
           rects.first.height,
         );
-        textToClusterMap[cluster.begin] = textClusters.length;
+        for (int i = cluster.begin; i < cluster.end; i += 1) {
+          textToClusterMap[i] = textClusters.length;
+        }
         textClusters.add(ExtendedTextCluster(cluster, bounds, blockTextMetrics));
       }
     }
@@ -217,8 +212,9 @@ class TextLayout {
     final List<int> logicalLevels = <int>[];
     int firstIndex = 0;
     for (final bidiRun in bidiRuns) {
-      final ClusterRange intesection = intersect(bidiRun.clusterRange, textRange);
-      if (intesection.width <= 0) {
+      final ClusterRange intesection1 = intersect(bidiRun.clusterRange, textRange);
+      final ClusterRange intesection2 = intersect(bidiRun.clusterRange, whitespaces);
+      if (intesection1.width <= 0 && intesection2.width <= 0) {
         if (logicalLevels.isNotEmpty) {
           // No more runs for this line
           break;
