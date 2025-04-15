@@ -217,6 +217,9 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
     phase = _PredictiveBackPhase.start;
 
     final bool gestureInProgress = !backEvent.isButtonEvent && _isEnabled;
+    print(
+      'justin handlestart. isEnabled = ($_isEnabled == ${widget.route.isCurrent} && ${widget.route.popGestureEnabled}).',
+    );
     if (!gestureInProgress) {
       return false;
     }
@@ -228,6 +231,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {
+    print('justin handleupdate.');
     phase = _PredictiveBackPhase.update;
 
     widget.route.handleUpdateBackGestureProgress(progress: 1 - backEvent.progress);
@@ -244,6 +248,7 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   void handleCommitBackGesture() {
+    print('justin handlecommit.');
     phase = _PredictiveBackPhase.commit;
 
     widget.route.handleCommitBackGesture();
@@ -254,12 +259,14 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   void initState() {
+    print('justin pbackgesturedetector initstate.');
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    print('justin pbackgesturedetector dispose.');
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -272,7 +279,6 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
   }
 }
 
-// TODO(justinmc): Bug: Do two backs back to back really fast.
 /// Android's predictive back page shared element transition.
 /// https://developer.android.com/design/ui/mobile/guides/patterns/predictive-back#shared-element-transition
 class _PredictiveBackSharedElementPageTransition extends StatefulWidget {
@@ -371,6 +377,7 @@ class _PredictiveBackSharedElementPageTransitionState
   void initState() {
     super.initState();
 
+    print('justin initstate. phase: ${widget.phase}.');
     _commitController = AnimationController(
       duration: const Duration(milliseconds: _kCommitMilliseconds),
       vsync: this,
@@ -382,6 +389,7 @@ class _PredictiveBackSharedElementPageTransitionState
     _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
+      print('justin init commit.');
       _commitController.forward(from: 0.0);
     }
   }
@@ -391,6 +399,7 @@ class _PredictiveBackSharedElementPageTransitionState
     super.didUpdateWidget(oldWidget);
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
+      print('justin commit.');
       _commitController.forward(from: 0.0);
       _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
       final double screenWidth = MediaQuery.sizeOf(context).width;
@@ -425,6 +434,8 @@ class _PredictiveBackSharedElementPageTransitionState
 
   @override
   Widget build(BuildContext context) {
+    // TODO(justinmc): Well the 2nd (problematic) commit never shows up here. It's always in start phase.
+    //print('justin build with phase ${widget.phase}.');
     return AnimatedBuilder(
       animation: _mergedAnimations,
       builder: (BuildContext context, Widget? child) {

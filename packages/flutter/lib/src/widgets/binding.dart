@@ -921,6 +921,7 @@ mixin WidgetsBinding
   final List<WidgetsBindingObserver> _backGestureObservers = <WidgetsBindingObserver>[];
 
   bool _handleStartBackGesture(Map<String?, Object?> arguments) {
+    print('justin _handleStartBackGesture, which clears backgestureobservers. Current _observers: ${_observers.length}');
     _backGestureObservers.clear();
     final PredictiveBackEvent backEvent = PredictiveBackEvent.fromMap(arguments);
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
@@ -932,6 +933,7 @@ mixin WidgetsBinding
   }
 
   void _handleUpdateBackGestureProgress(Map<String?, Object?> arguments) {
+    print('justin _handleUpdate with observers: ${_backGestureObservers.length}');
     if (_backGestureObservers.isEmpty) {
       return;
     }
