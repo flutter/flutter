@@ -6029,7 +6029,8 @@ class _Editable extends MultiChildRenderObjectWidget {
 }
 
 class _NeverUserScrollableScrollPhysics extends ScrollPhysics {
-  /// Creates scroll physics that does not let the user scroll, but allows for programatic scrolling.
+  /// Creates a scroll physics that prevents scrolling with user input, for example
+  /// by dragging, but still allows for programmatic scrolling.
   const _NeverUserScrollableScrollPhysics({super.parent});
 
   @override

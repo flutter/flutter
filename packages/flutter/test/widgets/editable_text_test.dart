@@ -8817,7 +8817,7 @@ void main() {
   );
 
   testWidgets(
-    'single-line field cannot be scroll with touch on iOS',
+    'single-line field cannot be scrolled with touch on iOS',
     (WidgetTester tester) async {
       controller.text = 'This is a long string that should overflow the TextField.';
 
