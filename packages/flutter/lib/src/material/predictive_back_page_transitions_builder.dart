@@ -12,8 +12,6 @@ import 'package:flutter/widgets.dart';
 
 import 'page_transitions_theme.dart';
 
-// TODO(justinmc): OK the border radius animation was there for a reason. It pops in now on the emulator.
-
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation that looks like the default page transition used on
 /// Android U and above when using predictive back.
@@ -312,12 +310,17 @@ class _PredictiveBackSharedElementPageTransitionState
   static const double _kYPositionFactor = 0.1;
 
   // Ideally this would match the curvature of the physical Android device being
-  // used. Since that seems impossible, this value is a best guess at a value
-  // that looks reasonable on most devices.
+  // used, but that is not yet supported. Instead, this value is a best guess at
+  // a value that looks reasonable on most devices.
+  // See https://github.com/flutter/flutter/issues/97349.
   static const double _kDeviceBorderRadius = 32.0;
 
   // Eyeballed on a Pixel 9 running Android 16.
   static const int _kCommitMilliseconds = 100;
+
+  // Since we don't know the device border radius, this provides a smooth
+  // transition between the default radius and the actual radius.
+  final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
 
   final Tween<double> _gapTween = Tween<double>(begin: _kMargin, end: 0.0);
   final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
@@ -442,7 +445,9 @@ class _PredictiveBackSharedElementPageTransitionState
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: _gapTween.evaluate(widget.animation)),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(_kDeviceBorderRadius),
+                  borderRadius: BorderRadius.circular(
+                    _borderRadiusTween.evaluate(widget.animation),
+                  ),
                   child: child,
                 ),
               ),
