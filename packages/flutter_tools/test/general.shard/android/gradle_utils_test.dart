@@ -717,7 +717,8 @@ dependencies {
         GradleKgpTestData(
           true,
           kgpVersion: templateKotlinGradlePluginVersion,
-          gradleVersion: '8.10', // TODO replace with templateDefaultGradleVersion.
+           // TODO(reidbaker): replace with templateDefaultGradleVersion.
+          gradleVersion: '8.10',
         ),
 
         // Kotlin version at the edge of support window.

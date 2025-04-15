@@ -453,7 +453,7 @@ bool validateGradleAndKGP(Logger logger, {required String? gradleV, required Str
     return false;
   }
 
-  const maxKnownAndSupportedKgpVersion = '2.1.20';
+  const String maxKnownAndSupportedKgpVersion = '2.1.20';
   if (isWithinVersionRange(
     kgpV,
     min: maxKnownAndSupportedKgpVersion,
