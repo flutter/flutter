@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -274,7 +276,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.material.textfield.onTap}
   final VoidCallback? onTap;
 
-  /// {@macro flutter.widgets.editableText.autocorrect}
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true.
   final bool autocorrect;
 
   /// Whether to allow the platform to automatically format quotes.
@@ -361,8 +365,8 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
   TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
   ScrollNotificationObserverState? _scrollNotificationObserver;
+  late double _scaledIconSize;
   double _fadeExtent = 0.0;
-  double? _maxHeight;
 
   @override
   void initState() {
@@ -439,12 +443,13 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (_maxHeight == null) {
-      _maxHeight ??= context.size?.height;
-    } else if (notification is ScrollUpdateNotification) {
+    if (notification is ScrollUpdateNotification) {
       final double currentHeight = context.size?.height ?? 0.0;
       setState(() {
-        _fadeExtent = _calculateScrollOpacity(currentHeight, _maxHeight!);
+        _fadeExtent = _calculateScrollOpacity(
+          currentHeight,
+          _scaledIconSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
+        );
       });
     }
   }
@@ -485,7 +490,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
-    final double scaledIconSize = MediaQuery.textScalerOf(context).scale(widget.itemSize);
+    _scaledIconSize = MediaQuery.textScalerOf(context).scale(widget.itemSize);
 
     // If decoration was not provided, create a decoration with the provided
     // background color and border radius.
@@ -498,7 +503,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> wit
 
     final IconThemeData iconThemeData = IconThemeData(
       color: CupertinoDynamicColor.resolve(widget.itemColor, context),
-      size: scaledIconSize,
+      size: _scaledIconSize,
     );
 
     final Widget prefix = Opacity(

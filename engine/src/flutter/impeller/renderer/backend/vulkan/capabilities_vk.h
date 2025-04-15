@@ -278,6 +278,9 @@ class CapabilitiesVK final : public Capabilities,
   // |Capabilities|
   ISize GetMaximumRenderPassAttachmentSize() const override;
 
+  // |Capabilities|
+  size_t GetMinimumUniformAlignment() const override;
+
   //----------------------------------------------------------------------------
   /// @return     If fixed-rate compression for non-onscreen surfaces is
   ///             supported.
@@ -319,6 +322,7 @@ class CapabilitiesVK final : public Capabilities,
   PixelFormat default_depth_stencil_format_ = PixelFormat::kUnknown;
   vk::PhysicalDevice physical_device_;
   vk::PhysicalDeviceProperties device_properties_;
+  size_t minimum_uniform_alignment_ = 256;
   bool supports_compute_subgroups_ = false;
   bool supports_device_transient_textures_ = false;
   bool supports_texture_fixed_rate_compression_ = false;
