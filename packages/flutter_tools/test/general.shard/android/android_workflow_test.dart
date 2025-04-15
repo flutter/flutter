@@ -425,7 +425,31 @@ Review licenses that have not been accepted (y/N)?
     expect(stdio.writtenToStderr, contains('sdkmanager crash'));
   });
 
-  testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
+  testUsingContext('includes emulator version', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = false
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar');
+    final ValidationResult validationResult =
+        await AndroidValidator(
+          java: FakeJava(),
+          androidSdk: sdk,
+          logger: logger,
+          platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+          userMessages: UserMessages(),
+        ).validate();
+
+    expect(validationResult.type, ValidationType.partial);
+    expect(validationResult.messages.length > 2, isTrue);
+    final ValidationMessage sdkMessage = validationResult.messages[1];
+    expect(sdkMessage.type, ValidationMessageType.information);
+    // This is `unknown` because knowing a real version number requires
+    // executing a real instance of the emulator.
+    expect(sdkMessage.message, 'Emulator version unknown');
+  });
+
+  testUsingContext('detects license-only SDK installation with cmdline-tools', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
@@ -505,7 +529,7 @@ Review licenses that have not been accepted (y/N)?
     );
   });
 
-  testWithoutContext('detects missing cmdline tools', () async {
+  testUsingContext('detects missing cmdline tools', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
@@ -646,7 +670,7 @@ Android sdkmanager tool was found, but failed to run
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     'Mentions that JDK is provided by latest Android Studio Installation',
     () async {
       // Mock a pass through scenario to reach _checkJavaVersion()
@@ -685,7 +709,7 @@ Android sdkmanager tool was found, but failed to run
     },
   );
 
-  testWithoutContext(
+  testUsingContext(
     "Mentions that JDK is provided by user's JAVA_HOME environment variable",
     () async {
       // Mock a pass through scenario to reach _checkJavaVersion()
@@ -724,7 +748,7 @@ Android sdkmanager tool was found, but failed to run
     },
   );
 
-  testWithoutContext('Mentions that path to Java binary is obtained from PATH', () async {
+  testUsingContext('Mentions that path to Java binary is obtained from PATH', () async {
     // Mock a pass through scenario to reach _checkJavaVersion()
     sdk
       ..licensesAvailable = true
@@ -759,7 +783,7 @@ Android sdkmanager tool was found, but failed to run
     );
   });
 
-  testWithoutContext('Mentions that JDK is provided by Flutter config', () async {
+  testUsingContext('Mentions that JDK is provided by Flutter config', () async {
     // Mock a pass through scenario to reach _checkJavaVersion()
     sdk
       ..licensesAvailable = true
