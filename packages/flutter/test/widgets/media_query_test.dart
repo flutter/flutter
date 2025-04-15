@@ -287,6 +287,11 @@ void main() {
     expect(datas1.first.supportsShowingSystemContextMenu, isFalse);
 
     tester.platformDispatcher.supportsShowingSystemContextMenu = true;
+    tester.binding.handleSupportsShowingSystemContextMenuChanged();
+    addTearDown(() {
+      tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+      tester.binding.handleSupportsShowingSystemContextMenuChanged();
+    });
 
     final List<MediaQueryData> datas2 = <MediaQueryData>[];
 
