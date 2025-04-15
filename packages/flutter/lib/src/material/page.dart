@@ -48,12 +48,6 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
     assert(opaque);
   }
 
-  @override
-  DelegatedTransitionBuilder? get delegatedTransition {
-    // TODO(justinmc): For predictive back, this should be the predictive back transition. But this won't matter if both routes are predictive back enabled routes? It will just use the primary animation of the incoming route, which should be the same as this?
-    return MaterialRouteTransitionMixin._delegatedTransition;
-  }
-
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
