@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
 @TestOn('!chrome')
 library;
 
@@ -1110,6 +1113,124 @@ void main() {
       moreOrLessEquals(-751.94, epsilon: 0.01),
     );
   });
+
+  testWidgets(
+    'CupertinoSliverNavigationBar.bottom clips its contents mid-transition when scrolled',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          builder: (BuildContext context, Widget? navigator) {
+            return navigator!;
+          },
+          home: const Placeholder(),
+        ),
+      );
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 1',
+              builder:
+                  (BuildContext context) =>
+                      scaffoldForNavBar(
+                        const CupertinoSliverNavigationBar.search(
+                          searchField: CupertinoSearchTextField(
+                            suffixMode: OverlayVisibilityMode.always,
+                            suffixIcon: Icon(CupertinoIcons.mic_solid),
+                          ),
+                        ),
+                      )!,
+            ),
+          );
+
+      await tester.pumpAndSettle();
+
+      final TestGesture scrollGesture1 = await tester.startGesture(
+        tester.getCenter(find.byType(CustomScrollView)),
+      );
+      await scrollGesture1.moveBy(const Offset(0, -300));
+      await scrollGesture1.up();
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.search), findsOneWidget);
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 2',
+              builder:
+                  (BuildContext context) =>
+                      scaffoldForNavBar(
+                        const CupertinoNavigationBar(
+                          bottom: PreferredSize(
+                            preferredSize: Size.fromHeight(20),
+                            child: ColoredBox(color: Color(0xffff0000)),
+                          ),
+                        ),
+                      )!,
+            ),
+          );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(2));
+      expect(find.byIcon(CupertinoIcons.search), findsNWidgets(2));
+      await expectLater(
+        find.byType(CupertinoApp),
+        matchesGoldenFile('nav_bar_transition.search.bottom.png'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsNothing);
+      expect(find.byIcon(CupertinoIcons.search), findsNothing);
+
+      tester
+          .state<NavigatorState>(find.byType(Navigator))
+          .push(
+            CupertinoPageRoute<void>(
+              title: 'Page 3',
+              builder:
+                  (BuildContext context) =>
+                      scaffoldForNavBar(
+                        const CupertinoSliverNavigationBar.search(
+                          searchField: CupertinoSearchTextField(
+                            suffixMode: OverlayVisibilityMode.always,
+                            suffixIcon: Icon(CupertinoIcons.mic_solid),
+                          ),
+                        ),
+                      )!,
+            ),
+          );
+
+      await tester.pumpAndSettle();
+
+      final TestGesture scrollGesture2 = await tester.startGesture(
+        tester.getCenter(find.byType(CustomScrollView)),
+      );
+      await scrollGesture2.moveBy(const Offset(0, -300));
+      await scrollGesture2.up();
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.search), findsOneWidget);
+
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+
+      expect(find.byIcon(CupertinoIcons.mic_solid), findsNWidgets(2));
+      expect(find.byIcon(CupertinoIcons.search), findsNWidgets(2));
+      await expectLater(
+        find.byType(CupertinoApp),
+        matchesGoldenFile('nav_bar_transition.search.top.png'),
+      );
+      await tester.pumpAndSettle();
+    },
+  );
 
   testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
     await startTransitionBetween(
