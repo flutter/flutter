@@ -777,7 +777,7 @@ object FlutterPluginUtils {
         project.tasks.register("kgpVersion") {
             description = "Print the current kgp version used by the project."
             doLast {
-                println(getKGPVersion(project).toString())
+                println("KGP Version: " + getKGPVersion(project).toString())
             }
         }
     }
