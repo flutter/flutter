@@ -21,6 +21,10 @@ Offset _rotate(Offset p, double radians) {
   return Offset(p.dx * cos_a - p.dy * sin_a, p.dx * sin_a + p.dy * cos_a);
 }
 
+double _angleTo(Offset a, Offset b) {
+  return math.atan2(a.dx * b.dy - a.dy * b.dx, a.dx * b.dx + a.dy * b.dy);
+}
+
 typedef _Transform = Offset Function(Offset);
 
 _Transform _composite(_Transform second, _Transform first) {
@@ -39,20 +43,8 @@ _Transform _scale(Offset scale) {
   return (Offset p) => Offset(p.dx * scale.dx, p.dy * scale.dy);
 }
 
-double _angleTo(Offset a, Offset b) {
-  return math.atan2(a.dx * b.dy - a.dy * b.dx, a.dx * b.dx + a.dy * b.dy);
-}
-
 // _RSuperellipseOctant Class
 class _RSuperellipseOctant {
-  final Offset offset;
-  final double se_a;
-  final double se_n;
-  final double se_max_theta;
-  final Offset circleStart;
-  final Offset circleCenter;
-  final double circleMaxAngle;
-
   const _RSuperellipseOctant({
     required this.offset,
     required this.se_a,
@@ -62,6 +54,14 @@ class _RSuperellipseOctant {
     required this.circleCenter,
     required this.circleMaxAngle,
   });
+
+  final Offset offset;
+  final double se_a;
+  final double se_n;
+  final double se_max_theta;
+  final Offset circleStart;
+  final Offset circleCenter;
+  final double circleMaxAngle;
 
   const _RSuperellipseOctant.square({required Offset offset, required double se_a})
     : this(
@@ -179,21 +179,21 @@ class _RSuperellipseOctant {
   );
 }
 
-// Quadrant Class
-class Quadrant {
-  final Offset offset;
-  final Size signedScale;
-  final _RSuperellipseOctant top;
-  final _RSuperellipseOctant right;
-
-  const Quadrant({
+// _RSuperellipseQuadrant Class
+class _RSuperellipseQuadrant {
+  const _RSuperellipseQuadrant({
     required this.offset,
     required this.signedScale,
     required this.top,
     required this.right,
   });
 
-  factory Quadrant.computeQuadrant(Offset center, Offset corner, Radius inRadii) {
+  final Offset offset;
+  final Size signedScale;
+  final _RSuperellipseOctant top;
+  final _RSuperellipseOctant right;
+
+  factory _RSuperellipseQuadrant.computeQuadrant(Offset center, Offset corner, Radius inRadii) {
     final Offset cornerVector = corner - center;
     final Size radii = Size(inRadii.x.abs(), inRadii.y.abs());
 
@@ -209,7 +209,7 @@ class Quadrant {
 
     final double c = normHalfSize.width - normHalfSize.height;
 
-    return Quadrant(
+    return _RSuperellipseQuadrant(
       offset: center,
       signedScale: signedScale,
       top: _RSuperellipseOctant.computeOctant(Offset(0, -c), normHalfSize.width, normRadius),
@@ -217,7 +217,7 @@ class Quadrant {
     );
   }
 
-  static const Quadrant zero = Quadrant(
+  static const _RSuperellipseQuadrant zero = _RSuperellipseQuadrant(
     offset: Offset.zero,
     signedScale: const Size(1, 1),
     top: _RSuperellipseOctant.zero,
@@ -267,7 +267,7 @@ class _RSuperellipsePathBuilder {
     final double bottom = r.height / 2;
     final double topSplit = _split(left, right, r.tlRadiusX, r.trRadiusX);
     final double rightSplit = _split(top, bottom, r.trRadiusY, r.brRadiusY);
-    final Quadrant topRight = Quadrant.computeQuadrant(
+    final _RSuperellipseQuadrant topRight = _RSuperellipseQuadrant.computeQuadrant(
       Offset(topSplit, rightSplit),
       Offset(right, top),
       r.trRadius,
@@ -291,7 +291,7 @@ class _RSuperellipsePathBuilder {
       final double leftSplit = _split(top, bottom, r.tlRadiusY, r.blRadiusY);
       _addQuadrant(topRight, false);
       _addQuadrant(
-        Quadrant.computeQuadrant(
+        _RSuperellipseQuadrant.computeQuadrant(
           Offset(bottomSplit, rightSplit),
           Offset(right, bottom),
           r.brRadius,
@@ -299,11 +299,11 @@ class _RSuperellipsePathBuilder {
         true,
       );
       _addQuadrant(
-        Quadrant.computeQuadrant(Offset(bottomSplit, leftSplit), Offset(left, bottom), r.blRadius),
+        _RSuperellipseQuadrant.computeQuadrant(Offset(bottomSplit, leftSplit), Offset(left, bottom), r.blRadius),
         false,
       );
       _addQuadrant(
-        Quadrant.computeQuadrant(Offset(topSplit, leftSplit), Offset(left, top), r.tlRadius),
+        _RSuperellipseQuadrant.computeQuadrant(Offset(topSplit, leftSplit), Offset(left, top), r.tlRadius),
         true,
       );
     }
@@ -312,7 +312,7 @@ class _RSuperellipsePathBuilder {
     path.close();
   }
 
-  void _addQuadrant(Quadrant param, bool reverse, [Offset scaleSign = const Offset(1, 1)]) {
+  void _addQuadrant(_RSuperellipseQuadrant param, bool reverse, [Offset scaleSign = const Offset(1, 1)]) {
     final _Transform transform = _composite(
       _translate(param.offset),
       _scale(scaleSign.scale(param.signedScale.width, param.signedScale.height)),
