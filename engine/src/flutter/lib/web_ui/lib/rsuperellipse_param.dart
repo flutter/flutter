@@ -264,30 +264,6 @@ class Quadrant {
 class RSuperellipseParam {
   static const double kGapFactor = 0.29289321881; // 1-cos(pi/4)
 
-  static Float64List scaleTranslateMatrix4(Size size, Offset offset) {
-    final Float64List transform = Float64List(16);
-    transform[0] = size.width;
-    // transform[1] = 0;
-    // transform[2] = 0;
-    // transform[3] = 0;
-
-    // transform[4] = 0;
-    transform[5] = size.height;
-    // transform[6] = 0;
-    // transform[7] = 0;
-
-    // transform[8] = 0;
-    // transform[9] = 0;
-    transform[10] = 1;
-    // transform[11] = 0;
-
-    transform[12] = offset.dx;
-    transform[13] = offset.dy;
-    // transform[14] = 0;
-    // transform[15] = 0;
-    return transform;
-  }
-
   Path? _cachedPath;
   bool get isInitialized => _cachedPath != null;
   Path getPath() {
@@ -410,7 +386,6 @@ class _RSuperellipsePathBuilder {
         Offset(-circleStartVector.dy, circleStartVector.dx) / circleStartVector.distance;
 
     final (double startFactor, double endFactor) = _superellipseBezierFactors(param.se_n);
-
     return <Offset>[
       start,
       start + startTangent * startFactor * param.se_a,

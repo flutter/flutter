@@ -1246,6 +1246,30 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     return _param.getPath();
   }
 
+  Float64List getTransform() {
+    return Float64List.fromList(<double>[
+      width,
+      0,
+      0,
+      0,
+
+      0,
+      height,
+      0,
+      0,
+
+      0,
+      0,
+      1,
+      0,
+
+      center.dx,
+      center.dy,
+      0,
+      1,
+    ]);
+  }
+
   @override
   RSuperellipse _create({
     required double left,

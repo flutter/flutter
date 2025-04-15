@@ -192,12 +192,15 @@ class SkwasmCanvas implements SceneCanvas {
     ui.Paint paint, {
     ui.RSuperellipse? maybeCache,
   }) {
-    final ui.Offset center = rsuperellipse.center;
-    save();
-    translate(center.dx, center.dy);
-    scale(rsuperellipse.width, rsuperellipse.height);
-    drawPath(rsuperellipse.getNormalizedPath(maybeCache), paint);
-    restore();
+    final ui.Path path =
+        ui.Path()
+          ..addPath(
+            rsuperellipse.getNormalizedPath(maybeCache),
+            ui.Offset.zero,
+            matrix4: rsuperellipse.getTransform(),
+          )
+          ..close();
+    drawPath(path, paint);
   }
 
   @override
