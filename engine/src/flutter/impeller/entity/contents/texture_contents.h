@@ -26,9 +26,11 @@ class TextureContents final : public Contents {
 
   ~TextureContents() override;
 
-  /// @brief  A common case factory that marks the texture contents as having a
-  ///         destination rectangle. In this situation, a subpass can be avoided
-  ///         when image filters are applied.
+  /// A common case factory that marks the texture contents as having a
+  /// destination rectangle.
+  ///
+  /// In this situation, a subpass can be avoided when image filters are
+  /// applied.
   static std::shared_ptr<TextureContents> MakeRect(Rect destination);
 
   /// Sets a debug label for this contents object.
