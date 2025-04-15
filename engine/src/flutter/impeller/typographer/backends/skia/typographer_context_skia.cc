@@ -20,7 +20,6 @@
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
-#include "impeller/core/platform.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/geometry/size.h"
@@ -309,7 +308,7 @@ static bool BulkUpdateAtlasBitmap(const GlyphAtlas& atlas,
       texture->GetSize().Area() *
           BytesPerPixelForPixelFormat(
               atlas.GetTexture()->GetTextureDescriptor().format),
-      DefaultUniformAlignment());
+      host_buffer.GetMinimumUniformAlignment());
 
   return blit_pass->AddCopy(std::move(buffer_view),  //
                             texture,                 //
@@ -370,7 +369,7 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
         bitmap.getAddr(0, 0),
         size.Area() * BytesPerPixelForPixelFormat(
                           atlas.GetTexture()->GetTextureDescriptor().format),
-        DefaultUniformAlignment());
+        host_buffer.GetMinimumUniformAlignment());
 
     // convert_to_read is set to false so that the texture remains in a transfer
     // dst layout until we finish writing to it below. This only has an impact

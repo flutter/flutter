@@ -264,7 +264,7 @@ class TextField extends StatefulWidget {
     this.statesController,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    this.autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -485,7 +485,7 @@ class TextField extends StatefulWidget {
   final bool obscureText;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool? autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -961,7 +961,7 @@ class TextField extends StatefulWidget {
       DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'),
     );
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: null));
     properties.add(
       EnumProperty<SmartDashesType>(
         'smartDashesType',
@@ -1155,7 +1155,10 @@ class _TextFieldState extends State<TextField>
         .applyDefaults(themeData.inputDecorationTheme)
         .copyWith(
           enabled: _isEnabled,
-          hintMaxLines: widget.decoration?.hintMaxLines ?? widget.maxLines,
+          hintMaxLines:
+              widget.decoration?.hintMaxLines ??
+              themeData.inputDecorationTheme.hintMaxLines ??
+              widget.maxLines,
         );
 
     // No need to build anything if counter or counterText were given directly.
@@ -1692,6 +1695,7 @@ class _TextFieldState extends State<TextField>
           dragStartBehavior: widget.dragStartBehavior,
           scrollController: widget.scrollController,
           scrollPhysics: widget.scrollPhysics,
+          autofillHints: widget.autofillHints,
           autofillClient: this,
           autocorrectionTextRectColor: autocorrectionTextRectColor,
           clipBehavior: widget.clipBehavior,

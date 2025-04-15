@@ -286,7 +286,7 @@ platform_properties:
         ]
       os: Mac-14
       cpu: x86
-      device_os: iOS-17
+      device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
@@ -304,7 +304,7 @@ platform_properties:
         ]
       os: Mac-14
       cpu: x86
-      device_os: iOS-17
+      device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
@@ -322,7 +322,7 @@ platform_properties:
         ]
       os: Mac-14
       cpu: arm64
-      device_os: iOS-17
+      device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
@@ -1511,10 +1511,12 @@ targets:
       test_timeout_secs: "2700"
     runIf:
       - packages/flutter_tools/templates/**
+      - packages/flutter_tools/gradle/**
       - .ci.yaml
       - engine/**
       - DEPS
       - dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart
+      - dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
@@ -1533,10 +1535,12 @@ targets:
       test_timeout_secs: "2700"
     runIf:
       - packages/flutter_tools/templates/**
+      - packages/flutter_tools/gradle/**
       - .ci.yaml
       - engine/**
       - DEPS
       - dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart
+      - dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
@@ -2374,6 +2378,29 @@ targets:
       tags: >
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: static_path_tessellation_perf__timeline_summary
+
+
+  # Uses Impeller.
+  - name: Linux_pixel_7pro dynamic_path_stroke_tessellation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: dynamic_path_stroke_tessellation_perf__timeline_summary
+
+  # Uses Impeller.
+  - name: Linux_pixel_7pro static_path_stroke_tessellation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: static_path_stroke_tessellation_perf__timeline_summary
 
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
@@ -3599,6 +3626,26 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: dynamic_path_tessellation_perf_ios__timeline_summary
+
+  - name: Mac_ios static_path_stroke_tessellation_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: static_path_stroke_tessellation_perf_ios__timeline_summary
+
+  - name: Mac_ios dynamic_path_stroke_tessellation_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    bringup: true
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: dynamic_path_stroke_tessellation_perf_ios__timeline_summary
 
   - name: Staging_build_linux analyze
     presubmit: false
@@ -5380,7 +5427,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-17","os=Mac-14", "cpu=x86"]
+        ["device_os=iOS-17|iOS-18","os=Mac-14", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
