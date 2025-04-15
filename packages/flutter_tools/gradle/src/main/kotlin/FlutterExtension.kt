@@ -35,7 +35,8 @@ open class FlutterExtension {
 
     /**
      * Sets the ndkVersion used by default in Flutter app projects.
-     * Chosen as default version of the AGP version below as found in
+     * Chosen as default version of the AGP version found in packages/flutter_tools/gradle/build.gradle.kts
+     * and in packages/flutter_tools/gradle/build.gradle.kts as found in
      * https://developer.android.com/studio/projects/install-ndk#default-ndk-per-agp.
      */
     val ndkVersion: String = "27.0.12077973"
