@@ -772,11 +772,13 @@ class IOSDevice extends Device {
 
     final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
 
+    // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
       usesIpv6: debuggingOptions.ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
+      throwOnError: !discoverVMUrlFromLogs,
     );
 
     final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
@@ -786,18 +788,7 @@ class IOSDevice extends Device {
       if (discoverVMUrlFromLogs) vmServiceDiscovery.uri,
     ];
 
-    Uri? localUri;
-    try {
-      localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
-    } on MissingLocalNetworkPermissionsException catch (e) {
-      if (discoverVMUrlFromLogs) {
-        // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
-        _logger.printError(e.toString());
-        localUri = await vmServiceDiscovery.uri;
-      } else {
-        rethrow;
-      }
-    }
+    Uri? localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
 
     // If the first future to return is null, wait for the other to complete
     // unless canceled.
