@@ -1017,6 +1017,24 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.hint != null) {
       config.hint = properties.hint!;
     }
+    if (properties.identifier != null) {
+      config.identifier = properties.identifier!;
+    }
+    if (properties.tooltip != null) {
+      config.tooltip = properties.tooltip!;
+    }
+    if (properties.hintOverrides != null) {
+      config.hintOverrides = properties.hintOverrides!;
+    }
+    if (properties.tagForChildren != null) {
+      config.addTagForChildren(properties.tagForChildren!);
+    }
+    if (properties.controlsNodes != null) {
+      config.controlsNodes = properties.controlsNodes!;
+    }
+    if (properties.hint != null) {
+      config.hint = properties.hint!;
+    }
     if (properties.textDirection != null) {
       config.textDirection = properties.textDirection;
     }

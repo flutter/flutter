@@ -58,16 +58,15 @@ class TestSemantics {
     this.role = SemanticsRole.none,
     this.validationResult = SemanticsValidationResult.none,
     this.inputType = SemanticsInputType.none,
-    this.controlsNodes = const <String>{},
-    Uri? linkUrl,
+    this.controlsNodes,
+    this.linkUrl,
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
     this.hintOverrides,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
-       tags = tags?.toSet() ?? <SemanticsTag>{},
-       linkUrl = linkUrl ?? Uri();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for the root node.
@@ -91,8 +90,8 @@ class TestSemantics {
     this.role = SemanticsRole.none,
     this.validationResult = SemanticsValidationResult.none,
     this.inputType = SemanticsInputType.none,
-    this.controlsNodes = const <String>{},
-    Uri? linkUrl,
+    this.controlsNodes,
+    this.linkUrl,
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
@@ -103,8 +102,7 @@ class TestSemantics {
        rect = TestSemantics.rootRect,
        elevation = 0.0,
        thickness = 0.0,
-       tags = tags?.toSet() ?? <SemanticsTag>{},
-       linkUrl = linkUrl ?? Uri();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// Creates an object with some test semantics data, with the [id] and [rect]
   /// set to the appropriate values for direct children of the root node.
@@ -140,8 +138,8 @@ class TestSemantics {
     this.role = SemanticsRole.none,
     this.validationResult = SemanticsValidationResult.none,
     this.inputType = SemanticsInputType.none,
-    this.controlsNodes = const <String>{},
-    Uri? linkUrl,
+    this.controlsNodes,
+    this.linkUrl,
     this.maxValueLength,
     this.currentValueLength,
     this.identifier = '',
@@ -149,8 +147,7 @@ class TestSemantics {
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
-       tags = tags?.toSet() ?? <SemanticsTag>{},
-       linkUrl = linkUrl ?? Uri();
+       tags = tags?.toSet() ?? <SemanticsTag>{};
 
   /// The unique identifier for this node.
   ///
@@ -257,6 +254,7 @@ class TestSemantics {
   /// The total number of semantic nodes within a scrollable.
   final int? scrollChildren;
 
+  /// The expected text selection.
   final TextSelection? textSelection;
 
   /// The validation result for this node, if any.
@@ -267,20 +265,7 @@ class TestSemantics {
   ///    for this field.
   final SemanticsValidationResult validationResult;
 
-  static Matrix4 _applyRootChildScale(Matrix4? transform) {
-    final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
-    if (transform != null) {
-      result.multiply(transform);
-    }
-    return result;
-  }
-
-  /// The children of this node.
-  final List<TestSemantics> children;
-
-  /// The tags of this node.
-  final Set<SemanticsTag> tags;
-
+  /// The expected heading level
   final int? headingLevel;
 
   /// The expected role for the node.
@@ -296,12 +281,12 @@ class TestSemantics {
   /// The expected nodes that this node controls.
   ///
   /// Defaults to an empty set if not set.
-  final Set<String> controlsNodes;
+  final Set<String>? controlsNodes;
 
   /// The expected url for the node.
   ///
-  /// Defaults to an empty uri if not set.
-  final Uri linkUrl;
+  /// Defaults to null if not set.
+  final Uri? linkUrl;
 
   /// The expected max value length for the node.
   ///
@@ -322,6 +307,20 @@ class TestSemantics {
   ///
   /// Defaults to null if not set.
   final SemanticsHintOverrides? hintOverrides;
+
+  static Matrix4 _applyRootChildScale(Matrix4? transform) {
+    final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
+    if (transform != null) {
+      result.multiply(transform);
+    }
+    return result;
+  }
+
+  /// The children of this node.
+  final List<TestSemantics> children;
+
+  /// The tags of this node.
+  final Set<SemanticsTag> tags;
 
   bool _matches(
     SemanticsNode? node,
@@ -473,13 +472,13 @@ class TestSemantics {
       );
     }
 
-    if (!setEquals(controlsNodes, node.controlsNodes)) {
+    if (controlsNodes != controlsNodes && !setEquals(controlsNodes, node.controlsNodes)) {
       return fail(
         'expected node id $id to controls nodes $controlsNodes but found controlling nodes ${node.controlsNodes}',
       );
     }
 
-    if (linkUrl.toString() != node.linkUrl.toString()) {
+    if (linkUrl?.toString() != node.linkUrl?.toString()) {
       return fail(
         'expected node id $id to have link url $linkUrl but found link url ${node.linkUrl}',
       );
@@ -491,7 +490,7 @@ class TestSemantics {
     }
     if (currentValueLength != node.currentValueLength) {
       return fail(
-        'expected node id $id to have max value length $currentValueLength but found max value length ${node.currentValueLength}',
+        'expected node id $id to have current value length $currentValueLength but found current value length ${node.currentValueLength}',
       );
     }
     if (identifier != node.identifier) {
@@ -593,10 +592,10 @@ class TestSemantics {
     if (inputType != SemanticsInputType.none) {
       buf.writeln('$indent  inputType: $inputType,');
     }
-    if (controlsNodes.isNotEmpty) {
+    if (controlsNodes != null) {
       buf.writeln('$indent  controlsNodes: $controlsNodes,');
     }
-    if (linkUrl.toString().isNotEmpty) {
+    if (linkUrl != null) {
       buf.writeln('$indent  linkUrl: $linkUrl,');
     }
     if (maxValueLength != null) {
@@ -943,6 +942,27 @@ class SemanticsTester {
     }
     if (node.role != SemanticsRole.none) {
       buf.writeln('  role: ${node.role},');
+    }
+    if (node.inputType != SemanticsInputType.none) {
+      buf.writeln('  inputType: ${node.inputType},');
+    }
+    if (node.controlsNodes != null) {
+      buf.writeln('  controlsNodes: ${node.controlsNodes},');
+    }
+    if (node.linkUrl != null) {
+      buf.writeln('  linkUrl: ${node.linkUrl},');
+    }
+    if (node.maxValueLength != null) {
+      buf.writeln('  maxValueLength: ${node.maxValueLength},');
+    }
+    if (node.currentValueLength != null) {
+      buf.writeln('  currentValueLength: ${node.currentValueLength},');
+    }
+    if (node.identifier.isNotEmpty) {
+      buf.writeln('  identifier: ${node.identifier},');
+    }
+    if (node.hintOverrides != null) {
+      buf.writeln('  hintOverrides: ${node.hintOverrides},');
     }
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');

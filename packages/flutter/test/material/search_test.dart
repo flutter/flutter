@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -702,6 +704,8 @@ void main() {
                   SemanticsAction.paste,
                 ],
                 label: 'Search',
+                currentValueLength: 0,
+                inputType: SemanticsInputType.search,
                 textDirection: TextDirection.ltr,
                 textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
               );
@@ -877,6 +881,8 @@ void main() {
                       SemanticsAction.paste,
                     ],
                     label: 'Search',
+                    inputType: SemanticsInputType.search,
+                    currentValueLength: 0,
                     textDirection: TextDirection.ltr,
                     textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                   ),
@@ -902,6 +908,8 @@ void main() {
                   SemanticsAction.paste,
                 ],
                 label: 'Search',
+                inputType: SemanticsInputType.search,
+                currentValueLength: 0,
                 textDirection: TextDirection.ltr,
                 textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
               );

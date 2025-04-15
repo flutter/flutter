@@ -724,6 +724,7 @@ void main() {
                               SemanticsAction.didLoseAccessibilityFocus,
                             ],
                             inputType: ui.SemanticsInputType.text,
+                            currentValueLength: 0,
                             textDirection: TextDirection.ltr,
                           ),
                         ],
@@ -1965,6 +1966,7 @@ void main() {
               ],
               value: 'abcdefghi',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection.collapsed(offset: 9),
             ),
@@ -5315,6 +5317,7 @@ void main() {
               value: 'some text',
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
                 SemanticsFlag.hasEnabledState,
@@ -6576,6 +6579,7 @@ void main() {
       semantics,
       includesNodeWith(
         inputType: ui.SemanticsInputType.text,
+        currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.hasEnabledState,
@@ -6985,13 +6989,13 @@ void main() {
       semantics,
       includesNodeWith(
         inputType: ui.SemanticsInputType.text,
+        currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.hasEnabledState,
           SemanticsFlag.isEnabled,
         ],
         maxValueLength: 10,
-        currentValueLength: 0,
       ),
     );
 
@@ -7039,6 +7043,7 @@ void main() {
       semantics,
       includesNodeWith(
         inputType: ui.SemanticsInputType.text,
+        currentValueLength: 0,
         flags: <SemanticsFlag>[
           SemanticsFlag.isTextField,
           SemanticsFlag.hasEnabledState,
@@ -8002,6 +8007,7 @@ void main() {
               id: 1,
               textDirection: TextDirection.ltr,
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
@@ -8029,6 +8035,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
@@ -8056,6 +8063,7 @@ void main() {
               textDirection: TextDirection.ltr,
               value: 'Guten Tag',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               textSelection: const TextSelection.collapsed(offset: 9),
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
@@ -8094,6 +8102,7 @@ void main() {
               textSelection: const TextSelection.collapsed(offset: 4),
               value: 'Guten Tag',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 9,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
                 SemanticsAction.focus,
@@ -8134,6 +8143,7 @@ void main() {
               textSelection: const TextSelection.collapsed(offset: 0),
               value: 'Schönen Feierabend',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 18,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
                 SemanticsAction.focus,
@@ -8248,6 +8258,7 @@ void main() {
               id: 1,
               textDirection: TextDirection.ltr,
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
                 SemanticsAction.focus,
@@ -8291,6 +8302,7 @@ void main() {
               id: 1,
               value: 'Hello',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
@@ -8319,6 +8331,7 @@ void main() {
               id: 1,
               value: 'Hello',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -8356,6 +8369,7 @@ void main() {
               id: 1,
               value: 'Hello',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textSelection: const TextSelection(baseOffset: 5, extentOffset: 3),
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -8415,6 +8429,7 @@ void main() {
               id: inputFieldId,
               value: 'Hello',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textSelection: const TextSelection.collapsed(offset: 5),
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -8472,6 +8487,7 @@ void main() {
               id: inputFieldId,
               value: 'Hello',
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 5),
               textDirection: TextDirection.ltr,
               actions: <SemanticsAction>[
@@ -8533,6 +8549,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               value: textInTextField,
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -8569,6 +8586,7 @@ void main() {
               ],
               value: textInTextField,
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection(
                 baseOffset: textInTextField.length,
@@ -8615,6 +8633,7 @@ void main() {
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               value: textInTextField,
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -8651,6 +8670,7 @@ void main() {
               ],
               value: textInTextField,
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 5,
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection(
                 baseOffset: textInTextField.length,
@@ -8795,6 +8815,8 @@ void main() {
               id: 1,
               textDirection: TextDirection.ltr,
               inputType: ui.SemanticsInputType.text,
+              maxValueLength: 10,
+              currentValueLength: 0,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
@@ -8831,6 +8853,8 @@ void main() {
               textDirection: TextDirection.ltr,
               textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
+              maxValueLength: 10,
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
                 SemanticsAction.focus,
@@ -8898,6 +8922,7 @@ void main() {
               label: 'label',
               textDirection: TextDirection.ltr,
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
               actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
               flags: <SemanticsFlag>[
                 SemanticsFlag.isTextField,
@@ -8954,6 +8979,7 @@ void main() {
                 SemanticsFlag.isEnabled,
               ],
               inputType: ui.SemanticsInputType.text,
+              currentValueLength: 0,
               children: <TestSemantics>[
                 TestSemantics(label: 'oh no!', textDirection: TextDirection.ltr),
               ],
@@ -17412,6 +17438,7 @@ void main() {
                         TestSemantics(
                           id: 4,
                           inputType: ui.SemanticsInputType.text,
+                          currentValueLength: 0,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
                             SemanticsFlag.hasEnabledState,
@@ -17481,6 +17508,7 @@ void main() {
                           TestSemantics(
                             id: 4,
                             inputType: ui.SemanticsInputType.text,
+                            currentValueLength: 0,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
                               SemanticsFlag.hasEnabledState,
