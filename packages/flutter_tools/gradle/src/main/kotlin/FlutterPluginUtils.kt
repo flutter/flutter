@@ -151,15 +151,21 @@ object FlutterPluginUtils {
         val kotlinPlugin =
             project.plugins
                 .findPlugin(KotlinAndroidPluginWrapper::class.java)
+        // Partial implementation of getKotlinPluginVersion from the comment above.
+        var versionString: String? = kotlinPlugin?.pluginVersion
+        if (!versionString.isNullOrEmpty()) {
+            return Version.fromString(versionString)
+        }
+        // Fall back to reflection.
         val versionField =
             kotlinPlugin?.javaClass?.kotlin?.members?.first {
                 it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
             }
-        val versionString = versionField?.call(kotlinPlugin)
+        versionString = versionField?.call(kotlinPlugin) as String?
         return if (versionString == null) {
             null
         } else {
-            Version.fromString(versionString as String)
+            Version.fromString(versionString)
         }
     }
 
@@ -757,6 +763,7 @@ object FlutterPluginUtils {
             }
         }
     }
+
     // Add a task that can be called on flutter projects that prints the KGP version used in
     // the project.
     //

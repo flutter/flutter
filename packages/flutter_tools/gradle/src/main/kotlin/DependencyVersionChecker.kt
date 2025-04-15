@@ -8,11 +8,11 @@ import androidx.annotation.VisibleForTesting
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
-import com.flutter.gradle.FlutterPluginUtils as FlutterPluginUtils
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.extra
+import com.flutter.gradle.FlutterPluginUtils as FlutterPluginUtils
 
 /**
  * Warns or errors on version ranges of dependencies required to build a flutter Android app.
@@ -407,9 +407,7 @@ internal class Version(
         return 0
     }
 
-    override fun equals(other: Any?): Boolean {
-        return other is Version && compareTo(other) == 0
-    }
+    override fun equals(other: Any?): Boolean = other is Version && compareTo(other) == 0
 
     override fun toString(): String = "$major.$minor.$patch"
 }
