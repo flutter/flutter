@@ -311,8 +311,12 @@ abstract mixin class WidgetsBindingObserver {
   ///    boilerplate.
   void didChangeTextScaleFactor() {}
 
-  // TODO(justinmc): Docs.
-  /// Handles a change in supportsShowingSystemContextMenuChanged.
+  /// Called when support for the system context menu changes.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.supportsShowingSystemContextMenu], which provides access to
+  ///    this value.
   void didChangeSupportsShowingSystemContextMenu() {}
 
   /// Called when the platform brightness changes.

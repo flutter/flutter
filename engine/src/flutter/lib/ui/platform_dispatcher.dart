@@ -1142,7 +1142,6 @@ class PlatformDispatcher {
   bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu;
   bool _supportsShowingSystemContextMenu = false;
 
-  // TODO(justinmc): Styleguide says this should be "handle", not "on"...
   VoidCallback? get onSupportsShowingSystemContextMenuChange =>
       _onSupportsShowingSystemContextMenuChange;
   VoidCallback? _onSupportsShowingSystemContextMenuChange;

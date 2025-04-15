@@ -59,7 +59,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     );
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
-    platformDispatcher.onSupportsShowingSystemContextMenuChange;
     platformDispatcher
       ..onSupportsShowingSystemContextMenuChange = handleSupportsShowingSystemContextMenuChanged
       ..onViewFocusChange = handleViewFocusChanged;
@@ -409,8 +408,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   @mustCallSuper
   void handleViewFocusChanged(ui.ViewFocusEvent event) {}
 
-  // TODO(justinmc): Docs.
-  /// Handles a change in supportsShowingSystemContextMenuChanged.
+  /// Called when support for the system context menu changes.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.supportsShowingSystemContextMenu], which provides access to
+  ///    this value.
   @protected
   void handleSupportsShowingSystemContextMenuChanged() {}
 

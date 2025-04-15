@@ -16151,11 +16151,11 @@ void main() {
     testWidgets(
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
-        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
-            true;
+        tester.binding.platformDispatcher.supportsShowingSystemContextMenu = true;
+        tester.binding.handleSupportsShowingSystemContextMenuChanged();
         addTearDown(() {
-          TestWidgetsFlutterBinding.instance.platformDispatcher
-              .resetSupportsShowingSystemContextMenu();
+          tester.binding.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.binding.handleSupportsShowingSystemContextMenuChanged();
         });
 
         await tester.pumpWidget(
