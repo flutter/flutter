@@ -709,49 +709,99 @@ dependencies {
     });
 
     group('validates gradle/kotlin versions', () {
-      final List<GradleKotlinTestData> testData = <GradleKotlinTestData>[
+      final List<GradleKgpTestData> testData = <GradleKgpTestData>[
         // Values too new.
-        GradleKotlinTestData(true, gradleVersion: '99.99', kgpVersion: '3.0'),
+        GradleKgpTestData(true, kgpVersion: '3.0', gradleVersion: '99.99'),
 
         // Template versions of Gradle/AGP.
-        GradleKotlinTestData(
+        GradleKgpTestData(
           true,
-          gradleVersion: templateDefaultGradleVersion,
           kgpVersion: templateKotlinGradlePluginVersion,
+          gradleVersion: '8.10', // TODO replace with templateDefaultGradleVersion. 
         ),
 
-        // Gradle version at edge of support window.
-        GradleKotlinTestData(true, gradleVersion: '8.3', kgpVersion: '2.0'),
-        GradleKotlinTestData(true, gradleVersion: '8.3', kgpVersion: '2.1.0'),
-        GradleKotlinTestData(true, gradleVersion: '8.3', kgpVersion: '1.9.20'),
         // Kotlin version at the edge of support window.
-        GradleKotlinTestData(false, gradleVersion: '8.1', kgpVersion: '2.0'),
-        GradleKotlinTestData(false, gradleVersion: '7.3', kgpVersion: '2.0'),
-        GradleKotlinTestData(true, gradleVersion: '8.3.1', kgpVersion: '2.0'),
-        GradleKotlinTestData(true, gradleVersion: '8.12', kgpVersion: '2.0'),
-        // "Normal" versions.
-        GradleKotlinTestData(true, gradleVersion: '7.3.3', kgpVersion: '1.9.0'),
-        GradleKotlinTestData(false, gradleVersion: '7.3.3', kgpVersion: '2.1.1'),
+        GradleKgpTestData(true, kgpVersion: '2.1.20', gradleVersion: '8.1'),
+        GradleKgpTestData(true, kgpVersion: '2.1.10', gradleVersion: '8.3'),
+        GradleKgpTestData(true, kgpVersion: '2.0.21', gradleVersion: '7.6.3'),
+        GradleKgpTestData(true, kgpVersion: '2.0.20', gradleVersion: '7.6.3'),
+        GradleKgpTestData(true, kgpVersion: '2.0', gradleVersion: '8.5'),
+        GradleKgpTestData(true, kgpVersion: '1.9.25', gradleVersion: '8.1.1'),
+        GradleKgpTestData(true, kgpVersion: '1.9.20', gradleVersion: '6.8.3'),
+        GradleKgpTestData(true, kgpVersion: '1.9.10', gradleVersion: '6.8.3'),
+        GradleKgpTestData(true, kgpVersion: '1.9.0', gradleVersion: '7.6.0'),
+        GradleKgpTestData(true, kgpVersion: '1.8.22', gradleVersion: '7.6.0'),
+        GradleKgpTestData(true, kgpVersion: '1.8.20', gradleVersion: '6.8.3'),
+        GradleKgpTestData(true, kgpVersion: '1.8.11', gradleVersion: '7.3.3'),
+        GradleKgpTestData(true, kgpVersion: '1.8.0', gradleVersion: '7.3.3'),
+        GradleKgpTestData(true, kgpVersion: '1.7.22', gradleVersion: '7.1.1'),
+        GradleKgpTestData(true, kgpVersion: '1.7.20', gradleVersion: '6.7.1'),
+        GradleKgpTestData(true, kgpVersion: '1.7.10', gradleVersion: '7.0.2'),
+        GradleKgpTestData(true, kgpVersion: '1.7.0', gradleVersion: '6.7.1'),
+        GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.1.1'),
+        GradleKgpTestData(true, kgpVersion: '1.6.20', gradleVersion: '7.0.2'),
+        // Gradle versions inspired by
+        // https://developer.android.com/build/releases/gradle-plugin#expandable-1
+        GradleKgpTestData(true, kgpVersion: '2.1.20', gradleVersion: '8.11.1'),
+        GradleKgpTestData(true, kgpVersion: '2.1.10', gradleVersion: '8.10.2'),
+        GradleKgpTestData(true, kgpVersion: '2.1.10', gradleVersion: '8.9'),
+        GradleKgpTestData(true, kgpVersion: '2.1.5', gradleVersion: '8.7'),
+        GradleKgpTestData(true, kgpVersion: '2.1.0', gradleVersion: '8.7'),
+        GradleKgpTestData(true, kgpVersion: '2.0.20', gradleVersion: '8.6'),
+        GradleKgpTestData(true, kgpVersion: '2.0.1', gradleVersion: '8.4'),
+        GradleKgpTestData(true, kgpVersion: '2.0.0', gradleVersion: '8.2'),
+        GradleKgpTestData(true, kgpVersion: '1.9.25', gradleVersion: '8.0'),
+        GradleKgpTestData(true, kgpVersion: '1.9.10', gradleVersion: '7.6.0'),
+        GradleKgpTestData(true, kgpVersion: '1.9.7', gradleVersion: '7.5'),
+        GradleKgpTestData(true, kgpVersion: '1.8.21', gradleVersion: '7.4'),
+        GradleKgpTestData(true, kgpVersion: '1.9.0', gradleVersion: '7.3.3'),
+        GradleKgpTestData(true, kgpVersion: '1.8.0', gradleVersion: '7.2'),
+        GradleKgpTestData(true, kgpVersion: '1.7.0', gradleVersion: '7.0'),
+        GradleKgpTestData(true, kgpVersion: '2.0.21', gradleVersion: '7.0'),
+        GradleKgpTestData(true, kgpVersion: '1.7.22', gradleVersion: '6.7.1'),
+        GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.7.1'),
+        GradleKgpTestData(true, kgpVersion: '1.6.21', gradleVersion: '6.5'),
+        // Kotlin newer than max known.
+        GradleKgpTestData(true, kgpVersion: '2.1.21', gradleVersion: '8.12.1'),
+        // Kotlin too new for gradle version.
+        GradleKgpTestData(false, kgpVersion: '2.1.20', gradleVersion: '7.6.2'),
+        GradleKgpTestData(false, kgpVersion: '2.1.0', gradleVersion: '7.6.2'),
+        GradleKgpTestData(false, kgpVersion: '2.0.20', gradleVersion: '6.8.2'),
+        GradleKgpTestData(false, kgpVersion: '1.9.0', gradleVersion: '6.8.2'),
+        GradleKgpTestData(false, kgpVersion: '1.8.0', gradleVersion: '6.8.2'),
+        GradleKgpTestData(false, kgpVersion: '1.7.22', gradleVersion: '6.7.0'),
+        GradleKgpTestData(false, kgpVersion: '1.7.0', gradleVersion: '6.1.1'),
+        // Kotlin too old for gradle version.
+        GradleKgpTestData(false, kgpVersion: '2.1.10', gradleVersion: '8.11.1'),
+        GradleKgpTestData(false, kgpVersion: '2.1.0', gradleVersion: '8.11'),
+        GradleKgpTestData(false, kgpVersion: '2.0.0', gradleVersion: '8.6'),
+        GradleKgpTestData(false, kgpVersion: '1.9.20', gradleVersion: '8.2'),
+        GradleKgpTestData(false, kgpVersion: '1.9.0', gradleVersion: '7.7'),
+        GradleKgpTestData(false, kgpVersion: '1.8.20', gradleVersion: '7.7'),
+        GradleKgpTestData(false, kgpVersion: '1.8.0', gradleVersion: '7.4'),
+        GradleKgpTestData(false, kgpVersion: '1.7.20', gradleVersion: '7.2'),
+        GradleKgpTestData(false, kgpVersion: '1.7.0', gradleVersion: '7.0.3'),
+        GradleKgpTestData(false, kgpVersion: '1.6.20', gradleVersion: '7.0.3'),
         // Null values:
         // ignore: avoid_redundant_argument_values
-        GradleKotlinTestData(false, gradleVersion: '7.2', kgpVersion: null),
+        GradleKgpTestData(false, kgpVersion: null, gradleVersion: '7.2'),
         // ignore: avoid_redundant_argument_values
-        GradleKotlinTestData(true, gradleVersion: '8.3', kgpVersion: null),
+        GradleKgpTestData(false, kgpVersion: '2.1', gradleVersion: null),
         // ignore: avoid_redundant_argument_values
-        GradleKotlinTestData(true, gradleVersion: '8.5.1', kgpVersion: null),
+        GradleKgpTestData(false, kgpVersion: '', gradleVersion: ''),
         // ignore: avoid_redundant_argument_values
-        GradleKotlinTestData(false, gradleVersion: null, kgpVersion: null),
+        GradleKgpTestData(false, kgpVersion: null, gradleVersion: null),
       ];
-      for (final GradleKotlinTestData data in testData) {
-        test('(gradle, agp): (${data.gradleVersion}, ${data.kgpVersion})', () {
+      for (final GradleKgpTestData data in testData) {
+        test('(KGP, Gradle): (${data.kgpVersion}, ${data.gradleVersion})', () {
           expect(
-            validateGradleAndKotlin(
+            validateGradleAndKGP(
               BufferLogger.test(),
               gradleV: data.gradleVersion,
               kgpV: data.kgpVersion,
             ),
             data.validPair ? isTrue : isFalse,
-            reason: 'G: ${data.gradleVersion}, AGP: ${data.kgpVersion}',
+            reason: 'KGP: ${data.kgpVersion}, G: ${data.gradleVersion}',
           );
         });
       }
@@ -1422,8 +1472,8 @@ class GradleAgpTestData {
   final bool validPair;
 }
 
-class GradleKotlinTestData {
-  GradleKotlinTestData(this.validPair, {this.gradleVersion, this.kgpVersion});
+class GradleKgpTestData {
+  GradleKgpTestData(this.validPair, {this.gradleVersion, this.kgpVersion});
   final String? gradleVersion;
   final String? kgpVersion;
   final bool validPair;

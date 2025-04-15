@@ -726,7 +726,7 @@ class AndroidProject extends FlutterProjectPlatform {
       gradleV: gradleVersion,
     );
 
-    final bool compatibleGradleKotlin = gradle.validateGradleAndKotlin(
+    final bool compatibleGradleKotlin = gradle.validateGradleAndKGP(
       globals.logger,
       gradleV: gradleVersion,
       kgpV: kgpVersion,

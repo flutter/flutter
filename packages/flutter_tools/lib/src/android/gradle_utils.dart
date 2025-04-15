@@ -325,7 +325,7 @@ OS:           Mac OS X 13.2.1 aarch64
   }
 }
 
-/// Returns the Kotlin Gradle Plugin (AGP) version that the current project
+/// Returns the Kotlin Gradle Plugin (KGP) version that the current project
 /// depends on when found, null otherwise.
 /// [directory] should be an android directory with a build.gradle file.
 Future<String?> getKotlinVersion(
@@ -439,39 +439,79 @@ String _formatParseWarning(String content, {String type = 'gradle'}) {
 // Validate that Gradle and Kotlin are compatible with each other.
 //
 // Returns true if versions are compatible.
-// Null Gradle version returns false.
+// Null or empty Gradle or KGP version returns false.
 // If compatibility cannot be evaluated returns false.
 // If versions are newer than the max known version a warning is logged and true
 // returned.
 //
 // Kotlin k2 can require gradle 8.3.
 // https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations.
-bool validateGradleAndKotlin(Logger logger, {required String? gradleV, required String? kgpV}) {
-  if (gradleV == null) {
-    logger.printTrace('Gradle version unknown ($gradleV).');
+// https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+bool validateGradleAndKGP(Logger logger, {required String? gradleV, required String? kgpV}) {
+  if (gradleV == null || kgpV == null || gradleV.isEmpty || kgpV.isEmpty) {
+    logger.printTrace('Gradle or Kotlin version unknown ($gradleV, $kgpV).');
     return false;
   }
 
-  // If gradle is newer than 8.3 all kotlin versions are supported.
-  if (isWithinVersionRange(gradleV, min: '8.3', max: '100.00')) {
-    if (isWithinVersionRange(gradleV, min: maxKnownAndSupportedGradleVersion, max: '100.00')) {
-      logger.printTrace(
-        'Newer than known gradle version ($gradleV).'
-        '\n Treating as valid configuration.',
-      );
-    }
+  const maxKnownAndSupportedKgpVersion = '2.1.20';
+  if (isWithinVersionRange(kgpV, min: maxKnownAndSupportedKgpVersion, max: '100.100', inclusiveMin: false)) {
+    logger.printTrace(
+      'Newer than known KGP version ($kgpV), gradle ($gradleV).'
+      '\n Treating as valid configuration.',
+    );
     return true;
-  } else {
-    // Gradle is pre 8.3.
-    if (kgpV == null) {
-      logger.printTrace('KGP version unknown ($kgpV).');
-      return false;
-    }
-
-    // If kotlin is past 2.0 then k2 can have issues.
-    // https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations.
-    return isWithinVersionRange(kgpV, min: '0.0', max: '2.0', inclusiveMax: false);
   }
+
+  // https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+  // Documenation is non continuous since past versions are known to the
+  // publishers of KGP. When covering version ranges beyond what is documented
+  // add a comment with the documented value.
+  // Continuous KGP version handling is prefered in case an emergency patch to a
+  // past release is shipped this code will assume the version range that is closest.
+  if (isWithinVersionRange(kgpV, min: '2.1.20', max: '2.1.20')) {
+    // Documented max is 8.11, using 8.12 non inclusive covers patch versions. 
+    return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.12', inclusiveMax: false);
+  }
+  if (isWithinVersionRange(kgpV, min: '2.1.0', max: '2.1.10')) {
+    // Documented max is 8.10, using 8.11 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.11', inclusiveMax: false);
+  }
+  // Documented max is 2.0.21.
+  if (isWithinVersionRange(kgpV, min: '2.0.20', max: '2.1', inclusiveMax: false)) {
+    // Documented max is 8.5, using 8.9 non inclusive covers patch versions.
+    // Kotlin Multiplatform can throw warnings on 8.8.
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.9', inclusiveMax: false);
+  }
+  if (isWithinVersionRange(kgpV, min: '2.0', max: '2.0.20', inclusiveMax: false)) {
+    // Documented max is 8.5, using 8.6 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.6', inclusiveMax: false);
+  }
+  // Documented max is 1.9.25.
+  if (isWithinVersionRange(kgpV, min: '1.9.20', max: '2.0', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.1.1');
+  }
+  // Documented max is 1.9.10.
+  if (isWithinVersionRange(kgpV, min: '1.8.20', max: '1.9.20', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '7.6.0');
+  }
+  // Documented max is 1.8.11.
+  if (isWithinVersionRange(kgpV, min: '1.8.0', max: '1.8.20', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '7.3.3');
+  }
+  // Documented max is 1.7.22.
+  if (isWithinVersionRange(kgpV, min: '1.7.20', max: '1.8.0', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.7.1', max: '7.1.1');
+  }
+  // Documented max is 1.7.10.
+  if (isWithinVersionRange(kgpV, min: '1.7.0', max: '1.7.20', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.7.1', max: '7.0.2');
+  }
+  // Documented max is 1.6.21.
+  if (isWithinVersionRange(kgpV, min: '1.6.20', max: '1.7.0', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.1.1', max: '7.0.2');
+  }
+
+  return false;
 }
 
 // Validate that Gradle version and AGP are compatible with each other.
