@@ -60,7 +60,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
     // When bumping, also update:
     //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
-    //  * AGP version constants in packages/flutter_tools/lib/src/android/gradle_utils.dart
+    //  * ndkVersion constant in packages/flutter_tools/lib/src/android/gradle_utils.dart
     //  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
     compileOnly("com.android.tools.build:gradle:8.9.1")
 
