@@ -9697,6 +9697,36 @@ void main() {
     expect(rectWithText.height, greaterThan(100));
   });
 
+  testWidgets('Placeholder is aligned with text', (WidgetTester tester) async {
+    const String placeholder = 'hint text';
+    const TextStyle style = TextStyle(fontSize: 100, fontWeight: FontWeight.w400);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            minLines: 4,
+            maxLines: 6,
+            placeholder: placeholder,
+            placeholderStyle: style,
+            style: style,
+          ),
+        ),
+      ),
+    );
+
+    final Finder placeholderFinder = find.text(placeholder);
+    expect(placeholderFinder, findsOne);
+
+    await tester.enterText(find.byType(CupertinoTextField), placeholder);
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getTopLeft(find.text(placeholder).first).dy,
+      tester.getTopLeft(find.text(placeholder).last).dy,
+    );
+  });
+
   testWidgets('Start the floating cursor on long tap', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     final TextEditingController controller = TextEditingController(text: 'abcd');
