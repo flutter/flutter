@@ -173,7 +173,7 @@ class SkwasmPath extends SkwasmObjectWrapper<RawPath> implements ScenePath {
   @override
   void addRSuperellipse(ui.RSuperellipse rsuperellipse) {
     withStackScope((StackScope s) {
-      rsuperellipse.getPath(null, this);
+      rsuperellipse.getPath(this);
     });
   }
 

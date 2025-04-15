@@ -80,7 +80,7 @@ class _RSuperellipseOctant {
     }
 
     final double ratio = a * 2 / radius;
-    final double g = RSuperellipseParam.kGapFactor * radius;
+    final double g = kGapFactor * radius;
 
     final (double n, double xJOverA) = _computeNAndXj(ratio);
     final double xJ = xJOverA * a;
@@ -168,6 +168,8 @@ class _RSuperellipseOctant {
     return (n, 1 - 1 / k_xJ);
   }
 
+  static const double kGapFactor = 0.29289321881; // 1-cos(pi/4)
+
   static const _RSuperellipseOctant zero = _RSuperellipseOctant(
     offset: Offset.zero,
     se_a: 0,
@@ -226,32 +228,37 @@ class _RSuperellipseQuadrant {
 }
 
 class RSuperellipseParam {
-  static const double kGapFactor = 0.29289321881; // 1-cos(pi/4)
+  RSuperellipseParam(this._shape, this._maybeCache);
 
+  final _Shape _shape;
+  final RSuperellipse? _maybeCache;
   Path? _cachedPath;
   bool get isInitialized => _cachedPath != null;
+
   Path getPath() {
+    _ensureBuilt();
     assert(_cachedPath != null);
     return _cachedPath!;
   }
 
-  void init(RSuperellipse target, [RSuperellipse? maybeCache]) {
+  bool contains(Offset point, Offset center) {
+    _ensureBuilt();
+    assert(_cachedPath != null);
+    return _cachedPath!.contains(point - center);
+  }
+
+  void _ensureBuilt() {
     if (_cachedPath != null) {
       return;
     }
-    if (maybeCache != null &&
-        maybeCache._param.isInitialized &&
-        target._shape.nearlyEqualTo(maybeCache._shape, 1e-6)) {
-      _cachedPath = maybeCache._param._cachedPath;
+    if (_maybeCache != null &&
+        _maybeCache._param.isInitialized &&
+        _shape.nearlyEqualTo(_maybeCache._shape, 1e-6)) {
+      _cachedPath = _maybeCache._param._cachedPath;
     } else {
       _cachedPath = Path();
-      _RSuperellipsePathBuilder(_cachedPath!).buildPath(target._shape);
+      _RSuperellipsePathBuilder(_cachedPath!).buildPath(_shape);
     }
-  }
-
-  bool contains(Offset point) {
-    assert(_cachedPath != null, 'Must call init() first.');
-    return _cachedPath!.contains(point);
   }
 }
 
@@ -299,11 +306,19 @@ class _RSuperellipsePathBuilder {
         true,
       );
       _addQuadrant(
-        _RSuperellipseQuadrant.computeQuadrant(Offset(bottomSplit, leftSplit), Offset(left, bottom), r.blRadius),
+        _RSuperellipseQuadrant.computeQuadrant(
+          Offset(bottomSplit, leftSplit),
+          Offset(left, bottom),
+          r.blRadius,
+        ),
         false,
       );
       _addQuadrant(
-        _RSuperellipseQuadrant.computeQuadrant(Offset(topSplit, leftSplit), Offset(left, top), r.tlRadius),
+        _RSuperellipseQuadrant.computeQuadrant(
+          Offset(topSplit, leftSplit),
+          Offset(left, top),
+          r.tlRadius,
+        ),
         true,
       );
     }
@@ -312,7 +327,11 @@ class _RSuperellipsePathBuilder {
     path.close();
   }
 
-  void _addQuadrant(_RSuperellipseQuadrant param, bool reverse, [Offset scaleSign = const Offset(1, 1)]) {
+  void _addQuadrant(
+    _RSuperellipseQuadrant param,
+    bool reverse, [
+    Offset scaleSign = const Offset(1, 1),
+  ]) {
     final _Transform transform = _composite(
       _translate(param.offset),
       _scale(scaleSign.scale(param.signedScale.width, param.signedScale.height)),
@@ -370,7 +389,12 @@ class _RSuperellipsePathBuilder {
     ];
   }
 
-  void _addOctant(_RSuperellipseOctant param, bool reverse, bool flip, _Transform externalTransform) {
+  void _addOctant(
+    _RSuperellipseOctant param,
+    bool reverse,
+    bool flip,
+    _Transform externalTransform,
+  ) {
     _Transform transform = _composite(externalTransform, _translate(param.offset));
     if (flip) {
       transform = _composite(transform, _flip);

@@ -206,13 +206,9 @@ class CanvasKitCanvas implements ui.Canvas {
   }
 
   @override
-  void drawRSuperellipse(
-    ui.RSuperellipse rsuperellipse,
-    ui.Paint paint, {
-    ui.RSuperellipse? maybeCache,
-  }) {
+  void drawRSuperellipse(ui.RSuperellipse rsuperellipse, ui.Paint paint) {
     assert(rsuperellipseIsValid(rsuperellipse));
-    drawPath(rsuperellipse.getPath(maybeCache), paint);
+    drawPath(rsuperellipse.getPath(), paint);
   }
 
   @override

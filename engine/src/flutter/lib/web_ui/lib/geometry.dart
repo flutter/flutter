@@ -1040,6 +1040,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     double brRadiusY = 0.0,
     double blRadiusX = 0.0,
     double blRadiusY = 0.0,
+    RSuperellipse? maybeCache,
     bool uniformRadii = false,
   }) : _shape = _Shape(
          width: right - left,
@@ -1053,7 +1054,9 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusX: blRadiusX,
          blRadiusY: blRadiusY,
          uniformRadii: uniformRadii,
-       );
+       ) {
+    _param = RSuperellipseParam(_shape, maybeCache);
+  }
 
   RSuperellipse.fromLTRBXY(
     double left,
@@ -1061,12 +1064,55 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     double right,
     double bottom,
     double radiusX,
-    double radiusY,
-  ) : this._raw(
-        top: top,
-        left: left,
-        right: right,
-        bottom: bottom,
+    double radiusY, {
+    RSuperellipse? maybeCache,
+  }) : this._raw(
+         top: top,
+         left: left,
+         right: right,
+         bottom: bottom,
+         tlRadiusX: radiusX,
+         tlRadiusY: radiusY,
+         trRadiusX: radiusX,
+         trRadiusY: radiusY,
+         blRadiusX: radiusX,
+         blRadiusY: radiusY,
+         brRadiusX: radiusX,
+         brRadiusY: radiusY,
+         maybeCache: maybeCache,
+         uniformRadii: true,
+       );
+
+  RSuperellipse.fromLTRBR(
+    double left,
+    double top,
+    double right,
+    double bottom,
+    Radius radius, {
+    RSuperellipse? maybeCache,
+  }) : this._raw(
+         top: top,
+         left: left,
+         right: right,
+         bottom: bottom,
+         tlRadiusX: radius.x,
+         tlRadiusY: radius.y,
+         trRadiusX: radius.x,
+         trRadiusY: radius.y,
+         blRadiusX: radius.x,
+         blRadiusY: radius.y,
+         brRadiusX: radius.x,
+         brRadiusY: radius.y,
+         maybeCache: maybeCache,
+         uniformRadii: true,
+       );
+
+  RSuperellipse.fromRectXY(Rect rect, double radiusX, double radiusY, {RSuperellipse? maybeCache})
+    : this._raw(
+        top: rect.top,
+        left: rect.left,
+        right: rect.right,
+        bottom: rect.bottom,
         tlRadiusX: radiusX,
         tlRadiusY: radiusY,
         trRadiusX: radiusX,
@@ -1075,41 +1121,11 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radiusY,
         brRadiusX: radiusX,
         brRadiusY: radiusY,
+        maybeCache: maybeCache,
+        uniformRadii: true,
       );
 
-  RSuperellipse.fromLTRBR(double left, double top, double right, double bottom, Radius radius)
-    : this._raw(
-        top: top,
-        left: left,
-        right: right,
-        bottom: bottom,
-        tlRadiusX: radius.x,
-        tlRadiusY: radius.y,
-        trRadiusX: radius.x,
-        trRadiusY: radius.y,
-        blRadiusX: radius.x,
-        blRadiusY: radius.y,
-        brRadiusX: radius.x,
-        brRadiusY: radius.y,
-      );
-
-  RSuperellipse.fromRectXY(Rect rect, double radiusX, double radiusY)
-    : this._raw(
-        top: rect.top,
-        left: rect.left,
-        right: rect.right,
-        bottom: rect.bottom,
-        tlRadiusX: radiusX,
-        tlRadiusY: radiusY,
-        trRadiusX: radiusX,
-        trRadiusY: radiusY,
-        blRadiusX: radiusX,
-        blRadiusY: radiusY,
-        brRadiusX: radiusX,
-        brRadiusY: radiusY,
-      );
-
-  RSuperellipse.fromRectAndRadius(Rect rect, Radius radius)
+  RSuperellipse.fromRectAndRadius(Rect rect, Radius radius, {RSuperellipse? maybeCache})
     : this._raw(
         top: rect.top,
         left: rect.left,
@@ -1123,6 +1139,8 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
         blRadiusY: radius.y,
         brRadiusX: radius.x,
         brRadiusY: radius.y,
+        maybeCache: maybeCache,
+        uniformRadii: true,
       );
 
   RSuperellipse.fromLTRBAndCorners(
@@ -1134,6 +1152,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     Radius topRight = Radius.zero,
     Radius bottomRight = Radius.zero,
     Radius bottomLeft = Radius.zero,
+    RSuperellipse? maybeCache,
   }) : this._raw(
          top: top,
          left: left,
@@ -1147,6 +1166,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
+         maybeCache: maybeCache,
          uniformRadii: false,
        );
 
@@ -1156,6 +1176,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     Radius topRight = Radius.zero,
     Radius bottomRight = Radius.zero,
     Radius bottomLeft = Radius.zero,
+    RSuperellipse? maybeCache,
   }) : this._raw(
          top: rect.top,
          left: rect.left,
@@ -1169,6 +1190,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          blRadiusY: bottomLeft.y,
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
+         maybeCache: maybeCache,
          uniformRadii: false,
        );
 
@@ -1198,11 +1220,9 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   double get brRadiusY => _shape.brRadiusY;
 
   final _Shape _shape;
-  final RSuperellipseParam _param = RSuperellipseParam();
+  late final RSuperellipseParam _param;
 
-  Path getPath([RSuperellipse? maybeCache, Path? basePath]) {
-    _param.init(this, maybeCache);
-    assert(_param.isInitialized);
+  Path getPath([Path? basePath]) {
     final Path path = basePath ?? Path();
     path.addPath(_param.getPath(), center);
     return path;
@@ -1265,11 +1285,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   static final RSuperellipse zero = RSuperellipse._raw();
 
   bool contains(Offset point) {
-    if (!_param.isInitialized) {
-      _param.init(this);
-    }
-    final Offset center = this.center;
-    return _param.contains(Offset((point.dx - center.dx) / width, (point.dy - center.dy) / height));
+    return _param.contains(point, center);
   }
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
