@@ -442,9 +442,9 @@ abstract class FlutterProjectPlatform {
 class AndroidProject extends FlutterProjectPlatform {
   AndroidProject._(this.parent);
 
-  // User facing string when java/gradle/agp versions are compatible.
+  // User facing string when java/gradle/agp/kgp versions are compatible.
   @visibleForTesting
-  static const String validJavaGradleAgpString = 'compatible java/gradle/agp';
+  static const String validJavaGradleAgpKgpString = 'compatible java/gradle/agp/kgp';
 
   // User facing link that describes compatibility between gradle and
   // android gradle plugin.
@@ -455,6 +455,11 @@ class AndroidProject extends FlutterProjectPlatform {
   // version of gradle to support it.
   static const String javaGradleCompatUrl =
       'https://docs.gradle.org/current/userguide/compatibility.html#java';
+
+  // User facing link that describes compatibility between KGP and Gradle
+  // and AGP.
+  static const String kgpCompatUrl =
+      'https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin';
 
   // User facing link that describes instructions for downloading
   // the latest version of Android Studio.
@@ -712,7 +717,7 @@ class AndroidProject extends FlutterProjectPlatform {
     );
 
     // Assume valid configuration.
-    String description = validJavaGradleAgpString;
+    String description = validJavaGradleAgpKgpString;
 
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(
       globals.logger,
@@ -726,7 +731,7 @@ class AndroidProject extends FlutterProjectPlatform {
       gradleV: gradleVersion,
     );
 
-    final bool compatibleGradleKotlin = gradle.validateGradleAndKGP(
+    final bool compatibleKgpGradle = gradle.validateGradleAndKGP(
       globals.logger,
       gradleV: gradleVersion,
       kgpV: kgpVersion,
@@ -756,17 +761,17 @@ See the link below for more information:
 $javaGradleCompatUrl
 ''';
     }
-    if (!compatibleGradleKotlin) {
+    if (!compatibleKgpGradle) {
       description = '''
-${compatibleGradleKotlin ? '' : description}
+${compatibleGradleAgp ? '' : description}
 Incompatible Gradle/Kotlin versions.
 Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion\n
 See the link below for more information:
-  https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+  $kgpCompatUrl
 ''';
     }
     return CompatibilityResult(
-      compatibleJavaGradle && compatibleGradleAgp && compatibleGradleKotlin,
+      compatibleJavaGradle && compatibleGradleAgp && compatibleKgpGradle,
       description,
     );
   }

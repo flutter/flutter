@@ -58,7 +58,7 @@ void main() {
           '│ [✓] Is Flutter Package: yes                                       │\n'
           '│ [✓] Uses Material Design: yes                                     │\n'
           '│ [✓] Is Plugin: no                                                 │\n'
-          '│ [✓] Java/Gradle/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpString} │\n'
+          '│ [✓] Java/Gradle/Android Gradle Plugin: ${AndroidProject.validJavaGradleAgpKgpString} │\n'
           '└───────────────────────────────────────────────────────────────────┘\n';
 
       expect(loggerTest.statusText, contains(expected));

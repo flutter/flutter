@@ -358,16 +358,9 @@ Future<String?> getKgpVersion(
   //
   // kgpVersion task is a custom flutter task dynamiclly added that can print the kgp version
   // if gradle can run successfuly.
-  String? gradleExecutable;
   if (processManager.canRun('gradle')) {
-    gradleExecutable = 'gradle';
-  }
-  if (processManager.canRun('./gradlew')) {
-    gradleExecutable = './gradlew';
-  }
-  if (gradleExecutable != null) {
     final String kgpVersionOutput =
-        (await processManager.run(<String>[gradleExecutable, 'kgpVersion', '-q'])).stdout as String;
+        (await processManager.run(<String>['gradle', 'kgpVersion', '-q'])).stdout as String;
 
     // See expected output defined in
     // flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt addTaskForKGPVersion

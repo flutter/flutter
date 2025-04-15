@@ -576,9 +576,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: Version(17, 0, 2));
-        processManager = FakeProcessManager.list(<FakeCommand>[
-          createGradleVersionCommand('1.9.20'),
-        ]);
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.9.20')]);
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -606,9 +604,7 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
-        processManager = FakeProcessManager.list(<FakeCommand>[
-          createGradleVersionCommand('1.7.20'),
-        ]);
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.7.20')]);
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -636,9 +632,7 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[
-          createGradleVersionCommand('1.9.1'),
-        ]);
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand('1.9.1')]);
         java = FakeJava(version: Version(11, 0, 14));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -664,13 +658,14 @@ dependencies {
         const String javaV = '17.0.2';
         const String gradleV = '6.7.3';
         const String agpV = '7.2.0';
+        const String kgpV = '2.1.0';
 
         final FakeProcessManager processManager;
         final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.any();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
         java = FakeJava(version: Version.parse(javaV));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -688,7 +683,7 @@ dependencies {
             // Should not have the valid string
             expect(
               value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))),
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
             );
             // On gradle/agp error print help url and gradle and agp versions.
             expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
@@ -698,6 +693,9 @@ dependencies {
             expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
             expect(value.description, contains(RegExp(javaV)));
             expect(value.description, contains(RegExp(gradleV)));
+            // On kgp/gradle eror print help url and kgp versions
+            expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
           },
           java: java,
           androidStudio: androidStudio,
@@ -709,13 +707,14 @@ dependencies {
         const String javaV = '17.0.2';
         const String gradleV = '6.7.3';
         const String agpV = '4.2.0';
+        const String kgpV = '1.7.22';
 
         final FakeProcessManager processManager;
         final Java java;
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.any();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
         java = FakeJava(version: Version(17, 0, 2));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -733,7 +732,7 @@ dependencies {
             // Should not have the valid string.
             expect(
               value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))),
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
             );
             // On gradle/agp error print help url and java and gradle versions.
             expect(value.description, contains(RegExp(AndroidProject.javaGradleCompatUrl)));
@@ -772,12 +771,53 @@ dependencies {
             // Should not have the valid string.
             expect(
               value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))),
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
             );
             // On gradle/agp error print help url and gradle and agp versions.
             expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
             expect(value.description, contains(RegExp(gradleV)));
             expect(value.description, contains(RegExp(agpV)));
+          },
+          java: java,
+          androidStudio: androidStudio,
+          processManager: processManager,
+          androidSdk: androidSdk,
+        );
+      });
+      group('_', () {
+        const String gradleV = '8.11';
+        const String agpV = '8.7.2';
+        const String kgpV = '2.1.10';
+
+        final FakeProcessManager processManager;
+        final Java java;
+        final AndroidStudio androidStudio;
+        final FakeAndroidSdkWithDir androidSdk;
+        final FileSystem fileSystem = getFileSystemForPlatform();
+        processManager = FakeProcessManager.list(<FakeCommand>[createKgpVersionCommand(kgpV)]);
+        java = FakeJava(version: Version(17, 0, 2));
+        androidStudio = FakeAndroidStudio();
+        androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
+        fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
+        _testInMemory(
+          'incompatible kgp/gradle only',
+          () async {
+            final FlutterProject? project = await configureGradleAgpForTest(
+              gradleV: gradleV,
+              agpV: agpV,
+            );
+            final CompatibilityResult value =
+                await project!.android.hasValidJavaGradleAgpVersions();
+            expect(value.success, isFalse);
+            // Should not have the valid string.
+            expect(
+              value.description,
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
+            );
+            // On gradle/agp error print help url and java and gradle versions.
+            expect(value.description, contains(RegExp(AndroidProject.kgpCompatUrl)));
+            expect(value.description, contains(RegExp(kgpV)));
+            expect(value.description, contains(RegExp(gradleV)));
           },
           java: java,
           androidStudio: androidStudio,
@@ -810,7 +850,7 @@ dependencies {
             // Should not have the valid string.
             expect(
               value.description,
-              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpString))),
+              isNot(contains(RegExp(AndroidProject.validJavaGradleAgpKgpString))),
             );
             // On gradle/agp error print help url null value for agp.
             expect(value.description, contains(RegExp(AndroidProject.gradleAgpCompatUrl)));
@@ -1985,11 +2025,11 @@ flutter:
   return FlutterProject.fromDirectory(directory);
 }
 
-FakeCommand createGradleVersionCommand(String kotlinV) {
+FakeCommand createKgpVersionCommand(String kgpV) {
   return FakeCommand(
-    command: const <String>['./gradlew', 'kgpVersion', '-q'],
+    command: const <String>['gradle', 'kgpVersion', '-q'],
     stdout: '''
-KGP Version: $kotlinV
+KGP Version: $kgpV
 ''',
   );
 }
