@@ -2194,27 +2194,6 @@ Future<void> testMain() async {
       hideKeyboard();
     });
 
-    test('Do not update composingBase and composingExtent while composing Text', () {
-      showKeyboard(inputType: 'text');
-      // 'text' is input as a composing target.
-      editingStrategy!.composingText = 'test';
-      sendFrameworkMessage(
-        codec.encodeMethodCall(
-          const MethodCall('TextInput.setEditingState', <String, dynamic>{
-            'text': 'test',
-            'selectionBase': 4,
-            'selectionExtent': 0,
-          }),
-        ),
-      );
-
-      // 'text' is composed as Japanese, and baseOffset and extentOffset are updated.
-      final EditingState editingState = EditingState(text: 'test', baseOffset: 0, extentOffset: 1);
-      editingStrategy!.setEditingState(editingState);
-
-      checkInputEditingState(textEditing!.strategy.domElement, 'test', 0, 4);
-    });
-
     test('Supports deletion at inverted selection', () async {
       final MethodCall setClient = MethodCall('TextInput.setClient', <dynamic>[
         123,
