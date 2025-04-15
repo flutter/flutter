@@ -1142,6 +1142,8 @@ class PlatformDispatcher {
   bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu;
   bool _supportsShowingSystemContextMenu = false;
 
+  /// A callback that is invoked whenever [supportsShowingSystemContextMenu]
+  /// changes.
   VoidCallback? get onSupportsShowingSystemContextMenuChange =>
       _onSupportsShowingSystemContextMenuChange;
   VoidCallback? _onSupportsShowingSystemContextMenuChange;
