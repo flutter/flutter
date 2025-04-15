@@ -124,6 +124,9 @@ abstract class PlatformDispatcher {
   VoidCallback? get onTextScaleFactorChanged;
   set onTextScaleFactorChanged(VoidCallback? callback);
 
+  VoidCallback? get onSupportsShowingSystemContextMenuChanged;
+  set onSupportsShowingSystemContextMenuChanged(VoidCallback? callback);
+
   Brightness get platformBrightness;
 
   VoidCallback? get onPlatformBrightnessChanged;
