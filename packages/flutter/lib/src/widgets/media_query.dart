@@ -1883,11 +1883,6 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
       _updateParentData();
     }
     if (_data == null || oldWidget.view != widget.view) {
-      /*
-    if (_data == null ||
-        oldWidget.view != widget.view ||
-        _data != MediaQueryData.fromView(widget.view, platformData: _parentData)) {
-      */
       _updateData();
     }
     assert(_data != null);
