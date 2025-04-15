@@ -4037,6 +4037,7 @@
 ../../../fuchsia/sdk/linux/pkg/memory_barriers/meta.json
 ../../../fuchsia/sdk/linux/pkg/mmio-ptr/meta.json
 ../../../fuchsia/sdk/linux/pkg/mmio/meta.json
+../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/include/lib/ui/scenic/cpp/testing
 ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/meta.json
