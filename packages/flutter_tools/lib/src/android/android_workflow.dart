@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show File;
 
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -71,7 +71,7 @@ Future<String?> getEmulatorVersion(String androidSdkDirectoryPath) async {
     emulatorExecutable = path.join(androidSdkDirectoryPath, 'emulator', 'emulator');
   }
 
-  final File emulatorFile = File(emulatorExecutable);
+  final File emulatorFile = globals.localFileSystem.file(emulatorExecutable);
   if (!emulatorFile.existsSync()) {
     return null;
   }
