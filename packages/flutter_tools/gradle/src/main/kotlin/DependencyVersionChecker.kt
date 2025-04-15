@@ -8,11 +8,11 @@ import androidx.annotation.VisibleForTesting
 import com.android.build.api.AndroidPluginVersion
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
+import com.flutter.gradle.FlutterPluginUtils as FlutterPluginUtils
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.extra
-import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 
 /**
  * Warns or errors on version ranges of dependencies required to build a flutter Android app.
@@ -135,7 +135,7 @@ object DependencyVersionChecker {
             )
         }
 
-        val kgpVersion: Version? = getKGPVersion(project)
+        val kgpVersion: Version? = FlutterPluginUtils.getKGPVersion(project)
         if (kgpVersion != null) {
             checkKGPVersion(kgpVersion, project)
         }
@@ -209,33 +209,6 @@ object DependencyVersionChecker {
                     AndroidComponentsExtension::class.java
                 )?.pluginVersion
         return androidPluginVersion
-    }
-
-    // TODO(gmackall): AGP has a getKotlinAndroidPluginVersion(), and KGP has a
-    //                 getKotlinPluginVersion(). Consider replacing this implementation with one of
-    //                 those.
-    @VisibleForTesting internal fun getKGPVersion(project: Project): Version? {
-        val kotlinVersionProperty = "kotlin_version"
-        val firstKotlinVersionFieldName = "pluginVersion"
-        val secondKotlinVersionFieldName = "kotlinPluginVersion"
-        // This property corresponds to application of the Kotlin Gradle plugin in the
-        // top-level build.gradle file.
-        if (project.hasProperty(kotlinVersionProperty)) {
-            return Version.fromString(project.properties[kotlinVersionProperty] as String)
-        }
-        val kotlinPlugin =
-            project.plugins
-                .findPlugin(KotlinAndroidPluginWrapper::class.java)
-        val versionField =
-            kotlinPlugin?.javaClass?.kotlin?.members?.first {
-                it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
-            }
-        val versionString = versionField?.call(kotlinPlugin)
-        return if (versionString == null) {
-            null
-        } else {
-            Version.fromString(versionString as String)
-        }
     }
 
     @VisibleForTesting internal fun getErrorMessage(
@@ -432,6 +405,10 @@ internal class Version(
             return patch - other.patch
         }
         return 0
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Version && compareTo(other) == 0
     }
 
     override fun toString(): String = "$major.$minor.$patch"

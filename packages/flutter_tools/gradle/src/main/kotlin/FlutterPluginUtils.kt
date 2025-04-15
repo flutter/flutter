@@ -17,6 +17,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
+import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Properties
@@ -131,6 +132,36 @@ object FlutterPluginUtils {
     }
 
     // ----------------- Methods that interact primarily with the Gradle project. -----------------
+
+    /**
+     * Returns the version of the Kotlin Gradle plugin.
+     */
+    internal fun getKGPVersion(project: Project): Version? {
+        // TODO(gmackall): AGP has a getKotlinAndroidPluginVersion(), and KGP has a
+        //                 getKotlinPluginVersion(). Consider replacing this implementation with one of
+        //                 those.
+        val kotlinVersionProperty = "kotlin_version"
+        val firstKotlinVersionFieldName = "pluginVersion"
+        val secondKotlinVersionFieldName = "kotlinPluginVersion"
+        // This property corresponds to application of the Kotlin Gradle plugin in the
+        // top-level build.gradle file.
+        if (project.hasProperty(kotlinVersionProperty)) {
+            return Version.fromString(project.properties[kotlinVersionProperty] as String)
+        }
+        val kotlinPlugin =
+            project.plugins
+                .findPlugin(KotlinAndroidPluginWrapper::class.java)
+        val versionField =
+            kotlinPlugin?.javaClass?.kotlin?.members?.first {
+                it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
+            }
+        val versionString = versionField?.call(kotlinPlugin)
+        return if (versionString == null) {
+            null
+        } else {
+            Version.fromString(versionString as String)
+        }
+    }
 
     @JvmStatic
     @JvmName("shouldShrinkResources")
@@ -721,7 +752,25 @@ object FlutterPluginUtils {
             description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
             doLast {
+                // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
                 println(JavaVersion.current())
+            }
+        }
+    }
+    // Add a task that can be called on flutter projects that prints the KGP version used in
+    // the project.
+    //
+    // Format of the output of this task can be used in debugging what version of KGP a
+    // project is using.
+    // Not recommended for use in time sensitive commands like `flutter run` or `flutter build` as
+    // Gradle tasks are slower than we want. Particularly in light of https://github.com/flutter/flutter/issues/119196.
+    @JvmStatic
+    @JvmName("addTaskForKGPVersion")
+    internal fun addTaskForKGPVersion(project: Project) {
+        project.tasks.register("kgpVersion") {
+            description = "Print the current kgp version used by the project."
+            doLast {
+                println(getKGPVersion(project).toString())
             }
         }
     }

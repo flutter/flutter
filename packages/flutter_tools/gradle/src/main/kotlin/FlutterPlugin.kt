@@ -313,6 +313,7 @@ class FlutterPlugin : Plugin<Project> {
         }
 
         FlutterPluginUtils.addTaskForJavaVersion(projectToAddTasksTo)
+        FlutterPluginUtils.addTaskForKGPVersion(projectToAddTasksTo)
         if (FlutterPluginUtils.isFlutterAppProject(projectToAddTasksTo)) {
             FlutterPluginUtils.addTaskForPrintBuildVariants(projectToAddTasksTo)
             FlutterPluginUtils.addTasksForOutputsAppLinkSettings(projectToAddTasksTo)

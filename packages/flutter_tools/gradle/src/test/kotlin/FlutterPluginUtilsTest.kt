@@ -204,6 +204,17 @@ class FlutterPluginUtilsTest {
         assertEquals("arm64_v8a", result)
     }
 
+    // getKGPVersion
+    @Test
+    fun `getKGPVersion returns version when kotlin_version is set`() {
+        val kgpVersion = Version(1, 9, 20)
+        val project = mockk<Project>()
+        every { project.hasProperty(eq("kotlin_version")) } returns true
+        every { project.properties["kotlin_version"] } returns kgpVersion.toString()
+        val result = FlutterPluginUtils.getKGPVersion(project)
+        assertEquals(kgpVersion, result!!)
+    }
+
     // shouldShrinkResources
     @Test
     fun `shouldShrinkResources returns true by default`() {
@@ -1036,6 +1047,24 @@ class FlutterPluginUtilsTest {
         verify {
             mockTask.description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
+        }
+    }
+
+    // addTaskForKGPVersion
+    @Test
+    fun `addTaskForKGPVersion adds task for KGP version`() {
+        val project = mockk<Project>()
+        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
+        val captureSlot = slot<Action<Task>>()
+        FlutterPluginUtils.addTaskForKGPVersion(project)
+        verify { project.tasks.register("kgpVersion", capture(captureSlot)) }
+
+        val mockTask = mockk<Task>()
+        every { mockTask.description = any() } returns Unit
+        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
+        captureSlot.captured.execute(mockTask)
+        verify {
+            mockTask.description = "Print the current kgp version used by the project."
         }
     }
 

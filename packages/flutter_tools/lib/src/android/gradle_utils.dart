@@ -348,51 +348,18 @@ Future<String?> getKotlinVersion(
   Logger logger,
   ProcessManager processManager,
 ) async {
-  // If running gradle becomes a performance problem then consider file regular expression evaluation
-  // similar to AGP version finding. We are avoiding that in the initial implemention because
-  // it is fragile and has complex regular expressions.
-  // System installed Gradle version.
-  /// DO NOT MERGE, this provides a different version of kotlin than what is used in the build files.
-  /// https://github.com/gradle/gradle/blob/cefbee263181a924ac4efcaace6bda97a55bc0f7/platforms/core-runtime/gradle-cli/src/main/java/org/gradle/launcher/cli/DefaultCommandLineActionFactory.java#L260
-  /// --version shows the kotlin dsl version not the kotlin android plugin (which I think is the same as the kotlin gradle plugin?)
-  ///
-  ///  https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
-  /// I think kotlin gradle plugin (kgp), kotlin android plugin, and kotlin dsl are different things.
-  if (processManager.canRun('gradle')) {
-    final String gradleVersionsVerbose =
-        (await processManager.run(<String>['gradle', gradleVersionFlag])).stdout as String;
-    // Expected format:
-    /*
+  // Maintainers the kotlin dsl and the kotlin gradle plugin (KGP) (Android Docs)
+  // also referred to as the kotlin android plugin (kotlin owned docs) are different.
+  //
+  // gradle --version or ./gradlew --version will print the kotlin dsl version.
+  // This version normally changes with the version of gradle.
+  // https://github.com/gradle/gradle/blob/cefbee263181a924ac4efcaace6bda97a55bc0f7/platforms/core-runtime/gradle-cli/src/main/java/org/gradle/launcher/cli/DefaultCommandLineActionFactory.java#L260
+  // This vesion is NOT the version of KGP that the project uses.
+  //
+  // KGP
 
-------------------------------------------------------------
-Gradle 7.6
-------------------------------------------------------------
-
-Build time:   2022-11-25 13:35:10 UTC
-Revision:     daece9dbc5b79370cc8e4fd6fe4b2cd400e150a8
-
-Kotlin:       1.7.10
-Groovy:       3.0.13
-Ant:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021
-JVM:          17.0.6 (Homebrew 17.0.6+0)
-OS:           Mac OS X 13.2.1 aarch64
-    */
-    // Observation shows that the version can have 2 or 3 numbers.
-    // Inner parentheticals `(\.\d+)?` denote the optional third value.
-    // Outer parentheticals `Gradle (...)` denote a grouping used to extract
-    // the version number.
-    final RegExp kotlinVersionRegex = RegExp(r'Kotlin:\s+(\d+\.\d+(?:\.\d+)?)');
-    final RegExpMatch? version = kotlinVersionRegex.firstMatch(gradleVersionsVerbose);
-    if (version == null) {
-      // Most likely a bug in our parse implementation/regex.
-      logger.printWarning(_formatParseWarning(gradleVersionsVerbose, type: 'kotlin'));
-      return null;
-    }
-    return version.group(1);
-  } else {
-    logger.printTrace('Could not run system gradle');
-    return null;
-  }
+  // DO NOT MERGE
+  return '1.9.10';
 }
 
 /// Returns the Android Gradle Plugin (AGP) version that the current project
