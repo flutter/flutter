@@ -461,7 +461,8 @@ bool validateGradleAndKotlin(Logger logger, {required String? gradleV, required 
       );
     }
     return true;
-  } else { // Gradle is pre 8.3.
+  } else {
+    // Gradle is pre 8.3.
     if (kgpV == null) {
       logger.printTrace('KGP version unknown ($kgpV).');
       return false;

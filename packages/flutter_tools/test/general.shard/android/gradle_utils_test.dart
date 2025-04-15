@@ -717,7 +717,7 @@ dependencies {
         GradleKotlinTestData(
           true,
           gradleVersion: templateDefaultGradleVersion,
-          kgpVersion: templateKotlinGradlePluginVersion
+          kgpVersion: templateKotlinGradlePluginVersion,
         ),
 
         // Gradle version at edge of support window.

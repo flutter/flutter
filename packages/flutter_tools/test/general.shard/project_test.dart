@@ -576,7 +576,9 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: Version(17, 0, 2));
-        processManager = FakeProcessManager.list(<FakeCommand>[createGradleVersionCommand('8.0', '1.9.1')]);
+        processManager = FakeProcessManager.list(<FakeCommand>[
+          createGradleVersionCommand('8.0', '1.9.1'),
+        ]);
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -604,7 +606,9 @@ dependencies {
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
         java = FakeJava(version: const Version.withText(1, 8, 0, '1.8.0_242'));
-        processManager = FakeProcessManager.list(<FakeCommand>[createGradleVersionCommand('6.7.1', '1.3.72')]);
+        processManager = FakeProcessManager.list(<FakeCommand>[
+          createGradleVersionCommand('6.7.1', '1.3.72'),
+        ]);
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
         fileSystem.currentDirectory.childDirectory(androidStudio.javaPath!).createSync();
@@ -632,7 +636,9 @@ dependencies {
         final AndroidStudio androidStudio;
         final FakeAndroidSdkWithDir androidSdk;
         final FileSystem fileSystem = getFileSystemForPlatform();
-        processManager = FakeProcessManager.list(<FakeCommand>[createGradleVersionCommand('7.3.3', '1.9.1')]);
+        processManager = FakeProcessManager.list(<FakeCommand>[
+          createGradleVersionCommand('7.3.3', '1.9.1'),
+        ]);
         java = FakeJava(version: Version(11, 0, 14));
         androidStudio = FakeAndroidStudio();
         androidSdk = FakeAndroidSdkWithDir(fileSystem.currentDirectory);
@@ -1981,8 +1987,8 @@ flutter:
 
 FakeCommand createGradleVersionCommand(String gradleV, String kotlinV) {
   return FakeCommand(
-            command: <String>['gradle', '--version'],
-            stdout: '''
+    command: const <String>['gradle', '--version'],
+    stdout: '''
 /*
 
 ------------------------------------------------------------
@@ -1998,7 +2004,7 @@ Ant:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021
 JVM:          17.0.6 (Homebrew 17.0.6+0)
 OS:           Mac OS X 13.2.1 aarch64
 ''',
-          );
+  );
 }
 
 /// Executes the [testMethod] in a context where the file system

@@ -708,7 +708,8 @@ class AndroidProject extends FlutterProjectPlatform {
     final String? kgpVersion = await gradle.getKotlinVersion(
       hostAppGradleRoot,
       globals.logger,
-      globals.processManager);
+      globals.processManager,
+    );
 
     // Assume valid configuration.
     String description = validJavaGradleAgpString;
@@ -764,7 +765,10 @@ See the link below for more information:
   https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations
 ''';
     }
-    return CompatibilityResult(compatibleJavaGradle && compatibleGradleAgp && compatibleGradleKotlin, description);
+    return CompatibilityResult(
+      compatibleJavaGradle && compatibleGradleAgp && compatibleGradleKotlin,
+      description,
+    );
   }
 
   bool get isUsingGradle {
