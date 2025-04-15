@@ -322,8 +322,11 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             // mDNS on simulators stopped working in macOS 15.4.
             // See https://github.com/flutter/flutter/issues/166333.
             return 'The Dart VM Service was not discovered after 30 seconds. '
-                'This may be due to limited mDNS support in the iOS Simulator. '
-                'To connect, either run "flutter attach" before starting the '
+                'This may be due to limited mDNS support in the iOS Simulator.\n\n'
+                'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n\n"
+                'If you do not receive a prompt, either run "flutter attach" before starting the '
                 'app or use the Dart VM service URL from the Xcode console with '
                 '"flutter attach --debug-url=<URL>".\n';
           } else if (_isIOSDevice(device)) {

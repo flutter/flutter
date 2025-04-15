@@ -1558,8 +1558,11 @@ void main() {
 
             logger.expectedWarning =
                 'The Dart VM Service was not discovered after 30 seconds. '
-                'This may be due to limited mDNS support in the iOS Simulator. '
-                'To connect, either run "flutter attach" before starting the '
+                'This may be due to limited mDNS support in the iOS Simulator.\n\n'
+                'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n\n"
+                'If you do not receive a prompt, either run "flutter attach" before starting the '
                 'app or use the Dart VM service URL from the Xcode console with '
                 '"flutter attach --debug-url=<URL>".\n';
             fakeAsync.elapse(const Duration(seconds: 30));
