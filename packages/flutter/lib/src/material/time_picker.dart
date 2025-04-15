@@ -2324,7 +2324,8 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
   static const Size _kTimePickerPortraitSize = Size(310, 468);
   static const Size _kTimePickerLandscapeSize = Size(524, 342);
   static const Size _kTimePickerLandscapeSizeM2 = Size(508, 300);
-  static const Size _kTimePickerInputSize = Size(312, 216);
+  static const Size _kTimePickerInputSize = Size(312, 252);
+  static const double _kTimePickerInputMinimumHeight = 216;
 
   // Absolute minimum dialog sizes, which is the point at which it begins
   // scrolling to fit everything in.
@@ -2606,33 +2607,45 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                 restorationId: 'time_picker_scroll_view_vertical',
                 child: AnimatedContainer(
                   width: allowedSize.width,
-                  height: allowedSize.height,
                   duration: _kDialogSizeAnimationDuration,
                   curve: Curves.easeIn,
+                  constraints: BoxConstraints(
+                    minHeight: _kTimePickerInputMinimumHeight,
+                    maxHeight: allowedSize.height,
+                  ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Expanded(
-                        child: Form(
-                          key: _formKey,
-                          autovalidateMode: _autovalidateMode.value,
-                          child: _TimePicker(
-                            time: widget.initialTime,
-                            onTimeChanged: _handleTimeChanged,
-                            helpText: widget.helpText,
-                            cancelText: widget.cancelText,
-                            confirmText: widget.confirmText,
-                            errorInvalidText: widget.errorInvalidText,
-                            hourLabelText: widget.hourLabelText,
-                            minuteLabelText: widget.minuteLabelText,
-                            restorationId: 'time_picker',
-                            entryMode: _entryMode.value,
-                            orientation: widget.orientation,
-                            onEntryModeChanged: _handleEntryModeChanged,
-                            switchToInputEntryModeIcon: widget.switchToInputEntryModeIcon,
-                            switchToTimerEntryModeIcon: widget.switchToTimerEntryModeIcon,
-                          ),
-                        ),
+                      Builder(
+                        builder: (BuildContext context) {
+                          final Widget child = Form(
+                            key: _formKey,
+                            autovalidateMode: _autovalidateMode.value,
+                            child: _TimePicker(
+                              time: widget.initialTime,
+                              onTimeChanged: _handleTimeChanged,
+                              helpText: widget.helpText,
+                              cancelText: widget.cancelText,
+                              confirmText: widget.confirmText,
+                              errorInvalidText: widget.errorInvalidText,
+                              hourLabelText: widget.hourLabelText,
+                              minuteLabelText: widget.minuteLabelText,
+                              restorationId: 'time_picker',
+                              entryMode: _entryMode.value,
+                              orientation: widget.orientation,
+                              onEntryModeChanged: _handleEntryModeChanged,
+                              switchToInputEntryModeIcon: widget.switchToInputEntryModeIcon,
+                              switchToTimerEntryModeIcon: widget.switchToTimerEntryModeIcon,
+                            ),
+                          );
+                          if (_entryMode.value != TimePickerEntryMode.input &&
+                              _entryMode.value != TimePickerEntryMode.inputOnly) {
+                            return Flexible(child: child);
+                          }
+                          return child;
+                        },
                       ),
                       actions,
                     ],
