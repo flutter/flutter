@@ -31,9 +31,13 @@ import 'android_sdk.dart';
 // See https://gradle.org/releases
 const String templateDefaultGradleVersion = '8.12';
 
+// When bumping, also update:
+//  * ndkVersion constant in this file
+//  * ndkVersion in FlutterExtension in packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+//  * AGP version constants in packages/flutter_tools/gradle/build.gradle.kts
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
-const String templateAndroidGradlePluginVersion = '8.7.3';
-const String templateAndroidGradlePluginVersionForModule = '8.7.3';
+const String templateAndroidGradlePluginVersion = '8.9.1';
+const String templateAndroidGradlePluginVersionForModule = '8.9.1';
 
 // See https://kotlinlang.org/docs/releases.html#release-details
 const String templateKotlinGradlePluginVersion = '2.1.0';
