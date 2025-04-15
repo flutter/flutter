@@ -343,7 +343,7 @@ OS:           Mac OS X 13.2.1 aarch64
 /// Returns the Kotlin Gradle Plugin (KGP) version that the current project
 /// depends on when found, null otherwise.
 /// [directory] should be an android directory with a build.gradle file.
-Future<String?> getKotlinVersion(
+Future<String?> getKgpVersion(
   Directory androidDirectory,
   Logger logger,
   ProcessManager processManager,
@@ -356,10 +356,38 @@ Future<String?> getKotlinVersion(
   // https://github.com/gradle/gradle/blob/cefbee263181a924ac4efcaace6bda97a55bc0f7/platforms/core-runtime/gradle-cli/src/main/java/org/gradle/launcher/cli/DefaultCommandLineActionFactory.java#L260
   // This vesion is NOT the version of KGP that the project uses.
   //
-  // KGP
+  // kgpVersion task is a custom flutter task dynamiclly added that can print the kgp version
+  // if gradle can run successfuly.
+  String? gradleExecutable;
+  if (processManager.canRun('gradle')) {
+    gradleExecutable = 'gradle';
+  }
+  if (processManager.canRun('./gradlew')) {
+    gradleExecutable = './gradlew';
+  }
+  if (gradleExecutable != null) {
+    final String kgpVersionOutput =
+        (await processManager.run(<String>[gradleExecutable, 'kgpVersion', '-q'])).stdout as String;
 
-  // DO NOT MERGE
-  return '1.9.10';
+    // See expected output defined in
+    // flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt addTaskForKGPVersion
+    final RegExp kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
+    final RegExpMatch? version = kotlinVersionRegex.firstMatch(kgpVersionOutput);
+    if (version == null) {
+      // Most likely a bug in our parse implementation/regex.
+      logger.printWarning(_formatParseWarning(kgpVersionOutput, type: 'kotlin'));
+      return null;
+    }
+    return version.group(1);
+  }
+  logger.printTrace('Could not run system gradle');
+
+  // Project valiation code is regularly run on projects that can not build.
+  // Because of that this code also attempts to search through known template
+  // locations for kotlin versions.
+
+  // TODO(reidbaker): regex search for kotlin versions.
+  return null;
 }
 
 /// Returns the Android Gradle Plugin (AGP) version that the current project

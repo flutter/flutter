@@ -705,7 +705,7 @@ class AndroidProject extends FlutterProjectPlatform {
     );
     final String? agpVersion = gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
     final String? javaVersion = versionToParsableString(globals.java?.version);
-    final String? kgpVersion = await gradle.getKotlinVersion(
+    final String? kgpVersion = await gradle.getKgpVersion(
       hostAppGradleRoot,
       globals.logger,
       globals.processManager,
@@ -762,7 +762,7 @@ ${compatibleGradleKotlin ? '' : description}
 Incompatible Gradle/Kotlin versions.
 Gradle Version: $gradleVersion, Kotlin Version: $kgpVersion\n
 See the link below for more information:
-  https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations
+  https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
 ''';
     }
     return CompatibilityResult(
