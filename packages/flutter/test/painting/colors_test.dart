@@ -323,6 +323,44 @@ void main() {
     expect(output, equals(expectedColors));
   });
 
+  group('HSLColor.fromColor tests', () {
+    test('Pink', () {
+      const Color color = Color.fromARGB(255, 255, 51, 152);
+      final HSLColor hslColor = HSLColor.fromColor(color);
+      expect(hslColor.alpha, 1.0);
+      expect(hslColor.hue, within<double>(distance: .3, from: 330));
+      expect(hslColor.saturation, 1.0);
+      expect(hslColor.lightness, within<double>(distance: _doubleColorPrecision, from: 0.6));
+    });
+
+    test('White', () {
+      const Color color = Color(0xffffffff);
+      final HSLColor hslColor = HSLColor.fromColor(color);
+      expect(hslColor.alpha, 1.0);
+      expect(hslColor.hue, 0.0);
+      expect(hslColor.saturation, 0.0);
+      expect(hslColor.lightness, 1.0);
+    });
+
+    test('Black', () {
+      const Color color = Color(0xff000000);
+      final HSLColor hslColor = HSLColor.fromColor(color);
+      expect(hslColor.alpha, 1.0);
+      expect(hslColor.hue, 0.0);
+      expect(hslColor.saturation, 0.0);
+      expect(hslColor.lightness, 0.0);
+    });
+
+    test('Gray', () {
+      const Color color = Color(0xff808080);
+      final HSLColor hslColor = HSLColor.fromColor(color);
+      expect(hslColor.alpha, 1.0);
+      expect(hslColor.hue, 0.0);
+      expect(hslColor.saturation, 0.0);
+      expect(hslColor.lightness, within<double>(distance: _doubleColorPrecision, from: 0.5));
+    });
+  });
+
   test('HSLColor.lerp identical a,b', () {
     expect(HSLColor.lerp(null, null, 0), null);
     const HSLColor color = HSLColor.fromAHSL(1.0, 0.0, 0.5, 0.5);
@@ -412,6 +450,88 @@ void main() {
       const Color(0xffffffff),
     ];
     expect(output, equals(expectedColors));
+  });
+
+  // Tests the implementation against these colors from Wikipedia
+  // https://en.wikipedia.org/wiki/HSL_and_HSV#Examples
+  test('Wikipedia Examples Table test', () {
+    // ignore: always_specify_types
+    final colors = <(int, double, double, double, double, double, double, double, double, String)>[
+      // RGB,        r,   g,   b, hue,   v,   l,s(hsv),s(hsl)
+      (0xFFFFFFFF, 1.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 'white'),
+      (0xFF808080, 0.5, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0.0, 'gray'),
+      (0xFF000000, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 'black'),
+      (0xFFFF0000, 1.0, 0.0, 0.0, 0.0, 1.0, 0.5, 1.0, 1.0, 'red'),
+      (0xFFBFBF00, .75, .75, 0.0, 60, .75, .375, 1.0, 1.0, 'lime'),
+      (0xFF008000, 0.0, 0.5, 0.0, 120, 0.5, .25, 1.0, 1.0, 'green'),
+      (0xFF80FFFF, 0.5, 1.0, 1.0, 180, 1.0, 0.75, 0.5, 1, 'cyan'),
+      (0xFF8080FF, 0.5, 0.5, 1.0, 240, 1.0, 0.75, 0.5, 1, 'light purple'),
+      (0xFFBF40BF, 0.75, 0.25, 0.75, 300, .75, .5, 2.0 / 3, .5, 'mute magenta'),
+    ];
+
+    for (final (
+          int rgb,
+          double r,
+          double g,
+          double b,
+          double hue,
+          double v,
+          double l,
+          double sHSV,
+          double sHSL,
+          String name,
+        )
+        in colors) {
+      final Color color = Color.from(alpha: 1.0, red: r, green: g, blue: b);
+      final String debugColorConstructor = 'Color.from(alpha: 1.0, red: $r, green: $g, blue: $b)';
+      final Color intColor = Color(rgb);
+      expect(
+        intColor.r,
+        within<double>(distance: _doubleColorPrecision, from: r),
+        reason: '$name: Color($rgb).r should be $r',
+      );
+      expect(
+        intColor.g,
+        within<double>(distance: _doubleColorPrecision, from: g),
+        reason: '$name: Color($rgb).g should be $g',
+      );
+      expect(
+        intColor.b,
+        within<double>(distance: _doubleColorPrecision, from: b),
+        reason: '$name: Color($rgb).b should be $b',
+      );
+      final HSVColor hsv = HSVColor.fromAHSV(1.0, hue, sHSV, v);
+      final HSLColor hsl = HSLColor.fromAHSL(1.0, hue, sHSL, l);
+      expect(
+        color,
+        within<Color>(distance: _doubleColorPrecision, from: intColor),
+        reason: '$name: $debugColorConstructor should be close to Color($rgb)',
+      );
+      expect(
+        hsv.toColor(),
+        within<Color>(distance: _doubleColorPrecision, from: color),
+        reason:
+            '$name: HSVColor.fromAHSV(1.0, $hue, $sHSV, $v).hsv should be close to $debugColorConstructor',
+      );
+      expect(
+        hsl.toColor(),
+        within<Color>(distance: _doubleColorPrecision, from: color),
+        reason:
+            '$name: HSLColor.fromAHSL(1.0, $hue, $sHSL, $l).hsl should be close to $debugColorConstructor',
+      );
+      expect(
+        HSVColor.fromColor(color),
+        within<HSVColor>(distance: _doubleColorPrecision, from: hsv),
+        reason:
+            '$name: HSVColor.fromColor($debugColorConstructor) should be close to HSVColor.fromAHSV(1.0, $hue, $sHSV, $v)',
+      );
+      expect(
+        HSLColor.fromColor(color),
+        within<HSLColor>(distance: _doubleColorPrecision, from: hsl),
+        reason:
+            '$name: HSLColor.fromColor($debugColorConstructor) should be close to HSLColor.fromAHSL(1.0, $hue, $sHSL, $l)',
+      );
+    }
   });
 
   test('ColorSwatch test', () {
