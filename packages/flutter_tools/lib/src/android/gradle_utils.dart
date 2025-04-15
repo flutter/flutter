@@ -454,7 +454,12 @@ bool validateGradleAndKGP(Logger logger, {required String? gradleV, required Str
   }
 
   const maxKnownAndSupportedKgpVersion = '2.1.20';
-  if (isWithinVersionRange(kgpV, min: maxKnownAndSupportedKgpVersion, max: '100.100', inclusiveMin: false)) {
+  if (isWithinVersionRange(
+    kgpV,
+    min: maxKnownAndSupportedKgpVersion,
+    max: '100.100',
+    inclusiveMin: false,
+  )) {
     logger.printTrace(
       'Newer than known KGP version ($kgpV), gradle ($gradleV).'
       '\n Treating as valid configuration.',
@@ -469,7 +474,7 @@ bool validateGradleAndKGP(Logger logger, {required String? gradleV, required Str
   // Continuous KGP version handling is prefered in case an emergency patch to a
   // past release is shipped this code will assume the version range that is closest.
   if (isWithinVersionRange(kgpV, min: '2.1.20', max: '2.1.20')) {
-    // Documented max is 8.11, using 8.12 non inclusive covers patch versions. 
+    // Documented max is 8.11, using 8.12 non inclusive covers patch versions.
     return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.12', inclusiveMax: false);
   }
   if (isWithinVersionRange(kgpV, min: '2.1.0', max: '2.1.10')) {
