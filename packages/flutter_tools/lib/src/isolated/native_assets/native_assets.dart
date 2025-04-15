@@ -8,6 +8,7 @@ import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
+import 'package:yaml/yaml.dart';
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
@@ -211,8 +212,10 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.fileSystem,
     this.logger,
     this.runPackageName,
+    this.pubspecPath,
   );
 
+  final String pubspecPath;
   final String packageConfigPath;
   final PackageConfig packageConfig;
   final FileSystem fileSystem;
@@ -251,11 +254,18 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     runPackageName,
   );
 
+  late final Map<String, Map<String, Object?>?> userDefines = () {
+    final String pubspecContents = fileSystem.file(pubspecPath).readAsStringSync();
+    final YamlMap pubspec = loadYaml(pubspecContents) as YamlMap;
+    return NativeAssetsBuildRunner.readHooksUserDefinesFromPubspec(pubspec);
+  }();
+
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
     logger: _logger,
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
     packageLayout: packageLayout,
+    userDefines: userDefines,
   );
 
   @override
