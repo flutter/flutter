@@ -15,6 +15,7 @@ import 'base/logger.dart';
 import 'build_info.dart';
 import 'convert.dart';
 import 'device.dart';
+import 'globals.dart' as globals;
 
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
@@ -246,6 +247,10 @@ class MDnsVmServiceDiscovery {
     try {
       return await completer.future;
     } on SocketException catch (e, stackTrace) {
+      if (!globals.platform.isMacOS) {
+        rethrow;
+      }
+
       _logger.printTrace(stackTrace.toString());
 
       throw MissingLocalNetworkPermissionsException(
