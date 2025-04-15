@@ -223,6 +223,7 @@
 ../../../flutter/impeller/shader_archive/shader_archive_unittests.cc
 ../../../flutter/impeller/tessellator/dart/.dart_tool
 ../../../flutter/impeller/tessellator/dart/pubspec.yaml
+../../../flutter/impeller/tessellator/path_tessellator_unittests.cc
 ../../../flutter/impeller/tessellator/tessellator_unittests.cc
 ../../../flutter/impeller/toolkit/android/README.md
 ../../../flutter/impeller/toolkit/android/toolkit_android_unittests.cc
@@ -3765,6 +3766,8 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.powerlevel/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.router/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.registers/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.rtc/meta.json
@@ -3785,6 +3788,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.endpoint/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.phy/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.request/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.vreg/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/meta.json

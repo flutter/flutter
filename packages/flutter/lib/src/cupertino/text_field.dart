@@ -400,7 +400,7 @@ class CupertinoTextField extends StatefulWidget {
     this.autofocus = false,
     this.obscuringCharacter = '•',
     this.obscureText = false,
-    this.autocorrect = true,
+    this.autocorrect,
     SmartDashesType? smartDashesType,
     SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
@@ -619,7 +619,7 @@ class CupertinoTextField extends StatefulWidget {
   final bool obscureText;
 
   /// {@macro flutter.widgets.editableText.autocorrect}
-  final bool autocorrect;
+  final bool? autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.smartDashesType}
   final SmartDashesType smartDashesType;
@@ -920,7 +920,7 @@ class CupertinoTextField extends StatefulWidget {
       DiagnosticsProperty<String>('obscuringCharacter', obscuringCharacter, defaultValue: '•'),
     );
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
-    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: null));
     properties.add(
       EnumProperty<SmartDashesType>(
         'smartDashesType',
