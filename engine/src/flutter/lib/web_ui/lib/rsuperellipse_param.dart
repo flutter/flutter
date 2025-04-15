@@ -39,72 +39,12 @@ _Transform _scale(Offset scale) {
   return (Offset p) => Offset(p.dx * scale.dx, p.dy * scale.dy);
 }
 
-const List<List<double>> _kPrecomputedVariables = [
-  /*ratio=2.00*/ [2.00000000, 1.13276676],
-  /*ratio=2.10*/ [2.18349805, 1.20311921],
-  /*ratio=2.20*/ [2.33888662, 1.28698796],
-  /*ratio=2.30*/ [2.48660575, 1.36351941],
-  /*ratio=2.40*/ [2.62226596, 1.44717976],
-  /*ratio=2.50*/ [2.75148990, 1.53385819],
-  /*ratio=3.00*/ [3.36298265, 1.98288283],
-  /*ratio=3.50*/ [4.08649929, 2.23811846],
-  /*ratio=4.00*/ [4.85481134, 2.47563463],
-  /*ratio=4.50*/ [5.62945551, 2.72948597],
-  /*ratio=5.00*/ [6.43023796, 2.98020421],
-];
-
-const double _kMinRatio = 2.00;
-const double _kFirstStepInverse = 10; // = 1 / 0.10
-const double _kFirstMaxRatio = 2.50;
-const double _kFirstNumRecords = 6;
-const double _kSecondStepInverse = 2; // = 1 / 0.50
-const double _kSecondMaxRatio = 5.00;
-const double _kThirdNSlope = 1.559599389;
-const double _kThirdKxjSlope = 0.522807185;
-int get _kNumRecords => _kPrecomputedVariables.length;
-
-bool _octantContains(Octant param, Offset p) {
-  if (p.dx < 0 || p.dy < 0 || p.dy < p.dx) {
-    return true;
-  }
-  if (p.dx <= param.circleStart.dx) {
-    Offset pSe = p / param.se_a;
-    return math.pow(pSe.dx, param.se_n) + math.pow(pSe.dy, param.se_n) <= 1;
-  }
-  double radiusSquared = (param.circleStart - param.circleCenter).distanceSquared;
-  Offset pCircle = p - param.circleCenter;
-  return pCircle.distanceSquared < radiusSquared;
-}
-
-bool _cornerContains(Quadrant param, Offset p, [bool checkQuadrant = true]) {
-  Offset normOffset = (p - param.offset).scale(
-    1 / param.signedScale.width,
-    1 / param.signedScale.height,
-  );
-  if (checkQuadrant) {
-    if (normOffset.dx < 0 || normOffset.dy < 0) {
-      return true;
-    }
-  } else {
-    normOffset = Offset(normOffset.dx.abs(), normOffset.dy.abs());
-  }
-  if (param.top.se_n < 2 || param.right.se_n < 2) {
-    final double xDelta = param.right.offset.dx + param.right.se_a - normOffset.dx;
-    final double yDelta = param.top.offset.dy + param.top.se_a - normOffset.dy;
-    final bool xWithin = xDelta > 0 || (xDelta == 0 && param.signedScale.width < 0);
-    final bool yWithin = yDelta > 0 || (yDelta == 0 && param.signedScale.height < 0);
-    return xWithin && yWithin;
-  }
-  return _octantContains(param.top, normOffset - param.top.offset) &&
-      _octantContains(param.right, _flip(normOffset - param.right.offset));
-}
-
 double _angleTo(Offset a, Offset b) {
   return math.atan2(a.dx * b.dy - a.dy * b.dx, a.dx * b.dx + a.dy * b.dy);
 }
 
-// Octant Class
-class Octant {
+// _RSuperellipseOctant Class
+class _RSuperellipseOctant {
   final Offset offset;
   final double se_a;
   final double se_n;
@@ -113,7 +53,7 @@ class Octant {
   final Offset circleCenter;
   final double circleMaxAngle;
 
-  const Octant({
+  const _RSuperellipseOctant({
     required this.offset,
     required this.se_a,
     required this.se_n,
@@ -123,7 +63,7 @@ class Octant {
     required this.circleMaxAngle,
   });
 
-  const Octant.square({required Offset offset, required double se_a})
+  const _RSuperellipseOctant.square({required Offset offset, required double se_a})
     : this(
         offset: offset,
         se_a: se_a,
@@ -134,9 +74,9 @@ class Octant {
         circleMaxAngle: 0,
       );
 
-  factory Octant.computeOctant(Offset center, double a, double radius) {
+  factory _RSuperellipseOctant.computeOctant(Offset center, double a, double radius) {
     if (radius <= 0) {
-      return Octant.square(offset: center, se_a: a);
+      return _RSuperellipseOctant.square(offset: center, se_a: a);
     }
 
     final double ratio = a * 2 / radius;
@@ -157,7 +97,7 @@ class Octant {
     final double circleMaxAngle =
         radius == 0 ? 0 : _angleTo(pointM - circleCenter, pointJ - circleCenter);
 
-    return Octant(
+    return _RSuperellipseOctant(
       offset: center,
       se_a: a,
       se_n: n,
@@ -178,6 +118,30 @@ class Octant {
   }
 
   static (double, double) _computeNAndXj(double ratio) {
+    const List<List<double>> _kPrecomputedVariables = [
+      /*ratio=2.00*/ [2.00000000, 1.13276676],
+      /*ratio=2.10*/ [2.18349805, 1.20311921],
+      /*ratio=2.20*/ [2.33888662, 1.28698796],
+      /*ratio=2.30*/ [2.48660575, 1.36351941],
+      /*ratio=2.40*/ [2.62226596, 1.44717976],
+      /*ratio=2.50*/ [2.75148990, 1.53385819],
+      /*ratio=3.00*/ [3.36298265, 1.98288283],
+      /*ratio=3.50*/ [4.08649929, 2.23811846],
+      /*ratio=4.00*/ [4.85481134, 2.47563463],
+      /*ratio=4.50*/ [5.62945551, 2.72948597],
+      /*ratio=5.00*/ [6.43023796, 2.98020421],
+    ];
+
+    const double _kMinRatio = 2.00;
+    const double _kFirstStepInverse = 10; // = 1 / 0.10
+    const double _kFirstMaxRatio = 2.50;
+    const double _kFirstNumRecords = 6;
+    const double _kSecondStepInverse = 2; // = 1 / 0.50
+    const double _kSecondMaxRatio = 5.00;
+    const double _kThirdNSlope = 1.559599389;
+    const double _kThirdKxjSlope = 0.522807185;
+    final int _kNumRecords = _kPrecomputedVariables.length;
+
     if (ratio > _kSecondMaxRatio) {
       final double n =
           _kThirdNSlope * (ratio - _kSecondMaxRatio) + _kPrecomputedVariables[_kNumRecords - 1][0];
@@ -204,7 +168,7 @@ class Octant {
     return (n, 1 - 1 / k_xJ);
   }
 
-  static const Octant zero = Octant(
+  static const _RSuperellipseOctant zero = _RSuperellipseOctant(
     offset: Offset.zero,
     se_a: 0,
     se_n: 0,
@@ -219,8 +183,8 @@ class Octant {
 class Quadrant {
   final Offset offset;
   final Size signedScale;
-  final Octant top;
-  final Octant right;
+  final _RSuperellipseOctant top;
+  final _RSuperellipseOctant right;
 
   const Quadrant({
     required this.offset,
@@ -248,16 +212,16 @@ class Quadrant {
     return Quadrant(
       offset: center,
       signedScale: signedScale,
-      top: Octant.computeOctant(Offset(0, -c), normHalfSize.width, normRadius),
-      right: Octant.computeOctant(Offset(c, 0), normHalfSize.height, normRadius),
+      top: _RSuperellipseOctant.computeOctant(Offset(0, -c), normHalfSize.width, normRadius),
+      right: _RSuperellipseOctant.computeOctant(Offset(c, 0), normHalfSize.height, normRadius),
     );
   }
 
   static const Quadrant zero = Quadrant(
     offset: Offset.zero,
     signedScale: const Size(1, 1),
-    top: Octant.zero,
-    right: Octant.zero,
+    top: _RSuperellipseOctant.zero,
+    right: _RSuperellipseOctant.zero,
   );
 }
 
@@ -372,7 +336,7 @@ class _RSuperellipsePathBuilder {
     }
   }
 
-  List<Offset> _superellipseArcPoints(Octant param) {
+  List<Offset> _superellipseArcPoints(_RSuperellipseOctant param) {
     final Offset start = Offset(0, param.se_a);
     final Offset end = param.circleStart;
     final Offset startTangent = Offset(1, 0);
@@ -389,7 +353,7 @@ class _RSuperellipsePathBuilder {
     ];
   }
 
-  List<Offset> _circularArcPoints(Octant param) {
+  List<Offset> _circularArcPoints(_RSuperellipseOctant param) {
     final Offset startVector = param.circleStart - param.circleCenter;
     final Offset endVector = _rotate(startVector, -param.circleMaxAngle);
     final Offset circleEnd = param.circleCenter + endVector;
@@ -406,7 +370,7 @@ class _RSuperellipsePathBuilder {
     ];
   }
 
-  void _addOctant(Octant param, bool reverse, bool flip, _Transform externalTransform) {
+  void _addOctant(_RSuperellipseOctant param, bool reverse, bool flip, _Transform externalTransform) {
     _Transform transform = _composite(externalTransform, _translate(param.offset));
     if (flip) {
       transform = _composite(transform, _flip);
