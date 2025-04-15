@@ -526,10 +526,10 @@ void main() {
     testWidgets(
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
-        tester.binding.platformDispatcher.supportsShowingSystemContextMenu = true;
+        tester.platformDispatcher.supportsShowingSystemContextMenu = true;
         tester.binding.handleSupportsShowingSystemContextMenuChanged();
         addTearDown(() {
-          tester.binding.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
           tester.binding.handleSupportsShowingSystemContextMenuChanged();
         });
 
