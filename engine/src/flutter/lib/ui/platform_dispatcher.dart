@@ -1144,13 +1144,13 @@ class PlatformDispatcher {
 
   /// A callback that is invoked whenever [supportsShowingSystemContextMenu]
   /// changes.
-  VoidCallback? get onSupportsShowingSystemContextMenuChange =>
-      _onSupportsShowingSystemContextMenuChange;
-  VoidCallback? _onSupportsShowingSystemContextMenuChange;
-  Zone _onSupportsShowingSystemContextMenuChangeZone = Zone.root;
-  set onSupportsShowingSystemContextMenuChange(VoidCallback? callback) {
-    _onSupportsShowingSystemContextMenuChange = callback;
-    _onSupportsShowingSystemContextMenuChangeZone = Zone.current;
+  VoidCallback? get onSupportsShowingSystemContextMenuChanged =>
+      _onSupportsShowingSystemContextMenuChanged;
+  VoidCallback? _onSupportsShowingSystemContextMenuChanged;
+  Zone _onSupportsShowingSystemContextMenuChangedZone = Zone.root;
+  set onSupportsShowingSystemContextMenuChanged(VoidCallback? callback) {
+    _onSupportsShowingSystemContextMenuChanged = callback;
+    _onSupportsShowingSystemContextMenuChangedZone = Zone.current;
   }
 
   /// Whether briefly displaying the characters as you type in obscured text
@@ -1227,8 +1227,8 @@ class PlatformDispatcher {
       if (supportsShowingSystemContextMenu != _supportsShowingSystemContextMenu) {
         _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
         _invoke(
-          onSupportsShowingSystemContextMenuChange,
-          _onSupportsShowingSystemContextMenuChangeZone,
+          onSupportsShowingSystemContextMenuChanged,
+          _onSupportsShowingSystemContextMenuChangedZone,
         );
       }
     } else {
