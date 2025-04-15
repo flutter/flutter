@@ -444,8 +444,7 @@ String _formatParseWarning(String content, {String type = 'gradle'}) {
 // If versions are newer than the max known version a warning is logged and true
 // returned.
 //
-// Kotlin k2 can require gradle 8.3.
-// https://kotlinlang.org/docs/whatsnew20.html#current-k2-compiler-limitations.
+// Source of truth found here:
 // https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
 bool validateGradleAndKGP(Logger logger, {required String? gradleV, required String? kgpV}) {
   if (gradleV == null || kgpV == null || gradleV.isEmpty || kgpV.isEmpty) {
@@ -516,6 +515,7 @@ bool validateGradleAndKGP(Logger logger, {required String? gradleV, required Str
     return isWithinVersionRange(gradleV, min: '6.1.1', max: '7.0.2');
   }
 
+  logger.printTrace('Unknown KGP-Gradle compatibility, KGP: $kgpV, Gradle: $gradleV');
   return false;
 }
 

@@ -717,7 +717,7 @@ dependencies {
         GradleKgpTestData(
           true,
           kgpVersion: templateKotlinGradlePluginVersion,
-           // TODO(reidbaker): replace with templateDefaultGradleVersion.
+          // TODO(reidbaker): replace with templateDefaultGradleVersion.
           gradleVersion: '8.10',
         ),
 
@@ -783,6 +783,8 @@ dependencies {
         GradleKgpTestData(false, kgpVersion: '1.7.20', gradleVersion: '7.2'),
         GradleKgpTestData(false, kgpVersion: '1.7.0', gradleVersion: '7.0.3'),
         GradleKgpTestData(false, kgpVersion: '1.6.20', gradleVersion: '7.0.3'),
+        // Unknown values.
+        GradleKgpTestData(false, kgpVersion: '1.6.19', gradleVersion: '7.0.3'),
         // Null values:
         // ignore: avoid_redundant_argument_values
         GradleKgpTestData(false, kgpVersion: null, gradleVersion: '7.2'),
