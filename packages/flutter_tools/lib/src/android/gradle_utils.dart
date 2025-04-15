@@ -71,10 +71,10 @@ const String maxKnownAndSupportedGradleVersion = '8.12';
 // Supported here means tooling is aware of this version's Java <-> AGP
 // compatibility.
 @visibleForTesting
-const String maxKnownAndSupportedAgpVersion = '8.7.3';
+const String maxKnownAndSupportedAgpVersion = '8.9.1';
 
 // Update this when new versions of AGP come out.
-const String maxKnownAgpVersion = '8.7.3';
+const String maxKnownAgpVersion = '8.9.1';
 
 // Oldest documented version of AGP that has a listed minimum
 // compatible Java version.
@@ -692,6 +692,7 @@ String getGradleVersionFor(String androidPluginVersion) {
     GradleForAgp(agpMin: '8.4.0', agpMax: '8.4.99', minRequiredGradle: '8.6'),
     GradleForAgp(agpMin: '8.5.0', agpMax: '8.6.99', minRequiredGradle: '8.7'),
     GradleForAgp(agpMin: '8.7.0', agpMax: '8.7.99', minRequiredGradle: '8.9'),
+    GradleForAgp(agpMin: '8.9.0', agpMax: '8.9.99', minRequiredGradle: '8.11.1'),
     // Assume if AGP is newer than this code know about return the highest gradle
     // version we know about.
     GradleForAgp(
