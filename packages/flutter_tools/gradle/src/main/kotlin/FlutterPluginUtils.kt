@@ -656,7 +656,7 @@ object FlutterPluginUtils {
         // build artifact, so we move it from that directory to within Flutter's build directory
         // to avoid polluting source directories with build artifacts.
         //
-        // AGP explicitely recommends not setting the buildStagingDirectory to be within a build
+        // AGP explicitly recommends not setting the buildStagingDirectory to be within a build
         // directory in
         // https://developer.android.com/reference/tools/gradle-api/8.3/null/com/android/build/api/dsl/Cmake#buildStagingDirectory(kotlin.Any),
         // but as we are not actually building anything (and are instead only tricking AGP into
