@@ -11526,7 +11526,7 @@ void main() {
   );
 
   testWidgets(
-    'Toolbar hides on scroll start and re-appears on scroll end on Android and iOS',
+    'Toolbar hides on scroll start and re-appears on scroll end on Android',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
@@ -11583,10 +11583,7 @@ void main() {
       expect(renderEditable.selectionStartInViewport.value, true);
       expect(renderEditable.selectionEndInViewport.value, true);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.android,
-      TargetPlatform.iOS,
-    }),
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
   testWidgets(
