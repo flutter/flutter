@@ -479,28 +479,57 @@ void main() {
           double l,
           double sHSV,
           double sHSL,
-          // ignore: unused_local_variable
           String name,
         )
         in colors) {
-      // debugPrint('Testing color: $name');
       final Color color = Color.from(alpha: 1.0, red: r, green: g, blue: b);
+      final String debugColorConstructor = 'Color.from(alpha: 1.0, red: $r, green: $g, blue: $b)';
       final Color intColor = Color(rgb);
-      expect(intColor.r, within<double>(distance: _doubleColorPrecision, from: r));
-      expect(intColor.g, within<double>(distance: _doubleColorPrecision, from: g));
-      expect(intColor.b, within<double>(distance: _doubleColorPrecision, from: b));
+      expect(
+        intColor.r,
+        within<double>(distance: _doubleColorPrecision, from: r),
+        reason: '$name: Color($rgb).r should be $r',
+      );
+      expect(
+        intColor.g,
+        within<double>(distance: _doubleColorPrecision, from: g),
+        reason: '$name: Color($rgb).g should be $g',
+      );
+      expect(
+        intColor.b,
+        within<double>(distance: _doubleColorPrecision, from: b),
+        reason: '$name: Color($rgb).b should be $b',
+      );
       final HSVColor hsv = HSVColor.fromAHSV(1.0, hue, sHSV, v);
       final HSLColor hsl = HSLColor.fromAHSL(1.0, hue, sHSL, l);
-      expect(color, within<Color>(distance: _doubleColorPrecision, from: intColor));
-      expect(hsv.toColor(), within<Color>(distance: _doubleColorPrecision, from: color));
-      expect(hsl.toColor(), within<Color>(distance: _doubleColorPrecision, from: color));
+      expect(
+        color,
+        within<Color>(distance: _doubleColorPrecision, from: intColor),
+        reason: '$name: $debugColorConstructor should be close to Color($rgb)',
+      );
+      expect(
+        hsv.toColor(),
+        within<Color>(distance: _doubleColorPrecision, from: color),
+        reason:
+            '$name: HSVColor.fromAHSV(1.0, $hue, $sHSV, $v).hsv should be close to $debugColorConstructor',
+      );
+      expect(
+        hsl.toColor(),
+        within<Color>(distance: _doubleColorPrecision, from: color),
+        reason:
+            '$name: HSLColor.fromAHSL(1.0, $hue, $sHSL, $l).hsl should be close to $debugColorConstructor',
+      );
       expect(
         HSVColor.fromColor(color),
         within<HSVColor>(distance: _doubleColorPrecision, from: hsv),
+        reason:
+            '$name: HSVColor.fromColor($debugColorConstructor) should be close to HSVColor.fromAHSV(1.0, $hue, $sHSV, $v)',
       );
       expect(
         HSLColor.fromColor(color),
         within<HSLColor>(distance: _doubleColorPrecision, from: hsl),
+        reason:
+            '$name: HSLColor.fromColor($debugColorConstructor) should be close to HSLColor.fromAHSL(1.0, $hue, $sHSL, $l)',
       );
     }
   });
