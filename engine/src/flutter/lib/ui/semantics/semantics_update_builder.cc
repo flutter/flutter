@@ -30,9 +30,47 @@ SemanticsUpdateBuilder::SemanticsUpdateBuilder() = default;
 
 SemanticsUpdateBuilder::~SemanticsUpdateBuilder() = default;
 
+SemanticsFlags2 vectorBoolToSemanticsFlags2(const std::vector<bool>& vec) {
+  SemanticsFlags2 flags = {};
+  flags.hasCheckedState = vec[0];
+  flags.isChecked = vec[1];
+  flags.isSelected = vec[2];
+  flags.isButton = vec[3];
+  flags.isTextField = vec[4];
+  flags.isFocused = vec[5];
+  flags.hasEnabledState = vec[6];
+  flags.isEnabled = vec[7];
+  flags.isInMutuallyExclusiveGroup = vec[8];
+  flags.isHeader = vec[9];
+  flags.isObscured = vec[10];
+  flags.scopesRoute = vec[11];
+  flags.namesRoute = vec[12];
+  flags.isHidden = vec[13];
+  flags.isImage = vec[14];
+  flags.isLiveRegion = vec[15];
+  flags.hasToggledState = vec[16];
+  flags.isToggled = vec[17];
+  flags.hasImplicitScrolling = vec[18];
+  flags.isMultiline = vec[19];
+  flags.isReadOnly = vec[20];
+  flags.isFocusable = vec[21];
+  flags.isLink = vec[22];
+  flags.isSlider = vec[23];
+  flags.isKeyboardKey = vec[24];
+  flags.isCheckStateMixed = vec[25];
+  flags.hasExpandedState = vec[26];
+  flags.isExpanded = vec[27];
+  flags.hasSelectedState = vec[28];
+  flags.hasRequiredState = vec[29];
+  flags.isRequired = vec[30];
+
+  // 4. Return the populated struct
+  return flags;
+}
+
 void SemanticsUpdateBuilder::updateNode(
     int id,
-    int flags,
+    const std::vector<bool>& flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -78,7 +116,7 @@ void SemanticsUpdateBuilder::updateNode(
          "childrenInHitTestOrder";
   SemanticsNode node;
   node.id = id;
-  node.flags = flags;
+  node.flags = vectorBoolToSemanticsFlags2(flags);
   node.actions = actions;
   node.maxValueLength = maxValueLength;
   node.currentValueLength = currentValueLength;

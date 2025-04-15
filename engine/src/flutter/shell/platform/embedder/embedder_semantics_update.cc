@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/embedder/embedder_semantics_update.h"
+#include "embedder.h"
 
 namespace flutter {
 
@@ -26,6 +27,114 @@ EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
   };
 }
 
+FlutterSemanticsFlag SemanticsFlagtoInt(const SemanticsFlags2& flags) {
+  int result = 0;
+
+  // Iterate through the fields and set the corresponding bit if true
+  if (flags.hasCheckedState)
+    result |= (1 << 0);
+  if (flags.isChecked)
+    result |= (1 << 1);
+  if (flags.isSelected)
+    result |= (1 << 2);
+  if (flags.isButton)
+    result |= (1 << 3);
+  if (flags.isTextField)
+    result |= (1 << 4);
+  if (flags.isFocused)
+    result |= (1 << 5);
+  if (flags.hasEnabledState)
+    result |= (1 << 6);
+  if (flags.isEnabled)
+    result |= (1 << 7);
+  if (flags.isInMutuallyExclusiveGroup)
+    result |= (1 << 8);
+  if (flags.isHeader)
+    result |= (1 << 9);
+  if (flags.isObscured)
+    result |= (1 << 10);
+  if (flags.scopesRoute)
+    result |= (1 << 11);
+  if (flags.namesRoute)
+    result |= (1 << 12);
+  if (flags.isHidden)
+    result |= (1 << 13);
+  if (flags.isImage)
+    result |= (1 << 14);
+  if (flags.isLiveRegion)
+    result |= (1 << 15);
+  if (flags.hasToggledState)
+    result |= (1 << 16);
+  if (flags.isToggled)
+    result |= (1 << 17);
+  if (flags.hasImplicitScrolling)
+    result |= (1 << 18);
+  if (flags.isMultiline)
+    result |= (1 << 19);
+  if (flags.isReadOnly)
+    result |= (1 << 20);
+  if (flags.isFocusable)
+    result |= (1 << 21);
+  if (flags.isLink)
+    result |= (1 << 22);
+  if (flags.isSlider)
+    result |= (1 << 23);
+  if (flags.isKeyboardKey)
+    result |= (1 << 24);
+  if (flags.isCheckStateMixed)
+    result |= (1 << 25);
+  if (flags.hasExpandedState)
+    result |= (1 << 26);
+  if (flags.isExpanded)
+    result |= (1 << 27);
+  if (flags.hasSelectedState)
+    result |= (1 << 28);
+  if (flags.hasRequiredState)
+    result |= (1 << 29);
+  if (flags.isRequired)
+    result |= (1 << 30);
+
+  return static_cast<FlutterSemanticsFlag>(result);
+}
+
+const FlutterSemanticsFlags convertToFlutterSemanticsFlags(
+    const SemanticsFlags2& source) {
+  FlutterSemanticsFlags dest = {};
+
+  dest.hasCheckedState = source.hasCheckedState;
+  dest.isChecked = source.isChecked;
+  dest.isSelected = source.isSelected;
+  dest.isButton = source.isButton;
+  dest.isTextField = source.isTextField;
+  dest.isFocused = source.isFocused;
+  dest.hasEnabledState = source.hasEnabledState;
+  dest.isEnabled = source.isEnabled;
+  dest.isInMutuallyExclusiveGroup = source.isInMutuallyExclusiveGroup;
+  dest.isHeader = source.isHeader;
+  dest.isObscured = source.isObscured;
+  dest.scopesRoute = source.scopesRoute;
+  dest.namesRoute = source.namesRoute;
+  dest.isHidden = source.isHidden;
+  dest.isImage = source.isImage;
+  dest.isLiveRegion = source.isLiveRegion;
+  dest.hasToggledState = source.hasToggledState;
+  dest.isToggled = source.isToggled;
+  dest.hasImplicitScrolling = source.hasImplicitScrolling;
+  dest.isMultiline = source.isMultiline;
+  dest.isReadOnly = source.isReadOnly;
+  dest.isFocusable = source.isFocusable;
+  dest.isLink = source.isLink;
+  dest.isSlider = source.isSlider;
+  dest.isKeyboardKey = source.isKeyboardKey;
+  dest.isCheckStateMixed = source.isCheckStateMixed;
+  dest.hasExpandedState = source.hasExpandedState;
+  dest.isExpanded = source.isExpanded;
+  dest.hasSelectedState = source.hasSelectedState;
+  dest.hasRequiredState = source.hasRequiredState;
+  dest.isRequired = source.isRequired;
+
+  return dest;
+}
 void EmbedderSemanticsUpdate::AddNode(const SemanticsNode& node) {
   SkMatrix transform = node.transform.asM33();
   FlutterTransformation flutter_transform{
@@ -41,7 +150,7 @@ void EmbedderSemanticsUpdate::AddNode(const SemanticsNode& node) {
   nodes_.push_back({
       sizeof(FlutterSemanticsNode),
       node.id,
-      static_cast<FlutterSemanticsFlag>(node.flags),
+      SemanticsFlagtoInt(node.flags),
       static_cast<FlutterSemanticsAction>(node.actions),
       node.textSelectionBase,
       node.textSelectionExtent,
@@ -138,11 +247,12 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       CreateStringAttributes(node.increasedValueAttributes);
   auto decreased_value_attributes =
       CreateStringAttributes(node.decreasedValueAttributes);
+  FlutterSemanticsFlags flags = convertToFlutterSemanticsFlags(node.flags);
 
   nodes_.push_back({
       sizeof(FlutterSemanticsNode2),
       node.id,
-      static_cast<FlutterSemanticsFlag>(node.flags),
+      SemanticsFlagtoInt(node.flags),
       static_cast<FlutterSemanticsAction>(node.actions),
       node.textSelectionBase,
       node.textSelectionExtent,
@@ -179,6 +289,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       increased_value_attributes.attributes,
       decreased_value_attributes.count,
       decreased_value_attributes.attributes,
+      &flags,
   });
 }
 

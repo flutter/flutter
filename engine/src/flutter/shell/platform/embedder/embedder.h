@@ -258,6 +258,40 @@ typedef enum {
   kFlutterSemanticsFlagIsRequired = 1 << 30,
 } FlutterSemanticsFlag;
 
+typedef struct {
+  bool hasCheckedState;
+  bool isChecked;
+  bool isSelected;
+  bool isButton;
+  bool isTextField;
+  bool isFocused;
+  bool hasEnabledState;
+  bool isEnabled;
+  bool isInMutuallyExclusiveGroup;
+  bool isHeader;
+  bool isObscured;
+  bool scopesRoute;
+  bool namesRoute;
+  bool isHidden;
+  bool isImage;
+  bool isLiveRegion;
+  bool hasToggledState;
+  bool isToggled;
+  bool hasImplicitScrolling;
+  bool isMultiline;
+  bool isReadOnly;
+  bool isFocusable;
+  bool isLink;
+  bool isSlider;
+  bool isKeyboardKey;
+  bool isCheckStateMixed;
+  bool hasExpandedState;
+  bool isExpanded;
+  bool hasSelectedState;
+  bool hasRequiredState;
+  bool isRequired;
+} FlutterSemanticsFlags;
+
 typedef enum {
   /// Text has unknown text direction.
   kFlutterTextDirectionUnknown = 0,
@@ -1594,6 +1628,9 @@ typedef struct {
   // Array of string attributes associated with the `decreased_value`.
   // Has length `decreased_value_attribute_count`.
   const FlutterStringAttribute** decreased_value_attributes;
+  // The set of semantics flags associated with this node. Prefer to use this
+  // over `flags`.
+  FlutterSemanticsFlags* flags2;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a

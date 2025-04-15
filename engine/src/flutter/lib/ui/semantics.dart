@@ -329,12 +329,10 @@ class SemanticsAction {
     _kFocusIndex: focus,
   };
 
-  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
-  // ignore: public_member_api_docs
+  //
   static List<SemanticsAction> get values => _kActionById.values.toList(growable: false);
 
-  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
-  // ignore: public_member_api_docs
+  //
   static SemanticsAction? fromIndex(int index) => _kActionById[index];
 
   @override
@@ -536,6 +534,7 @@ enum SemanticsInputType {
 // updated. If the change affects the visibility of a [SemanticsNode] to
 // accessibility services, `flutter_test/controller.dart#SemanticsController._importantFlags`
 // must be updated as well.
+
 class SemanticsFlag {
   const SemanticsFlag._(this.index, this.name);
 
@@ -962,6 +961,233 @@ class SemanticsFlag {
   String toString() => 'SemanticsFlag.$name';
 }
 
+class SemanticsFlags {
+  bool hasCheckedState;
+  bool isChecked;
+  bool isSelected;
+  bool isButton;
+  bool isTextField;
+  bool isFocused;
+  bool hasEnabledState;
+  bool isEnabled;
+  bool isInMutuallyExclusiveGroup;
+  bool isHeader;
+  bool isObscured;
+  bool scopesRoute;
+  bool namesRoute;
+  bool isHidden;
+  bool isImage;
+  bool isLiveRegion;
+  bool hasToggledState;
+  bool isToggled;
+  bool hasImplicitScrolling;
+  bool isMultiline;
+  bool isReadOnly;
+  bool isFocusable;
+  bool isLink;
+  bool isSlider;
+  bool isKeyboardKey;
+  bool isCheckStateMixed;
+  bool hasExpandedState;
+  bool isExpanded;
+  bool hasSelectedState;
+  bool hasRequiredState;
+  bool isRequired;
+
+  /// Constructor for SemanticsFlags.
+  ///
+  /// All flags default to `false` unless specified.
+  SemanticsFlags({
+    this.hasCheckedState = false, // Bit 0
+    this.isChecked = false, // Bit 1
+    this.isSelected = false, // Bit 2
+    this.isButton = false, // Bit 3
+    this.isTextField = false, // Bit 4
+    this.isFocused = false, // Bit 5
+    this.hasEnabledState = false, // Bit 6
+    this.isEnabled = false, // Bit 7
+    this.isInMutuallyExclusiveGroup = false, // Bit 8
+    this.isHeader = false, // Bit 9
+    this.isObscured = false, // Bit 10
+    this.scopesRoute = false, // Bit 11
+    this.namesRoute = false, // Bit 12
+    this.isHidden = false, // Bit 13
+    this.isImage = false, // Bit 14
+    this.isLiveRegion = false, // Bit 15
+    this.hasToggledState = false, // Bit 16
+    this.isToggled = false, // Bit 17
+    this.hasImplicitScrolling = false, // Bit 18
+    this.isMultiline = false, // Bit 19
+    this.isReadOnly = false, // Bit 20
+    this.isFocusable = false, // Bit 21
+    this.isLink = false, // Bit 22
+    this.isSlider = false, // Bit 23
+    this.isKeyboardKey = false, // Bit 24
+    this.isCheckStateMixed = false, // Bit 25
+    this.hasExpandedState = false, // Bit 26
+    this.isExpanded = false, // Bit 27
+    this.hasSelectedState = false, // Bit 28
+    this.hasRequiredState = false, // Bit 29
+    this.isRequired = false, // Bit 30
+  });
+
+  /// Merges the flags from [other] into this instance.
+  ///
+  /// For each flag, the result is `true` if the flag is `true` in *either*
+  /// this instance or the [other] instance (logical OR).
+  /// This method modifies the current instance.
+  void merge(SemanticsFlags other) {
+    hasCheckedState = hasCheckedState || other.hasCheckedState;
+    isChecked = isChecked || other.isChecked;
+    isSelected = isSelected || other.isSelected;
+    isButton = isButton || other.isButton;
+    isTextField = isTextField || other.isTextField;
+    isFocused = isFocused || other.isFocused;
+    hasEnabledState = hasEnabledState || other.hasEnabledState;
+    isEnabled = isEnabled || other.isEnabled;
+    isInMutuallyExclusiveGroup = isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup;
+    isHeader = isHeader || other.isHeader;
+    isObscured = isObscured || other.isObscured;
+    scopesRoute = scopesRoute || other.scopesRoute;
+    namesRoute = namesRoute || other.namesRoute;
+    isHidden = isHidden || other.isHidden;
+    isImage = isImage || other.isImage;
+    isLiveRegion = isLiveRegion || other.isLiveRegion;
+    hasToggledState = hasToggledState || other.hasToggledState;
+    isToggled = isToggled || other.isToggled;
+    hasImplicitScrolling = hasImplicitScrolling || other.hasImplicitScrolling;
+    isMultiline = isMultiline || other.isMultiline;
+    isReadOnly = isReadOnly || other.isReadOnly;
+    isFocusable = isFocusable || other.isFocusable;
+    isLink = isLink || other.isLink;
+    isSlider = isSlider || other.isSlider;
+    isKeyboardKey = isKeyboardKey || other.isKeyboardKey;
+    isCheckStateMixed = isCheckStateMixed || other.isCheckStateMixed;
+    hasExpandedState = hasExpandedState || other.hasExpandedState;
+    isExpanded = isExpanded || other.isExpanded;
+    hasSelectedState = hasSelectedState || other.hasSelectedState;
+    hasRequiredState = hasRequiredState || other.hasRequiredState;
+    isRequired = isRequired || other.isRequired;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    // Check if the instances are identical
+    if (identical(this, other)) return true;
+
+    // Check if the other object is a SemanticsFlags instance
+    // and that runtime types match (important if subclassing could occur)
+    if (other is! SemanticsFlags || runtimeType != other.runtimeType) return false;
+
+    // Compare all fields
+    return hasCheckedState == other.hasCheckedState &&
+        isChecked == other.isChecked &&
+        isSelected == other.isSelected &&
+        isButton == other.isButton &&
+        isTextField == other.isTextField &&
+        isFocused == other.isFocused &&
+        hasEnabledState == other.hasEnabledState &&
+        isEnabled == other.isEnabled &&
+        isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
+        isHeader == other.isHeader &&
+        isObscured == other.isObscured &&
+        scopesRoute == other.scopesRoute &&
+        namesRoute == other.namesRoute &&
+        isHidden == other.isHidden &&
+        isImage == other.isImage &&
+        isLiveRegion == other.isLiveRegion &&
+        hasToggledState == other.hasToggledState &&
+        isToggled == other.isToggled &&
+        hasImplicitScrolling == other.hasImplicitScrolling &&
+        isMultiline == other.isMultiline &&
+        isReadOnly == other.isReadOnly &&
+        isFocusable == other.isFocusable &&
+        isLink == other.isLink &&
+        isSlider == other.isSlider &&
+        isKeyboardKey == other.isKeyboardKey &&
+        isCheckStateMixed == other.isCheckStateMixed &&
+        hasExpandedState == other.hasExpandedState &&
+        isExpanded == other.isExpanded &&
+        hasSelectedState == other.hasSelectedState &&
+        hasRequiredState == other.hasRequiredState &&
+        isRequired == other.isRequired;
+  }
+
+  @override
+  List<String> toStrings() {
+    List<String> trueFlags = [];
+
+    if (hasCheckedState) trueFlags.add('hasCheckedState');
+    if (isChecked) trueFlags.add('isChecked');
+    if (isSelected) trueFlags.add('isSelected');
+    if (isButton) trueFlags.add('isButton');
+    if (isTextField) trueFlags.add('isTextField');
+    if (isFocused) trueFlags.add('isFocused');
+    if (hasEnabledState) trueFlags.add('hasEnabledState');
+    if (isEnabled) trueFlags.add('isEnabled');
+    if (isInMutuallyExclusiveGroup) trueFlags.add('isInMutuallyExclusiveGroup');
+    if (isHeader) trueFlags.add('isHeader');
+    if (isObscured) trueFlags.add('isObscured');
+    if (scopesRoute) trueFlags.add('scopesRoute');
+    if (namesRoute) trueFlags.add('namesRoute');
+    if (isHidden) trueFlags.add('isHidden');
+    if (isImage) trueFlags.add('isImage');
+    if (isLiveRegion) trueFlags.add('isLiveRegion');
+    if (hasToggledState) trueFlags.add('hasToggledState');
+    if (isToggled) trueFlags.add('isToggled');
+    if (hasImplicitScrolling) trueFlags.add('hasImplicitScrolling');
+    if (isMultiline) trueFlags.add('isMultiline');
+    if (isReadOnly) trueFlags.add('isReadOnly');
+    if (isFocusable) trueFlags.add('isFocusable');
+    if (isLink) trueFlags.add('isLink');
+    if (isSlider) trueFlags.add('isSlider');
+    if (isKeyboardKey) trueFlags.add('isKeyboardKey');
+    if (isCheckStateMixed) trueFlags.add('isCheckStateMixed');
+    if (hasExpandedState) trueFlags.add('hasExpandedState');
+    if (isExpanded) trueFlags.add('isExpanded');
+    if (hasSelectedState) trueFlags.add('hasSelectedState');
+    if (hasRequiredState) trueFlags.add('hasRequiredState');
+    if (isRequired) trueFlags.add('isRequired');
+    return trueFlags;
+  }
+
+  List<bool> toList() {
+    return [
+      hasCheckedState,
+      isChecked,
+      isSelected,
+      isButton,
+      isTextField,
+      isFocused,
+      hasEnabledState,
+      isEnabled,
+      isInMutuallyExclusiveGroup,
+      isHeader,
+      isObscured,
+      scopesRoute,
+      namesRoute,
+      isHidden,
+      isImage,
+      isLiveRegion,
+      hasToggledState,
+      isToggled,
+      hasImplicitScrolling,
+      isMultiline,
+      isReadOnly,
+      isFocusable,
+      isLink,
+      isSlider,
+      isKeyboardKey,
+      isCheckStateMixed,
+      hasExpandedState,
+      isExpanded,
+      hasSelectedState,
+      hasRequiredState,
+      isRequired,
+    ];
+  }
+}
+
 /// The validation result of a form field.
 ///
 /// The type, shape, and correctness of the value is specific to the kind of
@@ -1218,7 +1444,7 @@ abstract class SemanticsUpdateBuilder {
   ///    `validationResult` argument.
   void updateNode({
     required int id,
-    required int flags,
+    required List<bool> flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1297,7 +1523,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   @override
   void updateNode({
     required int id,
-    required int flags,
+    required List<bool> flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1391,7 +1617,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     Void Function(
       Pointer<Void>,
       Int32,
-      Int32,
+      Handle,
       Int32,
       Int32,
       Int32,
@@ -1436,7 +1662,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
     int id,
-    int flags,
+    List<bool> flags,
     int actions,
     int maxValueLength,
     int currentValueLength,

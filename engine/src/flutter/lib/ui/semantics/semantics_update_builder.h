@@ -31,7 +31,7 @@ class SemanticsUpdateBuilder
 
   void updateNode(
       int id,
-      int flags,
+      const std::vector<bool>& flags,
       int actions,
       int maxValueLength,
       int currentValueLength,

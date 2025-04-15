@@ -4843,7 +4843,7 @@ void _testSemanticsValidationResult() {
 void updateNode(
   ui.SemanticsUpdateBuilder builder, {
   int id = 0,
-  int flags = 0,
+  List<bool> flags = [],
   int actions = 0,
   int maxValueLength = 0,
   int currentValueLength = 0,

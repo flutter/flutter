@@ -85,7 +85,9 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       // sending.
       const flutter::SemanticsNode& node = value.second;
       buffer_int32[position++] = node.id;
-      buffer_int32[position++] = node.flags;
+      int64_t flags = node.flags.toInt64();
+      std::memcpy(&buffer_int32[position], &flags, 2);
+      position += 2;
       buffer_int32[position++] = node.actions;
       buffer_int32[position++] = node.maxValueLength;
       buffer_int32[position++] = node.currentValueLength;

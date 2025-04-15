@@ -17,6 +17,7 @@ import 'dart:ui'
         SemanticsAction,
         SemanticsFlag,
         SemanticsInputType,
+        SemanticsFlags,
         SemanticsRole,
         SemanticsUpdate,
         SemanticsUpdateBuilder,
@@ -41,6 +42,9 @@ export 'dart:ui'
         SemanticsFlag,
         SemanticsRole,
         SemanticsValidationResult,
+
+        SemanticsFlags,
+
         StringAttribute,
         TextDirection,
         VoidCallback;
@@ -155,7 +159,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.hasFlag(SemanticsFlag.hasSelectedState)) {
+    if (!data.flags.hasSelectedState) {
       return FlutterError('A tab needs selected states');
     }
 
@@ -232,19 +236,19 @@ sealed class _DebugSemanticsRoleChecks {
     bool hasCheckedChild = false;
     bool validateRadioGroupChildren(SemanticsNode node) {
       final SemanticsData data = node.getSemanticsData();
-      if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
+      if (!data.flags.hasCheckedState) {
         node.visitChildren(validateRadioGroupChildren);
         return error == null;
       }
 
-      if (!data.hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup)) {
+      if (!data.flags.isInMutuallyExclusiveGroup) {
         error = FlutterError(
           'Radio buttons in a radio group must be in a mutually exclusive group',
         );
         return false;
       }
 
-      if (data.hasFlag(SemanticsFlag.isChecked)) {
+      if (data.flags.isChecked) {
         if (hasCheckedChild) {
           error = FlutterError('Radio groups must not have multiple checked children');
           return false;
@@ -290,7 +294,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
+    if (!data.flags.hasCheckedState) {
       return FlutterError('a menu item checkbox must be checkable');
     }
 
@@ -307,7 +311,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
+    if (!data.flags.hasCheckedState) {
       return FlutterError('a menu item radio must be checkable');
     }
 
@@ -324,7 +328,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _noLiveRegion(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (data.hasFlag(SemanticsFlag.isLiveRegion)) {
+    if (data.flags.isLiveRegion) {
       return FlutterError(
         'Node ${node.id} has role ${data.role} but is also a live region. '
         'A node can not have ${data.role} and be live region at the same time. '
@@ -768,12 +772,12 @@ class SemanticsData with Diagnosticable {
        ),
        assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6'),
        assert(
-         linkUrl == null || (flags & SemanticsFlag.isLink.index) != 0,
+         linkUrl == null || flags.isLink,
          'A SemanticsData object with a linkUrl must have the isLink flag set to true',
        );
 
-  /// A bit field of [SemanticsFlag]s that apply to this node.
-  final int flags;
+  /// Semantics flags.
+  final SemanticsFlags flags;
 
   /// A bit field of [SemanticsAction]s that apply to this node.
   final int actions;
@@ -1010,8 +1014,6 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
-  /// Whether [flags] contains the given flag.
-  bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
@@ -1039,10 +1041,7 @@ class SemanticsData with Diagnosticable {
       IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null),
     );
 
-    final List<String> flagSummary = <String>[
-      for (final SemanticsFlag flag in SemanticsFlag.values)
-        if ((flags & flag.index) != 0) flag.name,
-    ];
+    final List<String> flagSummary = flags.toStrings();
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: ''));
     properties.add(AttributedStringProperty('label', attributedLabel));
@@ -2837,10 +2836,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// Whether this node is tagged with `tag`.
   bool isTagged(SemanticsTag tag) => tags != null && tags!.contains(tag);
 
-  int _flags = _kEmptyConfig._flags;
+  SemanticsFlags _flags = SemanticsFlags();
 
-  /// Whether this node currently has a given [SemanticsFlag].
-  bool hasFlag(SemanticsFlag flag) => _flags & flag.index != 0;
+  SemanticsFlags get flags => _flags;
 
   /// {@macro flutter.semantics.SemanticsProperties.identifier}
   String get identifier => _identifier;
@@ -3262,7 +3260,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// includes the information from this node's descendants. Otherwise, the
   /// returned data matches the data on this node.
   SemanticsData getSemanticsData() {
-    int flags = _flags;
+    final SemanticsFlags flags = _flags;
     // Can't use _effectiveActionsAsBits here. The filtering of action bits
     // must be done after the merging the its descendants.
     int actions = _actionsAsBits;
@@ -3316,9 +3314,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
-        flags |= node._flags;
+        flags.merge(node._flags);
         actions |= node._effectiveActionsAsBits;
-
         textDirection ??= node._textDirection;
         textSelection ??= node._textSelection;
         scrollChildCount ??= node._scrollChildCount;
@@ -3497,7 +3494,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     builder.updateNode(
       id: id,
-      flags: data.flags,
+      flags: data.flags.toList(), // Pass a bool list in update builder
       actions: data.actions,
       rect: data.rect,
       identifier: data.identifier,
@@ -3691,16 +3688,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(
       IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null),
     );
-    final List<String> flags =
-        SemanticsFlag.values
-            .where((SemanticsFlag flag) => hasFlag(flag))
-            .map((SemanticsFlag flag) => flag.name)
-            .toList();
-    properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
+
+    properties.add(IterableProperty<String>('flags', flags.toStrings(), ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
-    properties.add(
-      FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'),
-    );
+    properties.add(FlagProperty('isHidden', value: flags.isHidden, ifTrue: 'HIDDEN'));
     properties.add(StringProperty('identifier', _identifier, defaultValue: ''));
     properties.add(AttributedStringProperty('label', _attributedLabel));
     properties.add(AttributedStringProperty('value', _attributedValue));
@@ -5327,9 +5318,10 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [SemanticsFlag.scopesRoute], for a full description of route scoping.
-  bool get scopesRoute => _hasFlag(SemanticsFlag.scopesRoute);
+  bool get scopesRoute => _flags.scopesRoute;
   set scopesRoute(bool value) {
-    _setFlag(SemanticsFlag.scopesRoute, value);
+    _flags.scopesRoute = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the semantics node contains the label of a route.
@@ -5337,15 +5329,17 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [SemanticsFlag.namesRoute], for a full description of route naming.
-  bool get namesRoute => _hasFlag(SemanticsFlag.namesRoute);
+  bool get namesRoute => _flags.namesRoute;
   set namesRoute(bool value) {
-    _setFlag(SemanticsFlag.namesRoute, value);
+    _flags.namesRoute = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the semantics node represents an image.
-  bool get isImage => _hasFlag(SemanticsFlag.isImage);
+  bool get isImage => _flags.isImage;
   set isImage(bool value) {
-    _setFlag(SemanticsFlag.isImage, value);
+    _flags.isImage = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the semantics node is a live region.
@@ -5364,9 +5358,10 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [SemanticsFlag.isLiveRegion], the semantics flag that this setting controls.
-  bool get liveRegion => _hasFlag(SemanticsFlag.isLiveRegion);
+  bool get liveRegion => _flags.isLiveRegion;
   set liveRegion(bool value) {
-    _setFlag(SemanticsFlag.isLiveRegion, value);
+    _flags.isLiveRegion = value;
+    _hasBeenAnnotated = true;
   }
 
   /// The reading direction for the text in [label], [value], [hint],
@@ -5384,10 +5379,11 @@ class SemanticsConfiguration {
   /// accessibility focused may or may not be selected; e.g. a [ListTile] can have
   /// accessibility focus but have its [ListTile.selected] property set to false,
   /// in which case it will not be flagged as selected.
-  bool get isSelected => _hasFlag(SemanticsFlag.isSelected);
+  bool get isSelected => _flags.isSelected;
   set isSelected(bool value) {
-    _setFlag(SemanticsFlag.hasSelectedState, true);
-    _setFlag(SemanticsFlag.isSelected, value);
+    _flags.hasSelectedState = true;
+    _flags.isSelected = value;
+    _hasBeenAnnotated = true;
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
@@ -5398,11 +5394,11 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// expanded/collapsed state.
-  bool? get isExpanded =>
-      _hasFlag(SemanticsFlag.hasExpandedState) ? _hasFlag(SemanticsFlag.isExpanded) : null;
+  bool? get isExpanded => _flags.hasExpandedState ? _flags.isExpanded : null;
   set isExpanded(bool? value) {
-    _setFlag(SemanticsFlag.hasExpandedState, true);
-    _setFlag(SemanticsFlag.isExpanded, value!);
+    _flags.hasExpandedState = true;
+    _flags.isExpanded = value!;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is currently enabled.
@@ -5420,11 +5416,11 @@ class SemanticsConfiguration {
   /// This property does not control whether semantics are enabled. If you wish to
   /// disable semantics for a particular widget, you should use an [ExcludeSemantics]
   /// widget.
-  bool? get isEnabled =>
-      _hasFlag(SemanticsFlag.hasEnabledState) ? _hasFlag(SemanticsFlag.isEnabled) : null;
+  bool? get isEnabled => _flags.hasEnabledState ? _flags.isEnabled : null;
   set isEnabled(bool? value) {
-    _setFlag(SemanticsFlag.hasEnabledState, true);
-    _setFlag(SemanticsFlag.isEnabled, value!);
+    _flags.hasEnabledState = true;
+    _flags.isEnabled = value!;
+    _hasBeenAnnotated = true;
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
@@ -5436,12 +5432,12 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// checked/unchecked state.
-  bool? get isChecked =>
-      _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isChecked) : null;
+  bool? get isChecked => _flags.hasCheckedState ? _flags.isChecked : null;
   set isChecked(bool? value) {
     assert(value != true || isCheckStateMixed != true);
-    _setFlag(SemanticsFlag.hasCheckedState, true);
-    _setFlag(SemanticsFlag.isChecked, value!);
+    _flags.hasCheckedState = true;
+    _flags.isChecked = value!;
+    _hasBeenAnnotated = true;
   }
 
   /// If this node has tristate that can be controlled by the user, whether
@@ -5452,12 +5448,12 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// mixed checked state.
-  bool? get isCheckStateMixed =>
-      _hasFlag(SemanticsFlag.hasCheckedState) ? _hasFlag(SemanticsFlag.isCheckStateMixed) : null;
+  bool? get isCheckStateMixed => _flags.hasCheckedState ? _flags.isCheckStateMixed : null;
   set isCheckStateMixed(bool? value) {
     assert(value != true || isChecked != true);
-    _setFlag(SemanticsFlag.hasCheckedState, true);
-    _setFlag(SemanticsFlag.isCheckStateMixed, value!);
+    _flags.hasCheckedState = true;
+    _flags.isCheckStateMixed = value!;
+    _hasBeenAnnotated = true;
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether
@@ -5468,11 +5464,11 @@ class SemanticsConfiguration {
   ///
   /// The getter returns null if the owning [RenderObject] does not have
   /// on/off state.
-  bool? get isToggled =>
-      _hasFlag(SemanticsFlag.hasToggledState) ? _hasFlag(SemanticsFlag.isToggled) : null;
+  bool? get isToggled => _flags.hasToggledState ? _flags.isToggled : null;
   set isToggled(bool? value) {
-    _setFlag(SemanticsFlag.hasToggledState, true);
-    _setFlag(SemanticsFlag.isToggled, value!);
+    _flags.hasToggledState = true;
+    _flags.isToggled = value!;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning RenderObject corresponds to UI that allows the user to
@@ -5480,33 +5476,38 @@ class SemanticsConfiguration {
   ///
   /// For example, a [Radio] button is in a mutually exclusive group because
   /// only one radio button in that group can be marked as [isChecked].
-  bool get isInMutuallyExclusiveGroup => _hasFlag(SemanticsFlag.isInMutuallyExclusiveGroup);
+  bool get isInMutuallyExclusiveGroup => _flags.isInMutuallyExclusiveGroup;
   set isInMutuallyExclusiveGroup(bool value) {
-    _setFlag(SemanticsFlag.isInMutuallyExclusiveGroup, value);
+    _flags.isInMutuallyExclusiveGroup = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] can hold the input focus.
-  bool get isFocusable => _hasFlag(SemanticsFlag.isFocusable);
+  bool get isFocusable => _flags.isFocusable;
   set isFocusable(bool value) {
-    _setFlag(SemanticsFlag.isFocusable, value);
+    _flags.isFocusable = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] currently holds the input focus.
-  bool get isFocused => _hasFlag(SemanticsFlag.isFocused);
+  bool get isFocused => _flags.isFocused;
   set isFocused(bool value) {
-    _setFlag(SemanticsFlag.isFocused, value);
+    _flags.isFocused = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).
-  bool get isButton => _hasFlag(SemanticsFlag.isButton);
+  bool get isButton => _flags.isButton;
   set isButton(bool value) {
-    _setFlag(SemanticsFlag.isButton, value);
+    _flags.isButton = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a link (true) or not (false).
-  bool get isLink => _hasFlag(SemanticsFlag.isLink);
+  bool get isLink => _flags.isLink;
   set isLink(bool value) {
-    _setFlag(SemanticsFlag.isLink, value);
+    _flags.isLink = value;
+    _hasBeenAnnotated = true;
   }
 
   /// The URL that the owning [RenderObject] links to.
@@ -5522,9 +5523,10 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is a header (true) or not (false).
-  bool get isHeader => _hasFlag(SemanticsFlag.isHeader);
+  bool get isHeader => _flags.isHeader;
   set isHeader(bool value) {
-    _setFlag(SemanticsFlag.isHeader, value);
+    _flags.isHeader = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Indicates the heading level in the document structure.
@@ -5543,16 +5545,18 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is a slider (true) or not (false).
-  bool get isSlider => _hasFlag(SemanticsFlag.isSlider);
+  bool get isSlider => _flags.isSlider;
   set isSlider(bool value) {
-    _setFlag(SemanticsFlag.isSlider, value);
+    _flags.isSlider = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a keyboard key (true) or not
   /// (false).
-  bool get isKeyboardKey => _hasFlag(SemanticsFlag.isKeyboardKey);
+  bool get isKeyboardKey => _flags.isKeyboardKey;
   set isKeyboardKey(bool value) {
-    _setFlag(SemanticsFlag.isKeyboardKey, value);
+    _flags.isKeyboardKey = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is considered hidden.
@@ -5571,23 +5575,26 @@ class SemanticsConfiguration {
   /// the semantics tree altogether. Hidden elements are only included in the
   /// semantics tree to work around platform limitations and they are mainly
   /// used to implement accessibility scrolling on iOS.
-  bool get isHidden => _hasFlag(SemanticsFlag.isHidden);
+  bool get isHidden => _flags.isHidden;
   set isHidden(bool value) {
-    _setFlag(SemanticsFlag.isHidden, value);
+    _flags.isHidden = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a text field.
-  bool get isTextField => _hasFlag(SemanticsFlag.isTextField);
+  bool get isTextField => _flags.isTextField;
   set isTextField(bool value) {
-    _setFlag(SemanticsFlag.isTextField, value);
+    _flags.isTextField = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is read only.
   ///
   /// Only applicable when [isTextField] is true.
-  bool get isReadOnly => _hasFlag(SemanticsFlag.isReadOnly);
+  bool get isReadOnly => _flags.isReadOnly;
   set isReadOnly(bool value) {
-    _setFlag(SemanticsFlag.isReadOnly, value);
+    _flags.isReadOnly = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether [value] should be obscured.
@@ -5595,18 +5602,20 @@ class SemanticsConfiguration {
   /// This option is usually set in combination with [isTextField] to indicate
   /// that the text field contains a password (or other sensitive information).
   /// Doing so instructs screen readers to not read out [value].
-  bool get isObscured => _hasFlag(SemanticsFlag.isObscured);
+  bool get isObscured => _flags.isObscured;
   set isObscured(bool value) {
-    _setFlag(SemanticsFlag.isObscured, value);
+    _flags.isObscured = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the text field is multiline.
   ///
   /// This option is usually set in combination with [isTextField] to indicate
   /// that the text field is configured to be multiline.
-  bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
+  bool get isMultiline => _flags.isMultiline;
   set isMultiline(bool value) {
-    _setFlag(SemanticsFlag.isMultiline, value);
+    _flags.isMultiline = value;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the semantics node has a required state.
@@ -5620,11 +5629,11 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
-  bool? get isRequired =>
-      _hasFlag(SemanticsFlag.hasRequiredState) ? _hasFlag(SemanticsFlag.isRequired) : null;
+  bool? get isRequired => _flags.hasRequiredState ? _flags.isRequired : null;
   set isRequired(bool? value) {
-    _setFlag(SemanticsFlag.hasRequiredState, true);
-    _setFlag(SemanticsFlag.isRequired, value!);
+    _flags.hasRequiredState = true;
+    _flags.isRequired = value!;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts
@@ -5634,9 +5643,10 @@ class SemanticsConfiguration {
   /// easily move to the next visible set of children. A [TabBar] widget does
   /// not have implicit scrolling, so that users can navigate into the tab
   /// body when reaching the end of the tab bar.
-  bool get hasImplicitScrolling => _hasFlag(SemanticsFlag.hasImplicitScrolling);
+  bool get hasImplicitScrolling => _flags.hasImplicitScrolling;
   set hasImplicitScrolling(bool value) {
-    _setFlag(SemanticsFlag.hasImplicitScrolling, value);
+    _flags.hasImplicitScrolling = value;
+    _hasBeenAnnotated = true;
   }
 
   /// The currently selected text (or the position of the cursor) within
@@ -5763,30 +5773,21 @@ class SemanticsConfiguration {
 
   // INTERNAL FLAG MANAGEMENT
 
-  int _flags = 0;
-  void _setFlag(SemanticsFlag flag, bool value) {
-    if (value) {
-      _flags |= flag.index;
-    } else {
-      _flags &= ~flag.index;
-    }
-    _hasBeenAnnotated = true;
-  }
+  SemanticsFlags _flags = SemanticsFlags();
 
-  bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
 
   bool get _hasExplicitRole {
     if (_role != SemanticsRole.none) {
       return true;
     }
-    if (_hasFlag(SemanticsFlag.isTextField) ||
+    if (_flags.isTextField ||
         // In non web platforms, the header is a trait.
-        (_hasFlag(SemanticsFlag.isHeader) && kIsWeb) ||
-        _hasFlag(SemanticsFlag.isSlider) ||
-        _hasFlag(SemanticsFlag.isLink) ||
-        _hasFlag(SemanticsFlag.scopesRoute) ||
-        _hasFlag(SemanticsFlag.isImage) ||
-        _hasFlag(SemanticsFlag.isKeyboardKey)) {
+        (_flags.isHeader && kIsWeb) ||
+        _flags.isSlider ||
+        _flags.isLink ||
+        _flags.scopesRoute ||
+        _flags.isImage ||
+        _flags.isKeyboardKey) {
       return true;
     }
     return false;
@@ -5806,7 +5807,7 @@ class SemanticsConfiguration {
     if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
     }
-    if ((_flags & other._flags) != 0) {
+    if (_flags == other._flags) {
       return false;
     }
     if (_platformViewId != null && other._platformViewId != null) {
@@ -5855,7 +5856,7 @@ class SemanticsConfiguration {
     }
     _actionsAsBits |= child._effectiveActionsAsBits;
     _customSemanticsActions.addAll(child._customSemanticsActions);
-    _flags |= child._flags;
+    _flags.merge(child._flags);
     _textSelection ??= child._textSelection;
     _scrollPosition ??= child._scrollPosition;
     _scrollExtentMax ??= child._scrollExtentMax;

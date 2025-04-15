@@ -460,7 +460,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
     flutter::SemanticsNode new_node;
     new_node.id = 1;
     new_node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
-    new_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+    FlutterSemanticsFlags flags;
+    new_node.flags = flutter::SemanticsFlags2{};
+    new_node.flags.hasImplicitScrolling = true;
     new_node.actions = flutter::kHorizontalScrollSemanticsActions;
     new_node.label = "label";
     new_node.value = "value";
@@ -530,7 +532,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
     flutter::SemanticsNode node;
     node.id = 1;
-    node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+    node.flags = flutter::SemanticsFlags2{};
+    node.flags.hasImplicitScrolling = true;
     node.actions = flutter::kHorizontalScrollSemanticsActions;
     node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
     node.label = "label";
@@ -605,7 +608,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
     flutter::SemanticsNode node;
     node.id = 1;
-    node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+    node.flags = flutter::SemanticsFlags2{};
+    node.flags.hasImplicitScrolling = true;
     node.actions = flutter::kHorizontalScrollSemanticsActions;
     node.rect = SkRect::MakeXYWH(0, 0, 100, 200);
     node.label = "label";
@@ -682,7 +686,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.label = "node1";
-  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute);
+  node1.flags = flutter::SemanticsFlags2{};
+  node1.flags.kScopesRoute = true;
   node1.childrenInTraversalOrder = {2, 3};
   node1.childrenInHitTestOrder = {2, 3};
   nodes[node1.id] = node1;
@@ -692,12 +697,14 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   nodes[node2.id] = node2;
   flutter::SemanticsNode node3;
   node3.id = 3;
-  node3.flags = static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  node3.flags = flutter::SemanticsFlags2{};
+  node3.flags.kNamesRoute = true;
   node3.label = "node3";
   nodes[node3.id] = node3;
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
-  root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute);
+  root_node.flags = flutter::SemanticsFlags2{};
+  root_node.flags.kScopesRoute = true;
   root_node.childrenInTraversalOrder = {1};
   root_node.childrenInHitTestOrder = {1};
   nodes[root_node.id] = root_node;
@@ -744,10 +751,11 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
-  root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kIsInMutuallyExclusiveGroup) |
-                    static_cast<int32_t>(flutter::SemanticsFlags::kIsEnabled) |
-                    static_cast<int32_t>(flutter::SemanticsFlags::kHasCheckedState) |
-                    static_cast<int32_t>(flutter::SemanticsFlags::kHasEnabledState);
+  root_node.flags = flutter::SemanticsFlags2{};
+  root_node.flags.kIsInMutuallyExclusiveGroup = true;
+  root_node.flags.kIsEnabled = true;
+  root_node.flags.kHasCheckedState = true;
+  root_node.flags.kHasEnabledState = true;
   nodes[root_node.id] = root_node;
   bridge->UpdateSemantics(/*nodes=*/nodes, /*actions=*/actions);
 
@@ -1047,7 +1055,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
   root_node.label = "root";
-  root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  root_node.flags = flutter::SemanticsFlags2{};
+  root_node.flags.hasImplicitScrolling = true;
   root_node.childrenInTraversalOrder = {1};
   root_node.childrenInHitTestOrder = {1};
   nodes[root_node.id] = root_node;
@@ -1063,7 +1072,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode new_root_node;
   new_root_node.id = kRootNodeId;
   new_root_node.label = "root";
-  new_root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  new_root_node.flags = flutter::SemanticsFlags2{};
+  new_root_node.flags.hasImplicitScrolling = true;
   new_nodes[new_root_node.id] = new_root_node;
   bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/new_actions);
 
@@ -1124,7 +1134,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
   root_node.label = "root";
-  root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  root_node.flags = flutter::SemanticsFlags2{};
+  root_node.flags.hasImplicitScrolling = true;
   root_node.childrenInTraversalOrder = {1};
   root_node.childrenInHitTestOrder = {1};
   nodes[root_node.id] = root_node;
@@ -1140,7 +1151,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode new_root_node;
   new_root_node.id = kRootNodeId;
   new_root_node.label = "root";
-  new_root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  new_root_node.flags = flutter::SemanticsFlags2{};
+  new_root_node.flags.hasImplicitScrolling = true;
   new_nodes[new_root_node.id] = new_root_node;
   bridge->UpdateSemantics(/*nodes=*/new_nodes, /*actions=*/new_actions);
 
@@ -1200,7 +1212,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.label = "node1";
-  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  node1.flags = flutter::SemanticsFlags2{};
+  node1.flags.hasImplicitScrolling = true;
   nodes[node1.id] = node1;
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
@@ -1255,8 +1268,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.label = "node1";
-  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  node1.flags = flutter::SemanticsFlags2{};
+  node1.flags.hasImplicitScrolling = true;
+  node1.flags.kNamesRoute = true;
   nodes[node1.id] = node1;
   flutter::SemanticsNode node3;
   node3.id = 3;
@@ -1283,16 +1297,18 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode new_node1;
   new_node1.id = 1;
   new_node1.label = "new_node1";
-  new_node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                    static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  new_node1.flags = flutter::SemanticsFlags2{};
+  new_node1.flags.kScopesRoute = true;
+  new_node1.flags.kNamesRoute = true;
   new_node1.childrenInTraversalOrder = {2};
   new_node1.childrenInHitTestOrder = {2};
   new_nodes[new_node1.id] = new_node1;
   flutter::SemanticsNode new_node2;
   new_node2.id = 2;
   new_node2.label = "new_node2";
-  new_node2.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                    static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  new_node2.flags = flutter::SemanticsFlags2{};
+  new_node2.flags.kScopesRoute = true;
+  new_node2.flags.kNamesRoute = true;
   new_nodes[new_node2.id] = new_node2;
   flutter::SemanticsNode new_root_node;
   new_root_node.id = kRootNodeId;
@@ -1354,12 +1370,14 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.label = "node1";
-  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  node1.flags = flutter::SemanticsFlags2{};
+  node1.flags.kScopesRoute = true;
+  node1.flags.kNamesRoute = true;
   nodes[node1.id] = node1;
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
-  root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute);
+  root_node.flags = flutter::SemanticsFlags2{};
+  root_node.flags.kScopesRoute = true;
   root_node.childrenInTraversalOrder = {1};
   root_node.childrenInHitTestOrder = {1};
   nodes[root_node.id] = root_node;
@@ -1375,20 +1393,23 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode new_node1;
   new_node1.id = 1;
   new_node1.label = "new_node1";
-  new_node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                    static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  new_node1.flags = flutter::SemanticsFlags2{};
+  new_node1.flags.kScopesRoute = true;
+  new_node1.flags.kNamesRoute = true;
   new_node1.childrenInTraversalOrder = {2};
   new_node1.childrenInHitTestOrder = {2};
   new_nodes[new_node1.id] = new_node1;
   flutter::SemanticsNode new_node2;
   new_node2.id = 2;
   new_node2.label = "new_node2";
-  new_node2.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                    static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  new_node2.flags = flutter::SemanticsFlags2{};
+  new_node2.flags.kScopesRoute = true;
+  new_node2.flags.kNamesRoute = true;
   new_nodes[new_node2.id] = new_node2;
   flutter::SemanticsNode new_root_node;
   new_root_node.id = kRootNodeId;
-  new_root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute);
+  new_root_node.flags = flutter::SemanticsFlags2{};
+  new_root_node.flags.kScopesRoute = true;
   new_root_node.childrenInTraversalOrder = {1};
   new_root_node.childrenInHitTestOrder = {1};
   new_nodes[new_root_node.id] = new_root_node;
@@ -1442,20 +1463,23 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.label = "node1";
-  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  node1.flags = flutter::SemanticsFlags2{};
+  node1.flags.kScopesRoute = true;
+  node1.flags.kNamesRoute = true;
   node1.childrenInTraversalOrder = {2};
   node1.childrenInHitTestOrder = {2};
   nodes[node1.id] = node1;
   flutter::SemanticsNode node2;
   node2.id = 2;
   node2.label = "node2";
-  node2.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  node2.flags = flutter::SemanticsFlags2{};
+  node2.flags.kScopesRoute = true;
+  node2.flags.kNamesRoute = true;
   nodes[node2.id] = node2;
   flutter::SemanticsNode root_node;
   root_node.id = kRootNodeId;
-  root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute);
+  root_node.flags = flutter::SemanticsFlags2{};
+  root_node.flags.kScopesRoute = true;
   root_node.childrenInTraversalOrder = {1};
   root_node.childrenInHitTestOrder = {1};
   nodes[root_node.id] = root_node;
@@ -1477,12 +1501,14 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode new_node2;
   new_node2.id = 2;
   new_node2.label = "new_node2";
-  new_node2.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                    static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  new_node2.flags = flutter::SemanticsFlags2{};
+  new_node2.flags.kScopesRoute = true;
+  new_node2.flags.kNamesRoute = true;
   new_nodes[new_node2.id] = new_node2;
   flutter::SemanticsNode new_root_node;
   new_root_node.id = kRootNodeId;
-  new_root_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute);
+  new_root_node.flags = flutter::SemanticsFlags2{};
+  new_root_node.flags.kScopesRoute = true;
   new_root_node.childrenInTraversalOrder = {1};
   new_root_node.childrenInHitTestOrder = {1};
   new_nodes[new_root_node.id] = new_root_node;
@@ -1635,8 +1661,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.label = "node1";
-  node1.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  node1.flags = flutter::SemanticsFlags2{};
+  node1.flags.kScopesRoute = true;
+  node1.flags.kNamesRoute = true;
   node1.childrenInTraversalOrder = {2, 3};
   node1.childrenInHitTestOrder = {2, 3};
   nodes[node1.id] = node1;
@@ -1805,9 +1832,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   second_update[root_node.id] = new_root_node;
   bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
   id focusObject = accessibility_notifications[0][@"argument"];
-  // Since we have focused on the node 1 right before the layout changed, the bridge should not ask
-  // to refocus again on the same node.
-  XCTAssertEqualObjects(focusObject, [NSNull null]);
+  // Since we have focused on the node 1 right before the layout changed, the bridge should not
+  ask
+      // to refocus again on the same node.
+      XCTAssertEqualObjects(focusObject, [NSNull null]);
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityLayoutChangedNotification);
 }
@@ -1959,9 +1987,10 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   second_update[new_node_one.id] = new_node_one;
   bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
   SemanticsObject* focusObject = accessibility_notifications[0][@"argument"];
-  // Since we have focused on the node 1 right before the scrolling, the bridge should refocus the
-  // node 1.
-  XCTAssertEqual([focusObject uid], 1);
+  // Since we have focused on the node 1 right before the scrolling, the bridge should refocus
+  the
+      // node 1.
+      XCTAssertEqual([focusObject uid], 1);
   XCTAssertEqual([accessibility_notifications[0][@"notification"] unsignedIntValue],
                  UIAccessibilityPageScrolledNotification);
 }
@@ -2009,7 +2038,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node_one;
   node_one.id = 1;
   node_one.label = "route1";
-  node_one.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  node_one.flags = flutter::SemanticsFlags2{};
+  node_one.flags.hasImplicitScrolling = true;
   node_one.scrollPosition = 0.0;
   first_update[node_one.id] = node_one;
   flutter::SemanticsNode root_node;
@@ -2031,7 +2061,8 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode new_node_one;
   new_node_one.id = 1;
   new_node_one.label = "route1";
-  new_node_one.flags = static_cast<int32_t>(flutter::SemanticsFlags::kHasImplicitScrolling);
+  new_node_one.flags = flutter::SemanticsFlags2{};
+  new_node_one.flags.kHasImplicitScrolling = true;
   new_node_one.scrollPosition = 1.0;
   second_update[new_node_one.id] = new_node_one;
   bridge->UpdateSemantics(/*nodes=*/second_update, /*actions=*/actions);
@@ -2087,8 +2118,9 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
 
   flutter::SemanticsNode route_node;
   route_node.id = 1;
-  route_node.flags = static_cast<int32_t>(flutter::SemanticsFlags::kScopesRoute) |
-                     static_cast<int32_t>(flutter::SemanticsFlags::kNamesRoute);
+  route_node.flags = flutter::SemanticsFlags2{};
+  route_node.flags.kScopesRoute = true;
+  route_node.flags.kNamesRoute = true;
   route_node.label = "route";
   nodes[route_node.id] = route_node;
   flutter::SemanticsNode root_node;

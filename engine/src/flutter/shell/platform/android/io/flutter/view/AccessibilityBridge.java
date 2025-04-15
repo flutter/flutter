@@ -2514,7 +2514,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       previousScrollExtentMax = scrollExtentMax;
       previousScrollExtentMin = scrollExtentMin;
 
-      flags = buffer.getInt();
+      flags = buffer.getLong();
       actions = buffer.getInt();
       maxValueLength = buffer.getInt();
       currentValueLength = buffer.getInt();
