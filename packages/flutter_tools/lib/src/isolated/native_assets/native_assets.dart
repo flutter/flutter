@@ -8,7 +8,6 @@ import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:yaml/yaml.dart';
 
 import '../../base/common.dart';
 import '../../base/file_system.dart';
