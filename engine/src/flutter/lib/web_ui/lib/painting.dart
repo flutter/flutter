@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// For documentation see https://github.com/flutter/engine/blob/main/lib/ui/painting.dart
+// For documentation see https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/painting.dart
 part of ui;
 
 void _validateColorStops(List<Color> colors, List<double>? colorStops) {

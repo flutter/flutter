@@ -14,6 +14,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
 #include "impeller/core/vertex_buffer.h"
+#include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
@@ -196,6 +197,24 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   } else {
     TextureVK::Cast(*color_image_vk_).SetCachedFramebuffer(framebuffer);
     TextureVK::Cast(*color_image_vk_).SetCachedRenderPass(render_pass_);
+  }
+
+  // If the resolve image exists and has mipmaps, transition mip levels besides
+  // the base to shader read only in preparation for mipmap generation.
+  if (resolve_image_vk_ &&
+      resolve_image_vk_->GetTextureDescriptor().mip_count > 1) {
+    if (TextureVK::Cast(*resolve_image_vk_).GetLayout() ==
+        vk::ImageLayout::eUndefined) {
+      BarrierVK barrier;
+      barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
+      barrier.cmd_buffer = command_buffer_->GetCommandBuffer();
+      barrier.src_stage = vk::PipelineStageFlagBits::eBottomOfPipe;
+      barrier.src_access = {};
+      barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
+      barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+      barrier.base_mip_level = 1;
+      TextureVK::Cast(*resolve_image_vk_).SetLayout(barrier);
+    }
   }
 
   std::array<vk::ClearValue, kMaxAttachments> clears;
