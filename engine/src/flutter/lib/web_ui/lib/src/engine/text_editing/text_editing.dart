@@ -170,7 +170,10 @@ void _insertEditingElementInView(DomElement element, int viewId) {
     view != null,
     'Could not find View with id $viewId. This should never happen, please file a bug!',
   );
-  view!.dom.textEditingHost.append(element);
+  final host = view!.dom.textEditingHost;
+  if (!host.contains(element)) {
+    host.append(element);
+  }
 }
 
 /// Form that contains all the fields in the same AutofillGroup.
@@ -363,7 +366,9 @@ class EngineAutofillForm {
       mainTextEditingElement.style.pointerEvents = 'all';
     }
 
-    formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
+    if (!formElement.contains(mainTextEditingElement)) {
+      formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
+    }
     _insertEditingElementInView(formElement, viewId);
   }
 

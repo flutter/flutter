@@ -586,6 +586,48 @@ Future<void> testMain() async {
       expect(editingStrategy.domElement!.style.height, '10px');
     });
 
+    test('does not blur input when size is updated', () async {
+      final PlatformMessagesSpy spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = multilineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      int blurCount = 0;
+      textEditing.strategy.domElement!.addEventListener(
+        'blur',
+        createDomEventListener((_) {
+          blurCount++;
+        }),
+      );
+
+      final sizeCompleter = Completer<void>();
+      testTextEditing.acceptCommand(
+        TextInputSetEditableSizeAndTransform(
+          geometry: EditableTextGeometry(
+            width: 240,
+            height: 60,
+            globalTransform: Matrix4.translationValues(11, 12, 0).storage,
+          ),
+        ),
+        sizeCompleter.complete,
+      );
+      await sizeCompleter.future;
+
+      expect(blurCount, isZero);
+      // `TextInputClient.onConnectionClosed` shouldn't have been called.
+      expect(spy.messages, isEmpty);
+
+      spy.tearDown();
+    });
+
     test('closes input connection when window/iframe loses focus', () async {
       final PlatformMessagesSpy spy = PlatformMessagesSpy();
       spy.setUp();
