@@ -686,7 +686,7 @@ class AndroidProject extends FlutterProjectPlatform {
     // Constructing ProjectValidatorResult happens here and not in
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
-    const String visibleName = 'Java/Gradle/Android Gradle Plugin';
+    const String visibleName = 'Java/Gradle/KGP/Android Gradle Plugin';
     final CompatibilityResult validJavaGradleAgpVersions = await hasValidJavaGradleAgpVersions();
 
     return ProjectValidatorResult(

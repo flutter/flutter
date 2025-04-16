@@ -122,6 +122,7 @@ final RegExp _androidGradlePluginRegExpFromId = RegExp(
 
 // KGP is defined in several places this code only checks in plugins block of [settings.gradle.kts].
 // Expected content:
+// Groovy DSL - id "org.jetbrains.kotlin.android" version "{{kgpVersion}}"
 // Kotlin DSL - id("org.jetbrains.kotlin.android") version "{{kgpVersion}}"
 // ?<version> is used to name the version group which helps with extraction.
 // Concrete example:
@@ -386,14 +387,14 @@ Future<String?> getKgpVersion(
       // flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt addTaskForKGPVersion
       final RegExp kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
       final RegExpMatch? version = kotlinVersionRegex.firstMatch(kgpVersionOutput);
-      if (version == null) {
-        // Most likely a bug in our parse implementation/regex.
-        logger.printWarning(_formatParseWarning(kgpVersionOutput, type: 'kotlin'));
-        return null;
+      if (version != null) {
+        return version.group(1);
       }
-      return version.group(1);
+      // Most likely a bug in our parse implementation/regex.
+      logger.printWarning(_formatParseWarning(kgpVersionOutput, type: 'kotlin'));
+    } else {
+      logger.printTrace('Non zero exit code from gradle task kgpVersion.');
     }
-    logger.printTrace('Non zero exit code from gradle task kgpVersion.');
   } else {
     logger.printTrace('Could not run gradle task kgpVersion.');
   }
@@ -403,7 +404,10 @@ Future<String?> getKgpVersion(
   // locations for kotlin versions.
 
   logger.printTrace('Checking settings for kgp version.');
-  final File settingsFile = androidDirectory.childFile('settings.gradle.kts');
+  File settingsFile = androidDirectory.childFile('settings.gradle');
+  if (!settingsFile.existsSync()) {
+    settingsFile = androidDirectory.childFile('settings.gradle.kts');
+  }
 
   if (settingsFile.existsSync()) {
     final String settingsFileContent = settingsFile.readAsStringSync();
