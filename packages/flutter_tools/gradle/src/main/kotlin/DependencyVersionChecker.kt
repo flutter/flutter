@@ -12,10 +12,9 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.extra
-import com.flutter.gradle.FlutterPluginUtils as FlutterPluginUtils
 
 /**
- * Warns or errors on version ranges of dependencies required to build a flutter Android app.
+ * Warns or errors on version ranges of dependencies required to build a Flutter Android app.
  *
  * For code that evaluates if dependencies are compatible with each other see
  * packages/flutter_tools/lib/src/android/gradle_utils.dart.
@@ -408,6 +407,8 @@ internal class Version(
     }
 
     override fun equals(other: Any?): Boolean = other is Version && compareTo(other) == 0
+
+    override fun hashCode(): Int = major.hashCode() or minor.hashCode() or patch.hashCode()
 
     override fun toString(): String = "$major.$minor.$patch"
 }

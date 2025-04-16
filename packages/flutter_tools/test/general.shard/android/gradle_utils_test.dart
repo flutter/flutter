@@ -932,7 +932,7 @@ pluginManagement {
         KgpAgpTestData(
           false,
           kgpVersion: oldestDocumentedKgpCompatabilityVersion,
-          agpVersion: oldestSupportedAgpVersion,
+          agpVersion: oldestConsideredAgpVersion,
         ),
         // Null values:
         // ignore: avoid_redundant_argument_values

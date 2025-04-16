@@ -707,7 +707,7 @@ object FlutterPluginUtils {
         if (!supportsBuildMode(project, flutterBuildMode)) {
             project.logger.quiet(
                 "Project does not support Flutter build mode: $flutterBuildMode, " +
-                    "skipping adding flutter dependencies"
+                    "skipping adding Flutter dependencies"
             )
             return
         }
@@ -746,7 +746,7 @@ object FlutterPluginUtils {
 
     // ------------------ Task adders (a subset of the above category)
 
-    // Add a task that can be called on flutter projects that prints the Java version used in Gradle.
+    // Add a task that can be called on Flutter projects that prints the Java version used in Gradle.
     //
     // Format of the output of this task can be used in debugging what version of Java Gradle is using.
     // Not recommended for use in time sensitive commands like `flutter run` or `flutter build` as
@@ -764,7 +764,7 @@ object FlutterPluginUtils {
         }
     }
 
-    // Add a task that can be called on flutter projects that prints the KGP version used in
+    // Add a task that can be called on Flutter projects that prints the KGP version used in
     // the project.
     //
     // Format of the output of this task can be used in debugging what version of KGP a
