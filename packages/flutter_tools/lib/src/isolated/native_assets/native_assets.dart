@@ -254,18 +254,12 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     runPackageName,
   );
 
-  late final Map<String, Map<String, Object?>?> userDefines = () {
-    final String pubspecContents = fileSystem.file(pubspecPath).readAsStringSync();
-    final YamlMap pubspec = loadYaml(pubspecContents) as YamlMap;
-    return NativeAssetsBuildRunner.readHooksUserDefinesFromPubspec(pubspec);
-  }();
-
   late final NativeAssetsBuildRunner _buildRunner = NativeAssetsBuildRunner(
     logger: _logger,
     dartExecutable: _dartExecutable,
     fileSystem: fileSystem,
     packageLayout: packageLayout,
-    userDefines: userDefines,
+    userDefines: UserDefines(workspacePubspec: Uri.file(pubspecPath)),
   );
 
   @override
