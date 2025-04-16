@@ -24,8 +24,7 @@ using CGColorSpacePtr =
 
 std::unique_ptr<Screenshot> ReadTexture(
     const std::shared_ptr<Context>& surface_context,
-    const std::shared_ptr<Texture>& texture,
-    Point scale) {
+    const std::shared_ptr<Texture>& texture) {
   DeviceBufferDescriptor buffer_desc;
   buffer_desc.storage_mode = StorageMode::kHostVisible;
   buffer_desc.size =
@@ -77,31 +76,7 @@ std::unique_ptr<Screenshot> ReadTexture(
   CGImagePtr image(CGBitmapContextCreateImage(context.get()), &CGImageRelease);
   FML_CHECK(image);
 
-  // Scale results.
-
-  size_t scaled_width =
-      static_cast<size_t>(std::round(texture->GetSize().width * scale.x));
-  size_t scaled_height =
-      static_cast<size_t>(std::round(texture->GetSize().height * scale.y));
-  size_t scaled_bytes_per_row = scaled_width * 4;
-
-  CGContextPtr scaled_context(
-      CGBitmapContextCreate(nullptr, scaled_width, scaled_height,
-                            /*bitsPerComponent=*/8,
-                            /*bytesPerRow=*/scaled_bytes_per_row,
-                            color_space.get(), bitmap_info),
-      &CGContextRelease);
-  FML_CHECK(scaled_context);
-
-  CGContextSetInterpolationQuality(scaled_context.get(), kCGInterpolationHigh);
-  CGRect scaled_rect = CGRectMake(0, 0, scaled_width, scaled_height);
-  CGContextDrawImage(scaled_context.get(), scaled_rect, image.get());
-
-  CGImagePtr scaled_image(CGBitmapContextCreateImage(scaled_context.get()),
-                          &CGImageRelease);
-  FML_CHECK(scaled_image);
-
-  return std::make_unique<MetalScreenshot>(scaled_image.release());
+  return std::make_unique<MetalScreenshot>(image.release());
 }
 }  // namespace
 
@@ -113,9 +88,8 @@ VulkanScreenshotter::VulkanScreenshotter(
 
 std::unique_ptr<Screenshot> VulkanScreenshotter::MakeScreenshot(
     AiksContext& aiks_context,
-    const std::shared_ptr<Texture> texture,
-    Point scale) {
-  return ReadTexture(aiks_context.GetContext(), texture, scale);
+    const std::shared_ptr<Texture> texture) {
+  return ReadTexture(aiks_context.GetContext(), texture);
 }
 
 }  // namespace testing

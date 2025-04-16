@@ -228,13 +228,11 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   ISize physical_window_size(
       std::round(pimpl_->window_size.width * content_scale.x),
       std::round(pimpl_->window_size.height * content_scale.y));
-  Point inverse_content_scale = 1.f / content_scale;
   for (int i = 0; i < 2; ++i) {
     auto display_list = callback();
     auto texture =
         DisplayListToTexture(display_list, physical_window_size, renderer);
-    screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, texture,
-                                                       inverse_content_scale);
+    screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, texture);
   }
   return SaveScreenshot(std::move(screenshot));
 }
@@ -334,10 +332,8 @@ std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
   ISize physical_window_size(
       std::round(pimpl_->window_size.width * content_scale.x),
       std::round(pimpl_->window_size.height * content_scale.y));
-  Point inverse_content_scale = 1.f / content_scale;
   return pimpl_->screenshotter->MakeScreenshot(
-      renderer, DisplayListToTexture(list, physical_window_size, renderer),
-      inverse_content_scale);
+      renderer, DisplayListToTexture(list, physical_window_size, renderer));
 }
 
 }  // namespace impeller

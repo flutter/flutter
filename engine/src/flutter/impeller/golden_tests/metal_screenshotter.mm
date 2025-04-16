@@ -20,8 +20,7 @@ MetalScreenshotter::MetalScreenshotter(const PlaygroundSwitches& switches) {
 
 std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     AiksContext& aiks_context,
-    const std::shared_ptr<Texture> texture,
-    Point scale) {
+    const std::shared_ptr<Texture> texture) {
   @autoreleasepool {
     id<MTLTexture> metal_texture =
         std::static_pointer_cast<TextureMTL>(texture)->GetMTLTexture();
@@ -43,12 +42,8 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
     CIImage* flipped = [ciImage
         imageByApplyingOrientation:kCGImagePropertyOrientationDownMirrored];
 
-    CGAffineTransform scaleTransform =
-        CGAffineTransformMakeScale(scale.x, scale.y);
-    CIImage* final_image = [flipped imageByApplyingTransform:scaleTransform];
-
-    CGImageRef cgImage = [cicontext createCGImage:final_image
-                                         fromRect:[final_image extent]];
+    CGImageRef cgImage = [cicontext createCGImage:flipped
+                                         fromRect:[flipped extent]];
 
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     return std::unique_ptr<MetalScreenshot>(new MetalScreenshot(cgImage));

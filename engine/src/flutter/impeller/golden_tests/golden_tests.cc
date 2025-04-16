@@ -102,8 +102,7 @@ TEST_F(GoldenTests, ConicalGradient) {
       AiksContext(Screenshotter().GetPlayground().GetContext(), nullptr);
   auto screenshot = Screenshotter().MakeScreenshot(
       aiks_context,
-      DisplayListToTexture(builder.Build(), {240, 240}, aiks_context),
-      Point(1.0, 1.0));
+      DisplayListToTexture(builder.Build(), {240, 240}, aiks_context));
   ASSERT_TRUE(SaveScreenshot(std::move(screenshot)));
 }
 }  // namespace testing
