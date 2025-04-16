@@ -731,7 +731,7 @@ https://github.com/flutter/flutter/issues/156304''', title: _boxTitle);
   eventLabel: 'java21-and-source-compatibility',
 );
 
-final RegExp _missingNdkSourcePropertiesRegexp = RegExp(r'NDK at ((?:/|[a-zA-Z]:\\|\\\\).+?) did not have a source\.properties file', multiLine: true);
+final RegExp _missingNdkSourcePropertiesRegexp = RegExp(r'NDK at ((?:/|[a-zA-Z]:\\).+?) did not have a source\.properties file', multiLine: true);
 
 @visibleForTesting
 final GradleHandledError missingNdkSourcePropertiesFile = GradleHandledError(
