@@ -31,8 +31,7 @@ namespace {
 /// CanRenderLinearGradientClamp).
 void CanRenderLinearGradient(AiksTest* aiks_test, DlTileMode tile_mode) {
   DisplayListBuilder builder;
-  Point scale = aiks_test->GetContentScale();
-  builder.Scale(scale.x, scale.y);
+
   DlPaint paint;
   builder.Translate(100.0f, 0);
 
@@ -66,8 +65,7 @@ TEST_P(AiksTest, CanRenderLinearGradientDecal) {
 
 TEST_P(AiksTest, CanRenderLinearGradientDecalWithColorFilter) {
   DisplayListBuilder builder;
-  Point scale = GetContentScale();
-  builder.Scale(scale.x, scale.y);
+
   DlPaint paint;
   builder.Translate(100.0f, 0);
 
@@ -130,7 +128,7 @@ TEST_P(AiksTest, CanRenderRadialGradientWithDitheringEnabled) {
 
 static void CanRenderSweepGradientWithDithering(AiksTest* aiks_test) {
   DisplayListBuilder builder;
-  builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
+
   DlPaint paint;
   builder.Translate(100.0, 100.0);
 
@@ -153,7 +151,7 @@ TEST_P(AiksTest, CanRenderSweepGradientWithDitheringEnabled) {
 
 static void CanRenderConicalGradientWithDithering(AiksTest* aiks_test) {
   DisplayListBuilder builder;
-  builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
+
   DlPaint paint;
   builder.Translate(100.0, 100.0);
 
@@ -324,7 +322,7 @@ namespace {
 void CanRenderLinearGradientManyColors(AiksTest* aiks_test,
                                        DlTileMode tile_mode) {
   DisplayListBuilder builder;
-  builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
+
   DlPaint paint;
   builder.Translate(100, 100);
 
@@ -573,7 +571,7 @@ TEST_P(AiksTest, CanRenderRadialGradientManyColors) {
 namespace {
 void CanRenderSweepGradient(AiksTest* aiks_test, DlTileMode tile_mode) {
   DisplayListBuilder builder;
-  builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
+
   DlPaint paint;
   builder.Translate(100, 100);
 
@@ -752,7 +750,7 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
     }
 
     DisplayListBuilder builder;
-    builder.Scale(GetContentScale().x, GetContentScale().y);
+
     DlPaint paint;
     paint.setColor(DlColor::kWhite());
     builder.DrawPaint(paint);
@@ -794,8 +792,8 @@ TEST_P(AiksTest, GradientStrokesRenderCorrectly) {
         return nullptr;
       }
       ip_matrix = ip_matrix.Invert();
-      Point point_a = ip_matrix * handle_a * GetContentScale();
-      Point point_b = ip_matrix * handle_b * GetContentScale();
+      Point point_a = ip_matrix * handle_a;
+      Point point_b = ip_matrix * handle_b;
 
       Point middle = (point_a + point_b) / 2;
       auto radius = point_a.GetDistance(middle);

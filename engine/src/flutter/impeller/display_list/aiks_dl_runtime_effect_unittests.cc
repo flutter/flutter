@@ -74,7 +74,7 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
 
   DisplayListBuilder builder;
   builder.Save();
-  builder.Scale(GetContentScale().x, GetContentScale().y);
+
   builder.DrawPaint(paint);
   builder.Restore();
 

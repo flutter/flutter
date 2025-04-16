@@ -61,10 +61,7 @@ TEST_P(DlGoldenTest, CanRenderImage) {
 // Asserts that subpass rendering of MatrixImageFilters works.
 // https://github.com/flutter/flutter/issues/147807
 TEST_P(DlGoldenTest, Bug147807) {
-  Point content_scale = GetContentScale();
-  auto draw = [content_scale](DlCanvas* canvas,
-                              const std::vector<sk_sp<DlImage>>& images) {
-    canvas->Scale(content_scale.x, content_scale.y);
+  auto draw = [](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
     DlPaint paint;
     paint.setColor(DlColor(0xfffef7ff));
     canvas->DrawRect(DlRect::MakeLTRB(0, 0, 375, 667), paint);
@@ -139,10 +136,7 @@ void DrawBlurGrid(DlCanvas* canvas) {
 }  // namespace
 
 TEST_P(DlGoldenTest, GaussianVsRRectBlur) {
-  Point content_scale = GetContentScale();
-  auto draw = [content_scale](DlCanvas* canvas,
-                              const std::vector<sk_sp<DlImage>>& images) {
-    canvas->Scale(content_scale.x, content_scale.y);
+  auto draw = [](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
     canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
     DrawBlurGrid(canvas);
   };
@@ -155,10 +149,7 @@ TEST_P(DlGoldenTest, GaussianVsRRectBlur) {
 }
 
 TEST_P(DlGoldenTest, GaussianVsRRectBlurScaled) {
-  Point content_scale = GetContentScale();
-  auto draw = [content_scale](DlCanvas* canvas,
-                              const std::vector<sk_sp<DlImage>>& images) {
-    canvas->Scale(content_scale.x, content_scale.y);
+  auto draw = [](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
     canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
     canvas->Scale(0.33, 0.33);
     DrawBlurGrid(canvas);
@@ -172,10 +163,7 @@ TEST_P(DlGoldenTest, GaussianVsRRectBlurScaled) {
 }
 
 TEST_P(DlGoldenTest, GaussianVsRRectBlurScaledRotated) {
-  Point content_scale = GetContentScale();
-  auto draw = [content_scale](DlCanvas* canvas,
-                              const std::vector<sk_sp<DlImage>>& images) {
-    canvas->Scale(content_scale.x, content_scale.y);
+  auto draw = [](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
     canvas->Translate(200, 200);
     canvas->DrawPaint(DlPaint().setColor(DlColor(0xff112233)));
     canvas->Scale(0.33, 0.33);
@@ -194,7 +182,7 @@ TEST_P(DlGoldenTest, GaussianVsRRectBlurScaledRotated) {
 
 TEST_P(DlGoldenTest, FastVsGeneralGaussianMaskBlur) {
   DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
+
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
 
   auto blur_sigmas = std::array{5.0f, 10.0f, 20.0f};
@@ -268,10 +256,7 @@ TEST_P(DlGoldenTest, FastVsGeneralGaussianMaskBlur) {
 }
 
 TEST_P(DlGoldenTest, DashedLinesTest) {
-  Point content_scale = GetContentScale();
-  auto draw = [content_scale](DlCanvas* canvas,
-                              const std::vector<sk_sp<DlImage>>& images) {
-    canvas->Scale(content_scale.x, content_scale.y);
+  auto draw = [](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
     canvas->DrawPaint(DlPaint().setColor(DlColor::kWhite()));
 
     auto draw_one = [canvas](DlStrokeCap cap, Scalar x, Scalar y,

@@ -260,7 +260,7 @@ TEST_P(BlitPassTest, CanResizeTexturesPlayground) {
   EXPECT_TRUE(context->GetCommandQueue()->Submit({std::move(cmd_buffer)}).ok());
 
   DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
+
   DlPaint paint;
   paint.setColor(DlColor::kRed());
   auto image = DlImageImpeller::Make(dst);

@@ -231,7 +231,7 @@ TEST_P(AiksTest, CanRenderTextFrameWithScalingOverflow) {
       ImGui::End();
     }
     DisplayListBuilder builder;
-    builder.Scale(GetContentScale().x, GetContentScale().y);
+
     DlPaint paint;
     paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
     builder.DrawPaint(paint);
@@ -291,7 +291,7 @@ TEST_P(AiksTest, TextRotated180Degrees) {
       ImGui::End();
     }
     DisplayListBuilder builder;
-    builder.Scale(GetContentScale().x, GetContentScale().y);
+
     builder.DrawPaint(DlPaint().setColor(DlColor(0xffffeeff)));
 
     builder.Save();
@@ -334,7 +334,6 @@ TEST_P(AiksTest, TextFrameSubpixelAlignment) {
     }
 
     DisplayListBuilder builder;
-    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     for (size_t i = 0; i < phase_offsets.size(); i++) {
       DlPoint position = DlPoint(
@@ -393,7 +392,6 @@ TEST_P(AiksTest, CanRenderEmojiTextFrame) {
 TEST_P(AiksTest, CanRenderEmojiTextFrameWithBlur) {
   DisplayListBuilder builder;
 
-  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
@@ -487,7 +485,6 @@ TEST_P(AiksTest, CanRenderTextOutsideBoundaries) {
 TEST_P(AiksTest, TextRotated) {
   DisplayListBuilder builder;
 
-  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   paint.setColor(DlColor::ARGB(0.1, 0.1, 0.1, 1.0));
   builder.DrawPaint(paint);
@@ -771,7 +768,6 @@ TEST_P(AiksTest, TextContentsMismatchedTransformTest) {
 
 TEST_P(AiksTest, TextWithShadowCache) {
   DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
@@ -801,7 +797,6 @@ TEST_P(AiksTest, TextWithShadowCache) {
 
 TEST_P(AiksTest, MultipleTextWithShadowCache) {
   DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
@@ -834,7 +829,6 @@ TEST_P(AiksTest, MultipleTextWithShadowCache) {
 
 TEST_P(AiksTest, SingleIconShadowTest) {
   DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
@@ -877,7 +871,6 @@ TEST_P(AiksTest, VarietyOfTextScalesShowingRasterAndPath) {
   DlPaint paint;
   paint.setColor(DlColor::ARGB(1, 0.1, 0.1, 0.1));
   builder.DrawPaint(paint);
-  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   std::vector<Scalar> scales = {4, 8, 16, 24, 32};
   std::vector<Scalar> spacing = {8, 8, 8, 8, 8};

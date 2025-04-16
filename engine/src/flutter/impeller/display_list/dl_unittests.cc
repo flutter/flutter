@@ -190,8 +190,6 @@ TEST_P(DisplayListTest, CanDrawArc) {
     flutter::DisplayListBuilder builder;
     flutter::DlPaint paint;
 
-    Vector2 scale = GetContentScale();
-    builder.Scale(scale.x, scale.y);
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);
     paint.setStrokeCap(cap);
     paint.setStrokeJoin(flutter::DlStrokeJoin::kMiter);
@@ -671,9 +669,6 @@ TEST_P(DisplayListTest, CanDrawBackdropFilter) {
 
     flutter::DisplayListBuilder builder;
 
-    Vector2 scale = ctm_scale * GetContentScale();
-    builder.Scale(scale.x, scale.y);
-
     auto filter = flutter::DlBlurImageFilter(sigma[0], sigma[1],
                                              flutter::DlTileMode::kClamp);
 
@@ -865,9 +860,6 @@ TEST_P(DisplayListTest, CanDrawShadow) {
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
 
-  auto content_scale = GetContentScale() * 0.8;
-  builder.Scale(content_scale.x, content_scale.y);
-
   constexpr size_t star_spikes = 5;
   constexpr DlScalar half_spike_rotation = kPi / star_spikes;
   constexpr DlScalar radius = 40;
@@ -997,9 +989,6 @@ TEST_P(DisplayListTest, CanDrawWithMatrixFilter) {
       builder.SaveLayer(std::nullopt, nullptr);
     }
     {
-      auto content_scale = GetContentScale();
-      builder.Scale(content_scale.x, content_scale.y);
-
       // Set the current transform
       auto ctm_matrix = Matrix::MakeRow(
           ctm_scale[0], ctm_skew[0], 0.0f, ctm_translation[0],  //
@@ -1517,8 +1506,6 @@ TEST_P(DisplayListTest, DrawPaintIgnoresMaskFilter) {
 TEST_P(DisplayListTest, DrawMaskBlursThatMightUseSaveLayers) {
   flutter::DisplayListBuilder builder;
   builder.DrawColor(flutter::DlColor::kWhite(), flutter::DlBlendMode::kSrc);
-  Vector2 scale = GetContentScale();
-  builder.Scale(scale.x, scale.y);
 
   builder.Save();
   // We need a small transform op to avoid a deferred save
