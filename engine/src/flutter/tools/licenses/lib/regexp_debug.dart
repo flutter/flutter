@@ -103,7 +103,7 @@ class RegExp implements core.RegExp {
   @override
   Iterable<RegExpMatch> allMatches(String input, [int start = 0]) {
     _stopwatch.start();
-    final Iterable<RegExpMatch> result = _pattern.allMatches(input, start);
+    final List<RegExpMatch> result = _pattern.allMatches(input, start).toList();
     _stopwatch.stop();
     _testCount += 1;
     if (result.isNotEmpty) {
