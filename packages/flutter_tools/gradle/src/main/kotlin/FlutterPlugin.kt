@@ -131,7 +131,6 @@ class FlutterPlugin : Plugin<Project> {
             rootProjectLocalProperties.getProperty("flutter.versionName", "1.0")
 
         this.addFlutterTasks(project)
-        FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
 
         // By default, assembling APKs generates fat APKs if multiple platforms are passed.
         // Configuring split per ABI allows to generate separate APKs for each abi.
@@ -243,6 +242,8 @@ class FlutterPlugin : Plugin<Project> {
                 }
             }
         }
+
+        FlutterPluginUtils.forceNdkDownload(project, flutterRootPath)
 
         if (FlutterPluginUtils.shouldProjectUseLocalEngine(project)) {
             // This is required to pass the local engine to flutter build aot.

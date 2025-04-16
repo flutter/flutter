@@ -824,12 +824,21 @@ class FlutterPluginUtilsTest {
         val fakeBuildPath = "/randomapp/build/app/"
         every { mockCmakeOptions.path } returns null
         every { mockCmakeOptions.path(any()) } returns Unit
-        every { mockDefaultConfig.externalNativeBuild.cmake.arguments(any(), any()) } returns Unit
         every { mockCmakeOptions.buildStagingDirectory(any()) } returns Unit
         every { project.layout.buildDirectory } returns mockDirectoryProperty
         every { mockDirectoryProperty.dir(any<String>()) } returns mockDirectoryProperty
         every { mockDirectoryProperty.get() } returns mockDirectory
         every { mockDirectory.asFile.path } returns fakeBuildPath
+
+        val mockBuildType = mockk<com.android.build.gradle.internal.dsl.BuildType>()
+        every {
+            project.extensions
+                .findByType(BaseExtension::class.java)!!
+                .buildTypes
+                .iterator()
+        } returns mutableListOf(mockBuildType).iterator()
+        every { mockBuildType.name } returns "Debug"
+        every { mockBuildType.externalNativeBuild.cmake.arguments(any(), any(), any()) } returns Unit
 
         FlutterPluginUtils.forceNdkDownload(project, basePath)
 
@@ -839,9 +848,10 @@ class FlutterPluginUtilsTest {
         verify(exactly = 1) { mockCmakeOptions.path("$basePath/packages/flutter_tools/gradle/src/main/scripts/CMakeLists.txt") }
         verify(exactly = 1) { mockCmakeOptions.buildStagingDirectory(any()) }
         verify(exactly = 1) {
-            mockDefaultConfig.externalNativeBuild.cmake.arguments(
+            mockBuildType.externalNativeBuild.cmake.arguments(
                 "-Wno-dev",
-                "--no-warn-unused-cli"
+                "--no-warn-unused-cli",
+                "-DCMAKE_BUILD_TYPE=Debug"
             )
         }
     }
