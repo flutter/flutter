@@ -20,6 +20,8 @@ class Texture;
 /// should be drawn, such as the source rectangle within the texture, the
 /// destination rectangle on the render target, opacity, and sampler settings.
 /// It's used by the rendering system to draw textured quads.
+///
+/// @see `TiledTextureContents` for a tiled version.
 class TextureContents final : public Contents {
  public:
   TextureContents();
@@ -31,6 +33,9 @@ class TextureContents final : public Contents {
   ///
   /// In this situation, a subpass can be avoided when image filters are
   /// applied.
+  ///
+  /// @param destination The destination rectangle in the Entity's local
+  /// coordinate space.
   static std::shared_ptr<TextureContents> MakeRect(Rect destination);
 
   /// Sets a debug label for this contents object.
