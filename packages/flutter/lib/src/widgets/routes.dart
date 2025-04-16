@@ -565,28 +565,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   @override
   void handleStartBackGesture({double progress = 0.0}) {
     assert(isCurrent);
-    print('justin handleStartBackGesture in routes. animating? ${_controller?.isAnimating}');
-
-    if (!(secondaryAnimation?.isDismissed ?? false) && _controller != null) {
-      print('justin another start happened during animation, so clean up the old animation.');
-      //_controller?.stop();
-      _controller!.value = _controller!.upperBound;
-    }
-    /*
-    if (popGestureInProgress) {
-
-    }
-    */
-
-    // TODO(justinmc): This is called after I already check, so this is too late to solve the problem here.
-    /*
-    if (_controller?.isAnimating ?? false) {
-      //navigator?.didStopUserGesture();
-      // or this? _controller!.reset();
-      _controller!.stop();
-    }
-    */
-
     _controller?.value = progress;
     navigator?.didStartUserGesture();
   }
@@ -612,7 +590,6 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
   }
 
   void _handleDragEnd({required bool animateForward}) {
-    print('justin _handleDragEnd.');
     if (isCurrent) {
       if (animateForward) {
         // The closer the panel is to dismissing, the shorter the animation is.
@@ -647,13 +624,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> implements PredictiveB
       }
     }
 
-    // TODO(justinmc): This keeps userGestureInProgress true during the transition. The bug happens when the second drag occurs during the transition, then. So, when another gesture comes in while the animation is running, stop it and let this callback run.
     if (_controller?.isAnimating ?? false) {
       // Keep the userGestureInProgress in true state since AndroidBackGesturePageTransitionsBuilder
       // depends on userGestureInProgress.
       late final AnimationStatusListener animationStatusCallback;
       animationStatusCallback = (AnimationStatus status) {
-        print('justin animationStatusCallback.');
         navigator?.didStopUserGesture();
         _controller!.removeStatusListener(animationStatusCallback);
       };
@@ -1864,11 +1839,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// This should only be used between frames, not during build.
   @override
   bool get popGestureEnabled {
-    if (isCurrent) {
-      print(
-        'justin popGestureEnabled for the current route: $isFirst, $willHandlePopInternally, $hasScopedWillPopCallback || $popDisposition, ${!animation!.isCompleted}, ${!secondaryAnimation!.isDismissed}, $popGestureInProgress',
-      );
-    }
     // If there's nothing to go back to, then obviously we don't support
     // the back gesture.
     if (isFirst) {
@@ -1888,19 +1858,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     if (!animation!.isCompleted) {
       return false;
     }
-    // TODO(justinmc): Really, the pop gesture should be enabled while a previous pop gesture is animating. We don't want to stop users from performing a back gesture and make them wait. But we should probably immediately stop the old pop once a new one starts.
-    // If we're being popped into, we also cannot be swiped until the pop above
-    // it completes. This translates to our secondary animation being
-    // dismissed.
-    /*
-    if (!secondaryAnimation!.isDismissed) {
-      return false;
-    }
-    // If we're in a gesture already, we cannot start another.
-    if (popGestureInProgress) {
-      return false;
-    }
-    */
 
     // Looks like a back gesture would be welcome!
     return true;

@@ -5785,7 +5785,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   /// previously notified with [didStartUserGesture] has completed.
   void didStopUserGesture() {
     assert(_userGesturesInProgress > 0);
-    print('justin didStopUserGesture.');
     _userGesturesInProgress -= 1;
     if (_userGesturesInProgress == 0) {
       for (final NavigatorObserver observer in _effectiveObservers) {
