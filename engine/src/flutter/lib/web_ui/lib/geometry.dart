@@ -1224,7 +1224,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
 
   Path getPath([Path? basePath]) {
     final Path path = basePath ?? Path();
-    path.addPath(_param.getPath(), center);
+    path.addPath(_param.getPath(), Offset(left, top));
     return path;
   }
 
@@ -1285,7 +1285,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   static final RSuperellipse zero = RSuperellipse._raw();
 
   bool contains(Offset point) {
-    return _param.contains(point, center);
+    return _param.contains(point, topLeft: Offset(left, top));
   }
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {

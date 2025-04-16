@@ -19,10 +19,10 @@ class RSuperellipseParam {
     return _cachedPath!;
   }
 
-  bool contains(Offset point, Offset center) {
+  bool contains(Offset point, {required Offset topLeft}) {
     _ensureBuilt();
     assert(_cachedPath != null);
-    return _cachedPath!.contains(point - center);
+    return _cachedPath!.contains(point - topLeft);
   }
 
   void _ensureBuilt() {
@@ -269,10 +269,10 @@ class _RSuperellipsePathBuilder {
   final Path path;
 
   void buildPath(_Shape r) {
-    final double left = -r.width / 2;
-    final double right = r.width / 2;
-    final double top = -r.height / 2;
-    final double bottom = r.height / 2;
+    final double left = 0;
+    final double right = r.width;
+    final double top = 0;
+    final double bottom = r.height;
     final double topSplit = _split(left, right, r.tlRadiusX, r.trRadiusX);
     final double rightSplit = _split(top, bottom, r.trRadiusY, r.brRadiusY);
     final _RSuperellipseQuadrant topRight = _RSuperellipseQuadrant.computeQuadrant(
