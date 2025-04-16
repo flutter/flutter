@@ -186,6 +186,10 @@ ISize Playground::GetWindowSize() const {
   return window_size_;
 }
 
+Point Playground::GetContentScale() const {
+  return impl_->GetContentScale();
+}
+
 Scalar Playground::GetSecondsElapsed() const {
   return (fml::TimePoint::Now().ToEpochDelta() - start_time_).ToSecondsF();
 }

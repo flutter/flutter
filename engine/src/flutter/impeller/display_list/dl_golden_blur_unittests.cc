@@ -19,10 +19,11 @@ namespace testing {
 using impeller::Font;
 
 TEST_P(DlGoldenTest, TextBlurMaskFilterRespectCTM) {
+  impeller::Point content_scale = GetContentScale();
   auto draw = [&](DlCanvas* canvas,
                   const std::vector<std::unique_ptr<DlImage>>& images) {
     canvas->DrawColor(DlColor(0xff111111));
-
+    canvas->Scale(content_scale.x, content_scale.y);
     canvas->Scale(2, 2);
     TextRenderOptions options;
     options.mask_filter =
@@ -45,10 +46,11 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterRespectCTM) {
 }
 
 TEST_P(DlGoldenTest, TextBlurMaskFilterDisrespectCTM) {
+  impeller::Point content_scale = GetContentScale();
   auto draw = [&](DlCanvas* canvas,
                   const std::vector<std::unique_ptr<DlImage>>& images) {
     canvas->DrawColor(DlColor(0xff111111));
-
+    canvas->Scale(content_scale.x, content_scale.y);
     canvas->Scale(2, 2);
     TextRenderOptions options;
     options.mask_filter =
@@ -77,9 +79,11 @@ TEST_P(DlGoldenTest, TextBlurMaskFilterDisrespectCTM) {
 // See also:
 //   - https://github.com/flutter/flutter/issues/152195
 TEST_P(DlGoldenTest, ShimmerTest) {
+  impeller::Point content_scale = GetContentScale();
   auto draw = [&](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images,
                   float sigma) {
     canvas->DrawColor(DlColor(0xff111111));
+    canvas->Scale(content_scale.x, content_scale.y);
 
     DlPaint paint;
     canvas->DrawImage(images[0], DlPoint(10.135, 10.36334),
@@ -149,6 +153,7 @@ TEST_P(DlGoldenTest, ShimmerTest) {
 }
 
 TEST_P(DlGoldenTest, StrokedRRectFastBlur) {
+  impeller::Point content_scale = GetContentScale();
   DlRect rect = DlRect::MakeXYWH(50, 50, 100, 100);
   DlRoundRect rrect = DlRoundRect::MakeRectRadius(rect, 10.0f);
   DlPaint fill = DlPaint().setColor(DlColor::kBlue());
@@ -161,7 +166,7 @@ TEST_P(DlGoldenTest, StrokedRRectFastBlur) {
 
   DisplayListBuilder builder;
   builder.DrawColor(DlColor(0xff111111), DlBlendMode::kSrc);
-
+  builder.Scale(content_scale.x, content_scale.y);
   builder.DrawRoundRect(rrect, fill);
   builder.DrawRoundRect(rrect.Shift(150, 0), stroke);
   builder.DrawRoundRect(rrect.Shift(0, 150), blur);
@@ -174,7 +179,9 @@ TEST_P(DlGoldenTest, StrokedRRectFastBlur) {
 // equal).
 // See also: https://github.com/flutter/flutter/issues/152778
 TEST_P(DlGoldenTest, LargeDownscaleRrect) {
+  impeller::Point content_scale = GetContentScale();
   auto draw = [&](DlCanvas* canvas, const std::vector<sk_sp<DlImage>>& images) {
+    canvas->Scale(content_scale.x, content_scale.y);
     canvas->DrawColor(DlColor(0xff111111));
     {
       canvas->Save();

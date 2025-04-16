@@ -155,6 +155,7 @@ TEST_P(AiksTest, CanRenderQuadraticStrokeWithInstantTurn) {
 
 TEST_P(AiksTest, CanRenderFilledConicPaths) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::kRed());
@@ -204,6 +205,7 @@ TEST_P(AiksTest, CanRenderFilledConicPaths) {
 
 TEST_P(AiksTest, CanRenderStrokedConicPaths) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::kRed());
@@ -270,7 +272,7 @@ TEST_P(AiksTest, HairlinePath) {
     }
 
     DisplayListBuilder builder;
-
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     builder.DrawPaint(DlPaint(DlColor(0xff111111)));
 
     DlPaint paint;
@@ -314,7 +316,7 @@ TEST_P(AiksTest, HairlineDrawLine) {
     }
 
     DisplayListBuilder builder;
-
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     builder.DrawPaint(DlPaint(DlColor(0xff111111)));
 
     DlPaint paint;
@@ -340,6 +342,7 @@ TEST_P(AiksTest, HairlineDrawLine) {
 
 TEST_P(AiksTest, CanRenderTightConicPath) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::kRed());
@@ -479,7 +482,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
     }
 
     DisplayListBuilder builder;
-
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     DlPaint paint;
 
     paint.setColor(DlColor::kWhite());
@@ -518,7 +521,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
       Point point_b = screen_to_canvas * handle_b;
 
       Point middle = point_a + point_b;
-      middle *= 1.f / 2;
+      middle *= GetContentScale().x / 2;
 
       auto radius = point_a.GetDistance(middle);
 
@@ -545,6 +548,7 @@ TEST_P(AiksTest, SolidStrokesRenderCorrectly) {
 
 TEST_P(AiksTest, DrawLinesRenderCorrectly) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::kBlue());
@@ -629,6 +633,7 @@ TEST_P(AiksTest, ScaleExperimentAntialiasLines) {
       ImGui::End();
     }
     DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     builder.DrawPaint(DlPaint(DlColor(0xff111111)));
 
@@ -684,6 +689,8 @@ TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
       ImGui::End();
     }
     DisplayListBuilder builder;
+    builder.Scale(static_cast<float>(GetContentScale().x),
+                  static_cast<float>(GetContentScale().y));
 
     builder.DrawPaint(DlPaint(DlColor(0xff111111)));  // Background
 
@@ -731,6 +738,7 @@ TEST_P(AiksTest, HexagonExperimentAntialiasLines) {
 
 TEST_P(AiksTest, SimpleExperimentAntialiasLines) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   builder.DrawPaint(DlPaint(DlColor(0xff111111)));
 
@@ -826,6 +834,7 @@ TEST_P(AiksTest, CanDrawMultiContourConvexPath) {
 
 TEST_P(AiksTest, ArcWithZeroSweepAndBlur) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::kRed());

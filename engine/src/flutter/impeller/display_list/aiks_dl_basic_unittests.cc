@@ -118,6 +118,7 @@ void CanRenderTiledTexture(AiksTest* aiks_test,
   paint.setColor(DlColor::kWhite());
   paint.setColorSource(color_source);
 
+  builder.Scale(aiks_test->GetContentScale().x, aiks_test->GetContentScale().y);
   builder.Translate(100.0f, 100.0f);
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 600, 600), paint);
 
@@ -247,7 +248,7 @@ TEST_P(AiksTest, DrawImageRectSrcOutsideBounds) {
 
 TEST_P(AiksTest, CanRenderSimpleClips) {
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
 
   paint.setColor(DlColor::kWhite());
@@ -425,7 +426,7 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimes) {
 
 TEST_P(AiksTest, FilledCirclesRenderCorrectly) {
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   const int color_count = 3;
   DlColor colors[color_count] = {
@@ -486,7 +487,7 @@ TEST_P(AiksTest, FilledCirclesRenderCorrectly) {
 
 TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   const int color_count = 3;
   DlColor colors[color_count] = {
@@ -552,7 +553,7 @@ TEST_P(AiksTest, StrokedCirclesRenderCorrectly) {
 
 TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   const int color_count = 3;
   DlColor colors[color_count] = {
@@ -625,7 +626,7 @@ TEST_P(AiksTest, FilledEllipsesRenderCorrectly) {
 
 TEST_P(AiksTest, FilledRoundRectsRenderCorrectly) {
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   const int color_count = 3;
   DlColor colors[color_count] = {
@@ -733,7 +734,7 @@ TEST_P(AiksTest, FilledRoundRectsRenderCorrectly) {
 
 TEST_P(AiksTest, SolidColorCirclesOvalsRRectsMaskBlurCorrectly) {
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 1.0f));
 
@@ -798,6 +799,8 @@ TEST_P(AiksTest, SolidColorCirclesOvalsRRectsMaskBlurCorrectly) {
 
 TEST_P(AiksTest, CanRenderClippedBackdropFilter) {
   DisplayListBuilder builder;
+
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   // Draw something interesting in the background.
   std::vector<DlColor> colors = {DlColor::RGBA(0.9568, 0.2627, 0.2118, 1.0),
@@ -998,7 +1001,7 @@ TEST_P(AiksTest, SubpassWithClearColorOptimization) {
 // Render a white circle at the top left corner of the screen.
 TEST_P(AiksTest, MatrixImageFilterDoesntCullWhenTranslatedFromOffscreen) {
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.Translate(100, 100);
   // Draw a circle in a SaveLayer at -300, but move it back on-screen with a
   // +300 translation applied by a SaveLayer image filter.
@@ -1020,7 +1023,7 @@ TEST_P(AiksTest, MatrixImageFilterDoesntCullWhenTranslatedFromOffscreen) {
 TEST_P(AiksTest,
        MatrixImageFilterDoesntCullWhenScaledAndTranslatedFromOffscreen) {
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.Translate(100, 100);
   // Draw a circle in a SaveLayer at -300, but move it back on-screen with a
   // +300 translation applied by a SaveLayer image filter.
@@ -1044,6 +1047,8 @@ TEST_P(AiksTest, ClearColorOptimizationWhenSubpassIsBiggerThanParentPass) {
   SetWindowSize({400, 400});
   DisplayListBuilder builder;
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
   DlPaint paint;
   paint.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeLTRB(200, 200, 300, 300), paint);
@@ -1066,6 +1071,7 @@ TEST_P(AiksTest, ClearColorOptimizationWhenSubpassIsBiggerThanParentPass) {
 
 TEST_P(AiksTest, EmptySaveLayerIgnoresPaint) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::kRed());
@@ -1080,6 +1086,7 @@ TEST_P(AiksTest, EmptySaveLayerIgnoresPaint) {
 
 TEST_P(AiksTest, EmptySaveLayerRendersWithClear) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   auto image = DlImageImpeller::Make(CreateTextureForFixture("airplane.jpg"));
   builder.DrawImage(image, DlPoint(10, 10), {});
   builder.ClipRect(DlRect::MakeXYWH(100, 100, 200, 200));
@@ -1215,6 +1222,7 @@ TEST_P(AiksTest, CanPerformSaveLayerWithBounds) {
 
 TEST_P(AiksTest, FilledRoundRectPathsRenderCorrectly) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   const int color_count = 3;
@@ -1317,6 +1325,7 @@ TEST_P(AiksTest, FilledRoundRectPathsRenderCorrectly) {
 TEST_P(AiksTest, CoverageOriginShouldBeAccountedForInSubpasses) {
   auto callback = [&]() -> sk_sp<DisplayList> {
     DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     DlPaint alpha;
     alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
@@ -1456,6 +1465,7 @@ TEST_P(AiksTest, CanRenderClippedLayers) {
 TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
   DisplayListBuilder builder;
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.Translate(100, 100);
 
   auto texture = DlImageImpeller::Make(CreateTextureForFixture("boston.jpg"));
@@ -1479,6 +1489,7 @@ TEST_P(AiksTest, SaveLayerFiltersScaleWithTransform) {
 TEST_P(AiksTest, FastEllipticalRRectMaskBlursRenderCorrectly) {
   DisplayListBuilder builder;
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   DlPaint paint;
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 1));
 
@@ -1566,6 +1577,7 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
     }
 
     DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     DlPaint background_paint;
     background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));

@@ -76,6 +76,8 @@ class GoldenPlaygroundTest
 
   std::shared_ptr<Context> MakeContext() const;
 
+  Point GetContentScale() const;
+
   Scalar GetSecondsElapsed() const;
 
   ISize GetWindowSize() const;

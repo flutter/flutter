@@ -205,6 +205,7 @@ TEST_P(AiksTest, ColorFilterBlend) {
     }
 
     DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     auto src_image =
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_src.png"));
@@ -256,6 +257,7 @@ TEST_P(AiksTest, ColorFilterAdvancedBlend) {
     }
 
     DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     auto src_image =
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_src.png"));
@@ -348,6 +350,7 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
     }
 
     DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     auto src_image =
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_src.png"));
@@ -402,6 +405,7 @@ TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
 
   DisplayListBuilder builder;
   DlPaint paint;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   paint.setColor(DlColor::RGBA(0.9, 1, 0.9, 1.0));
   builder.DrawPaint(paint);
@@ -432,6 +436,7 @@ TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamut) {
                                          /*enable_mipmapping=*/true);
 
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::RGBA(0.1, 0.2, 0.1, 1.0));
@@ -492,7 +497,8 @@ TEST_P(AiksTest, ClearBlend) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-static sk_sp<DisplayList> BlendModeTest(BlendMode blend_mode,
+static sk_sp<DisplayList> BlendModeTest(Vector2 content_scale,
+                                        BlendMode blend_mode,
                                         const sk_sp<DlImageImpeller>& src_image,
                                         const sk_sp<DlImageImpeller>& dst_image,
                                         Scalar src_alpha) {
@@ -652,8 +658,8 @@ static sk_sp<DisplayList> BlendModeTest(BlendMode blend_mode,
     auto dst_image =                                                          \
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png")); \
     auto callback = [&]() -> sk_sp<DisplayList> {                             \
-      return BlendModeTest(BlendMode::k##blend_mode, src_image, dst_image,    \
-                           /*src_alpha=*/1.0);                                \
+      return BlendModeTest(GetContentScale(), BlendMode::k##blend_mode,       \
+                           src_image, dst_image, /*src_alpha=*/1.0);          \
     };                                                                        \
     OpenPlaygroundHere(callback);                                             \
   }
@@ -666,8 +672,8 @@ IMPELLER_FOR_EACH_BLEND_MODE(BLEND_MODE_TEST)
     auto dst_image =                                                          \
         DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png")); \
     auto callback = [&]() -> sk_sp<DisplayList> {                             \
-      return BlendModeTest(BlendMode::k##blend_mode, src_image, dst_image,    \
-                           /*src_alpha=*/0.5);                                \
+      return BlendModeTest(GetContentScale(), BlendMode::k##blend_mode,       \
+                           src_image, dst_image, /*src_alpha=*/0.5);          \
     };                                                                        \
     OpenPlaygroundHere(callback);                                             \
   }
@@ -843,7 +849,7 @@ TEST_P(AiksTest, ColorWheel) {
       builder.DrawPaint(paint);
 
       builder.SaveLayer(std::nullopt, nullptr);
-
+      builder.Scale(GetContentScale().x, GetContentScale().y);
       builder.Translate(500, 400);
       builder.Scale(3, 3);
       draw_color_wheel(builder);
@@ -851,6 +857,7 @@ TEST_P(AiksTest, ColorWheel) {
     }
     builder.Restore();
 
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     builder.Translate(500, 400);
     builder.Scale(3, 3);
 

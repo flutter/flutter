@@ -302,6 +302,10 @@ std::shared_ptr<Context> GoldenPlaygroundTest::MakeContext() const {
   }
 }
 
+Point GoldenPlaygroundTest::GetContentScale() const {
+  return pimpl_->screenshotter->GetPlayground().GetContentScale();
+}
+
 Scalar GoldenPlaygroundTest::GetSecondsElapsed() const {
   return 0.0f;
 }

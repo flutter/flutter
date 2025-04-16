@@ -61,6 +61,7 @@ TEST_P(AiksTest, DrawAtlasNoColor) {
   DisplayListBuilder builder;
   auto [texture_coordinates, transforms, atlas] = CreateTestData(this);
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
                     /*colors=*/nullptr, /*count=*/4, DlBlendMode::kSrcOver,
                     DlImageSampling::kNearestNeighbor, nullptr);
@@ -75,6 +76,7 @@ TEST_P(AiksTest, DrawAtlasWithColorAdvanced) {
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kGreen(),
                                  DlColor::kBlue(), DlColor::kYellow()};
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
                     colors.data(), /*count=*/4, DlBlendMode::kModulate,
                     DlImageSampling::kNearestNeighbor, /*cullRect=*/nullptr);
@@ -90,6 +92,7 @@ TEST_P(AiksTest, DrawAtlasWithColorSimple) {
   std::vector<DlColor> colors = {DlColor::kRed(), DlColor::kGreen(),
                                  DlColor::kBlue(), DlColor::kYellow()};
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
                     colors.data(), /*count=*/4, DlBlendMode::kSrcATop,
                     DlImageSampling::kNearestNeighbor, /*cullRect=*/nullptr);
@@ -105,7 +108,7 @@ TEST_P(AiksTest, DrawAtlasWithOpacity) {
 
   DlPaint paint;
   paint.setAlpha(128);
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
                     /*colors=*/nullptr, 4, DlBlendMode::kSrcOver,
                     DlImageSampling::kNearestNeighbor, /*cullRect=*/nullptr,
@@ -122,7 +125,7 @@ TEST_P(AiksTest, DrawAtlasNoColorFullSize) {
   std::vector<RSTransform> transforms = {MakeTranslation(0, 0)};
 
   DisplayListBuilder builder;
-
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawAtlas(atlas, transforms.data(), texture_coordinates.data(),
                     /*colors=*/nullptr, /*count=*/1, DlBlendMode::kSrcOver,
                     DlImageSampling::kNearestNeighbor, /*cullRect=*/nullptr);

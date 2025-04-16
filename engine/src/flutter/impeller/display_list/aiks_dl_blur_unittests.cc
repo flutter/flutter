@@ -36,6 +36,7 @@ using namespace flutter;
 // difference between the fast pass and not.
 TEST_P(AiksTest, SolidColorOvalsMaskBlurTinySigma) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   std::vector<float> sigmas = {0.0, 0.01, 1.0};
   std::vector<DlColor> colors = {DlColor::kGreen(), DlColor::kYellow(),
@@ -57,9 +58,11 @@ TEST_P(AiksTest, SolidColorOvalsMaskBlurTinySigma) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(Scalar sigma,
+sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(Vector2 content_Scale,
+                                                         Scalar sigma,
                                                          DlBlurStyle style) {
   DisplayListBuilder builder;
+  builder.Scale(content_Scale.x, content_Scale.y);
 
   DlPaint background_paint;
   background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
@@ -98,31 +101,32 @@ sk_sp<flutter::DisplayList> DoGradientOvalStrokeMaskBlur(Scalar sigma,
 // https://github.com/flutter/flutter/issues/155930
 TEST_P(AiksTest, GradientOvalStrokeMaskBlur) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
-      /*sigma=*/10, DlBlurStyle::kNormal)));
+      GetContentScale(), /*sigma=*/10, DlBlurStyle::kNormal)));
 }
 
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurSigmaZero) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
-      /*sigma=*/0, DlBlurStyle::kNormal)));
+      GetContentScale(), /*sigma=*/0, DlBlurStyle::kNormal)));
 }
 
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurOuter) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
-      /*sigma=*/10, DlBlurStyle::kOuter)));
+      GetContentScale(), /*sigma=*/10, DlBlurStyle::kOuter)));
 }
 
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurInner) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
-      /*sigma=*/10, DlBlurStyle::kInner)));
+      GetContentScale(), /*sigma=*/10, DlBlurStyle::kInner)));
 }
 
 TEST_P(AiksTest, GradientOvalStrokeMaskBlurSolid) {
   ASSERT_TRUE(OpenPlaygroundHere(DoGradientOvalStrokeMaskBlur(
-      /*sigma=*/10, DlBlurStyle::kSolid)));
+      GetContentScale(), /*sigma=*/10, DlBlurStyle::kSolid)));
 }
 
 TEST_P(AiksTest, SolidColorCircleMaskBlurTinySigma) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   std::vector<float> sigmas = {0.0, 0.01, 1.0};
   std::vector<DlColor> colors = {DlColor::kGreen(), DlColor::kYellow(),
@@ -439,7 +443,7 @@ TEST_P(AiksTest, BlurHasNoEdge) {
       ImGui::End();
     }
     DisplayListBuilder builder;
-
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     builder.DrawPaint({});
 
     DlPaint paint;
@@ -501,7 +505,8 @@ static sk_sp<DisplayList> MaskBlurVariantTest(
     const AiksTest& test_context,
     const MaskBlurTestConfig& config) {
   DisplayListBuilder builder;
-
+  builder.Scale(test_context.GetContentScale().x,
+                test_context.GetContentScale().y);
   builder.Scale(0.8f, 0.8f);
   builder.Translate(50.f, 50.f);
 
@@ -642,6 +647,7 @@ MASK_BLUR_VARIANT_TEST(OuterOpaqueWithBlurImageFilter)
 
 TEST_P(AiksTest, GaussianBlurStyleInner) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1));
@@ -668,6 +674,7 @@ TEST_P(AiksTest, GaussianBlurStyleInner) {
 
 TEST_P(AiksTest, GaussianBlurStyleOuter) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
@@ -694,6 +701,7 @@ TEST_P(AiksTest, GaussianBlurStyleOuter) {
 
 TEST_P(AiksTest, GaussianBlurStyleSolid) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
@@ -728,6 +736,7 @@ TEST_P(AiksTest, MaskBlurTexture) {
     }
 
     DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     DlPaint paint;
     paint.setColor(DlColor::kGreen());
@@ -756,6 +765,7 @@ TEST_P(AiksTest, MaskBlurDoesntStretchContents) {
     }
 
     DisplayListBuilder builder;
+    builder.Scale(GetContentScale().x, GetContentScale().y);
 
     DlPaint paint;
     paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
@@ -784,6 +794,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryVertical) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   paint.setColor(DlColor::kLimeGreen());
   DlRoundRect rrect = DlRoundRect::MakeRectXY(
@@ -810,6 +821,7 @@ TEST_P(AiksTest, GaussianBlurAtPeripheryVertical) {
 TEST_P(AiksTest, GaussianBlurAtPeripheryHorizontal) {
   DisplayListBuilder builder;
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   std::shared_ptr<Texture> boston = CreateTextureForFixture("boston.jpg");
   builder.DrawImageRect(
       DlImageImpeller::Make(boston),
@@ -857,7 +869,7 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
     }
 
     DisplayListBuilder builder;
-
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     Scalar y = amp * sin(freq * 2.0 * M_PI * count / 60);
     builder.DrawImage(DlImageImpeller::Make(boston),
                       DlPoint(1024 / 2 - boston->GetSize().width / 2,
@@ -885,6 +897,8 @@ TEST_P(AiksTest, GaussianBlurAnimatedBackdrop) {
 
 TEST_P(AiksTest, GaussianBlurStyleInnerGradient) {
   DisplayListBuilder builder;
+
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
@@ -921,6 +935,7 @@ TEST_P(AiksTest, GaussianBlurStyleInnerGradient) {
 
 TEST_P(AiksTest, GaussianBlurStyleSolidGradient) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
@@ -956,6 +971,7 @@ TEST_P(AiksTest, GaussianBlurStyleSolidGradient) {
 
 TEST_P(AiksTest, GaussianBlurStyleOuterGradient) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
   paint.setColor(DlColor::RGBA(0.1, 0.1, 0.1, 1.0));
@@ -1001,6 +1017,7 @@ TEST_P(AiksTest, GaussianBlurScaledAndClipped) {
 
   Vector2 clip_size = {150, 75};
   Vector2 center = Vector2(1024, 768) / 2;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   auto rect =
       Rect::MakeLTRB(center.x, center.y, center.x, center.y).Expand(clip_size);
@@ -1055,6 +1072,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
     auto [handle_a, handle_b] = DrawPlaygroundLine(point_a, point_b);
     Vector2 center = Vector2(1024, 768) / 2;
 
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     builder.ClipRect(
         DlRect::MakeLTRB(handle_a.x, handle_a.y, handle_b.x, handle_b.y));
     builder.Translate(center.x, center.y);
@@ -1078,6 +1096,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClippedInteractive) {
 TEST_P(AiksTest, GaussianBlurOneDimension) {
   DisplayListBuilder builder;
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.Scale(0.5, 0.5);
 
   std::shared_ptr<Texture> boston = CreateTextureForFixture("boston.jpg");
@@ -1109,6 +1128,7 @@ TEST_P(AiksTest, GaussianBlurRotatedAndClipped) {
   Vector2 image_center = Vector2(bounds.GetSize() / 2);
   Vector2 clip_size = {150, 75};
   Vector2 center = Vector2(1024, 768) / 2;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   auto clip_bounds =
       Rect::MakeLTRB(center.x, center.y, center.x, center.y).Expand(clip_size);
@@ -1159,7 +1179,7 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
         DlImageFilter::MakeBlur(50, 0, tile_modes[selected_tile_mode]));
 
     Vector2 center = Vector2(1024, 768) / 2;
-
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     builder.Translate(center.x, center.y);
     builder.Scale(scale, scale);
     builder.Rotate(rotation);
@@ -1175,6 +1195,7 @@ TEST_P(AiksTest, GaussianBlurRotatedNonUniform) {
 
 TEST_P(AiksTest, BlurredRectangleWithShader) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   auto paint_lines = [&builder](Scalar dx, Scalar dy, DlPaint paint) {
     auto draw_line = [&builder, &paint](DlPoint a, DlPoint b) {
@@ -1321,6 +1342,7 @@ TEST_P(AiksTest,
 
 TEST_P(AiksTest, BlurGradientWithOpacity) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   std::vector<DlColor> colors = {DlColor(0xFFFF0000), DlColor(0xFF00FF00)};
   std::vector<Scalar> stops = {0.0, 1.0};

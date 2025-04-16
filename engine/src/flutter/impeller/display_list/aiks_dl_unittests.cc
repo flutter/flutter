@@ -224,6 +224,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorAndImageFilterDrawsCorrectly) {
 
 TEST_P(AiksTest, ImageFilteredUnboundedSaveLayerWithUnboundedContents) {
   DisplayListBuilder builder(DlRect::MakeSize(GetWindowSize()));
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint save_paint;
   save_paint.setImageFilter(
@@ -599,7 +600,7 @@ TEST_P(AiksTest, ReleasesTextureOnTeardown) {
     weak_texture = texture;
 
     DisplayListBuilder builder;
-
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     builder.Translate(100.0f, 100.0f);
 
     DlPaint paint;
@@ -634,7 +635,7 @@ TEST_P(AiksTest, MatrixImageFilterMagnify) {
       ImGui::End();
     }
     DisplayListBuilder builder;
-
+    builder.Scale(GetContentScale().x, GetContentScale().y);
     auto image = DlImageImpeller::Make(CreateTextureForFixture("airplane.jpg"));
 
     builder.Translate(600, -200);
@@ -659,6 +660,7 @@ TEST_P(AiksTest, MatrixImageFilterMagnify) {
 
 TEST_P(AiksTest, ImageFilteredSaveLayerWithUnboundedContents) {
   DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
 
   auto test = [&builder](const std::shared_ptr<DlImageFilter>& filter) {
     auto DrawLine = [&builder](const DlPoint& p0, const DlPoint& p1,

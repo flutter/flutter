@@ -489,6 +489,7 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
 
   paint.setColorSource(color_source);
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.Save();
   builder.DrawRect(DlRect::MakeLTRB(0, 0, 100, 100), rect_paint);
   builder.DrawVertices(vertices_lt, flutter::DlBlendMode::kSrcOver, paint);
@@ -542,6 +543,7 @@ TEST_P(AiksTest,
 
   paint.setColorSource(color_source);
 
+  builder.Scale(GetContentScale().x, GetContentScale().y);
   builder.DrawRect(DlRect::MakeLTRB(200, 200, 250, 250), rect_paint);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
 
