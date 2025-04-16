@@ -203,7 +203,11 @@ class AndroidValidator extends DoctorValidator {
     }
 
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
-    messages.add(ValidationMessage('Emulator version ${await getEmulatorVersion(androidSdk.directory.path) ?? 'unknown'}'));
+    messages.add(
+      ValidationMessage(
+        'Emulator version ${await getEmulatorVersion(androidSdk.directory.path) ?? 'unknown'}',
+      ),
+    );
 
     _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {

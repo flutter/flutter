@@ -670,44 +670,41 @@ Android sdkmanager tool was found, but failed to run
     },
   );
 
-  testUsingContext(
-    'Mentions that JDK is provided by latest Android Studio Installation',
-    () async {
-      // Mock a pass through scenario to reach _checkJavaVersion()
-      sdk
-        ..licensesAvailable = true
-        ..platformToolsAvailable = true
-        ..cmdlineToolsAvailable = true
-        ..directory = fileSystem.directory('/foo/bar')
-        ..sdkManagerPath = '/foo/bar/sdkmanager';
+  testUsingContext('Mentions that JDK is provided by latest Android Studio Installation', () async {
+    // Mock a pass through scenario to reach _checkJavaVersion()
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..sdkManagerPath = '/foo/bar/sdkmanager';
 
-      final ValidationResult validationResult =
-          await AndroidValidator(
-            java: FakeJava(),
-            androidSdk: sdk,
-            logger: logger,
-            platform: FakePlatform(),
-            userMessages: UserMessages(),
-          ).validate();
+    final ValidationResult validationResult =
+        await AndroidValidator(
+          java: FakeJava(),
+          androidSdk: sdk,
+          logger: logger,
+          platform: FakePlatform(),
+          userMessages: UserMessages(),
+        ).validate();
 
-      expect(
-        validationResult.messages.any(
-          (ValidationMessage message) => message.message.contains(
-            'This is the JDK bundled with the latest Android Studio installation on this machine.',
-          ),
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains(
+          'This is the JDK bundled with the latest Android Studio installation on this machine.',
         ),
-        true,
-      );
-      expect(
-        validationResult.messages.any(
-          (ValidationMessage message) => message.message.contains(
-            'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.',
-          ),
+      ),
+      true,
+    );
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains(
+          'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.',
         ),
-        true,
-      );
-    },
-  );
+      ),
+      true,
+    );
+  });
 
   testUsingContext(
     "Mentions that JDK is provided by user's JAVA_HOME environment variable",
