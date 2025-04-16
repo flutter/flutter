@@ -297,7 +297,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
 );
 
 final RegExp _minSdkVersionPattern = RegExp(
-  r'uses-sdk:minSdkVersion ([0-9]+) cannot be smaller than version ([0-9]+) declared in library \[\:(.+)\]',
+  r'uses-sdk:minSdkVersion ([0-9]+) cannot be smaller than version ([0-9]+) declared in library \[:(.+)\]',
 );
 
 /// Handler when a plugin requires a higher Android API level.

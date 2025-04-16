@@ -1612,7 +1612,7 @@ A problem occurred configuring project ':app'.
       );
       expect(
         testLogger.statusText,
-        contains('C:\\Users\\mackall\\Library\\Android\\sdk\\ndk\\26.3.11579264'),
+        contains(r'C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264'),
       );
     },
     overrides: <Type, Generator>{
