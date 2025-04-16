@@ -1762,6 +1762,7 @@ class CompileTest {
 
       watch.start();
       await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        '-allowProvisioningUpdates',
         '-scheme',
         'hello_world_swiftui',
         '-target',
