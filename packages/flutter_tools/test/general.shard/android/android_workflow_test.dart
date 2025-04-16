@@ -425,12 +425,19 @@ Review licenses that have not been accepted (y/N)?
     expect(stdio.writtenToStderr, contains('sdkmanager crash'));
   });
 
-  testWithoutContext('detects license-only SDK installation with cmdline-tools', () async {
+  testUsingContext('includes emulator version', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = false
       ..cmdlineToolsAvailable = true
-      ..directory = fileSystem.directory('/foo/bar');
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator';
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[sdk.emulatorPath!, '-version'],
+        stdout: 'INFO    | Android emulator version 35.2.10.0 (build_id 12414864) (CL:N/A)',
+      ),
+    );
     final ValidationResult validationResult =
         await AndroidValidator(
           java: FakeJava(),
@@ -438,6 +445,31 @@ Review licenses that have not been accepted (y/N)?
           logger: logger,
           platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
           userMessages: UserMessages(),
+          processManager: processManager,
+        ).validate();
+
+    expect(validationResult.type, ValidationType.partial);
+    expect(validationResult.messages.length > 2, isTrue);
+    final ValidationMessage sdkMessage = validationResult.messages[1];
+    expect(sdkMessage.type, ValidationMessageType.information);
+    expect(sdkMessage.message, 'Emulator version 35.2.10.0 (build_id 12414864) (CL:N/A)');
+  });
+
+  testUsingContext('detects license-only SDK installation with cmdline-tools', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = false
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator';
+    final ValidationResult validationResult =
+        await AndroidValidator(
+          java: FakeJava(),
+          androidSdk: sdk,
+          logger: logger,
+          platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+          userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(validationResult.type, ValidationType.partial);
@@ -464,7 +496,8 @@ Review licenses that have not been accepted (y/N)?
       // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
-      ..latestVersion = sdkVersion;
+      ..latestVersion = sdkVersion
+      ..emulatorPath = 'path/to/emulator';
 
     final String errorMessage = UserMessages().androidSdkBuildToolsOutdated(
       kAndroidSdkMinVersion,
@@ -478,6 +511,7 @@ Review licenses that have not been accepted (y/N)?
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
+      processManager: processManager,
     );
 
     ValidationResult validationResult = await androidValidator.validate();
@@ -505,12 +539,13 @@ Review licenses that have not been accepted (y/N)?
     );
   });
 
-  testWithoutContext('detects missing cmdline tools', () async {
+  testUsingContext('detects missing cmdline tools', () async {
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = false
-      ..directory = fileSystem.directory('/foo/bar');
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator';
 
     final AndroidValidator androidValidator = AndroidValidator(
       java: FakeJava(),
@@ -518,6 +553,7 @@ Review licenses that have not been accepted (y/N)?
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
+      processManager: processManager,
     );
 
     final ValidationResult validationResult = await androidValidator.validate();
@@ -558,7 +594,8 @@ Review licenses that have not been accepted (y/N)?
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager';
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
     sdk.latestVersion = sdkVersion;
 
     const String javaVersionText = 'openjdk version "1.7.0_212"';
@@ -571,6 +608,7 @@ Review licenses that have not been accepted (y/N)?
           logger: logger,
           platform: platform,
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
     expect(validationResult.type, ValidationType.partial);
     expect(validationResult.messages.last.message, errorMessage);
@@ -595,6 +633,7 @@ Review licenses that have not been accepted (y/N)?
                   Java.javaHomeEnvironmentVariable: 'home/java',
                 },
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(
@@ -646,46 +685,45 @@ Android sdkmanager tool was found, but failed to run
     },
   );
 
-  testWithoutContext(
-    'Mentions that JDK is provided by latest Android Studio Installation',
-    () async {
-      // Mock a pass through scenario to reach _checkJavaVersion()
-      sdk
-        ..licensesAvailable = true
-        ..platformToolsAvailable = true
-        ..cmdlineToolsAvailable = true
-        ..directory = fileSystem.directory('/foo/bar')
-        ..sdkManagerPath = '/foo/bar/sdkmanager';
+  testUsingContext('Mentions that JDK is provided by latest Android Studio Installation', () async {
+    // Mock a pass through scenario to reach _checkJavaVersion()
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = true
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
 
-      final ValidationResult validationResult =
-          await AndroidValidator(
-            java: FakeJava(),
-            androidSdk: sdk,
-            logger: logger,
-            platform: FakePlatform(),
-            userMessages: UserMessages(),
-          ).validate();
+    final ValidationResult validationResult =
+        await AndroidValidator(
+          java: FakeJava(),
+          androidSdk: sdk,
+          logger: logger,
+          platform: FakePlatform(),
+          userMessages: UserMessages(),
+          processManager: processManager,
+        ).validate();
 
-      expect(
-        validationResult.messages.any(
-          (ValidationMessage message) => message.message.contains(
-            'This is the JDK bundled with the latest Android Studio installation on this machine.',
-          ),
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains(
+          'This is the JDK bundled with the latest Android Studio installation on this machine.',
         ),
-        true,
-      );
-      expect(
-        validationResult.messages.any(
-          (ValidationMessage message) => message.message.contains(
-            'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.',
-          ),
+      ),
+      true,
+    );
+    expect(
+      validationResult.messages.any(
+        (ValidationMessage message) => message.message.contains(
+          'To manually set the JDK path, use: `flutter config --jdk-dir="path/to/jdk"`.',
         ),
-        true,
-      );
-    },
-  );
+      ),
+      true,
+    );
+  });
 
-  testWithoutContext(
+  testUsingContext(
     "Mentions that JDK is provided by user's JAVA_HOME environment variable",
     () async {
       // Mock a pass through scenario to reach _checkJavaVersion()
@@ -694,7 +732,8 @@ Android sdkmanager tool was found, but failed to run
         ..platformToolsAvailable = true
         ..cmdlineToolsAvailable = true
         ..directory = fileSystem.directory('/foo/bar')
-        ..sdkManagerPath = '/foo/bar/sdkmanager';
+        ..sdkManagerPath = '/foo/bar/sdkmanager'
+        ..emulatorPath = 'path/to/emulator';
 
       final ValidationResult validationResult =
           await AndroidValidator(
@@ -703,6 +742,7 @@ Android sdkmanager tool was found, but failed to run
             logger: logger,
             platform: FakePlatform(),
             userMessages: UserMessages(),
+            processManager: processManager,
           ).validate();
 
       expect(
@@ -724,14 +764,15 @@ Android sdkmanager tool was found, but failed to run
     },
   );
 
-  testWithoutContext('Mentions that path to Java binary is obtained from PATH', () async {
+  testUsingContext('Mentions that path to Java binary is obtained from PATH', () async {
     // Mock a pass through scenario to reach _checkJavaVersion()
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager';
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
 
     final ValidationResult validationResult =
         await AndroidValidator(
@@ -740,6 +781,7 @@ Android sdkmanager tool was found, but failed to run
           logger: logger,
           platform: FakePlatform(),
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(
@@ -759,14 +801,15 @@ Android sdkmanager tool was found, but failed to run
     );
   });
 
-  testWithoutContext('Mentions that JDK is provided by Flutter config', () async {
+  testUsingContext('Mentions that JDK is provided by Flutter config', () async {
     // Mock a pass through scenario to reach _checkJavaVersion()
     sdk
       ..licensesAvailable = true
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager';
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
 
     final ValidationResult validationResult =
         await AndroidValidator(
@@ -775,6 +818,7 @@ Android sdkmanager tool was found, but failed to run
           logger: logger,
           platform: FakePlatform(),
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(
