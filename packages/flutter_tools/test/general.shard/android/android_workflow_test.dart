@@ -460,7 +460,8 @@ Review licenses that have not been accepted (y/N)?
       ..licensesAvailable = true
       ..platformToolsAvailable = false
       ..cmdlineToolsAvailable = true
-      ..directory = fileSystem.directory('/foo/bar');
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator';
     final ValidationResult validationResult =
         await AndroidValidator(
           java: FakeJava(),
@@ -495,7 +496,8 @@ Review licenses that have not been accepted (y/N)?
       // Test with invalid SDK and build tools
       ..directory = fileSystem.directory('/foo/bar')
       ..sdkManagerPath = '/foo/bar/sdkmanager'
-      ..latestVersion = sdkVersion;
+      ..latestVersion = sdkVersion
+      ..emulatorPath = 'path/to/emulator';
 
     final String errorMessage = UserMessages().androidSdkBuildToolsOutdated(
       kAndroidSdkMinVersion,
@@ -542,7 +544,8 @@ Review licenses that have not been accepted (y/N)?
       ..licensesAvailable = true
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = false
-      ..directory = fileSystem.directory('/foo/bar');
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator';
 
     final AndroidValidator androidValidator = AndroidValidator(
       java: FakeJava(),
@@ -591,7 +594,8 @@ Review licenses that have not been accepted (y/N)?
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager';
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
     sdk.latestVersion = sdkVersion;
 
     const String javaVersionText = 'openjdk version "1.7.0_212"';
@@ -688,7 +692,8 @@ Android sdkmanager tool was found, but failed to run
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager';
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
 
     final ValidationResult validationResult =
         await AndroidValidator(
@@ -727,7 +732,8 @@ Android sdkmanager tool was found, but failed to run
         ..platformToolsAvailable = true
         ..cmdlineToolsAvailable = true
         ..directory = fileSystem.directory('/foo/bar')
-        ..sdkManagerPath = '/foo/bar/sdkmanager';
+        ..sdkManagerPath = '/foo/bar/sdkmanager'
+        ..emulatorPath = 'path/to/emulator';
 
       final ValidationResult validationResult =
           await AndroidValidator(
@@ -765,7 +771,8 @@ Android sdkmanager tool was found, but failed to run
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager';
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
 
     final ValidationResult validationResult =
         await AndroidValidator(
@@ -801,7 +808,8 @@ Android sdkmanager tool was found, but failed to run
       ..platformToolsAvailable = true
       ..cmdlineToolsAvailable = true
       ..directory = fileSystem.directory('/foo/bar')
-      ..sdkManagerPath = '/foo/bar/sdkmanager';
+      ..sdkManagerPath = '/foo/bar/sdkmanager'
+      ..emulatorPath = 'path/to/emulator';
 
     final ValidationResult validationResult =
         await AndroidValidator(
