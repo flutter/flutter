@@ -778,7 +778,7 @@ class IOSDevice extends Device {
       this,
       usesIpv6: debuggingOptions.ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
-      throwOnError: !discoverVMUrlFromLogs,
+      throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
     );
 
     final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[

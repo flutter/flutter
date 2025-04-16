@@ -953,7 +953,10 @@ void main() {
         },
         // If mDNS is not the only method of discovery, it shouldn't throw on error.
         overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(allowThrowOnError: false),
+          MDnsVmServiceDiscovery:
+              () => FakeMDnsVmServiceDiscovery(
+                allowthrowOnMissingLocalNetworkPermissionsError: false,
+              ),
         },
       );
 
@@ -1242,9 +1245,12 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 }
 
 class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
-  FakeMDnsVmServiceDiscovery({this.returnsNull = false, this.allowThrowOnError = true});
+  FakeMDnsVmServiceDiscovery({
+    this.returnsNull = false,
+    this.allowthrowOnMissingLocalNetworkPermissionsError = true,
+  });
   bool returnsNull;
-  bool allowThrowOnError;
+  bool allowthrowOnMissingLocalNetworkPermissionsError;
 
   Completer<void> completer = Completer<void>();
   @override
@@ -1256,13 +1262,16 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
     int? deviceVmservicePort,
     bool useDeviceIPAsHost = false,
     Duration timeout = Duration.zero,
-    bool throwOnError = true,
+    bool throwOnMissingLocalNetworkPermissionsError = true,
   }) async {
     completer.complete();
     if (returnsNull) {
       return null;
     }
-    expect(throwOnError, allowThrowOnError);
+    expect(
+      throwOnMissingLocalNetworkPermissionsError,
+      allowthrowOnMissingLocalNetworkPermissionsError,
+    );
 
     return Uri.tryParse('http://0.0.0.0:1234');
   }

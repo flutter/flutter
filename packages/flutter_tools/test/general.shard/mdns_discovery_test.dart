@@ -683,7 +683,7 @@ void main() {
 
           final MDnsVmServiceDiscoveryResult? result = await portDiscovery.firstMatchingVmService(
             client,
-            throwOnError: false,
+            throwOnMissingLocalNetworkPermissionsError: false,
           );
 
           expect(result, isNull);
