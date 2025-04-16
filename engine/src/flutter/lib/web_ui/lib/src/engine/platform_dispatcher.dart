@@ -1034,11 +1034,9 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
   ui.VoidCallback? get onSupportsShowingSystemContextMenuChanged =>
       _onSupportsShowingSystemContextMenuChanged;
   ui.VoidCallback? _onSupportsShowingSystemContextMenuChanged;
-  Zone? _onSupportsShowingSystemContextMenuChangedZone;
   @override
   set onSupportsShowingSystemContextMenuChanged(ui.VoidCallback? callback) {
     _onSupportsShowingSystemContextMenuChanged = callback;
-    _onSupportsShowingSystemContextMenuChangedZone = Zone.current;
   }
 
   /// Engine code should use this method instead of the callback directly.
