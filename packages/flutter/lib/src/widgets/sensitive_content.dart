@@ -298,20 +298,23 @@ class SensitiveContentHost {
 /// obscured regardless of the [sensitivity] set. To programmatically check if
 /// a device supports this widget, call [SensitiveContentService.isSupported].
 ///
+/// It is possible for a frame to be projected before the screen is updated to match
+/// the widget's `sensitivityLevel`, potentially revealing sensitive information during
+/// that frame. For example, when navigating from a page with no `SensitiveContent` to a
+/// new page in an app using a `Navigator.of(context).pushReplacement` to push a new
+/// `PageRouteBuilder` with (1) a `pageBuilder` that includes a [SensitiveContent] widget
+/// with `sensitivity` [ContentSensitivity.sensitive] and (2)
+/// `transitionDuration: Duration.zero`, one frame showing the app content is projected
+/// before the screen is obscured. See https://github.com/flutter/flutter/issues/164820 for
+/// for a discussion on known vulnerabilities or to report encountered vulnerabilities.
+///
 /// See also:
 ///
 ///  * [ContentSensitivity], which are the different content sensitivity that a
 ///    [SensitiveContent] widget can set.
-///
-/// This widget is marked visible for testing because it is not ready for use. It
-/// will be ready for use when it is implemented such that we can guarantee that no
-/// frames will be dropped when content is marked sensitive, ensuring that no sensitive
-/// content will be revealed during media projection.
 // TODO(camsim99): Fix `SensitiveContent` implementation to prevent revealing sensitive
-// content during media projection. Then, export this file to make the widget available
-// for use. See https://github.com/flutter/flutter/issues/160050 and
-// https://github.com/flutter/flutter/issues/164820.
-@visibleForTesting
+// content during media projection. See https://github.com/flutter/flutter/issues/160050
+// and https://github.com/flutter/flutter/issues/164820.
 class SensitiveContent extends StatefulWidget {
   /// Creates a [SensitiveContent] widget.
   const SensitiveContent({super.key, required this.sensitivity, required this.child});

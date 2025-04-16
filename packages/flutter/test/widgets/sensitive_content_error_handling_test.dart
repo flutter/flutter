@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/sensitive_content.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'sensitive_content_utils.dart';
