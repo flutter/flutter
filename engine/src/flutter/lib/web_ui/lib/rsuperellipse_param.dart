@@ -4,10 +4,37 @@
 
 part of ui;
 
-class RSuperellipseParam {
-  RSuperellipseParam(this._shape, this._maybeCache);
+bool shapeNearlyEqualTo(RSuperellipse a, RSuperellipse b, double tolerance) {
+  if (identical(a, b)) {
+    return true;
+  }
 
-  final _Shape _shape;
+  bool ScalarNearlyEqual(double x, double y) {
+    return (x - y).abs() <= tolerance;
+  }
+
+  if (a.uniformRadii && b.uniformRadii) {
+    return ScalarNearlyEqual(a.width, b.width) &&
+        ScalarNearlyEqual(a.height, b.height) &&
+        ScalarNearlyEqual(a.tlRadiusX, b.tlRadiusX) &&
+        ScalarNearlyEqual(a.tlRadiusY, b.tlRadiusY);
+  }
+  return ScalarNearlyEqual(a.width, b.width) &&
+      ScalarNearlyEqual(a.height, b.height) &&
+      ScalarNearlyEqual(a.tlRadiusX, b.tlRadiusX) &&
+      ScalarNearlyEqual(a.tlRadiusY, b.tlRadiusY) &&
+      ScalarNearlyEqual(a.trRadiusX, b.trRadiusX) &&
+      ScalarNearlyEqual(a.trRadiusY, b.trRadiusY) &&
+      ScalarNearlyEqual(a.blRadiusX, b.blRadiusX) &&
+      ScalarNearlyEqual(a.blRadiusY, b.blRadiusY) &&
+      ScalarNearlyEqual(a.brRadiusX, b.brRadiusX) &&
+      ScalarNearlyEqual(a.brRadiusY, b.brRadiusY);
+}
+
+class RSuperellipseParam {
+  RSuperellipseParam(this._target, this._maybeCache);
+
+  final RSuperellipse _target;
   final RSuperellipse? _maybeCache;
 
   Path? _cachedPath;
@@ -31,11 +58,11 @@ class RSuperellipseParam {
     }
     if (_maybeCache != null &&
         _maybeCache._param.isInitialized &&
-        _maybeCache._shape.nearlyEqualTo(_shape, 1e-6)) {
+        shapeNearlyEqualTo(_target, _maybeCache, 1e-6)) {
       _cachedPath = _maybeCache._param._cachedPath;
     } else {
       _cachedPath = Path();
-      _RSuperellipsePathBuilder(_cachedPath!).buildPath(_shape);
+      _RSuperellipsePathBuilder(_cachedPath!).buildPath(_target);
     }
   }
 }
@@ -268,7 +295,7 @@ class _RSuperellipsePathBuilder {
 
   final Path path;
 
-  void buildPath(_Shape r) {
+  void buildPath(RSuperellipse r) {
     final double left = 0;
     final double right = r.width;
     final double top = 0;

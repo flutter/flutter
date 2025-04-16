@@ -406,7 +406,27 @@ class Radius {
 }
 
 abstract class _RRectLike<T extends _RRectLike<T>> {
-  const _RRectLike();
+  const _RRectLike({
+    required this.left,
+    required this.top,
+    required this.right,
+    required this.bottom,
+    required this.tlRadiusX,
+    required this.tlRadiusY,
+    required this.trRadiusX,
+    required this.trRadiusY,
+    required this.brRadiusX,
+    required this.brRadiusY,
+    required this.blRadiusX,
+    required this.blRadiusY,
+  }) : assert(tlRadiusX >= 0),
+       assert(tlRadiusY >= 0),
+       assert(trRadiusX >= 0),
+       assert(trRadiusY >= 0),
+       assert(brRadiusX >= 0),
+       assert(brRadiusY >= 0),
+       assert(blRadiusX >= 0),
+       assert(blRadiusY >= 0);
 
   T _create({
     required double left,
@@ -423,21 +443,21 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
     required double blRadiusY,
   });
 
-  double get left;
-  double get top;
-  double get right;
-  double get bottom;
-  double get tlRadiusX;
-  double get tlRadiusY;
+  final double left;
+  final double top;
+  final double right;
+  final double bottom;
+  final double tlRadiusX;
+  final double tlRadiusY;
   Radius get tlRadius => Radius.elliptical(tlRadiusX, tlRadiusY);
-  double get trRadiusX;
-  double get trRadiusY;
+  final double trRadiusX;
+  final double trRadiusY;
   Radius get trRadius => Radius.elliptical(trRadiusX, trRadiusY);
-  double get brRadiusX;
-  double get brRadiusY;
+  final double brRadiusX;
+  final double brRadiusY;
   Radius get brRadius => Radius.elliptical(brRadiusX, brRadiusY);
-  double get blRadiusX;
-  double get blRadiusY;
+  final double blRadiusX;
+  final double blRadiusY;
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
 
   T shift(Offset offset) {
@@ -713,26 +733,19 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
 
 class RRect extends _RRectLike<RRect> {
   const RRect._raw({
-    this.left = 0,
-    this.top = 0,
-    this.right = 0,
-    this.bottom = 0,
-    this.tlRadiusX = 0,
-    this.tlRadiusY = 0,
-    this.trRadiusX = 0,
-    this.trRadiusY = 0,
-    this.brRadiusX = 0,
-    this.brRadiusY = 0,
-    this.blRadiusX = 0,
-    this.blRadiusY = 0,
-  }) : assert(tlRadiusX >= 0),
-       assert(tlRadiusY >= 0),
-       assert(trRadiusX >= 0),
-       assert(trRadiusY >= 0),
-       assert(brRadiusX >= 0),
-       assert(brRadiusY >= 0),
-       assert(blRadiusX >= 0),
-       assert(blRadiusY >= 0);
+    super.left = 0.0,
+    super.top = 0.0,
+    super.right = 0.0,
+    super.bottom = 0.0,
+    super.tlRadiusX = 0.0,
+    super.tlRadiusY = 0.0,
+    super.trRadiusX = 0.0,
+    super.trRadiusY = 0.0,
+    super.brRadiusX = 0.0,
+    super.brRadiusY = 0.0,
+    super.blRadiusX = 0.0,
+    super.blRadiusY = 0.0,
+  });
 
   const RRect.fromLTRBXY(
     double left,
@@ -848,31 +861,6 @@ class RRect extends _RRectLike<RRect> {
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
        );
-
-  @override
-  final double left;
-  @override
-  final double top;
-  @override
-  final double right;
-  @override
-  final double bottom;
-  @override
-  final double tlRadiusX;
-  @override
-  final double tlRadiusY;
-  @override
-  final double trRadiusX;
-  @override
-  final double trRadiusY;
-  @override
-  final double brRadiusX;
-  @override
-  final double brRadiusY;
-  @override
-  final double blRadiusX;
-  @override
-  final double blRadiusY;
 
   @override
   RRect _create({
@@ -997,65 +985,26 @@ class _Shape {
   final double blRadiusY;
   Radius get blRadius => Radius.elliptical(blRadiusX, blRadiusY);
   final bool uniformRadii;
-
-  bool nearlyEqualTo(_Shape b, double tolerance) {
-    if (identical(this, b)) {
-      return true;
-    }
-
-    bool ScalarNearlyEqual(double x, double y) {
-      return (x - y).abs() <= tolerance;
-    }
-
-    if (uniformRadii && b.uniformRadii) {
-      return ScalarNearlyEqual(width, b.width) &&
-          ScalarNearlyEqual(height, b.height) &&
-          ScalarNearlyEqual(tlRadiusX, b.tlRadiusX) &&
-          ScalarNearlyEqual(tlRadiusY, b.tlRadiusY);
-    }
-    return ScalarNearlyEqual(width, b.width) &&
-        ScalarNearlyEqual(height, b.height) &&
-        ScalarNearlyEqual(tlRadiusX, b.tlRadiusX) &&
-        ScalarNearlyEqual(tlRadiusY, b.tlRadiusY) &&
-        ScalarNearlyEqual(trRadiusX, b.trRadiusX) &&
-        ScalarNearlyEqual(trRadiusY, b.trRadiusY) &&
-        ScalarNearlyEqual(blRadiusX, b.blRadiusX) &&
-        ScalarNearlyEqual(blRadiusY, b.blRadiusY) &&
-        ScalarNearlyEqual(brRadiusX, b.brRadiusX) &&
-        ScalarNearlyEqual(brRadiusY, b.brRadiusY);
-  }
 }
 
 class RSuperellipse extends _RRectLike<RSuperellipse> {
   RSuperellipse._raw({
-    this.left = 0.0,
-    this.top = 0.0,
-    double right = 0.0,
-    double bottom = 0.0,
-    double tlRadiusX = 0.0,
-    double tlRadiusY = 0.0,
-    double trRadiusX = 0.0,
-    double trRadiusY = 0.0,
-    double brRadiusX = 0.0,
-    double brRadiusY = 0.0,
-    double blRadiusX = 0.0,
-    double blRadiusY = 0.0,
+    super.left = 0.0,
+    super.top = 0.0,
+    super.right = 0.0,
+    super.bottom = 0.0,
+    super.tlRadiusX = 0.0,
+    super.tlRadiusY = 0.0,
+    super.trRadiusX = 0.0,
+    super.trRadiusY = 0.0,
+    super.brRadiusX = 0.0,
+    super.brRadiusY = 0.0,
+    super.blRadiusX = 0.0,
+    super.blRadiusY = 0.0,
     RSuperellipse? maybeCache,
-    bool uniformRadii = false,
-  }) : _shape = _Shape(
-         width: right - left,
-         height: bottom - top,
-         tlRadiusX: tlRadiusX,
-         tlRadiusY: tlRadiusY,
-         trRadiusX: trRadiusX,
-         trRadiusY: trRadiusY,
-         brRadiusX: brRadiusX,
-         brRadiusY: brRadiusY,
-         blRadiusX: blRadiusX,
-         blRadiusY: blRadiusY,
-         uniformRadii: uniformRadii,
-       ) {
-    _param = RSuperellipseParam(_shape, maybeCache);
+    this.uniformRadii = false,
+  }) {
+    _param = RSuperellipseParam(this, maybeCache);
   }
 
   RSuperellipse.fromLTRBXY(
@@ -1194,32 +1143,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          uniformRadii: false,
        );
 
-  @override
-  final double left;
-  @override
-  final double top;
-  @override
-  double get right => left + _shape.width;
-  @override
-  double get bottom => top + _shape.height;
-  @override
-  double get tlRadiusX => _shape.tlRadiusX;
-  @override
-  double get tlRadiusY => _shape.tlRadiusY;
-  @override
-  double get trRadiusX => _shape.trRadiusX;
-  @override
-  double get trRadiusY => _shape.trRadiusY;
-  @override
-  double get blRadiusX => _shape.blRadiusX;
-  @override
-  double get blRadiusY => _shape.blRadiusY;
-  @override
-  double get brRadiusX => _shape.brRadiusX;
-  @override
-  double get brRadiusY => _shape.brRadiusY;
-
-  final _Shape _shape;
+  final bool uniformRadii;
   late final RSuperellipseParam _param;
 
   Path getPath([Path? basePath]) {
@@ -1282,11 +1206,11 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     );
   }
 
-  static final RSuperellipse zero = RSuperellipse._raw();
-
   bool contains(Offset point) {
     return _param.contains(point, topLeft: Offset(left, top));
   }
+
+  static final RSuperellipse zero = RSuperellipse._raw();
 
   static RSuperellipse? lerp(RSuperellipse? a, RSuperellipse? b, double t) {
     if (a == null) {
