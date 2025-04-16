@@ -81,7 +81,7 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
         .split('\n')
         .firstWhere(
           (String line) => line.contains('Android emulator version'),
-          orElse: () => '', // Return an empty string if no matching line is found
+          orElse: () => '',
         );
 
     if (versionLine.isNotEmpty) {
