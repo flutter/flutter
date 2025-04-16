@@ -3032,6 +3032,7 @@ void main() {
               CupertinoSliverNavigationBar.search(
                 largeTitle: Text('Large title'),
                 searchField: CupertinoSearchTextField(),
+                enableBackgroundFilterBlur: false,
               ),
               SliverFillRemaining(child: SizedBox(height: 300.0)),
             ],
