@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/src/services/sensitive_content.dart' show ContentSensitivity;
-import 'package:flutter/src/widgets/sensitive_content.dart' show SensitiveContent;
 import 'package:flutter/widgets.dart';
 
 /// Widget to test disposing a [SensitiveContent] widget.
