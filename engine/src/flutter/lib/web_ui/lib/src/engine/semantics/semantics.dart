@@ -996,7 +996,7 @@ class SemanticsObject {
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   ui.SemanticsFlags get flags => _flags;
-  ui.SemanticsFlags _flags;
+  ui.SemanticsFlags _flags = ui.SemanticsFlags();
 
   /// Whether the [flags] field has been updated but has not been applied to the
   /// DOM yet.
@@ -1468,7 +1468,7 @@ class SemanticsObject {
   SemanticsObject? _parent;
 
   /// Whether [actions] contains the given action.
-  bool hasAction(ui.SemanticsAction action) => flags.hasAction;
+  bool hasAction(ui.SemanticsAction action) => (_actions! & action.index) != 0;
 
   /// Whether this object represents a widget that can receive input focus.
   bool get isFocusable => flags.isFocusable;
@@ -1552,7 +1552,7 @@ class SemanticsObject {
     // Update all field values and their corresponding dirty flags before
     // applying the updates to the DOM.
     if (_flags != update.flags) {
-      _flags = update.flags;
+      _flags = ui.SemanticsFlags.fromList(update.flags);
       _markFlagsDirty();
     }
 
