@@ -262,56 +262,55 @@ void main() {
     },
   );
 
-  testWidgets('MediaQueryData.fromView picks up new view data when rebuilding', (
-    WidgetTester tester,
-  ) async {
-    addTearDown(() {
-      tester.platformDispatcher.clearAllTestValues();
-    });
+  testWidgets(
+    'MediaQueryData.fromView picks up new view data (supportsShowingSystemContextMenu) when rebuilding',
+    (WidgetTester tester) async {
+      addTearDown(() {
+        tester.platformDispatcher.clearAllTestValues();
+        tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+        tester.binding.handleSupportsShowingSystemContextMenuChanged();
+      });
 
-    final List<MediaQueryData> datas1 = <MediaQueryData>[];
+      final List<MediaQueryData> datas1 = <MediaQueryData>[];
 
-    await tester.pumpWidget(
-      MediaQuery.fromView(
-        view: tester.view,
-        child: Builder(
-          builder: (BuildContext context) {
-            datas1.add(MediaQuery.of(context));
-            return const Placeholder();
-          },
+      await tester.pumpWidget(
+        MediaQuery.fromView(
+          view: tester.view,
+          child: Builder(
+            builder: (BuildContext context) {
+              datas1.add(MediaQuery.of(context));
+              return const Placeholder();
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(datas1, hasLength(1));
-    expect(datas1.first.supportsShowingSystemContextMenu, isFalse);
+      expect(datas1, hasLength(1));
+      expect(datas1.first.supportsShowingSystemContextMenu, isFalse);
 
-    tester.platformDispatcher.supportsShowingSystemContextMenu = true;
-    tester.binding.handleSupportsShowingSystemContextMenuChanged();
-    addTearDown(() {
-      tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+      tester.platformDispatcher.supportsShowingSystemContextMenu = true;
       tester.binding.handleSupportsShowingSystemContextMenuChanged();
-    });
 
-    final List<MediaQueryData> datas2 = <MediaQueryData>[];
+      final List<MediaQueryData> datas2 = <MediaQueryData>[];
 
-    // Rebuild the MediaQuery widget.
-    await tester.pumpWidget(
-      MediaQuery.fromView(
-        view: tester.view,
-        child: Builder(
-          builder: (BuildContext context) {
-            datas2.add(MediaQuery.of(context));
-            return const Placeholder();
-          },
+      // Rebuild the MediaQuery widget.
+      await tester.pumpWidget(
+        MediaQuery.fromView(
+          view: tester.view,
+          child: Builder(
+            builder: (BuildContext context) {
+              datas2.add(MediaQuery.of(context));
+              return const Placeholder();
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(datas1, hasLength(1));
-    expect(datas2, hasLength(1));
-    expect(datas2.first.supportsShowingSystemContextMenu, isTrue);
-  });
+      expect(datas1, hasLength(1));
+      expect(datas2, hasLength(1));
+      expect(datas2.first.supportsShowingSystemContextMenu, isTrue);
+    },
+  );
 
   testWidgets(
     'MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data',
