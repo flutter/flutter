@@ -48,8 +48,8 @@ void main() {
       ),
     );
 
-    expect(tester.getCenter(find.text('Title')).dx, greaterThan(110.0));
-    expect(tester.getCenter(find.text('Title')).dx, lessThan(111.0));
+    expect(tester.getCenter(find.text('Title')).dx, greaterThan(101.0));
+    expect(tester.getCenter(find.text('Title')).dx, lessThan(102.0));
   });
 
   testWidgets('Middle still in center with back button', (WidgetTester tester) async {
@@ -76,7 +76,9 @@ void main() {
 
   testWidgets('largeTitle still aligned with back button', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const CupertinoApp(home: CupertinoNavigationBar.large(largeTitle: Text('Title'))),
+      const CupertinoApp(
+        home: CupertinoPageScaffold(child: CupertinoNavigationBar.large(largeTitle: Text('Title'))),
+      ),
     );
 
     tester
@@ -84,7 +86,9 @@ void main() {
         .push(
           CupertinoPageRoute<void>(
             builder: (BuildContext context) {
-              return const CupertinoNavigationBar.large(largeTitle: Text('Page 2'));
+              return const CupertinoPageScaffold(
+                child: CupertinoNavigationBar.large(largeTitle: Text('Page 2')),
+              );
             },
           ),
         );
@@ -92,8 +96,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 600));
 
-    expect(tester.getCenter(find.text('Page 2')).dx, greaterThan(129.0));
-    expect(tester.getCenter(find.text('Page 2')).dx, lessThan(130.0));
+    expect(tester.getCenter(find.text('Page 2')).dx, greaterThan(119.0));
+    expect(tester.getCenter(find.text('Page 2')).dx, lessThan(120.0));
   });
 
   testWidgets(
