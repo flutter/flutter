@@ -833,6 +833,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             border: effectiveBorder,
             hasUserMiddle: widget.middle != null,
             largeExpanded: widget.largeTitle != null,
+            searchable: false,
             child: navBar,
           ),
         );
@@ -1342,6 +1343,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
                       : widget.bottomMode ?? NavigationBarBottomMode.automatic,
               bottomHeight: _bottomHeight,
               controller: _animationController,
+              searchable: widget._searchable,
             ),
           );
         },
@@ -1372,6 +1374,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
     required this.bottomMode,
     required this.bottomHeight,
     required this.controller,
+    required this.searchable,
   });
 
   final _NavigationBarStaticComponentsKeys keys;
@@ -1392,6 +1395,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
   final NavigationBarBottomMode bottomMode;
   final double bottomHeight;
   final AnimationController controller;
+  final bool searchable;
 
   @override
   double get minExtent =>
@@ -1537,6 +1541,7 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
         border: effectiveBorder,
         hasUserMiddle: userMiddle != null && (alwaysShowMiddle || !showLargeTitle),
         largeExpanded: showLargeTitle,
+        searchable: searchable,
         child: navBar,
       ),
     );
@@ -1559,7 +1564,8 @@ class _LargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDeleg
         enableBackgroundFilterBlur != oldDelegate.enableBackgroundFilterBlur ||
         bottomMode != oldDelegate.bottomMode ||
         bottomHeight != oldDelegate.bottomHeight ||
-        controller != oldDelegate.controller;
+        controller != oldDelegate.controller ||
+        searchable != oldDelegate.searchable;
   }
 }
 
@@ -2427,6 +2433,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
     required this.border,
     required this.hasUserMiddle,
     required this.largeExpanded,
+    required this.searchable,
     required this.child,
   }) : assert(!largeExpanded || largeTitleTextStyle != null),
        super(key: componentsKeys.navBarBoxKey);
@@ -2439,6 +2446,7 @@ class _TransitionableNavigationBar extends StatelessWidget {
   final Border? border;
   final bool hasUserMiddle;
   final bool largeExpanded;
+  final bool searchable;
   final Widget child;
 
   RenderBox get renderBox {
@@ -2614,6 +2622,7 @@ class _NavigationBarComponentsTransition {
        topBorder = topNavBar.border,
        userGestureInProgress =
            topNavBar.userGestureInProgress || bottomNavBar.userGestureInProgress,
+       searchable = topNavBar.searchable && bottomNavBar.searchable,
        transitionBox =
        // paintBounds are based on offset zero so it's ok to expand the Rects.
        bottomNavBar.renderBox.paintBounds.expandToInclude(topNavBar.renderBox.paintBounds),
@@ -2644,6 +2653,7 @@ class _NavigationBarComponentsTransition {
   final bool bottomLargeExpanded;
   final bool topLargeExpanded;
   final bool userGestureInProgress;
+  final bool searchable;
 
   final Color? bottomBackgroundColor;
   final Color? topBackgroundColor;
@@ -2983,8 +2993,6 @@ class _NavigationBarComponentsTransition {
   Widget? get bottomNavBarBottom {
     final KeyedSubtree? bottomNavBarBottom =
         bottomComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
-    final KeyedSubtree? topNavBarBottom =
-        topComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
 
     if (bottomNavBarBottom == null) {
       return null;
@@ -3008,9 +3016,7 @@ class _NavigationBarComponentsTransition {
 
     // Fade out only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
-    if (topNavBarBottom == null ||
-        topNavBarBottom.child is! _InactiveSearchableBottom ||
-        bottomNavBarBottom.child is! _InactiveSearchableBottom) {
+    if (!searchable) {
       child = FadeTransition(
         opacity: fadeOutBy(0.8, curve: animationCurve),
         child: ClipRect(child: child),
@@ -3309,8 +3315,6 @@ class _NavigationBarComponentsTransition {
   Widget? get topNavBarBottom {
     final KeyedSubtree? topNavBarBottom =
         topComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
-    final KeyedSubtree? bottomNavBarBottom =
-        bottomComponents.navBarBottomKey.currentWidget as KeyedSubtree?;
 
     if (topNavBarBottom == null) {
       return null;
@@ -3335,9 +3339,7 @@ class _NavigationBarComponentsTransition {
 
     // Fade in only if this is not a CupertinoSliverNavigationBar.search to
     // CupertinoSliverNavigationBar.search transition.
-    if (bottomNavBarBottom == null ||
-        bottomNavBarBottom.child is! _InactiveSearchableBottom ||
-        topNavBarBottom.child is! _InactiveSearchableBottom) {
+    if (!searchable) {
       child = FadeTransition(
         opacity: fadeInFrom(0.0, curve: animationCurve),
         child: ClipRect(child: child),
