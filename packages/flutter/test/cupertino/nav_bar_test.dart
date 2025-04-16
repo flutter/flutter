@@ -154,7 +154,7 @@ void main() {
       await tester.pump();
 
       expect(
-        tester.widget(find.byType(BackdropFilter)),
+        tester.widget(find.byType(BackdropFilter).last),
         isA<BackdropFilter>().having((BackdropFilter f) => f.enabled, 'filter enabled', true),
       );
       expect(find.byType(CupertinoNavigationBar), paints..rect(color: background.darkColor));
@@ -190,7 +190,7 @@ void main() {
     await tester.pump();
 
     expect(
-      tester.widget(find.byType(BackdropFilter)),
+      tester.widget(find.byType(BackdropFilter).last),
       isA<BackdropFilter>().having(
         (BackdropFilter f) => f.blendMode == BlendMode.srcATop,
         'filter is srcATop',
@@ -229,7 +229,7 @@ void main() {
     await test.pump();
 
     expect(
-      test.widget(find.byType(BackdropFilter)),
+      test.widget(find.byType(BackdropFilter).last),
       isA<BackdropFilter>().having(
         (BackdropFilter filter) => filter.enabled,
         'filter enabled',
