@@ -8,6 +8,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -92,7 +93,8 @@ const String oldestDocumentedKgpCompatabilityVersion = '1.6.20';
 const String oldestDocumentedJavaAgpCompatibilityVersion = '4.2';
 
 // Constant used in [_buildAndroidGradlePluginRegExp] and
-// [_settingsAndroidGradlePluginRegExp] to identify the version section.
+// [_settingsAndroidGradlePluginRegExp] and [_kotlinGradlePluginRegExpFromId]
+// to identify the version section.
 const String _versionGroupName = 'version';
 
 // AGP can be defined in the dependencies block of [build.gradle] or [build.gradle.kts].
@@ -115,6 +117,17 @@ final RegExp _androidGradlePluginRegExpFromDependencies = RegExp(
 // ?<version> is used to name the version group which helps with extraction.
 final RegExp _androidGradlePluginRegExpFromId = RegExp(
   r"""[^\/]*s*id\s*\(?['"]com\.android\.application['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+  multiLine: true,
+);
+
+// KGP is defined in several places this code only checks in plugins block of [settings.gradle.kts].
+// Expected content:
+// Kotlin DSL - id("org.jetbrains.kotlin.android") version "{{kgpVersion}}"
+// ?<version> is used to name the version group which helps with extraction.
+// Concrete example:
+// id("org.jetbrains.kotlin.android") version "1.8.22" apply false
+final RegExp _kotlinGradlePluginRegExpFromId = RegExp(
+  r"""[^\/]*s*id\s*\(?['"]org\.jetbrains\.kotlin\.android['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
 );
 
@@ -303,6 +316,7 @@ Future<String?> getGradleVersion(
     logger.printTrace('$propertiesFile does not exist falling back to system gradle');
   }
   // System installed Gradle version.
+  // TODO(reidbaker): Modify this gradle execution to use gradlew.
   if (processManager.canRun('gradle')) {
     final String gradleVersionsVerbose =
         (await processManager.run(<String>['gradle', gradleVersionFlag])).stdout as String;
@@ -356,30 +370,52 @@ Future<String?> getKgpVersion(
   // https://github.com/gradle/gradle/blob/cefbee263181a924ac4efcaace6bda97a55bc0f7/platforms/core-runtime/gradle-cli/src/main/java/org/gradle/launcher/cli/DefaultCommandLineActionFactory.java#L260
   // This vesion is NOT the version of KGP that the project uses.
   //
-  // kgpVersion task is a custom flutter task dynamiclly added that can print the kgp version
-  // if gradle can run successfuly.
-  if (processManager.canRun('gradle')) {
-    final String kgpVersionOutput =
-        (await processManager.run(<String>['gradle', 'kgpVersion', '-q'])).stdout as String;
+  // Instead the kgpVersion task is a custom flutter task dynamiclly added that can
+  // print the kgp version if gradle can run successfuly.
 
-    // See expected output defined in
-    // flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt addTaskForKGPVersion
-    final RegExp kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
-    final RegExpMatch? version = kotlinVersionRegex.firstMatch(kgpVersionOutput);
-    if (version == null) {
-      // Most likely a bug in our parse implementation/regex.
-      logger.printWarning(_formatParseWarning(kgpVersionOutput, type: 'kotlin'));
-      return null;
+  if (processManager.canRun('./gradlew', workingDirectory: androidDirectory.path)) {
+    final ProcessResult command = await processManager.run(<String>[
+      './gradlew',
+      'kgpVersion',
+      '-q',
+    ], workingDirectory: androidDirectory.path);
+    if (command.exitCode == 0) {
+      final String kgpVersionOutput = command.stdout as String;
+
+      // See expected output defined in
+      // flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt addTaskForKGPVersion
+      final RegExp kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
+      final RegExpMatch? version = kotlinVersionRegex.firstMatch(kgpVersionOutput);
+      if (version == null) {
+        // Most likely a bug in our parse implementation/regex.
+        logger.printWarning(_formatParseWarning(kgpVersionOutput, type: 'kotlin'));
+        return null;
+      }
+      return version.group(1);
     }
-    return version.group(1);
+    logger.printTrace('Non zero exit code from gradle task kgpVersion.');
+  } else {
+    logger.printTrace('Could not run gradle task kgpVersion.');
   }
-  logger.printTrace('Could not run system gradle');
 
   // Project valiation code is regularly run on projects that can not build.
   // Because of that this code also attempts to search through known template
   // locations for kotlin versions.
 
-  // TODO(reidbaker): regex search for kotlin versions.
+  logger.printTrace('Checking settings for kgp version.');
+  final File settingsFile = androidDirectory.childFile('settings.gradle.kts');
+
+  final String settingsFileContent = settingsFile.readAsStringSync();
+  final RegExpMatch? settingsMatch = _kotlinGradlePluginRegExpFromId.firstMatch(
+    settingsFileContent,
+  );
+
+  if (settingsMatch != null) {
+    final String? kgpVersion = settingsMatch.namedGroup(_versionGroupName);
+    logger.printTrace('$settingsFile provides KGP version: $kgpVersion');
+    return kgpVersion;
+  }
+
   return null;
 }
 

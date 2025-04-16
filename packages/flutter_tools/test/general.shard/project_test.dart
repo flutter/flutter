@@ -2075,7 +2075,7 @@ flutter:
 
 FakeCommand createKgpVersionCommand(String kgpV) {
   return FakeCommand(
-    command: const <String>['gradle', 'kgpVersion', '-q'],
+    command: const <String>['./gradlew', 'kgpVersion', '-q'],
     stdout: '''
 KGP Version: $kgpV
 ''',
