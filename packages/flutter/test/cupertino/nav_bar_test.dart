@@ -47,8 +47,6 @@ void main() {
         ),
       ),
     );
-    print(tester.getCenter(find.text('Title')));
-    print(tester.getCenter(find.text('Something')));
 
     expect(tester.getCenter(find.text('Title')).dx, greaterThan(110.0));
     expect(tester.getCenter(find.text('Title')).dx, lessThan(111.0));
