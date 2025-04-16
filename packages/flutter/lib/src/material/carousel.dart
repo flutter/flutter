@@ -503,7 +503,7 @@ class _CarouselViewState extends State<CarouselView> {
           Axis.vertical => constraints.maxHeight,
         };
         _itemExtent =
-            _itemExtent == null ? _itemExtent : clampDouble(_itemExtent!, 0, mainAxisExtent);
+            widget.itemExtent == null ? null : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
 
         return Scrollable(
           axisDirection: axisDirection,
@@ -1405,7 +1405,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     if (_itemExtent == value) {
       return;
     }
-    if (hasPixels && _itemExtent != null) {
+    if (hasPixels && _itemExtent != null && viewportDimension != 0.0) {
       final double leadingItem = getItemFromPixels(pixels, viewportDimension);
       final double newPixel = getPixelsFromItem(leadingItem, flexWeights, value);
       forcePixels(newPixel);
@@ -1500,7 +1500,8 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     } else {
       item = getItemFromPixels(oldPixels, oldViewportDimensions ?? viewportDimension);
     }
-    final double newPixels = getPixelsFromItem(item, flexWeights, itemExtent);
+    final double newPixels =
+        (viewportDimension == 0.0) ? 0.0 : getPixelsFromItem(item, flexWeights, itemExtent);
     // If the viewportDimension is zero, cache the item
     // in case the viewport is resized to be non-zero.
     _cachedItem = (viewportDimension == 0.0) ? item : null;
@@ -1510,6 +1511,18 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       return false;
     }
     return result;
+  }
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+
+    if (other is! _CarouselPosition) {
+      return;
+    }
+
+    _cachedItem = other._cachedItem;
+    _itemExtent = other._itemExtent;
   }
 
   @override
