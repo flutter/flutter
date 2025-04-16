@@ -230,6 +230,64 @@ void main() {
     expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/164860
+  testWidgets('Material3 - formats 24-hour numbers correctly in Farsi', (
+    WidgetTester tester,
+  ) async {
+    await mediaQueryBoilerplate(
+      tester,
+      locale: const Locale('fa', 'IR'),
+      materialType: MaterialType.material3,
+    );
+
+    final List<String> labels00To23 = <String>[
+      '۰',
+      '۱',
+      '۲',
+      '۳',
+      '۴',
+      '۵',
+      '۶',
+      '۷',
+      '۸',
+      '۹',
+      '۱۰',
+      '۱۱',
+      '۱۲',
+      '۱۳',
+      '۱۴',
+      '۱۵',
+      '۱۶',
+      '۱۷',
+      '۱۸',
+      '۱۹',
+      '۲۰',
+      '۲۱',
+      '۲۲',
+      '۲۳',
+    ];
+    final List<bool> inner0To23 = List<bool>.generate(24, (int index) => index >= 12);
+
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final dynamic dialPainter = dialPaint.painter;
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> primaryLabels = dialPainter.primaryLabels as List<dynamic>;
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    // ignore: avoid_dynamic_calls
+    expect(primaryLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+
+    // ignore: avoid_dynamic_calls
+    final List<dynamic> selectedLabels = dialPainter.selectedLabels as List<dynamic>;
+    expect(
+      // ignore: avoid_dynamic_calls
+      selectedLabels.map<String>((dynamic tp) => tp.painter.text.text as String),
+      labels00To23,
+    );
+    // ignore: avoid_dynamic_calls
+    expect(selectedLabels.map<bool>((dynamic tp) => tp.inner as bool), inner0To23);
+  });
+
   testWidgets('Material3 - Dial background uses correct default color', (
     WidgetTester tester,
   ) async {
