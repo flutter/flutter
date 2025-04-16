@@ -63,21 +63,16 @@ class AndroidWorkflow implements Workflow {
   bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
 }
 
-Future<String?> getEmulatorVersion(String androidSdkDirectoryPath) async {
-  String emulatorExecutable;
-  if (globals.platform.isWindows) {
-    emulatorExecutable = path.join(androidSdkDirectoryPath, 'emulator', 'emulator.exe');
-  } else {
-    emulatorExecutable = path.join(androidSdkDirectoryPath, 'emulator', 'emulator');
-  }
-
-  final File emulatorFile = globals.localFileSystem.file(emulatorExecutable);
-  if (!emulatorFile.existsSync()) {
+Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager processManager) async {
+  if (!processManager.canRun(androidSdk.emulatorPath)) {
     return null;
   }
 
   try {
-    final ProcessResult result = await Process.run(emulatorExecutable, <String>['-version']);
+    final ProcessResult result = await processManager.run(<Object>[
+      androidSdk.emulatorPath!,
+      '-version',
+    ]);
 
     if (result.exitCode != 0) {
       return null;
@@ -122,11 +117,13 @@ class AndroidValidator extends DoctorValidator {
     required Logger logger,
     required Platform platform,
     required UserMessages userMessages,
+    required ProcessManager processManager,
   }) : _java = java,
        _androidSdk = androidSdk,
        _logger = logger,
        _platform = platform,
        _userMessages = userMessages,
+       _processManager = processManager,
        super('Android toolchain - develop for Android devices');
 
   final Java? _java;
@@ -134,6 +131,7 @@ class AndroidValidator extends DoctorValidator {
   final Logger _logger;
   final Platform _platform;
   final UserMessages _userMessages;
+  final ProcessManager _processManager;
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -205,7 +203,7 @@ class AndroidValidator extends DoctorValidator {
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
     messages.add(
       ValidationMessage(
-        'Emulator version ${await getEmulatorVersion(androidSdk.directory.path) ?? 'unknown'}',
+        'Emulator version ${await getEmulatorVersion(androidSdk, _processManager) ?? 'unknown'}',
       ),
     );
 

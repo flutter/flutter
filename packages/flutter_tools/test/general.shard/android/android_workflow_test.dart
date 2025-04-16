@@ -430,7 +430,14 @@ Review licenses that have not been accepted (y/N)?
       ..licensesAvailable = true
       ..platformToolsAvailable = false
       ..cmdlineToolsAvailable = true
-      ..directory = fileSystem.directory('/foo/bar');
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = 'path/to/emulator';
+    processManager.addCommand(
+      FakeCommand(
+        command: <String>[sdk.emulatorPath!, '-version'],
+        stdout: 'INFO    | Android emulator version 35.2.10.0 (build_id 12414864) (CL:N/A)',
+      ),
+    );
     final ValidationResult validationResult =
         await AndroidValidator(
           java: FakeJava(),
@@ -438,15 +445,14 @@ Review licenses that have not been accepted (y/N)?
           logger: logger,
           platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(validationResult.type, ValidationType.partial);
     expect(validationResult.messages.length > 2, isTrue);
     final ValidationMessage sdkMessage = validationResult.messages[1];
     expect(sdkMessage.type, ValidationMessageType.information);
-    // This is `unknown` because knowing a real version number requires
-    // executing a real instance of the emulator.
-    expect(sdkMessage.message, 'Emulator version unknown');
+    expect(sdkMessage.message, 'Emulator version 35.2.10.0 (build_id 12414864) (CL:N/A)');
   });
 
   testUsingContext('detects license-only SDK installation with cmdline-tools', () async {
@@ -462,6 +468,7 @@ Review licenses that have not been accepted (y/N)?
           logger: logger,
           platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(validationResult.type, ValidationType.partial);
@@ -502,6 +509,7 @@ Review licenses that have not been accepted (y/N)?
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
+      processManager: processManager,
     );
 
     ValidationResult validationResult = await androidValidator.validate();
@@ -542,6 +550,7 @@ Review licenses that have not been accepted (y/N)?
       logger: logger,
       platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
       userMessages: UserMessages(),
+      processManager: processManager,
     );
 
     final ValidationResult validationResult = await androidValidator.validate();
@@ -595,6 +604,7 @@ Review licenses that have not been accepted (y/N)?
           logger: logger,
           platform: platform,
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
     expect(validationResult.type, ValidationType.partial);
     expect(validationResult.messages.last.message, errorMessage);
@@ -619,6 +629,7 @@ Review licenses that have not been accepted (y/N)?
                   Java.javaHomeEnvironmentVariable: 'home/java',
                 },
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(
@@ -686,6 +697,7 @@ Android sdkmanager tool was found, but failed to run
           logger: logger,
           platform: FakePlatform(),
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(
@@ -724,6 +736,7 @@ Android sdkmanager tool was found, but failed to run
             logger: logger,
             platform: FakePlatform(),
             userMessages: UserMessages(),
+            processManager: processManager,
           ).validate();
 
       expect(
@@ -761,6 +774,7 @@ Android sdkmanager tool was found, but failed to run
           logger: logger,
           platform: FakePlatform(),
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(
@@ -796,6 +810,7 @@ Android sdkmanager tool was found, but failed to run
           logger: logger,
           platform: FakePlatform(),
           userMessages: UserMessages(),
+          processManager: processManager,
         ).validate();
 
     expect(
