@@ -4,6 +4,42 @@
 
 part of ui;
 
+class RSuperellipseParam {
+  RSuperellipseParam(this._shape, this._maybeCache);
+
+  final _Shape _shape;
+  final RSuperellipse? _maybeCache;
+
+  Path? _cachedPath;
+  bool get isInitialized => _cachedPath != null;
+
+  Path getPath() {
+    _ensureBuilt();
+    assert(_cachedPath != null);
+    return _cachedPath!;
+  }
+
+  bool contains(Offset point, Offset center) {
+    _ensureBuilt();
+    assert(_cachedPath != null);
+    return _cachedPath!.contains(point - center);
+  }
+
+  void _ensureBuilt() {
+    if (_cachedPath != null) {
+      return;
+    }
+    if (_maybeCache != null &&
+        _maybeCache._param.isInitialized &&
+        _maybeCache._shape.nearlyEqualTo(_shape, 1e-6)) {
+      _cachedPath = _maybeCache._param._cachedPath;
+    } else {
+      _cachedPath = Path();
+      _RSuperellipsePathBuilder(_cachedPath!).buildPath(_shape);
+    }
+  }
+}
+
 double _split(double left, double right, double ratioLeft, double ratioRight) {
   if (ratioLeft == 0 && ratioRight == 0) {
     return (left + right) / 2;
@@ -225,41 +261,6 @@ class _RSuperellipseQuadrant {
     top: _RSuperellipseOctant.zero,
     right: _RSuperellipseOctant.zero,
   );
-}
-
-class RSuperellipseParam {
-  RSuperellipseParam(this._shape, this._maybeCache);
-
-  final _Shape _shape;
-  final RSuperellipse? _maybeCache;
-  Path? _cachedPath;
-  bool get isInitialized => _cachedPath != null;
-
-  Path getPath() {
-    _ensureBuilt();
-    assert(_cachedPath != null);
-    return _cachedPath!;
-  }
-
-  bool contains(Offset point, Offset center) {
-    _ensureBuilt();
-    assert(_cachedPath != null);
-    return _cachedPath!.contains(point - center);
-  }
-
-  void _ensureBuilt() {
-    if (_cachedPath != null) {
-      return;
-    }
-    if (_maybeCache != null &&
-        _maybeCache._param.isInitialized &&
-        _shape.nearlyEqualTo(_maybeCache._shape, 1e-6)) {
-      _cachedPath = _maybeCache._param._cachedPath;
-    } else {
-      _cachedPath = Path();
-      _RSuperellipsePathBuilder(_cachedPath!).buildPath(_shape);
-    }
-  }
 }
 
 class _RSuperellipsePathBuilder {

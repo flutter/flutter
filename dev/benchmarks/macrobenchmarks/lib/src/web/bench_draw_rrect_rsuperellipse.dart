@@ -13,15 +13,33 @@ typedef _Draw = void Function(Canvas canvas, int key, Rect rect, Radius radius, 
 /// Measures the performance of the `drawRSuperellipse` operation compared with `drawRRect`.
 class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
   /// A variant of the benchmark that draws rounded rectangles.
+  ///
+  /// This variant is used as a comparison benchmark.
   BenchDrawRRectRSuperellipse.drawRRect() : _draw = _drawRRect, super(name: drawRRectName);
 
-  /// A variant of the benchmark that draws rounded superellipses.
-  BenchDrawRRectRSuperellipse.drawRSuperellipse() : super(name: drawRSuperellipseName) {
+  /// A variant of the benchmark that draws rounded superellipses that are cached
+  /// across frames.
+  ///
+  /// This variant caches all rounded superellipse objects, therefore focusing
+  /// on overhead performance of utilizing and drawing existing paths.
+  BenchDrawRRectRSuperellipse.drawRSuperellipseCached() : super(name: drawRSuperellipseCachedName) {
     _draw = _drawRSuperellipseCached;
   }
 
+  /// A variant of the benchmark that draws rounded superellipses that are not
+  /// cached.
+  ///
+  /// This variant does not cache any rounded superellipse objects, therefore
+  /// demonstrates both the time to create the paths and that of drawing the
+  /// paths.
+  BenchDrawRRectRSuperellipse.drawRSuperellipseCacheless()
+    : super(name: drawRSuperellipseCachelessName) {
+    _draw = _drawRSuperellipseCacheless;
+  }
+
   static const String drawRRectName = 'draw_rrect';
-  static const String drawRSuperellipseName = 'draw_rsuperellipse';
+  static const String drawRSuperellipseCachedName = 'draw_rsuperellipse_cached';
+  static const String drawRSuperellipseCachelessName = 'draw_rsuperellipse_cacheless';
 
   /// Number of rows in the grid.
   static const int kRows = 25;
@@ -47,7 +65,11 @@ class BenchDrawRRectRSuperellipse extends SceneBuilderRecorder {
 
   final Map<int, RSuperellipse> _cache = <int, RSuperellipse>{};
   void _drawRSuperellipseCached(Canvas canvas, int key, Rect rect, Radius radius, Paint paint) {
-    final RSuperellipse rsuperellipse = RSuperellipse.fromRectAndRadius(rect, radius, maybeCache: _cache[key]);
+    final RSuperellipse rsuperellipse = RSuperellipse.fromRectAndRadius(
+      rect,
+      radius,
+      maybeCache: _cache[key],
+    );
     _cache.putIfAbsent(key, () => rsuperellipse);
     canvas.drawRSuperellipse(rsuperellipse, paint);
   }
