@@ -4,12 +4,10 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
 import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
@@ -19,7 +17,6 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor_validator.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import 'android_sdk.dart';
 import 'java.dart';
 
