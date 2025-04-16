@@ -1573,7 +1573,7 @@ Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJav
   testUsingContext(
     'Missing NDK source.properties file',
         () async {
-      const String errorExample = r'''
+      const String unixErrorExample = r'''
 * What went wrong:
 A problem occurred configuring project ':app'.
 > [CXX1101] NDK at /Users/mackall/Library/Android/sdk/ndk/26.3.11579264 did not have a source.properties file
@@ -1581,7 +1581,7 @@ A problem occurred configuring project ':app'.
 
       final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
       await missingNdkSourcePropertiesFile.handler(
-        line: errorExample,
+        line: unixErrorExample,
         project: project,
         usesAndroidX: true,
       );
@@ -1593,6 +1593,26 @@ A problem occurred configuring project ':app'.
       expect(
         testLogger.statusText,
         contains('/Users/mackall/Library/Android/sdk/ndk/26.3.11579264'),
+      );
+
+      const String windowsErrorExample = r'''
+* What went wrong:
+A problem occurred configuring project ':app'.
+> [CXX1101] NDK at C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264 did not have a source.properties file
+    ''';
+      await missingNdkSourcePropertiesFile.handler(
+        line: windowsErrorExample,
+        project: project,
+        usesAndroidX: true,
+      );
+
+      expect(
+        testLogger.statusText,
+        contains('This can be fixed by deleting the local NDK copy at'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('C:\\Users\\mackall\\Library\\Android\\sdk\\ndk\\26.3.11579264'),
       );
     },
     overrides: <Type, Generator>{
