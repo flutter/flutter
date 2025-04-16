@@ -42,9 +42,7 @@ export 'dart:ui'
         SemanticsFlag,
         SemanticsRole,
         SemanticsValidationResult,
-
         SemanticsFlags,
-
         StringAttribute,
         TextDirection,
         VoidCallback;
@@ -3314,7 +3312,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
-        flags.merge(node._flags);
+        _flags = flags.merge(node._flags);
         actions |= node._effectiveActionsAsBits;
         textDirection ??= node._textDirection;
         textSelection ??= node._textSelection;

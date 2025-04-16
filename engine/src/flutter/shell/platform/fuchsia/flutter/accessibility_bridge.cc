@@ -322,9 +322,9 @@ AccessibilityBridge::GetNodeAttributes(const flutter::SemanticsNode& node,
     *added_size += node.tooltip.size();
   }
 
-  if (node.flags.isKeyboardKey)) {
-      attributes.set_is_keyboard_key(true);
-    }
+  if (node.flags.isKeyboardKey) {
+    attributes.set_is_keyboard_key(true);
+  }
 
   return attributes;
 }
@@ -355,7 +355,7 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
   }
 
   // Set selected state.
-  states.set_selected(node.flags.isSelected));
+  states.set_selected(node.flags.isSelected);
 
   // Flutter's definition of a hidden node is different from Fuchsia, so it must
   // not be set here.
@@ -413,28 +413,28 @@ AccessibilityBridge::GetNodeActions(const flutter::SemanticsNode& node,
 
 fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
     const flutter::SemanticsNode& node) const {
-  if (node.flags.isButton)) {
-      return fuchsia::accessibility::semantics::Role::BUTTON;
-    }
+  if (node.flags.isButton) {
+    return fuchsia::accessibility::semantics::Role::BUTTON;
+  }
 
-  if (node.flags.isTextField)) {
-      return fuchsia::accessibility::semantics::Role::TEXT_FIELD;
-    }
+  if (node.flags.isTextField) {
+    return fuchsia::accessibility::semantics::Role::TEXT_FIELD;
+  }
 
-  if (node.flags.isLink)) {
-      return fuchsia::accessibility::semantics::Role::LINK;
-    }
+  if (node.flags.isLink) {
+    return fuchsia::accessibility::semantics::Role::LINK;
+  }
 
-  if (node.flags.isSlider)) {
-      return fuchsia::accessibility::semantics::Role::SLIDER;
-    }
+  if (node.flags.isSlider) {
+    return fuchsia::accessibility::semantics::Role::SLIDER;
+  }
 
-  if (node.flags.isHeader)) {
-      return fuchsia::accessibility::semantics::Role::HEADER;
-    }
-  if (node.flags.isImage)) {
-      return fuchsia::accessibility::semantics::Role::IMAGE;
-    }
+  if (node.flags.isHeader) {
+    return fuchsia::accessibility::semantics::Role::HEADER;
+  }
+  if (node.flags.isImage) {
+    return fuchsia::accessibility::semantics::Role::IMAGE;
+  }
 
   // If a flutter node supports the kIncrease or kDecrease actions, it can be
   // treated as a slider control by assistive technology. This is important

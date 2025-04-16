@@ -254,7 +254,7 @@ class SemanticsNodeUpdate {
   final int id;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  final int flags;
+  final List<bool> flags;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   final int actions;
@@ -995,8 +995,8 @@ class SemanticsObject {
   SemanticsObject(this.id, this.owner);
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
-  int get flags => _flags;
-  int _flags = 0;
+  ui.SemanticsFlags get flags => _flags;
+  ui.SemanticsFlags _flags;
 
   /// Whether the [flags] field has been updated but has not been applied to the
   /// DOM yet.
@@ -1366,7 +1366,7 @@ class SemanticsObject {
   /// See also:
   ///
   ///  * [isHeading], which determines whether this node represents a heading.
-  bool get isHeader => hasFlag(ui.SemanticsFlag.isHeader);
+  bool get isHeader => flags.isHeader;
 
   /// See [ui.SemanticsUpdateBuilder.updateNode].
   String? get identifier => _identifier;
@@ -1467,32 +1467,29 @@ class SemanticsObject {
 
   SemanticsObject? _parent;
 
-  /// Whether this node currently has a given [SemanticsFlag].
-  bool hasFlag(ui.SemanticsFlag flag) => _flags & flag.index != 0;
-
   /// Whether [actions] contains the given action.
-  bool hasAction(ui.SemanticsAction action) => (_actions! & action.index) != 0;
+  bool hasAction(ui.SemanticsAction action) => flags.hasAction;
 
   /// Whether this object represents a widget that can receive input focus.
-  bool get isFocusable => hasFlag(ui.SemanticsFlag.isFocusable);
+  bool get isFocusable => flags.isFocusable;
 
   /// Whether this object currently has input focus.
   ///
   /// This value only makes sense if [isFocusable] is true.
-  bool get hasFocus => hasFlag(ui.SemanticsFlag.isFocused);
+  bool get hasFocus => flags.isFocused;
 
   /// Whether this object can be in one of "enabled" or "disabled" state.
   ///
   /// If this is true, [isEnabled] communicates the state.
-  bool get hasEnabledState => hasFlag(ui.SemanticsFlag.hasEnabledState);
+  bool get hasEnabledState => flags.hasEnabledState;
 
   /// Whether this object is enabled.
   ///
   /// This field is only meaningful if [hasEnabledState] is true.
-  bool get isEnabled => hasFlag(ui.SemanticsFlag.isEnabled);
+  bool get isEnabled => flags.isEnabled;
 
   /// Whether this object can be in one of "expanded" or "collapsed" state.
-  bool get hasExpandedState => hasFlag(ui.SemanticsFlag.hasExpandedState);
+  bool get hasExpandedState => flags.hasExpandedState;
 
   /// Whether this object represents a vertically scrollable area.
   bool get isVerticalScrollContainer =>
@@ -1507,38 +1504,37 @@ class SemanticsObject {
   /// When the scrollable container has no scroll extent, it won't have any scroll actions, but
   /// it's still a scrollable container. In this case, we need to use the implicit scrolling flag
   /// to check for scrollability.
-  bool get isScrollContainer => hasFlag(ui.SemanticsFlag.hasImplicitScrolling);
+  bool get isScrollContainer => flags.hasImplicitScrolling;
 
   /// Whether this object has a non-empty list of children.
   bool get hasChildren =>
       _childrenInTraversalOrder != null && _childrenInTraversalOrder!.isNotEmpty;
 
   /// Whether this object represents an editable text field.
-  bool get isTextField => hasFlag(ui.SemanticsFlag.isTextField);
+  bool get isTextField => flags.isTextField;
 
   /// Whether this object represents an interactive link.
-  bool get isLink => hasFlag(ui.SemanticsFlag.isLink);
+  bool get isLink => flags.isLink;
 
   /// Whether this object needs screen readers attention right away.
-  bool get isLiveRegion =>
-      hasFlag(ui.SemanticsFlag.isLiveRegion) && !hasFlag(ui.SemanticsFlag.isHidden);
+  bool get isLiveRegion => flags.isLiveRegion && !flags.isHidden;
 
   /// Whether this object represents an image with no tappable functionality.
-  bool get isVisualOnly => hasFlag(ui.SemanticsFlag.isImage) && !isTappable && !isButton;
+  bool get isVisualOnly => flags.isImage && !isTappable && !isButton;
 
   /// Whether this node defines a scope for a route.
-  bool get scopesRoute => hasFlag(ui.SemanticsFlag.scopesRoute);
+  bool get scopesRoute => flags.scopesRoute;
 
   /// Whether this node describes a route.
-  bool get namesRoute => hasFlag(ui.SemanticsFlag.namesRoute);
+  bool get namesRoute => flags.namesRoute;
 
   /// Whether this object carry enabled/disabled state (and if so whether it is
   /// enabled).
   ///
   /// See [EnabledState] for more details.
   EnabledState enabledState() {
-    if (hasFlag(ui.SemanticsFlag.hasEnabledState)) {
-      if (hasFlag(ui.SemanticsFlag.isEnabled)) {
+    if (flags.hasEnabledState) {
+      if (flags.isEnabled) {
         return EnabledState.enabled;
       } else {
         return EnabledState.disabled;
@@ -2090,7 +2086,7 @@ class SemanticsObject {
   /// Whether the object represents a button.
   ///
   /// See also [isButtonLike].
-  bool get isButton => hasFlag(ui.SemanticsFlag.isButton);
+  bool get isButton => flags.isButton;
 
   /// Whether the object behaves like a button even if it does not formally have
   /// the [ui.SemanticsFlag.isButton] flag.
@@ -2106,16 +2102,15 @@ class SemanticsObject {
   /// Because such widgets require the use of specific ARIA roles and HTML
   /// elements, they are managed by the [SemanticCheckable] role, and they do
   /// not use the [Selectable] behavior.
-  bool get isCheckable =>
-      hasFlag(ui.SemanticsFlag.hasCheckedState) || hasFlag(ui.SemanticsFlag.hasToggledState);
+  bool get isCheckable => flags.hasCheckedState || flags.hasToggledState;
 
   /// If true, this node represents something that can be in a "checked" or
   /// state, such as checkboxes, radios, and switches.
-  bool get isChecked => hasFlag(ui.SemanticsFlag.isChecked);
+  bool get isChecked => flags.isChecked;
 
   /// If true, this node represents something that can be in a "mixed" or
   /// state, such as checkboxes.
-  bool get isMixed => hasFlag(ui.SemanticsFlag.isCheckStateMixed);
+  bool get isMixed => flags.isCheckStateMixed;
 
   /// If true, this node represents something that can be annotated as
   /// "selected", such as a tab, or an item in a list.
@@ -2130,11 +2125,11 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isSelected], which indicates whether the node is currently selected.
-  bool get isSelectable => hasFlag(ui.SemanticsFlag.hasSelectedState);
+  bool get isSelectable => flags.hasSelectedState;
 
   /// If [isSelectable] is true, indicates whether the node is currently
   /// selected.
-  bool get isSelected => hasFlag(ui.SemanticsFlag.isSelected);
+  bool get isSelected => flags.isSelected;
 
   /// If true, this node represents something that currently requires user input
   /// before a form can be submitted.
@@ -2147,10 +2142,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isRequired], which indicates whether the is currently required.
-  bool get isRequirable => hasFlag(ui.SemanticsFlag.hasRequiredState);
+  bool get isRequirable => flags.hasRequiredState;
 
   /// If [isRequirable] is true, indicates whether the node is required.
-  bool get isRequired => hasFlag(ui.SemanticsFlag.isRequired);
+  bool get isRequired => flags.isRequired;
 
   /// If true, this node represents something that can be annotated as
   /// "expanded", such as a expansion tile or drop down menu
@@ -2160,10 +2155,10 @@ class SemanticsObject {
   /// See also:
   ///
   ///   * [isExpanded], which indicates whether the node is currently selected.
-  bool get isExpandable => hasFlag(ui.SemanticsFlag.hasExpandedState);
+  bool get isExpandable => flags.hasExpandedState;
 
   /// Indicates whether the node is currently expanded.
-  bool get isExpanded => hasFlag(ui.SemanticsFlag.isExpanded);
+  bool get isExpanded => flags.isExpanded;
 
   /// Role-specific adjustment of the vertical position of the children.
   ///

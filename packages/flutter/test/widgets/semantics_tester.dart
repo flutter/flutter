@@ -9,7 +9,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-export 'dart:ui' show SemanticsAction, SemanticsFlag;
+export 'dart:ui' show SemanticsAction, SemanticsFlag, SemanticsFlags;
 export 'package:flutter/rendering.dart' show SemanticsData;
 
 const String _matcherHelp =

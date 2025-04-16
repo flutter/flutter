@@ -153,104 +153,37 @@ enum class SemanticsFlags : int32_t {
 };
 
 struct SemanticsFlags2 {
-  bool hasCheckedState;
-  bool isChecked;
-  bool isSelected;
-  bool isButton;
-  bool isTextField;
-  bool isFocused;
-  bool hasEnabledState;
-  bool isEnabled;
-  bool isInMutuallyExclusiveGroup;
-  bool isHeader;
-  bool isObscured;
-  bool scopesRoute;
-  bool namesRoute;
-  bool isHidden;
-  bool isImage;
-  bool isLiveRegion;
-  bool hasToggledState;
-  bool isToggled;
-  bool hasImplicitScrolling;
-  bool isMultiline;
-  bool isReadOnly;
-  bool isFocusable;
-  bool isLink;
-  bool isSlider;
-  bool isKeyboardKey;
-  bool isCheckStateMixed;
-  bool hasExpandedState;
-  bool isExpanded;
-  bool hasSelectedState;
-  bool hasRequiredState;
-  bool isRequired;
-
-  int64_t toInt64() const {
-    int64_t result = 0;
-    if (hasCheckedState)
-      result |= (INT64_C(1) << 0);
-    if (isChecked)
-      result |= (INT64_C(1) << 1);
-    if (isSelected)
-      result |= (INT64_C(1) << 2);
-    if (isButton)
-      result |= (INT64_C(1) << 3);
-    if (isTextField)
-      result |= (INT64_C(1) << 4);
-    if (isFocused)
-      result |= (INT64_C(1) << 5);
-    if (hasEnabledState)
-      result |= (INT64_C(1) << 6);
-    if (isEnabled)
-      result |= (INT64_C(1) << 7);
-    if (isInMutuallyExclusiveGroup)
-      result |= (INT64_C(1) << 8);
-    if (isHeader)
-      result |= (INT64_C(1) << 9);
-    if (isObscured)
-      result |= (INT64_C(1) << 10);
-    if (scopesRoute)
-      result |= (INT64_C(1) << 11);
-    if (namesRoute)
-      result |= (INT64_C(1) << 12);
-    if (isHidden)
-      result |= (INT64_C(1) << 13);
-    if (isImage)
-      result |= (INT64_C(1) << 14);
-    if (isLiveRegion)
-      result |= (INT64_C(1) << 15);
-    if (hasToggledState)
-      result |= (INT64_C(1) << 16);
-    if (isToggled)
-      result |= (INT64_C(1) << 17);
-    if (hasImplicitScrolling)
-      result |= (INT64_C(1) << 18);
-    if (isMultiline)
-      result |= (INT64_C(1) << 19);
-    if (isReadOnly)
-      result |= (INT64_C(1) << 20);
-    if (isFocusable)
-      result |= (INT64_C(1) << 21);
-    if (isLink)
-      result |= (INT64_C(1) << 22);
-    if (isSlider)
-      result |= (INT64_C(1) << 23);
-    if (isKeyboardKey)
-      result |= (INT64_C(1) << 24);
-    if (isCheckStateMixed)
-      result |= (INT64_C(1) << 25);
-    if (hasExpandedState)
-      result |= (INT64_C(1) << 26);
-    if (isExpanded)
-      result |= (INT64_C(1) << 27);
-    if (hasSelectedState)
-      result |= (INT64_C(1) << 28);
-    if (hasRequiredState)
-      result |= (INT64_C(1) << 29);
-    if (isRequired)
-      result |= (INT64_C(1) << 30);
-    return result;
-  }
+  bool hasCheckedState = false;
+  bool isChecked = false;
+  bool isSelected = false;
+  bool isButton = false;
+  bool isTextField = false;
+  bool isFocused = false;
+  bool hasEnabledState = false;
+  bool isEnabled = false;
+  bool isInMutuallyExclusiveGroup = false;
+  bool isHeader = false;
+  bool isObscured = false;
+  bool scopesRoute = false;
+  bool namesRoute = false;
+  bool isHidden = false;
+  bool isImage = false;
+  bool isLiveRegion = false;
+  bool hasToggledState = false;
+  bool isToggled = false;
+  bool hasImplicitScrolling = false;
+  bool isMultiline = false;
+  bool isReadOnly = false;
+  bool isFocusable = false;
+  bool isLink = false;
+  bool isSlider = false;
+  bool isKeyboardKey = false;
+  bool isCheckStateMixed = false;
+  bool hasExpandedState = false;
+  bool isExpanded = false;
+  bool hasSelectedState = false;
+  bool hasRequiredState = false;
+  bool isRequired = false;
 };
 
 const int kScrollableSemanticsFlags =
@@ -269,7 +202,7 @@ struct SemanticsNode {
   bool IsPlatformViewNode() const;
 
   int32_t id = 0;
-  SemanticsFlags2 flags;
+  SemanticsFlags2 flags{};
   int32_t actions = 0;
   int32_t maxValueLength = -1;
   int32_t currentValueLength = -1;

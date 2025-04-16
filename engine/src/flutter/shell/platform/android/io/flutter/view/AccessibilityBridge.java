@@ -2315,7 +2315,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     // Flutter ID of this {@code SemanticsNode}.
     private int id = -1;
 
-    private int flags;
+    private long flags;
     private int actions;
     private int maxValueLength;
     private int currentValueLength;
@@ -2365,7 +2365,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private TextDirection textDirection;
 
     private boolean hadPreviousConfig = false;
-    private int previousFlags;
+    private long previousFlags;
     private int previousActions;
     private int previousTextSelectionBase;
     private int previousTextSelectionExtent;

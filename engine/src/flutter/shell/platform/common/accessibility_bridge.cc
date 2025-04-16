@@ -559,8 +559,7 @@ void AccessibilityBridge::SetTreeData(const SemanticsNode& node,
   if (flags.isFocused && tree_update.tree_data.focus_id != node.id) {
     tree_update.tree_data.focus_id = node.id;
     tree_update.has_tree_data = true;
-  } else if ((flags.isFocused) == 0 &&
-             tree_update.tree_data.focus_id == node.id) {
+  } else if (!flags.isFocused && tree_update.tree_data.focus_id == node.id) {
     tree_update.tree_data.focus_id = ui::AXNode::kInvalidAXID;
     tree_update.has_tree_data = true;
   }

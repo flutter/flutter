@@ -355,7 +355,7 @@ class SemanticsUpdateBuilder {
   final List<engine.SemanticsNodeUpdate> _nodeUpdates = <engine.SemanticsNodeUpdate>[];
   void updateNode({
     required int id,
-    required int flags,
+    required List<bool> flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,

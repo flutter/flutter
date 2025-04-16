@@ -36,7 +36,7 @@ TEST(FlutterPlatformNodeDelegateMac, Basics) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
-  FlutterSemanticsFlags flags;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -72,7 +72,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextHasCorrectSemantics) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
-  FlutterSemanticsFlags flags;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
   flags.isTextField = YES;
@@ -115,7 +115,7 @@ TEST(FlutterPlatformNodeDelegateMac, SelectableTextWithoutSelectionReturnZeroRan
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
-  FlutterSemanticsFlags flags;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
   flags.isTextField = YES;
@@ -238,8 +238,8 @@ TEST(FlutterPlatformNodeDelegateMac, TextFieldUsesFlutterTextField) {
   auto bridge = viewController.accessibilityBridge.lock();
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
-  FlutterSemanticsFlags flags;
-  FlutterSemanticsFlags child_flags;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.id = 0;
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -318,8 +318,8 @@ TEST(FlutterPlatformNodeDelegateMac, ChangingFlagsUpdatesNativeViewAccessible) {
   // Initialize ax node data.
   FlutterSemanticsNode2 root;
   root.id = 0;
-  FlutterSemanticsFlags flags;
-  FlutterSemanticsFlags child_flags;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  FlutterSemanticsFlags child_flags = FlutterSemanticsFlags{0};
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
   root.label = "root";

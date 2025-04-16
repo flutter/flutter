@@ -43,7 +43,7 @@ TEST(FlutterPlatformNodeDelegateTest, canPerfomActions) {
   FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
-  FlutterSemanticsFlags flags;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.isTextField = true;
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);
@@ -91,7 +91,7 @@ TEST(FlutterPlatformNodeDelegateTest, canGetAXNode) {
   FlutterSemanticsNode2 root;
   root.id = 0;
   root.flags = FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField;
-  FlutterSemanticsFlags flags;
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.isTextField = true;
   root.flags2 = &flags;
   root.actions = static_cast<FlutterSemanticsAction>(0);

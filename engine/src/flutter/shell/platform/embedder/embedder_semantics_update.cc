@@ -201,6 +201,7 @@ EmbedderSemanticsUpdate2::EmbedderSemanticsUpdate2(
     const SemanticsNodeUpdates& nodes,
     const CustomAccessibilityActionUpdates& actions) {
   nodes_.reserve(nodes.size());
+  flags_.reserve(nodes.size());
   node_pointers_.reserve(nodes.size());
   actions_.reserve(actions.size());
   action_pointers_.reserve(actions.size());
@@ -248,6 +249,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
   auto decreased_value_attributes =
       CreateStringAttributes(node.decreasedValueAttributes);
   FlutterSemanticsFlags flags = convertToFlutterSemanticsFlags(node.flags);
+  flags_.push_back(flags);
 
   nodes_.push_back({
       sizeof(FlutterSemanticsNode2),
@@ -289,7 +291,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       increased_value_attributes.attributes,
       decreased_value_attributes.count,
       decreased_value_attributes.attributes,
-      &flags,
+      &(flags_.back()),
   });
 }
 

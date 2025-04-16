@@ -329,10 +329,12 @@ class SemanticsAction {
     _kFocusIndex: focus,
   };
 
-  //
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static List<SemanticsAction> get values => _kActionById.values.toList(growable: false);
 
-  //
+  // TODO(matanlurey): have original authors document; see https://github.com/flutter/flutter/issues/151917.
+  // ignore: public_member_api_docs
   static SemanticsAction? fromIndex(int index) => _kActionById[index];
 
   @override
@@ -962,37 +964,37 @@ class SemanticsFlag {
 }
 
 class SemanticsFlags {
-  bool hasCheckedState;
-  bool isChecked;
-  bool isSelected;
-  bool isButton;
-  bool isTextField;
-  bool isFocused;
-  bool hasEnabledState;
-  bool isEnabled;
-  bool isInMutuallyExclusiveGroup;
-  bool isHeader;
-  bool isObscured;
-  bool scopesRoute;
-  bool namesRoute;
-  bool isHidden;
-  bool isImage;
-  bool isLiveRegion;
-  bool hasToggledState;
-  bool isToggled;
-  bool hasImplicitScrolling;
-  bool isMultiline;
-  bool isReadOnly;
-  bool isFocusable;
-  bool isLink;
-  bool isSlider;
-  bool isKeyboardKey;
-  bool isCheckStateMixed;
-  bool hasExpandedState;
-  bool isExpanded;
-  bool hasSelectedState;
-  bool hasRequiredState;
-  bool isRequired;
+  final bool hasCheckedState;
+  final bool isChecked;
+  final bool isSelected;
+  final bool isButton;
+  final bool isTextField;
+  final bool isFocused;
+  final bool hasEnabledState;
+  final bool isEnabled;
+  final bool isInMutuallyExclusiveGroup;
+  final bool isHeader;
+  final bool isObscured;
+  final bool scopesRoute;
+  final bool namesRoute;
+  final bool isHidden;
+  final bool isImage;
+  final bool isLiveRegion;
+  final bool hasToggledState;
+  final bool isToggled;
+  final bool hasImplicitScrolling;
+  final bool isMultiline;
+  final bool isReadOnly;
+  final bool isFocusable;
+  final bool isLink;
+  final bool isSlider;
+  final bool isKeyboardKey;
+  final bool isCheckStateMixed;
+  final bool hasExpandedState;
+  final bool isExpanded;
+  final bool hasSelectedState;
+  final bool hasRequiredState;
+  final bool isRequired;
 
   /// Constructor for SemanticsFlags.
   ///
@@ -1031,87 +1033,80 @@ class SemanticsFlags {
     this.isRequired = false, // Bit 30
   });
 
-  /// Merges the flags from [other] into this instance.
-  ///
-  /// For each flag, the result is `true` if the flag is `true` in *either*
-  /// this instance or the [other] instance (logical OR).
-  /// This method modifies the current instance.
-  void merge(SemanticsFlags other) {
-    hasCheckedState = hasCheckedState || other.hasCheckedState;
-    isChecked = isChecked || other.isChecked;
-    isSelected = isSelected || other.isSelected;
-    isButton = isButton || other.isButton;
-    isTextField = isTextField || other.isTextField;
-    isFocused = isFocused || other.isFocused;
-    hasEnabledState = hasEnabledState || other.hasEnabledState;
-    isEnabled = isEnabled || other.isEnabled;
-    isInMutuallyExclusiveGroup = isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup;
-    isHeader = isHeader || other.isHeader;
-    isObscured = isObscured || other.isObscured;
-    scopesRoute = scopesRoute || other.scopesRoute;
-    namesRoute = namesRoute || other.namesRoute;
-    isHidden = isHidden || other.isHidden;
-    isImage = isImage || other.isImage;
-    isLiveRegion = isLiveRegion || other.isLiveRegion;
-    hasToggledState = hasToggledState || other.hasToggledState;
-    isToggled = isToggled || other.isToggled;
-    hasImplicitScrolling = hasImplicitScrolling || other.hasImplicitScrolling;
-    isMultiline = isMultiline || other.isMultiline;
-    isReadOnly = isReadOnly || other.isReadOnly;
-    isFocusable = isFocusable || other.isFocusable;
-    isLink = isLink || other.isLink;
-    isSlider = isSlider || other.isSlider;
-    isKeyboardKey = isKeyboardKey || other.isKeyboardKey;
-    isCheckStateMixed = isCheckStateMixed || other.isCheckStateMixed;
-    hasExpandedState = hasExpandedState || other.hasExpandedState;
-    isExpanded = isExpanded || other.isExpanded;
-    hasSelectedState = hasSelectedState || other.hasSelectedState;
-    hasRequiredState = hasRequiredState || other.hasRequiredState;
-    isRequired = isRequired || other.isRequired;
+  /// Merges the flags from this object with [other].
+  SemanticsFlags merge(SemanticsFlags other) {
+    return SemanticsFlags(
+      hasCheckedState: this.hasCheckedState || other.hasCheckedState,
+      isChecked: this.isChecked || other.isChecked,
+      isSelected: this.isSelected || other.isSelected,
+      isButton: this.isButton || other.isButton,
+      isTextField: this.isTextField || other.isTextField,
+      isFocused: this.isFocused || other.isFocused,
+      hasEnabledState: this.hasEnabledState || other.hasEnabledState,
+      isEnabled: this.isEnabled || other.isEnabled,
+      isInMutuallyExclusiveGroup:
+          this.isInMutuallyExclusiveGroup || other.isInMutuallyExclusiveGroup,
+      isHeader: this.isHeader || other.isHeader,
+      isObscured: this.isObscured || other.isObscured,
+      scopesRoute: this.scopesRoute || other.scopesRoute,
+      namesRoute: this.namesRoute || other.namesRoute,
+      isHidden: this.isHidden || other.isHidden,
+      isImage: this.isImage || other.isImage,
+      isLiveRegion: this.isLiveRegion || other.isLiveRegion,
+      hasToggledState: this.hasToggledState || other.hasToggledState,
+      isToggled: this.isToggled || other.isToggled,
+      hasImplicitScrolling: this.hasImplicitScrolling || other.hasImplicitScrolling,
+      isMultiline: this.isMultiline || other.isMultiline,
+      isReadOnly: this.isReadOnly || other.isReadOnly,
+      isFocusable: this.isFocusable || other.isFocusable,
+      isLink: this.isLink || other.isLink,
+      isSlider: this.isSlider || other.isSlider,
+      isKeyboardKey: this.isKeyboardKey || other.isKeyboardKey,
+      isCheckStateMixed: this.isCheckStateMixed || other.isCheckStateMixed,
+      hasExpandedState: this.hasExpandedState || other.hasExpandedState,
+      isExpanded: this.isExpanded || other.isExpanded,
+      hasSelectedState: this.hasSelectedState || other.hasSelectedState,
+      hasRequiredState: this.hasRequiredState || other.hasRequiredState,
+      isRequired: this.isRequired || other.isRequired,
+    );
   }
 
   @override
-  bool operator ==(Object other) {
-    // Check if the instances are identical
-    if (identical(this, other)) return true;
-
-    // Check if the other object is a SemanticsFlags instance
-    // and that runtime types match (important if subclassing could occur)
-    if (other is! SemanticsFlags || runtimeType != other.runtimeType) return false;
-
-    // Compare all fields
-    return hasCheckedState == other.hasCheckedState &&
-        isChecked == other.isChecked &&
-        isSelected == other.isSelected &&
-        isButton == other.isButton &&
-        isTextField == other.isTextField &&
-        isFocused == other.isFocused &&
-        hasEnabledState == other.hasEnabledState &&
-        isEnabled == other.isEnabled &&
-        isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
-        isHeader == other.isHeader &&
-        isObscured == other.isObscured &&
-        scopesRoute == other.scopesRoute &&
-        namesRoute == other.namesRoute &&
-        isHidden == other.isHidden &&
-        isImage == other.isImage &&
-        isLiveRegion == other.isLiveRegion &&
-        hasToggledState == other.hasToggledState &&
-        isToggled == other.isToggled &&
-        hasImplicitScrolling == other.hasImplicitScrolling &&
-        isMultiline == other.isMultiline &&
-        isReadOnly == other.isReadOnly &&
-        isFocusable == other.isFocusable &&
-        isLink == other.isLink &&
-        isSlider == other.isSlider &&
-        isKeyboardKey == other.isKeyboardKey &&
-        isCheckStateMixed == other.isCheckStateMixed &&
-        hasExpandedState == other.hasExpandedState &&
-        isExpanded == other.isExpanded &&
-        hasSelectedState == other.hasSelectedState &&
-        hasRequiredState == other.hasRequiredState &&
-        isRequired == other.isRequired;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SemanticsFlags &&
+          runtimeType == other.runtimeType &&
+          hasCheckedState == other.hasCheckedState &&
+          isChecked == other.isChecked &&
+          isSelected == other.isSelected &&
+          isButton == other.isButton &&
+          isTextField == other.isTextField &&
+          isFocused == other.isFocused &&
+          hasEnabledState == other.hasEnabledState &&
+          isEnabled == other.isEnabled &&
+          isInMutuallyExclusiveGroup == other.isInMutuallyExclusiveGroup &&
+          isHeader == other.isHeader &&
+          isObscured == other.isObscured &&
+          scopesRoute == other.scopesRoute &&
+          namesRoute == other.namesRoute &&
+          isHidden == other.isHidden &&
+          isImage == other.isImage &&
+          isLiveRegion == other.isLiveRegion &&
+          hasToggledState == other.hasToggledState &&
+          isToggled == other.isToggled &&
+          hasImplicitScrolling == other.hasImplicitScrolling &&
+          isMultiline == other.isMultiline &&
+          isReadOnly == other.isReadOnly &&
+          isFocusable == other.isFocusable &&
+          isLink == other.isLink &&
+          isSlider == other.isSlider &&
+          isKeyboardKey == other.isKeyboardKey &&
+          isCheckStateMixed == other.isCheckStateMixed &&
+          hasExpandedState == other.hasExpandedState &&
+          isExpanded == other.isExpanded &&
+          hasSelectedState == other.hasSelectedState &&
+          hasRequiredState == other.hasRequiredState &&
+          isRequired == other.isRequired;
 
   @override
   List<String> toStrings() {
