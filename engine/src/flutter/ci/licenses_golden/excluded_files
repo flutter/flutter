@@ -223,6 +223,7 @@
 ../../../flutter/impeller/shader_archive/shader_archive_unittests.cc
 ../../../flutter/impeller/tessellator/dart/.dart_tool
 ../../../flutter/impeller/tessellator/dart/pubspec.yaml
+../../../flutter/impeller/tessellator/path_tessellator_unittests.cc
 ../../../flutter/impeller/tessellator/tessellator_unittests.cc
 ../../../flutter/impeller/toolkit/android/README.md
 ../../../flutter/impeller/toolkit/android/toolkit_android_unittests.cc
@@ -1944,7 +1945,6 @@
 ../../../flutter/third_party/harfbuzz/CMakeLists.txt
 ../../../flutter/third_party/harfbuzz/CONFIG.md
 ../../../flutter/third_party/harfbuzz/NEWS
-../../../flutter/third_party/harfbuzz/README
 ../../../flutter/third_party/harfbuzz/README.md
 ../../../flutter/third_party/harfbuzz/README.mingw.md
 ../../../flutter/third_party/harfbuzz/README.python.md
@@ -1953,16 +1953,9 @@
 ../../../flutter/third_party/harfbuzz/TESTING.md
 ../../../flutter/third_party/harfbuzz/THANKS
 ../../../flutter/third_party/harfbuzz/docs
-../../../flutter/third_party/harfbuzz/git.mk
-../../../flutter/third_party/harfbuzz/m4/ax_check_link_flag.m4
-../../../flutter/third_party/harfbuzz/m4/ax_code_coverage.m4
-../../../flutter/third_party/harfbuzz/m4/ax_cxx_compile_stdcxx.m4
-../../../flutter/third_party/harfbuzz/m4/ax_pthread.m4
 ../../../flutter/third_party/harfbuzz/meson.build
-../../../flutter/third_party/harfbuzz/perf/README.md
-../../../flutter/third_party/harfbuzz/perf/meson.build
+../../../flutter/third_party/harfbuzz/perf
 ../../../flutter/third_party/harfbuzz/replace-enum-strings.cmake
-../../../flutter/third_party/harfbuzz/src/Makefile.sources
 ../../../flutter/third_party/harfbuzz/src/addTable.py
 ../../../flutter/third_party/harfbuzz/src/check-c-linkage-decls.py
 ../../../flutter/third_party/harfbuzz/src/check-externs.py
@@ -1972,6 +1965,7 @@
 ../../../flutter/third_party/harfbuzz/src/check-static-inits.py
 ../../../flutter/third_party/harfbuzz/src/check-symbols.py
 ../../../flutter/third_party/harfbuzz/src/fix_get_types.py
+../../../flutter/third_party/harfbuzz/src/fontations/meson.build
 ../../../flutter/third_party/harfbuzz/src/gen-arabic-joining-list.py
 ../../../flutter/third_party/harfbuzz/src/gen-arabic-pua.py
 ../../../flutter/third_party/harfbuzz/src/gen-arabic-table.py
@@ -1986,6 +1980,10 @@
 ../../../flutter/third_party/harfbuzz/src/gen-ucd-table.py
 ../../../flutter/third_party/harfbuzz/src/gen-use-table.py
 ../../../flutter/third_party/harfbuzz/src/gen-vowel-constraints.py
+../../../flutter/third_party/harfbuzz/src/hb-bit-vector.hh
+../../../flutter/third_party/harfbuzz/src/hb-directwrite-shape.cc
+../../../flutter/third_party/harfbuzz/src/hb-directwrite.hh
+../../../flutter/third_party/harfbuzz/src/hb-fontations.h
 ../../../flutter/third_party/harfbuzz/src/justify.py
 ../../../flutter/third_party/harfbuzz/src/meson.build
 ../../../flutter/third_party/harfbuzz/src/relative_to.py
@@ -3768,6 +3766,8 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.sensor/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power.statecontrol/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.power/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.powerlevel/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.router/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.registers/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.rtc/meta.json
@@ -3788,6 +3788,7 @@
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.endpoint/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.phy/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.request/meta.json
+../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.vreg/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
 ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/meta.json
@@ -3982,6 +3983,7 @@
 ../../../fuchsia/sdk/linux/pkg/driver_component_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_devfs_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_bti_cpp/meta.json
+../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_mmio_reg_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_object_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/driver_fake_platform_device_cpp/meta.json
@@ -4035,6 +4037,7 @@
 ../../../fuchsia/sdk/linux/pkg/memory_barriers/meta.json
 ../../../fuchsia/sdk/linux/pkg/mmio-ptr/meta.json
 ../../../fuchsia/sdk/linux/pkg/mmio/meta.json
+../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
 ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/include/lib/ui/scenic/cpp/testing
 ../../../fuchsia/sdk/linux/pkg/scenic_cpp_testing/meta.json

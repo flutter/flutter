@@ -13,6 +13,7 @@
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
 #include "impeller/entity/contents/pipelines.h"
+#include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/renderer/command_buffer.h"
@@ -531,8 +532,11 @@ ContentContext::ContentContext(
                                ? std::make_shared<RenderTargetCache>(
                                      context_->GetResourceAllocator())
                                : std::move(render_target_allocator)),
-      host_buffer_(HostBuffer::Create(context_->GetResourceAllocator(),
-                                      context_->GetIdleWaiter())) {
+      host_buffer_(HostBuffer::Create(
+          context_->GetResourceAllocator(),
+          context_->GetIdleWaiter(),
+          context_->GetCapabilities()->GetMinimumUniformAlignment())),
+      text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
@@ -931,6 +935,13 @@ PipelineRef ContentContext::GetCachedRuntimeEffectPipeline(
 
 void ContentContext::ClearCachedRuntimeEffectPipeline(
     const std::string& unique_entrypoint_name) const {
+#ifdef IMPELLER_DEBUG
+  // destroying in-use pipleines is a validation error.
+  const auto& idle_waiter = GetContext()->GetIdleWaiter();
+  if (idle_waiter) {
+    idle_waiter->WaitIdle();
+  }
+#endif  // IMPELLER_DEBUG
   for (auto it = runtime_effect_pipelines_.begin();
        it != runtime_effect_pipelines_.end();) {
     if (it->first.unique_entrypoint_name == unique_entrypoint_name) {

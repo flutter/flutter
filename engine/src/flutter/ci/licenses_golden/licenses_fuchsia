@@ -1,4 +1,4 @@
-Signature: 1bbb24cd85a32924bf966672eaa73e4f
+Signature: 065ad08a158cae132a5fb9a01ddb3ce5
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -43,6 +43,9 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/ftp.h
@@ -232,6 +235,8 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/arpa/ftp.h
@@ -421,6 +426,8 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/ftp.h
@@ -620,6 +627,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/arpa/ftp.h
@@ -818,6 +828,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/arpa/ftp.h
@@ -1016,6 +1029,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/arpa/ftp.h
@@ -1214,6 +1230,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/arpa/ftp.h
@@ -1412,6 +1431,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/arpa/ftp.h
@@ -1610,6 +1632,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/arpa/ftp.h
@@ -1808,6 +1833,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/arpa/ftp.h
@@ -2006,6 +2034,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/arpa/ftp.h
@@ -2204,6 +2235,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/arpa/ftp.h
@@ -2402,6 +2435,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/arpa/ftp.h
@@ -2600,6 +2635,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/arpa/ftp.h
@@ -2798,6 +2835,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/arpa/ftp.h
@@ -2996,6 +3035,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/arpa/ftp.h
@@ -3194,6 +3235,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/arpa/ftp.h
@@ -3392,6 +3435,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/arpa/ftp.h
@@ -3590,6 +3635,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/arpa/ftp.h
@@ -3788,6 +3835,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/arpa/ftp.h
@@ -3986,6 +4035,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/arpa/ftp.h
@@ -4184,6 +4235,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/arpa/ftp.h
@@ -4382,6 +4435,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/arpa/ftp.h
@@ -4580,6 +4635,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/arpa/ftp.h
@@ -4778,6 +4835,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/arpa/ftp.h
@@ -4976,6 +5035,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/arpa/ftp.h
@@ -5174,6 +5235,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/arpa/ftp.h
@@ -9076,6 +9139,9 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/ftp.h
@@ -9265,6 +9331,8 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/arpa/ftp.h
@@ -9454,6 +9522,8 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/ftp.h
@@ -9653,6 +9723,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/arpa/ftp.h
@@ -9851,6 +9924,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/arpa/ftp.h
@@ -10049,6 +10125,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/arpa/ftp.h
@@ -10247,6 +10326,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/arpa/ftp.h
@@ -10445,6 +10527,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/arpa/ftp.h
@@ -10643,6 +10728,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/arpa/ftp.h
@@ -10841,6 +10929,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/arpa/ftp.h
@@ -11039,6 +11130,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/arpa/ftp.h
@@ -11237,6 +11331,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/arpa/ftp.h
@@ -11435,6 +11531,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/arpa/ftp.h
@@ -11633,6 +11731,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/arpa/ftp.h
@@ -11831,6 +11931,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/arpa/ftp.h
@@ -12029,6 +12131,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/arpa/ftp.h
@@ -12227,6 +12331,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/arpa/ftp.h
@@ -12425,6 +12531,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/arpa/ftp.h
@@ -12623,6 +12731,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/arpa/ftp.h
@@ -12821,6 +12931,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/arpa/ftp.h
@@ -13019,6 +13131,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/arpa/ftp.h
@@ -13217,6 +13331,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/arpa/ftp.h
@@ -13415,6 +13531,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/arpa/ftp.h
@@ -13613,6 +13731,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/arpa/ftp.h
@@ -13811,6 +13931,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/arpa/ftp.h
@@ -14009,6 +14131,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/arpa/ftp.h
@@ -14207,6 +14331,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/arpa/ftp.h
@@ -16241,6 +16367,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/port.fidl + ../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/radar.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sharedmemory/sharedmemory.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.descriptor/usb.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.vreg/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyboard.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keymap.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/calendar.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -16424,6 +16551,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.network/port.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.radar/radar.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.sharedmemory/sharedmemory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.descriptor/usb.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.vreg/metadata.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input.virtualkeyboard/virtual_keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.input/keymap.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/calendar.fidl
@@ -17351,6 +17479,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.dci/usb-dci.fidl + 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.endpoint/endpoint.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.phy/usb-phy.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.request/request.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.vreg/vreg.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/math.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/inspect_sink.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -17457,6 +17586,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.dci/usb-dci.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.endpoint/endpoint.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.phy/usb-phy.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.usb.request/request.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.vreg/vreg.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images2/math.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/inspect_sink.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/symlink.fidl
@@ -17660,6 +17790,12 @@ ORIGIN: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/time.h + .
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/globally-ordered-region.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/globally-ordered-region.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/region.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/register.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/region.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/register.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml + ../../../fuchsia/sdk/linux/LICENSE
@@ -17773,6 +17909,12 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/cpp/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/use.shard.cml
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/globally-ordered-region.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/globally-ordered-region.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/region.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/include/lib/driver/mock-mmio/cpp/register.h
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/region.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/mock_mmio_cpp/register.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/client.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/offer.shard.cml
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/use.shard.cml
@@ -17810,7 +17952,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: fuchsia_sdk
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.powerlevel/powerlevel.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.router/qrtr.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -17818,11 +17963,16 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl + ../../../
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_member_watcher.h + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/fake-gpio.cc + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/include/lib/driver/fake-gpio/cpp/fake-gpio.h + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h + ../../../fuchsia/sdk/linux/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.boot.metadata/metadata.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.diagnostics.types/interest.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.gnss/gnss_device.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.powerlevel/powerlevel.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.qualcomm.router/qrtr.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.kernel/tracing-resource.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.location.gnss.types/gnss_types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.power/collaborative_reboot.fidl
@@ -17830,6 +17980,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.storage.ftl/ftl.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.softmac/features.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/directory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/component_incoming_cpp/include/lib/component/incoming/cpp/service_member_watcher.h
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/fake-gpio.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/driver_fake_gpio_cpp/include/lib/driver/fake-gpio/cpp/fake-gpio.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/counter.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/counter.h
 ----------------------------------------------------------------------------------------------------
@@ -17902,6 +18054,9 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/arpa/ftp.h
@@ -18091,6 +18246,8 @@ FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/riscv64/sysroot/include/arpa/ftp.h
@@ -18280,6 +18437,8 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-vthread.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/arpa/ftp.h
@@ -18479,6 +18638,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-16/sysroot/include/arpa/ftp.h
@@ -18677,6 +18839,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-20/sysroot/include/arpa/ftp.h
@@ -18875,6 +19040,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-22/sysroot/include/arpa/ftp.h
@@ -19073,6 +19241,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-23/sysroot/include/arpa/ftp.h
@@ -19271,6 +19442,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-24/sysroot/include/arpa/ftp.h
@@ -19469,6 +19643,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-25/sysroot/include/arpa/ftp.h
@@ -19667,6 +19844,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-26/sysroot/include/arpa/ftp.h
@@ -19865,6 +20045,9 @@ FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/hwasan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/arm64-api-NEXT/sysroot/include/arpa/ftp.h
@@ -20063,6 +20246,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-16/sysroot/include/arpa/ftp.h
@@ -20261,6 +20446,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-20/sysroot/include/arpa/ftp.h
@@ -20459,6 +20646,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-22/sysroot/include/arpa/ftp.h
@@ -20657,6 +20846,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-23/sysroot/include/arpa/ftp.h
@@ -20855,6 +21046,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-24/sysroot/include/arpa/ftp.h
@@ -21053,6 +21246,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-25/sysroot/include/arpa/ftp.h
@@ -21251,6 +21446,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-26/sysroot/include/arpa/ftp.h
@@ -21449,6 +21646,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/riscv64-api-NEXT/sysroot/include/arpa/ftp.h
@@ -21647,6 +21846,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-16/sysroot/include/arpa/ftp.h
@@ -21845,6 +22046,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-20/sysroot/include/arpa/ftp.h
@@ -22043,6 +22246,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-22/sysroot/include/arpa/ftp.h
@@ -22241,6 +22446,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-23/sysroot/include/arpa/ftp.h
@@ -22439,6 +22646,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-24/sysroot/include/arpa/ftp.h
@@ -22637,6 +22846,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-25/sysroot/include/arpa/ftp.h
@@ -22835,6 +23046,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-26/sysroot/include/arpa/ftp.h
@@ -23033,6 +23246,8 @@ FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvfs_internal.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvfs_internal.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvulkan.ifs
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/lib/libvulkan.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/debug/asan/libc.so
+FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/debug/libc.so
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/ar.h
 FILE: ../../../fuchsia/sdk/linux/obj/x64-api-NEXT/sysroot/include/arpa/ftp.h

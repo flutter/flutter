@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
+
 namespace flutter {
 
 sk_sp<DlImageGPU> DlImageGPU::Make(SkiaGPUObject<SkImage> image) {
@@ -48,12 +50,6 @@ bool DlImageGPU::isTextureBacked() const {
 // |DlImage|
 bool DlImageGPU::isUIThreadSafe() const {
   return true;
-}
-
-// |DlImage|
-SkISize DlImageGPU::dimensions() const {
-  const auto image = skia_image();
-  return image ? image->dimensions() : SkISize::MakeEmpty();
 }
 
 // |DlImage|

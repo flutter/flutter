@@ -145,6 +145,9 @@ void runSemanticsTests() {
   group('requirable', () {
     _testRequirable();
   });
+  group('SemanticsValidationResult', () {
+    _testSemanticsValidationResult();
+  });
 }
 
 void _testSemanticRole() {
@@ -1609,7 +1612,7 @@ void _testVerticalScrolling() {
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
-    expect(scrollable.scrollTop, isPositive);
+    expect(scrollable.scrollTop, 0);
     semantics().semanticsEnabled = false;
   });
 
@@ -1646,8 +1649,8 @@ void _testVerticalScrolling() {
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral scrollTop
-    // is still a positive number.
-    expect(scrollable.scrollTop, isPositive);
+    // is 0.
+    expect(scrollable.scrollTop, 0);
 
     semantics().semanticsEnabled = false;
   });
@@ -1700,18 +1703,7 @@ void _testVerticalScrolling() {
 
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
     expect(scrollable, isNotNull);
-
-    // When there's more content than the available size the neutral scrollTop
-    // is greater than 0 with a maximum of 10 or 9.
-    int browserMaxScrollDiff = 0;
-    // The max scroll value varies between `9` and `10` for Safari desktop
-    // browsers.
-    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
-      browserMaxScrollDiff = 1;
-    }
-
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollTop, 0);
 
     Future<ui.SemanticsActionEvent> capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollTop = 20;
@@ -1719,21 +1711,44 @@ void _testVerticalScrolling() {
     ui.SemanticsActionEvent capturedEvent = await capturedEventFuture;
 
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollUp);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    final Float64List expectedOffset = Float64List(2);
+    expectedOffset[0] = 0.0;
+    expectedOffset[1] = 20.0;
+    Float64List message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
+
+    // Update scrollPosition to scrollTop value.
+    final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder2,
+      scrollPosition: 20.0,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+    owner().updateSemantics(builder2.build());
 
     capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollTop = 5;
     capturedEvent = await capturedEventFuture;
 
-    expect(scrollable.scrollTop >= (5 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollTop, 5);
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollDown);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    expectedOffset[0] = 0.0;
+    expectedOffset[1] = 5.0;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
   });
 
   test('scrollable switches to pointer event mode on a wheel event', () async {
@@ -1780,27 +1795,22 @@ void _testVerticalScrolling() {
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
     expect(scrollable, isNotNull);
 
-    void expectNeutralPosition() {
-      // Browsers disagree on the exact value, but it's always close to 10.
-      expect((scrollable.scrollTop - 10).abs(), lessThan(2));
-    }
-
-    // Initially, starting with a neutral scroll position, everything should be
+    // Initially, starting at "scrollTop" 0, everything should be
     // in browser gesture mode, react to DOM scroll events, and generate
     // semantic actions.
-    expectNeutralPosition();
+    expect(scrollable.scrollTop, 0);
     expect(semantics().gestureMode, GestureMode.browserGestures);
     scrollable.scrollTop = 20;
     expect(scrollable.scrollTop, 20);
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(actionLog, hasLength(1));
     final capturedEvent = actionLog.removeLast();
-    expect(capturedEvent.type, ui.SemanticsAction.scrollUp);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
 
-    // Now, starting with a neutral mode, observing a DOM "wheel" event should
+    // Now, starting at the "scrollTop" 20 we set, observing a DOM "wheel" event should
     // swap into pointer event mode, and the scrollable becomes a plain clip,
     // i.e. `overflow: hidden`.
-    expectNeutralPosition();
+    expect(scrollable.scrollTop, 20);
     expect(semantics().gestureMode, GestureMode.browserGestures);
     expect(scrollable.style.overflowY, 'scroll');
 
@@ -1867,8 +1877,8 @@ void _testHorizontalScrolling() {
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral
-    // scrollLeft is still a positive number.
-    expect(scrollable.scrollLeft, isPositive);
+    // scrollLeft is still 0.
+    expect(scrollable.scrollLeft, 0);
 
     semantics().semanticsEnabled = false;
   });
@@ -1921,17 +1931,7 @@ void _testHorizontalScrolling() {
 
     final DomElement scrollable = findScrollable(owner());
     expect(scrollable, isNotNull);
-
-    // When there's more content than the available size the neutral scrollTop
-    // is greater than 0 with a maximum of 10.
-    int browserMaxScrollDiff = 0;
-    // The max scroll value varies between `9` and `10` for Safari desktop
-    // browsers.
-    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
-      browserMaxScrollDiff = 1;
-    }
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollLeft, 0);
 
     Future<ui.SemanticsActionEvent> capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollLeft = 20;
@@ -1939,21 +1939,44 @@ void _testHorizontalScrolling() {
     ui.SemanticsActionEvent capturedEvent = await capturedEventFuture;
 
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollLeft);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll position back to neutral.
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    final Float64List expectedOffset = Float64List(2);
+    expectedOffset[0] = 20.0;
+    expectedOffset[1] = 0.0;
+    Float64List message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
+
+    // Update scrollPosition to scrollLeft value.
+    final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder2,
+      scrollPosition: 20.0,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+    owner().updateSemantics(builder2.build());
 
     capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollLeft = 5;
     capturedEvent = await capturedEventFuture;
 
-    expect(scrollable.scrollLeft >= (5 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollLeft, 5);
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollRight);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    expectedOffset[0] = 5.0;
+    expectedOffset[1] = 0.0;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
   });
 }
 
@@ -4763,6 +4786,58 @@ void _testRequirable() {
   });
 }
 
+void _testSemanticsValidationResult() {
+  test('renders validation result', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        // This node does not validate its contents and should not have an
+        // aria-invalid attribute at all.
+        tester.updateNode(id: 1),
+        // This node is valid. aria-invalid should be "false".
+        tester.updateNode(id: 2, validationResult: ui.SemanticsValidationResult.valid),
+        // This node is invalid. aria-invalid should be "true".
+        tester.updateNode(id: 3, validationResult: ui.SemanticsValidationResult.invalid),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0" aria-invalid--missing>
+  <sem id="flt-semantic-node-1" aria-invalid--missing></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid="true"></sem>
+</sem>''');
+
+    // Shift all values, observe that the values changed accordingly
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        // This node is valid. aria-invalid should be "false".
+        tester.updateNode(id: 1, validationResult: ui.SemanticsValidationResult.valid),
+        // This node is invalid. aria-invalid should be "true".
+        tester.updateNode(id: 2, validationResult: ui.SemanticsValidationResult.invalid),
+        // This node does not validate its contents and should not have an
+        // aria-invalid attribute at all.
+        tester.updateNode(id: 3),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0" aria-invalid--missing>
+  <sem id="flt-semantic-node-1" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="true"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid--missing></sem>
+</sem>''');
+  });
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -4804,6 +4879,7 @@ void updateNode(
   String? linkUrl,
   List<String>? controlsNodes,
   ui.SemanticsRole role = ui.SemanticsRole.none,
+  ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -4847,6 +4923,7 @@ void updateNode(
     headingLevel: headingLevel,
     linkUrl: linkUrl,
     controlsNodes: controlsNodes,
+    inputType: inputType,
   );
 }
 

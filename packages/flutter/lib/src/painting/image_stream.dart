@@ -508,10 +508,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
 
-  /// We must avoid disposing a completer if it has never had a listener, even
-  /// if all [keepAlive] handles get disposed.
-  bool _hadAtLeastOneListener = false;
-
   /// Tracks if any listener with an onError callback was ever added.
   /// Used to prevent reporting errors even if the listener is removed
   /// before the error occurs, if an errorBuilder was intended.
@@ -542,7 +538,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///    automatically removed after first image load or error.
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
-    _hadAtLeastOneListener = true;
 
     // Track if any listener capable of handling errors was ever added.
     // The Image widget's listener always provides a non-null onError.
@@ -683,10 +678,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
   void onDisposed() {}
 
   /// Disposes this [ImageStreamCompleter] unless:
-  ///   1. It has never had a listener
-  ///   2. It is already disposed
-  ///   3. It has listeners.
-  ///   4. It has active "keep alive" handles.
+  ///
+  ///   1. It is already disposed
+  ///   2. It has listeners.
+  ///   3. It has active "keep alive" handles.
   @nonVirtual
   void maybeDispose() {
     _maybeDispose();
@@ -694,7 +689,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
   @mustCallSuper
   void _maybeDispose() {
-    if (!_hadAtLeastOneListener || _disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
+    if (_disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
       return;
     }
 
