@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// See https://github.com/flutter/engine/blob/main/lib/ui/geometry.dart for
+// See https://github.com/flutter/flutter/blob/main/engine/src/flutter/lib/ui/geometry.dart for
 // documentation of APIs.
 part of ui;
 
@@ -732,21 +732,6 @@ abstract class _RRectLike<T extends _RRectLike<T>> {
 }
 
 class RRect extends _RRectLike<RRect> {
-  const RRect._raw({
-    super.left = 0.0,
-    super.top = 0.0,
-    super.right = 0.0,
-    super.bottom = 0.0,
-    super.tlRadiusX = 0.0,
-    super.tlRadiusY = 0.0,
-    super.trRadiusX = 0.0,
-    super.trRadiusY = 0.0,
-    super.brRadiusX = 0.0,
-    super.brRadiusY = 0.0,
-    super.blRadiusX = 0.0,
-    super.blRadiusY = 0.0,
-  });
-
   const RRect.fromLTRBXY(
     double left,
     double top,
@@ -861,6 +846,21 @@ class RRect extends _RRectLike<RRect> {
          brRadiusX: bottomRight.x,
          brRadiusY: bottomRight.y,
        );
+
+  const RRect._raw({
+    super.left = 0.0,
+    super.top = 0.0,
+    super.right = 0.0,
+    super.bottom = 0.0,
+    super.tlRadiusX = 0.0,
+    super.tlRadiusY = 0.0,
+    super.trRadiusX = 0.0,
+    super.trRadiusY = 0.0,
+    super.brRadiusX = 0.0,
+    super.brRadiusY = 0.0,
+    super.blRadiusX = 0.0,
+    super.blRadiusY = 0.0,
+  });
 
   @override
   RRect _create({
@@ -988,25 +988,6 @@ class _Shape {
 }
 
 class RSuperellipse extends _RRectLike<RSuperellipse> {
-  RSuperellipse._raw({
-    super.left = 0.0,
-    super.top = 0.0,
-    super.right = 0.0,
-    super.bottom = 0.0,
-    super.tlRadiusX = 0.0,
-    super.tlRadiusY = 0.0,
-    super.trRadiusX = 0.0,
-    super.trRadiusY = 0.0,
-    super.brRadiusX = 0.0,
-    super.brRadiusY = 0.0,
-    super.blRadiusX = 0.0,
-    super.blRadiusY = 0.0,
-    RSuperellipse? maybeCache,
-    this.uniformRadii = false,
-  }) {
-    _param = RSuperellipseParam(this, maybeCache);
-  }
-
   RSuperellipse.fromLTRBXY(
     double left,
     double top,
@@ -1142,6 +1123,25 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
          maybeCache: maybeCache,
          uniformRadii: false,
        );
+
+  RSuperellipse._raw({
+    super.left = 0.0,
+    super.top = 0.0,
+    super.right = 0.0,
+    super.bottom = 0.0,
+    super.tlRadiusX = 0.0,
+    super.tlRadiusY = 0.0,
+    super.trRadiusX = 0.0,
+    super.trRadiusY = 0.0,
+    super.brRadiusX = 0.0,
+    super.brRadiusY = 0.0,
+    super.blRadiusX = 0.0,
+    super.blRadiusY = 0.0,
+    RSuperellipse? maybeCache,
+    this.uniformRadii = false,
+  }) {
+    _param = RSuperellipseParam(this, maybeCache);
+  }
 
   final bool uniformRadii;
   late final RSuperellipseParam _param;
