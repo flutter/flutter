@@ -1195,9 +1195,11 @@ class SafariDesktopTextEditingStrategy extends DefaultTextEditingStrategy {
       // Set the last editing state if it exists, this is critical for a
       // users ongoing work to continue uninterrupted when there is an update to
       // the transform.
-      // If domElement is not focused cursor location will not be correct.
-      moveFocusToActiveDomElement();
       lastEditingState?.applyToDomElement(activeDomElement);
+      // If domElement is not focused cursor location will not be correct.
+      Timer(Duration.zero, () {
+        moveFocusToActiveDomElement();
+      });
     }
   }
 
@@ -1953,12 +1955,14 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 
   @override
   void placeElement() {
-    moveFocusToActiveDomElement();
     geometry?.applyToDomElement(activeDomElement);
     // Set the last editing state if it exists, this is critical for a
     // users ongoing work to continue uninterrupted when there is an update to
     // the transform.
     lastEditingState?.applyToDomElement(activeDomElement);
+    Timer(Duration.zero, () {
+      moveFocusToActiveDomElement();
+    });
   }
 }
 
