@@ -97,6 +97,7 @@ class PreviewCodeGenerator {
                   'package:flutter/widgets.dart',
                 ).newInstance(<Expression>[], <String, Expression>{'builder': previewWidget});
               }
+
               if (preview.hasWrapper) {
                 previewWidget = refer(
                   preview.wrapper!,
@@ -119,6 +120,16 @@ class PreviewCodeGenerator {
                     key: PreviewDetails.kTextScaleFactor,
                     property: preview.textScaleFactor,
                   ),
+                  if (preview.theme != null)
+                    PreviewDetails.kTheme: refer(
+                      preview.theme!,
+                      preview.themeLibraryUri,
+                    ).call(<Expression>[]),
+                  if (preview.brightness != null)
+                    PreviewDetails.kBrightness: refer(
+                      preview.brightness!,
+                      preview.brightnessLibraryUri ?? 'package:flutter/foundation.dart',
+                    ),
                   'builder': previewWidget,
                 }),
               );
