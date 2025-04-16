@@ -2082,6 +2082,41 @@ void main() {
       TargetPlatform.linux,
       TargetPlatform.windows,
     });
+
+    testWidgets('select up', (WidgetTester tester) async {
+      const SingleActivator selectUp = SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
+      controller.text = testVerticalText;
+      controller.selection = const TextSelection.collapsed(offset: 5);
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, selectUp);
+      await tester.pump();
+
+      expect(controller.text, testVerticalText);
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 5, extentOffset: 3), // selection extends upwards from 5
+        reason: selectUp.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('select down', (WidgetTester tester) async {
+      const SingleActivator selectDown = SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
+      controller.text = testVerticalText;
+      controller.selection = const TextSelection.collapsed(offset: 5);
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, selectDown);
+      await tester.pump();
+
+      expect(controller.text, testVerticalText);
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 5, extentOffset: 7), // selection extends downwards from 5
+        reason: selectDown.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
+
     testWidgets('select all up', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
       final SingleActivator selectAllUp =
@@ -2123,6 +2158,91 @@ void main() {
         reason: selectAllDown.toString(),
       );
     }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('select left', (WidgetTester tester) async {
+      const SingleActivator selectLeft = SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(offset: 5);
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, selectLeft);
+      await tester.pump();
+
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 5, extentOffset: 4),
+        reason: selectLeft.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets('select right', (WidgetTester tester) async {
+      const SingleActivator selectRight = SingleActivator(
+        LogicalKeyboardKey.arrowRight,
+        shift: true,
+      );
+      controller.text = 'testing';
+      controller.selection = const TextSelection.collapsed(offset: 5);
+
+      await tester.pumpWidget(buildEditableText());
+      await sendKeyCombination(tester, selectRight);
+      await tester.pump();
+
+      expect(controller.text, 'testing');
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 5, extentOffset: 6),
+        reason: selectRight.toString(),
+      );
+    }, variant: TargetPlatformVariant.desktop());
+
+    testWidgets(
+      'select left should not expand selection if selection is disabled',
+      (WidgetTester tester) async {
+        const SingleActivator selectLeft = SingleActivator(
+          LogicalKeyboardKey.arrowLeft,
+          shift: true,
+        );
+        controller.text = 'testing';
+        controller.selection = const TextSelection.collapsed(offset: 5);
+
+        await tester.pumpWidget(buildEditableText(enableInteractiveSelection: false));
+        await sendKeyCombination(tester, selectLeft);
+        await tester.pump();
+
+        expect(controller.text, 'testing');
+        expect(
+          controller.selection,
+          const TextSelection.collapsed(offset: 4), // should not expand selection
+          reason: selectLeft.toString(),
+        );
+      },
+      variant: TargetPlatformVariant.desktop(),
+    );
+
+    testWidgets(
+      'select right should not expand selection if selection is disabled',
+      (WidgetTester tester) async {
+        const SingleActivator selectRight = SingleActivator(
+          LogicalKeyboardKey.arrowRight,
+          shift: true,
+        );
+        controller.text = 'testing';
+        controller.selection = const TextSelection.collapsed(offset: 5);
+
+        await tester.pumpWidget(buildEditableText(enableInteractiveSelection: false));
+        await sendKeyCombination(tester, selectRight);
+        await tester.pump();
+
+        expect(controller.text, 'testing');
+        expect(
+          controller.selection,
+          const TextSelection.collapsed(offset: 6), // should not expand selection
+          reason: selectRight.toString(),
+        );
+      },
+      variant: TargetPlatformVariant.desktop(),
+    );
 
     testWidgets('select all left', (WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
