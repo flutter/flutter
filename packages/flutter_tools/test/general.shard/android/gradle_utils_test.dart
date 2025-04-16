@@ -332,7 +332,10 @@ OS:           Mac OS X 13.2.1 aarch64
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       final ProcessManager processManager =
           FakeProcessManager.empty()..addCommand(
-            const FakeCommand(command: <String>['gradle', gradleVersionFlag], stdout: gradleOutput),
+            const FakeCommand(
+              command: <String>['gradle', gradleVersionsFlag],
+              stdout: gradleOutput,
+            ),
           );
 
       expect(
@@ -347,7 +350,10 @@ OS:           Mac OS X 13.2.1 aarch64
       final Directory androidDirectory = fileSystem.directory('/android')..createSync();
       final ProcessManager processManager =
           FakeProcessManager.empty()..addCommand(
-            const FakeCommand(command: <String>['gradle', gradleVersionFlag], stdout: gradleOutput),
+            const FakeCommand(
+              command: <String>['gradle', gradleVersionsFlag],
+              stdout: gradleOutput,
+            ),
           );
 
       expect(

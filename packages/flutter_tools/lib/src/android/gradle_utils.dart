@@ -63,7 +63,7 @@ const String oneMajorVersionHigherJavaVersion = '24';
 // flutter analyze --suggestions and does not imply broader flutter support.
 const String maxKnownAndSupportedGradleVersion = '8.12';
 
-// Update this with new KGP versions come out including mino versions.
+// Update this with new KGP versions come out including minor versions.
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
@@ -79,12 +79,20 @@ const String maxKnownAndSupportedAgpVersion = '8.7.3';
 // Update this when new versions of AGP come out.
 const String maxKnownAgpVersion = '8.7.3';
 
+// Supported here means tooling is aware of this versions
+// Java <-> AGP compatibility and does not imply broader flutter support.
+// For use in flutter see the code in:
+// flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
 @visibleForTesting
 const String oldestSupportedAgpVersion = '3.3.0';
 
+// Supported here means tooling is aware of this versions
+// gradle compatibility and does not imply broader flutter support.
 @visibleForTesting
 const String oldestSupportedGradleVersion = '4.10.1';
 
+// Supported here means tooling is aware of this versions
+// gradle/AGP compatibility and does not imply broader flutter support.
 @visibleForTesting
 const String oldestDocumentedKgpCompatabilityVersion = '1.6.20';
 
@@ -120,13 +128,12 @@ final RegExp _androidGradlePluginRegExpFromId = RegExp(
   multiLine: true,
 );
 
-// KGP is defined in several places this code only checks in plugins block of [settings.gradle.kts].
+// KGP is defined in several places this code only checks in plugins block
+// of [settings.gradle] and [settings.gradle.kts].
 // Expected content:
 // Groovy DSL - id "org.jetbrains.kotlin.android" version "{{kgpVersion}}"
 // Kotlin DSL - id("org.jetbrains.kotlin.android") version "{{kgpVersion}}"
 // ?<version> is used to name the version group which helps with extraction.
-// Concrete example:
-// id("org.jetbrains.kotlin.android") version "1.8.22" apply false
 final RegExp _kotlinGradlePluginRegExpFromId = RegExp(
   r"""[^\/]*s*id\s*\(?['"]org\.jetbrains\.kotlin\.android['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
   multiLine: true,
@@ -154,8 +161,8 @@ final RegExp tooOldMinSdkVersionMatch = RegExp(
 );
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
-// Flag to print the versions for gradle, kotlin, groovy, etc.
-const String gradleVersionFlag = r'--version';
+// Flag to print the versions for gradle, kotlin dsl, groovy, etc.
+const String gradleVersionsFlag = r'--version';
 
 // Directory under android/ that gradle uses to store gradle information.
 // Regularly used with [gradleWrapperDirectory] and
@@ -320,7 +327,7 @@ Future<String?> getGradleVersion(
   // TODO(reidbaker): Modify this gradle execution to use gradlew.
   if (processManager.canRun('gradle')) {
     final String gradleVersionsVerbose =
-        (await processManager.run(<String>['gradle', gradleVersionFlag])).stdout as String;
+        (await processManager.run(<String>['gradle', gradleVersionsFlag])).stdout as String;
     // Expected format:
     /*
 
@@ -356,7 +363,7 @@ OS:           Mac OS X 13.2.1 aarch64
 }
 
 /// Returns the Kotlin Gradle Plugin (KGP) version that the current project
-/// depends on when found, null otherwise.
+/// depends on if found, null otherwise.
 /// [directory] should be an android directory with a build.gradle file.
 Future<String?> getKgpVersion(
   Directory androidDirectory,
