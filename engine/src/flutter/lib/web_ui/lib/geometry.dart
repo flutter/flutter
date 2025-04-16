@@ -1139,16 +1139,19 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
     super.blRadiusY = 0.0,
     RSuperellipse? maybeCache,
     this.uniformRadii = false,
-  }) {
-    _param = RSuperellipseParam(this, maybeCache);
-  }
+  }) : _maybeCache = maybeCache;
 
   final bool uniformRadii;
-  late final RSuperellipseParam _param;
+  final RSuperellipse? _maybeCache;
+  Path? _basePath;
+  Path _ensurePath() {
+    _buildRSuperellipsePath(this, _maybeCache);
+    return _basePath!;
+  }
 
   Path getPath([Path? basePath]) {
     final Path path = basePath ?? Path();
-    path.addPath(_param.getPath(), Offset(left, top));
+    path.addPath(_ensurePath(), Offset(left, top));
     return path;
   }
 
@@ -1207,7 +1210,7 @@ class RSuperellipse extends _RRectLike<RSuperellipse> {
   }
 
   bool contains(Offset point) {
-    return _param.contains(point, topLeft: Offset(left, top));
+    return _ensurePath().contains(point - Offset(left, top));
   }
 
   static final RSuperellipse zero = RSuperellipse._raw();

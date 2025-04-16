@@ -4,7 +4,20 @@
 
 part of ui;
 
-bool shapeNearlyEqualTo(RSuperellipse a, RSuperellipse b, double tolerance) {
+void _buildRSuperellipsePath(RSuperellipse target, RSuperellipse? maybeCache) {
+  if (target._basePath != null) {
+    return;
+  }
+  if (maybeCache != null &&
+      maybeCache._basePath != null &&
+      _shapeNearlyEqualTo(target, maybeCache, 1e-6)) {
+    target._basePath = maybeCache._basePath;
+  } else {
+    target._basePath = _RSuperellipsePathBuilder().buildPath(target);
+  }
+}
+
+bool _shapeNearlyEqualTo(RSuperellipse a, RSuperellipse b, double tolerance) {
   if (identical(a, b)) {
     return true;
   }
@@ -29,42 +42,6 @@ bool shapeNearlyEqualTo(RSuperellipse a, RSuperellipse b, double tolerance) {
       ScalarNearlyEqual(a.blRadiusY, b.blRadiusY) &&
       ScalarNearlyEqual(a.brRadiusX, b.brRadiusX) &&
       ScalarNearlyEqual(a.brRadiusY, b.brRadiusY);
-}
-
-class RSuperellipseParam {
-  RSuperellipseParam(this._target, this._maybeCache);
-
-  final RSuperellipse _target;
-  final RSuperellipse? _maybeCache;
-
-  Path? _cachedPath;
-  bool get isInitialized => _cachedPath != null;
-
-  Path getPath() {
-    _ensureBuilt();
-    assert(_cachedPath != null);
-    return _cachedPath!;
-  }
-
-  bool contains(Offset point, {required Offset topLeft}) {
-    _ensureBuilt();
-    assert(_cachedPath != null);
-    return _cachedPath!.contains(point - topLeft);
-  }
-
-  void _ensureBuilt() {
-    if (_cachedPath != null) {
-      return;
-    }
-    if (_maybeCache != null &&
-        _maybeCache._param.isInitialized &&
-        shapeNearlyEqualTo(_target, _maybeCache, 1e-6)) {
-      _cachedPath = _maybeCache._param._cachedPath;
-    } else {
-      _cachedPath = Path();
-      _RSuperellipsePathBuilder(_cachedPath!).buildPath(_target);
-    }
-  }
 }
 
 double _split(double left, double right, double ratioLeft, double ratioRight) {
@@ -291,11 +268,11 @@ class _RSuperellipseQuadrant {
 }
 
 class _RSuperellipsePathBuilder {
-  const _RSuperellipsePathBuilder(this.path);
+  _RSuperellipsePathBuilder() : path = Path();
 
   final Path path;
 
-  void buildPath(RSuperellipse r) {
+  Path buildPath(RSuperellipse r) {
     final double left = 0;
     final double right = r.width;
     final double top = 0;
@@ -353,6 +330,8 @@ class _RSuperellipsePathBuilder {
 
     path.lineTo(start.dx, start.dy);
     path.close();
+
+    return path;
   }
 
   void _addQuadrant(
