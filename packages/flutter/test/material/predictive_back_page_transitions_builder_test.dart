@@ -427,6 +427,188 @@ void main() {
       },
       variant: TargetPlatformVariant.all(),
     );
+
+    testWidgets('two back gestures back to back dismiss two routes', (WidgetTester tester) async {
+      final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+        '/':
+            (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('push b'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/b');
+                },
+              ),
+            ),
+        '/b':
+            (BuildContext context) => Material(
+              child: TextButton(
+                child: const Text('push c'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/c');
+                },
+              ),
+            ),
+        '/c': (BuildContext context) => const Text('page c'),
+      };
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: PageTransitionsTheme(
+              builders: <TargetPlatform, PageTransitionsBuilder>{
+                for (final TargetPlatform platform in TargetPlatform.values)
+                  platform: pageTransitionsBuilder,
+              },
+            ),
+          ),
+          routes: routes,
+        ),
+      );
+
+      expect(find.text('push b'), findsOneWidget);
+      expect(find.text('push c'), findsNothing);
+      expect(find.text('page c'), findsNothing);
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(), findsOneWidget);
+
+      await tester.tap(find.text('push b'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('push'), findsNothing);
+      expect(find.text('push c'), findsOneWidget);
+      expect(find.text('page c'), findsNothing);
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(), findsOneWidget);
+
+      await tester.tap(find.text('push c'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('push'), findsNothing);
+      expect(find.text('push c'), findsNothing);
+      expect(find.text('page c'), findsOneWidget);
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(), findsOneWidget);
+
+      // Only Android supports backGesture channel methods. Other platforms will
+      // do nothing.
+      if (defaultTargetPlatform != TargetPlatform.android) {
+        return;
+      }
+
+      // Start a system pop gesture, which will switch to using
+      // _PredictiveBackPageTransition for the page transition.
+      final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0, // left
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsOneWidget);
+      expect(_findFallbackPageTransition(), findsNothing);
+
+      // Drag the system back gesture far enough to commit.
+      final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'x': 100.0,
+          'y': 300.0,
+          'progress': 0.35,
+          'swipeEdge': 0, // left
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
+      expect(_findFallbackPageTransition(), findsNothing);
+
+      // Commit the system back gesture.
+      final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('commitBackGesture'),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+
+      // The predictive back page transitions still exist because the outgoing
+      // animation has not yet finished.
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
+      expect(_findFallbackPageTransition(), findsNothing);
+
+      expect(find.text('push'), findsNothing);
+      expect(find.text('push c'), findsOneWidget);
+      expect(find.text('page c'), findsOneWidget);
+
+      // Start another system pop gesture, before the first has finished
+      // animating out.
+      final ByteData startMessage2 = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0, // left
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        startMessage2,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(2));
+      expect(_findFallbackPageTransition(), findsNothing);
+
+      // Drag the system back gesture far enough to commit.
+      final ByteData updateMessage2 = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'x': 100.0,
+          'y': 300.0,
+          'progress': 0.35,
+          'swipeEdge': 0, // left
+        }),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        updateMessage2,
+        (ByteData? _) {},
+      );
+      await tester.pump();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNWidgets(3));
+      expect(_findFallbackPageTransition(), findsNothing);
+
+      // Commit the system back gesture.
+      final ByteData commitMessage2 = const StandardMethodCodec().encodeMethodCall(
+        const MethodCall('commitBackGesture'),
+      );
+      await binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/backgesture',
+        commitMessage2,
+        (ByteData? _) {},
+      );
+      await tester.pumpAndSettle();
+
+      expect(_findPredictiveBackPageTransition(pageTransitionsBuilder), findsNothing);
+      expect(_findFallbackPageTransition(), findsOneWidget);
+
+      expect(find.text('push b'), findsOneWidget);
+      expect(find.text('push c'), findsNothing);
+      expect(find.text('page c'), findsNothing);
+    }, variant: TargetPlatformVariant.all());
   }
 }
 
