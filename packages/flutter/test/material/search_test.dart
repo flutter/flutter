@@ -679,6 +679,8 @@ void main() {
                       SemanticsAction.paste,
                     ],
                     label: 'Search',
+                    currentValueLength: 0,
+                    inputType: SemanticsInputType.search,
                     textDirection: TextDirection.ltr,
                     textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                   ),

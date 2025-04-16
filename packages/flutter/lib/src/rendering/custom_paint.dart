@@ -1024,13 +1024,13 @@ class RenderCustomPaint extends RenderProxyBox {
       config.tooltip = properties.tooltip!;
     }
     if (properties.hintOverrides != null) {
-      config.hintOverrides = properties.hintOverrides!;
+      config.hintOverrides = properties.hintOverrides;
     }
     if (properties.tagForChildren != null) {
       config.addTagForChildren(properties.tagForChildren!);
     }
     if (properties.controlsNodes != null) {
-      config.controlsNodes = properties.controlsNodes!;
+      config.controlsNodes = properties.controlsNodes;
     }
     if (properties.hint != null) {
       config.hint = properties.hint!;
