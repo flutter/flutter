@@ -79,10 +79,7 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
 
     final String versionLine = output
         .split('\n')
-        .firstWhere(
-          (String line) => line.contains('Android emulator version'),
-          orElse: () => '',
-        );
+        .firstWhere((String line) => line.contains('Android emulator version'), orElse: () => '');
 
     if (versionLine.isNotEmpty) {
       final RegExp regex = RegExp(r'Android emulator version\s+(.*)');
