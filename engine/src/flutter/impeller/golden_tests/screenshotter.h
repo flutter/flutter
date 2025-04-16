@@ -20,7 +20,8 @@ class Screenshotter {
 
   virtual std::unique_ptr<Screenshot> MakeScreenshot(
       AiksContext& aiks_context,
-      const std::shared_ptr<Texture> texture) = 0;
+      const std::shared_ptr<Texture> texture,
+      Point scale) = 0;
 
   virtual PlaygroundImpl& GetPlayground() = 0;
 };
