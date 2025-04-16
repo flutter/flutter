@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
@@ -2115,6 +2116,8 @@ class CupertinoDialogAction extends StatefulWidget {
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     this.textStyle,
+    this.focusNode,
+    this.focusColor,
     required this.child,
   });
 
@@ -2149,6 +2152,17 @@ class CupertinoDialogAction extends StatefulWidget {
   /// [_kCupertinoDialogActionStyle].
   final TextStyle? textStyle;
 
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// The color of the background that highlights active focus.
+  ///
+  /// A transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
+  /// [kCupertinoButtonTintedOpacityDark] (dark mode) is automatically applied to this color.
+  ///
+  /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue].
+  final Color? focusColor;
+
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget.
@@ -2161,6 +2175,12 @@ class CupertinoDialogAction extends StatefulWidget {
 class _CupertinoDialogActionState extends State<CupertinoDialogAction> implements _SlideTarget {
   // The button is enabled when it has [onPressed].
   bool get enabled => widget.onPressed != null;
+
+  bool _isFocused = false;
+
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
+  };
 
   // |_SlideTarget|
   @override
@@ -2177,6 +2197,28 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
   void didConfirm() {
     widget.onPressed?.call();
   }
+
+  void _handleTap([Intent? _]) {
+    if (widget.onPressed case final VoidCallback onPressed?) {
+      onPressed();
+      context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+    }
+  }
+
+  void _onShowFocusHighlight(bool showHighlight) {
+    setState(() {
+      _isFocused = showHighlight;
+    });
+  }
+
+  Color get effectiveFocusBackgroundColor =>
+      HSLColor.fromColor(
+        (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
+          CupertinoTheme.brightnessOf(context) == Brightness.light
+              ? kCupertinoButtonTintedOpacityLight
+              : kCupertinoButtonTintedOpacityDark,
+        ),
+      ).toColor();
 
   // Dialog action content shrinks to fit, up to a certain point, and if it still
   // cannot fit at the minimum size, the text content is ellipsized.
@@ -2202,15 +2244,21 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
       fit: BoxFit.scaleDown,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: fontSizeRatio * (dialogWidth - (2 * padding))),
-        child: Semantics(
-          button: true,
-          onTap: widget.onPressed,
-          child: DefaultTextStyle(
-            style: textStyle,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            child: content,
+        child: FocusableActionDetector(
+          actions: _actionMap,
+          focusNode: widget.focusNode,
+          enabled: enabled,
+          onShowFocusHighlight: _onShowFocusHighlight,
+          child: Semantics(
+            button: true,
+            onTap: widget.onPressed,
+            child: DefaultTextStyle(
+              style: textStyle,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              child: content,
+            ),
           ),
         ),
       ),
@@ -2275,7 +2323,10 @@ class _CupertinoDialogActionState extends State<CupertinoDialogAction> implement
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: _kDialogMinButtonHeight),
-          child: Padding(padding: EdgeInsets.all(padding), child: Center(child: sizedContent)),
+          child: DecoratedBox(
+            decoration: BoxDecoration(color: _isFocused ? effectiveFocusBackgroundColor : null),
+            child: Padding(padding: EdgeInsets.all(padding), child: Center(child: sizedContent)),
+          ),
         ),
       ),
     );
