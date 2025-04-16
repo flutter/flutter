@@ -708,6 +708,57 @@ dependencies {
       }
     });
 
+    FakeCommand createKgpVersionCommand(String kgpV) {
+      return FakeCommand(
+        command: const <String>['./gradlew', 'kgpVersion', '-q'],
+        stdout: '''
+    KGP Version: $kgpV
+    ''',
+      );
+    }
+
+    testWithoutContext('returns the KGP fetched from kgpVersion gradle task', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      // Three numbered versions.
+      const String kgpV2 = '1.8.22';
+      final FakeProcessManager processManager2 = FakeProcessManager.list(<FakeCommand>[
+        createKgpVersionCommand(kgpV2),
+      ]);
+      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager2), kgpV2);
+      // 2 numbered versions
+      const String kgpV3 = '1.9';
+      final FakeProcessManager processManager3 = FakeProcessManager.list(<FakeCommand>[
+        createKgpVersionCommand(kgpV3),
+      ]);
+      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager3), kgpV3);
+      final FakeProcessManager processManagerNoGradle = FakeProcessManager.empty();
+      processManagerNoGradle.excludedExecutables = <String>{'./gradlew'};
+      expect(
+        await getKgpVersion(androidDirectory, BufferLogger.test(), processManagerNoGradle),
+        null,
+      );
+    });
+
+    testWithoutContext('returns the KGP version when in Kotlin settings as plugin', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')..createSync();
+      // File must exist and cannot have kgp defined.
+      androidDirectory.childFile('build.gradle.kts').writeAsStringSync(r'');
+      androidDirectory.childFile('settings.gradle.kts').writeAsStringSync(r'''
+pluginManagement {
+  plugins {
+      id("dev.flutter.flutter-plugin-loader") version "1.0.0"
+      // Decoy value to ensure we ignore commented out lines.
+      // id("org.jetbrains.kotlin.android") version "6.1.0" apply false
+      id("org.jetbrains.kotlin.android") version "1.8.22" apply false
+  }
+}
+''');
+      final FakeProcessManager processManager = FakeProcessManager.empty();
+      processManager.excludedExecutables = <String>{'./gradlew'};
+
+      expect(await getKgpVersion(androidDirectory, BufferLogger.test(), processManager), '1.8.22');
+    });
+
     group('validates kgp/gradle versions', () {
       final List<GradleKgpTestData> testData = <GradleKgpTestData>[
         // Values too new.

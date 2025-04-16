@@ -405,15 +405,19 @@ Future<String?> getKgpVersion(
   logger.printTrace('Checking settings for kgp version.');
   final File settingsFile = androidDirectory.childFile('settings.gradle.kts');
 
-  final String settingsFileContent = settingsFile.readAsStringSync();
-  final RegExpMatch? settingsMatch = _kotlinGradlePluginRegExpFromId.firstMatch(
-    settingsFileContent,
-  );
+  if (settingsFile.existsSync()) {
+    final String settingsFileContent = settingsFile.readAsStringSync();
+    final RegExpMatch? settingsMatch = _kotlinGradlePluginRegExpFromId.firstMatch(
+      settingsFileContent,
+    );
 
-  if (settingsMatch != null) {
-    final String? kgpVersion = settingsMatch.namedGroup(_versionGroupName);
-    logger.printTrace('$settingsFile provides KGP version: $kgpVersion');
-    return kgpVersion;
+    if (settingsMatch != null) {
+      final String? kgpVersion = settingsMatch.namedGroup(_versionGroupName);
+      logger.printTrace('$settingsFile provides KGP version: $kgpVersion');
+      return kgpVersion;
+    }
+  } else {
+    logger.printTrace('No settings.gradle.kts');
   }
 
   return null;
