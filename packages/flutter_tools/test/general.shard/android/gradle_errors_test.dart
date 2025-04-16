@@ -1572,7 +1572,7 @@ Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJav
 
   testUsingContext(
     'Missing NDK source.properties file',
-        () async {
+    () async {
       const String unixErrorExample = r'''
 * What went wrong:
 A problem occurred configuring project ':app'.
