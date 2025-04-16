@@ -214,12 +214,22 @@ class _PredictiveBackGestureDetectorState extends State<_PredictiveBackGestureDe
 
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) {
+    if (widget.route.isCurrent) {
+      print(
+        'justin handlestart for the current route. phase = $phase. popGestureEnabled = ${widget.route.popGestureEnabled}).',
+      );
+    }
     phase = _PredictiveBackPhase.start;
 
+    /*
+    if (widget.route.isCurrent && !(widget.route.secondaryAnimation?.isDismissed ?? true)) {
+      print('justin stop it.');
+      //widget.route.navigator?.didStopUserGesture();
+      widget.route.animation;
+    }
+    */
+
     final bool gestureInProgress = !backEvent.isButtonEvent && _isEnabled;
-    print(
-      'justin handlestart. isEnabled = ($_isEnabled == ${widget.route.isCurrent} && ${widget.route.popGestureEnabled}).',
-    );
     if (!gestureInProgress) {
       return false;
     }
