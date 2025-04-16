@@ -1128,35 +1128,6 @@ void main() {
 
   group('Web does not accept shortcuts if focus under EditableText', () {
     testWidgets(
-      'character modifier + arrowDown',
-      (WidgetTester tester) async {
-        tester.binding.testTextInput.unregister();
-        addTearDown(() {
-          tester.binding.testTextInput.register();
-        });
-        final FocusNode editable = FocusNode();
-        addTearDown(editable.dispose);
-        final FocusNode spy = FocusNode();
-        addTearDown(spy.dispose);
-        await tester.pumpWidget(
-          buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
-        );
-        editable.requestFocus();
-        await tester.pump();
-        final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
-
-        await sendKeyCombination(
-          tester,
-          const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true),
-        );
-        await tester.pump();
-
-        expect(state.lastIntent, isNull);
-      },
-      skip: !kIsWeb, // [intended] Web only.
-    );
-
-    testWidgets(
       'character modifier + arrowLeft',
       (WidgetTester tester) async {
         tester.binding.testTextInput.unregister();
@@ -1235,6 +1206,35 @@ void main() {
         await sendKeyCombination(
           tester,
           const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+        );
+        await tester.pump();
+
+        expect(state.lastIntent, isNull);
+      },
+      skip: !kIsWeb, // [intended] Web only.
+    );
+
+    testWidgets(
+      'character modifier + arrowDown',
+      (WidgetTester tester) async {
+        tester.binding.testTextInput.unregister();
+        addTearDown(() {
+          tester.binding.testTextInput.register();
+        });
+        final FocusNode editable = FocusNode();
+        addTearDown(editable.dispose);
+        final FocusNode spy = FocusNode();
+        addTearDown(spy.dispose);
+        await tester.pumpWidget(
+          buildSpyAboveEditableText(editableFocusNode: editable, spyFocusNode: spy),
+        );
+        editable.requestFocus();
+        await tester.pump();
+        final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+        await sendKeyCombination(
+          tester,
+          const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true),
         );
         await tester.pump();
 
