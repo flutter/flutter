@@ -1645,14 +1645,14 @@ void main() {
     expect(backPressed, true);
   });
 
-  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgets('Contents except large title do not text scale', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Builder(
           builder: (BuildContext context) {
             return MediaQuery.withClampedTextScaling(
-              minScaleFactor: 99,
-              maxScaleFactor: 99,
+              minScaleFactor: 9.0,
+              maxScaleFactor: 9.0,
               child: const CupertinoPageScaffold(
                 child: CustomScrollView(
                   slivers: <Widget>[
@@ -1686,13 +1686,20 @@ void main() {
     expect(barItems.length, greaterThan(0));
     expect(
       barItems,
-      isNot(contains(predicate((RichText t) => t.textScaler != TextScaler.noScaling))),
+      isNot(
+        contains(
+          predicate(
+            (RichText t) =>
+                t.textScaler != TextScaler.noScaling && t.text.toPlainText() != 'Large Title',
+          ),
+        ),
+      ),
     );
 
     expect(contents.length, greaterThan(0));
     expect(
       contents,
-      isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(99.0)))),
+      isNot(contains(predicate((RichText t) => t.textScaler != const TextScaler.linear(9.0)))),
     );
 
     // Also works with implicitly added widgets.
@@ -1728,7 +1735,82 @@ void main() {
     );
 
     expect(barItems2.length, greaterThan(0));
-    expect(barItems2.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(
+      barItems2.any(
+        (RichText t) =>
+            t.textScaleFactor != 1 &&
+            t.text.toPlainText() != 'title' &&
+            t.text.toPlainText() != 'Large Title',
+      ),
+      isFalse,
+    );
+  });
+
+  testWidgets('Large title and search field contents text scale', (WidgetTester tester) async {
+    const double scaleFactor = 4.0;
+    const double iconSize = 10.0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.withClampedTextScaling(
+              minScaleFactor: scaleFactor,
+              maxScaleFactor: scaleFactor,
+              child: const CupertinoPageScaffold(
+                child: CustomScrollView(
+                  slivers: <Widget>[
+                    CupertinoSliverNavigationBar.search(
+                      largeTitle: Text('Large Title'),
+                      searchField: CupertinoSearchTextField(
+                        placeholder: 'Search',
+                        prefixIcon: Icon(CupertinoIcons.add),
+                        suffixIcon: Icon(CupertinoIcons.xmark),
+                        suffixMode: OverlayVisibilityMode.always,
+                        itemSize: iconSize,
+                      ),
+                    ),
+                    SliverFillRemaining(),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final Iterable<RichText> barItems = tester.widgetList<RichText>(
+      find.descendant(
+        of: find.byType(CupertinoSliverNavigationBar),
+        matching: find.byType(RichText),
+      ),
+    );
+
+    expect(barItems.length, greaterThan(0));
+    expect(
+      barItems.any(
+        (RichText t) =>
+            t.text.toPlainText() == 'Large Title' &&
+            t.textScaler == const TextScaler.linear(scaleFactor),
+      ),
+      isTrue,
+    );
+    expect(
+      barItems.any(
+        (RichText t) =>
+            t.text.toPlainText() == 'Search' &&
+            t.textScaler == const TextScaler.linear(scaleFactor),
+      ),
+      isTrue,
+    );
+    expect(
+      tester.getSize(find.byIcon(CupertinoIcons.add)),
+      const Size.square(scaleFactor * iconSize),
+    );
+    expect(
+      tester.getSize(find.byIcon(CupertinoIcons.xmark)),
+      const Size.square(scaleFactor * iconSize),
+    );
   });
 
   testWidgets(
