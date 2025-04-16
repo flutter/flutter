@@ -19,11 +19,10 @@ class RenderPass;
 
 /// Represents a renderable object within the Impeller scene.
 ///
-/// An Entity combines geometry or graphical content (`Contents`) with
-/// properties like transformation (`Matrix`), blend mode (`BlendMode`), and
-/// stencil clip depth. It serves as the primary unit for constructing and
-/// rendering scenes. Entities can be created directly or from `Snapshot`
-/// objects.
+/// An Entity combines graphical content (`Contents`) with properties
+/// like transformation (`Matrix`), blend mode (`BlendMode`), and stencil
+/// clip depth. It serves as the primary unit for constructing and rendering
+/// scenes. Entities can be created directly or from `Snapshot` objects.
 class Entity {
  public:
   static constexpr BlendMode kLastPipelineBlendMode = BlendMode::kModulate;
