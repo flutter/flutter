@@ -876,7 +876,7 @@ class FlutterPluginUtilsTest {
         verify(exactly = 1) {
             project.logger.quiet(
                 "Project does not support Flutter build mode: debug, " +
-                    "skipping adding flutter dependencies"
+                    "skipping adding Flutter dependencies"
             )
         }
     }
