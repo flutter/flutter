@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
@@ -4134,6 +4136,103 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/164905.
+  testWidgets('ensure exclude semantics for trailing button', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 5,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isReadOnly,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.focus],
+                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 6,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasSelectedState,
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('restorationId is passed to inner TextField', (WidgetTester tester) async {
+    const String restorationId = 'dropdown_menu';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            requestFocusOnTap: true,
+            restorationId: restorationId,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(TextField), findsOne);
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.restorationId, restorationId);
   });
 }
 

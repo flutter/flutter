@@ -517,8 +517,16 @@ object FlutterPluginUtils {
                 getCompileSdkFromProject(project).toIntOrNull() ?: Int.MAX_VALUE
 
             var maxPluginCompileSdkVersion = projectCompileSdkVersion
-            val projectNdkVersion =
-                getAndroidExtension(project).ndkVersion
+            // TODO(gmackall): This should be updated to reflect newer templates.
+            // The default for AGP 4.1.0 used in old templates.
+            val ndkVersionIfUnspecified = "21.1.6352462"
+
+            // TODO(gmackall): We can remove this elvis when our minimum AGP is >= 8.2.
+            //  This value (ndkVersion) is nullable on AGP versions below that.
+            //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
+            @Suppress("USELESS_ELVIS")
+            val projectNdkVersion: String =
+                getAndroidExtension(project).ndkVersion ?: ndkVersionIfUnspecified
             var maxPluginNdkVersion = projectNdkVersion
             var numProcessedPlugins = pluginList.size
             val pluginsWithHigherSdkVersion = mutableListOf<PluginVersionPair>()
@@ -543,8 +551,13 @@ object FlutterPluginUtils {
                             )
                         )
                     }
+
+                    // TODO(gmackall): We can remove this elvis when our minimum AGP is >= 8.2.
+                    //  This value (ndkVersion) is nullable on AGP versions below that.
+                    //  See https://developer.android.com/reference/tools/gradle-api/8.1/com/android/build/api/dsl/CommonExtension#ndkVersion().
+                    @Suppress("USELESS_ELVIS")
                     val pluginNdkVersion: String =
-                        getAndroidExtension(pluginProject).ndkVersion
+                        getAndroidExtension(pluginProject).ndkVersion ?: ndkVersionIfUnspecified
                     maxPluginNdkVersion =
                         VersionUtils.mostRecentSemanticVersion(
                             pluginNdkVersion,
@@ -628,8 +641,13 @@ object FlutterPluginUtils {
         // CMake will print warnings when you try to build an empty project.
         // These arguments silence the warnings - our project is intentionally
         // empty.
-        gradleProjectAndroidExtension.defaultConfig.externalNativeBuild.cmake
-            .arguments("-Wno-dev", "--no-warn-unused-cli")
+        gradleProjectAndroidExtension.buildTypes.forEach { buildType ->
+            buildType.externalNativeBuild.cmake.arguments(
+                "-Wno-dev",
+                "--no-warn-unused-cli",
+                "-DCMAKE_BUILD_TYPE=${buildType.name}"
+            )
+        }
     }
 
     @JvmStatic
@@ -826,7 +844,9 @@ object FlutterPluginUtils {
         //    https://github.com/flutter/flutter/issues/166550
         @Suppress("DEPRECATION")
         val manifest: Node =
-            groovy.xml.XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
+            groovy.xml
+                .XmlParser(false, false)
+                .parse(findProcessResources(baseVariantOutput).manifestFile)
         val applicationNode: Node? =
             manifest.children().find { node ->
                 node is Node && node.name() == "application"
