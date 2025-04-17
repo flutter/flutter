@@ -18,10 +18,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/src/material/button_style.dart';
+import 'package:flutter/src/material/theme_data.dart';
 
 import 'arc.dart';
 import 'colors.dart';
-import 'floating_action_button.dart';
 import 'icon_button.dart';
 import 'icons.dart';
 import 'material_localizations.dart';
@@ -903,12 +904,15 @@ class MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
-  static const double _moveExitWidgetSelectionIconSize = 32;
-  static const double _moveExitWidgetSelectionTargetSize = 40;
+  static const double _selectionButtonsSize = 32.0;
+  static const double _selectionButtonsIconSize = 18.0;
 
   late HeroController _heroController;
 
   bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
+
+  BoxConstraints get _selectionButtonsConstraints =>
+      const BoxConstraints.tightFor(width: _selectionButtonsSize, height: _selectionButtonsSize);
 
   @override
   void initState() {
@@ -940,13 +944,24 @@ class _MaterialAppState extends State<MaterialApp> {
     required VoidCallback onPressed,
     required GlobalKey key,
   }) {
-    return FloatingActionButton(
+    return _selectionButtonBuilder(
+      context,
       key: key,
       onPressed: onPressed,
-      mini: true,
-      backgroundColor: _widgetSelectionButtonsBackgroundColor(context),
-      foregroundColor: _widgetSelectionButtonsForegroundColor(context),
-      child: const Icon(Icons.close, semanticLabel: 'Exit Select Widget mode.'),
+      icon: const Icon(Icons.close),
+    );
+  }
+
+  Widget _tapBehaviorButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required GlobalKey key,
+  }) {
+    return _selectionButtonBuilder(
+      context,
+      key: key,
+      onPressed: onPressed,
+      icon: const Icon(Icons.ads_click),
     );
   }
 
@@ -955,20 +970,49 @@ class _MaterialAppState extends State<MaterialApp> {
     required VoidCallback onPressed,
     bool isLeftAligned = true,
   }) {
-    return IconButton(
-      color: _widgetSelectionButtonsBackgroundColor(context),
-      padding: EdgeInsets.zero,
-      iconSize: _moveExitWidgetSelectionIconSize,
+    return _selectionButtonBuilder(
+      context,
       onPressed: onPressed,
-      constraints: const BoxConstraints(
-        minWidth: _moveExitWidgetSelectionTargetSize,
-        minHeight: _moveExitWidgetSelectionTargetSize,
+      iconSize: _selectionButtonsSize,
+      backgroundColor: Colors.transparent,
+      foregroundColor: _widgetSelectionButtonsBackgroundColor(context),
+      icon: Icon(isLeftAligned ? Icons.arrow_right : Icons.arrow_left),
+    );
+  }
+
+  Widget _selectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required Icon icon,
+    GlobalKey? key,
+    Color? backgroundColor,
+    Color? foregroundColor,
+    double? iconSize,
+  }) {
+    return IconButton(
+      key: key,
+      onPressed: onPressed,
+      iconSize: iconSize ?? _selectionButtonsIconSize,
+      padding: EdgeInsets.zero,
+      constraints: _selectionButtonsConstraints,
+      style: _selectionButtonsIconStyle(
+        context,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
       ),
-      icon: Icon(
-        isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
-        semanticLabel:
-            'Move "Exit Select Widget mode" button to the ${isLeftAligned ? 'right' : 'left'}.',
-      ),
+      icon: icon,
+    );
+  }
+
+    ButtonStyle _selectionButtonsIconStyle(
+    BuildContext context, {
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) {
+    return IconButton.styleFrom(
+      backgroundColor: backgroundColor ?? _widgetSelectionButtonsBackgroundColor(context),
+      foregroundColor: foregroundColor ?? _widgetSelectionButtonsForegroundColor(context),
+      tapTargetSize: MaterialTapTargetSize.padded,
     );
   }
 
@@ -1100,6 +1144,7 @@ class _MaterialAppState extends State<MaterialApp> {
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
         moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+        tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -1135,6 +1180,7 @@ class _MaterialAppState extends State<MaterialApp> {
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
       moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+      tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,

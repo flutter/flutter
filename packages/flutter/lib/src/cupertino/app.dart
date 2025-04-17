@@ -568,6 +568,24 @@ class _CupertinoAppState extends State<CupertinoApp> {
     );
   }
 
+    Widget _tapBehaviorButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required GlobalKey key,
+  }) {
+    return CupertinoButton(
+      color: _widgetSelectionButtonsBackgroundColor(context),
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+      child: Icon(
+        CupertinoIcons.search,
+        size: 28.0,
+        color: _widgetSelectionButtonsForegroundColor(context),
+        semanticLabel: 'Enable tap behavior.',
+      ),
+    );
+  }
+
   Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
     return CupertinoTheme.of(context).primaryContrastingColor;
   }
@@ -607,6 +625,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
         exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
         moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+        tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
         shortcuts: widget.shortcuts,
         actions: widget.actions,
         restorationScopeId: widget.restorationScopeId,
@@ -642,6 +661,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
       exitWidgetSelectionButtonBuilder: _exitWidgetSelectionButtonBuilder,
       moveExitWidgetSelectionButtonBuilder: _moveExitWidgetSelectionButtonBuilder,
+      tapBehaviorButtonBuilder: _tapBehaviorButtonBuilder,
       shortcuts: widget.shortcuts,
       actions: widget.actions,
       restorationScopeId: widget.restorationScopeId,

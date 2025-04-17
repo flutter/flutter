@@ -353,6 +353,7 @@ class WidgetsApp extends StatefulWidget {
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
+    this.tapBehaviorButtonBuilder,
     this.exitWidgetSelectionButtonBuilder,
     this.moveExitWidgetSelectionButtonBuilder,
     this.shortcuts,
@@ -446,6 +447,7 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowCheckedModeBanner = true,
     this.exitWidgetSelectionButtonBuilder,
     this.moveExitWidgetSelectionButtonBuilder,
+    this.tapBehaviorButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -1053,6 +1055,8 @@ class WidgetsApp extends StatefulWidget {
   /// alignment without requiring [WidgetInspector] to depend on the Material
   /// package.
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
+
+  final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   /// Turns on a little "DEBUG" banner in debug mode to indicate
@@ -1822,6 +1826,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
           if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(
+              tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
               exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder,
               moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
               child: child!,
