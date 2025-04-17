@@ -27,39 +27,22 @@ class LabeledRadio extends StatelessWidget {
     super.key,
     required this.label,
     required this.padding,
-    required this.groupValue,
     required this.value,
-    required this.onChanged,
+    required this.onInkWellTap,
   });
 
   final String label;
   final EdgeInsets padding;
-  final bool groupValue;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final VoidCallback onInkWellTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        if (value != groupValue) {
-          onChanged(value);
-        }
-      },
+      onTap: onInkWellTap,
       child: Padding(
         padding: padding,
-        child: Row(
-          children: <Widget>[
-            Radio<bool>(
-              groupValue: groupValue,
-              value: value,
-              onChanged: (bool? newValue) {
-                onChanged(newValue!);
-              },
-            ),
-            Text(label),
-          ],
-        ),
+        child: Row(children: <Widget>[Radio<bool>(value: value), Text(label)]),
       ),
     );
   }
@@ -78,32 +61,42 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <LabeledRadio>[
-          LabeledRadio(
-            label: 'This is the first label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: true,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isRadioSelected = newValue;
-              });
-            },
-          ),
-          LabeledRadio(
-            label: 'This is the second label text',
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            value: false,
-            groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
-              setState(() {
-                _isRadioSelected = newValue;
-              });
-            },
-          ),
-        ],
+      body: RadioGroup<bool>(
+        groupValue: _isRadioSelected,
+        onChanged: (bool? newValue) {
+          setState(() {
+            _isRadioSelected = newValue!;
+          });
+        },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <LabeledRadio>[
+            LabeledRadio(
+              label: 'This is the first label text',
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              value: true,
+              onInkWellTap: () {
+                if (!_isRadioSelected) {
+                  setState(() {
+                    _isRadioSelected = true;
+                  });
+                }
+              },
+            ),
+            LabeledRadio(
+              label: 'This is the second label text',
+              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              value: false,
+              onInkWellTap: () {
+                if (_isRadioSelected) {
+                  setState(() {
+                    _isRadioSelected = false;
+                  });
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
