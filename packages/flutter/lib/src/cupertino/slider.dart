@@ -15,6 +15,12 @@ import 'colors.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
 
+// Value that determines what is considered a large delta when the user is
+// dragging the slider. Must be in range [0.0, 1.0].
+//
+// Eyeballed value from a native iOS slider.
+const double _kLargeDeltaThreshold = 0.05;
+
 // Examples can assume:
 // int _cupertinoSliderValue = 1;
 // void setState(VoidCallback fn) { }
@@ -218,9 +224,19 @@ class CupertinoSlider extends StatefulWidget {
 }
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
-  void _handleChanged(double value) {
+  // Initially true to ensure that starting drag at the edge will not emit haptic feedback.
+  bool _lastValueWasAtEdge = true;
+
+  void _handleChanged(double value, bool isLargeDelta) {
     assert(widget.onChanged != null);
     final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
+
+    final bool isAtEdge = lerpValue == widget.max || lerpValue == widget.min;
+    if (isAtEdge && !_lastValueWasAtEdge) {
+      _emitHapticFeedback(isLargeDelta);
+    }
+    _lastValueWasAtEdge = isAtEdge;
+
     if (lerpValue != widget.value) {
       widget.onChanged!(lerpValue);
     }
@@ -234,6 +250,23 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
   void _handleDragEnd(double value) {
     assert(widget.onChangeEnd != null);
     widget.onChangeEnd!(lerpDouble(widget.min, widget.max, value)!);
+  }
+
+  void _emitHapticFeedback(bool isLargeDelta) {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        if (isLargeDelta) {
+          HapticFeedback.mediumImpact();
+        } else {
+          HapticFeedback.selectionClick();
+        }
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+        break;
+    }
   }
 
   @override
@@ -270,7 +303,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int? divisions;
   final Color activeColor;
   final Color thumbColor;
-  final ValueChanged<double>? onChanged;
+  final void Function(double, bool)? onChanged;
   final ValueChanged<double>? onChangeStart;
   final ValueChanged<double>? onChangeEnd;
   final TickerProvider vsync;
@@ -325,7 +358,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     required Color activeColor,
     required Color thumbColor,
     required Color trackColor,
-    ValueChanged<double>? onChanged,
+    void Function(double, bool)? onChanged,
     this.onChangeStart,
     this.onChangeEnd,
     required TickerProvider vsync,
@@ -414,9 +447,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     markNeedsPaint();
   }
 
-  ValueChanged<double>? get onChanged => _onChanged;
-  ValueChanged<double>? _onChanged;
-  set onChanged(ValueChanged<double>? value) {
+  void Function(double, bool)? get onChanged => _onChanged;
+  void Function(double, bool)? _onChanged;
+  set onChanged(void Function(double, bool)? value) {
     if (value == _onChanged) {
       return;
     }
@@ -482,7 +515,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
         TextDirection.rtl => -valueDelta,
         TextDirection.ltr => valueDelta,
       };
-      onChanged!(_discretizedCurrentDragValue);
+
+      final bool isLargeDelta = valueDelta.abs() > _kLargeDeltaThreshold;
+      onChanged!(_discretizedCurrentDragValue, isLargeDelta);
     }
   }
 
@@ -492,7 +527,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     if (isInteractive) {
       onChangeStart?.call(_discretizedCurrentDragValue);
       _currentDragValue = _value;
-      onChanged!(_discretizedCurrentDragValue);
+      onChanged!(_discretizedCurrentDragValue, false);
     }
   }
 
@@ -574,13 +609,13 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   void _increaseAction() {
     if (isInteractive) {
-      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0));
+      onChanged!(clampDouble(value + _semanticActionUnit, 0.0, 1.0), false);
     }
   }
 
   void _decreaseAction() {
     if (isInteractive) {
-      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0));
+      onChanged!(clampDouble(value - _semanticActionUnit, 0.0, 1.0), false);
     }
   }
 
