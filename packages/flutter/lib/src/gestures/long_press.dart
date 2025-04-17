@@ -175,7 +175,7 @@ class LongPressStartDetails with Diagnosticable implements PositionedGestureDeta
 ///  * [LongPressStartDetails], the details for [GestureLongPressStartCallback].
 class LongPressMoveUpdateDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates the details for a [GestureLongPressMoveUpdateCallback].
-  LongPressMoveUpdateDetails({
+  const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,

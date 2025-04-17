@@ -908,7 +908,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
               focalPointDelta: -localDelta,
             ),
           );
-          widget.onInteractionEnd?.call(const ScaleEndDetails());
+          widget.onInteractionEnd?.call(ScaleEndDetails());
           return;
         }
 
@@ -927,7 +927,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
             focalPointDelta: -localDelta,
           ),
         );
-        widget.onInteractionEnd?.call(const ScaleEndDetails());
+        widget.onInteractionEnd?.call(ScaleEndDetails());
         return;
       }
       // Ignore left and right mouse wheel scroll.
@@ -946,7 +946,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       widget.onInteractionUpdate?.call(
         ScaleUpdateDetails(focalPoint: global, localFocalPoint: local, scale: scaleChange),
       );
-      widget.onInteractionEnd?.call(const ScaleEndDetails());
+      widget.onInteractionEnd?.call(ScaleEndDetails());
       return;
     }
 
@@ -964,7 +964,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
     widget.onInteractionUpdate?.call(
       ScaleUpdateDetails(focalPoint: global, localFocalPoint: local, scale: scaleChange),
     );
-    widget.onInteractionEnd?.call(const ScaleEndDetails());
+    widget.onInteractionEnd?.call(ScaleEndDetails());
   }
 
   void _handleInertiaAnimation() {

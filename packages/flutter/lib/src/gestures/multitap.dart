@@ -688,7 +688,7 @@ class SerialTapCancelDetails with Diagnosticable {
   /// Creates details for a [GestureSerialTapCancelCallback].
   ///
   /// The `count` argument must be greater than zero.
-  const SerialTapCancelDetails({this.count = 1}) : assert(count > 0);
+  SerialTapCancelDetails({this.count = 1}) : assert(count > 0);
 
   /// The number of consecutive taps that were in progress when the gesture was
   /// interrupted.

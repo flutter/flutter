@@ -271,7 +271,7 @@ class ScaleUpdateDetails with Diagnosticable {
 /// Details for [GestureScaleEndCallback].
 class ScaleEndDetails with Diagnosticable {
   /// Creates details for [GestureScaleEndCallback].
-  const ScaleEndDetails({
+  ScaleEndDetails({
     this.velocity = Velocity.zero,
     this.scaleVelocity = 0,
     this.pointerCount = 0,
