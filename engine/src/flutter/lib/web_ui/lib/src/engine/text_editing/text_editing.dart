@@ -171,6 +171,8 @@ void _insertEditingElementInView(DomElement element, int viewId) {
     'Could not find View with id $viewId. This should never happen, please file a bug!',
   );
   final host = view!.dom.textEditingHost;
+  // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
+  // harmless, but it actually causes focus changes that could break things.
   if (!host.contains(element)) {
     host.append(element);
   }
@@ -366,6 +368,8 @@ class EngineAutofillForm {
       mainTextEditingElement.style.pointerEvents = 'all';
     }
 
+    // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
+    // harmless, but it actually causes focus changes that could break things.
     if (!formElement.contains(mainTextEditingElement)) {
       formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
     }
