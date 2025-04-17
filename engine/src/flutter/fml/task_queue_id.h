@@ -25,6 +25,8 @@ class TaskQueueId {
   /// Intializes a task queue with the given value as it's ID.
   explicit TaskQueueId(size_t value) : value_(value) {}
 
+  static TaskQueueId Invalid() { return TaskQueueId(kInvalid); }
+
   operator size_t() const {  // NOLINT(google-explicit-constructor)
     return value_;
   }

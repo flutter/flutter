@@ -666,11 +666,15 @@ int main(int argc, char* argv[]) {
   };
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
+    fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
+    fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key,
+                                                               callback);
+    return queue_id;
   };
 
-  settings.task_observer_remove = [](intptr_t key) {
-    fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
+  settings.task_observer_remove = [](fml::TaskQueueId queue_id, intptr_t key) {
+    fml::MessageLoopTaskQueues::GetInstance()->RemoveTaskObserver(queue_id,
+                                                                  key);
   };
 
   settings.unhandled_exception_callback = [](const std::string& error,
