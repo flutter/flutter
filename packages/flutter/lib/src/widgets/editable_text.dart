@@ -5491,6 +5491,15 @@ class EditableTextState extends State<EditableText>
         ignoreNonCollapsedSelection: false,
       ),
     ),
+    HorizontalExtendSelectionByCharacterIntent: _makeOverridable(
+      _UpdateHorizontalTextSelectionAction(
+        this,
+        _characterBoundary,
+        _moveBeyondTextBoundary,
+        ignoreNonCollapsedSelection: false,
+        textDirection: widget.textDirection ?? Directionality.of(context),
+      ),
+    ),
     ExtendSelectionByPageIntent: _makeOverridable(
       CallbackAction<ExtendSelectionByPageIntent>(onInvoke: _extendSelectionByPage),
     ),
@@ -6435,6 +6444,25 @@ class _UpdateTextSelectionAction<T extends DirectionalCaretMovementIntent>
 
   @override
   bool get isActionEnabled => state._value.selection.isValid;
+}
+
+class _UpdateHorizontalTextSelectionAction extends _UpdateTextSelectionAction<HorizontalExtendSelectionByCharacterIntent>{
+  _UpdateHorizontalTextSelectionAction(
+    super.state,
+    super.getTextBoundary,
+    super.applyTextBoundary, {
+    required this.textDirection,
+    required super.ignoreNonCollapsedSelection,
+    // super.isExpand,
+    // super.extentAtIndex,
+  });
+
+  final TextDirection textDirection;
+
+  @override
+  Object? invoke(HorizontalExtendSelectionByCharacterIntent intent, [BuildContext? context]) {
+    return super.invoke(intent.withTextDirection(textDirection), context);
+  }
 }
 
 class _UpdateTextSelectionVerticallyAction<T extends DirectionalCaretMovementIntent>

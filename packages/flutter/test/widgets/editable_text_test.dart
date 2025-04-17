@@ -12070,9 +12070,9 @@ void main() {
       affinity: TextAffinity.upstream,
     );
     bool myIntentWasCalled = false;
-    final CallbackAction<ExtendSelectionByCharacterIntent> overrideAction =
-        CallbackAction<ExtendSelectionByCharacterIntent>(
-          onInvoke: (ExtendSelectionByCharacterIntent intent) {
+    final CallbackAction<HorizontalExtendSelectionByCharacterIntent> overrideAction =
+        CallbackAction<HorizontalExtendSelectionByCharacterIntent>(
+          onInvoke: (HorizontalExtendSelectionByCharacterIntent intent) {
             myIntentWasCalled = true;
             return null;
           },
@@ -12084,7 +12084,9 @@ void main() {
           child: SizedBox(
             width: 400,
             child: Actions(
-              actions: <Type, Action<Intent>>{ExtendSelectionByCharacterIntent: overrideAction},
+              actions: <Type, Action<Intent>>{
+                HorizontalExtendSelectionByCharacterIntent: overrideAction,
+              },
               child: EditableText(
                 maxLines: 10,
                 controller: controller,
@@ -12205,12 +12207,13 @@ void main() {
             width: 400,
             child: Actions(
               actions: <Type, Action<Intent>>{
-                ExtendSelectionByCharacterIntent: CallbackAction<ExtendSelectionByCharacterIntent>(
-                  onInvoke: (ExtendSelectionByCharacterIntent intent) {
-                    myIntentWasCalled = true;
-                    return null;
-                  },
-                ),
+                HorizontalExtendSelectionByCharacterIntent:
+                    CallbackAction<HorizontalExtendSelectionByCharacterIntent>(
+                      onInvoke: (HorizontalExtendSelectionByCharacterIntent intent) {
+                        myIntentWasCalled = true;
+                        return null;
+                      },
+                    ),
               },
               child: EditableText(
                 maxLines: 10,

@@ -1568,8 +1568,14 @@ class _SelectableFragment
           result = _handleSelectParagraph(selectParagraph.globalPosition);
         }
       case SelectionEventType.granularlyExtendSelection:
+        if (event is HorizontalGranularlyExtendSelectionEvent) {
+          event.textDirection = paragraph.textDirection;
+        }
+
         final GranularlyExtendSelectionEvent granularlyExtendSelection =
-            event as GranularlyExtendSelectionEvent;
+            event is HorizontalGranularlyExtendSelectionEvent
+                ? event.withTextDirection(paragraph.textDirection)
+                : event as GranularlyExtendSelectionEvent;
         result = _handleGranularlyExtendSelection(
           granularlyExtendSelection.forward,
           granularlyExtendSelection.isEnd,
