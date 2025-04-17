@@ -167,7 +167,7 @@ class Switch extends StatelessWidget {
     required this.value,
     required this.onChanged,
     @Deprecated(
-      'Use activeThumbColor instead. '
+      'Use activeThumbColor or activeTrackColor  instead. '
       'This feature was deprecated after v3.31.0-2.0.pre.',
     )
     this.activeColor,
@@ -236,7 +236,7 @@ class Switch extends StatelessWidget {
   /// If [thumbColor] returns a non-null color in the [WidgetState.selected]
   /// state, it will be used instead of this color.
   @Deprecated(
-    'Use activeThumbColor instead. '
+    'Use activeThumbColor or activeTrackColor instead. '
     'This feature was deprecated after v3.31.0-2.0.pre.',
   )
   final Color? activeColor;
@@ -618,14 +618,14 @@ class Switch extends StatelessWidget {
     Color? effectiveActiveTrackColor;
     switch (_switchType) {
       case _SwitchType.material:
-        effectiveActiveThumbColor = activeThumbColor ?? activeColor;
+        effectiveActiveThumbColor = activeColor;
       case _SwitchType.adaptive:
         switch (Theme.of(context).platform) {
           case TargetPlatform.android:
           case TargetPlatform.fuchsia:
           case TargetPlatform.linux:
           case TargetPlatform.windows:
-            effectiveActiveThumbColor = activeThumbColor ?? activeColor;
+            effectiveActiveThumbColor = activeColor;
           case TargetPlatform.iOS:
           case TargetPlatform.macOS:
             effectiveActiveTrackColor = activeColor;
@@ -635,7 +635,7 @@ class Switch extends StatelessWidget {
       value: value,
       onChanged: onChanged,
       size: _getSwitchSize(context),
-      activeThumbColor: effectiveActiveThumbColor,
+      activeThumbColor: activeThumbColor ?? effectiveActiveThumbColor,
       activeTrackColor: activeTrackColor ?? effectiveActiveTrackColor,
       inactiveThumbColor: inactiveThumbColor,
       inactiveTrackColor: inactiveTrackColor,

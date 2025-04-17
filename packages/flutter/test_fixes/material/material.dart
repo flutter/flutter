@@ -345,5 +345,4 @@ void main() {
 
   // Changes made in https://github.com/flutter/flutter/pull/166382
   Switch(activeColor: Colors.red, value: false, onChanged: null);
-  Switch.adaptive(activeColor: Colors.red, value: false, onChanged: null);
 }
