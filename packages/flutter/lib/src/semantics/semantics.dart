@@ -16,9 +16,11 @@ import 'dart:ui'
         Rect,
         SemanticsAction,
         SemanticsFlag,
+        SemanticsInputType,
         SemanticsRole,
         SemanticsUpdate,
         SemanticsUpdateBuilder,
+        SemanticsValidationResult,
         StringAttribute,
         TextDirection;
 
@@ -32,7 +34,16 @@ import 'binding.dart' show SemanticsBinding;
 import 'semantics_event.dart';
 
 export 'dart:ui'
-    show Offset, Rect, SemanticsAction, SemanticsFlag, StringAttribute, TextDirection, VoidCallback;
+    show
+        Offset,
+        Rect,
+        SemanticsAction,
+        SemanticsFlag,
+        SemanticsRole,
+        SemanticsValidationResult,
+        StringAttribute,
+        TextDirection,
+        VoidCallback;
 
 export 'package:flutter/foundation.dart'
     show
@@ -110,22 +121,26 @@ sealed class _DebugSemanticsRoleChecks {
     SemanticsRole.tab => _semanticsTab,
     SemanticsRole.tabBar => _semanticsTabBar,
     SemanticsRole.tabPanel => _noCheckRequired,
-    SemanticsRole.table => _noCheckRequired,
+    SemanticsRole.table => _semanticsTable,
     SemanticsRole.cell => _semanticsCell,
+    SemanticsRole.row => _semanticsRow,
     SemanticsRole.columnHeader => _semanticsColumnHeader,
     SemanticsRole.radioGroup => _semanticsRadioGroup,
+    SemanticsRole.menu => _semanticsMenu,
+    SemanticsRole.menuBar => _semanticsMenuBar,
+    SemanticsRole.menuItem => _semanticsMenuItem,
+    SemanticsRole.menuItemCheckbox => _semanticsMenuItemCheckbox,
+    SemanticsRole.menuItemRadio => _semanticsMenuItemRadio,
+    SemanticsRole.alert => _noLiveRegion,
+    SemanticsRole.status => _noLiveRegion,
+    SemanticsRole.list => _noCheckRequired,
+    SemanticsRole.listItem => _semanticsListItem,
     // TODO(chunhtai): add checks when the roles are used in framework.
     // https://github.com/flutter/flutter/issues/159741.
-    SemanticsRole.row => _unimplemented,
     SemanticsRole.searchBox => _unimplemented,
     SemanticsRole.dragHandle => _unimplemented,
     SemanticsRole.spinButton => _unimplemented,
     SemanticsRole.comboBox => _unimplemented,
-    SemanticsRole.menuBar => _unimplemented,
-    SemanticsRole.menu => _unimplemented,
-    SemanticsRole.menuItem => _unimplemented,
-    SemanticsRole.list => _unimplemented,
-    SemanticsRole.listItem => _unimplemented,
     SemanticsRole.form => _unimplemented,
     SemanticsRole.tooltip => _unimplemented,
     SemanticsRole.loadingSpinner => _unimplemented,
@@ -144,10 +159,17 @@ sealed class _DebugSemanticsRoleChecks {
       return FlutterError('A tab needs selected states');
     }
 
-    if (!node.areUserActionsBlocked && !data.hasAction(SemanticsAction.tap)) {
-      return FlutterError('A tab must have a tap action');
+    if (node.areUserActionsBlocked) {
+      return null;
     }
 
+    if (!data.hasFlag(SemanticsFlag.hasEnabledState)) {
+      if (!data.hasAction(SemanticsAction.tap)) {
+        return FlutterError('A tab must have a tap action');
+      }
+    } else if (data.hasFlag(SemanticsFlag.isEnabled) && !data.hasAction(SemanticsAction.tap)) {
+      return FlutterError('A tab must have a tap action');
+    }
     return null;
   }
 
@@ -165,16 +187,42 @@ sealed class _DebugSemanticsRoleChecks {
     return error;
   }
 
-  static FlutterError? _semanticsCell(SemanticsNode node) {
+  static FlutterError? _semanticsTable(SemanticsNode node) {
+    FlutterError? error;
+    node.visitChildren((SemanticsNode child) {
+      if (child.getSemanticsData().role != SemanticsRole.row) {
+        error = FlutterError('Children of Table must have the row role');
+      }
+      return error == null;
+    });
+    return error;
+  }
+
+  static FlutterError? _semanticsRow(SemanticsNode node) {
     if (node.parent?.role != SemanticsRole.table) {
-      return FlutterError('A cell must be a child of a table');
+      return FlutterError('A row must be a child of a table');
+    }
+    FlutterError? error;
+    node.visitChildren((SemanticsNode child) {
+      if (child.getSemanticsData().role != SemanticsRole.cell &&
+          child.getSemanticsData().role != SemanticsRole.columnHeader) {
+        error = FlutterError('Children of Row must have the cell or columnHeader role');
+      }
+      return error == null;
+    });
+    return error;
+  }
+
+  static FlutterError? _semanticsCell(SemanticsNode node) {
+    if (node.parent?.role != SemanticsRole.row && node.parent?.role != SemanticsRole.cell) {
+      return FlutterError('A cell must be a child of a row or another cell');
     }
     return null;
   }
 
   static FlutterError? _semanticsColumnHeader(SemanticsNode node) {
-    if (node.parent?.role != SemanticsRole.table) {
-      return FlutterError('A columnHeader must be a child of a table');
+    if (node.parent?.role != SemanticsRole.row && node.parent?.role != SemanticsRole.cell) {
+      return FlutterError('A columnHeader must be a child or another cell');
     }
     return null;
   }
@@ -210,6 +258,99 @@ sealed class _DebugSemanticsRoleChecks {
 
     node.visitChildren(validateRadioGroupChildren);
     return error;
+  }
+
+  static FlutterError? _semanticsMenu(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu cannot be empty');
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsMenuBar(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a menu bar cannot be empty');
+    }
+
+    return null;
+  }
+
+  static FlutterError? _semanticsMenuItem(SemanticsNode node) {
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item must be a child of a menu or a menu bar');
+  }
+
+  static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
+      return FlutterError('a menu item checkbox must be checkable');
+    }
+
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item checkbox must be a child of a menu or a menu bar');
+  }
+
+  static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (!data.hasFlag(SemanticsFlag.hasCheckedState)) {
+      return FlutterError('a menu item radio must be checkable');
+    }
+
+    SemanticsNode? currentNode = node;
+    while (currentNode?.parent != null) {
+      if (currentNode?.parent?.role == SemanticsRole.menu ||
+          currentNode?.parent?.role == SemanticsRole.menuBar) {
+        return null;
+      }
+      currentNode = currentNode?.parent;
+    }
+    return FlutterError('A menu item radio must be a child of a menu or a menu bar');
+  }
+
+  static FlutterError? _noLiveRegion(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    if (data.hasFlag(SemanticsFlag.isLiveRegion)) {
+      return FlutterError(
+        'Node ${node.id} has role ${data.role} but is also a live region. '
+        'A node can not have ${data.role} and be live region at the same time. '
+        'Either remove the role or the live region',
+      );
+    }
+    return null;
+  }
+
+  static FlutterError? _semanticsListItem(SemanticsNode node) {
+    final SemanticsData data = node.getSemanticsData();
+    final SemanticsNode? parent = node.parent;
+    if (parent == null) {
+      return FlutterError(
+        "Semantics node ${node.id} has role ${data.role} but doesn't have a parent",
+      );
+    }
+    final SemanticsData parentSemanticsData = parent.getSemanticsData();
+    if (parentSemanticsData.role != SemanticsRole.list) {
+      return FlutterError(
+        'Semantics node ${node.id} has role ${data.role}, but its '
+        "parent node ${parent.id} doesn't have the role ${SemanticsRole.list}. "
+        'Please assign the ${SemanticsRole.list} to node ${parent.id}',
+      );
+    }
+    return null;
   }
 }
 
@@ -595,6 +736,9 @@ class SemanticsData with Diagnosticable {
     required this.headingLevel,
     required this.linkUrl,
     required this.role,
+    required this.controlsNodes,
+    required this.validationResult,
+    required this.inputType,
     this.tags,
     this.transform,
     this.customSemanticsActionIds,
@@ -855,6 +999,17 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.role}
   final SemanticsRole role;
 
+  /// {@macro flutter.semantics.SemanticsNode.controlsNodes}
+  ///
+  /// {@macro flutter.semantics.SemanticsProperties.controlsNodes}
+  final Set<String>? controlsNodes;
+
+  /// {@macro flutter.semantics.SemanticsProperties.validationResult}
+  final SemanticsValidationResult validationResult;
+
+  /// {@macro flutter.semantics.SemanticsNode.inputType}
+  final SemanticsInputType inputType;
+
   /// Whether [flags] contains the given flag.
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
@@ -912,6 +1067,21 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(IntProperty('headingLevel', headingLevel, defaultValue: 0));
     properties.add(DiagnosticsProperty<Uri>('linkUrl', linkUrl, defaultValue: null));
+    if (controlsNodes != null) {
+      properties.add(IterableProperty<String>('controls', controlsNodes, ifEmpty: null));
+    }
+    if (role != SemanticsRole.none) {
+      properties.add(EnumProperty<SemanticsRole>('role', role, defaultValue: SemanticsRole.none));
+    }
+    if (validationResult != SemanticsValidationResult.none) {
+      properties.add(
+        EnumProperty<SemanticsValidationResult>(
+          'validationResult',
+          validationResult,
+          defaultValue: SemanticsValidationResult.none,
+        ),
+      );
+    }
   }
 
   @override
@@ -944,7 +1114,10 @@ class SemanticsData with Diagnosticable {
         other.headingLevel == headingLevel &&
         other.linkUrl == linkUrl &&
         other.role == role &&
-        _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
+        other.validationResult == validationResult &&
+        other.inputType == inputType &&
+        _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds) &&
+        setEquals<String>(controlsNodes, other.controlsNodes);
   }
 
   @override
@@ -978,6 +1151,9 @@ class SemanticsData with Diagnosticable {
       linkUrl,
       customSemanticsActionIds == null ? null : Object.hashAll(customSemanticsActionIds!),
       role,
+      validationResult,
+      controlsNodes == null ? null : Object.hashAll(controlsNodes!),
+      inputType,
     ),
   );
 
@@ -1105,6 +1281,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.namesRoute,
     this.image,
     this.liveRegion,
+    this.isRequired,
     this.maxValueLength,
     this.currentValueLength,
     this.identifier,
@@ -1123,6 +1300,9 @@ class SemanticsProperties extends DiagnosticableTree {
     this.textDirection,
     this.sortKey,
     this.tagForChildren,
+    this.role,
+    this.controlsNodes,
+    this.inputType,
     this.onTap,
     this.onLongPress,
     this.onScrollLeft,
@@ -1145,7 +1325,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onFocus,
     this.onDismiss,
     this.customSemanticsActions,
-    this.role,
+    this.validationResult = SemanticsValidationResult.none,
   }) : assert(
          label == null || attributedLabel == null,
          'Only one of label or attributedLabel should be provided',
@@ -1373,6 +1553,22 @@ class SemanticsProperties extends DiagnosticableTree {
   ///  * [SemanticsFlag.isLiveRegion], the semantics flag this setting controls.
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
   final bool? liveRegion;
+
+  /// If non-null, whether the node should be considered required.
+  ///
+  /// If true, user input is required on the semantics node before a form can
+  /// be submitted. If false, the node is optional before a form can be
+  /// submitted. If null, the node does not have a required semantics.
+  ///
+  /// For example, a login form requires its email text field to be non-empty.
+  ///
+  /// On web, this will set a `aria-required` attribute on the DOM element
+  /// that corresponds to the semantics node.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsFlag.isRequired], for the flag this setting controls.
+  final bool? isRequired;
 
   /// The maximum number of characters that can be entered into an editable
   /// text field.
@@ -1938,7 +2134,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// A enum to describe what role the subtree represents.
   ///
   /// Setting the role for a widget subtree helps assistive technologies, such
-  /// as screen readers, understand and interact with the UI correctly.
+  /// as screen readers, to understand and interact with the UI correctly.
   ///
   /// Defaults to [SemanticsRole.none] if not set, which means the subtree does
   /// not represent any complex ui or controls.
@@ -1947,6 +2143,43 @@ class SemanticsProperties extends DiagnosticableTree {
   /// {@endtemplate}
   final SemanticsRole? role;
 
+  /// The [SemanticsNode.identifier]s of widgets controlled by this subtree.
+  ///
+  /// {@template flutter.semantics.SemanticsProperties.controlsNodes}
+  /// If a widget is controlling the visibility or content of another widget,
+  /// for example, [Tab]s control child visibilities of [TabBarView] or
+  /// [ExpansionTile] controls visibility of its expanded content, one must
+  /// assign a [SemanticsNode.identifier] to the content and also provide a set
+  /// of identifiers including the content's identifier to this property.
+  /// {@endtemplate}
+  final Set<String>? controlsNodes;
+
+  /// {@template flutter.semantics.SemanticsProperties.validationResult}
+  /// Describes the validation result for a form field represented by this
+  /// widget.
+  ///
+  /// Providing a validation result helps assistive technologies, such as screen
+  /// readers, to communicate to the user whether they provided correct
+  /// information in a form.
+  ///
+  /// Defaults to [SemanticsValidationResult.none] if not set, which means no
+  /// validation information is available for the respective semantics node.
+  ///
+  /// For a list of available validation results, see [SemanticsValidationResult].
+  /// {@endtemplate}
+  final SemanticsValidationResult validationResult;
+
+  /// {@template flutter.semantics.SemanticsProperties.inputType}
+  /// The input type for of a editable widget.
+  ///
+  /// This property is only used when the subtree represents a text field.
+  ///
+  /// Assistive technologies use this property to provide better information to
+  /// users. For example, screen reader reads out the input type of text field
+  /// when focused.
+  /// {@endtemplate}
+  final SemanticsInputType? inputType;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
@@ -1954,6 +2187,7 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(DiagnosticsProperty<bool>('mixed', mixed, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('expanded', expanded, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('isRequired', isRequired, defaultValue: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: null));
     properties.add(StringProperty('label', label, defaultValue: null));
     properties.add(
@@ -1984,6 +2218,13 @@ class SemanticsProperties extends DiagnosticableTree {
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<SemanticsRole>('role', role, defaultValue: null));
+    properties.add(
+      EnumProperty<SemanticsValidationResult>(
+        'validationResult',
+        validationResult,
+        defaultValue: SemanticsValidationResult.none,
+      ),
+    );
     properties.add(DiagnosticsProperty<SemanticsSortKey>('sortKey', sortKey, defaultValue: null));
     properties.add(
       DiagnosticsProperty<SemanticsHintOverrides>(
@@ -2573,7 +2814,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
         _areUserActionsBlocked != config.isBlockingUserActions ||
         _headingLevel != config._headingLevel ||
         _linkUrl != config._linkUrl ||
-        _role != config.role;
+        _role != config.role ||
+        _validationResult != config.validationResult;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -2904,6 +3146,30 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsRole get role => _role;
   SemanticsRole _role = _kEmptyConfig.role;
 
+  /// {@template flutter.semantics.SemanticsNode.controlsNodes}
+  /// The [SemanticsNode.identifier]s of widgets controlled by this node.
+  /// {@endtemplate}
+  ///
+  /// {@macro flutter.semantics.SemanticsProperties.controlsNodes}
+  Set<String>? get controlsNodes => _controlsNodes;
+  Set<String>? _controlsNodes = _kEmptyConfig.controlsNodes;
+
+  /// {@macro flutter.semantics.SemanticsProperties.validationResult}
+  SemanticsValidationResult get validationResult => _validationResult;
+  SemanticsValidationResult _validationResult = _kEmptyConfig.validationResult;
+
+  /// {@template flutter.semantics.SemanticsNode.inputType}
+  /// The input type for of a editable node.
+  ///
+  /// This property is only used when this node represents a text field.
+  ///
+  /// Assistive technologies use this property to provide better information to
+  /// users. For example, screen reader reads out the input type of text field
+  /// when focused.
+  /// {@endtemplate}
+  SemanticsInputType get inputType => _inputType;
+  SemanticsInputType _inputType = _kEmptyConfig.inputType;
+
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = SemanticsConfiguration();
@@ -2970,6 +3236,10 @@ class SemanticsNode with DiagnosticableTreeMixin {
     _headingLevel = config._headingLevel;
     _linkUrl = config._linkUrl;
     _role = config._role;
+    _controlsNodes = config._controlsNodes;
+    _validationResult = config._validationResult;
+    _inputType = config._inputType;
+
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     if (mergeAllDescendantsIntoThisNodeValueChanged) {
@@ -3019,6 +3289,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     double thickness = _thickness;
     Uri? linkUrl = _linkUrl;
     SemanticsRole role = _role;
+    Set<String>? controlsNodes = _controlsNodes;
+    SemanticsValidationResult validationResult = _validationResult;
+    SemanticsInputType inputType = _inputType;
     final Set<int> customSemanticsActionIds = <int>{};
     for (final CustomSemanticsAction action in _customSemanticsActions.keys) {
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
@@ -3077,6 +3350,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
         if (role == SemanticsRole.none) {
           role = node._role;
         }
+        if (inputType == SemanticsInputType.none) {
+          inputType = node._inputType;
+        }
         if (tooltip == '') {
           tooltip = node._tooltip;
         }
@@ -3118,6 +3394,23 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
         thickness = math.max(thickness, node._thickness + node._elevation);
 
+        if (controlsNodes == null) {
+          controlsNodes = node._controlsNodes;
+        } else if (node._controlsNodes != null) {
+          controlsNodes = <String>{...controlsNodes!, ...node._controlsNodes!};
+        }
+
+        if (validationResult == SemanticsValidationResult.none) {
+          validationResult = node._validationResult;
+        } else if (validationResult == SemanticsValidationResult.valid) {
+          // When merging nodes, invalid validation result takes precedence.
+          // Otherwise, validation information could be lost.
+          if (node._validationResult != SemanticsValidationResult.none &&
+              node._validationResult != SemanticsValidationResult.valid) {
+            validationResult = node._validationResult;
+          }
+        }
+
         return true;
       });
     }
@@ -3151,6 +3444,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       headingLevel: headingLevel,
       linkUrl: linkUrl,
       role: role,
+      controlsNodes: controlsNodes,
+      validationResult: validationResult,
+      inputType: inputType,
     );
   }
 
@@ -3236,6 +3532,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       headingLevel: data.headingLevel,
       linkUrl: data.linkUrl?.toString() ?? '',
       role: data.role,
+      controlsNodes: data.controlsNodes?.toList(),
+      validationResult: data.validationResult,
+      inputType: data.inputType,
     );
     _dirty = false;
   }
@@ -3433,6 +3732,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     properties.add(IntProperty('headingLevel', _headingLevel, defaultValue: 0));
+    if (_inputType != SemanticsInputType.none) {
+      properties.add(EnumProperty<SemanticsInputType>('inputType', _inputType));
+    }
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -3883,7 +4185,7 @@ class SemanticsOwner extends ChangeNotifier {
         ErrorHint(
           'Consider removing the above invisible SemanticsNodes if they were added by your '
           'RenderObject.assembleSemanticsNode implementation, or filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+          '  https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
         ),
       ]);
     }());
@@ -5247,7 +5549,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is a keyboard key (true) or not
-  //(false).
+  /// (false).
   bool get isKeyboardKey => _hasFlag(SemanticsFlag.isKeyboardKey);
   set isKeyboardKey(bool value) {
     _setFlag(SemanticsFlag.isKeyboardKey, value);
@@ -5305,6 +5607,24 @@ class SemanticsConfiguration {
   bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
   set isMultiline(bool value) {
     _setFlag(SemanticsFlag.isMultiline, value);
+  }
+
+  /// Whether the semantics node has a required state.
+  ///
+  /// Do not call the setter for this field if the owning [RenderObject] doesn't
+  /// have a required state that can be controlled by the user.
+  ///
+  /// The getter returns null if the owning [RenderObject] does not have a
+  /// required state.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
+  bool? get isRequired =>
+      _hasFlag(SemanticsFlag.hasRequiredState) ? _hasFlag(SemanticsFlag.isRequired) : null;
+  set isRequired(bool? value) {
+    _setFlag(SemanticsFlag.hasRequiredState, true);
+    _setFlag(SemanticsFlag.isRequired, value!);
   }
 
   /// Whether the platform can scroll the semantics node when the user attempts
@@ -5379,6 +5699,31 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// The [SemanticsNode.identifier]s of widgets controlled by this node.
+  Set<String>? get controlsNodes => _controlsNodes;
+  Set<String>? _controlsNodes;
+  set controlsNodes(Set<String>? value) {
+    assert(value != null);
+    _controlsNodes = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// {@macro flutter.semantics.SemanticsProperties.validationResult}
+  SemanticsValidationResult get validationResult => _validationResult;
+  SemanticsValidationResult _validationResult = SemanticsValidationResult.none;
+  set validationResult(SemanticsValidationResult value) {
+    _validationResult = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// {@macro flutter.semantics.SemanticsProperties.inputType}
+  SemanticsInputType get inputType => _inputType;
+  SemanticsInputType _inputType = SemanticsInputType.none;
+  set inputType(SemanticsInputType value) {
+    _inputType = value;
+    _hasBeenAnnotated = true;
+  }
+
   // TAGS
 
   /// The set of tags that this configuration wants to add to all child
@@ -5430,6 +5775,23 @@ class SemanticsConfiguration {
 
   bool _hasFlag(SemanticsFlag flag) => (_flags & flag.index) != 0;
 
+  bool get _hasExplicitRole {
+    if (_role != SemanticsRole.none) {
+      return true;
+    }
+    if (_hasFlag(SemanticsFlag.isTextField) ||
+        // In non web platforms, the header is a trait.
+        (_hasFlag(SemanticsFlag.isHeader) && kIsWeb) ||
+        _hasFlag(SemanticsFlag.isSlider) ||
+        _hasFlag(SemanticsFlag.isLink) ||
+        _hasFlag(SemanticsFlag.scopesRoute) ||
+        _hasFlag(SemanticsFlag.isImage) ||
+        _hasFlag(SemanticsFlag.isKeyboardKey)) {
+      return true;
+    }
+    return false;
+  }
+
   // CONFIGURATION COMBINATION LOGIC
 
   /// Whether this configuration is compatible with the provided `other`
@@ -5457,6 +5819,9 @@ class SemanticsConfiguration {
       return false;
     }
     if (_attributedValue.string.isNotEmpty && other._attributedValue.string.isNotEmpty) {
+      return false;
+    }
+    if (_hasExplicitRole && other._hasExplicitRole) {
       return false;
     }
     return true;
@@ -5531,6 +5896,9 @@ class SemanticsConfiguration {
     if (_role == SemanticsRole.none) {
       _role = child._role;
     }
+    if (_inputType == SemanticsInputType.none) {
+      _inputType = child._inputType;
+    }
     _attributedHint = _concatAttributedString(
       thisAttributedString: _attributedHint,
       thisTextDirection: textDirection,
@@ -5542,6 +5910,21 @@ class SemanticsConfiguration {
     }
 
     _thickness = math.max(_thickness, child._thickness + child._elevation);
+
+    if (_controlsNodes == null) {
+      _controlsNodes = child._controlsNodes;
+    } else if (child._controlsNodes != null) {
+      _controlsNodes = <String>{..._controlsNodes!, ...child._controlsNodes!};
+    }
+
+    if (child._validationResult != _validationResult) {
+      if (child._validationResult == SemanticsValidationResult.invalid) {
+        // Invalid result always takes precedence.
+        _validationResult = SemanticsValidationResult.invalid;
+      } else if (_validationResult == SemanticsValidationResult.none) {
+        _validationResult = child._validationResult;
+      }
+    }
 
     _hasBeenAnnotated = hasBeenAnnotated || child.hasBeenAnnotated;
   }
@@ -5584,7 +5967,10 @@ class SemanticsConfiguration {
       ..isBlockingUserActions = isBlockingUserActions
       .._headingLevel = _headingLevel
       .._linkUrl = _linkUrl
-      .._role = _role;
+      .._role = _role
+      .._controlsNodes = _controlsNodes
+      .._validationResult = _validationResult
+      .._inputType = _inputType;
   }
 }
 

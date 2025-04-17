@@ -433,6 +433,30 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
+  testWidgets('CircularProgressIndicator.adaptive stroke width', (WidgetTester tester) async {
+    await tester.pumpWidget(const CircularProgressIndicator.adaptive());
+
+    // The default strokeWidth is 4.0
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
+
+    final ThemeData themeData = theme.copyWith(
+      progressIndicatorTheme: const ProgressIndicatorThemeData(strokeWidth: 10.0),
+    );
+    await tester.pumpWidget(
+      Theme(data: themeData, child: const CircularProgressIndicator.adaptive()),
+    );
+
+    // Get the theme’s strokeWidth.
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 10.0));
+
+    await tester.pumpWidget(
+      Theme(data: themeData, child: const CircularProgressIndicator.adaptive(strokeWidth: 16.0)),
+    );
+
+    // The strokeWidth parameter should override the theme’s strokeWidth.
+    expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
+  });
+
   testWidgets('CircularProgressIndicator strokeAlign', (WidgetTester tester) async {
     await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator()));
     expect(
@@ -761,7 +785,7 @@ void main() {
 
     await tester.pumpFrames(
       animationSheet.record(
-        Theme(data: ThemeData(useMaterial3: true), child: const _RefreshProgressIndicatorGolden()),
+        Theme(data: ThemeData(), child: const _RefreshProgressIndicatorGolden()),
       ),
       const Duration(seconds: 3),
     );
@@ -1063,7 +1087,7 @@ void main() {
     await tester.pumpFrames(
       animationSheet.record(
         Theme(
-          data: ThemeData(useMaterial3: true),
+          data: ThemeData(),
           child: const Directionality(
             textDirection: TextDirection.ltr,
             child: Padding(padding: EdgeInsets.all(4), child: CircularProgressIndicator()),

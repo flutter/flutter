@@ -21,9 +21,7 @@ class HighContrastSupport {
   final DomMediaQueryList _highContrastMediaQuery = domWindow.matchMedia(
     _highContrastMediaQueryString,
   );
-  late final DomEventListener _onHighContrastChangeListener = createDomEventListener(
-    _onHighContrastChange,
-  );
+  late final DomEventListener _onHighContrastChangeListener = _onHighContrastChange.toJS;
 
   bool get isHighContrastEnabled => _highContrastMediaQuery.matches;
 
@@ -43,7 +41,7 @@ class HighContrastSupport {
     }
   }
 
-  JSVoid _onHighContrastChange(DomEvent event) {
+  void _onHighContrastChange(DomEvent event) {
     final DomMediaQueryListEvent mqEvent = event as DomMediaQueryListEvent;
     final bool isHighContrastEnabled = mqEvent.matches!;
     for (final HighContrastListener listener in _listeners) {
@@ -75,46 +73,54 @@ const List<String> systemColorNames = <String>[
 ];
 
 class SystemColorPaletteDetector {
-  SystemColorPaletteDetector() {
-    final hostDetector = createDomHTMLDivElement();
-    hostDetector.style
-      ..position = 'absolute'
-      ..transform = 'translate(-10000, -10000)';
-    domDocument.body!.appendChild(hostDetector);
+  SystemColorPaletteDetector(this.brightness) : systemColors = _detectSystemColors(brightness);
 
-    final colorDetectors = <String, DomHTMLElement>{};
+  static SystemColorPaletteDetector light = SystemColorPaletteDetector(ui.Brightness.light);
+  static SystemColorPaletteDetector dark = SystemColorPaletteDetector(ui.Brightness.dark);
 
-    for (final systemColorName in systemColorNames) {
-      final detector = createDomHTMLDivElement();
-      detector.style.backgroundColor = systemColorName;
-      detector.innerText = '$systemColorName detector';
-      hostDetector.appendChild(detector);
-      colorDetectors[systemColorName] = detector;
-    }
+  final ui.Brightness brightness;
 
-    final results = <String, ui.SystemColor>{};
+  final Map<String, ui.SystemColor> systemColors;
+}
 
-    colorDetectors.forEach((systemColorName, detector) {
-      final computedDetector = domWindow.getComputedStyle(detector);
-      final computedColor = computedDetector.backgroundColor;
+Map<String, ui.SystemColor> _detectSystemColors(ui.Brightness brightness) {
+  final hostDetector = createDomHTMLDivElement();
+  hostDetector.style
+    ..position = 'absolute'
+    ..transform = 'translate(-10000, -10000)'
+    // Force the browser to use light mode colors or dark mode colors.
+    ..setProperty('color-scheme', brightness == ui.Brightness.light ? 'light' : 'dark');
+  domDocument.body!.appendChild(hostDetector);
 
-      final isSupported = domCSS.supports('color', systemColorName);
-      ui.Color? value;
-      if (isSupported) {
-        value = parseCssRgb(computedColor);
-      }
+  final colorDetectors = <String, DomHTMLElement>{};
 
-      results[systemColorName] = ui.SystemColor(name: systemColorName, value: value);
-    });
-    systemColors = results;
-
-    // Once colors have been detected, this element is no longer needed.
-    hostDetector.remove();
+  for (final systemColorName in systemColorNames) {
+    final detector = createDomHTMLDivElement();
+    detector.style.backgroundColor = systemColorName;
+    detector.innerText = '$systemColorName detector';
+    hostDetector.appendChild(detector);
+    colorDetectors[systemColorName] = detector;
   }
 
-  static SystemColorPaletteDetector instance = SystemColorPaletteDetector();
+  final results = <String, ui.SystemColor>{};
 
-  late final Map<String, ui.SystemColor> systemColors;
+  colorDetectors.forEach((systemColorName, detector) {
+    final computedDetector = domWindow.getComputedStyle(detector);
+    final computedColor = computedDetector.backgroundColor;
+
+    final isSupported = domCSS.supports('color', systemColorName);
+    ui.Color? value;
+    if (isSupported) {
+      value = parseCssRgb(computedColor);
+    }
+
+    results[systemColorName] = ui.SystemColor(name: systemColorName, value: value);
+  });
+
+  // Once colors have been detected, this element is no longer needed.
+  hostDetector.remove();
+
+  return results;
 }
 
 /// Parses CSS RGB color written as `rgb(r, g, b)` or `rgba(r, g, b, a)`.

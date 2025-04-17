@@ -2076,7 +2076,7 @@ abstract class RenderBox extends RenderObject {
           ),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
           ),
         ]),
       ),
@@ -2188,7 +2188,7 @@ abstract class RenderBox extends RenderObject {
           ),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
           ),
         ]),
       ),
@@ -2262,7 +2262,6 @@ abstract class RenderBox extends RenderObject {
             !doingRegularLayout ||
             debugDoingThisResize ||
             debugDoingThisLayout ||
-            _computingThisDryLayout ||
             RenderObject.debugActiveLayout == parent && size._canBeUsedByParent;
         assert(
           sizeAccessAllowed,
@@ -2273,16 +2272,29 @@ abstract class RenderBox extends RenderObject {
           'trying to access a child\'s size, pass "parentUsesSize: true" to '
           "that child's layout() in ${objectRuntimeType(this, 'RenderBox')}.performLayout.",
         );
+        final RenderBox? renderBoxDoingDryLayout =
+            _computingThisDryLayout
+                ? this
+                : (parent is RenderBox && parent._computingThisDryLayout ? parent : null);
+
+        assert(
+          renderBoxDoingDryLayout == null,
+          'RenderBox.size accessed in '
+          '${objectRuntimeType(renderBoxDoingDryLayout, 'RenderBox')}.computeDryLayout. '
+          "The computeDryLayout method must not access the RenderBox's own size, or the size of its child, "
+          "because it's established in performLayout or performResize using different BoxConstraints.",
+        );
+
         final RenderBox? renderBoxDoingDryBaseline =
             _computingThisDryBaseline
                 ? this
                 : (parent is RenderBox && parent._computingThisDryBaseline ? parent : null);
         assert(
           renderBoxDoingDryBaseline == null,
+
           'RenderBox.size accessed in '
-          '${objectRuntimeType(renderBoxDoingDryBaseline, 'RenderBox')}.computeDryBaseline.'
-          'The computeDryBaseline method must not access '
-          '${renderBoxDoingDryBaseline == this ? "the RenderBox's own size" : "the size of its child"},'
+          '${objectRuntimeType(renderBoxDoingDryBaseline, 'RenderBox')}.computeDryBaseline. '
+          "The computeDryBaseline method must not access the RenderBox's own size, or the size of its child, "
           "because it's established in performLayout or performResize using different BoxConstraints.",
         );
         assert(size == _size);
@@ -2634,7 +2646,7 @@ abstract class RenderBox extends RenderObject {
           DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
           ErrorHint(
             'If you are not writing your own RenderBox subclass, then this is not '
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
           ),
         ]);
       }
@@ -2726,7 +2738,7 @@ abstract class RenderBox extends RenderObject {
             ...failures,
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
             ),
           ]);
         }
@@ -2740,7 +2752,7 @@ abstract class RenderBox extends RenderObject {
         } finally {
           RenderObject.debugCheckingIntrinsics = false;
         }
-        if (_debugDryLayoutCalculationValid && dryLayoutSize != size) {
+        if (_debugDryLayoutCalculationValid && dryLayoutSize != _size) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary(
               'The size given to the ${objectRuntimeType(this, 'RenderBox')} class differs from the size computed by computeDryLayout.',
@@ -2752,7 +2764,7 @@ abstract class RenderBox extends RenderObject {
             ErrorDescription('The constraints used were $constraints.'),
             ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
-              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
             ),
           ]);
         }
@@ -2767,7 +2779,7 @@ abstract class RenderBox extends RenderObject {
         ErrorDescription('The constraints used were $constraints.'),
         ErrorHint(
           'If you are not writing your own RenderBox subclass, then this is not\n'
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=2_bug.yml',
+          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=02_bug.yml',
         ),
       ];
 

@@ -298,6 +298,17 @@ CapabilitiesVK::GetEnabledDeviceExtensions(
     return true;
   };
 
+  auto for_each_optional_android_extension =
+      [&](OptionalAndroidDeviceExtensionVK ext) {
+#ifdef FML_OS_ANDROID
+        auto name = GetExtensionName(ext);
+        if (exts.find(name) != exts.end()) {
+          enabled.push_back(name);
+        }
+#endif  //  FML_OS_ANDROID
+        return true;
+      };
+
   auto for_each_optional_extension = [&](OptionalDeviceExtensionVK ext) {
     auto name = GetExtensionName(ext);
     if (exts.find(name) != exts.end()) {
@@ -311,7 +322,10 @@ CapabilitiesVK::GetEnabledDeviceExtensions(
           for_each_common_extension) &&
       IterateExtensions<RequiredAndroidDeviceExtensionVK>(
           for_each_android_extension) &&
-      IterateExtensions<OptionalDeviceExtensionVK>(for_each_optional_extension);
+      IterateExtensions<OptionalDeviceExtensionVK>(
+          for_each_optional_extension) &&
+      IterateExtensions<OptionalAndroidDeviceExtensionVK>(
+          for_each_optional_android_extension);
 
   if (!iterate_extensions) {
     VALIDATION_LOG << "Device not suitable since required extensions are not "
@@ -506,11 +520,11 @@ bool CapabilitiesVK::SetPhysicalDevice(
     default_color_format_ = PixelFormat::kUnknown;
   }
 
-  if (HasSuitableDepthStencilFormat(device, vk::Format::eD32SfloatS8Uint)) {
-    default_depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
-  } else if (HasSuitableDepthStencilFormat(device,
-                                           vk::Format::eD24UnormS8Uint)) {
+  if (HasSuitableDepthStencilFormat(device, vk::Format::eD24UnormS8Uint)) {
     default_depth_stencil_format_ = PixelFormat::kD24UnormS8Uint;
+  } else if (HasSuitableDepthStencilFormat(device,
+                                           vk::Format::eD32SfloatS8Uint)) {
+    default_depth_stencil_format_ = PixelFormat::kD32FloatS8UInt;
   } else {
     default_depth_stencil_format_ = PixelFormat::kUnknown;
   }
@@ -626,6 +640,9 @@ bool CapabilitiesVK::SetPhysicalDevice(
     supports_external_fence_and_semaphore_ = true;
   }
 
+  minimum_uniform_alignment_ =
+      device_properties_.limits.minUniformBufferOffsetAlignment;
+
   return true;
 }
 
@@ -702,6 +719,10 @@ CapabilitiesVK::GetPhysicalDeviceProperties() const {
 
 PixelFormat CapabilitiesVK::GetDefaultGlyphAtlasFormat() const {
   return PixelFormat::kR8UNormInt;
+}
+
+size_t CapabilitiesVK::GetMinimumUniformAlignment() const {
+  return minimum_uniform_alignment_;
 }
 
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {
@@ -796,6 +817,10 @@ void CapabilitiesVK::ApplyWorkarounds(const WorkaroundsVK& workarounds) {
 
 bool CapabilitiesVK::SupportsExternalSemaphoreExtensions() const {
   return supports_external_fence_and_semaphore_;
+}
+
+bool CapabilitiesVK::SupportsExtendedRangeFormats() const {
+  return false;
 }
 
 }  // namespace impeller

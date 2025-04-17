@@ -127,6 +127,19 @@ transforms:
       - kind: 'rename'
         newName: 'a'
 
+  - title: "Replace 'value' with 'toARGB32()'"
+    date: 2025-02-03
+    element:
+      uris: [ 'painting.dart' ]
+      method: 'value'
+      inClass: 'Color'
+    changes:
+      - kind: 'replacedBy'
+        newElement:
+          uris: [ 'painting.dart' ]
+          method: 'toARGB32'
+          inClass: 'Color'
+
   - title: "Rename 'withOpacity'"
     date: 2024-09-10
     element:

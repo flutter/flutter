@@ -40,7 +40,6 @@ class PlatformViewAppState extends State<PlatformViewApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.light(),
       title: 'Advanced Layout',
       home: Scaffold(
         appBar: AppBar(title: const Text('Platform View Ad Banners')),

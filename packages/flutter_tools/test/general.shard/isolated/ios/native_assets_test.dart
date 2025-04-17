@@ -184,7 +184,10 @@ void main() {
           packagesWithNativeAssetsResult: <String>['bar'],
           onBuild:
               (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                codeAssets:
+                    buildMode == BuildMode.debug
+                        ? codeAssets(input.config.code.targetOS, input.config.code)
+                        : <CodeAsset>[],
               ),
           onLink:
               (LinkInput input) =>

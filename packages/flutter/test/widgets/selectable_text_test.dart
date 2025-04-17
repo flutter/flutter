@@ -20,7 +20,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 
-import '../impeller_test_helpers.dart';
 import '../widgets/clipboard_utils.dart';
 import '../widgets/editable_text_utils.dart' show textOffsetToPosition;
 import '../widgets/semantics_tester.dart';
@@ -5267,7 +5266,7 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.1.png'),
     );
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+  });
 
   testWidgets('text selection style 2', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -5304,7 +5303,7 @@ void main() {
       find.byType(MaterialApp),
       matchesGoldenFile('selectable_text_golden.TextSelectionStyle.2.png'),
     );
-  }, skip: impellerEnabled); // https://github.com/flutter/flutter/issues/143616
+  });
 
   testWidgets('keeps alive when has focus', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -5567,4 +5566,61 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        _updateMediaQueryFromView(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          _updateMediaQueryFromView(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          MaterialApp(home: Material(child: TextField(controller: controller))),
+        );
+
+        // No context menu shown.
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(CupertinoAdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  });
+}
+
+// Trigger MediaQuery to update itself based on the View, which is not
+// recreated between tests. This is necessary when changing something on
+// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
+// TODO(justinmc): This hack can be removed if
+// https://github.com/flutter/flutter/issues/165519 is fixed.
+void _updateMediaQueryFromView(WidgetTester tester) {
+  expect(find.byType(MediaQuery), findsOneWidget);
+  final WidgetsBindingObserver widgetsBindingObserver =
+      tester.state(
+            find.ancestor(
+              of: find.byType(MediaQuery),
+              matching: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
+              ),
+            ),
+          )
+          as WidgetsBindingObserver;
+  widgetsBindingObserver.didChangeMetrics();
 }

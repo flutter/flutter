@@ -609,8 +609,8 @@ void ExternalViewEmbedder::Reset() {
 ExternalViewEmbedder::ViewMutators ExternalViewEmbedder::ParseMutatorStack(
     const flutter::MutatorsStack& mutators_stack) {
   ViewMutators mutators;
-  SkMatrix total_transform = SkMatrix::I();
-  SkMatrix transform_accumulator = SkMatrix::I();
+  flutter::DlMatrix total_transform;
+  flutter::DlMatrix transform_accumulator;
 
   for (auto i = mutators_stack.Begin(); i != mutators_stack.End(); ++i) {
     const auto& mutator = *i;
@@ -619,37 +619,44 @@ ExternalViewEmbedder::ViewMutators ExternalViewEmbedder::ParseMutatorStack(
         mutators.opacity *= std::clamp(mutator->GetAlphaFloat(), 0.f, 1.f);
       } break;
       case flutter::MutatorType::kTransform: {
-        total_transform.preConcat(mutator->GetMatrix());
-        transform_accumulator.preConcat(mutator->GetMatrix());
+        total_transform = total_transform * mutator->GetMatrix();
+        transform_accumulator = transform_accumulator * mutator->GetMatrix();
       } break;
       case flutter::MutatorType::kClipRect: {
         mutators.clips.emplace_back(TransformedClip{
-            .transform = transform_accumulator,
-            .rect = mutator->GetRect(),
+            .transform = flutter::ToSkMatrix(transform_accumulator),
+            .rect = flutter::ToSkRect(mutator->GetRect()),
         });
-        transform_accumulator = SkMatrix::I();
+        transform_accumulator = flutter::DlMatrix();
       } break;
       case flutter::MutatorType::kClipRRect: {
         mutators.clips.emplace_back(TransformedClip{
-            .transform = transform_accumulator,
-            .rect = mutator->GetRRect().getBounds(),
+            .transform = flutter::ToSkMatrix(transform_accumulator),
+            .rect = flutter::ToSkRect(mutator->GetRRect().GetBounds()),
         });
-        transform_accumulator = SkMatrix::I();
+        transform_accumulator = flutter::DlMatrix();
+      } break;
+      case flutter::MutatorType::kClipRSE: {
+        mutators.clips.emplace_back(TransformedClip{
+            .transform = flutter::ToSkMatrix(transform_accumulator),
+            .rect = flutter::ToSkRect(mutator->GetRSE().GetBounds()),
+        });
+        transform_accumulator = flutter::DlMatrix();
       } break;
       case flutter::MutatorType::kClipPath: {
         mutators.clips.emplace_back(TransformedClip{
-            .transform = transform_accumulator,
-            .rect = mutator->GetPath().getBounds(),
+            .transform = flutter::ToSkMatrix(transform_accumulator),
+            .rect = flutter::ToSkRect(mutator->GetPath().GetBounds()),
         });
-        transform_accumulator = SkMatrix::I();
+        transform_accumulator = flutter::DlMatrix();
       } break;
       default: {
         break;
       }
     }
   }
-  mutators.total_transform = total_transform;
-  mutators.transform = transform_accumulator;
+  mutators.total_transform = flutter::ToSkMatrix(total_transform);
+  mutators.transform = flutter::ToSkMatrix(transform_accumulator);
   mutators.opacity = std::clamp(mutators.opacity, 0.f, 1.f);
 
   return mutators;

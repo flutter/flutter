@@ -454,6 +454,9 @@ class Context {
       '--ExtraGenSnapshotOptions=${environment['EXTRA_GEN_SNAPSHOT_OPTIONS'] ?? ''}',
       '--DartDefines=${environment['DART_DEFINES'] ?? ''}',
       '--ExtraFrontEndOptions=${environment['EXTRA_FRONT_END_OPTIONS'] ?? ''}',
+      '-dSrcRoot=${environment['SRCROOT'] ?? ''}',
+      '-dTargetDeviceOSVersion=${environment['TARGET_DEVICE_OS_VERSION'] ?? ''}',
+      '-dDevDependenciesEnabled=${environment['FLUTTER_DEV_DEPENDENCIES_ENABLED'] ?? ''}',
     ]);
 
     if (command == 'prepare') {

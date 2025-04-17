@@ -49,12 +49,17 @@ bool SaveScreenshot(std::unique_ptr<Screenshot> screenshot) {
       WorkingDirectory::Instance()->GetFilenamePath(filename));
 }
 
+PlaygroundSwitches GetPlaygroundSwitches() {
+  PlaygroundSwitches switches;
+  switches.enable_wide_gamut = false;
+  return switches;
+}
 }  // namespace
 
 class GoldenTests : public ::testing::Test {
  public:
   GoldenTests()
-      : screenshotter_(new MetalScreenshotter(/*enable_wide_gamut=*/false)) {}
+      : screenshotter_(new MetalScreenshotter(GetPlaygroundSwitches())) {}
 
   MetalScreenshotter& Screenshotter() { return *screenshotter_; }
 

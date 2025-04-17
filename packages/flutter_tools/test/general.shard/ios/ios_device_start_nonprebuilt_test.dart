@@ -808,6 +808,7 @@ void main() {
         testUsingContext(
           'succeeds',
           () async {
+            const String flavor = 'free';
             final IOSDevice iosDevice = setUpIOSDevice(
               fileSystem: fileSystem,
               processManager: FakeProcessManager.any(),
@@ -817,7 +818,7 @@ void main() {
               coreDeviceControl: FakeIOSCoreDeviceControl(),
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
-                  scheme: 'free',
+                  scheme: flavor,
                   xcodeWorkspace: fileSystem.directory('/ios/Runner.xcworkspace'),
                   xcodeProject: fileSystem.directory('/ios/Runner.xcodeproj'),
                   hostAppProjectName: 'Runner',
@@ -825,11 +826,11 @@ void main() {
                 expectedDeviceId: '123',
                 expectedLaunchArguments: <String>['--enable-dart-profiling'],
                 expectedSchemeFilePath:
-                    '/ios/Runner.xcodeproj/xcshareddata/xcschemes/free.xcscheme',
+                    '/ios/Runner.xcodeproj/xcshareddata/xcschemes/$flavor.xcscheme',
               ),
             );
 
-            setUpIOSProject(fileSystem);
+            setUpIOSProject(fileSystem, scheme: flavor);
             final FlutterProject flutterProject = FlutterProject.fromDirectory(
               fileSystem.currentDirectory,
             );
@@ -1156,7 +1157,11 @@ void main() {
   });
 }
 
-void setUpIOSProject(FileSystem fileSystem, {bool createWorkspace = true}) {
+void setUpIOSProject(
+  FileSystem fileSystem, {
+  bool createWorkspace = true,
+  String scheme = 'Runner',
+}) {
   fileSystem.file('pubspec.yaml').writeAsStringSync('''
 name: my_app
 ''');
@@ -1166,6 +1171,10 @@ name: my_app
     fileSystem.directory('ios/Runner.xcworkspace').createSync();
   }
   fileSystem.file('ios/Runner.xcodeproj/project.pbxproj').createSync(recursive: true);
+  final File schemeFile = fileSystem.file(
+    'ios/Runner.xcodeproj/xcshareddata/xcschemes/$scheme.xcscheme',
+  )..createSync(recursive: true);
+  schemeFile.writeAsStringSync(_validScheme);
   // This is the expected output directory.
   fileSystem.directory('build/ios/iphoneos/My Super Awesome App.app').createSync(recursive: true);
 }
@@ -1330,3 +1339,69 @@ class FakeIOSCoreDeviceControl extends Fake implements IOSCoreDeviceControl {
     return launchSuccess;
   }
 }
+
+const String _validScheme = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1510"
+   version = "1.3">
+   <BuildAction>
+   </BuildAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+            BuildableName = "Runner.app"
+            BlueprintName = "Runner"
+            ReferencedContainer = "container:Runner.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
+      <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "331C8080294A63A400263BE5"
+               BuildableName = "RunnerTests.xctest"
+               BlueprintName = "RunnerTests"
+               ReferencedContainer = "container:Runner.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
+   </TestAction>
+   <LaunchAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      debugServiceExtension = "internal"
+      enableGPUValidationMode = "1"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+            BuildableName = "Runner.app"
+            BlueprintName = "Runner"
+            ReferencedContainer = "container:Runner.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </LaunchAction>
+   <ProfileAction>
+   </ProfileAction>
+   <AnalyzeAction>
+   </AnalyzeAction>
+   <ArchiveAction>
+   </ArchiveAction>
+</Scheme>
+''';

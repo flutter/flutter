@@ -439,7 +439,7 @@ void main() {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(focusColor: highlightColor),
+        theme: ThemeData(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -478,7 +478,7 @@ void main() {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(focusColor: highlightColor),
+        theme: ThemeData(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -601,7 +601,7 @@ void main() {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(focusColor: highlightColor),
+        theme: ThemeData(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
