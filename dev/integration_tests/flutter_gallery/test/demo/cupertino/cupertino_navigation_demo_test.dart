@@ -13,8 +13,7 @@ void main() {
     // dependency against in the flutter/cupertino package directly.
 
     // Set window orientation to portrait.
-    tester.view.physicalSize = const Size(390.0, 850.0);
-    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(2400.0, 3000.0);
     addTearDown(tester.view.reset);
 
     final Future<ByteData> font = rootBundle.load(

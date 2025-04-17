@@ -16,9 +16,8 @@ import '../widgets/semantics_tester.dart';
 
 int count = 0;
 
-void setWindowToPortrait(WidgetTester tester, {Size size = const Size(390.0, 850.0)}) {
+void setWindowToPortrait(WidgetTester tester, {Size size = const Size(2400.0, 3000.0)}) {
   tester.view.physicalSize = size;
-  tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 }
 
@@ -581,7 +580,7 @@ void main() {
   });
 
   testWidgets('User specified middle is always visible in sliver', (WidgetTester tester) async {
-    setWindowToPortrait(tester, size: const Size(800, 1800));
+    setWindowToPortrait(tester);
     final ScrollController scrollController = ScrollController();
     addTearDown(scrollController.dispose);
     final Key segmentedControlsKey = UniqueKey();
@@ -1887,7 +1886,7 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar magnifies upon over-scroll and shrinks back once over-scroll ends',
     (WidgetTester tester) async {
-      setWindowToPortrait(tester, size: const Size(800, 1800));
+      setWindowToPortrait(tester);
       const Text titleText = Text('Large Title');
 
       await tester.pumpWidget(

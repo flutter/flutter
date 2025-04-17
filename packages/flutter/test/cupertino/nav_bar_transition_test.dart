@@ -132,9 +132,8 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
   );
 }
 
-void setWindowToPortrait(WidgetTester tester, {Size size = const Size(390.0, 850.0)}) {
+void setWindowToPortrait(WidgetTester tester, {Size size = const Size(2400.0, 3000.0)}) {
   tester.view.physicalSize = size;
-  tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 }
 
@@ -1090,6 +1089,7 @@ void main() {
   testWidgets('Bottom CupertinoNavigationBar.bottom fades and slides out from the left', (
     WidgetTester tester,
   ) async {
+    setWindowToPortrait(tester);
     await startTransitionBetween(
       tester,
       from: const CupertinoNavigationBar(
@@ -1126,6 +1126,7 @@ void main() {
   testWidgets(
     'CupertinoSliverNavigationBar.bottom clips its contents mid-transition when scrolled',
     (WidgetTester tester) async {
+      setWindowToPortrait(tester);
       await tester.pumpWidget(
         CupertinoApp(
           builder: (BuildContext context, Widget? navigator) {

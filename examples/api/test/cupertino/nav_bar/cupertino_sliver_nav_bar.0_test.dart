@@ -8,9 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 const Offset dragUp = Offset(0.0, -150.0);
 
-void setWindowToPortrait(WidgetTester tester, {Size size = const Size(390.0, 850.0)}) {
+void setWindowToPortrait(WidgetTester tester, {Size size = const Size(2400.0, 3000.0)}) {
   tester.view.physicalSize = size;
-  tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.reset);
 }
 
