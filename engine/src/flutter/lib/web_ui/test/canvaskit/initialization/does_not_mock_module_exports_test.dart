@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
 import 'package:test/bootstrap/browser.dart';
@@ -22,16 +21,8 @@ void testMain() {
       await bootstrapAndRunApp();
 
       // window.exports and window.module should be undefined!
-      expect(
-        (domWindow as JSObject).has('exports'),
-        isFalse,
-        reason: '`window.exports` should not be defined.',
-      );
-      expect(
-        (domWindow as JSObject).has('module'),
-        isFalse,
-        reason: '`window.module` should not be defined.',
-      );
+      expect(domWindow.has('exports'), isFalse, reason: '`window.exports` should not be defined.');
+      expect(domWindow.has('module'), isFalse, reason: '`window.module` should not be defined.');
     });
   });
 }

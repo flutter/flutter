@@ -24,10 +24,10 @@ import 'text_theme.dart';
 /// the [Typography.geometryThemeFor] method in terms of the
 /// three language categories defined in <https://material.io/go/design-typography>.
 ///
-/// Generally speaking, font sizes for [ScriptCategory.tall] and
-/// [ScriptCategory.dense] scripts - for text styles that are smaller than the
+/// Generally speaking, font sizes for `ScriptCategory.tall` and
+/// `ScriptCategory.dense` scripts - for text styles that are smaller than the
 /// title style - are one unit larger than they are for
-/// [ScriptCategory.englishLike] scripts.
+/// `ScriptCategory.englishLike` scripts.
 enum ScriptCategory {
   /// The languages of Western, Central, and Eastern Europe and much of
   /// Africa are typically written in the Latin alphabet. Vietnamese is a
@@ -260,12 +260,12 @@ class Typography with Diagnosticable {
   /// geometry.
   final TextTheme white;
 
-  /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
+  /// Defines text geometry for `ScriptCategory.englishLike` scripts, such as
   /// English, French, Russian, etc.
   ///
   /// This text theme is merged with either [black] or [white], depending
   /// on the overall [ThemeData.brightness], when the current locale's
-  /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.englishLike].
+  /// [MaterialLocalizations.scriptCategory] is `ScriptCategory.englishLike`.
   ///
   /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
@@ -276,7 +276,7 @@ class Typography with Diagnosticable {
   ///
   /// This text theme is merged with either [black] or [white], depending
   /// on the overall [ThemeData.brightness], when the current locale's
-  /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.dense].
+  /// [MaterialLocalizations.scriptCategory] is `ScriptCategory.dense`.
   ///
   /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
@@ -286,7 +286,7 @@ class Typography with Diagnosticable {
   ///
   /// This text theme is merged with either [black] or [white], depending
   /// on the overall [ThemeData.brightness], when the current locale's
-  /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.tall].
+  /// [MaterialLocalizations.scriptCategory] is `ScriptCategory.tall`.
   ///
   /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
@@ -1387,7 +1387,7 @@ class Typography with Diagnosticable {
     ),
   );
 
-  /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
+  /// Defines text geometry for `ScriptCategory.englishLike` scripts, such as
   /// English, French, Russian, etc.
   static const TextTheme englishLike2014 = TextTheme(
     displayLarge: TextStyle(
@@ -1499,7 +1499,7 @@ class Typography with Diagnosticable {
     ),
   );
 
-  /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
+  /// Defines text geometry for `ScriptCategory.englishLike` scripts, such as
   /// English, French, Russian, etc.
   ///
   /// The font sizes, weights, and letter spacings in this version match the
@@ -2071,7 +2071,7 @@ class Typography with Diagnosticable {
     ),
   );
 
-  /// Defines text geometry for [ScriptCategory.englishLike] scripts, such as
+  /// Defines text geometry for `ScriptCategory.englishLike` scripts, such as
   /// English, French, Russian, etc.
   ///
   /// The font sizes, weights, and letter spacings in this version match the

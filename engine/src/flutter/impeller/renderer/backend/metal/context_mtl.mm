@@ -82,16 +82,23 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetMaximumRenderPassAttachmentSize(DeviceMaxTextureSizeSupported(device))
       .SetSupportsExtendedRangeFormats(
           DeviceSupportsExtendedRangeFormats(device))
+#if FML_OS_IOS && !TARGET_OS_SIMULATOR
+      .SetMinimumUniformAlignment(16)
+#else
+      .SetMinimumUniformAlignment(256)
+#endif  // FML_OS_IOS && !TARGET_OS_SIMULATOR
       .Build();
 }
 
 ContextMTL::ContextMTL(
+    const Flags& flags,
     id<MTLDevice> device,
     id<MTLCommandQueue> command_queue,
     NSArray<id<MTLLibrary>>* shader_libraries,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     std::optional<PixelFormat> pixel_format_override)
-    : device_(device),
+    : Context(flags),
+      device_(device),
       command_queue_(command_queue),
       is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)) {
   // Validate device.
@@ -235,6 +242,7 @@ static id<MTLCommandQueue> CreateMetalCommandQueue(id<MTLDevice> device) {
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
+    const Flags& flags,
     const std::vector<std::string>& shader_library_paths,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch) {
   auto device = CreateMetalDevice();
@@ -243,7 +251,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     return nullptr;
   }
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
+      flags, device, command_queue,
       MTLShaderLibraryFromFilePaths(device, shader_library_paths),
       std::move(is_gpu_disabled_sync_switch)));
   if (!context->IsValid()) {
@@ -254,6 +262,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
+    const Flags& flags,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     const std::string& library_label,
@@ -264,7 +273,7 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
     return nullptr;
   }
   auto context = std::shared_ptr<ContextMTL>(new ContextMTL(
-      device, command_queue,
+      flags, device, command_queue,
       MTLShaderLibraryFromFileData(device, shader_libraries_data,
                                    library_label),
       std::move(is_gpu_disabled_sync_switch), pixel_format_override));
@@ -276,13 +285,14 @@ std::shared_ptr<ContextMTL> ContextMTL::Create(
 }
 
 std::shared_ptr<ContextMTL> ContextMTL::Create(
+    const Flags& flags,
     id<MTLDevice> device,
     id<MTLCommandQueue> command_queue,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     const std::string& library_label) {
   auto context = std::shared_ptr<ContextMTL>(
-      new ContextMTL(device, command_queue,
+      new ContextMTL(flags, device, command_queue,
                      MTLShaderLibraryFromFileData(device, shader_libraries_data,
                                                   library_label),
                      std::move(is_gpu_disabled_sync_switch)));

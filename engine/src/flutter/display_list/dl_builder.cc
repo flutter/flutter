@@ -11,6 +11,7 @@
 #include "flutter/display_list/effects/dl_color_filters.h"
 #include "flutter/display_list/effects/dl_color_source.h"
 #include "flutter/display_list/effects/dl_image_filters.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/utils/dl_accumulation_rect.h"
 #include "fml/logging.h"
 
@@ -1260,7 +1261,18 @@ void DisplayListBuilder::drawRoundSuperellipse(const DlRoundSuperellipse& rse) {
     OpResult result = PaintResult(current_, flags);
     if (result != OpResult::kNoEffect &&
         AccumulateOpBounds(rse.GetBounds(), flags)) {
-      Push<DrawRoundSuperellipseOp>(0, rse);
+      // DrawRoundSuperellipseOp only supports filling. Anything related to
+      // stroking must use path approximation.
+      if (current_.getDrawStyle() == DlDrawStyle::kFill) {
+        Push<DrawRoundSuperellipseOp>(0, rse);
+      } else {
+        DlPathBuilder builder;
+        builder.SetConvexity(impeller::Convexity::kConvex);
+        builder.SetBounds(rse.GetBounds());
+        builder.AddRoundSuperellipse(DlRoundSuperellipse::MakeRectRadii(
+            rse.GetBounds(), rse.GetRadii()));
+        Push<DrawPathOp>(0, DlPath(builder.TakePath()));
+      }
       CheckLayerOpacityCompatibility();
       UpdateLayerResult(result);
     }
@@ -1618,7 +1630,7 @@ void DisplayListBuilder::DrawAtlas(const sk_sp<DlImage>& atlas,
 void DisplayListBuilder::DrawDisplayList(const sk_sp<DisplayList> display_list,
                                          DlScalar opacity) {
   if (!std::isfinite(opacity) || opacity <= SK_ScalarNearlyZero ||
-      display_list->op_count() == 0 || display_list->bounds().isEmpty() ||
+      display_list->op_count() == 0 || display_list->GetBounds().IsEmpty() ||
       current_info().is_nop) {
     return;
   }

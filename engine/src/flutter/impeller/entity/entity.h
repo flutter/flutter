@@ -65,7 +65,7 @@ class Entity {
 
   /// @brief  Create an entity that can be used to render a given snapshot.
   static Entity FromSnapshot(const Snapshot& snapshot,
-                             BlendMode blend_mode = BlendMode::kSourceOver);
+                             BlendMode blend_mode = BlendMode::kSrcOver);
 
   Entity();
 
@@ -123,7 +123,7 @@ class Entity {
 
   Matrix transform_;
   std::shared_ptr<Contents> contents_;
-  BlendMode blend_mode_ = BlendMode::kSourceOver;
+  BlendMode blend_mode_ = BlendMode::kSrcOver;
   uint32_t clip_depth_ = 1u;
 };
 

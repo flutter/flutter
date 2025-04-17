@@ -234,24 +234,99 @@ bool _writeFlutterPluginsList(
     'macos': swiftPackageManagerEnabledMacos,
   };
 
-  // Only notify if the plugins list has changed. [date_created] will always be different,
-  // [version] is not relevant for this check.
-  final String? oldPluginsFileStringContent = _readFileContent(pluginsFile);
-  bool pluginsChanged = true;
-  if (oldPluginsFileStringContent != null) {
-    try {
-      final Object? decodedJson = jsonDecode(oldPluginsFileStringContent);
-      if (decodedJson is Map<String, Object?>) {
-        final String jsonOfNewPluginsMap = jsonEncode(pluginsMap);
-        final String jsonOfOldPluginsMap = jsonEncode(decodedJson[_kFlutterPluginsPluginListKey]);
-        pluginsChanged = jsonOfNewPluginsMap != jsonOfOldPluginsMap;
-      }
-    } on FormatException catch (_) {}
+  // Only write the plugins file if its content have changed. This ensures
+  // that flutter assemble targets that depend on this file aren't invalidated
+  // unnecessarily.
+  final (:bool pluginsChanged, :bool contentsChanged) = _detectFlutterPluginsListChanges(
+    pluginsFile,
+    result,
+  );
+  if (pluginsChanged || contentsChanged) {
+    final String pluginFileContent = json.encode(result);
+    pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   }
-  final String pluginFileContent = json.encode(result);
-  pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
 
   return pluginsChanged;
+}
+
+/// Find what has changed in the .flutter-plugins-dependencies JSON file.
+///
+/// [pluginsChanged] is [true] if anything changed in the 'plugins' property.
+/// This indicates that platform-specific tooling like 'pod install' should be
+/// re-run.
+///
+/// [contentsChanged] is [true] if [newJson] has changes that should be saved to
+/// disk.
+({bool pluginsChanged, bool contentsChanged}) _detectFlutterPluginsListChanges(
+  File pluginsFile,
+  Map<String, Object> newJson,
+) {
+  final String? oldPluginsFileStringContent = _readFileContent(pluginsFile);
+  if (oldPluginsFileStringContent == null) {
+    return (pluginsChanged: true, contentsChanged: true);
+  }
+
+  try {
+    final Object? oldJson = jsonDecode(oldPluginsFileStringContent);
+    if (oldJson is! Map<String, Object?>) {
+      return (pluginsChanged: true, contentsChanged: true);
+    }
+
+    // Check if plugins changed.
+    final String jsonOfNewPluginsMap = jsonEncode(newJson[_kFlutterPluginsPluginListKey]);
+    final String jsonOfOldPluginsMap = jsonEncode(oldJson[_kFlutterPluginsPluginListKey]);
+    if (jsonOfNewPluginsMap != jsonOfOldPluginsMap) {
+      return (pluginsChanged: true, contentsChanged: true);
+    }
+
+    // Create a copy of the new JSON so that the input isn't mutated when we
+    // drop properties that should be ignored.
+    final Map<String, Object?> newJsonCopy = <String, Object?>{...newJson};
+
+    // The 'info' property is a comment that doesn't affect functionality.
+    // The 'dependencyGraph' property is deprecated and shouldn't be used.
+    // The 'date_created' property is always updated.
+    // The 'plugins' property has already been checked by the logic above.
+    const List<String> ignoredKeys = <String>[
+      'info',
+      'dependencyGraph',
+      'date_created',
+      _kFlutterPluginsPluginListKey,
+    ];
+    for (final String key in ignoredKeys) {
+      oldJson.remove(key);
+      newJsonCopy.remove(key);
+    }
+
+    final String old = jsonEncode(oldJson);
+    final String updated = jsonEncode(newJsonCopy);
+
+    return (pluginsChanged: false, contentsChanged: old != updated);
+  } on FormatException catch (_) {
+    return (pluginsChanged: true, contentsChanged: true);
+  }
+}
+
+/// Checks if the .flutter-plugins-dependencies file has any plugin
+/// dev dependencies with platform-specific implementations.
+bool flutterPluginsListHasDevDependencies(File pluginsFile) {
+  final String pluginsString = pluginsFile.readAsStringSync();
+  final Map<String, dynamic> pluginsJson = json.decode(pluginsString) as Map<String, dynamic>;
+  final Map<String, dynamic> plugins =
+      pluginsJson[_kFlutterPluginsPluginListKey] as Map<String, dynamic>;
+
+  for (final MapEntry<String, dynamic> pluginEntries in plugins.entries) {
+    final List<dynamic> platformPlugins = pluginEntries.value as List<dynamic>;
+    final bool hasDevDependencies = platformPlugins.cast<Map<String, dynamic>>().any(
+      (Map<String, dynamic> plugin) => plugin[_kFlutterPluginsDevDependencyKey] == true,
+    );
+
+    if (hasDevDependencies) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 /// Creates a map representation of the [plugins] for those supported by [platformKey].

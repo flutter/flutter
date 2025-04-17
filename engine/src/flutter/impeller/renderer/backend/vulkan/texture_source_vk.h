@@ -6,14 +6,12 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_SOURCE_VK_H_
 
 #include "flutter/fml/status.h"
-#include "impeller/base/thread.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/backend/vulkan/yuv_conversion_vk.h"
-#include "vulkan/vulkan_handles.hpp"
 
 namespace impeller {
 
@@ -159,9 +157,7 @@ class TextureSourceVK {
  private:
   SharedHandleVK<vk::Framebuffer> framebuffer_;
   SharedHandleVK<vk::RenderPass> render_pass_;
-  mutable RWMutex layout_mutex_;
-  mutable vk::ImageLayout layout_ IPLR_GUARDED_BY(layout_mutex_) =
-      vk::ImageLayout::eUndefined;
+  mutable vk::ImageLayout layout_ = vk::ImageLayout::eUndefined;
 };
 
 }  // namespace impeller

@@ -530,10 +530,16 @@ static void RegisterImageTexture(JNIEnv* env,
                                  jobject jcaller,
                                  jlong shell_holder,
                                  jlong texture_id,
-                                 jobject image_texture_entry) {
+                                 jobject image_texture_entry,
+                                 jboolean reset_on_background) {
+  ImageExternalTexture::ImageLifecycle lifecycle =
+      reset_on_background ? ImageExternalTexture::ImageLifecycle::kReset
+                          : ImageExternalTexture::ImageLifecycle::kKeepAlive;
+
   ANDROID_SHELL_HOLDER->GetPlatformView()->RegisterImageTexture(
-      static_cast<int64_t>(texture_id),                                 //
-      fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry)  //
+      static_cast<int64_t>(texture_id),                                  //
+      fml::jni::ScopedJavaGlobalRef<jobject>(env, image_texture_entry),  //
+      lifecycle                                                          //
   );
 }
 
@@ -811,7 +817,7 @@ bool RegisterApi(JNIEnv* env) {
       {
           .name = "nativeRegisterImageTexture",
           .signature = "(JJLjava/lang/ref/"
-                       "WeakReference;)V",
+                       "WeakReference;Z)V",
           .fnPtr = reinterpret_cast<void*>(&RegisterImageTexture),
       },
       {
@@ -2023,6 +2029,54 @@ void PlatformViewAndroidJNIImpl::destroyOverlaySurface2() {
   FML_CHECK(fml::jni::CheckException(env));
 }
 
+namespace {
+class AndroidPathReceiver final : public DlPathReceiver {
+ public:
+  explicit AndroidPathReceiver(JNIEnv* env)
+      : env_(env),
+        android_path_(env->NewObject(path_class->obj(), path_constructor)) {}
+
+  void SetPathInfo(DlPathFillType type, bool is_convex) override {
+    // Need to convert the fill type to the Android enum and
+    // call setFillType on the path...
+    // see https://github.com/flutter/flutter/issues/164808
+  }
+  void MoveTo(const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
+  }
+  void LineTo(const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_line_to_method, p2.x, p2.y);
+  }
+  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_quad_to_method,  //
+                         cp.x, cp.y, p2.x, p2.y);
+  }
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
+    if (!path_conic_to_method) {
+      return false;
+    }
+    env_->CallVoidMethod(android_path_, path_conic_to_method,  //
+                         cp.x, cp.y, p2.x, p2.y, weight);
+    return true;
+  };
+  void CubicTo(const DlPoint& cp1,
+               const DlPoint& cp2,
+               const DlPoint& p2) override {
+    env_->CallVoidMethod(android_path_, path_cubic_to_method,  //
+                         cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
+  }
+  void Close() override {
+    env_->CallVoidMethod(android_path_, path_close_method);
+  }
+
+  jobject TakePath() { return android_path_; }
+
+ private:
+  JNIEnv* env_;
+  jobject android_path_;
+};
+}  // namespace
+
 void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
     int32_t view_id,
     int32_t x,
@@ -2132,79 +2186,14 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         FML_DCHECK(!dlPath.IsRoundRect());
 
         // Define and populate an Android Path with data from the DlPath
-        jobject androidPath =
-            env->NewObject(path_class->obj(), path_constructor);
+        AndroidPathReceiver receiver(env);
 
-        bool subpath_needs_close = false;
-        std::optional<flutter::DlPoint> pending_moveto;
-
-        auto resolve_moveto = [&env, &pending_moveto, &androidPath]() {
-          if (pending_moveto.has_value()) {
-            env->CallVoidMethod(androidPath, path_move_to_method,
-                                pending_moveto->x, pending_moveto->y);
-            pending_moveto.reset();
-          }
-        };
-
-        auto& path = dlPath.GetPath();
-        for (auto it = path.begin(), end = path.end(); it != end; ++it) {
-          switch (it.type()) {
-            case impeller::Path::ComponentType::kContour: {
-              const impeller::ContourComponent* contour = it.contour();
-              FML_DCHECK(contour != nullptr);
-              if (subpath_needs_close) {
-                env->CallVoidMethod(androidPath, path_close_method);
-              }
-              pending_moveto = contour->destination;
-              subpath_needs_close = contour->IsClosed();
-              break;
-            }
-            case impeller::Path::ComponentType::kLinear: {
-              const impeller::LinearPathComponent* linear = it.linear();
-              FML_DCHECK(linear != nullptr);
-              resolve_moveto();
-              env->CallVoidMethod(androidPath, path_line_to_method,
-                                  linear->p2.x, linear->p2.y);
-              break;
-            }
-            case impeller::Path::ComponentType::kQuadratic: {
-              const impeller::QuadraticPathComponent* quadratic =
-                  it.quadratic();
-              FML_DCHECK(quadratic != nullptr);
-              resolve_moveto();
-              env->CallVoidMethod(androidPath, path_quad_to_method,
-                                  quadratic->cp.x, quadratic->cp.y,
-                                  quadratic->p2.x, quadratic->p2.y);
-              break;
-            }
-            case impeller::Path::ComponentType::kConic: {
-              const impeller::ConicPathComponent* conic = it.conic();
-              FML_DCHECK(conic != nullptr);
-              resolve_moveto();
-              FML_DCHECK(path_conic_to_method != nullptr);
-              env->CallVoidMethod(androidPath, path_conic_to_method,
-                                  conic->cp.x, conic->cp.y,  //
-                                  conic->p2.x, conic->p2.y, conic->weight);
-              break;
-            }
-            case impeller::Path::ComponentType::kCubic: {
-              const impeller::CubicPathComponent* cubic = it.cubic();
-              FML_DCHECK(cubic != nullptr);
-              resolve_moveto();
-              env->CallVoidMethod(androidPath, path_cubic_to_method,
-                                  cubic->cp1.x, cubic->cp1.y,  //
-                                  cubic->cp2.x, cubic->cp2.y,  //
-                                  cubic->p2.x, cubic->p2.y);
-              break;
-            }
-          }
-        }
-        if (subpath_needs_close) {
-          env->CallVoidMethod(androidPath, path_close_method);
-        }
+        dlPath.Dispatch(receiver);
 
         env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_clippath_method, androidPath);
+                            g_mutators_stack_push_clippath_method,
+                            receiver.TakePath());
+        break;
       }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426

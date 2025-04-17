@@ -45,7 +45,6 @@ eventListener = (message) => {
             dispatchEvent(message);
         }
     });
-    console.log("removing initial listener");
     removeEventListener("message", eventListener);
     eventListener = (message) => {
 

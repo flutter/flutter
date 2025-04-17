@@ -109,7 +109,7 @@ class BlendFilterContents : public ColorFilterContents {
       std::optional<Scalar> alpha,
       ColorFilterContents::AbsorbOpacity absorb_opacity) const;
 
-  BlendMode blend_mode_ = BlendMode::kSourceOver;
+  BlendMode blend_mode_ = BlendMode::kSrcOver;
   AdvancedBlendProc advanced_blend_proc_;
   std::optional<Color> foreground_color_;
 

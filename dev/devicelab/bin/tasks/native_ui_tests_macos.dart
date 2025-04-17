@@ -25,6 +25,7 @@ Future<void> main() async {
       platformDirectory: path.join(projectDirectory, 'macos'),
       destination: 'platform=macOS',
       testName: 'native_ui_tests_macos',
+      configuration: 'Debug',
       skipCodesign: true,
     )) {
       return TaskResult.failure('Platform unit tests failed');

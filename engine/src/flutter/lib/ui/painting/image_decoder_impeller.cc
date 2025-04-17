@@ -74,6 +74,22 @@ bool IsWideGamut(const SkColorSpace* color_space) {
   float area = CalculateArea(rgb);
   return area > kSrgbGamutArea;
 }
+
+static std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type) {
+  switch (type) {
+    case kRGBA_8888_SkColorType:
+      return impeller::PixelFormat::kR8G8B8A8UNormInt;
+    case kBGRA_8888_SkColorType:
+      return impeller::PixelFormat::kB8G8R8A8UNormInt;
+    case kRGBA_F16_SkColorType:
+      return impeller::PixelFormat::kR16G16B16A16Float;
+    case kBGR_101010x_XR_SkColorType:
+      return impeller::PixelFormat::kB10G10R10XR;
+    default:
+      return std::nullopt;
+  }
+  return std::nullopt;
+}
 }  // namespace
 
 ImageDecoderImpeller::ImageDecoderImpeller(
@@ -160,11 +176,11 @@ DecompressResult ImageDecoderImpeller::DecompressTexture(
         base_image_info.makeWH(decode_size.width(), decode_size.height())
             .makeColorType(
                 ChooseCompatibleColorType(base_image_info.colorType()))
-            .makeAlphaType(alpha_type);
+            .makeAlphaType(alpha_type)
+            .makeColorSpace(SkColorSpace::MakeSRGB());
   }
 
-  const auto pixel_format =
-      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
+  const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format.has_value()) {
     std::string decode_error(impeller::SPrintF(
         "Codec pixel format is not supported (SkColorType=%d)",
@@ -289,8 +305,7 @@ ImageDecoderImpeller::UnsafeUploadTextureToPrivate(
     const std::shared_ptr<impeller::DeviceBuffer>& buffer,
     const SkImageInfo& image_info,
     const std::optional<SkImageInfo>& resize_info) {
-  const auto pixel_format =
-      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
+  const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
     std::string decode_error(impeller::SPrintF(
         "Unsupported pixel format (SkColorType=%d)", image_info.colorType()));
@@ -456,8 +471,7 @@ ImageDecoderImpeller::UploadTextureToStorage(
     return std::make_pair(nullptr, "No texture bitmap is available");
   }
   const auto image_info = bitmap->info();
-  const auto pixel_format =
-      impeller::skia_conversions::ToPixelFormat(image_info.colorType());
+  const auto pixel_format = ToPixelFormat(image_info.colorType());
   if (!pixel_format) {
     std::string decode_error(impeller::SPrintF(
         "Unsupported pixel format (SkColorType=%d)", image_info.colorType()));
