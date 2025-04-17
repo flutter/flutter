@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_api_samples/widgets/app/app.1.dart'
-    as example;
+import 'package:flutter_api_samples/widgets/app/app.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../widgets/navigator_utils.dart';
 
 void main() {
-  testWidgets('Can navigate through all of the routes with system back gestures', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.WidgetsAppExample(),
-    );
+  testWidgets('Can navigate through all of the routes with system back gestures', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const example.WidgetsAppExample());
 
     expect(find.text('Home Page'), findsOneWidget);
     expect(find.text('Leaf Page'), findsNothing);
