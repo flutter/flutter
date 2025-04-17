@@ -1869,8 +1869,10 @@ class Scaffold extends StatefulWidget {
   /// is also null, then it defaults to [Colors.black54].
   final Color? drawerScrimColor;
 
-  /// TODO: docs
-  /// TODO: should this allow null as a return value?
+  /// A builder for the widget that obscures primary content while a bottom sheet is open.
+  ///
+  /// If this is null, then a non-dismissible [ModalBarrier] with color [Colors.black] is used.
+  /// If the builder returns null, then no scrim is shown.
   final Widget? Function(BuildContext, double)? bottomSheetScrimBuilder;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
@@ -2925,7 +2927,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   final Color _bodyScrimColor = Colors.black;
   double _bodyScrimAnimation = 0.0;
 
-  /// Whether to show a [ModalBarrier] over the body of the scaffold.
+  /// Updates the state of the body scrim.
+  ///
+  /// This method is used to show or hide the body scrim and to set the animation value.
   void showBodyScrim(bool value, double opacity) {
     if (_showBodyScrim == value && _bodyScrimAnimation == opacity) {
       return;
