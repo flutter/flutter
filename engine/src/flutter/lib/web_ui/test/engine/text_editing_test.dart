@@ -590,23 +590,22 @@ Future<void> testMain() async {
       final PlatformMessagesSpy spy = PlatformMessagesSpy();
       spy.setUp();
 
-      textEditing.configuration = multilineConfig;
+      editingStrategy!.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
 
-      final showCompleter = Completer<void>();
-      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
-      await showCompleter.future;
+      expect(editingStrategy!.isEnabled, isTrue);
 
-      expect(textEditing.isEditing, isTrue);
-
-      expect(domDocument.activeElement, textEditing.strategy.domElement);
+      final inputElement = editingStrategy!.domElement!;
+      expect(domDocument.activeElement, inputElement);
 
       int blurCount = 0;
-      textEditing.strategy.domElement!.addEventListener(
-        'blur',
-        createDomEventListener((_) {
-          blurCount++;
-        }),
-      );
+      final blurListener = createDomEventListener((_) {
+        blurCount++;
+      });
+      inputElement.addEventListener('blur', blurListener);
 
       final sizeCompleter = Completer<void>();
       testTextEditing.acceptCommand(
@@ -625,6 +624,7 @@ Future<void> testMain() async {
       // `TextInputClient.onConnectionClosed` shouldn't have been called.
       expect(spy.messages, isEmpty);
 
+      inputElement.removeEventListener('blur', blurListener);
       spy.tearDown();
     });
 
