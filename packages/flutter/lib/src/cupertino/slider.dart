@@ -224,20 +224,15 @@ class CupertinoSlider extends StatefulWidget {
 }
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
-  // Initially true to ensure that starting drag at the edge will not emit haptic feedback.
-  bool _lastValueWasAtEdge = true;
-
   void _handleChanged(double value, bool isLargeDelta) {
     assert(widget.onChanged != null);
     final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
-
     final bool isAtEdge = lerpValue == widget.max || lerpValue == widget.min;
-    if (isAtEdge && !_lastValueWasAtEdge) {
-      _emitHapticFeedback(isLargeDelta);
-    }
-    _lastValueWasAtEdge = isAtEdge;
 
     if (lerpValue != widget.value) {
+      if (isAtEdge) {
+        _emitHapticFeedback(isLargeDelta);
+      }
       widget.onChanged!(lerpValue);
     }
   }
