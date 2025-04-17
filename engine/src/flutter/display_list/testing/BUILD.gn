@@ -10,6 +10,7 @@ source_set("display_list_testing") {
 
   sources = [
     "dl_test_equality.h",
+    "dl_test_mock_path_receiver.h",
     "dl_test_snippets.cc",
     "dl_test_snippets.h",
   ]
@@ -17,7 +18,7 @@ source_set("display_list_testing") {
   deps = [
     "//flutter/skia",
     "//flutter/testing:testing_lib",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
 
   public_deps = [ "//flutter/display_list:display_list" ]

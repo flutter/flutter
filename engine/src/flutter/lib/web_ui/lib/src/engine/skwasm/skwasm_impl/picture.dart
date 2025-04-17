@@ -10,7 +10,7 @@ class SkwasmPicture extends SkwasmObjectWrapper<RawPicture> implements ScenePict
   SkwasmPicture.fromHandle(PictureHandle handle) : super(handle, _registry);
 
   static final SkwasmFinalizationRegistry<RawPicture> _registry =
-      SkwasmFinalizationRegistry<RawPicture>(pictureDispose);
+      SkwasmFinalizationRegistry<RawPicture>((PictureHandle handle) => pictureDispose(handle));
 
   @override
   Future<ui.Image> toImage(int width, int height) async => toImageSync(width, height);
@@ -43,7 +43,9 @@ class SkwasmPictureRecorder extends SkwasmObjectWrapper<RawPictureRecorder>
   SkwasmPictureRecorder() : super(pictureRecorderCreate(), _registry);
 
   static final SkwasmFinalizationRegistry<RawPictureRecorder> _registry =
-      SkwasmFinalizationRegistry<RawPictureRecorder>(pictureRecorderDispose);
+      SkwasmFinalizationRegistry<RawPictureRecorder>(
+        (PictureRecorderHandle handle) => pictureRecorderDispose(handle),
+      );
 
   @override
   SkwasmPicture endRecording() {

@@ -134,6 +134,7 @@ class PlatformView : public flutter::PlatformView {
 
   // |flutter::PlatformView|
   void UpdateSemantics(
+      int64_t view_id,
       flutter::SemanticsNodeUpdates update,
       flutter::CustomAccessibilityActionUpdates actions) override;
 

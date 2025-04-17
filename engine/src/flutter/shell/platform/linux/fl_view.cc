@@ -11,15 +11,17 @@
 
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/fl_accessible_node.h"
+#include "flutter/shell/platform/linux/fl_compositor_opengl.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_key_event.h"
+#include "flutter/shell/platform/linux/fl_opengl_manager.h"
 #include "flutter/shell/platform/linux/fl_plugin_registrar_private.h"
 #include "flutter/shell/platform/linux/fl_pointer_manager.h"
-#include "flutter/shell/platform/linux/fl_renderer_gdk.h"
 #include "flutter/shell/platform/linux/fl_scrolling_manager.h"
 #include "flutter/shell/platform/linux/fl_socket_accessible.h"
 #include "flutter/shell/platform/linux/fl_touch_manager.h"
 #include "flutter/shell/platform/linux/fl_view_accessible.h"
+#include "flutter/shell/platform/linux/fl_view_private.h"
 #include "flutter/shell/platform/linux/fl_window_state_monitor.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_engine.h"
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_plugin_registry.h"
@@ -33,14 +35,14 @@ struct _FlView {
   // Engine this view is showing.
   FlEngine* engine;
 
-  // Signal subscription for engine restarts.
+  // Signal subscription for engine restart signal.
   guint on_pre_engine_restart_cb_id;
+
+  // Signal subscription for updating semantics signal.
+  guint update_semantics_cb_id;
 
   // ID for this view.
   FlutterViewId view_id;
-
-  // Object that performs the view rendering.
-  FlRendererGdk* renderer;
 
   // Background color.
   GdkRGBA* background_color;
@@ -132,25 +134,6 @@ static FlutterPointerDeviceKind get_device_kind(GdkEvent* event) {
   }
 }
 
-static gboolean get_mouse_button(GdkEvent* event, int64_t* button) {
-  guint event_button = 0;
-  gdk_event_get_button(event, &event_button);
-
-  switch (event_button) {
-    case 1:
-      *button = kFlutterPointerButtonMousePrimary;
-      return TRUE;
-    case 2:
-      *button = kFlutterPointerButtonMouseMiddle;
-      return TRUE;
-    case 3:
-      *button = kFlutterPointerButtonMouseSecondary;
-      return TRUE;
-    default:
-      return FALSE;
-  }
-}
-
 // Called when the mouse cursor changes.
 static void cursor_changed_cb(FlView* self) {
   FlMouseCursorHandler* handler =
@@ -212,9 +195,9 @@ static void handle_geometry_changed(FlView* self) {
   // Note: `gtk_widget_init()` initializes the size allocation to 1x1.
   if (allocation.width > 1 && allocation.height > 1 &&
       gtk_widget_get_realized(GTK_WIDGET(self))) {
-    fl_renderer_wait_for_frame(FL_RENDERER(self->renderer),
-                               allocation.width * scale_factor,
-                               allocation.height * scale_factor);
+    fl_compositor_wait_for_frame(fl_engine_get_compositor(self->engine),
+                                 allocation.width * scale_factor,
+                                 allocation.height * scale_factor);
   }
 }
 
@@ -238,10 +221,12 @@ static void view_added_cb(GObject* object,
 }
 
 // Called when the engine updates accessibility.
-static void update_semantics_cb(FlEngine* engine,
-                                const FlutterSemanticsUpdate2* update,
-                                gpointer user_data) {
-  FlView* self = FL_VIEW(user_data);
+static void update_semantics_cb(FlView* self,
+                                const FlutterSemanticsUpdate2* update) {
+  // A semantics update is routed to a particular view.
+  if (update->view_id != self->view_id) {
+    return;
+  }
 
   fl_view_accessible_handle_update_semantics(self->view_accessible, update);
 }
@@ -323,10 +308,8 @@ static gboolean button_press_event_cb(FlView* self,
     return FALSE;
   }
 
-  int64_t button;
-  if (!get_mouse_button(event, &button)) {
-    return FALSE;
-  }
+  guint button = 0;
+  gdk_event_get_button(event, &button);
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
@@ -345,10 +328,8 @@ static gboolean button_release_event_cb(FlView* self,
                                         GdkEventButton* button_event) {
   GdkEvent* event = reinterpret_cast<GdkEvent*>(button_event);
 
-  int64_t button;
-  if (!get_mouse_button(event, &button)) {
-    return FALSE;
-  }
+  guint button = 0;
+  gdk_event_get_button(event, &button);
 
   gdouble x = 0.0, y = 0.0;
   gdk_event_get_coords(event, &x, &y);
@@ -457,26 +438,26 @@ static void gesture_zoom_end_cb(FlView* self) {
 }
 
 static GdkGLContext* create_context_cb(FlView* self) {
-  fl_renderer_gdk_set_window(self->renderer,
-                             gtk_widget_get_parent_window(GTK_WIDGET(self)));
-
   init_scrolling(self);
   init_touch(self);
 
+  FlOpenGLManager* opengl_manager = fl_engine_get_opengl_manager(self->engine);
   g_autoptr(GError) error = nullptr;
-  if (!fl_renderer_gdk_create_contexts(self->renderer, &error)) {
+  if (!fl_opengl_manager_create_contexts(
+          opengl_manager, gtk_widget_get_parent_window(GTK_WIDGET(self)),
+          &error)) {
     gtk_gl_area_set_error(self->gl_area, error);
     return nullptr;
   }
 
   return GDK_GL_CONTEXT(
-      g_object_ref(fl_renderer_gdk_get_context(self->renderer)));
+      g_object_ref(fl_opengl_manager_get_context(opengl_manager)));
 }
 
 static void realize_cb(FlView* self) {
   g_autoptr(GError) error = nullptr;
 
-  fl_renderer_make_current(FL_RENDERER(self->renderer));
+  fl_opengl_manager_make_current(fl_engine_get_opengl_manager(self->engine));
 
   GError* gl_error = gtk_gl_area_get_error(self->gl_area);
   if (gl_error != NULL) {
@@ -484,7 +465,8 @@ static void realize_cb(FlView* self) {
     return;
   }
 
-  fl_renderer_setup(FL_RENDERER(self->renderer));
+  fl_compositor_opengl_setup(
+      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)));
 
   GtkWidget* toplevel_window = gtk_widget_get_toplevel(GTK_WIDGET(self));
 
@@ -496,8 +478,9 @@ static void realize_cb(FlView* self) {
   g_signal_connect_swapped(toplevel_window, "delete-event",
                            G_CALLBACK(window_delete_event_cb), self);
 
-  fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
-                             FL_RENDERABLE(self));
+  // Flutter engine will need to make the context current from raster thread
+  // during initialization.
+  fl_opengl_manager_clear_current(fl_engine_get_opengl_manager(self->engine));
 
   if (!fl_engine_start(self->engine, &error)) {
     g_warning("Failed to start Flutter engine: %s", error->message);
@@ -507,11 +490,10 @@ static void realize_cb(FlView* self) {
   setup_cursor(self);
 
   handle_geometry_changed(self);
+}
 
-  self->view_accessible = fl_view_accessible_new(self->engine);
-  fl_socket_accessible_embed(
-      FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
-      atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+static void secondary_realize_cb(FlView* self) {
+  setup_cursor(self);
 }
 
 static gboolean render_cb(FlView* self, GdkGLContext* context) {
@@ -522,9 +504,10 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
   int width = gtk_widget_get_allocated_width(GTK_WIDGET(self->gl_area));
   int height = gtk_widget_get_allocated_height(GTK_WIDGET(self->gl_area));
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self->gl_area));
-  fl_renderer_render(FL_RENDERER(self->renderer), self->view_id,
-                     width * scale_factor, height * scale_factor,
-                     self->background_color);
+  fl_compositor_opengl_render(
+      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)),
+      self->view_id, width * scale_factor, height * scale_factor,
+      self->background_color);
 
   return TRUE;
 }
@@ -532,7 +515,7 @@ static gboolean render_cb(FlView* self, GdkGLContext* context) {
 static void unrealize_cb(FlView* self) {
   g_autoptr(GError) error = nullptr;
 
-  fl_renderer_make_current(FL_RENDERER(self->renderer));
+  fl_opengl_manager_make_current(fl_engine_get_opengl_manager(self->engine));
 
   GError* gl_error = gtk_gl_area_get_error(self->gl_area);
   if (gl_error != NULL) {
@@ -540,7 +523,8 @@ static void unrealize_cb(FlView* self) {
     return;
   }
 
-  fl_renderer_cleanup(FL_RENDERER(self->renderer));
+  fl_compositor_opengl_cleanup(
+      FL_COMPOSITOR_OPENGL(fl_engine_get_compositor(self->engine)));
 }
 
 static void size_allocate_cb(FlView* self) {
@@ -565,18 +549,12 @@ static void fl_view_dispose(GObject* object) {
   g_cancellable_cancel(self->cancellable);
 
   if (self->engine != nullptr) {
-    fl_engine_set_update_semantics_handler(self->engine, nullptr, nullptr,
-                                           nullptr);
-
     FlMouseCursorHandler* handler =
         fl_engine_get_mouse_cursor_handler(self->engine);
     if (self->cursor_changed_cb_id != 0) {
       g_signal_handler_disconnect(handler, self->cursor_changed_cb_id);
       self->cursor_changed_cb_id = 0;
     }
-
-    // Stop rendering.
-    fl_renderer_remove_view(FL_RENDERER(self->renderer), self->view_id);
 
     // Release the view ID from the engine.
     fl_engine_remove_view(self->engine, self->view_id, nullptr, nullptr,
@@ -589,8 +567,12 @@ static void fl_view_dispose(GObject* object) {
     self->on_pre_engine_restart_cb_id = 0;
   }
 
+  if (self->update_semantics_cb_id != 0) {
+    g_signal_handler_disconnect(self->engine, self->update_semantics_cb_id);
+    self->update_semantics_cb_id = 0;
+  }
+
   g_clear_object(&self->engine);
-  g_clear_object(&self->renderer);
   g_clear_pointer(&self->background_color, gdk_rgba_free);
   g_clear_object(&self->window_state_monitor);
   g_clear_object(&self->scrolling_manager);
@@ -690,6 +672,22 @@ static void fl_view_class_init(FlViewClass* klass) {
                                        fl_socket_accessible_get_type());
 }
 
+// Engine related construction.
+static void setup_engine(FlView* self) {
+  self->view_accessible = fl_view_accessible_new(self->engine, self->view_id);
+  fl_socket_accessible_embed(
+      FL_SOCKET_ACCESSIBLE(gtk_widget_get_accessible(GTK_WIDGET(self))),
+      atk_plug_get_id(ATK_PLUG(self->view_accessible)));
+
+  self->pointer_manager = fl_pointer_manager_new(self->view_id, self->engine);
+
+  self->on_pre_engine_restart_cb_id =
+      g_signal_connect_swapped(self->engine, "on-pre-engine-restart",
+                               G_CALLBACK(on_pre_engine_restart_cb), self);
+  self->update_semantics_cb_id = g_signal_connect_swapped(
+      self->engine, "update-semantics", G_CALLBACK(update_semantics_cb), self);
+}
+
 static void fl_view_init(FlView* self) {
   self->cancellable = g_cancellable_new();
 
@@ -756,17 +754,8 @@ G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
 
   self->view_id = flutter::kFlutterImplicitViewId;
   self->engine = FL_ENGINE(g_object_ref(engine));
-  FlRenderer* renderer = fl_engine_get_renderer(engine);
-  g_assert(FL_IS_RENDERER_GDK(renderer));
-  self->renderer = FL_RENDERER_GDK(g_object_ref(renderer));
 
-  self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
-
-  fl_engine_set_update_semantics_handler(self->engine, update_semantics_cb,
-                                         self, nullptr);
-  self->on_pre_engine_restart_cb_id =
-      g_signal_connect_swapped(engine, "on-pre-engine-restart",
-                               G_CALLBACK(on_pre_engine_restart_cb), self);
+  setup_engine(self);
 
   g_signal_connect_swapped(self->gl_area, "create-context",
                            G_CALLBACK(create_context_cb), self);
@@ -775,6 +764,8 @@ G_MODULE_EXPORT FlView* fl_view_new(FlDartProject* project) {
   g_signal_connect_swapped(self->gl_area, "unrealize", G_CALLBACK(unrealize_cb),
                            self);
 
+  fl_engine_set_implicit_view(engine, FL_RENDERABLE(self));
+
   return self;
 }
 
@@ -782,23 +773,14 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
   FlView* self = FL_VIEW(g_object_new(fl_view_get_type(), nullptr));
 
   self->engine = FL_ENGINE(g_object_ref(engine));
-  FlRenderer* renderer = fl_engine_get_renderer(engine);
-  g_assert(FL_IS_RENDERER_GDK(renderer));
-  self->renderer = FL_RENDERER_GDK(g_object_ref(renderer));
 
-  self->on_pre_engine_restart_cb_id =
-      g_signal_connect_swapped(engine, "on-pre-engine-restart",
-                               G_CALLBACK(on_pre_engine_restart_cb), self);
+  self->view_id = fl_engine_add_view(engine, FL_RENDERABLE(self), 1, 1, 1.0,
+                                     self->cancellable, view_added_cb, self);
 
-  self->view_id = fl_engine_add_view(self->engine, 1, 1, 1.0, self->cancellable,
-                                     view_added_cb, self);
-  fl_renderer_add_renderable(FL_RENDERER(self->renderer), self->view_id,
-                             FL_RENDERABLE(self));
+  setup_engine(self);
 
-  self->pointer_manager = fl_pointer_manager_new(self->view_id, engine);
-
-  setup_cursor(self);
-
+  g_signal_connect_swapped(self->gl_area, "realize",
+                           G_CALLBACK(secondary_realize_cb), self);
   return self;
 }
 
@@ -818,4 +800,9 @@ G_MODULE_EXPORT void fl_view_set_background_color(FlView* self,
   g_return_if_fail(FL_IS_VIEW(self));
   gdk_rgba_free(self->background_color);
   self->background_color = gdk_rgba_copy(color);
+}
+
+FlViewAccessible* fl_view_get_accessible(FlView* self) {
+  g_return_val_if_fail(FL_IS_VIEW(self), nullptr);
+  return self->view_accessible;
 }

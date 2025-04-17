@@ -4,6 +4,8 @@
 
 #include "flutter/lib/ui/painting/display_list_image_gpu.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
+
 namespace flutter {
 
 sk_sp<DlImageGPU> DlImageGPU::Make(SkiaGPUObject<SkImage> image) {
@@ -51,9 +53,9 @@ bool DlImageGPU::isUIThreadSafe() const {
 }
 
 // |DlImage|
-SkISize DlImageGPU::dimensions() const {
+DlISize DlImageGPU::GetSize() const {
   const auto image = skia_image();
-  return image ? image->dimensions() : SkISize::MakeEmpty();
+  return image ? ToDlISize(image->dimensions()) : DlISize();
 }
 
 // |DlImage|

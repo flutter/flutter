@@ -4,6 +4,7 @@
 
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
 #include "impeller/base/validation.h"
@@ -66,12 +67,13 @@ FLUTTER_ASSERT_ARC
   }
 
   if (_externalImage) {
-    context.canvas->DrawImageRect(_externalImage,                          // image
-                                  SkRect::Make(_externalImage->bounds()),  // source rect
-                                  bounds,                                  // destination rect
-                                  sampling,                                // sampling
-                                  context.paint,                           // paint
-                                  flutter::DlSrcRectConstraint::kStrict    // enforce edges
+    context.canvas->DrawImageRect(
+        _externalImage,                                      // image
+        flutter::DlRect::Make(_externalImage->GetBounds()),  // source rect
+        flutter::ToDlRect(bounds),                           // destination rect
+        sampling,                                            // sampling
+        context.paint,                                       // paint
+        flutter::DlSrcRectConstraint::kStrict                // enforce edges
     );
   }
 }

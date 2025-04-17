@@ -21,6 +21,7 @@ import 'package:package_config/package_config_types.dart';
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -283,7 +284,10 @@ void main() {
             packagesWithNativeAssetsResult: <String>['bar'],
             onBuild:
                 (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                  codeAssets:
+                      buildMode == BuildMode.debug
+                          ? codeAssets(input.config.code.targetOS, input.config.code)
+                          : <CodeAsset>[],
                 ),
             onLink:
                 (LinkInput input) =>
@@ -388,22 +392,25 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         return;
       }
 
-      final File packageConfigFile = fileSystem
-          .directory(projectUri)
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json');
-      await packageConfigFile.parent.create();
-      await packageConfigFile.create();
+      final File packageConfigFile = writePackageConfigFile(
+        directory: fileSystem.directory(projectUri),
+        mainLibName: 'my_app',
+      );
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packageConfigFile,
         logger: environment.logger,
       );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
         runPackageName,
+        pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(

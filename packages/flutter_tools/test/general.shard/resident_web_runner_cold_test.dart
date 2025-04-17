@@ -8,6 +8,8 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -26,6 +28,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_pub_deps.dart';
 import '../src/fakes.dart';
+import '../src/package_config.dart';
 import '../src/test_build_system.dart';
 
 void main() {
@@ -46,8 +49,11 @@ void main() {
     mockFlutterDevice = FakeFlutterDevice(mockWebDevice);
     mockFlutterDevice._devFS = mockWebDevFS;
 
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
-    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+''');
+
+    writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
     fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
     fileSystem.file(fileSystem.path.join('web', 'index.html')).createSync(recursive: true);
   });
@@ -62,6 +68,9 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -96,6 +105,9 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -126,6 +138,9 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -155,6 +170,9 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -188,6 +206,9 @@ void main() {
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
@@ -237,6 +258,11 @@ class FakeWebDevice extends Fake implements Device {
   @override
   Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
     return true;
+  }
+
+  @override
+  Future<String> get sdkNameAndVersion async {
+    return 'Flutter Tools';
   }
 
   @override

@@ -7,6 +7,7 @@
 #include "flutter/display_list/skia/dl_sk_canvas.h"
 
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/skia/dl_sk_conversions.h"
 #include "flutter/display_list/skia/dl_sk_dispatcher.h"
 #include "flutter/fml/trace_event.h"
@@ -157,6 +158,13 @@ void DlSkCanvasAdapter::ClipRoundRect(const DlRoundRect& rrect,
   delegate_->clipRRect(ToSkRRect(rrect), ToSk(clip_op), is_aa);
 }
 
+void DlSkCanvasAdapter::ClipRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                              DlClipOp clip_op,
+                                              bool is_aa) {
+  // Skia doesn't support round superellipse, thus fall back to round rectangle.
+  delegate_->clipRRect(ToApproximateSkRRect(rse), ToSk(clip_op), is_aa);
+}
+
 void DlSkCanvasAdapter::ClipPath(const DlPath& path,
                                  DlClipOp clip_op,
                                  bool is_aa) {
@@ -233,6 +241,12 @@ void DlSkCanvasAdapter::DrawDiffRoundRect(const DlRoundRect& outer,
                                           const DlRoundRect& inner,
                                           const DlPaint& paint) {
   delegate_->drawDRRect(ToSkRRect(outer), ToSkRRect(inner), ToSk(paint));
+}
+
+void DlSkCanvasAdapter::DrawRoundSuperellipse(const DlRoundSuperellipse& rse,
+                                              const DlPaint& paint) {
+  // Skia doesn't support round superellipse, thus fall back to round rectangle.
+  delegate_->drawRRect(ToApproximateSkRRect(rse), ToSk(paint));
 }
 
 void DlSkCanvasAdapter::DrawPath(const DlPath& path, const DlPaint& paint) {
@@ -324,7 +338,7 @@ void DlSkCanvasAdapter::DrawDisplayList(const sk_sp<DisplayList> display_list,
   // if we need a saveLayer.
   if (opacity < SK_Scalar1 && !display_list->can_apply_group_opacity()) {
     TRACE_EVENT0("flutter", "Canvas::saveLayer");
-    delegate_->saveLayerAlphaf(&display_list->bounds(), opacity);
+    delegate_->saveLayerAlphaf(ToSkRect(&display_list->GetBounds()), opacity);
     opacity = SK_Scalar1;
   } else {
     delegate_->save();
@@ -332,7 +346,8 @@ void DlSkCanvasAdapter::DrawDisplayList(const sk_sp<DisplayList> display_list,
 
   DlSkCanvasDispatcher dispatcher(delegate_, opacity);
   if (display_list->has_rtree()) {
-    display_list->Dispatch(dispatcher, delegate_->getLocalClipBounds());
+    display_list->Dispatch(dispatcher,
+                           ToDlRect(delegate_->getLocalClipBounds()));
   } else {
     display_list->Dispatch(dispatcher);
   }

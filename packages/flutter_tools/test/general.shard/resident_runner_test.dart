@@ -36,6 +36,7 @@ import '../src/context.dart';
 import '../src/fake_pub_deps.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart';
+import '../src/package_config.dart';
 import '../src/testbed.dart';
 import 'resident_runner_helpers.dart';
 
@@ -237,6 +238,14 @@ void main() {
             method: 'getIsolate',
             args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
             jsonResponse: fakeUnpausedIsolate.toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
           ),
           FakeVmServiceRequest(
             method: 'getVM',
@@ -785,6 +794,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -851,18 +868,28 @@ void main() {
             jsonResponse: fakePausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'removeBreakpoint',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'breakpointId': 'test-breakpoint',
+            },
+          ),
+          FakeVmServiceRequest(
+            method: 'resume',
+            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
-          const FakeVmServiceRequest(
-            method: 'setIsolatePauseMode',
-            args: <String, String>{'isolateId': '1', 'exceptionPauseMode': 'None'},
-          ),
-          const FakeVmServiceRequest(
-            method: 'removeBreakpoint',
-            args: <String, String>{'isolateId': '1', 'breakpointId': 'test-breakpoint'},
-          ),
-          const FakeVmServiceRequest(method: 'resume', args: <String, String>{'isolateId': '1'}),
           listViews,
           const FakeVmServiceRequest(
             method: 'streamListen',
@@ -913,6 +940,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -940,6 +975,14 @@ void main() {
             jsonResponse: fakeUnpausedIsolate.toJson(),
           ),
           FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
+          ),
+          FakeVmServiceRequest(
             method: 'getVM',
             jsonResponse: vm_service.VM.parse(<String, Object>{})!.toJson(),
           ),
@@ -965,6 +1008,14 @@ void main() {
             method: 'getIsolate',
             args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id},
             jsonResponse: fakeUnpausedIsolate.toJson(),
+          ),
+          FakeVmServiceRequest(
+            method: 'setIsolatePauseMode',
+            args: <String, Object?>{
+              'isolateId': fakeUnpausedIsolate.id,
+              'exceptionPauseMode': vm_service.ExceptionPauseMode.kNone,
+            },
+            jsonResponse: vm_service.Success().toJson(),
           ),
           FakeVmServiceRequest(
             method: 'getVM',
@@ -1087,26 +1138,18 @@ void main() {
   }
 }''');
         globals.fs.file('l10n.yaml').createSync();
-        globals.fs.file('pubspec.yaml').writeAsStringSync('flutter:\n  generate: true\n');
+        globals.fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
+flutter:
+  generate: true''');
 
         // Create necessary files for [DartPluginRegistrantTarget]
-        final File packageConfig = globals.fs
-            .directory('.dart_tool')
-            .childFile('package_config.json');
-        packageConfig.createSync(recursive: true);
-        packageConfig.writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "../../../path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
+        );
+
         // Start from an empty dart_plugin_registrant.dart file.
         globals.fs
             .directory('.dart_tool')
@@ -1141,6 +1184,7 @@ void main() {
 }''');
         globals.fs.file('l10n.yaml').createSync();
         globals.fs.file('pubspec.yaml').writeAsStringSync('''
+name: my_app
 flutter:
   generate: true
 
@@ -1152,23 +1196,12 @@ dependencies:
 
         // Create necessary files for [DartPluginRegistrantTarget], including a
         // plugin that will trigger generation.
-        final File packageConfig = globals.fs
-            .directory('.dart_tool')
-            .childFile('package_config.json');
-        packageConfig.createSync(recursive: true);
-        packageConfig.writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "path_provider_linux",
-      "rootUri": "../path_provider_linux",
-      "packageUri": "lib/",
-      "languageVersion": "2.12"
-    }
-  ]
-}
-''');
+        writePackageConfigFile(
+          directory: globals.fs.currentDirectory,
+          mainLibName: 'my_app',
+          packages: <String, String>{'path_provider_linux': 'path_provider_linux'},
+        );
+
         final Directory fakePluginDir = globals.fs.directory('path_provider_linux');
         final File pluginPubspec = fakePluginDir.childFile('pubspec.yaml');
         pluginPubspec.createSync(recursive: true);
@@ -1390,7 +1423,7 @@ flutter:
             commandHelp.hWithDetails,
             commandHelp.c,
             commandHelp.q,
-            '',
+            '\n',
           ].join('\n'),
         ),
       );
@@ -1425,7 +1458,7 @@ flutter:
             commandHelp.hWithoutDetails,
             commandHelp.c,
             commandHelp.q,
-            '',
+            '\n',
           ].join('\n'),
         ),
       );

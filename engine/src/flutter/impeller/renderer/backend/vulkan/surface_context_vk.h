@@ -96,6 +96,9 @@ class SurfaceContextVK : public Context,
   ///        recreated on the next frame.
   void UpdateSurfaceSize(const ISize& size) const;
 
+  /// @brief Can be called when the surface is destroyed to reduce memory usage.
+  void TeardownSwapchain();
+
   // |Context|
   void InitializeCommonlyUsedShadersIfNeeded() const override;
 

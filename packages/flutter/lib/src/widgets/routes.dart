@@ -1583,7 +1583,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    if (receivedTransition == null) {
+    if (receivedTransition == null || secondaryAnimation.isDismissed) {
       return buildTransitions(context, animation, secondaryAnimation, child);
     }
 
@@ -2134,7 +2134,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didChangeNext(Route<dynamic>? nextRoute) {
     if (nextRoute is ModalRoute<T> &&
         canTransitionTo(nextRoute) &&
-        nextRoute.delegatedTransition != this.delegatedTransition) {
+        nextRoute.delegatedTransition != delegatedTransition) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
@@ -2147,7 +2147,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void didPopNext(Route<dynamic> nextRoute) {
     if (nextRoute is ModalRoute<T> &&
         canTransitionTo(nextRoute) &&
-        nextRoute.delegatedTransition != this.delegatedTransition) {
+        nextRoute.delegatedTransition != delegatedTransition) {
       receivedTransition = nextRoute.delegatedTransition;
     } else {
       receivedTransition = null;
@@ -2631,6 +2631,9 @@ class RawDialogRoute<T> extends PopupRoute<T> {
 /// The `routeSettings` will be used in the construction of the dialog's route.
 /// See [RouteSettings] for more details.
 ///
+/// {@macro flutter.material.dialog.requestFocus}
+/// {@macro flutter.widgets.navigator.Route.requestFocus}
+///
 /// {@macro flutter.widgets.RawDialogRoute}
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
@@ -2672,6 +2675,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
   Offset? anchorPoint,
+  bool? requestFocus,
 }) {
   assert(!barrierDismissible || barrierLabel != null);
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
@@ -2684,6 +2688,7 @@ Future<T?> showGeneralDialog<T extends Object?>({
       transitionBuilder: transitionBuilder,
       settings: routeSettings,
       anchorPoint: anchorPoint,
+      requestFocus: requestFocus,
     ),
   );
 }

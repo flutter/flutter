@@ -23,6 +23,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../features.dart';
 import '../globals.dart' as globals;
 import '../macos/xcdevice.dart';
 import '../mdns_discovery.dart';
@@ -38,6 +39,24 @@ import 'mac.dart';
 import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
+
+const String kJITCrashFailureMessage =
+    'Crash occurred when compiling unknown function in unoptimized JIT mode in unknown pass';
+
+@visibleForTesting
+String jITCrashFailureInstructions(String deviceVersion) => '''
+════════════════════════════════════════════════════════════════════════════════
+A change to iOS has caused a temporary break in Flutter's debug mode on
+physical devices.
+See https://github.com/flutter/flutter/issues/163984 for details.
+
+In the meantime, we recommend these temporary workarounds:
+
+* When developing with a physical device, use one running iOS 18.3 or lower.
+* Use a simulator for development rather than a physical device.
+* If you must use a device updated to $deviceVersion, use Flutter's release or
+  profile mode via --release or --profile flags.
+════════════════════════════════════════════════════════════════════════════════''';
 
 class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices({
@@ -594,6 +613,7 @@ class IOSDevice extends Device {
           debuggingOptions: debuggingOptions,
           packageId: packageId,
           vmServiceDiscovery: vmServiceDiscovery,
+          package: package,
         );
       } else if (isWirelesslyConnected) {
         // Wait for the Dart VM url to be discovered via logs (from `ios-deploy`)
@@ -681,6 +701,7 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: FlutterProject.current(),
           buildInfo: debuggingOptions.buildInfo,
+          featureFlags: featureFlags,
           targetOverride: mainPath,
         );
       }
@@ -702,6 +723,7 @@ class IOSDevice extends Device {
     required String packageId,
     required DebuggingOptions debuggingOptions,
     ProtocolDiscovery? vmServiceDiscovery,
+    IOSApp? package,
   }) async {
     Timer? maxWaitForCI;
     final Completer<Uri?> cancelCompleter = Completer<Uri?>();
@@ -743,18 +765,27 @@ class IOSDevice extends Device {
       });
     }
 
+    final StreamSubscription<String>? errorListener = await _interceptErrorsFromLogs(
+      package,
+      debuggingOptions: debuggingOptions,
+    );
+
+    final bool discoverVMUrlFromLogs = vmServiceDiscovery != null && !isWirelesslyConnected;
+
+    // If mDNS fails, don't throw since url may still be findable through vmServiceDiscovery.
     final Future<Uri?> vmUrlFromMDns = MDnsVmServiceDiscovery.instance!.getVMServiceUriForLaunch(
       packageId,
       this,
       usesIpv6: debuggingOptions.ipv6,
       useDeviceIPAsHost: isWirelesslyConnected,
+      throwOnMissingLocalNetworkPermissionsError: !discoverVMUrlFromLogs,
     );
 
     final List<Future<Uri?>> discoveryOptions = <Future<Uri?>>[
       vmUrlFromMDns,
       // vmServiceDiscovery uses device logs (`idevicesyslog`), which doesn't work
       // on wireless devices.
-      if (vmServiceDiscovery != null && !isWirelesslyConnected) vmServiceDiscovery.uri,
+      if (discoverVMUrlFromLogs) vmServiceDiscovery.uri,
     ];
 
     Uri? localUri = await Future.any(<Future<Uri?>>[...discoveryOptions, cancelCompleter.future]);
@@ -771,7 +802,38 @@ class IOSDevice extends Device {
       }
     }
     maxWaitForCI?.cancel();
+    await errorListener?.cancel();
     return localUri;
+  }
+
+  /// Listen to device logs for crash on iOS 18.4+ due to JIT restriction. If
+  /// found, give guided error and throw tool exit. Returns null and does not
+  /// listen if device is less than iOS 18.4.
+  Future<StreamSubscription<String>?> _interceptErrorsFromLogs(
+    IOSApp? package, {
+    required DebuggingOptions debuggingOptions,
+  }) async {
+    // Currently only checking for kJITCrashFailureMessage, which only should
+    // be checked on iOS 18.4+.
+    if (sdkVersion == null || sdkVersion! < Version(18, 4, null)) {
+      return null;
+    }
+    final DeviceLogReader deviceLogReader = getLogReader(
+      app: package,
+      usingCISystem: debuggingOptions.usingCISystem,
+    );
+
+    final Stream<String> logStream = deviceLogReader.logLines;
+
+    final String deviceSdkVersion = await sdkNameAndVersion;
+
+    final StreamSubscription<String> errorListener = logStream.listen((String line) {
+      if (line.contains(kJITCrashFailureMessage)) {
+        throwToolExit(jITCrashFailureInstructions(deviceSdkVersion));
+      }
+    });
+
+    return errorListener;
   }
 
   ProtocolDiscovery _setupDebuggerAndVmServiceDiscovery({
@@ -883,6 +945,7 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: flutterProject,
           buildInfo: debuggingOptions.buildInfo,
+          featureFlags: featureFlags,
           targetOverride: mainPath,
           configurationBuildDir: bundle.parent.absolute.path,
         );

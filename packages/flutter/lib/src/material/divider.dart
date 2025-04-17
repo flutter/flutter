@@ -58,11 +58,18 @@ class Divider extends StatelessWidget {
   ///
   /// The [height], [thickness], [indent], and [endIndent] must be null or
   /// non-negative.
-  const Divider({super.key, this.height, this.thickness, this.indent, this.endIndent, this.color})
-    : assert(height == null || height >= 0.0),
-      assert(thickness == null || thickness >= 0.0),
-      assert(indent == null || indent >= 0.0),
-      assert(endIndent == null || endIndent >= 0.0);
+  const Divider({
+    super.key,
+    this.height,
+    this.thickness,
+    this.indent,
+    this.endIndent,
+    this.color,
+    this.radius,
+  }) : assert(height == null || height >= 0.0),
+       assert(thickness == null || thickness >= 0.0),
+       assert(indent == null || indent >= 0.0),
+       assert(endIndent == null || endIndent >= 0.0);
 
   /// The divider's height extent.
   ///
@@ -75,29 +82,44 @@ class Divider extends StatelessWidget {
 
   /// The thickness of the line drawn within the divider.
   ///
+  /// {@template flutter.material.Divider.thickness}
   /// A divider with a [thickness] of 0.0 is always drawn as a line with a
   /// height of exactly one device pixel.
   ///
   /// If this is null, then the [DividerThemeData.thickness] is used. If
   /// that is also null, then this defaults to 0.0.
+  /// {@endtemplate}
   final double? thickness;
 
   /// The amount of empty space to the leading edge of the divider.
   ///
+  /// {@template flutter.material.Divider.indent}
   /// If this is null, then the [DividerThemeData.indent] is used. If that is
   /// also null, then this defaults to 0.0.
+  /// {@endtemplate}
   final double? indent;
 
   /// The amount of empty space to the trailing edge of the divider.
   ///
+  /// {@template flutter.material.Divider.endIndent}
   /// If this is null, then the [DividerThemeData.endIndent] is used. If that is
   /// also null, then this defaults to 0.0.
+  /// {@endtemplate}
   final double? endIndent;
 
+  /// The amount of radius for the border of the divider.
+  ///
+  /// {@template flutter.material.Divider.radius}
+  /// If this is null, then the default radius of [BoxDecoration] will be used.
+  /// {@endtemplate}
+  final BorderRadiusGeometry? radius;
+
+  /// {@template flutter.material.Divider.color}
   /// The color to use when painting the line.
   ///
   /// If this is null, then the [DividerThemeData.color] is used. If that is
   /// also null, then [ThemeData.dividerColor] is used.
+  /// {@endtemplate}
   ///
   /// {@tool snippet}
   ///
@@ -177,6 +199,7 @@ class Divider extends StatelessWidget {
           height: thickness,
           margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(
+            borderRadius: radius,
             border: Border(bottom: createBorderSide(context, color: color, width: thickness)),
           ),
         ),
@@ -227,6 +250,7 @@ class VerticalDivider extends StatelessWidget {
     this.indent,
     this.endIndent,
     this.color,
+    this.radius,
   }) : assert(width == null || width >= 0.0),
        assert(thickness == null || thickness >= 0.0),
        assert(indent == null || indent >= 0.0),
@@ -277,6 +301,11 @@ class VerticalDivider extends StatelessWidget {
   /// {@end-tool}
   final Color? color;
 
+  /// The amount of radius for the border of the divider.
+  ///
+  /// If this is null, then the default radius of [BoxDecoration] will be used.
+  final BorderRadiusGeometry? radius;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -295,6 +324,7 @@ class VerticalDivider extends StatelessWidget {
           width: thickness,
           margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
           decoration: BoxDecoration(
+            borderRadius: radius,
             border: Border(left: Divider.createBorderSide(context, color: color, width: thickness)),
           ),
         ),

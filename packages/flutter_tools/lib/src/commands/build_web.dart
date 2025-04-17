@@ -32,7 +32,6 @@ class BuildWebCommand extends BuildSubCommand {
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesDartDefineOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     addNativeNullAssertions();
 
     //
@@ -96,7 +95,7 @@ class BuildWebCommand extends BuildSubCommand {
       negatable: false,
       help:
           'Passes "--dump-info" to the Javascript compiler which generates '
-          'information about the generated code is a .js.info.json file.',
+          'information about the generated code in main.dart.js.info.json.',
     );
     argParser.addFlag(
       'no-frequency-based-minification',
@@ -209,7 +208,6 @@ class BuildWebCommand extends BuildSubCommand {
       ];
     }
 
-    final String target = stringArg('target')!;
     final BuildInfo buildInfo = await getBuildInfo();
     final String? baseHref = stringArg('base-href');
     if (baseHref != null && !(baseHref.startsWith('/') && baseHref.endsWith('/'))) {
@@ -247,7 +245,7 @@ class BuildWebCommand extends BuildSubCommand {
     );
     await webBuilder.buildWeb(
       project,
-      target,
+      targetFile,
       buildInfo,
       ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
       compilerConfigs: compilerConfigs,

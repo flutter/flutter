@@ -12,11 +12,13 @@
 #include <utility>
 #include <vector>
 
-#include "display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/display_list/paint.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
 #include "impeller/entity/geometry/geometry.h"
@@ -186,7 +188,7 @@ class Canvas {
 
   void Rotate(Radians radians);
 
-  void DrawPath(const Path& path, const Paint& paint);
+  void DrawPath(const flutter::DlPath& path, const Paint& paint);
 
   void DrawPaint(const Paint& paint);
 
@@ -200,6 +202,8 @@ class Canvas {
   void DrawOval(const Rect& rect, const Paint& paint);
 
   void DrawRoundRect(const RoundRect& rect, const Paint& paint);
+
+  void DrawRoundSuperellipse(const RoundSuperellipse& rse, const Paint& paint);
 
   void DrawCircle(const Point& center, Scalar radius, const Paint& paint);
 
@@ -250,6 +254,20 @@ class Canvas {
 
   // Visible for testing.
   bool RequiresReadback() const { return requires_readback_; }
+
+  // Whether the current device has the capabilities to blit an offscreen
+  // texture into the onscreen.
+  //
+  // This requires the availibility of the blit framebuffer command, but is
+  // disabled for GLES. A simple glBlitFramebuffer does not support resolving
+  // different sample counts which may be present in GLES when using MSAA.
+  //
+  // Visible for testing.
+  bool SupportsBlitToOnscreen() const;
+
+  /// For picture snapshots we need addition steps to verify that final mipmaps
+  /// are generated.
+  bool EnsureFinalMipmapGeneration() const;
 
  private:
   ContentContext& renderer_;
@@ -320,7 +338,8 @@ class Canvas {
   /// supports framebuffer fetch.
   std::shared_ptr<Texture> FlipBackdrop(Point global_pass_position,
                                         bool should_remove_texture = false,
-                                        bool should_use_onscreen = false);
+                                        bool should_use_onscreen = false,
+                                        bool post_depth_increment = false);
 
   bool BlitToOnscreen(bool is_onscreen = false);
 
@@ -340,6 +359,23 @@ class Canvas {
   bool AttemptDrawBlurredRRect(const Rect& rect,
                                Size corner_radii,
                                const Paint& paint);
+
+  /// For simple DrawImageRect calls, optimize any draws with a color filter
+  /// into the corresponding atlas draw.
+  ///
+  /// Returns whether not the optimization was applied.
+  bool AttemptColorFilterOptimization(const std::shared_ptr<Texture>& image,
+                                      Rect source,
+                                      Rect dest,
+                                      const Paint& paint,
+                                      const SamplerDescriptor& sampler,
+                                      SourceRectConstraint src_rect_constraint);
+
+  bool AttemptBlurredTextOptimization(
+      const std::shared_ptr<TextFrame>& text_frame,
+      const std::shared_ptr<TextContents>& text_contents,
+      Entity& entity,
+      const Paint& paint);
 
   RenderPass& GetCurrentRenderPass() const;
 

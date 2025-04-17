@@ -16,6 +16,7 @@
 #include "flutter/lib/ui/semantics/semantics_update.h"
 #include "flutter/lib/ui/window/platform_message_response.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
+#include "flutter/lib/ui/window/view_focus.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/shell/common/display.h"
 #include "fml/macros.h"
@@ -91,9 +92,10 @@ class PlatformConfigurationClient {
   //--------------------------------------------------------------------------
   /// @brief      Receives an updated semantics tree from the Framework.
   ///
+  /// @param[in] viewId The identifier of the view to update.
   /// @param[in] update The updated semantic tree to apply.
   ///
-  virtual void UpdateSemantics(SemanticsUpdate* update) = 0;
+  virtual void UpdateSemantics(int64_t viewId, SemanticsUpdate* update) = 0;
 
   //--------------------------------------------------------------------------
   /// @brief      When the Flutter application has a message to send to the
@@ -257,6 +259,14 @@ class PlatformConfigurationClient {
   virtual double GetScaledFontSize(double unscaled_font_size,
                                    int configuration_id) const = 0;
 
+  //--------------------------------------------------------------------------
+  /// @brief      Notifies the client that the Flutter view focus state has
+  ///             changed and the platform view should be updated.
+  ///
+  /// @param[in]  request  The request to change the focus state of the view.
+  virtual void RequestViewFocusChange(
+      const ViewFocusChangeRequest& request) = 0;
+
   virtual std::shared_ptr<PlatformIsolateManager>
   GetPlatformIsolateManager() = 0;
 
@@ -337,6 +347,23 @@ class PlatformConfiguration final {
   /// @return     Whether the view was removed.
   ///
   bool RemoveView(int64_t view_id);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notify the isolate that the focus state of a native view has
+  ///             changed.
+  ///
+  /// @param[in]  event  The focus event describing the change.
+  ///
+  /// @return     Whether the focus event was sent.
+  bool SendFocusEvent(const ViewFocusEvent& event);
+
+  /// @brief     Sets the opaque identifier of the engine.
+  ///
+  ///            The identifier can be passed from Dart to native code to
+  ///            retrieve the engine instance.
+  ///
+  /// @return    Whether the identifier was set.
+  bool SetEngineId(int64_t engine_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Update the view metrics for the specified view.
@@ -425,12 +452,14 @@ class PlatformConfiguration final {
   ///             originates on the platform view and has been forwarded to the
   ///             platform configuration here by the engine.
   ///
+  /// @param[in]  view_id The identifier of the view.
   /// @param[in]  node_id The identifier of the accessibility node.
   /// @param[in]  action  The accessibility related action performed on the
   ///                     node of the specified ID.
   /// @param[in]  args    Optional data that applies to the specified action.
   ///
-  void DispatchSemanticsAction(int32_t node_id,
+  void DispatchSemanticsAction(int64_t view_id,
+                               int32_t node_id,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
@@ -529,6 +558,8 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue on_error_;
   tonic::DartPersistentValue add_view_;
   tonic::DartPersistentValue remove_view_;
+  tonic::DartPersistentValue send_view_focus_event_;
+  tonic::DartPersistentValue set_engine_id_;
   tonic::DartPersistentValue update_window_metrics_;
   tonic::DartPersistentValue update_displays_;
   tonic::DartPersistentValue update_locales_;
@@ -592,7 +623,7 @@ class PlatformConfigurationNativeApi {
                      double width,
                      double height);
 
-  static void UpdateSemantics(SemanticsUpdate* update);
+  static void UpdateSemantics(int64_t viewId, SemanticsUpdate* update);
 
   static void SetNeedsReportTimings(bool value);
 
@@ -616,6 +647,10 @@ class PlatformConfigurationNativeApi {
                                        const tonic::DartByteData& data);
 
   static void SendChannelUpdate(const std::string& name, bool listening);
+
+  static void RequestViewFocusChange(int64_t view_id,
+                                     int64_t state,
+                                     int64_t direction);
 
   //--------------------------------------------------------------------------
   /// @brief      Requests the Dart VM to adjusts the GC heuristics based on

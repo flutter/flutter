@@ -1632,6 +1632,7 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
     'glfw/glfw',
     'GoogleCloudPlatform/artifact-registry-maven-tools',
     'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
+    'ninja-build/ninja',
     'torvalds/linux',
     'tpn/winsdk-10',
   };
@@ -2598,6 +2599,7 @@ const Set<String> kExecutableAllowlist = <String>{
   'bin/flutter-dev',
   'bin/internal/update_dart_sdk.sh',
   'bin/internal/update_engine_version.sh',
+  'bin/internal/content_aware_hash.sh',
 
   'dev/bots/codelabs_build_test.sh',
   'dev/bots/docs.sh',

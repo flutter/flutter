@@ -7,6 +7,10 @@
         "Tests to run on linux hosts should go in one of the other linux_ build ",
         "definition files."
     ],
+    "luci_flags": {
+      "delay_collect_builds": true,
+      "parallel_download_builds": true
+    },
     "builds": [
         {
             "archives": [
@@ -94,7 +98,7 @@
                 "--no-goma"
             ],
             "name": "ci/host_release",
-            "description": "Produces release mode Linux host-side tooling.",
+            "description": "Produces flutter_patched_sdk_product.zip shared by all Flutter release builds.",
             "ninja": {
                 "config": "ci/host_release",
                 "targets": [

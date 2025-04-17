@@ -5,7 +5,7 @@
 /// @docImport 'package:flutter/material.dart';
 library;
 
-import 'dart:ui' show Color, lerpDouble;
+import 'dart:ui' show Color, SystemColor, SystemColorPalette, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -21,6 +21,7 @@ import 'bottom_sheet_theme.dart';
 import 'button_bar_theme.dart';
 import 'button_theme.dart';
 import 'card_theme.dart';
+import 'carousel_theme.dart';
 import 'checkbox_theme.dart';
 import 'chip_theme.dart';
 import 'color_scheme.dart';
@@ -32,8 +33,10 @@ import 'dialog_theme.dart';
 import 'divider_theme.dart';
 import 'drawer_theme.dart';
 import 'dropdown_menu_theme.dart';
+import 'elevated_button.dart';
 import 'elevated_button_theme.dart';
 import 'expansion_tile_theme.dart';
+import 'filled_button.dart';
 import 'filled_button_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'icon_button_theme.dart';
@@ -50,6 +53,7 @@ import 'menu_theme.dart';
 import 'navigation_bar_theme.dart';
 import 'navigation_drawer_theme.dart';
 import 'navigation_rail_theme.dart';
+import 'outlined_button.dart';
 import 'outlined_button_theme.dart';
 import 'page_transitions_theme.dart';
 import 'popup_menu_theme.dart';
@@ -63,6 +67,7 @@ import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'switch_theme.dart';
 import 'tab_bar_theme.dart';
+import 'text_button.dart';
 import 'text_button_theme.dart';
 import 'text_selection_theme.dart';
 import 'text_theme.dart';
@@ -246,6 +251,11 @@ class ThemeData with Diagnosticable {
   /// a component theme parameter like [sliderTheme], [toggleButtonsTheme],
   /// or [bottomNavigationBarTheme].
   ///
+  /// When [useSystemColors] is true and the platform supports system colors, then the system colors
+  /// will be used to override certain theme colors. The [colorScheme], [textTheme],
+  /// [elevatedButtonTheme], [outlinedButtonTheme], [textButtonTheme], [filledButtonTheme], and
+  /// [floatingActionButtonTheme] are overriden by the system colors.
+  ///
   /// See also:
   ///
   ///  * [ThemeData.from], which creates a ThemeData from a [ColorScheme].
@@ -270,6 +280,7 @@ class ThemeData with Diagnosticable {
     ScrollbarThemeData? scrollbarTheme,
     InteractiveInkFeatureFactory? splashFactory,
     bool? useMaterial3,
+    bool? useSystemColors,
     VisualDensity? visualDensity,
     // COLOR
     ColorScheme? colorScheme,
@@ -313,14 +324,13 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
-    // TODO(QuncCccccc): Change the parameter type to CardThemeData
-    Object? cardTheme,
+    CardThemeData? cardTheme,
+    CarouselViewThemeData? carouselViewTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
     DatePickerThemeData? datePickerTheme,
-    // TODO(QuncCccccc): Change the parameter type to DialogThemeData
-    Object? dialogTheme,
+    DialogThemeData? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     DropdownMenuThemeData? dropdownMenuTheme,
@@ -346,8 +356,7 @@ class ThemeData with Diagnosticable {
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
-    // TODO(QuncCccccc): Change the parameter type to TabBarThemeData
-    Object? tabBarTheme,
+    TabBarThemeData? tabBarTheme,
     TextButtonThemeData? textButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     TimePickerThemeData? timePickerTheme,
@@ -390,6 +399,7 @@ class ThemeData with Diagnosticable {
     scrollbarTheme ??= const ScrollbarThemeData();
     visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
     useMaterial3 ??= true;
+    useSystemColors ??= false;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??=
         useMaterial3
@@ -519,27 +529,12 @@ class ThemeData with Diagnosticable {
     bottomAppBarTheme ??= const BottomAppBarTheme();
     bottomNavigationBarTheme ??= const BottomNavigationBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
-    // TODO(QuncCccccc): Clean it up once the type of `cardTheme` is changed to `CardThemeData`
-    if (cardTheme != null) {
-      if (cardTheme is CardTheme) {
-        cardTheme = cardTheme.data;
-      } else if (cardTheme is! CardThemeData) {
-        throw ArgumentError('cardTheme must be either a CardThemeData or a CardTheme');
-      }
-    }
     cardTheme ??= const CardThemeData();
+    carouselViewTheme ??= const CarouselViewThemeData();
     checkboxTheme ??= const CheckboxThemeData();
     chipTheme ??= const ChipThemeData();
     dataTableTheme ??= const DataTableThemeData();
     datePickerTheme ??= const DatePickerThemeData();
-    // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
-    if (dialogTheme != null) {
-      if (dialogTheme is DialogTheme) {
-        dialogTheme = dialogTheme.data;
-      } else if (dialogTheme is! DialogThemeData) {
-        throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
-      }
-    }
     dialogTheme ??= const DialogThemeData();
     dividerTheme ??= const DividerThemeData();
     drawerTheme ??= const DrawerThemeData();
@@ -566,14 +561,6 @@ class ThemeData with Diagnosticable {
     sliderTheme ??= const SliderThemeData();
     snackBarTheme ??= const SnackBarThemeData();
     switchTheme ??= const SwitchThemeData();
-    // TODO(QuncCccccc): Clean this up once the type of `tabBarTheme` is changed to `TabBarThemeData`
-    if (tabBarTheme != null) {
-      if (tabBarTheme is TabBarTheme) {
-        tabBarTheme = tabBarTheme.data;
-      } else if (tabBarTheme is! TabBarThemeData) {
-        throw ArgumentError('tabBarTheme must be either a TabBarThemeData or a TabBarTheme');
-      }
-    }
     tabBarTheme ??= const TabBarThemeData();
     textButtonTheme ??= const TextButtonThemeData();
     textSelectionTheme ??= const TextSelectionThemeData();
@@ -584,7 +571,8 @@ class ThemeData with Diagnosticable {
     buttonBarTheme ??= const ButtonBarThemeData();
     dialogBackgroundColor ??= isDark ? Colors.grey[800]! : Colors.white;
     indicatorColor ??= colorScheme.secondary == primaryColor ? Colors.white : colorScheme.secondary;
-    return ThemeData.raw(
+
+    ThemeData theme = ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
       // GENERAL CONFIGURATION). Each section except for deprecations should be
@@ -636,12 +624,13 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme,
       buttonTheme: buttonTheme,
-      cardTheme: cardTheme as CardThemeData,
+      cardTheme: cardTheme,
+      carouselViewTheme: carouselViewTheme,
       checkboxTheme: checkboxTheme,
       chipTheme: chipTheme,
       dataTableTheme: dataTableTheme,
       datePickerTheme: datePickerTheme,
-      dialogTheme: dialogTheme as DialogThemeData,
+      dialogTheme: dialogTheme,
       dividerTheme: dividerTheme,
       drawerTheme: drawerTheme,
       dropdownMenuTheme: dropdownMenuTheme,
@@ -667,7 +656,7 @@ class ThemeData with Diagnosticable {
       sliderTheme: sliderTheme,
       snackBarTheme: snackBarTheme,
       switchTheme: switchTheme,
-      tabBarTheme: tabBarTheme as TabBarThemeData,
+      tabBarTheme: tabBarTheme,
       textButtonTheme: textButtonTheme,
       textSelectionTheme: textSelectionTheme,
       timePickerTheme: timePickerTheme,
@@ -678,6 +667,11 @@ class ThemeData with Diagnosticable {
       dialogBackgroundColor: dialogBackgroundColor,
       indicatorColor: indicatorColor,
     );
+
+    if (useSystemColors) {
+      theme = theme._overrideWithSystemColors();
+    }
+    return theme;
   }
 
   /// Create a [ThemeData] given a set of exact values. Most values must be
@@ -743,6 +737,7 @@ class ThemeData with Diagnosticable {
     required this.bottomSheetTheme,
     required this.buttonTheme,
     required this.cardTheme,
+    required this.carouselViewTheme,
     required this.checkboxTheme,
     required this.chipTheme,
     required this.dataTableTheme,
@@ -1315,6 +1310,9 @@ class ThemeData with Diagnosticable {
   /// This is the value returned from [CardTheme.of].
   final CardThemeData cardTheme;
 
+  /// A theme for customizing the appearance and layout of [CarouselView] widgets.
+  final CarouselViewThemeData carouselViewTheme;
+
   /// A theme for customizing the appearance and layout of [Checkbox] widgets.
   final CheckboxThemeData checkboxTheme;
 
@@ -1525,13 +1523,13 @@ class ThemeData with Diagnosticable {
     BottomNavigationBarThemeData? bottomNavigationBarTheme,
     BottomSheetThemeData? bottomSheetTheme,
     ButtonThemeData? buttonTheme,
-    Object? cardTheme,
+    CardThemeData? cardTheme,
+    CarouselViewThemeData? carouselViewTheme,
     CheckboxThemeData? checkboxTheme,
     ChipThemeData? chipTheme,
     DataTableThemeData? dataTableTheme,
     DatePickerThemeData? datePickerTheme,
-    // TODO(QuncCccccc): Change the parameter type to DialogThemeData
-    Object? dialogTheme,
+    DialogThemeData? dialogTheme,
     DividerThemeData? dividerTheme,
     DrawerThemeData? drawerTheme,
     DropdownMenuThemeData? dropdownMenuTheme,
@@ -1557,8 +1555,7 @@ class ThemeData with Diagnosticable {
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
     SwitchThemeData? switchTheme,
-    // TODO(QuncCccccc): Change the parameter type to TabBarThemeData
-    Object? tabBarTheme,
+    TabBarThemeData? tabBarTheme,
     TextButtonThemeData? textButtonTheme,
     TextSelectionThemeData? textSelectionTheme,
     TimePickerThemeData? timePickerTheme,
@@ -1591,32 +1588,6 @@ class ThemeData with Diagnosticable {
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
-    // TODO(QuncCccccc): Clean it up once the type of `cardTheme` is changed to `CardThemeData`
-    if (cardTheme != null) {
-      if (cardTheme is CardTheme) {
-        cardTheme = cardTheme.data;
-      } else if (cardTheme is! CardThemeData) {
-        throw ArgumentError('cardTheme must be either a CardThemeData or a CardTheme');
-      }
-    }
-
-    // TODO(QuncCccccc): Clean this up once the type of `dialogTheme` is changed to `DialogThemeData`
-    if (dialogTheme != null) {
-      if (dialogTheme is DialogTheme) {
-        dialogTheme = dialogTheme.data;
-      } else if (dialogTheme is! DialogThemeData) {
-        throw ArgumentError('dialogTheme must be either a DialogThemeData or a DialogTheme');
-      }
-    }
-
-    // TODO(QuncCccccc): Clean this up once the type of `tabBarTheme` is changed to `TabBarThemeData`
-    if (tabBarTheme != null) {
-      if (tabBarTheme is TabBarTheme) {
-        tabBarTheme = tabBarTheme.data;
-      } else if (tabBarTheme is! TabBarThemeData) {
-        throw ArgumentError('tabBarTheme must be either a TabBarThemeData or a TabBarTheme');
-      }
-    }
     return ThemeData.raw(
       // For the sanity of the reader, make sure these properties are in the same
       // order in every place that they are separated by section comments (e.g.
@@ -1671,12 +1642,13 @@ class ThemeData with Diagnosticable {
       bottomNavigationBarTheme: bottomNavigationBarTheme ?? this.bottomNavigationBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       buttonTheme: buttonTheme ?? this.buttonTheme,
-      cardTheme: cardTheme as CardThemeData? ?? this.cardTheme,
+      cardTheme: cardTheme ?? this.cardTheme,
+      carouselViewTheme: carouselViewTheme ?? this.carouselViewTheme,
       checkboxTheme: checkboxTheme ?? this.checkboxTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       dataTableTheme: dataTableTheme ?? this.dataTableTheme,
       datePickerTheme: datePickerTheme ?? this.datePickerTheme,
-      dialogTheme: dialogTheme as DialogThemeData? ?? this.dialogTheme,
+      dialogTheme: dialogTheme ?? this.dialogTheme,
       dividerTheme: dividerTheme ?? this.dividerTheme,
       drawerTheme: drawerTheme ?? this.drawerTheme,
       dropdownMenuTheme: dropdownMenuTheme ?? this.dropdownMenuTheme,
@@ -1702,7 +1674,7 @@ class ThemeData with Diagnosticable {
       sliderTheme: sliderTheme ?? this.sliderTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       switchTheme: switchTheme ?? this.switchTheme,
-      tabBarTheme: tabBarTheme as TabBarThemeData? ?? this.tabBarTheme,
+      tabBarTheme: tabBarTheme ?? this.tabBarTheme,
       textButtonTheme: textButtonTheme ?? this.textButtonTheme,
       textSelectionTheme: textSelectionTheme ?? this.textSelectionTheme,
       timePickerTheme: timePickerTheme ?? this.timePickerTheme,
@@ -1818,6 +1790,115 @@ class ThemeData with Diagnosticable {
     });
   }
 
+  ThemeData _overrideWithSystemColors() {
+    if (!SystemColor.platformProvidesSystemColors) {
+      return this;
+    }
+
+    final SystemColorPalette systemColors =
+        brightness == Brightness.dark ? SystemColor.dark : SystemColor.light;
+
+    ThemeData theme = this;
+
+    theme = theme.copyWith(
+      colorScheme: colorScheme.copyWith(
+        secondary: systemColors.accentColor.value,
+        onSecondary: systemColors.accentColorText.value,
+        surface: systemColors.canvas.value,
+        onSurface: systemColors.canvasText.value,
+      ),
+      textTheme: textTheme.apply(
+        displayColor: systemColors.canvasText.value,
+        bodyColor: systemColors.canvasText.value,
+      ),
+    );
+
+    final bool overrideButtons =
+        systemColors.buttonFace.value != null ||
+        systemColors.buttonBorder.value != null ||
+        systemColors.buttonText.value != null;
+
+    if (overrideButtons) {
+      theme = theme.copyWith(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            foregroundColor: systemColors.buttonText.value,
+            backgroundColor: systemColors.buttonFace.value,
+            side:
+                systemColors.buttonBorder.value == null
+                    ? null
+                    : BorderSide(color: systemColors.buttonBorder.value!),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: systemColors.buttonText.value,
+            backgroundColor: systemColors.buttonFace.value,
+            side:
+                systemColors.buttonBorder.value == null
+                    ? null
+                    : BorderSide(color: systemColors.buttonBorder.value!),
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: systemColors.buttonText.value,
+            backgroundColor: systemColors.buttonFace.value,
+            side:
+                systemColors.buttonBorder.value == null
+                    ? null
+                    : BorderSide(color: systemColors.buttonBorder.value!),
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            foregroundColor: systemColors.buttonText.value,
+            backgroundColor: systemColors.buttonFace.value,
+            side:
+                systemColors.buttonBorder.value == null
+                    ? null
+                    : BorderSide(color: systemColors.buttonBorder.value!),
+          ),
+        ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: systemColors.buttonFace.value,
+          foregroundColor: systemColors.buttonText.value,
+        ),
+      );
+    }
+
+    final bool overrideInputDecoration =
+        systemColors.field.value != null || systemColors.fieldText.value != null;
+
+    if (overrideInputDecoration) {
+      theme = theme.copyWith(
+        inputDecorationTheme: inputDecorationTheme.copyWith(
+          fillColor: systemColors.field.value,
+          labelStyle:
+              inputDecorationTheme.labelStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          hintStyle:
+              inputDecorationTheme.hintStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          helperStyle:
+              inputDecorationTheme.helperStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          prefixStyle:
+              inputDecorationTheme.prefixStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          suffixStyle:
+              inputDecorationTheme.suffixStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+          counterStyle:
+              inputDecorationTheme.counterStyle?.copyWith(color: systemColors.fieldText.value) ??
+              TextStyle(color: systemColors.fieldText.value),
+        ),
+      );
+    }
+
+    return theme;
+  }
+
   /// Linearly interpolate between two themes.
   ///
   /// {@macro dart.ui.shadow.lerp}
@@ -1883,6 +1964,7 @@ class ThemeData with Diagnosticable {
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t)!,
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
       cardTheme: CardThemeData.lerp(a.cardTheme, b.cardTheme, t),
+      carouselViewTheme: CarouselViewThemeData.lerp(a.carouselViewTheme, b.carouselViewTheme, t),
       checkboxTheme: CheckboxThemeData.lerp(a.checkboxTheme, b.checkboxTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t)!,
       dataTableTheme: DataTableThemeData.lerp(a.dataTableTheme, b.dataTableTheme, t),
@@ -2001,6 +2083,7 @@ class ThemeData with Diagnosticable {
         other.bottomSheetTheme == bottomSheetTheme &&
         other.buttonTheme == buttonTheme &&
         other.cardTheme == cardTheme &&
+        other.carouselViewTheme == carouselViewTheme &&
         other.checkboxTheme == checkboxTheme &&
         other.chipTheme == chipTheme &&
         other.dataTableTheme == dataTableTheme &&
@@ -2100,6 +2183,7 @@ class ThemeData with Diagnosticable {
       bottomSheetTheme,
       buttonTheme,
       cardTheme,
+      carouselViewTheme,
       checkboxTheme,
       chipTheme,
       dataTableTheme,
@@ -2477,6 +2561,14 @@ class ThemeData with Diagnosticable {
     );
     properties.add(
       DiagnosticsProperty<CardThemeData>('cardTheme', cardTheme, level: DiagnosticLevel.debug),
+    );
+    properties.add(
+      DiagnosticsProperty<CarouselViewThemeData>(
+        'carouselViewTheme',
+        carouselViewTheme,
+        defaultValue: defaultData.carouselViewTheme,
+        level: DiagnosticLevel.debug,
+      ),
     );
     properties.add(
       DiagnosticsProperty<CheckboxThemeData>(

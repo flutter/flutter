@@ -1,4 +1,4 @@
-Signature: bc4416d21e8d35274edad1e5af243ec6
+Signature: 3590532a1d7d1f32596972aaff9feead
 
 ====================================================================================================
 LIBRARY: etc1
@@ -279,6 +279,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/npm_build/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/modules/canvaskit/npm_build/bidi.html
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/npm_build/extra.html
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/npm_build/multicanvas.html
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/npm_build/node.example.js
@@ -333,6 +334,7 @@ FILE: ../../../flutter/third_party/skia/OWNERS_build_files.android
 FILE: ../../../flutter/third_party/skia/RELEASE_NOTES.md
 FILE: ../../../flutter/third_party/skia/go.mod
 FILE: ../../../flutter/third_party/skia/go.sum
+FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi.js
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/catchExceptionNop.js
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/color.js
 FILE: ../../../flutter/third_party/skia/modules/canvaskit/cpu.js
@@ -398,8 +400,7 @@ FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../flutter/third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../flutter/third_party/skia/modules/skparagraph/test.html
 FILE: ../../../flutter/third_party/skia/package-lock.json
-FILE: ../../../flutter/third_party/skia/relnotes/graphiteincludes.md
-FILE: ../../../flutter/third_party/skia/relnotes/serializedkeyprecompilation.md
+FILE: ../../../flutter/third_party/skia/relnotes/recorder-ordering-override.md
 FILE: ../../../flutter/third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/Cargo.toml
 FILE: ../../../flutter/third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -626,7 +627,6 @@ ORIGIN: ../../../flutter/third_party/skia/include/core/SkBitmap.h + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkCanvas.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkColor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkColorFilter.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/core/SkColorPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkFlattenable.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkGraphics.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkMaskFilter.h + ../../../flutter/third_party/skia/LICENSE
@@ -651,7 +651,6 @@ ORIGIN: ../../../flutter/third_party/skia/include/effects/SkDashPathEffect.h + .
 ORIGIN: ../../../flutter/third_party/skia/include/effects/SkDiscretePathEffect.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/effects/SkGradientShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/effects/SkTableMaskFilter.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/include/private/SkColorData.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkDeque.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkFixed.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/private/base/SkFloatingPoint.h + ../../../flutter/third_party/skia/LICENSE
@@ -690,7 +689,9 @@ ORIGIN: ../../../flutter/third_party/skia/src/core/SkBlurMask.cpp + ../../../flu
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBlurMask.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkBlurMaskFilterImpl.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkColor.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkColorData.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkColorFilter.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkColorPriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkCoreBlitters.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDescriptor.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDraw.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -774,7 +775,6 @@ FILE: ../../../flutter/third_party/skia/include/core/SkBitmap.h
 FILE: ../../../flutter/third_party/skia/include/core/SkCanvas.h
 FILE: ../../../flutter/third_party/skia/include/core/SkColor.h
 FILE: ../../../flutter/third_party/skia/include/core/SkColorFilter.h
-FILE: ../../../flutter/third_party/skia/include/core/SkColorPriv.h
 FILE: ../../../flutter/third_party/skia/include/core/SkFlattenable.h
 FILE: ../../../flutter/third_party/skia/include/core/SkGraphics.h
 FILE: ../../../flutter/third_party/skia/include/core/SkMaskFilter.h
@@ -799,7 +799,6 @@ FILE: ../../../flutter/third_party/skia/include/effects/SkDashPathEffect.h
 FILE: ../../../flutter/third_party/skia/include/effects/SkDiscretePathEffect.h
 FILE: ../../../flutter/third_party/skia/include/effects/SkGradientShader.h
 FILE: ../../../flutter/third_party/skia/include/effects/SkTableMaskFilter.h
-FILE: ../../../flutter/third_party/skia/include/private/SkColorData.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkDeque.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkFixed.h
 FILE: ../../../flutter/third_party/skia/include/private/base/SkFloatingPoint.h
@@ -838,7 +837,9 @@ FILE: ../../../flutter/third_party/skia/src/core/SkBlurMask.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkBlurMask.h
 FILE: ../../../flutter/third_party/skia/src/core/SkBlurMaskFilterImpl.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkColor.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkColorData.h
 FILE: ../../../flutter/third_party/skia/src/core/SkColorFilter.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkColorPriv.h
 FILE: ../../../flutter/third_party/skia/src/core/SkCoreBlitters.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDescriptor.h
 FILE: ../../../flutter/third_party/skia/src/core/SkDraw.cpp
@@ -2688,12 +2689,12 @@ ORIGIN: ../../../flutter/third_party/skia/src/core/SkPicturePlayback.h + ../../.
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkPictureRecorder.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkReadPixelsRec.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecord.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordCanvas.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordDraw.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordDraw.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordOpts.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordOpts.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecorder.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecords.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkSurfacePriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkTaskGroup.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -2847,12 +2848,12 @@ FILE: ../../../flutter/third_party/skia/src/core/SkPicturePlayback.h
 FILE: ../../../flutter/third_party/skia/src/core/SkPictureRecorder.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkReadPixelsRec.h
 FILE: ../../../flutter/third_party/skia/src/core/SkRecord.h
+FILE: ../../../flutter/third_party/skia/src/core/SkRecordCanvas.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkRecordCanvas.h
 FILE: ../../../flutter/third_party/skia/src/core/SkRecordDraw.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkRecordDraw.h
 FILE: ../../../flutter/third_party/skia/src/core/SkRecordOpts.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkRecordOpts.h
-FILE: ../../../flutter/third_party/skia/src/core/SkRecorder.cpp
-FILE: ../../../flutter/third_party/skia/src/core/SkRecorder.h
 FILE: ../../../flutter/third_party/skia/src/core/SkRecords.h
 FILE: ../../../flutter/third_party/skia/src/core/SkSurfacePriv.h
 FILE: ../../../flutter/third_party/skia/src/core/SkTaskGroup.cpp
@@ -3058,7 +3059,6 @@ ORIGIN: ../../../flutter/third_party/skia/gm/annotated_text.cpp + ../../../flutt
 ORIGIN: ../../../flutter/third_party/skia/gm/badpaint.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/bigrrectaaeffect.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/bigtileimagefilter.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/gm/blend.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/blurredclippedcircle.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/bmpfilterqualityrepeat.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/gm/concavepaths.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -3333,7 +3333,6 @@ FILE: ../../../flutter/third_party/skia/gm/annotated_text.cpp
 FILE: ../../../flutter/third_party/skia/gm/badpaint.cpp
 FILE: ../../../flutter/third_party/skia/gm/bigrrectaaeffect.cpp
 FILE: ../../../flutter/third_party/skia/gm/bigtileimagefilter.cpp
-FILE: ../../../flutter/third_party/skia/gm/blend.cpp
 FILE: ../../../flutter/third_party/skia/gm/blurredclippedcircle.cpp
 FILE: ../../../flutter/third_party/skia/gm/bmpfilterqualityrepeat.cpp
 FILE: ../../../flutter/third_party/skia/gm/concavepaths.cpp
@@ -8916,8 +8915,14 @@ ORIGIN: ../../../flutter/third_party/skia/src/image/SkSurface_Null.cpp + ../../.
 ORIGIN: ../../../flutter/third_party/skia/src/image/SkTiledImageUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkOpts_RestoreTarget.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/opts/SkOpts_SetTarget.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/fontations/src/base.rs + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/fontations/src/bitmap.rs + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/fontations/src/colr.rs + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/fontations/src/ffi.rs + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/fontations/src/hinting.rs + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/fontations/src/names.rs + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/ports/fontations/src/skpath_bridge.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/ports/fontations/src/verbs_points_pen.rs + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkBlendShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkColorShader.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/shaders/SkCoordClampShader.h + ../../../flutter/third_party/skia/LICENSE
@@ -9207,8 +9212,14 @@ FILE: ../../../flutter/third_party/skia/src/image/SkSurface_Null.cpp
 FILE: ../../../flutter/third_party/skia/src/image/SkTiledImageUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/opts/SkOpts_RestoreTarget.h
 FILE: ../../../flutter/third_party/skia/src/opts/SkOpts_SetTarget.h
+FILE: ../../../flutter/third_party/skia/src/ports/fontations/src/base.rs
+FILE: ../../../flutter/third_party/skia/src/ports/fontations/src/bitmap.rs
+FILE: ../../../flutter/third_party/skia/src/ports/fontations/src/colr.rs
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/src/ffi.rs
+FILE: ../../../flutter/third_party/skia/src/ports/fontations/src/hinting.rs
+FILE: ../../../flutter/third_party/skia/src/ports/fontations/src/names.rs
 FILE: ../../../flutter/third_party/skia/src/ports/fontations/src/skpath_bridge.h
+FILE: ../../../flutter/third_party/skia/src/ports/fontations/src/verbs_points_pen.rs
 FILE: ../../../flutter/third_party/skia/src/shaders/SkBlendShader.h
 FILE: ../../../flutter/third_party/skia/src/shaders/SkColorShader.h
 FILE: ../../../flutter/third_party/skia/src/shaders/SkCoordClampShader.h
@@ -9478,6 +9489,7 @@ ORIGIN: ../../../flutter/third_party/skia/gm/pathopsblend.cpp + ../../../flutter
 ORIGIN: ../../../flutter/third_party/skia/gm/rendertomipmappedyuvimageplanes.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkArc.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/core/SkFourByteTag.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/docs/SkPDFJpegHelpers.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/epoxy/GrGLMakeEpoxyEGLInterface.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/ios/GrGLMakeIOSInterface.h + ../../../flutter/third_party/skia/LICENSE
@@ -9609,6 +9621,7 @@ FILE: ../../../flutter/third_party/skia/gm/pathopsblend.cpp
 FILE: ../../../flutter/third_party/skia/gm/rendertomipmappedyuvimageplanes.cpp
 FILE: ../../../flutter/third_party/skia/include/core/SkArc.h
 FILE: ../../../flutter/third_party/skia/include/core/SkFourByteTag.h
+FILE: ../../../flutter/third_party/skia/include/docs/SkPDFJpegHelpers.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/GrGLMakeWebGLInterface.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/epoxy/GrGLMakeEpoxyEGLInterface.h
 FILE: ../../../flutter/third_party/skia/include/gpu/ganesh/gl/ios/GrGLMakeIOSInterface.h
@@ -9856,14 +9869,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 LIBRARY: skia
 ORIGIN: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h + ../../../flutter/third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/third_party/skia/include/gpu/graphite/dawn/DawnGraphiteTypes.h
+FILE: ../../../flutter/third_party/skia/include/private/chromium/SkPMColor.h
+FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings.cpp
+FILE: ../../../flutter/third_party/skia/modules/canvaskit/bidi_bindings_gen.cpp
+FILE: ../../../flutter/third_party/skia/modules/skunicode/include/SkUnicode_bidi.h
+FILE: ../../../flutter/third_party/skia/modules/skunicode/src/SkUnicode_bidi.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkDrawTypes.h
 FILE: ../../../flutter/third_party/skia/src/core/SkMaskFilterBase.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkRasterPipelineVizualizer.h
+FILE: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkSynchronizedResourceCache.h
+FILE: ../../../flutter/third_party/skia/src/gpu/ganesh/text/GaneshVertexFiller.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.cpp
+FILE: ../../../flutter/third_party/skia/src/gpu/graphite/TextureFormat.h
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.cpp
 FILE: ../../../flutter/third_party/skia/src/gpu/graphite/precompile/SerializationUtils.h
 ----------------------------------------------------------------------------------------------------
@@ -9898,4 +9933,41 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
-Total license count: 72
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp + ../../../flutter/third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/third_party/skia/gm/tablemaskfilter.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2025 Google LLC.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+Total license count: 73

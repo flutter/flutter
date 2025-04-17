@@ -33,23 +33,23 @@ EmbedderExternalTextureMetal::~EmbedderExternalTextureMetal() = default;
 
 // |flutter::Texture|
 void EmbedderExternalTextureMetal::Paint(PaintContext& context,
-                                         const SkRect& bounds,
+                                         const DlRect& bounds,
                                          bool freeze,
                                          const DlImageSampling sampling) {
   if (last_image_ == nullptr) {
     last_image_ = ResolveTexture(Id(), context.gr_context, context.aiks_context,
-                                 SkISize::Make(bounds.width(), bounds.height()));
+                                 SkISize::Make(bounds.GetWidth(), bounds.GetHeight()));
   }
 
   DlCanvas* canvas = context.canvas;
   const DlPaint* paint = context.paint;
 
   if (last_image_) {
-    SkRect image_bounds = SkRect::Make(last_image_->bounds());
+    DlRect image_bounds = DlRect::Make(last_image_->GetBounds());
     if (bounds != image_bounds) {
       canvas->DrawImageRect(last_image_, image_bounds, bounds, sampling, paint);
     } else {
-      canvas->DrawImage(last_image_, SkPoint{bounds.x(), bounds.y()}, sampling, paint);
+      canvas->DrawImage(last_image_, DlPoint(bounds.GetX(), bounds.GetY()), sampling, paint);
     }
   }
 }

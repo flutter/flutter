@@ -9,6 +9,7 @@
 #include <string>
 
 #include "fml/closure.h"
+#include "impeller/base/flags.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/capabilities.h"
@@ -57,7 +58,7 @@ class Context {
   /// This number was arbitrarily chosen. The idea is that this is a somewhat
   /// rare situation where tasks happen to get executed in that tiny amount of
   /// time while an app is being backgrounded but still executing.
-  static constexpr int32_t kMaxTasksAwaitingGPU = 10;
+  static constexpr int32_t kMaxTasksAwaitingGPU = 1024;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys an Impeller context.
@@ -245,9 +246,12 @@ class Context {
   /// @brief Submit the command buffer that renders to the onscreen surface.
   virtual bool SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer);
 
- protected:
-  Context();
+  const Flags& GetFlags() const { return flags_; }
 
+ protected:
+  explicit Context(const Flags& flags);
+
+  Flags flags_;
   std::vector<std::function<void()>> per_frame_task_;
 
  private:

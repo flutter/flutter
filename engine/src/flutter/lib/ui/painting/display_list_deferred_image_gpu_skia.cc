@@ -84,9 +84,9 @@ bool DlDeferredImageGPUSkia::isUIThreadSafe() const {
 }
 
 // |DlImage|
-SkISize DlDeferredImageGPUSkia::dimensions() const {
-  return image_wrapper_ ? image_wrapper_->image_info().dimensions()
-                        : SkISize::MakeEmpty();
+DlISize DlDeferredImageGPUSkia::GetSize() const {
+  return image_wrapper_ ? ToDlISize(image_wrapper_->image_info().dimensions())
+                        : DlISize();
 }
 
 // |DlImage|

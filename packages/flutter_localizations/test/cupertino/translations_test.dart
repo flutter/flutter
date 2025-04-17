@@ -287,6 +287,20 @@ void main() {
     expect(localizations.datePickerDayOfMonth(1), '1日');
     expect(localizations.datePickerDayOfMonth(1, 2), '周二 1日');
   });
+
+  testWidgets('Test correct time order for CupertinoDatePicker in Korean locale', (
+    WidgetTester tester,
+  ) async {
+    const Locale locale = Locale('ko');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(
+      locale,
+    );
+
+    expect(localizations, isA<CupertinoLocalizationKo>());
+    expect(localizations.datePickerDateTimeOrder, DatePickerDateTimeOrder.date_dayPeriod_time);
+  });
 }
 
 class _FakeEditableText extends EditableText {

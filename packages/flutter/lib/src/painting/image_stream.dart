@@ -16,8 +16,6 @@ import 'dart:ui' as ui show Codec, FrameInfo, Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-const String _flutterPaintingLibrary = 'package:flutter/painting.dart';
-
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
@@ -47,13 +45,7 @@ class ImageInfo {
   ///
   /// See details for disposing contract in the class description.
   ImageInfo({required this.image, this.scale = 1.0, this.debugLabel}) {
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterPaintingLibrary,
-        className: '$ImageInfo',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', 'ImageInfo', this));
   }
 
   /// Creates an [ImageInfo] with a cloned [image].
@@ -144,9 +136,7 @@ class ImageInfo {
   /// and no clones of it or the image it contains can be made.
   void dispose() {
     assert((image.debugGetOpenHandleStackTraces()?.length ?? 1) > 0);
-    if (kFlutterMemoryAllocationsEnabled) {
-      MemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
     image.dispose();
   }
 
@@ -460,15 +450,7 @@ class ImageStream with Diagnosticable {
 class ImageStreamCompleterHandle {
   ImageStreamCompleterHandle._(ImageStreamCompleter this._completer) {
     _completer!._keepAliveHandles += 1;
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: _flutterPaintingLibrary,
-        className: '$ImageStreamCompleterHandle',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('painting', 'ImageStreamCompleterHandle', this));
   }
 
   ImageStreamCompleter? _completer;
@@ -485,11 +467,7 @@ class ImageStreamCompleterHandle {
     _completer!._keepAliveHandles -= 1;
     _completer!._maybeDispose();
     _completer = null;
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
+    assert(debugMaybeDispatchDisposed(this));
   }
 }
 
@@ -530,10 +508,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
 
-  /// We must avoid disposing a completer if it has never had a listener, even
-  /// if all [keepAlive] handles get disposed.
-  bool _hadAtLeastOneListener = false;
-
   /// Whether the future listeners added to this completer are initial listeners.
   ///
   /// This can be set to true when an [ImageStream] adds its initial listeners to
@@ -559,7 +533,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///    automatically removed after first image load or error.
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
-    _hadAtLeastOneListener = true;
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
@@ -693,10 +666,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
   void onDisposed() {}
 
   /// Disposes this [ImageStreamCompleter] unless:
-  ///   1. It has never had a listener
-  ///   2. It is already disposed
-  ///   3. It has listeners.
-  ///   4. It has active "keep alive" handles.
+  ///
+  ///   1. It is already disposed
+  ///   2. It has listeners.
+  ///   3. It has active "keep alive" handles.
   @nonVirtual
   void maybeDispose() {
     _maybeDispose();
@@ -704,7 +677,7 @@ abstract class ImageStreamCompleter with Diagnosticable {
 
   @mustCallSuper
   void _maybeDispose() {
-    if (!_hadAtLeastOneListener || _disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
+    if (_disposed || _listeners.isNotEmpty || _keepAliveHandles != 0) {
       return;
     }
 
@@ -1069,6 +1042,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _frameDuration = _nextFrame!.duration;
       _nextFrame!.image.dispose();
       _nextFrame = null;
+      if (_codec == null) {
+        // codec was disposed during _emitFrame
+        return;
+      }
       final int completedCycles = _framesEmitted ~/ _codec!.frameCount;
       if (_codec!.repetitionCount == -1 || completedCycles <= _codec!.repetitionCount) {
         _decodeNextFrameAndSchedule();
@@ -1130,7 +1107,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _nextFrame!.image.dispose();
       _nextFrame = null;
 
-      _codec!.dispose();
+      _codec?.dispose();
       _codec = null;
       return;
     }

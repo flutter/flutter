@@ -24,7 +24,6 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
-import '../build_system/tools/scene_importer.dart';
 import '../build_system/tools/shader_compiler.dart';
 import '../bundle_builder.dart';
 import '../cache.dart';
@@ -41,6 +40,7 @@ import '../web/chrome.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import '../web/module_metadata.dart';
+import '../web/web_constants.dart';
 import '../web_template.dart';
 
 typedef DwdsLauncher =
@@ -49,6 +49,7 @@ typedef DwdsLauncher =
       required Stream<BuildResult> buildResults,
       required ConnectionProvider chromeConnection,
       required ToolConfiguration toolConfiguration,
+      bool injectDebuggingSupportCode,
     });
 
 // A minimal index for projects that do not yet support web. A meta tag is used
@@ -146,10 +147,6 @@ class WebAssetServer implements AssetReader {
   final Map<String, String> _modules;
   final Map<String, String> _digests;
 
-  // The generation number that maps to the number of hot restarts. This is used
-  // to suffix a query to source paths in order to cache-bust.
-  int _hotRestartGeneration = 0;
-
   int get selectedPort => _httpServer.port;
 
   /// Given a list of [modules] that need to be loaded, compute module names and
@@ -179,15 +176,16 @@ class WebAssetServer implements AssetReader {
       _modules[name] = path;
       _digests[name] = _webMemoryFS.files[moduleName].hashCode.toString();
     }
-    if (writeRestartScripts && _hotRestartGeneration > 0) {
+    if (writeRestartScripts) {
       final List<Map<String, String>> srcIdsList = <Map<String, String>>[];
       for (final String src in modules) {
-        srcIdsList.add(<String, String>{'src': '$src?gen=$_hotRestartGeneration', 'id': src});
+        srcIdsList.add(<String, String>{'src': src, 'id': src});
       }
       writeFile('restart_scripts.json', json.encode(srcIdsList));
     }
-    _hotRestartGeneration++;
   }
+
+  static const String _reloadScriptsFileName = 'reload_scripts.json';
 
   /// Given a list of [modules] that need to be reloaded, writes a file that
   /// contains a list of objects each with two fields:
@@ -219,13 +217,16 @@ class WebAssetServer implements AssetReader {
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{'src': module, 'libraries': libraries});
     }
-    writeFile('reload_scripts.json', json.encode(moduleToLibrary));
+    writeFile(_reloadScriptsFileName, json.encode(moduleToLibrary));
   }
 
   @visibleForTesting
   List<String> write(File codeFile, File manifestFile, File sourcemapFile, File metadataFile) {
     return _webMemoryFS.write(codeFile, manifestFile, sourcemapFile, metadataFile);
   }
+
+  Uri? get baseUri => _baseUri;
+  Uri? _baseUri;
 
   /// Start the web asset server on a [hostname] and [port].
   ///
@@ -314,6 +315,15 @@ class WebAssetServer implements AssetReader {
       webRenderer: webRenderer,
       useLocalCanvasKit: useLocalCanvasKit,
     );
+    final int selectedPort = server.selectedPort;
+    String url = '$hostname:$selectedPort';
+    if (hostname == 'any') {
+      url = 'localhost:$selectedPort';
+    }
+    server._baseUri = Uri.http(url, server.basePath);
+    if (tlsCertPath != null && tlsCertKeyPath != null) {
+      server._baseUri = Uri.https(url, server.basePath);
+    }
     if (testMode) {
       return server;
     }
@@ -386,6 +396,10 @@ class WebAssetServer implements AssetReader {
                     ),
                   ),
                   packageConfigPath: buildInfo.packageConfigPath,
+                  hotReloadSourcesUri: server._baseUri!.replace(
+                    pathSegments: List<String>.from(server._baseUri!.pathSegments)
+                      ..add(_reloadScriptsFileName),
+                  ),
                 ).strategy
                 : FrontendServerRequireStrategyProvider(
                   ReloadConfiguration.none,
@@ -410,6 +424,10 @@ class WebAssetServer implements AssetReader {
         ),
         appMetadata: AppMetadata(hostname: hostname),
       ),
+      // Defaults to 'chrome' if deviceManager or specifiedDeviceId is null,
+      // ensuring the condition is true by default.
+      injectDebuggingSupportCode:
+          (globals.deviceManager?.specifiedDeviceId ?? 'chrome') == 'chrome',
     );
     shelf.Pipeline pipeline = const shelf.Pipeline();
     if (enableDwds) {
@@ -831,7 +849,6 @@ class WebDevFS implements DevFS {
     required this.expressionCompiler,
     required this.extraHeaders,
     required this.chromiumLauncher,
-    required this.nullAssertions,
     required this.nativeNullAssertions,
     required this.ddcModuleSystem,
     required this.canaryFeatures,
@@ -865,7 +882,6 @@ class WebDevFS implements DevFS {
   final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
-  final bool nullAssertions;
   final bool nativeNullAssertions;
   final int _port;
   final String? tlsCertPath;
@@ -948,8 +964,7 @@ class WebDevFS implements DevFS {
   Set<String> get assetPathsToEvict => const <String>{};
 
   @override
-  Uri? get baseUri => _baseUri;
-  Uri? _baseUri;
+  Uri? get baseUri => webAssetServer._baseUri;
 
   @override
   Future<Uri> create() async {
@@ -976,17 +991,7 @@ class WebDevFS implements DevFS {
       ddcModuleSystem: ddcModuleSystem,
       canaryFeatures: canaryFeatures,
     );
-
-    final int selectedPort = webAssetServer.selectedPort;
-    String url = '$hostname:$selectedPort';
-    if (hostname == 'any') {
-      url = 'localhost:$selectedPort';
-    }
-    _baseUri = Uri.http(url, webAssetServer.basePath);
-    if (tlsCertPath != null && tlsCertKeyPath != null) {
-      _baseUri = Uri.https(url, webAssetServer.basePath);
-    }
-    return _baseUri!;
+    return baseUri!;
   }
 
   @override
@@ -1030,7 +1035,6 @@ class WebDevFS implements DevFS {
     required PackageConfig packageConfig,
     required String dillOutputPath,
     required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
     DevFSWriter? devFSWriter,
     String? target,
     AssetBundle? bundle,
@@ -1087,15 +1091,13 @@ class WebDevFS implements DevFS {
         ddcModuleSystem
             ? generateDDCLibraryBundleMainModule(
               entrypoint: entrypoint,
-              nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
               onLoadEndBootstrap: onLoadEndBootstrap,
             )
             : generateMainModule(
               entrypoint: entrypoint,
-              nullAssertions: nullAssertions,
               nativeNullAssertions: nativeNullAssertions,
-              loaderRootDirectory: _baseUri.toString(),
+              loaderRootDirectory: baseUri.toString(),
             ),
       );
       // TODO(zanderso): refactor the asset code in this and the regular devfs to
@@ -1137,7 +1139,14 @@ class WebDevFS implements DevFS {
       recompileRestart: fullRestart,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
-      return UpdateFSReport();
+      return UpdateFSReport(
+        // TODO(srujzs): We're currently reliant on compile error string parsing
+        // as hot reload rejections are sent to stderr just like other
+        // compilation errors. Ideally, we should have some shared parsing
+        // functionality, but that would require a shared package.
+        // See https://github.com/dart-lang/sdk/issues/60275.
+        hotReloadRejected: compilerOutput?.errorMessage?.contains('Hot reload rejected') ?? false,
+      );
     }
 
     // Only update the last compiled time if we successfully compiled.
@@ -1165,7 +1174,10 @@ class WebDevFS implements DevFS {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
     if (fullRestart) {
-      webAssetServer.performRestart(modules, writeRestartScripts: ddcModuleSystem);
+      webAssetServer.performRestart(
+        modules,
+        writeRestartScripts: ddcModuleSystem && !bundleFirstUpload,
+      );
     } else {
       webAssetServer.performReload(modules);
     }
@@ -1233,9 +1245,6 @@ class WebDevFS implements DevFS {
 
   @override
   Set<String> get shaderPathsToEvict => <String>{};
-
-  @override
-  Set<String> get scenePathsToEvict => <String>{};
 }
 
 class ReleaseAssetServer {
@@ -1315,11 +1324,8 @@ class ReleaseAssetServer {
           'Content-Type': mimeType,
           'Cross-Origin-Resource-Policy': 'cross-origin',
           'Access-Control-Allow-Origin': '*',
-          if (_needsCoopCoep &&
-              _fileSystem.path.extension(file.path) == '.html') ...<String, String>{
-            'Cross-Origin-Opener-Policy': 'same-origin',
-            'Cross-Origin-Embedder-Policy': 'credentialless',
-          },
+          if (_needsCoopCoep && _fileSystem.path.extension(file.path) == '.html')
+            ...kMultiThreadedHeaders,
         },
       );
     }
@@ -1329,10 +1335,7 @@ class ReleaseAssetServer {
       file.readAsBytesSync(),
       headers: <String, String>{
         'Content-Type': 'text/html',
-        if (_needsCoopCoep) ...<String, String>{
-          'Cross-Origin-Opener-Policy': 'same-origin',
-          'Cross-Origin-Embedder-Policy': 'credentialless',
-        },
+        if (_needsCoopCoep) ...kMultiThreadedHeaders,
       },
     );
   }

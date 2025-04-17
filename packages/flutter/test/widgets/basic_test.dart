@@ -11,6 +11,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -380,6 +381,294 @@ void main() {
       expect(attributedHint.attributes[0].range, const TextRange(start: 1, end: 2));
     });
 
+    testWidgets('Semantics does not merge role', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(
+                key: key2,
+                role: SemanticsRole.alertDialog,
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      expect(node1 != node2, isTrue);
+      expect(node1.role, SemanticsRole.dialog);
+      expect(node2.role, SemanticsRole.alertDialog);
+    });
+
+    testWidgets('Semantics does not merge role - text field', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(key: key2, textField: true, child: const Placeholder()),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      expect(node1 != node2, isTrue);
+      expect(node1.role, SemanticsRole.dialog);
+      expect(node2.hasFlag(SemanticsFlag.isTextField), isTrue);
+    });
+
+    testWidgets('Semantics does not merge role - link', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(key: key2, link: true, child: const Placeholder()),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      expect(node1 != node2, isTrue);
+      expect(node1.role, SemanticsRole.dialog);
+      expect(node2.hasFlag(SemanticsFlag.isLink), isTrue);
+    });
+
+    testWidgets('Semantics does not merge role - scopes route', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(
+                key: key2,
+                scopesRoute: true,
+                explicitChildNodes: true,
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      expect(node1 != node2, isTrue);
+      expect(node1.role, SemanticsRole.dialog);
+      expect(node2.hasFlag(SemanticsFlag.scopesRoute), isTrue);
+    });
+
+    testWidgets('Semantics does not merge role - header on web', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(key: key2, header: true, child: const Placeholder()),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      if (kIsWeb) {
+        expect(node1 != node2, isTrue);
+        expect(node1.role, SemanticsRole.dialog);
+        expect(node2.hasFlag(SemanticsFlag.isHeader), isTrue);
+      } else {
+        expect(node1 == node2, isTrue);
+      }
+    });
+
+    testWidgets('Semantics does not merge role - image', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(key: key2, image: true, child: const Placeholder()),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      expect(node1 != node2, isTrue);
+      expect(node1.role, SemanticsRole.dialog);
+      expect(node2.hasFlag(SemanticsFlag.isImage), isTrue);
+    });
+
+    testWidgets('Semantics does not merge role - slider', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(key: key2, slider: true, child: const Placeholder()),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      expect(node1 != node2, isTrue);
+      expect(node1.role, SemanticsRole.dialog);
+      expect(node2.hasFlag(SemanticsFlag.isSlider), isTrue);
+    });
+
+    testWidgets('Semantics does not merge role - keyboard key', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(key: key2, keyboardKey: true, child: const Placeholder()),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      expect(node1 != node2, isTrue);
+      expect(node1.role, SemanticsRole.dialog);
+      expect(node2.hasFlag(SemanticsFlag.isKeyboardKey), isTrue);
+    });
+
+    testWidgets('Semantics does not merge role - scopes route', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.dialog,
+              child: Semantics(key: key2, slider: true, child: const Placeholder()),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode node2 = tester.getSemantics(find.byKey(key2));
+      expect(node1 != node2, isTrue);
+      expect(node1.role, SemanticsRole.dialog);
+      expect(node2.hasFlag(SemanticsFlag.isSlider), isTrue);
+    });
+
+    testWidgets('Semantics can set controls visibility of nodes', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key,
+              controlsNodes: const <String>{'abc'},
+              child: const Placeholder(),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData data = node.getSemanticsData();
+      expect(data.controlsNodes!.length, 1);
+      expect(data.controlsNodes!.first, 'abc');
+    });
+
+    testWidgets('Semantics can set controls visibility of nodes', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key,
+              controlsNodes: const <String>{'abc', 'ghi'},
+              child: Semantics(
+                controlsNodes: const <String>{'abc', 'def'},
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData data = node.getSemanticsData();
+      expect(data.controlsNodes!.length, 3);
+      expect(data.controlsNodes, <String>{'abc', 'ghi', 'def'});
+    });
+
+    testWidgets('Semantics can set semantics input type', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              inputType: SemanticsInputType.phone,
+              child: const SizedBox(width: 10, height: 10),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode node1 = tester.getSemantics(find.byKey(key1));
+      expect(node1.inputType, SemanticsInputType.phone);
+    });
+
+    testWidgets('Semantics can set alert rule', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(key: key, role: SemanticsRole.alert, child: const Placeholder()),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData data = node.getSemanticsData();
+      expect(data.role, SemanticsRole.alert);
+    });
+
+    testWidgets('Semantics can set status rule', (WidgetTester tester) async {
+      final UniqueKey key = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(key: key, role: SemanticsRole.status, child: const Placeholder()),
+          ),
+        ),
+      );
+      final SemanticsNode node = tester.getSemantics(find.byKey(key));
+      final SemanticsData data = node.getSemanticsData();
+      expect(data.role, SemanticsRole.status);
+    });
+
     testWidgets('Semantics can merge attributed strings', (WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
@@ -433,6 +722,33 @@ void main() {
       expect(attributedHint.attributes[0].range, const TextRange(start: 1, end: 2));
       expect(attributedHint.attributes[1] is SpellOutStringAttribute, isTrue);
       expect(attributedHint.attributes[1].range, const TextRange(start: 6, end: 7));
+    });
+
+    testWidgets('Semantics can use list and list item', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Semantics(
+              key: key1,
+              role: SemanticsRole.list,
+              container: true,
+              child: Semantics(
+                key: key2,
+                role: SemanticsRole.listItem,
+                container: true,
+                child: const Placeholder(),
+              ),
+            ),
+          ),
+        ),
+      );
+      final SemanticsNode listNode = tester.getSemantics(find.byKey(key1));
+      final SemanticsNode listItemNode = tester.getSemantics(find.byKey(key2));
+
+      expect(listNode.role, SemanticsRole.list);
+      expect(listItemNode.role, SemanticsRole.listItem);
     });
 
     testWidgets('Semantics can merge attributed strings with non attributed string', (
@@ -802,7 +1118,7 @@ void main() {
   testWidgets('Inconsequential golden test', (WidgetTester tester) async {
     // The test validates the Flutter Gold integration. Any changes to the
     // golden file can be approved at any time.
-    await tester.pumpWidget(RepaintBoundary(child: Container(color: const Color(0xAAA61145))));
+    await tester.pumpWidget(RepaintBoundary(child: Container(color: const Color(0xAFF61145))));
 
     await tester.pumpAndSettle();
     await expectLater(

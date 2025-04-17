@@ -28,6 +28,7 @@ CAPABILITY_TEST(SupportsReadFromResolve, false);
 CAPABILITY_TEST(SupportsDecalSamplerAddressMode, false);
 CAPABILITY_TEST(SupportsDeviceTransientTextures, false);
 CAPABILITY_TEST(SupportsTriangleFan, false);
+CAPABILITY_TEST(SupportsExtendedRangeFormats, false);
 
 TEST(CapabilitiesTest, DefaultColorFormat) {
   auto defaults = CapabilitiesBuilder().Build();
@@ -73,6 +74,13 @@ TEST(CapabilitiesTest, MaxRenderPassAttachmentSize) {
                      .SetMaximumRenderPassAttachmentSize({100, 100})
                      .Build();
   EXPECT_EQ(mutated->GetMaximumRenderPassAttachmentSize(), ISize(100, 100));
+}
+
+TEST(CapabilitiesTest, MinUniformAlignment) {
+  auto defaults = CapabilitiesBuilder().Build();
+  EXPECT_EQ(defaults->GetMinimumUniformAlignment(), 256u);
+  auto mutated = CapabilitiesBuilder().SetMinimumUniformAlignment(16).Build();
+  EXPECT_EQ(mutated->GetMinimumUniformAlignment(), 16u);
 }
 
 }  // namespace testing

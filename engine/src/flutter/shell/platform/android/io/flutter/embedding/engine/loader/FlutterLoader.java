@@ -51,6 +51,11 @@ public class FlutterLoader {
       "io.flutter.embedding.android.DisableMergedPlatformUIThread";
   private static final String ENABLE_SURFACE_CONTROL =
       "io.flutter.embedding.android.EnableSurfaceControl";
+  private static final String ENABLE_FLUTTER_GPU = "io.flutter.embedding.android.EnableFlutterGPU";
+  private static final String IMPELLER_LAZY_SHADER_MODE =
+      "io.flutter.embedding.android.ImpellerLazyShaderInitialization";
+  private static final String IMPELLER_ANTIALIAS_LINES =
+      "io.flutter.embedding.android.ImpellerAntialiasLines";
 
   /**
    * Set whether leave or clean up the VM after the last shell shuts down. It can be set from app's
@@ -368,7 +373,9 @@ public class FlutterLoader {
             shellArgs.add("--no-enable-merged-platform-ui-thread");
           }
         }
-
+        if (metaData.getBoolean(ENABLE_FLUTTER_GPU, false)) {
+          shellArgs.add("--enable-flutter-gpu");
+        }
         if (metaData.getBoolean(ENABLE_SURFACE_CONTROL, false)) {
           shellArgs.add("--enable-surface-control");
         }
@@ -376,6 +383,12 @@ public class FlutterLoader {
         String backend = metaData.getString(IMPELLER_BACKEND_META_DATA_KEY);
         if (backend != null) {
           shellArgs.add("--impeller-backend=" + backend);
+        }
+        if (metaData.getBoolean(IMPELLER_LAZY_SHADER_MODE)) {
+          shellArgs.add("--impeller-lazy-shader-mode");
+        }
+        if (metaData.getBoolean(IMPELLER_ANTIALIAS_LINES)) {
+          shellArgs.add("--impeller-antialias-lines");
         }
       }
 
@@ -390,7 +403,8 @@ public class FlutterLoader {
           kernelPath,
           result.appStoragePath,
           result.engineCachesPath,
-          initTimeMillis);
+          initTimeMillis,
+          Integer.valueOf(android.os.Build.VERSION.SDK_INT));
 
       initialized = true;
     } catch (Exception e) {

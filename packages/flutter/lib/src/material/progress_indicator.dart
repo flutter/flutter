@@ -606,7 +606,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
             ..strokeCap = strokeCap ?? StrokeCap.round
             ..style = PaintingStyle.stroke;
       // If hasGap is true, draw the background arc with a gap.
-      if (hasGap && value! > _epsilon) {
+      if (hasGap && value != null && value! > _epsilon) {
         final double arcRadius = arcActualSize.shortestSide / 2;
         final double strokeRadius = strokeWidth / arcRadius;
         final double gapRadius = trackGap! / arcRadius;
@@ -744,7 +744,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     super.value,
     super.backgroundColor,
     super.valueColor,
-    this.strokeWidth = 4.0,
+    this.strokeWidth,
     super.semanticsLabel,
     super.semanticsValue,
     this.strokeCap,

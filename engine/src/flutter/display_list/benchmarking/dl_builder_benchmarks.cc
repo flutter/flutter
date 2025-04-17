@@ -63,13 +63,13 @@ static void Complete(DisplayListBuilder& builder,
   auto display_list = builder.Build();
   switch (type) {
     case DisplayListBuilderBenchmarkType::kBounds:
-      display_list->bounds();
+      display_list->GetBounds();
       break;
     case DisplayListBuilderBenchmarkType::kRtree:
       display_list->rtree();
       break;
     case DisplayListBuilderBenchmarkType::kBoundsAndRtree:
-      display_list->bounds();
+      display_list->GetBounds();
       display_list->rtree();
       break;
     case DisplayListBuilderBenchmarkType::kDefault:
@@ -145,7 +145,7 @@ static void BM_DisplayListBuilderWithGlobalSaveLayer(
     DisplayListBuilder builder(prepare_rtree);
     builder.Scale(3.5, 3.5);
     builder.Translate(10.3, 6.9);
-    builder.SaveLayer(nullptr, nullptr);
+    builder.SaveLayer(std::nullopt, nullptr);
     builder.Translate(45.3, 27.9);
     DlOpReceiver& receiver = DisplayListBuilderBenchmarkAccessor(builder);
     for (auto& group : allRenderingOps) {
@@ -169,7 +169,7 @@ static void BM_DisplayListBuilderWithSaveLayer(
     for (auto& group : allRenderingOps) {
       for (size_t i = 0; i < group.variants.size(); i++) {
         auto& invocation = group.variants[i];
-        builder.SaveLayer(nullptr, nullptr);
+        builder.SaveLayer(std::nullopt, nullptr);
         invocation.Invoke(receiver);
         builder.Restore();
       }

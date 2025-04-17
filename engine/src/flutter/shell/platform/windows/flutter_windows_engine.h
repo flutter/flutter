@@ -96,6 +96,12 @@ class FlutterWindowsEngine {
 
   virtual ~FlutterWindowsEngine();
 
+  // Returns the engine associated with the given identifier.
+  // The engine_id must be valid and for a running engine, otherwise
+  // the behavior is undefined.
+  // Must be called on the platform thread.
+  static FlutterWindowsEngine* GetEngineForId(int64_t engine_id);
+
   // Starts running the entrypoint function specifed in the project bundle. If
   // unspecified, defaults to main().
   //
@@ -179,6 +185,9 @@ class FlutterWindowsEngine {
                     FlutterKeyEventCallback callback,
                     void* user_data);
 
+  // Informs the engine of an incoming focus event.
+  void SendViewFocusEvent(const FlutterViewFocusEvent& event);
+
   KeyboardHandlerBase* keyboard_key_handler() {
     return keyboard_key_handler_.get();
   }
@@ -228,7 +237,8 @@ class FlutterWindowsEngine {
   void OnVsync(intptr_t baton);
 
   // Dispatches a semantics action to the specified semantics node.
-  bool DispatchSemanticsAction(uint64_t id,
+  bool DispatchSemanticsAction(FlutterViewId view_id,
+                               uint64_t node_id,
                                FlutterSemanticsAction action,
                                fml::MallocMapping data);
 
@@ -298,6 +308,13 @@ class FlutterWindowsEngine {
     return windows_proc_table_;
   }
 
+  // Sets the cursor that should be used when the mouse is over the Flutter
+  // content. See mouse_cursor.dart for the values and meanings of cursor_name.
+  void UpdateFlutterCursor(const std::string& cursor_name) const;
+
+  // Sets the cursor directly from a cursor handle.
+  void SetFlutterCursor(HCURSOR cursor) const;
+
  protected:
   // Creates the keyboard key handler.
   //
@@ -325,18 +342,26 @@ class FlutterWindowsEngine {
   // channel.
   virtual void OnChannelUpdate(std::string name, bool listening);
 
+  virtual void OnViewFocusChangeRequest(
+      const FlutterViewFocusChangeRequest* request);
+
  private:
   // Allows swapping out embedder_api_ calls in tests.
   friend class EngineModifier;
+
+  // Maps a Flutter cursor name to an HCURSOR.
+  //
+  // Returns the arrow cursor for unknown constants.
+  //
+  // This map must be kept in sync with Flutter framework's
+  // services/mouse_cursor.dart.
+  HCURSOR GetCursorByName(const std::string& cursor_name) const;
 
   // Sends system locales to the engine.
   //
   // Should be called just after the engine is run, and after any relevant
   // system changes.
   void SendSystemLocales();
-
-  // Sends the current lifecycle state to the framework.
-  void SetLifecycleState(flutter::AppLifecycleState state);
 
   // Create the keyboard & text input sub-systems.
   //

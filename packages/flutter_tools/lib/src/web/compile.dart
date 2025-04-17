@@ -71,7 +71,9 @@ class WebBuilder {
     )).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory =
         outputDirectoryPath == null
-            ? _fileSystem.directory(getWebBuildDirectory())
+            ? _fileSystem.directory(
+              _fileSystem.path.join(flutterProject.directory.path, getWebBuildDirectory()),
+            )
             : _fileSystem.directory(outputDirectoryPath);
     outputDirectory.createSync(recursive: true);
 
@@ -89,7 +91,7 @@ class WebBuilder {
       final BuildResult result = await _buildSystem.build(
         globals.buildTargets.webServiceWorker(_fileSystem, compilerConfigs),
         Environment(
-          projectDir: _fileSystem.currentDirectory,
+          projectDir: flutterProject.directory,
           outputDir: outputDirectory,
           buildDir: flutterProject.directory
               .childDirectory('.dart_tool')
