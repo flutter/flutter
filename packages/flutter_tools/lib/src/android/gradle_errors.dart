@@ -732,27 +732,24 @@ https://github.com/flutter/flutter/issues/156304''', title: _boxTitle);
 );
 
 final RegExp _missingNdkSourcePropertiesRegexp = RegExp(
-    r'NDK at ((?:/|[a-zA-Z]:\\).+?) did not have a source\.properties file',
-    multiLine: true);
+  r'NDK at ((?:/|[a-zA-Z]:\\).+?) did not have a source\.properties file',
+  multiLine: true,
+);
 
 @visibleForTesting
 final GradleHandledError missingNdkSourcePropertiesFile = GradleHandledError(
-  test:
-      (String line) => _missingNdkSourcePropertiesRegexp.hasMatch(line),
+  test: (String line) => _missingNdkSourcePropertiesRegexp.hasMatch(line),
   handler: ({
     required String line,
     required FlutterProject project,
     required bool usesAndroidX,
   }) async {
-    final String path = _missingNdkSourcePropertiesRegexp.firstMatch(line)!
-        .group(1)!;
+    final String path = _missingNdkSourcePropertiesRegexp.firstMatch(line)!.group(1)!;
     globals.printBox('''
     ${globals.logger.terminal.warningMark} This is likely due to a malformed download of the NDK.
     This can be fixed by deleting the local NDK copy at: $path
     and allowing the Android Gradle Plugin to automatically re-download it.
-    ''',
-        title: _boxTitle
-    );
+    ''', title: _boxTitle);
     return GradleBuildStatus.exit;
   },
   eventLabel: 'ndk-missing-source-properties-file',
