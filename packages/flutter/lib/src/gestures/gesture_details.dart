@@ -4,7 +4,7 @@
 
 import 'dart:ui' show Offset;
 
-/// An abstract class representing gesture details that include positional information.
+/// An abstract interface representing gesture details that include positional information.
 ///
 /// This class serve as a common interface for gesture details that involve positional data,
 /// such as dragging and tapping. It simplifies gesture handling by enabling the use of shared logic
