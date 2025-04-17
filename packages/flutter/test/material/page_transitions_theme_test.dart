@@ -1007,39 +1007,49 @@ void main() {
 
   testWidgets('predictive back is the default on Android', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => Material(
-        child: TextButton(
-          child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
-        ),
-      ),
+      '/':
+          (BuildContext context) => Material(
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
     };
-    await tester.pumpWidget(
-      MaterialApp(
-        routes: routes,
-      ),
-    );
+    await tester.pumpWidget(MaterialApp(routes: routes));
 
     final ThemeData themeData = Theme.of(tester.element(find.text('push')));
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        expect(themeData.pageTransitionsTheme.builders[defaultTargetPlatform], isA<PredictiveBackPageTransitionsBuilder>());
+        expect(
+          themeData.pageTransitionsTheme.builders[defaultTargetPlatform],
+          isA<PredictiveBackPageTransitionsBuilder>(),
+        );
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.fuchsia:
       case TargetPlatform.windows:
-        expect(themeData.pageTransitionsTheme.builders[defaultTargetPlatform], isNot(isA<PredictiveBackPageTransitionsBuilder>()));
+        expect(
+          themeData.pageTransitionsTheme.builders[defaultTargetPlatform],
+          isNot(isA<PredictiveBackPageTransitionsBuilder>()),
+        );
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('predictive back falls back to ZoomPageTransitionBuilder', (WidgetTester tester) async {
+  testWidgets('predictive back falls back to ZoomPageTransitionBuilder', (
+    WidgetTester tester,
+  ) async {
     Finder findPredictiveBackPageTransition() {
       return find.descendant(
         of: find.byType(PrimaryScrollController),
-        matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_PredictiveBackPageTransition'),
+        matching: find.byWidgetPredicate(
+          (Widget w) => '${w.runtimeType}' == '_PredictiveBackPageTransition',
+        ),
       );
     }
+
     Finder findFallbackPageTransition() {
       return find.descendant(
         of: find.byType(PrimaryScrollController),
@@ -1048,12 +1058,15 @@ void main() {
     }
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => Material(
-        child: TextButton(
-          child: const Text('push'),
-          onPressed: () { Navigator.of(context).pushNamed('/b'); },
-        ),
-      ),
+      '/':
+          (BuildContext context) => Material(
+            child: TextButton(
+              child: const Text('push'),
+              onPressed: () {
+                Navigator.of(context).pushNamed('/b');
+              },
+            ),
+          ),
       '/b': (BuildContext context) => const Text('page b'),
     };
 
@@ -1076,7 +1089,10 @@ void main() {
     );
 
     final ThemeData themeData = Theme.of(tester.element(find.text('push')));
-    expect(themeData.pageTransitionsTheme.builders[defaultTargetPlatform], isA<PredictiveBackPageTransitionsBuilder>());
+    expect(
+      themeData.pageTransitionsTheme.builders[defaultTargetPlatform],
+      isA<PredictiveBackPageTransitionsBuilder>(),
+    );
 
     expect(find.text('push'), findsOneWidget);
     expect(find.text('page b'), findsNothing);
@@ -1090,14 +1106,11 @@ void main() {
     // Only Android sends system back gestures.
     if (defaultTargetPlatform == TargetPlatform.android) {
       final ByteData startMessage = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall(
-          'startBackGesture',
-          <String, dynamic>{
-            'touchOffset': <double>[5.0, 300.0],
-            'progress': 0.0,
-            'swipeEdge': 0, // left
-          },
-        ),
+        const MethodCall('startBackGesture', <String, dynamic>{
+          'touchOffset': <double>[5.0, 300.0],
+          'progress': 0.0,
+          'swipeEdge': 0, // left
+        }),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/backgesture',
@@ -1126,15 +1139,12 @@ void main() {
     // Drag the system back gesture far enough to commit.
     if (defaultTargetPlatform == TargetPlatform.android) {
       final ByteData updateMessage = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall(
-          'updateBackGestureProgress',
-          <String, dynamic>{
-            'x': 100.0,
-            'y': 300.0,
-            'progress': 0.35,
-            'swipeEdge': 0, // left
-          },
-        ),
+        const MethodCall('updateBackGestureProgress', <String, dynamic>{
+          'x': 100.0,
+          'y': 300.0,
+          'progress': 0.35,
+          'swipeEdge': 0, // left
+        }),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/backgesture',
@@ -1165,9 +1175,7 @@ void main() {
     if (defaultTargetPlatform == TargetPlatform.android) {
       // Commit the system back gesture on Android.
       final ByteData commitMessage = const StandardMethodCodec().encodeMethodCall(
-        const MethodCall(
-          'commitBackGesture',
-        ),
+        const MethodCall('commitBackGesture'),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/backgesture',
@@ -1177,9 +1185,7 @@ void main() {
     } else {
       // On other platforms, send a one-off system pop.
       final ByteData popMessage = const JSONMethodCodec().encodeMethodCall(
-        const MethodCall(
-          'popRoute',
-        ),
+        const MethodCall('popRoute'),
       );
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/navigation',
