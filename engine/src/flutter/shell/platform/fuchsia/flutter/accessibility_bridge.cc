@@ -341,7 +341,7 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
         fuchsia::accessibility::semantics::CheckedState::NONE);
   } else {
     states.set_checked_state(
-        node.flags.isChecked)
+        node.flags.isChecked
             ? fuchsia::accessibility::semantics::CheckedState::CHECKED
             : fuchsia::accessibility::semantics::CheckedState::UNCHECKED);
   }
@@ -349,7 +349,7 @@ fuchsia::accessibility::semantics::States AccessibilityBridge::GetNodeStates(
   // Set enabled state.
   if (node.flags.hasEnabledState) {
     states.set_enabled_state(
-        node.flags.isEnabled)
+        node.flags.isEnabled
             ? fuchsia::accessibility::semantics::EnabledState::ENABLED
             : fuchsia::accessibility::semantics::EnabledState::DISABLED);
   }
@@ -449,10 +449,9 @@ fuchsia::accessibility::semantics::Role AccessibilityBridge::GetNodeRole(
   // checkbox or a radio button. We distinguish between checkboxes and
   // radio buttons based on membership in a mutually exclusive group.
   if (node.flags.hasCheckedState) {
-    if (node.flags.isInMutuallyExclusiveGroup)) {
-        return fuchsia::accessibility::semantics::Role::RADIO_BUTTON;
-      }
-    else {
+    if (node.flags.isInMutuallyExclusiveGroup) {
+      return fuchsia::accessibility::semantics::Role::RADIO_BUTTON;
+    } else {
       return fuchsia::accessibility::semantics::Role::CHECK_BOX;
     }
   }
@@ -872,7 +871,8 @@ void AccessibilityBridge::FillInspectTree(int32_t flutter_node_id,
         "text_direction", data.textDirection == 1 ? "RTL" : "LTR", inspector);
   }
 
-  if (data.flags) {
+  std::string flags = NodeFlagsToString(data);
+  if (!flags.empty()) {
     inspect_node.CreateString("flags", NodeFlagsToString(data), inspector);
   }
   if (data.actions) {

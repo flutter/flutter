@@ -9,6 +9,7 @@
 /// @docImport 'package:flutter_test/flutter_test.dart';
 library;
 
+import 'dart:core';
 import 'dart:math' as math;
 import 'dart:ui'
     show
@@ -165,11 +166,11 @@ sealed class _DebugSemanticsRoleChecks {
       return null;
     }
 
-    if (!data.hasFlag(SemanticsFlag.hasEnabledState)) {
+    if (!data.flags.hasEnabledState) {
       if (!data.hasAction(SemanticsAction.tap)) {
         return FlutterError('A tab must have a tap action');
       }
-    } else if (data.hasFlag(SemanticsFlag.isEnabled) && !data.hasAction(SemanticsAction.tap)) {
+    } else if (data.flags.isEnabled && !data.hasAction(SemanticsAction.tap)) {
       return FlutterError('A tab must have a tap action');
     }
     return null;
@@ -1012,6 +1013,11 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
+  /// Keep this to avoid breaking change but we should deprecate it sometime.
+  bool hasFlag(SemanticsFlag flag) {
+    final realIndex = flag.index.bitLength - 1;
+    return flags.toList()[realIndex];
+  }
 
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
@@ -2837,6 +2843,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsFlags _flags = SemanticsFlags();
 
   SemanticsFlags get flags => _flags;
+
+  /// Keep this to avoid breaking change but we should deprecate it sometime.
+  bool hasFlag(SemanticsFlag flag) {
+    final realIndex = flag.index.bitLength - 1;
+    return flags.toList()[realIndex];
+  }
 
   /// {@macro flutter.semantics.SemanticsProperties.identifier}
   String get identifier => _identifier;
@@ -5318,7 +5330,7 @@ class SemanticsConfiguration {
   ///  * [SemanticsFlag.scopesRoute], for a full description of route scoping.
   bool get scopesRoute => _flags.scopesRoute;
   set scopesRoute(bool value) {
-    _flags.scopesRoute = value;
+    _flags = _flags.copyWith(scopesRoute: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5329,14 +5341,14 @@ class SemanticsConfiguration {
   ///  * [SemanticsFlag.namesRoute], for a full description of route naming.
   bool get namesRoute => _flags.namesRoute;
   set namesRoute(bool value) {
-    _flags.namesRoute = value;
+    _flags = _flags.copyWith(namesRoute: value);
     _hasBeenAnnotated = true;
   }
 
   /// Whether the semantics node represents an image.
   bool get isImage => _flags.isImage;
   set isImage(bool value) {
-    _flags.isImage = value;
+    _flags = _flags.copyWith(isImage: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5358,7 +5370,7 @@ class SemanticsConfiguration {
   ///  * [SemanticsFlag.isLiveRegion], the semantics flag that this setting controls.
   bool get liveRegion => _flags.isLiveRegion;
   set liveRegion(bool value) {
-    _flags.isLiveRegion = value;
+    _flags = _flags.copyWith(isLiveRegion: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5379,8 +5391,7 @@ class SemanticsConfiguration {
   /// in which case it will not be flagged as selected.
   bool get isSelected => _flags.isSelected;
   set isSelected(bool value) {
-    _flags.hasSelectedState = true;
-    _flags.isSelected = value;
+    _flags = _flags.copyWith(hasSelectedState: true, isSelected: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5394,8 +5405,7 @@ class SemanticsConfiguration {
   /// expanded/collapsed state.
   bool? get isExpanded => _flags.hasExpandedState ? _flags.isExpanded : null;
   set isExpanded(bool? value) {
-    _flags.hasExpandedState = true;
-    _flags.isExpanded = value!;
+    _flags = _flags.copyWith(hasExpandedState: true, isExpanded: value!);
     _hasBeenAnnotated = true;
   }
 
@@ -5416,8 +5426,8 @@ class SemanticsConfiguration {
   /// widget.
   bool? get isEnabled => _flags.hasEnabledState ? _flags.isEnabled : null;
   set isEnabled(bool? value) {
-    _flags.hasEnabledState = true;
-    _flags.isEnabled = value!;
+    _flags = _flags.copyWith(hasEnabledState: true, isEnabled: value!);
+
     _hasBeenAnnotated = true;
   }
 
@@ -5433,8 +5443,7 @@ class SemanticsConfiguration {
   bool? get isChecked => _flags.hasCheckedState ? _flags.isChecked : null;
   set isChecked(bool? value) {
     assert(value != true || isCheckStateMixed != true);
-    _flags.hasCheckedState = true;
-    _flags.isChecked = value!;
+    _flags = _flags.copyWith(hasCheckedState: true, isChecked: value!);
     _hasBeenAnnotated = true;
   }
 
@@ -5449,8 +5458,7 @@ class SemanticsConfiguration {
   bool? get isCheckStateMixed => _flags.hasCheckedState ? _flags.isCheckStateMixed : null;
   set isCheckStateMixed(bool? value) {
     assert(value != true || isChecked != true);
-    _flags.hasCheckedState = true;
-    _flags.isCheckStateMixed = value!;
+    _flags = _flags.copyWith(hasCheckedState: true, isCheckStateMixed: value!);
     _hasBeenAnnotated = true;
   }
 
@@ -5464,8 +5472,8 @@ class SemanticsConfiguration {
   /// on/off state.
   bool? get isToggled => _flags.hasToggledState ? _flags.isToggled : null;
   set isToggled(bool? value) {
-    _flags.hasToggledState = true;
-    _flags.isToggled = value!;
+    _flags = _flags.copyWith(hasToggledState: true);
+    _flags = _flags.copyWith(isToggled: value!);
     _hasBeenAnnotated = true;
   }
 
@@ -5476,35 +5484,35 @@ class SemanticsConfiguration {
   /// only one radio button in that group can be marked as [isChecked].
   bool get isInMutuallyExclusiveGroup => _flags.isInMutuallyExclusiveGroup;
   set isInMutuallyExclusiveGroup(bool value) {
-    _flags.isInMutuallyExclusiveGroup = value;
+    _flags = _flags.copyWith(isInMutuallyExclusiveGroup: value);
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] can hold the input focus.
   bool get isFocusable => _flags.isFocusable;
   set isFocusable(bool value) {
-    _flags.isFocusable = value;
+    _flags = _flags.copyWith(isFocusable: value);
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] currently holds the input focus.
   bool get isFocused => _flags.isFocused;
   set isFocused(bool value) {
-    _flags.isFocused = value;
+    _flags = _flags.copyWith(isFocused: value);
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).
   bool get isButton => _flags.isButton;
   set isButton(bool value) {
-    _flags.isButton = value;
+    _flags = _flags.copyWith(isButton: value);
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a link (true) or not (false).
   bool get isLink => _flags.isLink;
   set isLink(bool value) {
-    _flags.isLink = value;
+    _flags = _flags.copyWith(isLink: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5523,7 +5531,7 @@ class SemanticsConfiguration {
   /// Whether the owning [RenderObject] is a header (true) or not (false).
   bool get isHeader => _flags.isHeader;
   set isHeader(bool value) {
-    _flags.isHeader = value;
+    _flags = _flags.copyWith(isHeader: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5545,7 +5553,7 @@ class SemanticsConfiguration {
   /// Whether the owning [RenderObject] is a slider (true) or not (false).
   bool get isSlider => _flags.isSlider;
   set isSlider(bool value) {
-    _flags.isSlider = value;
+    _flags = _flags.copyWith(isSlider: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5553,7 +5561,7 @@ class SemanticsConfiguration {
   /// (false).
   bool get isKeyboardKey => _flags.isKeyboardKey;
   set isKeyboardKey(bool value) {
-    _flags.isKeyboardKey = value;
+    _flags = _flags.copyWith(isKeyboardKey: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5575,14 +5583,14 @@ class SemanticsConfiguration {
   /// used to implement accessibility scrolling on iOS.
   bool get isHidden => _flags.isHidden;
   set isHidden(bool value) {
-    _flags.isHidden = value;
+    _flags = _flags.copyWith(isHidden: value);
     _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is a text field.
   bool get isTextField => _flags.isTextField;
   set isTextField(bool value) {
-    _flags.isTextField = value;
+    _flags = _flags.copyWith(isTextField: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5591,7 +5599,7 @@ class SemanticsConfiguration {
   /// Only applicable when [isTextField] is true.
   bool get isReadOnly => _flags.isReadOnly;
   set isReadOnly(bool value) {
-    _flags.isReadOnly = value;
+    _flags = _flags.copyWith(isReadOnly: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5602,7 +5610,7 @@ class SemanticsConfiguration {
   /// Doing so instructs screen readers to not read out [value].
   bool get isObscured => _flags.isObscured;
   set isObscured(bool value) {
-    _flags.isObscured = value;
+    _flags = _flags.copyWith(isObscured: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5612,7 +5620,7 @@ class SemanticsConfiguration {
   /// that the text field is configured to be multiline.
   bool get isMultiline => _flags.isMultiline;
   set isMultiline(bool value) {
-    _flags.isMultiline = value;
+    _flags = _flags.copyWith(isMultiline: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5629,8 +5637,8 @@ class SemanticsConfiguration {
   ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
   bool? get isRequired => _flags.hasRequiredState ? _flags.isRequired : null;
   set isRequired(bool? value) {
-    _flags.hasRequiredState = true;
-    _flags.isRequired = value!;
+    _flags = _flags.copyWith(hasRequiredState: true);
+    _flags = _flags.copyWith(isRequired: value!);
     _hasBeenAnnotated = true;
   }
 
@@ -5643,7 +5651,7 @@ class SemanticsConfiguration {
   /// body when reaching the end of the tab bar.
   bool get hasImplicitScrolling => _flags.hasImplicitScrolling;
   set hasImplicitScrolling(bool value) {
-    _flags.hasImplicitScrolling = value;
+    _flags = _flags.copyWith(hasImplicitScrolling: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5772,7 +5780,6 @@ class SemanticsConfiguration {
   // INTERNAL FLAG MANAGEMENT
 
   SemanticsFlags _flags = SemanticsFlags();
-
 
   bool get _hasExplicitRole {
     if (_role != SemanticsRole.none) {

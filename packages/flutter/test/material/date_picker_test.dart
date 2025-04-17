@@ -1872,7 +1872,7 @@ void main() {
 
       final SemanticsNode node = tester.semantics.find(find.byType(DatePickerDialog));
       final SemanticsData semanticsData = node.getSemanticsData();
-      expect(semanticsData.hasFlag(SemanticsFlag.isFocusable), false);
+      expect(semanticsData.flagsisFocusable, false);
     });
   });
 

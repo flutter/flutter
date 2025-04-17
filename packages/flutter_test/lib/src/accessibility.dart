@@ -163,7 +163,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       }
       // skip node if it is touching the edge scrollable, since it might
       // be partially scrolled offscreen.
-      if (current.hasFlag(SemanticsFlag.hasImplicitScrolling) &&
+      if (current.flags.hasImplicitScrolling &&
           _isAtBoundary(paintBounds, current.rect)) {
         return result;
       }
