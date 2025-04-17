@@ -1744,6 +1744,11 @@ void main() {
       ),
       isFalse,
     );
+    await tester.pumpAndSettle();
+
+    // Pop the pushed route to allow disposal.
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Large title and search field contents text scale', (WidgetTester tester) async {
