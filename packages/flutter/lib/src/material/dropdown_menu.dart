@@ -190,6 +190,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.closeBehavior = DropdownMenuCloseBehavior.all,
     this.maxLines = 1,
     this.textInputAction,
+    this.restorationId,
   }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -526,6 +527,9 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// {@macro flutter.widgets.TextField.textInputAction}
   final TextInputAction? textInputAction;
+
+  /// {@macro flutter.material.textfield.restorationId}
+  final String? restorationId;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -1070,6 +1074,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     : null,
             suffixIcon: trailingButton,
           ).applyDefaults(effectiveInputDecorationTheme),
+          restorationId: widget.restorationId,
         );
 
         // If [expandedInsets] is not null, the width of the text field should depend
