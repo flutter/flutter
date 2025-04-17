@@ -21,8 +21,7 @@ class WidgetsAppExample extends StatefulWidget {
 }
 
 class _WidgetsAppExampleState extends State<WidgetsAppExample> {
-  final _MyRouteInformationParser _routeInformationParser =
-      _MyRouteInformationParser();
+  final _MyRouteInformationParser _routeInformationParser = _MyRouteInformationParser();
   final _MyRouterDelegate _routerDelegate = _MyRouterDelegate();
 
   @override
@@ -40,8 +39,7 @@ class _WidgetsAppExampleState extends State<WidgetsAppExample> {
   }
 }
 
-class _MyRouteInformationParser
-    extends RouteInformationParser<_MyNavigationConfiguration> {
+class _MyRouteInformationParser extends RouteInformationParser<_MyNavigationConfiguration> {
   @override
   SynchronousFuture<_MyNavigationConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
@@ -49,28 +47,23 @@ class _MyRouteInformationParser
     // If no navigation stack info was saved, then just make the given URI the
     // only route in the new stack.
     if (routeInformation.state == null) {
-      final _MyPage page =
-          _MyPage.values.firstWhere((_MyPage pageConfiguration) {
+      final _MyPage page = _MyPage.values.firstWhere((_MyPage pageConfiguration) {
         return pageConfiguration.uriString == routeInformation.uri.toString();
       }, orElse: () => _MyPage.unknown);
-      return SynchronousFuture<_MyNavigationConfiguration>(
-          _MyNavigationConfiguration.single(page));
+      return SynchronousFuture<_MyNavigationConfiguration>(_MyNavigationConfiguration.single(page));
     }
 
     // Otherwise, restore the whole given navigation stack.
-    final Map<Object?, Object?> state =
-        routeInformation.state! as Map<Object?, Object?>;
+    final Map<Object?, Object?> state = routeInformation.state! as Map<Object?, Object?>;
     final List<Object?>? pageNameObjects = state['pages'] as List<Object?>?;
     assert(pageNameObjects != null && pageNameObjects.isNotEmpty);
     final List<String> pageNames = pageNameObjects!.cast<String>();
     final List<_MyPage> pages = pageNames.map(_MyPage.fromName).toList();
-    return SynchronousFuture<_MyNavigationConfiguration>(
-        _MyNavigationConfiguration(pages: pages));
+    return SynchronousFuture<_MyNavigationConfiguration>(_MyNavigationConfiguration(pages: pages));
   }
 
   @override
-  RouteInformation? restoreRouteInformation(
-      _MyNavigationConfiguration configuration) {
+  RouteInformation? restoreRouteInformation(_MyNavigationConfiguration configuration) {
     return RouteInformation(
       uri: configuration.uri,
       // Pass the state of the navigation stack in the state parameter.
@@ -82,9 +75,7 @@ class _MyRouteInformationParser
 }
 
 class _MyRouterDelegate extends RouterDelegate<_MyNavigationConfiguration>
-    with
-        ChangeNotifier,
-        PopNavigatorRouterDelegateMixin<_MyNavigationConfiguration> {
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<_MyNavigationConfiguration> {
   final Set<VoidCallback> _listeners = <VoidCallback>{};
   final List<_MyPage> _pages = <_MyPage>[];
 
@@ -169,35 +160,36 @@ class _MyRouterDelegate extends RouterDelegate<_MyNavigationConfiguration>
         assert(!_pages.contains(myPage) || _pages.length > 1);
         _pages.remove(myPage);
       },
-      pages: _pages
-          .map(
-            (_MyPage myPage) => switch (myPage) {
-              _MyPage.unknown => _MyUnknownPage(),
-              _MyPage.home => _MyHomePage(onNavigateToLeaf: _onNavigateToLeaf),
-              _MyPage.leaf => _MyLeafPage(
-                  onNavigateToHome: _onNavigateToHome,
-                  onNavigateToNested: _onNavigateToNested,
-                ),
-              _MyPage.nestedNavigator => _MyNestedNavigatorPage(
-                  onNavigateToRootNavigator: _onNavigateToLeaf,
-                ),
-            },
-          )
-          .toList(),
+      pages:
+          _pages
+              .map(
+                (_MyPage myPage) => switch (myPage) {
+                  _MyPage.unknown => _MyUnknownPage(),
+                  _MyPage.home => _MyHomePage(onNavigateToLeaf: _onNavigateToLeaf),
+                  _MyPage.leaf => _MyLeafPage(
+                    onNavigateToHome: _onNavigateToHome,
+                    onNavigateToNested: _onNavigateToNested,
+                  ),
+                  _MyPage.nestedNavigator => _MyNestedNavigatorPage(
+                    onNavigateToRootNavigator: _onNavigateToLeaf,
+                  ),
+                },
+              )
+              .toList(),
     );
   }
 }
 
 class _MyUnknownPage extends MaterialPage<dynamic> {
   _MyUnknownPage()
-      : super(
-          restorationId: 'unknown-page',
-          child: Scaffold(
-            backgroundColor: const Color(0xff660000),
-            appBar: AppBar(title: const Text('404')),
-            body: const Center(child: Text('404')),
-          ),
-        );
+    : super(
+        restorationId: 'unknown-page',
+        child: Scaffold(
+          backgroundColor: const Color(0xff660000),
+          appBar: AppBar(title: const Text('404')),
+          body: const Center(child: Text('404')),
+        ),
+      );
 
   @override
   String get name => _MyPage.unknown.name;
@@ -205,49 +197,45 @@ class _MyUnknownPage extends MaterialPage<dynamic> {
 
 class _MyHomePage extends MaterialPage<dynamic> {
   _MyHomePage({required VoidCallback onNavigateToLeaf})
-      : super(
-          restorationId: 'home-page',
-          child: Scaffold(
-            backgroundColor: const Color(0xffddddff),
-            appBar: AppBar(title: const Text('Home Page')),
-            body: Center(
-              child: ElevatedButton(
-                onPressed: onNavigateToLeaf,
-                child: const Text('Go to leaf page'),
-              ),
+    : super(
+        restorationId: 'home-page',
+        child: Scaffold(
+          backgroundColor: const Color(0xffddddff),
+          appBar: AppBar(title: const Text('Home Page')),
+          body: Center(
+            child: ElevatedButton(
+              onPressed: onNavigateToLeaf,
+              child: const Text('Go to leaf page'),
             ),
           ),
-        );
+        ),
+      );
 
   @override
   String get name => _MyPage.home.name;
 }
 
 class _MyLeafPage extends MaterialPage<dynamic> {
-  _MyLeafPage(
-      {required VoidCallback onNavigateToHome,
-      required VoidCallback onNavigateToNested})
-      : super(
-          restorationId: 'leaf-page',
-          child: Scaffold(
-            backgroundColor: const Color(0xffaaaaff),
-            appBar: AppBar(title: const Text('Leaf Page')),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: onNavigateToNested,
-                    child: const Text('Go to nested Navigator page'),
-                  ),
-                  ElevatedButton(
-                      onPressed: onNavigateToHome,
-                      child: const Text('Go back to home')),
-                ],
-              ),
+  _MyLeafPage({required VoidCallback onNavigateToHome, required VoidCallback onNavigateToNested})
+    : super(
+        restorationId: 'leaf-page',
+        child: Scaffold(
+          backgroundColor: const Color(0xffaaaaff),
+          appBar: AppBar(title: const Text('Leaf Page')),
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                ElevatedButton(
+                  onPressed: onNavigateToNested,
+                  child: const Text('Go to nested Navigator page'),
+                ),
+                ElevatedButton(onPressed: onNavigateToHome, child: const Text('Go back to home')),
+              ],
             ),
           ),
-        );
+        ),
+      );
 
   @override
   String get name => _MyPage.leaf.name;
@@ -255,11 +243,10 @@ class _MyLeafPage extends MaterialPage<dynamic> {
 
 class _MyNestedNavigatorPage extends MaterialPage<dynamic> {
   _MyNestedNavigatorPage({required VoidCallback onNavigateToRootNavigator})
-      : super(
-          restorationId: 'nested-navigator-page',
-          child: _MyNestedNavigator(
-              onNavigateToRootNavigator: onNavigateToRootNavigator),
-        );
+    : super(
+        restorationId: 'nested-navigator-page',
+        child: _MyNestedNavigator(onNavigateToRootNavigator: onNavigateToRootNavigator),
+      );
 
   @override
   String get name => _MyPage.nestedNavigator.name;
@@ -274,8 +261,7 @@ class _MyNestedNavigator extends StatefulWidget {
   State<_MyNestedNavigator> createState() => _MyNestedNavigatorState();
 }
 
-class _MyNestedNavigatorState extends State<_MyNestedNavigator>
-    with RestorationMixin {
+class _MyNestedNavigatorState extends State<_MyNestedNavigator> with RestorationMixin {
   final _RestorablePages _pages = _RestorablePages();
 
   void _onNavigateToLeaf() {
@@ -317,8 +303,7 @@ class _MyNestedNavigatorState extends State<_MyNestedNavigator>
     return Navigator(
       restorationScopeId: 'nested-navigator',
       onDidRemovePage: (Page<void> page) {
-        final _MyNestedPage pageConfiguration =
-            _MyNestedPage.fromName(page.name!);
+        final _MyNestedPage pageConfiguration = _MyNestedPage.fromName(page.name!);
 
         // If _pages doesn't contain the removed page, then it was already
         // removed from _pages, and there is nothing else to do. For example,
@@ -339,31 +324,31 @@ class _MyNestedNavigatorState extends State<_MyNestedNavigator>
         // It's possible to remove more than one page at a time, but at least
         // one page must be removed.
         print(
-            'justin onDidRemovePage $page. Is it in _pages? ${_pages.value.contains(pageConfiguration)}. nextPages length ${nextPages.length} vs _pages.length ${_pages.value.length}. Are the pages and nxt pages equal? ${nextPages == _pages.value}. What is in _pages? ${_pages.value.first}.');
+          'justin onDidRemovePage $page. Is it in _pages? ${_pages.value.contains(pageConfiguration)}. nextPages length ${nextPages.length} vs _pages.length ${_pages.value.length}. Are the pages and nxt pages equal? ${nextPages == _pages.value}. What is in _pages? ${_pages.value.first}.',
+        );
         assert(nextPages.length < _pages.value.length);
         _pages.value = nextPages;
       },
-      pages: _pages.value
-          .map(
-            (_MyNestedPage page) => switch (page) {
-              _MyNestedPage.unknown => _MyUnknownPage(),
-              _MyNestedPage.home => _MyNestedHomePage(
-                  onNavigateToLeaf: _onNavigateToLeaf,
-                  onNavigateToRootNavigator: widget.onNavigateToRootNavigator,
-                ),
-              _MyNestedPage.leaf =>
-                _MyNestedLeafPage(onNavigateToHome: _onNavigateToHome),
-            },
-          )
-          .toList(),
+      pages:
+          _pages.value
+              .map(
+                (_MyNestedPage page) => switch (page) {
+                  _MyNestedPage.unknown => _MyUnknownPage(),
+                  _MyNestedPage.home => _MyNestedHomePage(
+                    onNavigateToLeaf: _onNavigateToLeaf,
+                    onNavigateToRootNavigator: widget.onNavigateToRootNavigator,
+                  ),
+                  _MyNestedPage.leaf => _MyNestedLeafPage(onNavigateToHome: _onNavigateToHome),
+                },
+              )
+              .toList(),
     );
   }
 }
 
 class _RestorablePages extends RestorableValue<Iterable<_MyNestedPage>> {
   @override
-  List<_MyNestedPage> createDefaultValue() =>
-      <_MyNestedPage>[_MyNestedPage.home];
+  List<_MyNestedPage> createDefaultValue() => <_MyNestedPage>[_MyNestedPage.home];
 
   @override
   void didUpdateValue(Iterable<_MyNestedPage>? oldValue) {
@@ -378,8 +363,7 @@ class _RestorablePages extends RestorableValue<Iterable<_MyNestedPage>> {
       final String dataString = data as String;
       final List<String> listOfStrings = dataString.split(',');
       return listOfStrings.map((String nestedPageConfigurationName) {
-        return _MyNestedPage.values
-            .firstWhere((_MyNestedPage nestedPageConfiguration) {
+        return _MyNestedPage.values.firstWhere((_MyNestedPage nestedPageConfiguration) {
           return nestedPageConfigurationName == nestedPageConfiguration.name;
         });
       }).toList();
@@ -390,8 +374,7 @@ class _RestorablePages extends RestorableValue<Iterable<_MyNestedPage>> {
   @override
   Object toPrimitives() {
     return value
-        .map((_MyNestedPage nestedPageConfiguration) =>
-            nestedPageConfiguration.name)
+        .map((_MyNestedPage nestedPageConfiguration) => nestedPageConfiguration.name)
         .join(',');
   }
 }
@@ -401,27 +384,27 @@ class _MyNestedHomePage extends MaterialPage<dynamic> {
     required VoidCallback onNavigateToLeaf,
     required VoidCallback onNavigateToRootNavigator,
   }) : super(
-          restorationId: 'nested-home-page',
-          child: Scaffold(
-            backgroundColor: const Color(0xffddffdd),
-            appBar: AppBar(title: const Text('Nested Home Page')),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: onNavigateToLeaf,
-                    child: const Text('Go to nested leaf page'),
-                  ),
-                  ElevatedButton(
-                    onPressed: onNavigateToRootNavigator,
-                    child: const Text('Go back to root Navigator'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
+         restorationId: 'nested-home-page',
+         child: Scaffold(
+           backgroundColor: const Color(0xffddffdd),
+           appBar: AppBar(title: const Text('Nested Home Page')),
+           body: Center(
+             child: Column(
+               mainAxisAlignment: MainAxisAlignment.center,
+               children: <Widget>[
+                 ElevatedButton(
+                   onPressed: onNavigateToLeaf,
+                   child: const Text('Go to nested leaf page'),
+                 ),
+                 ElevatedButton(
+                   onPressed: onNavigateToRootNavigator,
+                   child: const Text('Go back to root Navigator'),
+                 ),
+               ],
+             ),
+           ),
+         ),
+       );
 
   @override
   String get name => _MyPage.home.name;
@@ -429,19 +412,19 @@ class _MyNestedHomePage extends MaterialPage<dynamic> {
 
 class _MyNestedLeafPage extends MaterialPage<dynamic> {
   _MyNestedLeafPage({required VoidCallback onNavigateToHome})
-      : super(
-          restorationId: 'nested-leaf-page',
-          child: Scaffold(
-            backgroundColor: const Color(0xffaaffaa),
-            appBar: AppBar(title: const Text('Nested Leaf Page')),
-            body: Center(
-              child: ElevatedButton(
-                onPressed: onNavigateToHome,
-                child: const Text('Go back to nested home'),
-              ),
+    : super(
+        restorationId: 'nested-leaf-page',
+        child: Scaffold(
+          backgroundColor: const Color(0xffaaffaa),
+          appBar: AppBar(title: const Text('Nested Leaf Page')),
+          body: Center(
+            child: ElevatedButton(
+              onPressed: onNavigateToHome,
+              child: const Text('Go back to nested home'),
             ),
           ),
-        );
+        ),
+      );
 
   @override
   String get name => _MyPage.leaf.name;
