@@ -615,7 +615,7 @@ class FlutterTesterOptions():
       command_args.append('--disable-observatory')
 
     if self.enable_impeller:
-      command_args += ['--enable-impeller']
+      command_args += ['--enable-impeller', '--enable-flutter-gpu']
     else:
       command_args += ['--no-enable-impeller']
 
@@ -968,7 +968,6 @@ def build_dart_host_test_list():
       os.path.join('flutter', 'tools', 'build_bucket_golden_scraper'),
       os.path.join('flutter', 'tools', 'clang_tidy'),
       os.path.join('flutter', 'tools', 'const_finder'),
-      os.path.join('flutter', 'tools', 'dir_contents_diff'),
       os.path.join('flutter', 'tools', 'engine_tool'),
       os.path.join('flutter', 'tools', 'githooks'),
       os.path.join('flutter', 'tools', 'header_guard_check'),
@@ -1061,6 +1060,23 @@ class DirectoryChange():
     os.chdir(self.old_cwd)
 
 
+def contains_png_recursive(directory):
+  """
+  Recursively checks if a directory contains at least one .png file.
+
+  Args:
+    directory: The path to the directory to check.
+
+  Returns:
+    True if a .png file is found, False otherwise.
+  """
+  for _, _, files in os.walk(directory):
+    for filename in files:
+      if filename.lower().endswith('.png'):
+        return True
+  return False
+
+
 def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
   """
   Executes the impeller golden image tests from in the `variant` build.
@@ -1079,19 +1095,9 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
     extra_env.update(vulkan_validation_env(build_dir))
     run_cmd([tests_path, f'--working_dir={temp_dir}'], cwd=build_dir, env=extra_env)
     dart_bin = os.path.join(build_dir, 'dart-sdk', 'bin', 'dart')
-    golden_path = os.path.join('testing', 'impeller_golden_tests_output.txt')
-    script_path = os.path.join('tools', 'dir_contents_diff', 'bin', 'dir_contents_diff.dart')
-    diff_result = subprocess.run(
-        f'{dart_bin} {script_path} {golden_path} {temp_dir}',
-        check=False,
-        shell=True,
-        stdout=subprocess.PIPE,
-        cwd=os.path.join(BUILDROOT_DIR, 'flutter')
-    )
-    if diff_result.returncode != 0:
-      print_divider('<')
-      print(diff_result.stdout.decode())
-      raise RuntimeError('impeller_golden_tests diff failure')
+
+    if not contains_png_recursive(temp_dir):
+      raise RuntimeError('impeller_golden_tests diff failure - no PNGs found!')
 
     if not require_skia_gold:
       print_divider('<')

@@ -26,6 +26,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartVMServicePublisher.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSpellCheckPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextureRegistryRelay.h"
@@ -227,15 +228,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                  name:UIApplicationDidReceiveMemoryWarningNotification
                object:nil];
 
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    [self setUpSceneLifecycleNotifications:center];
-  } else {
-    [self setUpApplicationLifecycleNotifications:center];
-  }
-#else
-  [self setUpApplicationLifecycleNotifications:center];
-#endif
+  [self setUpLifecycleNotifications:center];
 
   [center addObserver:self
              selector:@selector(onLocaleUpdated:)
@@ -250,18 +243,21 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
 }
 
-- (void)setUpSceneLifecycleNotifications:(NSNotificationCenter*)center API_AVAILABLE(ios(13.0)) {
-  [center addObserver:self
-             selector:@selector(sceneWillEnterForeground:)
-                 name:UISceneWillEnterForegroundNotification
-               object:nil];
-  [center addObserver:self
-             selector:@selector(sceneDidEnterBackground:)
-                 name:UISceneDidEnterBackgroundNotification
-               object:nil];
-}
-
-- (void)setUpApplicationLifecycleNotifications:(NSNotificationCenter*)center {
+- (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
+  // If the application is not available, use the scene for lifecycle notifications if available.
+  if (!FlutterSharedApplication.isAvailable) {
+    if (@available(iOS 13.0, *)) {
+      [center addObserver:self
+                 selector:@selector(sceneWillEnterForeground:)
+                     name:UISceneWillEnterForegroundNotification
+                   object:nil];
+      [center addObserver:self
+                 selector:@selector(sceneDidEnterBackground:)
+                     name:UISceneDidEnterBackgroundNotification
+                   object:nil];
+      return;
+    }
+  }
   [center addObserver:self
              selector:@selector(applicationWillEnterForeground:)
                  name:UIApplicationWillEnterForegroundNotification
@@ -855,19 +851,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                     _threadHost->io_thread->GetTaskRunner()          // io
   );
 
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    _isGpuDisabled = self.viewController.flutterWindowSceneIfViewLoaded.activationState ==
-                     UISceneActivationStateBackground;
-  } else {
-    // [UIApplication sharedApplication API is not available for app extension.
-    // We intialize the shell assuming the GPU is required.
-    _isGpuDisabled = NO;
-  }
-#else
-  _isGpuDisabled =
-      [UIApplication sharedApplication].applicationState == UIApplicationStateBackground;
-#endif
+  // Disable GPU if the app or scene is running in the background.
+  self.isGpuDisabled = self.viewController.stateIsBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -882,8 +867,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
                    << entrypoint.UTF8String;
   } else {
-    // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-    FML_LOG(INFO) << "Enabled VM Service Publication: " << settings.enable_vm_service_publication;
     [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
     if ([FlutterEngine isProfilerEnabled]) {
@@ -1342,7 +1325,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Notifications
 
-#if APPLICATION_EXTENSION_API_ONLY
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
   [self flutterWillEnterForeground:notification];
 }
@@ -1350,7 +1332,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
   [self flutterDidEnterBackground:notification];
 }
-#else
+
 - (void)applicationWillEnterForeground:(NSNotification*)notification {
   [self flutterWillEnterForeground:notification];
 }
@@ -1358,7 +1340,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)applicationDidEnterBackground:(NSNotification*)notification {
   [self flutterDidEnterBackground:notification];
 }
-#endif
 
 - (void)flutterWillEnterForeground:(NSNotification*)notification {
   [self setIsGpuDisabled:NO];

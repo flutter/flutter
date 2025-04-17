@@ -14,6 +14,20 @@ config("display_list_config") {
   defines = []
 }
 
+source_set("dl_path") {
+  sources = [
+    "geometry/dl_geometry_conversions.h",
+    "geometry/dl_geometry_types.h",
+    "geometry/dl_path.cc",
+    "geometry/dl_path.h",
+  ]
+
+  public_deps = [
+    "//flutter/impeller/geometry",
+    "//flutter/skia",
+  ]
+}
+
 source_set("display_list") {
   sources = [
     "benchmarking/dl_complexity.cc",
@@ -98,9 +112,6 @@ source_set("display_list") {
     "effects/image_filters/dl_matrix_image_filter.h",
     "effects/image_filters/dl_runtime_effect_image_filter.cc",
     "effects/image_filters/dl_runtime_effect_image_filter.h",
-    "geometry/dl_geometry_types.h",
-    "geometry/dl_path.cc",
-    "geometry/dl_path.h",
     "geometry/dl_region.cc",
     "geometry/dl_region.h",
     "geometry/dl_rtree.cc",
@@ -129,6 +140,7 @@ source_set("display_list") {
   public_configs = [ ":display_list_config" ]
 
   public_deps = [
+    ":dl_path",
     "//flutter/fml",
     "//flutter/impeller/runtime_stage",
     "//flutter/impeller/typographer",

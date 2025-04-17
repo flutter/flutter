@@ -868,6 +868,7 @@ class RunCommand extends RunCommandBase {
       }
     } on RPCError catch (error) {
       if (error.code == RPCErrorKind.kServiceDisappeared.code ||
+          error.code == RPCErrorKind.kConnectionDisposed.code ||
           error.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

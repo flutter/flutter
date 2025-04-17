@@ -97,12 +97,17 @@ class PreviewCodeGenerator {
                   'package:flutter/widgets.dart',
                 ).newInstance(<Expression>[], <String, Expression>{'builder': previewWidget});
               }
+
               if (preview.hasWrapper) {
                 previewWidget = refer(
                   preview.wrapper!,
                   preview.wrapperLibraryUri,
                 ).call(<Expression>[previewWidget]);
               }
+              previewWidget =
+                  Method((MethodBuilder previewBuilder) {
+                    previewBuilder.body = previewWidget.code;
+                  }).closure;
               previewExpressions.add(
                 refer(
                   'WidgetPreview',
@@ -115,7 +120,17 @@ class PreviewCodeGenerator {
                     key: PreviewDetails.kTextScaleFactor,
                     property: preview.textScaleFactor,
                   ),
-                  'child': previewWidget,
+                  if (preview.theme != null)
+                    PreviewDetails.kTheme: refer(
+                      preview.theme!,
+                      preview.themeLibraryUri,
+                    ).call(<Expression>[]),
+                  if (preview.brightness != null)
+                    PreviewDetails.kBrightness: refer(
+                      preview.brightness!,
+                      preview.brightnessLibraryUri ?? 'package:flutter/foundation.dart',
+                    ),
+                  'builder': previewWidget,
                 }),
               );
             }

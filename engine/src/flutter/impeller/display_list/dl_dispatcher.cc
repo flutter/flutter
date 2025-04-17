@@ -13,6 +13,7 @@
 #include "display_list/dl_sampling_options.h"
 #include "display_list/effects/dl_image_filter.h"
 #include "flutter/fml/logging.h"
+#include "fml/closure.h"
 #include "impeller/core/formats.h"
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/canvas.h"
@@ -471,7 +472,7 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
     RoundRectGeometry geom(rrect.GetBounds(), rrect.GetRadii().top_left);
     GetCanvas().ClipGeometry(geom, clip_op);
   } else {
-    FillPathGeometry geom(PathBuilder{}.AddRoundRect(rrect).TakePath());
+    FillPathGeometry geom(DlPath::MakeRoundRect(rrect));
     GetCanvas().ClipGeometry(geom, clip_op);
   }
 }
@@ -511,13 +512,12 @@ void DlDispatcherBase::clipPath(const DlPath& path,
     EllipseGeometry geom(rect);
     GetCanvas().ClipGeometry(geom, clip_op);
   } else {
-    SkRRect rrect;
-    if (path.IsSkRRect(&rrect) && rrect.isSimple()) {
-      RoundRectGeometry geom(flutter::ToDlRect(rrect.rect()),
-                             flutter::ToDlSize(rrect.getSimpleRadii()));
+    DlRoundRect rrect;
+    if (path.IsRoundRect(&rrect) && rrect.GetRadii().AreAllCornersSame()) {
+      RoundRectGeometry geom(rrect.GetBounds(), rrect.GetRadii().top_left);
       GetCanvas().ClipGeometry(geom, clip_op);
     } else {
-      FillPathGeometry geom(path.GetPath());
+      FillPathGeometry geom(path);
       GetCanvas().ClipGeometry(geom, clip_op);
     }
   }
@@ -584,7 +584,7 @@ void DlDispatcherBase::drawDashedLine(const DlPoint& p0,
 
     Paint stroke_paint = paint_;
     stroke_paint.style = Paint::Style::kStroke;
-    GetCanvas().DrawPath(builder.TakePath(), stroke_paint);
+    GetCanvas().DrawPath(DlPath(builder), stroke_paint);
   } else {
     drawLine(p0, p1);
   }
@@ -627,7 +627,7 @@ void DlDispatcherBase::drawDiffRoundRect(const DlRoundRect& outer,
   builder.AddRoundRect(outer);
   builder.AddRoundRect(inner);
   builder.SetBounds(outer.GetBounds().Union(inner.GetBounds()));
-  GetCanvas().DrawPath(builder.TakePath(FillType::kOdd), paint_);
+  GetCanvas().DrawPath(DlPath(builder, FillType::kOdd), paint_);
 }
 
 // |flutter::DlOpReceiver|
@@ -656,9 +656,9 @@ void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
     return;
   }
 
-  SkRRect rrect;
-  if (path.IsSkRRect(&rrect) && rrect.isSimple()) {
-    canvas.DrawRoundRect(flutter::ToDlRoundRect(rrect), paint);
+  DlRoundRect rrect;
+  if (path.IsRoundRect(&rrect) && rrect.GetRadii().AreAllCornersSame()) {
+    canvas.DrawRoundRect(rrect, paint);
     return;
   }
 
@@ -667,7 +667,14 @@ void DlDispatcherBase::SimplifyOrDrawPath(Canvas& canvas,
     return;
   }
 
-  canvas.DrawPath(path.GetPath(), paint);
+  DlPoint start;
+  DlPoint end;
+  if (path.IsLine(&start, &end)) {
+    canvas.DrawLine(start, end, paint);
+    return;
+  }
+
+  canvas.DrawPath(path, paint);
 }
 
 // |flutter::DlOpReceiver|
@@ -690,12 +697,12 @@ void DlDispatcherBase::drawArc(const DlRect& oval_bounds,
     builder.AddArc(expanded_rect, Degrees(start_degrees),
                    Degrees(sweep_degrees),
                    /*use_center=*/true);
-    GetCanvas().DrawPath(builder.TakePath(), fill_paint);
+    GetCanvas().DrawPath(DlPath(builder), fill_paint);
   } else {
     PathBuilder builder;
     builder.AddArc(oval_bounds, Degrees(start_degrees), Degrees(sweep_degrees),
                    use_center);
-    GetCanvas().DrawPath(builder.TakePath(), paint_);
+    GetCanvas().DrawPath(DlPath(builder), paint_);
   }
 }
 
@@ -883,9 +890,7 @@ void DlDispatcherBase::drawDisplayList(
     if (global_culling_bounds.has_value()) {
       Rect cull_rect = global_culling_bounds->TransformBounds(
           GetCanvas().GetCurrentTransform().Invert());
-      display_list->Dispatch(
-          *this, SkRect::MakeLTRB(cull_rect.GetLeft(), cull_rect.GetTop(),
-                                  cull_rect.GetRight(), cull_rect.GetBottom()));
+      display_list->Dispatch(*this, cull_rect);
     } else {
       // If the culling bounds are empty, this display list can be skipped
       // entirely.
@@ -1198,13 +1203,8 @@ void FirstPassDispatcher::drawDisplayList(
     if (local_cull_bounds.IsMaximum()) {
       display_list->Dispatch(*this);
     } else if (!local_cull_bounds.IsEmpty()) {
-      IRect cull_rect = IRect::RoundOut(local_cull_bounds);
-      display_list->Dispatch(*this,
-                             SkIRect::MakeLTRB(cull_rect.GetLeft(),   //
-                                               cull_rect.GetTop(),    //
-                                               cull_rect.GetRight(),  //
-                                               cull_rect.GetBottom()  //
-                                               ));
+      DlIRect cull_rect = DlIRect::RoundOut(local_cull_bounds);
+      display_list->Dispatch(*this, cull_rect);
     }
   }
 
@@ -1319,10 +1319,10 @@ std::shared_ptr<Texture> DisplayListToTexture(
     return nullptr;
   }
 
-  SkIRect sk_cull_rect = SkIRect::MakeWH(size.width, size.height);
+  DlIRect cull_rect = DlIRect::MakeWH(size.width, size.height);
   impeller::FirstPassDispatcher collector(
       context.GetContentContext(), impeller::Matrix(), Rect::MakeSize(size));
-  display_list->Dispatch(collector, sk_cull_rect);
+  display_list->Dispatch(collector, cull_rect);
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context.GetContentContext(),               //
       target,                                    //
@@ -1333,14 +1333,18 @@ std::shared_ptr<Texture> DisplayListToTexture(
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
-  display_list->Dispatch(impeller_dispatcher, sk_cull_rect);
-  impeller_dispatcher.FinishRecording();
+  context.GetContentContext().GetTextShadowCache().MarkFrameStart();
+  fml::ScopedCleanupClosure cleanup([&] {
+    if (reset_host_buffer) {
+      context.GetContentContext().GetTransientsBuffer().Reset();
+    }
+    context.GetContentContext().GetTextShadowCache().MarkFrameEnd();
+    context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
+    context.GetContext()->DisposeThreadLocalCachedResources();
+  });
 
-  if (reset_host_buffer) {
-    context.GetContentContext().GetTransientsBuffer().Reset();
-  }
-  context.GetContentContext().GetLazyGlyphAtlas()->ResetTextFrames();
-  context.GetContext()->DisposeThreadLocalCachedResources();
+  display_list->Dispatch(impeller_dispatcher, cull_rect);
+  impeller_dispatcher.FinishRecording();
 
   return target.GetRenderTargetTexture();
 }
@@ -1354,7 +1358,7 @@ bool RenderToTarget(ContentContext& context,
   Rect ip_cull_rect = Rect::MakeLTRB(cull_rect.left(), cull_rect.top(),
                                      cull_rect.right(), cull_rect.bottom());
   FirstPassDispatcher collector(context, impeller::Matrix(), ip_cull_rect);
-  display_list->Dispatch(collector, cull_rect);
+  display_list->Dispatch(collector, ip_cull_rect);
 
   impeller::CanvasDlDispatcher impeller_dispatcher(
       context,                                   //
@@ -1366,11 +1370,16 @@ bool RenderToTarget(ContentContext& context,
   );
   const auto& [data, count] = collector.TakeBackdropData();
   impeller_dispatcher.SetBackdropData(data, count);
-  display_list->Dispatch(impeller_dispatcher, cull_rect);
+  context.GetTextShadowCache().MarkFrameStart();
+  fml::ScopedCleanupClosure cleanup([&] {
+    if (reset_host_buffer) {
+      context.GetTransientsBuffer().Reset();
+    }
+    context.GetTextShadowCache().MarkFrameEnd();
+  });
+
+  display_list->Dispatch(impeller_dispatcher, ip_cull_rect);
   impeller_dispatcher.FinishRecording();
-  if (reset_host_buffer) {
-    context.GetTransientsBuffer().Reset();
-  }
   context.GetLazyGlyphAtlas()->ResetTextFrames();
 
   return true;
