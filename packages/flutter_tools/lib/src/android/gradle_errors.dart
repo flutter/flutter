@@ -748,8 +748,8 @@ final GradleHandledError missingNdkSourcePropertiesFile = GradleHandledError(
         .group(1)!;
     globals.printBox('''
     ${globals.logger.terminal.warningMark} This is likely due to a malformed download of the NDK.
-    This can be fixed by deleting the local NDK copy at $path and allowing the Android Gradle 
-    Plugin to automatically re-download it.
+    This can be fixed by deleting the local NDK copy at: $path
+    and allowing the Android Gradle Plugin to automatically re-download it.
     ''',
         title: _boxTitle
     );
