@@ -769,11 +769,10 @@ void main() {
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
         home: Scaffold(
-          drawerDismissible: true,
           appBar: AppBar(
-            title: Semantics(headingLevel: 1, child: Text('Drawer Dismissible')),
+            title: Semantics(headingLevel: 1, child: const Text('Drawer Dismissible')),
           ),
-          endDrawer: Drawer(
+          endDrawer: const Drawer(
             backgroundColor: Colors.white,
             width: 300,
             child: Text('Drawer'),
@@ -782,7 +781,7 @@ void main() {
             color: Colors.white,
             width: 600,
             height: 600,
-            child: Center(
+            child: const Center(
               child: Text('Drawer Dismissible'),
             ),
           ),
@@ -791,7 +790,7 @@ void main() {
     );
 
     // check the flag is set at the Scaffold level
-    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerDismissible, true);
 
     // open the drawer initially
@@ -820,15 +819,15 @@ void main() {
 
     // tap on the modal barrier
     // Find the ModalBarrier
-    final modalBarrierFinder = find.byType(ModalBarrier);
+    final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
     // Get the RenderBox of the ModalBarrier
-    final modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
+    final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
 
     // Calculate a point to tap outside the Drawer
     // This example taps on the ModalBarrier somewhere outside its boundaries
-    final modalBarrierCenter = Offset(400, 300);
-    final tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
+    const Offset modalBarrierCenter = Offset(400, 300);
+    final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
 
     // Tap on the ModalBarrier
     await tester.tapAt(tapPosition);
@@ -847,9 +846,9 @@ void main() {
         home: Scaffold(
           drawerDismissible: false,
           appBar: AppBar(
-            title: Semantics(headingLevel: 1, child: Text('Drawer Dismissible')),
+            title: Semantics(headingLevel: 1, child: const Text('Drawer Dismissible')),
           ),
-          endDrawer: Drawer(
+          endDrawer: const Drawer(
             backgroundColor: Colors.white,
             width: 300,
             child: Text('Drawer'),
@@ -858,7 +857,7 @@ void main() {
             color: Colors.white,
             width: 600,
             height: 600,
-            child: Center(
+            child: const Center(
               child: Text('Drawer Dismissible'),
             ),
           ),
@@ -867,7 +866,7 @@ void main() {
     );
 
     // make sure the flag is set to false at the Scaffold level
-    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerDismissible, false);
 
     // open the drawer initially
@@ -896,15 +895,15 @@ void main() {
 
     // tap on the modal barrier
     // Find the ModalBarrier
-    final modalBarrierFinder = find.byType(ModalBarrier);
+    final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
     // Get the RenderBox of the ModalBarrier
-    final modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
+    final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
 
     // Calculate a point to tap outside the Drawer
     // This example taps on the ModalBarrier somewhere outside its boundaries
-    final modalBarrierCenter = Offset(400, 300);
-    final tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
+    const Offset modalBarrierCenter = Offset(400, 300);
+    final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
 
     // Tap on the ModalBarrier
     await tester.tapAt(tapPosition);
@@ -1004,3 +1003,4 @@ void main() {
     });
   });
 }
+
