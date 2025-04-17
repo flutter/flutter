@@ -65,7 +65,7 @@ internal object VersionFetcher {
         }
         // Fall back to reflection.
         val versionField =
-            kotlinPlugin?.javaClass?.kotlin?.members?.first {
+            kotlinPlugin?.javaClass?.kotlin?.members?.firstOrNull {
                 it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
             }
         versionString = versionField?.call(kotlinPlugin) as String?
