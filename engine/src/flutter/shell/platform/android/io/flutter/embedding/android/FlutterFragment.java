@@ -98,6 +98,15 @@ public class FlutterFragment extends Fragment
     implements FlutterActivityAndFragmentDelegate.Host,
         ComponentCallbacks2,
         FlutterActivityAndFragmentDelegate.DelegateFactory {
+
+  /**
+   * @deprecated - Use {@link flutterViewId} instead.
+   *     <p>The ID of the {@code FlutterView} created by this activity.
+   *     <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For
+   *     more, see {@link android.view.View#findViewById}.
+   */
+  @Deprecated public static final int FLUTTER_VIEW_ID = View.generateViewId();
+
   /**
    * The ID of the {@code FlutterView} created by this Fragment's attached activity.
    *
@@ -1023,7 +1032,11 @@ public class FlutterFragment extends Fragment
     // need to continually check for null arguments before grabbing one.
     setArguments(new Bundle());
 
-    flutterViewId = View.generateViewId();
+    if (findViewById(FLUTTER_VIEW_ID) == null) {
+      flutterViewId = FLUTTER_VIEW_ID;
+    } else {
+      flutterViewId = View.generateViewId();
+    }
   }
 
   /**

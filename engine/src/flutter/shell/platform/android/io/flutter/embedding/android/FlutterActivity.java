@@ -215,6 +215,14 @@ public class FlutterActivity extends Activity
   @VisibleForTesting boolean hasRegisteredBackCallback = false;
 
   /**
+   * @deprecated - use {@link flutterViewId} instead.
+   *     <p>The ID of the {@code FlutterView} created by this activity.
+   *     <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For
+   *     more, see {@link android.view.View#findViewById}.
+   */
+  @Deprecated public static final int FLUTTER_VIEW_ID = View.generateViewId();
+
+  /**
    * The ID of the {@code FlutterView} created by this activity.
    *
    * <p>This ID can be used to lookup {@code FlutterView} in the Android view hierarchy. For more,
@@ -600,7 +608,12 @@ public class FlutterActivity extends Activity
 
   public FlutterActivity() {
     lifecycle = new LifecycleRegistry(this);
-    flutterViewId = View.generateViewId();
+
+    if (findViewById(FLUTTER_VIEW_ID) == null) {
+      flutterViewId = FLUTTER_VIEW_ID;
+    } else {
+      flutterViewId = View.generateViewId();
+    }
   }
 
   /**
