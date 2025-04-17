@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'theme.dart';
 
@@ -808,18 +809,17 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
         ),
       );
 
-      final ModalRoute<dynamic>? route = ModalRoute.of(context);
-      if (route?.opaque ?? true) {
-        return ColoredBox(
-          color:
-              animation.isAnimating
-                  ? backgroundColor ?? Theme.of(context).colorScheme.surface
-                  : Colors.transparent,
-          child: builder,
-        );
-      } else {
+      if (!(ModalRoute.opaqueOf(context) ?? true)) {
         return builder;
       }
+
+      return ColoredBox(
+        color:
+            animation.isAnimating
+                ? backgroundColor ?? ColorScheme.of(context).surface
+                : Colors.transparent,
+        child: builder,
+      );
     },
     reverseBuilder: (BuildContext context, Animation<double> animation, Widget? child) {
       final Widget builder = FadeTransition(
@@ -830,18 +830,17 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
         ),
       );
 
-      final ModalRoute<dynamic>? route = ModalRoute.of(context);
-      if (route?.opaque ?? true) {
-        return ColoredBox(
-          color:
-              animation.isAnimating
-                  ? backgroundColor ?? Theme.of(context).colorScheme.surface
-                  : Colors.transparent,
-          child: builder,
-        );
-      } else {
+      if (!(ModalRoute.opaqueOf(context) ?? true)) {
         return builder;
       }
+
+      return ColoredBox(
+        color:
+            animation.isAnimating
+                ? backgroundColor ?? ColorScheme.of(context).surface
+                : Colors.transparent,
+        child: builder,
+      );
     },
     child: child,
   );
