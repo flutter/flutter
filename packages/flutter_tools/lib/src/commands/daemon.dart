@@ -17,7 +17,6 @@ import '../base/logger.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/targets/hook_runner_native.dart';
 import '../convert.dart';
 import '../daemon.dart';
 import '../device.dart';
@@ -727,7 +726,6 @@ class AppDomain extends Domain {
         hostIsIde: true,
         machine: machine,
         analytics: globals.analytics,
-        dartBuilder: FlutterHookRunnerNative(),
       );
     } else {
       runner = ColdRunner(
@@ -736,7 +734,6 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         applicationBinary: applicationBinary,
         machine: machine,
-        dartBuilder: FlutterHookRunnerNative(),
       );
     }
 
