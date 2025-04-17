@@ -640,8 +640,13 @@ object FlutterPluginUtils {
         // CMake will print warnings when you try to build an empty project.
         // These arguments silence the warnings - our project is intentionally
         // empty.
-        gradleProjectAndroidExtension.defaultConfig.externalNativeBuild.cmake
-            .arguments("-Wno-dev", "--no-warn-unused-cli")
+        gradleProjectAndroidExtension.buildTypes.forEach { buildType ->
+            buildType.externalNativeBuild.cmake.arguments(
+                "-Wno-dev",
+                "--no-warn-unused-cli",
+                "-DCMAKE_BUILD_TYPE=${buildType.name}"
+            )
+        }
     }
 
     @JvmStatic
@@ -856,7 +861,9 @@ object FlutterPluginUtils {
         //    https://github.com/flutter/flutter/issues/166550
         @Suppress("DEPRECATION")
         val manifest: Node =
-            groovy.xml.XmlParser(false, false).parse(findProcessResources(baseVariantOutput).manifestFile)
+            groovy.xml
+                .XmlParser(false, false)
+                .parse(findProcessResources(baseVariantOutput).manifestFile)
         val applicationNode: Node? =
             manifest.children().find { node ->
                 node is Node && node.name() == "application"
