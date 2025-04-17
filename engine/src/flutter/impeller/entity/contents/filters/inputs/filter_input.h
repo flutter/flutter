@@ -45,6 +45,29 @@ class FilterInput {
 
   static FilterInput::Vector Make(std::initializer_list<Variant> inputs);
 
+  /// Evaluates the filter input and returns a snapshot of the result.
+  ///
+  /// This method renders the input (which could be another filter, contents,
+  /// or a texture) into a `Snapshot` object, which contains the resulting
+  /// texture and its transform relative to the current render target.
+  ///
+  /// Implementations are typically lazy and may cache the result, ensuring
+  /// that the input is only rendered once even if `GetSnapshot` is called
+  /// multiple times.
+  ///
+  /// @param[in] label A debug label for the rendering operation and the
+  /// resulting snapshot texture.
+  /// @param[in] renderer The content context providing rendering resources.
+  /// @param[in] entity The entity associated with this filter input, providing
+  /// transform and other contextual information.
+  /// @param[in] coverage_limit An optional rectangle to limit the area of the
+  /// input that needs to be rendered. This can be used as an optimization.
+  /// @param[in] mip_count The number of mip levels to generate for the snapshot
+  /// texture. Defaults to 1 (no mips).
+  ///
+  /// @return A `Snapshot` containing the rendered texture and its transform, or
+  /// `std::nullopt` if the input cannot be rendered or results in an empty
+  /// output.
   virtual std::optional<Snapshot> GetSnapshot(
       std::string_view label,
       const ContentContext& renderer,
