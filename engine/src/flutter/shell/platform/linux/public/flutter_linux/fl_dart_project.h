@@ -156,7 +156,7 @@ void fl_dart_project_set_ui_thread_policy(FlDartProject* project,
  * fl_dart_project_get_ui_thread_policy:
  * @project: an #FlDartProject.
  *
- * Returns the thread policy used for running the UI isolate.
+ * Returns: the thread policy used for running the UI isolate.
  */
 FlUIThreadPolicy fl_dart_project_get_ui_thread_policy(FlDartProject* project);
 
