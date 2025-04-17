@@ -970,6 +970,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     addTearDown(focusNode.dispose);
     Widget buildButton({required bool enabled, MouseCursor? cursor}) {
       return CupertinoApp(
@@ -989,6 +990,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
       pointer: 1,
     );
+    addTearDown(gesture.removePointer);
     await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
     await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
     await tester.pump();
@@ -997,37 +999,27 @@ void main() {
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.basic,
     );
-    await gesture.removePointer();
 
     // Test disabled state mouse cursor
     await tester.pumpWidget(buildButton(enabled: false, cursor: const _ButtonMouseCursor()));
-    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
-    await tester.pump();
     await gesture.moveTo(tester.getCenter(find.byType(CupertinoButton)));
     expect(
       RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
       SystemMouseCursors.forbidden,
     );
-    await gesture.removePointer();
 
     // Test focused state mouse cursor
     await tester.pumpWidget(buildButton(enabled: true, cursor: const _ButtonMouseCursor()));
-    await tester.pump();
     focusNode.requestFocus();
-    if (focusNode.hasFocus) {
-      await tester.pump();
-      expect(
-        RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
-        SystemMouseCursors.copy,
-      );
-    }
-    focusNode.unfocus();
     await tester.pump();
-    await gesture.removePointer();
+    expect(
+      RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1),
+      SystemMouseCursors.copy,
+    );
+    focusNode.unfocus();
 
-    // Test Pressed State Mouse Cursor
+    // Test pressed state mouse cursor
     await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer(location: tester.getCenter(find.byType(CupertinoButton)));
     await gesture.down(tester.getCenter(find.byType(CupertinoButton)));
     await tester.pump();
     expect(
