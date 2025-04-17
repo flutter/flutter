@@ -81,7 +81,12 @@ mixin CompositionAwareMixin {
     final int composingBase = editingState.extentOffset - composingText!.length;
 
     if (composingBase < 0) {
-      return editingState;
+      // The length of the input string is set to the length of the composing string.
+      // This is a workaround for the case where the japanese IME is used.
+      return editingState.copyWith(
+        composingBaseOffset: editingState.baseOffset,
+        composingExtentOffset: editingState.extentOffset,
+      );
     }
 
     return editingState.copyWith(
