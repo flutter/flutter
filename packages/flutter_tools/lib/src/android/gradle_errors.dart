@@ -750,7 +750,9 @@ final GradleHandledError missingNdkSourcePropertiesFile = GradleHandledError(
     ${globals.logger.terminal.warningMark} This is likely due to a malformed download of the NDK.
     This can be fixed by deleting the local NDK copy at $path and allowing the Android Gradle 
     Plugin to automatically re-download it.
-    ''');
+    ''',
+        title: _boxTitle
+    );
     return GradleBuildStatus.exit;
   },
   eventLabel: 'ndk-missing-source-properties-file',
