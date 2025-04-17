@@ -977,15 +977,15 @@ void main() {
 
       switch (defaultTargetPlatform) {
         case TargetPlatform.android:
+          // Shows both pages while doing the "peek" predicitve back transition.
           expect(find.text('push'), findsOneWidget);
-          expect(find.text('page b'), findsNothing);
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
         case TargetPlatform.fuchsia:
         case TargetPlatform.windows:
+          // Does no transition yet; still shows page b only.
           expect(find.text('push'), findsNothing);
-          expect(find.text('page b'), findsOneWidget);
       }
       expect(find.text('page b'), findsOneWidget);
 
