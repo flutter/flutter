@@ -160,11 +160,7 @@ enum _RadioType { material, adaptive }
 class RadioListTile<T> extends StatelessWidget {
   /// Creates a combination of a list tile and a radio button.
   ///
-  /// The radio tile itself does not maintain any state. Instead, when the radio
-  /// button is selected, the widget calls the [onChanged] callback. Most
-  /// widgets that use a radio button will listen for the [onChanged] callback
-  /// and rebuild the radio tile with a new [groupValue] to update the visual
-  /// appearance of the radio button.
+  /// {@macro flutter.material.Radio.groupValue}
   ///
   /// The following arguments are required:
   ///
@@ -174,8 +170,8 @@ class RadioListTile<T> extends StatelessWidget {
   const RadioListTile({
     super.key,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
+    this.groupValue,
+    this.onChanged,
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
@@ -215,8 +211,8 @@ class RadioListTile<T> extends StatelessWidget {
   const RadioListTile.adaptive({
     super.key,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
+    this.groupValue,
+    this.onChanged,
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
@@ -254,6 +250,8 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// This radio button is considered selected if its [value] matches the
   /// [groupValue].
+  ///
+  /// leave this unassigned or null if building this widget under [RadioGroup].
   final T? groupValue;
 
   /// Called when the user selects this radio button.

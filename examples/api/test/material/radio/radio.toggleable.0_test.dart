@@ -21,8 +21,10 @@ void main() {
       await tester.tap(find.byType(Radio<int>).at(i));
       await tester.pump();
       expect(
-        find.byWidgetPredicate((Widget widget) => widget is Radio<int> && widget.groupValue == i),
-        findsExactly(5),
+        find.byWidgetPredicate(
+          (Widget widget) => widget is RadioGroup<int> && widget.groupValue == i,
+        ),
+        findsOne,
       );
     }
   });

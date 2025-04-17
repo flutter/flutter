@@ -10,8 +10,12 @@
 /// @docImport 'switch.dart';
 library;
 
+import 'dart:ui';
+
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'color_scheme.dart';
 import 'colors.dart';
@@ -33,6 +37,212 @@ enum _RadioType { material, adaptive }
 const double _kOuterRadius = 8.0;
 const double _kInnerRadius = 4.5;
 
+/// A group for [Radio]s.
+///
+/// This widget treats all [Radio]s in the sub tree with the same type T as a
+/// group.
+///
+/// This widget handles the group value for the [Radio]s in the subtree with the
+/// same value type. To use this widget, the [Radio.groupValue] must leave as
+/// null. Otherwise, an assertion error is thrown.
+///
+/// Using this widget also provides keyboard navigation and semantics for the
+/// radio buttons that matches [APG](https://www.w3.org/WAI/ARIA/apg/patterns/radio/)
+///
+/// The keyboard behaviors are:
+/// * Tab and Shift+Tab: moves focus into and out of radio group. When focus
+///   moves into a radio group and a radio button is select, focus is set on
+///   selected button. Otherwise, it focus the first radio button in reading
+///   order
+/// * Space: toggle the selection on the focused radio button
+/// * Right and down arrow key: move selection to next radio button in the group
+///   in reading order.
+/// * Left and up arrow key: move selection to previous radio button in the
+///   group in reading order.
+///
+/// Arrow keys will wrap around if it reach the first or last radio in the
+/// group.
+///
+/// {@tool dartpad}
+/// Here is an example of RadioGroup widget.
+///
+/// Try using tab, arrow keys, and space to see how the widget responds.
+///
+/// ** See code in examples/api/lib/material/radio/radio_group.0.dart **
+/// {@end-tool}
+class RadioGroup<T> extends StatefulWidget {
+  /// creates a radio group
+  ///
+  /// The `groupValue` set the selection on a subtree [Radio] with the same
+  /// [Radio.value].
+  ///
+  /// The `onChanged` is called when the selection has changed in the subtree
+  /// [Radio]s.
+  const RadioGroup({super.key, this.groupValue, required this.onChanged, required this.child})
+    : super();
+
+  /// The selected value under this radio group.
+  ///
+  /// [Radio] under this radio group where its [Radio.value] equals to this
+  /// value will be selected.
+  final T? groupValue;
+
+  /// Called when selection has changed.
+  ///
+  /// The value can be null if when unselect the [Radio] with [Radio.toggleable]
+  /// set to true.
+  final ValueChanged<T?> onChanged;
+
+  /// {@macro flutter.widgets.ProxyWidget.child}
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => _RadioGroupState<T>();
+}
+
+class _RadioGroupState<T> extends State<RadioGroup<T>> {
+  late final Map<ShortcutActivator, Intent> _radioGroupShortcuts = <ShortcutActivator, Intent>{
+    const SingleActivator(LogicalKeyboardKey.arrowLeft): VoidCallbackIntent(_selectPreviousRadio),
+    const SingleActivator(LogicalKeyboardKey.arrowRight): VoidCallbackIntent(_selectNextRadio),
+    const SingleActivator(LogicalKeyboardKey.arrowDown): VoidCallbackIntent(_selectNextRadio),
+    const SingleActivator(LogicalKeyboardKey.arrowUp): VoidCallbackIntent(_selectPreviousRadio),
+    const SingleActivator(LogicalKeyboardKey.space): VoidCallbackIntent(_toggleFocusedRadio),
+  };
+
+  final Set<_RadioState<T>> _radios = <_RadioState<T>>{};
+
+  bool _debugCheckOnlySingleSelection() {
+    return _radios.where((_RadioState<T> radio) => radio.value!).length < 2;
+  }
+
+  void registerRadio(_RadioState<T> radio) {
+    _radios.add(radio);
+    assert(
+      _debugCheckOnlySingleSelection(),
+      "RadioGroupPolicy can't be used for a radio group that allows multiple selection",
+    );
+  }
+
+  void unregisterRadio(_RadioState<T> radio) => _radios.remove(radio);
+
+  void _toggleFocusedRadio() {
+    final _RadioState<T>? radio = _radios.firstWhereOrNull(
+      (_RadioState<T> radio) => radio.isInteractive && radio.focusNode.hasFocus,
+    );
+    if (radio == null) {
+      return;
+    }
+    radio.handleChanged(radio.value! ? null : true);
+  }
+
+  void _selectNextRadio() => _selectRadioInDirection(true);
+
+  void _selectPreviousRadio() => _selectRadioInDirection(false);
+
+  void _selectRadioInDirection(bool forward) {
+    final Iterable<_RadioState<T>> enabledRadios = _radios.where(
+      (_RadioState<T> radio) => radio.isInteractive,
+    );
+    if (enabledRadios.length < 2) {
+      return;
+    }
+    final FocusNode? currentFocus =
+        enabledRadios
+            .firstWhereOrNull((_RadioState<T> radio) => radio.focusNode.hasFocus)
+            ?.focusNode;
+    if (currentFocus == null) {
+      // The focused node is either a non interactive radio or other controls.
+      return;
+    }
+    final List<FocusNode> sorted =
+        ReadingOrderTraversalPolicy.sort(
+          enabledRadios.map<FocusNode>((_RadioState<T> radio) => radio.focusNode),
+        ).toList();
+    final Iterable<FocusNode> nodesInEffectiveOrder = forward ? sorted : sorted.reversed;
+
+    final Iterator<FocusNode> iterator = nodesInEffectiveOrder.iterator;
+    FocusNode? nextFocus;
+    while (iterator.moveNext()) {
+      if (iterator.current == currentFocus) {
+        if (iterator.moveNext()) {
+          nextFocus = iterator.current;
+        }
+        break;
+      }
+    }
+    // Current focus is at the end, the next focus should wrap around.
+    nextFocus ??= nodesInEffectiveOrder.first;
+    final _RadioState<T> radioToSelect = enabledRadios.firstWhere(
+      (_RadioState<T> radio) => radio.focusNode == nextFocus,
+    );
+    radioToSelect.handleChanged(true);
+    nextFocus.requestFocus();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      role: SemanticsRole.radioGroup,
+      child: Shortcuts(
+        shortcuts: _radioGroupShortcuts,
+        child: FocusTraversalGroup(
+          policy: _SkipUnselectedRadioPolicy<T>(_radios),
+          child: _RadioGroupStateScope<T>(
+            state: this,
+            groupValue: widget.groupValue,
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RadioGroupStateScope<T> extends InheritedWidget {
+  const _RadioGroupStateScope({required this.state, required this.groupValue, required super.child})
+    : super();
+  final _RadioGroupState<T> state;
+  // Needs this to notify listener when group value changes.
+  final T? groupValue;
+
+  @override
+  bool updateShouldNotify(covariant _RadioGroupStateScope<T> oldWidget) {
+    return state != oldWidget.state || groupValue != oldWidget.groupValue;
+  }
+}
+
+/// A traversal policy that is the same as [ReadingOrderTraversalPolicy] except
+/// it skips nodes of unselected radio button if there is one selected radio
+/// button.
+///
+/// If none of the radio is selected, this defaults to
+/// [ReadingOrderTraversalPolicy] for all nodes.
+///
+/// This policy is to ensure when tab into a radio group, it will only focus
+/// the current selected radio button and prevent focus to reach unselected one
+class _SkipUnselectedRadioPolicy<T> extends ReadingOrderTraversalPolicy {
+  _SkipUnselectedRadioPolicy(this.radios);
+  final Set<_RadioState<T>> radios;
+  @override
+  Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
+    if (radios.every((_RadioState<T> radio) => !radio.value!)) {
+      // None of the radio are selected. Defaults to ReadingOrderTraversalPolicy.
+      return super.sortDescendants(descendants, currentNode);
+    }
+    // Nodes that are not selected AND not currently focused, since we can't
+    // remove the focused node from the sorted result.
+    final Set<FocusNode> nodeToSkip =
+        radios
+            .where((_RadioState<T> radio) => !radio.value! && radio.focusNode != currentNode)
+            .map<FocusNode>((_RadioState<T> radio) => radio.focusNode)
+            .toSet();
+    final Iterable<FocusNode> skipsNonSelected = descendants.where(
+      (FocusNode node) => !nodeToSkip.contains(node),
+    );
+    return super.sortDescendants(skipsNonSelected, currentNode);
+  }
+}
+
 /// A Material Design radio button.
 ///
 /// Used to select between a number of mutually exclusive values. When one radio
@@ -40,11 +250,19 @@ const double _kInnerRadius = 4.5;
 /// be selected. The values are of type `T`, the type parameter of the [Radio]
 /// class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, selecting the
-/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
-/// [groupValue] and [value] match, this radio will be selected. Most widgets
-/// will respond to [onChanged] by calling [State.setState] to update the
-/// radio button's [groupValue].
+/// {@template flutter.material.Radio.groupValue}
+/// The radio button itself does not maintain any state. This is typically used
+/// under a [RadioGroup] which provides the group value and thus selection to
+/// radio. When using under [RadioGroup], one should assign a [Radio.value] to
+/// each radio and leave [Radio.groupValue] null or unassigned.
+///
+/// If one wants to customize how radio is selected, they can provide both
+/// [groupValue] and [value] as parameters. If [groupValue] and [value] match,
+/// this radio will be selected. Most widgets will respond to [onChanged]
+/// by calling [State.setState] to update the radio button's [groupValue]. If in
+/// such case, consider also use [RadioGroupPolicy] to provide better user
+/// experience.
+/// {@endtemplate}
 ///
 /// {@tool dartpad}
 /// Here is an example of Radio widgets wrapped in ListTiles, which is similar
@@ -75,22 +293,25 @@ const double _kInnerRadius = 4.5;
 class Radio<T> extends StatefulWidget {
   /// Creates a Material Design radio button.
   ///
-  /// The radio button itself does not maintain any state. Instead, when the
-  /// radio button is selected, the widget calls the [onChanged] callback. Most
-  /// widgets that use a radio button will listen for the [onChanged] callback
-  /// and rebuild the radio button with a new [groupValue] to update the visual
-  /// appearance of the radio button.
+  /// {@macro flutter.material.Radio.groupValue}
   ///
   /// The following arguments are required:
   ///
-  /// * [value] and [groupValue] together determine whether the radio button is
-  ///   selected.
+  /// * [value] is used to identify this radio
   /// * [onChanged] is called when the user selects this radio button.
   const Radio({
     super.key,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
+    @Deprecated(
+      'Use RadioGroup to manage group value instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.groupValue,
+    @Deprecated(
+      'Use RadioGroup to handle value change instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.onChanged,
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
@@ -125,8 +346,16 @@ class Radio<T> extends StatefulWidget {
   const Radio.adaptive({
     super.key,
     required this.value,
-    required this.groupValue,
-    required this.onChanged,
+    @Deprecated(
+      'Use RadioGroup to manage group value instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.groupValue,
+    @Deprecated(
+      'Use RadioGroup to handle value change instead. '
+      'This feature was deprecated after v3.32.0-0.0.pre.',
+    )
+    this.onChanged,
     this.mouseCursor,
     this.toggleable = false,
     this.activeColor,
@@ -149,6 +378,12 @@ class Radio<T> extends StatefulWidget {
   ///
   /// This radio button is considered selected if its [value] matches the
   /// [groupValue].
+  ///
+  /// leave this unassigned or null if building this widget under [RadioGroup].
+  @Deprecated(
+    'Use RadioGroup to manage group value instead. '
+    'This feature was deprecated after v3.32.0-0.0.pre.',
+  )
   final T? groupValue;
 
   /// Called when the user selects this radio button.
@@ -177,6 +412,10 @@ class Radio<T> extends StatefulWidget {
   ///   },
   /// )
   /// ```
+  @Deprecated(
+    'Use RadioGroup to handle value change instead. '
+    'This feature was deprecated after v3.32.0-0.0.pre.',
+  )
   final ValueChanged<T?>? onChanged;
 
   /// {@template flutter.material.radio.mouseCursor}
@@ -371,47 +610,100 @@ class Radio<T> extends StatefulWidget {
 
   final _RadioType _radioType;
 
-  bool get _selected => value == groupValue;
-
   @override
   State<Radio<T>> createState() => _RadioState<T>();
 }
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, ToggleableStateMixin {
   final _RadioPainter _painter = _RadioPainter();
+  _RadioGroupState<T>? _group;
 
-  void _handleChanged(bool? selected) {
-    if (selected == null) {
-      widget.onChanged!(null);
+  FocusNode? _internalFocusNode;
+
+  /// The focus node for this radio state.
+  @protected
+  FocusNode get focusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
+
+  bool get _usesRadioGroup => _group != null;
+  bool get _handlesChanges => widget.onChanged != null || _usesRadioGroup;
+
+  T? get _effectiveGroupValue => _group?.widget.groupValue ?? widget.groupValue;
+
+  /// Handle selection status changed.
+  ///
+  /// if `selected` is false, nothing happens.
+  ///
+  /// if `selected` is true, select this radio. i.e. [Radio.onChanged] is called
+  /// with [Radio.value]. This also updates the group value in [RadioGroup] if it
+  /// is in use.
+  ///
+  /// if `selected` is null, unselect this radio. Same as `selected` is true
+  /// except group value is set to null.
+  @protected
+  void handleChanged(bool? selected) {
+    assert(_handlesChanges);
+    if (!(selected ?? true)) {
       return;
     }
-    if (selected) {
-      widget.onChanged!(widget.value);
+    _handleGroupValueChanged(selected ?? false ? widget.value : null);
+  }
+
+  void _handleGroupValueChanged(T? newGroupValue) {
+    if (_usesRadioGroup) {
+      _group!.widget.onChanged(newGroupValue);
     }
+    if (widget.onChanged != null) {
+      widget.onChanged!(newGroupValue);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final _RadioGroupState<T>? newGroup =
+        context.dependOnInheritedWidgetOfExactType<_RadioGroupStateScope<T>>()?.state;
+    if (newGroup != _group) {
+      _group?.unregisterRadio(this);
+      newGroup?.registerRadio(this);
+      _group = newGroup;
+    }
+    assert(
+      _group == null || widget.groupValue == null,
+      'A RadioGroup can not wrap Radio widget with a non null groupValue. '
+      'Either unassign groupValue or use RadioGroupPolicy instead',
+    );
+    animateToValue();
   }
 
   @override
   void didUpdateWidget(Radio<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget._selected != oldWidget._selected) {
+    if (widget.groupValue != oldWidget.groupValue) {
       animateToValue();
     }
+    assert(
+      _group == null || widget.groupValue == null,
+      'A RadioGroup can not wrap Radio widget with a non null groupValue. '
+      'Either unassign groupValue or use RadioGroupPolicy instead',
+    );
   }
 
   @override
   void dispose() {
     _painter.dispose();
+    _internalFocusNode?.dispose();
+    _group?.unregisterRadio(this);
     super.dispose();
   }
 
   @override
-  ValueChanged<bool?>? get onChanged => widget.onChanged != null ? _handleChanged : null;
+  ValueChanged<bool?>? get onChanged => _handlesChanges ? handleChanged : null;
 
   @override
   bool get tristate => widget.toggleable;
 
   @override
-  bool? get value => widget._selected;
+  bool? get value => widget.value == _effectiveGroupValue;
 
   @override
   Duration? get reactionAnimationDuration => kRadialReactionDuration;
@@ -447,13 +739,13 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
           case TargetPlatform.macOS:
             return CupertinoRadio<T>(
               value: widget.value,
-              groupValue: widget.groupValue,
-              onChanged: widget.onChanged,
+              groupValue: _effectiveGroupValue,
+              onChanged: onChanged != null ? _handleGroupValueChanged : null,
               mouseCursor: widget.mouseCursor,
               toggleable: widget.toggleable,
               activeColor: widget.activeColor,
               focusColor: widget.focusColor,
-              focusNode: widget.focusNode,
+              focusNode: focusNode,
               autofocus: widget.autofocus,
               useCheckmarkStyle: widget.useCupertinoCheckmarkStyle,
             );
@@ -556,15 +848,15 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
         accessibilitySelected = null;
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-        accessibilitySelected = widget._selected;
+        accessibilitySelected = value;
     }
 
     return Semantics(
       inMutuallyExclusiveGroup: true,
-      checked: widget._selected,
+      checked: value,
       selected: accessibilitySelected,
       child: buildToggleable(
-        focusNode: widget.focusNode,
+        focusNode: focusNode,
         autofocus: widget.autofocus,
         mouseCursor: effectiveMouseCursor,
         size: size,

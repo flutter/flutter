@@ -63,9 +63,7 @@ void main() {
     await tester.pumpWidget(
       Theme(
         data: theme,
-        child: Material(
-          child: Center(child: Radio<int>(key: key, value: 1, groupValue: 2, onChanged: null)),
-        ),
+        child: Material(child: Center(child: Radio<int>(key: key, value: 1, groupValue: 2))),
       ),
     );
 
@@ -127,13 +125,7 @@ void main() {
         data: theme,
         child: Material(
           child: Center(
-            child: Radio<int>(
-              key: key,
-              value: 1,
-              groupValue: null,
-              onChanged: log.add,
-              toggleable: true,
-            ),
+            child: Radio<int>(key: key, value: 1, onChanged: log.add, toggleable: true),
           ),
         ),
       ),
@@ -291,10 +283,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(
-        data: theme,
-        child: const Material(child: Radio<int>(value: 1, groupValue: 2, onChanged: null)),
-      ),
+      Theme(data: theme, child: const Material(child: Radio<int>(value: 1, groupValue: 2))),
     );
 
     expect(
@@ -343,10 +332,7 @@ void main() {
     );
 
     await tester.pumpWidget(
-      Theme(
-        data: theme,
-        child: const Material(child: Radio<int>(value: 2, groupValue: 2, onChanged: null)),
-      ),
+      Theme(data: theme, child: const Material(child: Radio<int>(value: 2, groupValue: 2))),
     );
 
     expect(
@@ -1091,7 +1077,7 @@ void main() {
             child: Material(
               child: MouseRegion(
                 cursor: SystemMouseCursors.forbidden,
-                child: Radio<int>(value: 1, onChanged: null, groupValue: 2),
+                child: Radio<int>(value: 1, groupValue: 2),
               ),
             ),
           ),
@@ -1566,7 +1552,7 @@ void main() {
         home: const Material(
           child: Tooltip(
             message: longPressTooltip,
-            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
+            child: Radio<bool>(value: true, groupValue: false),
           ),
         ),
       ),
@@ -1596,7 +1582,7 @@ void main() {
           child: Tooltip(
             triggerMode: TooltipTriggerMode.tap,
             message: tapTooltip,
-            child: Radio<bool>(value: true, groupValue: false, onChanged: null),
+            child: Radio<bool>(value: true, groupValue: false),
           ),
         ),
       ),
