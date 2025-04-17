@@ -31,7 +31,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.Logger
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.TaskProvider
-import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
@@ -203,30 +202,6 @@ class FlutterPluginUtilsTest {
     fun `formatPlatformString returns correct string`() {
         val result = FlutterPluginUtils.formatPlatformString("android-arm64")
         assertEquals("arm64_v8a", result)
-    }
-
-    // getKGPVersion
-    @Test
-    fun `getKGPVersion returns version when kotlin_version is set`() {
-        val kgpVersion = Version(1, 9, 20)
-        val project = mockk<Project>()
-        every { project.hasProperty(eq("kotlin_version")) } returns true
-        every { project.properties["kotlin_version"] } returns kgpVersion.toString()
-        val result = FlutterPluginUtils.getKGPVersion(project)
-        assertEquals(kgpVersion, result!!)
-    }
-
-    @Test
-    fun `getKGPVersion returns version from KotlinAndroidPluginWrapper`() {
-        val kgpVersion = Version(1, 9, 20)
-        val project = mockk<Project>()
-        every { project.hasProperty(eq("kotlin_version")) } returns false
-        every { project.plugins.findPlugin(KotlinAndroidPluginWrapper::class.java) } returns
-            mockk<KotlinAndroidPluginWrapper> {
-                every { pluginVersion } returns kgpVersion.toString()
-            }
-        val result = FlutterPluginUtils.getKGPVersion(project)
-        assertEquals(kgpVersion, result!!)
     }
 
     // shouldShrinkResources

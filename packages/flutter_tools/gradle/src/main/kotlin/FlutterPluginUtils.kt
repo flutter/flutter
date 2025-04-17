@@ -12,12 +12,10 @@ import com.flutter.gradle.plugins.PluginHandler
 import groovy.lang.Closure
 import groovy.util.Node
 import org.gradle.api.GradleException
-import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
-import org.jetbrains.kotlin.gradle.plugin.KotlinAndroidPluginWrapper
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.util.Properties
@@ -132,42 +130,6 @@ object FlutterPluginUtils {
     }
 
     // ----------------- Methods that interact primarily with the Gradle project. -----------------
-
-    /**
-     * Returns the version of the Kotlin Gradle plugin.
-     */
-    internal fun getKGPVersion(project: Project): Version? {
-        // TODO(gmackall): AGP has a getKotlinAndroidPluginVersion(), and KGP has a
-        //                 getKotlinPluginVersion(). Consider replacing this implementation with one of
-        //                 those.
-        val kotlinVersionProperty = "kotlin_version"
-        val firstKotlinVersionFieldName = "pluginVersion"
-        val secondKotlinVersionFieldName = "kotlinPluginVersion"
-        // This property corresponds to application of the Kotlin Gradle plugin in the
-        // top-level build.gradle file.
-        if (project.hasProperty(kotlinVersionProperty)) {
-            return Version.fromString(project.properties[kotlinVersionProperty] as String)
-        }
-        val kotlinPlugin =
-            project.plugins
-                .findPlugin(KotlinAndroidPluginWrapper::class.java)
-        // Partial implementation of getKotlinPluginVersion from the comment above.
-        var versionString: String? = kotlinPlugin?.pluginVersion
-        if (!versionString.isNullOrEmpty()) {
-            return Version.fromString(versionString)
-        }
-        // Fall back to reflection.
-        val versionField =
-            kotlinPlugin?.javaClass?.kotlin?.members?.first {
-                it.name == firstKotlinVersionFieldName || it.name == secondKotlinVersionFieldName
-            }
-        versionString = versionField?.call(kotlinPlugin) as String?
-        return if (versionString == null) {
-            null
-        } else {
-            Version.fromString(versionString)
-        }
-    }
 
     @JvmStatic
     @JvmName("shouldShrinkResources")
@@ -758,8 +720,7 @@ object FlutterPluginUtils {
             description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
             doLast {
-                // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api/-java-version/index.html#-1790786897%2FFunctions%2F-1793262594
-                println(JavaVersion.current())
+                println(VersionFetcher.getJavaVersion())
             }
         }
     }
@@ -777,7 +738,7 @@ object FlutterPluginUtils {
         project.tasks.register("kgpVersion") {
             description = "Print the current kgp version used by the project."
             doLast {
-                println("KGP Version: " + getKGPVersion(project).toString())
+                println("KGP Version: " + VersionFetcher.getKGPVersion(project).toString())
             }
         }
     }
