@@ -153,11 +153,6 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
         TextureVK::Cast(*resolve_image_vk_).GetCachedRenderPass();
     recycled_framebuffer =
         TextureVK::Cast(*resolve_image_vk_).GetCachedFramebuffer();
-  } else {
-    recycled_render_pass =
-        TextureVK::Cast(*color_image_vk_).GetCachedRenderPass();
-    recycled_framebuffer =
-        TextureVK::Cast(*color_image_vk_).GetCachedFramebuffer();
   }
 
   const auto& target_size = render_target_.GetRenderTargetSize();
@@ -194,9 +189,6 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   if (resolve_image_vk_) {
     TextureVK::Cast(*resolve_image_vk_).SetCachedFramebuffer(framebuffer);
     TextureVK::Cast(*resolve_image_vk_).SetCachedRenderPass(render_pass_);
-  } else {
-    TextureVK::Cast(*color_image_vk_).SetCachedFramebuffer(framebuffer);
-    TextureVK::Cast(*color_image_vk_).SetCachedRenderPass(render_pass_);
   }
 
   // If the resolve image exists and has mipmaps, transition mip levels besides
