@@ -300,9 +300,6 @@ TEST(AccessibilityBridgeTest, CanSetCheckboxChecked) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  //   root.flags = static_cast<FlutterSemanticsFlag>(
-  //       FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
-  //       FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked);
   FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
   flags.hasCheckedState = true;
   flags.isChecked = true;

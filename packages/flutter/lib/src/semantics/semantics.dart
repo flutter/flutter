@@ -17,8 +17,8 @@ import 'dart:ui'
         Rect,
         SemanticsAction,
         SemanticsFlag,
-        SemanticsInputType,
         SemanticsFlags,
+        SemanticsInputType,
         SemanticsRole,
         SemanticsUpdate,
         SemanticsUpdateBuilder,
@@ -41,9 +41,9 @@ export 'dart:ui'
         Rect,
         SemanticsAction,
         SemanticsFlag,
+        SemanticsFlags,
         SemanticsRole,
         SemanticsValidationResult,
-        SemanticsFlags,
         StringAttribute,
         TextDirection,
         VoidCallback;
@@ -1015,7 +1015,7 @@ class SemanticsData with Diagnosticable {
 
   /// Keep this to avoid breaking change but we should deprecate it sometime.
   bool hasFlag(SemanticsFlag flag) {
-    final realIndex = flag.index.bitLength - 1;
+    final int realIndex = flag.index.bitLength - 1;
     return flags.toList()[realIndex];
   }
 
@@ -2842,11 +2842,12 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   SemanticsFlags _flags = SemanticsFlags();
 
+  /// Semantics flags.
   SemanticsFlags get flags => _flags;
 
   /// Keep this to avoid breaking change but we should deprecate it sometime.
   bool hasFlag(SemanticsFlag flag) {
-    final realIndex = flag.index.bitLength - 1;
+    final int realIndex = flag.index.bitLength - 1;
     return flags.toList()[realIndex];
   }
 

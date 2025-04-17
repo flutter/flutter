@@ -67,23 +67,11 @@ class SemanticsController {
   /// a custom implementation can be passed via the [WidgetController] constructor.
   SemanticsController._(this._controller);
 
-  static final int _scrollingActions =
-      SemanticsAction.scrollUp.index |
+  static final int _scrollingActions = SemanticsAction.scrollUp.index |
       SemanticsAction.scrollDown.index |
       SemanticsAction.scrollLeft.index |
       SemanticsAction.scrollRight.index |
       SemanticsAction.scrollToOffset.index;
-
-  /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
-  static final int _importantFlagsForAccessibility =
-      SemanticsFlag.hasCheckedState.index |
-      SemanticsFlag.hasToggledState.index |
-      SemanticsFlag.hasEnabledState.index |
-      SemanticsFlag.isButton.index |
-      SemanticsFlag.isTextField.index |
-      SemanticsFlag.isFocusable.index |
-      SemanticsFlag.isSlider.index |
-      SemanticsFlag.isInMutuallyExclusiveGroup.index;
 
   final WidgetController _controller;
 
@@ -362,7 +350,16 @@ class SemanticsController {
       return true;
     }
 
-    final bool hasImportantFlag = data.flags & _importantFlagsForAccessibility != 0;
+    /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
+    final bool hasImportantFlag = data.flags.hasCheckedState ||
+        data.flags.hasToggledState ||
+        data.flags.hasEnabledState ||
+        data.flags.isButton ||
+        data.flags.isTextField ||
+        data.flags.isFocusable ||
+        data.flags.isSlider ||
+        data.flags.isInMutuallyExclusiveGroup;
+
     if (hasImportantFlag) {
       return true;
     }
@@ -892,8 +889,8 @@ abstract class WidgetController {
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
     return allElements.whereType<StatefulElement>().map<State>(
-      (StatefulElement element) => element.state,
-    );
+          (StatefulElement element) => element.state,
+        );
   }
 
   /// The matching state in the widget tree.

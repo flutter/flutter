@@ -999,7 +999,7 @@ class SemanticsFlags {
   /// Constructor for SemanticsFlags.
   ///
   /// All flags default to `false` unless specified.
-  SemanticsFlags({
+  const SemanticsFlags({
     this.hasCheckedState = false, // Bit 0
     this.isChecked = false, // Bit 1
     this.isSelected = false, // Bit 2
@@ -1032,6 +1032,8 @@ class SemanticsFlags {
     this.hasRequiredState = false, // Bit 29
     this.isRequired = false, // Bit 30
   });
+
+  static const SemanticsFlags none = SemanticsFlags();
 
   /// Merges the flags from this object with [other].
   SemanticsFlags merge(SemanticsFlags other) {

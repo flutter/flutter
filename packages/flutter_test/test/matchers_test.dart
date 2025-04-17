@@ -431,13 +431,12 @@ void main() {
 
     test('differently constructed rects match', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath =
-          Path()
-            ..moveTo(5.0, 5.0)
-            ..lineTo(5.0, 6.0)
-            ..lineTo(6.0, 6.0)
-            ..lineTo(6.0, 5.0)
-            ..close();
+      final Path linePath = Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.0)
+        ..close();
       expect(
         linePath,
         coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)),
@@ -446,13 +445,12 @@ void main() {
 
     test('partially overlapping paths', () {
       final Path rectPath = Path()..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      final Path linePath =
-          Path()
-            ..moveTo(5.0, 5.0)
-            ..lineTo(5.0, 6.0)
-            ..lineTo(6.0, 6.0)
-            ..lineTo(6.0, 5.5)
-            ..close();
+      final Path linePath = Path()
+        ..moveTo(5.0, 5.0)
+        ..lineTo(5.0, 6.0)
+        ..lineTo(6.0, 6.0)
+        ..lineTo(6.0, 5.5)
+        ..close();
       expect(
         linePath,
         isNot(coversSameAreaAs(rectPath, areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0))),
@@ -695,16 +693,46 @@ void main() {
 
     testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
       int actions = 0;
-      int flags = 0;
+
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       for (final SemanticsAction action in SemanticsAction.values) {
         actions |= action.index;
       }
-      for (final SemanticsFlag flag in SemanticsFlag.values) {
-        flags |= flag.index;
-      }
+
       final SemanticsData data = SemanticsData(
-        flags: flags,
+        flags: SemanticsFlags(
+          hasCheckedState: true,
+          isChecked: true,
+          isCheckStateMixed: true,
+          hasSelectedState: true,
+          isSelected: true,
+          isButton: true,
+          isSlider: true,
+          isKeyboardKey: true,
+          isLink: true,
+          isTextField: true,
+          isReadOnly: true,
+          hasEnabledState: true,
+          isFocused: true,
+          isFocusable: true,
+          isEnabled: true,
+          isInMutuallyExclusiveGroup: true,
+          isHeader: true,
+          isObscured: true,
+          isMultiline: true,
+          namesRoute: true,
+          scopesRoute: true,
+          isHidden: true,
+          isImage: true,
+          isLiveRegion: true,
+          hasToggledState: true,
+          isToggled: true,
+          hasImplicitScrolling: true,
+          hasExpandedState: true,
+          isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
+        ),
         actions: actions,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -863,30 +891,30 @@ void main() {
 
       // This should fail due to the mis-match between the `namesRoute` value.
       void failedExpectation() => expect(
-        tester.getSemantics(find.byKey(key)),
-        matchesSemantics(
-          // Adding the explicit `false` for test readability
-          // ignore: avoid_redundant_argument_values
-          namesRoute: false,
-          label: 'foo',
-          hint: 'bar',
-          value: 'baz',
-          increasedValue: 'a',
-          decreasedValue: 'b',
-          textDirection: TextDirection.rtl,
-          hasTapAction: true,
-          hasLongPressAction: true,
-          isButton: true,
-          isLink: true,
-          isHeader: true,
-          onTapHint: 'scan',
-          onLongPressHint: 'fill',
-          customActions: <CustomSemanticsAction>[
-            const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar'),
-          ],
-        ),
-      );
+            tester.getSemantics(find.byKey(key)),
+            matchesSemantics(
+              // Adding the explicit `false` for test readability
+              // ignore: avoid_redundant_argument_values
+              namesRoute: false,
+              label: 'foo',
+              hint: 'bar',
+              value: 'baz',
+              increasedValue: 'a',
+              decreasedValue: 'b',
+              textDirection: TextDirection.rtl,
+              hasTapAction: true,
+              hasLongPressAction: true,
+              isButton: true,
+              isLink: true,
+              isHeader: true,
+              onTapHint: 'scan',
+              onLongPressHint: 'fill',
+              customActions: <CustomSemanticsAction>[
+                const CustomSemanticsAction(label: 'foo'),
+                const CustomSemanticsAction(label: 'bar'),
+              ],
+            ),
+          );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
       handle.dispose();
@@ -1000,16 +1028,45 @@ void main() {
 
     testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
       int actions = 0;
-      int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       for (final SemanticsAction action in SemanticsAction.values) {
         actions |= action.index;
       }
-      for (final SemanticsFlag flag in SemanticsFlag.values) {
-        flags |= flag.index;
-      }
+
       final SemanticsData data = SemanticsData(
-        flags: flags,
+        flags: SemanticsFlags(
+          hasCheckedState: true,
+          isChecked: true,
+          isCheckStateMixed: true,
+          hasSelectedState: true,
+          isSelected: true,
+          isButton: true,
+          isSlider: true,
+          isKeyboardKey: true,
+          isLink: true,
+          isTextField: true,
+          isReadOnly: true,
+          hasEnabledState: true,
+          isFocused: true,
+          isFocusable: true,
+          isEnabled: true,
+          isInMutuallyExclusiveGroup: true,
+          isHeader: true,
+          isObscured: true,
+          isMultiline: true,
+          namesRoute: true,
+          scopesRoute: true,
+          isHidden: true,
+          isImage: true,
+          isLiveRegion: true,
+          hasToggledState: true,
+          isToggled: true,
+          hasImplicitScrolling: true,
+          hasExpandedState: true,
+          isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
+        ),
         actions: actions,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1111,7 +1168,7 @@ void main() {
 
     testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
       final SemanticsData data = SemanticsData(
-        flags: 0,
+        flags: SemanticsFlags(),
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1211,15 +1268,12 @@ void main() {
 
     testWidgets('only matches given flags and actions', (WidgetTester tester) async {
       int allActions = 0;
-      int allFlags = 0;
       for (final SemanticsAction action in SemanticsAction.values) {
         allActions |= action.index;
       }
-      for (final SemanticsFlag flag in SemanticsFlag.values) {
-        allFlags |= flag.index;
-      }
+
       final SemanticsData emptyData = SemanticsData(
-        flags: 0,
+        flags: SemanticsFlags(),
         actions: 0,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1252,7 +1306,39 @@ void main() {
 
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       final SemanticsData fullData = SemanticsData(
-        flags: allFlags,
+        flags: SemanticsFlags(
+          hasCheckedState: true,
+          isChecked: true,
+          isCheckStateMixed: true,
+          hasSelectedState: true,
+          isSelected: true,
+          isButton: true,
+          isSlider: true,
+          isKeyboardKey: true,
+          isLink: true,
+          isTextField: true,
+          isReadOnly: true,
+          hasEnabledState: true,
+          isFocused: true,
+          isFocusable: true,
+          isEnabled: true,
+          isInMutuallyExclusiveGroup: true,
+          isHeader: true,
+          isObscured: true,
+          isMultiline: true,
+          namesRoute: true,
+          scopesRoute: true,
+          isHidden: true,
+          isImage: true,
+          isLiveRegion: true,
+          hasToggledState: true,
+          isToggled: true,
+          hasImplicitScrolling: true,
+          hasExpandedState: true,
+          isExpanded: true,
+          hasRequiredState: true,
+          isRequired: true,
+        ),
         actions: allActions,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1342,7 +1428,7 @@ void main() {
     testWidgets('can match only custom actions', (WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       final SemanticsData data = SemanticsData(
-        flags: 0,
+        flags: SemanticsFlags(),
         actions: SemanticsAction.customAction.index,
         identifier: 'i',
         attributedLabel: AttributedString('a'),
@@ -1407,28 +1493,28 @@ void main() {
 
       // This should fail due to the mis-match between the `namesRoute` value.
       void failedExpectation() => expect(
-        tester.getSemantics(find.byKey(key)),
-        containsSemantics(
-          label: 'foo',
-          hint: 'bar',
-          value: 'baz',
-          increasedValue: 'a',
-          decreasedValue: 'b',
-          textDirection: TextDirection.rtl,
-          hasTapAction: true,
-          hasLongPressAction: true,
-          isButton: true,
-          isLink: true,
-          isHeader: true,
-          namesRoute: false,
-          onTapHint: 'scan',
-          onLongPressHint: 'fill',
-          customActions: <CustomSemanticsAction>[
-            const CustomSemanticsAction(label: 'foo'),
-            const CustomSemanticsAction(label: 'bar'),
-          ],
-        ),
-      );
+            tester.getSemantics(find.byKey(key)),
+            containsSemantics(
+              label: 'foo',
+              hint: 'bar',
+              value: 'baz',
+              increasedValue: 'a',
+              decreasedValue: 'b',
+              textDirection: TextDirection.rtl,
+              hasTapAction: true,
+              hasLongPressAction: true,
+              isButton: true,
+              isLink: true,
+              isHeader: true,
+              namesRoute: false,
+              onTapHint: 'scan',
+              onLongPressHint: 'fill',
+              customActions: <CustomSemanticsAction>[
+                const CustomSemanticsAction(label: 'foo'),
+                const CustomSemanticsAction(label: 'bar'),
+              ],
+            ),
+          );
 
       expect(failedExpectation, throwsA(isA<TestFailure>()));
       handle.dispose();

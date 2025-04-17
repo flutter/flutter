@@ -21,7 +21,9 @@ import 'widget_tester.dart';
 /// The result of evaluating a semantics node by a [AccessibilityGuideline].
 class Evaluation {
   /// Create a passing evaluation.
-  const Evaluation.pass() : passed = true, reason = null;
+  const Evaluation.pass()
+      : passed = true,
+        reason = null;
 
   /// Create a failing evaluation, with an optional [reason] explaining the
   /// result.
@@ -163,8 +165,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       }
       // skip node if it is touching the edge scrollable, since it might
       // be partially scrolled offscreen.
-      if (current.flags.hasImplicitScrolling &&
-          _isAtBoundary(paintBounds, current.rect)) {
+      if (current.flags.hasImplicitScrolling && _isAtBoundary(paintBounds, current.rect)) {
         return result;
       }
       current = current.parent;
@@ -573,13 +574,12 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
 
       // Obtain a previously rendered image or render one for a new view.
       await tester.binding.runAsync(() async {
-        image =
-            images[view] ??= await layer.toImage(
-              renderView.paintBounds,
-              // Needs to be the same pixel ratio otherwise our dimensions
-              // won't match the last transform layer.
-              pixelRatio: 1 / view.devicePixelRatio,
-            );
+        image = images[view] ??= await layer.toImage(
+          renderView.paintBounds,
+          // Needs to be the same pixel ratio otherwise our dimensions
+          // won't match the last transform layer.
+          pixelRatio: 1 / view.devicePixelRatio,
+        );
         byteData = byteDatas[view] ??= (await image.toByteData())!;
       });
 

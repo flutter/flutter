@@ -673,12 +673,10 @@ class CommonSemanticsFinders {
   SemanticsFinder byLabel(Pattern label, {FlutterView? view}) {
     return byPredicate(
       (SemanticsNode node) => _matchesPattern(node.label, label),
-      describeMatch:
-          (Plurality plurality) =>
-              '${switch (plurality) {
-                Plurality.one => 'SemanticsNode',
-                Plurality.zero || Plurality.many => 'SemanticsNodes',
-              }} with label "$label"',
+      describeMatch: (Plurality plurality) => '${switch (plurality) {
+        Plurality.one => 'SemanticsNode',
+        Plurality.zero || Plurality.many => 'SemanticsNodes',
+      }} with label "$label"',
       view: view,
     );
   }
@@ -690,12 +688,10 @@ class CommonSemanticsFinders {
   SemanticsFinder byValue(Pattern value, {FlutterView? view}) {
     return byPredicate(
       (SemanticsNode node) => _matchesPattern(node.value, value),
-      describeMatch:
-          (Plurality plurality) =>
-              '${switch (plurality) {
-                Plurality.one => 'SemanticsNode',
-                Plurality.zero || Plurality.many => 'SemanticsNodes',
-              }} with value "$value"',
+      describeMatch: (Plurality plurality) => '${switch (plurality) {
+        Plurality.one => 'SemanticsNode',
+        Plurality.zero || Plurality.many => 'SemanticsNodes',
+      }} with value "$value"',
       view: view,
     );
   }
@@ -707,12 +703,10 @@ class CommonSemanticsFinders {
   SemanticsFinder byHint(Pattern hint, {FlutterView? view}) {
     return byPredicate(
       (SemanticsNode node) => _matchesPattern(node.hint, hint),
-      describeMatch:
-          (Plurality plurality) =>
-              '${switch (plurality) {
-                Plurality.one => 'SemanticsNode',
-                Plurality.zero || Plurality.many => 'SemanticsNodes',
-              }} with hint "$hint"',
+      describeMatch: (Plurality plurality) => '${switch (plurality) {
+        Plurality.one => 'SemanticsNode',
+        Plurality.zero || Plurality.many => 'SemanticsNodes',
+      }} with hint "$hint"',
       view: view,
     );
   }
@@ -723,12 +717,10 @@ class CommonSemanticsFinders {
   SemanticsFinder byAction(SemanticsAction action, {FlutterView? view}) {
     return byPredicate(
       (SemanticsNode node) => node.getSemanticsData().hasAction(action),
-      describeMatch:
-          (Plurality plurality) =>
-              '${switch (plurality) {
-                Plurality.one => 'SemanticsNode',
-                Plurality.zero || Plurality.many => 'SemanticsNodes',
-              }} with action "$action"',
+      describeMatch: (Plurality plurality) => '${switch (plurality) {
+        Plurality.one => 'SemanticsNode',
+        Plurality.zero || Plurality.many => 'SemanticsNodes',
+      }} with action "$action"',
       view: view,
     );
   }
@@ -744,12 +736,10 @@ class CommonSemanticsFinders {
     );
     return byPredicate(
       (SemanticsNode node) => node.getSemanticsData().actions & actionsInt != 0,
-      describeMatch:
-          (Plurality plurality) =>
-              '${switch (plurality) {
-                Plurality.one => 'SemanticsNode',
-                Plurality.zero || Plurality.many => 'SemanticsNodes',
-              }} with any of the following actions: $actions',
+      describeMatch: (Plurality plurality) => '${switch (plurality) {
+        Plurality.one => 'SemanticsNode',
+        Plurality.zero || Plurality.many => 'SemanticsNodes',
+      }} with any of the following actions: $actions',
       view: view,
     );
   }
@@ -760,12 +750,10 @@ class CommonSemanticsFinders {
   SemanticsFinder byFlag(SemanticsFlag flag, {FlutterView? view}) {
     return byPredicate(
       (SemanticsNode node) => node.hasFlag(flag),
-      describeMatch:
-          (Plurality plurality) =>
-              '${switch (plurality) {
-                Plurality.one => 'SemanticsNode',
-                Plurality.zero || Plurality.many => 'SemanticsNodes',
-              }} with flag "$flag"',
+      describeMatch: (Plurality plurality) => '${switch (plurality) {
+        Plurality.one => 'SemanticsNode',
+        Plurality.zero || Plurality.many => 'SemanticsNodes',
+      }} with flag "$flag"',
       view: view,
     );
   }
@@ -775,15 +763,14 @@ class CommonSemanticsFinders {
   ///
   /// {@macro flutter_test.finders.CommonSemanticsFinders.viewParameter}
   SemanticsFinder byAnyFlag(List<SemanticsFlag> flags, {FlutterView? view}) {
-    final int flagsInt = flags.fold(0, (int value, SemanticsFlag flag) => value | flag.index);
     return byPredicate(
-      (SemanticsNode node) => node.getSemanticsData().flags & flagsInt != 0,
-      describeMatch:
-          (Plurality plurality) =>
-              '${switch (plurality) {
-                Plurality.one => 'SemanticsNode',
-                Plurality.zero || Plurality.many => 'SemanticsNodes',
-              }} with any of the following flags: $flags',
+      (SemanticsNode node) {
+        return flags.any((flag) => node.hasFlag(flag));
+      },
+      describeMatch: (Plurality plurality) => '${switch (plurality) {
+        Plurality.one => 'SemanticsNode',
+        Plurality.zero || Plurality.many => 'SemanticsNodes',
+      }} with any of the following flags: $flags',
       view: view,
     );
   }
@@ -847,15 +834,14 @@ final class CommonTextRangeFinders {
       skipOffstage: skipOffstage,
       findRichText: true,
     );
-    final Finder elementFinder =
-        descendentOf == null
-            ? textWidgetFinder
-            : _DescendantWidgetFinder(
-              descendentOf,
-              textWidgetFinder,
-              matchRoot: true,
-              skipOffstage: skipOffstage,
-            );
+    final Finder elementFinder = descendentOf == null
+        ? textWidgetFinder
+        : _DescendantWidgetFinder(
+            descendentOf,
+            textWidgetFinder,
+            matchRoot: true,
+            skipOffstage: skipOffstage,
+          );
     return _StaticTextRangeFinder(elementFinder, substring);
   }
 }
@@ -1070,8 +1056,8 @@ class FinderResult<CandidateType> extends Iterable<CandidateType> {
   ///
   /// {@macro flutter_test.finders.FinderBase.describeMatch}
   FinderResult(DescribeMatchCallback describeMatch, Iterable<CandidateType> values)
-    : _describeMatch = describeMatch,
-      _values = values;
+      : _describeMatch = describeMatch,
+        _values = values;
 
   final DescribeMatchCallback _describeMatch;
   final Iterable<CandidateType> _values;
@@ -1273,9 +1259,7 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
     visitor(renderObject);
     Iterable<TextRangeContext> searchInParagraph(RenderParagraph paragraph) {
       final String text = paragraph.text.toPlainText(includeSemanticsLabels: false);
-      return pattern
-          .allMatches(text)
-          .map(
+      return pattern.allMatches(text).map(
             (Match match) =>
                 TextRangeContext._(view, paragraph, TextRange(start: match.start, end: match.end)),
           );
@@ -1294,7 +1278,8 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
   String describeMatch(Plurality plurality) {
     return switch (plurality) {
       Plurality.zero ||
-      Plurality.many => 'non-overlapping TextRanges that match the Pattern "$pattern"',
+      Plurality.many =>
+        'non-overlapping TextRanges that match the Pattern "$pattern"',
       Plurality.one => 'non-overlapping TextRange that matches the Pattern "$pattern"',
     };
   }
@@ -1662,7 +1647,7 @@ class _ExactWidgetFinder extends MatchFinder {
 
 class _WidgetPredicateWidgetFinder extends MatchFinder {
   _WidgetPredicateWidgetFinder(this.predicate, {String? description, super.skipOffstage})
-    : _description = description;
+      : _description = description;
 
   final WidgetPredicate predicate;
   final String? _description;
@@ -1678,7 +1663,7 @@ class _WidgetPredicateWidgetFinder extends MatchFinder {
 
 class _ElementPredicateWidgetFinder extends MatchFinder {
   _ElementPredicateWidgetFinder(this.predicate, {String? description, super.skipOffstage})
-    : _description = description;
+      : _description = description;
 
   final ElementPredicate predicate;
   final String? _description;
@@ -1694,7 +1679,7 @@ class _ElementPredicateWidgetFinder extends MatchFinder {
 
 class _PredicateSemanticsFinder extends SemanticsFinder with MatchFinderMixin<SemanticsNode> {
   _PredicateSemanticsFinder(this.predicate, DescribeMatchCallback? describeMatch, super.view)
-    : _describeMatch = describeMatch;
+      : _describeMatch = describeMatch;
 
   final SemanticsNodePredicate predicate;
   final DescribeMatchCallback? _describeMatch;
@@ -1731,11 +1716,10 @@ mixin _DescendantFinderMixin<CandidateType> on FinderBase<CandidateType> {
   @override
   Iterable<CandidateType> get allCandidates {
     final Iterable<CandidateType> ancestors = ancestor.evaluate();
-    final List<CandidateType> candidates =
-        ancestors
-            .expand<CandidateType>((CandidateType ancestor) => _collectDescendants(ancestor))
-            .toSet()
-            .toList();
+    final List<CandidateType> candidates = ancestors
+        .expand<CandidateType>((CandidateType ancestor) => _collectDescendants(ancestor))
+        .toSet()
+        .toList();
     if (matchRoot) {
       candidates.insertAll(0, ancestors);
     }
@@ -1823,7 +1807,7 @@ mixin _AncestorFinderMixin<CandidateType> on FinderBase<CandidateType> {
 
 class _AncestorWidgetFinder extends Finder with _AncestorFinderMixin<Element> {
   _AncestorWidgetFinder(this.descendant, this.ancestor, {this.matchLeaves = false})
-    : super(skipOffstage: false);
+      : super(skipOffstage: false);
 
   @override
   final FinderBase<Element> ancestor;

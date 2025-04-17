@@ -2894,7 +2894,7 @@ class _MatchesSemanticsData extends Matcher {
       for (final MapEntry<ui.SemanticsFlag, bool> flagEntry in flags.entries) {
         final ui.SemanticsFlag flag = flagEntry.key;
         final bool flagExpected = flagEntry.value;
-        final bool flagPresent = flag.index & data.flags == flag.index;
+        final bool flagPresent = data.hasFlag(flag) ;
         if (flagPresent != flagExpected) {
           if (flagExpected) {
             missingFlags.add(flag);

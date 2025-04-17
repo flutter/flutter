@@ -286,14 +286,23 @@ class TestSemantics {
 
     final SemanticsData nodeData = node.getSemanticsData();
 
-    final int flagsBitmask =
-        flags is int
-            ? flags as int
-            : (flags as List<SemanticsFlag>).fold<int>(
-              0,
-              (int bitmask, SemanticsFlag flag) => bitmask | flag.index,
-            );
-    if (flagsBitmask != nodeData.flags) {
+    late final SemanticsFlags semanticsFlags;
+    if (flags is SemanticsFlag) {
+      semanticsFlags = flags as SemanticsFlag;
+    } else {
+      final int flagsBitmask =
+          flags is int
+              ? flags as int
+              : (flags as List<SemanticsFlag>).fold<int>(
+                0,
+                (int bitmask, SemanticsFlag flag) => bitmask | flag.index,
+              );
+      semanticsFlags = SemanticsFlags.fromList(
+        List.generate(31, (i) => (flagsBitmask & (1 << i)) != 0),
+      );
+    }
+
+    if (semanticsFlags != nodeData.flags) {
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
     }
 
@@ -643,10 +652,14 @@ class SemanticsTester {
         }
       }
       if (flags != null) {
-        final int expectedFlags = flags.fold<int>(
+        final int flagsBitmask = flags.fold<int>(
           0,
           (int value, SemanticsFlag flag) => value | flag.index,
         );
+        final SemanticsFlags expectedFlags = SemanticsFlags.fromList(
+          List.generate(31, (i) => (flagsBitmask & (1 << i)) != 0),
+        );
+
         final int actualFlags = node.getSemanticsData().flags;
         if (expectedFlags != actualFlags) {
           return false;
@@ -750,7 +763,10 @@ class SemanticsTester {
 
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
     Iterable<SemanticsFlag> list;
-    if (flags is int) {
+    if (flags is SemanticsFlags) {
+      list = flags.toStrings();
+    }
+    else if (flags is int) {
       list = SemanticsFlag.values.where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
       list = flags as List<SemanticsFlag>;
@@ -795,7 +811,7 @@ class SemanticsTester {
     if (nodeData.tags != null) {
       buf.writeln('  tags: ${_tagsToSemanticsTagExpression(nodeData.tags!)},');
     }
-    if (nodeData.flags != 0) {
+    if (nodeData.flags!= SemanticsFlags.none) {
       buf.writeln('  flags: ${_flagsToSemanticsFlagExpression(nodeData.flags)},');
     }
     if (nodeData.actions != 0) {
