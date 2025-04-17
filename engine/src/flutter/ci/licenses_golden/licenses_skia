@@ -1,4 +1,4 @@
-Signature: 073626fc39b5b5024ff65c29038b7add
+Signature: 9915f10298af57762d7c60fdea583942
 
 ====================================================================================================
 LIBRARY: etc1
@@ -2689,12 +2689,12 @@ ORIGIN: ../../../flutter/third_party/skia/src/core/SkPicturePlayback.h + ../../.
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkPictureRecorder.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkReadPixelsRec.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecord.h + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordCanvas.cpp + ../../../flutter/third_party/skia/LICENSE
+ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordCanvas.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordDraw.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordDraw.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordOpts.cpp + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecordOpts.h + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecorder.cpp + ../../../flutter/third_party/skia/LICENSE
-ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecorder.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkRecords.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkSurfacePriv.h + ../../../flutter/third_party/skia/LICENSE
 ORIGIN: ../../../flutter/third_party/skia/src/core/SkTaskGroup.cpp + ../../../flutter/third_party/skia/LICENSE
@@ -2848,12 +2848,12 @@ FILE: ../../../flutter/third_party/skia/src/core/SkPicturePlayback.h
 FILE: ../../../flutter/third_party/skia/src/core/SkPictureRecorder.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkReadPixelsRec.h
 FILE: ../../../flutter/third_party/skia/src/core/SkRecord.h
+FILE: ../../../flutter/third_party/skia/src/core/SkRecordCanvas.cpp
+FILE: ../../../flutter/third_party/skia/src/core/SkRecordCanvas.h
 FILE: ../../../flutter/third_party/skia/src/core/SkRecordDraw.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkRecordDraw.h
 FILE: ../../../flutter/third_party/skia/src/core/SkRecordOpts.cpp
 FILE: ../../../flutter/third_party/skia/src/core/SkRecordOpts.h
-FILE: ../../../flutter/third_party/skia/src/core/SkRecorder.cpp
-FILE: ../../../flutter/third_party/skia/src/core/SkRecorder.h
 FILE: ../../../flutter/third_party/skia/src/core/SkRecords.h
 FILE: ../../../flutter/third_party/skia/src/core/SkSurfacePriv.h
 FILE: ../../../flutter/third_party/skia/src/core/SkTaskGroup.cpp
