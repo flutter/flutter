@@ -167,6 +167,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('Lint Kotlin files...');
   await lintKotlinFiles(flutterRoot);
 
+  printProgress('Lint generated Kotlin files from templates...');
+  await lintKotlinTemplatedFiles(flutterRoot);
+
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
   await runCommand(flutter, <String>[
@@ -2458,6 +2461,67 @@ Future<void> verifyTabooDocumentation(String workingDirectory, {int minimumMatch
       '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.$reset',
     ]);
   }
+}
+
+final Map<String, String> _kKotlinTemplateKeys = {
+  'androidIdentifier': 'dummyPackage',
+  'pluginClass': 'PluginClass',
+  'projectName': 'dummy',
+  'agpVersion': '0.0.0.1',
+  'kotlinVersion': '0.0.0.1',
+};
+
+final String _kKotlinTemplateRelativePath = path.join('packages', 'flutter_tools', 'templates');
+
+const List<String> _kKotlinExtList = <String>['.kt.tmpl', '.kts.tmpl'];
+const String _kKotlinTmplExt = '.tmpl';
+final RegExp _kKotlinTemplatePattern = RegExp(r'{{(.*?)}}');
+
+/// Copy kotlin template files from [_kKotlinTemplateRelativePath] into a system tmp folder
+/// then replace template values with values from [_kKotlinTemplateKeys] or "'dummy'" if an
+/// unknown key is found. Then run ktlint on the tmp folder to check for lint errors in the
+/// generated Kotlin files.
+Future<void> lintKotlinTemplatedFiles(String workingDirectory) async {
+  final String templatePath = path.join(workingDirectory, _kKotlinTemplateRelativePath);
+  final Iterable<File> files = Directory(templatePath)
+      .listSync(recursive: true)
+      .toList()
+      .whereType<File>()
+      .where((file) => _kKotlinExtList.contains(path.extension(file.path, 2)));
+
+  if (files.isEmpty) {
+    foundError(<String>['No Kotlin template files found']);
+    return null;
+  }
+
+  final Directory tempDir = Directory.systemTemp.createTempSync('template_output');
+  for (final File templateFile in files) {
+    final inputContent = await templateFile.readAsString();
+    final modifiedContent = inputContent.replaceAllMapped(
+      _kKotlinTemplatePattern,
+      (match) => _kKotlinTemplateKeys[match[1]] ?? 'dummy',
+    );
+
+    String outputFilename = path.basename(templateFile.path);
+    outputFilename = outputFilename.substring(
+      0,
+      outputFilename.length - _kKotlinTmplExt.length,
+    ); // Remove '.tmpl' from file path
+
+    // Ensure the first letter of the generated class is uppercase (instead of pluginClass)
+    outputFilename = outputFilename.substring(0, 1).toUpperCase() + outputFilename.substring(1);
+
+    final String relativePath = path.dirname(path.relative(templateFile.path, from: templatePath));
+    final String outputDir = path.join(tempDir.path, relativePath);
+    var directory = await Directory(outputDir).create(recursive: true);
+    final String outputFile = path.join(outputDir, outputFilename);
+    final File output = File(outputFile);
+    await output.writeAsString(modifiedContent);
+  }
+  return lintKotlinFiles(tempDir.path).then((value) {
+    tempDir.deleteSync(recursive: true);
+    return value;
+  });
 }
 
 Future<void> lintKotlinFiles(String workingDirectory) async {
