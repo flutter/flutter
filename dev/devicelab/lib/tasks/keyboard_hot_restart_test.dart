@@ -17,7 +17,7 @@ import '../framework/utils.dart';
 //
 // 1. Launches an app that forces the keyboard to be visible
 // 2. Updates the app to no longer force the keyboard to be visible
-// 3. Hot reloads
+// 3. Hot restarts
 // 4. Checks that the keyboard is no longer visible
 TaskFunction createKeyboardHotRestartTest({
   String? deviceIdOverride,
