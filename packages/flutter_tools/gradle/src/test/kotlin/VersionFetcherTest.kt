@@ -4,6 +4,8 @@
 
 package com.flutter.gradle
 
+import com.android.build.api.AndroidPluginVersion
+import com.android.build.api.variant.AndroidComponentsExtension
 import io.mockk.every
 import io.mockk.mockk
 import org.gradle.api.Project
@@ -12,6 +14,33 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class VersionFetcherTest {
+    // getGradleVersion
+    @Test
+    fun `getGradleVersion returns version when gradleVersion is set`() {
+        val gradleVersion = Version(1, 9, 20)
+        val project = mockk<Project>()
+        every { project.gradle.gradleVersion } returns gradleVersion.toString()
+        assertEquals(VersionFetcher.getGradleVersion(project), gradleVersion)
+    }
+
+    @Test
+    fun `getGradleVersion returns version when gradleVersion has hyphen`() {
+        val project = mockk<Project>()
+        every { project.gradle.gradleVersion } returns "2.1.20-2"
+        assertEquals(VersionFetcher.getGradleVersion(project), Version(2, 1, 20))
+    }
+
+    // getAGPVersion
+    @Test
+    fun `getAGPVersion returns version when agpVersion is set`() {
+        val agpVersion = AndroidPluginVersion(8, 3, 0)
+        val project = mockk<Project>()
+        val mockAndroidComponentsExtension = mockk<AndroidComponentsExtension<*, *, *>>()
+        every { project.extensions.findByType(AndroidComponentsExtension::class.java) } returns mockAndroidComponentsExtension
+        every { mockAndroidComponentsExtension.pluginVersion } returns agpVersion
+        assertEquals(VersionFetcher.getAGPVersion(project).toString(), agpVersion.toString())
+    }
+
     // getKGPVersion
     @Test
     fun `getKGPVersion returns version when kotlin_version is set`() {
