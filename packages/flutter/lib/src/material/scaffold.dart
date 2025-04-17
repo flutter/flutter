@@ -1711,6 +1711,7 @@ class Scaffold extends StatefulWidget {
     this.drawerBarrierDismissible = true,
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
+    this.bottomSheetScrimBuilder,
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
@@ -1867,6 +1868,10 @@ class Scaffold extends StatefulWidget {
   /// If this is null, then [DrawerThemeData.scrimColor] is used. If that
   /// is also null, then it defaults to [Colors.black54].
   final Color? drawerScrimColor;
+
+  /// TODO: docs
+  /// TODO: should this allow null as a return value?
+  final Widget? Function(BuildContext, double)? bottomSheetScrimBuilder;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
@@ -2462,7 +2467,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       bottomSheetKey.currentState!.close();
       setState(() {
         _showBodyScrim = false;
-        _bodyScrimColor = Colors.black.withOpacity(0.0);
+        _bodyScrimAnimation = 0.0;
         _currentBottomSheet = null;
       });
 
@@ -2917,16 +2922,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   bool _showBodyScrim = false;
-  Color _bodyScrimColor = Colors.black;
+  final Color _bodyScrimColor = Colors.black;
+  double _bodyScrimAnimation = 0.0;
 
   /// Whether to show a [ModalBarrier] over the body of the scaffold.
   void showBodyScrim(bool value, double opacity) {
-    if (_showBodyScrim == value && _bodyScrimColor.opacity == opacity) {
+    if (_showBodyScrim == value && _bodyScrimAnimation == opacity) {
       return;
     }
     setState(() {
       _showBodyScrim = value;
-      _bodyScrimColor = Colors.black.withOpacity(opacity);
+      _bodyScrimAnimation = opacity;
     });
   }
 
@@ -2959,7 +2965,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_showBodyScrim) {
       _addIfNonNull(
         children,
-        ModalBarrier(dismissible: false, color: _bodyScrimColor),
+        widget.bottomSheetScrimBuilder != null
+            ? widget.bottomSheetScrimBuilder!(context, _bodyScrimAnimation)
+            : ModalBarrier(
+              dismissible: false,
+              color: _bodyScrimColor.withOpacity(_bodyScrimAnimation),
+            ),
         _ScaffoldSlot.bodyScrim,
         removeLeftPadding: true,
         removeTopPadding: true,
