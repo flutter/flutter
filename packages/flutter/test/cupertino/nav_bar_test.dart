@@ -2851,6 +2851,52 @@ void main() {
       expect(cancelOpacity.opacity.value, 0.0);
     },
   );
+
+  testWidgets('Large title is hidden if middle is provided in landscape mode', (
+    WidgetTester tester,
+  ) async {
+    const String largeTitle = 'Large title';
+    const String middle = 'Middle';
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar.search(
+              largeTitle: Text(largeTitle),
+              middle: Text(middle),
+              searchField: CupertinoSearchTextField(),
+            ),
+            SliverFillRemaining(child: SizedBox(height: 1000.0)),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text(largeTitle), findsNothing);
+    expect(find.text(middle), findsOneWidget);
+    expect(find.byType(CupertinoSearchTextField), findsOneWidget);
+  });
+
+  testWidgets('Large title is shown in middle position in landscape mode', (
+    WidgetTester tester,
+  ) async {
+    const String largeTitle = 'Large title';
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar.search(
+              largeTitle: Text(largeTitle),
+              searchField: CupertinoSearchTextField(),
+            ),
+            SliverFillRemaining(child: SizedBox(height: 1000.0)),
+          ],
+        ),
+      ),
+    );
+    expect(find.text(largeTitle), findsOneWidget);
+    expect(find.byType(CupertinoSearchTextField), findsOneWidget);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {

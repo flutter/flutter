@@ -1149,7 +1149,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   late Animation<double> persistentHeightAnimation;
   late Animation<double> largeTitleHeightAnimation;
   bool searchIsActive = false;
-  bool isLarge = true;
+  bool isPortrait = true;
 
   @override
   void initState() {
@@ -1165,13 +1165,13 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    isLarge = MediaQuery.orientationOf(context) != Orientation.landscape;
+    isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
     final Tween<double> largeTitleHeightTween = Tween<double>(
-      begin: isLarge ? _kNavBarLargeTitleHeightExtension : 0.0,
+      begin: isPortrait ? _kNavBarLargeTitleHeightExtension : 0.0,
       end: 0.0,
     );
     largeTitleHeightAnimation = largeTitleHeightTween.animate(_animationController);
-    effectiveMiddle = widget.middle ?? (isLarge ? null : widget.largeTitle);
+    effectiveMiddle = widget.middle ?? (isPortrait ? null : widget.largeTitle);
 
     _scrollableState?.position.isScrollingNotifier.removeListener(_handleScrollChange);
     _scrollableState = Scrollable.maybeOf(context);
@@ -1220,7 +1220,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
         widget.bottomMode == NavigationBarBottomMode.always ? 0.0 : _bottomHeight;
     final bool canScrollBottom =
         (widget._searchable || widget.bottom != null) && bottomScrollOffset > 0.0;
-    final double effectiveLargeTitleHeight = isLarge ? _kNavBarLargeTitleHeightExtension : 0.0;
+    final double effectiveLargeTitleHeight = isPortrait ? _kNavBarLargeTitleHeightExtension : 0.0;
 
     // Snap the scroll view to a target determined by the navigation bar's
     // position.
@@ -1304,7 +1304,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
               : widget.bottom) ??
           const SizedBox.shrink(),
       padding: widget.padding,
-      large: isLarge,
+      large: isPortrait,
       staticBar: false, // This one scrolls.
       context: context,
     );
