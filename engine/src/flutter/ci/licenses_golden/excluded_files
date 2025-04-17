@@ -1453,6 +1453,7 @@
 ../../../flutter/third_party/dart/runtime/bin/ffi_test
 ../../../flutter/third_party/dart/runtime/bin/file_test.cc
 ../../../flutter/third_party/dart/runtime/bin/hashmap_test.cc
+../../../flutter/third_party/dart/runtime/bin/list_queue_test.cc
 ../../../flutter/third_party/dart/runtime/bin/priority_heap_test.cc
 ../../../flutter/third_party/dart/runtime/bin/process_test.cc
 ../../../flutter/third_party/dart/runtime/bin/secure_socket_utils_test.cc
