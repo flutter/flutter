@@ -64,8 +64,8 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   }
 
   final List<String> supportedAssetTypes = <String>[
-    if (featureFlags.isNativeAssetsEnabled) 'CodeAssetType',
-    if (featureFlags.isDartDataAssetsEnabled) 'DataAssetType',
+    if (featureFlags.isNativeAssetsEnabled) 'native_code',
+    if (featureFlags.isDartDataAssetsEnabled) 'data',
   ];
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform,

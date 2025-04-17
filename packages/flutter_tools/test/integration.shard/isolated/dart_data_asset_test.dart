@@ -365,7 +365,7 @@ void writeHookLibrary(
 
       void main(List<String> args) async {
         await build(args, (BuildInput input, BuildOutputBuilder output) async {
-          if(input.config.buildAssetTypes.contains('DataAssetType')) {
+          if(input.config.buildAssetTypes.contains('data')) {
             for (final id in $available) {
               output.assets.data.add(
                 DataAsset(

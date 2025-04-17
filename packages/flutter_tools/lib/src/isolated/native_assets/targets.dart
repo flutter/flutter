@@ -53,7 +53,7 @@ sealed class AssetBuildTarget {
   String get targetString;
 
   List<DataAssetsExtension> get dataAssetExtensions => <DataAssetsExtension>[
-    if (supportedAssetTypes.contains('DataAssetType')) DataAssetsExtension(),
+    if (supportedAssetTypes.contains('data')) DataAssetsExtension(),
   ];
 
   /// Build the list of [AssetBuildTarget]s for a given [TargetPlatform].
@@ -180,7 +180,7 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   Future<void> setCCompilerConfig();
 
   List<CodeAssetExtension> get codeAssetExtensions => <CodeAssetExtension>[
-    if (supportedAssetTypes.contains('CodeAssetType'))
+    if (supportedAssetTypes.contains('native_code'))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
@@ -246,7 +246,7 @@ final class IOSAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    if (supportedAssetTypes.contains('CodeAssetType'))
+    if (supportedAssetTypes.contains('native_code'))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
@@ -264,7 +264,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    if (supportedAssetTypes.contains('CodeAssetType'))
+    if (supportedAssetTypes.contains('native_code'))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
@@ -296,7 +296,7 @@ final class AndroidAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    if (supportedAssetTypes.contains('CodeAssetType'))
+    if (supportedAssetTypes.contains('native_code'))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
