@@ -681,7 +681,7 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
 
   flutterArguments.engine_id = reinterpret_cast<int64_t>((__bridge void*)self);
 
-  BOOL mergedPlatformUIThread = NO;
+  BOOL mergedPlatformUIThread = YES;
   NSNumber* enableMergedPlatformUIThread =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTEnableMergedPlatformUIThread"];
   if (enableMergedPlatformUIThread != nil) {
