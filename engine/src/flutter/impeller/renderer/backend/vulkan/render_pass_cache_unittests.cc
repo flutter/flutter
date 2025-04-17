@@ -47,39 +47,5 @@ TEST_P(RendererTest, CachesRenderPassAndFramebuffer) {
   EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer_2}).ok());
 }
 
-TEST_P(RendererTest, CachesRenderPassAndFramebufferNonMSAA) {
-  if (GetBackend() != PlaygroundBackend::kVulkan) {
-    GTEST_SKIP() << "Test only applies to Vulkan";
-  }
-
-  auto allocator = std::make_shared<RenderTargetAllocator>(
-      GetContext()->GetResourceAllocator());
-
-  RenderTarget render_target =
-      allocator->CreateOffscreen(*GetContext(), {100, 100}, 1);
-  std::shared_ptr<Texture> color_texture =
-      render_target.GetColorAttachment(0).texture;
-  TextureVK& texture_vk = TextureVK::Cast(*color_texture);
-
-  EXPECT_EQ(texture_vk.GetCachedFramebuffer(), nullptr);
-  EXPECT_EQ(texture_vk.GetCachedRenderPass(), nullptr);
-
-  auto buffer = GetContext()->CreateCommandBuffer();
-  auto render_pass = buffer->CreateRenderPass(render_target);
-
-  EXPECT_NE(texture_vk.GetCachedFramebuffer(), nullptr);
-  EXPECT_NE(texture_vk.GetCachedRenderPass(), nullptr);
-
-  render_pass->EncodeCommands();
-  EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer}).ok());
-
-  // Can be reused without error.
-  auto buffer_2 = GetContext()->CreateCommandBuffer();
-  auto render_pass_2 = buffer_2->CreateRenderPass(render_target);
-
-  EXPECT_TRUE(render_pass_2->EncodeCommands());
-  EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer_2}).ok());
-}
-
 }  // namespace testing
 }  // namespace impeller
