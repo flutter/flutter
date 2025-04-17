@@ -158,7 +158,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsTab(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flags.hasSelectedState) {
+    if (!data.flagsCollection.hasSelectedState) {
       return FlutterError('A tab needs selected states');
     }
 
@@ -166,11 +166,11 @@ sealed class _DebugSemanticsRoleChecks {
       return null;
     }
 
-    if (!data.flags.hasEnabledState) {
+    if (!data.flagsCollection.hasEnabledState) {
       if (!data.hasAction(SemanticsAction.tap)) {
         return FlutterError('A tab must have a tap action');
       }
-    } else if (data.flags.isEnabled && !data.hasAction(SemanticsAction.tap)) {
+    } else if (data.flagsCollection.isEnabled && !data.hasAction(SemanticsAction.tap)) {
       return FlutterError('A tab must have a tap action');
     }
     return null;
@@ -235,19 +235,19 @@ sealed class _DebugSemanticsRoleChecks {
     bool hasCheckedChild = false;
     bool validateRadioGroupChildren(SemanticsNode node) {
       final SemanticsData data = node.getSemanticsData();
-      if (!data.flags.hasCheckedState) {
+      if (!data.flagsCollection.hasCheckedState) {
         node.visitChildren(validateRadioGroupChildren);
         return error == null;
       }
 
-      if (!data.flags.isInMutuallyExclusiveGroup) {
+      if (!data.flagsCollection.isInMutuallyExclusiveGroup) {
         error = FlutterError(
           'Radio buttons in a radio group must be in a mutually exclusive group',
         );
         return false;
       }
 
-      if (data.flags.isChecked) {
+      if (data.flagsCollection.isChecked) {
         if (hasCheckedChild) {
           error = FlutterError('Radio groups must not have multiple checked children');
           return false;
@@ -293,7 +293,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemCheckbox(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flags.hasCheckedState) {
+    if (!data.flagsCollection.hasCheckedState) {
       return FlutterError('a menu item checkbox must be checkable');
     }
 
@@ -310,7 +310,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _semanticsMenuItemRadio(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (!data.flags.hasCheckedState) {
+    if (!data.flagsCollection.hasCheckedState) {
       return FlutterError('a menu item radio must be checkable');
     }
 
@@ -327,7 +327,7 @@ sealed class _DebugSemanticsRoleChecks {
 
   static FlutterError? _noLiveRegion(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
-    if (data.flags.isLiveRegion) {
+    if (data.flagsCollection.isLiveRegion) {
       return FlutterError(
         'Node ${node.id} has role ${data.role} but is also a live region. '
         'A node can not have ${data.role} and be live region at the same time. '
@@ -714,7 +714,8 @@ class SemanticsData with Diagnosticable {
   ///
   /// If [label] is not empty, then [textDirection] must also not be null.
   SemanticsData({
-    required this.flags,
+    int? flags,
+    SemanticsFlags? flagsCollection,
     required this.actions,
     required this.identifier,
     required this.attributedLabel,
@@ -770,13 +771,20 @@ class SemanticsData with Diagnosticable {
          'A SemanticsData object with hint "${attributedHint.string}" had a null textDirection.',
        ),
        assert(headingLevel >= 0 && headingLevel <= 6, 'Heading level must be between 0 and 6'),
+       assert(flags != null || flagsCollection != null),
+       this.flagsCollection = flagsCollection ?? _fromBitMask(flags!),
        assert(
-         linkUrl == null || flags.isLink,
+         linkUrl == null ||
+             (flagsCollection?.isLink ?? ((flags! & SemanticsFlag.isLink.index) != 0)),
          'A SemanticsData object with a linkUrl must have the isLink flag set to true',
        );
 
+  /// Semantics flags as a bitMask.
+  @Deprecated('Use flagsCollection instead')
+  int get flags => _toBitMask(flagsCollection);
+
   /// Semantics flags.
-  final SemanticsFlags flags;
+  final SemanticsFlags flagsCollection;
 
   /// A bit field of [SemanticsAction]s that apply to this node.
   final int actions;
@@ -1013,11 +1021,8 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
-  /// Keep this to avoid breaking change but we should deprecate it sometime.
-  bool hasFlag(SemanticsFlag flag) {
-    final int realIndex = flag.index.bitLength - 1;
-    return flags.toList()[realIndex];
-  }
+  @Deprecated('Use flagsCollection instead')
+  bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
   /// Whether [actions] contains the given action.
   bool hasAction(SemanticsAction action) => (actions & action.index) != 0;
@@ -1045,7 +1050,7 @@ class SemanticsData with Diagnosticable {
       IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null),
     );
 
-    final List<String> flagSummary = flags.toStrings();
+    final List<String> flagSummary = flagsCollection.toStrings();
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(StringProperty('identifier', identifier, defaultValue: ''));
     properties.add(AttributedStringProperty('label', attributedLabel));
@@ -2843,13 +2848,16 @@ class SemanticsNode with DiagnosticableTreeMixin {
   SemanticsFlags _flags = SemanticsFlags();
 
   /// Semantics flags.
-  SemanticsFlags get flags => _flags;
 
-  /// Keep this to avoid breaking change but we should deprecate it sometime.
-  bool hasFlag(SemanticsFlag flag) {
-    final int realIndex = flag.index.bitLength - 1;
-    return flags.toList()[realIndex];
-  }
+  @Deprecated('Use flagsCollection instead')
+  int get flags => _toBitMask(flagsCollection);
+
+  /// Semantics flags.
+  SemanticsFlags get flagsCollection => _flags;
+
+  /// Whether [flags] contains the given flag.
+  @Deprecated('Use flagsCollection instead')
+  bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
   /// {@macro flutter.semantics.SemanticsProperties.identifier}
   String get identifier => _identifier;
@@ -3271,7 +3279,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
   /// includes the information from this node's descendants. Otherwise, the
   /// returned data matches the data on this node.
   SemanticsData getSemanticsData() {
-    final SemanticsFlags flags = _flags;
+     SemanticsFlags flags = _flags;
     // Can't use _effectiveActionsAsBits here. The filtering of action bits
     // must be done after the merging the its descendants.
     int actions = _actionsAsBits;
@@ -3325,7 +3333,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
-        _flags = flags.merge(node._flags);
+        flags = flags.merge(node._flags);
         actions |= node._effectiveActionsAsBits;
         textDirection ??= node._textDirection;
         textSelection ??= node._textSelection;
@@ -3424,7 +3432,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
 
     return SemanticsData(
-      flags: flags,
+      flagsCollection: flags,
       actions: _areUserActionsBlocked ? actions & _kUnblockedUserActions : actions,
       identifier: identifier,
       attributedLabel: attributedLabel,
@@ -3505,7 +3513,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     builder.updateNode(
       id: id,
-      flags: data.flags.toList(), // Pass a bool list in update builder
+      flags: data.flagsCollection.toList(), // Pass a bool list in update builder
       actions: data.actions,
       rect: data.rect,
       identifier: data.identifier,
@@ -3700,9 +3708,9 @@ class SemanticsNode with DiagnosticableTreeMixin {
       IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null),
     );
 
-    properties.add(IterableProperty<String>('flags', flags.toStrings(), ifEmpty: null));
+    properties.add(IterableProperty<String>('flags', flagsCollection.toStrings(), ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
-    properties.add(FlagProperty('isHidden', value: flags.isHidden, ifTrue: 'HIDDEN'));
+    properties.add(FlagProperty('isHidden', value: flagsCollection.isHidden, ifTrue: 'HIDDEN'));
     properties.add(StringProperty('identifier', _identifier, defaultValue: ''));
     properties.add(AttributedStringProperty('label', _attributedLabel));
     properties.add(AttributedStringProperty('value', _attributedValue));
@@ -6156,4 +6164,77 @@ class OrdinalSortKey extends SemanticsSortKey {
 /// heading level.
 int _mergeHeadingLevels({required int sourceLevel, required int targetLevel}) {
   return targetLevel == 0 ? sourceLevel : targetLevel;
+}
+
+/// This is just to support flag 0-30, new flag don't need to be in the bitmask.
+int _toBitMask(SemanticsFlags flags) {
+  int bitmask = 0;
+  if (flags.hasCheckedState) bitmask |= (1 << 0);
+  if (flags.isChecked) bitmask |= (1 << 1);
+  if (flags.isSelected) bitmask |= (1 << 2);
+  if (flags.isButton) bitmask |= (1 << 3);
+  if (flags.isTextField) bitmask |= (1 << 4);
+  if (flags.isFocused) bitmask |= (1 << 5);
+  if (flags.hasEnabledState) bitmask |= (1 << 6);
+  if (flags.isEnabled) bitmask |= (1 << 7);
+  if (flags.isInMutuallyExclusiveGroup) bitmask |= (1 << 8);
+  if (flags.isHeader) bitmask |= (1 << 9);
+  if (flags.isObscured) bitmask |= (1 << 10);
+  if (flags.scopesRoute) bitmask |= (1 << 11);
+  if (flags.namesRoute) bitmask |= (1 << 12);
+  if (flags.isHidden) bitmask |= (1 << 13);
+  if (flags.isImage) bitmask |= (1 << 14);
+  if (flags.isLiveRegion) bitmask |= (1 << 15);
+  if (flags.hasToggledState) bitmask |= (1 << 16);
+  if (flags.isToggled) bitmask |= (1 << 17);
+  if (flags.hasImplicitScrolling) bitmask |= (1 << 18);
+  if (flags.isMultiline) bitmask |= (1 << 19);
+  if (flags.isReadOnly) bitmask |= (1 << 20);
+  if (flags.isFocusable) bitmask |= (1 << 21);
+  if (flags.isLink) bitmask |= (1 << 22);
+  if (flags.isSlider) bitmask |= (1 << 23);
+  if (flags.isKeyboardKey) bitmask |= (1 << 24);
+  if (flags.isCheckStateMixed) bitmask |= (1 << 25);
+  if (flags.hasExpandedState) bitmask |= (1 << 26);
+  if (flags.isExpanded) bitmask |= (1 << 27);
+  if (flags.hasSelectedState) bitmask |= (1 << 28);
+  if (flags.hasRequiredState) bitmask |= (1 << 29);
+  if (flags.isRequired) bitmask |= (1 << 30);
+  return bitmask;
+}
+
+SemanticsFlags _fromBitMask(int bitmask) {
+  return SemanticsFlags(
+    hasCheckedState: (bitmask & (1 << 0)) != 0,
+    isChecked: (bitmask & (1 << 1)) != 0,
+    isSelected: (bitmask & (1 << 2)) != 0,
+    isButton: (bitmask & (1 << 3)) != 0,
+    isTextField: (bitmask & (1 << 4)) != 0,
+    isFocused: (bitmask & (1 << 5)) != 0,
+    hasEnabledState: (bitmask & (1 << 6)) != 0,
+    isEnabled: (bitmask & (1 << 7)) != 0,
+    isInMutuallyExclusiveGroup: (bitmask & (1 << 8)) != 0,
+    isHeader: (bitmask & (1 << 9)) != 0,
+    isObscured: (bitmask & (1 << 10)) != 0,
+    scopesRoute: (bitmask & (1 << 11)) != 0,
+    namesRoute: (bitmask & (1 << 12)) != 0,
+    isHidden: (bitmask & (1 << 13)) != 0,
+    isImage: (bitmask & (1 << 14)) != 0,
+    isLiveRegion: (bitmask & (1 << 15)) != 0,
+    hasToggledState: (bitmask & (1 << 16)) != 0,
+    isToggled: (bitmask & (1 << 17)) != 0,
+    hasImplicitScrolling: (bitmask & (1 << 18)) != 0,
+    isMultiline: (bitmask & (1 << 19)) != 0,
+    isReadOnly: (bitmask & (1 << 20)) != 0,
+    isFocusable: (bitmask & (1 << 21)) != 0,
+    isLink: (bitmask & (1 << 22)) != 0,
+    isSlider: (bitmask & (1 << 23)) != 0,
+    isKeyboardKey: (bitmask & (1 << 24)) != 0,
+    isCheckStateMixed: (bitmask & (1 << 25)) != 0,
+    hasExpandedState: (bitmask & (1 << 26)) != 0,
+    isExpanded: (bitmask & (1 << 27)) != 0,
+    hasSelectedState: (bitmask & (1 << 28)) != 0,
+    hasRequiredState: (bitmask & (1 << 29)) != 0,
+    isRequired: (bitmask & (1 << 30)) != 0,
+  );
 }

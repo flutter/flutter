@@ -226,11 +226,11 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final List<String> annotations = <String>[];
 
     bool wantsTap = false;
-    if (data.flags.hasCheckedState) {
-      annotations.add(data.flags.isChecked ? 'checked' : 'unchecked');
+    if (data.flagsCollection.hasCheckedState) {
+      annotations.add(data.flagsCollection.isChecked ? 'checked' : 'unchecked');
       wantsTap = true;
     }
-    if (data.flags.isTextField) {
+    if (data.flagsCollection.isTextField) {
       annotations.add('textfield');
       wantsTap = true;
     }
