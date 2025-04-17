@@ -3901,6 +3901,8 @@ Future<void> waitForTextStrategyStopPropagation() async {
   await Future<void>.delayed(Duration.zero);
 }
 
+/// Waits until the input element is focused on Desktop Safari and Firefox.
+/// Does nothing for other browsers and platforms.
 Future<void> waitForDesktopSafariAndFirefoxFocus() async {
   if (textEditing.strategy is SafariDesktopTextEditingStrategy ||
       textEditing.strategy is FirefoxTextEditingStrategy) {
