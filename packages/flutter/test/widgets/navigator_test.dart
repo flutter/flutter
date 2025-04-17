@@ -5952,7 +5952,7 @@ void main() {
     });
   });
 
-  testWidgets('NavigatorPopHandler.onPopWithResult', (WidgetTester tester) async {
+  testWidgets('manual nested Navigators with handlesBacksWhenNested false and NavigatorPopHandler.onPopWithResult', (WidgetTester tester) async {
     final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
     final GlobalKey<NavigatorState> nestedNav = GlobalKey<NavigatorState>();
     const String result = 'i am a result';
@@ -6528,6 +6528,9 @@ class _NestedNavigatorsPage extends StatefulWidget {
 
   final GlobalKey<NavigatorState>? navigatorKey;
 
+  /// The callback to call when NavigatorPopHandler.onPopWithResult is called.
+  ///
+  /// If null, then no NavigatorPopHandler is used.
   final PopResultCallback<String>? onPopWithResult;
 
   @override
@@ -6546,67 +6549,73 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
   @override
   Widget build(BuildContext context) {
     final BuildContext rootContext = context;
+    final Widget child = Navigator(
+      key: _navigatorKey,
+      handlesBacksWhenNested: widget.onPopWithResult == null,
+      initialRoute: '/',
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case '/':
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return _LinksPage(
+                  title: 'Nested - home',
+                  onBack: () {
+                    Navigator.of(rootContext).pop();
+                  },
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/one');
+                      },
+                      child: const Text('Go to nested/one'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/popscope');
+                      },
+                      child: const Text('Go to nested/popscope'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(rootContext).pop();
+                      },
+                      child: const Text('Go back out of nested nav'),
+                    ),
+                  ],
+                );
+              },
+            );
+          case '/one':
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return const _LinksPage(title: 'Nested - page one');
+              },
+            );
+          case '/popscope':
+            return MaterialPageRoute<void>(
+              builder: (BuildContext context) {
+                return _LinksPage(canPop: widget.popScopePageEnabled, title: 'Nested - PopScope');
+              },
+            );
+          default:
+            throw Exception('Invalid route: ${settings.name}');
+        }
+      },
+      //),
+    );
+    if (widget.onPopWithResult == null) {
+      return child;
+    }
     return NavigatorPopHandler<String>(
       onPopWithResult: (String? result) {
-        widget.onPopWithResult?.call(result);
+        widget.onPopWithResult!.call(result);
         if (widget.popScopePageEnabled == false) {
           return;
         }
         _navigatorKey.currentState!.pop(result);
       },
-      child: Navigator(
-        key: _navigatorKey,
-        initialRoute: '/',
-        onGenerateRoute: (RouteSettings settings) {
-          switch (settings.name) {
-            case '/':
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return _LinksPage(
-                    title: 'Nested - home',
-                    onBack: () {
-                      Navigator.of(rootContext).pop();
-                    },
-                    buttons: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/one');
-                        },
-                        child: const Text('Go to nested/one'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamed('/popscope');
-                        },
-                        child: const Text('Go to nested/popscope'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(rootContext).pop();
-                        },
-                        child: const Text('Go back out of nested nav'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            case '/one':
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return const _LinksPage(title: 'Nested - page one');
-                },
-              );
-            case '/popscope':
-              return MaterialPageRoute<void>(
-                builder: (BuildContext context) {
-                  return _LinksPage(canPop: widget.popScopePageEnabled, title: 'Nested - PopScope');
-                },
-              );
-            default:
-              throw Exception('Invalid route: ${settings.name}');
-          }
-        },
-      ),
+      child: child,
     );
   }
 }
