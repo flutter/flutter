@@ -4,6 +4,7 @@
 
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 
+#include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/host_buffer.h"
@@ -14,6 +15,7 @@
 #include "impeller/geometry/path_component.h"
 #include "impeller/geometry/separated_vector.h"
 #include "impeller/geometry/wangs_formula.h"
+#include "impeller/tessellator/path_tessellator.h"
 
 namespace impeller {
 
@@ -323,6 +325,362 @@ class StrokeGenerator {
   SolidFillVertexShader::PerVertexData vtx;
 };
 
+class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
+ public:
+  StrokePathSegmentReceiver(PositionWriter& vtx_builder,
+                            const Scalar stroke_width,
+                            const Scalar miter_limit,
+                            const Join join,
+                            const Cap cap,
+                            const Scalar scale,
+                            const Tessellator::Trigs& trigs)
+      : vtx_builder_(vtx_builder),
+        half_stroke_width_(stroke_width * 0.5f),
+        scaled_miter_limit_squared_(miter_limit * half_stroke_width_ *
+                                    miter_limit * half_stroke_width_),
+        join_(join),
+        cap_(cap),
+        scale_(scale),
+        trigs_(trigs) {}
+
+  inline SeparatedVector2 ComputePerpendicular(const Point from,
+                                               const Point to) const {
+    return ComputePerpendicular((to - from).Normalize());
+  }
+
+  inline SeparatedVector2 ComputePerpendicular(const Vector2 direction) const {
+    return SeparatedVector2(Vector2{-direction.y, direction.x},
+                            half_stroke_width_);
+  }
+
+  inline void AppendPoints(const Point curve_point, Vector2 offset) {
+    vtx_builder_.AppendVertex(curve_point + offset);
+    vtx_builder_.AppendVertex(curve_point - offset);
+  }
+
+  inline void AppendPoints(const Point curve_point,
+                           SeparatedVector2 perpendicular) {
+    return AppendPoints(curve_point, perpendicular.GetVector());
+  }
+
+  void BeginContour(Point origin, bool will_be_closed) override {
+    if (has_prior_contour_ && origin != last_point_) {
+      // We only append these extra points if we have had a prior contour.
+      vtx_builder_.AppendVertex(last_point_);
+      vtx_builder_.AppendVertex(last_point_);
+      vtx_builder_.AppendVertex(origin);
+      vtx_builder_.AppendVertex(origin);
+    }
+    has_prior_contour_ = true;
+    has_prior_segment_ = false;
+    contour_needs_cap_ = !will_be_closed;
+    last_point_ = origin;
+    origin_point_ = origin;
+  }
+
+  void RecordLine(Point p1, Point p2) override {
+    // FML_DCHECK(p1 == last_point_);
+    FML_DCHECK(p2 != p1);
+    if (p2 != p1) {
+      auto current_perpendicular = ComputePerpendicular(p1, p2);
+
+      HandlePreviousJoin(current_perpendicular);
+      AppendPoints(p2, current_perpendicular);
+
+      last_perpendicular_ = current_perpendicular;
+      last_point_ = p2;
+    }
+  }
+
+  void RecordQuad(Point p1, Point cp, Point p2) override {
+    RecordCurve<PathTessellator::Quad>({p1, cp, p2});
+  }
+
+  void RecordConic(Point p1, Point cp, Point p2, Scalar weight) override {
+    RecordCurve<PathTessellator::Conic>({p1, cp, p2, weight});
+  }
+
+  void RecordCubic(Point p1, Point cp1, Point cp2, Point p2) override {
+    RecordCurve<PathTessellator::Cubic>({p1, cp1, cp2, p2});
+  }
+
+  template <typename Curve>
+  inline void RecordCurve(const Curve& curve) {
+    // This fails on the dynamic stroke perf task
+    // FML_DCHECK(curve.p1 == last_point_);
+
+    auto start_direction = curve.GetStartDirection();
+    auto end_direction = curve.GetEndDirection();
+
+    // The Prune receiver should have eliminated any empty curves, so any
+    // curve we see should have both start and end direction.
+    FML_DCHECK(start_direction.has_value() && end_direction.has_value());
+
+    // In order to keep the compiler/lint happy we check for values anyway.
+    if (start_direction.has_value() && end_direction.has_value()) {
+      // We now know the curve cannot be degenerate
+      auto start_perpendicular = ComputePerpendicular(-start_direction.value());
+      auto end_perpendicular = ComputePerpendicular(end_direction.value());
+
+      // We join the previous segment to this one with a normal join
+      HandlePreviousJoin(start_perpendicular);
+      AppendPoints(curve.p1, start_perpendicular);
+
+      Scalar count = std::ceilf(curve.SubdivisionCount(scale_));
+      if (count > 1) {
+        // Handle first point specially as it does not have a join from
+        // any previous curve segment.
+        // Point prev = curve.Solve(1 / count);
+        // auto prev_perpendicular = ComputePerpendicular(curve.p1, prev);
+        // AppendPoints(prev, prev_perpendicular);
+        Point prev = curve.p1;
+        auto prev_perpendicular = start_perpendicular;
+
+        // Handle all intermediate curve points up to but not including the end
+        for (int i = 1; i < count; i++) {
+          Point cur = curve.Solve(i / count);
+          auto cur_perpendicular = ComputePerpendicular(prev, cur);
+          // AddJoin(Join::kRound, prev, prev_perpendicular, cur_perpendicular);
+          // CurveJoin(prev, prev_perpendicular, cur_perpendicular);
+          AppendPoints(cur, cur_perpendicular);
+          prev = cur;
+          prev_perpendicular = cur_perpendicular;
+        }
+
+        // One last curve join for the last segment
+        // AddJoin(Join::kRound, prev, prev_perpendicular, end_perpendicular);
+        // CurveJoin(prev, prev_perpendicular, end_perpendicular);
+        AppendPoints(curve.p2, end_perpendicular);
+
+        last_perpendicular_ = end_perpendicular;
+        last_point_ = curve.p2;
+      }
+    }
+  }
+
+  void EndContour(Point origin, bool with_close) override {
+    FML_DCHECK(origin == origin_point_);
+    if (!has_prior_segment_) {
+      // Empty contour, fill in an axis aligned "cap box" at the origin
+      FML_DCHECK(last_point_ == origin);
+      // kButt wouldn't fill anything so it defers to kSquare by convention
+      Cap cap = (cap_ == Cap::kButt) ? Cap::kSquare : cap_;
+      AddCap(cap, origin, {-half_stroke_width_, 0}, false);
+      AddCap(cap, origin, {-half_stroke_width_, 0}, true);
+    } else if (with_close) {
+      // Closed contour, join back to origin
+      FML_DCHECK(origin == origin_point_);
+      FML_DCHECK(last_point_ == origin);
+      AddJoin(join_, origin, last_perpendicular_, origin_perpendicular_);
+
+      last_perpendicular_ = origin_perpendicular_;
+      last_point_ = origin;
+    } else {
+      AddCap(cap_, last_point_, last_perpendicular_.GetVector(), false);
+    }
+    has_prior_segment_ = false;
+  }
+
+ private:
+  PositionWriter& vtx_builder_;
+  const Scalar half_stroke_width_;
+  const Scalar scaled_miter_limit_squared_;
+  const Join join_;
+  const Cap cap_;
+  const Scalar scale_;
+  const Tessellator::Trigs& trigs_;
+
+  SeparatedVector2 origin_perpendicular_;
+  Point origin_point_;
+  SeparatedVector2 last_perpendicular_;
+  Point last_point_;
+  bool has_prior_contour_ = false;
+  bool has_prior_segment_ = false;
+  bool contour_needs_cap_ = false;
+
+  inline void HandlePreviousJoin(SeparatedVector2 new_perpendicular) {
+    FML_DCHECK(has_prior_contour_);
+    if (has_prior_segment_) {
+      AddJoin(join_, last_point_, last_perpendicular_, new_perpendicular);
+    } else {
+      has_prior_segment_ = true;
+      auto perpendicular = new_perpendicular.GetVector();
+      if (contour_needs_cap_) {
+        AddCap(cap_, last_point_, perpendicular, true);
+      }
+      AppendPoints(last_point_, perpendicular);
+      origin_perpendicular_ = new_perpendicular;
+    }
+  }
+
+  // Adds a cap to an endpoint of a contour. The location points to the
+  // centerline of the stroke. The perpendicular points clockwise to the
+  // direction the path is traveling and is the length of half of the
+  // stroke width.
+  //
+  // If contour_start is true, then the cap is being added prior to the first
+  // segment at the beginning of a contour and assumes that no points have
+  // been added for this contour yet and also that the caller will add the
+  // two points that start the segment's "box" when this method returns.
+  //
+  // If contour_start is false, then the cap is being added after the last
+  // segment at the end of a contour and assumes that the caller has already
+  // added the two segments that define the end of the "box" for the last
+  // path segment.
+  void AddCap(Cap cap,
+              Point path_point,
+              Vector2 perpendicular,
+              bool contour_start) {
+    switch (cap) {
+      case Cap::kButt:
+        break;
+      case Cap::kRound: {
+        Point along(perpendicular.y, -perpendicular.x);
+        if (contour_start) {
+          // Add a single point at the far end of the round cap
+          vtx_builder_.AppendVertex(path_point - along);
+
+          // Iterate down to, but not including, the first entry (1, 0)
+          for (size_t i = trigs_.size() - 2u; i > 0u; --i) {
+            Point center = path_point - along * trigs_[i].sin;
+            Vector2 offset = perpendicular * trigs_[i].cos;
+
+            AppendPoints(center, offset);
+          }
+        } else {
+          // Iterate up to, but not including, the last entry (0, 1)
+          size_t end = trigs_.size() - 1u;
+          for (size_t i = 1u; i < end; ++i) {
+            Point center = path_point + along * trigs_[i].sin;
+            Vector2 offset = perpendicular * trigs_[i].cos;
+
+            AppendPoints(center, offset);
+          }
+
+          vtx_builder_.AppendVertex(path_point + along);
+        }
+        break;
+      }
+      case Cap::kSquare: {
+        Point along(perpendicular.y, -perpendicular.x);
+        Point square_center = contour_start             //
+                                  ? path_point - along  //
+                                  : path_point + along;
+        AppendPoints(square_center, perpendicular);
+        break;
+      }
+    }
+  }
+
+  void AddJoin(Join join,
+               Point path_point,
+               SeparatedVector2 old_perpendicular,
+               SeparatedVector2 new_perpendicular) {
+    Scalar turning = old_perpendicular.Cross(new_perpendicular);
+    // Can we compute a threshold based on scale and stroke width?
+    Scalar threshold = 0.0f;
+    if (std::abs(turning) <= threshold) {
+      // If the perpendiculars are so aligned that we cannot tell them
+      // apart (threshold), then no need to add any further points, we
+      // don't really even need to start the new segment's "box", we can
+      // just let it connect to the prior segment's "box end" directly.
+      return;
+    }
+    switch (join) {
+      case Join::kBevel:
+        // Just starting the new segment's "box" is enough to bevel join them.
+        break;
+      case Join::kMiter: {
+        // 1 for no joint (straight line), 0 for max joint (180 degrees).
+        Scalar alignment =
+            (old_perpendicular.GetAlignment(new_perpendicular) + 1) / 2;
+        Point miter_vector =
+            (old_perpendicular.GetVector() + new_perpendicular.GetVector()) /
+            (2 * alignment);
+        if (miter_vector.GetLengthSquared() <= scaled_miter_limit_squared_) {
+          if (turning < 0) {
+            vtx_builder_.AppendVertex(path_point + miter_vector);
+          } else {
+            vtx_builder_.AppendVertex(path_point - miter_vector);
+          }
+        }
+        break;
+      }
+      case Join::kRound: {
+        // We want to set up the from and to vectors to facilitate a
+        // clockwise angular fill from one to the other.
+        Vector2 from_vector, to_vector;
+        if (turning > 0) {
+          // Clockwise path turn, since our prependicular vectors point to
+          // the right of the path we need to fill in the "back side" of the
+          // turn, so we fill from -old to -new perpendicular which also
+          // has a clockwise turn.
+          from_vector = -old_perpendicular.GetVector();
+          to_vector = -new_perpendicular.GetVector();
+        } else if (turning < 0) {
+          // Countercockwise path turn, we need to reverse the order of the
+          // perpendiculars to achieve a clockwise angular fill, and since
+          // both vectors are pointing to the right, the vectors themselves
+          // are "turning outside" the widened path.
+          from_vector = new_perpendicular.GetVector();
+          to_vector = old_perpendicular.GetVector();
+        } else {
+          // No turn at all, we can even skip the opening end of the
+          // following "box" just like a bevel join.
+          return;
+        }
+        FML_DCHECK(from_vector.Cross(to_vector) > 0);
+
+        // If rotating by the first (non-quadrant) entry in trigs takes
+        // us too far then we don't need to fill in anything.
+        if ((trigs_[1] * from_vector).Cross(to_vector) > 0) {
+          // Start and end at the path point to make a wedge
+          vtx_builder_.AppendVertex(path_point);
+          vtx_builder_.AppendVertex(path_point + from_vector);
+
+          // The sum of the vectors points in the direction halfway between
+          // them.  Since we only need its direction, this is enough without
+          // having to adjust for the length to get the exact midpoint of
+          // the curve we have to draw.
+          Point middle_vector = (from_vector + to_vector);
+
+          // Iterate through trigs until we reach a full quadrant's rotation
+          // or until we pass the halfway point (middle_vector)
+          size_t end = trigs_.size() - 1u;
+          for (size_t i = 1u; i < end; ++i) {
+            Point p = trigs_[i] * from_vector;
+            if (p.Cross(middle_vector) <= 0) {
+              // We've traversed far enough to pass the halfway vector,
+              // stop and traverse backwards from the new_perpendicular.
+              // Record the stopping point in end as we will use it to
+              // backtrack in the next loop.
+              end = i;
+              break;
+            }
+            vtx_builder_.AppendVertex(path_point);
+            vtx_builder_.AppendVertex(path_point + p);
+          }
+
+          // end points to the last trigs entry we decided not to use, so
+          // a pre-decrement here moves us onto the trigs we do want to use
+          // (stopping before we use 0 which is the 0 rotation vector)
+          while (--end > 0u) {
+            Point p = -trigs_[end] * to_vector;
+            vtx_builder_.AppendVertex(path_point);
+            vtx_builder_.AppendVertex(path_point + p);
+          }
+
+          // Start and end at the path point to make a wedge
+          vtx_builder_.AppendVertex(path_point + to_vector);
+          vtx_builder_.AppendVertex(path_point);
+        }
+        break;
+      }
+    }
+    AppendPoints(path_point, new_perpendicular);
+  }
+};
+
 void CreateButtCap(PositionWriter& vtx_builder,
                    const Point& position,
                    const Point& offset,
@@ -488,18 +846,6 @@ void CreateBevelJoin(PositionWriter& vtx_builder,
   CreateBevelAndGetDirection(vtx_builder, position, start_offset, end_offset);
 }
 
-void CreateSolidStrokeVertices(PositionWriter& vtx_builder,
-                               const Path::Polyline& polyline,
-                               Scalar stroke_width,
-                               Scalar scaled_miter_limit,
-                               const JoinProc& join_proc,
-                               const CapProc& cap_proc,
-                               Scalar scale) {
-  StrokeGenerator stroke_generator(polyline, stroke_width, scaled_miter_limit,
-                                   join_proc, cap_proc, scale);
-  stroke_generator.Generate(vtx_builder);
-}
-
 // static
 
 JoinProc GetJoinProc(Join stroke_join) {
@@ -540,6 +886,57 @@ std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
   std::vector<Point> points(4096);
   PositionWriter vtx_builder(points);
   stroke_generator.Generate(vtx_builder);
+  auto [arena, extra] = vtx_builder.GetUsedSize();
+  FML_DCHECK(extra == 0u);
+  points.resize(arena);
+  return points;
+}
+
+std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
+    const Path& path,
+    Scalar stroke_width,
+    Scalar miter_limit,
+    Join stroke_join,
+    Cap stroke_cap,
+    Scalar scale) {
+  auto scaled_miter_limit = stroke_width * miter_limit * 0.5f;
+  JoinProc join_proc = GetJoinProc(stroke_join);
+  CapProc cap_proc = GetCapProc(stroke_cap);
+
+  auto poly_points = std::make_unique<std::vector<Point>>();
+  poly_points->reserve(2048);
+  auto polyline = path.CreatePolyline(
+      scale, std::move(poly_points),
+      [&poly_points](Path::Polyline::PointBufferPtr reclaimed) {
+        poly_points = std::move(reclaimed);
+      });
+  StrokeGenerator stroke_generator(polyline, stroke_width, scaled_miter_limit,
+                                   join_proc, cap_proc, scale);
+  std::vector<Point> points(4096);
+  PositionWriter vtx_builder(points);
+  stroke_generator.Generate(vtx_builder);
+  auto [arena, extra] = vtx_builder.GetUsedSize();
+  FML_DCHECK(extra == 0u);
+  points.resize(arena);
+  return points;
+}
+
+std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVerticesDirect(
+    const PathSource& source,
+    Scalar stroke_width,
+    Scalar miter_limit,
+    Join stroke_join,
+    Cap stroke_cap,
+    Scalar scale) {
+  std::vector<Point> points(4096);
+  PositionWriter vtx_builder(points);
+  Tessellator::Trigs trigs(scale * stroke_width * 0.5f);
+  StrokePathSegmentReceiver receiver(vtx_builder, stroke_width, miter_limit,
+                                     stroke_join, stroke_cap, scale, trigs);
+  PathTessellator::PathToStrokedSegments(source, receiver);
+  auto [arena, extra] = vtx_builder.GetUsedSize();
+  FML_DCHECK(extra == 0u);
+  points.resize(arena);
   return points;
 }
 
@@ -594,15 +991,14 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   auto& host_buffer = renderer.GetTransientsBuffer();
   auto scale = entity.GetTransform().GetMaxBasisLengthXY();
 
-  PositionWriter position_writer(
-      renderer.GetTessellator().GetStrokePointCache());
-  Path::Polyline polyline =
-      renderer.GetTessellator().CreateTempPolyline(path_, scale);
-
-  CreateSolidStrokeVertices(position_writer, polyline, stroke_width,
-                            miter_limit_ * stroke_width_ * 0.5f,
-                            GetJoinProc(stroke_join_), GetCapProc(stroke_cap_),
-                            scale);
+  auto& tessellator = renderer.GetTessellator();
+  PositionWriter position_writer(tessellator.GetStrokePointCache());
+  Tessellator::Trigs trigs =
+      tessellator.GetTrigsForDeviceRadius(scale * stroke_width * 0.5f);
+  StrokePathSegmentReceiver receiver(position_writer, stroke_width,
+                                     miter_limit_, stroke_join_, stroke_cap_,
+                                     scale, trigs);
+  PathTessellator::PathToStrokedSegments(flutter::DlPath(path_), receiver);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
   if (!position_writer.HasOversizedBuffer()) {

@@ -980,5 +980,77 @@ TEST_P(AiksTest, TwoContourPathWithSinglePointContour) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, StrokeCapsAndJoins) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+
+  builder.Save();
+  for (auto cap : std::vector<DlStrokeCap>{
+           DlStrokeCap::kButt, DlStrokeCap::kRound, DlStrokeCap::kSquare}) {
+    DlPathBuilder path_builder;
+    path_builder.MoveTo({20, 50});
+    path_builder.LineTo({50, 50});
+    path_builder.MoveTo({120, 50});
+    path_builder.LineTo({120, 80});
+    DlPath path(path_builder);
+
+    DlPaint paint;
+    paint.setColor(DlColor::kRed());
+    paint.setDrawStyle(DlDrawStyle::kStroke);
+    paint.setStrokeWidth(20.0f);
+    paint.setStrokeCap(cap);
+    paint.setStrokeJoin(DlStrokeJoin::kBevel);
+
+    builder.DrawPath(path, paint);
+
+    paint.setColor(DlColor::kYellow());
+    paint.setStrokeWidth(1.0f);
+    paint.setStrokeCap(DlStrokeCap::kButt);
+
+    builder.DrawPath(path, paint);
+
+    builder.Translate(250, 0);
+  }
+  builder.Restore();
+
+  builder.Save();
+  for (auto join : std::vector<DlStrokeJoin>{
+           DlStrokeJoin::kBevel, DlStrokeJoin::kRound, DlStrokeJoin::kMiter}) {
+    DlPathBuilder path_builder;
+    path_builder.MoveTo({20, 150});  // 0 degree turn
+    path_builder.LineTo({50, 150});
+    path_builder.LineTo({50, 180});
+    path_builder.MoveTo({120, 180});  // 90 degree turn
+    path_builder.LineTo({150, 180});
+    path_builder.LineTo({150, 150});
+    path_builder.MoveTo({20, 250});  // 45 degree turn
+    path_builder.LineTo({50, 250});
+    path_builder.LineTo({70, 270});
+    path_builder.MoveTo({120, 250});  // 135 degree turn
+    path_builder.LineTo({150, 250});
+    path_builder.LineTo({130, 270});
+    DlPath path(path_builder);
+
+    DlPaint paint;
+
+    paint.setColor(DlColor::kRed());
+    paint.setDrawStyle(DlDrawStyle::kStroke);
+    paint.setStrokeWidth(20.0f);
+    paint.setStrokeCap(DlStrokeCap::kSquare);
+    paint.setStrokeJoin(join);
+    builder.DrawPath(path, paint);
+
+    paint.setColor(DlColor::kYellow());
+    paint.setStrokeWidth(1.0f);
+    paint.setStrokeCap(DlStrokeCap::kButt);
+    builder.DrawPath(path, paint);
+
+    builder.Translate(250, 0);
+  }
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 }  // namespace testing
 }  // namespace impeller

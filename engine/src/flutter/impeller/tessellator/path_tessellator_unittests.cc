@@ -23,7 +23,10 @@ class MockPathVertexWriter : public impeller::PathTessellator::VertexWriter {
 
 class MockSegmentReceiver : public impeller::PathTessellator::SegmentReceiver {
  public:
-  MOCK_METHOD(void, BeginContour, (Point origin), (override));
+  MOCK_METHOD(void,
+              BeginContour,
+              (Point origin, bool will_be_closed),
+              (override));
   MOCK_METHOD(void, RecordLine, (Point p1, Point p2), (override));
   MOCK_METHOD(void, RecordQuad, (Point p1, Point cp, Point p2), (override));
   MOCK_METHOD(void,
@@ -83,7 +86,7 @@ TEST(PathTessellatorTest, SimpleClosedPath) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(0, 20)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 20), Point(0, 0)));
@@ -120,7 +123,7 @@ TEST(PathTessellatorTest, SimpleUnclosedPath) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), false));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(0, 20)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 20), Point(0, 0)));
@@ -158,7 +161,7 @@ TEST(PathTessellatorTest, SimplePathTrailingMoveTo) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(0, 20)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 20), Point(0, 0)));
@@ -201,7 +204,7 @@ TEST(PathTessellatorTest, DegenerateSegmentsPath) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), true));
     EXPECT_CALL(mock_receiver, EndContour(Point(0, 0), true));
   }
   PathTessellator::PathToFilledSegments(path, mock_receiver);
@@ -234,7 +237,7 @@ TEST(PathTessellatorTest, QuadToLineToOptimization) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(20, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(20, 10), Point(0, 0)));
@@ -275,7 +278,7 @@ TEST(PathTessellatorTest, ConicToLineToOptimization) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(20, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(20, 10), Point(10, 0)));
@@ -317,7 +320,7 @@ TEST(PathTessellatorTest, ConicToQuadToOptimization) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(quad.p1));
+    EXPECT_CALL(mock_receiver, BeginContour(quad.p1, true));
     EXPECT_CALL(mock_receiver, RecordQuad(quad.p1, quad.cp, quad.p2));
     EXPECT_CALL(mock_receiver, RecordLine(quad.p2, quad.p1));
     EXPECT_CALL(mock_receiver, EndContour(quad.p1, true));
@@ -359,7 +362,7 @@ TEST(PathTessellatorTest, SimplePathMultipleMoveTo) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(10, 10), Point(0, 20)));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 20), Point(0, 0)));
@@ -402,7 +405,7 @@ TEST(PathTessellatorTest, ComplexPath) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordQuad(quad.p1, quad.cp, quad.p2));
     EXPECT_CALL(mock_receiver,
@@ -477,7 +480,7 @@ TEST(PathTessellatorTest, ComplexPathTrailingMoveTo) {
   {
     ::testing::InSequence sequence;
 
-    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0)));
+    EXPECT_CALL(mock_receiver, BeginContour(Point(0, 0), true));
     EXPECT_CALL(mock_receiver, RecordLine(Point(0, 0), Point(10, 10)));
     EXPECT_CALL(mock_receiver, RecordQuad(quad.p1, quad.cp, quad.p2));
     EXPECT_CALL(mock_receiver,

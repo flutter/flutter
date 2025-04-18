@@ -2036,12 +2036,7 @@ class AndroidPathReceiver final : public DlPathReceiver {
       : env_(env),
         android_path_(env->NewObject(path_class->obj(), path_constructor)) {}
 
-  void SetPathInfo(DlPathFillType type, bool is_convex) override {
-    // Need to convert the fill type to the Android enum and
-    // call setFillType on the path...
-    // see https://github.com/flutter/flutter/issues/164808
-  }
-  void MoveTo(const DlPoint& p2) override {
+  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
     env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
   }
   void LineTo(const DlPoint& p2) override {
@@ -2188,6 +2183,9 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         // Define and populate an Android Path with data from the DlPath
         AndroidPathReceiver receiver(env);
 
+        // Need to convert the fill type to the Android enum and
+        // call setFillType on the path...
+        // see https://github.com/flutter/flutter/issues/164808
         dlPath.Dispatch(receiver);
 
         env->CallVoidMethod(mutatorsStack,

@@ -24,6 +24,25 @@ class ImpellerBenchmarkAccessor {
     return StrokePathGeometry::GenerateSolidStrokeVertices(
         polyline, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
   }
+  static std::vector<Point> GenerateSolidStrokeVertices(const Path& path,
+                                                        Scalar stroke_width,
+                                                        Scalar miter_limit,
+                                                        Join stroke_join,
+                                                        Cap stroke_cap,
+                                                        Scalar scale) {
+    return StrokePathGeometry::GenerateSolidStrokeVertices(
+        path, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
+  }
+  static std::vector<Point> GenerateSolidStrokeVerticesDirect(
+      const PathSource& path,
+      Scalar stroke_width,
+      Scalar miter_limit,
+      Join stroke_join,
+      Cap stroke_cap,
+      Scalar scale) {
+    return StrokePathGeometry::GenerateSolidStrokeVerticesDirect(
+        path, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
+  }
 };
 
 namespace {
@@ -79,7 +98,7 @@ static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
   auto points = std::make_unique<std::vector<Point>>();
   points->reserve(2048);
   auto polyline =
-      path.CreatePolyline(1.0f, std::move(points),
+      path.CreatePolyline(scale, std::move(points),
                           [&points](Path::Polyline::PointBufferPtr reclaimed) {
                             points = std::move(reclaimed);
                           });
@@ -89,6 +108,79 @@ static void BM_StrokePolyline(benchmark::State& state, Args&&... args) {
   while (state.KeepRunning()) {
     auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
         polyline, stroke_width, miter_limit, join, cap, scale);
+    single_point_count = vertices.size();
+    point_count += single_point_count;
+  }
+  state.counters["SinglePointCount"] = single_point_count;
+  state.counters["TotalPointCount"] = point_count;
+}
+
+template <class... Args>
+static void BM_StrokePath(benchmark::State& state, Args&&... args) {
+  auto args_tuple = std::make_tuple(std::move(args)...);
+  auto path = std::get<Path>(args_tuple);
+  auto cap = std::get<Cap>(args_tuple);
+  auto join = std::get<Join>(args_tuple);
+
+  const Scalar stroke_width = 5.0f;
+  const Scalar miter_limit = 10.0f;
+  const Scalar scale = 1.0f;
+
+  size_t point_count = 0u;
+  size_t single_point_count = 0u;
+  while (state.KeepRunning()) {
+    auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
+        path, stroke_width, miter_limit, join, cap, scale);
+    single_point_count = vertices.size();
+    point_count += single_point_count;
+  }
+  state.counters["SinglePointCount"] = single_point_count;
+  state.counters["TotalPointCount"] = point_count;
+}
+
+template <class... Args>
+static void BM_StrokeConvertedPath(benchmark::State& state, Args&&... args) {
+  auto args_tuple = std::make_tuple(std::move(args)...);
+  auto original_path = std::get<Path>(args_tuple);
+  auto cap = std::get<Cap>(args_tuple);
+  auto join = std::get<Join>(args_tuple);
+  flutter::DlPath converting_path(original_path);
+  auto sk_path = converting_path.GetSkPath();
+
+  const Scalar stroke_width = 5.0f;
+  const Scalar miter_limit = 10.0f;
+  const Scalar scale = 1.0f;
+
+  size_t point_count = 0u;
+  size_t single_point_count = 0u;
+  while (state.KeepRunning()) {
+    flutter::DlPath path(sk_path);
+    auto vertices = ImpellerBenchmarkAccessor::GenerateSolidStrokeVertices(
+        path.GetPath(), stroke_width, miter_limit, join, cap, scale);
+    single_point_count = vertices.size();
+    point_count += single_point_count;
+  }
+  state.counters["SinglePointCount"] = single_point_count;
+  state.counters["TotalPointCount"] = point_count;
+}
+
+template <class... Args>
+static void BM_StrokePathDirect(benchmark::State& state, Args&&... args) {
+  auto args_tuple = std::make_tuple(std::move(args)...);
+  auto path = flutter::DlPath(std::get<Path>(args_tuple));
+  auto cap = std::get<Cap>(args_tuple);
+  auto join = std::get<Join>(args_tuple);
+
+  const Scalar stroke_width = 5.0f;
+  const Scalar miter_limit = 10.0f;
+  const Scalar scale = 1.0f;
+
+  size_t point_count = 0u;
+  size_t single_point_count = 0u;
+  while (state.KeepRunning()) {
+    auto vertices =
+        ImpellerBenchmarkAccessor::GenerateSolidStrokeVerticesDirect(
+            path, stroke_width, miter_limit, join, cap, scale);
     single_point_count = vertices.size();
     point_count += single_point_count;
   }
@@ -121,12 +213,39 @@ static void BM_Convex(benchmark::State& state, Args&&... args) {
   BENCHMARK_CAPTURE(BM_StrokePolyline, stroke_##path##_##cap##_##join, \
                     Create##path(closed), Cap::k##cap, Join::k##join)
 
-#define MAKE_STROKE_BENCHMARK_CAPTURE_ALL_CAPS_JOINS(path, closed) \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Bevel, closed);        \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Miter, closed);        \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Round, closed);        \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Square, Bevel, closed);      \
-  MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, closed)
+#define MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, cap, join, closed) \
+  BENCHMARK_CAPTURE(BM_StrokePath, stroke_##path##_##cap##_##join,  \
+                    Create##path(closed), Cap::k##cap, Join::k##join)
+
+#define MAKE_STROKE_CONV_PATH_BENCHMARK_CAPTURE(path, cap, join, closed)    \
+  BENCHMARK_CAPTURE(BM_StrokeConvertedPath, stroke_##path##_##cap##_##join, \
+                    Create##path(closed), Cap::k##cap, Join::k##join)
+
+#define MAKE_STROKE_PATH_DIRECT_BENCHMARK_CAPTURE(path, cap, join, closed) \
+  BENCHMARK_CAPTURE(BM_StrokePathDirect, stroke_##path##_##cap##_##join,   \
+                    Create##path(closed), Cap::k##cap, Join::k##join)
+
+#define MAKE_STROKE_BENCHMARK_CAPTURE_ALL_CAPS_JOINS(path, closed)        \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Bevel, closed);               \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Miter, closed);               \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Butt, Round, closed);               \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Square, Bevel, closed);             \
+  MAKE_STROKE_BENCHMARK_CAPTURE(path, Round, Bevel, closed);              \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Butt, Bevel, closed);          \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Butt, Miter, closed);          \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Butt, Round, closed);          \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Square, Bevel, closed);        \
+  MAKE_STROKE_PATH_BENCHMARK_CAPTURE(path, Round, Bevel, closed);         \
+  MAKE_STROKE_CONV_PATH_BENCHMARK_CAPTURE(path, Butt, Bevel, closed);     \
+  MAKE_STROKE_CONV_PATH_BENCHMARK_CAPTURE(path, Butt, Miter, closed);     \
+  MAKE_STROKE_CONV_PATH_BENCHMARK_CAPTURE(path, Butt, Round, closed);     \
+  MAKE_STROKE_CONV_PATH_BENCHMARK_CAPTURE(path, Square, Bevel, closed);   \
+  MAKE_STROKE_CONV_PATH_BENCHMARK_CAPTURE(path, Round, Bevel, closed);    \
+  MAKE_STROKE_PATH_DIRECT_BENCHMARK_CAPTURE(path, Butt, Bevel, closed);   \
+  MAKE_STROKE_PATH_DIRECT_BENCHMARK_CAPTURE(path, Butt, Miter, closed);   \
+  MAKE_STROKE_PATH_DIRECT_BENCHMARK_CAPTURE(path, Butt, Round, closed);   \
+  MAKE_STROKE_PATH_DIRECT_BENCHMARK_CAPTURE(path, Square, Bevel, closed); \
+  MAKE_STROKE_PATH_DIRECT_BENCHMARK_CAPTURE(path, Round, Bevel, closed)
 
 BENCHMARK_CAPTURE(BM_Polyline, cubic_polyline, CreateCubic(true));
 BENCHMARK_CAPTURE(BM_Polyline, unclosed_cubic_polyline, CreateCubic(false));

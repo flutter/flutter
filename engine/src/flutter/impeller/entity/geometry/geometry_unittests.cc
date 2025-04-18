@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include <memory>
+
+#include "flutter/display_list/geometry/dl_path.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/content_context.h"
@@ -13,6 +15,22 @@
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/testing/mocks.h"
+
+namespace impeller {
+class ImpellerGeometryUnitTestAccessor {
+ public:
+  static std::vector<Point> GenerateSolidStrokeVerticesDirect(
+      const PathSource& path,
+      Scalar stroke_width,
+      Scalar miter_limit,
+      Join stroke_join,
+      Cap stroke_cap,
+      Scalar scale) {
+    return StrokePathGeometry::GenerateSolidStrokeVerticesDirect(
+        path, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
+  }
+};
+}  // namespace impeller
 
 inline ::testing::AssertionResult SolidVerticesNear(
     std::vector<impeller::Point> a,
@@ -151,6 +169,327 @@ TEST(EntityGeometryTest, AlphaCoverageStrokePaths) {
       1e-05, 0.001);
   EXPECT_EQ(Geometry::MakeStrokePath({}, 0)->ComputeAlphaCoverage(matrix), 1);
   EXPECT_EQ(Geometry::MakeStrokePath({}, 40)->ComputeAlphaCoverage(matrix), 1);
+}
+
+TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesButtCap) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  path_builder.MoveTo({120, 20});
+  path_builder.LineTo({130, 20});
+  flutter::DlPath path(path_builder);
+
+  auto points =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the first segment (20, 20) -> (30, 20)
+      Point(20, 25),
+      Point(20, 15),
+      Point(30, 25),
+      Point(30, 15),
+
+      // The glue points that allow us to "pick up the pen" between segments
+      Point(30, 20),
+      Point(30, 20),
+      Point(120, 20),
+      Point(120, 20),
+
+      // The points for the second segment (120, 20) -> (130, 20)
+      Point(120, 25),
+      Point(120, 15),
+      Point(130, 25),
+      Point(130, 15),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesRoundCap) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  path_builder.MoveTo({120, 20});
+  path_builder.LineTo({130, 20});
+  flutter::DlPath path(path_builder);
+
+  auto points =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 10.0f, 4.0f, Join::kBevel, Cap::kRound, 1.0f);
+
+  size_t count = points.size();
+  ASSERT_TRUE((count & 0x1) == 0x0);  // Should always be even
+
+  // For a scale factor of 1.0 and a stroke width of 10.0 we currently
+  // generate 40 total points for the 2 line segments based on the number
+  // of quadrant circle divisions for a radius of 5.0
+  //
+  // If the number of points changes because of a change in the way we
+  // compute circle divisions, we need to recompute the circular offsets
+  ASSERT_EQ(points.size(), 40u);
+
+  // Compute the indicated circular end cap offset based on the current
+  // step out of 4 divisions [1, 2, 3] (not 0 or 4) based on whether this
+  // is the left or right side of the path and whether this is a backwards
+  // (starting) cap or a forwards (ending) cap.
+  auto offset = [](int step, bool left, bool backwards) -> Point {
+    Radians angle(kPiOver2 * (step / 4.0f));
+    Point along = Point(5.0f, 0.0f) * std::cos(angle.radians);
+    Point across = Point(0.0f, 5.0f) * std::sin(angle.radians);
+    Point center = backwards ? -along : along;
+    return left ? center + across : center - across;
+  };
+
+  // The points for the first segment (20, 20) -> (30, 20)
+  EXPECT_EQ(points[0], Point(15, 20));
+  EXPECT_EQ(points[1], Point(20, 20) + offset(1, true, true));
+  EXPECT_EQ(points[2], Point(20, 20) + offset(1, false, true));
+  EXPECT_EQ(points[3], Point(20, 20) + offset(2, true, true));
+  EXPECT_EQ(points[4], Point(20, 20) + offset(2, false, true));
+  EXPECT_EQ(points[5], Point(20, 20) + offset(3, true, true));
+  EXPECT_EQ(points[6], Point(20, 20) + offset(3, false, true));
+  EXPECT_EQ(points[7], Point(20, 25));
+  EXPECT_EQ(points[8], Point(20, 15));
+  EXPECT_EQ(points[9], Point(30, 25));
+  EXPECT_EQ(points[10], Point(30, 15));
+  EXPECT_EQ(points[11], Point(30, 20) + offset(3, true, false));
+  EXPECT_EQ(points[12], Point(30, 20) + offset(3, false, false));
+  EXPECT_EQ(points[13], Point(30, 20) + offset(2, true, false));
+  EXPECT_EQ(points[14], Point(30, 20) + offset(2, false, false));
+  EXPECT_EQ(points[15], Point(30, 20) + offset(1, true, false));
+  EXPECT_EQ(points[16], Point(30, 20) + offset(1, false, false));
+  EXPECT_EQ(points[17], Point(35, 20));
+
+  // The glue points that allow us to "pick up the pen" between segments
+  EXPECT_EQ(points[18], Point(30, 20));
+  EXPECT_EQ(points[19], Point(30, 20));
+  EXPECT_EQ(points[20], Point(120, 20));
+  EXPECT_EQ(points[21], Point(120, 20));
+
+  // The points for the second segment (120, 20) -> (130, 20)
+  EXPECT_EQ(points[22], Point(115, 20));
+  EXPECT_EQ(points[23], Point(120, 20) + offset(1, true, true));
+  EXPECT_EQ(points[24], Point(120, 20) + offset(1, false, true));
+  EXPECT_EQ(points[25], Point(120, 20) + offset(2, true, true));
+  EXPECT_EQ(points[26], Point(120, 20) + offset(2, false, true));
+  EXPECT_EQ(points[27], Point(120, 20) + offset(3, true, true));
+  EXPECT_EQ(points[28], Point(120, 20) + offset(3, false, true));
+  EXPECT_EQ(points[29], Point(120, 25));
+  EXPECT_EQ(points[30], Point(120, 15));
+  EXPECT_EQ(points[31], Point(130, 25));
+  EXPECT_EQ(points[32], Point(130, 15));
+  EXPECT_EQ(points[33], Point(130, 20) + offset(3, true, false));
+  EXPECT_EQ(points[34], Point(130, 20) + offset(3, false, false));
+  EXPECT_EQ(points[35], Point(130, 20) + offset(2, true, false));
+  EXPECT_EQ(points[36], Point(130, 20) + offset(2, false, false));
+  EXPECT_EQ(points[37], Point(130, 20) + offset(1, true, false));
+  EXPECT_EQ(points[38], Point(130, 20) + offset(1, false, false));
+  EXPECT_EQ(points[39], Point(135, 20));
+}
+
+TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesSquareCap) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  path_builder.MoveTo({120, 20});
+  path_builder.LineTo({130, 20});
+  flutter::DlPath path(path_builder);
+
+  auto points =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 10.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+
+  // clang-format off
+  std::vector<Point> expected = {
+      // The points for the first segment (20, 20) -> (30, 20)
+      Point(15, 25),
+      Point(15, 15),
+      Point(20, 25),
+      Point(20, 15),
+      Point(30, 25),
+      Point(30, 15),
+      Point(35, 25),
+      Point(35, 15),
+
+      // The glue points that allow us to "pick up the pen" between segments
+      Point(30, 20),
+      Point(30, 20),
+      Point(120, 20),
+      Point(120, 20),
+
+      // The points for the second segment (120, 20) -> (130, 20)
+      Point(115, 25),
+      Point(115, 15),
+      Point(120, 25),
+      Point(120, 15),
+      Point(130, 25),
+      Point(130, 15),
+      Point(135, 25),
+      Point(135, 15),
+  };
+  // clang-format on
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesBevelJoin) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  path_builder.LineTo({30, 30});
+  flutter::DlPath path(path_builder);
+
+  auto points =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the first segment (20, 20) -> (30, 20)
+      Point(20, 25),
+      Point(20, 15),
+      Point(30, 25),
+      Point(30, 15),
+
+      // The points for the second segment (120, 20) -> (130, 20)
+      Point(25, 20),
+      Point(35, 20),
+      Point(25, 30),
+      Point(35, 30),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesBevelJoin) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  path_builder.LineTo({30, 10});
+  flutter::DlPath path(path_builder);
+
+  auto points =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the first segment (20, 20) -> (30, 20)
+      Point(20, 25),
+      Point(20, 15),
+      Point(30, 25),
+      Point(30, 15),
+
+      // The points for the second segment (120, 20) -> (130, 20)
+      Point(35, 20),
+      Point(25, 20),
+      Point(35, 10),
+      Point(25, 10),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesMiterJoin) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  path_builder.LineTo({30, 30});
+  flutter::DlPath path(path_builder);
+
+  auto points =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 10.0f, 4.0f, Join::kMiter, Cap::kButt, 1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the first segment (20, 20) -> (30, 20)
+      Point(20, 25),
+      Point(20, 15),
+      Point(30, 25),
+      Point(30, 15),
+
+      // And one point makes a Miter
+      Point(35, 15),
+
+      // The points for the second segment (120, 20) -> (130, 20)
+      Point(25, 20),
+      Point(35, 20),
+      Point(25, 30),
+      Point(35, 30),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesMiterJoin) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.LineTo({30, 20});
+  path_builder.LineTo({30, 10});
+  flutter::DlPath path(path_builder);
+
+  auto points =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 10.0f, 4.0f, Join::kMiter, Cap::kButt, 1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the first segment (20, 20) -> (30, 20)
+      Point(20, 25),
+      Point(20, 15),
+      Point(30, 25),
+      Point(30, 15),
+
+      // And one point makes a Miter
+      Point(35, 25),
+
+      // The points for the second segment (120, 20) -> (130, 20)
+      Point(35, 20),
+      Point(25, 20),
+      Point(35, 10),
+      Point(25, 10),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
+  // degrees is the angle that the line deviates from "straight ahead"
+  for (int degrees = 10; degrees < 180; degrees += 10) {
+    for (int width = 1; width <= 10; width++) {
+      Degrees d(degrees);
+      Radians r(d);
+      Scalar x_delta = std::cos(r.radians) * 10.0f;
+      Scalar y_delta = std::sin(r.radians) * 10.0f;
+
+      // Miter limits are based on angle between the vectors/segments
+      Degrees between(180 - degrees);
+      Radians r_between(between);
+      Scalar limit = 1.0f / std::sin(r_between.radians / 2.0f);
+
+      PathBuilder path_builder;
+      path_builder.MoveTo({20, 20});
+      path_builder.LineTo({30, 20});
+      path_builder.LineTo({30 + x_delta, 20 + y_delta});
+      flutter::DlPath path(path_builder);
+
+      // Miter limit too small (99% of required) to allow a miter
+      auto points1 =
+          ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+              path, width, limit * 0.99f, Join::kMiter, Cap::kButt, 1.0f);
+      EXPECT_EQ(points1.size(), 8u)
+          << "degrees: " << degrees << ", width: " << width << ", "
+          << points1[4];
+
+      // Miter limit large enough (101% of required) to allow a miter
+      auto points2 =
+          ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+              path, width, limit * 1.01f, Join::kMiter, Cap::kButt, 1.0f);
+      EXPECT_EQ(points2.size(), 9u)
+          << "degrees: " << degrees << ", width: " << width;
+      EXPECT_LT(points2[4].GetDistance({30, 20}), width * limit * 1.05f)
+          << "degrees: " << degrees << ", width: " << width << ", "
+          << points2[4];
+    }
+  }
 }
 
 }  // namespace testing
