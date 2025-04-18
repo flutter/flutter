@@ -14,6 +14,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
@@ -2035,6 +2036,420 @@ void main() {
     });
 
     expect(elements.length, 1, reason: 'No DecoratedBox matches the specified criteria.');
+  });
+
+  testWidgets(
+    'CupertinoDialogAction in CupertinoDialog can be focused and unfocused',
+    (WidgetTester tester) async {
+      final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
+      final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
+
+      addTearDown(focusNodeOne.dispose);
+      addTearDown(focusNodeTwo.dispose);
+
+      await tester.pumpWidget(
+        TestScaffoldApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          dialog: CupertinoAlertDialog(
+            content: const Text('The content'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                onPressed: () {},
+                focusNode: focusNodeOne,
+                child: const Text('One'),
+              ),
+              CupertinoDialogAction(
+                onPressed: () {},
+                focusNode: focusNodeTwo,
+                child: const Text('Two'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+
+      focusNodeOne.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isTrue);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+
+      focusNodeTwo.requestFocus();
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isTrue);
+
+      focusNodeTwo.unfocus();
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+    },
+  );
+
+  testWidgets(
+    'CupertinoDialogActions in CupertinoDialog can be traversed with keyboard when onPressed is not null',
+    (WidgetTester tester) async {
+      final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
+      final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
+
+      addTearDown(focusNodeOne.dispose);
+      addTearDown(focusNodeTwo.dispose);
+
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+      await tester.pumpWidget(
+        TestScaffoldApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          dialog: CupertinoAlertDialog(
+            content: const Text('The content'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                onPressed: () {},
+                focusNode: focusNodeOne,
+                child: const Text('One'),
+              ),
+              CupertinoDialogAction(
+                onPressed: () {},
+                focusNode: focusNodeTwo,
+                child: const Text('Two'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isTrue);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasFocus, isFalse);
+      expect(focusNodeTwo.hasFocus, isTrue);
+    },
+  );
+
+  testWidgets(
+    'CupertinoDialogActions in CupertinoDialog cannot be traversed with keyboard when onPressed is null',
+    (WidgetTester tester) async {
+      final FocusNode focusNodeOne = FocusNode(debugLabel: 'CupertinoDialogAction One');
+      final FocusNode focusNodeTwo = FocusNode(debugLabel: 'CupertinoDialogAction Two');
+
+      addTearDown(focusNodeOne.dispose);
+      addTearDown(focusNodeTwo.dispose);
+
+      tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+      await tester.pumpWidget(
+        TestScaffoldApp(
+          theme: const CupertinoThemeData(brightness: Brightness.light),
+          dialog: CupertinoAlertDialog(
+            content: const Text('The content'),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                onPressed: () {},
+                focusNode: focusNodeOne,
+                child: const Text('One'),
+              ),
+              CupertinoDialogAction(focusNode: focusNodeTwo, child: const Text('Two')),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Go'));
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isFalse);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasPrimaryFocus, isTrue);
+      expect(focusNodeTwo.hasPrimaryFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+
+      expect(focusNodeOne.hasFocus, isTrue);
+      expect(focusNodeTwo.hasFocus, isFalse);
+    },
+  );
+
+  testWidgets('CupertinoDialogAction in CupertinoDialog can be selected with keyboard', (
+    WidgetTester tester,
+  ) async {
+    bool isOneSelected = false;
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        dialog: CupertinoAlertDialog(
+          content: const Text('The content'),
+          actions: <Widget>[
+            CupertinoDialogAction(onPressed: () => isOneSelected = true, child: const Text('One')),
+            CupertinoDialogAction(onPressed: () {}, child: const Text('Two')),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+
+    expect(isOneSelected, isTrue);
+  });
+
+  testWidgets('CupertinoDialogAction has correct default focused appearance in dark theme', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    final Color defaultLDarkFocusColor =
+        HSLColor.fromColor(
+          CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
+        ).toColor();
+
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        dialog: CupertinoAlertDialog(
+          content: const Text('The content'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {},
+              focusNode: focusNode,
+              child: const Text('One'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    BoxDecoration getDecoration() {
+      final Finder decoratedBoxFinder = find.descendant(
+        of: find.byType(CupertinoDialogAction),
+        matching: find.byType(DecoratedBox),
+      );
+
+      return tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+    }
+
+    expect(getDecoration().color, isNull);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(getDecoration().color, defaultLDarkFocusColor);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(getDecoration().color, isNull);
+  });
+
+  testWidgets('CupertinoDialogAction has correct default focused appearance in light theme', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    final Color defaultLightFocusColor =
+        HSLColor.fromColor(
+          CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityLight),
+        ).toColor();
+
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        dialog: CupertinoAlertDialog(
+          content: const Text('The content'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {},
+              focusNode: focusNode,
+              child: const Text('One'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    BoxDecoration getDecoration() {
+      final Finder decoratedBoxFinder = find.descendant(
+        of: find.byType(CupertinoDialogAction),
+        matching: find.byType(DecoratedBox),
+      );
+
+      return tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+    }
+
+    expect(getDecoration().color, isNull);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(getDecoration().color, defaultLightFocusColor);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(getDecoration().color, isNull);
+  });
+
+  testWidgets('CupertinoDialogAction has correct focused appearance in light theme when focus color is overridden', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color focusColor = Colors.teal;
+
+    final Color defaultLightFocusColor =
+        HSLColor.fromColor(
+          focusColor.withOpacity(kCupertinoButtonTintedOpacityLight),
+        ).toColor();
+
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        dialog: CupertinoAlertDialog(
+          content: const Text('The content'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {},
+              focusColor: focusColor,
+              focusNode: focusNode,
+              child: const Text('One'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    BoxDecoration getDecoration() {
+      final Finder decoratedBoxFinder = find.descendant(
+        of: find.byType(CupertinoDialogAction),
+        matching: find.byType(DecoratedBox),
+      );
+
+      return tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+    }
+
+    expect(getDecoration().color, isNull);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(getDecoration().color, defaultLightFocusColor);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(getDecoration().color, isNull);
+  });
+
+  testWidgets('CupertinoDialogAction has correct focused appearance in dark theme when focus color is overridden', (
+    WidgetTester tester,
+  ) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'CupertinoDialogAction');
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    const Color focusColor = Colors.teal;
+
+    final Color defaultDarkFocusColor =
+        HSLColor.fromColor(
+          focusColor.withOpacity(kCupertinoButtonTintedOpacityDark),
+        ).toColor();
+
+    await tester.pumpWidget(
+      TestScaffoldApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        dialog: CupertinoAlertDialog(
+          content: const Text('The content'),
+          actions: <Widget>[
+            CupertinoDialogAction(
+              onPressed: () {},
+              focusColor: focusColor,
+              focusNode: focusNode,
+              child: const Text('One'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Go'));
+    await tester.pumpAndSettle();
+
+    BoxDecoration getDecoration() {
+      final Finder decoratedBoxFinder = find.descendant(
+        of: find.byType(CupertinoDialogAction),
+        matching: find.byType(DecoratedBox),
+      );
+
+      return tester.widget<DecoratedBox>(decoratedBoxFinder).decoration as BoxDecoration;
+    }
+
+    expect(getDecoration().color, isNull);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    expect(getDecoration().color, defaultDarkFocusColor);
+
+    focusNode.unfocus();
+    await tester.pumpAndSettle();
+
+    expect(getDecoration().color, isNull);
   });
 }
 
