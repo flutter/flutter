@@ -209,9 +209,11 @@ TEST(AccessibilityBridgeTest, CanHandleSelectionChangeCorrectly) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocused);
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  flags.isTextField = true;
+  flags.isReadOnly = true;
+  root.flags2 = &flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -241,9 +243,11 @@ TEST(AccessibilityBridgeTest, DoesNotAssignEditableRootToSelectableText) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsTextField |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsReadOnly);
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  flags.isTextField = true;
+  flags.isReadOnly = true;
+  root.flags2 = &flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -257,10 +261,11 @@ TEST(AccessibilityBridgeTest, SwitchHasSwitchRole) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasToggledState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasEnabledState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsEnabled);
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  flags.hasToggledState = true;
+  flags.hasEnabledState = true;
+  flags.isEnabled = true;
+  root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -272,11 +277,13 @@ TEST(AccessibilityBridgeTest, SliderHasSliderRole) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsSlider |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasEnabledState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsEnabled |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsFocusable);
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  flags.isSlider = true;
+  flags.hasEnabledState = true;
+  flags.isEnabled = true;
+  flags.isFocusable = true;
+  root.flags2 = &flags;
+
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
@@ -293,9 +300,10 @@ TEST(AccessibilityBridgeTest, CanSetCheckboxChecked) {
   std::shared_ptr<TestAccessibilityBridge> bridge =
       std::make_shared<TestAccessibilityBridge>();
   FlutterSemanticsNode2 root = CreateSemanticsNode(0, "root");
-  root.flags = static_cast<FlutterSemanticsFlag>(
-      FlutterSemanticsFlag::kFlutterSemanticsFlagHasCheckedState |
-      FlutterSemanticsFlag::kFlutterSemanticsFlagIsChecked);
+  FlutterSemanticsFlags flags = FlutterSemanticsFlags{0};
+  flags.hasCheckedState = true;
+  flags.isChecked = true;
+  root.flags2 = &flags;
   bridge->AddFlutterSemanticsNodeUpdate(root);
   bridge->CommitUpdates();
 
