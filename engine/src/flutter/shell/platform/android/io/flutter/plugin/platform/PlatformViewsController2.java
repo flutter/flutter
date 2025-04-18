@@ -6,7 +6,6 @@ package io.flutter.plugin.platform;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.SparseArray;
@@ -520,7 +519,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -542,7 +540,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // NOT called from UI thread.
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public SurfaceControl.Transaction createTransaction() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -551,7 +548,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   }
 
   // NOT called from UI thread.
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void applyTransactions() {
     SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
@@ -562,7 +558,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     pendingTransactions.clear();
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
     if (overlayerSurface == null) {
@@ -592,7 +587,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void showOverlaySurface() {
     if (overlaySurfaceControl == null) {
@@ -603,7 +597,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     tx.apply();
   }
 
-  @TargetApi(API_LEVELS.API_34)
   @RequiresApi(API_LEVELS.API_34)
   public void hideOverlaySurface() {
     if (overlaySurfaceControl == null) {

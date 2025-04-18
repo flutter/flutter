@@ -6,7 +6,6 @@ package io.flutter.plugin.editing;
 
 import static io.flutter.Build.API_LEVELS;
 
-import android.annotation.TargetApi;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -495,7 +494,6 @@ public class InputConnectionAdaptor extends BaseInputConnection
   }
 
   @Override
-  @TargetApi(API_LEVELS.API_25)
   @RequiresApi(API_LEVELS.API_25)
   public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
     // Ensure permission is granted.

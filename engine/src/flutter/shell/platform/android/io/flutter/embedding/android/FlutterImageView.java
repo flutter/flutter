@@ -7,7 +7,6 @@ package io.flutter.embedding.android;
 import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -22,6 +21,7 @@ import android.view.Surface;
 import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
@@ -253,7 +253,7 @@ public class FlutterImageView extends View implements RenderSurface {
     }
   }
 
-  @TargetApi(API_LEVELS.API_29)
+  @RequiresApi(API_LEVELS.API_29)
   private void updateCurrentBitmap() {
     if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
       final HardwareBuffer buffer = currentImage.getHardwareBuffer();
