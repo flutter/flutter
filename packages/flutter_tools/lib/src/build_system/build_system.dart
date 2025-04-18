@@ -55,7 +55,7 @@ class BuildSystemConfig {
 /// be either an md5 hash of the file contents or a timestamp.
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
-/// later are safe to evaluate before invoking the [buildAction]. For example,
+/// latter are safe to evaluate before invoking the [buildAction]. For example,
 /// a wildcard output pattern requires the outputs to exist before it can
 /// glob files correctly.
 ///
@@ -449,7 +449,7 @@ class Environment {
   static const String kProjectDirectory = '{PROJECT_DIR}';
 
   /// The [Source] value which is substituted with the path to the directory
-  /// that contains `.dart_tool/package_config.json1`.
+  /// that contains `.dart_tool/package_config.json`.
   /// That is the grand-parent of [BuildInfo.packageConfigPath].
   static const String kWorkspaceDirectory = '{WORKSPACE_DIR}';
 
