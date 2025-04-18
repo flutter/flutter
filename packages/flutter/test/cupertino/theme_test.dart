@@ -221,6 +221,14 @@ void main() {
     expect(c, isNot(equals(b)));
   });
 
+  testWidgets('NoDefaultCupertinoThemeData equality', (WidgetTester tester) async {
+    const NoDefaultCupertinoThemeData a = NoDefaultCupertinoThemeData();
+    final NoDefaultCupertinoThemeData b = a.copyWith();
+    final NoDefaultCupertinoThemeData c = a.copyWith(brightness: Brightness.light);
+    expect(a, equals(b));
+    expect(a, isNot(c));
+  });
+
   late Brightness currentBrightness;
   void colorMatches(Color? componentColor, Color expectedDynamicColor) {
     if (expectedDynamicColor is CupertinoDynamicColor) {

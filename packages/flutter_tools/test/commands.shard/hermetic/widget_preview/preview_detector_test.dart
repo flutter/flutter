@@ -110,6 +110,8 @@ void main() {
           height: '100',
           textScaleFactor: '2',
           wrapper: 'testWrapper',
+          theme: 'theming',
+          brightness: 'Brightness.dark',
         ),
         PreviewDetails.test(
           functionName: 'MyWidget.preview',
@@ -185,6 +187,8 @@ void main() {
           height: '100',
           textScaleFactor: '2',
           wrapper: 'testWrapper',
+          theme: 'theming',
+          brightness: 'Brightness.dark',
         ),
         PreviewDetails.test(
           functionName: 'MyWidget.preview',
@@ -256,7 +260,15 @@ PreviewMapping stripNonDeterministicFields(PreviewMapping mapping) {
   ) {
     return MapEntry<PreviewPath, List<PreviewDetails>>(
       key,
-      value.map((PreviewDetails details) => details.copyWith(wrapperLibraryUri: '')).toList(),
+      value
+          .map(
+            (PreviewDetails details) => details.copyWith(
+              wrapperLibraryUri: '',
+              themeLibraryUri: '',
+              brightnessLibraryUri: '',
+            ),
+          )
+          .toList(),
     );
   });
 }
@@ -276,7 +288,14 @@ Widget testWrapper(Widget child) {
   return child;
 }
 
-@Preview(name: 'Attributes preview', height: 100, width: 100.0, textScaleFactor: 2, wrapper: testWrapper)
+PreviewThemeData theming() => PreviewThemeData(
+  materialLight: ThemeData(colorScheme: ColorScheme.light(primary: Colors.red)),
+  materialDark: ThemeData(colorScheme: ColorScheme.dark(primary: Colors.blue)),
+  cupertinoLight: CupertinoThemeData(primaryColor: Colors.yellow),
+  cupertinoDark: CupertinoThemeData(primaryColor: Colors.purple),
+);
+
+@Preview(name: 'Attributes preview', height: 100, width: 100.0, textScaleFactor: 2, wrapper: testWrapper, theme: theming, brightness: Brightness.dark)
 Widget attributesPreview() {
   return Text('Attributes');
 }

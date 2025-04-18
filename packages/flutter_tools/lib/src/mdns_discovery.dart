@@ -17,6 +17,16 @@ import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
 
+String _missingLocalNetworkPermissionsInstructions(String err) => '''
+Flutter could not access the local network.
+
+Please ensure your IDE or terminal app has permission to access devices on the local network. This allows Flutter to connect to the Dart VM.
+
+You can grant this permission in System Settings > Privacy & Security > Local Network.
+
+$err
+''';
+
 /// A wrapper around [MDnsClient] to find a Dart VM Service instance.
 class MDnsVmServiceDiscovery {
   /// Creates a new [MDnsVmServiceDiscovery] object.
@@ -83,6 +93,7 @@ class MDnsVmServiceDiscovery {
     bool ipv6 = false,
     bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
+    bool throwOnMissingLocalNetworkPermissionsError = true,
   }) async {
     // Poll for 5 seconds to see if there are already services running.
     // Use a new instance of MDnsClient so results don't get cached in _client.
@@ -96,6 +107,7 @@ class MDnsVmServiceDiscovery {
       ipv6: ipv6,
       useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: const Duration(seconds: 5),
+      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
     );
     if (results.isEmpty) {
       return firstMatchingVmService(
@@ -156,6 +168,7 @@ class MDnsVmServiceDiscovery {
     bool ipv6 = false,
     bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
+    bool throwOnMissingLocalNetworkPermissionsError = true,
   }) async {
     // Either the device port or the device name must be provided.
     assert(deviceVmservicePort != null || deviceName != null);
@@ -169,6 +182,7 @@ class MDnsVmServiceDiscovery {
       ipv6: ipv6,
       useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
+      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
     );
   }
 
@@ -184,6 +198,7 @@ class MDnsVmServiceDiscovery {
     bool ipv6 = false,
     bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
+    bool throwOnMissingLocalNetworkPermissionsError = true,
   }) async {
     final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
       client,
@@ -194,6 +209,7 @@ class MDnsVmServiceDiscovery {
       useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
       quitOnFind: true,
+      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
     );
     if (results.isEmpty) {
       return null;
@@ -210,6 +226,7 @@ class MDnsVmServiceDiscovery {
     bool useDeviceIPAsHost = false,
     required Duration timeout,
     bool quitOnFind = false,
+    bool throwOnMissingLocalNetworkPermissionsError = true,
   }) async {
     // macOS blocks mDNS unless the app has Local Network permissions.
     // Since the mDNS client does not handle errors from the socket's stream,
@@ -252,19 +269,12 @@ class MDnsVmServiceDiscovery {
       }
 
       _logger.printTrace(stackTrace.toString());
-
-      throwToolExit(
-        'Flutter could not connect to the Dart VM service.\n'
-        '\n'
-        'Please ensure your IDE or terminal app has permission to access '
-        'devices on the local network. This allows Flutter to connect to '
-        'the Dart VM.\n'
-        '\n'
-        'You can grant this permission in System Settings > Privacy & '
-        'Security > Local Network.\n'
-        '\n'
-        '$e',
-      );
+      if (throwOnMissingLocalNetworkPermissionsError) {
+        throwToolExit(_missingLocalNetworkPermissionsInstructions(e.toString()));
+      } else {
+        _logger.printError(_missingLocalNetworkPermissionsInstructions(e.toString()));
+        return <MDnsVmServiceDiscoveryResult>[];
+      }
     }
   }
 
@@ -496,6 +506,7 @@ class MDnsVmServiceDiscovery {
     int? deviceVmservicePort,
     bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
+    bool throwOnMissingLocalNetworkPermissionsError = true,
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForLaunch(
       applicationId: applicationId,
@@ -504,6 +515,7 @@ class MDnsVmServiceDiscovery {
       ipv6: usesIpv6,
       useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
+      throwOnMissingLocalNetworkPermissionsError: throwOnMissingLocalNetworkPermissionsError,
     );
     return _handleResult(
       result,

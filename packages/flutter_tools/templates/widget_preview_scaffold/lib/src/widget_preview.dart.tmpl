@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 
 /// Wraps a [Widget], initializing various state and properties to allow for
@@ -23,6 +26,8 @@ class WidgetPreview {
     this.width,
     this.height,
     this.textScaleFactor,
+    this.brightness,
+    this.theme,
   });
 
   /// A description to be displayed alongside the preview.
@@ -50,4 +55,14 @@ class WidgetPreview {
   /// If not provided, the default text scaling factor provided by [MediaQuery]
   /// will be used.
   final double? textScaleFactor;
+
+  /// Material and Cupertino theming data to be applied to the previewed [Widget].
+  ///
+  /// If not provided, the default theme will be used.
+  final PreviewThemeData? theme;
+
+  /// Sets the initial theme brightness.
+  ///
+  /// If not provided, the current system default brightness will be used.
+  final Brightness? brightness;
 }

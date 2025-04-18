@@ -47,7 +47,7 @@ runs them, run `dart dev/bots/test.dart` and `dart --enable-asserts dev/bots/ana
 
 ### Locally built engines
 
-If you've built your own flutter engine (see [Setting up the Engine development environment](../../engine/contributing/Setting-up-the-Engine-development-environment.md)), you
+If you've built your own flutter engine (see [Setting up the Engine development environment](../../../engine/src/flutter/docs/contributing/Setting-up-the-Engine-development-environment.md)), you
 can pass `--local-engine` to change what flutter shell `flutter test` uses. For example,
 if you built an engine in the `out/host_debug_unopt` directory, you can use:
 
@@ -120,8 +120,8 @@ The following is an example of what running the local engine command might look 
 
 The above command would use the local Flutter engine located at `/Users/myname/flutter/engine` to execute the `external_ui_integration_test` test on an Android emulator, which is why the `android_debug_unopt_x86` version of the engine is used.
 
-Note that some tests may require `profile` mode instead of `debug` mode when running with local engine. Make sure to pass in the correct local engine. See [Compiling the engine](../../engine/contributing/Compiling-the-engine.md) for more details.
+Note that some tests may require `profile` mode instead of `debug` mode when running with local engine. Make sure to pass in the correct local engine. See [Compiling the engine](../../../engine/src/flutter/docs/contributing/Compiling-the-engine.md) for more details.
 
 ## For the engine
 
-See the [Testing the engine](../../engine/testing/Testing-the-engine.md) wiki.
+See the [Testing the engine](../../../engine/src/flutter/docs/testing/Testing-the-engine.md) wiki.

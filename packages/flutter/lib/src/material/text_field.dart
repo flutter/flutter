@@ -316,6 +316,7 @@ class TextField extends StatefulWidget {
     this.canRequestFocus = true,
     this.spellCheckConfiguration,
     this.magnifierConfiguration,
+    this.hintLocales,
   }) : assert(obscuringCharacter.length == 1),
        smartDashesType =
            smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
@@ -845,6 +846,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
+  /// {@macro flutter.services.TextInputConfiguration.hintLocales}
+  final List<Locale>? hintLocales;
+
   static Widget _defaultContextMenuBuilder(
     BuildContext context,
     EditableTextState editableTextState,
@@ -1088,6 +1092,9 @@ class TextField extends StatefulWidget {
                 ? const <String>[]
                 : kDefaultContentInsertionMimeTypes,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
     );
   }
 }
@@ -1708,6 +1715,7 @@ class _TextFieldState extends State<TextField>
           spellCheckConfiguration: spellCheckConfiguration,
           magnifierConfiguration:
               widget.magnifierConfiguration ?? TextMagnifier.adaptiveMagnifierConfiguration,
+          hintLocales: widget.hintLocales,
         ),
       ),
     );

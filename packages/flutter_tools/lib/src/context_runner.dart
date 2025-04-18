@@ -121,6 +121,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             logger: globals.logger,
             platform: globals.platform,
             userMessages: globals.userMessages,
+            processManager: globals.processManager,
           ),
       AndroidWorkflow:
           () => AndroidWorkflow(androidSdk: globals.androidSdk, featureFlags: featureFlags),
