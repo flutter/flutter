@@ -1758,8 +1758,9 @@ class CompileTest {
       final Map<String, String> environment = Platform.environment;
       final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
       final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-      final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
-      
+      final String? provisioningProfile =
+          environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
       int releaseSizeInBytes = 0;
@@ -1781,7 +1782,7 @@ class CompileTest {
         'archive',
         'DEVELOPMENT_TEAM=$developmentTeam',
         'CODE_SIGN_STYLE=$codeSignStyle',
-        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile'
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         watch.stop();
         print(results.stdout);
