@@ -1759,6 +1759,15 @@ class CompileTest {
 
       int releaseSizeInBytes = 0;
       final Stopwatch watch = Stopwatch();
+      var environment = Platform.environment;
+
+      var developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+      var codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+      var provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+
+      // if (developmentTeam != null) 'DEVELOPMENT_TEAM=$developmentTeam',
+      // if (codeSignStyle != null) 'CODE_SIGN_STYLE=$codeSignStyle',
+      // if (provisioningProfile != null) 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
 
       watch.start();
       await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
@@ -1774,6 +1783,9 @@ class CompileTest {
         '-archivePath',
         '$testDirectory/hello_world_swiftui',
         'archive',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile'
       ]).then((ProcessResult results) {
         watch.stop();
         print(results.stdout);
