@@ -151,12 +151,14 @@ Future<void> testMain() async {
       });
 
       test('should return editing state if extentOffset is smaller than composingText length', () {
-        const String composingText = 'composeMe';
+        const String composingText = '今日は';
 
         final EditingState editingState = EditingState(
-          text: 'Test',
+          text: '今日は',
           baseOffset: 0,
-          extentOffset: 4,
+          extentOffset: 2,
+          composingBaseOffset: 0,
+          composingExtentOffset: 2,
         );
 
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
