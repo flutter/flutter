@@ -4058,6 +4058,47 @@ void main() {
     await tester.pump();
     expect(searchViewState, 'Closed');
   });
+
+  testWidgets(
+    'The last element of the suggestion list should be visible when scrolling to the end of list',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<Widget>.generate(30, (int index) {
+                return ListTile(
+                  titleAlignment: ListTileTitleAlignment.center,
+                  title: Text('Item $index'),
+                );
+              });
+            },
+          ),
+        ),
+      );
+
+      // Open search view.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      const double fakeKeyboardHeight = 500.0;
+      final double physicalBottomPadding = fakeKeyboardHeight * tester.view.devicePixelRatio;
+
+      // Simulate the keyboard opening resizing the view.
+      tester.view.viewInsets = FakeViewPadding(bottom: physicalBottomPadding);
+      addTearDown(tester.view.reset);
+
+      // Scroll down to the end of the list.
+      expect(find.byType(ListView), findsOne);
+      await tester.fling(find.byType(ListView), const Offset(0, -5000), 5000);
+      await tester.pumpAndSettle();
+
+      // The last item should not be hidden by the keyboard.
+      final double lastItemBottom = tester.getRect(find.text('Item 29')).bottom;
+      final double fakeKeyboardTop =
+          tester.getSize(find.byType(MaterialApp)).height - fakeKeyboardHeight;
+      expect(lastItemBottom, lessThanOrEqualTo(fakeKeyboardTop));
+    },
+  );
 }
 
 Future<void> checkSearchBarDefaults(
