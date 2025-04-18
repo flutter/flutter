@@ -28,7 +28,7 @@ Future<void> execute() async {
     stocks.main();
     await tester.pump(); // Start startup animation
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation
-    final navigationMenu = tester.getCenter(find.byTooltip('Open navigation menu'));
+    final Offset navigationMenu = tester.getCenter(find.byTooltip('Open navigation menu'));
     await tester.tapAt(navigationMenu); // Open drawer
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
