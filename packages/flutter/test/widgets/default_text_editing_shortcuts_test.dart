@@ -13,8 +13,11 @@ void main() {
   Widget buildSpyAboveEditableText({
     required FocusNode editableFocusNode,
     required FocusNode spyFocusNode,
+    String text = 'dummy text',
+    TextRange composing = TextRange.empty,
   }) {
-    final TextEditingController controller = TextEditingController(text: 'dummy text');
+    final TextEditingValue textEditingValue = TextEditingValue(text: text, composing: composing);
+    final TextEditingController controller = TextEditingController.fromValue(textEditingValue);
     addTearDown(controller.dispose);
 
     return MaterialApp(
@@ -1125,6 +1128,144 @@ void main() {
         );
     }
   }, variant: TargetPlatformVariant.all());
+
+  group('Web does not accept shortcuts if focus under EditableText with composing', () {
+    testWidgets(
+      'character modifier + arrowLeft',
+      (WidgetTester tester) async {
+        tester.binding.testTextInput.unregister();
+        addTearDown(() {
+          tester.binding.testTextInput.register();
+        });
+        final FocusNode editable = FocusNode();
+        addTearDown(editable.dispose);
+        final FocusNode spy = FocusNode();
+        addTearDown(spy.dispose);
+        await tester.pumpWidget(
+          buildSpyAboveEditableText(
+            editableFocusNode: editable,
+            spyFocusNode: spy,
+            text: 'こんにちは',
+            composing: const TextRange(start: 0, end: 5),
+          ),
+        );
+        editable.requestFocus();
+        await tester.pump();
+        final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+        await sendKeyCombination(
+          tester,
+          const SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true),
+        );
+        await tester.pump();
+
+        expect(state.lastIntent, isNull);
+      },
+      skip: !kIsWeb, // [intended] Web only.
+    );
+
+    testWidgets(
+      'character modifier + arrowRight',
+      (WidgetTester tester) async {
+        tester.binding.testTextInput.unregister();
+        addTearDown(() {
+          tester.binding.testTextInput.register();
+        });
+        final FocusNode editable = FocusNode();
+        addTearDown(editable.dispose);
+        final FocusNode spy = FocusNode();
+        addTearDown(spy.dispose);
+        await tester.pumpWidget(
+          buildSpyAboveEditableText(
+            editableFocusNode: editable,
+            spyFocusNode: spy,
+            text: 'こんにちは',
+            composing: const TextRange(start: 0, end: 5),
+          ),
+        );
+        editable.requestFocus();
+        await tester.pump();
+        final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+        await sendKeyCombination(
+          tester,
+          const SingleActivator(LogicalKeyboardKey.arrowRight, shift: true),
+        );
+        await tester.pump();
+
+        expect(state.lastIntent, isNull);
+      },
+      skip: !kIsWeb, // [intended] Web only.
+    );
+
+    testWidgets(
+      'character modifier + arrowUp',
+      (WidgetTester tester) async {
+        tester.binding.testTextInput.unregister();
+        addTearDown(() {
+          tester.binding.testTextInput.register();
+        });
+        final FocusNode editable = FocusNode();
+        addTearDown(editable.dispose);
+        final FocusNode spy = FocusNode();
+        addTearDown(spy.dispose);
+        await tester.pumpWidget(
+          buildSpyAboveEditableText(
+            editableFocusNode: editable,
+            spyFocusNode: spy,
+            text: 'こんにちは',
+            composing: const TextRange(start: 0, end: 5),
+          ),
+        );
+        editable.requestFocus();
+        await tester.pump();
+        final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+        await sendKeyCombination(
+          tester,
+          const SingleActivator(LogicalKeyboardKey.arrowUp, shift: true),
+        );
+        await tester.pump();
+
+        expect(state.lastIntent, isNull);
+      },
+      skip: !kIsWeb, // [intended] Web only.
+    );
+
+    testWidgets(
+      'character modifier + arrowDown',
+      (WidgetTester tester) async {
+        tester.binding.testTextInput.unregister();
+        addTearDown(() {
+          tester.binding.testTextInput.register();
+        });
+        final FocusNode editable = FocusNode();
+        addTearDown(editable.dispose);
+        final FocusNode spy = FocusNode();
+        addTearDown(spy.dispose);
+        await tester.pumpWidget(
+          buildSpyAboveEditableText(
+            editableFocusNode: editable,
+            spyFocusNode: spy,
+            text: 'こんにちは',
+            composing: const TextRange(start: 0, end: 5),
+          ),
+        );
+        editable.requestFocus();
+        await tester.pump();
+        final ActionSpyState state = tester.state<ActionSpyState>(find.byType(ActionSpy));
+
+        await sendKeyCombination(
+          tester,
+          const SingleActivator(LogicalKeyboardKey.arrowDown, shift: true),
+        );
+        await tester.pump();
+
+        expect(state.lastIntent, isNull);
+      },
+      skip: !kIsWeb, // [intended] Web only.
+    );
+  });
 }
 
 class ActionSpy extends StatefulWidget {
