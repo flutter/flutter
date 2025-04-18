@@ -1549,6 +1549,10 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
+Widget _defaultBottomSheetScrimBuilder(BuildContext context, double opacity) {
+  return ModalBarrier(dismissible: false, color: Colors.black.withOpacity(opacity));
+}
+
 /// Implements the basic Material Design visual layout structure.
 ///
 /// This class provides APIs for showing drawers and bottom sheets.
@@ -1710,7 +1714,7 @@ class Scaffold extends StatefulWidget {
     this.extendBody = false,
     this.extendBodyBehindAppBar = false,
     this.drawerScrimColor,
-    this.bottomSheetScrimBuilder,
+    this.bottomSheetScrimBuilder = _defaultBottomSheetScrimBuilder,
     this.drawerEdgeDragWidth,
     this.drawerEnableOpenDragGesture = true,
     this.endDrawerEnableOpenDragGesture = true,
@@ -1864,7 +1868,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// If this is null, then a non-dismissible [ModalBarrier] with color [Colors.black] is used.
   /// If the builder returns null, then no scrim is shown.
-  final Widget? Function(BuildContext, double)? bottomSheetScrimBuilder;
+  final Widget? Function(BuildContext, double) bottomSheetScrimBuilder;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
@@ -2913,7 +2917,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   bool _showBodyScrim = false;
-  final Color _bodyScrimColor = Colors.black;
   double _bodyScrimAnimation = 0.0;
 
   /// Updates the state of the body scrim.
@@ -2958,12 +2961,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_showBodyScrim) {
       _addIfNonNull(
         children,
-        widget.bottomSheetScrimBuilder != null
-            ? widget.bottomSheetScrimBuilder!(context, _bodyScrimAnimation)
-            : ModalBarrier(
-              dismissible: false,
-              color: _bodyScrimColor.withOpacity(_bodyScrimAnimation),
-            ),
+        widget.bottomSheetScrimBuilder(context, _bodyScrimAnimation),
         _ScaffoldSlot.bodyScrim,
         removeLeftPadding: true,
         removeTopPadding: true,
