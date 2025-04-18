@@ -43,7 +43,7 @@ std::unique_ptr<Screenshot> MetalScreenshotter::MakeScreenshot(
         imageByApplyingOrientation:kCGImagePropertyOrientationDownMirrored];
 
     CGImageRef cgImage = [cicontext createCGImage:flipped
-                                         fromRect:[ciImage extent]];
+                                         fromRect:[flipped extent]];
 
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     return std::unique_ptr<MetalScreenshot>(new MetalScreenshot(cgImage));
