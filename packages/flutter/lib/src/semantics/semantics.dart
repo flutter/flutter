@@ -780,7 +780,10 @@ class SemanticsData with Diagnosticable {
        );
 
   /// Semantics flags as a bitMask.
-  @Deprecated('Use flagsCollection instead')
+  @Deprecated(
+  'Use flagsCollection instead. '
+  'This feature was deprecated after v3.29.0.'
+)
   int get flags => _toBitMask(flagsCollection);
 
   /// Semantics flags.
@@ -1021,7 +1024,10 @@ class SemanticsData with Diagnosticable {
   /// {@macro flutter.semantics.SemanticsNode.inputType}
   final SemanticsInputType inputType;
 
-  @Deprecated('Use flagsCollection instead')
+  @Deprecated(
+  'Use flagsCollection instead. '
+  'This feature was deprecated after v3.29.0.'
+)
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
   /// Whether [actions] contains the given action.
@@ -2849,14 +2855,20 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   /// Semantics flags.
 
-  @Deprecated('Use flagsCollection instead')
+  @Deprecated(
+  'Use flagsCollection instead. '
+  'This feature was deprecated after v3.29.0.'
+)
   int get flags => _toBitMask(flagsCollection);
 
   /// Semantics flags.
   SemanticsFlags get flagsCollection => _flags;
 
   /// Whether [flags] contains the given flag.
-  @Deprecated('Use flagsCollection instead')
+  @Deprecated(
+  'Use flagsCollection instead. '
+  'This feature was deprecated after v3.29.0.'
+)
   bool hasFlag(SemanticsFlag flag) => (flags & flag.index) != 0;
 
   /// {@macro flutter.semantics.SemanticsProperties.identifier}

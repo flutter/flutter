@@ -351,14 +351,14 @@ class SemanticsController {
     }
 
     /// Based on Android's FOCUSABLE_FLAGS. See [flutter/engine/AccessibilityBridge.java](https://github.com/flutter/flutter/blob/main/engine/src/flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java).
-    final bool hasImportantFlag = data.flags.hasCheckedState ||
-        data.flags.hasToggledState ||
-        data.flags.hasEnabledState ||
-        data.flags.isButton ||
-        data.flags.isTextField ||
-        data.flags.isFocusable ||
-        data.flags.isSlider ||
-        data.flags.isInMutuallyExclusiveGroup;
+    final bool hasImportantFlag = data.flagsCollection.hasCheckedState ||
+        data.flagsCollection.hasToggledState ||
+        data.flagsCollection.hasEnabledState ||
+        data.flagsCollection.isButton ||
+        data.flagsCollection.isTextField ||
+        data.flagsCollection.isFocusable ||
+        data.flagsCollection.isSlider ||
+        data.flagsCollection.isInMutuallyExclusiveGroup;
 
     if (hasImportantFlag) {
       return true;

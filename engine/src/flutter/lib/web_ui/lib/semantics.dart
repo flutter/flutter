@@ -301,7 +301,7 @@ class SemanticsFlags {
   /// Constructor for SemanticsFlags.
   ///
   /// All flags default to `false` unless specified.
-  SemanticsFlags({
+  const SemanticsFlags({
     this.hasCheckedState = false, // Bit 0
     this.isChecked = false, // Bit 1
     this.isSelected = false, // Bit 2
@@ -334,6 +334,8 @@ class SemanticsFlags {
     this.hasRequiredState = false, // Bit 29
     this.isRequired = false, // Bit 30
   });
+
+  static const SemanticsFlags none = SemanticsFlags();
 
   /// Merges the flags from this object with [other].
   SemanticsFlags merge(SemanticsFlags other) {
@@ -370,6 +372,75 @@ class SemanticsFlags {
       hasSelectedState: this.hasSelectedState || other.hasSelectedState,
       hasRequiredState: this.hasRequiredState || other.hasRequiredState,
       isRequired: this.isRequired || other.isRequired,
+    );
+  }
+
+  SemanticsFlags copyWith({
+    bool? hasCheckedState,
+    bool? isChecked,
+    bool? isSelected,
+    bool? isButton,
+    bool? isTextField,
+    bool? isFocused,
+    bool? hasEnabledState,
+    bool? isEnabled,
+    bool? isInMutuallyExclusiveGroup,
+    bool? isHeader,
+    bool? isObscured,
+    bool? scopesRoute,
+    bool? namesRoute,
+    bool? isHidden,
+    bool? isImage,
+    bool? isLiveRegion,
+    bool? hasToggledState,
+    bool? isToggled,
+    bool? hasImplicitScrolling,
+    bool? isMultiline,
+    bool? isReadOnly,
+    bool? isFocusable,
+    bool? isLink,
+    bool? isSlider,
+    bool? isKeyboardKey,
+    bool? isCheckStateMixed,
+    bool? hasExpandedState,
+    bool? isExpanded,
+    bool? hasSelectedState,
+    bool? hasRequiredState,
+    bool? isRequired,
+  }) {
+    return SemanticsFlags(
+      // Use the provided value if not null, otherwise use the current object's value
+      hasCheckedState: hasCheckedState ?? this.hasCheckedState,
+      isChecked: isChecked ?? this.isChecked,
+      isSelected: isSelected ?? this.isSelected,
+      isButton: isButton ?? this.isButton,
+      isTextField: isTextField ?? this.isTextField,
+      isFocused: isFocused ?? this.isFocused,
+      hasEnabledState: hasEnabledState ?? this.hasEnabledState,
+      isEnabled: isEnabled ?? this.isEnabled,
+      isInMutuallyExclusiveGroup: isInMutuallyExclusiveGroup ?? this.isInMutuallyExclusiveGroup,
+      isHeader: isHeader ?? this.isHeader,
+      isObscured: isObscured ?? this.isObscured,
+      scopesRoute: scopesRoute ?? this.scopesRoute,
+      namesRoute: namesRoute ?? this.namesRoute,
+      isHidden: isHidden ?? this.isHidden,
+      isImage: isImage ?? this.isImage,
+      isLiveRegion: isLiveRegion ?? this.isLiveRegion,
+      hasToggledState: hasToggledState ?? this.hasToggledState,
+      isToggled: isToggled ?? this.isToggled,
+      hasImplicitScrolling: hasImplicitScrolling ?? this.hasImplicitScrolling,
+      isMultiline: isMultiline ?? this.isMultiline,
+      isReadOnly: isReadOnly ?? this.isReadOnly,
+      isFocusable: isFocusable ?? this.isFocusable,
+      isLink: isLink ?? this.isLink,
+      isSlider: isSlider ?? this.isSlider,
+      isKeyboardKey: isKeyboardKey ?? this.isKeyboardKey,
+      isCheckStateMixed: isCheckStateMixed ?? this.isCheckStateMixed,
+      hasExpandedState: hasExpandedState ?? this.hasExpandedState,
+      isExpanded: isExpanded ?? this.isExpanded,
+      hasSelectedState: hasSelectedState ?? this.hasSelectedState,
+      hasRequiredState: hasRequiredState ?? this.hasRequiredState,
+      isRequired: isRequired ?? this.isRequired,
     );
   }
 
