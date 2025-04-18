@@ -764,7 +764,7 @@ class SemanticsTester {
   static String _flagsToSemanticsFlagExpression(dynamic flags) {
     Iterable<SemanticsFlag> list;
     if (flags is SemanticsFlags) {
-      list = flags.toStrings();
+      return '<SemanticsFlag>[${flags.toStrings().join(', ')}]';
     }
     else if (flags is int) {
       list = SemanticsFlag.values.where((SemanticsFlag flag) => (flag.index & flags) != 0);
