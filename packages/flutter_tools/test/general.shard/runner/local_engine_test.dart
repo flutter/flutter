@@ -482,6 +482,32 @@ void main() {
       );
     },
   );
+
+  testWithoutContext('fails if --local-engine-host is used without --local-engine', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem.directory(
+      '$kArbitraryEngineRoot/src/out/android_debug_unopt_arm64/',
+    )..createSync(recursive: true);
+    fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt/')
+        .createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    await expectLater(
+      localEngineLocator.findEnginePath(localHostEngine: localEngine.path),
+      throwsToolExit(
+        message: 'You must specify --local-engine if you are using --local-engine-host.',
+      ),
+    );
+  });
 }
 
 Matcher matchesEngineBuildPaths({String? hostEngine, String? targetEngine}) {
