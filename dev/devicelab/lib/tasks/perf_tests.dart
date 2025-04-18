@@ -1755,19 +1755,15 @@ class CompileTest {
 
   Future<TaskResult> runSwiftUIApp() async {
     return inDirectory<TaskResult>(testDirectory, () async {
+      final Map<String, String> environment = Platform.environment;
+      final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+      final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+      final String? provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
+      
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
       int releaseSizeInBytes = 0;
       final Stopwatch watch = Stopwatch();
-      var environment = Platform.environment;
-
-      var developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
-      var codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
-      var provisioningProfile = environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
-
-      // if (developmentTeam != null) 'DEVELOPMENT_TEAM=$developmentTeam',
-      // if (codeSignStyle != null) 'CODE_SIGN_STYLE=$codeSignStyle',
-      // if (provisioningProfile != null) 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
 
       watch.start();
       await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
