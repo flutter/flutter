@@ -567,7 +567,7 @@ class DragScrollActivity extends ScrollActivity {
 /// scroll offset when the geometry of the scroll view changes. In these
 /// situations, the [Simulation] typically starts with a zero velocity.
 ///
-/// The scrolling will be driven by the given [Simulation].  If a
+/// The scrolling will be driven by the given [Simulation]. If a
 /// [BallisticScrollActivity] is in progress when the scroll metrics change,
 /// then the activity will be replaced with a new ballistic activity starting
 /// from the current velocity (see [ScrollPhysics.createBallisticSimulation]).
@@ -684,6 +684,7 @@ class BallisticScrollActivity extends ScrollActivity {
 ///
 /// The scrolling will be driven by the given animation parameters
 /// or the given [Simulation].
+///
 /// Unlike a [BallisticScrollActivity], if a [DrivenScrollActivity] is
 /// in progress when the scroll metrics change, the activity will continue
 /// with its original animation.
