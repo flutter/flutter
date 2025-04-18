@@ -2463,7 +2463,7 @@ Future<void> verifyTabooDocumentation(String workingDirectory, {int minimumMatch
   }
 }
 
-final Map<String, String> _kKotlinTemplateKeys = {
+final Map<String, String> _kKotlinTemplateKeys = <String, String>{
   'androidIdentifier': 'dummyPackage',
   'pluginClass': 'PluginClass',
   'projectName': 'dummy',
@@ -2487,19 +2487,19 @@ Future<void> lintKotlinTemplatedFiles(String workingDirectory) async {
       .listSync(recursive: true)
       .toList()
       .whereType<File>()
-      .where((file) => _kKotlinExtList.contains(path.extension(file.path, 2)));
+      .where((File file) => _kKotlinExtList.contains(path.extension(file.path, 2)));
 
   if (files.isEmpty) {
     foundError(<String>['No Kotlin template files found']);
-    return null;
+    return;
   }
 
   final Directory tempDir = Directory.systemTemp.createTempSync('template_output');
   for (final File templateFile in files) {
-    final inputContent = await templateFile.readAsString();
-    final modifiedContent = inputContent.replaceAllMapped(
+    final String inputContent = await templateFile.readAsString();
+    final String modifiedContent = inputContent.replaceAllMapped(
       _kKotlinTemplatePattern,
-      (match) => _kKotlinTemplateKeys[match[1]] ?? 'dummy',
+      (Match match) => _kKotlinTemplateKeys[match[1]] ?? 'dummy',
     );
 
     String outputFilename = path.basename(templateFile.path);
@@ -2513,14 +2513,13 @@ Future<void> lintKotlinTemplatedFiles(String workingDirectory) async {
 
     final String relativePath = path.dirname(path.relative(templateFile.path, from: templatePath));
     final String outputDir = path.join(tempDir.path, relativePath);
-    var directory = await Directory(outputDir).create(recursive: true);
+    await Directory(outputDir).create(recursive: true);
     final String outputFile = path.join(outputDir, outputFilename);
     final File output = File(outputFile);
     await output.writeAsString(modifiedContent);
   }
-  return lintKotlinFiles(tempDir.path).then((value) {
+  return lintKotlinFiles(tempDir.path).whenComplete(() {
     tempDir.deleteSync(recursive: true);
-    return value;
   });
 }
 
