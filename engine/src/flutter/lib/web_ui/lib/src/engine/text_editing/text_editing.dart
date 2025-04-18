@@ -614,18 +614,16 @@ class TextEditingDeltaState {
         newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.deltaEnd - deletedLength;
       } else {
         // Forward deletion
-        newTextEditingDeltaState.deltaStart = newEditingState.baseOffset!;
+        newTextEditingDeltaState.deltaStart = newEditingState.baseOffset;
         newTextEditingDeltaState.deltaEnd = newTextEditingDeltaState.deltaStart + deletedLength;
       }
     } else if (isTextBeingChangedAtActiveSelection) {
       final bool isPreviousSelectionInverted =
-          lastEditingState!.baseOffset! > lastEditingState.extentOffset!;
+          lastEditingState!.baseOffset > lastEditingState.extentOffset;
       // When a selection of text is replaced by a copy/paste operation we set the starting range
       // of the delta to be the beginning of the selection of the previous editing state.
       newTextEditingDeltaState.deltaStart =
-          isPreviousSelectionInverted
-              ? lastEditingState.extentOffset!
-              : lastEditingState.baseOffset!;
+          isPreviousSelectionInverted ? lastEditingState.extentOffset : lastEditingState.baseOffset;
     }
 
     // If we are composing then set the delta range to the composing region we
@@ -869,9 +867,9 @@ class EditingState {
   }
 
   // Pick the smallest selection index for base.
-  int get minOffset => math.min(baseOffset ?? 0, extentOffset ?? 0);
+  int get minOffset => math.min(baseOffset, extentOffset);
   // Pick the greatest selection index for extent.
-  int get maxOffset => math.max(baseOffset ?? 0, extentOffset ?? 0);
+  int get maxOffset => math.max(baseOffset, extentOffset);
 
   EditingState copyWith({
     String? text,
@@ -904,10 +902,10 @@ class EditingState {
   final String? text;
 
   /// The offset at which the text selection originates.
-  final int? baseOffset;
+  final int baseOffset;
 
   /// The offset at which the text selection terminates.
-  final int? extentOffset;
+  final int extentOffset;
 
   /// The offset at which [CompositionAwareMixin.composingText] begins, if any.
   final int composingBaseOffset;
@@ -916,7 +914,7 @@ class EditingState {
   final int composingExtentOffset;
 
   /// Whether the current editing state is valid or not.
-  bool get isValid => baseOffset! >= 0 && extentOffset! >= 0;
+  bool get isValid => baseOffset >= 0 && extentOffset >= 0;
 
   @override
   int get hashCode =>
@@ -1507,9 +1505,9 @@ abstract class DefaultTextEditingStrategy
 
     if (inputType != null) {
       final bool isSelectionInverted =
-          lastEditingState!.baseOffset! > lastEditingState!.extentOffset!;
+          lastEditingState!.baseOffset > lastEditingState!.extentOffset;
       final int deltaOffset =
-          isSelectionInverted ? lastEditingState!.baseOffset! : lastEditingState!.extentOffset!;
+          isSelectionInverted ? lastEditingState!.baseOffset : lastEditingState!.extentOffset;
       if (inputType.contains('delete')) {
         // The deltaStart is set in handleChange because there is where we get access
         // to the new selection baseOffset which is our new deltaStart.
