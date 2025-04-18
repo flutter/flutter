@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -372,15 +373,14 @@ void main() {
     final DraggableScrollableController draggableController = DraggableScrollableController();
     addTearDown(draggableController.dispose);
     const double kBottomSheetDominatesPercentage = 0.3;
-    const double kMinBottomSheetScrimOpacity = 0.1;
-    const double kMaxBottomSheetScrimOpacity = 0.6;
+
     const Key scrimKey = Key('scrim');
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          bottomSheetScrimBuilder: (BuildContext context, double animation) {
-            return ColoredBox(key: scrimKey, color: Colors.black.withOpacity(animation));
+          bottomSheetScrimBuilder: (BuildContext context, double visibilityValue) {
+            return ColoredBox(key: scrimKey, color: Colors.black.withOpacity(visibilityValue));
           },
           bottomSheet: DraggableScrollableSheet(
             expand: false,
@@ -396,8 +396,6 @@ void main() {
     Finder findModalBarrier() =>
         find.descendant(of: find.byType(Scaffold), matching: find.byType(ModalBarrier));
     double getOpacity() => tester.firstWidget<ColoredBox>(findScrim()).color.opacity;
-    double getExpectedOpacity(double visValue) =>
-        math.max(kMinBottomSheetScrimOpacity, kMaxBottomSheetScrimOpacity - visValue);
 
     for (double i = 0, extent = i / 10; i <= 10; i++, extent = i / 10) {
       draggableController.jumpTo(extent);
@@ -405,11 +403,12 @@ void main() {
 
       final double extentRemaining = 1.0 - extent;
       if (extentRemaining < kBottomSheetDominatesPercentage) {
-        final double visValue = extentRemaining * kBottomSheetDominatesPercentage * 10;
+        final double visibilityValue =
+            lerpDouble(1.0, 0.0, extentRemaining / kBottomSheetDominatesPercentage)!;
 
         expect(findModalBarrier(), findsNothing);
         expect(findScrim(), findsOneWidget);
-        expect(getOpacity(), moreOrLessEquals(getExpectedOpacity(visValue), epsilon: 0.02));
+        expect(getOpacity(), moreOrLessEquals(visibilityValue, epsilon: 0.02));
       } else {
         expect(findScrim(), findsNothing);
       }

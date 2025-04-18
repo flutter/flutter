@@ -18,6 +18,7 @@ library;
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
@@ -1549,7 +1550,16 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
-Widget _defaultBottomSheetScrimBuilder(BuildContext context, double opacity) {
+Widget _defaultBottomSheetScrimBuilder(BuildContext context, double visibilityValue) {
+  final double extentRemaining = _kBottomSheetDominatesPercentage * (1.0 - visibilityValue);
+  final double floatingButtonVisibilityValue =
+      extentRemaining * _kBottomSheetDominatesPercentage * 10;
+
+  final double opacity = math.max(
+    _kMinBottomSheetScrimOpacity,
+    _kMaxBottomSheetScrimOpacity - floatingButtonVisibilityValue,
+  );
+
   return ModalBarrier(dismissible: false, color: Colors.black.withOpacity(opacity));
 }
 
@@ -2335,7 +2345,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
               onRemove: () {
                 DraggableScrollableActuator.reset(notification.context);
                 showBodyScrim(false, 0.0);
-                _floatingActionButtonVisibilityValue = 1.0;
+                _floatingActionButtonVisibilityController.value = 1.0;
                 _persistentSheetHistoryEntry = null;
               },
             );
@@ -2473,7 +2483,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       bottomSheetKey.currentState!.close();
       setState(() {
         _showBodyScrim = false;
-        _bodyScrimAnimation = 0.0;
+        _bodyScrimVisibilityValue = 0.0;
         _currentBottomSheet = null;
       });
 
@@ -2676,21 +2686,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   FloatingActionButtonLocation? _floatingActionButtonLocation;
 
   late AnimationController _floatingActionButtonVisibilityController;
-
-  /// Gets the current value of the visibility animation for the
-  /// [Scaffold.floatingActionButton].
-  double get _floatingActionButtonVisibilityValue =>
-      _floatingActionButtonVisibilityController.value;
-
-  /// Sets the current value of the visibility animation for the
-  /// [Scaffold.floatingActionButton].
-  set _floatingActionButtonVisibilityValue(double newValue) {
-    _floatingActionButtonVisibilityController.value = clampDouble(
-      newValue,
-      _floatingActionButtonVisibilityController.lowerBound,
-      _floatingActionButtonVisibilityController.upperBound,
-    );
-  }
 
   /// Shows the [Scaffold.floatingActionButton].
   TickerFuture _showFloatingActionButton() {
@@ -2928,18 +2923,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   }
 
   bool _showBodyScrim = false;
-  double _bodyScrimAnimation = 0.0;
+  double _bodyScrimVisibilityValue = 0.0;
 
   /// Updates the state of the body scrim.
   ///
-  /// This method is used to show or hide the body scrim and to set the animation value.
-  void showBodyScrim(bool value, double opacity) {
-    if (_showBodyScrim == value && _bodyScrimAnimation == opacity) {
+  /// This method is used to show or hide the body scrim and to set the visibility value.
+  void showBodyScrim(bool value, double visibilityValue) {
+    if (_showBodyScrim == value && _bodyScrimVisibilityValue == visibilityValue) {
       return;
     }
     setState(() {
       _showBodyScrim = value;
-      _bodyScrimAnimation = opacity;
+      _bodyScrimVisibilityValue = visibilityValue;
     });
   }
 
@@ -2972,7 +2967,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_showBodyScrim) {
       _addIfNonNull(
         children,
-        widget.bottomSheetScrimBuilder(context, _bodyScrimAnimation),
+        widget.bottomSheetScrimBuilder(context, _bodyScrimVisibilityValue),
         _ScaffoldSlot.bodyScrim,
         removeLeftPadding: true,
         removeTopPadding: true,
@@ -3333,17 +3328,14 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     final double extentRemaining = 1.0 - notification.extent;
     final ScaffoldState scaffold = Scaffold.of(context);
     if (extentRemaining < _kBottomSheetDominatesPercentage) {
-      scaffold._floatingActionButtonVisibilityValue =
+      scaffold._floatingActionButtonVisibilityController.value =
           extentRemaining * _kBottomSheetDominatesPercentage * 10;
-      scaffold.showBodyScrim(
-        true,
-        math.max(
-          _kMinBottomSheetScrimOpacity,
-          _kMaxBottomSheetScrimOpacity - scaffold._floatingActionButtonVisibilityValue,
-        ),
-      );
+      final double scrimVisibilityValue =
+          lerpDouble(1.0, 0.0, extentRemaining / _kBottomSheetDominatesPercentage)!;
+
+      scaffold.showBodyScrim(true, scrimVisibilityValue);
     } else {
-      scaffold._floatingActionButtonVisibilityValue = 1.0;
+      scaffold._floatingActionButtonVisibilityController.value = 1.0;
       scaffold.showBodyScrim(false, 0.0);
     }
     // If the Scaffold.bottomSheet != null, we're a persistent bottom sheet.
