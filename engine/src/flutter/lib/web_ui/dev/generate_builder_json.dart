@@ -94,7 +94,7 @@ class GenerateBuilderJsonCommand extends Command<bool> {
     return <Map<String, dynamic>>[
       _getAnalysisAndLicenseStep(),
       _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.chrome),
-      _getTestStepForPlatformAndBrowser(suites, packageLock, 'Linux', BrowserName.firefox),
+      _getTestStepForPlatformAndBrowser(suites, packageLock, 'Mac', BrowserName.firefox),
       _getTestStepForPlatformAndBrowser(
         suites,
         packageLock,

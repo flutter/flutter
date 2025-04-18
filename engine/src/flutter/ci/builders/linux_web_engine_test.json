@@ -321,11 +321,11 @@
       ]
     },
     {
-      "name": "Linux run firefox suites",
+      "name": "Mac run firefox suites",
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Linux"
+        "os=Mac"
       ],
       "gclient_variables": {
         "download_android_deps": false,
