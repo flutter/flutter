@@ -301,7 +301,7 @@ flutter:
 
   testUsingContext(
     'dart format is run when --format-arg is passed',
-        () async {
+    () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
       arbFile.writeAsStringSync('''
@@ -333,7 +333,14 @@ flutter:
         processManager: processManager,
       );
 
-      await createTestCommandRunner(command).run(<String>['gen-l10n', '--format', '--format-arg', '--page-width=120', '--format-arg', '--enable-experiment']);
+      await createTestCommandRunner(command).run(<String>[
+        'gen-l10n',
+        '--format',
+        '--format-arg',
+        '--page-width=120',
+        '--format-arg',
+        '--enable-experiment',
+      ]);
 
       final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
       expect(outputDirectory.existsSync(), true);
@@ -350,7 +357,7 @@ flutter:
 
   testUsingContext(
     'dart format is not run when --no-format is passed',
-        () async {
+    () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
       arbFile.writeAsStringSync('''
@@ -436,7 +443,7 @@ format: true
 
   testUsingContext(
     'dart format is not running when format: false is passed into l10n.yaml',
-        () async {
+    () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
       arbFile.writeAsStringSync('''
@@ -475,7 +482,7 @@ format: false
 
   testUsingContext(
     'dart format with args',
-        () async {
+    () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
       arbFile.writeAsStringSync('''
