@@ -1550,19 +1550,6 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 }
 
-Widget _defaultBottomSheetScrimBuilder(BuildContext context, double visibilityValue) {
-  final double extentRemaining = _kBottomSheetDominatesPercentage * (1.0 - visibilityValue);
-  final double floatingButtonVisibilityValue =
-      extentRemaining * _kBottomSheetDominatesPercentage * 10;
-
-  final double opacity = math.max(
-    _kMinBottomSheetScrimOpacity,
-    _kMaxBottomSheetScrimOpacity - floatingButtonVisibilityValue,
-  );
-
-  return ModalBarrier(dismissible: false, color: Colors.black.withOpacity(opacity));
-}
-
 /// Implements the basic Material Design visual layout structure.
 ///
 /// This class provides APIs for showing drawers and bottom sheets.
@@ -2159,6 +2146,19 @@ class Scaffold extends StatefulWidget {
       final ScaffoldState? scaffold = context.findAncestorStateOfType<ScaffoldState>();
       return scaffold?.hasDrawer ?? false;
     }
+  }
+
+  static Widget _defaultBottomSheetScrimBuilder(BuildContext context, double visibilityValue) {
+    final double extentRemaining = _kBottomSheetDominatesPercentage * (1.0 - visibilityValue);
+    final double floatingButtonVisibilityValue =
+        extentRemaining * _kBottomSheetDominatesPercentage * 10;
+
+    final double opacity = math.max(
+      _kMinBottomSheetScrimOpacity,
+      _kMaxBottomSheetScrimOpacity - floatingButtonVisibilityValue,
+    );
+
+    return ModalBarrier(dismissible: false, color: Colors.black.withOpacity(opacity));
   }
 
   @override
@@ -3330,9 +3330,8 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
     if (extentRemaining < _kBottomSheetDominatesPercentage) {
       scaffold._floatingActionButtonVisibilityController.value =
           extentRemaining * _kBottomSheetDominatesPercentage * 10;
-      final double scrimVisibilityValue =
-          lerpDouble(1.0, 0.0, extentRemaining / _kBottomSheetDominatesPercentage)!;
 
+      final double scrimVisibilityValue = 1 - extentRemaining / _kBottomSheetDominatesPercentage;
       scaffold.showBodyScrim(true, scrimVisibilityValue);
     } else {
       scaffold._floatingActionButtonVisibilityController.value = 1.0;

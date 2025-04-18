@@ -403,8 +403,7 @@ void main() {
 
       final double extentRemaining = 1.0 - extent;
       if (extentRemaining < kBottomSheetDominatesPercentage) {
-        final double visibilityValue =
-            lerpDouble(1.0, 0.0, extentRemaining / kBottomSheetDominatesPercentage)!;
+        final double visibilityValue = 1 - extentRemaining / kBottomSheetDominatesPercentage;
 
         expect(findModalBarrier(), findsNothing);
         expect(findScrim(), findsOneWidget);
