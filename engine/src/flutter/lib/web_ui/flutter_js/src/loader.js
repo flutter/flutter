@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import { browserEnvironment } from './browser_environment.js';
+import { browserEnvironment, defaultWasmSupport } from './browser_environment.js';
 import { FlutterEntrypointLoader } from './entrypoint_loader.js';
 import { FlutterServiceWorkerLoader } from './service_worker_loader.js';
 import { FlutterTrustedTypesPolicy } from './trusted_types.js';
@@ -76,10 +76,11 @@ export class FlutterLoader {
       throw "FlutterLoader.load requires _flutter.buildConfig to be set";
     }
 
+    const enableWasm = config.wasmAllowList?.[browserEnvironment.browserEngine] ?? defaultWasmSupport[browserEnvironment.browserEngine];
     const rendererIsCompatible = (renderer) => {
       switch (renderer) {
         case "skwasm":
-          return browserEnvironment.supportsWasmGC;
+          return browserEnvironment.supportsWasmGC && enableWasm;
         default:
           return true;
       }

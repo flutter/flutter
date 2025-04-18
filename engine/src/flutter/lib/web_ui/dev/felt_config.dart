@@ -43,6 +43,7 @@ class RunConfiguration {
     this.variant,
     this.crossOriginIsolated,
     this.forceSingleThreadedSkwasm,
+    this.wasmAllowList,
   );
 
   final String name;
@@ -50,6 +51,7 @@ class RunConfiguration {
   final CanvasKitVariant? variant;
   final bool crossOriginIsolated;
   final bool forceSingleThreadedSkwasm;
+  final Map<String, bool> wasmAllowList;
 }
 
 class ArtifactDependencies {
@@ -174,12 +176,14 @@ class FeltConfig {
       final bool crossOriginIsolated = runConfigYaml['cross-origin-isolated'] as bool? ?? false;
       final bool forceSingleThreadedSkwasm =
           runConfigYaml['force-single-threaded-skwasm'] as bool? ?? false;
+      final YamlMap wasmAllowList = (runConfigYaml['wasm-allow-list'] as YamlMap?) ?? YamlMap();
       final RunConfiguration runConfig = RunConfiguration(
         name,
         browser,
         variant,
         crossOriginIsolated,
         forceSingleThreadedSkwasm,
+        wasmAllowList.cast<String, bool>(),
       );
       runConfigs.add(runConfig);
       if (runConfigsByName.containsKey(name)) {

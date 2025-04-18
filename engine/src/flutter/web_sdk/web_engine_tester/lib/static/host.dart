@@ -225,14 +225,6 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
         if (message.origin != domWindow.location.origin) {
           return;
         }
-        // We have to do these ugly casts because the message is cross-origin
-        // which isn't handled cleanly by dart:js_interop.
-        if (((message.source as DomMessageEventSource?)?.location as DomMessageEventLocation?)
-                ?.href !=
-            iframe.src) {
-          return;
-        }
-
         message.stopPropagation();
 
         if (message.data == 'port') {
