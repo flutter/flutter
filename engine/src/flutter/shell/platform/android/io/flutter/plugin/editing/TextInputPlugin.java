@@ -11,6 +11,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.text.Editable;
 import android.text.InputType;
 import android.util.SparseArray;
@@ -348,6 +349,10 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
       outAttrs.actionId = enterAction;
     }
     outAttrs.imeOptions |= enterAction;
+
+    if (Build.VERSION.SDK_INT >= API_LEVELS.API_24 && configuration.hintLocales != null) {
+      outAttrs.hintLocales = new LocaleList(configuration.hintLocales);
+    }
 
     if (configuration.contentCommitMimeTypes != null) {
       String[] imgTypeString = configuration.contentCommitMimeTypes;
