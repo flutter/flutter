@@ -3392,7 +3392,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     }
     builder.updateNode(
       id: id,
-      flags: data.flags,
+      flags: data.flagsCollection.toBoolList(),
       actions: data.actions,
       rect: data.rect,
       identifier: data.identifier,

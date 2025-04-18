@@ -1064,6 +1064,43 @@ class SemanticsFlags {
     this.isRequired = false,
   });
 
+  /// Convert a list of bools in a predefined order to Flag.
+  factory SemanticsFlags.fromBoolList(List<bool> flags) {
+    return SemanticsFlags(
+      hasCheckedState: flags[0],
+      isChecked: flags[1],
+      isSelected: flags[2],
+      isButton: flags[3],
+      isTextField: flags[4],
+      isFocused: flags[5],
+      hasEnabledState: flags[6],
+      isEnabled: flags[7],
+      isInMutuallyExclusiveGroup: flags[8],
+      isHeader: flags[9],
+      isObscured: flags[10],
+      scopesRoute: flags[11],
+      namesRoute: flags[12],
+      isHidden: flags[13],
+      isImage: flags[14],
+      isLiveRegion: flags[15],
+      hasToggledState: flags[16],
+      isToggled: flags[17],
+      hasImplicitScrolling: flags[18],
+      isMultiline: flags[19],
+      isReadOnly: flags[20],
+      isFocusable: flags[21],
+      isLink: flags[22],
+      isSlider: flags[23],
+      isKeyboardKey: flags[24],
+      isCheckStateMixed: flags[25],
+      hasExpandedState: flags[26],
+      isExpanded: flags[27],
+      hasSelectedState: flags[28],
+      hasRequiredState: flags[29],
+      isRequired: flags[30],
+    );
+  }
+
   /// The set of semantics flags with every flag set to false.
   static const SemanticsFlags kNone = SemanticsFlags();
 
@@ -1375,6 +1412,44 @@ class SemanticsFlags {
     ];
   }
 
+  /// Convert flags to a list of bools in a predefined order.
+  /// This can be used for serialization.
+  List<bool> toBoolList() {
+    return <bool>[
+      hasCheckedState,
+      isChecked,
+      isSelected,
+      isButton,
+      isTextField,
+      isFocused,
+      hasEnabledState,
+      isEnabled,
+      isInMutuallyExclusiveGroup,
+      isHeader,
+      isObscured,
+      scopesRoute,
+      namesRoute,
+      isHidden,
+      isImage,
+      isLiveRegion,
+      hasToggledState,
+      isToggled,
+      hasImplicitScrolling,
+      isMultiline,
+      isReadOnly,
+      isFocusable,
+      isLink,
+      isSlider,
+      isKeyboardKey,
+      isCheckStateMixed,
+      hasExpandedState,
+      isExpanded,
+      hasSelectedState,
+      hasRequiredState,
+      isRequired,
+    ];
+  }
+
   /// Checks if any of the boolean semantic flags are set to true
   /// in both this instance and the [other] instance.
   bool hasRepeatedFlags(SemanticsFlags other) {
@@ -1660,7 +1735,7 @@ abstract class SemanticsUpdateBuilder {
   ///    `validationResult` argument.
   void updateNode({
     required int id,
-    required int flags,
+    required List<bool> flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1737,7 +1812,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   @override
   void updateNode({
     required int id,
-    required int flags,
+    required List<bool> flags,
     required int actions,
     required int maxValueLength,
     required int currentValueLength,
@@ -1827,7 +1902,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
     Void Function(
       Pointer<Void>,
       Int32,
-      Int32,
+      Handle,
       Int32,
       Int32,
       Int32,
@@ -1870,7 +1945,7 @@ base class _NativeSemanticsUpdateBuilder extends NativeFieldWrapperClass1
   >(symbol: 'SemanticsUpdateBuilder::updateNode')
   external void _updateNode(
     int id,
-    int flags,
+    List<bool> flags,
     int actions,
     int maxValueLength,
     int currentValueLength,

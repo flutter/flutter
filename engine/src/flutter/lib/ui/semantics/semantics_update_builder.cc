@@ -30,35 +30,49 @@ SemanticsUpdateBuilder::SemanticsUpdateBuilder() = default;
 
 SemanticsUpdateBuilder::~SemanticsUpdateBuilder() = default;
 
-// TODO(hangyujin): This a temporary converter, change this to use a list of
-// bool after migrating framework to use SemanticsFlags class instead of a
-// bitmask.
-SemanticsFlags _intToSemanticsFlags(int bitmask) {
-  return SemanticsFlags{
-
-      (bitmask & (1 << 0)) != 0,  (bitmask & (1 << 1)) != 0,
-      (bitmask & (1 << 2)) != 0,  (bitmask & (1 << 3)) != 0,
-      (bitmask & (1 << 4)) != 0,  (bitmask & (1 << 5)) != 0,
-      (bitmask & (1 << 6)) != 0,  (bitmask & (1 << 7)) != 0,
-      (bitmask & (1 << 8)) != 0,  (bitmask & (1 << 9)) != 0,
-      (bitmask & (1 << 10)) != 0, (bitmask & (1 << 11)) != 0,
-      (bitmask & (1 << 12)) != 0, (bitmask & (1 << 13)) != 0,
-      (bitmask & (1 << 14)) != 0, (bitmask & (1 << 15)) != 0,
-      (bitmask & (1 << 16)) != 0, (bitmask & (1 << 17)) != 0,
-      (bitmask & (1 << 18)) != 0, (bitmask & (1 << 19)) != 0,
-      (bitmask & (1 << 20)) != 0, (bitmask & (1 << 21)) != 0,
-      (bitmask & (1 << 22)) != 0, (bitmask & (1 << 23)) != 0,
-      (bitmask & (1 << 24)) != 0, (bitmask & (1 << 25)) != 0,
-      (bitmask & (1 << 26)) != 0, (bitmask & (1 << 27)) != 0,
-      (bitmask & (1 << 28)) != 0, (bitmask & (1 << 29)) != 0,
-      (bitmask & (1 << 30)) != 0
-
-  };
+SemanticsFlags vectorBoolToSemanticsFlags(const std::vector<bool>& vec) {
+  std::vector<bool> local_vec = vec;
+  if (local_vec.size() < 31) {
+    local_vec.resize(31, false);
+  }
+  SemanticsFlags flags = {};
+  flags.hasCheckedState = local_vec[0];
+  flags.isChecked = local_vec[1];
+  flags.isSelected = local_vec[2];
+  flags.isButton = local_vec[3];
+  flags.isTextField = local_vec[4];
+  flags.isFocused = local_vec[5];
+  flags.hasEnabledState = local_vec[6];
+  flags.isEnabled = local_vec[7];
+  flags.isInMutuallyExclusiveGroup = local_vec[8];
+  flags.isHeader = local_vec[9];
+  flags.isObscured = local_vec[10];
+  flags.scopesRoute = local_vec[11];
+  flags.namesRoute = local_vec[12];
+  flags.isHidden = local_vec[13];
+  flags.isImage = local_vec[14];
+  flags.isLiveRegion = local_vec[15];
+  flags.hasToggledState = local_vec[16];
+  flags.isToggled = local_vec[17];
+  flags.hasImplicitScrolling = local_vec[18];
+  flags.isMultiline = local_vec[19];
+  flags.isReadOnly = local_vec[20];
+  flags.isFocusable = local_vec[21];
+  flags.isLink = local_vec[22];
+  flags.isSlider = local_vec[23];
+  flags.isKeyboardKey = local_vec[24];
+  flags.isCheckStateMixed = local_vec[25];
+  flags.hasExpandedState = local_vec[26];
+  flags.isExpanded = local_vec[27];
+  flags.hasSelectedState = local_vec[28];
+  flags.hasRequiredState = local_vec[29];
+  flags.isRequired = local_vec[30];
+  return flags;
 }
 
 void SemanticsUpdateBuilder::updateNode(
     int id,
-    int flags,
+    const std::vector<bool>& flags,
     int actions,
     int maxValueLength,
     int currentValueLength,
@@ -102,7 +116,7 @@ void SemanticsUpdateBuilder::updateNode(
          "childrenInHitTestOrder";
   SemanticsNode node;
   node.id = id;
-  node.flags = _intToSemanticsFlags(flags);
+  node.flags = vectorBoolToSemanticsFlags(flags);
   node.actions = actions;
   node.maxValueLength = maxValueLength;
   node.currentValueLength = currentValueLength;

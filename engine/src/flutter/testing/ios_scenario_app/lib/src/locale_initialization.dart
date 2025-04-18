@@ -42,7 +42,7 @@ class LocaleInitialization extends Scenario {
         SemanticsUpdateBuilder()..updateNode(
           id: 0,
           // SemanticsFlag.isTextField.
-          flags: 16,
+          flags: [false, false, false, false, true],
           // SemanticsAction.tap.
           actions: 1,
           rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
@@ -102,7 +102,7 @@ class LocaleInitialization extends Scenario {
         SemanticsUpdateBuilder()..updateNode(
           id: 0,
           // SemanticsFlag.isTextField.
-          flags: 16,
+          flags: [false, false, false, false, true],
           // SemanticsAction.tap.
           actions: 1,
           rect: const Rect.fromLTRB(0.0, 0.0, 414.0, 48.0),
