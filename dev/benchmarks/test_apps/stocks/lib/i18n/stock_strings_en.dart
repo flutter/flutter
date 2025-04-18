@@ -9,6 +9,7 @@ import 'package:intl/intl.dart' as intl;
 import 'stock_strings.dart';
 
 // ignore_for_file: type=lint
+// dart format on
 
 /// The translations for English (`en`).
 class StockStringsEn extends StockStrings {

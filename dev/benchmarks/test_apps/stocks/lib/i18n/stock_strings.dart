@@ -15,6 +15,7 @@ import 'stock_strings_en.dart';
 import 'stock_strings_es.dart';
 
 // ignore_for_file: type=lint
+// dart format on
 
 /// Callers can lookup localized strings with an instance of StockStrings
 /// returned by `StockStrings.of(context)`.

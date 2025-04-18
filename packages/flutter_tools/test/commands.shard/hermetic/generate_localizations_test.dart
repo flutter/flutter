@@ -349,7 +349,7 @@ flutter:
   );
 
   testUsingContext(
-    'dart format is run when --no-format is passed',
+    'dart format is not run when --no-format is passed',
         () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
