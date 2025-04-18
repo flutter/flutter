@@ -8,6 +8,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -62,6 +63,12 @@ const String oneMajorVersionHigherJavaVersion = '24';
 // flutter analyze --suggestions and does not imply broader flutter support.
 const String maxKnownAndSupportedGradleVersion = '8.12';
 
+// Update this with new KGP versions come out including minor versions.
+//
+// Supported here means supported by the tooling for
+// flutter analyze --suggestions and does not imply broader flutter support.
+const String maxKnownAndSupportedKgpVersion = '2.1.20';
+
 // Update this when new versions of AGP come out.
 //
 // Supported here means tooling is aware of this version's Java <-> AGP
@@ -72,12 +79,30 @@ const String maxKnownAndSupportedAgpVersion = '8.7.3';
 // Update this when new versions of AGP come out.
 const String maxKnownAgpVersion = '8.7.3';
 
+// Supported here means tooling is aware of this versions
+// Java <-> AGP compatibility and does not imply broader flutter support.
+// For use in flutter see the code in:
+// flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt
+@visibleForTesting
+const String oldestConsideredAgpVersion = '3.3.0';
+
+// Supported here means tooling is aware of this versions
+// gradle compatibility and does not imply broader flutter support.
+@visibleForTesting
+const String oldestConsideredGradleVersion = '4.10.1';
+
+// Supported here means tooling is aware of this versions
+// gradle/AGP compatibility and does not imply broader flutter support.
+@visibleForTesting
+const String oldestDocumentedKgpCompatabilityVersion = '1.6.20';
+
 // Oldest documented version of AGP that has a listed minimum
 // compatible Java version.
 const String oldestDocumentedJavaAgpCompatibilityVersion = '4.2';
 
 // Constant used in [_buildAndroidGradlePluginRegExp] and
-// [_settingsAndroidGradlePluginRegExp] to identify the version section.
+// [_settingsAndroidGradlePluginRegExp] and [_kotlinGradlePluginRegExpFromId]
+// to identify the version section.
 const String _versionGroupName = 'version';
 
 // AGP can be defined in the dependencies block of [build.gradle] or [build.gradle.kts].
@@ -103,6 +128,17 @@ final RegExp _androidGradlePluginRegExpFromId = RegExp(
   multiLine: true,
 );
 
+// KGP is defined in several places this code only checks in plugins block
+// of [settings.gradle] and [settings.gradle.kts].
+// Expected content:
+// Groovy DSL - id "org.jetbrains.kotlin.android" version "{{kgpVersion}}"
+// Kotlin DSL - id("org.jetbrains.kotlin.android") version "{{kgpVersion}}"
+// ?<version> is used to name the version group which helps with extraction.
+final RegExp _kotlinGradlePluginRegExpFromId = RegExp(
+  r"""[^\/]*s*id\s*\(?['"]org\.jetbrains\.kotlin\.android['"]\)?\s+version\s+['"](?<version>\d+(\.\d+){1,2})\)?""",
+  multiLine: true,
+);
+
 // Expected content format (with lines above and below).
 // Version can have 2 or 3 numbers.
 // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
@@ -125,7 +161,8 @@ final RegExp tooOldMinSdkVersionMatch = RegExp(
 );
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
-const String gradleVersionFlag = r'--version';
+// Flag to print the versions for gradle, kotlin dsl, groovy, etc.
+const String gradleVersionsFlag = r'--version';
 
 // Directory under android/ that gradle uses to store gradle information.
 // Regularly used with [gradleWrapperDirectory] and
@@ -274,7 +311,7 @@ Future<String?> getGradleVersion(
         return gradleVersion;
       } else {
         // Did not find gradle zip url. Likely this is a bug in our parsing.
-        logger.printWarning(_formatParseWarning(wrapperFileContent));
+        logger.printWarning(_formatParseWarning(wrapperFileContent, type: 'gradle'));
       }
     } else {
       // If no distributionUrl log then treat as if there was no propertiesFile.
@@ -287,9 +324,10 @@ Future<String?> getGradleVersion(
     logger.printTrace('$propertiesFile does not exist falling back to system gradle');
   }
   // System installed Gradle version.
+  // TODO(reidbaker): Modify this gradle execution to use gradlew.
   if (processManager.canRun('gradle')) {
-    final String gradleVersionVerbose =
-        (await processManager.run(<String>['gradle', gradleVersionFlag])).stdout as String;
+    final String gradleVersionsVerbose =
+        (await processManager.run(<String>['gradle', gradleVersionsFlag])).stdout as String;
     // Expected format:
     /*
 
@@ -311,10 +349,10 @@ OS:           Mac OS X 13.2.1 aarch64
     // Outer parentheticals `Gradle (...)` denote a grouping used to extract
     // the version number.
     final RegExp gradleVersionRegex = RegExp(r'Gradle\s+(\d+\.\d+(?:\.\d+)?)');
-    final RegExpMatch? version = gradleVersionRegex.firstMatch(gradleVersionVerbose);
+    final RegExpMatch? version = gradleVersionRegex.firstMatch(gradleVersionsVerbose);
     if (version == null) {
       // Most likely a bug in our parse implementation/regex.
-      logger.printWarning(_formatParseWarning(gradleVersionVerbose));
+      logger.printWarning(_formatParseWarning(gradleVersionsVerbose, type: 'gradle'));
       return null;
     }
     return version.group(1);
@@ -322,6 +360,80 @@ OS:           Mac OS X 13.2.1 aarch64
     logger.printTrace('Could not run system gradle');
     return null;
   }
+}
+
+/// Returns the Kotlin Gradle Plugin (KGP) version that the current project
+/// depends on if found, null otherwise.
+/// [directory] should be an android directory with a build.gradle file.
+Future<String?> getKgpVersion(
+  Directory androidDirectory,
+  Logger logger,
+  ProcessManager processManager,
+) async {
+  // Maintainers of the kotlin dsl and the kotlin gradle plugin are different.
+  //
+  // Android Docs refer to the kotlin gradle plugin with either the full name or KGP.
+  // Kotlin docs refer to the kotlin gradle plugin as kotlin android plugin.
+  //
+  // gradle --version or ./gradlew --version will print the kotlin dsl version.
+  // This version normally changes with the version of gradle.
+  // https://github.com/gradle/gradle/blob/cefbee263181a924ac4efcaace6bda97a55bc0f7/platforms/core-runtime/gradle-cli/src/main/java/org/gradle/launcher/cli/DefaultCommandLineActionFactory.java#L260
+  // This vesion is NOT the version of KGP that the project uses.
+  //
+  // Instead the kgpVersion task is a custom flutter task dynamiclly added that can
+  // print the kgp version if gradle can run successfuly.
+
+  if (processManager.canRun('./gradlew', workingDirectory: androidDirectory.path)) {
+    final ProcessResult command = await processManager.run(<String>[
+      './gradlew',
+      'kgpVersion',
+      '-q',
+    ], workingDirectory: androidDirectory.path);
+    if (command.exitCode == 0) {
+      final String kgpVersionOutput = command.stdout as String;
+
+      // See expected output defined in
+      // flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt addTaskForKGPVersion
+      final RegExp kotlinVersionRegex = RegExp(r'KGP Version:\s+(\d+\.\d+(?:\.\d+)?)');
+      final RegExpMatch? version = kotlinVersionRegex.firstMatch(kgpVersionOutput);
+      if (version != null) {
+        return version.group(1);
+      }
+      // Most likely a bug in our parse implementation/regex.
+      logger.printWarning(_formatParseWarning(kgpVersionOutput, type: 'kotlin'));
+    } else {
+      logger.printTrace('Non zero exit code from gradle task kgpVersion.');
+    }
+  } else {
+    logger.printTrace('Could not run gradle task kgpVersion.');
+  }
+
+  // Project valiation code is regularly run on projects that can not build.
+  // Because of that this code also attempts to search through known template
+  // locations for kotlin versions.
+
+  logger.printTrace('Checking settings for kgp version.');
+  File settingsFile = androidDirectory.childFile('settings.gradle');
+  if (!settingsFile.existsSync()) {
+    settingsFile = androidDirectory.childFile('settings.gradle.kts');
+  }
+
+  if (settingsFile.existsSync()) {
+    final String settingsFileContent = settingsFile.readAsStringSync();
+    final RegExpMatch? settingsMatch = _kotlinGradlePluginRegExpFromId.firstMatch(
+      settingsFileContent,
+    );
+
+    if (settingsMatch != null) {
+      final String? kgpVersion = settingsMatch.namedGroup(_versionGroupName);
+      logger.printTrace('$settingsFile provides KGP version: $kgpVersion');
+      return kgpVersion;
+    }
+  } else {
+    logger.printTrace('No settings.gradle.kts');
+  }
+
+  return null;
 }
 
 /// Returns the Android Gradle Plugin (AGP) version that the current project
@@ -378,12 +490,196 @@ String? getAgpVersion(Directory androidDirectory, Logger logger) {
   return null;
 }
 
-String _formatParseWarning(String content) {
-  return 'Could not parse gradle version from: \n'
+String _formatParseWarning(String content, {required String type}) {
+  return 'Could not parse $type version from: \n'
       '$content \n'
       'If there is a version please look for an existing bug '
       'https://github.com/flutter/flutter/issues/'
       ' and if one does not exist file a new issue.';
+}
+
+// Validate that KGP and Gradle are compatible with each other.
+//
+// Returns true if versions are compatible.
+// Null or empty Gradle or KGP version returns false.
+// If compatibility cannot be evaluated returns false.
+// If versions are newer than the max known version a warning is logged and true
+// returned.
+//
+// Source of truth found here:
+// https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+bool validateGradleAndKGP(Logger logger, {required String? kgpV, required String? gradleV}) {
+  if (gradleV == null || kgpV == null || gradleV.isEmpty || kgpV.isEmpty) {
+    logger.printTrace('Gradle or KGP version unknown ($gradleV, $kgpV).');
+    return false;
+  }
+
+  if (isWithinVersionRange(gradleV, min: '0.0', max: oldestConsideredGradleVersion)) {
+    logger.printTrace(
+      'Gradle version $gradleV older than oldest considered $oldestConsideredGradleVersion',
+    );
+    return false;
+  }
+
+  if (isWithinVersionRange(
+    kgpV,
+    min: maxKnownAndSupportedKgpVersion,
+    max: '100.100',
+    inclusiveMin: false,
+  )) {
+    logger.printTrace(
+      'Newer than known KGP version ($kgpV), gradle ($gradleV).'
+      '\n Treating as valid configuration.',
+    );
+    return true;
+  }
+
+  // https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+  // Documenation is non continuous, past versions are known to the
+  // publishers of KGP. When covering version ranges beyond what is documented
+  // add a comment with the documented value.
+  // Continuous KGP version handling is prefered in case an emergency patch to a
+  // past release is shipped this code will assume the version range that is closest.
+  if (isWithinVersionRange(kgpV, min: '2.1.20', max: '2.1.20')) {
+    // Documented max is 8.11, using 8.12 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.12', inclusiveMax: false);
+  }
+  if (isWithinVersionRange(kgpV, min: '2.1.0', max: '2.1.10')) {
+    // Documented max is 8.10, using 8.11 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '7.6.3', max: '8.11', inclusiveMax: false);
+  }
+  // Documented max is 2.0.21.
+  if (isWithinVersionRange(kgpV, min: '2.0.20', max: '2.1', inclusiveMax: false)) {
+    // Documented max is 8.5, using 8.9 non inclusive covers patch versions.
+    // Kotlin Multiplatform can throw warnings on 8.8.
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.9', inclusiveMax: false);
+  }
+  if (isWithinVersionRange(kgpV, min: '2.0', max: '2.0.20', inclusiveMax: false)) {
+    // Documented max is 8.5, using 8.6 non inclusive covers patch versions.
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.6', inclusiveMax: false);
+  }
+  // Documented max is 1.9.25.
+  if (isWithinVersionRange(kgpV, min: '1.9.20', max: '2.0', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '8.1.1');
+  }
+  // Documented max is 1.9.10.
+  if (isWithinVersionRange(kgpV, min: '1.8.20', max: '1.9.20', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '7.6.0');
+  }
+  // Documented max is 1.8.11.
+  if (isWithinVersionRange(kgpV, min: '1.8.0', max: '1.8.20', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.8.3', max: '7.3.3');
+  }
+  // Documented max is 1.7.22.
+  if (isWithinVersionRange(kgpV, min: '1.7.20', max: '1.8.0', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.7.1', max: '7.1.1');
+  }
+  // Documented max is 1.7.10.
+  if (isWithinVersionRange(kgpV, min: '1.7.0', max: '1.7.20', inclusiveMax: false)) {
+    return isWithinVersionRange(gradleV, min: '6.7.1', max: '7.0.2');
+  }
+  // Documented max is 1.6.21.
+  if (isWithinVersionRange(
+    kgpV,
+    min: oldestDocumentedKgpCompatabilityVersion,
+    max: '1.7.0',
+    inclusiveMax: false,
+  )) {
+    return isWithinVersionRange(gradleV, min: '6.1.1', max: '7.0.2');
+  }
+
+  logger.printTrace('Unknown KGP-Gradle compatibility, KGP: $kgpV, Gradle: $gradleV');
+  return false;
+}
+
+// Validate that KGP and AGP are compatible with each other.
+//
+// Returns true if versions are compatible.
+// Null or empty KGP or AGP version returns false.
+// If compatibility cannot be evaluated returns false.
+// If versions are newer than the max known version a warning is logged and true
+// returned.
+//
+// Source of truth found here:
+// https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+bool validateAgpAndKgp(Logger logger, {required String? kgpV, required String? agpV}) {
+  if (agpV == null || kgpV == null || agpV.isEmpty || kgpV.isEmpty) {
+    logger.printTrace('KGP or AGP version unknown ($kgpV, $agpV).');
+    return false;
+  }
+
+  if (isWithinVersionRange(agpV, min: '0.0', max: oldestConsideredAgpVersion)) {
+    logger.printTrace(
+      'AGP version ($agpV) older than oldest supported $oldestConsideredAgpVersion.',
+    );
+  }
+  const String maxKnownAgpVersionWithFullKotinSupport = '8.7.2';
+
+  if (isWithinVersionRange(
+        kgpV,
+        min: maxKnownAndSupportedKgpVersion,
+        max: '100.100',
+        inclusiveMin: false,
+      ) ||
+      isWithinVersionRange(
+        agpV,
+        min: maxKnownAgpVersionWithFullKotinSupport,
+        max: '100.100',
+        inclusiveMin: false,
+      )) {
+    logger.printTrace(
+      'Newer than known KGP version ($kgpV), AGP ($agpV).'
+      '\n Treating as valid configuration.',
+    );
+    return true;
+  }
+
+  // https://kotlinlang.org/docs/gradle-configure-project.html#apply-the-plugin
+  // Documenation is non continuous, past versions are known to the
+  // publishers of KGP. When covering version ranges beyond what is documented
+  // add a comment with the documented value.
+  // Continuous KGP version handling is prefered in case an emergency patch to a
+  // past release is shipped this code will assume the version range that is closest.
+  if (isWithinVersionRange(kgpV, min: '2.1.0', max: '2.1.20')) {
+    return isWithinVersionRange(agpV, min: '7.3.1', max: '8.7.2');
+  }
+  // Documented max is 2.0.21
+  if (isWithinVersionRange(kgpV, min: '2.0.20', max: '2.1.0', inclusiveMax: false)) {
+    // Documented max is 8.5.
+    return isWithinVersionRange(agpV, min: '7.1.3', max: '8.6', inclusiveMax: false);
+  }
+  // Documented max is 2.0.0.
+  if (isWithinVersionRange(kgpV, min: '2.0.0', max: '2.0.20', inclusiveMax: false)) {
+    return isWithinVersionRange(agpV, min: '7.1.3', max: '8.3.1');
+  }
+  // Documented max is 1.9.25
+  if (isWithinVersionRange(kgpV, min: '1.9.20', max: '2.0.0', inclusiveMax: false)) {
+    return isWithinVersionRange(agpV, min: '4.2.2', max: '8.1.0');
+  }
+  // Documented max is 1.9.10
+  if (isWithinVersionRange(kgpV, min: '1.9.0', max: '1.9.20', inclusiveMax: false)) {
+    return isWithinVersionRange(agpV, min: '4.2.2', max: '7.4.0');
+  }
+  // Documented max is 1.8.22
+  if (isWithinVersionRange(kgpV, min: '1.8.20', max: '1.9', inclusiveMax: false)) {
+    return isWithinVersionRange(agpV, min: '4.1.3', max: '7.4.0');
+  }
+  // Documented max is 1.8.11
+  if (isWithinVersionRange(kgpV, min: '1.8.0', max: '1.8.20', inclusiveMax: false)) {
+    return isWithinVersionRange(agpV, min: '4.1.3', max: '7.2.1');
+  }
+  // Documented max is 1.7.22
+  if (isWithinVersionRange(kgpV, min: '1.7.20', max: '1.8.0', inclusiveMax: false)) {
+    return isWithinVersionRange(agpV, min: '3.6.4', max: '7.0.4');
+  }
+  // Documented max is 1.7.10
+  // Documented gap between 1.6.21 and 1.7.0.
+  if (isWithinVersionRange(kgpV, min: '1.6.20', max: '1.7.20', inclusiveMax: false)) {
+    return isWithinVersionRange(agpV, min: '3.4.3', max: '7.0.2');
+  }
+
+  logger.printTrace('Unknown KGP-Gradle compatibility, KGP: $kgpV, AGP: $agpV');
+  return false;
 }
 
 // Validate that Gradle version and AGP are compatible with each other.
@@ -399,23 +695,25 @@ String _formatParseWarning(String content) {
 // AGP has a minimum version of gradle required but no max starting at
 // AGP version 2.3.0+.
 bool validateGradleAndAgp(Logger logger, {required String? gradleV, required String? agpV}) {
-  const String oldestSupportedAgpVersion = '3.3.0';
-  const String oldestSupportedGradleVersion = '4.10.1';
-
   if (gradleV == null || agpV == null) {
     logger.printTrace('Gradle version or AGP version unknown ($gradleV, $agpV).');
     return false;
   }
 
   // First check if versions are too old.
-  if (isWithinVersionRange(agpV, min: '0.0', max: oldestSupportedAgpVersion, inclusiveMax: false)) {
+  if (isWithinVersionRange(
+    agpV,
+    min: '0.0',
+    max: oldestConsideredAgpVersion,
+    inclusiveMax: false,
+  )) {
     logger.printTrace('AGP Version: $agpV is too old.');
     return false;
   }
   if (isWithinVersionRange(
     gradleV,
     min: '0.0',
-    max: oldestSupportedGradleVersion,
+    max: oldestConsideredGradleVersion,
     inclusiveMax: false,
   )) {
     logger.printTrace('Gradle Version: $gradleV is too old.');
@@ -499,7 +797,7 @@ bool validateGradleAndAgp(Logger logger, {required String? gradleV, required Str
 /// https://docs.gradle.org/current/userguide/compatibility.html#java
 bool validateJavaAndGradle(Logger logger, {required String? javaV, required String? gradleV}) {
   // https://docs.gradle.org/current/userguide/compatibility.html#java
-  const String oldestSupportedJavaVersion = '1.8';
+  const String oldestConsideredJavaVersion = '1.8';
   const String oldestDocumentedJavaGradleCompatibility = '2.0';
 
   // Begin Java <-> Gradle validation.
@@ -513,7 +811,7 @@ bool validateJavaAndGradle(Logger logger, {required String? javaV, required Stri
   if (isWithinVersionRange(
     javaV,
     min: '1.1',
-    max: oldestSupportedJavaVersion,
+    max: oldestConsideredJavaVersion,
     inclusiveMax: false,
   )) {
     logger.printTrace('Java Version: $javaV is too old.');

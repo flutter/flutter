@@ -886,7 +886,7 @@ class FlutterPluginUtilsTest {
         verify(exactly = 1) {
             project.logger.quiet(
                 "Project does not support Flutter build mode: debug, " +
-                    "skipping adding flutter dependencies"
+                    "skipping adding Flutter dependencies"
             )
         }
     }
@@ -1046,6 +1046,24 @@ class FlutterPluginUtilsTest {
         verify {
             mockTask.description = "Print the current java version used by gradle. see: " +
                 "https://docs.gradle.org/current/javadoc/org/gradle/api/JavaVersion.html"
+        }
+    }
+
+    // addTaskForKGPVersion
+    @Test
+    fun `addTaskForKGPVersion adds task for KGP version`() {
+        val project = mockk<Project>()
+        every { project.tasks.register(any(), any<Action<Task>>()) } returns mockk()
+        val captureSlot = slot<Action<Task>>()
+        FlutterPluginUtils.addTaskForKGPVersion(project)
+        verify { project.tasks.register("kgpVersion", capture(captureSlot)) }
+
+        val mockTask = mockk<Task>()
+        every { mockTask.description = any() } returns Unit
+        every { mockTask.doLast(any<Action<Task>>()) } returns mockk()
+        captureSlot.captured.execute(mockTask)
+        verify {
+            mockTask.description = "Print the current kgp version used by the project."
         }
     }
 
