@@ -148,7 +148,20 @@ class SensitiveContentHost {
   }
 
   Future<void> _register(ContentSensitivity desiredSensitivity) async {
-    _contentSenstivityIsSupported ??= await _sensitiveContentService.isSupported();
+    try {
+      _contentSenstivityIsSupported ??= await _sensitiveContentService.isSupported();
+    } on PlatformException catch (e) {
+      _contentSenstivityIsSupported = false;
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: FlutterError(
+            'Call to check if setting content sensitivity is supported on the current platform failed unexpectedly, so it is assumed to be unsupported: $e}',
+          ),
+          library: 'widget library',
+          stack: e.stacktrace == null ? StackTrace.current : StackTrace.fromString(e.stacktrace!),
+        ),
+      );
+    }
     if (!_contentSenstivityIsSupported!) {
       // Setting content sensitivity is not supported on this device.
       return;

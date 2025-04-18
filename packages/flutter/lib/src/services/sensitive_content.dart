@@ -137,15 +137,6 @@ class SensitiveContentService {
     if (defaultTargetPlatform != TargetPlatform.android) {
       return false;
     }
-
-    try {
-      final bool result =
-          (await sensitiveContentChannel.invokeMethod<bool>('SensitiveContent.isSupported'))!;
-      return result;
-    } catch (e) {
-      // If this call fails or unexpectedly returns null, then consider setting content
-      // sensitivity unsupported.
-      return false;
-    }
+    return (await sensitiveContentChannel.invokeMethod<bool>('SensitiveContent.isSupported'))!;
   }
 }
