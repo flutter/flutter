@@ -10,7 +10,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.DynamicLayout;
 import android.text.Editable;
@@ -497,8 +496,7 @@ public class InputConnectionAdaptor extends BaseInputConnection
   @RequiresApi(API_LEVELS.API_25)
   public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
     // Ensure permission is granted.
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_25
-        && (flags & InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
+    if ((flags & InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0) {
       try {
         inputContentInfo.requestPermission();
       } catch (Exception e) {

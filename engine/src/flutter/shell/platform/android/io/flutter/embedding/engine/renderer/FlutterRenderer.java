@@ -913,11 +913,9 @@ public class FlutterRenderer implements TextureRegistry {
     private ImageReader createImageReader() {
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
         return createImageReader33();
-      } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+      } else {
         return createImageReader29();
       }
-      throw new UnsupportedOperationException(
-          "ImageReaderPlatformViewRenderTarget requires API version 29+");
     }
 
     @VisibleForTesting

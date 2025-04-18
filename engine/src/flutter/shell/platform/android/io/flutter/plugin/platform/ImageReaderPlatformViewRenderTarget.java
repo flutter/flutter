@@ -85,18 +85,12 @@ public class ImageReaderPlatformViewRenderTarget implements PlatformViewRenderTa
   protected ImageReader createImageReader() {
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_33) {
       return createImageReader33();
-    } else if (Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+    } else {
       return createImageReader29();
     }
-    throw new UnsupportedOperationException(
-        "ImageReaderPlatformViewRenderTarget requires API version 29+");
   }
 
   public ImageReaderPlatformViewRenderTarget(ImageTextureEntry textureEntry) {
-    if (Build.VERSION.SDK_INT < API_LEVELS.API_29) {
-      throw new UnsupportedOperationException(
-          "ImageReaderPlatformViewRenderTarget requires API version 29+");
-    }
     this.textureEntry = textureEntry;
   }
 

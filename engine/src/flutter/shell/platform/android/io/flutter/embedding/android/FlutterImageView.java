@@ -14,7 +14,6 @@ import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
-import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.util.AttributeSet;
 import android.view.Surface;
@@ -26,7 +25,6 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.RenderSurface;
-import java.nio.ByteBuffer;
 import java.util.Locale;
 
 /**
@@ -255,30 +253,10 @@ public class FlutterImageView extends View implements RenderSurface {
 
   @RequiresApi(API_LEVELS.API_29)
   private void updateCurrentBitmap() {
-    if (android.os.Build.VERSION.SDK_INT >= API_LEVELS.API_29) {
+    {
       final HardwareBuffer buffer = currentImage.getHardwareBuffer();
       currentBitmap = Bitmap.wrapHardwareBuffer(buffer, ColorSpace.get(ColorSpace.Named.SRGB));
       buffer.close();
-    } else {
-      final Plane[] imagePlanes = currentImage.getPlanes();
-      if (imagePlanes.length != 1) {
-        return;
-      }
-
-      final Plane imagePlane = imagePlanes[0];
-      final int desiredWidth = imagePlane.getRowStride() / imagePlane.getPixelStride();
-      final int desiredHeight = currentImage.getHeight();
-
-      if (currentBitmap == null
-          || currentBitmap.getWidth() != desiredWidth
-          || currentBitmap.getHeight() != desiredHeight) {
-        currentBitmap =
-            Bitmap.createBitmap(
-                desiredWidth, desiredHeight, android.graphics.Bitmap.Config.ARGB_8888);
-      }
-      ByteBuffer buffer = imagePlane.getBuffer();
-      buffer.rewind();
-      currentBitmap.copyPixelsFromBuffer(buffer);
     }
   }
 
