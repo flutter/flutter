@@ -5952,80 +5952,83 @@ void main() {
     });
   });
 
-  testWidgets('manual nested Navigators with handlesBacksWhenNested false and NavigatorPopHandler.onPopWithResult', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
-    final GlobalKey<NavigatorState> nestedNav = GlobalKey<NavigatorState>();
-    const String result = 'i am a result';
-    final List<String?> results = <String>[];
-    await tester.pumpWidget(
-      MaterialApp(
-        navigatorKey: nav,
-        initialRoute: '/',
-        routes: <String, WidgetBuilder>{
-          '/':
-              (BuildContext context) => _LinksPage(
-                title: 'Home page',
-                buttons: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed('/one');
-                    },
-                    child: const Text('Go to one'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed('/nested');
-                    },
-                    child: const Text('Go to nested'),
-                  ),
-                ],
-              ),
-          '/one':
-              (BuildContext context) => _LinksPage(
-                title: 'Page one',
-                buttons: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed('/one/one');
-                    },
-                    child: const Text('Go to one/one'),
-                  ),
-                ],
-              ),
-          '/nested':
-              (BuildContext context) => _NestedNavigatorsPage(
-                navigatorKey: nestedNav,
-                onPopWithResult: (String? result) {
-                  results.add(result);
-                },
-              ),
-        },
-      ),
-    );
+  testWidgets(
+    'manual nested Navigators with handlesBacksWhenNested false and NavigatorPopHandler.onPopWithResult',
+    (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      final GlobalKey<NavigatorState> nestedNav = GlobalKey<NavigatorState>();
+      const String result = 'i am a result';
+      final List<String?> results = <String>[];
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/':
+                (BuildContext context) => _LinksPage(
+                  title: 'Home page',
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/one');
+                      },
+                      child: const Text('Go to one'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/nested');
+                      },
+                      child: const Text('Go to nested'),
+                    ),
+                  ],
+                ),
+            '/one':
+                (BuildContext context) => _LinksPage(
+                  title: 'Page one',
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/one/one');
+                      },
+                      child: const Text('Go to one/one'),
+                    ),
+                  ],
+                ),
+            '/nested':
+                (BuildContext context) => _NestedNavigatorsPage(
+                  navigatorKey: nestedNav,
+                  onPopWithResult: (String? result) {
+                    results.add(result);
+                  },
+                ),
+          },
+        ),
+      );
 
-    expect(find.text('Home page'), findsOneWidget);
+      expect(find.text('Home page'), findsOneWidget);
 
-    await tester.tap(find.text('Go to nested'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Go to nested'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Nested - home'), findsOneWidget);
+      expect(find.text('Nested - home'), findsOneWidget);
 
-    await tester.tap(find.text('Go to nested/one'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Go to nested/one'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Nested - page one'), findsOneWidget);
-    expect(results, isEmpty);
+      expect(find.text('Nested - page one'), findsOneWidget);
+      expect(results, isEmpty);
 
-    // Pop the root Navigator, despite being on a route in the nested
-    // Navigator. This is to trigger NavigatorPopHandler.onPopWithResult with
-    // a the given result.
-    await nav.currentState?.maybePop(result);
-    await tester.pumpAndSettle();
+      // Pop the root Navigator, despite being on a route in the nested
+      // Navigator. This is to trigger NavigatorPopHandler.onPopWithResult with
+      // a the given result.
+      await nav.currentState?.maybePop(result);
+      await tester.pumpAndSettle();
 
-    expect(find.text('Nested - home'), findsOneWidget);
-    expect(results, hasLength(1));
-    expect(results.first, result);
-  });
+      expect(find.text('Nested - home'), findsOneWidget);
+      expect(results, hasLength(1));
+      expect(results.first, result);
+    },
+  );
 
   testWidgets('Directional focus traversal behavior with nested Navigators.', (
     WidgetTester tester,
