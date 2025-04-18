@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 
 // If true, the app autofocuses a text field, making the software keyboard visible.
+// The test changes this line while the app is running.
+// If you change this line, update the test as well.
 // See:
 // //dev/devicelab/lib/tasks/keyboard_hot_restart_test.dart
 const bool forceKeyboard = true;
@@ -29,6 +31,9 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Print the app's view insets.
     // The test uses the bottom value to check whether the keyboard is visible.
+    // If you change this line, update the test as well.
+    // See:
+    // //dev/devicelab/lib/tasks/keyboard_hot_restart_test.dart
     // ignore: avoid_print
     print('viewInsets: ${MediaQuery.of(context).viewInsets}');
 

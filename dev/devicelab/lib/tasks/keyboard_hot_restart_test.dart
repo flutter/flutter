@@ -13,12 +13,18 @@ import '../framework/framework.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
-// Verifies that hot restart hides the keyboard if it is visible:
+// This test verifies that hot restart hides the keyboard if it is visible.
 //
-// 1. Launches an app that forces the keyboard to be visible
-// 2. Updates the app to no longer force the keyboard to be visible
-// 3. Hot restarts
-// 4. Checks that the keyboard is no longer visible
+// Steps:
+//
+// 1. Launch an app that focuses a text field at startup.
+//    This makes the keyboard visible.
+// 2. Wait until the keyboard is visible.
+// 3. Update the app's source code to no longer focus a text field at startup.
+// 4. Hot restart the app
+// 5. Wait until the keyboard is no longer visible.
+//
+// See: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
 TaskFunction createKeyboardHotRestartTest({
   String? deviceIdOverride,
   bool checkAppRunningOnLocalDevice = false,
@@ -27,10 +33,15 @@ TaskFunction createKeyboardHotRestartTest({
   final Directory appDir = dir(
     path.join(flutterDirectory.path, 'dev/integration_tests/keyboard_hot_restart'),
   );
-  final File mainFile = file(path.join(appDir.path, 'lib/main.dart'));
 
   // This file is modified during the test and needs to be restored at the end.
+  final File mainFile = file(path.join(appDir.path, 'lib/main.dart'));
   final String oldContents = mainFile.readAsStringSync();
+
+  // When the test starts, the app forces the keyboard to be visible.
+  // The test turns off this behavior by mutating the app's source code from
+  // `forceKeyboardOn` to `forceKeyboardOff`.
+  // See: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
   const String forceKeyboardOn = 'const bool forceKeyboard = true;';
   const String forceKeyboardOff = 'const bool forceKeyboard = false;';
 
@@ -41,7 +52,7 @@ TaskFunction createKeyboardHotRestartTest({
       deviceIdOverride = device.deviceId;
     }
 
-    await inDirectory<void>(appDir, () async {
+    return inDirectory<TaskResult>(appDir, () async {
       try {
         section('Create app');
         await createAppProject();
@@ -54,11 +65,11 @@ TaskFunction createKeyboardHotRestartTest({
 
         TestState state = TestState.waitUntilKeyboardOpen;
 
-        await runApp(
+        final int exitCode = await runApp(
           options: <String>['-d', deviceIdOverride!],
           onLine: (String line, Process process) {
             if (state == TestState.waitUntilKeyboardOpen) {
-              if (!lineIndicatesKeyboardIsOpen(line)) {
+              if (!stdoutLineIndicatesKeyboardIsOpen(line)) {
                 return;
               }
 
@@ -69,26 +80,31 @@ TaskFunction createKeyboardHotRestartTest({
               );
               mainFile.writeAsStringSync(newContents);
 
-              section('Hot reload app');
+              section('Hot restart the app');
               process.stdin.writeln('R');
 
               section('Wait until the keyboard is no longer visible');
               state = TestState.waitUntilKeyboardClosed;
             } else if (state == TestState.waitUntilKeyboardClosed) {
-              if (!lineIndicatesKeyboardIsClosed(line)) {
+              if (!stdoutLineIndicatesKeyboardIsOpen(line)) {
                 return;
               }
 
+              // Quit the app. This makes the 'flutter run' process exit.
               process.stdin.writeln('q');
             }
           },
         );
+
+        if (exitCode != 0) {
+          return TaskResult.failure('flutter run exited with non-zero exit code: $exitCode');
+        }
       } finally {
         mainFile.writeAsStringSync(oldContents);
       }
-    });
 
-    return TaskResult.success(null);
+      return TaskResult.success(null);
+    });
   };
 }
 
@@ -102,7 +118,7 @@ Future<void> createAppProject() async {
   ]);
 }
 
-Future<void> runApp({
+Future<int> runApp({
   required List<String> options,
   required void Function(String, Process) onLine,
 }) async {
@@ -127,10 +143,12 @@ Future<void> runApp({
       .listen((String line) => print('stderr: $line'), onDone: stderrDone.complete);
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
-  await process.exitCode;
+  return process.exitCode;
 }
 
-bool lineIndicatesKeyboardIsOpen(String line) {
+// Check if the keyboard_hot_restart app's stdout indicates the keyboard is open.
+// See: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
+bool stdoutLineIndicatesKeyboardIsOpen(String line) {
   final RegExp regExp = RegExp(
     r'flutter: viewInsets: EdgeInsets\(\d+\.\d+, \d+\.\d+, \d+\.\d+, (\d+\.\d+)\)',
   );
@@ -144,6 +162,8 @@ bool lineIndicatesKeyboardIsOpen(String line) {
   return keyboardHeight > 0;
 }
 
-bool lineIndicatesKeyboardIsClosed(String line) {
+// Check if the keyboard_hot_restart app's stdout indicates the keyboard is closed.
+// See: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
+bool stdoutLineIndicatesKeyboardIsClosed(String line) {
   return line.contains('flutter: viewInsets: EdgeInsets.zero');
 }

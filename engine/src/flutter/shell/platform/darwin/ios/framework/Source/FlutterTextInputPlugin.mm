@@ -2520,8 +2520,6 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)reset {
-  // Reset the text input plugin to prepare for a hot restart.
-  // Hide the software keyboard and text editing context menu if they are visible.
   [self hideTextInput];
 }
 
