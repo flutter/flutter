@@ -5,19 +5,12 @@
 import 'dart:async';
 import 'dart:js_interop';
 
-import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 /// Tracks the [FlutterView]s focus changes.
 final class ViewFocusBinding {
   ViewFocusBinding(this._viewManager, this._onViewFocusChange);
-
-  /// Whether [FlutterView] focus changes will be reported and performed.
-  ///
-  /// DO NOT rely on this bit as it will go away soon. You're warned :)!
-  @visibleForTesting
-  static bool isEnabled = true;
 
   final FlutterViewManager _viewManager;
   final ui.ViewFocusChangeCallback _onViewFocusChange;
@@ -46,9 +39,6 @@ final class ViewFocusBinding {
   }
 
   void changeViewFocus(int viewId, ui.ViewFocusState state) {
-    if (!isEnabled) {
-      return;
-    }
     final DomElement? viewElement = _viewManager[viewId]?.dom.rootElement;
 
     switch (state) {
@@ -97,10 +87,6 @@ final class ViewFocusBinding {
   });
 
   void _handleFocusChange(DomElement? focusedElement) {
-    if (!isEnabled) {
-      return;
-    }
-
     final int? viewId = _viewId(focusedElement);
     if (viewId == _lastViewId) {
       return;
