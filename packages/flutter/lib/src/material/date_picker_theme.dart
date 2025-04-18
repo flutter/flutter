@@ -220,7 +220,7 @@ class DatePickerThemeData with Diagnosticable {
   ///   if (states.contains(WidgetState.focused)) {
   ///     return Colors.blue.withOpacity(0.12);
   ///   }
-  ///   return Colors.transparent;
+  ///   return null; // Use the default color.
   /// })
   /// ```
   final WidgetStateProperty<Color?>? dayOverlayColor;
