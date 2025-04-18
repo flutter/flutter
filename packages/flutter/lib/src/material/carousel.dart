@@ -1472,6 +1472,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
 
   double getPixelsFromItem(double item, List<int>? flexWeights, double? itemExtent) {
     double fraction;
+    if (viewportDimension == 0.0) {
+      return 0.0;
+    }
     if (itemExtent != null) {
       fraction = itemExtent / viewportDimension;
     } else {
@@ -1500,8 +1503,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     } else {
       item = getItemFromPixels(oldPixels, oldViewportDimensions ?? viewportDimension);
     }
-    final double newPixels =
-        (viewportDimension == 0.0) ? 0.0 : getPixelsFromItem(item, flexWeights, itemExtent);
+    final double newPixels = getPixelsFromItem(item, flexWeights, itemExtent);
     // If the viewportDimension is zero, cache the item
     // in case the viewport is resized to be non-zero.
     _cachedItem = (viewportDimension == 0.0) ? item : null;
