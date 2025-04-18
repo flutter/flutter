@@ -49,7 +49,7 @@ static std::string VKShaderNameToShaderKeyName(const std::string& name,
 }
 
 namespace {
-bool SupportsFloat16(std::weak_ptr<DeviceHolderVK> device_holder) {
+bool SupportsFloat16(const std::weak_ptr<DeviceHolderVK>& device_holder) {
   std::shared_ptr<DeviceHolderVK> strong_device = device_holder.lock();
   if (strong_device) {
     vk::PhysicalDeviceVulkan12Features vk12_features;
@@ -76,7 +76,7 @@ ShaderLibraryVK::ShaderLibraryVK(
     : device_holder_(std::move(device_holder)) {
   TRACE_EVENT0("impeller", "CreateShaderLibrary");
   bool success = true;
-  bool supports_float_16 = SupportsFloat16(device_holder);
+  bool supports_float_16 = SupportsFloat16(device_holder_);
   auto iterator = [&](auto type,         //
                       const auto& name,  //
                       const auto& code   //
