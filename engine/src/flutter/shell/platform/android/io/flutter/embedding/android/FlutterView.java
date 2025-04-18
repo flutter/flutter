@@ -7,7 +7,6 @@ package io.flutter.embedding.android;
 import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;

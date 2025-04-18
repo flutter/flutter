@@ -3,9 +3,7 @@ package io.flutter.plugin.platform;
 import static io.flutter.Build.API_LEVELS;
 
 import android.view.Surface;
-
 import androidx.annotation.RequiresApi;
-
 import io.flutter.view.TextureRegistry.SurfaceProducer;
 
 @RequiresApi(API_LEVELS.API_29)

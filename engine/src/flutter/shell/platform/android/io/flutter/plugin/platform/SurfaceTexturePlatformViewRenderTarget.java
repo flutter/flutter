@@ -6,9 +6,7 @@ import static io.flutter.Build.API_LEVELS;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.view.Surface;
-
 import androidx.annotation.RequiresApi;
-
 import io.flutter.view.TextureRegistry;
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 
