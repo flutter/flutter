@@ -1769,13 +1769,12 @@ void PopulateJITSnapshotMappingCallbacks(const FlutterProjectArgs* args,
         true);
   }
 
-#if !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   settings.dart_library_sources_kernel = []() {
     return std::make_unique<fml::NonOwnedMapping>(kPlatformStrongDill,
                                                   kPlatformStrongDillSize);
   };
-#endif  // !OS_FUCHSIA && (FLUTTER_RUNTIME_MODE ==
-        // FLUTTER_RUNTIME_MODE_DEBUG)
+#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 }
 
 void PopulateAOTSnapshotMappingCallbacks(

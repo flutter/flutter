@@ -58,17 +58,32 @@ def resolve_packages(tests: Iterable[Mapping[str, Any]]) -> Set[str]:
   resolved_packages = set()
   for package in packages:
     if package.endswith('-0.far'):
-      # Make a symbolic link to match the name of the package itself without the
-      # '-0.far' suffix.
-      new_package = os.path.join(OUT_DIR, package.replace('-0.far', '.far'))
-      try:
-        # Remove the old one if it exists, usually happen on the devbox, so
-        # ignore the FileNotFoundError.
-        os.remove(new_package)
-      except FileNotFoundError:
-        pass
-      os.symlink(package, new_package)
-      resolved_packages.add(new_package)
+      # Use the original file in the gen to ensure the load of build-ids.
+      # Note, this can be optimized by changing the test_suites.yaml file.
+      new_package = os.path.join(OUT_DIR,
+                                 'gen',
+                                 'flutter',
+                                 'shell',
+                                 'platform',
+                                 'fuchsia',
+                                 'flutter',
+                                 package.replace('-0.far', ''),
+                                 package.replace('-0.far', '.far'))
+      if os.path.isfile(new_package):
+          resolved_packages.add(new_package)
+      else:
+          # Make a symbolic link to match the name of the package itself without
+          # the '-0.far' suffix.
+          new_package = os.path.join(OUT_DIR, package.replace('-0.far', '.far'))
+          try:
+            # Remove the old one if it exists, usually happen on the devbox, so
+            # ignore the FileNotFoundError.
+            os.remove(new_package)
+          except FileNotFoundError:
+            pass
+          os.symlink(package, new_package)
+          assert os.path.isfile(new_package)
+          resolved_packages.add(new_package)
     else:
       resolved_packages.add(os.path.join(OUT_DIR, package))
   return resolved_packages

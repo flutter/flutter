@@ -72,12 +72,6 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
 
   ELFAOTSymbols symbols;
 
-#if OS_FUCHSIA
-  // TODO(gw280): https://github.com/flutter/flutter/issues/50285
-  // Dart doesn't implement Dart_LoadELF on Fuchsia
-  FML_LOG(ERROR) << "Dart doesn't implement Dart_LoadELF on Fuchsia";
-  return {};
-#else
   // Must not be freed.
   const char* error = nullptr;
 
@@ -102,7 +96,6 @@ ELFAOTSymbols LoadELFSplitSymbolFromFixturesIfNeccessary(
   symbols.loaded_elf.reset(loaded_elf);
 
   return symbols;
-#endif
 }
 
 bool PrepareSettingsForAOTWithSymbols(Settings& settings,
