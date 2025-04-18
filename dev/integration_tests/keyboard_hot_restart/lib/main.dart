@@ -29,13 +29,14 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Print the app's view insets.
-    // The test uses the bottom value to check whether the keyboard is visible.
+    // Print whether the keyboard is visible or not.
     // If you change this line, update the test as well.
     // See:
     // //dev/devicelab/lib/tasks/keyboard_hot_restart_test.dart
     // ignore: avoid_print
-    print('viewInsets: ${MediaQuery.of(context).viewInsets}');
+    final EdgeInsets insets = MediaQuery.of(context).viewInsets;
+
+    print('Keyboard is ${insets.bottom > 0 ? 'open' : 'closed'}');
 
     return const Scaffold(body: Center(child: TextField(autofocus: forceKeyboard)));
   }

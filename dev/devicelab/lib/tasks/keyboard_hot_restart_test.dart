@@ -69,7 +69,7 @@ TaskFunction createKeyboardHotRestartTest({
           options: <String>['-d', deviceIdOverride!],
           onLine: (String line, Process process) {
             if (state == TestState.waitUntilKeyboardOpen) {
-              if (!stdoutLineIndicatesKeyboardIsOpen(line)) {
+              if (!line.contains('flutter: Keyboard is open')) {
                 return;
               }
 
@@ -86,7 +86,7 @@ TaskFunction createKeyboardHotRestartTest({
               section('Wait until the keyboard is no longer visible');
               state = TestState.waitUntilKeyboardClosed;
             } else if (state == TestState.waitUntilKeyboardClosed) {
-              if (!stdoutLineIndicatesKeyboardIsOpen(line)) {
+              if (!line.contains('flutter: Keyboard is closed')) {
                 return;
               }
 
@@ -144,26 +144,4 @@ Future<int> runApp({
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   return process.exitCode;
-}
-
-// Check if the keyboard_hot_restart app's stdout indicates the keyboard is open.
-// See: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
-bool stdoutLineIndicatesKeyboardIsOpen(String line) {
-  final RegExp regExp = RegExp(
-    r'flutter: viewInsets: EdgeInsets\(\d+\.\d+, \d+\.\d+, \d+\.\d+, (\d+\.\d+)\)',
-  );
-  final Match? match = regExp.firstMatch(line);
-  if (match == null) {
-    return false;
-  }
-
-  final double keyboardHeight = double.parse(match.group(1)!);
-
-  return keyboardHeight > 0;
-}
-
-// Check if the keyboard_hot_restart app's stdout indicates the keyboard is closed.
-// See: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
-bool stdoutLineIndicatesKeyboardIsClosed(String line) {
-  return line.contains('flutter: viewInsets: EdgeInsets.zero');
 }
