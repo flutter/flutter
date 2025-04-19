@@ -5,7 +5,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -26,6 +28,8 @@ void main() {
     bool isDestructiveAction = false,
     bool isDefaultAction = false,
     Brightness? brightness,
+    FocusNode? actionFocusNode,
+    Color? actionFocusColor,
   }) {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
@@ -34,6 +38,8 @@ void main() {
       trailingIcon: CupertinoIcons.home,
       isDestructiveAction: isDestructiveAction,
       isDefaultAction: isDefaultAction,
+      focusNode: actionFocusNode,
+      focusColor: actionFocusColor,
       child: const Text('I am a CupertinoContextMenuAction'),
     );
 
@@ -114,6 +120,161 @@ void main() {
       find.byType(CupertinoContextMenuAction),
       paints..rect(color: kBackgroundColor.darkColor),
     );
+  });
+
+  testWidgets('changes color when focused', (WidgetTester tester) async {
+    final FocusNode lightDefaultFocusNode = FocusNode();
+    final FocusNode darkDefaultFocusNode = FocusNode();
+    final FocusNode lightCustomFocusNode = FocusNode();
+    final FocusNode darkCustomFocusNode = FocusNode();
+
+    addTearDown(lightDefaultFocusNode.dispose);
+    addTearDown(darkDefaultFocusNode.dispose);
+    addTearDown(lightCustomFocusNode.dispose);
+    addTearDown(darkCustomFocusNode.dispose);
+
+    const Color customFocusColor = Colors.orange;
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    // Default focus color, light theme
+    await tester.pumpWidget(getApp(
+      actionFocusNode: lightDefaultFocusNode,
+      onPressed: (){},
+    ));
+
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColor.color));
+
+    lightDefaultFocusNode.requestFocus();
+    await tester.pump();
+
+    final Color defaultFocusBackgroundLight =
+        HSLColor.fromColor(
+          CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityLight),
+        ).toColor();
+
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: defaultFocusBackgroundLight));
+
+    // Default focus color, dark theme
+    await tester.pumpWidget(getApp(
+      actionFocusNode: darkDefaultFocusNode,
+      onPressed: (){},
+      brightness: Brightness.dark,
+    ));
+
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColor.darkColor));
+
+    darkDefaultFocusNode.requestFocus();
+    await tester.pump();
+
+    final Color defaultFocusBackgroundDark =
+        HSLColor.fromColor(
+          CupertinoColors.activeBlue.withOpacity(kCupertinoButtonTintedOpacityDark),
+        ).toColor();
+
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: defaultFocusBackgroundDark));
+
+    // Custom focus color, light theme
+    await tester.pumpWidget(getApp(
+      actionFocusNode: lightCustomFocusNode,
+      actionFocusColor: customFocusColor,
+      onPressed: (){},
+    ));
+
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColor.color));
+
+    lightCustomFocusNode.requestFocus();
+    await tester.pump();
+
+    final Color customFocusBackgroundLight =
+        HSLColor.fromColor(
+          customFocusColor.withOpacity(kCupertinoButtonTintedOpacityLight),
+        ).toColor();
+
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: customFocusBackgroundLight));
+
+    // Custom focus color, dark theme
+    await tester.pumpWidget(getApp(
+      actionFocusNode: darkCustomFocusNode,
+      onPressed: (){},
+      actionFocusColor: customFocusColor,
+      brightness: Brightness.dark,
+    ));
+
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: kBackgroundColor.darkColor));
+
+    darkCustomFocusNode.requestFocus();
+    await tester.pump();
+
+    final Color customFocusBackgroundDark =
+        HSLColor.fromColor(
+          customFocusColor.withOpacity(kCupertinoButtonTintedOpacityDark),
+        ).toColor();
+
+    expect(find.byType(CupertinoContextMenuAction), paints..rect(color: customFocusBackgroundDark));
+  });
+
+  testWidgets('can be traversed and responds to focus action when onPressed is not null', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    bool pressed = false;
+
+    await tester.pumpWidget(getApp(
+      actionFocusNode: focusNode,
+      onPressed: () => pressed = true,
+    ));
+
+    expect(pressed, isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(pressed, isFalse);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(pressed, isTrue);
+  });
+
+  testWidgets('cannot be traversed when onPressed is null', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    await tester.pumpWidget(getApp(
+      actionFocusNode: focusNode,
+    ));
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('cannot be focused when onPressed is null', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    addTearDown(focusNode.dispose);
+
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+
+    await tester.pumpWidget(getApp(
+      actionFocusNode: focusNode,
+    ));
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
   testWidgets('icon and textStyle colors are correct out of the box', (WidgetTester tester) async {
