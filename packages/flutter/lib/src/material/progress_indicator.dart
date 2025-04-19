@@ -745,7 +745,7 @@ class CircularProgressIndicator extends ProgressIndicator {
     super.value,
     super.backgroundColor,
     super.valueColor,
-    this.strokeWidth = 4.0,
+    this.strokeWidth,
     super.semanticsLabel,
     super.semanticsValue,
     this.strokeCap,

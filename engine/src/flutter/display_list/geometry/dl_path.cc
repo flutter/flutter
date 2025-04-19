@@ -4,9 +4,10 @@
 
 #include "flutter/display_list/geometry/dl_path.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/geometry/dl_geometry_types.h"
+#include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/geometry/path_builder.h"
-#include "impeller/geometry/path.h"
 
 namespace {
 inline constexpr flutter::DlPathFillType ToDlFillType(SkPathFillType sk_type) {
@@ -224,6 +225,16 @@ bool DlPath::IsOval(DlRect* bounds) const {
   return GetSkPath().isOval(ToSkRect(bounds));
 }
 
+bool DlPath::IsLine(DlPoint* start, DlPoint* end) const {
+  SkPoint sk_points[2];
+  if (GetSkPath().isLine(sk_points)) {
+    *start = ToDlPoint(sk_points[0]);
+    *end = ToDlPoint(sk_points[1]);
+    return true;
+  }
+  return false;
+}
+
 bool DlPath::IsRoundRect(DlRoundRect* rrect) const {
   SkRRect sk_rrect;
   bool ret = GetSkPath().isRRect(rrect ? &sk_rrect : nullptr);
@@ -233,24 +244,16 @@ bool DlPath::IsRoundRect(DlRoundRect* rrect) const {
   return ret;
 }
 
-bool DlPath::IsSkRect(SkRect* rect, bool* is_closed) const {
-  return GetSkPath().isRect(rect, is_closed);
-}
-
-bool DlPath::IsSkOval(SkRect* bounds) const {
-  return GetSkPath().isOval(bounds);
-}
-
-bool DlPath::IsSkRRect(SkRRect* rrect) const {
-  return GetSkPath().isRRect(rrect);
-}
-
 bool DlPath::Contains(const DlPoint& point) const {
   return GetSkPath().contains(point.x, point.y);
 }
 
-SkRect DlPath::GetSkBounds() const {
-  return GetSkPath().getBounds();
+DlPathFillType DlPath::GetFillType() const {
+  auto& path = data_->path;
+  if (path.has_value()) {
+    return path.value().GetFillType();
+  }
+  return ToDlFillType(GetSkPath().getFillType());
 }
 
 DlRect DlPath::GetBounds() const {
@@ -420,6 +423,7 @@ void DlPath::DispatchFromImpellerPath(const impeller::Path& path,
   if (subpath_needs_close) {
     receiver.Close();
   }
+  receiver.PathEnd();
 }
 
 namespace {
@@ -442,9 +446,10 @@ class ImpellerPathReceiver final : public DlPathReceiver {
   void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
     builder_.QuadraticCurveTo(cp, p2);
   }
-  // For legacy compatibility we do not override ConicTo to let the dispatcher
-  // convert conics to quads until we update Impeller for full support of
-  // rational quadratics
+  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
+    builder_.ConicCurveTo(cp, p2, weight);
+    return true;
+  }
   void CubicTo(const DlPoint& cp1,
                const DlPoint& cp2,
                const DlPoint& p2) override {
@@ -527,6 +532,7 @@ void DlPath::DispatchFromSkiaPath(const SkPath& path,
         break;
     }
   } while (verb != SkPath::Verb::kDone_Verb);
+  receiver.PathEnd();
 }
 
 }  // namespace flutter

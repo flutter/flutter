@@ -190,6 +190,7 @@ class DropdownMenu<T> extends StatefulWidget {
     this.closeBehavior = DropdownMenuCloseBehavior.all,
     this.maxLines = 1,
     this.textInputAction,
+    this.restorationId,
   }) : assert(filterCallback == null || enableFilter);
 
   /// Determine if the [DropdownMenu] is enabled.
@@ -526,6 +527,9 @@ class DropdownMenu<T> extends StatefulWidget {
 
   /// {@macro flutter.widgets.TextField.textInputAction}
   final TextInputAction? textInputAction;
+
+  /// {@macro flutter.material.textfield.restorationId}
+  final String? restorationId;
 
   @override
   State<DropdownMenu<T>> createState() => _DropdownMenuState<T>();
@@ -884,6 +888,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       currentHighlight = null;
       controller.close();
     } else {
+      filteredEntries = widget.dropdownMenuEntries;
       // close to open
       if (_localTextEditingController!.text.isNotEmpty) {
         _enableFilter = false;
@@ -934,8 +939,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       filteredEntries =
           widget.filterCallback?.call(filteredEntries, _localTextEditingController!.text) ??
           filter(widget.dropdownMenuEntries, _localTextEditingController!);
-    } else {
-      filteredEntries = widget.dropdownMenuEntries;
     }
     _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
 
@@ -1071,6 +1074,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                     : null,
             suffixIcon: trailingButton,
           ).applyDefaults(effectiveInputDecorationTheme),
+          restorationId: widget.restorationId,
         );
 
         // If [expandedInsets] is not null, the width of the text field should depend
@@ -1417,6 +1421,17 @@ class _RenderDropdownMenuBody extends RenderBox
       }
     }
     return false;
+  }
+
+  // Children except the text field (first child) are laid out for measurement purpose but not painted.
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    visitChildren((RenderObject renderObjectChild) {
+      final RenderBox child = renderObjectChild as RenderBox;
+      if (child == firstChild) {
+        visitor(renderObjectChild);
+      }
+    });
   }
 }
 

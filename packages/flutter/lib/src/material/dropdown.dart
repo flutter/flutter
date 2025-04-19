@@ -1465,7 +1465,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   Color get _iconColor {
     // These colors are not defined in the Material Design spec.
-    final Brightness brightness = Theme.of(context).brightness;
+    final Brightness brightness = Theme.brightnessOf(context);
     if (_enabled) {
       return widget.iconEnabledColor ??
           switch (brightness) {
@@ -1796,40 +1796,36 @@ class DropdownButtonFormField<T> extends FormField<T> {
            return Focus(
              canRequestFocus: false,
              skipTraversal: true,
-             child: Builder(
-               builder: (BuildContext context) {
-                 return DropdownButtonHideUnderline(
-                   child: DropdownButton<T>._formField(
-                     items: items,
-                     selectedItemBuilder: selectedItemBuilder,
-                     value: state.value,
-                     hint: effectiveHint,
-                     disabledHint: effectiveDisabledHint,
-                     onChanged: onChanged == null ? null : state.didChange,
-                     onTap: onTap,
-                     elevation: elevation,
-                     style: style,
-                     icon: icon,
-                     iconDisabledColor: iconDisabledColor,
-                     iconEnabledColor: iconEnabledColor,
-                     iconSize: iconSize,
-                     isDense: isDense,
-                     isExpanded: isExpanded,
-                     itemHeight: itemHeight,
-                     focusColor: focusColor,
-                     focusNode: focusNode,
-                     autofocus: autofocus,
-                     dropdownColor: dropdownColor,
-                     menuMaxHeight: menuMaxHeight,
-                     enableFeedback: enableFeedback,
-                     alignment: alignment,
-                     borderRadius: borderRadius,
-                     inputDecoration: effectiveDecoration,
-                     isEmpty: isEmpty,
-                     padding: padding,
-                   ),
-                 );
-               },
+             child: DropdownButtonHideUnderline(
+               child: DropdownButton<T>._formField(
+                 items: items,
+                 selectedItemBuilder: selectedItemBuilder,
+                 value: state.value,
+                 hint: effectiveHint,
+                 disabledHint: effectiveDisabledHint,
+                 onChanged: onChanged == null ? null : state.didChange,
+                 onTap: onTap,
+                 elevation: elevation,
+                 style: style,
+                 icon: icon,
+                 iconDisabledColor: iconDisabledColor,
+                 iconEnabledColor: iconEnabledColor,
+                 iconSize: iconSize,
+                 isDense: isDense,
+                 isExpanded: isExpanded,
+                 itemHeight: itemHeight,
+                 focusColor: focusColor,
+                 focusNode: focusNode,
+                 autofocus: autofocus,
+                 dropdownColor: dropdownColor,
+                 menuMaxHeight: menuMaxHeight,
+                 enableFeedback: enableFeedback,
+                 alignment: alignment,
+                 borderRadius: borderRadius,
+                 inputDecoration: effectiveDecoration,
+                 isEmpty: isEmpty,
+                 padding: padding,
+               ),
              ),
            );
          },

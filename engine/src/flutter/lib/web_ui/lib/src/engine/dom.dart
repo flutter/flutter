@@ -218,7 +218,7 @@ extension type DomDocument._(JSObject _) implements DomNode {
   @JS('querySelectorAll')
   external _DomList _querySelectorAll(String selectors);
   Iterable<DomElement> querySelectorAll(String selectors) =>
-      createDomListWrapper<DomElement>(_querySelectorAll(selectors));
+      _createDomListWrapper<DomElement>(_querySelectorAll(selectors));
 
   @JS('createElement')
   external DomElement _createElement(String name, [JSAny? options]);
@@ -249,7 +249,7 @@ extension type DomHTMLDocument._(JSObject _) implements DomDocument {
   @JS('getElementsByTagName')
   external _DomList _getElementsByTagName(String tag);
   Iterable<DomElement> getElementsByTagName(String tag) =>
-      createDomListWrapper<DomElement>(_getElementsByTagName(tag));
+      _createDomListWrapper<DomElement>(_getElementsByTagName(tag));
 
   external DomElement? getElementById(String id);
   external String get visibilityState;
@@ -366,7 +366,7 @@ extension type DomNode._(JSObject _) implements DomEventTarget {
 
   @JS('childNodes')
   external _DomList get _childNodes;
-  Iterable<DomNode> get childNodes => createDomListWrapper<DomElement>(_childNodes);
+  Iterable<DomNode> get childNodes => _createDomListWrapper<DomElement>(_childNodes);
 
   external DomDocument? get ownerDocument;
   void clearChildren() {
@@ -380,7 +380,7 @@ extension type DomNode._(JSObject _) implements DomEventTarget {
 extension type DomElement._(JSObject _) implements DomNode {
   @JS('children')
   external _DomList get _children;
-  Iterable<DomElement> get children => createDomListWrapper<DomElement>(_children);
+  Iterable<DomElement> get children => _createDomListWrapper<DomElement>(_children);
 
   external DomElement? get firstElementChild;
   external DomElement? get lastElementChild;
@@ -405,7 +405,7 @@ extension type DomElement._(JSObject _) implements DomNode {
   @JS('querySelectorAll')
   external _DomList _querySelectorAll(String selectors);
   Iterable<DomElement> querySelectorAll(String selectors) =>
-      createDomListWrapper<DomElement>(_querySelectorAll(selectors));
+      _createDomListWrapper<DomElement>(_querySelectorAll(selectors));
 
   // TODO(srujzs): Adding @redeclare here is leading to some build failures.
   // ignore: annotate_redeclares
@@ -451,12 +451,12 @@ extension type DomElement._(JSObject _) implements DomNode {
   @JS('getElementsByTagName')
   external _DomList _getElementsByTagName(String tag);
   Iterable<DomNode> getElementsByTagName(String tag) =>
-      createDomListWrapper(_getElementsByTagName(tag));
+      _createDomListWrapper(_getElementsByTagName(tag));
 
   @JS('getElementsByClassName')
   external _DomList _getElementsByClassName(String className);
   Iterable<DomNode> getElementsByClassName(String className) =>
-      createDomListWrapper(_getElementsByClassName(className));
+      _createDomListWrapper(_getElementsByClassName(className));
 
   external void click();
   external bool hasAttribute(String name);
@@ -543,6 +543,7 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   set textAlign(String value) => setProperty('text-align', value);
   set font(String value) => setProperty('font', value);
   set cursor(String value) => setProperty('cursor', value);
+  set scrollbarWidth(String value) => setProperty('scrollbar-width', value);
   String get width => getPropertyValue('width');
   String get height => getPropertyValue('height');
   String get position => getPropertyValue('position');
@@ -604,6 +605,7 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   String get textAlign => getPropertyValue('text-align');
   String get font => getPropertyValue('font');
   String get cursor => getPropertyValue('cursor');
+  String get scrollbarWidth => getPropertyValue('scrollbar-width');
 
   external String getPropertyValue(String property);
 
@@ -1225,8 +1227,8 @@ class HttpFetchPayloadImpl implements HttpFetchPayload {
 
   @override
   Future<void> read(HttpFetchReader<JSUint8Array> callback) async {
-    final _DomReadableStream stream = _domResponse.body;
-    final _DomStreamReader reader = stream.getReader();
+    final DomReadableStream stream = _domResponse.body;
+    final _DomStreamReader reader = stream._getReader();
 
     while (true) {
       final _DomStreamChunk chunk = await reader.read();
@@ -1342,7 +1344,7 @@ extension type DomResponse._(JSObject _) implements JSObject {
 
   external DomHeaders get headers;
 
-  external _DomReadableStream get body;
+  external DomReadableStream get body;
 
   @JS('arrayBuffer')
   external JSPromise<JSAny?> _arrayBuffer();
@@ -1363,8 +1365,9 @@ extension type DomHeaders._(JSObject _) implements JSObject {
   external String? get(String? headerName);
 }
 
-extension type _DomReadableStream._(JSObject _) implements JSObject {
-  external _DomStreamReader getReader();
+extension type DomReadableStream._(JSObject _) implements JSObject {
+  @JS('getReader')
+  external _DomStreamReader _getReader();
 }
 
 extension type _DomStreamReader._(JSObject _) implements JSObject {
@@ -1654,7 +1657,7 @@ extension type DomMutationRecord._(JSObject _) implements JSObject {
     if (list == null) {
       return null;
     }
-    return createDomListWrapper<DomNode>(list);
+    return _createDomListWrapper<DomNode>(list);
   }
 
   @JS('removedNodes')
@@ -1664,7 +1667,7 @@ extension type DomMutationRecord._(JSObject _) implements JSObject {
     if (list == null) {
       return null;
     }
-    return createDomListWrapper<DomNode>(list);
+    return _createDomListWrapper<DomNode>(list);
   }
 
   external String? get attributeName;
@@ -1796,7 +1799,7 @@ extension type DomTouchEvent._(JSObject _) implements DomUIEvent {
 
   @JS('changedTouches')
   external _DomList get _changedTouches;
-  Iterable<DomTouch> get changedTouches => createDomListWrapper<DomTouch>(_changedTouches);
+  Iterable<DomTouch> get changedTouches => _createDomListWrapper<DomTouch>(_changedTouches);
 }
 
 @JS('Touch')
@@ -1960,7 +1963,7 @@ extension type DomDocumentFragment._(JSObject _) implements DomNode {
   @JS('querySelectorAll')
   external _DomList _querySelectorAll(String selectors);
   Iterable<DomElement> querySelectorAll(String selectors) =>
-      createDomListWrapper<DomElement>(_querySelectorAll(selectors));
+      _createDomListWrapper<DomElement>(_querySelectorAll(selectors));
 }
 
 @JS('ShadowRoot')
@@ -1979,7 +1982,7 @@ extension type DomStyleSheet._(JSObject _) implements JSObject {}
 extension type DomCSSStyleSheet._(JSObject _) implements DomStyleSheet {
   @JS('cssRules')
   external _DomList get _cssRules;
-  Iterable<DomCSSRule> get cssRules => createDomListWrapper<DomCSSRule>(_cssRules);
+  Iterable<DomCSSRule> get cssRules => _createDomListWrapper<DomCSSRule>(_cssRules);
 
   @JS('insertRule')
   external double _insertRule(String rule, [int index]);
@@ -2301,7 +2304,7 @@ class _DomListWrapper<T extends JSObject> extends Iterable<T> {
 
 /// This is a work around for a `TypeError` which can be triggered by calling
 /// `toList` on the `Iterable`.
-Iterable<T> createDomListWrapper<T extends JSObject>(_DomList list) => _DomListWrapper<T>._(list);
+Iterable<T> _createDomListWrapper<T extends JSObject>(_DomList list) => _DomListWrapper<T>._(list);
 
 @JS('Symbol')
 extension type DomSymbol._(JSObject _) implements JSObject {
