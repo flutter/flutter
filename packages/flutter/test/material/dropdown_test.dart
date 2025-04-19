@@ -2628,6 +2628,38 @@ void main() {
     );
   });
 
+  testWidgets('DropdownButtonFormField should properly dispose its internal FocusNode '
+      'when replaced by an external FocusNode', (WidgetTester tester) async {
+    final UniqueKey buttonKey = UniqueKey();
+    FocusNode? focusNode;
+    addTearDown(() => focusNode?.dispose());
+
+    Widget buildFormField() => buildFrame(
+      isFormField: true,
+      buttonKey: buttonKey,
+      onChanged: onChanged,
+      focusNode: focusNode,
+    );
+
+    await tester.pumpWidget(buildFormField());
+    final FocusNode internalNode = tester.widget<Focus>(find.byType(Focus).last).focusNode!;
+
+    // Replace internal FocusNode with external FocusNode.
+    focusNode = FocusNode(debugLabel: 'DropdownButtonFormField');
+    await tester.pumpWidget(buildFormField());
+
+    expect(
+      internalNode.dispose,
+      throwsA(
+        isA<FlutterError>().having(
+          (FlutterError error) => error.message,
+          'message',
+          startsWith('A FocusNode was used after being disposed.'),
+        ),
+      ),
+    );
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/147069.
   testWidgets('DropdownButtonFormField can be hovered', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
