@@ -33,7 +33,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 /// Given a [ValueListenable<T>] and a [builder] which builds widgets from
 /// concrete values of `T`, this class will automatically register itself as a
 /// listener of the [ValueListenable] and call the [builder] with updated values
-/// when the value changes.
+/// based on the [rebuildOnlyOnValueChange] parameter.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=s-ZG-jS5QHQ}
 ///
@@ -87,6 +87,16 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// null, therefore your [builder] may need to handle null values.
   final ValueListenable<T> valueListenable;
 
+  /// Whether the [builder] should be called only when the [valueListenable]'s
+  /// value changes.
+  ///
+  /// If `true`, the [builder] is called only when the [valueListenable]'s value
+  /// changes, reusing the previously built widget for other rebuilds (e.g., due
+  /// to parent widget updates). If `false` (default), the [builder] is called
+  /// on every build, reflecting the current value of the [valueListenable].
+  ///
+  /// Setting this to `true` can improve performance by reducing unnecessary
+  /// rebuilds when the [valueListenable]'s value hasn't changed.
   final bool rebuildOnlyOnValueChange;
 
   /// A [ValueWidgetBuilder] which builds a widget depending on the
