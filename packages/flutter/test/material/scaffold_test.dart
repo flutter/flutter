@@ -378,8 +378,8 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          bottomSheetScrimBuilder: (BuildContext context, double visibilityValue) {
-            return ColoredBox(key: scrimKey, color: Colors.black.withOpacity(visibilityValue));
+          bottomSheetScrimBuilder: (BuildContext context, Animation<double> animation) {
+            return ColoredBox(key: scrimKey, color: Colors.black.withOpacity(animation.value));
           },
           bottomSheet: DraggableScrollableSheet(
             expand: false,
@@ -402,11 +402,11 @@ void main() {
 
       final double extentRemaining = 1.0 - extent;
       if (extentRemaining < kBottomSheetDominatesPercentage) {
-        final double visibilityValue = 1 - extentRemaining / kBottomSheetDominatesPercentage;
+        final double animationValue = 1 - extentRemaining / kBottomSheetDominatesPercentage;
 
         expect(findModalBarrier(), findsNothing);
         expect(findScrim(), findsOneWidget);
-        expect(getOpacity(), moreOrLessEquals(visibilityValue, epsilon: 0.02));
+        expect(getOpacity(), moreOrLessEquals(animationValue, epsilon: 0.02));
       } else {
         expect(findScrim(), findsNothing);
       }

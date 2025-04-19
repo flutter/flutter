@@ -1865,7 +1865,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// If this is null, then a non-dismissible [ModalBarrier] with color [Colors.black] is used.
   /// If the builder returns null, then no scrim is shown.
-  final Widget? Function(BuildContext, double) bottomSheetScrimBuilder;
+  final Widget? Function(BuildContext, Animation<double>) bottomSheetScrimBuilder;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
@@ -2139,8 +2139,8 @@ class Scaffold extends StatefulWidget {
     }
   }
 
-  static Widget _defaultBottomSheetScrimBuilder(BuildContext context, double visibilityValue) {
-    final double extentRemaining = _kBottomSheetDominatesPercentage * (1.0 - visibilityValue);
+  static Widget _defaultBottomSheetScrimBuilder(BuildContext context, Animation<double> animation) {
+    final double extentRemaining = _kBottomSheetDominatesPercentage * (1.0 - animation.value);
     final double floatingButtonVisibilityValue =
         extentRemaining * _kBottomSheetDominatesPercentage * 10;
 
@@ -2474,7 +2474,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       bottomSheetKey.currentState!.close();
       setState(() {
         _showBodyScrim = false;
-        _bodyScrimVisibilityValue = 0.0;
+        _bottomSheetScrimAnimationController.value = 0.0;
         _currentBottomSheet = null;
       });
 
@@ -2755,6 +2755,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       duration: kFloatingActionButtonSegue,
       vsync: this,
     );
+
+    _bottomSheetScrimAnimationController = AnimationController(vsync: this);
   }
 
   @protected
@@ -2826,6 +2828,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     _scaffoldMessenger?._unregister(this);
     _drawerOpened.dispose();
     _endDrawerOpened.dispose();
+    _bottomSheetScrimAnimationController.dispose();
     super.dispose();
   }
 
@@ -2911,19 +2914,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     }
   }
 
+  late AnimationController _bottomSheetScrimAnimationController;
   bool _showBodyScrim = false;
-  double _bodyScrimVisibilityValue = 0.0;
 
   /// Updates the state of the body scrim.
   ///
-  /// This method is used to show or hide the body scrim and to set the visibility value.
-  void showBodyScrim(bool value, double visibilityValue) {
-    if (_showBodyScrim == value && _bodyScrimVisibilityValue == visibilityValue) {
+  /// This method is used to show or hide the body scrim and to set the animation value.
+  void showBodyScrim(bool value, double animationValue) {
+    if (_showBodyScrim == value && _bottomSheetScrimAnimationController.value == animationValue) {
       return;
     }
     setState(() {
       _showBodyScrim = value;
-      _bodyScrimVisibilityValue = visibilityValue;
+      _bottomSheetScrimAnimationController.value = animationValue;
     });
   }
 
@@ -2956,7 +2959,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
     if (_showBodyScrim) {
       _addIfNonNull(
         children,
-        widget.bottomSheetScrimBuilder(context, _bodyScrimVisibilityValue),
+        widget.bottomSheetScrimBuilder(context, _bottomSheetScrimAnimationController.view),
         _ScaffoldSlot.bodyScrim,
         removeLeftPadding: true,
         removeTopPadding: true,
