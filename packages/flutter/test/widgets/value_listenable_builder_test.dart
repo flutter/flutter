@@ -149,7 +149,7 @@ void main() {
                 rebuildOnlyOnValueChange: true,
                 builder: builder,
               );
-            }
+            },
           ),
         ),
       );
@@ -171,7 +171,6 @@ void main() {
       await tester.pump();
       expect(find.text('1'), findsOneWidget);
       expect(buildCount, 2);
-
     });
 
     testWidgets('calls builder on every build when false', (WidgetTester tester) async {
@@ -186,13 +185,10 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: ValueListenableBuilder<int>(
-              valueListenable: parentNotifier,
-              builder: (BuildContext context, int value, Widget? child) {
-              return ValueListenableBuilder<int>(
-                valueListenable: notifier,
-                builder: builder,
-              );
-            }
+            valueListenable: parentNotifier,
+            builder: (BuildContext context, int value, Widget? child) {
+              return ValueListenableBuilder<int>(valueListenable: notifier, builder: builder);
+            },
           ),
         ),
       );
@@ -214,7 +210,6 @@ void main() {
       await tester.pump();
       expect(find.text('1'), findsOneWidget);
       expect(buildCount, 4);
-
     });
   });
 }
