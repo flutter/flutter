@@ -76,6 +76,7 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   const ValueListenableBuilder({
     super.key,
     required this.valueListenable,
+    this.rebuildOnlyOnValueChange = false,
     required this.builder,
     this.child,
   });
@@ -85,6 +86,8 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// This widget does not ensure that the [ValueListenable]'s value is not
   /// null, therefore your [builder] may need to handle null values.
   final ValueListenable<T> valueListenable;
+
+  final bool rebuildOnlyOnValueChange;
 
   /// A [ValueWidgetBuilder] which builds a widget depending on the
   /// [valueListenable]'s value.
@@ -108,6 +111,9 @@ class ValueListenableBuilder<T> extends StatefulWidget {
 
 class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   late T value;
+
+  Widget? _lastWidget;
+  bool _isChangeCalled = false;
 
   @override
   void initState() {
@@ -135,11 +141,16 @@ class _ValueListenableBuilderState<T> extends State<ValueListenableBuilder<T>> {
   void _valueChanged() {
     setState(() {
       value = widget.valueListenable.value;
+      _isChangeCalled = true;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, value, widget.child);
+    if (_lastWidget == null || !widget.rebuildOnlyOnValueChange || _isChangeCalled) {
+      _lastWidget = widget.builder(context, value, widget.child);
+    }
+    _isChangeCalled = false;
+    return _lastWidget!;
   }
 }
