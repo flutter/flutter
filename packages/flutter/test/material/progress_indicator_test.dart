@@ -510,24 +510,26 @@ void main() {
   testWidgets('CircularProgressIndicator with custom animation controller', (
     WidgetTester tester,
   ) async {
-    late AnimationController controller;
+    late AnimationController controller1;
 
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          controller = AnimationController(vsync: tester, duration: const Duration(seconds: 2));
+    Widget buildWidget(AnimationController? controller) {
+      return MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator(value: controller?.value))),
+      );
+    }
 
-          return MaterialApp(
-            home: Scaffold(body: Center(child: CircularProgressIndicator(controller: controller))),
-          );
-        },
-      ),
-    );
+    controller1 = AnimationController(vsync: tester, duration: const Duration(seconds: 2));
 
-    await tester.pump();
-    expect(controller.value, 0.0);
+    await tester.pumpWidget(buildWidget(controller1));
+    expect(controller1.value, 0.0);
+
+    await tester.pumpWidget(buildWidget(null));
+
+    await tester.pumpWidget(buildWidget(controller1));
+    expect(controller1.value, 0.0);
+
+    controller1.dispose();
   });
-
   testWidgets('LinearProgressIndicator with indicatorBorderRadius', (WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(

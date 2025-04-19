@@ -893,7 +893,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
     curve: const SawTooth(_rotationCount),
   );
 
-  late AnimationController _controller;
+  AnimationController get _controller => widget.controller ?? _fallbackController;
   late AnimationController _fallbackController;
 
   @override
@@ -903,7 +903,6 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
       duration: const Duration(milliseconds: _kIndeterminateCircularDuration),
       vsync: this,
     );
-    _controller = widget.controller ?? _fallbackController;
     if (widget.value == null) {
       _controller.repeat();
     }
@@ -916,7 +915,6 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
       if (oldWidget.controller == null) {
         _controller.dispose();
       }
-      _controller = widget.controller ?? _fallbackController;
     }
     if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
