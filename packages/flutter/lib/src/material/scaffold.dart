@@ -3340,8 +3340,8 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
       scaffold._floatingActionButtonVisibilityController.value =
           extentRemaining * _kBottomSheetDominatesPercentage * 10;
 
-      final double scrimVisibilityValue = 1 - extentRemaining / _kBottomSheetDominatesPercentage;
-      scaffold.showBodyScrim(true, scrimVisibilityValue);
+      final double scrimAnimationValue = 1 - extentRemaining / _kBottomSheetDominatesPercentage;
+      scaffold.showBodyScrim(true, scrimAnimationValue);
     } else {
       scaffold._floatingActionButtonVisibilityController.value = 1.0;
       scaffold.showBodyScrim(false, 0.0);
