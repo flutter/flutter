@@ -2149,16 +2149,21 @@ class Scaffold extends StatefulWidget {
   }
 
   static Widget _defaultBottomSheetScrimBuilder(BuildContext context, Animation<double> animation) {
-    final double extentRemaining = _kBottomSheetDominatesPercentage * (1.0 - animation.value);
-    final double floatingButtonVisibilityValue =
-        extentRemaining * _kBottomSheetDominatesPercentage * 10;
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        final double extentRemaining = _kBottomSheetDominatesPercentage * (1.0 - animation.value);
+        final double floatingButtonVisibilityValue =
+            extentRemaining * _kBottomSheetDominatesPercentage * 10;
 
-    final double opacity = math.max(
-      _kMinBottomSheetScrimOpacity,
-      _kMaxBottomSheetScrimOpacity - floatingButtonVisibilityValue,
+        final double opacity = math.max(
+          _kMinBottomSheetScrimOpacity,
+          _kMaxBottomSheetScrimOpacity - floatingButtonVisibilityValue,
+        );
+
+        return ModalBarrier(dismissible: false, color: Colors.black.withOpacity(opacity));
+      },
     );
-
-    return ModalBarrier(dismissible: false, color: Colors.black.withOpacity(opacity));
   }
 
   @override
@@ -2932,13 +2937,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
   ///
   /// This method is used to show or hide the body scrim and to set the animation value.
   void showBodyScrim(bool value, double animationValue) {
-    if (_showBodyScrim == value && _bottomSheetScrimAnimationController.value == animationValue) {
-      return;
+    if (_showBodyScrim != value) {
+      setState(() {
+        _showBodyScrim = value;
+      });
     }
-    setState(() {
-      _showBodyScrim = value;
+    if (_bottomSheetScrimAnimationController.value != animationValue) {
       _bottomSheetScrimAnimationController.value = animationValue;
-    });
+    }
   }
 
   @protected

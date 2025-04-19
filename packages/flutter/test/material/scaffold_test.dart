@@ -379,7 +379,12 @@ void main() {
       MaterialApp(
         home: Scaffold(
           bottomSheetScrimBuilder: (BuildContext context, Animation<double> animation) {
-            return ColoredBox(key: scrimKey, color: Colors.black.withOpacity(animation.value));
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (BuildContext context, Widget? child) {
+                return ColoredBox(key: scrimKey, color: Colors.black.withOpacity(animation.value));
+              },
+            );
           },
           bottomSheet: DraggableScrollableSheet(
             expand: false,
