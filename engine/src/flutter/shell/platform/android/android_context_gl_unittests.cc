@@ -36,7 +36,7 @@ TaskRunners MakeTaskRunners(const std::string& thread_label,
 
 class TestImpellerContext : public impeller::Context {
  public:
-  TestImpellerContext() {}
+  TestImpellerContext() : Context(impeller::Flags{}) {}
 
   ~TestImpellerContext() {}
 

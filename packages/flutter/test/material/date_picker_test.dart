@@ -1714,6 +1714,7 @@ void main() {
             label: '3, Sunday, January 3, 2016, Today',
             isButton: true,
             hasTapAction: true,
+            hasSelectedState: true,
             hasFocusAction: true,
             isFocusable: true,
           ),
@@ -1822,6 +1823,7 @@ void main() {
             hasPasteAction: true,
             hasMoveCursorBackwardByCharacterAction: true,
             hasMoveCursorBackwardByWordAction: true,
+            validationResult: SemanticsValidationResult.valid,
           ),
         );
 

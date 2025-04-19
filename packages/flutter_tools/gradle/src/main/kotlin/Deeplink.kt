@@ -10,10 +10,10 @@ import kotlinx.serialization.json.put
 
 // TODO(gmackall): Identify which of these can be val instead of var.
 class Deeplink(
-    var scheme: String?,
-    var host: String?,
+    private var scheme: String?,
+    private var host: String?,
     var path: String?,
-    var intentFilterCheck: IntentFilterCheck
+    private var intentFilterCheck: IntentFilterCheck
 ) {
     // TODO(gmackall): This behavior was kept identical to the original Groovy behavior as part of
     // the Groovy->Kotlin conversion, but should be changed once the conversion is complete.

@@ -1365,6 +1365,179 @@ void main() {
     verifyTreeIsClean();
   });
 
+  testWidgets('PortalController can be assigned to another after deactivate', (
+    WidgetTester tester,
+  ) async {
+    final OverlayPortalController controller1 = OverlayPortalController();
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+
+    final OverlayEntry overlayEntry1 = OverlayEntry(
+      builder: (BuildContext context) {
+        return OverlayPortal(
+          controller: controller1,
+          overlayChildBuilder: (BuildContext context) => const Placeholder(),
+        );
+      },
+    );
+
+    final OverlayEntry overlayEntry2 = OverlayEntry(
+      builder: (BuildContext context) {
+        return OverlayPortal(
+          controller: controller1,
+          overlayChildBuilder: (BuildContext context) => const Placeholder(),
+        );
+      },
+    );
+
+    addTearDown(() {
+      overlayEntry1
+        ..remove()
+        ..dispose();
+      overlayEntry2.dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(key: overlayKey, initialEntries: <OverlayEntry>[overlayEntry1]),
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(key: overlayKey, initialEntries: <OverlayEntry>[overlayEntry2]),
+      ),
+    );
+
+    verifyTreeIsClean();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Reactivation maintains portal state', (WidgetTester tester) async {
+    final OverlayPortalController controller1 = OverlayPortalController();
+    final GlobalKey<State<OverlayPortal>> portalKey = GlobalKey<State<OverlayPortal>>();
+
+    late OverlayEntry overlayEntry1, overlayEntry2;
+    addTearDown(() {
+      overlayEntry1
+        ..remove()
+        ..dispose();
+      overlayEntry2
+        ..remove()
+        ..dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry1 = OverlayEntry(
+              builder:
+                  (BuildContext context) => OverlayPortal(
+                    key: portalKey,
+                    controller: controller1,
+                    overlayChildBuilder: (BuildContext context) => const Placeholder(),
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller1.show();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SizedBox(
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              overlayEntry2 = OverlayEntry(
+                builder:
+                    (BuildContext context) => OverlayPortal(
+                      key: portalKey,
+                      controller: controller1,
+                      overlayChildBuilder: (BuildContext context) => const Placeholder(),
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Placeholder), findsOneWidget);
+    expect(controller1.isShowing, equals(true));
+  });
+
+  testWidgets('attachTarget is restored after reparenting', (WidgetTester tester) async {
+    final GlobalKey<State<OverlayPortal>> portalKey = GlobalKey<State<OverlayPortal>>();
+    final RenderBox childBox = RenderConstrainedBox(additionalConstraints: const BoxConstraints());
+    final RenderBox overlayChildBox = RenderConstrainedBox(
+      additionalConstraints: const BoxConstraints(),
+    );
+
+    bool moveToSecondOverlay = false;
+
+    final Widget child = WidgetToRenderBoxAdapter(renderBox: childBox);
+    final Widget overlayChild = WidgetToRenderBoxAdapter(renderBox: overlayChildBox);
+
+    final OverlayEntry overlayEntry1 = OverlayEntry(
+      builder: (BuildContext context) {
+        return !moveToSecondOverlay
+            ? OverlayPortal(
+              key: portalKey,
+              controller: controller1,
+              overlayChildBuilder: (BuildContext context) => overlayChild,
+              child: child,
+            )
+            : const SizedBox();
+      },
+    );
+    final OverlayEntry overlayEntry2 = OverlayEntry(
+      builder: (BuildContext context) {
+        return moveToSecondOverlay
+            ? OverlayPortal(
+              key: portalKey,
+              controller: controller1,
+              overlayChildBuilder: (BuildContext context) => overlayChild,
+              child: child,
+            )
+            : const SizedBox();
+      },
+    );
+    addTearDown(() {
+      overlayEntry1
+        ..remove()
+        ..dispose();
+      overlayEntry2
+        ..remove()
+        ..dispose();
+    });
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            Overlay(initialEntries: <OverlayEntry>[overlayEntry1]),
+            Overlay(initialEntries: <OverlayEntry>[overlayEntry2]),
+          ],
+        ),
+      ),
+    );
+
+    // Move to second overlay
+    moveToSecondOverlay = true;
+    overlayEntry1.markNeedsBuild();
+    overlayEntry2.markNeedsBuild();
+    await tester.pump();
+
+    verifyTreeIsClean();
+  });
+
   group('GlobalKey Reparenting', () {
     testWidgets('child is laid out before overlay child after OverlayEntry shuffle', (
       WidgetTester tester,

@@ -2810,4 +2810,287 @@ void main() {
 
     semantics.dispose();
   }, semanticsEnabled: false);
+
+  testWidgets('RangeSlider overlay appears correctly for specific thumb interactions', (
+    WidgetTester tester,
+  ) async {
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    RangeValues values = const RangeValues(50, 70);
+    const Color hoverColor = Color(0xffff0000);
+    const Color dragColor = Color(0xff0000ff);
+
+    Widget buildApp() {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Material(
+                child: Center(
+                  child: RangeSlider(
+                    values: values,
+                    max: 100.0,
+                    overlayColor: WidgetStateProperty.resolveWith<Color?>((
+                      Set<WidgetState> states,
+                    ) {
+                      if (states.contains(WidgetState.hovered)) {
+                        return hoverColor;
+                      }
+                      if (states.contains(WidgetState.dragged)) {
+                        return dragColor;
+                      }
+
+                      return null;
+                    }),
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {},
+                    onChangeEnd: (RangeValues newValues) {},
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    // Initial state - no overlay.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: dragColor)),
+    );
+
+    // Drag start thumb to left.
+    final Offset topThumbLocation = tester.getCenter(find.byType(RangeSlider));
+    final TestGesture dragStartThumb = await tester.startGesture(topThumbLocation);
+    await tester.pump(kPressTimeout);
+    await dragStartThumb.moveBy(const Offset(-20.0, 0));
+    await tester.pumpAndSettle();
+
+    // Verify overlay is visible and shadow is visible on single thumb.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints
+        ..circle(color: dragColor)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 12.0),
+    );
+
+    // Move back and release.
+    await dragStartThumb.moveBy(const Offset(20.0, 0));
+    await dragStartThumb.up();
+    await tester.pumpAndSettle();
+
+    // Verify overlay and shadow disappears
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(
+        paints
+          ..circle(color: dragColor)
+          ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+          ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0),
+      ),
+    );
+
+    // Drag end thumb and return to original position.
+    final Offset bottomThumbLocation = tester
+        .getCenter(find.byType(RangeSlider))
+        .translate(220.0, 0.0);
+    final TestGesture dragEndThumb = await tester.startGesture(bottomThumbLocation);
+    await tester.pump(kPressTimeout);
+    await dragEndThumb.moveBy(const Offset(20.0, 0));
+    await tester.pump(kPressTimeout);
+    await dragEndThumb.moveBy(const Offset(-20.0, 0));
+    await dragEndThumb.up();
+    await tester.pumpAndSettle();
+
+    // Verify overlay disappears.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: dragColor)),
+    );
+
+    // Hover on start thumb.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(topThumbLocation);
+    await tester.pumpAndSettle();
+
+    // Verify overlay appears only for start thumb and no shadow is visible.
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      paints
+        ..circle(color: hoverColor)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0)
+        ..path(color: Colors.black, style: PaintingStyle.stroke, strokeWidth: 2.0),
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(RangeSlider));
+    // 2 thumbs and 1 overlay.
+    expect(renderObject, paintsExactlyCountTimes(#drawCircle, 3));
+
+    // Move away from thumb
+    await gesture.moveTo(tester.getTopRight(find.byType(RangeSlider)));
+    await tester.pumpAndSettle();
+
+    // Verify overlay disappears
+    expect(
+      Material.of(tester.element(find.byType(RangeSlider))),
+      isNot(paints..circle(color: hoverColor)),
+    );
+  });
+
+  testWidgets('RangeSlider.padding can override the default RangeSlider padding', (
+    WidgetTester tester,
+  ) async {
+    Widget buildRangeSlider({EdgeInsetsGeometry? padding}) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: RangeSlider(
+                padding: padding,
+                values: const RangeValues(0, 1.0),
+                onChanged: (RangeValues values) {},
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    RenderBox sliderRenderBox() {
+      return tester.allRenderObjects.firstWhere(
+            (RenderObject object) => object.runtimeType.toString() == '_RenderRangeSlider',
+          )
+          as RenderBox;
+    }
+
+    // Test RangeSlider height and tracks spacing with zero padding.
+    await tester.pumpWidget(buildRangeSlider(padding: EdgeInsets.zero));
+    await tester.pumpAndSettle();
+
+    // The height equals to the default thumb height.
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            790.0,
+            8.0,
+            790.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 792.0, 13.0, const Radius.circular(2.0))),
+    );
+
+    // Test RangeSlider height and tracks spacing with directional padding.
+    const double startPadding = 100;
+    const double endPadding = 20;
+    await tester.pumpWidget(
+      buildRangeSlider(
+        padding: const EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(sliderRenderBox().size, const Size(800 - startPadding - endPadding, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            670.0,
+            8.0,
+            670.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 672.0, 13.0, const Radius.circular(2.0))),
+    );
+
+    // Test RangeSlider height and tracks spacing with top and bottom padding.
+    const double topPadding = 100;
+    const double bottomPadding = 20;
+    const double trackHeight = 20;
+    await tester.pumpWidget(
+      buildRangeSlider(
+        padding: const EdgeInsetsDirectional.only(top: topPadding, bottom: bottomPadding),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.byType(RangeSlider)),
+      const Size(800, topPadding + trackHeight + bottomPadding),
+    );
+    expect(sliderRenderBox().size, const Size(800, 20));
+    expect(
+      find.byType(RangeSlider),
+      paints
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            10.0,
+            8.0,
+            10.0,
+            12.0,
+            topLeft: const Radius.circular(2.0),
+            bottomLeft: const Radius.circular(2.0),
+          ),
+        )
+        // Inactive track.
+        ..rrect(
+          rrect: RRect.fromLTRBAndCorners(
+            790.0,
+            8.0,
+            790.0,
+            12.0,
+            topRight: const Radius.circular(2.0),
+            bottomRight: const Radius.circular(2.0),
+          ),
+        )
+        // Active track.
+        ..rrect(rrect: RRect.fromLTRBR(8.0, 7.0, 792.0, 13.0, const Radius.circular(2.0))),
+    );
+  });
 }

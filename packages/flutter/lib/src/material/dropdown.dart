@@ -131,7 +131,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 }
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
-  CurvedAnimation? _opacityAnimation;
+  late CurvedAnimation _opacityAnimation;
 
   @override
   void initState() {
@@ -146,12 +146,12 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         oldWidget.route.animation != widget.route.animation ||
         oldWidget.route.selectedIndex != widget.route.selectedIndex ||
         widget.route.items.length != oldWidget.route.items.length) {
+      _opacityAnimation.dispose();
       _setOpacityAnimation();
     }
   }
 
   void _setOpacityAnimation() {
-    _opacityAnimation?.dispose();
     final double unit = 0.5 / (widget.route.items.length + 1.5);
     if (widget.itemIndex == widget.route.selectedIndex) {
       _opacityAnimation = CurvedAnimation(
@@ -205,7 +205,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
 
   @override
   void dispose() {
-    _opacityAnimation?.dispose();
+    _opacityAnimation.dispose();
     super.dispose();
   }
 
@@ -227,7 +227,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
         child: child,
       );
     }
-    child = FadeTransition(opacity: _opacityAnimation!, child: child);
+    child = FadeTransition(opacity: _opacityAnimation, child: child);
     if (kIsWeb && dropdownMenuItem.enabled) {
       child = Shortcuts(shortcuts: _webShortcuts, child: child);
     }
@@ -1465,7 +1465,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   Color get _iconColor {
     // These colors are not defined in the Material Design spec.
-    final Brightness brightness = Theme.of(context).brightness;
+    final Brightness brightness = Theme.brightnessOf(context);
     if (_enabled) {
       return widget.iconEnabledColor ??
           switch (brightness) {
@@ -1731,6 +1731,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     super.onSaved,
     super.validator,
     super.errorBuilder,
+    super.forceErrorText,
     AutovalidateMode? autovalidateMode,
     double? menuMaxHeight,
     bool? enableFeedback,
@@ -1795,40 +1796,36 @@ class DropdownButtonFormField<T> extends FormField<T> {
            return Focus(
              canRequestFocus: false,
              skipTraversal: true,
-             child: Builder(
-               builder: (BuildContext context) {
-                 return DropdownButtonHideUnderline(
-                   child: DropdownButton<T>._formField(
-                     items: items,
-                     selectedItemBuilder: selectedItemBuilder,
-                     value: state.value,
-                     hint: effectiveHint,
-                     disabledHint: effectiveDisabledHint,
-                     onChanged: onChanged == null ? null : state.didChange,
-                     onTap: onTap,
-                     elevation: elevation,
-                     style: style,
-                     icon: icon,
-                     iconDisabledColor: iconDisabledColor,
-                     iconEnabledColor: iconEnabledColor,
-                     iconSize: iconSize,
-                     isDense: isDense,
-                     isExpanded: isExpanded,
-                     itemHeight: itemHeight,
-                     focusColor: focusColor,
-                     focusNode: focusNode,
-                     autofocus: autofocus,
-                     dropdownColor: dropdownColor,
-                     menuMaxHeight: menuMaxHeight,
-                     enableFeedback: enableFeedback,
-                     alignment: alignment,
-                     borderRadius: borderRadius,
-                     inputDecoration: effectiveDecoration,
-                     isEmpty: isEmpty,
-                     padding: padding,
-                   ),
-                 );
-               },
+             child: DropdownButtonHideUnderline(
+               child: DropdownButton<T>._formField(
+                 items: items,
+                 selectedItemBuilder: selectedItemBuilder,
+                 value: state.value,
+                 hint: effectiveHint,
+                 disabledHint: effectiveDisabledHint,
+                 onChanged: onChanged == null ? null : state.didChange,
+                 onTap: onTap,
+                 elevation: elevation,
+                 style: style,
+                 icon: icon,
+                 iconDisabledColor: iconDisabledColor,
+                 iconEnabledColor: iconEnabledColor,
+                 iconSize: iconSize,
+                 isDense: isDense,
+                 isExpanded: isExpanded,
+                 itemHeight: itemHeight,
+                 focusColor: focusColor,
+                 focusNode: focusNode,
+                 autofocus: autofocus,
+                 dropdownColor: dropdownColor,
+                 menuMaxHeight: menuMaxHeight,
+                 enableFeedback: enableFeedback,
+                 alignment: alignment,
+                 borderRadius: borderRadius,
+                 inputDecoration: effectiveDecoration,
+                 isEmpty: isEmpty,
+                 padding: padding,
+               ),
              ),
            );
          },

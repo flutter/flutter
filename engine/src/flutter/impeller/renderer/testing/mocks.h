@@ -140,6 +140,8 @@ class MockCommandBuffer : public CommandBuffer {
 
 class MockImpellerContext : public Context {
  public:
+  MockImpellerContext() : Context(Flags{}) {}
+
   MOCK_METHOD(Context::BackendType, GetBackendType, (), (const, override));
 
   MOCK_METHOD(std::string, DescribeGpuModel, (), (const, override));
@@ -229,6 +231,7 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(PixelFormat, GetDefaultDepthStencilFormat, (), (const, override));
   MOCK_METHOD(PixelFormat, GetDefaultGlyphAtlasFormat, (), (const, override));
   MOCK_METHOD(ISize, GetMaximumRenderPassAttachmentSize, (), (const override));
+  MOCK_METHOD(size_t, GetMinimumUniformAlignment, (), (const override));
 };
 
 class MockCommandQueue : public CommandQueue {
