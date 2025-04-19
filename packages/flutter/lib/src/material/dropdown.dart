@@ -1360,7 +1360,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode?.removeListener(_handleFocusChanged);
       if (_internalNode != null && widget.focusNode != null) {
-        _internalNode!.removeListener(_handleFocusChanged);
+        _internalNode!.dispose();
         _internalNode = null;
       }
 
