@@ -4,8 +4,11 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import '../../semantics.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'context_menu.dart';
+import 'theme.dart';
 
 /// A button in a _ContextMenuSheet.
 ///
@@ -21,6 +24,8 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.isDestructiveAction = false,
     this.onPressed,
     this.trailingIcon,
+    this.focusNode,
+    this.focusColor,
   });
 
   /// The widget that will be placed inside the action.
@@ -43,6 +48,17 @@ class CupertinoContextMenuAction extends StatefulWidget {
   /// example, if using [isDestructiveAction]).
   final IconData? trailingIcon;
 
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// The color of the background that highlights active focus.
+  ///
+  /// A transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
+  /// [kCupertinoButtonTintedOpacityDark] (dark mode) is automatically applied to this color.
+  ///
+  /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue].
+  final Color? focusColor;
+
   @override
   State<CupertinoContextMenuAction> createState() => _CupertinoContextMenuActionState();
 }
@@ -64,6 +80,26 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
 
   final GlobalKey _globalKey = GlobalKey();
   bool _isPressed = false;
+  bool _isFocused = false;
+
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
+  };
+
+  bool get enabled => widget.onPressed != null;
+
+  void _handleTap([Intent? _]) {
+    if (widget.onPressed case final VoidCallback onPressed?) {
+      onPressed();
+      context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+    }
+  }
+
+  void _onShowFocusHighlight(bool showHighlight) {
+    setState(() {
+      _isFocused = showHighlight;
+    });
+  }
 
   void onTapDown(TapDownDetails details) {
     setState(() {
@@ -98,10 +134,19 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
     );
   }
 
+  Color get effectiveFocusBackgroundColor =>
+      HSLColor.fromColor(
+        (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
+          CupertinoTheme.brightnessOf(context) == Brightness.light
+              ? kCupertinoButtonTintedOpacityLight
+              : kCupertinoButtonTintedOpacityDark,
+        ),
+      ).toColor();
+
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
+      cursor: enabled && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(
         key: _globalKey,
         onTapDown: onTapDown,
@@ -111,27 +156,37 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
         behavior: HitTestBehavior.opaque,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: _kButtonHeight),
-          child: Semantics(
-            button: true,
-            child: ColoredBox(
-              color:
-                  _isPressed
-                      ? CupertinoDynamicColor.resolve(_kBackgroundColorPressed, context)
-                      : CupertinoDynamicColor.resolve(
-                        CupertinoContextMenu.kBackgroundColor,
-                        context,
-                      ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.5, 8.0, 17.5, 8.0),
-                child: DefaultTextStyle(
-                  style: _textStyle,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Flexible(child: widget.child),
-                      if (widget.trailingIcon != null)
-                        Icon(widget.trailingIcon, color: _textStyle.color, size: 21.0),
-                    ],
+          child: FocusableActionDetector(
+            actions: _actionMap,
+            focusNode: widget.focusNode,
+            enabled: enabled,
+            onShowFocusHighlight: _onShowFocusHighlight,
+            child: Semantics(
+              button: true,
+              child: ColoredBox(
+                color: switch ((pressed: _isPressed, focused: _isFocused)) {
+                  (pressed: true, focused: _) => CupertinoDynamicColor.resolve(
+                    _kBackgroundColorPressed,
+                    context,
+                  ),
+                  (pressed: _, focused: true) => effectiveFocusBackgroundColor,
+                  _ => CupertinoDynamicColor.resolve(
+                    CupertinoContextMenu.kBackgroundColor,
+                    context,
+                  ),
+                },
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(15.5, 8.0, 17.5, 8.0),
+                  child: DefaultTextStyle(
+                    style: _textStyle,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Flexible(child: widget.child),
+                        if (widget.trailingIcon != null)
+                          Icon(widget.trailingIcon, color: _textStyle.color, size: 21.0),
+                      ],
+                    ),
                   ),
                 ),
               ),
