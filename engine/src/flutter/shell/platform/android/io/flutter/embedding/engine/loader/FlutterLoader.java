@@ -368,8 +368,10 @@ public class FlutterLoader {
         if (metaData.getBoolean(IMPELLER_VULKAN_GPU_TRACING_DATA_KEY, false)) {
           shellArgs.add("--enable-vulkan-gpu-tracing");
         }
-        if (metaData.getBoolean(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY, false)) {
-          shellArgs.add("--merged-platform-ui-thread=disabled");
+        if (metaData.containsKey(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY)) {
+          if (metaData.getBoolean(DISABLE_MERGED_PLATFORM_UI_THREAD_KEY)) {
+            shellArgs.add("--no-enable-merged-platform-ui-thread");
+          }
         }
         if (metaData.getBoolean(ENABLE_FLUTTER_GPU, false)) {
           shellArgs.add("--enable-flutter-gpu");

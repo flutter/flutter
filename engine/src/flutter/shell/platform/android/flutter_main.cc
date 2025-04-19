@@ -147,15 +147,11 @@ void FlutterMain::Init(JNIEnv* env,
   }
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
-    fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
-    fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key,
-                                                               callback);
-    return queue_id;
+    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
   };
 
-  settings.task_observer_remove = [](fml::TaskQueueId queue_id, intptr_t key) {
-    fml::MessageLoopTaskQueues::GetInstance()->RemoveTaskObserver(queue_id,
-                                                                  key);
+  settings.task_observer_remove = [](intptr_t key) {
+    fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
   };
 
   settings.log_message_callback = [](const std::string& tag,

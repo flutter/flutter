@@ -16,16 +16,14 @@ void ExecuteAfterTaskObservers() {
   }
 }
 
-fml::TaskQueueId CurrentMessageLoopAddAfterTaskObserver(intptr_t key,
-                                                        fit::closure observer) {
+void CurrentMessageLoopAddAfterTaskObserver(intptr_t key,
+                                            fit::closure observer) {
   if (observer) {
     tTaskObservers[key] = std::move(observer);
   }
-  return fml::TaskQueueId::Invalid();
 }
 
-void CurrentMessageLoopRemoveAfterTaskObserver(fml::TaskQueueId queue_id,
-                                               intptr_t key) {
+void CurrentMessageLoopRemoveAfterTaskObserver(intptr_t key) {
   tTaskObservers.erase(key);
 }
 

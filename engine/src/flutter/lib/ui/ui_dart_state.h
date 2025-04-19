@@ -48,9 +48,8 @@ class UIDartState : public tonic::DartState {
             fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
             fml::WeakPtr<IOManager> io_manager,
             fml::RefPtr<SkiaUnrefQueue> unref_queue,
-            fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
-            fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
-                image_generator_registry,
+            fml::WeakPtr<ImageDecoder> image_decoder,
+            fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
             std::string advisory_script_uri,
             std::string advisory_script_entrypoint,
             bool deterministic_rendering_enabled,
@@ -77,13 +76,12 @@ class UIDartState : public tonic::DartState {
     fml::RefPtr<SkiaUnrefQueue> unref_queue;
 
     /// The image decoder.
-    fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder;
+    fml::WeakPtr<ImageDecoder> image_decoder;
 
     /// Cascading registry of image generator builders. Given compressed image
     /// bytes as input, this is used to find and create image generators, which
     /// can then be used for image decoding.
-    fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
-        image_generator_registry;
+    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry;
 
     /// The advisory script URI (only used for debugging). This does not affect
     /// the code being run in the isolate in any way.
@@ -146,10 +144,9 @@ class UIDartState : public tonic::DartState {
 
   fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
-  fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetImageDecoder() const;
+  fml::WeakPtr<ImageDecoder> GetImageDecoder() const;
 
-  fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
-  GetImageGeneratorRegistry() const;
+  fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry() const;
 
   std::shared_ptr<IsolateNameServer> GetIsolateNameServer() const;
 
@@ -208,7 +205,6 @@ class UIDartState : public tonic::DartState {
 
   const TaskObserverAdd add_callback_;
   const TaskObserverRemove remove_callback_;
-  fml::TaskQueueId callback_queue_id_;
   const std::string logger_prefix_;
   Dart_Port main_port_ = ILLEGAL_PORT;
   const bool is_root_isolate_;

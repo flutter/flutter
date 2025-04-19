@@ -16,7 +16,6 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/mapping.h"
-#include "flutter/fml/task_queue_id.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/unique_fd.h"
 
@@ -71,10 +70,8 @@ class FrameTiming {
 };
 
 using TaskObserverAdd =
-    std::function<fml::TaskQueueId(intptr_t /* key */,
-                                   fml::closure /* callback */)>;
-using TaskObserverRemove =
-    std::function<void(fml::TaskQueueId /* queue */, intptr_t /* key */)>;
+    std::function<void(intptr_t /* key */, fml::closure /* callback */)>;
+using TaskObserverRemove = std::function<void(intptr_t /* key */)>;
 using UnhandledExceptionCallback =
     std::function<bool(const std::string& /* error */,
                        const std::string& /* stack trace */)>;
@@ -362,20 +359,9 @@ struct Settings {
   /// This is used by the runOnPlatformThread API.
   bool enable_platform_isolates = false;
 
-  enum class MergedPlatformUIThread {
-    // Use separate threads for the UI and platform task runners.
-    kDisabled,
-    // Use the platform thread for both the UI and platform task runners.
-    kEnabled,
-    // Start the engine on a separate UI thread and then move the UI task
-    // runner to the platform thread after the engine is initialized.
-    // This can improve app launch latency by allowing other work to run on
-    // the platform thread during engine startup.
-    kMergeAfterLaunch
-  };
-
-  MergedPlatformUIThread merged_platform_ui_thread =
-      MergedPlatformUIThread::kEnabled;
+  // If true, the UI thread is the platform thread on supported
+  // platforms.
+  bool merged_platform_ui_thread = true;
 };
 
 }  // namespace flutter

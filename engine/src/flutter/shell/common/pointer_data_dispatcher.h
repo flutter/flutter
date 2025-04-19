@@ -159,8 +159,7 @@ class SmoothPointerDataDispatcher : public DefaultPointerDataDispatcher {
   bool is_pointer_data_in_progress_ = false;
 
   // WeakPtrFactory must be the last member.
-  fml::TaskRunnerAffineWeakPtrFactory<SmoothPointerDataDispatcher>
-      weak_factory_;
+  fml::WeakPtrFactory<SmoothPointerDataDispatcher> weak_factory_;
   FML_DISALLOW_COPY_AND_ASSIGN(SmoothPointerDataDispatcher);
 };
 

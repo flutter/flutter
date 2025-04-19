@@ -24,9 +24,8 @@ UIDartState::Context::Context(
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
-    fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
-    fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
-        image_generator_registry,
+    fml::WeakPtr<ImageDecoder> image_decoder,
+    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     bool deterministic_rendering_enabled,
@@ -59,7 +58,6 @@ UIDartState::UIDartState(
     const UIDartState::Context& context)
     : add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
-      callback_queue_id_(fml::TaskQueueId::kInvalid),
       logger_prefix_(std::move(logger_prefix)),
       is_root_isolate_(is_root_isolate),
       unhandled_exception_callback_(std::move(unhandled_exception_callback)),
@@ -180,12 +178,10 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
   }
   FML_DCHECK(add_callback_ && remove_callback_);
   if (add) {
-    callback_queue_id_ =
-        add_callback_(reinterpret_cast<intptr_t>(this),
-                      [this]() { this->FlushMicrotasksNow(); });
+    add_callback_(reinterpret_cast<intptr_t>(this),
+                  [this]() { this->FlushMicrotasksNow(); });
   } else {
-    remove_callback_(callback_queue_id_, reinterpret_cast<intptr_t>(this));
-    callback_queue_id_ = fml::TaskQueueId::Invalid();
+    remove_callback_(reinterpret_cast<intptr_t>(this));
   }
 }
 
@@ -194,13 +190,12 @@ UIDartState::GetSnapshotDelegate() const {
   return context_.snapshot_delegate;
 }
 
-fml::TaskRunnerAffineWeakPtr<ImageDecoder> UIDartState::GetImageDecoder()
-    const {
+fml::WeakPtr<ImageDecoder> UIDartState::GetImageDecoder() const {
   return context_.image_decoder;
 }
 
-fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
-UIDartState::GetImageGeneratorRegistry() const {
+fml::WeakPtr<ImageGeneratorRegistry> UIDartState::GetImageGeneratorRegistry()
+    const {
   return context_.image_generator_registry;
 }
 

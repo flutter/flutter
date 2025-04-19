@@ -7,8 +7,6 @@
 
 #include <lib/fit/function.h>
 
-#include "flutter/fml/task_queue_id.h"
-
 namespace fml {
 
 // Executes all closures that were registered via
@@ -32,11 +30,10 @@ namespace fml {
 // somehow.
 void ExecuteAfterTaskObservers();
 
-fml::TaskQueueId CurrentMessageLoopAddAfterTaskObserver(intptr_t key,
-                                                        fit::closure observer);
+void CurrentMessageLoopAddAfterTaskObserver(intptr_t key,
+                                            fit::closure observer);
 
-void CurrentMessageLoopRemoveAfterTaskObserver(fml::TaskQueueId queue_id,
-                                               intptr_t key);
+void CurrentMessageLoopRemoveAfterTaskObserver(intptr_t key);
 
 }  // namespace fml
 
