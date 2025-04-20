@@ -590,7 +590,7 @@ void main() {
         const Duration snapAnimationDuration = Duration(milliseconds: 300);
         const double minChildSize = .1;
         const double maxChildSize = .9;
-        const Duration snapAnimationTestInterval = Duration(milliseconds: 100);
+        const int snapAnimationTestSteps = 5;
 
         await tester.pumpWidget(
           boilerplateWidget(
@@ -615,14 +615,10 @@ void main() {
         double sizeAtSnapStart = tester.getSize(find.byKey(containerKey)).height / screenHeight;
 
         // Verify that the sheet snaps up according to the curve by checking the size at each interval.
-        for (
-          Duration elapsed = snapAnimationTestInterval;
-          elapsed < snapAnimationDuration;
-          elapsed += snapAnimationTestInterval
-        ) {
-          await tester.pump(snapAnimationTestInterval);
+        for (int i = 1; i <= snapAnimationTestSteps; i++) {
+          await tester.pump(snapAnimationDuration ~/ snapAnimationTestSteps);
 
-          final double progress = elapsed.inMilliseconds / snapAnimationDuration.inMilliseconds;
+          final double progress = i / snapAnimationTestSteps;
           final double expectedSize =
               sizeAtSnapStart +
               (maxChildSize - sizeAtSnapStart) * snapAnimationCurve.transform(progress);
@@ -631,8 +627,7 @@ void main() {
           expect(actualSize, closeTo(expectedSize, precisionErrorTolerance));
         }
 
-        // Verify that the sheet animates to the max child size.
-        await tester.pumpAndSettle();
+        // Verify that the sheet is at [maxChildSize].
         expect(
           tester.getSize(find.byKey(containerKey)).height / screenHeight,
           closeTo(maxChildSize, precisionErrorTolerance),
@@ -644,13 +639,10 @@ void main() {
         sizeAtSnapStart = tester.getSize(find.byKey(containerKey)).height / screenHeight;
 
         // Verify that the sheet snaps down according to the curve by checking the size at each interval.
-        for (
-          Duration elapsed = snapAnimationTestInterval;
-          elapsed < snapAnimationDuration;
-          elapsed += snapAnimationTestInterval
-        ) {
-          await tester.pump(snapAnimationTestInterval);
-          final double progress = elapsed.inMilliseconds / snapAnimationDuration.inMilliseconds;
+        for (int i = 1; i <= snapAnimationTestSteps; i++) {
+          await tester.pump(snapAnimationDuration ~/ snapAnimationTestSteps);
+
+          final double progress = i / snapAnimationTestSteps;
           final double expectedSize =
               sizeAtSnapStart +
               (minChildSize - sizeAtSnapStart) * snapAnimationCurve.transform(progress);
@@ -659,7 +651,7 @@ void main() {
           expect(actualSize, closeTo(expectedSize, precisionErrorTolerance));
         }
 
-        await tester.pumpAndSettle();
+        // Verify that the sheet is at [minChildSize].
         expect(
           tester.getSize(find.byKey(containerKey)).height / screenHeight,
           closeTo(minChildSize, precisionErrorTolerance),
