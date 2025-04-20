@@ -17,15 +17,12 @@ void testMain() {
     late EnginePlatformDispatcher dispatcher;
 
     setUp(() {
-      ViewFocusBinding.isEnabled = true;
-
       dispatcher = EnginePlatformDispatcher.instance;
       dispatchedViewFocusEvents = <ui.ViewFocusEvent>[];
       dispatcher.onViewFocusChange = dispatchedViewFocusEvents.add;
     });
 
     tearDown(() {
-      ViewFocusBinding.isEnabled = false;
       EngineSemantics.instance.semanticsEnabled = false;
     });
 

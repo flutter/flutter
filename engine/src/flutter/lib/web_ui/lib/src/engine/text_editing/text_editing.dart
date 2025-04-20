@@ -170,7 +170,12 @@ void _insertEditingElementInView(DomElement element, int viewId) {
     view != null,
     'Could not find View with id $viewId. This should never happen, please file a bug!',
   );
-  view!.dom.textEditingHost.append(element);
+  final host = view!.dom.textEditingHost;
+  // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
+  // harmless, but it actually causes focus changes that could break things.
+  if (!host.contains(element)) {
+    host.append(element);
+  }
 }
 
 /// Form that contains all the fields in the same AutofillGroup.
@@ -363,7 +368,11 @@ class EngineAutofillForm {
       mainTextEditingElement.style.pointerEvents = 'all';
     }
 
-    formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
+    // Do not cause DOM disturbance unless necessary. Doing superfluous DOM operations may seem
+    // harmless, but it actually causes focus changes that could break things.
+    if (!formElement.contains(mainTextEditingElement)) {
+      formElement.insertBefore(mainTextEditingElement, insertionReferenceNode);
+    }
     _insertEditingElementInView(formElement, viewId);
   }
 
@@ -1535,8 +1544,26 @@ abstract class DefaultTextEditingStrategy
     event as DomFocusEvent;
 
     final DomElement? willGainFocusElement = event.relatedTarget as DomElement?;
-    if (willGainFocusElement == null ||
-        _viewForElement(willGainFocusElement) == activeDomElementView) {
+    if (willGainFocusElement == null) {
+      // If the element to gain focus is reported as `null`, it means that the
+      // window/iframe that Flutter runs in is losing focus. In this case, the
+      // engine signals to the framework to close the text input connection,
+      // allowing the focus to move elsewhere.
+      //
+      // This is fixing https://github.com/flutter/flutter/issues/155265.
+      textEditing.sendTextConnectionClosedToFrameworkIfAny();
+    } else if (_viewForElement(willGainFocusElement) == activeDomElementView) {
+      // If the focus stays within the same FlutterView, ensure the focus stays
+      // on the input element.
+
+      // TODO(yjbanov): Make text input less grabby. See: https://github.com/flutter/flutter/issues/166857
+      // The motivation/reasoning behind this remains murky.
+      // It's unclear why, if the browser wants to remove focus from the input,
+      // we must insist that it stays on the element. This could lead to
+      // different elements/widgets fighting over who gets the focus, or resist
+      // to user's request to move focus elsewhere, which can be super-annoying
+      // UX. We should reevaluate what it is we're trying to do here. Perhaps
+      // there's a better way.
       moveFocusToActiveDomElement();
     }
   }
