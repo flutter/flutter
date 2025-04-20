@@ -260,7 +260,7 @@ class Shell final : public PlatformView::Delegate,
   ///
   /// @return     A weak pointer to the engine.
   ///
-  fml::TaskRunnerAffineWeakPtr<Engine> GetEngine();
+  fml::WeakPtr<Engine> GetEngine();
 
   //----------------------------------------------------------------------------
   /// @brief      Platform views may only be accessed on the platform task
@@ -470,8 +470,7 @@ class Shell final : public PlatformView::Delegate,
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   std::atomic<bool> route_messages_through_platform_thread_ = false;
 
-  fml::TaskRunnerAffineWeakPtr<Engine>
-      weak_engine_;  // to be shared across threads
+  fml::WeakPtr<Engine> weak_engine_;  // to be shared across threads
   fml::TaskRunnerAffineWeakPtr<Rasterizer>
       weak_rasterizer_;  // to be shared across threads
   fml::WeakPtr<PlatformView>
