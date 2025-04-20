@@ -539,8 +539,6 @@ abstract class ImageStreamCompleter with Diagnosticable {
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
 
-    // Track if any listener capable of handling errors was ever added.
-    // The Image widget's listener always provides a non-null onError.
     if (listener.onError != null) {
       _hadErrorHandlerListener = true;
     }
