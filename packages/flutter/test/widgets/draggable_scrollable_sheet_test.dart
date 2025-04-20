@@ -614,7 +614,7 @@ void main() {
         await tester.pump(Duration.zero);
         double sizeAtSnapStart = tester.getSize(find.byKey(containerKey)).height / screenHeight;
 
-        // Verify that the sheet snaps up according to the curve by checking the size at each interval.
+        // Verify that the sheet snaps up according to the curve by checking the size with regular intervals.
         for (int i = 1; i <= snapAnimationTestSteps; i++) {
           await tester.pump(snapAnimationDuration ~/ snapAnimationTestSteps);
 
@@ -638,7 +638,7 @@ void main() {
         await tester.pump(Duration.zero);
         sizeAtSnapStart = tester.getSize(find.byKey(containerKey)).height / screenHeight;
 
-        // Verify that the sheet snaps down according to the curve by checking the size at each interval.
+        // Verify that the sheet snaps down according to the curve by checking the size with regular intervals.
         for (int i = 1; i <= snapAnimationTestSteps; i++) {
           await tester.pump(snapAnimationDuration ~/ snapAnimationTestSteps);
 
