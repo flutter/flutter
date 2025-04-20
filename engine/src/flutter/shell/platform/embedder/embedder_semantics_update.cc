@@ -29,68 +29,99 @@ EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
 FlutterSemanticsFlag SemanticsFlagtoInt(const SemanticsFlags& flags) {
   int result = 0;
 
-  if (flags.hasCheckedState)
+  if (flags.hasCheckedState) {
     result |= (1 << 0);
-  if (flags.isChecked)
+  }
+  if (flags.isChecked) {
     result |= (1 << 1);
-  if (flags.isSelected)
+  }
+  if (flags.isSelected) {
     result |= (1 << 2);
-  if (flags.isButton)
+  }
+  if (flags.isButton) {
     result |= (1 << 3);
-  if (flags.isTextField)
+  }
+  if (flags.isTextField) {
     result |= (1 << 4);
-  if (flags.isFocused)
+  }
+  if (flags.isFocused) {
     result |= (1 << 5);
-  if (flags.hasEnabledState)
+  }
+  if (flags.hasEnabledState) {
     result |= (1 << 6);
-  if (flags.isEnabled)
+  }
+  if (flags.isEnabled) {
     result |= (1 << 7);
-  if (flags.isInMutuallyExclusiveGroup)
+  }
+  if (flags.isInMutuallyExclusiveGroup) {
     result |= (1 << 8);
-  if (flags.isHeader)
+  }
+  if (flags.isHeader) {
     result |= (1 << 9);
-  if (flags.isObscured)
+  }
+  if (flags.isObscured) {
     result |= (1 << 10);
-  if (flags.scopesRoute)
+  }
+  if (flags.scopesRoute) {
     result |= (1 << 11);
-  if (flags.namesRoute)
+  }
+  if (flags.namesRoute) {
     result |= (1 << 12);
-  if (flags.isHidden)
+  }
+  if (flags.isHidden) {
     result |= (1 << 13);
-  if (flags.isImage)
+  }
+  if (flags.isImage) {
     result |= (1 << 14);
-  if (flags.isLiveRegion)
+  }
+  if (flags.isLiveRegion) {
     result |= (1 << 15);
-  if (flags.hasToggledState)
+  }
+  if (flags.hasToggledState) {
     result |= (1 << 16);
-  if (flags.isToggled)
+  }
+  if (flags.isToggled) {
     result |= (1 << 17);
-  if (flags.hasImplicitScrolling)
+  }
+  if (flags.hasImplicitScrolling) {
     result |= (1 << 18);
-  if (flags.isMultiline)
+  }
+  if (flags.isMultiline) {
     result |= (1 << 19);
-  if (flags.isReadOnly)
+  }
+  if (flags.isReadOnly) {
     result |= (1 << 20);
-  if (flags.isFocusable)
+  }
+  if (flags.isFocusable) {
     result |= (1 << 21);
-  if (flags.isLink)
+  }
+  if (flags.isLink) {
     result |= (1 << 22);
-  if (flags.isSlider)
+  }
+  if (flags.isSlider) {
     result |= (1 << 23);
-  if (flags.isKeyboardKey)
+  }
+  if (flags.isKeyboardKey) {
     result |= (1 << 24);
-  if (flags.isCheckStateMixed)
+  }
+  if (flags.isCheckStateMixed) {
     result |= (1 << 25);
-  if (flags.hasExpandedState)
+  }
+  if (flags.hasExpandedState) {
     result |= (1 << 26);
-  if (flags.isExpanded)
+  }
+  if (flags.isExpanded) {
     result |= (1 << 27);
-  if (flags.hasSelectedState)
+  }
+  if (flags.hasSelectedState) {
     result |= (1 << 28);
-  if (flags.hasRequiredState)
+  }
+  if (flags.hasRequiredState) {
     result |= (1 << 29);
-  if (flags.isRequired)
+  }
+  if (flags.isRequired) {
     result |= (1 << 30);
+  }
 
   return static_cast<FlutterSemanticsFlag>(result);
 }

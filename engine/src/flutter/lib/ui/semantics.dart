@@ -1302,7 +1302,7 @@ class SemanticsFlags {
           isRequired == other.isRequired;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll(<bool>[
     hasCheckedState,
     isChecked,
     isSelected,
@@ -1334,7 +1334,7 @@ class SemanticsFlags {
     hasSelectedState,
     hasRequiredState,
     isRequired,
-  );
+  ]);
 }
 
 /// The validation result of a form field.

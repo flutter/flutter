@@ -1255,7 +1255,7 @@ fml::RefPtr<fml::TaskRunner> CreateNewThread(const std::string& name) {
   flutter::SemanticsNode node1;
   node1.id = 1;
   node1.label = "node1";
-  node1.flags.hasImplicitScrolling = true;
+  node1.flags.scopesRoute = true;
   node1.flags.namesRoute = true;
   nodes[node1.id] = node1;
   flutter::SemanticsNode node3;
