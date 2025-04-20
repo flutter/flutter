@@ -271,11 +271,7 @@ class ScaleUpdateDetails with Diagnosticable {
 /// Details for [GestureScaleEndCallback].
 class ScaleEndDetails with Diagnosticable {
   /// Creates details for [GestureScaleEndCallback].
-  ScaleEndDetails({
-    this.velocity = Velocity.zero,
-    this.scaleVelocity = 0,
-    this.pointerCount = 0,
-  });
+  ScaleEndDetails({this.velocity = Velocity.zero, this.scaleVelocity = 0, this.pointerCount = 0});
 
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;
