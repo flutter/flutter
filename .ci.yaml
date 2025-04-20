@@ -2423,7 +2423,6 @@ targets:
   - name: Linux_pixel_7pro static_path_stroke_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3658,7 +3657,6 @@ targets:
   - name: Mac_ios static_path_stroke_tessellation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3668,7 +3666,6 @@ targets:
   - name: Mac_ios dynamic_path_stroke_tessellation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5024,7 +5021,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
-      task_name: imitation_game_swiftui__compile
+      task_name: imitation_game_flutter__compile
 
   - name: Mac_arm64_ios imitation_game_swiftui
     recipe: devicelab/devicelab_drone
@@ -5034,7 +5031,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
-      task_name: imitation_game_flutter__compile
+      task_name: imitation_game_swiftui__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
