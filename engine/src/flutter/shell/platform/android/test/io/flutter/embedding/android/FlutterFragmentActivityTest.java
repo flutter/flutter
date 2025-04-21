@@ -45,7 +45,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
+@Config()
 @RunWith(AndroidJUnit4.class)
 public class FlutterFragmentActivityTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();

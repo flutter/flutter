@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
 /** Basic smoke test verifying that Robolectric is loaded and mocking out Android APIs. */
-@Config(manifest = Config.NONE)
+@Config()
 @RunWith(AndroidJUnit4.class)
 public class SmokeTest {
   @Test

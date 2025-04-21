@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
+@Config()
 @RunWith(AndroidJUnit4.class)
 public class MethodChannelTest {
   @Test

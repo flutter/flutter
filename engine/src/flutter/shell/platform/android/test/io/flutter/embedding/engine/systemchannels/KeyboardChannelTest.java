@@ -23,7 +23,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
+@Config()
 @RunWith(AndroidJUnit4.class)
 public class KeyboardChannelTest {
 

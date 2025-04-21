@@ -45,7 +45,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
+@Config()
 @RunWith(AndroidJUnit4.class)
 public class KeyboardManagerTest {
   public static final int SCAN_KEY_A = 0x1e;
