@@ -529,7 +529,6 @@ def to_gn_args(args):
   gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
   gn_args['dart_component_kind'] = 'static_library'  # Always link Dart in statically.
   gn_args['embedder_for_target'] = args.embedder_for_target
-  gn_args['dart_lib_export_symbols'] = False
   gn_args['flutter_runtime_mode'] = runtime_mode
   gn_args['dart_version_git_info'] = not args.no_dart_version_git_info
 
