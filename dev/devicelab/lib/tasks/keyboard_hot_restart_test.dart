@@ -24,7 +24,12 @@ import '../framework/utils.dart';
 // 4. Hot restart the app
 // 5. Wait until the keyboard is no longer visible.
 //
-// See: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
+// App under test: //dev/integration_tests/keyboard_hot_restart/lib/main.dart
+//
+// Since this test must hot restart the app under test, this test cannot use
+// testing frameworks like XCUITest or Flutter's integration_test as they don't
+// support hot restart. Instead, this test uses the Flutter tool to run the app,
+// hot restart it, and verify its log output.
 TaskFunction createKeyboardHotRestartTest({
   String? deviceIdOverride,
   bool checkAppRunningOnLocalDevice = false,
