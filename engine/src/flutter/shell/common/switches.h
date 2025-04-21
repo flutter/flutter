@@ -302,6 +302,10 @@ DEF_SWITCH(MergedPlatformUIThread,
 DEF_SWITCH(DisableMergedPlatformUIThread,
            "no-enable-merged-platform-ui-thread",
            "Merge the ui thread and platform thread.")
+DEF_SWITCH(EnableWindowing,
+           "enable-windowing",
+           "Enable support for multiple windows. Ignored if not supported on "
+           "the platform.")
 DEF_SWITCH(EnableAndroidSurfaceControl,
            "enable-surface-control",
            "Enable the SurfaceControl backed swapchain when supported.")
