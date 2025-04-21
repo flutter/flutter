@@ -2382,18 +2382,12 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   settings.task_observer_add = [has_ui_thread_message_loop](
                                    intptr_t key, const fml::closure& callback) {
     if (has_ui_thread_message_loop) {
-      fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
-      fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key,
-                                                                 callback);
-      return queue_id;
-    } else {
-      return fml::TaskQueueId::Invalid();
+      fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
     }
   };
-  settings.task_observer_remove = [](fml::TaskQueueId queue_id, intptr_t key) {
-    if (queue_id.is_valid()) {
-      fml::MessageLoopTaskQueues::GetInstance()->RemoveTaskObserver(queue_id,
-                                                                    key);
+  settings.task_observer_remove = [has_ui_thread_message_loop](intptr_t key) {
+    if (has_ui_thread_message_loop) {
+      fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
     }
   };
 
