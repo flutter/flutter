@@ -789,52 +789,51 @@ void main() {
       ),
     );
 
-    // check the flag is set at the Scaffold level
+    // Check the flag is set at the Scaffold level.
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerDismissible, true);
 
-    // open the drawer initially
+    // Open the drawer initially.
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openEndDrawer();
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // check that it's open
+    // Check that the drawer open.
     expect(find.byType(Drawer), findsExactly(1));
 
-    // close it programmatically
+    // Close the drawer programmatically.
     state.closeEndDrawer();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(Drawer), findsExactly(0));
 
-    // open it again, this time we'll try tapping on the modal barrier
+    // Open it again, this time we'll try tapping on the modal barrier.
     state.openEndDrawer();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(Drawer), findsExactly(1));
 
-    // tap on the modal barrier
-    // Find the ModalBarrier
+    // Tap on the modal barrier.
+    // Find the ModalBarrier.
     final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
-    // Get the RenderBox of the ModalBarrier
+    // Get the RenderBox of the ModalBarrier.
     final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
 
-    // Calculate a point to tap outside the Drawer
-    // This example taps on the ModalBarrier somewhere outside its boundaries
+    // Calculate a point to tap outside the Drawer.
+    // This example taps on the ModalBarrier somewhere outside its boundaries.
     const Offset modalBarrierCenter = Offset(400, 300);
     final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
 
-    // Tap on the ModalBarrier
+    // Tap on the ModalBarrier.
     await tester.tapAt(tapPosition);
     await tester.pumpAndSettle();
 
-    // make sure the drawer is gone, since the flag is set to
-    // drawerDismissible = true
+    // Make sure the drawer is gone, since the drawerDismissible flag is set to true by default.
     expect(find.byType(Drawer), findsExactly(0));
   });
 
@@ -865,53 +864,52 @@ void main() {
       ),
     );
 
-    // make sure the flag is set to false at the Scaffold level
+    // Make sure the flag is set to false at the Scaffold level.
     final Scaffold scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.drawerDismissible, false);
 
-    // open the drawer initially
+    // Open the drawer initially.
     final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openEndDrawer();
 
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    // check that it's open
+    // Check that the drawer is open.
     expect(find.byType(Drawer), findsExactly(1));
 
-    // close it programmatically
+    // Close the drawer programmatically.
     state.closeEndDrawer();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(Drawer), findsExactly(0));
 
-    // open it again, this time we'll try tapping on the modal barrier
+    // Open it again, this time we'll try tapping on the modal barrier.
     state.openEndDrawer();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(Drawer), findsExactly(1));
 
-    // tap on the modal barrier
-    // Find the ModalBarrier
+    // Tap on the modal barrier.
+    // Find the ModalBarrier.
     final Finder modalBarrierFinder = find.byType(ModalBarrier);
 
-    // Get the RenderBox of the ModalBarrier
+    // Get the RenderBox of the ModalBarrier.
     final RenderBox modalBarrierRenderBox = tester.renderObject(modalBarrierFinder) as RenderBox;
 
-    // Calculate a point to tap outside the Drawer
-    // This example taps on the ModalBarrier somewhere outside its boundaries
+    // Calculate a point to tap outside the Drawer.
+    // This example taps on the ModalBarrier somewhere outside its boundaries.
     const Offset modalBarrierCenter = Offset(400, 300);
     final Offset tapPosition = modalBarrierRenderBox.localToGlobal(modalBarrierCenter);
 
-    // Tap on the ModalBarrier
+    // Tap on the ModalBarrier.
     await tester.tapAt(tapPosition);
     await tester.pumpAndSettle();
 
-    // make sure the drawer is still present, and by tapping on the
-    // modal barrier didn't dismiss it, since the property
-    // is set to drawerDismissible = false.
+    // Make sure the drawer is still present, and by tapping on the modal barrier
+    // didn't dismiss it, since the drawerDismissible property is set to false.
     expect(find.byType(Drawer), findsExactly(1));
   });
 
@@ -1003,5 +1001,3 @@ void main() {
     });
   });
 }
-
-
