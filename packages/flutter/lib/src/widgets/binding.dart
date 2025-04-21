@@ -492,13 +492,20 @@ mixin WidgetsBinding
       _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
+  /// TODO: Add documentation.
+  ValueNotifier<bool> get debugWidgetInspectorDefaultTapBehaviorEnabledNotifier =>
+      _debugWidgetInspectorDefaultTapBehaviorEnabledNotifierObject ??= ValueNotifier<bool>(true);
+  ValueNotifier<bool>? _debugWidgetInspectorDefaultTapBehaviorEnabledNotifierObject;
+
   @visibleForTesting
   @override
   void resetInternalState() {
     // ignore: invalid_use_of_visible_for_testing_member, https://github.com/dart-lang/sdk/issues/41998
     super.resetInternalState();
     _debugShowWidgetInspectorOverrideNotifierObject?.dispose();
+    _debugWidgetInspectorDefaultTapBehaviorEnabledNotifierObject?.dispose();
     _debugShowWidgetInspectorOverrideNotifierObject = null;
+    _debugWidgetInspectorDefaultTapBehaviorEnabledNotifierObject = null;
   }
 
   void _debugAddStackFilters() {

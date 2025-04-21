@@ -2812,6 +2812,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   late InspectorSelection selection;
 
   late bool isSelectMode;
+  late bool defaultSelectModeTapBehaviorEnabled;
 
   final GlobalKey _ignorePointerKey = GlobalKey();
 
@@ -2827,8 +2828,14 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.addListener(
       _selectionInformationChanged,
     );
+    WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.addListener(
+      _selectionInformationChanged,
+    );
     selection = WidgetInspectorService.instance.selection;
     isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
+    defaultSelectModeTapBehaviorEnabled =
+        isSelectMode &&
+        WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.value;
   }
 
   @override
@@ -2843,6 +2850,9 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   void _selectionInformationChanged() => setState(() {
     selection = WidgetInspectorService.instance.selection;
     isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
+    defaultSelectModeTapBehaviorEnabled =
+        isSelectMode &&
+        WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.value;
   });
 
   bool _hitTestHelper(
@@ -2921,7 +2931,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   }
 
   void _inspectAt(Offset position) {
-    if (!isSelectMode) {
+    if (!defaultSelectModeTapBehaviorEnabled) {
       return;
     }
 
@@ -2962,7 +2972,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   }
 
   void _handleTap() {
-    if (!isSelectMode) {
+    if (!defaultSelectModeTapBehaviorEnabled) {
       return;
     }
     if (_lastPointerLocation != null) {
@@ -2976,13 +2986,6 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     // Be careful changing this build method. The _InspectorOverlayLayer
     // assumes the root RenderObject for the WidgetInspector will be
     // a RenderStack containing a _RenderInspectorOverlay as a child.
-    print('include exit widget selection button group?');
-    print(
-      (isSelectMode &&
-          widget.exitWidgetSelectionButtonBuilder != null &&
-          widget.tapBehaviorButtonBuilder != null),
-    );
-    print(widget.tapBehaviorButtonBuilder);
     return Stack(
       children: <Widget>[
         GestureDetector(
@@ -2992,7 +2995,11 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
           onPanUpdate: _handlePanUpdate,
           behavior: HitTestBehavior.opaque,
           excludeFromSemantics: true,
-          child: IgnorePointer(ignoring: isSelectMode, key: _ignorePointerKey, child: widget.child),
+          child: IgnorePointer(
+            ignoring: defaultSelectModeTapBehaviorEnabled,
+            key: _ignorePointerKey,
+            child: widget.child,
+          ),
         ),
         _InspectorOverlay(selection: selection),
         if (isSelectMode &&
@@ -3491,7 +3498,6 @@ class _ExitWidgetSelectionButtonGroup extends StatefulWidget {
 }
 
 class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionButtonGroup> {
-  static const double _kExitWidgetSelectionButtonPadding = 4.0;
   static const double _kExitWidgetSelectionButtonMargin = 10.0;
 
   final GlobalKey _exitWidgetSelectionButtonKey = GlobalKey(
@@ -3537,7 +3543,11 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
     button: widget.tapBehaviorButtonBuilder(
       context,
       onPressed: () {
-        print('tapped!');
+        final ValueNotifier<bool> defaultTapBehaviorEnabledNotifier =
+            WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier;
+        final bool defaultTapBehaviorEnabled = defaultTapBehaviorEnabledNotifier.value;
+        defaultTapBehaviorEnabledNotifier.value = !defaultTapBehaviorEnabled;
+        WidgetInspectorService.instance.selection.clear();
       },
       key: _tapBehaviorButtonKey,
     ),
@@ -3549,14 +3559,9 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
 
   @override
   Widget build(BuildContext context) {
-    final stackedButtons = Column(
+    final Widget selectionModeButtons = Column(
       children: <Widget>[_tapBehaviorButton, _exitWidgetSelectionButton],
     );
-
-    final List<Widget?> orderedButtons =
-        _leftAligned
-            ? <Widget?>[stackedButtons, _moveExitWidgetSelectionButton]
-            : <Widget?>[_moveExitWidgetSelectionButton, stackedButtons];
 
     final Widget buttonGroup = Stack(
       alignment: AlignmentDirectional.topCenter,
@@ -3568,7 +3573,15 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
             isLeftAligned: _leftAligned,
           ),
         ),
-        Row(crossAxisAlignment: CrossAxisAlignment.end, mainAxisAlignment: MainAxisAlignment.center, children: orderedButtons.whereType<Widget>().toList()),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            if (_leftAligned) selectionModeButtons,
+            if (_moveExitWidgetSelectionButton != null) _moveExitWidgetSelectionButton!,
+            if (!_leftAligned) selectionModeButtons,
+          ],
+        ),
       ],
     );
 
