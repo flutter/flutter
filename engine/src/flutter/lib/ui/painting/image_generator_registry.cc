@@ -79,8 +79,8 @@ ImageGeneratorRegistry::CreateCompatibleGenerator(const sk_sp<SkData>& buffer) {
   return nullptr;
 }
 
-fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
-ImageGeneratorRegistry::GetWeakPtr() const {
+fml::WeakPtr<ImageGeneratorRegistry> ImageGeneratorRegistry::GetWeakPtr()
+    const {
   return weak_factory_.GetWeakPtr();
 }
 
