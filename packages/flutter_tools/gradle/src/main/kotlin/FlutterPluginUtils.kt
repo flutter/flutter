@@ -403,10 +403,8 @@ object FlutterPluginUtils {
         return project.extensions.findByType(BaseExtension::class.java)!!
     }
 
-    // TODO: Use find by type and AbstractAppExtension instead. Or delete in favor of getAndroidExtension.
-    //       see https://github.com/flutter/flutter/issues/165882
     private fun getAndroidAppExtensionOrNull(project: Project): AbstractAppExtension? =
-        project.extensions.findByName("android") as? AbstractAppExtension
+        project.extensions.findByType(AbstractAppExtension::class.java)
 
     /**
      * Expected format of getAndroidExtension(project).compileSdkVersion is a string of the form
