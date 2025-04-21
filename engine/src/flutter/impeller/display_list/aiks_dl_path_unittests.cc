@@ -984,6 +984,8 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
   DisplayListBuilder builder;
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
+  builder.Translate(100, 0);
+
   builder.Save();
   for (auto cap : std::vector<DlStrokeCap>{
            DlStrokeCap::kButt, DlStrokeCap::kRound, DlStrokeCap::kSquare}) {
@@ -992,6 +994,8 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
     path_builder.LineTo({50, 50});
     path_builder.MoveTo({120, 50});
     path_builder.LineTo({120, 80});
+    path_builder.MoveTo({180, 50});
+    path_builder.LineTo({180, 50});
     DlPath path(path_builder);
 
     DlPaint paint;

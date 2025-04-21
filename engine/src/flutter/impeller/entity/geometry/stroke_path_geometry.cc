@@ -380,8 +380,6 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   }
 
   void RecordLine(Point p1, Point p2) override {
-    // FML_DCHECK(p1 == last_point_);
-    FML_DCHECK(p2 != p1);
     if (p2 != p1) {
       auto current_perpendicular = ComputePerpendicular(p1, p2);
 
@@ -407,9 +405,6 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
 
   template <typename Curve>
   inline void RecordCurve(const Curve& curve) {
-    // This fails on the dynamic stroke perf task
-    // FML_DCHECK(curve.p1 == last_point_);
-
     auto start_direction = curve.GetStartDirection();
     auto end_direction = curve.GetEndDirection();
 
@@ -456,8 +451,13 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       FML_DCHECK(last_point_ == origin);
       // kButt wouldn't fill anything so it defers to kSquare by convention
       Cap cap = (cap_ == Cap::kButt) ? Cap::kSquare : cap_;
-      AddCap(cap, origin, {-half_stroke_width_, 0}, false);
-      AddCap(cap, origin, {-half_stroke_width_, 0}, true);
+      Vector2 perpendicular = {-half_stroke_width_, 0};
+      AddCap(cap, origin, perpendicular, true);
+      if (cap == Cap::kRound) {
+        // Only round caps need the perpendicular between them to connect.
+        AppendVertices(origin, perpendicular);
+      }
+      AddCap(cap, origin, perpendicular, false);
     } else if (with_close) {
       // Closed contour, join back to origin
       FML_DCHECK(origin == origin_point_);
