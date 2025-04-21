@@ -837,7 +837,7 @@ void main() {
     expect(find.byType(Drawer), findsExactly(0));
   });
 
-  testWidgets('Drawer is not dismissible', (WidgetTester tester) async {
+  testWidgets('Drawer can be configured as not dismissible', (WidgetTester tester) async {
 
     await tester.pumpWidget(
       MaterialApp(
