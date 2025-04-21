@@ -389,7 +389,8 @@ config("compiler") {
   if (is_android) {
     cflags += [
       "-ffunction-sections",
-      "-funwind-tables",
+      "-fno-unwind-tables",
+      "-fno-asynchronous-unwind-tables",
       "-fno-short-enums",
       "-nostdinc++",
     ]
