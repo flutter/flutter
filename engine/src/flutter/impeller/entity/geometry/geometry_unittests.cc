@@ -454,11 +454,20 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesMiterJoin) {
 TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
   // degrees is the angle that the line deviates from "straight ahead"
   for (int degrees = 10; degrees < 180; degrees += 10) {
-    for (int width = 1; width <= 10; width++) {
+    // Start with a width of 2 since line widths of 1 usually decide
+    // that they don't need join geometry at a scale of 1.0
+    for (int width = 2; width <= 10; width++) {
       Degrees d(degrees);
       Radians r(d);
-      Scalar x_delta = std::cos(r.radians) * 10.0f;
-      Scalar y_delta = std::sin(r.radians) * 10.0f;
+      Point pixel_delta = Point(std::cos(r.radians), std::sin(r.radians));
+
+      if (pixel_delta.GetDistance(Point(1, 0)) * width < 1.0f) {
+        // Some combinations of angle and width result in a join that is
+        // less than a pixel in size. We don't care about compliance on
+        // such a small join delta (and, in fact, the implementation may
+        // decide to elide those small joins).
+        continue;
+      }
 
       // Miter limits are based on angle between the vectors/segments
       Degrees between(180 - degrees);
@@ -466,9 +475,9 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
       Scalar limit = 1.0f / std::sin(r_between.radians / 2.0f);
 
       PathBuilder path_builder;
-      path_builder.MoveTo({20, 20});
-      path_builder.LineTo({30, 20});
-      path_builder.LineTo({30 + x_delta, 20 + y_delta});
+      path_builder.MoveTo(Point(20, 20));
+      path_builder.LineTo(Point(30, 20));
+      path_builder.LineTo(Point(30, 20) + pixel_delta * 10.0f);
       flutter::DlPath path(path_builder);
 
       // Miter limit too small (99% of required) to allow a miter
@@ -485,7 +494,7 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
               path, width, limit * 1.01f, Join::kMiter, Cap::kButt, 1.0f);
       EXPECT_EQ(points2.size(), 9u)
           << "degrees: " << degrees << ", width: " << width;
-      EXPECT_LT(points2[4].GetDistance({30, 20}), width * limit * 1.05f)
+      EXPECT_LE(points2[4].GetDistance({30, 20}), width * limit * 1.05f)
           << "degrees: " << degrees << ", width: " << width << ", "
           << points2[4];
     }

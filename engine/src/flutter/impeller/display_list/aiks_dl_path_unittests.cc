@@ -1013,22 +1013,42 @@ TEST_P(AiksTest, StrokeCapsAndJoins) {
   }
   builder.Restore();
 
+  builder.Translate(0, 100);
+
   builder.Save();
   for (auto join : std::vector<DlStrokeJoin>{
            DlStrokeJoin::kBevel, DlStrokeJoin::kRound, DlStrokeJoin::kMiter}) {
     DlPathBuilder path_builder;
-    path_builder.MoveTo({20, 150});  // 0 degree turn
+    path_builder.MoveTo({20, 50});  // 0 degree right turn
+    path_builder.LineTo({50, 50});
+    path_builder.LineTo({80, 50});
+    path_builder.MoveTo({20, 150});  // 90 degree right turn
     path_builder.LineTo({50, 150});
     path_builder.LineTo({50, 180});
-    path_builder.MoveTo({120, 180});  // 90 degree turn
-    path_builder.LineTo({150, 180});
-    path_builder.LineTo({150, 150});
-    path_builder.MoveTo({20, 250});  // 45 degree turn
+    path_builder.MoveTo({20, 250});  // 45 degree right turn
     path_builder.LineTo({50, 250});
     path_builder.LineTo({70, 270});
-    path_builder.MoveTo({120, 250});  // 135 degree turn
-    path_builder.LineTo({150, 250});
-    path_builder.LineTo({130, 270});
+    path_builder.MoveTo({20, 350});  // 135 degree right turn
+    path_builder.LineTo({50, 350});
+    path_builder.LineTo({30, 370});
+    path_builder.MoveTo({20, 450});  // 180 degree right turn
+    path_builder.LineTo({50, 450});
+    path_builder.LineTo({20, 450});
+    path_builder.MoveTo({120, 80});  // 0 degree left turn
+    path_builder.LineTo({150, 80});
+    path_builder.LineTo({180, 80});
+    path_builder.MoveTo({120, 180});  // 90 degree left turn
+    path_builder.LineTo({150, 180});
+    path_builder.LineTo({150, 150});
+    path_builder.MoveTo({120, 280});  // 45 degree left turn
+    path_builder.LineTo({150, 280});
+    path_builder.LineTo({170, 260});
+    path_builder.MoveTo({120, 380});  // 135 degree left turn
+    path_builder.LineTo({150, 380});
+    path_builder.LineTo({130, 360});
+    path_builder.MoveTo({120, 480});  // 180 degree left turn
+    path_builder.LineTo({150, 480});
+    path_builder.LineTo({120, 480});
     DlPath path(path_builder);
 
     DlPaint paint;

@@ -336,8 +336,9 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
                             const Tessellator::Trigs& trigs)
       : vtx_builder_(vtx_builder),
         half_stroke_width_(stroke_width * 0.5f),
-        scaled_miter_limit_squared_(miter_limit * half_stroke_width_ *
-                                    miter_limit * half_stroke_width_),
+        maximum_join_cosine_(
+            ComputeMaximumJoinCosine(scale, stroke_width * 0.5f)),
+        minimum_miter_cosine_(ComputeMinimumMiterCosine(miter_limit)),
         join_(join),
         cap_(cap),
         scale_(scale),
@@ -353,14 +354,14 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
                             half_stroke_width_);
   }
 
-  inline void AppendPoints(const Point curve_point, Vector2 offset) {
+  inline void AppendVertices(const Point curve_point, Vector2 offset) {
     vtx_builder_.AppendVertex(curve_point + offset);
     vtx_builder_.AppendVertex(curve_point - offset);
   }
 
-  inline void AppendPoints(const Point curve_point,
-                           SeparatedVector2 perpendicular) {
-    return AppendPoints(curve_point, perpendicular.GetVector());
+  inline void AppendVertices(const Point curve_point,
+                             SeparatedVector2 perpendicular) {
+    return AppendVertices(curve_point, perpendicular.GetVector());
   }
 
   void BeginContour(Point origin, bool will_be_closed) override {
@@ -385,7 +386,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       auto current_perpendicular = ComputePerpendicular(p1, p2);
 
       HandlePreviousJoin(current_perpendicular);
-      AppendPoints(p2, current_perpendicular);
+      AppendVertices(p2, current_perpendicular);
 
       last_perpendicular_ = current_perpendicular;
       last_point_ = p2;
@@ -424,15 +425,10 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
 
       // We join the previous segment to this one with a normal join
       HandlePreviousJoin(start_perpendicular);
-      AppendPoints(curve.p1, start_perpendicular);
+      AppendVertices(curve.p1, start_perpendicular);
 
       Scalar count = std::ceilf(curve.SubdivisionCount(scale_));
       if (count > 1) {
-        // Handle first point specially as it does not have a join from
-        // any previous curve segment.
-        // Point prev = curve.Solve(1 / count);
-        // auto prev_perpendicular = ComputePerpendicular(curve.p1, prev);
-        // AppendPoints(prev, prev_perpendicular);
         Point prev = curve.p1;
         auto prev_perpendicular = start_perpendicular;
 
@@ -440,17 +436,12 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
         for (int i = 1; i < count; i++) {
           Point cur = curve.Solve(i / count);
           auto cur_perpendicular = ComputePerpendicular(prev, cur);
-          // AddJoin(Join::kRound, prev, prev_perpendicular, cur_perpendicular);
-          // CurveJoin(prev, prev_perpendicular, cur_perpendicular);
-          AppendPoints(cur, cur_perpendicular);
+          AppendVertices(cur, cur_perpendicular);
           prev = cur;
           prev_perpendicular = cur_perpendicular;
         }
 
-        // One last curve join for the last segment
-        // AddJoin(Join::kRound, prev, prev_perpendicular, end_perpendicular);
-        // CurveJoin(prev, prev_perpendicular, end_perpendicular);
-        AppendPoints(curve.p2, end_perpendicular);
+        AppendVertices(curve.p2, end_perpendicular);
 
         last_perpendicular_ = end_perpendicular;
         last_point_ = curve.p2;
@@ -484,7 +475,8 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
  private:
   PositionWriter& vtx_builder_;
   const Scalar half_stroke_width_;
-  const Scalar scaled_miter_limit_squared_;
+  const Scalar maximum_join_cosine_;
+  const Scalar minimum_miter_cosine_;
   const Join join_;
   const Cap cap_;
   const Scalar scale_;
@@ -498,17 +490,89 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   bool has_prior_segment_ = false;
   bool contour_needs_cap_ = false;
 
+  // Half of the allowed distance between the ends of the perpendiculars.
+  static constexpr Scalar kJoinPixelThreshold = 0.25f;
+
+  static Scalar ComputeMaximumJoinCosine(Scalar scale,
+                                         Scalar half_stroke_width) {
+    // Consider 2 perpendicular vectors, each pointing to the same side of
+    // two adjacent path segment "boxes". If they are identical, then there
+    // is no turn at that point on the path and we do not need to decorate
+    // that gap with any join geometry. If they differ, there will be a gap
+    // between them that must be decorated and the cosine of the angle of
+    // that gap will be their Dot product (with +1 meaning that there is
+    // no turn and therefore no decoration needed). We need to find the
+    // cosine of the angle between them where we start to care about adding
+    // the join geometry.
+    //
+    // Consider the right triangle where one side is the line bisecting the
+    // two perpendiculars, starting from the common point on the path and
+    // ending at the line that joins them. The hypotenuse of that triangle
+    // is one of the perpendiculars, whose length is (scale * half_width).
+    // The other non-hypotenuse side is kJoinPixelThreshold. This
+    // triangle establishes the equation:
+    //   ||bisector|| ^ 2 + kJoinThreshold ^ 2 == ||hypotenuse|| ^ 2
+    // and the cosine of the angle between the perpendicular and the bisector
+    // will be (||bisector|| / ||hypotenuse||).
+    // The cosine between the perpendiculars which can be compared to the
+    // will be the cosine of double that angle.
+    Scalar hypotenuse = scale * half_stroke_width;
+    if (hypotenuse <= kJoinPixelThreshold) {
+      // The line geometry is too small to register the docorations. Return
+      // a cosine value small enough to never qualify to add join decorations.
+      return -1.1f;
+    }
+    Scalar bisector = std::sqrt(hypotenuse * hypotenuse -
+                                kJoinPixelThreshold * kJoinPixelThreshold);
+    Scalar half_cosine = bisector / hypotenuse;
+    Scalar cosine = 2.0f * half_cosine * half_cosine - 1;
+    return cosine;
+  }
+
+  static Scalar ComputeMinimumMiterCosine(Scalar miter_limit) {
+    if (miter_limit <= 1.0f) {
+      // Miter limits less than 1.0 are impossible to meet since the miter
+      // join will always be at least as long as half the line width, so they
+      // essentially eliminate all miters. We return a degenerate cosine
+      // value so that the join routine never adds a miter.
+      return 1.1f;
+    }
+    // We enter the join routine with a point on the path shared between
+    // two segments that must be joined and 2 perpendicular values that
+    // locate the sides of the old and new segment "boxes" relative to
+    // that point. We can think of the miter as a diamond starting at the
+    // point on the path, extending outwards by those 2 perpendicular
+    // lines, and then continuing perpendicular to those perpendiculars
+    // to a common intersection point out in the distance. If you then
+    // consider the line that extends from the path point to the far
+    // intersection point, that divides the diamond into 2 right triangles
+    // (they are right triangles due to the right angle turn we take at
+    // the ends of the path perpendiculars). If we want to know the angle
+    // at which we reach the miter limit we can assume maximum extension
+    // which places the dividing line (the hypotenuse) at a multiple of the
+    // line width which is the length of one of those segment perpendiculars.
+    // This means that the near bisected angle has a cosine of the ratio
+    // of one of the near edges (length of half the line width) with the
+    // miter length (miter_limit times half the line width). The ratio of
+    // those is (1 / miter_limit).
+    Scalar half_cosine = 1 / miter_limit;
+    Scalar cosine = 2.0f * half_cosine * half_cosine - 1;
+    return cosine;
+  }
+
   inline void HandlePreviousJoin(SeparatedVector2 new_perpendicular) {
     FML_DCHECK(has_prior_contour_);
     if (has_prior_segment_) {
       AddJoin(join_, last_point_, last_perpendicular_, new_perpendicular);
     } else {
       has_prior_segment_ = true;
-      auto perpendicular = new_perpendicular.GetVector();
+      auto perpendicular_vector = new_perpendicular.GetVector();
       if (contour_needs_cap_) {
-        AddCap(cap_, last_point_, perpendicular, true);
+        AddCap(cap_, last_point_, perpendicular_vector, true);
       }
-      AppendPoints(last_point_, perpendicular);
+      // Start the new segment's "box" at the shared "last_point_" with
+      // the new perpendicular vector.
+      AppendVertices(last_point_, perpendicular_vector);
       origin_perpendicular_ = new_perpendicular;
     }
   }
@@ -545,7 +609,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
             Point center = path_point - along * trigs_[i].sin;
             Vector2 offset = perpendicular * trigs_[i].cos;
 
-            AppendPoints(center, offset);
+            AppendVertices(center, offset);
           }
         } else {
           // Iterate up to, but not including, the last entry (0, 1)
@@ -554,7 +618,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
             Point center = path_point + along * trigs_[i].sin;
             Vector2 offset = perpendicular * trigs_[i].cos;
 
-            AppendPoints(center, offset);
+            AppendVertices(center, offset);
           }
 
           vtx_builder_.AppendVertex(path_point + along);
@@ -566,7 +630,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
         Point square_center = contour_start             //
                                   ? path_point - along  //
                                   : path_point + along;
-        AppendPoints(square_center, perpendicular);
+        AppendVertices(square_center, perpendicular);
         break;
       }
     }
@@ -576,40 +640,64 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
                Point path_point,
                SeparatedVector2 old_perpendicular,
                SeparatedVector2 new_perpendicular) {
-    Scalar turning = old_perpendicular.Cross(new_perpendicular);
-    // Can we compute a threshold based on scale and stroke width?
-    Scalar threshold = 0.0f;
-    if (std::abs(turning) <= threshold) {
-      // If the perpendiculars are so aligned that we cannot tell them
-      // apart (threshold), then no need to add any further points, we
-      // don't really even need to start the new segment's "box", we can
-      // just let it connect to the prior segment's "box end" directly.
+    Scalar cosine = old_perpendicular.GetAlignment(new_perpendicular);
+    if (cosine >= maximum_join_cosine_) {
+      // If the perpendiculars are closer than a pixel to each other, then
+      // no need to add any further points, we don't even need to start
+      // the new segment's "box", we can just let it connect back to the
+      // prior segment's "box end" directly.
       return;
     }
+    // All cases of this switch will fall through into the code that starts
+    // the new segment's "box" down below which is good enough to bevel join
+    // the segments should they individually decide that they don't need any
+    // other decorations to bridge the gap.
     switch (join) {
       case Join::kBevel:
-        // Just starting the new segment's "box" is enough to bevel join them.
+        // Just fall through to the bevel operation after the switch
         break;
+
       case Join::kMiter: {
-        // 1 for no joint (straight line), 0 for max joint (180 degrees).
-        Scalar alignment =
-            (old_perpendicular.GetAlignment(new_perpendicular) + 1) / 2;
-        Point miter_vector =
-            (old_perpendicular.GetVector() + new_perpendicular.GetVector()) /
-            (2 * alignment);
-        if (miter_vector.GetLengthSquared() <= scaled_miter_limit_squared_) {
-          if (turning < 0) {
+        if (cosine >= minimum_miter_cosine_) {
+          Point miter_vector =
+              (old_perpendicular.GetVector() + new_perpendicular.GetVector()) /
+              (cosine + 1);
+          if (old_perpendicular.Cross(new_perpendicular) < 0) {
             vtx_builder_.AppendVertex(path_point + miter_vector);
           } else {
             vtx_builder_.AppendVertex(path_point - miter_vector);
           }
+          // else default (fall through) to bevel operation after the switch
         }
         break;
-      }
+      }  // end of kMiter join case
+
       case Join::kRound: {
+        if (cosine >= trigs_[1].cos) {
+          // If rotating by the first (non-quadrant) entry in trigs takes
+          // us too far then we don't need to fill in anything. Just fall
+          // through to the bevel operation after the switch.
+          break;
+        }
         // We want to set up the from and to vectors to facilitate a
-        // clockwise angular fill from one to the other.
+        // clockwise angular fill from one to the other. We might generate
+        // a couple fewer points by iterating counter-clockwise in some
+        // cases so that we always go from the old to new perpendiculars,
+        // but there is a lot of code to duplicate below for just a small
+        // change in whether we negate the trigs and expect the a.Cross(b)
+        // values to be > or < 0.
         Vector2 from_vector, to_vector;
+        bool begin_end_crossed;
+        Scalar turning = old_perpendicular.Cross(new_perpendicular);
+        if (turning == 0) {
+          // Uh oh, this is a 180 degree turn, but there is no clean way to
+          // adjust the code below to make a semi-circle when the cross
+          // product of the vectors is not signed. We resolve this by simply
+          // adding a cap here based on the previous segment and then let
+          // the bevel operation below position us for the next segment.
+          AddCap(Cap::kRound, path_point, old_perpendicular.GetVector(), false);
+          break;
+        }
         if (turning > 0) {
           // Clockwise path turn, since our prependicular vectors point to
           // the right of the path we need to fill in the "back side" of the
@@ -617,67 +705,86 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
           // has a clockwise turn.
           from_vector = -old_perpendicular.GetVector();
           to_vector = -new_perpendicular.GetVector();
-        } else if (turning < 0) {
+          // Despite the fact that we are using the negative vectors, they
+          // are in the right "order" so we can connect directly from the
+          // prior segment's "box" and directly to the following segment's.
+          begin_end_crossed = false;
+        } else {
           // Countercockwise path turn, we need to reverse the order of the
           // perpendiculars to achieve a clockwise angular fill, and since
           // both vectors are pointing to the right, the vectors themselves
           // are "turning outside" the widened path.
           from_vector = new_perpendicular.GetVector();
           to_vector = old_perpendicular.GetVector();
-        } else {
-          // No turn at all, we can even skip the opening end of the
-          // following "box" just like a bevel join.
-          return;
+          // We are reversing the direction of traversal with respect to
+          // the old segment's and new segment's boxes so we should append
+          // extra segments to cross back and forth.
+          begin_end_crossed = true;
         }
         FML_DCHECK(from_vector.Cross(to_vector) > 0);
 
-        // If rotating by the first (non-quadrant) entry in trigs takes
-        // us too far then we don't need to fill in anything.
-        if ((trigs_[1] * from_vector).Cross(to_vector) > 0) {
-          // Start and end at the path point to make a wedge
-          vtx_builder_.AppendVertex(path_point);
+        if (begin_end_crossed) {
           vtx_builder_.AppendVertex(path_point + from_vector);
+        }
 
-          // The sum of the vectors points in the direction halfway between
-          // them.  Since we only need its direction, this is enough without
-          // having to adjust for the length to get the exact midpoint of
-          // the curve we have to draw.
-          Point middle_vector = (from_vector + to_vector);
+        // We only need to trace back to the common center point on every
+        // other circular vertex we add. This generates a "corrugated"
+        // path that visits the center once for every pair of edge vertices.
+        bool visit_center = false;
 
-          // Iterate through trigs until we reach a full quadrant's rotation
-          // or until we pass the halfway point (middle_vector)
-          size_t end = trigs_.size() - 1u;
-          for (size_t i = 1u; i < end; ++i) {
-            Point p = trigs_[i] * from_vector;
-            if (p.Cross(middle_vector) <= 0) {
-              // We've traversed far enough to pass the halfway vector,
-              // stop and traverse backwards from the new_perpendicular.
-              // Record the stopping point in end as we will use it to
-              // backtrack in the next loop.
-              end = i;
-              break;
-            }
-            vtx_builder_.AppendVertex(path_point);
-            vtx_builder_.AppendVertex(path_point + p);
+        // The sum of the vectors points in the direction halfway between
+        // them.  Since we only need its direction, this is enough without
+        // having to adjust for the length to get the exact midpoint of
+        // the curve we have to draw.
+        Point middle_vector = (from_vector + to_vector);
+
+        // Iterate through trigs until we reach a full quadrant's rotation
+        // or until we pass the halfway point (middle_vector)
+        size_t end = trigs_.size() - 1u;
+        for (size_t i = 1u; i < end; ++i) {
+          Point p = trigs_[i] * from_vector;
+          if (p.Cross(middle_vector) <= 0) {
+            // We've traversed far enough to pass the halfway vector,
+            // stop and traverse backwards from the new_perpendicular.
+            // Record the stopping point in end as we will use it to
+            // backtrack in the next loop.
+            end = i;
+            break;
           }
-
-          // end points to the last trigs entry we decided not to use, so
-          // a pre-decrement here moves us onto the trigs we do want to use
-          // (stopping before we use 0 which is the 0 rotation vector)
-          while (--end > 0u) {
-            Point p = -trigs_[end] * to_vector;
+          if (visit_center) {
             vtx_builder_.AppendVertex(path_point);
-            vtx_builder_.AppendVertex(path_point + p);
+            visit_center = false;
+          } else {
+            visit_center = true;
           }
+          vtx_builder_.AppendVertex(path_point + p);
+        }
 
-          // Start and end at the path point to make a wedge
+        // end points to the last trigs entry we decided not to use, so
+        // a pre-decrement here moves us onto the trigs we do want to use
+        // (stopping before we use 0 which is the 0 rotation vector)
+        while (--end > 0u) {
+          Point p = -trigs_[end] * to_vector;
+          if (visit_center) {
+            vtx_builder_.AppendVertex(path_point);
+            visit_center = false;
+          } else {
+            visit_center = true;
+          }
+          vtx_builder_.AppendVertex(path_point + p);
+        }
+
+        if (begin_end_crossed) {
           vtx_builder_.AppendVertex(path_point + to_vector);
-          vtx_builder_.AppendVertex(path_point);
         }
         break;
-      }
-    }
-    AppendPoints(path_point, new_perpendicular);
+      }  // end of kRound join case
+    }  // end of switch
+    // All joins need a final segment that is perpendicular to the shared
+    // path point along the new perpendicular direction, and this also
+    // provides a bevel join for all cases that decided no further
+    // decoration was warranted.
+    AppendVertices(path_point, new_perpendicular);
   }
 };
 
