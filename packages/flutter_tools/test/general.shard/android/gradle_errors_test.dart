@@ -54,6 +54,7 @@ void main() {
           incompatibleCompileSdk35AndAgpVersionHandler,
           usageOfV1EmbeddingReferencesHandler,
           jlinkErrorWithJava21AndSourceCompatibility,
+          missingNdkSourcePropertiesFile,
           incompatibleKotlinVersionHandler,
         ]),
       );
@@ -1560,6 +1561,59 @@ Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJav
       // Links to info.
       expect(testLogger.statusText, contains('https://issuetracker.google.com/issues/294137077'));
       expect(testLogger.statusText, contains('https://github.com/flutter/flutter/issues/156304'));
+    },
+    overrides: <Type, Generator>{
+      GradleUtils: () => FakeGradleUtils(),
+      Platform: () => fakePlatform('android'),
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'Missing NDK source.properties file',
+    () async {
+      const String unixErrorExample = r'''
+* What went wrong:
+A problem occurred configuring project ':app'.
+> [CXX1101] NDK at /Users/mackall/Library/Android/sdk/ndk/26.3.11579264 did not have a source.properties file
+    ''';
+
+      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+      await missingNdkSourcePropertiesFile.handler(
+        line: unixErrorExample,
+        project: project,
+        usesAndroidX: true,
+      );
+
+      expect(
+        testLogger.statusText,
+        contains('This can be fixed by deleting the local NDK copy at'),
+      );
+      expect(
+        testLogger.statusText,
+        contains('/Users/mackall/Library/Android/sdk/ndk/26.3.11579264'),
+      );
+
+      const String windowsErrorExample = r'''
+* What went wrong:
+A problem occurred configuring project ':app'.
+> [CXX1101] NDK at C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264 did not have a source.properties file
+    ''';
+      await missingNdkSourcePropertiesFile.handler(
+        line: windowsErrorExample,
+        project: project,
+        usesAndroidX: true,
+      );
+
+      expect(
+        testLogger.statusText,
+        contains('This can be fixed by deleting the local NDK copy at'),
+      );
+      expect(
+        testLogger.statusText,
+        contains(r'C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264'),
+      );
     },
     overrides: <Type, Generator>{
       GradleUtils: () => FakeGradleUtils(),
