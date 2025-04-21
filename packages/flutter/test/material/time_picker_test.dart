@@ -2220,12 +2220,8 @@ void main() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       tester.element(find.byType(TimePickerDialog)),
     );
-    final Finder semanticsFinder = find.byKey(const ValueKey<String>('hour-minute-mode-semantics'));
-
-    expect(
-      semanticsFinder,
-      findsOneWidget,
-      reason: 'Semantics node for hour/minute mode should exist',
+    final Finder semanticsFinder = find.bySemanticsLabel(
+      localizations.timePickerHourModeAnnouncement,
     );
 
     final SemanticsNode semanticsNode = tester.getSemantics(semanticsFinder);
@@ -2271,18 +2267,15 @@ void main() {
       materialType: MaterialType.material3,
     );
 
-    final Finder semanticsFinder = find.byKey(
-      const ValueKey<String>('time-picker-header-semantics'),
-    );
-    final SemanticsNode semanticsNode = tester.getSemantics(semanticsFinder);
     final MaterialLocalizations localizations = MaterialLocalizations.of(
       tester.element(find.byType(TimePickerDialog)),
     );
     final String expectedLabel12Hour = localizations.formatTimeOfDay(initialTime);
+    final String expectedHelpText = localizations.timePickerDialHelpText;
 
     expect(
-      semanticsNode.label,
-      contains(expectedLabel12Hour),
+      semantics,
+      includesNodeWith(label: '$expectedLabel12Hour\n$expectedHelpText'),
       reason: 'Header should have semantics label: $expectedLabel12Hour (12-hour)',
     );
 
