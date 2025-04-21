@@ -904,15 +904,9 @@ class MaterialScrollBehavior extends ScrollBehavior {
 }
 
 class _MaterialAppState extends State<MaterialApp> {
-  static const double _selectionButtonsSize = 32.0;
-  static const double _selectionButtonsIconSize = 18.0;
-
   late HeroController _heroController;
 
   bool get _usesRouter => widget.routerDelegate != null || widget.routerConfig != null;
-
-  BoxConstraints get _selectionButtonsConstraints =>
-      const BoxConstraints.tightFor(width: _selectionButtonsSize, height: _selectionButtonsSize);
 
   @override
   void initState() {
@@ -944,11 +938,11 @@ class _MaterialAppState extends State<MaterialApp> {
     required VoidCallback onPressed,
     required GlobalKey key,
   }) {
-    return _selectionButtonBuilder(
-      context,
-      key: key,
+    return _MaterialInspectorButton(
       onPressed: onPressed,
-      icon: const Icon(Icons.close),
+      isDarkTheme: _isDarkTheme(context),
+      icon: Icons.close,
+      buttonKey: key,
     );
   }
 
@@ -957,11 +951,10 @@ class _MaterialAppState extends State<MaterialApp> {
     required VoidCallback onPressed,
     required GlobalKey key,
   }) {
-    return _selectionButtonBuilder(
-      context,
-      key: key,
+    return _TapBehaviorButton(
       onPressed: onPressed,
-      icon: const Icon(Icons.ads_click),
+      isDarkTheme: _isDarkTheme(context),
+      buttonKey: key,
     );
   }
 
@@ -970,64 +963,18 @@ class _MaterialAppState extends State<MaterialApp> {
     required VoidCallback onPressed,
     bool isLeftAligned = true,
   }) {
-    return _selectionButtonBuilder(
-      context,
+    final bool isDarkTheme = _isDarkTheme(context);
+    return _MaterialInspectorButton(
       onPressed: onPressed,
-      iconSize: _selectionButtonsSize,
+      isDarkTheme: isDarkTheme,
+      icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+      iconSize: _MaterialInspectorButton._selectionButtonsSize,
       backgroundColor: Colors.transparent,
-      foregroundColor: _widgetSelectionButtonsBackgroundColor(context),
-      icon: Icon(isLeftAligned ? Icons.arrow_right : Icons.arrow_left),
-    );
-  }
-
-  Widget _selectionButtonBuilder(
-    BuildContext context, {
-    required VoidCallback onPressed,
-    required Icon icon,
-    GlobalKey? key,
-    Color? backgroundColor,
-    Color? foregroundColor,
-    double? iconSize,
-  }) {
-    return IconButton(
-      key: key,
-      onPressed: onPressed,
-      iconSize: iconSize ?? _selectionButtonsIconSize,
-      padding: EdgeInsets.zero,
-      constraints: _selectionButtonsConstraints,
-      style: _selectionButtonsIconStyle(
+      foregroundColor: _MaterialInspectorButton._widgetSelectionButtonsBackgroundColor(
         context,
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
+        isDarkTheme: isDarkTheme,
       ),
-      icon: icon,
     );
-  }
-
-    ButtonStyle _selectionButtonsIconStyle(
-    BuildContext context, {
-    Color? backgroundColor,
-    Color? foregroundColor,
-  }) {
-    return IconButton.styleFrom(
-      backgroundColor: backgroundColor ?? _widgetSelectionButtonsBackgroundColor(context),
-      foregroundColor: foregroundColor ?? _widgetSelectionButtonsForegroundColor(context),
-      tapTargetSize: MaterialTapTargetSize.padded,
-    );
-  }
-
-  Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return _isDarkTheme(context)
-        ? theme.colorScheme.onPrimaryContainer
-        : theme.colorScheme.primaryContainer;
-  }
-
-  Color _widgetSelectionButtonsBackgroundColor(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return _isDarkTheme(context)
-        ? theme.colorScheme.primaryContainer
-        : theme.colorScheme.onPrimaryContainer;
   }
 
   bool _isDarkTheme(BuildContext context) {
@@ -1216,6 +1163,127 @@ class _MaterialAppState extends State<MaterialApp> {
     return ScrollConfiguration(
       behavior: widget.scrollBehavior ?? const MaterialScrollBehavior(),
       child: HeroControllerScope(controller: _heroController, child: result),
+    );
+  }
+}
+
+class _MaterialInspectorButton extends StatelessWidget {
+  const _MaterialInspectorButton({
+    required this.onPressed,
+    required this.icon,
+    required this.isDarkTheme,
+    this.iconSize,
+    this.buttonKey,
+    this.backgroundColor,
+    this.foregroundColor,
+  });
+
+  static const double _selectionButtonsSize = 32.0;
+  static const double _selectionButtonsIconSize = 18.0;
+
+  BoxConstraints get _selectionButtonsConstraints =>
+      const BoxConstraints.tightFor(width: _selectionButtonsSize, height: _selectionButtonsSize);
+
+  final VoidCallback onPressed;
+  final IconData icon;
+  final bool isDarkTheme;
+  final double? iconSize;
+  final GlobalKey? buttonKey;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      key: buttonKey,
+      onPressed: onPressed,
+      iconSize: iconSize ?? _selectionButtonsIconSize,
+      padding: EdgeInsets.zero,
+      constraints: _selectionButtonsConstraints,
+      style: _selectionButtonsIconStyle(
+        context,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+      ),
+      icon: Icon(icon),
+    );
+  }
+
+  ButtonStyle _selectionButtonsIconStyle(
+    BuildContext context, {
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) {
+    return IconButton.styleFrom(
+      backgroundColor:
+          backgroundColor ??
+          _widgetSelectionButtonsBackgroundColor(context, isDarkTheme: isDarkTheme),
+      foregroundColor:
+          foregroundColor ??
+          _widgetSelectionButtonsForegroundColor(context, isDarkTheme: isDarkTheme),
+      tapTargetSize: MaterialTapTargetSize.padded,
+    );
+  }
+
+  static Color _widgetSelectionButtonsForegroundColor(
+    BuildContext context, {
+    required bool isDarkTheme,
+  }) {
+    final ThemeData theme = Theme.of(context);
+    return isDarkTheme ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primaryContainer;
+  }
+
+  static Color _widgetSelectionButtonsBackgroundColor(
+    BuildContext context, {
+    required bool isDarkTheme,
+  }) {
+    final ThemeData theme = Theme.of(context);
+    return isDarkTheme ? theme.colorScheme.primaryContainer : theme.colorScheme.onPrimaryContainer;
+  }
+}
+
+class _TapBehaviorButton extends StatefulWidget {
+  const _TapBehaviorButton({
+    required this.onPressed,
+    required this.isDarkTheme,
+    required this.buttonKey,
+  });
+
+  final VoidCallback onPressed;
+  final bool isDarkTheme;
+  final GlobalKey? buttonKey;
+
+  @override
+  State<_TapBehaviorButton> createState() => _TapBehaviorButtonState();
+}
+
+class _TapBehaviorButtonState extends State<_TapBehaviorButton> {
+  bool isEnabled = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color backgroundColor = _MaterialInspectorButton._widgetSelectionButtonsBackgroundColor(
+      context,
+      isDarkTheme: widget.isDarkTheme,
+    );
+    final Color foregroundColor = _MaterialInspectorButton._widgetSelectionButtonsForegroundColor(
+      context,
+      isDarkTheme: widget.isDarkTheme,
+    );
+
+    return _MaterialInspectorButton(
+      isDarkTheme: widget.isDarkTheme,
+      onPressed: () {
+        setState(() {
+          isEnabled = !isEnabled;
+        });
+        widget.onPressed();
+      },
+      icon: Icons.ads_click,
+      foregroundColor: foregroundColor,
+      backgroundColor:
+          isEnabled ? Color.lerp(backgroundColor, foregroundColor, 0.3) : backgroundColor,
+      buttonKey: widget.buttonKey,
     );
   }
 }
