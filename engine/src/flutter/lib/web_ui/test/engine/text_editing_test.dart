@@ -979,6 +979,8 @@ Future<void> testMain() async {
         'text': 'abcd',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
