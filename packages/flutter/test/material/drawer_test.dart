@@ -763,7 +763,7 @@ void main() {
     expect(material.clipBehavior, Clip.antiAlias);
   });
 
-  testWidgets('Drawer is dismissible', (WidgetTester tester) async {
+  testWidgets('Drawer is dismissible by default', (WidgetTester tester) async {
 
     await tester.pumpWidget(
       MaterialApp(
