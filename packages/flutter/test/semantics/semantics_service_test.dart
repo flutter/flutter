@@ -49,7 +49,10 @@ void main() {
   for (final TargetPlatform platform in TargetPlatform.values) {
     test('Announce not supported on Android. (platform=$platform)', () {
       debugDefaultTargetPlatformOverride = platform;
-      expect(SemanticsService.isAnnounceSupported(), platform != TargetPlatform.android);
+      expect(
+        const DefaultSemanticsService().isAnnounceSupported(),
+        platform != TargetPlatform.android,
+      );
       debugDefaultTargetPlatformOverride = null;
     });
   }

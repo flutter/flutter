@@ -21,7 +21,10 @@ export 'dart:ui' show TextDirection;
 ///
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
-abstract final class SemanticsService {
+abstract class SemanticsService {
+  /// Creates a [SemanticsService].
+  const SemanticsService();
+
   /// Sends a semantic announcement.
   ///
   /// This should be used for announcement that are not seamlessly announced by
@@ -68,10 +71,20 @@ abstract final class SemanticsService {
   }
 
   /// Checks if announce is supported on the given platform.
+  bool isAnnounceSupported();
+}
+
+/// Default implementation of [SemanticsService].
+final class DefaultSemanticsService extends SemanticsService {
+  /// Creates a [DefaultSemanticsService].
+  const DefaultSemanticsService();
+
+  /// Checks if announce is supported on the given platform.
   ///
   /// On Android the announce method is deprecated, therefore will return false.
   /// On other platforms, this will return true.
-  static bool isAnnounceSupported() {
+  @override
+  bool isAnnounceSupported() {
     return defaultTargetPlatform != TargetPlatform.android;
   }
 }
