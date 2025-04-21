@@ -308,7 +308,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 TAG,
                 "Using AnnounceSemanticsEvent for accessibility is deprecated on Android. "
                     + "Migrate to using semantic properties for a more robust and accessible "
-                    + "user experience. See https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)");
+                    + "user experience.\n"
+                    + "Flutter: If you are unsure why you are seeing this bug, it might be because "
+                    + "you are using a widget that calls this method. See https://github.com/flutter/flutter/issues/165510 "
+                    + "for more details.\n"
+                    + "Android documentation: https://developer.android.com/reference/android/view/View#announceForAccessibility(java.lang.CharSequence)");
           }
           rootAccessibilityView.announceForAccessibility(message);
         }
