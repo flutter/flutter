@@ -27,7 +27,6 @@ import android.text.style.TtsSpan;
 import android.text.style.URLSpan;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -1651,31 +1650,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     if (rootObject != null) {
       final float[] identity = new float[16];
       Matrix.setIdentityM(identity, 0);
-      // In Android devices API 23 and above, the system nav bar can be placed on the left side
-      // of the screen in landscape mode. We must handle the translation ourselves for the
-      // a11y nodes.
-      if (Build.VERSION.SDK_INT >= API_LEVELS.API_23) {
-        boolean needsToApplyLeftCutoutInset = true;
-        // In Android devices API 28 and above, the `layoutInDisplayCutoutMode` window attribute
-        // can be set to allow overlapping content within the cutout area. Query the attribute
-        // to figure out whether the content overlaps with the cutout and decide whether to
-        // apply cutout inset.
-        if (Build.VERSION.SDK_INT >= API_LEVELS.API_28) {
-          needsToApplyLeftCutoutInset = doesLayoutInDisplayCutoutModeRequireLeftInset();
-        }
-
-        if (needsToApplyLeftCutoutInset) {
-          WindowInsets insets = rootAccessibilityView.getRootWindowInsets();
-          if (insets != null) {
-            if (!lastLeftFrameInset.equals(insets.getSystemWindowInsetLeft())) {
-              rootObject.globalGeometryDirty = true;
-              rootObject.inverseTransformDirty = true;
-            }
-            lastLeftFrameInset = insets.getSystemWindowInsetLeft();
-            Matrix.translateM(identity, 0, lastLeftFrameInset, 0, 0);
-          }
-        }
-      }
       rootObject.updateRecursively(identity, visitedObjects, false);
       rootObject.collectRoutes(newRoutes);
     }
