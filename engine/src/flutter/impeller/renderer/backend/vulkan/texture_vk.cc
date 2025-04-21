@@ -196,22 +196,12 @@ vk::ImageView TextureVK::GetRenderTargetView() const {
   return source_->GetRenderTargetView();
 }
 
-void TextureVK::SetCachedFramebuffer(
-    const SharedHandleVK<vk::Framebuffer>& framebuffer) {
-  source_->SetCachedFramebuffer(framebuffer);
+void TextureVK::SetCachedFrameData(const FramebufferAndRenderPass& data) {
+  source_->SetCachedFrameData(data);
 }
 
-void TextureVK::SetCachedRenderPass(
-    const SharedHandleVK<vk::RenderPass>& render_pass) {
-  source_->SetCachedRenderPass(render_pass);
-}
-
-SharedHandleVK<vk::Framebuffer> TextureVK::GetCachedFramebuffer() const {
-  return source_->GetCachedFramebuffer();
-}
-
-SharedHandleVK<vk::RenderPass> TextureVK::GetCachedRenderPass() const {
-  return source_->GetCachedRenderPass();
+const FramebufferAndRenderPass& TextureVK::GetCachedFrameData() const {
+  return source_->GetCachedFrameData();
 }
 
 void TextureVK::SetMipMapGenerated() {

@@ -76,8 +76,8 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
 
     auto texture = render_target.GetRenderTargetTexture();
     auto& texture_vk = TextureVK::Cast(*texture);
-    EXPECT_EQ(texture_vk.GetCachedFramebuffer(), nullptr);
-    EXPECT_EQ(texture_vk.GetCachedRenderPass(), nullptr);
+    EXPECT_EQ(texture_vk.GetCachedFrameData().framebuffer, nullptr);
+    EXPECT_EQ(texture_vk.GetCachedFrameData().render_pass, nullptr);
 
     auto command_buffer = context->CreateCommandBuffer();
     auto render_pass = command_buffer->CreateRenderPass(render_target);
@@ -106,10 +106,10 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
     auto texture = render_target.GetRenderTargetTexture();
     auto& texture_vk = TextureVK::Cast(*texture);
 
-    EXPECT_NE(texture_vk.GetCachedFramebuffer(), nullptr);
-    EXPECT_NE(texture_vk.GetCachedRenderPass(), nullptr);
-    framebuffers.push_back(texture_vk.GetCachedFramebuffer());
-    render_passes.push_back(texture_vk.GetCachedRenderPass());
+    EXPECT_NE(texture_vk.GetCachedFrameData().framebuffer, nullptr);
+    EXPECT_NE(texture_vk.GetCachedFrameData().render_pass, nullptr);
+    framebuffers.push_back(texture_vk.GetCachedFrameData().framebuffer);
+    render_passes.push_back(texture_vk.GetCachedFrameData().render_pass);
   }
 
   // Iterate through once more to verify render passes and framebuffers are
@@ -121,8 +121,8 @@ TEST(SwapchainTest, CachesRenderPassOnSwapchainImage) {
     auto texture = render_target.GetRenderTargetTexture();
     auto& texture_vk = TextureVK::Cast(*texture);
 
-    EXPECT_EQ(texture_vk.GetCachedFramebuffer(), framebuffers[i]);
-    EXPECT_EQ(texture_vk.GetCachedRenderPass(), render_passes[i]);
+    EXPECT_EQ(texture_vk.GetCachedFrameData().framebuffer, framebuffers[i]);
+    EXPECT_EQ(texture_vk.GetCachedFrameData().render_pass, render_passes[i]);
   }
 }
 

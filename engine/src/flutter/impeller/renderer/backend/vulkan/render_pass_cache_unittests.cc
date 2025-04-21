@@ -27,14 +27,14 @@ TEST_P(RendererTest, CachesRenderPassAndFramebuffer) {
       render_target.GetColorAttachment(0).resolve_texture;
   TextureVK& texture_vk = TextureVK::Cast(*resolve_texture);
 
-  EXPECT_EQ(texture_vk.GetCachedFramebuffer(), nullptr);
-  EXPECT_EQ(texture_vk.GetCachedRenderPass(), nullptr);
+  EXPECT_EQ(texture_vk.GetCachedFrameData().framebuffer, nullptr);
+  EXPECT_EQ(texture_vk.GetCachedFrameData().render_pass, nullptr);
 
   auto buffer = GetContext()->CreateCommandBuffer();
   auto render_pass = buffer->CreateRenderPass(render_target);
 
-  EXPECT_NE(texture_vk.GetCachedFramebuffer(), nullptr);
-  EXPECT_NE(texture_vk.GetCachedRenderPass(), nullptr);
+  EXPECT_NE(texture_vk.GetCachedFrameData().framebuffer, nullptr);
+  EXPECT_NE(texture_vk.GetCachedFrameData().render_pass, nullptr);
 
   render_pass->EncodeCommands();
   EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer}).ok());
@@ -61,14 +61,14 @@ TEST_P(RendererTest, CachesRenderPassAndFramebufferNonMSAA) {
       render_target.GetColorAttachment(0).texture;
   TextureVK& texture_vk = TextureVK::Cast(*color_texture);
 
-  EXPECT_EQ(texture_vk.GetCachedFramebuffer(), nullptr);
-  EXPECT_EQ(texture_vk.GetCachedRenderPass(), nullptr);
+  EXPECT_EQ(texture_vk.GetCachedFrameData().framebuffer, nullptr);
+  EXPECT_EQ(texture_vk.GetCachedFrameData().render_pass, nullptr);
 
   auto buffer = GetContext()->CreateCommandBuffer();
   auto render_pass = buffer->CreateRenderPass(render_target);
 
-  EXPECT_NE(texture_vk.GetCachedFramebuffer(), nullptr);
-  EXPECT_NE(texture_vk.GetCachedRenderPass(), nullptr);
+  EXPECT_NE(texture_vk.GetCachedFrameData().framebuffer, nullptr);
+  EXPECT_NE(texture_vk.GetCachedFrameData().render_pass, nullptr);
 
   render_pass->EncodeCommands();
   EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer}).ok());

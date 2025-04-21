@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_VK_H_
 
 #include "impeller/base/backend_cast.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/texture.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/device_buffer_vk.h"
@@ -48,31 +49,17 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   std::shared_ptr<SamplerVK> GetImmutableSamplerVariant(
       const SamplerVK& sampler) const;
 
-  // These methods should only be used by render_pass_vk.h
-
   /// Store the last framebuffer object used with this texture.
   ///
   /// This field is only set if this texture is used as the resolve texture
   /// of a render pass. By construction, this framebuffer should be compatible
   /// with any future render passes.
-  void SetCachedFramebuffer(const SharedHandleVK<vk::Framebuffer>& framebuffer);
-
-  /// Store the last render pass object used with this texture.
-  ///
-  /// This field is only set if this texture is used as the resolve texture
-  /// of a render pass. By construction, this framebuffer should be compatible
-  /// with any future render passes.
-  void SetCachedRenderPass(const SharedHandleVK<vk::RenderPass>& render_pass);
+  void SetCachedFrameData(const FramebufferAndRenderPass& data);
 
   /// Retrieve the last framebuffer object used with this texture.
   ///
   /// May be nullptr if no previous framebuffer existed.
-  SharedHandleVK<vk::Framebuffer> GetCachedFramebuffer() const;
-
-  /// Retrieve the last render pass object used with this texture.
-  ///
-  /// May be nullptr if no previous render pass existed.
-  SharedHandleVK<vk::RenderPass> GetCachedRenderPass() const;
+  const FramebufferAndRenderPass& GetCachedFrameData() const;
 
  private:
   std::weak_ptr<Context> context_;

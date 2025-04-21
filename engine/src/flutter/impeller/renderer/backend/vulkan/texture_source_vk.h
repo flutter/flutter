@@ -15,6 +15,13 @@
 
 namespace impeller {
 
+// These methods should only be used by render_pass_vk.h
+struct FramebufferAndRenderPass {
+  SharedHandleVK<vk::Framebuffer> framebuffer = nullptr;
+  SharedHandleVK<vk::RenderPass> render_pass = nullptr;
+  SampleCount sample_count = SampleCount::kCount1;
+};
+
 //------------------------------------------------------------------------------
 /// @brief      Abstract base class that represents a vkImage and an
 ///             vkImageView.
@@ -130,24 +137,12 @@ class TextureSourceVK {
   /// This field is only set if this texture is used as the resolve texture
   /// of a render pass. By construction, this framebuffer should be compatible
   /// with any future render passes.
-  void SetCachedFramebuffer(const SharedHandleVK<vk::Framebuffer>& framebuffer);
-
-  /// Store the last render pass object used with this texture.
-  ///
-  /// This field is only set if this texture is used as the resolve texture
-  /// of a render pass. By construction, this framebuffer should be compatible
-  /// with any future render passes.
-  void SetCachedRenderPass(const SharedHandleVK<vk::RenderPass>& render_pass);
+  void SetCachedFrameData(const FramebufferAndRenderPass& data);
 
   /// Retrieve the last framebuffer object used with this texture.
   ///
   /// May be nullptr if no previous framebuffer existed.
-  SharedHandleVK<vk::Framebuffer> GetCachedFramebuffer() const;
-
-  /// Retrieve the last render pass object used with this texture.
-  ///
-  /// May be nullptr if no previous render pass existed.
-  SharedHandleVK<vk::RenderPass> GetCachedRenderPass() const;
+  const FramebufferAndRenderPass& GetCachedFrameData() const;
 
  protected:
   const TextureDescriptor desc_;
@@ -155,8 +150,7 @@ class TextureSourceVK {
   explicit TextureSourceVK(TextureDescriptor desc);
 
  private:
-  SharedHandleVK<vk::Framebuffer> framebuffer_;
-  SharedHandleVK<vk::RenderPass> render_pass_;
+  FramebufferAndRenderPass frame_data_ = {};
   mutable vk::ImageLayout layout_ = vk::ImageLayout::eUndefined;
 };
 
