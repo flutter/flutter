@@ -63,7 +63,7 @@ bool SupportsFloat16(const std::weak_ptr<DeviceHolderVK>& device_holder) {
   }
 }
 
-const std::set<std::string_view> kShadersRequiringFloat16 = {
+const std::set<std::string_view> shaders_requiring_float16 = {
     "half",  // This is a test fixture which is unexecuted, so no alternative is
              // necessary.
 };
@@ -81,8 +81,8 @@ ShaderLibraryVK::ShaderLibraryVK(
                       const auto& name,  //
                       const auto& code   //
                       ) -> bool {
-    if (!supports_float_16 &&
-        kShadersRequiringFloat16.find(name) != kShadersRequiringFloat16.end()) {
+    if (!supports_float_16 && shaders_requiring_float16.find(name) !=
+                                  shaders_requiring_float16.end()) {
       return true;
     }
 
