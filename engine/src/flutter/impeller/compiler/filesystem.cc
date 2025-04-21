@@ -19,9 +19,9 @@ static bool MappingsAreSame(const fml::Mapping* lhs, const fml::Mapping* rhs) {
   return std::memcmp(lhs->GetMapping(), rhs->GetMapping(), lhs->GetSize()) == 0;
 }
 
-bool WriteToFilesystem(const fml::UniqueFD& base_directory,
-                       const char* file_name,
-                       const fml::Mapping& data) {
+bool WriteAtomicallyIfChanged(const fml::UniqueFD& base_directory,
+                              const char* file_name,
+                              const fml::Mapping& data) {
   if (auto existing = fml::FileMapping::CreateReadOnly(file_name)) {
     if (MappingsAreSame(&data, existing.get())) {
       return true;

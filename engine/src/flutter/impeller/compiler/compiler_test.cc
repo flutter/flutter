@@ -121,9 +121,9 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
     return false;
   }
 
-  if (!WriteToFilesystem(intermediates_directory_,
-                         SPIRVFileName(fixture_name).c_str(),
-                         *spirv_assembly)) {
+  if (!WriteAtomicallyIfChanged(intermediates_directory_,
+                                SPIRVFileName(fixture_name).c_str(),
+                                *spirv_assembly)) {
     VALIDATION_LOG << "Could not write SPIRV intermediates.";
     return false;
   }
@@ -134,9 +134,9 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
     return false;
   }
 
-  if (!WriteToFilesystem(intermediates_directory_,
-                         SLFileName(fixture_name, GetParam()).c_str(),
-                         *sl_source)) {
+  if (!WriteAtomicallyIfChanged(intermediates_directory_,
+                                SLFileName(fixture_name, GetParam()).c_str(),
+                                *sl_source)) {
     VALIDATION_LOG << "Could not write SL intermediates.";
     return false;
   }
@@ -168,23 +168,23 @@ bool CompilerTest::CanCompileAndReflect(const char* fixture_name,
       return false;
     }
 
-    if (!WriteToFilesystem(intermediates_directory_,
-                           ReflectionHeaderName(fixture_name).c_str(),
-                           *reflection_header)) {
+    if (!WriteAtomicallyIfChanged(intermediates_directory_,
+                                  ReflectionHeaderName(fixture_name).c_str(),
+                                  *reflection_header)) {
       VALIDATION_LOG << "Could not write reflection header intermediates.";
       return false;
     }
 
-    if (!WriteToFilesystem(intermediates_directory_,
-                           ReflectionCCName(fixture_name).c_str(),
-                           *reflection_source)) {
+    if (!WriteAtomicallyIfChanged(intermediates_directory_,
+                                  ReflectionCCName(fixture_name).c_str(),
+                                  *reflection_source)) {
       VALIDATION_LOG << "Could not write reflection CC intermediates.";
       return false;
     }
 
-    if (!WriteToFilesystem(intermediates_directory_,
-                           ReflectionJSONName(fixture_name).c_str(),
-                           *reflection_json)) {
+    if (!WriteAtomicallyIfChanged(intermediates_directory_,
+                                  ReflectionJSONName(fixture_name).c_str(),
+                                  *reflection_json)) {
       VALIDATION_LOG << "Could not write reflection json intermediates.";
       return false;
     }
