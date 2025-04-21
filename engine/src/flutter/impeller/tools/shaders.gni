@@ -140,7 +140,11 @@ template("impeller_shaders") {
       if (defined(invoker.vulkan_language_version)) {
         vulkan_language_version = invoker.vulkan_language_version
       }
-      shaders = invoker.shaders
+      if (defined(invoker.vulkan_exclusions)) {
+        shaders = invoker.shaders - invoker.vulkan_exclusions
+      } else {
+        shaders = invoker.shaders
+      }
       analyze = analyze
     }
   }
