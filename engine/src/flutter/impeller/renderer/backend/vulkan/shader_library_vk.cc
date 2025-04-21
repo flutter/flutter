@@ -48,44 +48,16 @@ static std::string VKShaderNameToShaderKeyName(const std::string& name,
   return stream.str();
 }
 
-namespace {
-bool SupportsFloat16(std::weak_ptr<DeviceHolderVK> device_holder) {
-  std::shared_ptr<DeviceHolderVK> strong_device = device_holder.lock();
-  if (strong_device) {
-    vk::PhysicalDeviceVulkan12Features vk12_features;
-    vk::PhysicalDeviceFeatures2 features2;
-    features2.setPNext(&vk12_features);
-
-    strong_device->GetPhysicalDevice().getFeatures2(&features2);
-    return vk12_features.shaderFloat16;
-  } else {
-    return false;
-  }
-}
-
-const std::set<std::string_view> shaders_requiring_float16 = {
-    "half",  // This is a test fixture which is unexecuted, so no alternative is
-             // necessary.
-};
-
-}  // namespace
-
 ShaderLibraryVK::ShaderLibraryVK(
     std::weak_ptr<DeviceHolderVK> device_holder,
     const std::vector<std::shared_ptr<fml::Mapping>>& shader_libraries_data)
     : device_holder_(std::move(device_holder)) {
   TRACE_EVENT0("impeller", "CreateShaderLibrary");
   bool success = true;
-  bool supports_float_16 = SupportsFloat16(device_holder);
   auto iterator = [&](auto type,         //
                       const auto& name,  //
                       const auto& code   //
                       ) -> bool {
-    if (!supports_float_16 && shaders_requiring_float16.find(name) !=
-                                  shaders_requiring_float16.end()) {
-      return true;
-    }
-
     const auto stage = ToShaderStage(type);
     if (!RegisterFunction(VKShaderNameToShaderKeyName(name, stage), stage,
                           code)) {
