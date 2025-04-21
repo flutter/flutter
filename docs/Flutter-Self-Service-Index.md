@@ -283,9 +283,9 @@ Flutter provides multiple functionality through self-service services. Most of t
    </td>
    <td>Flutter organization members
    </td>
-   <td><a href="https://github.com/flutter/engine/security/code-scanning">Link</a>
+   <td><a href="https://github.com/flutter/flutter/security/code-scanning">Link</a>
    </td>
-   <td><a href="https://github.com/flutter/engine/security">Engine GitHub security tab</a>.
+   <td><a href="https://github.com/flutter/flutter/security">Flutter GitHub security tab</a>.
    </td>
   </tr>
   <tr>
