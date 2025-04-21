@@ -75,9 +75,8 @@ android {
     testImplementation "junit:junit:4.13.2"
     testImplementation "androidx.test.ext:junit:1.1.4-alpha07"
 
-    def mockitoVersion = "4.7.0"
+    def mockitoVersion = "5.3.0"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "org.mockito:mockito-inline:$mockitoVersion"
     testImplementation "org.mockito:mockito-android:$mockitoVersion"
   }
 
