@@ -918,7 +918,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
@@ -1081,7 +1087,13 @@ Future<void> testMain() async {
 
         const MethodCall setEditingState = MethodCall(
           'TextInput.setEditingState',
-          <String, dynamic>{'text': 'abcd', 'selectionBase': 2, 'selectionExtent': 3},
+          <String, dynamic>{
+            'text': 'abcd',
+            'selectionBase': 2,
+            'selectionExtent': 3,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
         );
         sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
 
