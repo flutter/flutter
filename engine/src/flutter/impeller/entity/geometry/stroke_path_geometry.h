@@ -71,7 +71,6 @@ class StrokePathGeometry final : public Geometry {
 
   friend class ImpellerBenchmarkAccessor;
   friend class ImpellerEntityUnitTestAccessor;
-  friend class ImpellerGeometryUnitTestAccessor;
 
   bool SkipRendering() const;
 
