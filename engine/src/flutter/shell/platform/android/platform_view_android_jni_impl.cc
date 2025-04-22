@@ -2079,10 +2079,12 @@ class AndroidPathReceiver final : public DlPathReceiver {
         fill_type_field_id = g_path_fill_type_even_odd_field;
         break;
       case DlPathFillType::kNonZero:
-      default:
-        // Default to WINDING (non-zero)
         fill_type_field_id = g_path_fill_type_winding_field;
         break;
+      default:
+        // DlPathFillType does not have corresponding kInverseEvenOdd or kInverseWinding fill type.
+        FML_UNREACHABLE();
+        return;
     }
 
     // Get the static enum field value (Path.FillType.WINDING or
