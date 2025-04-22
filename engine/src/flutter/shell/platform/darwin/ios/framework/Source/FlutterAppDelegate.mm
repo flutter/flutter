@@ -20,7 +20,7 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-@interface FlutterAppDelegate ()
+@interface FlutterAppDelegate () <UIWindowSceneDelegate>
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 @end
@@ -214,9 +214,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 // This method is called when opening an URL with a http/https scheme.
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:
-          (void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable restorableObjects))
-              restorationHandler {
+      restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>>* __nullable
+                                       restorableObjects))restorationHandler {
   if ([self.lifeCycleDelegate application:application
                      continueUserActivity:userActivity
                        restorationHandler:restorationHandler]) {
@@ -339,6 +338,39 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                                     error:&error];
   NSAssert(error == nil, @"Cannot obtain modification date of main bundle: %@", error);
   return [fileDate timeIntervalSince1970];
+}
+
+- (UISceneConfiguration*)application:(UIApplication*)application
+    configurationForConnectingSceneSession:(UISceneSession*)connectingSceneSession
+                                   options:(UISceneConnectionOptions*)options {
+  // Not called before iOS 13.
+  if (@available(iOS 13.0, *)) {
+    NSDictionary* sceneManifest =
+        [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
+    NSDictionary* sceneConfigs = sceneManifest[@"UISceneConfigurations"];
+    NSArray* roleConfigs = sceneConfigs[connectingSceneSession.role];
+
+    if (roleConfigs.count > 0) {
+      // Defer to the Info.plist if it is specified there.
+      return nil;
+    }
+
+    // This is the default storyboard in the flutter template.
+    UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main"
+                                                         bundle:[NSBundle mainBundle]];
+    if (!storyboard) {
+      return nil;
+    }
+
+    UISceneConfiguration* config =
+        [UISceneConfiguration configurationWithName:@"flutter"
+                                        sessionRole:connectingSceneSession.role];
+    config.sceneClass = [UIWindowScene class];
+    config.delegateClass = [FlutterAppDelegate class];
+    config.storyboard = storyboard;
+    return config;
+  }
+  return nil;
 }
 
 @end
