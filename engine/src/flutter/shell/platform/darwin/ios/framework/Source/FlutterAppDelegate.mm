@@ -345,14 +345,45 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
     configurationForConnectingSceneSession:(UISceneSession*)connectingSceneSession
                                    options:(UISceneConnectionOptions*)options
     API_AVAILABLE(ios(13.0)) {
-  UISceneConfiguration* config =
-      [UISceneConfiguration configurationWithName:@"flutter"
-                                      sessionRole:connectingSceneSession.role];
-  config.sceneClass = [UIWindowScene class];
-  config.delegateClass = [FlutterAppDelegate class];
+  NSDictionary* sceneManifest =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
+  NSDictionary* sceneConfigs = sceneManifest[@"UISceneConfigurations"];
+  NSArray* roleConfigs = sceneConfigs[connectingSceneSession.role];
 
-  if ([[NSBundle mainBundle] pathForResource:@"Main" ofType:@"storyboardc"]) {
-    UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main"
+  NSString* configurationName;
+  Class delegateClass;
+  Class sceneClass;
+  NSString* storyboardName = @"Main";
+  if (roleConfigs.count > 0) {
+    configurationName = roleConfigs[0][@"UISceneConfigurationName"];
+    NSString* delegateClassName = roleConfigs[0][@"UISceneDelegateClassName"];
+    if (delegateClassName) {
+      delegateClass = NSClassFromString(delegateClassName);
+    }
+    NSString* sceneClassName = roleConfigs[0][@"UISceneDelegateClassName"];
+    if (sceneClassName) {
+      sceneClass = NSClassFromString(sceneClassName);
+    }
+    storyboardName = roleConfigs[0][@"UISceneStoryboardFile"];
+  }
+  if (!configurationName) {
+    configurationName = @"flutter";
+  }
+  if (!delegateClass) {
+    delegateClass = [FlutterAppDelegate class];
+  }
+  if (!sceneClass) {
+    sceneClass = [UIWindowScene class];
+  }
+
+  UISceneConfiguration* config =
+      [UISceneConfiguration configurationWithName:configurationName
+                                      sessionRole:connectingSceneSession.role];
+  config.sceneClass = sceneClass;
+  config.delegateClass = delegateClass;
+
+  if (storyboardName) {
+    UIStoryboard* storyboard = [UIStoryboard storyboardWithName:storyboardName
                                                          bundle:[NSBundle mainBundle]];
     config.storyboard = storyboard;
   }
