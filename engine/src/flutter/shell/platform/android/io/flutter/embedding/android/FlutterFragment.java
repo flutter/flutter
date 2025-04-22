@@ -1032,7 +1032,9 @@ public class FlutterFragment extends Fragment
     // need to continually check for null arguments before grabbing one.
     setArguments(new Bundle());
 
-    if (findViewById(FLUTTER_VIEW_ID) == null) {
+    // TODO(camsim99): reduce getActivity(), activity weirdness when sensitive content plugin PR
+    // lands.
+    if (getActivity().findViewById(FLUTTER_VIEW_ID) == null) {
       flutterViewId = FLUTTER_VIEW_ID;
     } else {
       flutterViewId = View.generateViewId();
