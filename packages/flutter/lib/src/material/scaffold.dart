@@ -1697,6 +1697,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButtonAnimator,
     this.persistentFooterButtons,
     this.persistentFooterAlignment = AlignmentDirectional.centerEnd,
+    this.persistentFooterDecoration,
     this.drawer,
     this.onDrawerChanged,
     this.endDrawer,
@@ -1804,6 +1805,22 @@ class Scaffold extends StatefulWidget {
   ///
   /// Defaults to [AlignmentDirectional.centerEnd].
   final AlignmentDirectional persistentFooterAlignment;
+
+  /// Decoration to customize the persistent footer buttons container.
+  ///
+  /// By default, the persistent footer buttons container has a border at the top
+  /// created using [Divider.createBorderSide].
+  ///
+  /// This property can be used to customize the decoration of the container,
+  /// such as adding different borders, shadows, or background colors.
+  ///
+  /// If null, the default decoration with a top border will be used.
+  ///
+  /// See also:
+  ///
+  ///  * [persistentFooterButtons], which defines the buttons to show in the footer.
+  ///  * [persistentFooterAlignment], which defines the alignment of the footer buttons.
+  final BoxDecoration? persistentFooterDecoration;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
@@ -3047,9 +3064,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin, Resto
       _addIfNonNull(
         children,
         Container(
-          decoration: BoxDecoration(
-            border: Border(top: Divider.createBorderSide(context, width: 1.0)),
-          ),
+          decoration:
+              widget.persistentFooterDecoration ??
+              BoxDecoration(border: Border(top: Divider.createBorderSide(context, width: 1.0))),
           child: SafeArea(
             top: false,
             child: IntrinsicHeight(
