@@ -2093,13 +2093,13 @@ class AndroidPathReceiver final : public DlPathReceiver {
         fml::jni::ScopedJavaLocalRef<jobject>(
             env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
                                              fill_type_field_id));
-    FML_CHECK(!fml::jni::CheckException(env_));
-    FML_CHECK(!fill_type_enum.is_null());
+    FML_CHECK(fml::jni::CheckException(env_));
+    FML_CHECK(fill_type_enum.is_null());
 
     // Call Path.setFillType(Path.FillType)
     env_->CallVoidMethod(android_path_, path_set_fill_type_method,
                          fill_type_enum.obj());
-    FML_CHECK(!fml::jni::CheckException(env_));
+    FML_CHECK(fml::jni::CheckException(env_));
   }
   void MoveTo(const DlPoint& p2) override {
     env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
