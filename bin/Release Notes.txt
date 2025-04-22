@@ -1,0 +1,80 @@
+Intel(R) Hardware Accelerated Execution Manager (HAXM)
+with Intel(R) Virtualization Technology (VT)
+for faster Android* Emulation
+
+
+Version 7.8.0
+----------------------------
+Changelog
+----------------------------
+- Enabled XSAVE feature in CPUID (#472).
+- Enabled INVPCID instruction (#471).
+- Improved the implementation of CPUID module (#470).
+- Fixed a host crash issue caused by a regression (#469).
+- Improved the user experience of installer (#474).
+
+----------------------------
+Overview
+----------------------------
+The Hardware Accelerated Execution Manager (HAXM) is a hardware-assisted virtualization engine (hypervisor) that uses Intel(R) Virtualization Technology (VT) to speed up Android* development.
+
+This software:
+- Uses Intel VT, available on selected Intel processors
+- Provides hardware-accelerated emulation of Intel(R) x86 and x86_64 Android virtual devices
+- Integrates with the Android SDK
+
+----------------------------
+Prerequisites
+----------------------------
+Intel(R) HAXM requires the Android SDK to be installed (version 17 or higher).
+For best performance, using SDK version 20 or higher is recommended.
+
+Please refer to the Android developer website (http://developer.android.com/sdk/) for more information.
+
+----------------------------
+System Requirements
+----------------------------
+Hardware Requirements:
+- Intel(R) processor with support for VT-x, EM64T, and Execute Disable Bit
+- At least 1GB of available RAM
+
+Supported Operating Systems:
+Windows* 10 (64-bit)
+Windows* 8.1 (64-bit)
+Windows* 8 (64-bit)
+Windows* 7 (64-bit)
+macOS* 10.12, 10.13, 10.14
+Note:
+Test was NOT conducted on Windows* XP since Microsoft* will not offer support for this version.
+Test was NOT conducted on 32-bit Windows since Android Emulator only supports 64-bit Windows.
+
+Important:
+1. Intel HAXM cannot be used on systems without an Intel processor, or an Intel processor lacking the hardware features, described in the "Hardware Requirements" section above.
+To determine the capabilities of your Intel processor, please visit http://ark.intel.com/
+2. Intel HAXM can only accelerate Android x86 and x86_64 system images for Android Emulator.
+These system images as well as Android Emulator can be installed using Android SDK Manager.
+
+Known Issues:
+- HAXM driver does not support emulating a 64-bit system image on Intel systems based on Core microarchitecture (Core, Core 2 Duo etc.). All systems based on Nehalem and beyond are supported (Core i3, Core i5 and Core i7 machines).
+- QEMU or Android Emulator will fail to launch if the guest RAM size (specified with the -m option for QEMU or -memory for Android Emulator) exceeds 4095MB.
+- If the guest RAM size (specified with the -memory option for Android Emulator) exceeds 3583MB, Android will either fail to boot or report the total memory as 3.0GB.
+- If DriverVerifier is running on a Windows System on which HAXM is installed BSOD can happen during HAXM uninstall. Check the following link for more information from Microsoft. http://msdn.microsoft.com/en-us/library/windows/hardware/ff545448(v=vs.85).aspx
+- On Windows platform using sc query command on command line will show the driver to be in Running state even if VT is disabled in BIOS. The Android SDK gets this information from HAXM driver whether VT is enabled or not and displays it to user when the user starts to emulate a device. The information in the SDK is the most accurate information for the state of the HAXM driver.
+- On Windows 8, 8.1 and 10, it is recommended to disable Hyper-V from Windows Features in order for the HAXM driver to properly function.
+- On Windows, Avast Antivirus may interfere with HAXM and cause Android Emulator or QEMU to run very slowly. A workaround is to uncheck "Use nested virtualization where available" in Avast Settings > Troubleshooting.
+- On Windows 7 Service Pack 1, it is required to install Microsoft security update KB3033929 first in order to upgrade HAXM.
+- On macOS, it is possible to downgrade to an older version of HAXM, but it is recommended to use the latest version.
+
+----------------------------
+Additional Documentation
+----------------------------
+For detailed installation instructions, latest release notes, and known limitations please visit:
+https://github.com/intel/haxm
+
+
+----------------------------
+Copyright (C) 2009 Intel Corporation. All rights reserved.
+All products, computer systems, dates, and figures specified are preliminary based on current expectations, and are subject to change without notice.
+* Other names and brands may be claimed as the property of others.
+
+----------------------------
