@@ -31,5 +31,5 @@ Future<void> main() async {
       fail('Did not expect a socket exception.');
     }
     expect(gotStateError, true);
-  }, skip: !(await hasVmServiceEnabled()));
+  }, skip: !(await hasVmServiceEnabled())); // [intended] avoid local failures
 }
