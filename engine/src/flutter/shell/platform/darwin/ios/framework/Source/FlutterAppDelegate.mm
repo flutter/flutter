@@ -360,7 +360,7 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
     if (delegateClassName) {
       delegateClass = NSClassFromString(delegateClassName);
     }
-    NSString* sceneClassName = roleConfigs[0][@"UISceneDelegateClassName"];
+    NSString* sceneClassName = roleConfigs[0][@"UISceneClassName"];
     if (sceneClassName) {
       sceneClass = NSClassFromString(sceneClassName);
     }
