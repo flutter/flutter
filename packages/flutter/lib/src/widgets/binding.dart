@@ -493,6 +493,16 @@ mixin WidgetsBinding
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
   /// TODO: Add documentation.
+  bool get debugWidgetInspectorDefaultTapBehaviorEnabled {
+    return debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.value;
+  }
+
+  /// TODO: Add documentation.
+  set debugWidgetInspectorDefaultTapBehaviorEnabled(bool value) {
+    debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.value = value;
+  }
+
+  /// TODO: Add documentation.
   ValueNotifier<bool> get debugWidgetInspectorDefaultTapBehaviorEnabledNotifier =>
       _debugWidgetInspectorDefaultTapBehaviorEnabledNotifierObject ??= ValueNotifier<bool>(true);
   ValueNotifier<bool>? _debugWidgetInspectorDefaultTapBehaviorEnabledNotifierObject;

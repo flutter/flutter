@@ -2812,13 +2812,18 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   late InspectorSelection selection;
 
   late bool isSelectMode;
-  late bool defaultSelectModeTapBehaviorEnabled;
 
   final GlobalKey _ignorePointerKey = GlobalKey();
 
   /// Distance from the edge of the bounding box for an element to consider
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
+
+  ValueNotifier<bool> get _defaultInspectorTapBehaviorEnabledNotifier =>
+      WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier;
+
+  bool get _isSelectModeWithDefaultTapBehavior =>
+      isSelectMode && _defaultInspectorTapBehaviorEnabledNotifier.value;
 
   @override
   void initState() {
@@ -2828,14 +2833,9 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.addListener(
       _selectionInformationChanged,
     );
-    WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.addListener(
-      _selectionInformationChanged,
-    );
+    _defaultInspectorTapBehaviorEnabledNotifier.addListener(_selectionInformationChanged);
     selection = WidgetInspectorService.instance.selection;
     isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
-    defaultSelectModeTapBehaviorEnabled =
-        isSelectMode &&
-        WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.value;
   }
 
   @override
@@ -2844,15 +2844,13 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.removeListener(
       _selectionInformationChanged,
     );
+    _defaultInspectorTapBehaviorEnabledNotifier.removeListener(_selectionInformationChanged);
     super.dispose();
   }
 
   void _selectionInformationChanged() => setState(() {
     selection = WidgetInspectorService.instance.selection;
     isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
-    defaultSelectModeTapBehaviorEnabled =
-        isSelectMode &&
-        WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.value;
   });
 
   bool _hitTestHelper(
@@ -2931,7 +2929,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   }
 
   void _inspectAt(Offset position) {
-    if (!defaultSelectModeTapBehaviorEnabled) {
+    if (!_isSelectModeWithDefaultTapBehavior) {
       return;
     }
 
@@ -2972,7 +2970,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   }
 
   void _handleTap() {
-    if (!defaultSelectModeTapBehaviorEnabled) {
+    if (!_isSelectModeWithDefaultTapBehavior) {
       return;
     }
     if (_lastPointerLocation != null) {
@@ -2996,7 +2994,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
           behavior: HitTestBehavior.opaque,
           excludeFromSemantics: true,
           child: IgnorePointer(
-            ignoring: defaultSelectModeTapBehaviorEnabled,
+            ignoring: _isSelectModeWithDefaultTapBehavior,
             key: _ignorePointerKey,
             child: widget.child,
           ),
@@ -3543,10 +3541,10 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
     button: widget.tapBehaviorButtonBuilder(
       context,
       onPressed: () {
-        final ValueNotifier<bool> defaultTapBehaviorEnabledNotifier =
-            WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier;
-        final bool defaultTapBehaviorEnabled = defaultTapBehaviorEnabledNotifier.value;
-        defaultTapBehaviorEnabledNotifier.value = !defaultTapBehaviorEnabled;
+        final bool defaultTapBehaviorEnabled =
+            WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled;
+        WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled =
+            !defaultTapBehaviorEnabled;
         WidgetInspectorService.instance.selection.clear();
       },
       key: _tapBehaviorButtonKey,
