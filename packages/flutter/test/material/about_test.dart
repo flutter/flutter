@@ -1879,7 +1879,7 @@ void main() {
 
     final Color? titleColor = titleText.style?.color;
     expect(titleColor, isNotNull);
-    expect(titleColor!.computeLuminance(), greaterThan(0.5));
+    expect(ThemeData.estimateBrightnessForColor(titleColor!), Brightness.light);
 
     final ThemeData theme = Theme.of(tester.element(find.text('Test Package')));
     expect(titleText.style?.color, equals(theme.textTheme.titleMedium?.color));
@@ -1894,7 +1894,7 @@ void main() {
 
     final Color? subtitleColor = subtitleText.style?.color;
     expect(subtitleColor, isNotNull);
-    expect(subtitleColor!.computeLuminance(), greaterThan(0.5));
+    expect(ThemeData.estimateBrightnessForColor(subtitleColor!), Brightness.light);
   });
 }
 
