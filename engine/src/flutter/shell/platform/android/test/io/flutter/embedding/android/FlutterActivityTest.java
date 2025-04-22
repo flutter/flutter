@@ -60,7 +60,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
-@Config()
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();

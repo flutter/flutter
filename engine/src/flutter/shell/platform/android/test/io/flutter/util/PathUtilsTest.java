@@ -16,9 +16,7 @@ import java.io.File;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
-@Config()
 @RunWith(RobolectricTestRunner.class)
 public class PathUtilsTest {
 

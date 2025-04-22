@@ -22,7 +22,6 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 
-@Config()
 @RunWith(AndroidJUnit4.class)
 public class SettingsChannelTest {
   @Test

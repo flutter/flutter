@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
-@Config()
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24) // LocaleList and scriptCode are API 24+.
 public class LocalizationPluginTest {
@@ -44,7 +43,7 @@ public class LocalizationPluginTest {
     Configuration config = mock(Configuration.class);
     DartExecutor dartExecutor = mock(DartExecutor.class);
     LocaleList localeList =
-        new LocaleList(Locale.of("es", "MX"), Locale.of("zh", "CN"), Locale.of("en", "US"));
+        new LocaleList(new Locale("es", "MX"), new Locale("zh", "CN"), new Locale("en", "US"));
     when(context.getResources()).thenReturn(resources);
     when(resources.getConfiguration()).thenReturn(config);
     when(config.getLocales()).thenReturn(localeList);
@@ -82,7 +81,7 @@ public class LocalizationPluginTest {
           "fr", "FR", "",
           "it", "IT", ""
         };
-    localeList = new LocaleList(Locale.of("fr", "CH"));
+    localeList = new LocaleList(new Locale("fr", "CH"));
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
     // The call will use the new (> API 24) algorithm.
@@ -100,7 +99,7 @@ public class LocalizationPluginTest {
           "fr", "", "",
           "it", "IT", ""
         };
-    localeList = new LocaleList(Locale.of("fr", "CH"));
+    localeList = new LocaleList(new Locale("fr", "CH"));
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
     // The call will use the new (> API 24) algorithm.
@@ -117,7 +116,7 @@ public class LocalizationPluginTest {
           "es", "ES", "",
           "it", "IT", ""
         };
-    localeList = new LocaleList(Locale.of("fr", "CH"), Locale.of("it", "CH"));
+    localeList = new LocaleList(new Locale("fr", "CH"), new Locale("it", "CH"));
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
     // The call will use the new (> API 24) algorithm.
@@ -131,7 +130,7 @@ public class LocalizationPluginTest {
           "zh", "CN", "Hans",
           "zh", "HK", "Hant",
         };
-    localeList = new LocaleList(Locale.of("zh", "CN"));
+    localeList = new LocaleList(new Locale("zh", "CN"));
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
     assertEquals(result.length, 3);
@@ -152,7 +151,7 @@ public class LocalizationPluginTest {
     Configuration config = mock(Configuration.class);
     DartExecutor dartExecutor = mock(DartExecutor.class);
     LocaleList localeList =
-        new LocaleList(Locale.of("es", "MX"), Locale.of("zh", "CN"), Locale.of("en", "US"));
+        new LocaleList(new Locale("es", "MX"), new Locale("zh", "CN"), new Locale("en", "US"));
     when(context.getResources()).thenReturn(resources);
     when(resources.getConfiguration()).thenReturn(config);
     when(config.getLocales()).thenReturn(localeList);
@@ -190,7 +189,7 @@ public class LocalizationPluginTest {
           "fr", "FR", "",
           "it", "IT", ""
         };
-    localeList = new LocaleList(Locale.of("fr", "CH"));
+    localeList = new LocaleList(new Locale("fr", "CH"));
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
     // The call will use the new (> API 24) algorithm.
@@ -208,7 +207,7 @@ public class LocalizationPluginTest {
           "fr", "", "",
           "it", "IT", ""
         };
-    localeList = new LocaleList(Locale.of("fr", "CH"));
+    localeList = new LocaleList(new Locale("fr", "CH"));
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
     // The call will use the new (> API 24) algorithm.
@@ -225,7 +224,7 @@ public class LocalizationPluginTest {
           "es", "ES", "",
           "it", "IT", ""
         };
-    localeList = new LocaleList(Locale.of("fr", "CH"), Locale.of("it", "CH"));
+    localeList = new LocaleList(new Locale("fr", "CH"), new Locale("it", "CH"));
     when(config.getLocales()).thenReturn(localeList);
     result = flutterJNI.computePlatformResolvedLocale(supportedLocales);
     // The call will use the new (> API 24) algorithm.
@@ -341,31 +340,31 @@ public class LocalizationPluginTest {
   @Test
   public void localeFromString_languageOnly() {
     Locale locale = LocalizationPlugin.localeFromString("en");
-    assertEquals(locale, Locale.of("en"));
+    assertEquals(locale, new Locale("en"));
   }
 
   @Test
   public void localeFromString_languageAndCountry() {
     Locale locale = LocalizationPlugin.localeFromString("en-US");
-    assertEquals(locale, Locale.of("en", "US"));
+    assertEquals(locale, new Locale("en", "US"));
   }
 
   @Test
   public void localeFromString_languageCountryAndVariant() {
     Locale locale = LocalizationPlugin.localeFromString("zh-Hans-CN");
-    assertEquals(locale, Locale.of("zh", "CN", "Hans"));
+    assertEquals(locale, new Locale("zh", "CN", "Hans"));
   }
 
   @Test
   public void localeFromString_underscore() {
     Locale locale = LocalizationPlugin.localeFromString("zh_Hans_CN");
-    assertEquals(locale, Locale.of("zh", "CN", "Hans"));
+    assertEquals(locale, new Locale("zh", "CN", "Hans"));
   }
 
   @Test
   public void localeFromString_additionalVariantsAreIgnored() {
     Locale locale = LocalizationPlugin.localeFromString("de-DE-u-co-phonebk");
-    assertEquals(locale, Locale.of("de", "DE"));
+    assertEquals(locale, new Locale("de", "DE"));
   }
 
   @Test

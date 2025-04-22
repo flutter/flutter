@@ -15,9 +15,7 @@ import io.flutter.embedding.android.RobolectricFlutterActivity;
 import io.flutter.embedding.android.TransparencyMode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 
-@Config()
 @RunWith(AndroidJUnit4.class)
 public class FlutterLaunchTests {
   @Test
