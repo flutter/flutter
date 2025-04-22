@@ -126,7 +126,6 @@ class TestIOManager final : public IOManager {
   explicit TestIOManager(const fml::RefPtr<fml::TaskRunner>& task_runner,
                          bool has_gpu_context = true)
       : gl_surface_(SkISize::Make(1, 1)),
-        impeller_context_(std::make_shared<impeller::TestImpellerContext>()),
         gl_context_(has_gpu_context ? gl_surface_.CreateGrContext() : nullptr),
         weak_gl_context_factory_(
             has_gpu_context
@@ -143,6 +142,9 @@ class TestIOManager final : public IOManager {
     FML_CHECK(task_runner->RunsTasksOnCurrentThread())
         << "The IO manager must be initialized its primary task runner. The "
            "test harness may not be set up correctly/safely.";
+    std::promise<std::shared_ptr<impeller::Context>> promise;
+    context_future_ = promise.get_future();
+    promise.set_value(std::make_shared<impeller::TestImpellerContext>());
     weak_prototype_ = weak_factory_.GetWeakPtr();
   }
 
@@ -179,8 +181,9 @@ class TestIOManager final : public IOManager {
   }
 
   // |IOManager|
-  std::shared_ptr<impeller::Context> GetImpellerContext() const override {
-    return impeller_context_;
+  std::shared_future<std::shared_ptr<impeller::Context>> GetImpellerContext()
+      const override {
+    return context_future_;
   }
 
   void SetGpuDisabled(bool disabled) {
@@ -191,6 +194,7 @@ class TestIOManager final : public IOManager {
 
  private:
   TestGLSurface gl_surface_;
+  std::shared_future<std::shared_ptr<impeller::Context>> context_future_;
   std::shared_ptr<impeller::Context> impeller_context_;
   sk_sp<GrDirectContext> gl_context_;
   std::unique_ptr<fml::WeakPtrFactory<GrDirectContext>>
