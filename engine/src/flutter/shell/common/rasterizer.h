@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_COMMON_RASTERIZER_H_
 #define FLUTTER_SHELL_COMMON_RASTERIZER_H_
 
+#include <future>
 #include <memory>
 #include <optional>
 #include <unordered_map>
