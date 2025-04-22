@@ -321,17 +321,20 @@ class _PredictiveBackSharedElementPageTransitionState
   final Tween<double> _borderRadiusTween = Tween<double>(begin: _kDeviceBorderRadius, end: 0.0);
 
   final Tween<double> _gapTween = Tween<double>(begin: _kMargin, end: 0.0);
-  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
   final Tween<double> _opacityTween = Tween<double>(begin: 1.0, end: 0.0);
 
   late final AnimationController _commitController;
   late final CurvedAnimation _commitAnimation;
+  // TODO(justinmc): Maybe rename to just _animation?
+  final ProxyAnimation _proxyAnimation = ProxyAnimation();
   late final Listenable _mergedAnimations;
   late final Animation<double> _opacityAnimation;
-  late final Animation<double> _scaleAnimation;
-  late Tween<double> _scaleCommitTween;
   late Animation<double> _xAnimation;
   late Animation<Offset> _positionCommitAnimation;
+
+  final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
+  final Tween<double> _scaleCommitTween = Tween<double>(begin: 1.0, end: 1.0);
+  late Animation<double> _scaleAnimation;
 
   double _lastXDrag = 0.0;
   double _lastYDrag = 0.0;
@@ -361,6 +364,11 @@ class _PredictiveBackSharedElementPageTransitionState
     ).animate(_commitAnimation);
   }
 
+  Tween<double> get _currentScaleTween => switch (widget.phase) {
+    _PredictiveBackPhase.commit => _scaleCommitTween,
+    _ => _scaleTween,
+  };
+
   // TODO(justinmc): Should have a delegatedTransition to animate the incoming
   // route regardless of its page transition.
   // https://github.com/flutter/flutter/issues/153577
@@ -374,10 +382,13 @@ class _PredictiveBackSharedElementPageTransitionState
       vsync: this,
     );
     _commitAnimation = CurvedAnimation(parent: _commitController, curve: Curves.easeOut);
+    _proxyAnimation.parent = switch (widget.phase) {
+      _PredictiveBackPhase.commit => _commitAnimation,
+      _ => widget.animation,
+    };
+    _scaleAnimation = _proxyAnimation.drive(_currentScaleTween);
     _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
     _opacityAnimation = _opacityTween.animate(_commitAnimation);
-    _scaleAnimation = _scaleTween.animate(widget.animation);
-    _scaleCommitTween = Tween<double>(begin: _lastScale, end: 1.0);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
       _commitController.forward(from: 0.0);
@@ -390,7 +401,10 @@ class _PredictiveBackSharedElementPageTransitionState
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       _commitController.forward(from: 0.0);
-      _scaleCommitTween = Tween<double>(begin: _lastScale, end: 1.0);
+      _proxyAnimation.parent = _commitController;
+      _scaleCommitTween.begin = _lastScale;
+      // TODO(justinmc): Maybe abstract into an updateAnimations method or something? Could probably get rid of _currentScaleTween then.
+      _scaleAnimation = _proxyAnimation.drive(_currentScaleTween);
       final double screenWidth = MediaQuery.sizeOf(context).width;
       _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
     }
@@ -424,13 +438,11 @@ class _PredictiveBackSharedElementPageTransitionState
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
+      // TODO(justinmc): Could this one be _proxyAnimation?
       animation: _mergedAnimations,
       builder: (BuildContext context, Widget? child) {
         return Transform.scale(
-          scale: switch (widget.phase) {
-            _PredictiveBackPhase.commit => _scaleCommitTween.evaluate(_commitAnimation),
-            _ => _lastScale = _scaleAnimation.value,
-          },
+          scale: _lastScale = _scaleAnimation.value,
           child: Transform.translate(
             offset: switch (widget.phase) {
               _PredictiveBackPhase.commit => _positionCommitAnimation.value,
