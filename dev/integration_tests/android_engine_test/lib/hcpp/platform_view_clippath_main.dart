@@ -16,12 +16,7 @@ import '../src/allow_list_devices.dart';
 
 // Enum to represent the different clipper types that can be toggled in this
 // test app. See their definitions below.
-enum ClipperType {
-  triangle,
-  cubicWave,
-  overlappingNonZero,
-  overlappingEvenOdd,
-}
+enum ClipperType { triangle, cubicWave, overlappingNonZero, overlappingEvenOdd }
 
 void main() async {
   ensureAndroidDevice();
@@ -45,9 +40,7 @@ class ClipperToggleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        elevatedButtonTheme: const ElevatedButtonThemeData(),
-      ),
+      theme: ThemeData(elevatedButtonTheme: const ElevatedButtonThemeData()),
       home: const ClipperHomePage(),
     );
   }
@@ -84,7 +77,6 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
     ClipperType.overlappingEvenOdd,
   ];
 
-
   // Method to toggle the state of a specific clipper
   void _toggleClipper(ClipperType type) {
     setState(() {
@@ -108,20 +100,16 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
     return currentChild; // Return the final potentially nested structure
   }
 
-
   @override
   Widget build(BuildContext context) {
     // Content that will be clipped
-    const Widget contentToClip = ClipOval( // Inner ClipOval remains
+    const Widget contentToClip = ClipOval(
+      // Inner ClipOval remains
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
           // Background
-          SizedBox(
-            width: 500,
-            height: 500,
-            child: ColoredBox(color: Colors.green),
-          ),
+          SizedBox(width: 500, height: 500, child: ColoredBox(color: Colors.green)),
           SizedBox(
             width: 400,
             height: 400,
@@ -143,13 +131,14 @@ class _ClipperHomePageState extends State<ClipperHomePage> {
               spacing: 8.0,
               runSpacing: 4.0,
               alignment: WrapAlignment.center,
-              children: ClipperType.values.map((ClipperType type) {
-                return ElevatedButton(
-                  key: ValueKey<String>('clipper_button_${type.name}'), // Use enum name in key
-                  onPressed: () => _toggleClipper(type),
-                  child: Text(type.name), // Display clipper name on button
-                );
-              }).toList(),
+              children:
+                  ClipperType.values.map((ClipperType type) {
+                    return ElevatedButton(
+                      key: ValueKey<String>('clipper_button_${type.name}'), // Use enum name in key
+                      onPressed: () => _toggleClipper(type),
+                      child: Text(type.name), // Display clipper name on button
+                    );
+                  }).toList(),
             ),
           ),
           // Expanded takes remaining space for the clipped content
@@ -219,7 +208,6 @@ class TriangleClipper extends CustomClipper<Path> {
 
 // Clips based on two overlapping rectangles.
 class OverlappingRectClipper extends CustomClipper<Path> {
-
   OverlappingRectClipper({required this.fillType});
   final PathFillType fillType;
 
@@ -235,7 +223,6 @@ class OverlappingRectClipper extends CustomClipper<Path> {
     final double offsetY1 = size.height * 0.1;
     final double offsetX2 = size.width * 0.25;
     final double offsetY2 = size.height * 0.25;
-
 
     final Rect rect1 = Rect.fromLTWH(offsetX1, offsetY1, rectWidth, rectHeight);
     final Rect rect2 = Rect.fromLTWH(offsetX2, offsetY2, rectWidth, rectHeight); // Overlaps rect1
@@ -255,7 +242,6 @@ class OverlappingRectClipper extends CustomClipper<Path> {
     return oldClipper.fillType != fillType;
   }
 }
-
 
 // --- Platform View Definition ---
 final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
@@ -277,11 +263,11 @@ final class _HybridCompositionAndroidPlatformView extends StatelessWidget {
       onCreatePlatformView: (PlatformViewCreationParams params) {
         // Use initHybridAndroidView for Hybrid Composition
         return PlatformViewsService.initHybridAndroidView(
-          id: params.id,
-          viewType: viewType,
-          layoutDirection: TextDirection.ltr,
-          creationParamsCodec: const StandardMessageCodec(),
-        )
+            id: params.id,
+            viewType: viewType,
+            layoutDirection: TextDirection.ltr,
+            creationParamsCodec: const StandardMessageCodec(),
+          )
           ..addOnPlatformViewCreatedListener(params.onPlatformViewCreated)
           ..create();
       },

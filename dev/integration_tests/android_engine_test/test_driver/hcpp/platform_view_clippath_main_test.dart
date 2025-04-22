@@ -78,7 +78,7 @@ void main() async {
 
   test(
     'should start with wave cutoff on bottom, and toggle to no wave cutoff on bottom',
-        () async {
+    () async {
       await flutterDriver.tap(find.byValueKey('clipper_button_cubicWave'));
       await expectLater(
         nativeDriver.screenshot(),
@@ -93,51 +93,39 @@ void main() async {
     timeout: Timeout.none,
   );
 
-  test(
-    'should start with box cutout (nonZero), and toggle to no box cutout',
-        () async {
-      await flutterDriver.tap(find.byValueKey('clipper_button_overlappingNonZero'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.only_overlappingNonZero.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('clipper_button_overlappingNonZero'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.no_path_clipping.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should start with box cutout (nonZero), and toggle to no box cutout', () async {
+    await flutterDriver.tap(find.byValueKey('clipper_button_overlappingNonZero'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.only_overlappingNonZero.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('clipper_button_overlappingNonZero'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_path_clipping.png'),
+    );
+  }, timeout: Timeout.none);
 
-  test(
-    'should start with box cutout (evenOdd), and toggle to no box cutout',
-        () async {
-      await flutterDriver.tap(find.byValueKey('clipper_button_overlappingEvenOdd'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.only_overlappingEvenOdd.png'),
-      );
-      await flutterDriver.tap(find.byValueKey('clipper_button_overlappingEvenOdd'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.no_path_clipping.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should start with box cutout (evenOdd), and toggle to no box cutout', () async {
+    await flutterDriver.tap(find.byValueKey('clipper_button_overlappingEvenOdd'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.only_overlappingEvenOdd.png'),
+    );
+    await flutterDriver.tap(find.byValueKey('clipper_button_overlappingEvenOdd'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.no_path_clipping.png'),
+    );
+  }, timeout: Timeout.none);
 
-  test(
-    'should apply all except evenOdd box clipper',
-        () async {
-      await flutterDriver.tap(find.byValueKey('clipper_button_overlappingNonZero'));
-      await flutterDriver.tap(find.byValueKey('clipper_button_cubicWave'));
-      await flutterDriver.tap(find.byValueKey('clipper_button_triangle'));
-      await expectLater(
-        nativeDriver.screenshot(),
-        matchesGoldenFile('$goldenPrefix.complex_clippath.png'),
-      );
-    },
-    timeout: Timeout.none,
-  );
+  test('should apply all except evenOdd box clipper', () async {
+    await flutterDriver.tap(find.byValueKey('clipper_button_overlappingNonZero'));
+    await flutterDriver.tap(find.byValueKey('clipper_button_cubicWave'));
+    await flutterDriver.tap(find.byValueKey('clipper_button_triangle'));
+    await expectLater(
+      nativeDriver.screenshot(),
+      matchesGoldenFile('$goldenPrefix.complex_clippath.png'),
+    );
+  }, timeout: Timeout.none);
 }
