@@ -4,11 +4,13 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, ValueListenable;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widget_previews.dart';
 
 import 'package:stack_trace/stack_trace.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -114,7 +116,7 @@ class NoPreviewsDetectedWidget extends StatelessWidget {
   static Uri documentationUrl = Uri.https(
     'github.com',
     'flutter/flutter/blob/master/packages/flutter/'
-        'lib/src/widgets/widget_preview.dart',
+        'lib/src/widget_previews/widget_previews.dart',
   );
 
   @override
@@ -159,7 +161,13 @@ class WidgetPreviewWidget extends StatefulWidget {
 
 class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
   final transformationController = TransformationController();
-  final deviceOrientation = ValueNotifier<Orientation>(Orientation.portrait);
+
+  // Set the initial preview brightness based on the platform default or the
+  // value explicitly specified for the preview.
+  late final brightnessListenable = ValueNotifier<Brightness>(
+    widget.preview.brightness ?? MediaQuery.platformBrightnessOf(context),
+  );
+
   final softRestartListenable = ValueNotifier<bool>(false);
   final key = GlobalKey();
 
@@ -168,8 +176,30 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       (key.currentContext!.findRenderObject() as RenderBox).size;
 
   @override
-  void initState() {
-    super.initState();
+  void didUpdateWidget(WidgetPreviewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final previousBrightness = oldWidget.preview.brightness;
+    final newBrightness = widget.preview.brightness;
+    final currentBrightness = brightnessListenable.value;
+    final systemBrightness = MediaQuery.platformBrightnessOf(context);
+
+    // No initial brightness was previously defined.
+    if (previousBrightness == null && newBrightness != null) {
+      if (currentBrightness == systemBrightness) {
+        // If the current brightness is different than the system brightness, the user has manually
+        // changed the brightness through the UI, so don't change it automatically.
+        brightnessListenable.value = newBrightness;
+      }
+    }
+    // Changing the initial brightness to either a new initial brightness or system brightness.
+    else if (previousBrightness != null) {
+      // If the current brightness is different than the initial brightness, the user has manually
+      // changed the brightness through the UI, so don't change it automatically.
+      if (currentBrightness == previousBrightness) {
+        brightnessListenable.value = newBrightness ?? systemBrightness;
+      }
+    }
   }
 
   @override
@@ -196,7 +226,10 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
         try {
           final previewWidget = Container(
             key: key,
-            child: widget.preview.builder(),
+            child: WidgetPreviewTheming(
+              theme: widget.preview.theme,
+              child: widget.preview.builder(),
+            ),
           );
           if (performRestart) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -228,7 +261,11 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       ),
     );
 
-    preview = MediaQuery(data: _buildMediaQueryOverride(), child: preview);
+    preview = WidgetPreviewMediaQueryOverride(
+      preview: widget.preview,
+      brightnessListenable: brightnessListenable,
+      child: preview,
+    );
 
     preview = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,6 +295,11 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
               enabled: !errorThrownDuringTreeConstruction,
             ),
             const SizedBox(width: 30),
+            BrightnessToggleButton(
+              enabled: !errorThrownDuringTreeConstruction,
+              brightnessListenable: brightnessListenable,
+            ),
+            const SizedBox(width: 10),
             SoftRestartButton(
               enabled: !errorThrownDuringTreeConstruction,
               softRestartListenable: softRestartListenable,
@@ -277,22 +319,97 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       ),
     );
   }
+}
 
-  MediaQueryData _buildMediaQueryOverride() {
-    var mediaQueryData = MediaQuery.of(context);
+/// Applies theming defined in [theme] to [child].
+class WidgetPreviewTheming extends StatelessWidget {
+  const WidgetPreviewTheming({
+    super.key,
+    required this.theme,
+    required this.child,
+  });
 
-    if (widget.preview.textScaleFactor != null) {
+  final Widget child;
+
+  /// The set of themes to be applied to [child].
+  final PreviewThemeData? theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final themeData = theme;
+    if (themeData == null) {
+      return child;
+    }
+    final (materialTheme, cupertinoTheme) = themeData.themeForBrightness(
+      MediaQuery.platformBrightnessOf(context),
+    );
+    Widget result = child;
+    if (materialTheme != null) {
+      result = Theme(data: materialTheme, child: result);
+    }
+    if (cupertinoTheme != null) {
+      result = CupertinoTheme(data: cupertinoTheme, child: result);
+    }
+    return result;
+  }
+}
+
+/// Wraps the previewed [child] with the correct [MediaQueryData] overrides
+/// based on [preview] and the current device [Brightness].
+class WidgetPreviewMediaQueryOverride extends StatelessWidget {
+  const WidgetPreviewMediaQueryOverride({
+    super.key,
+    required this.preview,
+    required this.brightnessListenable,
+    required this.child,
+  });
+
+  /// The preview specification used to render the preview.
+  final WidgetPreview preview;
+
+  /// The currently set brightness for this preview instance.
+  final ValueListenable<Brightness> brightnessListenable;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<Brightness>(
+      valueListenable: brightnessListenable,
+      builder: (context, brightness, _) {
+        return MediaQuery(
+          data: _buildMediaQueryOverride(
+            context: context,
+            brightness: brightness,
+          ),
+          // Use mediaQueryPreview instead of preview to avoid capturing preview
+          // and creating an infinite loop.
+          child: child,
+        );
+      },
+    );
+  }
+
+  MediaQueryData _buildMediaQueryOverride({
+    required BuildContext context,
+    required Brightness brightness,
+  }) {
+    var mediaQueryData = MediaQuery.of(
+      context,
+    ).copyWith(platformBrightness: brightness);
+
+    if (preview.textScaleFactor != null) {
       mediaQueryData = mediaQueryData.copyWith(
-        textScaler: TextScaler.linear(widget.preview.textScaleFactor!),
+        textScaler: TextScaler.linear(preview.textScaleFactor!),
       );
     }
 
     var size = Size(
-      widget.preview.width ?? mediaQueryData.size.width,
-      widget.preview.height ?? mediaQueryData.size.height,
+      preview.width ?? mediaQueryData.size.width,
+      preview.height ?? mediaQueryData.size.height,
     );
 
-    if (widget.preview.width != null || widget.preview.height != null) {
+    if (preview.width != null || preview.height != null) {
       mediaQueryData = mediaQueryData.copyWith(size: size);
     }
 

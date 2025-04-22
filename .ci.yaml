@@ -1511,10 +1511,12 @@ targets:
       test_timeout_secs: "2700"
     runIf:
       - packages/flutter_tools/templates/**
+      - packages/flutter_tools/gradle/**
       - .ci.yaml
       - engine/**
       - DEPS
       - dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart
+      - dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
@@ -1533,10 +1535,12 @@ targets:
       test_timeout_secs: "2700"
     runIf:
       - packages/flutter_tools/templates/**
+      - packages/flutter_tools/gradle/**
       - .ci.yaml
       - engine/**
       - DEPS
       - dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart
+      - dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
@@ -1658,6 +1662,34 @@ targets:
       tags: >
         ["devicelab","hostonly", "linux"]
       task_name: web_benchmarks_canvaskit
+
+  - name: Linux web_benchmarks_ddc
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
+      tags: >
+        ["devicelab","hostonly", "linux"]
+      task_name: web_benchmarks_ddc
+
+  - name: Linux web_benchmarks_ddc_hot_reload
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
+      tags: >
+        ["devicelab","hostonly", "linux"]
+      task_name: web_benchmarks_ddc_hot_reload
 
   - name: Linux web_benchmarks_skwasm
     recipe: devicelab/devicelab_drone
@@ -2391,7 +2423,6 @@ targets:
   - name: Linux_pixel_7pro static_path_stroke_tessellation_perf__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3626,7 +3657,6 @@ targets:
   - name: Mac_ios static_path_stroke_tessellation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -3636,7 +3666,6 @@ targets:
   - name: Mac_ios dynamic_path_stroke_tessellation_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -4992,7 +5021,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
-      task_name: imitation_game_swiftui__compile
+      task_name: imitation_game_flutter__compile
 
   - name: Mac_arm64_ios imitation_game_swiftui
     recipe: devicelab/devicelab_drone
@@ -5002,7 +5031,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
-      task_name: imitation_game_flutter__compile
+      task_name: imitation_game_swiftui__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
