@@ -3544,7 +3544,8 @@ class SemanticsNode with DiagnosticableTreeMixin {
     if (inheritedTextDirection != null) {
       childrenInDefaultOrder = _childrenInDefaultOrder(_children!, inheritedTextDirection);
     } else {
-      // In the absence of text direction default to paint order.
+      // In the absence of text direction default to the hit test order (i.e.
+      // `childrenInInversePaintOrder`).
       childrenInDefaultOrder = _children;
     }
 
