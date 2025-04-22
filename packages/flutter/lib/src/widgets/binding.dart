@@ -492,17 +492,27 @@ mixin WidgetsBinding
       _debugShowWidgetInspectorOverrideNotifierObject ??= ValueNotifier<bool>(false);
   ValueNotifier<bool>? _debugShowWidgetInspectorOverrideNotifierObject;
 
-  /// TODO: Add documentation.
+  /// The default behavior for taps in the app when the widget inspector is
+  /// enabled.
+  ///
+  /// - If true, taps in the app are intercepted by the widget inspector.
+  /// - If false, taps in the app are not intercepted by the widget inspector.
   bool get debugWidgetInspectorDefaultTapBehaviorEnabled {
     return debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.value;
   }
 
-  /// TODO: Add documentation.
+  /// Sets the default behavior for taps in the app when the widget inspector is
+  /// enabled.
+  ///
+  /// See [debugWidgetInspectorDefaultTapBehaviorEnabled].
   set debugWidgetInspectorDefaultTapBehaviorEnabled(bool value) {
     debugWidgetInspectorDefaultTapBehaviorEnabledNotifier.value = value;
   }
 
-  /// TODO: Add documentation.
+  /// The notifier for the default behavior for taps in the app when the widget
+  /// inspector is enabled.
+  ///
+  /// See [debugWidgetInspectorDefaultTapBehaviorEnabled].
   ValueNotifier<bool> get debugWidgetInspectorDefaultTapBehaviorEnabledNotifier =>
       _debugWidgetInspectorDefaultTapBehaviorEnabledNotifierObject ??= ValueNotifier<bool>(true);
   ValueNotifier<bool>? _debugWidgetInspectorDefaultTapBehaviorEnabledNotifierObject;

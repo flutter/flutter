@@ -948,6 +948,24 @@ class _MaterialAppState extends State<MaterialApp> {
     );
   }
 
+  Widget _moveExitWidgetSelectionButtonBuilder(
+    BuildContext context, {
+    required VoidCallback onPressed,
+    required String semanticLabel,
+    bool isLeftAligned = true,
+  }) {
+    final bool isDarkTheme = _isDarkTheme(context);
+    return _MaterialInspectorButton(
+      onPressed: onPressed,
+      semanticLabel: semanticLabel,
+      isDarkTheme: isDarkTheme,
+      icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
+      iconSize: _MaterialInspectorButton._selectionButtonsSize,
+      backgroundColor: Colors.transparent,
+      foregroundColor: _MaterialInspectorButton._backgroundColor(context, isDarkTheme: isDarkTheme),
+    );
+  }
+
   Widget _tapBehaviorButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
@@ -967,24 +985,6 @@ class _MaterialAppState extends State<MaterialApp> {
                 context,
                 isDarkTheme: isDarkTheme,
               ),
-    );
-  }
-
-  Widget _moveExitWidgetSelectionButtonBuilder(
-    BuildContext context, {
-    required VoidCallback onPressed,
-    required String semanticLabel,
-    bool isLeftAligned = true,
-  }) {
-    final bool isDarkTheme = _isDarkTheme(context);
-    return _MaterialInspectorButton(
-      onPressed: onPressed,
-      semanticLabel: semanticLabel,
-      isDarkTheme: isDarkTheme,
-      icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
-      iconSize: _MaterialInspectorButton._selectionButtonsSize,
-      backgroundColor: Colors.transparent,
-      foregroundColor: _MaterialInspectorButton._backgroundColor(context, isDarkTheme: isDarkTheme),
     );
   }
 

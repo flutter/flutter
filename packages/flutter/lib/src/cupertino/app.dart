@@ -741,7 +741,6 @@ class _CupertinoInspectorButton extends StatelessWidget {
           color: foregroundColor ?? _foregroundColor(context),
         ),
       ),
-      // ),
     );
   }
 }

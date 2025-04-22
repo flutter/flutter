@@ -47,15 +47,6 @@ typedef ExitWidgetSelectionButtonBuilder =
       required GlobalKey key,
     });
 
-// TODO: documentation
-typedef TapBehaviorButtonBuilder =
-    Widget Function(
-      BuildContext context, {
-      required VoidCallback onPressed,
-      required String semanticLabel,
-      required bool defaultTapBehaviorEnabled,
-    });
-
 /// Signature for the builder callback used by
 /// [WidgetInspector.moveExitWidgetSelectionButtonBuilder].
 typedef MoveExitWidgetSelectionButtonBuilder =
@@ -64,6 +55,16 @@ typedef MoveExitWidgetSelectionButtonBuilder =
       required VoidCallback onPressed,
       required String semanticLabel,
       bool isLeftAligned,
+    });
+
+/// Signature for the builder callback used by
+/// [WidgetInspector.tapBehaviorButtonBuilder].
+typedef TapBehaviorButtonBuilder =
+    Widget Function(
+      BuildContext context, {
+      required VoidCallback onPressed,
+      required String semanticLabel,
+      required bool defaultTapBehaviorEnabled,
     });
 
 /// Signature for a method that registers the service extension `callback` with
@@ -2791,8 +2792,6 @@ class WidgetInspector extends StatefulWidget {
   /// The widget that is being inspected.
   final Widget child;
 
-  final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
-
   /// A builder that is called to create the exit select-mode button.
   ///
   /// The `onPressed` callback and key passed as arguments to the builder should
@@ -2807,6 +2806,15 @@ class WidgetInspector extends StatefulWidget {
   ///
   /// The button UI should respond to the `leftAligned` argument.
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
+
+  /// A builder that is called to create the button that changes the default tap
+  /// behavior when Select Widget mode is enabled.
+  ///
+  /// The `onPressed` callback passed as an argument to the builder should be
+  /// hooked up to the returned widget.
+  ///
+  /// The button UI should respond to the `defaultTapBehaviorEnabled` argument.
+  final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
 
   @override
   State<WidgetInspector> createState() => _WidgetInspectorState();
@@ -3495,9 +3503,9 @@ class _ExitWidgetSelectionButtonGroup extends StatefulWidget {
     required this.moveExitWidgetSelectionButtonBuilder,
   });
 
-  final TapBehaviorButtonBuilder tapBehaviorButtonBuilder;
   final ExitWidgetSelectionButtonBuilder exitWidgetSelectionButtonBuilder;
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
+  final TapBehaviorButtonBuilder tapBehaviorButtonBuilder;
 
   @override
   State<_ExitWidgetSelectionButtonGroup> createState() => _ExitWidgetSelectionButtonGroupState();

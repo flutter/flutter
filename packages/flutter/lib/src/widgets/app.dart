@@ -353,9 +353,9 @@ class WidgetsApp extends StatefulWidget {
     this.showSemanticsDebugger = false,
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
-    this.tapBehaviorButtonBuilder,
     this.exitWidgetSelectionButtonBuilder,
     this.moveExitWidgetSelectionButtonBuilder,
+    this.tapBehaviorButtonBuilder,
     this.shortcuts,
     this.actions,
     this.restorationScopeId,
@@ -1043,19 +1043,25 @@ class WidgetsApp extends StatefulWidget {
 
   /// Builds the widget the [WidgetInspector] uses to exit selection mode.
   ///
-  /// This lets [MaterialApp] to use a Material Design button to exit the
-  /// inspector select mode without requiring [WidgetInspector] to depend on the
-  /// Material package.
+  /// This lets [MaterialApp] and [CupertinoApp] to use an appropriately styled
+  /// button for their design systems without requiring [WidgetInspector] to
+  /// depend on the Material or Cupertino packages.
   final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
 
   /// Builds the widget the [WidgetInspector] uses to move the exit selection
   /// mode button.
   ///
-  /// This lets [MaterialApp] to use a Material Design button to change the
-  /// alignment without requiring [WidgetInspector] to depend on the Material
-  /// package.
+  /// This lets [MaterialApp] and [CupertinoApp] to use an appropriately styled
+  /// button for their design systems without requiring [WidgetInspector] to
+  /// depend on the Material or Cupertino packages.
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
 
+  /// Builds the widget the [WidgetInspector] uses to change the default
+  /// behavior when tapping on widgets in the app.
+  ///
+  /// This lets [MaterialApp] and [CupertinoApp] to use an appropriately styled
+  /// button for their design systems without requiring [WidgetInspector] to
+  /// depend on the Material or Cupertino packages.
   final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
 
   /// {@template flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
@@ -1826,9 +1832,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         builder: (BuildContext context, bool debugShowWidgetInspectorOverride, Widget? child) {
           if (widget.debugShowWidgetInspector || debugShowWidgetInspectorOverride) {
             return WidgetInspector(
-              tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
               exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder,
               moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
+              tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
               child: child!,
             );
           }
