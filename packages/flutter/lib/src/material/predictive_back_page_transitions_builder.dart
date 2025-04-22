@@ -329,7 +329,7 @@ class _PredictiveBackSharedElementPageTransitionState
   late final Listenable _mergedAnimations;
   late final Animation<double> _opacityAnimation;
   late final Animation<double> _scaleAnimation;
-  late Animation<double> _scaleCommitAnimation;
+  late Tween<double> _scaleCommitTween;
   late Animation<double> _xAnimation;
   late Animation<Offset> _positionCommitAnimation;
 
@@ -377,7 +377,7 @@ class _PredictiveBackSharedElementPageTransitionState
     _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
     _opacityAnimation = _opacityTween.animate(_commitAnimation);
     _scaleAnimation = _scaleTween.animate(widget.animation);
-    _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
+    _scaleCommitTween = Tween<double>(begin: _lastScale, end: 1.0);
 
     if (widget.phase == _PredictiveBackPhase.commit) {
       _commitController.forward(from: 0.0);
@@ -390,7 +390,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       _commitController.forward(from: 0.0);
-      _scaleCommitAnimation = Tween<double>(begin: _lastScale, end: 1.0).animate(_commitAnimation);
+      _scaleCommitTween = Tween<double>(begin: _lastScale, end: 1.0);
       final double screenWidth = MediaQuery.sizeOf(context).width;
       _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
     }
@@ -428,7 +428,7 @@ class _PredictiveBackSharedElementPageTransitionState
       builder: (BuildContext context, Widget? child) {
         return Transform.scale(
           scale: switch (widget.phase) {
-            _PredictiveBackPhase.commit => _scaleCommitAnimation.value,
+            _PredictiveBackPhase.commit => _scaleCommitTween.evaluate(_commitAnimation),
             _ => _lastScale = _scaleAnimation.value,
           },
           child: Transform.translate(
