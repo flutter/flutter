@@ -12,6 +12,13 @@ $ flutter upgrade
 ```
 
 <!--
+INTERNAL NOTE: DO **NOT** READ THIS FILE IN A TEST OR BUILDER.
+
+As an optimization, `CHANGELOG.md`-only PRs skip almost all
+tests, except `Linux analyze`. It is unsafe to read and use
+this file in a test unless it is part of the Linux analyze
+task (and that specific task, with that specific name).
+
 INTERNAL NOTE: PLEASE DON'T JUST PASTE ISSUE TITLES!
 
 Make sure that the text here helps customers understand
@@ -21,8 +28,6 @@ Our goal is to make the list easy for them to scan.
 
 More information and tips:
 docs/releases/Hotfix-Documentation-Best-Practices.md
-
-INTERNAL NOTE
 -->
 ## Flutter 3.29 Changes
 

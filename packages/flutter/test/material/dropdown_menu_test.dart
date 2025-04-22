@@ -4213,6 +4213,27 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('restorationId is passed to inner TextField', (WidgetTester tester) async {
+    const String restorationId = 'dropdown_menu';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            requestFocusOnTap: true,
+            restorationId: restorationId,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(TextField), findsOne);
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.restorationId, restorationId);
+  });
 }
 
 enum TestMenu {
