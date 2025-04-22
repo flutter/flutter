@@ -192,14 +192,6 @@ std::unique_ptr<Shell> Shell::Create(
                             CreateEngine, is_gpu_disabled);
 }
 
-// static impeller::RuntimeStageBackend DetermineRuntimeStageBackend(
-//     const std::shared_ptr<impeller::Context>& impeller_context) {
-//   if (!impeller_context) {
-//     return impeller::RuntimeStageBackend::kSkSL;
-//   }
-//   return impeller_context->GetRuntimeStageBackend();
-// }
-
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
     fml::RefPtr<fml::RasterThreadMerger> parent_merger,

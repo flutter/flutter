@@ -19,6 +19,10 @@
 
 namespace flutter {
 
+/// @brief An Impeller Android surface class that dynamically creates either an
+/// [AndroidSurfaceVKImpeller] or an [AndroidSurfaceGLImpeller].
+///
+/// The backing surface is created the first time [CreateGPUSurface] is called.
 class AndroidSurfaceDynamicImpeller : public AndroidSurface {
  public:
   explicit AndroidSurfaceDynamicImpeller(

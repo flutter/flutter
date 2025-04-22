@@ -155,4 +155,14 @@ AndroidContextDynamicImpeller::GetImpellerContext() const {
   return nullptr;
 }
 
+std::shared_ptr<AndroidContextGLImpeller>
+AndroidContextDynamicImpeller::GetGLContext() const {
+  return gl_context_;
+}
+
+std::shared_ptr<AndroidContextVKImpeller>
+AndroidContextDynamicImpeller::GetVKContext() const {
+  return vk_context_;
+}
+
 }  // namespace flutter

@@ -59,22 +59,15 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
            std::string("' does not contain any shader data.");
   }
 
+  auto impeller_context =
+      ui_dart_state->GetIOManager()->GetImpellerContext().get();
   impeller::RuntimeStageBackend backend;
-  impeller::Context::BackendType backend_type = ui_dart_state->GetIOManager()
-                                                    ->GetImpellerContext()
-                                                    .get()
-                                                    ->GetBackendType();
-  switch (backend_type) {
-    case impeller::Context::BackendType::kMetal:
-      backend = impeller::RuntimeStageBackend::kMetal;
-      break;
-    case impeller::Context::BackendType::kOpenGLES:
-      backend = impeller::RuntimeStageBackend::kOpenGLES;
-      break;
-    case impeller::Context::BackendType::kVulkan:
-      backend = impeller::RuntimeStageBackend::kVulkan;
-      break;
+  if (impeller_context) {
+    backend = impeller_context->GetRuntimeStageBackend();
+  } else {
+    backend = impeller::RuntimeStageBackend::kSkSL;
   }
+
   std::shared_ptr<impeller::RuntimeStage> runtime_stage =
       runtime_stages[backend];
   if (!runtime_stage) {

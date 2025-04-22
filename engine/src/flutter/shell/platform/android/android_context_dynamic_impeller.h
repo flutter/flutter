@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_CONTEXT_DYNAMIC_IMPELLER_H_
 
 #include <mutex>
+
 #include "flutter/fml/macros.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
@@ -14,6 +15,11 @@
 
 namespace flutter {
 
+/// @brief An Impeller Android context that dynamically creates either an
+/// [AndroidContextGLImpeller] or an [AndroidContextVKImpeller].
+///
+/// The construction of these objects is deferred until [GetImpellerContext] is
+/// invoked. Up to this point, the reported backend will be kImpellerAutoselect.
 class AndroidContextDynamicImpeller : public AndroidContext {
  public:
   explicit AndroidContextDynamicImpeller(
@@ -29,13 +35,11 @@ class AndroidContextDynamicImpeller : public AndroidContext {
 
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
 
-  std::shared_ptr<AndroidContextGLImpeller> GetGLContext() const {
-    return gl_context_;
-  }
+  /// @brief Retrieve the GL Context if it was created, or nullptr.
+  std::shared_ptr<AndroidContextGLImpeller> GetGLContext() const;
 
-  std::shared_ptr<AndroidContextVKImpeller> GetVKContext() const {
-    return vk_context_;
-  }
+  /// @brief Retrieve the VK context if it was created, or nullptr.
+  std::shared_ptr<AndroidContextVKImpeller> GetVKContext() const;
 
  private:
   const AndroidContext::ContextSettings settings_;

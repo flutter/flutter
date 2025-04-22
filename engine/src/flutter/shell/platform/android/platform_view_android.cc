@@ -19,6 +19,7 @@
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/android/android_surface_dynamic_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
@@ -29,7 +30,6 @@
 #include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 #include "fml/logging.h"
 #include "impeller/display_list/aiks_context.h"
-#include "shell/platform/android/android_surface_dynamic_impeller.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
@@ -157,7 +157,10 @@ PlatformViewAndroid::PlatformViewAndroid(
             .impeller_enable_lazy_shader_mode  //
     );
     android_surface_ = surface_factory_->CreateSurface();
-    android_use_new_platform_view_ = false;
+    android_use_new_platform_view_ =
+        delegate.OnPlatformViewGetSettings().enable_surface_control &&
+        android_get_device_api_level() >= kMinAPILevelHCPP &&
+        delegate.OnPlatformViewGetSettings().enable_impeller;
     FML_CHECK(android_surface_ && android_surface_->IsValid())
         << "Could not create an OpenGL, Vulkan or Software surface to set "
            "up "
