@@ -19,6 +19,7 @@
 #import "flutter/shell/platform/darwin/ios/ios_surface.h"
 #import "flutter/shell/platform/darwin/ios/platform_message_handler_ios.h"
 #import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
+#include "shell/platform/darwin/ios/ios_text_input.h"
 
 @class FlutterViewController;
 
@@ -128,6 +129,9 @@ class PlatformViewIOS final : public PlatformView {
     return platform_message_handler_;
   }
 
+  // |PlatformView|
+  std::shared_ptr<TextInputConnectionFactory> GetTextInputConnectionFactory() const override;
+
  private:
   /// Smart pointer for use with objective-c observers.
   /// This guarantees we remove the observer.
@@ -172,6 +176,7 @@ class PlatformViewIOS final : public PlatformView {
   ScopedObserver dealloc_view_controller_observer_;
   std::vector<std::string> platform_resolved_locale_;
   std::shared_ptr<PlatformMessageHandlerIos> platform_message_handler_;
+  std::shared_ptr<IOSTextInputConnectionFactory> text_input_connection_factory_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };

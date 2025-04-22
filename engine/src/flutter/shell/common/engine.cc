@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "flutter/assets/native_assets.h"
+#include "flutter/common/input/text_input_connection.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/text/font_collection.h"
@@ -41,6 +42,7 @@ Engine::Engine(
     std::unique_ptr<Animator> animator,
     const fml::WeakPtr<IOManager>& io_manager,
     const std::shared_ptr<FontCollection>& font_collection,
+    const std::shared_ptr<TextInputConnectionFactory>& input_connection_factory,
     std::unique_ptr<RuntimeController> runtime_controller,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch)
     : delegate_(delegate),
@@ -48,6 +50,7 @@ Engine::Engine(
       animator_(std::move(animator)),
       runtime_controller_(std::move(runtime_controller)),
       font_collection_(font_collection),
+      text_input_connection_factory_(input_connection_factory),
       image_decoder_(ImageDecoder::Make(settings_,
                                         task_runners,
                                         image_decoder_task_runner,
@@ -58,19 +61,21 @@ Engine::Engine(
   pointer_data_dispatcher_ = dispatcher_maker(*this);
 }
 
-Engine::Engine(Delegate& delegate,
-               const PointerDataDispatcherMaker& dispatcher_maker,
-               DartVM& vm,
-               fml::RefPtr<const DartSnapshot> isolate_snapshot,
-               const TaskRunners& task_runners,
-               const PlatformData& platform_data,
-               const Settings& settings,
-               std::unique_ptr<Animator> animator,
-               fml::WeakPtr<IOManager> io_manager,
-               const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
-               fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-               const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-               impeller::RuntimeStageBackend runtime_stage_type)
+Engine::Engine(
+    Delegate& delegate,
+    const PointerDataDispatcherMaker& dispatcher_maker,
+    DartVM& vm,
+    fml::RefPtr<const DartSnapshot> isolate_snapshot,
+    const TaskRunners& task_runners,
+    const PlatformData& platform_data,
+    const Settings& settings,
+    std::unique_ptr<Animator> animator,
+    fml::WeakPtr<IOManager> io_manager,
+    const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
+    const std::shared_ptr<TextInputConnectionFactory>& input_connection_factory,
+    fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
+    impeller::RuntimeStageBackend runtime_stage_type)
     : Engine(delegate,
              dispatcher_maker,
              vm.GetConcurrentWorkerTaskRunner(),
@@ -79,6 +84,7 @@ Engine::Engine(Delegate& delegate,
              std::move(animator),
              io_manager,
              std::make_shared<FontCollection>(),
+             input_connection_factory,
              nullptr,
              gpu_disabled_switch) {
   runtime_controller_ = std::make_unique<RuntimeController>(
@@ -97,8 +103,9 @@ Engine::Engine(Delegate& delegate,
           unref_queue,                             // Skia unref queue
           image_decoder_->GetWeakPtr(),            // image decoder
           image_generator_registry_.GetWeakPtr(),  // image generator registry
-          settings_.advisory_script_uri,           // advisory script uri
-          settings_.advisory_script_entrypoint,    // advisory script entrypoint
+          text_input_connection_factory_,  // text input connection factory
+          settings_.advisory_script_uri,   // advisory script uri
+          settings_.advisory_script_entrypoint,  // advisory script entrypoint
           settings_
               .skia_deterministic_rendering_on_cpu,  // deterministic rendering
           vm.GetConcurrentWorkerTaskRunner(),        // concurrent task runner
@@ -127,6 +134,7 @@ std::unique_ptr<Engine> Engine::Spawn(
       /*animator=*/std::move(animator),
       /*io_manager=*/io_manager,
       /*font_collection=*/font_collection_,
+      /*text_input_connection_factory=*/text_input_connection_factory_,
       /*runtime_controller=*/nullptr,
       /*gpu_disabled_switch=*/gpu_disabled_switch);
   result->runtime_controller_ = runtime_controller_->Spawn(

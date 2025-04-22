@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "flutter/common/input/text_input_connection.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/lib/ui/window/platform_configuration.h"
 #include "flutter/lib/ui/window/platform_message.h"
@@ -26,6 +27,7 @@ UIDartState::Context::Context(
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
     fml::WeakPtr<ImageDecoder> image_decoder,
     fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+    std::shared_ptr<TextInputConnectionFactory> text_input_connection_factory,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     bool deterministic_rendering_enabled,
@@ -39,6 +41,7 @@ UIDartState::Context::Context(
       unref_queue(std::move(unref_queue)),
       image_decoder(std::move(image_decoder)),
       image_generator_registry(std::move(image_generator_registry)),
+      text_input_connection_factory(std::move(text_input_connection_factory)),
       advisory_script_uri(std::move(advisory_script_uri)),
       advisory_script_entrypoint(std::move(advisory_script_entrypoint)),
       deterministic_rendering_enabled(deterministic_rendering_enabled),
@@ -245,6 +248,10 @@ Dart_Isolate UIDartState::CreatePlatformIsolate(Dart_Handle entry_point,
                                                 char** error) {
   FML_UNREACHABLE();
   return nullptr;
+}
+
+TextInputConnectionFactory& UIDartState::GetTextInputConnectionFactory() const {
+  return *context_.text_input_connection_factory;
 }
 
 }  // namespace flutter

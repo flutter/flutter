@@ -252,6 +252,7 @@ class EngineContext {
           /*animator=*/std::move(animator),
           /*io_manager=*/io_manager_,
           /*unref_queue=*/nullptr,
+          /*text_input_connection_factory=*/nullptr,
           /*snapshot_delegate=*/snapshot_delegate_,
           /*gpu_disabled_switch=*/std::make_shared<fml::SyncSwitch>());
     });

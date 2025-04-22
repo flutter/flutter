@@ -13,6 +13,7 @@
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_builder.h"
 #include "flutter/lib/ui/dart_runtime_hooks.h"
+#include "flutter/lib/ui/input/text_input_model.h"
 #include "flutter/lib/ui/isolate_name_server/isolate_name_server_natives.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/codec.h"
@@ -81,6 +82,7 @@ typedef CanvasPath Path;
   V(RSuperellipse::Create)                                         \
   V(SceneBuilder::Create)                                          \
   V(SemanticsUpdateBuilder::Create)                                \
+  V(UiTextInputModel::Create)                                      \
   /* Other */                                                      \
   V(FontCollection::LoadFontFromList)                              \
   V(ImageDescriptor::initEncoded)                                  \
@@ -311,7 +313,11 @@ typedef CanvasPath Path;
   V(SemanticsUpdateBuilder, updateCustomAction)  \
   V(SemanticsUpdateBuilder, updateNode)          \
   V(SemanticsUpdate, dispose)                    \
-  V(Vertices, dispose)
+  V(Vertices, dispose)                           \
+  V(UiTextInputModel, getCurrentText)            \
+  V(UiTextInputModel, setCurrentText)            \
+  V(UiTextInputModel, setUpdateCallback)         \
+  V(UiTextInputModel, dispose)
 
 #define FFI_FUNCTION_INSERT(FUNCTION)           \
   g_function_dispatchers.insert(std::make_pair( \

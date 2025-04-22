@@ -105,6 +105,7 @@ template("embedder_source_set") {
       "//flutter/assets",
       "//flutter/common",
       "//flutter/common/graphics",
+      "//flutter/common/input",
       "//flutter/flow",
       "//flutter/fml",
       "//flutter/lib/ui",
