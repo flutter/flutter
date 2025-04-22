@@ -2082,7 +2082,8 @@ class AndroidPathReceiver final : public DlPathReceiver {
         fill_type_field_id = g_path_fill_type_winding_field;
         break;
       default:
-        // DlPathFillType does not have corresponding kInverseEvenOdd or kInverseWinding fill type.
+        // DlPathFillType does not have corresponding kInverseEvenOdd or
+        // kInverseWinding fill type.
         FML_UNREACHABLE();
         return;
     }
