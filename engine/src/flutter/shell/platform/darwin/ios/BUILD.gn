@@ -22,9 +22,18 @@ shell_gpu_configuration("ios_gpu_configuration") {
   enable_metal = true
 }
 
-config("config_swift") {
+config("config_ios") {
   include_dirs = [ target_gen_dir ]
+}
+
+config("config_swift") {
+  configs = [ ":config_ios" ]
   lib_dirs = ios_swift_lib_paths
+
+  # Allow use of @testable imports in debug builds and when tests are enabled.
+  if (flutter_runtime_mode == "debug" || enable_unittests) {
+    swiftflags = [ "-enable-testing" ]
+  }
 }
 
 # The headers that will be copied to the Flutter.framework and be accessed
@@ -44,11 +53,11 @@ _flutter_framework_headers = [
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
-source_set("flutter_framework_swift") {
+source_set("InternalFlutterSwift") {
   visibility = [ ":*" ]
   configs += [ ":config_swift" ]
 
-  sources = [ "framework/Source/FlutterFoo.swift" ]
+  sources = [ "framework/Source/UIPressProxy.swift" ]
 }
 
 source_set("flutter_framework_source") {
@@ -62,7 +71,10 @@ source_set("flutter_framework_source") {
     "//flutter:config",
   ]
 
-  configs += [ "//build/config/ios:ios_application_extension" ]
+  configs += [
+    ":config_ios",
+    "//build/config/ios:ios_application_extension",
+  ]
 
   sources = [
     "framework/Source/FlutterAppDelegate.mm",
@@ -108,8 +120,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterTextInputPlugin.mm",
     "framework/Source/FlutterTextureRegistryRelay.h",
     "framework/Source/FlutterTextureRegistryRelay.mm",
-    "framework/Source/FlutterUIPressProxy.h",
-    "framework/Source/FlutterUIPressProxy.mm",
     "framework/Source/FlutterUndoManagerDelegate.h",
     "framework/Source/FlutterUndoManagerPlugin.h",
     "framework/Source/FlutterUndoManagerPlugin.mm",
@@ -180,7 +190,7 @@ source_set("flutter_framework_source") {
   }
 
   deps = [
-    ":flutter_framework_swift",
+    ":InternalFlutterSwift",
     ":ios_gpu_configuration",
     "//flutter/common:common",
     "//flutter/common/graphics",
@@ -202,6 +212,15 @@ source_set("flutter_framework_source") {
 platform_frameworks_path =
     rebase_path("$ios_sdk_path/../../Library/Frameworks/")
 
+source_set("ios_test_flutter_swift") {
+  testonly = true
+  visibility = [ ":*" ]
+  configs += [ ":config_swift" ]
+
+  sources = [ "framework/Source/FakeUIPressProxy.swift" ]
+  deps = [ ":InternalFlutterSwift" ]
+}
+
 shared_library("ios_test_flutter") {
   testonly = true
   visibility = [ "*" ]
@@ -219,6 +238,7 @@ shared_library("ios_test_flutter") {
     "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib",
   ]
   frameworks = [ "XCTest.framework" ]
+  configs += [ ":config_ios" ]
   configs -= [
     "//build/config/gcc:symbol_visibility_hidden",
     "//build/config:symbol_visibility_hidden",
@@ -259,9 +279,11 @@ shared_library("ios_test_flutter") {
     "platform_message_handler_ios_test.mm",
   ]
   deps = [
+    ":InternalFlutterSwift",
     ":flutter_framework",
     ":flutter_framework_source",
     ":ios_gpu_configuration",
+    ":ios_test_flutter_swift",
     "//flutter/common:common",
     "//flutter/lib/ui:ui",
     "//flutter/shell/platform/darwin/common:framework_common",
@@ -289,8 +311,8 @@ shared_library("create_flutter_framework_dylib") {
   public = _flutter_framework_headers
 
   deps = [
+    ":InternalFlutterSwift",
     ":flutter_framework_source",
-    ":flutter_framework_swift",
   ]
 
   public_configs = [ "//flutter:config" ]

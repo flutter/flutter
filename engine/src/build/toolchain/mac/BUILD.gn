@@ -200,7 +200,7 @@ template("mac_toolchain") {
       depfile = "{{target_out_dir}}/{{module_name}}.d"
       depsformat = "gcc"
 
-      _header_path = "{{target_gen_dir}}/{{module_name}}/{{module_name}}.h"
+      _header_path = "{{target_gen_dir}}/{{target_output_name}}/{{target_output_name}}.h"
       _output_dir = "{{target_out_dir}}/{{label_name}}"
 
       outputs = [

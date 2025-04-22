@@ -16,7 +16,6 @@
 #include "flutter/runtime/ptrace_check.h"
 #include "flutter/shell/common/thread_host.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
-#import "flutter/shell/platform/darwin/ios/flutter_framework_swift/flutter_framework_swift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterChannelKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEmbedderKeyResponder.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine_Internal.h"
@@ -303,10 +302,6 @@ typedef struct MouseState {
   _initialized = YES;
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
-
-  FlutterFoo* foo = [[FlutterFoo alloc] initWithName:@"Chris"];
-  NSString* greeting = [foo hello];
-  NSLog(@"FlutterFoo hello: %@", greeting);
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/157140
   // Eliminate method calls in initializers and dealloc.
@@ -1976,7 +1971,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesBegan:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -1991,7 +1986,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesChanged:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -2006,7 +2001,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesEnded:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -2021,7 +2016,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesCancelled:[NSSet setWithObject:press] withEvent:event];
                   }];
