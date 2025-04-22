@@ -329,8 +329,10 @@ class _PredictiveBackSharedElementPageTransitionState
   final ProxyAnimation _proxyAnimation = ProxyAnimation();
   late final Listenable _mergedAnimations;
   late final Animation<double> _opacityAnimation;
+
   late Animation<double> _xAnimation;
   late Animation<Offset> _positionCommitAnimation;
+  late Animation<double> _positionAnimation;
 
   final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
   final Tween<double> _scaleCommitTween = Tween<double>(begin: 1.0, end: 1.0);
@@ -364,10 +366,13 @@ class _PredictiveBackSharedElementPageTransitionState
     ).animate(_commitAnimation);
   }
 
-  Tween<double> get _currentScaleTween => switch (widget.phase) {
-    _PredictiveBackPhase.commit => _scaleCommitTween,
-    _ => _scaleTween,
-  };
+  void _updateAnimations() {
+    _scaleCommitTween.begin = _lastScale;
+    _scaleAnimation = _proxyAnimation.drive(switch (widget.phase) {
+      _PredictiveBackPhase.commit => _scaleCommitTween,
+      _ => _scaleTween,
+    });
+  }
 
   // TODO(justinmc): Should have a delegatedTransition to animate the incoming
   // route regardless of its page transition.
@@ -386,7 +391,8 @@ class _PredictiveBackSharedElementPageTransitionState
       _PredictiveBackPhase.commit => _commitAnimation,
       _ => widget.animation,
     };
-    _scaleAnimation = _proxyAnimation.drive(_currentScaleTween);
+    _updateAnimations();
+    //_positionAnimation = _proxyAnimation.drive();
     _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
     _opacityAnimation = _opacityTween.animate(_commitAnimation);
 
@@ -402,9 +408,7 @@ class _PredictiveBackSharedElementPageTransitionState
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       _commitController.forward(from: 0.0);
       _proxyAnimation.parent = _commitController;
-      _scaleCommitTween.begin = _lastScale;
-      // TODO(justinmc): Maybe abstract into an updateAnimations method or something? Could probably get rid of _currentScaleTween then.
-      _scaleAnimation = _proxyAnimation.drive(_currentScaleTween);
+      _updateAnimations();
       final double screenWidth = MediaQuery.sizeOf(context).width;
       _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
     }
@@ -441,6 +445,7 @@ class _PredictiveBackSharedElementPageTransitionState
       // TODO(justinmc): Could this one be _proxyAnimation?
       animation: _mergedAnimations,
       builder: (BuildContext context, Widget? child) {
+        // TODO(justinmc): You could even split out things like Transform.scale into their own widgets, if there's not a lot of overlap in initState and didUpdateWidget.
         return Transform.scale(
           scale: _lastScale = _scaleAnimation.value,
           child: Transform.translate(
