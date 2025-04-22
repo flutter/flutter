@@ -332,7 +332,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   late Animation<double> _xAnimation;
   late Animation<Offset> _positionCommitAnimation;
-  late Animation<double> _positionAnimation;
+  late Animation<Offset> _positionAnimation;
 
   final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
   final Tween<double> _scaleCommitTween = Tween<double>(begin: 1.0, end: 1.0);
@@ -366,11 +366,38 @@ class _PredictiveBackSharedElementPageTransitionState
     ).animate(_commitAnimation);
   }
 
-  void _updateAnimations() {
+  void _updateAnimations(Size screenSize) {
     _scaleCommitTween.begin = _lastScale;
     _scaleAnimation = _proxyAnimation.drive(switch (widget.phase) {
       _PredictiveBackPhase.commit => _scaleCommitTween,
       _ => _scaleTween,
+    });
+
+    final double xShift = (screenSize.width / _kDivisionFactor) - _kMargin;
+    _xAnimation = _proxyAnimation.drive(
+      Tween<double>(
+        begin: switch (widget.currentBackEvent?.swipeEdge) {
+          SwipeEdge.left => xShift,
+          SwipeEdge.right => -xShift,
+          null => xShift,
+        },
+        end: 0.0,
+      ),
+    );
+    _positionCommitAnimation = _getCommitPositionAnimation(screenSize.width);
+    _positionAnimation = _proxyAnimation.drive(switch (widget.phase) {
+      _PredictiveBackPhase.commit => Tween<Offset>(
+        begin: Offset(_lastXDrag, _lastYDrag),
+        end: Offset(screenSize.height * _kYPositionFactor, 0.0),
+      ),
+      _ => Tween<Offset>(
+        begin: switch (widget.currentBackEvent?.swipeEdge) {
+          SwipeEdge.left => Offset(xShift, _getYPosition(screenSize.height)),
+          SwipeEdge.right => Offset(-xShift, _getYPosition(screenSize.height)),
+          null => Offset(xShift, _getYPosition(screenSize.height)),
+        },
+        end: Offset(0.0, _getYPosition(screenSize.height)),
+      ),
     });
   }
 
@@ -391,8 +418,6 @@ class _PredictiveBackSharedElementPageTransitionState
       _PredictiveBackPhase.commit => _commitAnimation,
       _ => widget.animation,
     };
-    _updateAnimations();
-    //_positionAnimation = _proxyAnimation.drive();
     _mergedAnimations = Listenable.merge(<Listenable>[widget.animation, _commitAnimation]);
     _opacityAnimation = _opacityTween.animate(_commitAnimation);
 
@@ -408,17 +433,16 @@ class _PredictiveBackSharedElementPageTransitionState
     if (widget.phase != oldWidget.phase && widget.phase == _PredictiveBackPhase.commit) {
       _commitController.forward(from: 0.0);
       _proxyAnimation.parent = _commitController;
-      _updateAnimations();
-      final double screenWidth = MediaQuery.sizeOf(context).width;
-      _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
+      _updateAnimations(MediaQuery.sizeOf(context));
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final double screenWidth = MediaQuery.sizeOf(context).width;
+    _updateAnimations(MediaQuery.sizeOf(context));
 
+    /*
     final double xShift = (screenWidth / _kDivisionFactor) - _kMargin;
     _xAnimation = Tween<double>(
       begin: switch (widget.currentBackEvent?.swipeEdge) {
@@ -428,8 +452,9 @@ class _PredictiveBackSharedElementPageTransitionState
       },
       end: 0.0,
     ).animate(widget.animation);
+    */
 
-    _positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
+    //_positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
   }
 
   @override
@@ -449,6 +474,7 @@ class _PredictiveBackSharedElementPageTransitionState
         return Transform.scale(
           scale: _lastScale = _scaleAnimation.value,
           child: Transform.translate(
+          /*
             offset: switch (widget.phase) {
               _PredictiveBackPhase.commit => _positionCommitAnimation.value,
               _ => Offset(
@@ -456,6 +482,8 @@ class _PredictiveBackSharedElementPageTransitionState
                 _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
               ),
             },
+            */
+            offset: _positionAnimation.value,
             child: Opacity(
               opacity: _opacityAnimation.value,
               child: Padding(
