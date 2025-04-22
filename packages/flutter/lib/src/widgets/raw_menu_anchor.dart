@@ -403,6 +403,12 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   void close({bool inDispose = false});
 
   @protected
+  void dismiss() {
+    assert(_parent == null);
+    Actions.invoke(menuController._context!, const DismissMenuIntent());
+  }
+
+  @protected
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
     for (final _RawMenuAnchorBaseMixin child in List<_RawMenuAnchorBaseMixin>.from(
@@ -467,7 +473,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
           if (isOpen)
             DismissIntent: CallbackAction<DismissIntent>(
               onInvoke: (DismissIntent intent) {
-                Actions.invoke(menuController._context!, const DismissMenuIntent());
+                root.dismiss();
                 return null;
               },
             ),
