@@ -875,7 +875,7 @@ class MenuController {
   /// This method will establish a dependency relationship, so the calling
   /// widget will rebuild when the menu opens and closes.
   static bool? maybeIsOpenOf(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.isOpen;
+    return context.dependOnInheritedWidgetOfExactType<_MenuControllerScope>()?.isOpen;
   }
 
   @override
