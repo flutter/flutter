@@ -1,5 +1,5 @@
 class WebParagraphDebug {
-  static bool logging = true;
+  static bool logging = false;
 
   static void log(String arg) {
     if (logging) {

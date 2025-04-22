@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:ui/ui.dart' as ui;
-import 'dart:math';
+
 import 'code_unit_flags.dart';
 import 'debug.dart';
 import 'layout.dart';
@@ -19,14 +19,14 @@ class TextWrapper {
   final TextLayout _layout;
 
   int _startLine = 0;
+  double _top = 0.0;
 
   // Whitespaces always separates text from clusters even if it's empty
   ClusterRange _whitespaces = ClusterRange.empty;
 
   double _widthText = 0.0; // English: contains all whole words on the line
   double _widthWhitespaces = 0.0;
-  double _widthLetters =
-      0.0; // English: contains all the letters that didn't make the whole word yet
+  double _widthLetters = 0.0; // English: contains all the letters that didn't make the word yet
 
   bool isWhitespace(ExtendedTextCluster cluster) {
     return _layout.hasFlag(
@@ -55,6 +55,7 @@ class TextWrapper {
     _widthText = 0.0;
     _widthWhitespaces = 0.0;
     _widthLetters = clusterWidth;
+    _top = 0.0;
   }
 
   void breakLines(double width) {
@@ -77,13 +78,15 @@ class TextWrapper {
           _whitespaces.start = index;
           _whitespaces.end = index;
         }
-        _layout.addLine(
+        _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
           _widthText,
           ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
           _widthWhitespaces,
           hardLineBreak,
+          _top,
         );
+
         // Start a new line
         startNewLine(index, 0.0);
       } else if (isSoftLineBreak(cluster) && index != _startLine) {
@@ -107,7 +110,6 @@ class TextWrapper {
 
       // Check if we have a (hanging) whitespace which does not affect the line width
       if (isWhitespace(cluster)) {
-        final String whitespaces = _text.substring(cluster.start, cluster.end);
         if (_whitespaces.end < index) {
           // Start a new (empty) whitespace sequence
           _widthText += _widthWhitespaces + _widthLetters;
@@ -154,14 +156,13 @@ class TextWrapper {
         }
 
         // Add the line
-        final String text = _text.substring(_startLine, _whitespaces.start);
-        final String whitespaces = _text.substring(_whitespaces.start, _whitespaces.end);
-        _layout.addLine(
+        _top += _layout.addLine(
           ClusterRange(start: _startLine, end: _whitespaces.start),
           _widthText,
           ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
           _widthWhitespaces,
           hardLineBreak,
+          _top,
         );
 
         // Start a new line but keep the clusters sequence
@@ -184,12 +185,13 @@ class TextWrapper {
       _widthText += _widthLetters;
     }
 
-    _layout.addLine(
+    _top += _layout.addLine(
       ClusterRange(start: _startLine, end: _whitespaces.start),
       _widthText,
       ClusterRange(start: _whitespaces.start, end: _whitespaces.end),
       _widthWhitespaces,
       hardLineBreak,
+      _top,
     );
 
     // TODO(jlavrova): Discuss with Mouad
@@ -201,7 +203,7 @@ class TextWrapper {
         start: _layout.textClusters.length - 1,
         end: _layout.textClusters.length - 1,
       );
-      _layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false);
+      _top +=_layout.addLine(emptyClusterRange, 0.0, emptyClusterRange, 0.0, false, _top,);
     }
     */
     if (WebParagraphDebug.logging) {

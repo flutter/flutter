@@ -139,7 +139,7 @@ Future<void> testMain() async {
     );
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_ltr.png', region: region);
   });
@@ -160,7 +160,7 @@ Future<void> testMain() async {
     );
     final WebParagraph paragraph = builder.build();
     paragraph.layout(const ParagraphConstraints(width: 300));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
   });

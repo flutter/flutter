@@ -37,9 +37,6 @@ class TextLayout {
 
   Map<int, int> textToClusterMap = <int, int>{};
 
-  double _top = 0.0;
-  double _left = 0.0;
-
   bool hasFlag(ui.TextRange cluster, int flag) {
     return codeUnitFlags[cluster.start].hasFlag(flag);
   }
@@ -180,8 +177,6 @@ class TextLayout {
     lines.clear();
 
     final TextWrapper wrapper = TextWrapper(paragraph.text!, this);
-    _top = 0.0;
-    _left = 0.0;
     wrapper.breakLines(width);
   }
 
@@ -189,12 +184,13 @@ class TextLayout {
     return ClusterRange(start: max(a.start, b.start), end: min(a.end, b.end));
   }
 
-  void addLine(
+  double addLine(
     ClusterRange textRange,
     double textWidth,
     ClusterRange whitespaces,
     double whitespacesWidth,
     bool hardLineBreak,
+    double top,
   ) {
     // Arrange line vertically, calculate metrics and bounds
     final TextLine line = TextLine(
@@ -271,11 +267,9 @@ class TextLayout {
         );
       }
     }
-    final BidiRun firstVisualRun = line.visualRuns.first;
-    final double visualyLeft = firstVisualRun.shift;
     line.bounds = ui.Rect.fromLTWH(
       0,
-      _top,
+      top,
       textWidth,
       line.fontBoundingBoxAscent + line.fontBoundingBoxDescent,
     );
@@ -284,7 +278,7 @@ class TextLayout {
     WebParagraphDebug.log(
       'Line [${line.textRange.start}:${line.textRange.end}) ${line.bounds.left},${line.bounds.top} ${line.bounds.width}x${line.bounds.height} "$lineText"',
     );
-    _top += line.bounds.height;
+    return line.bounds.height;
   }
 
   double runWidth(BidiRun run, double shift) {
