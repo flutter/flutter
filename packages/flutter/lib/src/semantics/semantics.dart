@@ -2445,7 +2445,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
 
   // CHILDREN
 
-  /// Contains the children in hit test order (i.e. inversed paint order).
+  /// Contains the children in hit test order (i.e. `childrenInInversePaintOrder`).
   List<SemanticsNode>? _children;
 
   /// A snapshot of `newChildren` passed to [_replaceChildren] that we keep in
@@ -3545,7 +3545,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInDefaultOrder = _childrenInDefaultOrder(_children!, inheritedTextDirection);
     } else {
       // In the absence of text direction default to paint order.
-      childrenInDefaultOrder = _children;
+      childrenInDefaultOrder = _children?.reversed.toList();
     }
 
     // List.sort does not guarantee stable sort order. Therefore, children are
