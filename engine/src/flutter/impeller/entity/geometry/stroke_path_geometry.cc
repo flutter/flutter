@@ -52,279 +52,82 @@ class PositionWriter {
   size_t offset_ = 0u;
 };
 
-using CapProc = std::function<void(PositionWriter& vtx_builder,
-                                   const Point& position,
-                                   const Point& offset,
-                                   Scalar scale,
-                                   bool reverse)>;
-
-using JoinProc = std::function<void(PositionWriter& vtx_builder,
-                                    const Point& position,
-                                    const Point& start_offset,
-                                    const Point& end_offset,
-                                    Scalar miter_limit,
-                                    Scalar scale)>;
-
-class StrokeGenerator {
- public:
-  StrokeGenerator(const Path::Polyline& p_polyline,
-                  const Scalar p_stroke_width,
-                  const Scalar p_scaled_miter_limit,
-                  const JoinProc& p_join_proc,
-                  const CapProc& p_cap_proc,
-                  const Scalar p_scale)
-      : polyline(p_polyline),
-        stroke_width(p_stroke_width),
-        scaled_miter_limit(p_scaled_miter_limit),
-        join_proc(p_join_proc),
-        cap_proc(p_cap_proc),
-        scale(p_scale) {}
-
-  void Generate(PositionWriter& vtx_builder) {
-    for (size_t contour_i = 0; contour_i < polyline.contours.size();
-         contour_i++) {
-      const Path::PolylineContour& contour = polyline.contours[contour_i];
-      size_t contour_start_point_i, contour_end_point_i;
-      std::tie(contour_start_point_i, contour_end_point_i) =
-          polyline.GetContourPointBounds(contour_i);
-
-      size_t contour_delta = contour_end_point_i - contour_start_point_i;
-      if (contour_delta == 0) {
-        continue;  // This contour has no renderable content.
-      }
-
-      if (contour_i > 0) {
-        // This branch only executes when we've just finished drawing a contour
-        // and are switching to a new one.
-        // We're drawing a triangle strip, so we need to "pick up the pen" by
-        // appending two vertices at the end of the previous contour and two
-        // vertices at the start of the new contour (thus connecting the two
-        // contours with two zero volume triangles, which will be discarded by
-        // the rasterizer).
-        vtx.position = polyline.GetPoint(contour_start_point_i - 1);
-        // Append two vertices when "picking up" the pen so that the triangle
-        // drawn when moving to the beginning of the new contour will have zero
-        // volume.
-        vtx_builder.AppendVertex(vtx.position);
-        vtx_builder.AppendVertex(vtx.position);
-
-        vtx.position = polyline.GetPoint(contour_start_point_i);
-        // Append two vertices at the beginning of the new contour, which
-        // appends  two triangles of zero area.
-        vtx_builder.AppendVertex(vtx.position);
-        vtx_builder.AppendVertex(vtx.position);
-      }
-
-      if (contour_delta == 1) {
-        Point p = polyline.GetPoint(contour_start_point_i);
-        cap_proc(vtx_builder, p, {-stroke_width * 0.5f, 0}, scale,
-                 /*reverse=*/false);
-        cap_proc(vtx_builder, p, {stroke_width * 0.5f, 0}, scale,
-                 /*reverse=*/false);
-        continue;
-      }
-
-      previous_offset = offset;
-      offset = ComputeOffset(contour_start_point_i, contour_start_point_i,
-                             contour_end_point_i, contour);
-      const Point contour_first_offset = offset.GetVector();
-
-      // Generate start cap.
-      if (!polyline.contours[contour_i].is_closed) {
-        Point cap_offset =
-            Vector2(-contour.start_direction.y, contour.start_direction.x) *
-            stroke_width * 0.5f;  // Counterclockwise normal
-        cap_proc(vtx_builder, polyline.GetPoint(contour_start_point_i),
-                 cap_offset, scale, /*reverse=*/true);
-      }
-
-      for (size_t contour_component_i = 0;
-           contour_component_i < contour.components.size();
-           contour_component_i++) {
-        const Path::PolylineContour::Component& component =
-            contour.components[contour_component_i];
-        bool is_last_component =
-            contour_component_i == contour.components.size() - 1;
-
-        size_t component_start_index = component.component_start_index;
-        size_t component_end_index =
-            is_last_component ? contour_end_point_i - 1
-                              : contour.components[contour_component_i + 1]
-                                    .component_start_index;
-        if (component.is_curve) {
-          AddVerticesForCurveComponent(
-              vtx_builder, component_start_index, component_end_index,
-              contour_start_point_i, contour_end_point_i, contour);
-        } else {
-          AddVerticesForLinearComponent(
-              vtx_builder, component_start_index, component_end_index,
-              contour_start_point_i, contour_end_point_i, contour);
-        }
-      }
-
-      // Generate end cap or join.
-      if (!contour.is_closed) {
-        auto cap_offset =
-            Vector2(-contour.end_direction.y, contour.end_direction.x) *
-            stroke_width * 0.5f;  // Clockwise normal
-        cap_proc(vtx_builder, polyline.GetPoint(contour_end_point_i - 1),
-                 cap_offset, scale, /*reverse=*/false);
-      } else {
-        join_proc(vtx_builder, polyline.GetPoint(contour_start_point_i),
-                  offset.GetVector(), contour_first_offset, scaled_miter_limit,
-                  scale);
-      }
-    }
-  }
-
-  /// Computes offset by calculating the direction from point_i - 1 to point_i
-  /// if point_i is within `contour_start_point_i` and `contour_end_point_i`;
-  /// Otherwise, it uses direction from contour.
-  SeparatedVector2 ComputeOffset(const size_t point_i,
-                                 const size_t contour_start_point_i,
-                                 const size_t contour_end_point_i,
-                                 const Path::PolylineContour& contour) const {
-    Point direction;
-    if (point_i >= contour_end_point_i) {
-      direction = contour.end_direction;
-    } else if (point_i <= contour_start_point_i) {
-      direction = -contour.start_direction;
-    } else {
-      direction = (polyline.GetPoint(point_i) - polyline.GetPoint(point_i - 1))
-                      .Normalize();
-    }
-    return SeparatedVector2(Vector2{-direction.y, direction.x},
-                            stroke_width * 0.5f);
-  }
-
-  void AddVerticesForLinearComponent(PositionWriter& vtx_builder,
-                                     const size_t component_start_index,
-                                     const size_t component_end_index,
-                                     const size_t contour_start_point_i,
-                                     const size_t contour_end_point_i,
-                                     const Path::PolylineContour& contour) {
-    bool is_last_component = component_start_index ==
-                             contour.components.back().component_start_index;
-
-    for (size_t point_i = component_start_index; point_i < component_end_index;
-         point_i++) {
-      bool is_end_of_component = point_i == component_end_index - 1;
-
-      Point offset_vector = offset.GetVector();
-
-      vtx.position = polyline.GetPoint(point_i) + offset_vector;
-      vtx_builder.AppendVertex(vtx.position);
-      vtx.position = polyline.GetPoint(point_i) - offset_vector;
-      vtx_builder.AppendVertex(vtx.position);
-
-      // For line components, two additional points need to be appended
-      // prior to appending a join connecting the next component.
-      vtx.position = polyline.GetPoint(point_i + 1) + offset_vector;
-      vtx_builder.AppendVertex(vtx.position);
-      vtx.position = polyline.GetPoint(point_i + 1) - offset_vector;
-      vtx_builder.AppendVertex(vtx.position);
-
-      previous_offset = offset;
-      offset = ComputeOffset(point_i + 2, contour_start_point_i,
-                             contour_end_point_i, contour);
-      if (!is_last_component && is_end_of_component) {
-        // Generate join from the current line to the next line.
-        join_proc(vtx_builder, polyline.GetPoint(point_i + 1),
-                  previous_offset.GetVector(), offset.GetVector(),
-                  scaled_miter_limit, scale);
-      }
-    }
-  }
-
-  void AddVerticesForCurveComponent(PositionWriter& vtx_builder,
-                                    const size_t component_start_index,
-                                    const size_t component_end_index,
-                                    const size_t contour_start_point_i,
-                                    const size_t contour_end_point_i,
-                                    const Path::PolylineContour& contour) {
-    bool is_last_component = component_start_index ==
-                             contour.components.back().component_start_index;
-
-    for (size_t point_i = component_start_index; point_i < component_end_index;
-         point_i++) {
-      bool is_end_of_component = point_i == component_end_index - 1;
-
-      vtx.position = polyline.GetPoint(point_i) + offset.GetVector();
-      vtx_builder.AppendVertex(vtx.position);
-      vtx.position = polyline.GetPoint(point_i) - offset.GetVector();
-      vtx_builder.AppendVertex(vtx.position);
-
-      previous_offset = offset;
-      offset = ComputeOffset(point_i + 2, contour_start_point_i,
-                             contour_end_point_i, contour);
-
-      // If the angle to the next segment is too sharp, round out the join.
-      if (!is_end_of_component) {
-        constexpr Scalar kAngleThreshold = 10 * kPi / 180;
-        // `std::cosf` is not constexpr-able, unfortunately, so we have to bake
-        // the alignment constant.
-        constexpr Scalar kAlignmentThreshold =
-            0.984807753012208;  // std::cosf(kThresholdAngle) -- 10 degrees
-
-        // Use a cheap dot product to determine whether the angle is too sharp.
-        if (previous_offset.GetAlignment(offset) < kAlignmentThreshold) {
-          Scalar angle_total = previous_offset.AngleTo(offset).radians;
-          Scalar angle = kAngleThreshold;
-
-          // Bridge the large angle with additional geometry at
-          // `kAngleThreshold` interval.
-          while (angle < std::abs(angle_total)) {
-            Scalar signed_angle = angle_total < 0 ? -angle : angle;
-            Point offset =
-                previous_offset.GetVector().Rotate(Radians(signed_angle));
-            vtx.position = polyline.GetPoint(point_i) + offset;
-            vtx_builder.AppendVertex(vtx.position);
-            vtx.position = polyline.GetPoint(point_i) - offset;
-            vtx_builder.AppendVertex(vtx.position);
-
-            angle += kAngleThreshold;
-          }
-        }
-      }
-
-      // For curve components, the polyline is detailed enough such that
-      // it can avoid worrying about joins altogether.
-      if (is_end_of_component) {
-        // Append two additional vertices to close off the component. If we're
-        // on the _last_ component of the contour then we need to use the
-        // contour's end direction.
-        // `ComputeOffset` returns the contour's end direction when attempting
-        // to grab offsets past `contour_end_point_i`, so just use `offset` when
-        // we're on the last component.
-        Point last_component_offset = is_last_component
-                                          ? offset.GetVector()
-                                          : previous_offset.GetVector();
-        vtx.position = polyline.GetPoint(point_i + 1) + last_component_offset;
-        vtx_builder.AppendVertex(vtx.position);
-        vtx.position = polyline.GetPoint(point_i + 1) - last_component_offset;
-        vtx_builder.AppendVertex(vtx.position);
-        // Generate join from the current line to the next line.
-        if (!is_last_component) {
-          join_proc(vtx_builder, polyline.GetPoint(point_i + 1),
-                    previous_offset.GetVector(), offset.GetVector(),
-                    scaled_miter_limit, scale);
-        }
-      }
-    }
-  }
-
-  const Path::Polyline& polyline;
-  const Scalar stroke_width;
-  const Scalar scaled_miter_limit;
-  const JoinProc& join_proc;
-  const CapProc& cap_proc;
-  const Scalar scale;
-
-  SeparatedVector2 previous_offset;
-  SeparatedVector2 offset;
-  SolidFillVertexShader::PerVertexData vtx;
-};
-
+/// StrokePathSegmentReceiver converts path segments (fed by PathTessellator)
+/// into a vertex strip that covers the outline of the stroked version of the
+/// path and feeds those vertices, expressed in the form of a vertex strip
+/// into the supplied PositionWriter.
+///
+/// The general procedure follows the following basic methodology:
+///
+/// Every path segment is represented by a box with two starting vertices
+/// perpendicular to its start point and two vertices perpendicular to its
+/// end point, all perpendiculars of length (stroke_width * 0.5).
+///
+/// Joins will connect the ending "box" perpendiculars of the previous segment
+/// to the starting "box" perpendiculars of the following segment. If the two
+/// boxes are so aligned that their adjacent perpendiculars are less than a
+/// threshold distance apart (kJoinPixelThreshold), the join will just be
+/// elided so that the end of one box becomes the start of the next box.
+/// If the join process does add decorations, it assumes that the ending
+/// perpendicular vertices from the prior segment are the last vertices
+/// added and ensures that it appends the two vertices for the starting
+/// perpendiculars of the new segment's "box". Thus every join either
+/// adds nothing and the end perpendiculars of the previous segment become
+/// the start perpendiculars of the next segment, or it makes sure its
+/// geometry fills in the gap and ends with the start perpendiculars for the
+/// new segment.
+///
+/// Prior to the start of an unclosed contour we insert a cap and also the
+/// starting perpendicular segments for the first segment. Prior to the
+/// start of a closed contour, we just insert the starting perpendiculars
+/// for the first segment. Either way, we've initialized the path with the
+/// starting perpendiculars of the first segment.
+///
+/// After the last segment in an unclosed contour we insert a cap which
+/// can assume that the last segment has already inserted its closing
+/// perpendicular segments. After the last segment in a closed contour, we
+/// insert a join back to the very first segment in that contour.
+///
+/// Connecting any two contours we insert an infinitely thin connecting
+/// thread by inserting the last point of the previous contour twice and
+/// then inserting the first point of the next contour twice. This ensures
+/// that there are no non-empty triangles between the two contours.
+///
+/// Finally, inserting a line segment can assume that the starting
+/// perpendiculars have already been inserted by the preceding cap, join,
+/// or prior segment, so all it needs to do is to insert the ending
+/// perpendiculars which set the process up for the subsequent cap, join,
+/// or future segment.
+///
+/// Inserting curve segments acts like a series of line segments except
+/// that the opening perpendicular is taken from the curve rather than the
+/// direction between the starting point and the first sample point. This
+/// ensures that any cap or join will be aligned with the curve and not
+/// tilted by the first approximating segment. The same is true of the
+/// ending perpendicular which is taken from the curve and not the last
+/// approximated segment. Between each approximated segment of the curve,
+/// we insert only Cap::kRound joins so as not to polygonize a curve when
+/// it turns very sharply. We also skip these joins for any change of
+/// direction which is smaller than the first sample point of a round join
+/// for performance reasons.
+///
+/// To facilitate all of that work we maintain variables containing
+/// SeparatedVector2 values that, by convention, point 90 degrees to the
+/// right of the given path direction. This facilitates a quick add/subtract
+/// from the point on the path to insert the necessary perpendicular
+/// points of a segment's box. These values contain both a unit vector for
+/// direction and a magnitude for length.
+///
+/// SeparatedVector2 values also allow us to quickly test limits on when to
+/// include joins by using a simple dot product on the previous and next
+/// perpendiculars at a given path point which should match the dot product
+/// of the path's direction itself at the same point since both perpendiculars
+/// have been rotated identically to the same side of the path.
+/// The SeparatedVector2 will perform the dot product on the unit-length
+/// vectors so that the result is exactly the cosine of the angle between the
+/// segments - also the angle by which the path turned at a given path point.
+///
+/// @see PathTessellator::PathToStrokedSegments
 class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
  public:
   StrokePathSegmentReceiver(PositionWriter& vtx_builder,
@@ -343,26 +146,6 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
         cap_(cap),
         scale_(scale),
         trigs_(trigs) {}
-
-  inline SeparatedVector2 ComputePerpendicular(const Point from,
-                                               const Point to) const {
-    return ComputePerpendicular((to - from).Normalize());
-  }
-
-  inline SeparatedVector2 ComputePerpendicular(const Vector2 direction) const {
-    return SeparatedVector2(Vector2{-direction.y, direction.x},
-                            half_stroke_width_);
-  }
-
-  inline void AppendVertices(const Point curve_point, Vector2 offset) {
-    vtx_builder_.AppendVertex(curve_point + offset);
-    vtx_builder_.AppendVertex(curve_point - offset);
-  }
-
-  inline void AppendVertices(const Point curve_point,
-                             SeparatedVector2 perpendicular) {
-    return AppendVertices(curve_point, perpendicular.GetVector());
-  }
 
   void BeginContour(Point origin, bool will_be_closed) override {
     if (has_prior_contour_ && origin != last_point_) {
@@ -431,19 +214,17 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
         // Handle all intermediate curve points up to but not including the end
         for (int i = 1; i < count; i++) {
           Point cur = curve.Solve(i / count);
-          if (cur != prev) {
-            auto cur_perpendicular = ComputePerpendicular(prev, cur);
-            if (prev_perpendicular.GetAlignment(cur_perpendicular) <
-                trigs_[1].cos) {
-              // We only connect 2 curved segments if their change in
-              // direction is faster than a single sample of a round join
-              AppendVertices(cur, prev_perpendicular);
-              AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
-            }
-            AppendVertices(cur, cur_perpendicular);
-            prev = cur;
-            prev_perpendicular = cur_perpendicular;
+          auto cur_perpendicular = ComputePerpendicular(prev, cur);
+          if (prev_perpendicular.GetAlignment(cur_perpendicular) <
+              trigs_[1].cos) {
+            // We only connect 2 curved segments if their change in
+            // direction is faster than a single sample of a round join
+            AppendVertices(cur, prev_perpendicular);
+            AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
           }
+          AppendVertices(cur, cur_perpendicular);
+          prev = cur;
+          prev_perpendicular = cur_perpendicular;
         }
 
         if (prev_perpendicular.GetAlignment(end_perpendicular) <
@@ -577,6 +358,26 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     return cosine;
   }
 
+  inline SeparatedVector2 ComputePerpendicular(const Point from,
+                                               const Point to) const {
+    return ComputePerpendicular((to - from).Normalize());
+  }
+
+  inline SeparatedVector2 ComputePerpendicular(const Vector2 direction) const {
+    return SeparatedVector2(Vector2{-direction.y, direction.x},
+                            half_stroke_width_);
+  }
+
+  inline void AppendVertices(const Point curve_point, Vector2 offset) {
+    vtx_builder_.AppendVertex(curve_point + offset);
+    vtx_builder_.AppendVertex(curve_point - offset);
+  }
+
+  inline void AppendVertices(const Point curve_point,
+                             SeparatedVector2 perpendicular) {
+    return AppendVertices(curve_point, perpendicular.GetVector());
+  }
+
   inline void HandlePreviousJoin(SeparatedVector2 new_perpendicular) {
     FML_DCHECK(has_prior_contour_);
     if (has_prior_segment_) {
@@ -618,7 +419,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       case Cap::kRound: {
         Point along(perpendicular.y, -perpendicular.x);
         if (contour_start) {
-          // Add a single point at the far end of the round cap
+          // Start with a single point at the far end of the round cap
           vtx_builder_.AppendVertex(path_point - along);
 
           // Iterate down to, but not including, the first entry (1, 0)
@@ -638,6 +439,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
             AppendVertices(center, offset);
           }
 
+          // End with a single point at the far end of the round cap
           vtx_builder_.AppendVertex(path_point + along);
         }
         break;
@@ -808,248 +610,9 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     AppendVertices(path_point, new_perpendicular);
   }
 };
-
-void CreateButtCap(PositionWriter& vtx_builder,
-                   const Point& position,
-                   const Point& offset,
-                   Scalar scale,
-                   bool reverse) {
-  Point orientation = offset * (reverse ? -1 : 1);
-  vtx_builder.AppendVertex(position + orientation);
-  vtx_builder.AppendVertex(position - orientation);
-}
-
-void CreateRoundCap(PositionWriter& vtx_builder,
-                    const Point& position,
-                    const Point& offset,
-                    Scalar scale,
-                    bool reverse) {
-  Point orientation = offset * (reverse ? -1 : 1);
-  Point forward(offset.y, -offset.x);
-  Point forward_normal = forward.Normalize();
-
-  CubicPathComponent arc;
-  if (reverse) {
-    arc = CubicPathComponent(
-        forward, forward + orientation * PathBuilder::kArcApproximationMagic,
-        orientation + forward * PathBuilder::kArcApproximationMagic,
-        orientation);
-  } else {
-    arc = CubicPathComponent(
-        orientation,
-        orientation + forward * PathBuilder::kArcApproximationMagic,
-        forward + orientation * PathBuilder::kArcApproximationMagic, forward);
-  }
-
-  Point vtx = position + orientation;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position - orientation;
-  vtx_builder.AppendVertex(vtx);
-
-  Scalar line_count = std::ceilf(ComputeCubicSubdivisions(scale, arc));
-  for (size_t i = 1; i < line_count; i++) {
-    Point point = arc.Solve(i / line_count);
-    vtx = position + point;
-    vtx_builder.AppendVertex(vtx);
-    vtx = position + (-point).Reflect(forward_normal);
-    vtx_builder.AppendVertex(vtx);
-  }
-
-  Point point = arc.p2;
-  vtx = position + point;
-  vtx_builder.AppendVertex(position + point);
-  vtx = position + (-point).Reflect(forward_normal);
-  vtx_builder.AppendVertex(vtx);
-}
-
-void CreateSquareCap(PositionWriter& vtx_builder,
-                     const Point& position,
-                     const Point& offset,
-                     Scalar scale,
-                     bool reverse) {
-  Point orientation = offset * (reverse ? -1 : 1);
-  Point forward(offset.y, -offset.x);
-
-  Point vtx = position + orientation;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position - orientation;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position + orientation + forward;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position - orientation + forward;
-  vtx_builder.AppendVertex(vtx);
-}
-
-Scalar CreateBevelAndGetDirection(PositionWriter& vtx_builder,
-                                  const Point& position,
-                                  const Point& start_offset,
-                                  const Point& end_offset) {
-  Point vtx = position;
-  vtx_builder.AppendVertex(vtx);
-
-  Scalar dir = start_offset.Cross(end_offset) > 0 ? -1 : 1;
-  vtx = position + start_offset * dir;
-  vtx_builder.AppendVertex(vtx);
-  vtx = position + end_offset * dir;
-  vtx_builder.AppendVertex(vtx);
-
-  return dir;
-}
-
-void CreateMiterJoin(PositionWriter& vtx_builder,
-                     const Point& position,
-                     const Point& start_offset,
-                     const Point& end_offset,
-                     Scalar miter_limit,
-                     Scalar scale) {
-  Point start_normal = start_offset.Normalize();
-  Point end_normal = end_offset.Normalize();
-
-  // 1 for no joint (straight line), 0 for max joint (180 degrees).
-  Scalar alignment = (start_normal.Dot(end_normal) + 1) / 2;
-  if (ScalarNearlyEqual(alignment, 1)) {
-    return;
-  }
-
-  Scalar direction = CreateBevelAndGetDirection(vtx_builder, position,
-                                                start_offset, end_offset);
-
-  Point miter_point = (((start_offset + end_offset) / 2) / alignment);
-  if (miter_point.GetDistanceSquared({0, 0}) > miter_limit * miter_limit) {
-    return;  // Convert to bevel when we exceed the miter limit.
-  }
-
-  // Outer miter point.
-  vtx_builder.AppendVertex(position + miter_point * direction);
-}
-
-void CreateRoundJoin(PositionWriter& vtx_builder,
-                     const Point& position,
-                     const Point& start_offset,
-                     const Point& end_offset,
-                     Scalar miter_limit,
-                     Scalar scale) {
-  Point start_normal = start_offset.Normalize();
-  Point end_normal = end_offset.Normalize();
-
-  // 0 for no joint (straight line), 1 for max joint (180 degrees).
-  Scalar alignment = 1 - (start_normal.Dot(end_normal) + 1) / 2;
-  if (ScalarNearlyEqual(alignment, 0)) {
-    return;
-  }
-
-  Scalar direction = CreateBevelAndGetDirection(vtx_builder, position,
-                                                start_offset, end_offset);
-
-  Point middle =
-      (start_offset + end_offset).Normalize() * start_offset.GetLength();
-  Point middle_normal = middle.Normalize();
-
-  Point middle_handle = middle + Point(-middle.y, middle.x) *
-                                     PathBuilder::kArcApproximationMagic *
-                                     alignment * direction;
-  Point start_handle = start_offset + Point(start_offset.y, -start_offset.x) *
-                                          PathBuilder::kArcApproximationMagic *
-                                          alignment * direction;
-
-  CubicPathComponent arc(start_offset, start_handle, middle_handle, middle);
-  Scalar line_count = std::ceilf(ComputeCubicSubdivisions(scale, arc));
-  for (size_t i = 1; i < line_count; i++) {
-    Point point = arc.Solve(i / line_count);
-    vtx_builder.AppendVertex(position + point * direction);
-    vtx_builder.AppendVertex(position +
-                             (-point * direction).Reflect(middle_normal));
-  }
-  vtx_builder.AppendVertex(position + arc.p2 * direction);
-  vtx_builder.AppendVertex(position +
-                           (-arc.p2 * direction).Reflect(middle_normal));
-}
-
-void CreateBevelJoin(PositionWriter& vtx_builder,
-                     const Point& position,
-                     const Point& start_offset,
-                     const Point& end_offset,
-                     Scalar miter_limit,
-                     Scalar scale) {
-  CreateBevelAndGetDirection(vtx_builder, position, start_offset, end_offset);
-}
-
-// static
-
-JoinProc GetJoinProc(Join stroke_join) {
-  switch (stroke_join) {
-    case Join::kBevel:
-      return &CreateBevelJoin;
-    case Join::kMiter:
-      return &CreateMiterJoin;
-    case Join::kRound:
-      return &CreateRoundJoin;
-  }
-}
-
-CapProc GetCapProc(Cap stroke_cap) {
-  switch (stroke_cap) {
-    case Cap::kButt:
-      return &CreateButtCap;
-    case Cap::kRound:
-      return &CreateRoundCap;
-    case Cap::kSquare:
-      return &CreateSquareCap;
-  }
-}
 }  // namespace
 
 std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
-    const Path::Polyline& polyline,
-    Scalar stroke_width,
-    Scalar miter_limit,
-    Join stroke_join,
-    Cap stroke_cap,
-    Scalar scale) {
-  auto scaled_miter_limit = stroke_width * miter_limit * 0.5f;
-  JoinProc join_proc = GetJoinProc(stroke_join);
-  CapProc cap_proc = GetCapProc(stroke_cap);
-  StrokeGenerator stroke_generator(polyline, stroke_width, scaled_miter_limit,
-                                   join_proc, cap_proc, scale);
-  std::vector<Point> points(4096);
-  PositionWriter vtx_builder(points);
-  stroke_generator.Generate(vtx_builder);
-  auto [arena, extra] = vtx_builder.GetUsedSize();
-  FML_DCHECK(extra == 0u);
-  points.resize(arena);
-  return points;
-}
-
-std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
-    const Path& path,
-    Scalar stroke_width,
-    Scalar miter_limit,
-    Join stroke_join,
-    Cap stroke_cap,
-    Scalar scale) {
-  auto scaled_miter_limit = stroke_width * miter_limit * 0.5f;
-  JoinProc join_proc = GetJoinProc(stroke_join);
-  CapProc cap_proc = GetCapProc(stroke_cap);
-
-  auto poly_points = std::make_unique<std::vector<Point>>();
-  poly_points->reserve(2048);
-  auto polyline = path.CreatePolyline(
-      scale, std::move(poly_points),
-      [&poly_points](Path::Polyline::PointBufferPtr reclaimed) {
-        poly_points = std::move(reclaimed);
-      });
-  StrokeGenerator stroke_generator(polyline, stroke_width, scaled_miter_limit,
-                                   join_proc, cap_proc, scale);
-  std::vector<Point> points(4096);
-  PositionWriter vtx_builder(points);
-  stroke_generator.Generate(vtx_builder);
-  auto [arena, extra] = vtx_builder.GetUsedSize();
-  FML_DCHECK(extra == 0u);
-  points.resize(arena);
-  return points;
-}
-
-std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVerticesDirect(
     const PathSource& source,
     Scalar stroke_width,
     Scalar miter_limit,

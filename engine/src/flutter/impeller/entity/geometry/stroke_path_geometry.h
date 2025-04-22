@@ -45,23 +45,6 @@ class StrokePathGeometry final : public Geometry {
 
   // Private for benchmarking and debugging
   static std::vector<Point> GenerateSolidStrokeVertices(
-      const Path::Polyline& polyline,
-      Scalar stroke_width,
-      Scalar miter_limit,
-      Join stroke_join,
-      Cap stroke_cap,
-      Scalar scale);
-
-  // Private for benchmarking and debugging
-  static std::vector<Point> GenerateSolidStrokeVertices(const Path& polyline,
-                                                        Scalar stroke_width,
-                                                        Scalar miter_limit,
-                                                        Join stroke_join,
-                                                        Cap stroke_cap,
-                                                        Scalar scale);
-
-  // Private for benchmarking and debugging
-  static std::vector<Point> GenerateSolidStrokeVerticesDirect(
       const PathSource& source,
       Scalar stroke_width,
       Scalar miter_limit,

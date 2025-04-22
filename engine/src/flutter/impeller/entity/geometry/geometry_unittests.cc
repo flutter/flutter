@@ -56,14 +56,13 @@ namespace impeller {
 
 class ImpellerEntityUnitTestAccessor {
  public:
-  static std::vector<Point> GenerateSolidStrokeVerticesDirect(
-      const PathSource& path,
-      Scalar stroke_width,
-      Scalar miter_limit,
-      Join stroke_join,
-      Cap stroke_cap,
-      Scalar scale) {
-    return StrokePathGeometry::GenerateSolidStrokeVerticesDirect(
+  static std::vector<Point> GenerateSolidStrokeVertices(const PathSource& path,
+                                                        Scalar stroke_width,
+                                                        Scalar miter_limit,
+                                                        Join stroke_join,
+                                                        Cap stroke_cap,
+                                                        Scalar scale) {
+    return StrokePathGeometry::GenerateSolidStrokeVertices(
         path, stroke_width, miter_limit, stroke_join, stroke_cap, scale);
   }
 };
@@ -163,9 +162,8 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesButtCap) {
   path_builder.LineTo({130, 20});
   flutter::DlPath path(path_builder);
 
-  auto points =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
-          path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -198,9 +196,8 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesRoundCap) {
   path_builder.LineTo({130, 20});
   flutter::DlPath path(path_builder);
 
-  auto points =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
-          path, 10.0f, 4.0f, Join::kBevel, Cap::kRound, 1.0f);
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 10.0f, 4.0f, Join::kBevel, Cap::kRound, 1.0f);
 
   size_t count = points.size();
   ASSERT_TRUE((count & 0x1) == 0x0);  // Should always be even
@@ -280,9 +277,8 @@ TEST(EntityGeometryTest, SimpleTwoLineStrokeVerticesSquareCap) {
   path_builder.LineTo({130, 20});
   flutter::DlPath path(path_builder);
 
-  auto points =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
-          path, 10.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 10.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
 
   // clang-format off
   std::vector<Point> expected = {
@@ -324,9 +320,8 @@ TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesBevelJoin) {
   path_builder.LineTo({30, 30});
   flutter::DlPath path(path_builder);
 
-  auto points =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
-          path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -352,9 +347,8 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesBevelJoin) {
   path_builder.LineTo({30, 10});
   flutter::DlPath path(path_builder);
 
-  auto points =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
-          path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 10.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -380,9 +374,8 @@ TEST(EntityGeometryTest, TwoLineSegmentsRightTurnStrokeVerticesMiterJoin) {
   path_builder.LineTo({30, 30});
   flutter::DlPath path(path_builder);
 
-  auto points =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
-          path, 10.0f, 4.0f, Join::kMiter, Cap::kButt, 1.0f);
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 10.0f, 4.0f, Join::kMiter, Cap::kButt, 1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -411,9 +404,8 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesMiterJoin) {
   path_builder.LineTo({30, 10});
   flutter::DlPath path(path_builder);
 
-  auto points =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
-          path, 10.0f, 4.0f, Join::kMiter, Cap::kButt, 1.0f);
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 10.0f, 4.0f, Join::kMiter, Cap::kButt, 1.0f);
 
   std::vector<Point> expected = {
       // The points for the first segment (20, 20) -> (30, 20)
@@ -466,7 +458,7 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
 
       // Miter limit too small (99% of required) to allow a miter
       auto points1 =
-          ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
               path, width, limit * 0.99f, Join::kMiter, Cap::kButt, 1.0f);
       EXPECT_EQ(points1.size(), 8u)
           << "degrees: " << degrees << ", width: " << width << ", "
@@ -474,7 +466,7 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
 
       // Miter limit large enough (101% of required) to allow a miter
       auto points2 =
-          ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
               path, width, limit * 1.01f, Join::kMiter, Cap::kButt, 1.0f);
       EXPECT_EQ(points2.size(), 9u)
           << "degrees: " << degrees << ", width: " << width;
@@ -494,19 +486,19 @@ TEST(EntityGeometryTest, TwoLineSegments180DegreeJoins) {
   flutter::DlPath path(path_builder);
 
   auto points_bevel =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates no join - because it is a bevel join
   EXPECT_EQ(points_bevel.size(), 8u);
 
   auto points_miter =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
   // Generates no join - even with a very large miter limit
   EXPECT_EQ(points_miter.size(), 8u);
 
   auto points_round =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
   // Generates lots of join points - to round off the 180 degree bend
   EXPECT_EQ(points_round.size(), 19u);
@@ -521,7 +513,7 @@ TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
   flutter::DlPath path_reference(path_builder_refrence);
 
   auto points_bevel_reference =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates no joins because the curve is smooth
   EXPECT_EQ(points_bevel_reference.size(), 76u);
@@ -533,19 +525,19 @@ TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
   flutter::DlPath path(path_builder);
 
   auto points_bevel =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_bevel.size(), points_bevel_reference.size());
 
   auto points_miter =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_miter.size(), points_bevel_reference.size());
 
   auto points_round =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_round.size(), points_bevel_reference.size());
@@ -560,7 +552,7 @@ TEST(EntityGeometryTest, TightConic180DegreeJoins) {
   flutter::DlPath path_reference(path_builder_refrence);
 
   auto points_bevel_reference =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates no joins because the curve is smooth
   EXPECT_EQ(points_bevel_reference.size(), 80u);
@@ -572,19 +564,19 @@ TEST(EntityGeometryTest, TightConic180DegreeJoins) {
   flutter::DlPath path(path_builder);
 
   auto points_bevel =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_bevel.size(), points_bevel_reference.size());
 
   auto points_miter =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_miter.size(), points_bevel_reference.size());
 
   auto points_round =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_round.size(), points_bevel_reference.size());
@@ -600,7 +592,7 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
   flutter::DlPath path_reference(path_builder_reference);
 
   auto points_reference =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates no joins because the curve is smooth
   EXPECT_EQ(points_reference.size(), 82u);
@@ -612,19 +604,19 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
   flutter::DlPath path(path_builder);
 
   auto points_bevel =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_bevel.size(), points_reference.size());
 
   auto points_miter =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_miter.size(), points_reference.size());
 
   auto points_round =
-      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+      ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
   // Generates round join because it is in the middle of a curved segment
   EXPECT_GT(points_round.size(), points_reference.size());

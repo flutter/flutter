@@ -228,13 +228,6 @@ class Tessellator {
                                        Scalar tolerance);
 
   //----------------------------------------------------------------------------
-  /// @brief      Create a temporary polyline. Only one per-process can exist at
-  ///             a time.
-  ///
-  ///             The tessellator itself is not a thread safe class and should
-  ///             only be used from the raster thread.
-  Path::Polyline CreateTempPolyline(const Path& path, Scalar tolerance);
-
   /// @brief   The pixel tolerance used by the algorighm to determine how
   ///          many divisions to create for a circle.
   ///

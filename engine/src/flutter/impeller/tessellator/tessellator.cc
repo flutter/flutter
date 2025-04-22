@@ -311,18 +311,6 @@ Tessellator::Trigs Tessellator::GetTrigsForDeviceRadius(Scalar pixel_radius) {
   return GetTrigsForDivisions(ComputeQuadrantDivisions(pixel_radius));
 }
 
-Path::Polyline Tessellator::CreateTempPolyline(const Path& path,
-                                               Scalar tolerance) {
-  FML_DCHECK(point_buffer_);
-  point_buffer_->clear();
-  auto polyline =
-      path.CreatePolyline(tolerance, std::move(point_buffer_),
-                          [this](Path::Polyline::PointBufferPtr point_buffer) {
-                            point_buffer_ = std::move(point_buffer);
-                          });
-  return polyline;
-}
-
 VertexBuffer Tessellator::TessellateConvex(const PathSource& path,
                                            HostBuffer& host_buffer,
                                            Scalar tolerance,
