@@ -1239,12 +1239,13 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
-    path_set_fill_type_method = env->GetMethodID(
-            path_class->obj(), "setFillType", "(Landroid/graphics/Path$FillType;)V");
-    if (path_set_fill_type_method == nullptr) {
-        FML_LOG(ERROR) << "Could not locate android.graphics.Path.setFillType method";
-        return false;
-    }
+  path_set_fill_type_method = env->GetMethodID(
+      path_class->obj(), "setFillType", "(Landroid/graphics/Path$FillType;)V");
+  if (path_set_fill_type_method == nullptr) {
+    FML_LOG(ERROR)
+        << "Could not locate android.graphics.Path.setFillType method";
+    return false;
+  }
 
   path_move_to_method = env->GetMethodID(path_class->obj(), "moveTo", "(FF)V");
   if (path_move_to_method == nullptr) {
@@ -1283,26 +1284,28 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
-    g_path_fill_type_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
-            env, env->FindClass("android/graphics/Path$FillType"));
-    if (g_path_fill_type_class->is_null()) {
-        FML_LOG(ERROR) << "Could not locate android.graphics.Path$FillType class";
-        return false;
-    }
+  g_path_fill_type_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+      env, env->FindClass("android/graphics/Path$FillType"));
+  if (g_path_fill_type_class->is_null()) {
+    FML_LOG(ERROR) << "Could not locate android.graphics.Path$FillType class";
+    return false;
+  }
 
-    g_path_fill_type_winding_field = env->GetStaticFieldID(
-            g_path_fill_type_class->obj(), "WINDING", "Landroid/graphics/Path$FillType;");
-    if (g_path_fill_type_winding_field == nullptr) {
-        FML_LOG(ERROR) << "Could not locate Path.FillType.WINDING field";
-        return false;
-    }
+  g_path_fill_type_winding_field =
+      env->GetStaticFieldID(g_path_fill_type_class->obj(), "WINDING",
+                            "Landroid/graphics/Path$FillType;");
+  if (g_path_fill_type_winding_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate Path.FillType.WINDING field";
+    return false;
+  }
 
-    g_path_fill_type_even_odd_field = env->GetStaticFieldID(
-            g_path_fill_type_class->obj(), "EVEN_ODD", "Landroid/graphics/Path$FillType;");
-    if (g_path_fill_type_even_odd_field == nullptr) {
-        FML_LOG(ERROR) << "Could not locate Path.FillType.EVEN_ODD field";
-        return false;
-    }
+  g_path_fill_type_even_odd_field =
+      env->GetStaticFieldID(g_path_fill_type_class->obj(), "EVEN_ODD",
+                            "Landroid/graphics/Path$FillType;");
+  if (g_path_fill_type_even_odd_field == nullptr) {
+    FML_LOG(ERROR) << "Could not locate Path.FillType.EVEN_ODD field";
+    return false;
+  }
 
   return RegisterApi(env);
 }
@@ -2070,29 +2073,31 @@ class AndroidPathReceiver final : public DlPathReceiver {
         android_path_(env->NewObject(path_class->obj(), path_constructor)) {}
 
   void SetPathInfo(DlPathFillType type, bool is_convex) override {
-      jfieldID fill_type_field_id;
-      switch (type) {
-          case DlPathFillType::kOdd:
-              fill_type_field_id = g_path_fill_type_even_odd_field;
-              break;
-          case DlPathFillType::kNonZero:
-          default:
-              // Default to WINDING (non-zero)
-              fill_type_field_id = g_path_fill_type_winding_field;
-              break;
-      }
+    jfieldID fill_type_field_id;
+    switch (type) {
+      case DlPathFillType::kOdd:
+        fill_type_field_id = g_path_fill_type_even_odd_field;
+        break;
+      case DlPathFillType::kNonZero:
+      default:
+        // Default to WINDING (non-zero)
+        fill_type_field_id = g_path_fill_type_winding_field;
+        break;
+    }
 
-      // Get the static enum field value (Path.FillType.WINDING or Path.FillType.EVEN_ODD)
-      fml::jni::ScopedJavaLocalRef<jobject> fill_type_enum =
-              fml::jni::ScopedJavaLocalRef<jobject>(
-                      env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
-                                                       fill_type_field_id));
-      FML_CHECK(!fml::jni::CheckException(env_));
-      FML_CHECK(!fill_type_enum.is_null());
+    // Get the static enum field value (Path.FillType.WINDING or
+    // Path.FillType.EVEN_ODD)
+    fml::jni::ScopedJavaLocalRef<jobject> fill_type_enum =
+        fml::jni::ScopedJavaLocalRef<jobject>(
+            env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
+                                             fill_type_field_id));
+    FML_CHECK(!fml::jni::CheckException(env_));
+    FML_CHECK(!fill_type_enum.is_null());
 
-      // Call Path.setFillType(Path.FillType)
-      env_->CallVoidMethod(android_path_, path_set_fill_type_method, fill_type_enum.obj());
-      FML_CHECK(!fml::jni::CheckException(env_));
+    // Call Path.setFillType(Path.FillType)
+    env_->CallVoidMethod(android_path_, path_set_fill_type_method,
+                         fill_type_enum.obj());
+    FML_CHECK(!fml::jni::CheckException(env_));
   }
   void MoveTo(const DlPoint& p2) override {
     env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
