@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
@@ -804,6 +805,7 @@ void main() {
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
                             SemanticsAction.focus,
+                            if (kIsWasm) SemanticsAction.paste,
                           ],
                           textDirection: TextDirection.ltr,
                           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
