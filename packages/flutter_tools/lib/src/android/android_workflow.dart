@@ -61,11 +61,11 @@ class AndroidWorkflow implements Workflow {
 }
 
 Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager processManager) async {
-  if (!processManager.canRun(androidSdk.emulatorPath)) {
-    return null;
-  }
-
   try {
+    if (!processManager.canRun(androidSdk.emulatorPath)) {
+      return null;
+    }
+
     final ProcessResult result = await processManager.run(<Object>[
       androidSdk.emulatorPath!,
       '-version',
@@ -93,6 +93,8 @@ Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager process
       return null;
     }
   } on Exception catch (e, _) {
+    return null;
+  } on Error catch (_) {
     return null;
   }
 }
