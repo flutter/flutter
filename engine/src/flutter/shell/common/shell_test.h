@@ -92,6 +92,7 @@ class ShellTest : public FixtureTest {
                            std::unique_ptr<PlatformMessage> message);
 
   void SendSemanticsAction(Shell* shell,
+                           int64_t view_id,
                            int32_t node_id,
                            SemanticsAction action,
                            fml::MallocMapping args);

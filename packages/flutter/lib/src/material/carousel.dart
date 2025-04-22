@@ -12,6 +12,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'carousel_theme.dart';
+import 'color_scheme.dart';
 import 'colors.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -87,7 +89,7 @@ import 'theme.dart';
 /// As a result, when the first visible item is completely off-screen, the
 /// following items will follow the same layout as before. Using [CarouselView.weighted]
 /// helps build the multi-browse, hero, center-aligned hero and full-screen layouts,
-/// as indicated in [Carousel sepcs](https://m3.material.io/components/carousel/specs).
+/// as indicated in [Carousel specs](https://m3.material.io/components/carousel/specs).
 ///
 /// The [CarouselController] is used to control the
 /// [CarouselController.initialItem], which determines the first fully expanded
@@ -106,6 +108,15 @@ import 'theme.dart';
 /// {@tool dartpad}
 /// Here is an example to show different carousel layouts that [CarouselView]
 /// and [CarouselView.weighted] can build.
+///
+/// On desktop and web running on desktop platforms, dragging to scroll with a mouse
+/// is disabled by default to align with natural behavior.
+///
+/// To further align expected behavior like this, mouse input can scroll horizontally
+/// by pressing the shift key while scrolling with the mouse wheel.
+///
+/// This key-driven behavior is dictated by the [ScrollBehavior.pointerAxisModifiers],
+/// while [ScrollBehavior.dragDevices] manages what devices can drag a scrollable.
 ///
 /// ** See code in examples/api/lib/material/carousel/carousel.0.dart **
 /// {@end-tool}
@@ -392,25 +403,30 @@ class _CarouselViewState extends State<CarouselView> {
     }
   }
 
-  Widget _buildCarouselItem(ThemeData theme, int index) {
-    final EdgeInsets effectivePadding = widget.padding ?? const EdgeInsets.all(4.0);
+  Widget _buildCarouselItem(int index) {
+    final CarouselViewThemeData carouselTheme = CarouselViewTheme.of(context);
+    final ColorScheme colorScheme = ColorScheme.of(context);
+    final EdgeInsets effectivePadding =
+        widget.padding ?? carouselTheme.padding ?? const EdgeInsets.all(4.0);
     final Color effectiveBackgroundColor =
-        widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
-    final double effectiveElevation = widget.elevation ?? 0.0;
+        widget.backgroundColor ?? carouselTheme.backgroundColor ?? colorScheme.surface;
+    final double effectiveElevation = widget.elevation ?? carouselTheme.elevation ?? 0.0;
     final ShapeBorder effectiveShape =
         widget.shape ??
+        carouselTheme.shape ??
         const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(28.0)));
     final WidgetStateProperty<Color?> effectiveOverlayColor =
         widget.overlayColor ??
+        carouselTheme.overlayColor ??
         WidgetStateProperty.resolveWith((Set<WidgetState> states) {
           if (states.contains(WidgetState.pressed)) {
-            return theme.colorScheme.onSurface.withOpacity(0.1);
+            return colorScheme.onSurface.withOpacity(0.1);
           }
           if (states.contains(WidgetState.hovered)) {
-            return theme.colorScheme.onSurface.withOpacity(0.08);
+            return colorScheme.onSurface.withOpacity(0.08);
           }
           if (states.contains(WidgetState.focused)) {
-            return theme.colorScheme.onSurface.withOpacity(0.1);
+            return colorScheme.onSurface.withOpacity(0.1);
           }
           return null;
         });
@@ -452,7 +468,7 @@ class _CarouselViewState extends State<CarouselView> {
         itemExtent: _itemExtent!,
         minExtent: widget.shrinkExtent,
         delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-          return _buildCarouselItem(theme, index);
+          return _buildCarouselItem(index);
         }, childCount: widget.children.length),
       );
     }
@@ -466,7 +482,7 @@ class _CarouselViewState extends State<CarouselView> {
       shrinkExtent: widget.shrinkExtent,
       weights: _flexWeights!,
       delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-        return _buildCarouselItem(theme, index);
+        return _buildCarouselItem(index);
       }, childCount: widget.children.length),
     );
   }
@@ -487,7 +503,7 @@ class _CarouselViewState extends State<CarouselView> {
           Axis.vertical => constraints.maxHeight,
         };
         _itemExtent =
-            _itemExtent == null ? _itemExtent : clampDouble(_itemExtent!, 0, mainAxisExtent);
+            widget.itemExtent == null ? null : clampDouble(widget.itemExtent!, 0, mainAxisExtent);
 
         return Scrollable(
           axisDirection: axisDirection,
@@ -1389,7 +1405,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
     if (_itemExtent == value) {
       return;
     }
-    if (hasPixels && _itemExtent != null) {
+    if (hasPixels && _itemExtent != null && viewportDimension != 0.0) {
       final double leadingItem = getItemFromPixels(pixels, viewportDimension);
       final double newPixel = getPixelsFromItem(leadingItem, flexWeights, value);
       forcePixels(newPixel);
@@ -1456,6 +1472,9 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
 
   double getPixelsFromItem(double item, List<int>? flexWeights, double? itemExtent) {
     double fraction;
+    if (viewportDimension == 0.0) {
+      return 0.0;
+    }
     if (itemExtent != null) {
       fraction = itemExtent / viewportDimension;
     } else {
@@ -1482,7 +1501,7 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       // If resize from zero, we should use the _cachedItem to recover the state.
       item = _cachedItem!;
     } else {
-      item = getItemFromPixels(oldPixels, oldViewportDimensions!);
+      item = getItemFromPixels(oldPixels, oldViewportDimensions ?? viewportDimension);
     }
     final double newPixels = getPixelsFromItem(item, flexWeights, itemExtent);
     // If the viewportDimension is zero, cache the item
@@ -1494,6 +1513,18 @@ class _CarouselPosition extends ScrollPositionWithSingleContext implements _Caro
       return false;
     }
     return result;
+  }
+
+  @override
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+
+    if (other is! _CarouselPosition) {
+      return;
+    }
+
+    _cachedItem = other._cachedItem;
+    _itemExtent = other._itemExtent;
   }
 
   @override

@@ -70,6 +70,7 @@ void main() {
       projectRoot = createBasicProjectStructure(fs);
       logger = BufferLogger.test();
       previewDetector = PreviewDetector(
+        projectRoot: projectRoot,
         logger: logger,
         fs: fs,
         onChangeDetected: onChangeDetectedRoot,
@@ -89,15 +90,50 @@ void main() {
         addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']),
       ];
       addNonPreviewContainingFile(projectRoot, <String>['baz.dart']);
-      final PreviewMapping mapping = previewDetector.findPreviewFunctions(projectRoot);
+      final PreviewMapping mapping = await previewDetector.findPreviewFunctions(projectRoot);
       expect(mapping.keys.toSet(), previewFiles.toSet());
     });
 
     testUsingContext('can detect previews in updated files', () async {
+      final List<PreviewDetails> expectedPreviewDetails = <PreviewDetails>[
+        PreviewDetails.test(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
+        PreviewDetails.test(
+          functionName: 'builderPreview',
+          isBuilder: true,
+          name: 'Builder preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'attributesPreview',
+          isBuilder: false,
+          name: 'Attributes preview',
+          width: '100.0',
+          height: '100',
+          textScaleFactor: '2',
+          wrapper: 'testWrapper',
+          theme: 'theming',
+          brightness: 'Brightness.dark',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.preview',
+          isBuilder: false,
+          name: 'Constructor preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.factoryPreview',
+          isBuilder: false,
+          name: 'Factory constructor preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.previewStatic',
+          isBuilder: false,
+          name: 'Static preview',
+        ),
+      ];
+
       // Create two files with existing previews and one without.
-      final PreviewMapping expectedInitialMapping = <PreviewPath, List<String>>{
-        addPreviewContainingFile(projectRoot, <String>['foo.dart']): <String>['previews'],
-        addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']): <String>['previews'],
+      final PreviewMapping expectedInitialMapping = <PreviewPath, List<PreviewDetails>>{
+        addPreviewContainingFile(projectRoot, <String>['foo.dart']): expectedPreviewDetails,
+        addPreviewContainingFile(projectRoot, <String>['src', 'bar.dart']): expectedPreviewDetails,
       };
       final PreviewPath nonPreviewContainingFile = addNonPreviewContainingFile(
         projectRoot,
@@ -107,15 +143,15 @@ void main() {
       Completer<void> completer = Completer<void>();
       onChangeDetected = (PreviewMapping updated) {
         // The new preview in baz.dart should be included in the preview mapping.
-        expect(updated, <PreviewPath, List<String>>{
+        expect(stripNonDeterministicFields(updated), <PreviewPath, List<PreviewDetails>>{
           ...expectedInitialMapping,
-          nonPreviewContainingFile: <String>['previews'],
+          nonPreviewContainingFile: expectedPreviewDetails,
         });
         completer.complete();
       };
       // Initialize the file watcher.
-      final PreviewMapping initialPreviews = await previewDetector.initialize(projectRoot);
-      expect(initialPreviews, expectedInitialMapping);
+      final PreviewMapping initialPreviews = await previewDetector.initialize();
+      expect(stripNonDeterministicFields(initialPreviews), expectedInitialMapping);
 
       // Update the file without an existing preview to include a preview and ensure it triggers
       // the preview detector.
@@ -125,13 +161,74 @@ void main() {
       completer = Completer<void>();
       onChangeDetected = (PreviewMapping updated) {
         // The removed preview in baz.dart should not longer be included in the preview mapping.
-        expect(updated, expectedInitialMapping);
+        expect(stripNonDeterministicFields(updated), expectedInitialMapping);
         completer.complete();
       };
 
       // Update the file with an existing preview to remove the preview and ensure it triggers
       // the preview detector.
       addNonPreviewContainingFile(projectRoot, <String>['baz.dart']);
+      await completer.future;
+    });
+
+    testUsingContext('can detect previews in newly added files', () async {
+      final List<PreviewDetails> expectedPreviewDetails = <PreviewDetails>[
+        PreviewDetails.test(functionName: 'previews', isBuilder: false, name: 'Top-level preview'),
+        PreviewDetails.test(
+          functionName: 'builderPreview',
+          isBuilder: true,
+          name: 'Builder preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'attributesPreview',
+          isBuilder: false,
+          name: 'Attributes preview',
+          width: '100.0',
+          height: '100',
+          textScaleFactor: '2',
+          wrapper: 'testWrapper',
+          theme: 'theming',
+          brightness: 'Brightness.dark',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.preview',
+          isBuilder: false,
+          name: 'Constructor preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.factoryPreview',
+          isBuilder: false,
+          name: 'Factory constructor preview',
+        ),
+        PreviewDetails.test(
+          functionName: 'MyWidget.previewStatic',
+          isBuilder: false,
+          name: 'Static preview',
+        ),
+      ];
+
+      // The initial mapping should be empty as there's no files containing previews.
+      final PreviewMapping expectedInitialMapping = <PreviewPath, List<PreviewDetails>>{};
+
+      final Completer<void> completer = Completer<void>();
+      late final PreviewPath previewContainingFilePath;
+      onChangeDetected = (PreviewMapping updated) {
+        if (completer.isCompleted) {
+          return;
+        }
+        // The new previews in baz.dart should be included in the preview mapping.
+        expect(stripNonDeterministicFields(updated), <PreviewPath, List<PreviewDetails>>{
+          previewContainingFilePath: expectedPreviewDetails,
+        });
+        completer.complete();
+      };
+
+      // Initialize the file watcher.
+      final PreviewMapping initialPreviews = await previewDetector.initialize();
+      expect(stripNonDeterministicFields(initialPreviews), expectedInitialMapping);
+
+      // Create baz.dart, which contains previews.
+      previewContainingFilePath = addPreviewContainingFile(projectRoot, <String>['baz.dart']);
       await completer.future;
     });
 
@@ -144,7 +241,7 @@ void main() {
         completer.complete();
       };
       // Initialize the file watcher.
-      final PreviewMapping initialPreviews = await previewDetector.initialize(projectRoot);
+      final PreviewMapping initialPreviews = await previewDetector.initialize();
       expect(initialPreviews, isEmpty);
 
       // Change the contents of the pubspec and verify the callback is invoked.
@@ -154,10 +251,70 @@ void main() {
   });
 }
 
+/// Creates a copy of [mapping] with [PreviewDetails] entries that have non-deterministic values
+/// that differ per run (e.g., temporary file paths).
+PreviewMapping stripNonDeterministicFields(PreviewMapping mapping) {
+  return mapping.map<PreviewPath, List<PreviewDetails>>((
+    PreviewPath key,
+    List<PreviewDetails> value,
+  ) {
+    return MapEntry<PreviewPath, List<PreviewDetails>>(
+      key,
+      value
+          .map(
+            (PreviewDetails details) => details.copyWith(
+              wrapperLibraryUri: '',
+              themeLibraryUri: '',
+              brightnessLibraryUri: '',
+            ),
+          )
+          .toList(),
+    );
+  });
+}
+
 const String previewContainingFileContents = '''
-@Preview()
-// This isn't necessarily valid code. We're just looking for the annotation
-WidgetPreview previews() => WidgetPreview();
+@Preview(name: 'Top-level preview')
+Widget previews() => Text('Foo');
+
+@Preview(name: 'Builder preview')
+WidgetBuilder builderPreview() {
+  return (BuildContext context) {
+    return Text('Builder');
+  };
+}
+
+Widget testWrapper(Widget child) {
+  return child;
+}
+
+PreviewThemeData theming() => PreviewThemeData(
+  materialLight: ThemeData(colorScheme: ColorScheme.light(primary: Colors.red)),
+  materialDark: ThemeData(colorScheme: ColorScheme.dark(primary: Colors.blue)),
+  cupertinoLight: CupertinoThemeData(primaryColor: Colors.yellow),
+  cupertinoDark: CupertinoThemeData(primaryColor: Colors.purple),
+);
+
+@Preview(name: 'Attributes preview', height: 100, width: 100.0, textScaleFactor: 2, wrapper: testWrapper, theme: theming, brightness: Brightness.dark)
+Widget attributesPreview() {
+  return Text('Attributes');
+}
+
+class MyWidget extends StatelessWidget {
+  @Preview(name: 'Constructor preview')
+  MyWidget.preview();
+
+  @Preview(name: 'Factory constructor preview')
+  MyWidget.factoryPreview() => MyWidget.preview();
+
+  @Preview(name: 'Static preview')
+  static Widget previewStatic() => Text('Static');
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('MyWidget');
+  }
+}
 ''';
 
 const String nonPreviewContainingFileContents = '''

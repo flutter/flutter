@@ -47,6 +47,9 @@ struct BarrierVK {
   // running till after the barrier. In the Vulkan spec, this is usually
   // referred to as the dst scope.
   vk::AccessFlags dst_access = vk::AccessFlagBits::eNone;
+
+  /// The base mip level to apply the barrier to in the subresource range.
+  uint32_t base_mip_level = 0;
 };
 
 }  // namespace impeller

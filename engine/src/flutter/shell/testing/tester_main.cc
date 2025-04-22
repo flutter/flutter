@@ -35,6 +35,7 @@
 
 #if ALLOW_IMPELLER
 #include <vulkan/vulkan.h>                                        // nogncheck
+#include "impeller/display_list/aiks_context.h"                   // nogncheck
 #include "impeller/entity/vk/entity_shaders_vk.h"                 // nogncheck
 #include "impeller/entity/vk/framebuffer_blend_shaders_vk.h"      // nogncheck
 #include "impeller/entity/vk/modern_shaders_vk.h"                 // nogncheck
@@ -73,6 +74,9 @@ bool ImpellerVulkanContextHolder::Initialize(bool enable_validation) {
   context_settings.shader_libraries_data = ShaderLibraryMappings();
   context_settings.cache_directory = fml::paths::GetCachesDirectory();
   context_settings.enable_validation = enable_validation;
+  // Enable lazy shader mode for faster test execution as most tests
+  // will never render anything at all.
+  context_settings.flags.lazy_shader_mode = true;
 
   context = impeller::ContextVK::Create(std::move(context_settings));
   if (!context || !context->IsValid()) {
@@ -662,11 +666,15 @@ int main(int argc, char* argv[]) {
   };
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
+    fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
+    fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key,
+                                                               callback);
+    return queue_id;
   };
 
-  settings.task_observer_remove = [](intptr_t key) {
-    fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
+  settings.task_observer_remove = [](fml::TaskQueueId queue_id, intptr_t key) {
+    fml::MessageLoopTaskQueues::GetInstance()->RemoveTaskObserver(queue_id,
+                                                                  key);
   };
 
   settings.unhandled_exception_callback = [](const std::string& error,

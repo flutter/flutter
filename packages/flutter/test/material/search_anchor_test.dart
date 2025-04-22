@@ -3223,7 +3223,7 @@ void main() {
     expect(controller.value.text, initValue);
   });
 
-  testWidgets('Disabled SearchBar semantics node still contains value', (
+  testWidgets('Disabled SearchBar semantics node still contains value and inputType', (
     WidgetTester tester,
   ) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -3236,7 +3236,23 @@ void main() {
       ),
     );
 
-    expect(semantics, includesNodeWith(actions: <SemanticsAction>[], value: 'text'));
+    expect(
+      semantics,
+      includesNodeWith(
+        actions: <SemanticsAction>[],
+        value: 'text',
+        inputType: SemanticsInputType.search,
+      ),
+    );
+    semantics.dispose();
+  });
+
+  testWidgets('SearchBar semantics node has search input type', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(const MaterialApp(home: Material(child: Center(child: SearchBar()))));
+
+    expect(semantics, includesNodeWith(inputType: SemanticsInputType.search));
     semantics.dispose();
   });
 
@@ -3687,6 +3703,41 @@ void main() {
 
       expect(find.byType(Placeholder), findsOneWidget);
     });
+
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        _updateMediaQueryFromView(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          _updateMediaQueryFromView(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          MaterialApp(home: Material(child: TextField(controller: controller))),
+        );
+
+        // No context menu shown.
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 
   testWidgets('SearchAnchor does not dispose external SearchController', (
@@ -3911,6 +3962,143 @@ void main() {
 
     // No exception.
   });
+
+  testWidgets('SearchAnchor viewOnOpen is called when the search view is opened', (
+    WidgetTester tester,
+  ) async {
+    String searchViewState = 'Idle';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor(
+              viewOnClose: () {
+                searchViewState = 'Closed';
+              },
+              viewOnOpen: () {
+                searchViewState = 'Opened';
+              },
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
+    expect(searchViewState, 'Opened');
+
+    // Pop search view route.
+    await tester.tap(find.backButton());
+    await tester.pump();
+    expect(searchViewState, 'Closed');
+  });
+
+  testWidgets('SearchAnchor.bar onOpen is called when the search view is opened', (
+    WidgetTester tester,
+  ) async {
+    String searchViewState = 'Idle';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SearchAnchor.bar(
+              onClose: () {
+                searchViewState = 'Closed';
+              },
+              onOpen: () {
+                searchViewState = 'Opened';
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return List<Widget>.generate(5, (int index) {
+                  final String item = 'item $index';
+                  return ListTile(
+                    leading: const Icon(Icons.history),
+                    title: Text(item),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {},
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.search), findsOneWidget);
+    // Open search view.
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pump();
+    expect(searchViewState, 'Opened');
+
+    // Pop search view route.
+    await tester.tap(find.backButton());
+    await tester.pump();
+    expect(searchViewState, 'Closed');
+  });
+
+  testWidgets(
+    'The last element of the suggestion list should be visible when scrolling to the end of list',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SearchAnchor.bar(
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return List<Widget>.generate(30, (int index) {
+                return ListTile(
+                  titleAlignment: ListTileTitleAlignment.center,
+                  title: Text('Item $index'),
+                );
+              });
+            },
+          ),
+        ),
+      );
+
+      // Open search view.
+      await tester.tap(find.byIcon(Icons.search));
+      await tester.pumpAndSettle();
+      const double fakeKeyboardHeight = 500.0;
+      final double physicalBottomPadding = fakeKeyboardHeight * tester.view.devicePixelRatio;
+
+      // Simulate the keyboard opening resizing the view.
+      tester.view.viewInsets = FakeViewPadding(bottom: physicalBottomPadding);
+      addTearDown(tester.view.reset);
+
+      // Scroll down to the end of the list.
+      expect(find.byType(ListView), findsOne);
+      await tester.fling(find.byType(ListView), const Offset(0, -5000), 5000);
+      await tester.pumpAndSettle();
+
+      // The last item should not be hidden by the keyboard.
+      final double lastItemBottom = tester.getRect(find.text('Item 29')).bottom;
+      final double fakeKeyboardTop =
+          tester.getSize(find.byType(MaterialApp)).height - fakeKeyboardHeight;
+      expect(lastItemBottom, lessThanOrEqualTo(fakeKeyboardTop));
+    },
+  );
 }
 
 Future<void> checkSearchBarDefaults(
@@ -4010,4 +4198,24 @@ Material getSearchViewMaterial(WidgetTester tester) {
   return tester.widget<Material>(
     find.descendant(of: findViewContent(), matching: find.byType(Material)).first,
   );
+}
+
+// Trigger MediaQuery to update itself based on the View, which is not
+// recreated between tests. This is necessary when changing something on
+// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
+// TODO(justinmc): This hack can be removed if
+// https://github.com/flutter/flutter/issues/165519 is fixed.
+void _updateMediaQueryFromView(WidgetTester tester) {
+  expect(find.byType(MediaQuery), findsOneWidget);
+  final WidgetsBindingObserver widgetsBindingObserver =
+      tester.state(
+            find.ancestor(
+              of: find.byType(MediaQuery),
+              matching: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
+              ),
+            ),
+          )
+          as WidgetsBindingObserver;
+  widgetsBindingObserver.didChangeMetrics();
 }

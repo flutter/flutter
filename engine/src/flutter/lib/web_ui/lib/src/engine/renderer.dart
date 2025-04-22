@@ -227,4 +227,6 @@ abstract class Renderer {
   ui.ParagraphBuilder createParagraphBuilder(ui.ParagraphStyle style);
 
   Future<void> renderScene(ui.Scene scene, EngineFlutterView view);
+
+  void dumpDebugInfo();
 }

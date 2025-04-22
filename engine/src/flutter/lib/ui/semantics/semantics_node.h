@@ -73,12 +73,12 @@ enum class SemanticsRole : int32_t {
   kTab = 1,
   kTabBar = 2,
   kTabPanel = 3,
-  kTable = 4,
-  kCell = 5,
-  kRow = 6,
-  kColumnHeader = 7,
-  kDialog = 8,
-  kAlertDialog = 9,
+  kDialog = 4,
+  kAlertDialog = 5,
+  kTable = 6,
+  kCell = 7,
+  kRow = 8,
+  kColumnHeader = 9,
   kSearchBox = 10,
   kDragHandle = 11,
   kSpinButton = 12,
@@ -86,16 +86,30 @@ enum class SemanticsRole : int32_t {
   kMenuBar = 14,
   kMenu = 15,
   kMenuItem = 16,
-  kList = 17,
-  kListItem = 18,
-  kForm = 19,
-  kTooltip = 20,
-  kLoadingSpinner = 21,
-  kProgressBar = 22,
-  kHotKey = 23,
-  kRadioGroup = 24,
-  kStatus = 25,
-  kAlert = 26,
+  kMenuItemCheckbox = 17,
+  kMenuItemRadio = 18,
+  kList = 19,
+  kListItem = 20,
+  kForm = 21,
+  kTooltip = 22,
+  kLoadingSpinner = 23,
+  kProgressBar = 24,
+  kHotKey = 25,
+  kRadioGroup = 26,
+  kStatus = 27,
+  kAlert = 28,
+};
+
+/// C/C++ representation of `SemanticsValidationResult` defined in
+/// `lib/ui/semantics.dart`.
+///\warning This must match the `SemanticsValidationResult` enum in
+///         `lib/ui/semantics.dart`.
+/// See also:
+///   - file://./../../../lib/ui/semantics.dart
+enum class SemanticsValidationResult : int32_t {
+  kNone = 0,
+  kValid = 1,
+  kInvalid = 2,
 };
 
 /// C/C++ representation of `SemanticsFlags` defined in
@@ -192,6 +206,7 @@ struct SemanticsNode {
 
   std::string linkUrl;
   SemanticsRole role;
+  SemanticsValidationResult validationResult = SemanticsValidationResult::kNone;
 };
 
 // Contains semantic nodes that need to be updated.

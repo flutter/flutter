@@ -36,6 +36,7 @@ abstract final class FlutterGlobalOptions {
   static const String kMachineFlag = 'machine';
   static const String kPackagesOption = 'packages';
   static const String kPrefixedErrorsFlag = 'prefixed-errors';
+  static const String kDtdUrl = 'dtd-url';
   static const String kPrintDtd = 'print-dtd';
   static const String kQuietFlag = 'quiet';
   static const String kShowTestDeviceFlag = 'show-test-device';
@@ -150,6 +151,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
       FlutterGlobalOptions.kPackagesOption,
       hide: !verboseHelp,
       help: 'Path to your "package_config.json" file.',
+    );
+    argParser.addOption(
+      FlutterGlobalOptions.kDtdUrl,
+      help:
+          'The address of an existing Dart Tooling Daemon instance to be used by the Flutter CLI.',
+      hide: !verboseHelp,
     );
     argParser.addFlag(
       FlutterGlobalOptions.kPrintDtd,

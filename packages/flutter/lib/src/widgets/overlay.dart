@@ -1920,7 +1920,8 @@ class _OverlayPortalState extends State<OverlayPortal> {
 
   void _setupController(OverlayPortalController controller) {
     assert(
-      controller._attachTarget == null || controller._attachTarget == this,
+      controller._attachTarget == this ||
+          !((controller._attachTarget?.context as StatefulElement?)?.debugIsActive ?? false),
       'Failed to attach $controller to $this. It is already attached to ${controller._attachTarget}.',
     );
     final int? controllerZOrderIndex = controller._zOrderIndex;
@@ -1951,8 +1952,13 @@ class _OverlayPortalState extends State<OverlayPortal> {
   }
 
   @override
-  void dispose() {
+  void activate() {
     assert(widget.controller._attachTarget == this);
+    super.activate();
+  }
+
+  @override
+  void dispose() {
     widget.controller._attachTarget = null;
     _locationCache?._debugMarkLocationInvalid();
     _locationCache = null;
@@ -2613,9 +2619,6 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
   RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> createRenderObject(
     BuildContext context,
   ) => _RenderLayoutBuilder();
-
-  @override
-  bool updateShouldRebuild(_OverlayChildLayoutBuilder oldWidget) => oldWidget.builder != builder;
 }
 
 // A RenderBox that:
@@ -2629,7 +2632,10 @@ class _OverlayChildLayoutBuilder extends AbstractLayoutBuilder<OverlayChildLayou
 // Additionally, like RenderDeferredLayoutBox, this RenderBox also uses the Stack
 // layout algorithm so developers can use the Positioned widget.
 class _RenderLayoutBuilder extends RenderProxyBox
-    with _RenderTheaterMixin, RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> {
+    with
+        _RenderTheaterMixin,
+        RenderObjectWithLayoutCallbackMixin,
+        RenderAbstractLayoutBuilderMixin<OverlayChildLayoutInfo, RenderBox> {
   @override
   Iterable<RenderBox> _childrenInPaintOrder() {
     final RenderBox? child = this.child;
@@ -2706,23 +2712,25 @@ class _RenderLayoutBuilder extends RenderProxyBox
     return OverlayChildLayoutInfo._((overlayPortalSize, paintTransform, size));
   }
 
+  @override
+  @visibleForOverriding
+  void layoutCallback() {
+    _layoutInfo = _computeNewLayoutInfo();
+    super.layoutCallback();
+  }
+
   int? _callbackId;
   @override
   void performLayout() {
-    late OverlayChildLayoutInfo newLayoutInfo;
-    // The invokeLayoutCallback allows arbitrary access to the sizes of
-    // RenderBoxes the we know that have finished doing layout.
-    invokeLayoutCallback((_) => newLayoutInfo = _computeNewLayoutInfo());
-    if (newLayoutInfo != _layoutInfo) {
-      _layoutInfo = newLayoutInfo;
-      rebuildIfNecessary();
+    runLayoutCallback();
+    if (child case final RenderBox child?) {
+      layoutChild(child, constraints);
     }
     assert(_callbackId == null);
     _callbackId ??= SchedulerBinding.instance.scheduleFrameCallback(
       _frameCallback,
       scheduleNewFrame: false,
     );
-    layoutChild(child!, constraints);
   }
 
   // This RenderObject is a child of _RenderDeferredLayouts which in turn is a

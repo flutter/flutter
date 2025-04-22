@@ -5,6 +5,7 @@
 #ifndef BASE_CONTAINER_UTILS_H_
 #define BASE_CONTAINER_UTILS_H_
 
+#include <algorithm>
 #include <set>
 #include <vector>
 

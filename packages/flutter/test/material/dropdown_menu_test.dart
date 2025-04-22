@@ -10,6 +10,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 void main() {
   const String longText = 'one two three four five six seven eight nine ten eleven twelve';
   final List<DropdownMenuEntry<TestMenu>> menuChildren = <DropdownMenuEntry<TestMenu>>[];
@@ -1699,6 +1701,55 @@ void main() {
     await tester.enterText(find.byType(TextField).first, 'No match 2');
     await tester.pump();
     expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/165867.
+  testWidgets('Keyboard navigation only traverses filtered entries', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            requestFocusOnTap: true,
+            enableFilter: true,
+            controller: controller,
+            dropdownMenuEntries: const <DropdownMenuEntry<TestMenu>>[
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu0, label: 'Good Match 1'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu1, label: 'Bad Match 1'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu2, label: 'Good Match 2'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu3, label: 'Bad Match 2'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu4, label: 'Good Match 3'),
+              DropdownMenuEntry<TestMenu>(value: TestMenu.mainMenu5, label: 'Bad Match 3'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Open the menu.
+    await tester.tap(find.byType(DropdownMenu<TestMenu>));
+    await tester.pump();
+
+    // Filter the entries to only show the ones with 'Good Match'.
+    await tester.enterText(find.byType(TextField), 'Good Match');
+    await tester.pump();
+
+    // Since the first entry is already highlighted, navigate to the second item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 2');
+
+    // Navigate to the third item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 3');
+
+    // Navigate back to the first item.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+    expect(controller.text, 'Good Match 1');
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/147253.
@@ -4085,6 +4136,103 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(tester.getSize(findMenuItemButton(menuChildren.first.label)).width, 150.0);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/164905.
+  testWidgets('ensure exclude semantics for trailing button', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<int>(
+            dropdownMenuEntries: <DropdownMenuEntry<int>>[
+              DropdownMenuEntry<int>(value: 0, label: 'Item 0'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 5,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isReadOnly,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.focus],
+                          textDirection: TextDirection.ltr,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 6,
+                              flags: <SemanticsFlag>[
+                                SemanticsFlag.hasSelectedState,
+                                SemanticsFlag.isButton,
+                                SemanticsFlag.hasEnabledState,
+                                SemanticsFlag.isEnabled,
+                                SemanticsFlag.isFocusable,
+                              ],
+                              actions: <SemanticsAction>[
+                                SemanticsAction.tap,
+                                SemanticsAction.focus,
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        ignoreId: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('restorationId is passed to inner TextField', (WidgetTester tester) async {
+    const String restorationId = 'dropdown_menu';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenu<TestMenu>(
+            dropdownMenuEntries: menuChildren,
+            requestFocusOnTap: true,
+            restorationId: restorationId,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(TextField), findsOne);
+
+    final TextField textField = tester.firstWidget(find.byType(TextField));
+    expect(textField.restorationId, restorationId);
   });
 }
 

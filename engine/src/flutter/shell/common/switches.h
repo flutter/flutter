@@ -294,12 +294,27 @@ DEF_SWITCH(EnableEmbedderAPI,
 DEF_SWITCH(EnablePlatformIsolates,
            "enable-platform-isolates",
            "Enable support for isolates that run on the platform thread.")
+DEF_SWITCH(MergedPlatformUIThread,
+           "merged-platform-ui-thread",
+           "Sets whether the ui thread and platform thread should be merged.")
+// This is a legacy flag that has been superseded by merged-platform-ui-thread.
+// TODO(163064): remove this when users have been migrated.
 DEF_SWITCH(DisableMergedPlatformUIThread,
            "no-enable-merged-platform-ui-thread",
            "Merge the ui thread and platform thread.")
 DEF_SWITCH(EnableAndroidSurfaceControl,
            "enable-surface-control",
            "Enable the SurfaceControl backed swapchain when supported.")
+DEF_SWITCH(EnableFlutterGPU,
+           "enable-flutter-gpu",
+           "Whether Flutter GPU is enabled.")
+DEF_SWITCH(ImpellerLazyShaderMode,
+           "impeller-lazy-shader-mode",
+           "Whether to defer initialization of all required PSOs for the "
+           "Impeller backend. Defaults to false.")
+DEF_SWITCH(ImpellerAntialiasLines,
+           "impeller-antialias-lines",
+           "Experimental flag to test drawing lines with antialiasing.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

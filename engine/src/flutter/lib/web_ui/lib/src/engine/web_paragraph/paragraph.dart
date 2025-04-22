@@ -283,7 +283,7 @@ class WebParagraph implements ui.Paragraph {
   }
 
   /// Paints this paragraph instance on a [canvas] at the given [offset].
-  void paintOnCanvas2D(DomCanvasElement canvas, ui.Offset offset) {
+  void paintOnCanvas2D(DomHTMLCanvasElement canvas, ui.Offset offset) {
     for (final line in _layout.lines) {
       _paint.paintLineOnCanvas2D(canvas, _layout, line, offset.dx, offset.dy);
     }

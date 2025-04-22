@@ -281,6 +281,9 @@ Future<XcodeBuildResult> buildXcodeProject({
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
+      fileSystem: globals.fs,
+      fileSystemUtils: globals.fsUtils,
+      plistParser: globals.plistParser,
     );
   }
 
@@ -288,6 +291,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
+    featureFlags: featureFlags,
   );
   if (app.project.usesSwiftPackageManager) {
     final String? iosDeploymentTarget = buildSettings['IPHONEOS_DEPLOYMENT_TARGET'];

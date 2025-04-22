@@ -21,6 +21,10 @@
 #include "impeller/geometry/size.h"
 #include "impeller/toolkit/interop/impeller.h"
 
+#include "flutter/third_party/skia/include/core/SkM44.h"
+#include "flutter/third_party/skia/include/core/SkPath.h"
+#include "flutter/third_party/skia/include/core/SkRRect.h"
+
 namespace impeller::interop {
 
 constexpr std::optional<SkRect> ToSkiaType(const ImpellerRect* rect) {
@@ -126,25 +130,25 @@ constexpr flutter::DlBlendMode ToDisplayListType(BlendMode mode) {
   switch (mode) {
     case BlendMode::kClear:
       return Mode::kClear;
-    case BlendMode::kSource:
+    case BlendMode::kSrc:
       return Mode::kSrc;
-    case BlendMode::kDestination:
+    case BlendMode::kDst:
       return Mode::kDst;
-    case BlendMode::kSourceOver:
+    case BlendMode::kSrcOver:
       return Mode::kSrcOver;
-    case BlendMode::kDestinationOver:
+    case BlendMode::kDstOver:
       return Mode::kDstOver;
-    case BlendMode::kSourceIn:
+    case BlendMode::kSrcIn:
       return Mode::kSrcIn;
-    case BlendMode::kDestinationIn:
+    case BlendMode::kDstIn:
       return Mode::kDstIn;
-    case BlendMode::kSourceOut:
+    case BlendMode::kSrcOut:
       return Mode::kSrcOut;
-    case BlendMode::kDestinationOut:
+    case BlendMode::kDstOut:
       return Mode::kDstOut;
-    case BlendMode::kSourceATop:
+    case BlendMode::kSrcATop:
       return Mode::kSrcATop;
-    case BlendMode::kDestinationATop:
+    case BlendMode::kDstATop:
       return Mode::kDstATop;
     case BlendMode::kXor:
       return Mode::kXor;
@@ -298,25 +302,25 @@ constexpr BlendMode ToImpellerType(ImpellerBlendMode mode) {
     case kImpellerBlendModeClear:
       return BlendMode::kClear;
     case kImpellerBlendModeSource:
-      return BlendMode::kSource;
+      return BlendMode::kSrc;
     case kImpellerBlendModeDestination:
-      return BlendMode::kDestination;
+      return BlendMode::kDst;
     case kImpellerBlendModeSourceOver:
-      return BlendMode::kSourceOver;
+      return BlendMode::kSrcOver;
     case kImpellerBlendModeDestinationOver:
-      return BlendMode::kDestinationOver;
+      return BlendMode::kDstOver;
     case kImpellerBlendModeSourceIn:
-      return BlendMode::kSourceIn;
+      return BlendMode::kSrcIn;
     case kImpellerBlendModeDestinationIn:
-      return BlendMode::kDestinationIn;
+      return BlendMode::kDstIn;
     case kImpellerBlendModeSourceOut:
-      return BlendMode::kSourceOut;
+      return BlendMode::kSrcOut;
     case kImpellerBlendModeDestinationOut:
-      return BlendMode::kDestinationOut;
+      return BlendMode::kDstOut;
     case kImpellerBlendModeSourceATop:
-      return BlendMode::kSourceATop;
+      return BlendMode::kSrcATop;
     case kImpellerBlendModeDestinationATop:
-      return BlendMode::kDestinationATop;
+      return BlendMode::kDstATop;
     case kImpellerBlendModeXor:
       return BlendMode::kXor;
     case kImpellerBlendModePlus:
@@ -354,7 +358,7 @@ constexpr BlendMode ToImpellerType(ImpellerBlendMode mode) {
     case kImpellerBlendModeLuminosity:
       return BlendMode::kLuminosity;
   }
-  return BlendMode::kSourceOver;
+  return BlendMode::kSrcOver;
 }
 
 constexpr flutter::DlDrawStyle ToDisplayListType(ImpellerDrawStyle style) {

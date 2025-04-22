@@ -155,7 +155,11 @@ void GoldenPlaygroundTest::SetUp() {
   setenv("VK_ICD_FILENAMES", icd_path.c_str(), 1);
 
   std::string test_name = GetTestName();
-  bool enable_wide_gamut = test_name.find("WideGamut_") != std::string::npos;
+  PlaygroundSwitches switches;
+  switches.enable_wide_gamut =
+      test_name.find("WideGamut_") != std::string::npos;
+  switches.flags.antialiased_lines =
+      test_name.find("ExperimentAntialiasLines_") != std::string::npos;
   switch (GetParam()) {
     case PlaygroundBackend::kMetal:
       if (!DoesSupportWideGamutTests()) {
@@ -163,11 +167,15 @@ void GoldenPlaygroundTest::SetUp() {
             << "This metal device doesn't support wide gamut golden tests.";
       }
       pimpl_->screenshotter =
-          std::make_unique<testing::MetalScreenshotter>(enable_wide_gamut);
+          std::make_unique<testing::MetalScreenshotter>(switches);
       break;
     case PlaygroundBackend::kVulkan: {
-      if (enable_wide_gamut) {
+      if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "Vulkan doesn't support wide gamut golden tests.";
+      }
+      if (switches.flags.antialiased_lines) {
+        GTEST_SKIP()
+            << "Vulkan doesn't support antialiased lines golden tests.";
       }
       const std::unique_ptr<PlaygroundImpl>& playground =
           GetSharedVulkanPlayground(/*enable_validations=*/true);
@@ -176,8 +184,12 @@ void GoldenPlaygroundTest::SetUp() {
       break;
     }
     case PlaygroundBackend::kOpenGLES: {
-      if (enable_wide_gamut) {
+      if (switches.enable_wide_gamut) {
         GTEST_SKIP() << "OpenGLES doesn't support wide gamut golden tests.";
+      }
+      if (switches.flags.antialiased_lines) {
+        GTEST_SKIP()
+            << "OpenGLES doesn't support antialiased lines golden tests.";
       }
       FML_CHECK(::glfwInit() == GLFW_TRUE);
       PlaygroundSwitches playground_switches;
@@ -210,10 +222,16 @@ bool GoldenPlaygroundTest::OpenPlaygroundHere(
   AiksContext renderer(GetContext(), typographer_context_);
 
   std::unique_ptr<testing::Screenshot> screenshot;
+  Point content_scale =
+      pimpl_->screenshotter->GetPlayground().GetContentScale();
+
+  ISize physical_window_size(
+      std::round(pimpl_->window_size.width * content_scale.x),
+      std::round(pimpl_->window_size.height * content_scale.y));
   for (int i = 0; i < 2; ++i) {
     auto display_list = callback();
     auto texture =
-        DisplayListToTexture(display_list, pimpl_->window_size, renderer);
+        DisplayListToTexture(display_list, physical_window_size, renderer);
     screenshot = pimpl_->screenshotter->MakeScreenshot(renderer, texture);
   }
   return SaveScreenshot(std::move(screenshot));
@@ -308,9 +326,14 @@ fml::Status GoldenPlaygroundTest::SetCapabilities(
 std::unique_ptr<testing::Screenshot> GoldenPlaygroundTest::MakeScreenshot(
     const sk_sp<flutter::DisplayList>& list) {
   AiksContext renderer(GetContext(), typographer_context_);
+  Point content_scale =
+      pimpl_->screenshotter->GetPlayground().GetContentScale();
 
+  ISize physical_window_size(
+      std::round(pimpl_->window_size.width * content_scale.x),
+      std::round(pimpl_->window_size.height * content_scale.y));
   return pimpl_->screenshotter->MakeScreenshot(
-      renderer, DisplayListToTexture(list, pimpl_->window_size, renderer));
+      renderer, DisplayListToTexture(list, physical_window_size, renderer));
 }
 
 }  // namespace impeller

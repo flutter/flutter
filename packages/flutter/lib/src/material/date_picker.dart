@@ -33,7 +33,6 @@ import 'input_date_picker_form_field.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'material_state.dart';
 import 'scaffold.dart';
 import 'text_button.dart';
 import 'text_field.dart';
@@ -2828,7 +2827,7 @@ class _DayItem extends StatefulWidget {
 }
 
 class _DayItemState extends State<_DayItem> {
-  final MaterialStatesController _statesController = MaterialStatesController();
+  final WidgetStatesController _statesController = WidgetStatesController();
 
   @override
   void dispose() {
@@ -2855,17 +2854,17 @@ class _DayItemState extends State<_DayItem> {
     }
 
     T? resolve<T>(
-      MaterialStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
-      Set<MaterialState> states,
+      WidgetStateProperty<T>? Function(DatePickerThemeData? theme) getProperty,
+      Set<WidgetState> states,
     ) {
       return effectiveValue((DatePickerThemeData? theme) {
         return getProperty(theme)?.resolve(states);
       });
     }
 
-    final Set<MaterialState> states = <MaterialState>{
-      if (widget.isDisabled) MaterialState.disabled,
-      if (widget.isSelectedDayStart || widget.isSelectedDayEnd) MaterialState.selected,
+    final Set<WidgetState> states = <WidgetState>{
+      if (widget.isDisabled) WidgetState.disabled,
+      if (widget.isSelectedDayStart || widget.isSelectedDayEnd) WidgetState.selected,
     };
 
     _statesController.value = states;
@@ -2878,8 +2877,8 @@ class _DayItemState extends State<_DayItem> {
       (DatePickerThemeData? theme) => theme?.dayBackgroundColor,
       states,
     );
-    final MaterialStateProperty<Color?> dayOverlayColor = MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) => effectiveValue(
+    final WidgetStateProperty<Color?> dayOverlayColor = WidgetStateProperty.resolveWith<Color?>(
+      (Set<WidgetState> states) => effectiveValue(
         (DatePickerThemeData? theme) =>
             widget.isInRange
                 ? theme?.rangeSelectionOverlayColor?.resolve(states)

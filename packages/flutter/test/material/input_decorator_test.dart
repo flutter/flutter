@@ -728,6 +728,155 @@ void main() {
 
         expect(getContainerRect(tester).height, desktopContainerHeight);
       }, variant: TargetPlatformVariant.desktop());
+
+      testWidgets(
+        'default container height is 48dp on all platforms when visual density is VisualDensity.compact',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.compact),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets(
+        'default container height is 56dp on all platforms when visual density if VisualDensity.standard',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.standard,
+                ),
+              ),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.standard),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets('Visual density defined at the decoration level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+            decoration: const InputDecoration(
+              filled: true,
+              labelText: labelText,
+              helperText: helperText,
+              visualDensity: VisualDensity.comfortable,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
+
+      testWidgets('Visual density defined at the input decoration theme level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.comfortable,
+              ),
+            ),
+            decoration: const InputDecoration(
+              filled: true,
+              labelText: labelText,
+              helperText: helperText,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
     });
 
     group('for outlined text field', () {
@@ -1078,6 +1227,155 @@ void main() {
 
         expect(getContainerRect(tester).height, desktopContainerHeight);
       }, variant: TargetPlatformVariant.desktop());
+
+      testWidgets(
+        'default container height is 48dp on all platforms when visual density is VisualDensity.compact',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.compact),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets(
+        'default container height is 56dp on all platforms when visual density if VisualDensity.standard',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.standard,
+                ),
+              ),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.standard),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets('Visual density defined at the decoration level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: labelText,
+              helperText: helperText,
+              visualDensity: VisualDensity.comfortable,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
+
+      testWidgets('Visual density defined at the input decoration theme level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.comfortable,
+              ),
+            ),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: labelText,
+              helperText: helperText,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
     });
 
     testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
@@ -4829,6 +5127,7 @@ void main() {
         topPadding + floatingLabelHeight + labelInputGap + inputHeight + bottomPadding; // 56.0
     const double fullHeight = containerHeight + helperGap + helperHeight; // 76.0
     const double errorHeight = helperHeight;
+    const double hintHeight = inputHeight;
     // TODO(bleroux): consider changing this padding because, from the M3 specification, it should be 16.
     const double helperStartPadding = 12.0;
     const double counterEndPadding = 12.0;
@@ -5425,6 +5724,40 @@ void main() {
           getDecoratorRect(tester).height,
           closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25),
         );
+      });
+
+      testWidgets('InputDecorationTheme hintMaxLines behaves as default value', (
+        WidgetTester tester,
+      ) async {
+        const int numberOfLines = 2;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationTheme(hintMaxLines: numberOfLines),
+            decoration: const InputDecoration(hintText: threeLines),
+          ),
+        );
+
+        final Rect hintRect = tester.getRect(find.text(threeLines));
+        expect(hintRect.height, closeTo(hintHeight * numberOfLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(topPadding + hintHeight * numberOfLines + bottomPadding, 0.25),
+        );
+      });
+
+      testWidgets('InputDecoration hintMaxLines default expands with hintText', (
+        WidgetTester tester,
+      ) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationTheme(),
+            decoration: const InputDecoration(hintText: threeLines),
+          ),
+        );
+
+        final Size hintSize = tester.getSize(find.byType(InputDecorator));
+        expect(hintSize.height, topPadding + hintHeight * numberOfLines + bottomPadding);
       });
 
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
@@ -8700,7 +9033,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(getIconStyle(tester, prefixIcon)?.color, iconColor);
   });
@@ -8742,7 +9075,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(getIconStyle(tester, suffixIcon)?.color, iconColor);
   });

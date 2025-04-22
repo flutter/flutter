@@ -56,8 +56,9 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
     const fml::closure& p_isolate_shutdown_callback,
     const std::shared_ptr<const fml::Mapping>& p_persistent_isolate_data,
     fml::WeakPtr<IOManager> io_manager,
-    fml::WeakPtr<ImageDecoder> image_decoder,
-    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+    fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+    fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+        image_generator_registry,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const {
   UIDartState::Context spawned_context{context_.task_runners,
                                        std::move(snapshot_delegate),
@@ -70,6 +71,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
                                        context_.deterministic_rendering_enabled,
                                        context_.concurrent_task_runner,
                                        context_.enable_impeller,
+                                       context_.enable_flutter_gpu,
                                        context_.runtime_stage_backend};
   auto result =
       std::make_unique<RuntimeController>(p_client,                      //
@@ -383,13 +385,14 @@ bool RuntimeController::DispatchPointerDataPacket(
   return false;
 }
 
-bool RuntimeController::DispatchSemanticsAction(int32_t node_id,
+bool RuntimeController::DispatchSemanticsAction(int64_t view_id,
+                                                int32_t node_id,
                                                 SemanticsAction action,
                                                 fml::MallocMapping args) {
   TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
                "basic");
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->DispatchSemanticsAction(node_id, action,
+    platform_configuration->DispatchSemanticsAction(view_id, node_id, action,
                                                     std::move(args));
     return true;
   }
@@ -447,9 +450,11 @@ void RuntimeController::CheckIfAllViewsRendered() {
 }
 
 // |PlatformConfigurationClient|
-void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
+void RuntimeController::UpdateSemantics(int64_t view_id,
+                                        SemanticsUpdate* update) {
   if (platform_data_.semantics_enabled) {
-    client_.UpdateSemantics(update->takeNodes(), update->takeActions());
+    client_.UpdateSemantics(view_id, update->takeNodes(),
+                            update->takeActions());
   }
 }
 
@@ -670,6 +675,13 @@ void RuntimeController::RequestViewFocusChange(
 
 void RuntimeController::ShutdownPlatformIsolates() {
   platform_isolate_manager_->ShutdownPlatformIsolates();
+}
+
+void RuntimeController::SetRootIsolateOwnerToCurrentThread() {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (root_isolate) {
+    root_isolate->SetOwnerToCurrentThread();
+  }
 }
 
 RuntimeController::Locale::Locale(std::string language_code_,

@@ -22,7 +22,7 @@ class TextPaint {
   final WebParagraph paragraph;
 
   void paintLineOnCanvas2D(
-    DomCanvasElement canvas,
+    DomHTMLCanvasElement canvas,
     TextLayout layout,
     TextLine line,
     double x,
