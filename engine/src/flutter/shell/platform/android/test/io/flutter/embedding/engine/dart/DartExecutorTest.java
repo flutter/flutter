@@ -26,8 +26,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
-
 
 @RunWith(AndroidJUnit4.class)
 public class DartExecutorTest {

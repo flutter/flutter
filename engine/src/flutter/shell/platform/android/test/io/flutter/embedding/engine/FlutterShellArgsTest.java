@@ -14,8 +14,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
-
 
 @RunWith(AndroidJUnit4.class)
 public class FlutterShellArgsTest {

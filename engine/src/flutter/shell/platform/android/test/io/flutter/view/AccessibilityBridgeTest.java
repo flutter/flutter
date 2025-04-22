@@ -63,7 +63,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.robolectric.annotation.Config;
 
-
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityBridgeTest {
 

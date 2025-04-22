@@ -25,8 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 
-@Config(
-    shadows = {})
+@Config(shadows = {})
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24)
 public class RestorationChannelTest {
