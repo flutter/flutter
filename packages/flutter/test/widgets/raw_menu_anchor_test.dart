@@ -739,7 +739,7 @@ void main() {
       serializedException = exception.toString();
     });
 
-    expect(serializedException, contains('_anchor != null'));
+    expect(serializedException, contains('_context != null'));
   });
 
   testWidgets('[Group] MenuController is detached on update', (WidgetTester tester) async {
@@ -759,7 +759,7 @@ void main() {
       serializedException = exception.toString();
     });
 
-    expect(serializedException, contains('_anchor != null'));
+    expect(serializedException, contains('_context != null'));
   });
 
   testWidgets('[Default] MenuController is detached on dispose', (WidgetTester tester) async {
@@ -777,7 +777,7 @@ void main() {
       serializedException = exception.toString();
     });
 
-    expect(serializedException, contains('_anchor != null'));
+    expect(serializedException, contains('_context != null'));
   });
 
   testWidgets('[Group] MenuController is detached on dispose', (WidgetTester tester) async {
@@ -795,7 +795,7 @@ void main() {
       serializedException = exception.toString();
     });
 
-    expect(serializedException, contains('_anchor != null'));
+    expect(serializedException, contains('_context != null'));
   });
 
   testWidgets('[Default] MenuOverlayPosition.anchorRect applies transformations to panel', (
@@ -1140,7 +1140,7 @@ void main() {
     expect(invokedOverlay, isTrue);
   });
 
-  testWidgets('DismissMenuAction closes menus', (WidgetTester tester) async {
+  testWidgets('DismissMenuIntent closes menus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
     await tester.pumpWidget(
@@ -1181,11 +1181,7 @@ void main() {
     focusNode.requestFocus();
     await tester.pump();
 
-    const ActionDispatcher().invokeAction(
-      DismissMenuAction(controller: controller),
-      const DismissIntent(),
-      focusNode.context,
-    );
+    Actions.invoke(focusNode.context!, DismissIntent());
 
     await tester.pump();
 

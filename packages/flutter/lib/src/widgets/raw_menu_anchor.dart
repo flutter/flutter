@@ -122,12 +122,12 @@ typedef RawMenuAnchorChildBuilder =
 class _MenuControllerScope extends InheritedWidget {
   const _MenuControllerScope({
     required this.isOpen,
-    required this.controller,
+    required this.menuBase,
     required super.child,
   });
 
   final bool isOpen;
-  final MenuController controller;
+  final _RawMenuAnchorBaseMixin menuBase;
 
   @override
   bool updateShouldNotify(_MenuControllerScope oldWidget) {
@@ -312,15 +312,9 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    menuController._attach(this);
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final _RawMenuAnchorBaseMixin? newParent = MenuController.maybeOf(context)?._anchor;
+    final _RawMenuAnchorBaseMixin? newParent = _RawMenuAnchorBaseMixin.maybeOf(context);
     if (newParent != _parent) {
       assert(
         newParent != this,
@@ -352,7 +346,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     _parent?._removeChild(this);
     _parent = null;
     _anchorChildren.clear();
-    menuController._detach(this);
     super.dispose();
   }
 
@@ -437,20 +430,71 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   Widget build(BuildContext context) {
     return _MenuControllerScope(
       isOpen: isOpen,
-      controller: menuController,
+      menuBase: this,
       child: Actions(
         actions: <Type, Action<Intent>>{
-          // Check if open to allow DismissIntent to bubble when the menu is
-          // closed.
-          if (isOpen) DismissIntent: DismissMenuAction(controller: menuController),
+          OpenMenuIntent: CallbackAction<OpenMenuIntent>(
+            onInvoke: (OpenMenuIntent intent) {
+              open(position: intent.position);
+              return null;
+            },
+          ),
+          CloseMenuIntent: CallbackAction<CloseMenuIntent>(
+            onInvoke: (CloseMenuIntent intent) {
+              close();
+              return null;
+            },
+          ),
+          CloseChildrenMenuIntent: CallbackAction<CloseChildrenMenuIntent>(
+            onInvoke: (CloseChildrenMenuIntent intent) {
+              closeChildren();
+              return null;
+            },
+          ),
+          // The DismissIntent closes the entire menu via a double action
+          // dispatching: first a DismissIntent then a DismissMenuIntent.
+          //
+          // The DismissIntent must not be not overridable, otherwise a menu
+          // dismissing intent intended for the external-most menu will be
+          // leaked to the futher external widget (such as a dialog barrier).
+          //
+          // However DismissIntent handles the action indirectly by invoking a
+          // DismissMenuIntent, which is overridable so that it finds the
+          // external-most menu anchor to handle closing.
+          //
+          // The isOpen is checked to allow DismissIntent to bubble when the
+          // menu is closed.
+          if (isOpen)
+            DismissIntent: CallbackAction<DismissIntent>(
+              onInvoke: (DismissIntent intent) {
+                Actions.invoke(menuController._context!, const DismissMenuIntent());
+                return null;
+              },
+            ),
+          DismissMenuIntent: Action<DismissMenuIntent>.overridable(
+            context: context,
+            defaultAction: CallbackAction<DismissMenuIntent>(
+              onInvoke: (DismissMenuIntent intent) {
+                close();
+                return null;
+              },
+            ),
+          ),
         },
-        child: Builder(builder: buildAnchor),
+        child: _AttachMenuController(
+          controller: menuController,
+          child: Builder(builder: buildAnchor),
+        ),
       ),
     );
   }
 
   @override
   String toString({DiagnosticLevel? minLevel}) => describeIdentity(this);
+
+  static _RawMenuAnchorBaseMixin? maybeOf(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.menuBase;
+  }
 }
 
 class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMixin<RawMenuAnchor> {
@@ -486,17 +530,7 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
   MenuController get menuController => widget.controller;
 
   @override
-  void didUpdateWidget(RawMenuAnchor oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller._detach(this);
-      widget.controller._attach(this);
-    }
-  }
-
-  @override
   void open({Offset? position}) {
-    assert(menuController._anchor == this);
     if (isOpen) {
       if (position == _menuPosition) {
         assert(_debugMenuInfo("Not opening $this because it's already open"));
@@ -692,15 +726,6 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
   MenuController get menuController => widget.controller;
 
   @override
-  void didUpdateWidget(RawMenuAnchorGroup oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller) {
-      oldWidget.controller._detach(this);
-      widget.controller._attach(this);
-    }
-  }
-
-  @override
   void close({bool inDispose = false}) {
     if (!isOpen) {
       return;
@@ -726,7 +751,6 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 
   @override
   void open({Offset? position}) {
-    assert(menuController._anchor == this);
     // Menu nodes are always open, so this is a no-op.
     return;
   }
@@ -773,10 +797,16 @@ class MenuController {
   ///
   /// This is set automatically when a [MenuController] is given to the anchor
   /// it controls.
-  _RawMenuAnchorBaseMixin? _anchor;
+  BuildContext? _context;
 
   /// Whether or not the menu associated with this [MenuController] is open.
-  bool get isOpen => _anchor?.isOpen ?? false;
+  // bool get isOpen => _anchor?.isOpen ?? false;
+  bool get isOpen {
+    if (_context == null) {
+      return false;
+    }
+    return maybeIsOpenOf(_context!) ?? false;
+  }
 
   /// Opens the menu that this [MenuController] is associated with.
   ///
@@ -786,8 +816,8 @@ class MenuController {
   /// If the menu's anchor point is scrolled by an ancestor, or the view changes
   /// size, then any open menus will automatically close.
   void open({Offset? position}) {
-    assert(_anchor != null);
-    _anchor!.open(position: position);
+    assert(_context != null);
+    Actions.invoke(_context!, OpenMenuIntent(position));
   }
 
   /// Close the menu that this [MenuController] is associated with.
@@ -798,24 +828,26 @@ class MenuController {
   /// If the menu's anchor point is scrolled by an ancestor, or the view changes
   /// size, then any open menu will automatically close.
   void close() {
-    _anchor?.close();
+    if (_context != null) {
+      Actions.invoke(_context!, const CloseMenuIntent());
+    }
   }
 
   /// Close the children of the menu associated with this [MenuController],
   /// without closing the menu itself.
   void closeChildren() {
-    assert(_anchor != null);
-    _anchor!.closeChildren();
+    assert(_context != null);
+    Actions.invoke(_context!, const CloseChildrenMenuIntent());
   }
 
   // ignore: use_setters_to_change_properties
-  void _attach(_RawMenuAnchorBaseMixin anchor) {
-    _anchor = anchor;
+  void _attach(BuildContext context) {
+    _context = context;
   }
 
-  void _detach(_RawMenuAnchorBaseMixin anchor) {
-    if (_anchor == anchor) {
-      _anchor = null;
+  void _detach(BuildContext context) {
+    if (_context == context) {
+      _context = null;
     }
   }
 
@@ -827,7 +859,7 @@ class MenuController {
   /// widget will not rebuild when the menu opens and closes, nor when the
   /// [MenuController] changes.
   static MenuController? maybeOf(BuildContext context) {
-    return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.controller;
+    return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.menuBase.menuController;
   }
 
   /// Returns the value of [MenuController.isOpen] of the ancestor
@@ -837,40 +869,35 @@ class MenuController {
   /// This method will establish a dependency relationship, so the calling
   /// widget will rebuild when the menu opens and closes.
   static bool? maybeIsOpenOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_MenuControllerScope>()?.isOpen;
+    return context.getInheritedWidgetOfExactType<_MenuControllerScope>()?.isOpen;
   }
 
   @override
   String toString() => describeIdentity(this);
 }
 
-/// An action that closes all the menus associated with the given
-/// [MenuController].
-///
-/// See also:
-///
-///  * [MenuAnchor], a material-themed widget that hosts a cascading submenu.
-///  * [MenuBar], a widget that defines a menu bar with cascading submenus.
-///  * [RawMenuAnchor], a widget that hosts a cascading submenu.
-///  * [MenuController], a controller used to manage menus created by a
-///    [RawMenuAnchor].
-class DismissMenuAction extends DismissAction {
-  /// Creates a [DismissMenuAction].
-  DismissMenuAction({required this.controller});
+class OpenMenuIntent extends Intent {
+  /// Creates an intent that opens the menu.
+  const OpenMenuIntent(this.position);
 
-  /// The [MenuController] that manages the menu which should be dismissed upon
-  /// invocation.
-  final MenuController controller;
+  final Offset? position;
+}
 
-  @override
-  void invoke(DismissIntent intent) {
-    controller._anchor!.root.close();
-  }
+class CloseMenuIntent extends Intent {
+  /// Creates an intent that opens the menu.
+  const CloseMenuIntent([this.position]);
 
-  @override
-  bool isEnabled(DismissIntent intent) {
-    return controller._anchor != null;
-  }
+  final Offset? position;
+}
+
+class CloseChildrenMenuIntent extends Intent {
+  /// Creates an intent that closes the children menus but not the menu itself.
+  const CloseChildrenMenuIntent();
+}
+
+class DismissMenuIntent extends Intent {
+  /// Creates an intent that closes all menus.
+  const DismissMenuIntent();
 }
 
 /// A debug print function, which should only be called within an assert, like
@@ -896,4 +923,46 @@ bool _debugMenuInfo(String message, [Iterable<String>? details]) {
   }());
   // Return true so that it can be easily used inside of an assert.
   return true;
+}
+
+// Attach the controller to the state.
+//
+// This widget ensures that the controller's attached context is within the
+// scope of `Actions`.
+class _AttachMenuController extends StatefulWidget {
+  _AttachMenuController({required this.controller, required this.child});
+
+  final MenuController controller;
+  final Widget child;
+
+  @override
+  _AttachMenuControllerState createState() => _AttachMenuControllerState();
+}
+
+class _AttachMenuControllerState extends State<_AttachMenuController> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller._attach(context);
+  }
+
+  @override
+  void didUpdateWidget(_AttachMenuController oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller._detach(context);
+      widget.controller._attach(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller._detach(context);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }

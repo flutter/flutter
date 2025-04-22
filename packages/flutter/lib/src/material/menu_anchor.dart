@@ -2302,7 +2302,6 @@ class _MenuBarAnchor extends MenuAnchor {
 
 class _MenuBarAnchorState extends _MenuAnchorState {
   late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
-    DismissIntent: DismissMenuAction(controller: _menuController),
   };
 
   @override
@@ -3352,7 +3351,10 @@ class _Submenu extends StatelessWidget {
       groupId: menuPosition.tapRegionGroupId,
       consumeOutsideTaps: anchor._root._menuController.isOpen && anchor.widget.consumeOutsideTap,
       onTapOutside: (PointerDownEvent event) {
-        anchor._menuController.close();
+        // This context is outside of the scope of this menu's RawMenuAnchor,
+        // and the intent dispatched here is meant for the parent menu, hence
+        // CloseChildrenMenuIntent.
+        Actions.invoke(context, const CloseChildrenMenuIntent());
       },
       child: MouseRegion(
         cursor: mouseCursor,
@@ -3360,19 +3362,14 @@ class _Submenu extends StatelessWidget {
         child: FocusScope(
           node: anchor._menuScopeNode,
           skipTraversal: true,
-          child: Actions(
-            actions: <Type, Action<Intent>>{
-              DismissIntent: DismissMenuAction(controller: anchor._menuController),
-            },
-            child: Shortcuts(
-              shortcuts: _kMenuTraversalShortcuts,
-              child: _MenuPanel(
-                menuStyle: menuStyle,
-                clipBehavior: clipBehavior,
-                orientation: anchor._orientation,
-                crossAxisUnconstrained: crossAxisUnconstrained,
-                children: menuChildren,
-              ),
+          child: Shortcuts(
+            shortcuts: _kMenuTraversalShortcuts,
+            child: _MenuPanel(
+              menuStyle: menuStyle,
+              clipBehavior: clipBehavior,
+              orientation: anchor._orientation,
+              crossAxisUnconstrained: crossAxisUnconstrained,
+              children: menuChildren,
             ),
           ),
         ),
