@@ -7,10 +7,13 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'events.dart';
+import 'gesture_details.dart';
 import 'pointer_router.dart';
 import 'recognizer.dart';
 import 'tap.dart';
@@ -615,7 +618,7 @@ typedef GestureSerialTapDownCallback = void Function(SerialTapDownDetails detail
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapDown] callback.
-class SerialTapDownDetails {
+class SerialTapDownDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureSerialTapDownCallback].
   ///
   /// The `count` argument must be greater than zero.
@@ -628,10 +631,12 @@ class SerialTapDownDetails {
   }) : assert(count > 0),
        localPosition = localPosition ?? globalPosition;
 
-  /// The global position at which the pointer contacted the screen.
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
   final Offset globalPosition;
 
-  /// The local position at which the pointer contacted the screen.
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.
@@ -655,6 +660,16 @@ class SerialTapDownDetails {
   /// the two taps had too much distance between them), then this count will
   /// reset back to `1`, and a new series will have begun.
   final int count;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(EnumProperty<PointerDeviceKind>('kind', kind));
+    properties.add(IntProperty('buttons', buttons));
+    properties.add(IntProperty('count', count));
+  }
 }
 
 /// Signature used by [SerialTapGestureRecognizer.onSerialTapCancel] for when a
@@ -669,7 +684,7 @@ typedef GestureSerialTapCancelCallback = void Function(SerialTapCancelDetails de
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapCancel] callback.
-class SerialTapCancelDetails {
+class SerialTapCancelDetails with Diagnosticable {
   /// Creates details for a [GestureSerialTapCancelCallback].
   ///
   /// The `count` argument must be greater than zero.
@@ -682,6 +697,12 @@ class SerialTapCancelDetails {
   /// [SerialTapDownDetails.count] for the tap that is being canceled. See
   /// that field for more information on how this count is reported.
   final int count;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('count', count));
+  }
 }
 
 /// Signature used by [SerialTapGestureRecognizer.onSerialTapUp] for when a
@@ -695,7 +716,7 @@ typedef GestureSerialTapUpCallback = void Function(SerialTapUpDetails details);
 ///
 ///  * [SerialTapGestureRecognizer], which passes this information to its
 ///    [SerialTapGestureRecognizer.onSerialTapUp] callback.
-class SerialTapUpDetails {
+class SerialTapUpDetails with Diagnosticable implements PositionedGestureDetails {
   /// Creates details for a [GestureSerialTapUpCallback].
   ///
   /// The `count` argument must be greater than zero.
@@ -707,10 +728,12 @@ class SerialTapUpDetails {
   }) : assert(count > 0),
        localPosition = localPosition ?? globalPosition;
 
-  /// The global position at which the pointer contacted the screen.
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.globalPosition}
+  @override
   final Offset globalPosition;
 
-  /// The local position at which the pointer contacted the screen.
+  /// {@macro flutter.gestures.gesturedetails.PositionedGestureDetails.localPosition}
+  @override
   final Offset localPosition;
 
   /// The kind of the device that initiated the event.
@@ -727,6 +750,15 @@ class SerialTapUpDetails {
   /// the two taps had too much distance between them), then this count will
   /// reset back to `1`, and a new series will have begun.
   final int count;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Offset>('globalPosition', globalPosition));
+    properties.add(DiagnosticsProperty<Offset>('localPosition', localPosition));
+    properties.add(EnumProperty<PointerDeviceKind?>('kind', kind));
+    properties.add(IntProperty('count', count));
+  }
 }
 
 /// Recognizes serial taps (taps in a series).
