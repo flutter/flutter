@@ -1112,6 +1112,7 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
       # See https://github.com/flutter/flutter/issues/147180 as an example.
       is_luci = 'LUCI_CONTEXT' in os.environ
       if is_luci:
+        # pylint: disable=line-too-long
         raise RuntimeError(
             """
 The GOLDCTL environment variable is not set. This is required for Skia Gold tests.
@@ -1119,6 +1120,7 @@ See https://github.com/flutter/flutter/tree/main/engine/src/flutter/testing/skia
 for more information.
 """
         )
+        # pylint: enable=line-too-long
 
       print_divider('<')
       print(
