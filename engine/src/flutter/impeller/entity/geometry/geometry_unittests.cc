@@ -501,5 +501,150 @@ TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
   }
 }
 
+TEST(EntityGeometryTest, TwoLineSegments180DegreeJoins) {
+  // First, create a path that doubles back on itself.
+  PathBuilder path_builder;
+  path_builder.MoveTo(Point(10, 10));
+  path_builder.LineTo(Point(100, 10));
+  path_builder.LineTo(Point(10, 10));
+  flutter::DlPath path(path_builder);
+
+  auto points_bevel =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  // Generates no join - because it is a bevel join
+  EXPECT_EQ(points_bevel.size(), 8u);
+
+  auto points_miter =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
+  // Generates no join - even with a very large miter limit
+  EXPECT_EQ(points_miter.size(), 8u);
+
+  auto points_round =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
+  // Generates lots of join points - to round off the 180 degree bend
+  EXPECT_EQ(points_round.size(), 19u);
+}
+
+TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
+  // First, create a mild quadratic that helps us verify how many points
+  // should normally be on a quad with 2 legs of length 90.
+  PathBuilder path_builder_refrence;
+  path_builder_refrence.MoveTo(Point(10, 10));
+  path_builder_refrence.QuadraticCurveTo(Point(100, 10), Point(100, 100));
+  flutter::DlPath path_reference(path_builder_refrence);
+
+  auto points_bevel_reference =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  // Generates no joins because the curve is smooth
+  EXPECT_EQ(points_bevel_reference.size(), 28u);
+
+  // Now create a path that doubles back on itself with a quadratic.
+  PathBuilder path_builder;
+  path_builder.MoveTo(Point(10, 10));
+  path_builder.QuadraticCurveTo(Point(100, 10), Point(10, 10));
+  flutter::DlPath path(path_builder);
+
+  auto points_bevel =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_bevel.size(), points_bevel_reference.size());
+
+  auto points_miter =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_miter.size(), points_bevel_reference.size());
+
+  auto points_round =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_round.size(), points_bevel_reference.size());
+}
+
+TEST(EntityGeometryTest, TightConic180DegreeJoins) {
+  // First, create a mild conic that helps us verify how many points
+  // should normally be on a quad with 2 legs of length 90.
+  PathBuilder path_builder_refrence;
+  path_builder_refrence.MoveTo(Point(10, 10));
+  path_builder_refrence.ConicCurveTo(Point(100, 10), Point(100, 100), 0.9f);
+  flutter::DlPath path_reference(path_builder_refrence);
+
+  auto points_bevel_reference =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  // Generates no joins because the curve is smooth
+  EXPECT_EQ(points_bevel_reference.size(), 28u);
+
+  // Now create a path that doubles back on itself with a conic.
+  PathBuilder path_builder;
+  path_builder.MoveTo(Point(10, 10));
+  path_builder.QuadraticCurveTo(Point(100, 10), Point(10, 10));
+  flutter::DlPath path(path_builder);
+
+  auto points_bevel =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_bevel.size(), points_bevel_reference.size());
+
+  auto points_miter =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_miter.size(), points_bevel_reference.size());
+
+  auto points_round =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_round.size(), points_bevel_reference.size());
+}
+
+TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
+  // First, create a mild cubic that helps us verify how many points
+  // should normally be on a quad with 3 legs of length ~50.
+  PathBuilder path_builder_reference;
+  path_builder_reference.MoveTo(Point(10, 10));
+  path_builder_reference.CubicCurveTo(Point(60, 10), Point(100, 40),
+                                      Point(100, 90));
+  flutter::DlPath path_reference(path_builder_reference);
+
+  auto points_reference =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  // Generates no joins because the curve is smooth
+  EXPECT_EQ(points_reference.size(), 30u);
+
+  // Now create a path that doubles back on itself with a cubic.
+  PathBuilder path_builder;
+  path_builder.MoveTo(Point(10, 10));
+  path_builder.CubicCurveTo(Point(60, 10), Point(100, 40), Point(60, 10));
+  flutter::DlPath path(path_builder);
+
+  auto points_bevel =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_bevel.size(), points_reference.size());
+
+  auto points_miter =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 400.0f, Join::kMiter, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_miter.size(), points_reference.size());
+
+  auto points_round =
+      ImpellerGeometryUnitTestAccessor::GenerateSolidStrokeVerticesDirect(
+          path, 20.0f, 4.0f, Join::kRound, Cap::kButt, 1.0f);
+  // Generates round join because it is in the middle of a curved segment
+  EXPECT_GT(points_round.size(), points_reference.size());
+}
+
 }  // namespace testing
 }  // namespace impeller

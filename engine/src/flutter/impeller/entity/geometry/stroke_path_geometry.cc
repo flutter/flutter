@@ -430,12 +430,28 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
         // Handle all intermediate curve points up to but not including the end
         for (int i = 1; i < count; i++) {
           Point cur = curve.Solve(i / count);
-          auto cur_perpendicular = ComputePerpendicular(prev, cur);
-          AppendVertices(cur, cur_perpendicular);
-          prev = cur;
-          prev_perpendicular = cur_perpendicular;
+          if (cur != prev) {
+            auto cur_perpendicular = ComputePerpendicular(prev, cur);
+            if (prev_perpendicular.GetAlignment(cur_perpendicular) <
+                trigs_[1].cos) {
+              // We only connect 2 curved segments if their change in
+              // direction is faster than a single sample of a round join
+              AppendVertices(cur, prev_perpendicular);
+              AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
+            }
+            AppendVertices(cur, cur_perpendicular);
+            prev = cur;
+            prev_perpendicular = cur_perpendicular;
+          }
         }
 
+        if (prev_perpendicular.GetAlignment(end_perpendicular) <
+            trigs_[1].cos) {
+          // We only connect 2 curved segments if their change in
+          // direction is faster than a single sample of a round join
+          AppendVertices(curve.p2, prev_perpendicular);
+          AddJoin(Join::kRound, prev, prev_perpendicular, end_perpendicular);
+        }
         AppendVertices(curve.p2, end_perpendicular);
 
         last_perpendicular_ = end_perpendicular;
@@ -679,6 +695,19 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
           // through to the bevel operation after the switch.
           break;
         }
+        if (cosine < -trigs_[1].cos) {
+          // This is closer to a 180 degree turn than the last trigs entry
+          // can distinguish. Since we are going to generate all of the
+          // sample points of the entire round join anyway, it is faster to
+          // generate them using a round cap operation. Additionally, it
+          // avoids math issues in the code below that stem from the
+          // calculations being performed on a pair of vectors that are
+          // nearly opposite each other.
+          AddCap(Cap::kRound, path_point, old_perpendicular.GetVector(), false);
+          // The bevel operation following the switch statement will set
+          // us up to start drawing the following segment.
+          break;
+        }
         // We want to set up the from and to vectors to facilitate a
         // clockwise angular fill from one to the other. We might generate
         // a couple fewer points by iterating counter-clockwise in some
@@ -689,15 +718,6 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
         Vector2 from_vector, to_vector;
         bool begin_end_crossed;
         Scalar turning = old_perpendicular.Cross(new_perpendicular);
-        if (turning == 0) {
-          // Uh oh, this is a 180 degree turn, but there is no clean way to
-          // adjust the code below to make a semi-circle when the cross
-          // product of the vectors is not signed. We resolve this by simply
-          // adding a cap here based on the previous segment and then let
-          // the bevel operation below position us for the next segment.
-          AddCap(Cap::kRound, path_point, old_perpendicular.GetVector(), false);
-          break;
-        }
         if (turning > 0) {
           // Clockwise path turn, since our prependicular vectors point to
           // the right of the path we need to fill in the "back side" of the
