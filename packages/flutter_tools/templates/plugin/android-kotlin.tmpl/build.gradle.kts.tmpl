@@ -2,7 +2,6 @@ group = "{{androidIdentifier}}"
 version = "1.0"
 
 buildscript {
-    extra["kotlin_version"] = "{{kotlinVersion}}"
     repositories {
         google()
         mavenCentral()
@@ -10,7 +9,7 @@ buildscript {
 
     dependencies {
         classpath("com.android.tools.build:gradle:{{agpVersion}}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${extra["kotlin_version"] as String}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${{kotlinVersion}}")
     }
 }
 
