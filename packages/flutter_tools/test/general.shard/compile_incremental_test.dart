@@ -191,7 +191,7 @@ void main() {
             projectRootPath: '',
           ),
         ),
-        throwsToolExit(message: 'the Dart compiler exited unexpectedly.'),
+        throwsToolExit(message: 'The Dart compiler exited unexpectedly.'),
       );
     },
   );
