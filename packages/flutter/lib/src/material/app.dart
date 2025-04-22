@@ -949,12 +949,12 @@ class _MaterialAppState extends State<MaterialApp> {
   Widget _tapBehaviorButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required GlobalKey key,
+    required bool defaultTapBehaviorEnabled,
   }) {
     return _TapBehaviorButton(
       onPressed: onPressed,
+      defaultTapBehaviorEnabled: defaultTapBehaviorEnabled,
       isDarkTheme: _isDarkTheme(context),
-      buttonKey: key,
     );
   }
 
@@ -1242,48 +1242,37 @@ class _MaterialInspectorButton extends StatelessWidget {
   }
 }
 
-class _TapBehaviorButton extends StatefulWidget {
+class _TapBehaviorButton extends StatelessWidget {
   const _TapBehaviorButton({
     required this.onPressed,
+    required this.defaultTapBehaviorEnabled,
     required this.isDarkTheme,
-    required this.buttonKey,
   });
 
   final VoidCallback onPressed;
+  final bool defaultTapBehaviorEnabled;
   final bool isDarkTheme;
-  final GlobalKey? buttonKey;
-
-  @override
-  State<_TapBehaviorButton> createState() => _TapBehaviorButtonState();
-}
-
-class _TapBehaviorButtonState extends State<_TapBehaviorButton> {
-  bool isEnabled = false;
 
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = _MaterialInspectorButton._widgetSelectionButtonsBackgroundColor(
       context,
-      isDarkTheme: widget.isDarkTheme,
+      isDarkTheme: isDarkTheme,
     );
     final Color foregroundColor = _MaterialInspectorButton._widgetSelectionButtonsForegroundColor(
       context,
-      isDarkTheme: widget.isDarkTheme,
+      isDarkTheme: isDarkTheme,
     );
 
     return _MaterialInspectorButton(
-      isDarkTheme: widget.isDarkTheme,
-      onPressed: () {
-        setState(() {
-          isEnabled = !isEnabled;
-        });
-        widget.onPressed();
-      },
+      isDarkTheme: isDarkTheme,
+      onPressed: onPressed,
       icon: Icons.ads_click,
       foregroundColor: foregroundColor,
       backgroundColor:
-          isEnabled ? Color.lerp(backgroundColor, foregroundColor, 0.3) : backgroundColor,
-      buttonKey: widget.buttonKey,
+          defaultTapBehaviorEnabled
+              ? backgroundColor
+              : Color.lerp(backgroundColor, foregroundColor, 0.35),
     );
   }
 }

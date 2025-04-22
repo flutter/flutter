@@ -571,7 +571,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     Widget _tapBehaviorButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
-    required GlobalKey key,
+    required bool defaultTapBehaviorEnabled,
   }) {
     return CupertinoButton(
       color: _widgetSelectionButtonsBackgroundColor(context),

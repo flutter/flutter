@@ -46,11 +46,12 @@ typedef ExitWidgetSelectionButtonBuilder =
       required GlobalKey key,
     });
 
+// TODO: documentation
 typedef TapBehaviorButtonBuilder =
     Widget Function(
       BuildContext context, {
       required VoidCallback onPressed,
-      required GlobalKey key,
+      required bool defaultTapBehaviorEnabled,
     });
 
 /// Signature for the builder callback used by
@@ -3547,10 +3548,16 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
             !defaultTapBehaviorEnabled;
         WidgetInspectorService.instance.selection.clear();
       },
-      key: _tapBehaviorButtonKey,
+      defaultTapBehaviorEnabled: WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled,
     ),
     onTooltipVisible: () {
-      _changeTooltipMessage('Tap tap!');
+      final bool defaultTapBehaviorEnabled =
+          WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled;
+      _changeTooltipMessage(
+        defaultTapBehaviorEnabled
+            ? 'Disable triggering widget selections on tap.'
+            : 'Enable triggering widget selections on tap.',
+      );
     },
     onTooltipHidden: _onTooltipHidden,
   );
