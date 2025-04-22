@@ -35,8 +35,7 @@
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
 #endif
 #include "flutter/shell/platform/android/context/android_context.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_wrapper.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_response_android.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
@@ -157,7 +156,7 @@ PlatformViewAndroid::PlatformViewAndroid(
             .impeller_enable_lazy_shader_mode  //
     );
     android_surface_ = surface_factory_->CreateSurface();
-    android_use_new_platform_view_ =
+    android_meets_hcpp_criteria_ =
         delegate.OnPlatformViewGetSettings().enable_surface_control &&
         android_get_device_api_level() >= kMinAPILevelHCPP &&
         delegate.OnPlatformViewGetSettings().enable_impeller;
@@ -408,12 +407,9 @@ std::unique_ptr<Surface> PlatformViewAndroid::CreateRenderingSurface() {
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder>
 PlatformViewAndroid::CreateExternalViewEmbedder() {
-  if (android_use_new_platform_view_) {
-    return std::make_shared<AndroidExternalViewEmbedder2>(
-        *android_context_, jni_facade_, surface_factory_, task_runners_);
-  }
-  return std::make_shared<AndroidExternalViewEmbedder>(
-      *android_context_, jni_facade_, surface_factory_, task_runners_);
+  return std::make_shared<AndroidExternalViewEmbedderWrapper>(
+      android_meets_hcpp_criteria_, *android_context_, jni_facade_,
+      surface_factory_, task_runners_);
 }
 
 // |PlatformView|
@@ -529,7 +525,12 @@ double PlatformViewAndroid::GetScaledFontSize(double unscaled_font_size,
 }
 
 bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
-  return android_use_new_platform_view_;
+  // This needs to know if we're actually using HCPP.
+  return android_meets_hcpp_criteria_ &&
+         android_context_->RenderingApi() ==
+             AndroidRenderingAPI::kImpellerVulkan &&
+         impeller::ContextVK::Cast(*android_context_->GetImpellerContext())
+             .GetShouldEnableSurfaceControlSwapchain();
 }
 
 }  // namespace flutter
