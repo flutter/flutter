@@ -2083,7 +2083,7 @@ class AndroidPathReceiver final : public DlPathReceiver {
         break;
       default:
         // DlPathFillType does not have corresponding kInverseEvenOdd or
-        // kInverseWinding fill type.
+        // kInverseWinding fill types.
         FML_UNREACHABLE();
         return;
     }
@@ -2095,7 +2095,7 @@ class AndroidPathReceiver final : public DlPathReceiver {
             env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
                                              fill_type_field_id));
     FML_CHECK(fml::jni::CheckException(env_));
-    FML_CHECK(fill_type_enum.is_null());
+    FML_CHECK(!fill_type_enum.is_null());
 
     // Call Path.setFillType(Path.FillType)
     env_->CallVoidMethod(android_path_, path_set_fill_type_method,
