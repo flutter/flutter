@@ -5072,6 +5072,47 @@ TEST_F(ShellTest, ProvidesNullEngineId) {
   DestroyShell(std::move(shell), task_runners);
 }
 
+TEST_F(ShellTest, MergeUIAndPlatformThreadsAfterLaunch) {
+  Settings settings = CreateSettingsForFixture();
+  settings.merged_platform_ui_thread =
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch;
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      "io.flutter.test." + GetCurrentTestName() + ".",
+      ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
+          ThreadHost::Type::kIo | ThreadHost::Type::kUi));
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell);
+
+  ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
+      task_runners.GetUITaskRunner()->GetTaskQueueId(),
+      task_runners.GetPlatformTaskRunner()->GetTaskQueueId()));
+
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback(
+      "NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
+        ASSERT_TRUE(
+            task_runners.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+        latch.Signal();
+      }));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("mainNotifyNative");
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+
+  ASSERT_TRUE(fml::TaskRunnerChecker::RunsOnTheSameThread(
+      task_runners.GetUITaskRunner()->GetTaskQueueId(),
+      task_runners.GetPlatformTaskRunner()->GetTaskQueueId()));
+
+  DestroyShell(std::move(shell), task_runners);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

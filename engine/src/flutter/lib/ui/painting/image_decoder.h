@@ -44,7 +44,7 @@ class ImageDecoder {
                       uint32_t target_height,
                       const ImageResult& result) = 0;
 
-  fml::WeakPtr<ImageDecoder> GetWeakPtr() const;
+  fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetWeakPtr() const;
 
  protected:
   TaskRunners runners_;
@@ -57,7 +57,7 @@ class ImageDecoder {
       fml::WeakPtr<IOManager> io_manager);
 
  private:
-  fml::WeakPtrFactory<ImageDecoder> weak_factory_;
+  fml::TaskRunnerAffineWeakPtrFactory<ImageDecoder> weak_factory_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ImageDecoder);
 };

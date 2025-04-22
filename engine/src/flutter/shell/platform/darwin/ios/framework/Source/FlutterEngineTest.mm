@@ -528,7 +528,7 @@ FLUTTER_ASSERT_ARC
 - (void)testCanUnMergePlatformAndUIThread {
 #if defined(TARGET_IPHONE_SIMULATOR) && TARGET_IPHONE_SIMULATOR
   auto settings = FLTDefaultSettingsForBundle();
-  settings.merged_platform_ui_thread = false;
+  settings.merged_platform_ui_thread = flutter::Settings::MergedPlatformUIThread::kDisabled;
   FlutterDartProject* project = [[FlutterDartProject alloc] initWithSettings:settings];
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:project];
   [engine run];

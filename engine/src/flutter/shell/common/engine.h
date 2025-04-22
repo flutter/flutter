@@ -441,7 +441,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   /// @return     The pointer to this instance of the engine. The engine may
   ///             only be accessed safely on the UI task runner.
   ///
-  fml::WeakPtr<Engine> GetWeakPtr() const;
+  fml::TaskRunnerAffineWeakPtr<Engine> GetWeakPtr() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Moves the root isolate to the `DartIsolate::Phase::Running`
@@ -877,7 +877,7 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   std::shared_ptr<AssetManager> GetAssetManager() override;
 
   // Return the weak_ptr of ImageDecoder.
-  fml::WeakPtr<ImageDecoder> GetImageDecoderWeakPtr();
+  fml::TaskRunnerAffineWeakPtr<ImageDecoder> GetImageDecoderWeakPtr();
 
   //----------------------------------------------------------------------------
   /// @brief      Get the `ImageGeneratorRegistry` associated with the current
@@ -885,7 +885,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   ///
   /// @return     The engine's `ImageGeneratorRegistry`.
   ///
-  fml::WeakPtr<ImageGeneratorRegistry> GetImageGeneratorRegistry();
+  fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+  GetImageGeneratorRegistry();
 
   // |PointerDataDispatcher::Delegate|
   void DoDispatchPacket(std::unique_ptr<PointerDataPacket> packet,
@@ -1084,7 +1085,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
   const std::unique_ptr<ImageDecoder> image_decoder_;
   ImageGeneratorRegistry image_generator_registry_;
   TaskRunners task_runners_;
-  fml::WeakPtrFactory<Engine> weak_factory_;  // Must be the last member.
+  fml::TaskRunnerAffineWeakPtrFactory<Engine>
+      weak_factory_;  // Must be the last member.
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
 
