@@ -422,7 +422,8 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       HandlePreviousJoin(start_perpendicular);
       AppendVertices(curve.p1, start_perpendicular);
 
-      Scalar count = std::ceilf(curve.SubdivisionCount(scale_));
+      Scalar count =
+          std::ceilf(curve.SubdivisionCount(scale_ * half_stroke_width_));
       if (count > 1) {
         Point prev = curve.p1;
         auto prev_perpendicular = start_perpendicular;
