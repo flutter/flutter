@@ -2983,6 +2983,17 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
       ),
     );
   }
+
+  @override
+  CupertinoThemeData resolveFrom(BuildContext context) {
+    // Only the cupertino override theme part will be resolved, except for the
+    // text theme.
+    // If the color comes from the material theme it's not resolved.
+    return MaterialBasedCupertinoThemeData._(
+      _materialTheme,
+      _cupertinoOverrideTheme.copyWith(textTheme: super.textTheme).resolveFrom(context),
+    );
+  }
 }
 
 /// A class for creating a Material theme with a color scheme based off of the
