@@ -15,6 +15,7 @@ import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'icons.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
@@ -534,64 +535,48 @@ class _CupertinoAppState extends State<CupertinoApp> {
   Widget _exitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
+    required String semanticLabel,
     required GlobalKey key,
   }) {
-    return CupertinoButton(
-      key: key,
-      color: _widgetSelectionButtonsBackgroundColor(context),
-      padding: EdgeInsets.zero,
+    return _CupertinoInspectorButton(
       onPressed: onPressed,
-      child: Icon(
-        CupertinoIcons.xmark,
-        size: 28.0,
-        color: _widgetSelectionButtonsForegroundColor(context),
-        semanticLabel: 'Exit Select Widget mode.',
-      ),
+      semanticLabel: semanticLabel,
+      icon: CupertinoIcons.xmark,
+      buttonKey: key,
     );
   }
 
   Widget _moveExitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
+    required String semanticLabel,
     bool isLeftAligned = true,
   }) {
-    return CupertinoButton(
+    return _CupertinoInspectorButton(
       onPressed: onPressed,
-      padding: EdgeInsets.zero,
-      child: Icon(
-        isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
-        size: 32.0,
-        color: _widgetSelectionButtonsBackgroundColor(context),
-        semanticLabel:
-            'Move "Exit Select Widget mode" button to the ${isLeftAligned ? 'right' : 'left'}.',
-      ),
+      semanticLabel: semanticLabel,
+      icon: isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
+      iconSize: _CupertinoInspectorButton._selectionButtonsSize,
+      backgroundColor: const Color(0x00000000),
+      foregroundColor: _CupertinoInspectorButton._backgroundColor(context),
     );
   }
 
-    Widget _tapBehaviorButtonBuilder(
+  Widget _tapBehaviorButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
+    required String semanticLabel,
     required bool defaultTapBehaviorEnabled,
   }) {
-    return CupertinoButton(
-      color: _widgetSelectionButtonsBackgroundColor(context),
-      padding: EdgeInsets.zero,
+    return _CupertinoInspectorButton(
       onPressed: onPressed,
-      child: Icon(
-        CupertinoIcons.search,
-        size: 28.0,
-        color: _widgetSelectionButtonsForegroundColor(context),
-        semanticLabel: 'Enable tap behavior.',
-      ),
+      semanticLabel: semanticLabel,
+      icon: CupertinoIcons.cursor_rays,
+      backgroundColor:
+          defaultTapBehaviorEnabled
+              ? _CupertinoInspectorButton._backgroundColor(context)
+              : _CupertinoInspectorButton._alternateBackgroundColor(context),
     );
-  }
-
-  Color _widgetSelectionButtonsForegroundColor(BuildContext context) {
-    return CupertinoTheme.of(context).primaryContrastingColor;
-  }
-
-  Color _widgetSelectionButtonsBackgroundColor(BuildContext context) {
-    return CupertinoTheme.of(context).primaryColor;
   }
 
   WidgetsApp _buildWidgetApp(BuildContext context) {
@@ -697,6 +682,66 @@ class _CupertinoAppState extends State<CupertinoApp> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CupertinoInspectorButton extends StatelessWidget {
+  const _CupertinoInspectorButton({
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+    this.iconSize,
+    this.buttonKey,
+    this.backgroundColor,
+    this.foregroundColor,
+  });
+
+  final VoidCallback onPressed;
+  final String semanticLabel;
+  final IconData icon;
+  final double? iconSize;
+  final GlobalKey? buttonKey;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+
+  static Color _foregroundColor(BuildContext context) {
+    return CupertinoTheme.of(context).primaryContrastingColor;
+  }
+
+  static Color _backgroundColor(BuildContext context) {
+    return CupertinoTheme.of(context).primaryColor;
+  }
+
+  static Color _alternateBackgroundColor(BuildContext context) {
+    final Color backgroundColor = _backgroundColor(context);
+    final Color foregroundColor = _foregroundColor(context);
+    return Color.lerp(backgroundColor, foregroundColor, 0.5) ?? backgroundColor;
+  }
+
+  static const double _selectionButtonsSize = 32.0;
+  static const double _selectionButtonsIconSize = 18.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      key: buttonKey,
+      padding: const EdgeInsets.all(
+        (kMinInteractiveDimensionCupertino - _selectionButtonsSize) / 2,
+      ),
+      child: CupertinoButton(
+        minSize: _selectionButtonsSize,
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        color: backgroundColor ?? _backgroundColor(context),
+        child: Icon(
+          icon,
+          semanticLabel: semanticLabel,
+          size: iconSize ?? _selectionButtonsIconSize,
+          color: foregroundColor ?? _foregroundColor(context),
+        ),
+      ),
+      // ),
     );
   }
 }

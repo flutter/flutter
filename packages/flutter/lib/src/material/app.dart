@@ -936,10 +936,12 @@ class _MaterialAppState extends State<MaterialApp> {
   Widget _exitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
+    required String semanticLabel,
     required GlobalKey key,
   }) {
     return _MaterialInspectorButton(
       onPressed: onPressed,
+      semanticLabel: semanticLabel,
       isDarkTheme: _isDarkTheme(context),
       icon: Icons.close,
       buttonKey: key,
@@ -949,31 +951,40 @@ class _MaterialAppState extends State<MaterialApp> {
   Widget _tapBehaviorButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
+    required String semanticLabel,
     required bool defaultTapBehaviorEnabled,
   }) {
-    return _TapBehaviorButton(
+    final bool isDarkTheme = _isDarkTheme(context);
+    return _MaterialInspectorButton(
       onPressed: onPressed,
-      defaultTapBehaviorEnabled: defaultTapBehaviorEnabled,
-      isDarkTheme: _isDarkTheme(context),
+      semanticLabel: semanticLabel,
+      isDarkTheme: isDarkTheme,
+      icon: Icons.ads_click,
+      backgroundColor:
+          defaultTapBehaviorEnabled
+              ? _MaterialInspectorButton._backgroundColor(context, isDarkTheme: isDarkTheme)
+              : _MaterialInspectorButton._alternateBackgroundColor(
+                context,
+                isDarkTheme: isDarkTheme,
+              ),
     );
   }
 
   Widget _moveExitWidgetSelectionButtonBuilder(
     BuildContext context, {
     required VoidCallback onPressed,
+    required String semanticLabel,
     bool isLeftAligned = true,
   }) {
     final bool isDarkTheme = _isDarkTheme(context);
     return _MaterialInspectorButton(
       onPressed: onPressed,
+      semanticLabel: semanticLabel,
       isDarkTheme: isDarkTheme,
       icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
       iconSize: _MaterialInspectorButton._selectionButtonsSize,
       backgroundColor: Colors.transparent,
-      foregroundColor: _MaterialInspectorButton._widgetSelectionButtonsBackgroundColor(
-        context,
-        isDarkTheme: isDarkTheme,
-      ),
+      foregroundColor: _MaterialInspectorButton._backgroundColor(context, isDarkTheme: isDarkTheme),
     );
   }
 
@@ -1170,6 +1181,7 @@ class _MaterialAppState extends State<MaterialApp> {
 class _MaterialInspectorButton extends StatelessWidget {
   const _MaterialInspectorButton({
     required this.onPressed,
+    required this.semanticLabel,
     required this.icon,
     required this.isDarkTheme,
     this.iconSize,
@@ -1178,19 +1190,37 @@ class _MaterialInspectorButton extends StatelessWidget {
     this.foregroundColor,
   });
 
-  static const double _selectionButtonsSize = 32.0;
-  static const double _selectionButtonsIconSize = 18.0;
-
-  BoxConstraints get _selectionButtonsConstraints =>
-      const BoxConstraints.tightFor(width: _selectionButtonsSize, height: _selectionButtonsSize);
-
   final VoidCallback onPressed;
+  final String semanticLabel;
   final IconData icon;
   final bool isDarkTheme;
   final double? iconSize;
   final GlobalKey? buttonKey;
   final Color? backgroundColor;
   final Color? foregroundColor;
+
+  static Color _foregroundColor(BuildContext context, {required bool isDarkTheme}) {
+    final ThemeData theme = Theme.of(context);
+    return isDarkTheme ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primaryContainer;
+  }
+
+  static Color _backgroundColor(BuildContext context, {required bool isDarkTheme}) {
+    final ThemeData theme = Theme.of(context);
+    return isDarkTheme ? theme.colorScheme.primaryContainer : theme.colorScheme.onPrimaryContainer;
+  }
+
+  static Color _alternateBackgroundColor(BuildContext context, {required bool isDarkTheme}) {
+    final Color backgroundColor = _backgroundColor(context, isDarkTheme: isDarkTheme);
+    final Color foregroundColor = _foregroundColor(context, isDarkTheme: isDarkTheme);
+    return Color.lerp(backgroundColor, foregroundColor, 0.35) ?? backgroundColor;
+  }
+
+  static const double _selectionButtonsSize = 32.0;
+  static const double _selectionButtonsIconSize = 18.0;
+  static const BoxConstraints _selectionButtonsConstraints = BoxConstraints.tightFor(
+    width: _selectionButtonsSize,
+    height: _selectionButtonsSize,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -1205,7 +1235,7 @@ class _MaterialInspectorButton extends StatelessWidget {
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor,
       ),
-      icon: Icon(icon),
+      icon: Icon(icon, semanticLabel: semanticLabel),
     );
   }
 
@@ -1215,64 +1245,9 @@ class _MaterialInspectorButton extends StatelessWidget {
     Color? foregroundColor,
   }) {
     return IconButton.styleFrom(
-      backgroundColor:
-          backgroundColor ??
-          _widgetSelectionButtonsBackgroundColor(context, isDarkTheme: isDarkTheme),
-      foregroundColor:
-          foregroundColor ??
-          _widgetSelectionButtonsForegroundColor(context, isDarkTheme: isDarkTheme),
+      backgroundColor: backgroundColor ?? _backgroundColor(context, isDarkTheme: isDarkTheme),
+      foregroundColor: foregroundColor ?? _foregroundColor(context, isDarkTheme: isDarkTheme),
       tapTargetSize: MaterialTapTargetSize.padded,
-    );
-  }
-
-  static Color _widgetSelectionButtonsForegroundColor(
-    BuildContext context, {
-    required bool isDarkTheme,
-  }) {
-    final ThemeData theme = Theme.of(context);
-    return isDarkTheme ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primaryContainer;
-  }
-
-  static Color _widgetSelectionButtonsBackgroundColor(
-    BuildContext context, {
-    required bool isDarkTheme,
-  }) {
-    final ThemeData theme = Theme.of(context);
-    return isDarkTheme ? theme.colorScheme.primaryContainer : theme.colorScheme.onPrimaryContainer;
-  }
-}
-
-class _TapBehaviorButton extends StatelessWidget {
-  const _TapBehaviorButton({
-    required this.onPressed,
-    required this.defaultTapBehaviorEnabled,
-    required this.isDarkTheme,
-  });
-
-  final VoidCallback onPressed;
-  final bool defaultTapBehaviorEnabled;
-  final bool isDarkTheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color backgroundColor = _MaterialInspectorButton._widgetSelectionButtonsBackgroundColor(
-      context,
-      isDarkTheme: isDarkTheme,
-    );
-    final Color foregroundColor = _MaterialInspectorButton._widgetSelectionButtonsForegroundColor(
-      context,
-      isDarkTheme: isDarkTheme,
-    );
-
-    return _MaterialInspectorButton(
-      isDarkTheme: isDarkTheme,
-      onPressed: onPressed,
-      icon: Icons.ads_click,
-      foregroundColor: foregroundColor,
-      backgroundColor:
-          defaultTapBehaviorEnabled
-              ? backgroundColor
-              : Color.lerp(backgroundColor, foregroundColor, 0.35),
     );
   }
 }

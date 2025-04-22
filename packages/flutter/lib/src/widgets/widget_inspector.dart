@@ -43,6 +43,7 @@ typedef ExitWidgetSelectionButtonBuilder =
     Widget Function(
       BuildContext context, {
       required VoidCallback onPressed,
+      required String semanticLabel,
       required GlobalKey key,
     });
 
@@ -51,13 +52,19 @@ typedef TapBehaviorButtonBuilder =
     Widget Function(
       BuildContext context, {
       required VoidCallback onPressed,
+      required String semanticLabel,
       required bool defaultTapBehaviorEnabled,
     });
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.moveExitWidgetSelectionButtonBuilder].
 typedef MoveExitWidgetSelectionButtonBuilder =
-    Widget Function(BuildContext context, {required VoidCallback onPressed, bool isLeftAligned});
+    Widget Function(
+      BuildContext context, {
+      required VoidCallback onPressed,
+      required String semanticLabel,
+      bool isLeftAligned,
+    });
 
 /// Signature for a method that registers the service extension `callback` with
 /// the given `name`.
@@ -3502,41 +3509,51 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
   final GlobalKey _exitWidgetSelectionButtonKey = GlobalKey(
     debugLabel: 'Exit Widget Selection button',
   );
-  final GlobalKey _tapBehaviorButtonKey = GlobalKey(debugLabel: 'Tap behavior button');
 
   String? _tooltipMessage;
 
   bool _leftAligned = true;
 
-  Widget? get _moveExitWidgetSelectionButton =>
-      widget.moveExitWidgetSelectionButtonBuilder != null
-          ? _TooltipGestureDetector(
-            button: widget.moveExitWidgetSelectionButtonBuilder!(
-              context,
-              onPressed: () {
-                _changeButtonGroupAlignment();
-                _onTooltipHidden();
-              },
-              isLeftAligned: _leftAligned,
-            ),
-            onTooltipVisible: () {
-              _changeTooltipMessage('Move to the ${_leftAligned ? 'right' : 'left'}');
-            },
-            onTooltipHidden: _onTooltipHidden,
-          )
-          : null;
+  Widget? get _moveExitWidgetSelectionButton {
+    final MoveExitWidgetSelectionButtonBuilder? buttonBuilder =
+        widget.moveExitWidgetSelectionButtonBuilder;
+    if (buttonBuilder == null) {
+      return null;
+    }
 
-  Widget get _exitWidgetSelectionButton => _TooltipGestureDetector(
-    button: widget.exitWidgetSelectionButtonBuilder(
-      context,
-      onPressed: _exitWidgetSelectionMode,
-      key: _exitWidgetSelectionButtonKey,
-    ),
-    onTooltipVisible: () {
-      _changeTooltipMessage('Exit Select Widget mode');
-    },
-    onTooltipHidden: _onTooltipHidden,
-  );
+    final String buttonLabel = 'Move to the ${_leftAligned ? 'right' : 'left'}';
+    return _TooltipGestureDetector(
+      button: buttonBuilder(
+        context,
+        onPressed: () {
+          _changeButtonGroupAlignment();
+          _onTooltipHidden();
+        },
+        semanticLabel: buttonLabel,
+        isLeftAligned: _leftAligned,
+      ),
+      onTooltipVisible: () {
+        _changeTooltipMessage(buttonLabel);
+      },
+      onTooltipHidden: _onTooltipHidden,
+    );
+  }
+
+  Widget get _exitWidgetSelectionButton {
+    const String buttonLabel = 'Exit Select Widget mode';
+    return _TooltipGestureDetector(
+      button: widget.exitWidgetSelectionButtonBuilder(
+        context,
+        onPressed: _exitWidgetSelectionMode,
+        semanticLabel: buttonLabel,
+        key: _exitWidgetSelectionButtonKey,
+      ),
+      onTooltipVisible: () {
+        _changeTooltipMessage(buttonLabel);
+      },
+      onTooltipHidden: _onTooltipHidden,
+    );
+  }
 
   Widget get _tapBehaviorButton => _TooltipGestureDetector(
     button: widget.tapBehaviorButtonBuilder(
@@ -3548,15 +3565,17 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
             !defaultTapBehaviorEnabled;
         WidgetInspectorService.instance.selection.clear();
       },
-      defaultTapBehaviorEnabled: WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled,
+      semanticLabel: 'Change widget selection mode for taps',
+      defaultTapBehaviorEnabled:
+          WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled,
     ),
     onTooltipVisible: () {
       final bool defaultTapBehaviorEnabled =
           WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled;
       _changeTooltipMessage(
         defaultTapBehaviorEnabled
-            ? 'Disable triggering widget selections on tap.'
-            : 'Enable triggering widget selections on tap.',
+            ? 'Disable widget selection for taps'
+            : 'Enable widget selection for taps',
       );
     },
     onTooltipHidden: _onTooltipHidden,
