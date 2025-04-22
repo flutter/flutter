@@ -18,7 +18,8 @@ declare_args() {
   mac_sdk_path = ""
 
   # Path to the Xcode toolchain (XcodeDefault.xctoolchain).
-  # TODO(cbracken): merge with ios_toolchain_path into apple_sdk.gni.
+  # TODO(cbracken): https://github.com/flutter/flutter/issues/167592
+  # Merge with ios_toolchain_path into apple_sdk.gni.
   mac_toolchain_path = ""
 }
 

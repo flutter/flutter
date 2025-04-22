@@ -35,7 +35,8 @@ config("compiler") {
   }
   _target_triplet = "$_triplet_cpu-$_triplet_os$ios_deployment_target$_triplet_environment"
 
-  # TODO(cbracken): Look up xcode_version in ios_sdk.gni/mac_sdk.gni.
+  # TODO(cbracken): https://github.com/flutter/flutter/issues/167592
+  # Look up xcode_version in ios_sdk.gni/mac_sdk.gni.
   #
   # This is here so that all files get recompiled after an Xcode update.
   # (defines are passed via the command line, and build system rebuild things
