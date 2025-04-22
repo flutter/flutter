@@ -179,6 +179,7 @@ class ButtonStyle with Diagnosticable {
     this.iconAlignment,
     this.side,
     this.shape,
+    this.borderOnForeground = true,
     this.mouseCursor,
     this.visualDensity,
     this.tapTargetSize,
@@ -309,6 +310,12 @@ class ButtonStyle with Diagnosticable {
   /// This shape is combined with [side] to create a shape decorated
   /// with an outline.
   final MaterialStateProperty<OutlinedBorder?>? shape;
+
+  /// Whether to paint the border in front of the [child].
+  ///
+  /// The default value is true.
+  /// If false, the border will be painted behind the [child].
+  final bool borderOnForeground;
 
   /// The cursor for a mouse pointer when it enters or is hovering over
   /// this button's [InkWell].

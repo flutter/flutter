@@ -203,6 +203,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
+    this.borderOnForeground = true,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -236,6 +237,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
+    this.borderOnForeground = true,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -271,6 +273,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
+    this.borderOnForeground = true,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -305,6 +308,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
+    this.borderOnForeground = true,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -519,6 +523,12 @@ class IconButton extends StatelessWidget {
   /// used for accessibility.
   final String? tooltip;
 
+  /// Whether to paint the border in front of the [child].
+  ///
+  /// The default value is true.
+  /// If false, the border will be painted behind the [child].
+  final bool borderOnForeground;
+
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
   /// For example, on Android a tap will produce a clicking sound and a
@@ -655,6 +665,7 @@ class IconButton extends StatelessWidget {
     double? iconSize,
     BorderSide? side,
     OutlinedBorder? shape,
+    bool? borderOnForeground,
     EdgeInsetsGeometry? padding,
     MouseCursor? enabledMouseCursor,
     MouseCursor? disabledMouseCursor,
@@ -692,6 +703,7 @@ class IconButton extends StatelessWidget {
       iconSize: ButtonStyleButton.allOrNull<double>(iconSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
+      borderOnForeground: borderOnForeground ?? true,
       mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
         WidgetState.disabled: disabledMouseCursor,
         WidgetState.any: enabledMouseCursor,
@@ -730,6 +742,7 @@ class IconButton extends StatelessWidget {
         enabledMouseCursor: mouseCursor,
         disabledMouseCursor: mouseCursor,
         enableFeedback: enableFeedback,
+        borderOnForeground: borderOnForeground,
       );
       if (style != null) {
         adjustedStyle = style!.merge(adjustedStyle);
