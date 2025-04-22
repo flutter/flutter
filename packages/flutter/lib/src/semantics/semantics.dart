@@ -3545,7 +3545,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
       childrenInDefaultOrder = _childrenInDefaultOrder(_children!, inheritedTextDirection);
     } else {
       // In the absence of text direction default to paint order.
-      childrenInDefaultOrder = _children?.reversed.toList();
+      childrenInDefaultOrder = _children;
     }
 
     // List.sort does not guarantee stable sort order. Therefore, children are
