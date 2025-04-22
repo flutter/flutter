@@ -900,7 +900,9 @@ class _PackageListTile extends StatelessWidget {
         ),
         child: ListTile(
           title: Text(packageName),
-          subtitle: Text(MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses)),
+          subtitle: Text(
+            MaterialLocalizations.of(context).licensesPackageDetailText(numberLicenses),
+          ),
           selected: isSelected,
           onTap: onTap,
         ),
