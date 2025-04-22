@@ -6,6 +6,7 @@ Future<bool> hasVmServiceEnabled() async {
   final developer.ServiceProtocolInfo info = await developer.Service.getInfo();
   final bool result = info.serverUri != null;
   if (!result) {
+    // ignore: avoid_print
     print('Run test suite with --enable-vmservice to enable this test.');
   }
   return result;
