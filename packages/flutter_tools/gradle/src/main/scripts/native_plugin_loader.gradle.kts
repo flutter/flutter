@@ -59,7 +59,10 @@ class NativePluginLoader {
             // of a federated plugin).
             val needsBuild = androidPlugin[NATIVE_BUILD_KEY] as? Boolean ?: true
             if (needsBuild) {
-                nativePlugins.add(androidPlugin as Map<String, Any>) // Safe cast when adding, assuming type is now validated
+                // Suppress the unchecked cast warning as we define the structure of the JSON in
+                // the tool and we have already mostly validated the structure.
+                @Suppress("UNCHECKED_CAST")
+                nativePlugins.add(androidPlugin as Map<String, Any>)
             }
         }
         return nativePlugins.toList() // Return immutable list
@@ -72,9 +75,63 @@ class NativePluginLoader {
      */
     fun getDependenciesMetadata(flutterSourceDirectory: File): Map<String, Any>? {
         // Consider a `.flutter-plugins-dependencies` file with the following content:
-        // { ... (example content as in the original Groovy code) ... }
+        // {
+        //     "plugins": {
+        //       "android": [
+        //         {
+        //           "name": "plugin-a",
+        //           "path": "/path/to/plugin-a",
+        //           "dependencies": ["plugin-b", "plugin-c"],
+        //           "native_build": true
+        //           "dev_dependency": false
+        //         },
+        //         {
+        //           "name": "plugin-b",
+        //           "path": "/path/to/plugin-b",
+        //           "dependencies": ["plugin-c"],
+        //           "native_build": true
+        //           "dev_dependency": false
+        //         },
+        //         {
+        //           "name": "plugin-c",
+        //           "path": "/path/to/plugin-c",
+        //           "dependencies": [],
+        //           "native_build": true
+        //           "dev_dependency": false
+        //         },
+        //         {
+        //           "name": "plugin-d",
+        //           "path": "/path/to/plugin-d",
+        //           "dependencies": [],
+        //           "native_build": true
+        //           "dev_dependency": true
+        //         },
+        //       ],
+        //     },
+        //     "dependencyGraph": [
+        //       {
+        //         "name": "plugin-a",
+        //         "dependencies": ["plugin-b","plugin-c"]
+        //       },
+        //       {
+        //         "name": "plugin-b",
+        //         "dependencies": ["plugin-c"]
+        //       },
+        //       {
+        //         "name": "plugin-c",
+        //         "dependencies": []
+        //       },
+        //       {
+        //         "name": "plugin-d",
+        //         "dependencies": []
+        //       }
+        //     ]
+        // }
         // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
-        // ... (rest of the comment as in the original Groovy code) ...
+        // `plugin-b` depends on `plugin-c`.
+        // `plugin-c` doesn't depend on anything.
+        // `plugin-d` also doesn't depend on anything, but it is a dev
+        // dependency to the Flutter project, so it is marked as such.
         if (parsedFlutterPluginsDependencies != null) {
             return parsedFlutterPluginsDependencies
         }
@@ -82,6 +139,9 @@ class NativePluginLoader {
         if (pluginsDependencyFile.exists()) {
             val slurper = JsonSlurper()
             val readText = slurper.parseText(pluginsDependencyFile.readText())
+
+            // Suppress the unchecked cast warning as we define the structure of the JSON in the tool.
+            @Suppress("UNCHECKED_CAST")
             val parsedText =
                 readText as? Map<String, Any>
                     ?: error("Parsed JSON is not a Map<String, Any>: $readText")

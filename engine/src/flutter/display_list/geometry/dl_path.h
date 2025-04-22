@@ -10,46 +10,16 @@
 #include "flutter/display_list/geometry/dl_geometry_types.h"
 #include "flutter/impeller/geometry/path.h"
 #include "flutter/impeller/geometry/path_builder.h"
+#include "flutter/impeller/geometry/path_source.h"
 #include "flutter/third_party/skia/include/core/SkPath.h"
 
 namespace flutter {
 
 using DlPathFillType = impeller::FillType;
 using DlPathBuilder = impeller::PathBuilder;
+using DlPathReceiver = impeller::PathReceiver;
 
-/// @brief   Collection of functions to receive path segments from the
-///          underlying path representation via the DlPath::Dispatch method.
-///
-/// The conic_to function is optional. If the receiver understands rational
-/// quadratic Bezier curve forms then it should accept the curve parameters
-/// and return true, otherwise it can return false and the dispatcher will
-/// provide the path segment in a different form via the other methods.
-///
-/// The dispatcher might not call the recommend_size or recommend_bounds
-/// functions if the original path does not contain such information.
-///
-/// The dispatcher will always call the path_info function, though the
-/// is_convex parameter may be conservatively reported as false if the
-/// original path does not contain such info.
-class DlPathReceiver {
- public:
-  virtual ~DlPathReceiver() = default;
-  virtual void RecommendSizes(size_t verb_count, size_t point_count) {};
-  virtual void RecommendBounds(const DlRect& bounds) {};
-  virtual void SetPathInfo(DlPathFillType fill_type, bool is_convex) = 0;
-  virtual void MoveTo(const DlPoint& p2) = 0;
-  virtual void LineTo(const DlPoint& p2) = 0;
-  virtual void QuadTo(const DlPoint& cp, const DlPoint& p2) = 0;
-  virtual bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) {
-    return false;
-  };
-  virtual void CubicTo(const DlPoint& cp1,
-                       const DlPoint& cp2,
-                       const DlPoint& p2) = 0;
-  virtual void Close() = 0;
-};
-
-class DlPath {
+class DlPath : public impeller::PathSource {
  public:
   static constexpr uint32_t kMaxVolatileUses = 2;
 
@@ -100,10 +70,12 @@ class DlPath {
   DlPath(DlPath&& path) = default;
   DlPath& operator=(const DlPath&) = default;
 
+  ~DlPath() override = default;
+
   const SkPath& GetSkPath() const;
   const impeller::Path& GetPath() const;
 
-  void Dispatch(DlPathReceiver& receiver) const;
+  void Dispatch(DlPathReceiver& receiver) const override;
 
   /// Intent to render an SkPath multiple times will make the path
   /// non-volatile to enable caching in Skia. Calling this method
@@ -121,21 +93,17 @@ class DlPath {
   bool IsLine(DlPoint* start = nullptr, DlPoint* end = nullptr) const;
   bool IsRoundRect(DlRoundRect* rrect = nullptr) const;
 
-  bool IsSkRect(SkRect* rect, bool* is_closed = nullptr) const;
-  bool IsSkOval(SkRect* bounds) const;
-  bool IsSkRRect(SkRRect* rrect) const;
-
   bool Contains(const DlPoint& point) const;
 
-  SkRect GetSkBounds() const;
-  DlRect GetBounds() const;
+  DlRect GetBounds() const override;
+  DlPathFillType GetFillType() const override;
 
   bool operator==(const DlPath& other) const;
   bool operator!=(const DlPath& other) const { return !(*this == other); }
 
   bool IsConverted() const;
   bool IsVolatile() const;
-  bool IsConvex() const;
+  bool IsConvex() const override;
 
   DlPath operator+(const DlPath& other) const;
 

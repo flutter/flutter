@@ -302,8 +302,9 @@ bool Playground::OpenPlaygroundHere(
       }
       pass->SetLabel("ImGui Render Pass");
       if (!host_buffer_) {
-        host_buffer_ = HostBuffer::Create(context_->GetResourceAllocator(),
-                                          context_->GetIdleWaiter());
+        host_buffer_ = HostBuffer::Create(
+            context_->GetResourceAllocator(), context_->GetIdleWaiter(),
+            context_->GetCapabilities()->GetMinimumUniformAlignment());
       }
 
       ImGui_ImplImpeller_RenderDrawData(ImGui::GetDrawData(), *pass,

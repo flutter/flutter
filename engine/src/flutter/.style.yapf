@@ -10,5 +10,5 @@ dedent_closing_brackets = true
 coalesce_brackets = true
 each_dict_entry_on_separate_line = false
 # Match the number in .pylintrc at
-# https://github.com/flutter/engine/blob/main/.pylintrc#L135
+# https://github.com/flutter/flutter/blob/main/engine/src/flutter/.pylintrc#L135
 column_limit = 100
