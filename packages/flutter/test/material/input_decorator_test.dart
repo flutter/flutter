@@ -7384,6 +7384,82 @@ void main() {
       // The suffix icon should be tapped.
       expect(tapped, isTrue);
     });
+
+    testWidgets('suffixIconGap is applied', (WidgetTester tester) async {
+      // Default gap.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isHovering: true,
+          decoration: const InputDecoration(labelText: labelText, suffixIcon: Icon(suffixIcon)),
+        ),
+      );
+
+      // Icon internal padding is 12 per Material 3 spec.
+      const double iconLeftPadding = 12.0;
+      expect(
+        tester.getRect(findSuffixIconInnerRichText()).left - getSuffixIconRect(tester).left,
+        iconLeftPadding,
+      );
+
+      double suffixIconGap =
+          tester.getRect(findSuffixIconInnerRichText()).left -
+          getInputRect(tester).right -
+          iconLeftPadding;
+      expect(suffixIconGap, 4.0); // M3 default.
+
+      // Custom gap defined at InputDecoration level.
+      const double customGap = 9.0;
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isHovering: true,
+          decoration: const InputDecoration(
+            labelText: labelText,
+            suffixIcon: Icon(suffixIcon),
+            suffixIconGap: customGap,
+          ),
+        ),
+      );
+
+      suffixIconGap =
+          tester.getRect(findSuffixIconInnerRichText()).left -
+          getInputRect(tester).right -
+          iconLeftPadding;
+      expect(suffixIconGap, customGap);
+
+      // Custom gap defined at InputDecorationTheme level.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isHovering: true,
+          inputDecorationTheme: const InputDecorationTheme(suffixIconGap: customGap),
+          decoration: const InputDecoration(labelText: labelText, suffixIcon: Icon(suffixIcon)),
+        ),
+      );
+
+      suffixIconGap =
+          tester.getRect(findSuffixIconInnerRichText()).left -
+          getInputRect(tester).right -
+          iconLeftPadding;
+      expect(suffixIconGap, customGap);
+
+      // InputDecoration.suffixIconGap takes precedence over InputDecorationTheme.suffixIconGap.
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isHovering: true,
+          inputDecorationTheme: const InputDecorationTheme(suffixIconGap: 15.0),
+          decoration: const InputDecoration(
+            labelText: labelText,
+            suffixIcon: Icon(suffixIcon),
+            suffixIconGap: customGap,
+          ),
+        ),
+      );
+
+      suffixIconGap =
+          tester.getRect(findSuffixIconInnerRichText()).left -
+          getInputRect(tester).right -
+          iconLeftPadding;
+      expect(suffixIconGap, customGap);
+    });
   });
 
   group('Material3 - InputDecoration collapsed', () {

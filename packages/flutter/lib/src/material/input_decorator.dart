@@ -582,6 +582,7 @@ class _Decoration {
     this.suffix,
     this.prefixIcon,
     this.suffixIcon,
+    this.suffixIconGap,
     this.helperError,
     this.counter,
     this.container,
@@ -608,6 +609,7 @@ class _Decoration {
   final Widget? suffix;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final double? suffixIconGap;
   final Widget? helperError;
   final Widget? counter;
   final Widget? container;
@@ -642,6 +644,7 @@ class _Decoration {
         other.suffix == suffix &&
         other.prefixIcon == prefixIcon &&
         other.suffixIcon == suffixIcon &&
+        other.suffixIconGap == suffixIconGap &&
         other.helperError == helperError &&
         other.counter == counter &&
         other.container == container;
@@ -668,7 +671,7 @@ class _Decoration {
     prefix,
     suffix,
     prefixIcon,
-    Object.hash(suffixIcon, helperError, counter, container),
+    Object.hash(suffixIcon, suffixIconGap, helperError, counter, container),
   );
 }
 
@@ -714,7 +717,7 @@ class _RenderDecoration extends RenderBox
   // configurable by InputDecorationTheme.
   double get subtextGap => material3 ? 4.0 : 8.0;
   double get prefixToInputGap => material3 ? 4.0 : 0.0;
-  double get inputToSuffixGap => material3 ? 4.0 : 0.0;
+  double get inputToSuffixGap => decoration.suffixIconGap ?? (material3 ? 4.0 : 0.0);
 
   RenderBox? get icon => childForSlot(_DecorationSlot.icon);
   RenderBox? get input => childForSlot(_DecorationSlot.input);
@@ -2648,6 +2651,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         suffix: suffix,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
+        suffixIconGap: decoration.suffixIconGap,
         helperError: helperError,
         counter: counter,
         container: container,
@@ -2798,6 +2802,7 @@ class InputDecoration {
     this.suffixStyle,
     this.suffixIconColor,
     this.suffixIconConstraints,
+    this.suffixIconGap,
     this.counter,
     this.counterText,
     this.counterStyle,
@@ -2910,6 +2915,7 @@ class InputDecoration {
        suffixStyle = null,
        suffixIconColor = null,
        suffixIconConstraints = null,
+       suffixIconGap = null,
        counter = null,
        counterText = null,
        counterStyle = null,
@@ -3565,6 +3571,12 @@ class InputDecoration {
   /// {@end-tool}
   final BoxConstraints? suffixIconConstraints;
 
+  /// The width of the gap between the content and the [suffixIcon].
+  ///
+  /// If null and [ThemeData.useMaterial3] is true, defaults to 4 pixels.
+  /// If null and [ThemeData.useMaterial3] is false, defaults to zero.
+  final double? suffixIconGap;
+
   /// Optional text to place below the line as a character count.
   ///
   /// Rendered using [counterStyle]. Uses [helperStyle] if [counterStyle] is
@@ -3906,6 +3918,7 @@ class InputDecoration {
     TextStyle? suffixStyle,
     Color? suffixIconColor,
     BoxConstraints? suffixIconConstraints,
+    double? suffixIconGap,
     Widget? counter,
     String? counterText,
     TextStyle? counterStyle,
@@ -3965,6 +3978,7 @@ class InputDecoration {
       suffixStyle: suffixStyle ?? this.suffixStyle,
       suffixIconColor: suffixIconColor ?? this.suffixIconColor,
       suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
+      suffixIconGap: suffixIconGap ?? this.suffixIconGap,
       counter: counter ?? this.counter,
       counterText: counterText ?? this.counterText,
       counterStyle: counterStyle ?? this.counterStyle,
@@ -4014,6 +4028,7 @@ class InputDecoration {
       suffixStyle: suffixStyle ?? theme.suffixStyle,
       suffixIconColor: suffixIconColor ?? theme.suffixIconColor,
       suffixIconConstraints: suffixIconConstraints ?? theme.suffixIconConstraints,
+      suffixIconGap: suffixIconGap ?? theme.suffixIconGap,
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
@@ -4079,6 +4094,7 @@ class InputDecoration {
         other.suffixText == suffixText &&
         other.suffixStyle == suffixStyle &&
         other.suffixIconConstraints == suffixIconConstraints &&
+        other.suffixIconGap == suffixIconGap &&
         other.counter == counter &&
         other.counterText == counterText &&
         other.counterStyle == counterStyle &&
@@ -4145,6 +4161,7 @@ class InputDecoration {
       suffixText,
       suffixStyle,
       suffixIconConstraints,
+      suffixIconGap,
       counter,
       counterText,
       counterStyle,
@@ -4201,6 +4218,7 @@ class InputDecoration {
       if (suffixText != null) 'suffixText: $suffixText',
       if (suffixStyle != null) 'suffixStyle: $suffixStyle',
       if (suffixIconConstraints != null) 'suffixIconConstraints: $suffixIconConstraints',
+      if (suffixIconGap != null) 'suffixIconGap: $suffixIconGap',
       if (counter != null) 'counter: $counter',
       if (counterText != null) 'counterText: $counterText',
       if (counterStyle != null) 'counterStyle: $counterStyle',
@@ -4259,6 +4277,7 @@ class InputDecorationTheme with Diagnosticable {
     this.suffixStyle,
     this.suffixIconColor,
     this.suffixIconConstraints,
+    this.suffixIconGap,
     this.counterStyle,
     this.filled = false,
     this.fillColor,
@@ -4456,6 +4475,12 @@ class InputDecorationTheme with Diagnosticable {
   /// If null, [BoxConstraints] with a minimum width and height of 48px is
   /// used.
   final BoxConstraints? suffixIconConstraints;
+
+  /// The width of the gap between the content and the [InputDecoration.suffixIcon].
+  ///
+  /// If null and [ThemeData.useMaterial3] is true, defaults to 4 pixels.
+  /// If null and [ThemeData.useMaterial3] is false, defaults to zero.
+  final double? suffixIconGap;
 
   /// The style to use for the [InputDecoration.counterText].
   ///
@@ -4737,6 +4762,7 @@ class InputDecorationTheme with Diagnosticable {
     TextStyle? suffixStyle,
     Color? suffixIconColor,
     BoxConstraints? suffixIconConstraints,
+    double? suffixIconGap,
     TextStyle? counterStyle,
     bool? filled,
     Color? fillColor,
@@ -4776,6 +4802,7 @@ class InputDecorationTheme with Diagnosticable {
       suffixStyle: suffixStyle ?? this.suffixStyle,
       suffixIconColor: suffixIconColor ?? this.suffixIconColor,
       suffixIconConstraints: suffixIconConstraints ?? this.suffixIconConstraints,
+      suffixIconGap: suffixIconGap ?? this.suffixIconGap,
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
@@ -4826,6 +4853,7 @@ class InputDecorationTheme with Diagnosticable {
       suffixStyle: suffixStyle ?? inputDecorationTheme.suffixStyle,
       suffixIconColor: suffixIconColor ?? inputDecorationTheme.suffixIconColor,
       suffixIconConstraints: suffixIconConstraints ?? inputDecorationTheme.suffixIconConstraints,
+      suffixIconGap: suffixIconGap ?? inputDecorationTheme.suffixIconGap,
       counterStyle: counterStyle ?? inputDecorationTheme.counterStyle,
       fillColor: fillColor ?? inputDecorationTheme.fillColor,
       activeIndicatorBorder: activeIndicatorBorder ?? inputDecorationTheme.activeIndicatorBorder,
@@ -4866,6 +4894,7 @@ class InputDecorationTheme with Diagnosticable {
     suffixIconColor,
     Object.hash(
       suffixIconConstraints,
+      suffixIconGap,
       counterStyle,
       filled,
       fillColor,
@@ -4913,6 +4942,7 @@ class InputDecorationTheme with Diagnosticable {
         other.suffixStyle == suffixStyle &&
         other.suffixIconColor == suffixIconColor &&
         other.suffixIconConstraints == suffixIconConstraints &&
+        other.suffixIconGap == suffixIconGap &&
         other.counterStyle == counterStyle &&
         other.floatingLabelBehavior == floatingLabelBehavior &&
         other.floatingLabelAlignment == floatingLabelAlignment &&
@@ -5049,6 +5079,13 @@ class InputDecorationTheme with Diagnosticable {
         'suffixIconConstraints',
         suffixIconConstraints,
         defaultValue: defaultTheme.suffixIconConstraints,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<double?>(
+        'suffixIconGap',
+        suffixIconGap,
+        defaultValue: defaultTheme.suffixIconGap,
       ),
     );
     properties.add(
