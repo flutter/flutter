@@ -1025,8 +1025,13 @@ class SemanticsFlag {
   String toString() => 'SemanticsFlag.$name';
 }
 
-/// Semantics flags.
+/// Represents a collection of boolean flags that convey semantic information
+/// about a widget's accessibility state and properties.
+///
+/// For example, These flags can indicate if an element is
+/// checkable, currently checked, selectable, or functions as a button.
 class SemanticsFlags {
+  /// Creates a set of semantics flags that describe various states of a widget.
   /// All flags default to `false` unless specified.
   const SemanticsFlags({
     this.hasCheckedState = false,
@@ -1062,8 +1067,8 @@ class SemanticsFlags {
     this.isRequired = false,
   });
 
-  /// SemanticsFlags with everything default to false.
-  static const SemanticsFlags none = SemanticsFlags();
+  /// The set of semantics flags with every flag set to false.
+  static const SemanticsFlags kNone = SemanticsFlags();
 
   /// {@macro dart.ui.semantics.hasCheckedState}
   final bool hasCheckedState;
@@ -1158,7 +1163,7 @@ class SemanticsFlags {
   /// {@macro dart.ui.semantics.isRequired}
   final bool isRequired;
 
-  /// Merges the flags from this object with [other].
+  /// Combines two sets of flags, such that if a flag it set to true in any of the two sets, the resulting set contains that flag set to true.
   SemanticsFlags merge(SemanticsFlags other) {
     return SemanticsFlags(
       hasCheckedState: hasCheckedState || other.hasCheckedState,

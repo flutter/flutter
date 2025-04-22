@@ -159,7 +159,7 @@ struct SemanticsNode {
   bool IsPlatformViewNode() const;
 
   int32_t id = 0;
-  SemanticsFlags flags{};
+  SemanticsFlags flags;
   int32_t actions = 0;
   int32_t maxValueLength = -1;
   int32_t currentValueLength = -1;

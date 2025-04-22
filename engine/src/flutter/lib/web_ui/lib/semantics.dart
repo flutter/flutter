@@ -265,9 +265,8 @@ class SemanticsFlag {
   String toString() => 'SemanticsFlag.$name';
 }
 
-/// Semantics flags.
+// Mirrors engine/src/flutter/lib/ui/semantics.dart
 class SemanticsFlags {
-  /// All flags default to `false` unless specified.
   const SemanticsFlags({
     this.hasCheckedState = false,
     this.isChecked = false,
@@ -302,8 +301,7 @@ class SemanticsFlags {
     this.isRequired = false,
   });
 
-  /// SemanticsFlags with everything default to false.
-  static const SemanticsFlags none = SemanticsFlags();
+  static const SemanticsFlags kNone = SemanticsFlags();
 
   final bool hasCheckedState;
   final bool isChecked;
@@ -337,7 +335,6 @@ class SemanticsFlags {
   final bool hasRequiredState;
   final bool isRequired;
 
-  /// Merges the flags from this object with [other].
   SemanticsFlags merge(SemanticsFlags other) {
     return SemanticsFlags(
       hasCheckedState: hasCheckedState || other.hasCheckedState,
@@ -374,7 +371,6 @@ class SemanticsFlags {
     );
   }
 
-  /// Copy the semantics flags, with some of them optionally replaced.
   SemanticsFlags copyWith({
     bool? hasCheckedState,
     bool? isChecked,

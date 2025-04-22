@@ -26,7 +26,7 @@ EmbedderSemanticsUpdate::EmbedderSemanticsUpdate(
   };
 }
 
-FlutterSemanticsFlag SemanticsFlagtoInt(const SemanticsFlags& flags) {
+FlutterSemanticsFlag SemanticsFlagsToInt(const SemanticsFlags& flags) {
   int result = 0;
 
   if (flags.hasCheckedState) {
@@ -141,7 +141,7 @@ void EmbedderSemanticsUpdate::AddNode(const SemanticsNode& node) {
   nodes_.push_back({
       sizeof(FlutterSemanticsNode),
       node.id,
-      SemanticsFlagtoInt(node.flags),
+      SemanticsFlagsToInt(node.flags),
       static_cast<FlutterSemanticsAction>(node.actions),
       node.textSelectionBase,
       node.textSelectionExtent,
@@ -242,7 +242,7 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
   nodes_.push_back({
       sizeof(FlutterSemanticsNode2),
       node.id,
-      SemanticsFlagtoInt(node.flags),
+      SemanticsFlagsToInt(node.flags),
       static_cast<FlutterSemanticsAction>(node.actions),
       node.textSelectionBase,
       node.textSelectionExtent,
