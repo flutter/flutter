@@ -8,10 +8,10 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/android/context/android_context.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
+#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 
 namespace flutter {
 
@@ -23,8 +23,8 @@ namespace flutter {
 /// impeller context setup has completed on the raster thread.
 class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
  public:
- AndroidExternalViewEmbedderWrapper(
-     bool meets_hcpp_criteria,
+  AndroidExternalViewEmbedderWrapper(
+      bool meets_hcpp_criteria,
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
@@ -77,16 +77,16 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   void Teardown() override;
 
  private:
-    void EnsureInitialized();
+  void EnsureInitialized();
 
-    // Whether the device has hcpp mode initialized and is at least API 34.
-   const bool meets_hcpp_criteria_;
-   const AndroidContext& android_context_;
-   const TaskRunners& task_runners_;
-   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
-   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
-   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
-   std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
+  // Whether the device has hcpp mode initialized and is at least API 34.
+  const bool meets_hcpp_criteria_;
+  const AndroidContext& android_context_;
+  const TaskRunners& task_runners_;
+  std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+  std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
+  std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
 };
 
 }  // namespace flutter
