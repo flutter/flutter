@@ -24,13 +24,15 @@ UIDartState::Context::Context(
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::RefPtr<SkiaUnrefQueue> unref_queue,
-    fml::WeakPtr<ImageDecoder> image_decoder,
-    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+    fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+    fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+        image_generator_registry,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     bool deterministic_rendering_enabled,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
     bool enable_impeller,
+    bool enable_flutter_gpu,
     impeller::RuntimeStageBackend runtime_stage_backend)
     : task_runners(task_runners),
       snapshot_delegate(std::move(snapshot_delegate)),
@@ -43,6 +45,7 @@ UIDartState::Context::Context(
       deterministic_rendering_enabled(deterministic_rendering_enabled),
       concurrent_task_runner(std::move(concurrent_task_runner)),
       enable_impeller(enable_impeller),
+      enable_flutter_gpu(enable_flutter_gpu),
       runtime_stage_backend(runtime_stage_backend) {}
 
 UIDartState::UIDartState(
@@ -79,6 +82,10 @@ bool UIDartState::IsDeterministicRenderingEnabled() const {
 
 bool UIDartState::IsImpellerEnabled() const {
   return context_.enable_impeller;
+}
+
+bool UIDartState::IsFlutterGPUEnabled() const {
+  return context_.enable_impeller && context_.enable_flutter_gpu;
 }
 
 impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
@@ -172,10 +179,14 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
   }
   FML_DCHECK(add_callback_ && remove_callback_);
   if (add) {
-    add_callback_(reinterpret_cast<intptr_t>(this),
-                  [this]() { this->FlushMicrotasksNow(); });
-  } else {
-    remove_callback_(reinterpret_cast<intptr_t>(this));
+    FML_DCHECK(!callback_queue_id_.has_value());
+    callback_queue_id_ =
+        add_callback_(reinterpret_cast<intptr_t>(this),
+                      [this]() { this->FlushMicrotasksNow(); });
+  } else if (callback_queue_id_.has_value()) {
+    remove_callback_(callback_queue_id_.value(),
+                     reinterpret_cast<intptr_t>(this));
+    callback_queue_id_.reset();
   }
 }
 
@@ -184,12 +195,13 @@ UIDartState::GetSnapshotDelegate() const {
   return context_.snapshot_delegate;
 }
 
-fml::WeakPtr<ImageDecoder> UIDartState::GetImageDecoder() const {
+fml::TaskRunnerAffineWeakPtr<ImageDecoder> UIDartState::GetImageDecoder()
+    const {
   return context_.image_decoder;
 }
 
-fml::WeakPtr<ImageGeneratorRegistry> UIDartState::GetImageGeneratorRegistry()
-    const {
+fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+UIDartState::GetImageGeneratorRegistry() const {
   return context_.image_generator_registry;
 }
 

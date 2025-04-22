@@ -421,6 +421,12 @@ class Image extends StatefulWidget {
   ///    [repeat], filtering, and blurring.
   ///
   /// By default, this feature is turned off ([WebHtmlElementStrategy.never]).
+  ///
+  /// ### Android Permissions
+  ///
+  /// Images fetched from the network require the internet permission.
+  /// Ensure that all AndroidMainifest.xml variants (especially release) have the internet permission.
+  /// See https://docs.flutter.dev/data-and-backend/networking for more information.
   Image.network(
     String src, {
     super.key,
