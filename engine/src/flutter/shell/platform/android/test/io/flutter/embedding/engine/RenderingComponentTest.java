@@ -16,9 +16,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class RenderingComponentTest {
   @Test
