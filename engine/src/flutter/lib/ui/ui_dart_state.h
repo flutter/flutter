@@ -55,8 +55,7 @@ class UIDartState : public tonic::DartState {
             bool deterministic_rendering_enabled,
             std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
             bool enable_impeller,
-            bool enable_flutter_gpu,
-            impeller::RuntimeStageBackend runtime_stage_backend);
+            bool enable_flutter_gpu);
 
     /// The task runners used by the shell hosting this runtime controller. This
     /// may be used by the isolate to scheduled asynchronous texture uploads or
@@ -104,9 +103,6 @@ class UIDartState : public tonic::DartState {
 
     /// Whether flutter_gpu is enabled or not.
     bool enable_flutter_gpu = false;
-
-    /// The expected backend for runtime stage shaders.
-    impeller::RuntimeStageBackend runtime_stage_backend;
   };
 
   Dart_Port main_port() const { return main_port_; }
@@ -176,9 +172,6 @@ class UIDartState : public tonic::DartState {
 
   /// Whether Flutter GPU is enabled for this application.
   bool IsFlutterGPUEnabled() const;
-
-  /// The expected type for runtime stage shaders.
-  impeller::RuntimeStageBackend GetRuntimeStageBackend() const;
 
   virtual Dart_Isolate CreatePlatformIsolate(Dart_Handle entry_point,
                                              char** error);

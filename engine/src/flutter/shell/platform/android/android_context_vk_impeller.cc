@@ -75,9 +75,8 @@ AndroidContextVKImpeller::AndroidContextVKImpeller(
     const AndroidContext::ContextSettings& settings)
     : AndroidContext(AndroidRenderingAPI::kImpellerVulkan),
       vulkan_dylib_(fml::NativeLibrary::Create("libvulkan.so")) {
-  auto impeller_context = CreateImpellerContext(vulkan_dylib_, settings);
-  SetImpellerContext(impeller_context);
-  is_valid_ = !!impeller_context;
+  impeller_context_ = CreateImpellerContext(vulkan_dylib_, settings);
+  is_valid_ = !!impeller_context_;
 }
 
 AndroidContextVKImpeller::~AndroidContextVKImpeller() = default;
@@ -88,6 +87,11 @@ bool AndroidContextVKImpeller::IsValid() const {
 
 AndroidRenderingAPI AndroidContextVKImpeller::RenderingApi() const {
   return AndroidRenderingAPI::kImpellerVulkan;
+}
+
+std::shared_ptr<impeller::Context>
+AndroidContextVKImpeller::GetImpellerContext() const {
+  return impeller_context_;
 }
 
 }  // namespace flutter

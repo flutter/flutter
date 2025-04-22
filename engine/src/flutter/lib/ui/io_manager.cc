@@ -6,8 +6,6 @@
 
 namespace flutter {
 
-std::shared_ptr<impeller::Context> IOManager::GetImpellerContext() const {
-  return nullptr;
-}
+//
 
 }  // namespace flutter

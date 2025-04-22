@@ -73,7 +73,7 @@ fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> Rasterizer::GetSnapshotDelegate()
 }
 
 void Rasterizer::SetImpellerContext(
-    std::weak_ptr<impeller::Context> impeller_context) {
+    std::shared_future<std::shared_ptr<impeller::Context>> impeller_context) {
   impeller_context_ = std::move(impeller_context);
 }
 

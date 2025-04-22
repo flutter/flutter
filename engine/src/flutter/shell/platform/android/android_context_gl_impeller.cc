@@ -198,9 +198,14 @@ AndroidContextGLImpeller::AndroidContextGLImpeller(
   offscreen_config_ = std::move(offscreen_config);
   onscreen_context_ = std::move(onscreen_context);
   offscreen_context_ = std::move(offscreen_context);
-  SetImpellerContext(impeller_context);
+  impeller_context_ = std::move(impeller_context);
 
   is_valid_ = true;
+}
+
+std::shared_ptr<impeller::Context>
+AndroidContextGLImpeller::GetImpellerContext() const {
+  return impeller_context_;
 }
 
 AndroidContextGLImpeller::~AndroidContextGLImpeller() = default;

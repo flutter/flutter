@@ -96,9 +96,14 @@ class TestAndroidContext : public AndroidContext {
  public:
   TestAndroidContext(const std::shared_ptr<impeller::Context>& impeller_context,
                      AndroidRenderingAPI rendering_api)
-      : AndroidContext(rendering_api) {
-    SetImpellerContext(impeller_context);
+      : AndroidContext(rendering_api), impeller_context_(impeller_context) {}
+
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override {
+    return impeller_context_;
   }
+
+ private:
+  std::shared_ptr<impeller::Context> impeller_context_;
 };
 
 TEST(AndroidContextGl, Create) {

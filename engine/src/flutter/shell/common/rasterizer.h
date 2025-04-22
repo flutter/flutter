@@ -205,7 +205,8 @@ class Rasterizer final : public SnapshotDelegate,
   ///
   ~Rasterizer();
 
-  void SetImpellerContext(std::weak_ptr<impeller::Context> impeller_context);
+  void SetImpellerContext(
+      std::shared_future<std::shared_ptr<impeller::Context>> impeller_context);
 
   //----------------------------------------------------------------------------
   /// @brief      Rasterizers may be created well before an on-screen surface is
@@ -685,7 +686,7 @@ class Rasterizer final : public SnapshotDelegate,
     if (surface_) {
       return surface_->GetAiksContext();
     }
-    if (auto context = impeller_context_.lock()) {
+    if (auto context = impeller_context_.get()) {
       return std::make_shared<impeller::AiksContext>(
           context, impeller::TypographerContextSkia::Make());
     }
@@ -757,7 +758,7 @@ class Rasterizer final : public SnapshotDelegate,
   bool is_torn_down_ = false;
   Delegate& delegate_;
   [[maybe_unused]] MakeGpuImageBehavior gpu_image_behavior_;
-  std::weak_ptr<impeller::Context> impeller_context_;
+  std::shared_future<std::shared_ptr<impeller::Context>> impeller_context_;
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<SnapshotSurfaceProducer> snapshot_surface_producer_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;

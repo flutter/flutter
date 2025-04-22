@@ -24,6 +24,8 @@ class AndroidContextGLImpeller : public AndroidContext {
   // |AndroidContext|
   AndroidRenderingAPI RenderingApi() const override;
 
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
+
   bool ResourceContextMakeCurrent(impeller::egl::Surface* offscreen_surface);
   bool ResourceContextClearCurrent();
   std::unique_ptr<impeller::egl::Surface> CreateOffscreenSurface();
@@ -36,6 +38,7 @@ class AndroidContextGLImpeller : public AndroidContext {
   class ReactorWorker;
 
   std::shared_ptr<ReactorWorker> reactor_worker_;
+  std::shared_ptr<impeller::Context> impeller_context_;
   std::unique_ptr<impeller::egl::Display> display_;
   std::unique_ptr<impeller::egl::Config> onscreen_config_;
   std::unique_ptr<impeller::egl::Config> offscreen_config_;

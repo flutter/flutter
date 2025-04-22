@@ -204,7 +204,7 @@ Dart_Handle EncodeImage(CanvasImage* canvas_image,
             raster_task_runner, io_task_runner,
             io_manager->GetResourceContext(), snapshot_delegate,
             io_manager->GetIsGpuDisabledSyncSwitch(),
-            io_manager->GetImpellerContext(), is_impeller_enabled);
+            io_manager->GetImpellerContext().get(), is_impeller_enabled);
       }));
 
   return Dart_Null();

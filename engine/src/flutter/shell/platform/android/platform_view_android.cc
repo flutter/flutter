@@ -14,6 +14,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
+#include "flutter/shell/platform/android/android_context_dynamic_impeller.h"
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
@@ -28,6 +29,7 @@
 #include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 #include "fml/logging.h"
 #include "impeller/display_list/aiks_context.h"
+#include "shell/platform/android/android_surface_dynamic_impeller.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
@@ -44,40 +46,6 @@
 namespace flutter {
 
 namespace {
-
-static const constexpr char* kAndroidHuawei = "android-huawei";
-
-/// These are SoCs that crash when using AHB imports.
-static constexpr const char* kBLC[] = {
-    // Most Exynos Series SoC
-    "exynos7870",  //
-    "exynos7880",  //
-    "exynos7872",  //
-    "exynos7884",  //
-    "exynos7885",  //
-    "exynos8890",  //
-    "exynos8895",  //
-    "exynos7904",  //
-    "exynos9609",  //
-    "exynos9610",  //
-    "exynos9611",  //
-    "exynos9810"   //
-};
-
-static bool IsDeviceEmulator(std::string_view product_model) {
-  return std::string(product_model).find("gphone") != std::string::npos;
-}
-
-static bool IsKnownBadSOC(std::string_view hardware) {
-  // TODO(jonahwilliams): if the list gets too long (> 16), convert
-  // to a hash map first.
-  for (const auto& board : kBLC) {
-    if (strcmp(board, hardware.data()) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
 
 static constexpr int kMinAPILevelHCPP = 34;
 static constexpr int64_t kImplicitViewId = 0;
@@ -106,69 +74,6 @@ AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
-static std::unique_ptr<AndroidContextVKImpeller>
-GetActualRenderingAPIForImpeller(
-    int api_level,
-    const AndroidContext::ContextSettings& settings) {
-  constexpr int kMinimumAndroidApiLevelForMediaTekVulkan = 31;
-
-  // have requisite features to support platform views.
-  //
-  // Even if this check returns true, Impeller may determine it cannot use
-  // Vulkan for some other reason, such as a missing required extension or
-  // feature. In these cases it will use OpenGLES.
-  char product_model[PROP_VALUE_MAX];
-  __system_property_get("ro.product.model", product_model);
-  if (IsDeviceEmulator(product_model)) {
-    // Avoid using Vulkan on known emulators.
-    return nullptr;
-  }
-
-  __system_property_get("ro.com.google.clientidbase", product_model);
-  if (strcmp(product_model, kAndroidHuawei) == 0) {
-    // Avoid using Vulkan on Huawei as AHB imports do not
-    // consistently work.
-    return nullptr;
-  }
-
-  if (api_level < kMinimumAndroidApiLevelForMediaTekVulkan &&
-      __system_property_find("ro.vendor.mediatek.platform") != nullptr) {
-    // Probably MediaTek. Avoid Vulkan if older than 34 to work around
-    // crashes when importing AHB.
-    return nullptr;
-  }
-
-  __system_property_get("ro.product.board", product_model);
-  if (IsKnownBadSOC(product_model)) {
-    // Avoid using Vulkan on known bad SoCs.
-    return nullptr;
-  }
-
-  // Determine if Vulkan is supported by creating a Vulkan context and
-  // checking if it is valid.
-  impeller::ScopedValidationDisable disable_validation;
-  auto vulkan_backend = std::make_unique<AndroidContextVKImpeller>(
-      AndroidContext::ContextSettings{
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-          .enable_validation = settings.enable_validation,
-#else
-          .enable_validation = false,
-#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-          .enable_gpu_tracing = settings.enable_gpu_tracing,
-          .enable_surface_control = settings.enable_surface_control,
-          .impeller_flags =
-              {
-                  .lazy_shader_mode = settings.impeller_flags.lazy_shader_mode,
-                  .antialiased_lines =
-                      settings.impeller_flags.antialiased_lines,
-              },
-      });
-  if (!vulkan_backend->IsValid()) {
-    return nullptr;
-  }
-  return vulkan_backend;
-}
-
 std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
   switch (android_context_->RenderingApi()) {
     case AndroidRenderingAPI::kSoftware:
@@ -182,8 +87,11 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
     case AndroidRenderingAPI::kImpellerVulkan:
       return std::make_unique<AndroidSurfaceVKImpeller>(
           std::static_pointer_cast<AndroidContextVKImpeller>(android_context_));
-    case AndroidRenderingAPI::kImpellerAutoselect:
-      FML_CHECK(false);
+    case AndroidRenderingAPI::kImpellerAutoselect: {
+      auto cast_ptr = std::static_pointer_cast<AndroidContextDynamicImpeller>(
+          android_context_);
+      return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr);
+    }
   }
   FML_UNREACHABLE();
 }
@@ -209,15 +117,7 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
       );
     case AndroidRenderingAPI::kImpellerAutoselect:
       // Determine if we're using GL or Vulkan.
-      auto android_vulkan_context = GetActualRenderingAPIForImpeller(
-          android_get_device_api_level(), settings);
-      if (android_vulkan_context) {
-        return android_vulkan_context;
-      } else {
-        return std::make_unique<AndroidContextGLImpeller>(
-            std::make_unique<impeller::egl::Display>(),
-            enable_opengl_gpu_tracing);
-      }
+      return std::make_unique<AndroidContextDynamicImpeller>(settings);
   }
   FML_UNREACHABLE();
 }
@@ -257,13 +157,7 @@ PlatformViewAndroid::PlatformViewAndroid(
             .impeller_enable_lazy_shader_mode  //
     );
     android_surface_ = surface_factory_->CreateSurface();
-    android_use_new_platform_view_ =
-        android_context->RenderingApi() ==
-            AndroidRenderingAPI::kImpellerVulkan &&
-        (android_get_device_api_level() >= kMinAPILevelHCPP) &&
-        delegate.OnPlatformViewGetSettings().enable_surface_control &&
-        impeller::ContextVK::Cast(*android_context->GetImpellerContext())
-            .GetShouldEnableSurfaceControlSwapchain();
+    android_use_new_platform_view_ = false;
     FML_CHECK(android_surface_ && android_surface_->IsValid())
         << "Could not create an OpenGL, Vulkan or Software surface to set "
            "up "

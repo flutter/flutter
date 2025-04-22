@@ -67,6 +67,7 @@ void PlatformView::NotifyCreated() {
       task_runners_.GetRasterTaskRunner(), [platform_view, &surface, &latch]() {
         surface = platform_view->CreateRenderingSurface();
         if (surface && !surface->IsValid()) {
+          FML_LOG(ERROR) << "surface not valid!";
           surface.reset();
         }
         latch.Signal();

@@ -31,8 +31,7 @@ UIDartState::Context::Context(
     bool deterministic_rendering_enabled,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
     bool enable_impeller,
-    bool enable_flutter_gpu,
-    impeller::RuntimeStageBackend runtime_stage_backend)
+    bool enable_flutter_gpu)
     : task_runners(task_runners),
       snapshot_delegate(std::move(snapshot_delegate)),
       io_manager(std::move(io_manager)),
@@ -44,8 +43,7 @@ UIDartState::Context::Context(
       deterministic_rendering_enabled(deterministic_rendering_enabled),
       concurrent_task_runner(std::move(concurrent_task_runner)),
       enable_impeller(enable_impeller),
-      enable_flutter_gpu(enable_flutter_gpu),
-      runtime_stage_backend(runtime_stage_backend) {}
+      enable_flutter_gpu(enable_flutter_gpu) {}
 
 UIDartState::UIDartState(
     TaskObserverAdd add_callback,
@@ -85,10 +83,6 @@ bool UIDartState::IsImpellerEnabled() const {
 
 bool UIDartState::IsFlutterGPUEnabled() const {
   return context_.enable_impeller && context_.enable_flutter_gpu;
-}
-
-impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
-  return context_.runtime_stage_backend;
 }
 
 void UIDartState::DidSetIsolate() {

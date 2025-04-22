@@ -129,8 +129,7 @@ class Shell final : public PlatformView::Delegate,
       fml::WeakPtr<IOManager> io_manager,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-      const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-      impeller::RuntimeStageBackend runtime_stage_type)>
+      const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch)>
       EngineCreateCallback;
 
   //----------------------------------------------------------------------------

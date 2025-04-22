@@ -13,8 +13,9 @@ AndroidContext::~AndroidContext() {
   if (main_context_) {
     main_context_->releaseResourcesAndAbandonContext();
   }
-  if (impeller_context_) {
-    impeller_context_->Shutdown();
+  auto impeller_context = GetImpellerContext();
+  if (impeller_context) {
+    impeller_context->Shutdown();
   }
 };
 
@@ -36,12 +37,7 @@ sk_sp<GrDirectContext> AndroidContext::GetMainSkiaContext() const {
 }
 
 std::shared_ptr<impeller::Context> AndroidContext::GetImpellerContext() const {
-  return impeller_context_;
-}
-
-void AndroidContext::SetImpellerContext(
-    const std::shared_ptr<impeller::Context>& context) {
-  impeller_context_ = context;
+  return nullptr;
 }
 
 }  // namespace flutter
