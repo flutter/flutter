@@ -247,6 +247,7 @@ bool FlutterMain::Register(JNIEnv* env) {
 AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     const flutter::Settings& settings,
     int api_level) {
+#if !SLIMPELLER
   if (settings.enable_software_rendering) {
     if (settings.enable_impeller) {
       FML_CHECK(!settings.enable_impeller)
@@ -275,6 +276,9 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
   }
 
   return AndroidRenderingAPI::kSkiaOpenGLES;
+#else
+  return AndroidRenderingAPI::kImpellerAutoselect
+#endif  // !SLIMPELLER
 }
 
 }  // namespace flutter
