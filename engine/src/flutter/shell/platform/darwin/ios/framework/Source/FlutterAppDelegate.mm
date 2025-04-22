@@ -20,7 +20,7 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-@interface FlutterAppDelegate () <UIWindowSceneDelegate>
+@interface FlutterAppDelegate ()
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
 @end
@@ -343,35 +343,20 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
 - (UISceneConfiguration*)application:(UIApplication*)application
     configurationForConnectingSceneSession:(UISceneSession*)connectingSceneSession
-                                   options:(UISceneConnectionOptions*)options {
-  // Not called before iOS 13.
-  if (@available(iOS 13.0, *)) {
-    NSDictionary* sceneManifest =
-        [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
-    NSDictionary* sceneConfigs = sceneManifest[@"UISceneConfigurations"];
-    NSArray* roleConfigs = sceneConfigs[connectingSceneSession.role];
+                                   options:(UISceneConnectionOptions*)options
+    API_AVAILABLE(ios(13.0)) {
+  UISceneConfiguration* config =
+      [UISceneConfiguration configurationWithName:@"flutter"
+                                      sessionRole:connectingSceneSession.role];
+  config.sceneClass = [UIWindowScene class];
+  config.delegateClass = [FlutterAppDelegate class];
 
-    if (roleConfigs.count > 0) {
-      // Defer to the Info.plist if it is specified there.
-      return nil;
-    }
-
-    // This is the default storyboard in the flutter template.
+  if ([[NSBundle mainBundle] pathForResource:@"Main" ofType:@"storyboardc"]) {
     UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main"
                                                          bundle:[NSBundle mainBundle]];
-    if (!storyboard) {
-      return nil;
-    }
-
-    UISceneConfiguration* config =
-        [UISceneConfiguration configurationWithName:@"flutter"
-                                        sessionRole:connectingSceneSession.role];
-    config.sceneClass = [UIWindowScene class];
-    config.delegateClass = [FlutterAppDelegate class];
     config.storyboard = storyboard;
-    return config;
   }
-  return nil;
+  return config;
 }
 
 @end

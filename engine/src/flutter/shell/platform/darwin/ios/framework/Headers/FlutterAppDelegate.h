@@ -24,8 +24,10 @@
  * code as necessary from FlutterAppDelegate.mm.
  */
 FLUTTER_DARWIN_EXPORT
-@interface FlutterAppDelegate
-    : UIResponder <UIApplicationDelegate, FlutterPluginRegistry, FlutterAppLifeCycleProvider>
+@interface FlutterAppDelegate : UIResponder <UIApplicationDelegate,
+                                             UIWindowSceneDelegate,
+                                             FlutterPluginRegistry,
+                                             FlutterAppLifeCycleProvider>
 
 @property(strong, nonatomic) UIWindow* window;
 
