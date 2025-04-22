@@ -29,6 +29,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.provider.Settings;
 import android.text.InputType;
 import android.text.Selection;
@@ -68,6 +69,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,9 +88,7 @@ import org.robolectric.shadows.ShadowAutofillManager;
 import org.robolectric.shadows.ShadowBuild;
 import org.robolectric.shadows.ShadowInputMethodManager;
 
-@Config(
-    manifest = Config.NONE,
-    shadows = {TextInputPluginTest.TestImm.class, TextInputPluginTest.TestAfm.class})
+@Config(shadows = {TextInputPluginTest.TestImm.class, TextInputPluginTest.TestAfm.class})
 @RunWith(AndroidJUnit4.class)
 public class TextInputPluginTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -184,6 +184,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     textInputPlugin.setTextInputEditingState(
@@ -255,6 +256,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     textInputPlugin.setTextInputEditingState(
@@ -310,6 +312,7 @@ public class TextInputPluginTest {
             false, // Delta model is disabled.
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -431,6 +434,7 @@ public class TextInputPluginTest {
             true, // Enable delta model.
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -570,6 +574,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     // There's a pending restart since we initialized the text input client. Flush that now.
@@ -682,6 +687,7 @@ public class TextInputPluginTest {
             true, // Enable delta model.
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -800,6 +806,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     // There's a pending restart since we initialized the text input client. Flush that now.
@@ -911,6 +918,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     // There's a pending restart since we initialized the text input client. Flush that now.
@@ -1006,6 +1014,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
     // There's a pending restart since we initialized the text input client. Flush that now.
     textInputPlugin.setTextInputEditingState(
@@ -1045,6 +1054,7 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
+            null,
             null,
             null,
             null,
@@ -1100,6 +1110,7 @@ public class TextInputPluginTest {
             false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false),
+            null,
             null,
             null,
             null,
@@ -1211,6 +1222,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
     // There's a pending restart since we initialized the text input client. Flush that now.
     textInputPlugin.setTextInputEditingState(
@@ -1262,6 +1274,7 @@ public class TextInputPluginTest {
             false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(textInputType, false, false),
+            null,
             null,
             null,
             null,
@@ -1347,6 +1360,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
     // There's a pending restart since we initialized the text input client. Flush that now.
     textInputPlugin.setTextInputEditingState(
@@ -1391,6 +1405,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     InputConnection connection =
@@ -1427,6 +1442,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     textInputPlugin.showTextInput(testView);
@@ -1457,6 +1473,7 @@ public class TextInputPluginTest {
             false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.WEB_SEARCH, false, false),
+            null,
             null,
             null,
             null,
@@ -1499,6 +1516,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     EditorInfo editorInfo = new EditorInfo();
@@ -1534,6 +1552,7 @@ public class TextInputPluginTest {
             false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.MULTILINE, false, false),
+            null,
             null,
             null,
             null,
@@ -1581,6 +1600,7 @@ public class TextInputPluginTest {
             null,
             null,
             null,
+            null,
             null));
 
     EditorInfo editorInfo = new EditorInfo();
@@ -1615,6 +1635,7 @@ public class TextInputPluginTest {
             false,
             TextInputChannel.TextCapitalization.NONE,
             new TextInputChannel.InputType(TextInputChannel.TextInputType.MULTILINE, false, false),
+            null,
             null,
             null,
             null,
@@ -1661,6 +1682,7 @@ public class TextInputPluginTest {
             null,
             autofill,
             null,
+            null,
             null);
 
     textInputPlugin.setTextInputClient(
@@ -1677,7 +1699,8 @@ public class TextInputPluginTest {
             null,
             autofill,
             null,
-            new TextInputChannel.Configuration[] {config}));
+            new TextInputChannel.Configuration[] {config},
+            null));
 
     final ViewStructure viewStructure = mock(ViewStructure.class);
     final ViewStructure[] children = {mock(ViewStructure.class), mock(ViewStructure.class)};
@@ -1722,6 +1745,7 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
+            null,
             null,
             null,
             null,
@@ -1772,6 +1796,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill,
+            null,
             null,
             null);
 
@@ -1830,6 +1855,7 @@ public class TextInputPluginTest {
             null,
             autofill1,
             null,
+            null,
             null);
     final TextInputChannel.Configuration config2 =
         new TextInputChannel.Configuration(
@@ -1843,6 +1869,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill2,
+            null,
             null,
             null);
 
@@ -1860,7 +1887,8 @@ public class TextInputPluginTest {
             null,
             autofill1,
             null,
-            new TextInputChannel.Configuration[] {config1, config2}));
+            new TextInputChannel.Configuration[] {config1, config2},
+            null));
 
     final ViewStructure viewStructure = mock(ViewStructure.class);
     final ViewStructure[] children = {mock(ViewStructure.class), mock(ViewStructure.class)};
@@ -1923,6 +1951,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill,
+            null,
             null,
             null));
 
@@ -1989,6 +2018,7 @@ public class TextInputPluginTest {
             null,
             autofill1,
             null,
+            null,
             null);
     final TextInputChannel.Configuration config2 =
         new TextInputChannel.Configuration(
@@ -2002,6 +2032,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill2,
+            null,
             null,
             null);
 
@@ -2020,7 +2051,8 @@ public class TextInputPluginTest {
             null,
             autofill1,
             null,
-            new TextInputChannel.Configuration[] {config1, config2});
+            new TextInputChannel.Configuration[] {config1, config2},
+            null);
 
     textInputPlugin.setTextInputClient(0, autofillConfiguration);
 
@@ -2061,6 +2093,7 @@ public class TextInputPluginTest {
             true,
             false,
             TextInputChannel.TextCapitalization.NONE,
+            null,
             null,
             null,
             null,
@@ -2132,6 +2165,7 @@ public class TextInputPluginTest {
             null,
             autofill1,
             null,
+            null,
             null);
     final TextInputChannel.Configuration config2 =
         new TextInputChannel.Configuration(
@@ -2145,6 +2179,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill2,
+            null,
             null,
             null);
 
@@ -2161,7 +2196,8 @@ public class TextInputPluginTest {
             null,
             autofill1,
             null,
-            new TextInputChannel.Configuration[] {config1, config2});
+            new TextInputChannel.Configuration[] {config1, config2},
+            null);
 
     textInputPlugin.setTextInputClient(0, autofillConfiguration);
     textInputPlugin.setTextInputEditingState(
@@ -2224,6 +2260,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofillConfig,
+            null,
             null,
             null);
 
@@ -2291,6 +2328,7 @@ public class TextInputPluginTest {
             null,
             autofill1,
             null,
+            null,
             null);
     final TextInputChannel.Configuration config2 =
         new TextInputChannel.Configuration(
@@ -2304,6 +2342,7 @@ public class TextInputPluginTest {
             null,
             null,
             autofill2,
+            null,
             null,
             null);
 
@@ -2320,7 +2359,8 @@ public class TextInputPluginTest {
             null,
             autofill1,
             null,
-            new TextInputChannel.Configuration[] {config1, config2});
+            new TextInputChannel.Configuration[] {config1, config2},
+            null);
 
     textInputPlugin.setTextInputClient(0, autofillConfiguration);
 
@@ -2701,6 +2741,46 @@ public class TextInputPluginTest {
 
     verify(flutterRenderer, atLeast(1)).setViewportMetrics(viewportMetricsCaptor.capture());
     assertEquals(0, viewportMetricsCaptor.getValue().viewPaddingBottom);
+  }
+
+  @Test
+  @TargetApi(API_LEVELS.API_24)
+  @Config(sdk = API_LEVELS.API_24)
+  public void inputConnection_hintLocalesIsSetInEditorInfo() {
+    View testView = new View(ctx);
+    DartExecutor dartExecutor = mock(DartExecutor.class);
+    TextInputChannel textInputChannel = new TextInputChannel(dartExecutor);
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    final Locale[] hintLocales = {new Locale("en")};
+    textInputPlugin.setTextInputClient(
+        0,
+        new TextInputChannel.Configuration(
+            false,
+            false,
+            true,
+            true,
+            false,
+            TextInputChannel.TextCapitalization.NONE,
+            new TextInputChannel.InputType(TextInputChannel.TextInputType.MULTILINE, false, false),
+            null,
+            null,
+            null,
+            null,
+            null,
+            hintLocales));
+
+    EditorInfo editorInfo = new EditorInfo();
+    InputConnection connection =
+        textInputPlugin.createInputConnection(testView, mock(KeyboardManager.class), editorInfo);
+
+    assertEquals(editorInfo.hintLocales, new LocaleList(hintLocales));
   }
 
   interface EventHandler {
