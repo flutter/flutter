@@ -40,8 +40,8 @@ android {
   }
 
   compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_11
+    targetCompatibility JavaVersion.VERSION_11
   }
 
   testOptions {
@@ -75,9 +75,8 @@ android {
     testImplementation "junit:junit:4.13.2"
     testImplementation "androidx.test.ext:junit:1.1.4-alpha07"
 
-    def mockitoVersion = "4.7.0"
+    def mockitoVersion = "5.17.0"
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "org.mockito:mockito-inline:$mockitoVersion"
     testImplementation "org.mockito:mockito-android:$mockitoVersion"
   }
 

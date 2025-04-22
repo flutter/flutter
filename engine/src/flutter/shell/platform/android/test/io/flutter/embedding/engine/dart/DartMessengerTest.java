@@ -35,7 +35,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
+
 @RunWith(AndroidJUnit4.class)
 public class DartMessengerTest {
   SynchronousTaskQueue synchronousTaskQueue = new SynchronousTaskQueue();

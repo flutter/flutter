@@ -26,7 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 
 @Config(
-    manifest = Config.NONE,
     shadows = {})
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24)

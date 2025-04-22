@@ -53,7 +53,7 @@ class TestDeferredComponentManager implements DeferredComponentManager {
   public void destroy() {}
 }
 
-@Config(manifest = Config.NONE)
+
 @RunWith(AndroidJUnit4.class)
 public class DeferredComponentChannelTest {
   @Test

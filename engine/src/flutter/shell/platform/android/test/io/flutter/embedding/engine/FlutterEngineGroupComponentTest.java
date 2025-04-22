@@ -40,7 +40,7 @@ import org.robolectric.annotation.Config;
 
 // It's a component test because it tests the FlutterEngineGroup its components such as the
 // FlutterEngine and the DartExecutor.
-@Config(manifest = Config.NONE)
+
 @RunWith(AndroidJUnit4.class)
 public class FlutterEngineGroupComponentTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
