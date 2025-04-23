@@ -45,7 +45,7 @@ abstract final class FlutterVersion {
   /// version of the current Dart runtime, possibly followed by whitespace and other
   /// version and build details.
   ///
-  /// On `dart:io` platforms, it is more reliable to use [Platform.version].
+  /// On `dart:io` platforms it is more reliable to use [Platform.version].
   static const String? dartVersion =
       bool.hasEnvironment('FLUTTER_DART_VERSION')
           ? String.fromEnvironment('FLUTTER_DART_VERSION')
