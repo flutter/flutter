@@ -68,6 +68,7 @@ class Dialog extends StatelessWidget {
     this.alignment,
     this.child,
     this.semanticsRole = SemanticsRole.dialog,
+    this.constraints,
   }) : assert(elevation == null || elevation >= 0.0),
        _fullscreen = false;
 
@@ -88,6 +89,7 @@ class Dialog extends StatelessWidget {
        clipBehavior = Clip.none,
        shape = null,
        alignment = null,
+       constraints = null,
        _fullscreen = true;
 
   /// {@template flutter.material.dialog.backgroundColor}
@@ -236,6 +238,11 @@ class Dialog extends StatelessWidget {
   /// Defaults to [SemanticsRole.dialog].
   final SemanticsRole semanticsRole;
 
+  /// Constrains the size of the [Dialog].
+  ///
+  /// If null, the bottom sheet's size will be unconstrained.
+  final BoxConstraints? constraints;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -248,8 +255,8 @@ class Dialog extends StatelessWidget {
             ? (_fullscreen ? _DialogFullscreenDefaultsM3(context) : _DialogDefaultsM3(context))
             : _DialogDefaultsM2(context);
 
-    final BoxConstraints constraints =
-        defaults.constraints ?? const BoxConstraints(minHeight: 280.0);
+    final BoxConstraints boxConstraints =
+        constraints ?? defaults.constraints ?? const BoxConstraints(minHeight: 280.0);
 
     Widget dialogChild;
 
@@ -262,7 +269,7 @@ class Dialog extends StatelessWidget {
       dialogChild = Align(
         alignment: alignment ?? dialogTheme.alignment ?? defaults.alignment!,
         child: ConstrainedBox(
-          constraints: constraints,
+          constraints: boxConstraints,
           child: Material(
             color: backgroundColor ?? dialogTheme.backgroundColor ?? defaults.backgroundColor,
             elevation: elevation ?? dialogTheme.elevation ?? defaults.elevation!,
@@ -1793,9 +1800,6 @@ class _DialogDefaultsM3 extends DialogThemeData {
 
   @override
   EdgeInsetsGeometry? get actionsPadding => const EdgeInsets.only(left: 24.0, right: 24.0, bottom: 24.0);
-
-  @override
-  BoxConstraints? get constraints => const BoxConstraints(minHeight: 280.0, maxWidth: 560.0);
 }
 // dart format on
 

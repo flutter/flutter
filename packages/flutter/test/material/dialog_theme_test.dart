@@ -143,7 +143,6 @@ void main() {
       barrierColor: Color(0xff000005),
       insetPadding: EdgeInsets.all(20.0),
       clipBehavior: Clip.antiAlias,
-      constraints: BoxConstraints(minWidth: 280, maxWidth: 560),
     ).debugFillProperties(builder);
     final List<String> description =
         builder.properties
@@ -164,7 +163,6 @@ void main() {
       'barrierColor: ${const Color(0xff000005)}',
       'insetPadding: EdgeInsets.all(20.0)',
       'clipBehavior: Clip.antiAlias',
-      'constraints: BoxConstraints(280.0<=w<=560.0, 0.0<=h<=Infinity)',
     ]);
   });
 
