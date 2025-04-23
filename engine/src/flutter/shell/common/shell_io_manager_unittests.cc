@@ -51,7 +51,7 @@ TEST_F(ShellIOManagerTest,
     io_manager = std::make_unique<ShellIOManager>(
         gl_surface->CreateGrContext(), std::make_shared<fml::SyncSwitch>(),
         runners.GetIOTaskRunner(), promise.get_future(),
-        fml::TimeDelta::FromMilliseconds(0));
+        /*enable_impeller=*/false, fml::TimeDelta::FromMilliseconds(0));
   });
 
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "emptyMain",

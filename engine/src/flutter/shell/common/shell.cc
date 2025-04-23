@@ -309,6 +309,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        platform_view_ptr,                                                  //
        io_task_runner,                                                     //
        is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch(),  //
+       impeller_enabled = settings.enable_impeller,                        //
        impeller_context_future]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
         std::shared_ptr<ShellIOManager> io_manager;
@@ -318,8 +319,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
           io_manager = std::make_shared<ShellIOManager>(
               platform_view_ptr->CreateResourceContext(),  // resource context
               is_backgrounded_sync_switch,                 // sync switch
-              io_task_runner,          // unref queue task runner
-              impeller_context_future  // impeller context
+              io_task_runner,           // unref queue task runner
+              impeller_context_future,  // impeller context
+              impeller_enabled          //
           );
         }
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());

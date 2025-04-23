@@ -32,6 +32,7 @@ class ShellIOManager final : public IOManager {
       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
       fml::RefPtr<fml::TaskRunner> unref_queue_task_runner,
       std::shared_future<std::shared_ptr<impeller::Context>> impeller_context,
+      bool impeller_enabled,
       fml::TimeDelta unref_queue_drain_delay =
           fml::TimeDelta::FromMilliseconds(8));
 
