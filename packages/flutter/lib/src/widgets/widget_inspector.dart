@@ -3016,11 +3016,9 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
           ),
         ),
         _InspectorOverlay(selection: selection),
-        if (isSelectMode &&
-            widget.exitWidgetSelectionButtonBuilder != null &&
-            widget.tapBehaviorButtonBuilder != null)
+        if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
           _ExitWidgetSelectionButtonGroup(
-            tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder!,
+            tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
             exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder!,
             moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
           ),
@@ -3498,14 +3496,14 @@ const TextStyle _messageStyle = TextStyle(color: Color(0xFFFFFFFF), fontSize: 10
 
 class _ExitWidgetSelectionButtonGroup extends StatefulWidget {
   const _ExitWidgetSelectionButtonGroup({
-    required this.tapBehaviorButtonBuilder,
     required this.exitWidgetSelectionButtonBuilder,
     required this.moveExitWidgetSelectionButtonBuilder,
+    required this.tapBehaviorButtonBuilder,
   });
 
   final ExitWidgetSelectionButtonBuilder exitWidgetSelectionButtonBuilder;
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
-  final TapBehaviorButtonBuilder tapBehaviorButtonBuilder;
+  final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
 
   @override
   State<_ExitWidgetSelectionButtonGroup> createState() => _ExitWidgetSelectionButtonGroupState();
@@ -3563,36 +3561,46 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
     );
   }
 
-  Widget get _tapBehaviorButton => _TooltipGestureDetector(
-    button: widget.tapBehaviorButtonBuilder(
-      context,
-      onPressed: () {
+  Widget? get _tapBehaviorButton {
+    final TapBehaviorButtonBuilder? buttonBuilder = widget.tapBehaviorButtonBuilder;
+    if (buttonBuilder == null) {
+      return null;
+    }
+
+    return _TooltipGestureDetector(
+      button: buttonBuilder(
+        context,
+        onPressed: () {
+          final bool defaultTapBehaviorEnabled =
+              WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled;
+          WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled =
+              !defaultTapBehaviorEnabled;
+          WidgetInspectorService.instance.selection.clear();
+        },
+        semanticLabel: 'Change widget selection mode for taps',
+        defaultTapBehaviorEnabled:
+            WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled,
+      ),
+      onTooltipVisible: () {
         final bool defaultTapBehaviorEnabled =
             WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled;
-        WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled =
-            !defaultTapBehaviorEnabled;
-        WidgetInspectorService.instance.selection.clear();
+        _changeTooltipMessage(
+          defaultTapBehaviorEnabled
+              ? 'Disable widget selection for taps'
+              : 'Enable widget selection for taps',
+        );
       },
-      semanticLabel: 'Change widget selection mode for taps',
-      defaultTapBehaviorEnabled:
-          WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled,
-    ),
-    onTooltipVisible: () {
-      final bool defaultTapBehaviorEnabled =
-          WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled;
-      _changeTooltipMessage(
-        defaultTapBehaviorEnabled
-            ? 'Disable widget selection for taps'
-            : 'Enable widget selection for taps',
-      );
-    },
-    onTooltipHidden: _onTooltipHidden,
-  );
+      onTooltipHidden: _onTooltipHidden,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final Widget selectionModeButtons = Column(
-      children: <Widget>[_tapBehaviorButton, _exitWidgetSelectionButton],
+      children: <Widget>[
+        if (_tapBehaviorButton != null) _tapBehaviorButton!,
+        _exitWidgetSelectionButton,
+      ],
     );
 
     final Widget buttonGroup = Stack(
