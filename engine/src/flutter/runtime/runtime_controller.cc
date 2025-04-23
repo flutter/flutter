@@ -56,8 +56,9 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
     const fml::closure& p_isolate_shutdown_callback,
     const std::shared_ptr<const fml::Mapping>& p_persistent_isolate_data,
     fml::WeakPtr<IOManager> io_manager,
-    fml::WeakPtr<ImageDecoder> image_decoder,
-    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+    fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+    fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+        image_generator_registry,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const {
   UIDartState::Context spawned_context{
       context_.task_runners,
@@ -676,6 +677,13 @@ void RuntimeController::RequestViewFocusChange(
 
 void RuntimeController::ShutdownPlatformIsolates() {
   platform_isolate_manager_->ShutdownPlatformIsolates();
+}
+
+void RuntimeController::SetRootIsolateOwnerToCurrentThread() {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (root_isolate) {
+    root_isolate->SetOwnerToCurrentThread();
+  }
 }
 
 RuntimeController::Locale::Locale(std::string language_code_,

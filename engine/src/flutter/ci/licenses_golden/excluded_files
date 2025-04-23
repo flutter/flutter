@@ -986,6 +986,7 @@
 ../../../flutter/third_party/boringssl/src/crypto/cipher/aead_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/cipher/cipher_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/cipher/test
+../../../flutter/third_party/boringssl/src/crypto/cms/cms_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/compiler_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/conf/conf_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/constant_time_test.cc
@@ -1041,6 +1042,7 @@
 ../../../flutter/third_party/boringssl/src/crypto/pem/pem_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/perlasm/readme
 ../../../flutter/third_party/boringssl/src/crypto/pkcs7/pkcs7_test.cc
+../../../flutter/third_party/boringssl/src/crypto/pkcs7/test
 ../../../flutter/third_party/boringssl/src/crypto/pkcs8/pkcs12_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/pkcs8/pkcs8_test.cc
 ../../../flutter/third_party/boringssl/src/crypto/pkcs8/test

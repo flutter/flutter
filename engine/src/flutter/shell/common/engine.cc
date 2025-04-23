@@ -150,7 +150,7 @@ std::unique_ptr<Engine> Engine::Spawn(
 
 Engine::~Engine() = default;
 
-fml::WeakPtr<Engine> Engine::GetWeakPtr() const {
+fml::TaskRunnerAffineWeakPtr<Engine> Engine::GetWeakPtr() const {
   return weak_factory_.GetWeakPtr();
 }
 
@@ -163,11 +163,12 @@ std::shared_ptr<AssetManager> Engine::GetAssetManager() {
   return asset_manager_;
 }
 
-fml::WeakPtr<ImageDecoder> Engine::GetImageDecoderWeakPtr() {
+fml::TaskRunnerAffineWeakPtr<ImageDecoder> Engine::GetImageDecoderWeakPtr() {
   return image_decoder_->GetWeakPtr();
 }
 
-fml::WeakPtr<ImageGeneratorRegistry> Engine::GetImageGeneratorRegistry() {
+fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+Engine::GetImageGeneratorRegistry() {
   return image_generator_registry_.GetWeakPtr();
 }
 
@@ -241,6 +242,19 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
     }
   };
 
+  if (settings_.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+    // Queue a task to the UI task runner that sets the owner of the root
+    // isolate.  This task runs after the thread merge and will therefore be
+    // executed on the platform thread.  The task will run before any tasks
+    // queued by LaunchRootIsolate that execute the app's Dart code.
+    task_runners_.GetUITaskRunner()->PostTask([engine = GetWeakPtr()]() {
+      if (engine) {
+        engine->runtime_controller_->SetRootIsolateOwnerToCurrentThread();
+      }
+    });
+  }
+
   if (!runtime_controller_->LaunchRootIsolate(
           settings_,                                 //
           root_isolate_create_callback,              //
@@ -260,6 +274,18 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
         std::make_unique<flutter::PlatformMessage>(
             kIsolateChannel, MakeMapping(service_id.value()), nullptr);
     HandlePlatformMessage(std::move(service_id_message));
+  }
+
+  if (settings_.merged_platform_ui_thread ==
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+    // Move the UI task runner to the platform thread.
+    bool success = fml::MessageLoopTaskQueues::GetInstance()->Merge(
+        task_runners_.GetPlatformTaskRunner()->GetTaskQueueId(),
+        task_runners_.GetUITaskRunner()->GetTaskQueueId());
+    if (!success) {
+      FML_LOG(ERROR)
+          << "Unable to move the UI task runner to the platform thread";
+    }
   }
 
   return Engine::RunStatus::Success;
