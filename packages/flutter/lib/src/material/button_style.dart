@@ -179,7 +179,7 @@ class ButtonStyle with Diagnosticable {
     this.iconAlignment,
     this.side,
     this.shape,
-    this.borderOnForeground = true,
+    this.borderOnForeground,
     this.mouseCursor,
     this.visualDensity,
     this.tapTargetSize,
@@ -313,9 +313,9 @@ class ButtonStyle with Diagnosticable {
 
   /// Whether to paint the border in front of the [child].
   ///
-  /// The default value is true.
+  /// The default value is null.
   /// If false, the border will be painted behind the [child].
-  final bool borderOnForeground;
+  final bool? borderOnForeground;
 
   /// The cursor for a mouse pointer when it enters or is hovering over
   /// this button's [InkWell].
@@ -445,6 +445,7 @@ class ButtonStyle with Diagnosticable {
     InteractiveInkFeatureFactory? splashFactory,
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
+    bool? borderOnForeground,
   }) {
     return ButtonStyle(
       textStyle: textStyle ?? this.textStyle,
@@ -472,6 +473,7 @@ class ButtonStyle with Diagnosticable {
       splashFactory: splashFactory ?? this.splashFactory,
       backgroundBuilder: backgroundBuilder ?? this.backgroundBuilder,
       foregroundBuilder: foregroundBuilder ?? this.foregroundBuilder,
+      borderOnForeground: borderOnForeground ?? this.borderOnForeground,
     );
   }
 
@@ -510,6 +512,7 @@ class ButtonStyle with Diagnosticable {
       splashFactory: splashFactory ?? style.splashFactory,
       backgroundBuilder: backgroundBuilder ?? style.backgroundBuilder,
       foregroundBuilder: foregroundBuilder ?? style.foregroundBuilder,
+      borderOnForeground: borderOnForeground ?? style.borderOnForeground,
     );
   }
 
@@ -541,6 +544,7 @@ class ButtonStyle with Diagnosticable {
       splashFactory,
       backgroundBuilder,
       foregroundBuilder,
+      borderOnForeground,
     ];
     return Object.hashAll(values);
   }
@@ -578,7 +582,8 @@ class ButtonStyle with Diagnosticable {
         other.alignment == alignment &&
         other.splashFactory == splashFactory &&
         other.backgroundBuilder == backgroundBuilder &&
-        other.foregroundBuilder == foregroundBuilder;
+        other.foregroundBuilder == foregroundBuilder &&
+        other.borderOnForeground == borderOnForeground;
   }
 
   @override
@@ -709,6 +714,13 @@ class ButtonStyle with Diagnosticable {
       DiagnosticsProperty<ButtonLayerBuilder>(
         'foregroundBuilder',
         foregroundBuilder,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<bool>(
+        'borderOnForeground',
+        borderOnForeground,
         defaultValue: null,
       ),
     );

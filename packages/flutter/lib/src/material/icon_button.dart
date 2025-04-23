@@ -203,7 +203,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
-    this.borderOnForeground = true,
+    this.borderOnForeground,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -237,7 +237,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
-    this.borderOnForeground = true,
+    this.borderOnForeground,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -273,7 +273,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
-    this.borderOnForeground = true,
+    this.borderOnForeground,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -308,7 +308,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
-    this.borderOnForeground = true,
+    this.borderOnForeground,
     this.enableFeedback,
     this.constraints,
     this.style,
@@ -525,9 +525,9 @@ class IconButton extends StatelessWidget {
 
   /// Whether to paint the border in front of the [child].
   ///
-  /// The default value is true.
+  /// The default value is null.
   /// If false, the border will be painted behind the [child].
-  final bool borderOnForeground;
+  final bool? borderOnForeground;
 
   /// Whether detected gestures should provide acoustic and/or haptic feedback.
   ///
