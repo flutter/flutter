@@ -59,7 +59,6 @@ UIDartState::UIDartState(
     const UIDartState::Context& context)
     : add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
-      callback_queue_id_(fml::TaskQueueId::kInvalid),
       logger_prefix_(std::move(logger_prefix)),
       is_root_isolate_(is_root_isolate),
       unhandled_exception_callback_(std::move(unhandled_exception_callback)),
@@ -180,12 +179,14 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
   }
   FML_DCHECK(add_callback_ && remove_callback_);
   if (add) {
+    FML_DCHECK(!callback_queue_id_.has_value());
     callback_queue_id_ =
         add_callback_(reinterpret_cast<intptr_t>(this),
                       [this]() { this->FlushMicrotasksNow(); });
-  } else {
-    remove_callback_(callback_queue_id_, reinterpret_cast<intptr_t>(this));
-    callback_queue_id_ = fml::TaskQueueId::Invalid();
+  } else if (callback_queue_id_.has_value()) {
+    remove_callback_(callback_queue_id_.value(),
+                     reinterpret_cast<intptr_t>(this));
+    callback_queue_id_.reset();
   }
 }
 

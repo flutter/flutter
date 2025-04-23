@@ -208,7 +208,7 @@ class UIDartState : public tonic::DartState {
 
   const TaskObserverAdd add_callback_;
   const TaskObserverRemove remove_callback_;
-  fml::TaskQueueId callback_queue_id_;
+  std::optional<fml::TaskQueueId> callback_queue_id_;
   const std::string logger_prefix_;
   Dart_Port main_port_ = ILLEGAL_PORT;
   const bool is_root_isolate_;
