@@ -251,6 +251,20 @@ class Canvas {
   // Visible for testing.
   bool RequiresReadback() const { return requires_readback_; }
 
+  // Whether the current device has the capabilities to blit an offscreen
+  // texture into the onscreen.
+  //
+  // This requires the availibility of the blit framebuffer command, but is
+  // disabled for GLES. A simple glBlitFramebuffer does not support resolving
+  // different sample counts which may be present in GLES when using MSAA.
+  //
+  // Visible for testing.
+  bool SupportsBlitToOnscreen() const;
+
+  /// For picture snapshots we need addition steps to verify that final mipmaps
+  /// are generated.
+  bool EnsureFinalMipmapGeneration() const;
+
  private:
   ContentContext& renderer_;
   RenderTarget render_target_;

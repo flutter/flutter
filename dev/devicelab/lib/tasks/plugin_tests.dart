@@ -370,6 +370,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
           destination: 'platform=macOS',
           configuration: 'Debug',
           testName: 'native_plugin_unit_tests_macos',
+          extraOptions: <String>['-parallel-testing-enabled', 'NO'],
           skipCodesign: true,
         )) {
           throw TaskResult.failure('Platform unit tests failed');
