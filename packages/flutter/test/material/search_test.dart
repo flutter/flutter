@@ -137,7 +137,7 @@ void main() {
     expect(find.text('Suggestions'), findsOneWidget);
   });
 
-  testWidgets('Can close search with escape button return null', (WidgetTester tester) async {
+  testWidgets('Can close search with escape button and return null', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
     addTearDown(() => delegate.dispose());
     final List<String?> selectedResults = <String?>[];
