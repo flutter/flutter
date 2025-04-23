@@ -204,7 +204,7 @@ MultiChannel<dynamic> _connectToServer() {
 ///
 /// [id] identifies the suite loaded in this iframe.
 StreamChannel<dynamic> _connectToIframe(String url, int id) {
-  hostLog('connect iframe');
+  hostLog('connect iframe with url: $url id: $id');
   final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
   _iframes[id] = iframe;
 
@@ -278,6 +278,7 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
     ),
   );
 
+  hostLog('loading url: $url $id');
   iframe
     ..src = url
     ..width = '1000'
