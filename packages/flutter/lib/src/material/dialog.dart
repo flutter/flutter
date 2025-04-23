@@ -44,6 +44,12 @@ const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, v
 /// ** See code in examples/api/lib/material/dialog/dialog.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample shows a [Dialog] using [BoxConstraints].
+///
+/// ** See code in examples/api/lib/material/dialog/dialog.1.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AlertDialog], for dialogs that have a message and some buttons.
