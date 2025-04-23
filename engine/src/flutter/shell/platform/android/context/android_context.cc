@@ -10,9 +10,11 @@ AndroidContext::AndroidContext(AndroidRenderingAPI rendering_api)
     : rendering_api_(rendering_api) {}
 
 AndroidContext::~AndroidContext() {
+#if !SLIMPELLER
   if (main_context_) {
     main_context_->releaseResourcesAndAbandonContext();
   }
+#endif  // !SLIMPELLER
   if (impeller_context_) {
     impeller_context_->Shutdown();
   }
@@ -28,11 +30,17 @@ bool AndroidContext::IsValid() const {
 
 void AndroidContext::SetMainSkiaContext(
     const sk_sp<GrDirectContext>& main_context) {
+#if !SLIMPELLER
   main_context_ = main_context;
+#endif  // !SLIMPELLER
 }
 
 sk_sp<GrDirectContext> AndroidContext::GetMainSkiaContext() const {
+#if !SLIMPELLER
   return main_context_;
+#else
+  return nullptr;
+#endif  // !SLIMPELLER
 }
 
 std::shared_ptr<impeller::Context> AndroidContext::GetImpellerContext() const {

@@ -4,6 +4,7 @@
 
 #ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_GL_SKIA_H_
 #define FLUTTER_SHELL_GPU_GPU_SURFACE_GL_SKIA_H_
+#if !SLIMPELLER
 
 #include <functional>
 #include <memory>
@@ -88,4 +89,5 @@ class GPUSurfaceGLSkia : public Surface {
 
 }  // namespace flutter
 
+#endif  // !SLIMPELLER
 #endif  // FLUTTER_SHELL_GPU_GPU_SURFACE_GL_SKIA_H_

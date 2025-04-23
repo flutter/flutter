@@ -277,7 +277,7 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
 
   return AndroidRenderingAPI::kSkiaOpenGLES;
 #else
-  return AndroidRenderingAPI::kImpellerAutoselect
+  return AndroidRenderingAPI::kImpellerAutoselect;
 #endif  // !SLIMPELLER
 }
 

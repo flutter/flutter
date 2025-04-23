@@ -9,7 +9,13 @@
 #include "flutter/impeller/base/flags.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
+
+#if !SLIMPELLER
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
+#else
+#include "third_party/skia/include/core/SkRefCnt.h"
+class GrDirectContext;
+#endif  // !SLIMPELLER
 
 namespace flutter {
 
@@ -74,7 +80,9 @@ class AndroidContext {
   const AndroidRenderingAPI rendering_api_;
 
   // This is the Skia context used for on-screen rendering.
+#if !SLIMPELLER
   sk_sp<GrDirectContext> main_context_;
+#endif  // !SLIMPELLER
 
   std::shared_ptr<impeller::Context> impeller_context_;
 
