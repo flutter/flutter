@@ -2301,8 +2301,7 @@ class _MenuBarAnchor extends MenuAnchor {
 }
 
 class _MenuBarAnchorState extends _MenuAnchorState {
-  late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{
-  };
+  late final Map<Type, Action<Intent>> actions = <Type, Action<Intent>>{};
 
   @override
   Axis get _orientation => Axis.horizontal;
@@ -3351,10 +3350,7 @@ class _Submenu extends StatelessWidget {
       groupId: menuPosition.tapRegionGroupId,
       consumeOutsideTaps: anchor._root._menuController.isOpen && anchor.widget.consumeOutsideTap,
       onTapOutside: (PointerDownEvent event) {
-        // This context is outside of the scope of this menu's RawMenuAnchor,
-        // and the intent dispatched here is meant for the parent menu, hence
-        // CloseChildrenMenuIntent.
-        Actions.invoke(context, const CloseChildrenMenuIntent());
+        anchor._menuController.close();
       },
       child: MouseRegion(
         cursor: mouseCursor,

@@ -120,11 +120,7 @@ typedef RawMenuAnchorChildBuilder =
 // An [InheritedWidget] used to notify anchor descendants when a menu opens
 // and closes, and to pass the anchor's controller to descendants.
 class _MenuControllerScope extends InheritedWidget {
-  const _MenuControllerScope({
-    required this.isOpen,
-    required this.menuBase,
-    required super.child,
-  });
+  const _MenuControllerScope({required this.isOpen, required this.menuBase, required super.child});
 
   final bool isOpen;
   final _RawMenuAnchorBaseMixin menuBase;
