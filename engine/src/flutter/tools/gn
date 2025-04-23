@@ -835,8 +835,6 @@ def to_gn_wasm_args(args, gn_args):
   gn_args['skia_canvaskit_enable_webgpu'] = False
   gn_args['skia_canvaskit_profile_build'] = args.runtime_mode == 'profile'
   gn_args['flutter_prebuilt_dart_sdk'] = True
-  gn_args['skia_canvaskit_enable_bidi'] = True
-  gn_args['skia_use_bidi'] = True
 
 def run_impeller_cmake(args):
   impeller_cmake_dir = os.path.join('flutter', 'third_party', 'impeller-cmake-example')
