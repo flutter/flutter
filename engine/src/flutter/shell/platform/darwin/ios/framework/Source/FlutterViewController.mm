@@ -323,11 +323,7 @@ typedef struct MouseState {
   if (FlutterSharedApplication.isAvailable) {
     [self setUpApplicationLifecycleNotifications:center];
   } else {
-    if (@available(iOS 13.0, *)) {
-      [self setUpSceneLifecycleNotifications:center];
-    } else {
-      [self setUpApplicationLifecycleNotifications:center];
-    }
+    [self setUpSceneLifecycleNotifications:center];
   }
 
   [center addObserver:self
@@ -380,12 +376,10 @@ typedef struct MouseState {
                  name:UIAccessibilityDarkerSystemColorsStatusDidChangeNotification
                object:nil];
 
-  if (@available(iOS 13.0, *)) {
-    [center addObserver:self
-               selector:@selector(onAccessibilityStatusChanged:)
-                   name:UIAccessibilityOnOffSwitchLabelsDidChangeNotification
-                 object:nil];
-  }
+  [center addObserver:self
+             selector:@selector(onAccessibilityStatusChanged:)
+                 name:UIAccessibilityOnOffSwitchLabelsDidChangeNotification
+               object:nil];
 
   [center addObserver:self
              selector:@selector(onUserSettingsChanged:)
@@ -479,11 +473,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   auto placeholder = [[UIView alloc] init];
 
   placeholder.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  if (@available(iOS 13.0, *)) {
-    placeholder.backgroundColor = UIColor.systemBackgroundColor;
-  } else {
-    placeholder.backgroundColor = UIColor.whiteColor;
-  }
+  placeholder.backgroundColor = UIColor.systemBackgroundColor;
   placeholder.autoresizesSubviews = YES;
 
   // Only add the label when we know we have failed to enable tracing (and it was necessary).
@@ -734,7 +724,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
   if (flutterApplication) {
     isActive = [self isApplicationStateMatching:UIApplicationStateActive
                                 withApplication:flutterApplication];
-  } else if (@available(iOS 13.0, *)) {
+  } else {
     isActive = [self isSceneStateMatching:UISceneActivationStateForegroundActive];
   }
   return isActive;
@@ -749,7 +739,7 @@ static void SendFakeTouchEvent(UIScreen* screen,
   if (flutterApplication) {
     isBackground = [self isApplicationStateMatching:UIApplicationStateBackground
                                     withApplication:flutterApplication];
-  } else if (@available(iOS 13.0, *)) {
+  } else {
     isBackground = [self isSceneStateMatching:UISceneActivationStateBackground];
   }
   return isBackground;
@@ -1592,20 +1582,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if ([self isKeyboardNotificationForDifferentView:notification]) {
     return YES;
   }
-
-  if (@available(iOS 13.0, *)) {
-    // noop
-  } else {
-    // If OS version is less than 13, ignore notification if the app is in the background
-    // or is transitioning from the background. In older versions, when switching between
-    // apps with the keyboard open in the secondary app, notifications are sent when
-    // the app is in the background/transitioning from background as if they belong
-    // to the app and as if the keyboard is showing even though it is not.
-    if (self.isKeyboardInOrTransitioningFromBackground) {
-      return YES;
-    }
-  }
-
   return NO;
 }
 
@@ -2076,24 +2052,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       [self requestGeometryUpdateForWindowScenes:scenes];
     } else {
       UIInterfaceOrientationMask currentInterfaceOrientation = 0;
-      if (@available(iOS 13.0, *)) {
-        UIWindowScene* windowScene = self.flutterWindowSceneIfViewLoaded;
-        if (!windowScene) {
-          FML_LOG(WARNING)
-              << "Accessing the interface orientation when the window scene is unavailable.";
-          return;
-        }
-        currentInterfaceOrientation = 1 << windowScene.interfaceOrientation;
-      } else {
-        UIApplication* flutterApplication = FlutterSharedApplication.application;
-        if (flutterApplication) {
-          currentInterfaceOrientation = 1 << [flutterApplication statusBarOrientation];
-        } else {
-          FML_LOG(ERROR) << "Application based status bar orentiation update is not supported in "
-                            "app extension. Orientation: "
-                         << currentInterfaceOrientation;
-        }
+      UIWindowScene* windowScene = self.flutterWindowSceneIfViewLoaded;
+      if (!windowScene) {
+        FML_LOG(WARNING)
+            << "Accessing the interface orientation when the window scene is unavailable.";
+        return;
       }
+      currentInterfaceOrientation = 1 << windowScene.interfaceOrientation;
       if (!(self.orientationPreferences & currentInterfaceOrientation)) {
         [UIViewController attemptRotationToDeviceOrientation];
         // Force orientation switch if the current orientation is not allowed
@@ -2200,11 +2165,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 }
 
 + (BOOL)accessibilityIsOnOffSwitchLabelsEnabled {
-  if (@available(iOS 13, *)) {
-    return UIAccessibilityIsOnOffSwitchLabelsEnabled();
-  } else {
-    return NO;
-  }
+  return UIAccessibilityIsOnOffSwitchLabelsEnabled();
 }
 
 #pragma mark - Set user settings
@@ -2296,14 +2257,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 // is understood by the Flutter framework. See the settings
 // system channel for more information.
 - (NSString*)brightnessMode {
-  if (@available(iOS 13, *)) {
-    UIUserInterfaceStyle style = self.traitCollection.userInterfaceStyle;
+  UIUserInterfaceStyle style = self.traitCollection.userInterfaceStyle;
 
-    if (style == UIUserInterfaceStyleDark) {
-      return @"dark";
-    } else {
-      return @"light";
-    }
+  if (style == UIUserInterfaceStyleDark) {
+    return @"dark";
   } else {
     return @"light";
   }
@@ -2313,14 +2270,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 // understood by the Flutter framework. See the settings system channel for more
 // information.
 - (NSString*)contrastMode {
-  if (@available(iOS 13, *)) {
-    UIAccessibilityContrast contrast = self.traitCollection.accessibilityContrast;
+  UIAccessibilityContrast contrast = self.traitCollection.accessibilityContrast;
 
-    if (contrast == UIAccessibilityContrastHigh) {
-      return @"high";
-    } else {
-      return @"normal";
-    }
+  if (contrast == UIAccessibilityContrastHigh) {
+    return @"high";
   } else {
     return @"normal";
   }
