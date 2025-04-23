@@ -30,6 +30,9 @@ for support.
 
 Google employees can view the test output and provide feedback for next steps.
 
+In order to track pull requests blocked on Google testing for resolution, have your reviewer add yours to
+the [Github Testing Queue Project](https://github.com/orgs/flutter/projects/200).
+
 For full guidance on presubmit failures, see the [Fix failing checks](../contributing/testing/Fix-failing-checks.md) doc.
 
 ### There's goldens failures on my PR, but those are expected
