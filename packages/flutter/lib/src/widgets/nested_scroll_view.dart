@@ -1131,9 +1131,9 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _NestedScrollPosition target, {
     ScrollableState? previousScrollable,
   }) {
-      // If the target is the outer position and the previous scrollable is an inner position,
-      // we should ignore the ensureVisible call. This is because the inner position will
-      // already have been scrolled to make the target visible.
+    // If the target is the outer position and the previous scrollable is an inner position,
+    // we should ignore the ensureVisible call. This is because the inner position will
+    // already have been scrolled to make the target visible.
     return target == _outerPosition &&
         previousScrollable != null &&
         _innerPositions.contains(previousScrollable.position);
