@@ -336,7 +336,7 @@ abstract class SearchDelegate<T> {
   ///
   /// The value provided for `result` is used as the return value of the call
   /// to [showSearch] that launched the search initially.
-  void close(BuildContext context, T result) {
+  void close(BuildContext context, T? result) {
     _currentBody = null;
     _focusNode?.unfocus();
     Navigator.of(context)
@@ -506,7 +506,15 @@ class _SearchPage<T> extends StatefulWidget {
 class _SearchPageState<T> extends State<_SearchPage<T>> {
   // This node is owned, but not hosted by, the search page. Hosting is done by
   // the text field.
-  FocusNode focusNode = FocusNode();
+  late final FocusNode focusNode = FocusNode(
+    onKeyEvent: (FocusNode node, KeyEvent event) {
+      if (event is KeyUpEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+        widget.delegate.close(context, null);
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    },
+  );
 
   @override
   void initState() {
