@@ -28,6 +28,26 @@ namespace impeller {
 
 namespace {
 
+class GenericVariants {
+ public:
+  void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
+    desc_ = std::move(desc);
+  }
+
+  size_t GetPipelineCount() const { return pipelines_.size(); }
+
+  bool IsDefault(const ContentContextOptions& opts) {
+    return default_options_.has_value() &&
+           opts.ToKey() == default_options_.value().ToKey();
+  }
+
+ protected:
+  std::optional<PipelineDescriptor> desc_;
+  std::optional<ContentContextOptions> default_options_;
+  std::vector<std::pair<uint64_t, std::unique_ptr<GenericRenderPipelineHandle>>>
+      pipelines_;
+};
+
 /// Holds multiple Pipelines associated with the same PipelineHandle types.
 ///
 /// For example, it may have multiple
@@ -42,7 +62,7 @@ namespace {
 ///  - impeller::RenderPipelineHandle<> - The type of objects this typically
 ///    contains.
 template <class PipelineHandleT>
-class Variants {
+class Variants : public GenericVariants {
   static_assert(
       ShaderStageCompatibilityChecker<
           typename PipelineHandleT::VertexShader,
@@ -72,10 +92,6 @@ class Variants {
     }
   }
 
-  void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
-    desc_ = std::move(desc);
-  }
-
   void CreateDefault(const Context& context,
                      const ContentContextOptions& options,
                      const std::vector<Scalar>& constants = {}) {
@@ -99,15 +115,10 @@ class Variants {
     uint64_t p_key = options.ToKey();
     for (const auto& [key, pipeline] : pipelines_) {
       if (key == p_key) {
-        return pipeline.get();
+        return static_cast<PipelineHandleT*>(pipeline.get());
       }
     }
     return nullptr;
-  }
-
-  bool IsDefault(const ContentContextOptions& opts) {
-    return default_options_.has_value() &&
-           opts.ToKey() == default_options_.value().ToKey();
   }
 
   PipelineHandleT* GetDefault(const Context& context) {
@@ -123,13 +134,7 @@ class Variants {
     return Get(default_options_.value());
   }
 
-  size_t GetPipelineCount() const { return pipelines_.size(); }
-
  private:
-  std::optional<PipelineDescriptor> desc_;
-  std::optional<ContentContextOptions> default_options_;
-  std::vector<std::pair<uint64_t, std::unique_ptr<PipelineHandleT>>> pipelines_;
-
   Variants(const Variants&) = delete;
 
   Variants& operator=(const Variants&) = delete;

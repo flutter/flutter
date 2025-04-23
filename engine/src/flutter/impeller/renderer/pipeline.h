@@ -123,6 +123,8 @@ class GenericRenderPipelineHandle {
       PipelineFuture<PipelineDescriptor> future)
       : pipeline_future_(std::move(future)) {}
 
+  virtual ~GenericRenderPipelineHandle() = default;
+
   std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet() {
     if (did_wait_) {
       return pipeline_;
