@@ -1,6 +1,7 @@
 // Copyright 2025 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:meta/meta.dart';
 import 'package:ui/src/engine.dart' as engine;
 import 'package:ui/src/engine/util.dart';
@@ -32,6 +33,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
   }
 
   ui.TextDirection get textDirection => _textDirection;
+
   ui.TextAlign get textAlign => _textAlign;
 
   @override

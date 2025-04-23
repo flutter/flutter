@@ -235,6 +235,7 @@ extension type DomDocument._(JSObject _) implements DomNode {
       return _createElement(name, options.toJSAnyDeep);
     }
   }
+
   external bool execCommand(String commandId);
   external DomHTMLScriptElement? get currentScript;
   external DomElement createElementNS(String namespaceURI, String qualifiedName);
@@ -2226,7 +2227,6 @@ extension type DomMessageEvent._(JSObject _) implements DomEvent {
 
   dynamic get data => _data?.toObjectDeep;
 
-
   external String get origin;
 
   /// The source may be a `WindowProxy`, a `MessagePort`, or a `ServiceWorker`.
@@ -2482,7 +2482,6 @@ Iterable<T> _createDomListWrapper<T extends JSObject>(_DomList list) => _DomList
 
 @JS('Symbol')
 extension type DomSymbol._(JSObject _) implements JSObject {
-
   external JSAny get iterator;
 }
 

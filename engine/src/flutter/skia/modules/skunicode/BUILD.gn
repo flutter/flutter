@@ -12,7 +12,8 @@ declare_args() {
   skunicode_tests_enabled = true
 }
 
-if (skia_use_icu || skia_use_client_icu || skia_use_libgrapheme || skia_use_bidi) {
+if (skia_use_icu || skia_use_client_icu || skia_use_libgrapheme ||
+    skia_use_bidi) {
   config("public_config") {
     include_dirs = [ "$_skia_root/modules/skunicode/include" ]
     defines = [ "SK_UNICODE_AVAILABLE" ]
@@ -72,8 +73,8 @@ if (skia_use_icu || skia_use_client_icu || skia_use_libgrapheme || skia_use_bidi
       deps += [ skia_libgrapheme_third_party_dir ]
     }
     if (skia_use_bidi) {
-        sources += skia_unicode_bidi_sources
-        defines += [ "SK_UNICODE_BIDI_IMPLEMENTATION" ]
+      sources += skia_unicode_bidi_sources
+      defines += [ "SK_UNICODE_BIDI_IMPLEMENTATION" ]
     }
   }
 } else {
