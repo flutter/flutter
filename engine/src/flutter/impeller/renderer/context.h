@@ -29,16 +29,15 @@ class PipelineLibrary;
 class ImpellerContextFuture {
  public:
   explicit ImpellerContextFuture(
-      std::shared_future<std::shared_ptr<impeller::Context>> context);
+      std::future<std::shared_ptr<impeller::Context>> context);
 
   std::shared_ptr<impeller::Context> GetContext();
 
  private:
   std::mutex mutex_;
-  std::shared_future<std::shared_ptr<impeller::Context>> future_
-      IPLR_GUARDED_BY(mutex_);
-  std::shared_ptr<impeller::Context> context_ IPLR_GUARDED_BY(mutex_);
-  bool did_wait_ IPLR_GUARDED_BY(mutex_) = false;
+  std::future<std::shared_ptr<impeller::Context>> future_;
+  std::shared_ptr<impeller::Context> context_;
+  bool did_wait_ = false;
 };
 
 //------------------------------------------------------------------------------

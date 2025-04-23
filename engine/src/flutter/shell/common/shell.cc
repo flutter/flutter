@@ -238,8 +238,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   std::promise<std::shared_ptr<impeller::Context>> impeller_context_promise;
   auto impeller_context_future =
       std::make_shared<impeller::ImpellerContextFuture>(
-          std::shared_future<std::shared_ptr<impeller::Context>>(
-              impeller_context_promise.get_future()));
+          impeller_context_promise.get_future());
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetRasterTaskRunner(),
@@ -255,7 +254,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       });
 
   // Defer setting up the impeller context until after the startup blocking
-  // futures have completed. context creation may be slow (100+ms) when using
+  // futures have completed. Context creation may be slow (100+ ms) when using
   // the Vulkan backend on certain Android devices, so we intentionally try
   // to move it off the critical path for startup.
   std::promise<impeller::RuntimeStageBackend> runtime_stage_backend;

@@ -10,7 +10,7 @@
 namespace impeller {
 
 ImpellerContextFuture::ImpellerContextFuture(
-    std::shared_future<std::shared_ptr<impeller::Context>> context)
+    std::future<std::shared_ptr<impeller::Context>> context)
     : future_(std::move(context)) {}
 
 std::shared_ptr<impeller::Context> ImpellerContextFuture::GetContext() {
