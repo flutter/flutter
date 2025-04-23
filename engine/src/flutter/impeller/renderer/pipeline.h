@@ -117,7 +117,7 @@ class GenericRenderPipelineHandle {
                                        std::optional<PipelineDescriptor> desc,
                                        bool async = true)
       : GenericRenderPipelineHandle(
-            CreatePipelineFuture(context, desc, /*async=*/async)) {}
+            CreatePipelineFuture(context, std::move(desc), /*async=*/async)) {}
 
   explicit GenericRenderPipelineHandle(
       PipelineFuture<PipelineDescriptor> future)
