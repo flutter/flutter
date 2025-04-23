@@ -1694,6 +1694,7 @@ class CompileTest {
     return inDirectory<TaskResult>(testDirectory, () async {
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
 
+      /* Compile Time */
       int releaseSizeInBytes = 0;
       final Stopwatch watch = Stopwatch();
 
@@ -1718,12 +1719,57 @@ class CompileTest {
         }
       });
 
+      /* App Size */
+
       final String appPath =
           '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
       // Zip up the .app file to get an approximation of the .ipa size.
       await exec('tar', <String>['-zcf', 'app.tar.gz', appPath]);
       releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
+
+      /* Time to First Frame */
+      await Process.run('rm', <String>['./results', '-rf']);
+
+      await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
+        'test',
+        '-project',
+        'hello_world_swiftui.xcodeproj',
+        '-scheme',
+        'hello_world_swiftui',
+        '-destination',
+        'platform=iOS,name=Fluttér 的 iPhone',
+        '-only-testing:BenchmarkTests/testLaunchPerformance',
+        '-resultBundlePath',
+        './results/benchmarkResults.xcresult'
+      ]).then((ProcessResult results) {
+        if (results.exitCode != 0) {
+          print(results.stderr);
+        }
+      });
+
+      await Process.run('xcrun', <String>[
+        'xcresulttool',
+        'get',
+        'test-results',
+        'metrics',
+        '--path',
+        './results/benchmarkResults.xcresult',
+        '--format',
+        'json',
+        '>',
+        './results/results.json'
+      ]).then((ProcessResult results) {
+        if (results.exitCode != 0) {
+          print(results.stderr);
+        } else {
+          print("done");
+        }
+      });
+
+
+
+      // xcrun xcresulttool get test-results metrics --path PerfTestResults2.xcresult --format json > results.json
 
       final Map<String, dynamic> metrics = <String, dynamic>{};
       metrics.addAll(<String, dynamic>{
