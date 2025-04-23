@@ -155,7 +155,10 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
 
   {
     tonic::DartState::Scope scope(isolate.get());
-    Dart_SetCurrentThreadOwnsIsolate();
+    if (settings.merged_platform_ui_thread !=
+        Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+      Dart_SetCurrentThreadOwnsIsolate();
+    }
 
     if (settings.root_isolate_create_callback) {
       // Isolate callbacks always occur in isolate scope and before user code
@@ -349,6 +352,7 @@ Dart_Isolate DartIsolate::CreatePlatformIsolate(Dart_Handle entry_point,
       }
       old_task_observer_add(key, callback);
     });
+    return platform_task_runner->GetTaskQueueId();
   };
 
   UIDartState::Context context(task_runners);
@@ -1371,6 +1375,11 @@ void DartIsolate::DartIsolateCleanupCallback(
 
 std::weak_ptr<DartIsolate> DartIsolate::GetWeakIsolatePtr() {
   return std::static_pointer_cast<DartIsolate>(shared_from_this());
+}
+
+void DartIsolate::SetOwnerToCurrentThread() {
+  tonic::DartIsolateScope isolate_scope(isolate());
+  Dart_SetCurrentThreadOwnsIsolate();
 }
 
 void DartIsolate::AddIsolateShutdownCallback(const fml::closure& closure) {

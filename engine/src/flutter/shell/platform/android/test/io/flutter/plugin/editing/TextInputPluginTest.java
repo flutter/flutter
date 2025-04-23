@@ -88,9 +88,7 @@ import org.robolectric.shadows.ShadowAutofillManager;
 import org.robolectric.shadows.ShadowBuild;
 import org.robolectric.shadows.ShadowInputMethodManager;
 
-@Config(
-    manifest = Config.NONE,
-    shadows = {TextInputPluginTest.TestImm.class, TextInputPluginTest.TestAfm.class})
+@Config(shadows = {TextInputPluginTest.TestImm.class, TextInputPluginTest.TestAfm.class})
 @RunWith(AndroidJUnit4.class)
 public class TextInputPluginTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
