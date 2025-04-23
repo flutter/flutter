@@ -4543,14 +4543,14 @@ void main() {
 
       expect(logs, isEmpty);
 
-      // test tap
+      // Test tap.
       final TestGesture gesture = await tester.startGesture(centerOfTheSliderTrack);
-      // start animation
+      // Start animation.
       await tester.pump();
-      // go to mid-animation frame
+      // Go to mid-animation frame.
       await tester.pump(kRadialReactionDuration * 0.5);
       expect(material, paints..circle(color: overlayColor, x: xPosThumb.transform(value)));
-      // we have a non-linear asymmetric curve, so just verify the radius is not full
+      // We have a non-linear asymmetric curve, so just verify the radius is not full.
       expect(
         material,
         isNot(
@@ -4558,33 +4558,33 @@ void main() {
         ),
       );
 
-      // finish animation
+      // Finish animation.
       await tester.pumpAndSettle();
-      // overlay drawn
+      // Overlay drawn.
       expect(
         material,
         paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
       );
-      // has no other effect as tap is disabled, remains 1.0
+      // Has no other effect as tap is disabled, remains 1.0.
       expect(value, 1.0);
       expect(logs, <String>['onChangeStart']);
 
-      // test slide
+      // Test slide.
       await gesture.moveTo(startOfTheSliderTrack);
       await tester.pump();
-      // changes from 1.0 -> 0.5
+      // Changes from 1.0 -> 0.5.
       expect(value, 0.5);
-      // overlay still there
+      // Overlay still there.
       expect(
         material,
         paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
       );
       await gesture.moveTo(endOfTheSliderTrack);
       await tester.pump();
-      // changes from 0.0 -> 1.0
+      // Changes from 0.0 -> 1.0.
       expect(value, 1.0);
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged']);
-      // overlay still there
+      // Overlay still there.
       expect(
         material,
         paints..circle(color: overlayColor, radius: overlayRadius, x: xPosThumb.transform(value)),
@@ -4592,12 +4592,12 @@ void main() {
 
       await gesture.up();
 
-      // start release animation
+      // Start release animation.
       await tester.pump();
-      // go to mid-animation frame
+      // Go to mid-animation frame.
       await tester.pump(kRadialReactionDuration * 0.5);
       expect(material, paints..circle(color: overlayColor, x: xPosThumb.transform(value)));
-      // verify the radius is not full
+      // Verify the radius is not full.
       expect(
         material,
         isNot(
@@ -4606,7 +4606,7 @@ void main() {
       );
 
       await tester.pumpAndSettle();
-      // no overlay drawn
+      // No overlay drawn.
       expect(material, isNot(paints..circle(color: overlayColor, radius: overlayRadius)));
 
       expect(logs, <String>['onChangeStart', 'onChanged', 'onChanged', 'onChangeEnd']);
