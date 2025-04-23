@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <future>
 #include "fml/task_runner.h"
+#include "impeller/core/runtime_types.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "flutter/shell/common/shell.h"
 
@@ -64,7 +66,9 @@ std::unique_ptr<Engine> CreateEngine(
     const fml::WeakPtr<IOManager>& io_manager,
     const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
-    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch) {
+    const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
+    const std::shared_future<impeller::RuntimeStageBackend>&
+        runtime_stage_backend) {
   return std::make_unique<Engine>(delegate,             //
                                   dispatcher_maker,     //
                                   vm,                   //
@@ -76,7 +80,8 @@ std::unique_ptr<Engine> CreateEngine(
                                   io_manager,           //
                                   unref_queue,          //
                                   snapshot_delegate,    //
-                                  gpu_disabled_switch);
+                                  gpu_disabled_switch,  //
+                                  runtime_stage_backend);
 }
 
 void RegisterCodecsWithSkia() {
@@ -247,15 +252,24 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         rasterizer_promise.set_value(std::move(rasterizer));
       });
 
+  // Defer setting up the impeller context until after the startup blocking
+  // futures have completed.
+  std::promise<impeller::RuntimeStageBackend> runtime_stage_backend;
+  std::shared_future<impeller::RuntimeStageBackend> runtime_stage_future =
+      runtime_stage_backend.get_future();
+
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetRasterTaskRunner(),
       fml::MakeCopyable(
           [&,
            impeller_context_promise = std::move(impeller_context_promise),  //
+           runtime_stage_backend = std::move(runtime_stage_backend),        //
            platform_view_ptr]() mutable {
             TRACE_EVENT0("flutter", "CreateImpellerContext");
-            impeller_context_promise.set_value(
-                platform_view_ptr->GetImpellerContext());
+            auto impeller_context = platform_view_ptr->GetImpellerContext();
+            runtime_stage_backend.set_value(
+                impeller_context->GetRuntimeStageBackend());
+            impeller_context_promise.set_value(impeller_context);
           }));
 
   // Ask the platform view for the vsync waiter. This will be used by the engine
@@ -323,6 +337,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          vsync_waiter = std::move(vsync_waiter),          //
                          &weak_io_manager_future,                         //
                          &snapshot_delegate_future,                       //
+                         &runtime_stage_future,                           //
                          &unref_queue_future,                             //
                          &on_create_engine]() mutable {
         TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
@@ -333,20 +348,20 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         auto animator = std::make_unique<Animator>(*shell, task_runners,
                                                    std::move(vsync_waiter));
 
-        engine_promise.set_value(on_create_engine(
-            *shell,                              //
-            dispatcher_maker,                    //
-            *shell->GetDartVM(),                 //
-            std::move(isolate_snapshot),         //
-            task_runners,                        //
-            platform_data,                       //
-            shell->GetSettings(),                //
-            std::move(animator),                 //
-            weak_io_manager_future.get(),        //
-            unref_queue_future.get(),            //
-            snapshot_delegate_future.get(),      //
-            shell->is_gpu_disabled_sync_switch_  //
-            ));
+        engine_promise.set_value(
+            on_create_engine(*shell,                               //
+                             dispatcher_maker,                     //
+                             *shell->GetDartVM(),                  //
+                             std::move(isolate_snapshot),          //
+                             task_runners,                         //
+                             platform_data,                        //
+                             shell->GetSettings(),                 //
+                             std::move(animator),                  //
+                             weak_io_manager_future.get(),         //
+                             unref_queue_future.get(),             //
+                             snapshot_delegate_future.get(),       //
+                             shell->is_gpu_disabled_sync_switch_,  //
+                             runtime_stage_future));
       }));
 
   if (!shell->Setup(std::move(platform_view),  //
@@ -597,7 +612,9 @@ std::unique_ptr<Shell> Shell::Spawn(
           const fml::WeakPtr<IOManager>& io_manager,
           const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
           fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-          const std::shared_ptr<fml::SyncSwitch>& is_gpu_disabled_sync_switch) {
+          const std::shared_ptr<fml::SyncSwitch>& is_gpu_disabled_sync_switch,
+          const std::shared_future<impeller::RuntimeStageBackend>&
+              runtime_stage_backend) {
         return engine->Spawn(
             /*delegate=*/delegate,
             /*dispatcher_maker=*/dispatcher_maker,

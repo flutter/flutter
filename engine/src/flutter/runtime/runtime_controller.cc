@@ -59,18 +59,21 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
     fml::WeakPtr<ImageDecoder> image_decoder,
     fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const {
-  UIDartState::Context spawned_context{context_.task_runners,
-                                       std::move(snapshot_delegate),
-                                       std::move(io_manager),
-                                       context_.unref_queue,
-                                       std::move(image_decoder),
-                                       std::move(image_generator_registry),
-                                       advisory_script_uri,
-                                       advisory_script_entrypoint,
-                                       context_.deterministic_rendering_enabled,
-                                       context_.concurrent_task_runner,
-                                       context_.enable_impeller,
-                                       context_.enable_flutter_gpu};
+  UIDartState::Context spawned_context{
+      context_.task_runners,
+      std::move(snapshot_delegate),
+      std::move(io_manager),
+      context_.unref_queue,
+      std::move(image_decoder),
+      std::move(image_generator_registry),
+      advisory_script_uri,
+      advisory_script_entrypoint,
+      context_.deterministic_rendering_enabled,
+      context_.concurrent_task_runner,
+      context_.runtime_stage_backend,
+      context_.enable_impeller,
+      context_.enable_flutter_gpu,
+  };
   auto result =
       std::make_unique<RuntimeController>(p_client,                      //
                                           vm_,                           //

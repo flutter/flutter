@@ -59,15 +59,8 @@ std::string FragmentProgram::initFromAsset(const std::string& asset_name) {
            std::string("' does not contain any shader data.");
   }
 
-  auto impeller_context =
-      ui_dart_state->GetIOManager()->GetImpellerContext().get();
-  impeller::RuntimeStageBackend backend;
-  if (impeller_context) {
-    backend = impeller_context->GetRuntimeStageBackend();
-  } else {
-    backend = impeller::RuntimeStageBackend::kSkSL;
-  }
-
+  impeller::RuntimeStageBackend backend =
+      ui_dart_state->GetRuntimeStageBackend();
   std::shared_ptr<impeller::RuntimeStage> runtime_stage =
       runtime_stages[backend];
   if (!runtime_stage) {

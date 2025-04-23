@@ -30,6 +30,7 @@ UIDartState::Context::Context(
     std::string advisory_script_entrypoint,
     bool deterministic_rendering_enabled,
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
+    std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend,
     bool enable_impeller,
     bool enable_flutter_gpu)
     : task_runners(task_runners),
@@ -42,6 +43,7 @@ UIDartState::Context::Context(
       advisory_script_entrypoint(std::move(advisory_script_entrypoint)),
       deterministic_rendering_enabled(deterministic_rendering_enabled),
       concurrent_task_runner(std::move(concurrent_task_runner)),
+      runtime_stage_backend(std::move(runtime_stage_backend)),
       enable_impeller(enable_impeller),
       enable_flutter_gpu(enable_flutter_gpu) {}
 
@@ -239,6 +241,11 @@ Dart_Isolate UIDartState::CreatePlatformIsolate(Dart_Handle entry_point,
                                                 char** error) {
   FML_UNREACHABLE();
   return nullptr;
+}
+
+/// The runtime stage to use for fragment shaders.
+impeller::RuntimeStageBackend UIDartState::GetRuntimeStageBackend() const {
+  return context_.runtime_stage_backend.get();
 }
 
 }  // namespace flutter
