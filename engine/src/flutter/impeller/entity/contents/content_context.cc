@@ -30,6 +30,35 @@ namespace {
 
 class GenericVariants {
  public:
+  void Set(const ContentContextOptions& options,
+           std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return;
+      }
+    }
+    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+  }
+
+  void SetDefault(const ContentContextOptions& options,
+                  std::unique_ptr<GenericRenderPipelineHandle> pipeline) {
+    default_options_ = options;
+    if (pipeline) {
+      Set(options, std::move(pipeline));
+    }
+  }
+
+  GenericRenderPipelineHandle* Get(const ContentContextOptions& options) const {
+    uint64_t p_key = options.ToKey();
+    for (const auto& [key, pipeline] : pipelines_) {
+      if (key == p_key) {
+        return pipeline.get();
+      }
+    }
+    return nullptr;
+  }
+
   void SetDefaultDescriptor(std::optional<PipelineDescriptor> desc) {
     desc_ = std::move(desc);
   }
@@ -75,28 +104,20 @@ class Variants : public GenericVariants {
 
   void Set(const ContentContextOptions& options,
            std::unique_ptr<PipelineHandleT> pipeline) {
-    uint64_t p_key = options.ToKey();
-    for (const auto& [key, pipeline] : pipelines_) {
-      if (key == p_key) {
-        return;
-      }
-    }
-    pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
+    GenericVariants::Set(options, std::move(pipeline));
   }
 
   void SetDefault(const ContentContextOptions& options,
                   std::unique_ptr<PipelineHandleT> pipeline) {
-    default_options_ = options;
-    if (pipeline) {
-      Set(options, std::move(pipeline));
-    }
+    GenericVariants::SetDefault(options, std::move(pipeline));
   }
 
   void CreateDefault(const Context& context,
                      const ContentContextOptions& options,
                      const std::vector<Scalar>& constants = {}) {
-    auto desc = PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(
-        context, constants);
+    std::optional<PipelineDescriptor> desc =
+        PipelineHandleT::Builder::MakeDefaultPipelineDescriptor(context,
+                                                                constants);
     if (!desc.has_value()) {
       VALIDATION_LOG << "Failed to create default pipeline.";
       return;
@@ -112,13 +133,7 @@ class Variants : public GenericVariants {
   }
 
   PipelineHandleT* Get(const ContentContextOptions& options) const {
-    uint64_t p_key = options.ToKey();
-    for (const auto& [key, pipeline] : pipelines_) {
-      if (key == p_key) {
-        return static_cast<PipelineHandleT*>(pipeline.get());
-      }
-    }
-    return nullptr;
+    return static_cast<PipelineHandleT*>(GenericVariants::Get(options));
   }
 
   PipelineHandleT* GetDefault(const Context& context) {
