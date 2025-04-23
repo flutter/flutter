@@ -18,10 +18,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/src/material/button_style.dart';
-import 'package:flutter/src/material/theme_data.dart';
 
 import 'arc.dart';
+import 'button_style.dart';
 import 'colors.dart';
 import 'icon_button.dart';
 import 'icons.dart';
@@ -30,6 +29,7 @@ import 'page.dart';
 import 'scaffold.dart' show ScaffoldMessenger, ScaffoldMessengerState;
 import 'scrollbar.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Examples can assume:
