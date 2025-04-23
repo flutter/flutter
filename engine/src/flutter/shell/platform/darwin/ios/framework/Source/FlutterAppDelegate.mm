@@ -348,16 +348,13 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
   NSDictionary* sceneManifest =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIApplicationSceneManifest"];
   NSDictionary* sceneConfigs = sceneManifest[@"UISceneConfigurations"];
-  NSArray* roleConfigs = sceneConfigs[connectingSceneSession.role];
 
-  UISceneConfiguration* config;
-  if (roleConfigs.count > 0) {
-    NSString* configurationName = roleConfigs[0][@"UISceneConfigurationName"];
-    config = [UISceneConfiguration configurationWithName:configurationName
-                                             sessionRole:connectingSceneSession.role];
+  if (sceneConfigs.count > 0) {
+    return connectingSceneSession.configuration;
   } else {
-    config = [UISceneConfiguration configurationWithName:@"flutter"
-                                             sessionRole:connectingSceneSession.role];
+    UISceneConfiguration* config =
+        [UISceneConfiguration configurationWithName:@"flutter"
+                                        sessionRole:connectingSceneSession.role];
     config.sceneClass = [UIWindowScene class];
     config.delegateClass = [FlutterAppDelegate class];
     if ([[NSBundle mainBundle] pathForResource:@"Main" ofType:@"storyboardc"]) {
@@ -365,8 +362,8 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                                            bundle:[NSBundle mainBundle]];
       config.storyboard = storyboard;
     }
+    return config;
   }
-  return config;
 }
 
 @end
