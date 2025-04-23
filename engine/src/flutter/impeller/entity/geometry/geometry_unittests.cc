@@ -427,6 +427,96 @@ TEST(EntityGeometryTest, TwoLineSegmentsLeftTurnStrokeVerticesMiterJoin) {
   EXPECT_EQ(points, expected);
 }
 
+TEST(EntityGeometryTest, TinyQuadGeneratesCaps) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.QuadraticCurveTo({20.125, 20}, {20.250, 20});
+  flutter::DlPath path(path_builder);
+
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 4.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the opening square cap
+      Point(18, 22),
+      Point(18, 18),
+
+      // The points for the start of the curve
+      Point(20, 22),
+      Point(20, 18),
+
+      // The points for the end of the curve
+      Point(20.25, 22),
+      Point(20.25, 18),
+
+      // The points for the closing square cap
+      Point(22.25, 22),
+      Point(22.25, 18),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TinyConicGeneratesCaps) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.ConicCurveTo({20.125, 20}, {20.250, 20}, 0.6);
+  flutter::DlPath path(path_builder);
+
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 4.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the opening square cap
+      Point(18, 22),
+      Point(18, 18),
+
+      // The points for the start of the curve
+      Point(20, 22),
+      Point(20, 18),
+
+      // The points for the end of the curve
+      Point(20.25, 22),
+      Point(20.25, 18),
+
+      // The points for the closing square cap
+      Point(22.25, 22),
+      Point(22.25, 18),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
+TEST(EntityGeometryTest, TinyCubicGeneratesCaps) {
+  PathBuilder path_builder;
+  path_builder.MoveTo({20, 20});
+  path_builder.CubicCurveTo({20.0625, 20}, {20.125, 20}, {20.250, 20});
+  flutter::DlPath path(path_builder);
+
+  auto points = ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
+      path, 4.0f, 4.0f, Join::kBevel, Cap::kSquare, 1.0f);
+
+  std::vector<Point> expected = {
+      // The points for the opening square cap
+      Point(18, 22),
+      Point(18, 18),
+
+      // The points for the start of the curve
+      Point(20, 22),
+      Point(20, 18),
+
+      // The points for the end of the curve
+      Point(20.25, 22),
+      Point(20.25, 18),
+
+      // The points for the closing square cap
+      Point(22.25, 22),
+      Point(22.25, 18),
+  };
+
+  EXPECT_EQ(points, expected);
+}
+
 TEST(EntityGeometryTest, TwoLineSegmentsMiterLimit) {
   // degrees is the angle that the line deviates from "straight ahead"
   for (int degrees = 10; degrees < 180; degrees += 10) {
@@ -516,7 +606,7 @@ TEST(EntityGeometryTest, TightQuadratic180DegreeJoins) {
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates no joins because the curve is smooth
-  EXPECT_EQ(points_bevel_reference.size(), 76u);
+  EXPECT_EQ(points_bevel_reference.size(), 74u);
 
   // Now create a path that doubles back on itself with a quadratic.
   PathBuilder path_builder;
@@ -555,7 +645,7 @@ TEST(EntityGeometryTest, TightConic180DegreeJoins) {
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates no joins because the curve is smooth
-  EXPECT_EQ(points_bevel_reference.size(), 80u);
+  EXPECT_EQ(points_bevel_reference.size(), 78u);
 
   // Now create a path that doubles back on itself with a conic.
   PathBuilder path_builder;
@@ -595,7 +685,7 @@ TEST(EntityGeometryTest, TightCubic180DegreeJoins) {
       ImpellerEntityUnitTestAccessor::GenerateSolidStrokeVertices(
           path_reference, 20.0f, 4.0f, Join::kBevel, Cap::kButt, 1.0f);
   // Generates no joins because the curve is smooth
-  EXPECT_EQ(points_reference.size(), 82u);
+  EXPECT_EQ(points_reference.size(), 80u);
 
   // Now create a path that doubles back on itself with a cubic.
   PathBuilder path_builder;

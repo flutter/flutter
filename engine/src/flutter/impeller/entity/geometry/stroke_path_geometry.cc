@@ -202,43 +202,42 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       auto end_perpendicular = ComputePerpendicular(end_direction.value());
 
       // We join the previous segment to this one with a normal join
+      // The join will append the perpendicular at the start of this
+      // curve as well.
       HandlePreviousJoin(start_perpendicular);
-      AppendVertices(curve.p1, start_perpendicular);
 
       Scalar count =
           std::ceilf(curve.SubdivisionCount(scale_ * half_stroke_width_));
-      if (count > 1) {
-        Point prev = curve.p1;
-        auto prev_perpendicular = start_perpendicular;
 
-        // Handle all intermediate curve points up to but not including the end
-        for (int i = 1; i < count; i++) {
-          Point cur = curve.Solve(i / count);
-          auto cur_perpendicular = ComputePerpendicular(prev, cur);
-          if (prev_perpendicular.GetAlignment(cur_perpendicular) <
-              trigs_[1].cos) {
-            // We only connect 2 curved segments if their change in
-            // direction is faster than a single sample of a round join
-            AppendVertices(cur, prev_perpendicular);
-            AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
-          }
-          AppendVertices(cur, cur_perpendicular);
-          prev = cur;
-          prev_perpendicular = cur_perpendicular;
-        }
+      Point prev = curve.p1;
+      auto prev_perpendicular = start_perpendicular;
 
-        if (prev_perpendicular.GetAlignment(end_perpendicular) <
+      // Handle all intermediate curve points up to but not including the end
+      for (int i = 1; i < count; i++) {
+        Point cur = curve.Solve(i / count);
+        auto cur_perpendicular = ComputePerpendicular(prev, cur);
+        if (prev_perpendicular.GetAlignment(cur_perpendicular) <
             trigs_[1].cos) {
           // We only connect 2 curved segments if their change in
           // direction is faster than a single sample of a round join
-          AppendVertices(curve.p2, prev_perpendicular);
-          AddJoin(Join::kRound, prev, prev_perpendicular, end_perpendicular);
+          AppendVertices(cur, prev_perpendicular);
+          AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
         }
-        AppendVertices(curve.p2, end_perpendicular);
-
-        last_perpendicular_ = end_perpendicular;
-        last_point_ = curve.p2;
+        AppendVertices(cur, cur_perpendicular);
+        prev = cur;
+        prev_perpendicular = cur_perpendicular;
       }
+
+      if (prev_perpendicular.GetAlignment(end_perpendicular) < trigs_[1].cos) {
+        // We only connect 2 curved segments if their change in
+        // direction is faster than a single sample of a round join
+        AppendVertices(curve.p2, prev_perpendicular);
+        AddJoin(Join::kRound, prev, prev_perpendicular, end_perpendicular);
+      }
+      AppendVertices(curve.p2, end_perpendicular);
+
+      last_perpendicular_ = end_perpendicular;
+      last_point_ = curve.p2;
     }
   }
 
