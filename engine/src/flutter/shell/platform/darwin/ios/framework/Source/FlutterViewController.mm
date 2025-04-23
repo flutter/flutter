@@ -2709,4 +2709,8 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   return self.engine.restorationPlugin;
 }
 
+- (FlutterTextInputPlugin*)textInputPlugin {
+  return self.engine.textInputPlugin;
+}
+
 @end
