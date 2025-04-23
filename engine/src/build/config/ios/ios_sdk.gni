@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/apple/apple_sdk.gni")
 import("//build/toolchain/rbe.gni")
 
 declare_args() {
@@ -26,11 +27,6 @@ declare_args() {
 
   # The path to the iOS simulator SDK.
   ios_simulator_sdk_path = ""
-
-  # Path to the Xcode toolchain (XcodeDefault.xctoolchain).
-  # TODO(cbracken): https://github.com/flutter/flutter/issues/167592
-  # Merge with mac_toolchain_path into apple_sdk.gni.
-  ios_toolchain_path = ""
 
   # The path to iOS SDK Swift libraries.
   ios_swift_lib_paths = []
@@ -75,22 +71,14 @@ if (ios_sdk_path == "") {
   }
 }
 
-if (ios_toolchain_path == "") {
-  # The tool will print the SDK path on the first line, and the version on the
-  # second line.
-  _find_sdk_lines =
-      exec_script("//build/mac/find_sdk.py", ["--print_sdk_path", "1.0"] , "list lines")
-
-  ios_toolchain_path = _find_sdk_lines[1]
-}
+# Set in //build/config/apple/apple_sdk.gni.
+assert (apple_host_toolchain_path != "")
 
 if (ios_swift_lib_paths == []) {
   ios_swift_lib_paths += [rebase_path("$ios_sdk_path/usr/lib/swift")]
-  if (ios_toolchain_path != "") {
-    if (use_ios_simulator) {
-      ios_swift_lib_paths += [rebase_path("$ios_toolchain_path/usr/lib/swift/iphonesimulator")]
-    } else {
-      ios_swift_lib_paths += [rebase_path("$ios_toolchain_path/usr/lib/swift/iphoneos")]
-    }
+  if (use_ios_simulator) {
+    ios_swift_lib_paths += [rebase_path("$apple_host_toolchain_path/usr/lib/swift/iphonesimulator")]
+  } else {
+    ios_swift_lib_paths += [rebase_path("$apple_host_toolchain_path/usr/lib/swift/iphoneos")]
   }
 }

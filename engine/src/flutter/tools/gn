@@ -280,6 +280,7 @@ def setup_apple_sdks():
       ('MacOSX', 'mac_sdk_path'),
       ('iPhoneOS', 'ios_device_sdk_path'),
       ('iPhoneSimulator', 'ios_simulator_sdk_path'),
+      ('XcodeDefault.xctoolchain', 'apple_host_toolchain_path'),
   ]
   sdks_path = os.path.join(SRC_ROOT, 'flutter', 'prebuilts', 'SDKs')
   sdk_entries = os.listdir(sdks_path)

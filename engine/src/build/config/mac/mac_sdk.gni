@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/apple/apple_sdk.gni")
 import("//build/toolchain/rbe.gni")
 
 declare_args() {
@@ -16,11 +17,6 @@ declare_args() {
   # the end. If empty, the path to the lowest version greater than or equal to
   # mac_sdk_min is used.
   mac_sdk_path = ""
-
-  # Path to the Xcode toolchain (XcodeDefault.xctoolchain).
-  # TODO(cbracken): https://github.com/flutter/flutter/issues/167592
-  # Merge with ios_toolchain_path into apple_sdk.gni.
-  mac_toolchain_path = ""
 }
 
 assert(mac_sdk_min != "")
@@ -46,14 +42,4 @@ if (mac_sdk_path == "") {
       exec_script("//build/mac/find_sdk.py", find_sdk_args, "list lines")
 
   mac_sdk_path = _find_sdk_lines[0]
-}
-
-if (mac_toolchain_path == "") {
-  # The tool will print the SDK path on the first line, and the version on the
-  # second line.
-  _find_sdk_lines = []
-  _find_sdk_lines =
-      exec_script("//build/mac/find_sdk.py", ["--print_sdk_path", mac_sdk_min], "list lines")
-
-  mac_toolchain_path = _find_sdk_lines[1]
 }
