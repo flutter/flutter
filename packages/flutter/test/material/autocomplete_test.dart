@@ -805,7 +805,7 @@ void main() {
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
                             SemanticsAction.focus,
-                            if (kIsWasm) SemanticsAction.paste,
+                            if (kIsWeb) SemanticsAction.paste,
                           ],
                           textDirection: TextDirection.ltr,
                           textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
