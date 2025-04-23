@@ -764,7 +764,6 @@ void main() {
   });
 
   testWidgets('Drawer is dismissible by default', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -772,18 +771,12 @@ void main() {
           appBar: AppBar(
             title: Semantics(headingLevel: 1, child: const Text('Drawer Dismissible')),
           ),
-          endDrawer: const Drawer(
-            backgroundColor: Colors.white,
-            width: 300,
-            child: Text('Drawer'),
-          ),
+          endDrawer: const Drawer(backgroundColor: Colors.white, width: 300, child: Text('Drawer')),
           body: Container(
             color: Colors.white,
             width: 600,
             height: 600,
-            child: const Center(
-              child: Text('Drawer Dismissible'),
-            ),
+            child: const Center(child: Text('Drawer Dismissible')),
           ),
         ),
       ),
@@ -838,7 +831,6 @@ void main() {
   });
 
   testWidgets('Drawer can be configured as not dismissible', (WidgetTester tester) async {
-
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: false),
@@ -847,18 +839,12 @@ void main() {
           appBar: AppBar(
             title: Semantics(headingLevel: 1, child: const Text('Drawer Dismissible')),
           ),
-          endDrawer: const Drawer(
-            backgroundColor: Colors.white,
-            width: 300,
-            child: Text('Drawer'),
-          ),
+          endDrawer: const Drawer(backgroundColor: Colors.white, width: 300, child: Text('Drawer')),
           body: Container(
             color: Colors.white,
             width: 600,
             height: 600,
-            child: const Center(
-              child: Text('Drawer Dismissible'),
-            ),
+            child: const Center(child: Text('Drawer Dismissible')),
           ),
         ),
       ),
