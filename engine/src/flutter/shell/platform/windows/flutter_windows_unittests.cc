@@ -82,8 +82,8 @@ TEST_F(WindowsTest, LaunchMain) {
 
 // Verify there is no unexpected output from launching main.
 TEST_F(WindowsTest, LaunchMainHasNoOutput) {
-  // Replace stdout & stderr stream buffers with our own.
-  StreamCapture stdout_capture(&std::cout);
+  // Replace stderr stream buffer with our own.  (stdout may contain expected
+  // output printed by Dart, such as the Dart VM service startup message)
   StreamCapture stderr_capture(&std::cerr);
 
   auto& context = GetContext();
@@ -91,11 +91,9 @@ TEST_F(WindowsTest, LaunchMainHasNoOutput) {
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
-  stdout_capture.Stop();
   stderr_capture.Stop();
 
-  // Verify stdout & stderr have no output.
-  EXPECT_TRUE(stdout_capture.GetOutput().empty());
+  // Verify stderr has no output.
   EXPECT_TRUE(stderr_capture.GetOutput().empty());
 }
 
@@ -131,23 +129,20 @@ TEST_F(WindowsTest, LaunchHeadlessEngine) {
   ASSERT_NE(engine, nullptr);
 
   std::string view_ids;
-  bool signaled = false;
+  fml::AutoResetWaitableEvent latch;
   context.AddNativeFunction(
       "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
         auto handle = Dart_GetNativeArgument(args, 0);
         ASSERT_FALSE(Dart_IsError(handle));
         view_ids = tonic::DartConverter<std::string>::FromDart(handle);
-        signaled = true;
+        latch.Signal();
       }));
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
-  while (!signaled) {
-    PumpMessage();
-  }
-
   // Verify a headless app has the implicit view.
+  latch.Wait();
   EXPECT_EQ(view_ids, "View IDs: [0]");
 }
 
@@ -217,18 +212,16 @@ TEST_F(WindowsTest, VerifyNativeFunction) {
   WindowsConfigBuilder builder(context);
   builder.SetDartEntrypoint("verifyNativeFunction");
 
-  bool signaled = false;
+  fml::AutoResetWaitableEvent latch;
   auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signaled = true; });
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); });
   context.AddNativeFunction("Signal", native_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
   // Wait until signal has been called.
-  while (!signaled) {
-    PumpMessage();
-  }
+  latch.Wait();
 }
 
 // Verify that native functions that pass parameters can be registered and
@@ -239,11 +232,11 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithParameters) {
   builder.SetDartEntrypoint("verifyNativeFunctionWithParameters");
 
   bool bool_value = false;
-  bool signaled = false;
+  fml::AutoResetWaitableEvent latch;
   auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
     auto handle = Dart_GetNativeBooleanArgument(args, 0, &bool_value);
     ASSERT_FALSE(Dart_IsError(handle));
-    signaled = true;
+    latch.Signal();
   });
   context.AddNativeFunction("SignalBoolValue", native_entry);
 
@@ -251,9 +244,7 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithParameters) {
   ASSERT_NE(controller, nullptr);
 
   // Wait until signalBoolValue has been called.
-  while (!signaled) {
-    PumpMessage();
-  }
+  latch.Wait();
   EXPECT_TRUE(bool_value);
 }
 
@@ -264,12 +255,12 @@ TEST_F(WindowsTest, PlatformExecutable) {
   builder.SetDartEntrypoint("readPlatformExecutable");
 
   std::string executable_name;
-  bool signaled = false;
+  fml::AutoResetWaitableEvent latch;
   auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
     auto handle = Dart_GetNativeArgument(args, 0);
     ASSERT_FALSE(Dart_IsError(handle));
     executable_name = tonic::DartConverter<std::string>::FromDart(handle);
-    signaled = true;
+    latch.Signal();
   });
   context.AddNativeFunction("SignalStringValue", native_entry);
 
@@ -277,9 +268,7 @@ TEST_F(WindowsTest, PlatformExecutable) {
   ASSERT_NE(controller, nullptr);
 
   // Wait until signalStringValue has been called.
-  while (!signaled) {
-    PumpMessage();
-  }
+  latch.Wait();
   EXPECT_EQ(executable_name, "flutter_windows_unittests.exe");
 }
 
@@ -291,10 +280,10 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithReturn) {
   builder.SetDartEntrypoint("verifyNativeFunctionWithReturn");
 
   bool bool_value_to_return = true;
-  int count = 2;
+  fml::CountDownLatch latch(2);
   auto bool_return_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
     Dart_SetBooleanReturnValue(args, bool_value_to_return);
-    --count;
+    latch.CountDown();
   });
   context.AddNativeFunction("SignalBoolReturn", bool_return_entry);
 
@@ -302,7 +291,7 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithReturn) {
   auto bool_pass_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
     auto handle = Dart_GetNativeBooleanArgument(args, 0, &bool_value_passed);
     ASSERT_FALSE(Dart_IsError(handle));
-    --count;
+    latch.CountDown();
   });
   context.AddNativeFunction("SignalBoolValue", bool_pass_entry);
 
@@ -310,9 +299,7 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithReturn) {
   ASSERT_NE(controller, nullptr);
 
   // Wait until signalBoolReturn and signalBoolValue have been called.
-  while (count > 0) {
-    PumpMessage();
-  }
+  latch.Wait();
   EXPECT_TRUE(bool_value_passed);
 }
 
@@ -625,10 +612,10 @@ TEST_F(WindowsTest, AddRemoveView) {
   WindowsConfigBuilder builder(context);
   builder.SetDartEntrypoint("onMetricsChangedSignalViewIds");
 
-  bool ready = false;
+  fml::AutoResetWaitableEvent ready_latch;
   context.AddNativeFunction(
-      "Signal",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { ready = true; }));
+      "Signal", CREATE_NATIVE_ENTRY(
+                    [&](Dart_NativeArguments args) { ready_latch.Signal(); }));
 
   context.AddNativeFunction(
       "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
@@ -643,9 +630,7 @@ TEST_F(WindowsTest, AddRemoveView) {
   ViewControllerPtr first_controller{builder.Run()};
   ASSERT_NE(first_controller, nullptr);
 
-  while (!ready) {
-    PumpMessage();
-  }
+  ready_latch.Wait();
 
   // Create a second view.
   FlutterDesktopEngineRef engine =
@@ -683,6 +668,7 @@ TEST_F(WindowsTest, EngineId) {
   WindowsConfigBuilder builder(context);
   builder.SetDartEntrypoint("testEngineId");
 
+  fml::AutoResetWaitableEvent latch;
   std::optional<int64_t> engineId;
   context.AddNativeFunction(
       "NotifyEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
@@ -691,15 +677,17 @@ TEST_F(WindowsTest, EngineId) {
           const auto handle = tonic::DartConverter<int64_t>::FromDart(argument);
           engineId = handle;
         }
+        latch.Signal();
       }));
   // Create the implicit view.
   ViewControllerPtr first_controller{builder.Run()};
   ASSERT_NE(first_controller, nullptr);
 
-  while (!engineId.has_value()) {
-    PumpMessage();
+  latch.Wait();
+  EXPECT_TRUE(engineId.has_value());
+  if (!engineId.has_value()) {
+    return;
   }
-
   auto engine = FlutterDesktopViewControllerGetEngine(first_controller.get());
   EXPECT_EQ(engine, FlutterDesktopEngineForId(*engineId));
 }

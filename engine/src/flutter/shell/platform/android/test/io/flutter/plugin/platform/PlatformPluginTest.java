@@ -57,7 +57,6 @@ import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLooper;
 
-@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class PlatformPluginTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();

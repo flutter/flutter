@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -41,9 +40,6 @@ import android.text.style.URLSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
-import android.view.Window;
-import android.view.WindowInsets;
-import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -67,7 +63,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityBridgeTest {
 
@@ -476,213 +471,6 @@ public class AccessibilityBridgeTest {
         .thenReturn(mockNodeInfo1);
     spyAccessibilityBridge.createAccessibilityNodeInfo(1);
     verify(mockNodeInfo1, times(1)).setImportantForAccessibility(eq(false));
-  }
-
-  @SuppressWarnings("deprecation")
-  // getSystemWindowInset* methods deprecated.
-  @Config(sdk = API_LEVELS.API_28)
-  @TargetApi(API_LEVELS.API_28)
-  @Test
-  public void itSetCutoutInsetBasedonLayoutModeNever() {
-    int expectedInsetLeft = 5;
-    int top = 0;
-    int left = 0;
-    int right = 100;
-    int bottom = 200;
-    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
-    AccessibilityManager mockManager = mock(AccessibilityManager.class);
-    View mockRootView = mock(View.class);
-    Activity context = mock(Activity.class);
-    Window window = mock(Window.class);
-    WindowInsets insets = mock(WindowInsets.class);
-    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-    layoutParams.layoutInDisplayCutoutMode =
-        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
-    when(mockRootView.getContext()).thenReturn(context);
-    when(context.getWindow()).thenReturn(window);
-    when(window.getAttributes()).thenReturn(layoutParams);
-    when(mockRootView.getRootWindowInsets()).thenReturn(insets);
-    when(insets.getSystemWindowInsetLeft()).thenReturn(expectedInsetLeft);
-    when(context.getPackageName()).thenReturn("test");
-    AccessibilityBridge accessibilityBridge =
-        setUpBridge(mockRootView, mockManager, mockViewEmbedder);
-    ViewParent mockParent = mock(ViewParent.class);
-    when(mockRootView.getParent()).thenReturn(mockParent);
-    when(mockManager.isEnabled()).thenReturn(true);
-
-    TestSemanticsNode root = new TestSemanticsNode();
-    root.id = 0;
-    root.left = left;
-    root.top = top;
-    root.right = right;
-    root.bottom = bottom;
-    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-
-    AccessibilityBridge spyAccessibilityBridge = spy(accessibilityBridge);
-    AccessibilityNodeInfo mockNodeInfo = mock(AccessibilityNodeInfo.class);
-
-    when(spyAccessibilityBridge.obtainAccessibilityNodeInfo(mockRootView, 0))
-        .thenReturn(mockNodeInfo);
-    spyAccessibilityBridge.createAccessibilityNodeInfo(0);
-    verify(mockNodeInfo, times(1))
-        .setBoundsInScreen(
-            new Rect(left + expectedInsetLeft, top, right + expectedInsetLeft, bottom));
-  }
-
-  @SuppressWarnings("deprecation")
-  // getSystemWindowInset* methods deprecated.
-  @Config(sdk = API_LEVELS.API_28)
-  @TargetApi(API_LEVELS.API_28)
-  @Test
-  public void itSetCutoutInsetBasedonLayoutModeDefault() {
-    int expectedInsetLeft = 5;
-    int top = 0;
-    int left = 0;
-    int right = 100;
-    int bottom = 200;
-    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
-    AccessibilityManager mockManager = mock(AccessibilityManager.class);
-    View mockRootView = mock(View.class);
-    Activity context = mock(Activity.class);
-    Window window = mock(Window.class);
-    WindowInsets insets = mock(WindowInsets.class);
-    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-    layoutParams.layoutInDisplayCutoutMode =
-        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
-    when(mockRootView.getContext()).thenReturn(context);
-    when(context.getWindow()).thenReturn(window);
-    when(window.getAttributes()).thenReturn(layoutParams);
-    when(mockRootView.getRootWindowInsets()).thenReturn(insets);
-    when(insets.getSystemWindowInsetLeft()).thenReturn(expectedInsetLeft);
-    when(context.getPackageName()).thenReturn("test");
-    AccessibilityBridge accessibilityBridge =
-        setUpBridge(mockRootView, mockManager, mockViewEmbedder);
-    ViewParent mockParent = mock(ViewParent.class);
-    when(mockRootView.getParent()).thenReturn(mockParent);
-    when(mockManager.isEnabled()).thenReturn(true);
-
-    TestSemanticsNode root = new TestSemanticsNode();
-    root.id = 0;
-    root.left = left;
-    root.top = top;
-    root.right = right;
-    root.bottom = bottom;
-    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-
-    AccessibilityBridge spyAccessibilityBridge = spy(accessibilityBridge);
-    AccessibilityNodeInfo mockNodeInfo = mock(AccessibilityNodeInfo.class);
-
-    when(spyAccessibilityBridge.obtainAccessibilityNodeInfo(mockRootView, 0))
-        .thenReturn(mockNodeInfo);
-    spyAccessibilityBridge.createAccessibilityNodeInfo(0);
-    verify(mockNodeInfo, times(1))
-        .setBoundsInScreen(
-            new Rect(left + expectedInsetLeft, top, right + expectedInsetLeft, bottom));
-  }
-
-  @SuppressWarnings("deprecation")
-  // getSystemWindowInset* methods deprecated.
-  @Config(sdk = API_LEVELS.API_28)
-  @TargetApi(API_LEVELS.API_28)
-  @Test
-  public void itSetCutoutInsetBasedonLayoutModeShortEdges() {
-    int expectedInsetLeft = 5;
-    int top = 0;
-    int left = 0;
-    int right = 100;
-    int bottom = 200;
-    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
-    AccessibilityManager mockManager = mock(AccessibilityManager.class);
-    View mockRootView = mock(View.class);
-    Activity context = mock(Activity.class);
-    Window window = mock(Window.class);
-    WindowInsets insets = mock(WindowInsets.class);
-    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-    layoutParams.layoutInDisplayCutoutMode =
-        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-    when(mockRootView.getContext()).thenReturn(context);
-    when(context.getWindow()).thenReturn(window);
-    when(window.getAttributes()).thenReturn(layoutParams);
-    when(mockRootView.getRootWindowInsets()).thenReturn(insets);
-    when(insets.getSystemWindowInsetLeft()).thenReturn(expectedInsetLeft);
-    when(context.getPackageName()).thenReturn("test");
-    AccessibilityBridge accessibilityBridge =
-        setUpBridge(mockRootView, mockManager, mockViewEmbedder);
-    ViewParent mockParent = mock(ViewParent.class);
-    when(mockRootView.getParent()).thenReturn(mockParent);
-    when(mockManager.isEnabled()).thenReturn(true);
-
-    TestSemanticsNode root = new TestSemanticsNode();
-    root.id = 0;
-    root.left = left;
-    root.top = top;
-    root.right = right;
-    root.bottom = bottom;
-    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-
-    AccessibilityBridge spyAccessibilityBridge = spy(accessibilityBridge);
-    AccessibilityNodeInfo mockNodeInfo = mock(AccessibilityNodeInfo.class);
-
-    when(spyAccessibilityBridge.obtainAccessibilityNodeInfo(mockRootView, 0))
-        .thenReturn(mockNodeInfo);
-    spyAccessibilityBridge.createAccessibilityNodeInfo(0);
-    // Does not apply left inset if the layout mode is `short edges`.
-    verify(mockNodeInfo, times(1)).setBoundsInScreen(new Rect(left, top, right, bottom));
-  }
-
-  @SuppressWarnings("deprecation")
-  // getSystemWindowInset* methods deprecated.
-  // fluter#133074 tracks post deprecation work.
-  @Config(sdk = API_LEVELS.API_30)
-  @TargetApi(API_LEVELS.API_30)
-  @Test
-  public void itSetCutoutInsetBasedonLayoutModeAlways() {
-    int expectedInsetLeft = 5;
-    int top = 0;
-    int left = 0;
-    int right = 100;
-    int bottom = 200;
-    AccessibilityViewEmbedder mockViewEmbedder = mock(AccessibilityViewEmbedder.class);
-    AccessibilityManager mockManager = mock(AccessibilityManager.class);
-    View mockRootView = mock(View.class);
-    Activity context = mock(Activity.class);
-    Window window = mock(Window.class);
-    WindowInsets insets = mock(WindowInsets.class);
-    WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
-    layoutParams.layoutInDisplayCutoutMode =
-        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-    when(mockRootView.getContext()).thenReturn(context);
-    when(context.getWindow()).thenReturn(window);
-    when(window.getAttributes()).thenReturn(layoutParams);
-    when(mockRootView.getRootWindowInsets()).thenReturn(insets);
-    when(insets.getSystemWindowInsetLeft()).thenReturn(expectedInsetLeft);
-    when(context.getPackageName()).thenReturn("test");
-    AccessibilityBridge accessibilityBridge =
-        setUpBridge(mockRootView, mockManager, mockViewEmbedder);
-    ViewParent mockParent = mock(ViewParent.class);
-    when(mockRootView.getParent()).thenReturn(mockParent);
-    when(mockManager.isEnabled()).thenReturn(true);
-
-    TestSemanticsNode root = new TestSemanticsNode();
-    root.id = 0;
-    root.left = left;
-    root.top = top;
-    root.right = right;
-    root.bottom = bottom;
-    TestSemanticsUpdate testSemanticsUpdate = root.toUpdate();
-    testSemanticsUpdate.sendUpdateToBridge(accessibilityBridge);
-
-    AccessibilityBridge spyAccessibilityBridge = spy(accessibilityBridge);
-    AccessibilityNodeInfo mockNodeInfo = mock(AccessibilityNodeInfo.class);
-
-    when(spyAccessibilityBridge.obtainAccessibilityNodeInfo(mockRootView, 0))
-        .thenReturn(mockNodeInfo);
-    spyAccessibilityBridge.createAccessibilityNodeInfo(0);
-    // Does not apply left inset if the layout mode is `always`.
-    verify(mockNodeInfo, times(1)).setBoundsInScreen(new Rect(left, top, right, bottom));
   }
 
   @Test
@@ -2308,7 +2096,7 @@ public class AccessibilityBridgeTest {
     // These fields are declared in the order they should be
     // encoded.
     int id = 0;
-    int flags = 0;
+    long flags = 0;
     int actions = 0;
     int maxValueLength = 0;
     int currentValueLength = 0;
@@ -2367,7 +2155,7 @@ public class AccessibilityBridgeTest {
     protected void addToBuffer(
         ByteBuffer bytes, ArrayList<String> strings, ArrayList<ByteBuffer> stringAttributeArgs) {
       bytes.putInt(id);
-      bytes.putInt(flags);
+      bytes.putLong(flags);
       bytes.putInt(actions);
       bytes.putInt(maxValueLength);
       bytes.putInt(currentValueLength);

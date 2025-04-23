@@ -47,6 +47,13 @@ typedef NS_ENUM(NSInteger, FlutterScribbleInteractionStatus) {
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 
 /**
+ * Reset the text input plugin to prepare for a hot restart.
+ *
+ * This hides the software keyboard and text editing context menu.
+ */
+- (void)reset;
+
+/**
  * The `UITextInput` implementation used to control text entry.
  *
  * This is used by `AccessibilityBridge` to forward interactions with iOS'

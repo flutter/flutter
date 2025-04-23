@@ -5609,6 +5609,16 @@ targets:
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: run_release_test_macos
 
+  - name: Mac_ios keyboard_hot_restart_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: keyboard_hot_restart_ios
+
   - name: Windows build_tests_1_9
     recipe: flutter/flutter_drone
     timeout: 60

@@ -76,7 +76,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowDisplay;
 import org.robolectric.shadows.ShadowViewGroup;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 @TargetApi(30)
 public class FlutterViewTest {

@@ -1108,7 +1108,7 @@ class FlutterPluginUtilsTest {
                         every { info(any()) } returns Unit
                         every { warn(any()) } returns Unit
                     }
-                every { extensions.findByName("android") } returns
+                every { extensions.findByType(AbstractAppExtension::class.java) } returns
                     mockk<AbstractAppExtension> {
                         val variant1 =
                             mockk<ApplicationVariant> {
@@ -1237,7 +1237,7 @@ class FlutterPluginUtilsTest {
         val mockLogger = mockk<Logger>()
         every { mockProject.logger } returns mockLogger
         every { mockLogger.info(any()) } returns Unit
-        every { mockProject.extensions.findByName("android") } returns null
+        every { mockProject.extensions.findByType(AbstractAppExtension::class.java) } returns null
 
         FlutterPluginUtils.addTasksForOutputsAppLinkSettings(mockProject)
         verify(exactly = 1) { mockLogger.info("addTasksForOutputsAppLinkSettings called on project without android extension.") }

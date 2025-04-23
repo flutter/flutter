@@ -31,9 +31,7 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 @TargetApi(API_LEVELS.API_24) // LocaleList and scriptCode are API 24+.
 public class FlutterJNITest {

@@ -65,9 +65,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterActivityAndFragmentDelegateTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();

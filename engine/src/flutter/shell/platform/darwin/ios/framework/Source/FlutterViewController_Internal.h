@@ -12,6 +12,7 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViewsController.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterRestorationPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewResponder.h"
 
@@ -60,6 +61,7 @@ typedef void (^FlutterKeyboardAnimationCallback)(fml::TimePoint);
 @property(nonatomic, readonly) FlutterPlatformViewsController* platformViewsController;
 
 - (FlutterRestorationPlugin*)restorationPlugin;
+- (FlutterTextInputPlugin*)textInputPlugin;
 
 // Accepts keypress events, and then calls |nextAction| if the event was not
 // handled.

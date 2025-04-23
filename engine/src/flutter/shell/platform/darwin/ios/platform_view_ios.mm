@@ -207,6 +207,7 @@ void PlatformViewIOS::OnPreEngineRestart() const {
   }
   [owner_controller_.platformViewsController reset];
   [owner_controller_.restorationPlugin reset];
+  [owner_controller_.textInputPlugin reset];
 }
 
 std::unique_ptr<std::vector<std::string>> PlatformViewIOS::ComputePlatformResolvedLocales(
