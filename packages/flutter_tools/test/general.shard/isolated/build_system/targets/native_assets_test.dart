@@ -194,8 +194,6 @@ void main() {
           package: 'foo',
           name: 'foo.dart',
           linkMode: DynamicLoadingBundled(),
-          os: OS.iOS,
-          architecture: Architecture.arm64,
           file: Uri.file('foo.framework/foo'),
         ),
       ];
@@ -261,8 +259,6 @@ void main() {
               package: 'foo',
               name: 'foo.dart',
               linkMode: DynamicLoadingBundled(),
-              os: OS.android,
-              architecture: Architecture.arm64,
               file: Uri.file('libfoo.so'),
             ),
         ];
