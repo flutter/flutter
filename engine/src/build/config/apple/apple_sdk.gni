@@ -8,8 +8,8 @@ declare_args() {
 }
 
 if (apple_host_toolchain_path == "") {
-  # The tool will print the SDK path on the first line, and the version on the
-  # second line.
+  # Outputs the SDK path on the first line, and the host toolchain path on the
+  # second.
   _find_sdk_lines =
       exec_script("//build/mac/find_sdk.py", ["--print_sdk_path", "1.0"], "list lines")
 

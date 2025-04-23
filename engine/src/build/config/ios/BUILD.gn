@@ -41,10 +41,11 @@ config("compiler") {
 
   # swiftc -swift-version flag.
   #
-  # Swift 6 transition: As of April 2024, no public framework API is authored
-  # in Swift. Swift 6 is ABI-compatible with Swift 5, but not source-compatible.
-  # If any public API *is* written in Swift, it's possible we may need to
-  # prepare concurrent Swift 5 and 6 builds during a transition period.
+  # Swift 6 transition: As of April 2025, no public Flutter framework API is
+  # authored in Swift. Swift 6 is ABI-compatible with Swift 5, but not
+  # source-compatible. If any public API *is* written in Swift, it's possible
+  # we may need to prepare concurrent Swift 5 and 6 builds during a transition
+  # period.
   _swift_version = "5"
 
   # TODO(cbracken): https://github.com/flutter/flutter/issues/167592

@@ -36,8 +36,8 @@ if (mac_sdk_path == "") {
     mac_sdk_min,
   ]
 
-  # The tool will print the SDK path on the first line, and the version on the
-  # second line.
+  # Outputs the SDK path on the first line, and the host toolchain path on the
+  # second.
   _find_sdk_lines =
       exec_script("//build/mac/find_sdk.py", find_sdk_args, "list lines")
 
