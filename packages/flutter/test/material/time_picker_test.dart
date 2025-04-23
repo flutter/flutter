@@ -2211,6 +2211,77 @@ void main() {
     expect(paragraph.text.style!.fontSize, 56.0);
   });
 
+  testWidgets('provides semantics information for hour/minute mode announcement', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, materialType: MaterialType.material3);
+
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      tester.element(find.byType(TimePickerDialog)),
+    );
+    final Finder semanticsFinder = find.bySemanticsLabel(
+      localizations.timePickerHourModeAnnouncement,
+    );
+
+    final SemanticsNode semanticsNode = tester.getSemantics(semanticsFinder);
+    expect(
+      semanticsNode.label,
+      localizations.timePickerHourModeAnnouncement,
+      reason: 'Label should announce hour mode initially',
+    );
+    expect(
+      semanticsNode.hasFlag(SemanticsFlag.isLiveRegion),
+      isTrue,
+      reason: 'Node should be a live region to announce changes',
+    );
+
+    // --- Switch to minute mode ---
+    final Finder minuteControlInkWell = find.descendant(
+      of: _minuteControl,
+      matching: find.byType(InkWell),
+    );
+    expect(minuteControlInkWell, findsOneWidget, reason: 'Minute control should exist');
+    await tester.tap(minuteControlInkWell);
+    await tester.pumpAndSettle();
+
+    // Get the updated node properties
+    expect(
+      semanticsNode.label,
+      localizations.timePickerMinuteModeAnnouncement,
+      reason: 'Label should announce minute mode after switching',
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for the header (selected time)', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TimeOfDay initialTime = TimeOfDay(hour: 7, minute: 15);
+
+    await mediaQueryBoilerplate(
+      tester,
+      initialTime: initialTime,
+      materialType: MaterialType.material3,
+    );
+
+    final MaterialLocalizations localizations = MaterialLocalizations.of(
+      tester.element(find.byType(TimePickerDialog)),
+    );
+    final String expectedLabel12Hour = localizations.formatTimeOfDay(initialTime);
+    final String expectedHelpText = localizations.timePickerDialHelpText;
+
+    expect(
+      semantics,
+      includesNodeWith(label: '$expectedLabel12Hour\n$expectedHelpText'),
+      reason: 'Header should have semantics label: $expectedLabel12Hour (12-hour)',
+    );
+
+    semantics.dispose();
+  });
+
   // This is a regression test for https://github.com/flutter/flutter/issues/153549.
   testWidgets('Time picker hour minute does not resize on error', (WidgetTester tester) async {
     await startPicker(entryMode: TimePickerEntryMode.input, tester, (TimeOfDay? value) {});
