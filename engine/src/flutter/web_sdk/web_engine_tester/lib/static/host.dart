@@ -207,11 +207,6 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
   hostLog('connect iframe');
   final DomHTMLIFrameElement iframe = createDomHTMLIFrameElement();
   _iframes[id] = iframe;
-  iframe
-    ..src = url
-    ..width = '1000'
-    ..height = '1000';
-  domDocument.body!.appendChild(iframe);
 
   final StreamChannelController<dynamic> controller = StreamChannelController<dynamic>(sync: true);
 
@@ -282,6 +277,12 @@ StreamChannel<dynamic> _connectToIframe(String url, int id) {
       }),
     ),
   );
+
+  iframe
+    ..src = url
+    ..width = '1000'
+    ..height = '1000';
+  domDocument.body!.appendChild(iframe);
 
   return controller.foreign;
 }
