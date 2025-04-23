@@ -174,24 +174,14 @@ GetActualRenderingAPIForImpeller(
 }
 
 std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
-#if !SLIMPELLER
   switch (android_context_->RenderingApi()) {
+#if !SLIMPELLER
     case AndroidRenderingAPI::kSoftware:
       return std::make_unique<AndroidSurfaceSoftware>();
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-      return std::make_unique<AndroidSurfaceGLImpeller>(
-          std::static_pointer_cast<AndroidContextGLImpeller>(android_context_));
     case AndroidRenderingAPI::kSkiaOpenGLES:
       return std::make_unique<AndroidSurfaceGLSkia>(
           std::static_pointer_cast<AndroidContextGLSkia>(android_context_));
-    case AndroidRenderingAPI::kImpellerVulkan:
-      return std::make_unique<AndroidSurfaceVKImpeller>(
-          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_));
-    case AndroidRenderingAPI::kImpellerAutoselect:
-      FML_CHECK(false);
-  }
-#else
-  switch (android_context_->RenderingApi()) {
+#endif  // !SLIMPELLER
     case AndroidRenderingAPI::kImpellerOpenGLES:
       return std::make_unique<AndroidSurfaceGLImpeller>(
           std::static_pointer_cast<AndroidContextGLImpeller>(android_context_));
@@ -199,11 +189,8 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
       return std::make_unique<AndroidSurfaceVKImpeller>(
           std::static_pointer_cast<AndroidContextVKImpeller>(android_context_));
     case AndroidRenderingAPI::kImpellerAutoselect:
-    default:
       FML_CHECK(false);
   }
-
-#endif  // !SLIMPELLER
   FML_UNREACHABLE();
 }
 
@@ -212,21 +199,22 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
     AndroidRenderingAPI android_rendering_api,
     bool enable_opengl_gpu_tracing,
     const AndroidContext::ContextSettings& settings) {
-#if !SLIMPELLER
   switch (android_rendering_api) {
+#if !SLIMPELLER
     case AndroidRenderingAPI::kSoftware:
       return std::make_shared<AndroidContext>(AndroidRenderingAPI::kSoftware);
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-      return std::make_unique<AndroidContextGLImpeller>(
-          std::make_unique<impeller::egl::Display>(),
-          enable_opengl_gpu_tracing);
-    case AndroidRenderingAPI::kImpellerVulkan:
-      return std::make_unique<AndroidContextVKImpeller>(settings);
     case AndroidRenderingAPI::kSkiaOpenGLES:
       return std::make_unique<AndroidContextGLSkia>(
           fml::MakeRefCounted<AndroidEnvironmentGL>(),  //
           task_runners                                  //
       );
+#endif  // !SLIMPELLER
+    case AndroidRenderingAPI::kImpellerVulkan:
+      return std::make_unique<AndroidContextVKImpeller>(settings);
+    case AndroidRenderingAPI::kImpellerOpenGLES:
+      return std::make_unique<AndroidContextGLImpeller>(
+          std::make_unique<impeller::egl::Display>(),
+          enable_opengl_gpu_tracing);
     case AndroidRenderingAPI::kImpellerAutoselect:
       // Determine if we're using GL or Vulkan.
       auto android_vulkan_context = GetActualRenderingAPIForImpeller(
@@ -239,30 +227,6 @@ static std::shared_ptr<flutter::AndroidContext> CreateAndroidContext(
             enable_opengl_gpu_tracing);
       }
   }
-#else
-  switch (android_rendering_api) {
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-      return std::make_unique<AndroidContextGLImpeller>(
-          std::make_unique<impeller::egl::Display>(),
-          enable_opengl_gpu_tracing);
-    case AndroidRenderingAPI::kImpellerVulkan:
-      return std::make_unique<AndroidContextVKImpeller>(settings);
-    case AndroidRenderingAPI::kImpellerAutoselect: {
-      // Determine if we're using GL or Vulkan.
-      auto android_vulkan_context = GetActualRenderingAPIForImpeller(
-          android_get_device_api_level(), settings);
-      if (android_vulkan_context) {
-        return android_vulkan_context;
-      } else {
-        return std::make_unique<AndroidContextGLImpeller>(
-            std::make_unique<impeller::egl::Display>(),
-            enable_opengl_gpu_tracing);
-      }
-    }
-    default:
-      FML_UNREACHABLE();
-  }
-#endif  // !SLIMPELLER
   FML_UNREACHABLE();
 }
 
@@ -463,7 +427,6 @@ void PlatformViewAndroid::UpdateSemantics(
 void PlatformViewAndroid::RegisterExternalTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
-#if !SLIMPELLER
   switch (android_context_->RenderingApi()) {
     case AndroidRenderingAPI::kImpellerOpenGLES:
       // Impeller GLES.
@@ -475,6 +438,7 @@ void PlatformViewAndroid::RegisterExternalTexture(
           jni_facade_                                   //
           ));
       break;
+#if !SLIMPELLER
     case AndroidRenderingAPI::kSkiaOpenGLES:
       // Legacy GL.
       RegisterTexture(std::make_shared<SurfaceTextureExternalTextureGLSkia>(
@@ -486,36 +450,7 @@ void PlatformViewAndroid::RegisterExternalTexture(
     case AndroidRenderingAPI::kSoftware:
       FML_LOG(INFO) << "Software rendering does not support external textures.";
       break;
-    case AndroidRenderingAPI::kImpellerVulkan:
-      FML_LOG(IMPORTANT)
-          << "Flutter recommends migrating plugins that create and "
-             "register surface textures to the new surface producer "
-             "API. See https://docs.flutter.dev/release/breaking-changes/"
-             "android-surface-plugins";
-      RegisterTexture(std::make_shared<SurfaceTextureExternalTextureVKImpeller>(
-          std::static_pointer_cast<impeller::ContextVK>(
-              android_context_->GetImpellerContext()),  //
-          texture_id,                                   //
-          surface_texture,                              //
-          jni_facade_                                   //
-          ));
-      break;
-    case AndroidRenderingAPI::kImpellerAutoselect:
-      FML_CHECK(false);
-      break;
-  }
-#else
-  switch (android_context_->RenderingApi()) {
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-      // Impeller GLES.
-      RegisterTexture(std::make_shared<SurfaceTextureExternalTextureGLImpeller>(
-          std::static_pointer_cast<impeller::ContextGLES>(
-              android_context_->GetImpellerContext()),  //
-          texture_id,                                   //
-          surface_texture,                              //
-          jni_facade_                                   //
-          ));
-      break;
+#endif  // !SLIMPELLER
     case AndroidRenderingAPI::kImpellerVulkan:
       FML_LOG(IMPORTANT)
           << "Flutter recommends migrating plugins that create and "
@@ -535,43 +470,24 @@ void PlatformViewAndroid::RegisterExternalTexture(
       FML_CHECK(false);
       break;
   }
-#endif  // !SLIMPELLER
 }
 
 void PlatformViewAndroid::RegisterImageTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
     ImageExternalTexture::ImageLifecycle lifecycle) {
-#if !SLIMPELLER
   switch (android_context_->RenderingApi()) {
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-      // Impeller GLES.
-      RegisterTexture(std::make_shared<ImageExternalTextureGLImpeller>(
-          std::static_pointer_cast<impeller::ContextGLES>(
-              android_context_->GetImpellerContext()),
-          texture_id, image_texture_entry, jni_facade_, lifecycle));
-      break;
+#if !SLIMPELLER
     case AndroidRenderingAPI::kSkiaOpenGLES:
       // Legacy GL.
       RegisterTexture(std::make_shared<ImageExternalTextureGLSkia>(
           std::static_pointer_cast<AndroidContextGLSkia>(android_context_),
           texture_id, image_texture_entry, jni_facade_, lifecycle));
       break;
-    case AndroidRenderingAPI::kImpellerVulkan:
-      RegisterTexture(std::make_shared<ImageExternalTextureVKImpeller>(
-          std::static_pointer_cast<impeller::ContextVK>(
-              android_context_->GetImpellerContext()),
-          texture_id, image_texture_entry, jni_facade_, lifecycle));
-      break;
     case AndroidRenderingAPI::kSoftware:
       FML_LOG(INFO) << "Software rendering does not support external textures.";
       break;
-    case AndroidRenderingAPI::kImpellerAutoselect:
-      FML_CHECK(false);
-      break;
-  }
-#else
-  switch (android_context_->RenderingApi()) {
+#endif  // !SLIMPELLER
     case AndroidRenderingAPI::kImpellerOpenGLES:
       // Impeller GLES.
       RegisterTexture(std::make_shared<ImageExternalTextureGLImpeller>(
@@ -586,11 +502,9 @@ void PlatformViewAndroid::RegisterImageTexture(
           texture_id, image_texture_entry, jni_facade_, lifecycle));
       break;
     case AndroidRenderingAPI::kImpellerAutoselect:
-    default:
       FML_CHECK(false);
       break;
   }
-#endif  // !SLIMPELLER
 }
 
 // |PlatformView|

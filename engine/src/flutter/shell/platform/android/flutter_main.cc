@@ -106,6 +106,8 @@ void FlutterMain::Init(JNIEnv* env,
 
   AndroidRenderingAPI android_rendering_api =
       SelectedRenderingAPI(settings, api_level);
+
+#if !SLIMPELLER
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
@@ -117,6 +119,7 @@ void FlutterMain::Init(JNIEnv* env,
       settings.enable_impeller = true;
       break;
   }
+#endif  // !SLIMPELLER
 
 #if FLUTTER_RELEASE
   // On most platforms the timeline is always disabled in release mode.

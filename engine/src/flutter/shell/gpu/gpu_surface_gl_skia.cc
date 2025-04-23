@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if !SLIMPELLER
-
 #include "flutter/shell/gpu/gpu_surface_gl_skia.h"
 
 #include "flutter/common/graphics/persistent_cache.h"
@@ -356,5 +354,3 @@ bool GPUSurfaceGLSkia::AllowsDrawingWhenGpuDisabled() const {
 }
 
 }  // namespace flutter
-
-#endif  // !SLIMPELLER

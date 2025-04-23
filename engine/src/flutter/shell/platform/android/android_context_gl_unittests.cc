@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #define FML_USED_ON_EMBEDDER
-#if !SLIMPELLER
 
 #include <memory>
 #include "flutter/shell/common/thread_host.h"
@@ -227,5 +226,3 @@ TEST(AndroidContextGl, EnsureMakeCurrentChecksCurrentContextStatus) {
 }  // namespace android
 }  // namespace testing
 }  // namespace flutter
-
-#endif  // !SLIMPELLER
