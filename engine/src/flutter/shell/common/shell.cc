@@ -253,7 +253,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       });
 
   // Defer setting up the impeller context until after the startup blocking
-  // futures have completed.
+  // futures have completed. context creation may be slow (100+ms) when using
+  // the Vulkan backend on certain Android devices, so we intentionally try
+  // to move it off the critical path for startup.
   std::promise<impeller::RuntimeStageBackend> runtime_stage_backend;
   std::shared_future<impeller::RuntimeStageBackend> runtime_stage_future =
       runtime_stage_backend.get_future();
@@ -261,15 +263,20 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetRasterTaskRunner(),
       fml::MakeCopyable(
-          [&,
-           impeller_context_promise = std::move(impeller_context_promise),  //
+          [impeller_context_promise = std::move(impeller_context_promise),  //
            runtime_stage_backend = std::move(runtime_stage_backend),        //
            platform_view_ptr]() mutable {
             TRACE_EVENT0("flutter", "CreateImpellerContext");
             auto impeller_context = platform_view_ptr->GetImpellerContext();
-            runtime_stage_backend.set_value(
-                impeller_context->GetRuntimeStageBackend());
-            impeller_context_promise.set_value(impeller_context);
+            if (impeller_context) {
+              runtime_stage_backend.set_value(
+                  impeller_context->GetRuntimeStageBackend());
+              impeller_context_promise.set_value(impeller_context);
+            } else {
+              runtime_stage_backend.set_value(
+                  impeller::RuntimeStageBackend::kSkSL);
+              impeller_context_promise.set_value(nullptr);
+            }
           }));
 
   // Ask the platform view for the vsync waiter. This will be used by the engine

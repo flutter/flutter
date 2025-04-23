@@ -147,7 +147,6 @@ AndroidContextDynamicImpeller::GetImpellerContext() const {
 
   if (vk_context_) {
     return vk_context_->GetImpellerContext();
-    ;
   }
   if (gl_context_) {
     return gl_context_->GetImpellerContext();
