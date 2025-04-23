@@ -2084,7 +2084,6 @@ class AndroidPathReceiver final : public DlPathReceiver {
       default:
         // DlPathFillType does not have corresponding kInverseEvenOdd or
         // kInverseWinding fill types.
-        FML_UNREACHABLE();
         return;
     }
 
