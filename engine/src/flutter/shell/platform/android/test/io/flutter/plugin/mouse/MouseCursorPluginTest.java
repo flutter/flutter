@@ -25,7 +25,6 @@ import org.robolectric.Robolectric;
 import org.robolectric.annotation.Config;
 
 @Config(
-    manifest = Config.NONE,
     minSdk = API_LEVELS.API_24,
     shadows = {})
 @RunWith(AndroidJUnit4.class)
