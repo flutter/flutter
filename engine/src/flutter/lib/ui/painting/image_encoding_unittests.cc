@@ -464,13 +464,16 @@ TEST_F(ShellTest, EncodeImageFailsWithoutGPUImpeller) {
   AddNativeCallback("TurnOffGPU", CREATE_NATIVE_ENTRY(turn_off_gpu));
 
   auto flush_awaiting_tasks = [&](Dart_NativeArguments args) {
-    task_runners.GetIOTaskRunner()->PostTask([&] {
-      std::shared_ptr<impeller::Context> impeller_context =
-          shell->GetIOManager()->GetImpellerContext();
-      // This will cause the stored tasks to overflow and start throwing them
-      // away.
-      for (int i = 0; i < impeller::Context::kMaxTasksAwaitingGPU; i++) {
-        impeller_context->StoreTaskForGPU([] {}, [] {});
+    fml::WeakPtr io_manager = shell->GetIOManager();
+    task_runners.GetIOTaskRunner()->PostTask([io_manager] {
+      if (io_manager) {
+        std::shared_ptr<impeller::Context> impeller_context =
+            io_manager->GetImpellerContext();
+        // This will cause the stored tasks to overflow and start throwing them
+        // away.
+        for (int i = 0; i < impeller::Context::kMaxTasksAwaitingGPU; i++) {
+          impeller_context->StoreTaskForGPU([] {}, [] {});
+        }
       }
     });
   };
