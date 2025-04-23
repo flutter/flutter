@@ -32,8 +32,8 @@ Google employees can view the test output and give feedback accordingly.
 
 The correct course of action in this case will likely be further changes in the pull request to make
 it non-breaking. The Google employee assisting will be able to advise. Breaking changes create churn
-for users and decay the ecosystem, so most often a non-breaking change is preferred and usually
-the correct course of action to unblock the PR for most cases.
+for users and decay the ecosystem, so most often updating to a non-breaking change is
+the correct course of action to unblock the PR.
 
 If the breaking change _is_ approved, the [breaking change policy](../Tree-hygiene.md#handling-breaking-changes)
 must be followed. This means these changes should include a dart fix when they can, or a migration guide.
