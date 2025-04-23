@@ -211,7 +211,7 @@
                     "language": "bash",
                     "script": "flutter/ci/binary_size_treemap.sh",
                     "parameters": [
-                        "../../src/out/ci/android_release_arm64/libflutter.so",
+                        "../../src/out/ci/android_release_slimpeller_arm64/libflutter.so",
                         "${FLUTTER_LOGS_DIR}"
                     ]
                 }
