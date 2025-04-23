@@ -51,7 +51,8 @@ class UIDartState : public tonic::DartState {
         fml::WeakPtr<IOManager> io_manager,
         fml::RefPtr<SkiaUnrefQueue> unref_queue,
         fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
-        fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry> image_generator_registry,
+        fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+            image_generator_registry,
         std::string advisory_script_uri,
         std::string advisory_script_entrypoint,
         bool deterministic_rendering_enabled,
