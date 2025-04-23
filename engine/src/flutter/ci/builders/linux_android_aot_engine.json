@@ -167,7 +167,7 @@
                     "base_path": "out/ci/android_release_slimpeller_arm64/zip_archives/",
                     "include_paths": [
                         "out/ci/android_release_slimpeller_arm64/zip_archives/android-arm64-release/artifacts.zip",
-                        "out/ci/android_release_arm64/zip_archives/android-arm64-release/linux-x64.zip",
+                        "out/ci/android_release_slimpeller_arm64/zip_archives/android-arm64-release/linux-x64.zip",
                         "out/ci/android_release_slimpeller_arm64/zip_archives/android-arm64-release/symbols.zip",
                         "out/ci/android_release_slimpeller_arm64/zip_archives/android-arm64-release/analyze-snapshot-linux-x64.zip",
                         "out/ci/android_release_slimpeller_arm64/zip_archives/download.flutter.io"
