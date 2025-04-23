@@ -240,7 +240,10 @@ class Dialog extends StatelessWidget {
 
   /// Constrains the size of the [Dialog].
   ///
-  /// If null, the bottom sheet's size will be unconstrained.
+  /// If this property is null, then
+  /// ```dart
+  /// const BoxConstraints(minHeight: 280.0)
+  /// ```
   final BoxConstraints? constraints;
 
   @override
