@@ -19,7 +19,7 @@ import tempfile
 
 
 class ArgumentForwarder(object):
-  """Class used to abstract forwarding arguments from to the swiftc compiler.
+  """Class used to abstract forwarding arguments to the swiftc compiler.
 
   Arguments:
     - arg_name: string corresponding to the argument to pass to the compiler
@@ -220,11 +220,10 @@ def generate_source_output_file_map_fragment(args, filename):
   """
   assert os.path.splitext(filename)[1] == '.swift', filename
   basename = os.path.splitext(os.path.basename(filename))[0]
-  rel_name = os.path.join(args.target_out_dir, basename)
-  out_name = rel_name
+  out_name = os.path.join(args.target_out_dir, basename)
 
   fragment = {
-      'index-unit-output-path': f'/{rel_name}.o',
+      'index-unit-output-path': f'/{out_name}.o',
       'object': f'{out_name}.o',
   }
 
