@@ -508,7 +508,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   // the text field.
   late final FocusNode focusNode = FocusNode(
     onKeyEvent: (FocusNode node, KeyEvent event) {
-      if (event is KeyUpEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
         widget.delegate.close(context, null);
         return KeyEventResult.handled;
       }
