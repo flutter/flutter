@@ -8,8 +8,8 @@
 #include "impeller/compiler/source_options.h"
 #include "impeller/compiler/types.h"
 
+#include "impeller/compiler/filesystem.h"
 #include "impeller/compiler/utilities.h"
-#include "impeller/runtime_stage/runtime_stage.h"
 #include "impeller/shader_bundle/shader_bundle_flatbuffers.h"
 #include "third_party/json/include/nlohmann/json.hpp"
 
@@ -235,10 +235,10 @@ bool GenerateShaderBundle(Switches& switches) {
   auto sl_file_name = std::filesystem::absolute(
       std::filesystem::current_path() / switches.sl_file_name);
 
-  if (!fml::WriteAtomically(*switches.working_directory,         //
-                            Utf8FromPath(sl_file_name).c_str(),  //
-                            *mapping                             //
-                            )) {
+  if (!WriteAtomicallyIfChanged(*switches.working_directory,         //
+                                Utf8FromPath(sl_file_name).c_str(),  //
+                                *mapping                             //
+                                )) {
     std::cerr << "Could not write file to " << switches.sl_file_name
               << std::endl;
     return false;
