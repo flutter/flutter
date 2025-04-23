@@ -28,6 +28,7 @@ namespace impeller {
 
 namespace {
 
+/// A generic version of `Variants` which mostly exists to reduce code size.
 class GenericVariants {
  public:
   void Set(const ContentContextOptions& options,
