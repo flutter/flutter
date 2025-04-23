@@ -347,7 +347,8 @@ mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderO
 /// the the same `LayoutInfoType`.
 ///
 /// Use [RenderAbstractLayoutBuilderMixin] instead, which replaces this mixin.
-typedef RenderConstrainedLayoutBuilder<LayoutInfoType, ChildType extends RenderObject> = RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType>;
+typedef RenderConstrainedLayoutBuilder<LayoutInfoType, ChildType extends RenderObject> =
+    RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType>;
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///
