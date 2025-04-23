@@ -405,6 +405,24 @@ void main() {
     expect(align.alignment, Alignment.center);
   });
 
+  testWidgets('test default borderOnForeground', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        useMaterial3: theme.useMaterial3,
+        child: IconButton(
+          onPressed: mockOnPressedFunction.handler,
+          icon: const Icon(Icons.ac_unit),
+          iconSize: 80.0,
+        ),
+      ),
+    );
+
+    final IconButton iconButton = tester.firstWidget<IconButton>(
+      find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(IconButton)),
+    );
+    expect(iconButton.borderOnForeground, null);
+  });
+
   testWidgets('test tooltip', (WidgetTester tester) async {
     const String tooltipText = 'Test tooltip';
     Widget buildIconButton({String? tooltip}) {
