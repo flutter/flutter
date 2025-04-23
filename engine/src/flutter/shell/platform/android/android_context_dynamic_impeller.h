@@ -33,21 +33,21 @@ class AndroidContextDynamicImpeller : public AndroidContext {
   // |AndroidContext|
   AndroidRenderingAPI RenderingApi() const override;
 
-  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
   /// @brief Retrieve the GL Context if it was created, or nullptr.
   std::shared_ptr<AndroidContextGLImpeller> GetGLContext() const;
 
   /// @brief Retrieve the VK context if it was created, or nullptr.
   std::shared_ptr<AndroidContextVKImpeller> GetVKContext() const;
 
+  // |AndroidContext|
+  void SetupImpellerContext() override;
+
+  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
+
  private:
   const AndroidContext::ContextSettings settings_;
-  // The impeller context may be accessed simultaneously on UI/Raster/IO
-  // threads.
-  mutable std::mutex mutex_;
-  mutable std::shared_ptr<AndroidContextGLImpeller> gl_context_;
-  mutable std::shared_ptr<AndroidContextVKImpeller> vk_context_;
+  std::shared_ptr<AndroidContextGLImpeller> gl_context_;
+  std::shared_ptr<AndroidContextVKImpeller> vk_context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextDynamicImpeller);
 };

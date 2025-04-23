@@ -5,11 +5,13 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_CONTEXT_H_
 #define FLUTTER_IMPELLER_RENDERER_CONTEXT_H_
 
+#include <future>
 #include <memory>
 #include <string>
 
 #include "fml/closure.h"
 #include "impeller/base/flags.h"
+#include "impeller/base/thread_safety.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/capabilities.h"
@@ -21,6 +23,23 @@ namespace impeller {
 class ShaderLibrary;
 class CommandBuffer;
 class PipelineLibrary;
+
+/// A wrapper for provided a deferred initialization of impeller to various
+/// engine subsystems.
+class ImpellerContextFuture {
+ public:
+  explicit ImpellerContextFuture(
+      std::shared_future<std::shared_ptr<impeller::Context>> context);
+
+  std::shared_ptr<impeller::Context> GetContext();
+
+ private:
+  std::mutex mutex_;
+  std::shared_future<std::shared_ptr<impeller::Context>> future_
+      IPLR_GUARDED_BY(mutex_);
+  std::shared_ptr<impeller::Context> context_ IPLR_GUARDED_BY(mutex_);
+  bool did_wait_ IPLR_GUARDED_BY(mutex_) = false;
+};
 
 //------------------------------------------------------------------------------
 /// @brief      To do anything rendering related with Impeller, you need a

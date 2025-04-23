@@ -65,7 +65,15 @@ class AndroidContext {
   ///
   virtual std::shared_ptr<impeller::Context> GetImpellerContext() const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Perform deferred setup for the impeller Context.
+  ///
+  virtual void SetupImpellerContext() {}
+
  protected:
+  void SetImpellerContext(
+      const std::shared_ptr<impeller::Context>& impeller_context);
+
  private:
   const AndroidRenderingAPI rendering_api_;
 

@@ -58,7 +58,7 @@ std::shared_ptr<impeller::Context> Context::GetDefaultContext(
       dart_state->GetTaskRunners().GetIOTaskRunner(),
       fml::MakeCopyable([promise = std::move(context_promise),
                          io_manager = dart_state->GetIOManager()]() mutable {
-        promise.set_value(io_manager->GetImpellerContext().get());
+        promise.set_value(io_manager->GetImpellerContext());
       }));
   auto context = impeller_context_future.get();
 

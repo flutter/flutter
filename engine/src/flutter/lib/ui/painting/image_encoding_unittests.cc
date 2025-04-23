@@ -466,7 +466,7 @@ TEST_F(ShellTest, EncodeImageFailsWithoutGPUImpeller) {
   auto flush_awaiting_tasks = [&](Dart_NativeArguments args) {
     task_runners.GetIOTaskRunner()->PostTask([&] {
       std::shared_ptr<impeller::Context> impeller_context =
-          shell->GetIOManager()->GetImpellerContext().get();
+          shell->GetIOManager()->GetImpellerContext();
       // This will cause the stored tasks to overflow and start throwing them
       // away.
       for (int i = 0; i < impeller::Context::kMaxTasksAwaitingGPU; i++) {

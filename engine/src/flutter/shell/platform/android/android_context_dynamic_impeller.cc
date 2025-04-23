@@ -132,19 +132,6 @@ AndroidRenderingAPI AndroidContextDynamicImpeller::RenderingApi() const {
 
 std::shared_ptr<impeller::Context>
 AndroidContextDynamicImpeller::GetImpellerContext() const {
-  std::lock_guard<std::mutex> lock(mutex_);
-
-  if (!vk_context_ && !gl_context_) {
-    // Initialize.
-    vk_context_ = GetActualRenderingAPIForImpeller(
-        android_get_device_api_level(), settings_);
-    if (!vk_context_) {
-      gl_context_ = std::make_shared<AndroidContextGLImpeller>(
-          std::make_unique<impeller::egl::Display>(),
-          settings_.enable_gpu_tracing);
-    }
-  }
-
   if (vk_context_) {
     return vk_context_->GetImpellerContext();
   }
@@ -162,6 +149,16 @@ AndroidContextDynamicImpeller::GetGLContext() const {
 std::shared_ptr<AndroidContextVKImpeller>
 AndroidContextDynamicImpeller::GetVKContext() const {
   return vk_context_;
+}
+
+void AndroidContextDynamicImpeller::SetupImpellerContext() {
+  vk_context_ = GetActualRenderingAPIForImpeller(android_get_device_api_level(),
+                                                 settings_);
+  if (!vk_context_) {
+    gl_context_ = std::make_shared<AndroidContextGLImpeller>(
+        std::make_unique<impeller::egl::Display>(),
+        settings_.enable_gpu_tracing);
+  }
 }
 
 }  // namespace flutter

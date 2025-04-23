@@ -5,6 +5,7 @@
 #include <future>
 #include "fml/task_runner.h"
 #include "impeller/core/runtime_types.h"
+#include "impeller/renderer/context.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "flutter/shell/common/shell.h"
 
@@ -236,8 +237,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
   std::promise<std::shared_ptr<impeller::Context>> impeller_context_promise;
   auto impeller_context_future =
-      std::shared_future<std::shared_ptr<impeller::Context>>(
-          impeller_context_promise.get_future());
+      std::make_shared<impeller::ImpellerContextFuture>(
+          std::shared_future<std::shared_ptr<impeller::Context>>(
+              impeller_context_promise.get_future()));
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetRasterTaskRunner(),
@@ -267,7 +269,9 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
            runtime_stage_backend = std::move(runtime_stage_backend),        //
            platform_view_ptr]() mutable {
             TRACE_EVENT0("flutter", "CreateImpellerContext");
-            auto impeller_context = platform_view_ptr->GetImpellerContext();
+            platform_view_ptr->SetupImpellerContext();
+            std::shared_ptr<impeller::Context> impeller_context =
+                platform_view_ptr->GetImpellerContext();
             if (impeller_context) {
               runtime_stage_backend.set_value(
                   impeller_context->GetRuntimeStageBackend());

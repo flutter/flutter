@@ -454,7 +454,7 @@ std::shared_ptr<impeller::Context> PlatformViewAndroid::GetImpellerContext()
   if (android_surface_) {
     return android_surface_->GetImpellerContext();
   }
-  return nullptr;
+  return android_context_->GetImpellerContext();
 }
 
 // |PlatformView|
@@ -531,6 +531,10 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
              AndroidRenderingAPI::kImpellerVulkan &&
          impeller::ContextVK::Cast(*android_context_->GetImpellerContext())
              .GetShouldEnableSurfaceControlSwapchain();
+}
+
+void PlatformViewAndroid::SetupImpellerContext() {
+  android_context_->SetupImpellerContext();
 }
 
 }  // namespace flutter

@@ -295,7 +295,7 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
             std::move(callback), ui_task_runner,
             io_manager->GetResourceContext(), io_manager->GetSkiaUnrefQueue(),
             io_manager->GetIsGpuDisabledSyncSwitch(), trace_id,
-            io_manager->GetImpellerContext().get());
+            io_manager->GetImpellerContext());
       }));
 
   return Dart_Null();

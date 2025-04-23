@@ -977,6 +977,13 @@ class PlatformView {
   /// @param[in]  request  The request to change the focus state of the view.
   virtual void RequestViewFocusChange(const ViewFocusChangeRequest& request);
 
+  //--------------------------------------------------------------------------
+  /// @brief      Performs any deferred setup of the Impeller context
+  ///
+  ///             This is intended to be called from the raster thread so that
+  ///             Impeller context creation can be moved off the startup path.
+  virtual void SetupImpellerContext() {}
+
  protected:
   // This is the only method called on the raster task runner.
   virtual std::unique_ptr<Surface> CreateRenderingSurface();

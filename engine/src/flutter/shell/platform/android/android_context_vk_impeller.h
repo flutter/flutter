@@ -24,11 +24,8 @@ class AndroidContextVKImpeller : public AndroidContext {
   // |AndroidContext|
   AndroidRenderingAPI RenderingApi() const override;
 
-  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
  private:
   fml::RefPtr<fml::NativeLibrary> vulkan_dylib_;
-  std::shared_ptr<impeller::Context> impeller_context_;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContextVKImpeller);

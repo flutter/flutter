@@ -32,8 +32,10 @@ class IOManager {
   virtual std::shared_ptr<const fml::SyncSwitch>
   GetIsGpuDisabledSyncSwitch() = 0;
 
-  virtual std::shared_future<std::shared_ptr<impeller::Context>>
-  GetImpellerContext() const = 0;
+  /// @brief Retrieve the impeller::Context.
+  ///
+  /// Call may block until context is availabe.
+  virtual std::shared_ptr<impeller::Context> GetImpellerContext() const = 0;
 };
 
 }  // namespace flutter
