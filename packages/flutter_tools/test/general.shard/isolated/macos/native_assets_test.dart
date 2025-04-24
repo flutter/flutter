@@ -267,16 +267,12 @@ void main() {
               package: 'bar',
               name: 'bar.dart',
               linkMode: DynamicLoadingBundled(),
-              os: targetOS,
-              architecture: codeConfig.targetArchitecture,
               file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
             ),
             CodeAsset(
               package: 'buz',
               name: 'buz.dart',
               linkMode: DynamicLoadingBundled(),
-              os: targetOS,
-              architecture: codeConfig.targetArchitecture,
               file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
             ),
           ];

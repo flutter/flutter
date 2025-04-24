@@ -33,7 +33,8 @@ import 'theme_data.dart';
 ///
 ///  * [TextButton], [TextButtonTheme], [TextButtonThemeData],
 ///  * [ElevatedButton], [ElevatedButtonTheme], [ElevatedButtonThemeData],
-///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData]
+///  * [OutlinedButton], [OutlinedButtonTheme], [OutlinedButtonThemeData],
+///  * [FilledButton], [FilledButtonTheme], [FilledButtonThemeData]
 ///
 /// The button's size will expand to fit the child widget, if necessary.
 ///
