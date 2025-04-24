@@ -692,7 +692,7 @@ std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
   return points;
 }
 
-StrokePathGeometry::StrokePathGeometry(const Path& path,
+StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
                                        Scalar stroke_width,
                                        Scalar miter_limit,
                                        Cap stroke_cap,
@@ -747,9 +747,8 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
       renderer.GetTessellator().GetStrokePointCache());
   Tessellator::Trigs trigs = renderer.GetTessellator().GetTrigsForDeviceRadius(
       scale * stroke_width * 0.5f);
-  flutter::DlPath source(path_);
   StrokePathSegmentReceiver::GenerateStrokeVertices(
-      position_writer, source, stroke_width, miter_limit_, stroke_join_,
+      position_writer, path_, stroke_width, miter_limit_, stroke_join_,
       stroke_cap_, scale, trigs);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
@@ -804,8 +803,8 @@ GeometryResult::Mode StrokePathGeometry::GetResultMode() const {
 
 std::optional<Rect> StrokePathGeometry::GetCoverage(
     const Matrix& transform) const {
-  auto path_bounds = path_.GetBoundingBox();
-  if (!path_bounds.has_value()) {
+  auto path_bounds = path_.GetBounds();
+  if (path_bounds.IsEmpty()) {
     return std::nullopt;
   }
 
@@ -823,7 +822,7 @@ std::optional<Rect> StrokePathGeometry::GetCoverage(
   // Use the most conervative coverage setting.
   Scalar min_size = kMinStrokeSize / max_basis;
   max_radius *= std::max(stroke_width_, min_size);
-  return path_bounds->Expand(max_radius).TransformBounds(transform);
+  return path_bounds.Expand(max_radius).TransformBounds(transform);
 }
 
 }  // namespace impeller
