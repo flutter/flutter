@@ -2183,9 +2183,9 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
         // Define and populate an Android Path with data from the DlPath
         AndroidPathReceiver receiver(env);
 
+        // TODO(flar): https://github.com/flutter/flutter/issues/164808
         // Need to convert the fill type to the Android enum and
         // call setFillType on the path...
-        // see https://github.com/flutter/flutter/issues/164808
         dlPath.Dispatch(receiver);
 
         env->CallVoidMethod(mutatorsStack,

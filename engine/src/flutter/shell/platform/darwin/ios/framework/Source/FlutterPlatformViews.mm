@@ -415,9 +415,9 @@ static BOOL _preparedOnce = NO;
 
   CGPathReceiver receiver;
 
+  // TODO(flar): https://github.com/flutter/flutter/issues/164826
   // CGPaths do not have an inherit fill type, we would need to remember
   // the fill type and employ it when we use the path.
-  // see https://github.com/flutter/flutter/issues/164826
   dlPath.Dispatch(receiver);
 
   // The `matrix` is based on the physical pixels, convert it to UIKit points.

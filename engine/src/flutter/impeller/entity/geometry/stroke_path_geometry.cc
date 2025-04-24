@@ -145,7 +145,14 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
         join_(join),
         cap_(cap),
         scale_(scale),
-        trigs_(trigs) {}
+        trigs_(trigs) {
+    // Trigs ensures that it always contains at least 2 entries.
+    FML_DCHECK(trigs_.size() >= 2);
+    FML_DCHECK(trigs_[0].cos == 1.0f);  // Angle == 0 degrees
+    FML_DCHECK(trigs_[0].sin == 0.0f);
+    FML_DCHECK(trigs_.end()[-1].cos == 0.0f);  // Angle == 90 degrees
+    FML_DCHECK(trigs_.end()[-1].sin == 1.0f);
+  }
 
   void BeginContour(Point origin, bool will_be_closed) override {
     if (has_prior_contour_ && origin != last_point_) {
@@ -164,7 +171,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
 
   void RecordLine(Point p1, Point p2) override {
     if (p2 != p1) {
-      auto current_perpendicular = ComputePerpendicular(p1, p2);
+      SeparatedVector2 current_perpendicular = ComputePerpendicular(p1, p2);
 
       HandlePreviousJoin(current_perpendicular);
       AppendVertices(p2, current_perpendicular);
@@ -188,8 +195,8 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
 
   template <typename Curve>
   inline void RecordCurve(const Curve& curve) {
-    auto start_direction = curve.GetStartDirection();
-    auto end_direction = curve.GetEndDirection();
+    std::optional<Point> start_direction = curve.GetStartDirection();
+    std::optional<Point> end_direction = curve.GetEndDirection();
 
     // The Prune receiver should have eliminated any empty curves, so any
     // curve we see should have both start and end direction.
@@ -197,9 +204,11 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
 
     // In order to keep the compiler/lint happy we check for values anyway.
     if (start_direction.has_value() && end_direction.has_value()) {
-      // We now know the curve cannot be degenerate
-      auto start_perpendicular = ComputePerpendicular(-start_direction.value());
-      auto end_perpendicular = ComputePerpendicular(end_direction.value());
+      // We now know the curve cannot be degenerate.
+      SeparatedVector2 start_perpendicular =
+          ComputePerpendicular(-start_direction.value());
+      SeparatedVector2 end_perpendicular =
+          ComputePerpendicular(end_direction.value());
 
       // We join the previous segment to this one with a normal join
       // The join will append the perpendicular at the start of this
@@ -210,16 +219,16 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
           std::ceilf(curve.SubdivisionCount(scale_ * half_stroke_width_));
 
       Point prev = curve.p1;
-      auto prev_perpendicular = start_perpendicular;
+      SeparatedVector2 prev_perpendicular = start_perpendicular;
 
-      // Handle all intermediate curve points up to but not including the end
+      // Handle all intermediate curve points up to but not including the end.
       for (int i = 1; i < count; i++) {
         Point cur = curve.Solve(i / count);
-        auto cur_perpendicular = ComputePerpendicular(prev, cur);
+        SeparatedVector2 cur_perpendicular = ComputePerpendicular(prev, cur);
         if (prev_perpendicular.GetAlignment(cur_perpendicular) <
             trigs_[1].cos) {
-          // We only connect 2 curved segments if their change in
-          // direction is faster than a single sample of a round join
+          // We only connect 2 curved segments if their change in direction
+          // is faster than a single sample of a round join.
           AppendVertices(cur, prev_perpendicular);
           AddJoin(Join::kRound, cur, prev_perpendicular, cur_perpendicular);
         }
@@ -229,10 +238,10 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       }
 
       if (prev_perpendicular.GetAlignment(end_perpendicular) < trigs_[1].cos) {
-        // We only connect 2 curved segments if their change in
-        // direction is faster than a single sample of a round join
+        // We only connect 2 curved segments if their change in direction
+        // is faster than a single sample of a round join.
         AppendVertices(curve.p2, prev_perpendicular);
-        AddJoin(Join::kRound, prev, prev_perpendicular, end_perpendicular);
+        AddJoin(Join::kRound, curve.p2, prev_perpendicular, end_perpendicular);
       }
       AppendVertices(curve.p2, end_perpendicular);
 
@@ -244,9 +253,9 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   void EndContour(Point origin, bool with_close) override {
     FML_DCHECK(origin == origin_point_);
     if (!has_prior_segment_) {
-      // Empty contour, fill in an axis aligned "cap box" at the origin
+      // Empty contour, fill in an axis aligned "cap box" at the origin.
       FML_DCHECK(last_point_ == origin);
-      // kButt wouldn't fill anything so it defers to kSquare by convention
+      // kButt wouldn't fill anything so it defers to kSquare by convention.
       Cap cap = (cap_ == Cap::kButt) ? Cap::kSquare : cap_;
       Vector2 perpendicular = {-half_stroke_width_, 0};
       AddCap(cap, origin, perpendicular, true);
@@ -256,7 +265,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       }
       AddCap(cap, origin, perpendicular, false);
     } else if (with_close) {
-      // Closed contour, join back to origin
+      // Closed contour, join back to origin.
       FML_DCHECK(origin == origin_point_);
       FML_DCHECK(last_point_ == origin);
       AddJoin(join_, origin, last_perpendicular_, origin_perpendicular_);
@@ -290,6 +299,14 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   // Half of the allowed distance between the ends of the perpendiculars.
   static constexpr Scalar kJoinPixelThreshold = 0.25f;
 
+  /// Determine the cosine of the angle where the ends of 2 vectors that are
+  /// each as long as half of the stroke width, differ by less than the
+  /// kJoinPixelThreshold.
+  ///
+  /// Any angle between 2 segments in the path for which the cosine of that
+  /// angle is greater than this return value, do not need any kind of join
+  /// geometry. The angle between the segments can be quickly computed by
+  /// the dot product of their direction vectors.
   static Scalar ComputeMaximumJoinCosine(Scalar scale,
                                          Scalar half_stroke_width) {
     // Consider 2 perpendicular vectors, each pointing to the same side of
@@ -326,6 +343,18 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     return cosine;
   }
 
+  /// Determine the cosine of the angle between 2 segments on the path where
+  /// the miter limit will be exceeded if their outer stroked outlines are
+  /// joined at their intersection. The miter limit is expressed as a multiple
+  /// of the stroke width and since it is dependent on lines offset from the
+  /// path by that same stroke width, the angle is based just on the miter
+  /// limit itself.
+  ///
+  /// Any angle between 2 segments in the path for which the cosine of that
+  /// angle is less than this return value would result in an intersection
+  /// point that is further than the miter limit would allow. The angle
+  /// between the segments can be quickly computed by the dot product of
+  /// their direction vectors.
   static Scalar ComputeMinimumMiterCosine(Scalar miter_limit) {
     if (miter_limit <= 1.0f) {
       // Miter limits less than 1.0 are impossible to meet since the miter
@@ -383,7 +412,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       AddJoin(join_, last_point_, last_perpendicular_, new_perpendicular);
     } else {
       has_prior_segment_ = true;
-      auto perpendicular_vector = new_perpendicular.GetVector();
+      Vector2 perpendicular_vector = new_perpendicular.GetVector();
       if (contour_needs_cap_) {
         AddCap(cap_, last_point_, perpendicular_vector, true);
       }
@@ -418,10 +447,12 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       case Cap::kRound: {
         Point along(perpendicular.y, -perpendicular.x);
         if (contour_start) {
-          // Start with a single point at the far end of the round cap
+          // Start with a single point at the far end of the round cap.
           vtx_builder_.AppendVertex(path_point - along);
 
-          // Iterate down to, but not including, the first entry (1, 0)
+          // Iterate from the last non-quadrant value in the trigs vector
+          // (trigs.back() == (1, 0)) down to, but not including, the first
+          // entry (which is (0, 1)).
           for (size_t i = trigs_.size() - 2u; i > 0u; --i) {
             Point center = path_point - along * trigs_[i].sin;
             Vector2 offset = perpendicular * trigs_[i].cos;
@@ -429,7 +460,9 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
             AppendVertices(center, offset);
           }
         } else {
-          // Iterate up to, but not including, the last entry (0, 1)
+          // Iterate from the first non-quadrant value in the trigs vector
+          // (trigs[0] == (0, 1)) up to, but not including, the last entry
+          // (which is (0, 1)).
           size_t end = trigs_.size() - 1u;
           for (size_t i = 1u; i < end; ++i) {
             Point center = path_point + along * trigs_[i].sin;
@@ -438,7 +471,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
             AppendVertices(center, offset);
           }
 
-          // End with a single point at the far end of the round cap
+          // End with a single point at the far end of the round cap.
           vtx_builder_.AppendVertex(path_point + along);
         }
         break;
@@ -472,7 +505,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     // other decorations to bridge the gap.
     switch (join) {
       case Join::kBevel:
-        // Just fall through to the bevel operation after the switch
+        // Just fall through to the bevel operation after the switch.
         break;
 
       case Join::kMiter: {
@@ -485,10 +518,10 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
           } else {
             vtx_builder_.AppendVertex(path_point - miter_vector);
           }
-          // else default (fall through) to bevel operation after the switch
         }
+        // Else just fall through to bevel operation after the switch.
         break;
-      }  // end of kMiter join case
+      }  // end of case Join::kMiter
 
       case Join::kRound: {
         if (cosine >= trigs_[1].cos) {
@@ -561,15 +594,20 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
         Point middle_vector = (from_vector + to_vector);
 
         // Iterate through trigs until we reach a full quadrant's rotation
-        // or until we pass the halfway point (middle_vector)
+        // or until we pass the halfway point (middle_vector). We start at
+        // position 1 because the first value is (0, 1) and just repeats
+        // the from_vector, and we choose the end here as the last value
+        // rather than the end of the vector because it is (1, 0) and that
+        // would just repeat the to_vector. The end variable will be updated
+        // in the first loop if we stop short of a full quadrant.
         size_t end = trigs_.size() - 1u;
         for (size_t i = 1u; i < end; ++i) {
           Point p = trigs_[i] * from_vector;
           if (p.Cross(middle_vector) <= 0) {
-            // We've traversed far enough to pass the halfway vector,
-            // stop and traverse backwards from the new_perpendicular.
-            // Record the stopping point in end as we will use it to
-            // backtrack in the next loop.
+            // We've traversed far enough to pass the halfway vector, stop
+            // here and drop out to traverse backwards from the to_vector.
+            // Record the stopping point in the end variable as we will use
+            // it to backtrack in the next loop.
             end = i;
             break;
           }
@@ -582,9 +620,10 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
           vtx_builder_.AppendVertex(path_point + p);
         }
 
-        // end points to the last trigs entry we decided not to use, so
-        // a pre-decrement here moves us onto the trigs we do want to use
-        // (stopping before we use 0 which is the 0 rotation vector)
+        // The end variable points to the last trigs entry we decided not to
+        // use, so a pre-decrement here moves us onto the trigs we actually
+        // want to use (stopping before we use 0 which is the no rotation
+        // vector).
         while (--end > 0u) {
           Point p = -trigs_[end] * to_vector;
           if (visit_center) {
@@ -600,7 +639,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
           vtx_builder_.AppendVertex(path_point + to_vector);
         }
         break;
-      }  // end of kRound join case
+      }  // end of case Join::kRound
     }  // end of switch
     // All joins need a final segment that is perpendicular to the shared
     // path point along the new perpendicular direction, and this also
@@ -681,10 +720,10 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   auto& host_buffer = renderer.GetTransientsBuffer();
   auto scale = entity.GetTransform().GetMaxBasisLengthXY();
 
-  auto& tessellator = renderer.GetTessellator();
-  PositionWriter position_writer(tessellator.GetStrokePointCache());
-  Tessellator::Trigs trigs =
-      tessellator.GetTrigsForDeviceRadius(scale * stroke_width * 0.5f);
+  PositionWriter position_writer(
+      renderer.GetTessellator().GetStrokePointCache());
+  Tessellator::Trigs trigs = renderer.GetTessellator().GetTrigsForDeviceRadius(
+      scale * stroke_width * 0.5f);
   StrokePathSegmentReceiver receiver(position_writer, stroke_width,
                                      miter_limit_, stroke_join_, stroke_cap_,
                                      scale, trigs);

@@ -38,20 +38,26 @@ class Tessellator {
   /// reference to either a cached vector or a locally generated vector.
   /// The constructor will fill the vector with quarter circular samples
   /// for the indicated number of equal divisions if the vector is new.
+  ///
+  /// A given instance of Trigs will always contain at least 2 entries
+  /// which is the minimum number of samples to traverse a quarter circle
+  /// in a single step. The first sample will always be (0, 1) and the last
+  /// sample will always be (1, 0).
   class Trigs {
    public:
     explicit Trigs(Scalar pixel_radius);
 
     // Utility forwards of the indicated vector methods.
-    auto inline size() const { return trigs_.size(); }
-    auto inline begin() const { return trigs_.begin(); }
-    auto inline end() const { return trigs_.end(); }
-    auto inline operator[](size_t index) const { return trigs_[index]; }
+    size_t inline size() const { return trigs_.size(); }
+    std::vector<Trig>::iterator inline begin() const { return trigs_.begin(); }
+    std::vector<Trig>::iterator inline end() const { return trigs_.end(); }
+    Trig inline operator[](size_t index) const { return trigs_[index]; }
 
    private:
     friend class Tessellator;
 
     explicit Trigs(std::vector<Trig>& trigs, size_t divisions) : trigs_(trigs) {
+      FML_DCHECK(divisions >= 1);
       init(divisions);
       FML_DCHECK(trigs_.size() == divisions + 1);
     }
@@ -59,6 +65,7 @@ class Tessellator {
     explicit Trigs(size_t divisions)
         : local_storage_(std::make_unique<std::vector<Trig>>()),
           trigs_(*local_storage_) {
+      FML_DCHECK(divisions >= 1);
       init(divisions);
       FML_DCHECK(trigs_.size() == divisions + 1);
     }
