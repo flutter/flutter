@@ -527,8 +527,15 @@ void main() {
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
         tester.platformDispatcher.supportsShowingSystemContextMenu = true;
-        addTearDown(() {
+        addTearDown(() async {
           tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+          // Pump one more root view to replace it with one that reads the
+          // updated reset value of supportsShowingSystemContextMenu for
+          // subsequent tests..
+          await tester.pumpWidget(
+            wrapWithView: false,
+            View(view: tester.view, child: const SizedBox.shrink()),
+          );
         });
 
         final TextEditingController controller = TextEditingController(text: 'one two three');
@@ -537,7 +544,10 @@ void main() {
           // Don't wrap with the global View so that the change to
           // platformDispatcher is read.
           wrapWithView: false,
-          CupertinoApp(home: CupertinoTextField(controller: controller)),
+          View(
+            view: tester.view,
+            child: CupertinoApp(home: CupertinoTextField(controller: controller)),
+          ),
         );
 
         // No context menu shown.

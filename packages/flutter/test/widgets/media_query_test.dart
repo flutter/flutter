@@ -265,17 +265,21 @@ void main() {
   testWidgets(
     'MediaQueryData.fromView picks up new view data (supportsShowingSystemContextMenu) when rebuilding',
     (WidgetTester tester) async {
-      addTearDown(() {
+      addTearDown(() async {
         tester.platformDispatcher.clearAllTestValues();
         tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
+        // Pump one more root view to replace it with one that reads the
+        // updated reset value of supportsShowingSystemContextMenu for
+        // subsequent tests..
+        await tester.pumpWidget(
+          wrapWithView: false,
+          View(view: tester.view, child: const SizedBox.shrink()),
+        );
       });
 
       final List<MediaQueryData> datas1 = <MediaQueryData>[];
 
       await tester.pumpWidget(
-        // Don't wrap with the global View so that the change to
-        // platformDispatcher is read.
-        wrapWithView: false,
         MediaQuery.fromView(
           view: tester.view,
           child: Builder(
@@ -299,13 +303,16 @@ void main() {
         // Don't wrap with the global View so that the change to
         // platformDispatcher is read.
         wrapWithView: false,
-        MediaQuery.fromView(
+        View(
           view: tester.view,
-          child: Builder(
-            builder: (BuildContext context) {
-              datas2.add(MediaQuery.of(context));
-              return const Placeholder();
-            },
+          child: MediaQuery.fromView(
+            view: tester.view,
+            child: Builder(
+              builder: (BuildContext context) {
+                datas2.add(MediaQuery.of(context));
+                return const Placeholder();
+              },
+            ),
           ),
         ),
       );
