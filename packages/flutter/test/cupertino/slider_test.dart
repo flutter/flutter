@@ -322,7 +322,11 @@ void main() {
 
       // Move the slider to the start slowly.
       thumbCenter = tester.getTopRight(find.byKey(sliderKey)) - const Offset(unit, -unit);
-      await tester.timedDragFrom(thumbCenter, -topLeft, const Duration(milliseconds: 1000));
+      await tester.timedDragFrom(
+        thumbCenter,
+        -Offset(thumbCenter.dx - topLeft.dx - unit * 2, 0),
+        const Duration(milliseconds: 1100),
+      );
 
       expect(value, equals(0.0));
 

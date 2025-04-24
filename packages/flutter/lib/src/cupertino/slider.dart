@@ -15,11 +15,18 @@ import 'colors.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
 
-// Value that determines what is considered a large delta when the user is
-// dragging the slider. Must be in range [0.0, 1.0].
-//
-// Eyeballed value from a native iOS slider.
-const double _kLargeDeltaThreshold = 0.05;
+typedef _SliderValueChanged = void Function(double value, bool isLargeDelta)?;
+
+/// Defines the threshold for determining a "fast" slider drag.
+///
+/// Measured in slider extent per second.
+///
+/// For example, a threshold of 1.0 means that the user must drag with
+/// a velocity that will move the slider from start to end in 1 second.
+///
+/// A threshold of 0.5 means that the user must drag with a velocity
+/// that will move the slider 50% in 1 second.
+const double _kVelocityThreshold = 1.0;
 
 // Examples can assume:
 // int _cupertinoSliderValue = 1;
@@ -298,7 +305,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final int? divisions;
   final Color activeColor;
   final Color thumbColor;
-  final void Function(double, bool)? onChanged;
+  final _SliderValueChanged onChanged;
   final ValueChanged<double>? onChangeStart;
   final ValueChanged<double>? onChangeEnd;
   final TickerProvider vsync;
@@ -353,7 +360,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     required Color activeColor,
     required Color thumbColor,
     required Color trackColor,
-    void Function(double, bool)? onChanged,
+    _SliderValueChanged onChanged,
     this.onChangeStart,
     this.onChangeEnd,
     required TickerProvider vsync,
@@ -442,9 +449,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     markNeedsPaint();
   }
 
-  void Function(double, bool)? get onChanged => _onChanged;
-  void Function(double, bool)? _onChanged;
-  set onChanged(void Function(double, bool)? value) {
+  _SliderValueChanged get onChanged => _onChanged;
+  _SliderValueChanged _onChanged;
+  set onChanged(_SliderValueChanged value) {
     if (value == _onChanged) {
       return;
     }
@@ -497,31 +504,45 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   bool get isInteractive => onChanged != null;
 
-  void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
+  void _handleDragStart(DragStartDetails details) => _startInteraction(details);
+
+  Duration? _lastUpdateTimestamp;
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (isInteractive) {
-      final double extent = math.max(
-        _kPadding,
-        size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius),
-      );
-      final double valueDelta = details.primaryDelta! / extent;
-      _currentDragValue += switch (textDirection) {
-        TextDirection.rtl => -valueDelta,
-        TextDirection.ltr => valueDelta,
-      };
-
-      final bool isLargeDelta = valueDelta.abs() > _kLargeDeltaThreshold;
-      onChanged!(_discretizedCurrentDragValue, isLargeDelta);
+    if (!isInteractive) {
+      return;
     }
+    final double extent = math.max(
+      _kPadding,
+      size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius),
+    );
+    final double valueDelta = details.primaryDelta! / extent;
+    _currentDragValue += switch (textDirection) {
+      TextDirection.rtl => -valueDelta,
+      TextDirection.ltr => valueDelta,
+    };
+
+    // Default to false if no source timestamp is available.
+    bool isFast = false;
+    final Duration? currentTimestamp = details.sourceTimeStamp;
+    if (currentTimestamp != null && _lastUpdateTimestamp != null) {
+      final int timeDelta = (currentTimestamp - _lastUpdateTimestamp!).inMilliseconds;
+      final double velocity = valueDelta.abs() * 1000.0 / timeDelta;
+      // Velocity is in units of slider extent per second.
+      // Value of 0.5 means the user is dragging at 50% of the slider extent per second.
+      isFast = velocity > _kVelocityThreshold;
+    }
+    _lastUpdateTimestamp = currentTimestamp;
+    onChanged!(_discretizedCurrentDragValue, isFast);
   }
 
   void _handleDragEnd(DragEndDetails details) => _endInteraction();
 
-  void _startInteraction(Offset globalPosition) {
+  void _startInteraction(DragStartDetails details) {
     if (isInteractive) {
       onChangeStart?.call(_discretizedCurrentDragValue);
       _currentDragValue = _value;
+      _lastUpdateTimestamp = details.sourceTimeStamp;
       onChanged!(_discretizedCurrentDragValue, false);
     }
   }
@@ -529,6 +550,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   void _endInteraction() {
     onChangeEnd?.call(_discretizedCurrentDragValue);
     _currentDragValue = 0.0;
+    _lastUpdateTimestamp = null;
   }
 
   @override
