@@ -248,7 +248,7 @@ class Dialog extends StatelessWidget {
   ///
   /// If this property is null, then
   /// ```dart
-  /// const BoxConstraints(minHeight: 280.0)
+  /// const BoxConstraints(minWidth: 280.0)
   /// ```
   final BoxConstraints? constraints;
 
@@ -265,7 +265,7 @@ class Dialog extends StatelessWidget {
             : _DialogDefaultsM2(context);
 
     final BoxConstraints boxConstraints =
-        constraints ?? defaults.constraints ?? const BoxConstraints(minHeight: 280.0);
+        constraints ?? defaults.constraints ?? const BoxConstraints(minWidth: 280.0);
 
     Widget dialogChild;
 
