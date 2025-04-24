@@ -16151,13 +16151,14 @@ void main() {
       'iOS uses the system context menu by default if supported',
       (WidgetTester tester) async {
         tester.platformDispatcher.supportsShowingSystemContextMenu = true;
-        tester.binding.handleSupportsShowingSystemContextMenuChanged();
         addTearDown(() {
           tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
-          tester.binding.handleSupportsShowingSystemContextMenuChanged();
         });
 
         await tester.pumpWidget(
+          // Don't wrap with the global View so that the change to
+          // platformDispatcher is read.
+          wrapWithView: false,
           MaterialApp(
             home: Material(
               child: TextField(controller: _textEditingController(text: 'one two three')),

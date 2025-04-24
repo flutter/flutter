@@ -1919,11 +1919,6 @@ class _MediaQueryFromViewState extends State<_MediaQueryFromView> with WidgetsBi
   }
 
   @override
-  void didChangeSupportsShowingSystemContextMenu() {
-    _updateData();
-  }
-
-  @override
   void didChangeTextScaleFactor() {
     // If we have a parent, it dictates our text scale factor. If we don't have
     // a parent, we get our text scale factor from the PlatformDispatcher and

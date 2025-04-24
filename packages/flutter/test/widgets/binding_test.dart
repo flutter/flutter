@@ -116,12 +116,6 @@ class RentrantObserver implements WidgetsBindingObserver {
   }
 
   @override
-  void didChangeSupportsShowingSystemContextMenu() {
-    assert(active);
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
   void didHaveMemoryPressure() {
     assert(active);
     WidgetsBinding.instance.addObserver(this);

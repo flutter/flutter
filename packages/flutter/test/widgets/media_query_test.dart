@@ -268,12 +268,14 @@ void main() {
       addTearDown(() {
         tester.platformDispatcher.clearAllTestValues();
         tester.platformDispatcher.resetSupportsShowingSystemContextMenu();
-        tester.binding.handleSupportsShowingSystemContextMenuChanged();
       });
 
       final List<MediaQueryData> datas1 = <MediaQueryData>[];
 
       await tester.pumpWidget(
+        // Don't wrap with the global View so that the change to
+        // platformDispatcher is read.
+        wrapWithView: false,
         MediaQuery.fromView(
           view: tester.view,
           child: Builder(
@@ -289,12 +291,14 @@ void main() {
       expect(datas1.first.supportsShowingSystemContextMenu, isFalse);
 
       tester.platformDispatcher.supportsShowingSystemContextMenu = true;
-      tester.binding.handleSupportsShowingSystemContextMenuChanged();
 
       final List<MediaQueryData> datas2 = <MediaQueryData>[];
 
       // Rebuild the MediaQuery widget.
       await tester.pumpWidget(
+        // Don't wrap with the global View so that the change to
+        // platformDispatcher is read.
+        wrapWithView: false,
         MediaQuery.fromView(
           view: tester.view,
           child: Builder(

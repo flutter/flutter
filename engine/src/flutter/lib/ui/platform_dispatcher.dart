@@ -1142,17 +1142,6 @@ class PlatformDispatcher {
   bool get supportsShowingSystemContextMenu => _supportsShowingSystemContextMenu;
   bool _supportsShowingSystemContextMenu = false;
 
-  /// A callback that is invoked whenever [supportsShowingSystemContextMenu]
-  /// changes.
-  VoidCallback? get onSupportsShowingSystemContextMenuChanged =>
-      _onSupportsShowingSystemContextMenuChanged;
-  VoidCallback? _onSupportsShowingSystemContextMenuChanged;
-  Zone _onSupportsShowingSystemContextMenuChangedZone = Zone.root;
-  set onSupportsShowingSystemContextMenuChanged(VoidCallback? callback) {
-    _onSupportsShowingSystemContextMenuChanged = callback;
-    _onSupportsShowingSystemContextMenuChangedZone = Zone.current;
-  }
-
   /// Whether briefly displaying the characters as you type in obscured text
   /// fields is enabled in system settings.
   ///
@@ -1224,13 +1213,7 @@ class PlatformDispatcher {
     final bool? supportsShowingSystemContextMenu =
         data['supportsShowingSystemContextMenu'] as bool?;
     if (supportsShowingSystemContextMenu != null) {
-      if (supportsShowingSystemContextMenu != _supportsShowingSystemContextMenu) {
-        _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
-        _invoke(
-          onSupportsShowingSystemContextMenuChanged,
-          _onSupportsShowingSystemContextMenuChangedZone,
-        );
-      }
+      _supportsShowingSystemContextMenu = supportsShowingSystemContextMenu;
     } else {
       _supportsShowingSystemContextMenu = false;
     }

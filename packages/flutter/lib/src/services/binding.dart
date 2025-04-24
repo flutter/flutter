@@ -59,9 +59,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     );
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
-    platformDispatcher
-      ..onSupportsShowingSystemContextMenuChanged = handleSupportsShowingSystemContextMenuChanged
-      ..onViewFocusChange = handleViewFocusChanged;
+    platformDispatcher.onViewFocusChange = handleViewFocusChanged;
     TextInput.ensureInitialized();
     readInitialLifecycleStateFromNativeWindow();
     initializationComplete();

@@ -1020,25 +1020,6 @@ class EnginePlatformDispatcher extends ui.PlatformDispatcher {
     _onTextScaleFactorChangedZone = Zone.current;
   }
 
-  /// A callback that is invoked whenever [supportsShowingSystemContextMenu]
-  /// changes value.
-  ///
-  /// The framework invokes this callback in the same zone in which the
-  /// callback was set.
-  ///
-  /// See also:
-  ///
-  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
-  ///    observe when this callback is invoked.
-  @override
-  ui.VoidCallback? get onSupportsShowingSystemContextMenuChanged =>
-      _onSupportsShowingSystemContextMenuChanged;
-  ui.VoidCallback? _onSupportsShowingSystemContextMenuChanged;
-  @override
-  set onSupportsShowingSystemContextMenuChanged(ui.VoidCallback? callback) {
-    _onSupportsShowingSystemContextMenuChanged = callback;
-  }
-
   /// Engine code should use this method instead of the callback directly.
   /// Otherwise zones won't work properly.
   void invokeOnTextScaleFactorChanged() {

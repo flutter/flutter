@@ -311,14 +311,6 @@ abstract mixin class WidgetsBindingObserver {
   ///    boilerplate.
   void didChangeTextScaleFactor() {}
 
-  /// Called when support for the system context menu changes.
-  ///
-  /// See also:
-  ///
-  ///  * [MediaQuery.supportsShowingSystemContextMenu], which provides access to
-  ///    this value.
-  void didChangeSupportsShowingSystemContextMenu() {}
-
   /// Called when the platform brightness changes.
   ///
   /// This method exposes notifications from
@@ -820,14 +812,6 @@ mixin WidgetsBinding
     super.handleTextScaleFactorChanged();
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       observer.didChangeTextScaleFactor();
-    }
-  }
-
-  @override
-  void handleSupportsShowingSystemContextMenuChanged() {
-    super.handleSupportsShowingSystemContextMenuChanged();
-    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
-      observer.didChangeSupportsShowingSystemContextMenu();
     }
   }
 
