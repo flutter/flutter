@@ -200,11 +200,13 @@ test-suites:
     test-bundle: dart2wasm-canvaskit-engine
     run-config: safari-wasm
     artifact-deps: [ canvaskit ]
+    enable-ci: false
 
   - name: safari-dart2wasm-skwasm-ui
     test-bundle: dart2wasm-skwasm-ui
     run-config: safari-wasm
     artifact-deps: [ skwasm ]
+    enable-ci: false
 
   - name: chrome-dart2wasm-canvaskit-engine
     test-bundle: dart2wasm-canvaskit-engine

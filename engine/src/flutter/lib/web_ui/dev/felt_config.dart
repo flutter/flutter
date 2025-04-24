@@ -84,12 +84,13 @@ class ArtifactDependencies {
 }
 
 class TestSuite {
-  TestSuite(this.name, this.testBundle, this.runConfig, this.artifactDependencies);
+  TestSuite(this.name, this.testBundle, this.runConfig, this.artifactDependencies, this.enableCi);
 
   String name;
   TestBundle testBundle;
   RunConfiguration runConfig;
   ArtifactDependencies artifactDependencies;
+  bool enableCi;
 }
 
 class FeltConfig {
@@ -242,7 +243,8 @@ class FeltConfig {
         canvasKitChromium: canvasKitChromium,
         skwasm: skwasm,
       );
-      final TestSuite suite = TestSuite(name, bundle, runConfig, artifactDeps);
+      final bool enableCi = (testSuiteYaml['enable-ci'] as bool?) ?? true;
+      final TestSuite suite = TestSuite(name, bundle, runConfig, artifactDeps, enableCi);
       testSuites.add(suite);
     }
     return FeltConfig(compileConfigs, testSets, testBundles, runConfigs, testSuites);
