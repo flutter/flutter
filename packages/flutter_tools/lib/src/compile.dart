@@ -891,7 +891,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
             // process has died unexpectedly.
             if (_stdoutHandler.compilerOutput?.isCompleted == false) {
               _stdoutHandler.compilerOutput?.complete();
-              throwToolExit('the Dart compiler exited unexpectedly.');
+              throwToolExit('The Dart compiler exited unexpectedly.');
             }
           },
         );
@@ -904,7 +904,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     unawaited(
       _server?.exitCode.then((int code) {
         if (code != 0) {
-          throwToolExit('the Dart compiler exited unexpectedly.');
+          throwToolExit('The Dart compiler exited unexpectedly.');
         }
       }),
     );
