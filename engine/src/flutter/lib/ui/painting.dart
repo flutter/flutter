@@ -1194,6 +1194,9 @@ enum Clip {
   /// This is the default option for most widgets: if the content does not
   /// overflow the widget boundary, don't pay any performance cost for clipping.
   ///
+  /// when the content overflows the widget boundary the visible overflow area
+  /// will not accept hi test.
+  ///
   /// If the content does overflow, consider the following [Clip] options:
   ///
   ///  * [hardEdge], which is the fastest clipping, but with lower fidelity.
