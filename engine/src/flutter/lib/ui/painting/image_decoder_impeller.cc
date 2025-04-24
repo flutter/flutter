@@ -105,11 +105,8 @@ ImageDecoderImpeller::ImageDecoderImpeller(
   context_ = context_promise.get_future();
   runners_.GetIOTaskRunner()->PostTask(fml::MakeCopyable(
       [promise = std::move(context_promise), io_manager]() mutable {
-        if (io_manager) {
-          promise.set_value(io_manager->GetImpellerContext());
-        } else {
-          promise.set_value(nullptr);
-        }
+        promise.set_value(io_manager ? io_manager->GetImpellerContext()
+                                     : nullptr);
       }));
 }
 

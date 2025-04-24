@@ -39,7 +39,6 @@
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/resource_cache_limit_calculator.h"
 #include "flutter/shell/common/shell_io_manager.h"
-#include "impeller/core/runtime_types.h"
 #include "impeller/renderer/context.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 
@@ -131,8 +130,7 @@ class Shell final : public PlatformView::Delegate,
       fml::RefPtr<SkiaUnrefQueue> unref_queue,
       fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
       const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-      const std::shared_future<impeller::RuntimeStageBackend>&
-          runtime_stage_backend)>
+      impeller::RuntimeStageBackend runtime_stage_type)>
       EngineCreateCallback;
 
   //----------------------------------------------------------------------------
