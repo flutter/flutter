@@ -1784,7 +1784,9 @@ void main() {
     await tester.tap(find.text('No'));
     await tester.pumpAndSettle();
     expect(
-      find.byWidgetPredicate((Widget widget) => widget is ModalBarrier && widget.color == Colors.red),
+      find.byWidgetPredicate(
+        (Widget widget) => widget is ModalBarrier && widget.color == Colors.red,
+      ),
       findsNothing,
     );
   });
