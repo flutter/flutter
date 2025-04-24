@@ -851,9 +851,9 @@ Future<void> _createStubAppFramework(
       '-dynamiclib',
       // Keep version in sync with AOTSnapshotter flag
       if (environmentType == EnvironmentType.physical)
-        '-miphoneos-version-min=12.0'
+        '-miphoneos-version-min=13.0'
       else
-        '-miphonesimulator-version-min=12.0',
+        '-miphonesimulator-version-min=13.0',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-fapplication-extension',

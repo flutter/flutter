@@ -98,7 +98,9 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       NmEntry entry,
     ) {
       final bool cSymbol =
-          (entry.type == '(__DATA,__common)' || entry.type == '(__DATA,__const)') &&
+          (entry.type == '(__DATA,__common)' ||
+              entry.type == '(__DATA,__const)' ||
+              entry.type == '(__DATA_CONST,__const)') &&
           entry.name.startsWith('_Flutter');
       final bool cInternalSymbol =
           entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
