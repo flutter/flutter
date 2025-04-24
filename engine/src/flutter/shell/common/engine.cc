@@ -15,7 +15,6 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/shell/common/animator.h"
-#include "impeller/core/runtime_types.h"
 #include "rapidjson/document.h"
 
 namespace flutter {
@@ -71,8 +70,7 @@ Engine::Engine(Delegate& delegate,
                const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
                fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
                const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-               const std::shared_future<impeller::RuntimeStageBackend>&
-                   runtime_stage_backend)
+               impeller::RuntimeStageBackend runtime_stage_type)
     : Engine(delegate,
              dispatcher_maker,
              vm.GetConcurrentWorkerTaskRunner(),
@@ -104,9 +102,9 @@ Engine::Engine(Delegate& delegate,
           settings_
               .skia_deterministic_rendering_on_cpu,  // deterministic rendering
           vm.GetConcurrentWorkerTaskRunner(),        // concurrent task runner
-          runtime_stage_backend,                     // runtime stage
           settings_.enable_impeller,                 // enable impeller
-          settings_.enable_flutter_gpu               // enable impeller
+          settings_.enable_flutter_gpu,              // enable impeller
+          runtime_stage_type,                        // runtime stage type
       });
 }
 
