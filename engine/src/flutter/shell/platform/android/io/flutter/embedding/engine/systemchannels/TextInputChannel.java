@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -481,14 +483,16 @@ public class TextInputChannel {
 
       // Build an array of hint locales from the data in the JSON list.
       Locale[] hintLocales = null;
+      System.out.println("Before Locale Array =========================================");
       if (!json.isNull("hintLocales")) {
         JSONArray hintLocalesJson = json.getJSONArray("hintLocales");
         hintLocales = new Locale[hintLocalesJson.length()];
+        System.out.println("new Locale Array Created =========================================");
         for (int i = 0; i < hintLocalesJson.length(); i++) {
           hintLocales[i] = Locale.forLanguageTag(hintLocalesJson.optString(i));
         }
       }
-
+      System.out.println("Locale Array Created =========================================");
       return new Configuration(
           json.optBoolean("obscureText"),
           json.optBoolean("autocorrect", true),

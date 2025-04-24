@@ -2758,7 +2758,7 @@ public class TextInputPluginTest {
             scribeChannel,
             mock(PlatformViewsController.class),
             mock(PlatformViewsController2.class));
-    final Locale[] hintLocales = {new Locale("en")};
+    final Locale[] hintLocales = {Locale.of("en")};
     textInputPlugin.setTextInputClient(
         0,
         new TextInputChannel.Configuration(
