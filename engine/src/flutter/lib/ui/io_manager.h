@@ -5,7 +5,6 @@
 #ifndef FLUTTER_LIB_UI_IO_MANAGER_H_
 #define FLUTTER_LIB_UI_IO_MANAGER_H_
 
-#include <future>
 #include "flutter/flow/skia_gpu_object.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/synchronization/sync_switch.h"
@@ -32,10 +31,7 @@ class IOManager {
   virtual std::shared_ptr<const fml::SyncSwitch>
   GetIsGpuDisabledSyncSwitch() = 0;
 
-  /// @brief Retrieve the impeller::Context.
-  ///
-  /// Call may block until context is availabe.
-  virtual std::shared_ptr<impeller::Context> GetImpellerContext() const = 0;
+  virtual std::shared_ptr<impeller::Context> GetImpellerContext() const;
 };
 
 }  // namespace flutter

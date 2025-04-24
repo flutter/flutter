@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <future>
 #include "fml/task_runner.h"
-#include "impeller/core/runtime_types.h"
-#include "impeller/renderer/context.h"
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "flutter/shell/common/shell.h"
 
@@ -68,8 +65,7 @@ std::unique_ptr<Engine> CreateEngine(
     const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
     const fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>& snapshot_delegate,
     const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-    const std::shared_future<impeller::RuntimeStageBackend>&
-        runtime_stage_backend) {
+    impeller::RuntimeStageBackend runtime_stage_backend) {
   return std::make_unique<Engine>(delegate,             //
                                   dispatcher_maker,     //
                                   vm,                   //
@@ -198,6 +194,14 @@ std::unique_ptr<Shell> Shell::Create(
                             CreateEngine, is_gpu_disabled);
 }
 
+static impeller::RuntimeStageBackend DetermineRuntimeStageBackend(
+    const std::shared_ptr<impeller::Context>& impeller_context) {
+  if (!impeller_context) {
+    return impeller::RuntimeStageBackend::kSkSL;
+  }
+  return impeller_context->GetRuntimeStageBackend();
+}
+
 std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     DartVMRef vm,
     fml::RefPtr<fml::RasterThreadMerger> parent_merger,
@@ -227,60 +231,26 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
     return nullptr;
   }
 
-  PlatformView* platform_view_ptr = platform_view.get();
   // Create the rasterizer on the raster thread.
   std::promise<std::unique_ptr<Rasterizer>> rasterizer_promise;
   auto rasterizer_future = rasterizer_promise.get_future();
   std::promise<fml::TaskRunnerAffineWeakPtr<SnapshotDelegate>>
       snapshot_delegate_promise;
   auto snapshot_delegate_future = snapshot_delegate_promise.get_future();
-
-  std::promise<std::shared_ptr<impeller::Context>> impeller_context_promise;
-  auto impeller_context_future =
-      std::make_shared<impeller::ImpellerContextFuture>(
-          impeller_context_promise.get_future());
-
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetRasterTaskRunner(),
       [&rasterizer_promise,  //
-       &snapshot_delegate_promise, impeller_context_future,
-       on_create_rasterizer,  //
-       shell = shell.get()]() {
+       &snapshot_delegate_promise,
+       on_create_rasterizer,                                   //
+       shell = shell.get(),                                    //
+       impeller_context = platform_view->GetImpellerContext()  //
+  ]() {
         TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
         std::unique_ptr<Rasterizer> rasterizer(on_create_rasterizer(*shell));
-        rasterizer->SetImpellerContext(impeller_context_future);
+        rasterizer->SetImpellerContext(impeller_context);
         snapshot_delegate_promise.set_value(rasterizer->GetSnapshotDelegate());
         rasterizer_promise.set_value(std::move(rasterizer));
       });
-
-  // Defer setting up the impeller context until after the startup blocking
-  // futures have completed. Context creation may be slow (100+ ms) when using
-  // the Vulkan backend on certain Android devices, so we intentionally try
-  // to move it off the critical path for startup.
-  std::promise<impeller::RuntimeStageBackend> runtime_stage_backend;
-  std::shared_future<impeller::RuntimeStageBackend> runtime_stage_future =
-      runtime_stage_backend.get_future();
-
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners.GetRasterTaskRunner(),
-      fml::MakeCopyable(
-          [impeller_context_promise = std::move(impeller_context_promise),  //
-           runtime_stage_backend = std::move(runtime_stage_backend),        //
-           platform_view_ptr]() mutable {
-            TRACE_EVENT0("flutter", "CreateImpellerContext");
-            platform_view_ptr->SetupImpellerContext();
-            std::shared_ptr<impeller::Context> impeller_context =
-                platform_view_ptr->GetImpellerContext();
-            if (impeller_context) {
-              runtime_stage_backend.set_value(
-                  impeller_context->GetRuntimeStageBackend());
-              impeller_context_promise.set_value(impeller_context);
-            } else {
-              runtime_stage_backend.set_value(
-                  impeller::RuntimeStageBackend::kSkSL);
-              impeller_context_promise.set_value(nullptr);
-            }
-          }));
 
   // Ask the platform view for the vsync waiter. This will be used by the engine
   // to create the animator.
@@ -303,17 +273,17 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
   // The platform_view will be stored into shell's platform_view_ in
   // shell->Setup(std::move(platform_view), ...) at the end.
+  PlatformView* platform_view_ptr = platform_view.get();
   fml::TaskRunner::RunNowOrPostTask(
       io_task_runner,
-      [&io_manager_promise,                                                //
-       &weak_io_manager_promise,                                           //
-       &parent_io_manager,                                                 //
-       &unref_queue_promise,                                               //
-       platform_view_ptr,                                                  //
-       io_task_runner,                                                     //
-       is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch(),  //
-       impeller_enabled = settings.enable_impeller,                        //
-       impeller_context_future]() {
+      [&io_manager_promise,                                               //
+       &weak_io_manager_promise,                                          //
+       &parent_io_manager,                                                //
+       &unref_queue_promise,                                              //
+       platform_view_ptr,                                                 //
+       io_task_runner,                                                    //
+       is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch()  //
+  ]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
         std::shared_ptr<ShellIOManager> io_manager;
         if (parent_io_manager) {
@@ -322,9 +292,8 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
           io_manager = std::make_shared<ShellIOManager>(
               platform_view_ptr->CreateResourceContext(),  // resource context
               is_backgrounded_sync_switch,                 // sync switch
-              io_task_runner,           // unref queue task runner
-              impeller_context_future,  // impeller context
-              impeller_enabled          //
+              io_task_runner,  // unref queue task runner
+              platform_view_ptr->GetImpellerContext()  // impeller context
           );
         }
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
@@ -349,9 +318,10 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          vsync_waiter = std::move(vsync_waiter),          //
                          &weak_io_manager_future,                         //
                          &snapshot_delegate_future,                       //
-                         &runtime_stage_future,                           //
                          &unref_queue_future,                             //
-                         &on_create_engine]() mutable {
+                         &on_create_engine,
+                         runtime_stage_backend = DetermineRuntimeStageBackend(
+                             platform_view->GetImpellerContext())]() mutable {
         TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
         const auto& task_runners = shell->GetTaskRunners();
 
@@ -360,20 +330,21 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         auto animator = std::make_unique<Animator>(*shell, task_runners,
                                                    std::move(vsync_waiter));
 
-        engine_promise.set_value(
-            on_create_engine(*shell,                               //
-                             dispatcher_maker,                     //
-                             *shell->GetDartVM(),                  //
-                             std::move(isolate_snapshot),          //
-                             task_runners,                         //
-                             platform_data,                        //
-                             shell->GetSettings(),                 //
-                             std::move(animator),                  //
-                             weak_io_manager_future.get(),         //
-                             unref_queue_future.get(),             //
-                             snapshot_delegate_future.get(),       //
-                             shell->is_gpu_disabled_sync_switch_,  //
-                             runtime_stage_future));
+        engine_promise.set_value(on_create_engine(
+            *shell,                               //
+            dispatcher_maker,                     //
+            *shell->GetDartVM(),                  //
+            std::move(isolate_snapshot),          //
+            task_runners,                         //
+            platform_data,                        //
+            shell->GetSettings(),                 //
+            std::move(animator),                  //
+            weak_io_manager_future.get(),         //
+            unref_queue_future.get(),             //
+            snapshot_delegate_future.get(),       //
+            shell->is_gpu_disabled_sync_switch_,  //
+            runtime_stage_backend                 //
+            ));
       }));
 
   if (!shell->Setup(std::move(platform_view),  //
@@ -648,8 +619,7 @@ std::unique_ptr<Shell> Shell::Spawn(
           const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
           fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
           const std::shared_ptr<fml::SyncSwitch>& is_gpu_disabled_sync_switch,
-          const std::shared_future<impeller::RuntimeStageBackend>&
-              runtime_stage_backend) {
+          impeller::RuntimeStageBackend runtime_stage_backend) {
         return engine->Spawn(
             /*delegate=*/delegate,
             /*dispatcher_maker=*/dispatcher_maker,
