@@ -1031,9 +1031,15 @@ public class FlutterFragment extends Fragment
     // Ensure that we at least have an empty Bundle of arguments so that we don't
     // need to continually check for null arguments before grabbing one.
     setArguments(new Bundle());
+  }
+
+  void setFlutterViewIdIfNeeded() {
+    if (flutterViewId == null) {
+      return;
+    }
 
     // TODO(camsim99): reduce getActivity(), activity weirdness when sensitive content plugin PR
-    // lands.
+    // lands + add tests if needed.
     if (getActivity().findViewById(FLUTTER_VIEW_ID) == null) {
       flutterViewId = FLUTTER_VIEW_ID;
     } else {
@@ -1102,6 +1108,7 @@ public class FlutterFragment extends Fragment
   @Override
   public View onCreateView(
       LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    setFlutterViewIdIfNeeded();
     return delegate.onCreateView(
         inflater,
         container,
