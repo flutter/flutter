@@ -210,7 +210,6 @@ class OutlinedButton extends ButtonStyleButton {
     Size? maximumSize,
     BorderSide? side,
     OutlinedBorder? shape,
-    bool? borderOnForeground,
     MouseCursor? enabledMouseCursor,
     MouseCursor? disabledMouseCursor,
     VisualDensity? visualDensity,
@@ -260,7 +259,6 @@ class OutlinedButton extends ButtonStyleButton {
       maximumSize: ButtonStyleButton.allOrNull<Size>(maximumSize),
       side: ButtonStyleButton.allOrNull<BorderSide>(side),
       shape: ButtonStyleButton.allOrNull<OutlinedBorder>(shape),
-      borderOnForeground: borderOnForeground,
       mouseCursor: WidgetStateProperty<MouseCursor?>.fromMap(<WidgetStatesConstraint, MouseCursor?>{
         WidgetState.disabled: disabledMouseCursor,
         WidgetState.any: enabledMouseCursor,
@@ -360,7 +358,6 @@ class OutlinedButton extends ButtonStyleButton {
   ///   * disabled - BorderSide(color: Theme.colorScheme.onSurface(0.12))
   ///   * others - BorderSide(color: Theme.colorScheme.outline)
   /// * `shape` - StadiumBorder()
-  /// * `borderOnForeground` - null
   /// * `mouseCursor`
   ///   * disabled - SystemMouseCursors.basic
   ///   * others - SystemMouseCursors.click

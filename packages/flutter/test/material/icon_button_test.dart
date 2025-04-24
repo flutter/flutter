@@ -405,24 +405,6 @@ void main() {
     expect(align.alignment, Alignment.center);
   });
 
-  testWidgets('test default borderOnForeground', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-        useMaterial3: theme.useMaterial3,
-        child: IconButton(
-          onPressed: mockOnPressedFunction.handler,
-          icon: const Icon(Icons.ac_unit),
-          iconSize: 80.0,
-        ),
-      ),
-    );
-
-    final IconButton iconButton = tester.firstWidget<IconButton>(
-      find.ancestor(of: find.byIcon(Icons.ac_unit), matching: find.byType(IconButton)),
-    );
-    expect(iconButton.borderOnForeground, null);
-  });
-
   testWidgets('test tooltip', (WidgetTester tester) async {
     const String tooltipText = 'Test tooltip';
     Widget buildIconButton({String? tooltip}) {
@@ -1149,7 +1131,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -1175,7 +1157,7 @@ void main() {
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -1195,7 +1177,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -1288,7 +1270,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.primary);
@@ -1314,7 +1296,7 @@ void main() {
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.primary);
@@ -1335,7 +1317,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));
@@ -1435,7 +1417,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.primary);
@@ -1461,7 +1443,7 @@ void main() {
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.primary);
@@ -1488,7 +1470,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.surfaceVariant);
@@ -1512,7 +1494,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));
@@ -1546,7 +1528,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.secondaryContainer);
@@ -1572,7 +1554,7 @@ void main() {
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.secondaryContainer);
@@ -1595,7 +1577,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));
@@ -1695,7 +1677,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.secondaryContainer);
@@ -1721,7 +1703,7 @@ void main() {
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.secondaryContainer);
@@ -1747,7 +1729,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.surfaceVariant);
@@ -1775,7 +1757,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));
@@ -1807,7 +1789,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -1833,7 +1815,7 @@ void main() {
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -1854,7 +1836,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -1957,7 +1939,7 @@ void main() {
 
     Material material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.inverseSurface);
@@ -1983,7 +1965,7 @@ void main() {
     material = tester.widget<Material>(buttonMaterial);
     // No change vs enabled and not pressed.
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.inverseSurface);
@@ -2010,7 +1992,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, Colors.transparent);
@@ -2034,7 +2016,7 @@ void main() {
 
     material = tester.widget<Material>(buttonMaterial);
     expect(material.animationDuration, const Duration(milliseconds: 200));
-    expect(material.borderOnForeground, true);
+    expect(material.borderOnForeground, false);
     expect(material.borderRadius, null);
     expect(material.clipBehavior, Clip.none);
     expect(material.color, colorScheme.onSurface.withOpacity(0.12));

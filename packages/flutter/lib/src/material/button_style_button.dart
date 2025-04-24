@@ -607,7 +607,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
             type: resolvedBackgroundColor == null ? MaterialType.transparency : MaterialType.button,
             animationDuration: resolvedAnimationDuration,
             clipBehavior: effectiveClipBehavior,
-            borderOnForeground: widget.style?.borderOnForeground ?? true,
+            borderOnForeground: false,
             child: result,
           ),
         ),

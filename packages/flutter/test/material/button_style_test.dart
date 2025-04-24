@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -46,7 +45,6 @@ void main() {
     expect(style.splashFactory, isNull);
     expect(style.backgroundBuilder, isNull);
     expect(style.foregroundBuilder, isNull);
-    expect(style.borderOnForeground, isNull);
   });
 
   testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
@@ -83,7 +81,6 @@ void main() {
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       animationDuration: Duration(seconds: 1),
       enableFeedback: true,
-      borderOnForeground: true,
     ).debugFillProperties(builder);
 
     final List<String> description =
@@ -111,7 +108,6 @@ void main() {
       'tapTargetSize: shrinkWrap',
       'animationDuration: 0:00:01.000000',
       'enableFeedback: true',
-      'borderOnForeground: true'
     ]);
   });
 
@@ -158,7 +154,6 @@ void main() {
     const MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const Duration animationDuration = Duration(seconds: 1);
     const bool enableFeedback = true;
-    const bool borderOnForeground = false;
 
     const ButtonStyle style = ButtonStyle(
       textStyle: textStyle,
@@ -181,7 +176,6 @@ void main() {
       tapTargetSize: tapTargetSize,
       animationDuration: animationDuration,
       enableFeedback: enableFeedback,
-      borderOnForeground: borderOnForeground,
     );
 
     expect(
@@ -207,7 +201,6 @@ void main() {
         tapTargetSize: tapTargetSize,
         animationDuration: animationDuration,
         enableFeedback: enableFeedback,
-        borderOnForeground: borderOnForeground,
       ),
     );
 
