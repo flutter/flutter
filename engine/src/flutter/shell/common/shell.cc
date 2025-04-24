@@ -305,28 +305,28 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // shell->Setup(std::move(platform_view), ...) at the end.
   fml::TaskRunner::RunNowOrPostTask(
       io_task_runner,
-      [&io_manager_promise,       //
-       &weak_io_manager_promise,  //
-                                  //   &parent_io_manager, //
-       &unref_queue_promise,      //
-       platform_view_ptr,         //
-       io_task_runner,            //
+      [&io_manager_promise,                                                //
+       &weak_io_manager_promise,                                           //
+       &parent_io_manager,                                                 //
+       &unref_queue_promise,                                               //
+       platform_view_ptr,                                                  //
+       io_task_runner,                                                     //
        is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch(),  //
        impeller_enabled = settings.enable_impeller,                        //
        impeller_context_future]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
         std::shared_ptr<ShellIOManager> io_manager;
-        // if (parent_io_manager) {
-        //   io_manager = parent_io_manager;
-        // } else {
-        io_manager = std::make_shared<ShellIOManager>(
-            platform_view_ptr->CreateResourceContext(),  // resource context
-            is_backgrounded_sync_switch,                 // sync switch
-            io_task_runner,           // unref queue task runner
-            impeller_context_future,  // impeller context
-            impeller_enabled          //
-        );
-        // }
+        if (parent_io_manager) {
+          io_manager = parent_io_manager;
+        } else {
+          io_manager = std::make_shared<ShellIOManager>(
+              platform_view_ptr->CreateResourceContext(),  // resource context
+              is_backgrounded_sync_switch,                 // sync switch
+              io_task_runner,           // unref queue task runner
+              impeller_context_future,  // impeller context
+              impeller_enabled          //
+          );
+        }
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
         io_manager_promise.set_value(io_manager);

@@ -152,6 +152,9 @@ AndroidContextDynamicImpeller::GetVKContext() const {
 }
 
 void AndroidContextDynamicImpeller::SetupImpellerContext() {
+  if (vk_context_ || gl_context_) {
+    return;
+  }
   vk_context_ = GetActualRenderingAPIForImpeller(android_get_device_api_level(),
                                                  settings_);
   if (!vk_context_) {
