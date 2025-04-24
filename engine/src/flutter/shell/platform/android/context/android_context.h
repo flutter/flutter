@@ -63,12 +63,16 @@ class AndroidContext {
   /// @brief      Accessor for the Impeller context associated with
   ///             AndroidSurfaces and the raster thread.
   ///
-  std::shared_ptr<impeller::Context> GetImpellerContext() const;
+  virtual std::shared_ptr<impeller::Context> GetImpellerContext() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Perform deferred setup for the impeller Context.
+  ///
+  virtual void SetupImpellerContext() {}
 
  protected:
-  /// Intended to be called from a subclass constructor after setup work for the
-  /// context has completed.
-  void SetImpellerContext(const std::shared_ptr<impeller::Context>& context);
+  void SetImpellerContext(
+      const std::shared_ptr<impeller::Context>& impeller_context);
 
  private:
   const AndroidRenderingAPI rendering_api_;
