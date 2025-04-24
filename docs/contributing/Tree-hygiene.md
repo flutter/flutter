@@ -11,6 +11,12 @@ Flutter other than the actual writing of the code. For guidance on
 designing APIs, documenting, and formatting your code, see the
 [Style guide for Flutter repo](Style-guide-for-Flutter-repo.md) document.
 
+Across the document we use the word "tree" to mean "the health state of flutter/flutter repository". Tree status is shown:
+
+- On our [build dashboard](https://flutter-dashboard.appspot.com/)
+- On every PR (referred to as "Tree Status")
+- In the [tree-status](https://discord.com/channels/608014603317936148/613398423093116959) Discord channel
+
 ## Overview
 
 The general process for submitting code to a Flutter repository is as follows:
@@ -300,12 +306,6 @@ Once you have submitted your patch and received your LGTM, if you do not have co
 the repository yet, then wait for one of the project maintainers to submit it for you.
 
 If you do have access, add the "autosubmit" label. A bot will land the PR for you.
-
-
-### Squashing commits
-
-When you squash commits, by default, GitHub will concatenate all your commit messages to form a unified commit message.  This often yields an overly verbose commit message with many unhelpful entries (e.g. "fix typo").  Please double-check (and hand-edit if necessary) your commit message before merging such that the message contains a helpful description of the overall change.
-
 
 ## Tree breakage (regressions in functionality)
 
