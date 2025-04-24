@@ -2753,7 +2753,7 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_engine_group_performance
     recipe: devicelab/devicelab_drone
-    presubmit: false
+    presubmit: true
     timeout: 60
     properties:
       tags: >
