@@ -25,13 +25,13 @@ struct Trig {
   double sin;
 
   /// @brief  Returns the vector rotated by the represented angle.
-  Vector2 operator*(const Vector2& vector) {
+  Vector2 operator*(const Vector2& vector) const {
     return Vector2(static_cast<Scalar>(vector.x * cos - vector.y * sin),
                    static_cast<Scalar>(vector.x * sin + vector.y * cos));
   }
 
   /// @brief  Returns the Trig representing the negative version of this angle.
-  Trig operator-() { return Trig(cos, -sin); }
+  Trig operator-() const { return Trig(cos, -sin); }
 
   /// @brief  Returns the corresponding point on a circle of a given |radius|.
   Vector2 operator*(double radius) const {
