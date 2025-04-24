@@ -11,9 +11,9 @@ namespace flutter {
 enum class AndroidRenderingAPI {
 #if !SLIMPELLER
   kSoftware,
-  kSkiaOpenGLES
+  kSkiaOpenGLES,
 #endif  // !SLIMPELLER
-      kImpellerOpenGLES,
+  kImpellerOpenGLES,
   kImpellerVulkan,
   kImpellerAutoselect,
 };
