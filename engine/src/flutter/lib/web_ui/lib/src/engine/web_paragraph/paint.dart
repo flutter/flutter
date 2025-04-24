@@ -44,13 +44,15 @@ class TextPaint {
     double x,
     double y,
   ) {
-    // TODO(jlavrova): We need to traverse clusters in the order of visual bidi runs
-    // (by line, then by reordered visual runs)
     WebParagraphDebug.log(
-      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.shift}->${line.bounds.width}x${line.bounds.height}',
+      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) *${line.visualRuns.length} @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.shift}->${line.bounds.width}x${line.bounds.height}',
     );
 
+    double clusterShift = 0.0;
     for (final BidiRun run in line.visualRuns) {
+      WebParagraphDebug.log(
+        'run: [${run.clusterRange.start}:${run.clusterRange.end}) ${run.shift}',
+      );
       for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final clusterText = layout.textClusters[i];
         paintCluster(
@@ -62,6 +64,7 @@ class TextPaint {
           ),
           ui.Offset(x, y),
         );
+        clusterShift += clusterText.bounds.width;
       }
     }
   }
@@ -72,6 +75,8 @@ class TextPaint {
     ui.Offset clusterOffset,
     ui.Offset lineOffset,
   ) {
+    final WebTextStyle textStyle = webTextCluster.textStyle!;
+    textContext.fillStyle = textStyle.foreground?.color.toCssString();
     textContext.fillTextCluster(webTextCluster.cluster!, clusterOffset.dx, clusterOffset.dy);
 
     final engine.DomImageBitmap bitmap = textCanvas.transferToImageBitmap();
@@ -89,19 +94,26 @@ class TextPaint {
     canvas.drawImageRect(
       ckImage,
       clusterRect,
-      clusterRect.translate(lineOffset.dx, lineOffset.dy),
+      clusterRect.translate(lineOffset.dx + webTextCluster.shift, lineOffset.dy),
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
+    final String text = paragraph.text!.substring(
+      webTextCluster.textRange.start,
+      webTextCluster.textRange.end,
+    );
     WebParagraphDebug.log(
-      '[${webTextCluster.start}:${webTextCluster.end}) ${webTextCluster.bounds.left},${webTextCluster.bounds.top},${clusterRect.width}${clusterRect.height} => ${clusterOffset.dx},${clusterOffset.dy}',
+      'cluster "$text" "${textStyle.foreground?.color.toCssString()}" ${webTextCluster.bounds.left}:${webTextCluster.bounds.right} @${lineOffset.dx},${lineOffset.dy}',
     );
   }
 
   void printTextCluster(ExtendedTextCluster webTextCluster) {
-    final String text = paragraph.text!.substring(webTextCluster.start, webTextCluster.end);
+    final String text = paragraph.text!.substring(
+      webTextCluster.textRange.start,
+      webTextCluster.textRange.end,
+    );
     final ui.Rect box = webTextCluster.bounds;
     print(
-      '[${webTextCluster.start}:${webTextCluster.end}) = "$text", ${box.width}, ${box.height}\n',
+      '[${webTextCluster.textRange.start}:${webTextCluster.textRange.end}) = "$text", ${box.width}, ${box.height}\n',
     );
   }
 }

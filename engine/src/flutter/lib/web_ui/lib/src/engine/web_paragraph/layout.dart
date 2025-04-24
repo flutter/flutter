@@ -87,6 +87,7 @@ class TextLayout {
 
   void extractClusterTexts() {
     // Walk through all the styled text ranges
+    double blockStart = 0.0;
     for (final StyledTextRange styledBlock in paragraph.styledTextRanges) {
       final String text = paragraph.text!.substring(
         styledBlock.textRange.start,
@@ -94,8 +95,8 @@ class TextLayout {
       );
       textContext.font =
           '${styledBlock.textStyle.fontSize}px ${styledBlock.textStyle.originalFontFamily!}';
-      textContext.fillStyle = styledBlock.textStyle.color;
       final DomTextMetrics blockTextMetrics = textContext.measureText(text);
+      double blockWidth = 0.0;
       for (final WebTextCluster cluster in blockTextMetrics.getTextClusters()) {
         final List<DomRectReadOnly> rects = blockTextMetrics.getSelectionRects(
           cluster.begin,
@@ -108,10 +109,25 @@ class TextLayout {
           rects.first.height,
         );
         for (int i = cluster.begin; i < cluster.end; i += 1) {
-          textToClusterMap[i] = textClusters.length;
+          textToClusterMap[i + styledBlock.textRange.start] = textClusters.length;
         }
-        textClusters.add(ExtendedTextCluster(cluster, bounds, blockTextMetrics));
+
+        textClusters.add(
+          ExtendedTextCluster(
+            cluster,
+            /*textRange:*/ ClusterRange(
+              start: cluster.begin + styledBlock.textRange.start,
+              end: cluster.end + styledBlock.textRange.start,
+            ),
+            styledBlock.textStyle,
+            bounds,
+            blockStart,
+            blockTextMetrics,
+          ),
+        );
+        blockWidth += rects.first.width;
       }
+      blockStart += blockWidth;
     }
     textToClusterMap[paragraph.text!.length] = textClusters.length;
     textClusters.add(ExtendedTextCluster.empty());
@@ -125,7 +141,7 @@ class TextLayout {
     final ExtendedTextCluster start =
         textClusters[min(clusterRange.start, textClusters.length - 1)];
     final ExtendedTextCluster end = textClusters[min(clusterRange.end, textClusters.length - 1)];
-    if (start.cluster != null && end.cluster != null) {
+    if (start.cluster != null && end.cluster != null && start.start != end.start) {
       return paragraph.text!.substring(start.start, end.start);
     } else {
       return '';
@@ -142,7 +158,7 @@ class TextLayout {
 
     WebParagraphDebug.log('Bidi ${paragraph.paragraphStyle.textDirection}:${regions.length}');
     for (final region in regions) {
-      WebParagraphDebug.log('[${region.start}: ${region.end}):${region.level}');
+      WebParagraphDebug.log('region [${region.start}: ${region.end}):${region.level}');
     }
 
     for (final region in regions) {
@@ -262,9 +278,13 @@ class TextLayout {
       );
       for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
         final ExtendedTextCluster cluster = textClusters[i];
-        final String clusterText = paragraph.text!.substring(cluster.start, cluster.end);
+        final String clusterText = paragraph.text!.substring(
+          cluster.textRange.start,
+          cluster.textRange.end,
+        );
+        ;
         WebParagraphDebug.log(
-          'cluster$i: [${cluster.bounds.left}:${cluster.bounds.right}) "$clusterText"',
+          'cluster[$i]: [${cluster.bounds.left}:${cluster.bounds.right}) "$clusterText"',
         );
       }
     }
@@ -316,25 +336,35 @@ class TextLayout {
       } else if (effectiveAlign == ui.TextAlign.center) {
         line.shift = delta / 2;
       }
-      WebParagraphDebug.log(
-        'aligne: ${paragraph.paragraphStyle.textAlign} effectiveAlign: $effectiveAlign delta: $delta shift: ${line.shift}',
-      );
     }
   }
 }
 
 class ExtendedTextCluster {
-  ExtendedTextCluster(this.cluster, this.bounds, this.textMetrics) {
+  ExtendedTextCluster(
+    this.cluster,
+    this.textRange,
+    this.textStyle,
+    this.bounds,
+    this.shift,
+    this.textMetrics,
+  ) {
     start = cluster!.begin;
     end = cluster!.end;
   }
 
-  ExtendedTextCluster.empty() : bounds = ui.Rect.zero;
+  ExtendedTextCluster.empty()
+    : shift = 0.0,
+      bounds = ui.Rect.zero,
+      textRange = ClusterRange(start: 0, end: 0);
 
   WebTextCluster? cluster;
+  ClusterRange textRange;
   int start = 0;
   int end = 0;
   ui.Rect bounds;
+  double shift;
+  WebTextStyle? textStyle;
 
   // TODO(jlavrova): once we know everything we need we can calculate it once
   // and do not keep textMetrics longer than we have to
