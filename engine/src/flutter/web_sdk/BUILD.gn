@@ -27,6 +27,12 @@ web_engine_libraries = [
   ":web_locale_keymap_library",
 ]
 
+declare_args() {
+  # Whether to build the CanvasKit variant that supports the experimental WebParagraph
+  # implementation.
+  skia_canvaskit_experimental_webparagraph = false
+}
+
 group("web_sdk") {
   deps = [
     ":flutter_ddc_modules",
@@ -410,6 +416,9 @@ if (!is_fuchsia) {
            ] + web_engine_libraries
 
     if (is_wasm) {
+      if (skia_canvaskit_experimental_webparagraph) {
+        deps += [ "//flutter/third_party/canvaskit:canvaskit_experimental_webparagraph_group" ]
+      }
       deps += [
         "//flutter/third_party/canvaskit:canvaskit_chromium_group",
         "//flutter/third_party/canvaskit:canvaskit_group",
@@ -428,6 +437,13 @@ if (!is_fuchsia) {
     sources += get_target_outputs(":flutter_dart2js_kernel_sdk_full")
     sources += get_target_outputs(":flutter_dart2wasm_kernel_sdk_full")
     if (is_wasm) {
+      if (skia_canvaskit_experimental_webparagraph) {
+        sources += [
+          "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/canvaskit.js",
+          "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/canvaskit.js.symbols",
+          "$root_out_dir/flutter_web_sdk/canvaskit/experimental_webparagraph/canvaskit.wasm",
+        ]
+      }
       sources += [
         "$root_out_dir/flutter_web_sdk/canvaskit/canvaskit.js",
         "$root_out_dir/flutter_web_sdk/canvaskit/canvaskit.js.symbols",
