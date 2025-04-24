@@ -290,12 +290,12 @@ class TestSemantics {
 
   /// The expected max value length for the node.
   ///
-  /// Defaults to null uri if not set.
+  /// Defaults to null if not set.
   final int? maxValueLength;
 
   /// The expected current value length for the node.
   ///
-  /// Defaults to null uri if not set.
+  /// Defaults to null if not set.
   final int? currentValueLength;
 
   /// The expected identifier for the node.
@@ -303,7 +303,7 @@ class TestSemantics {
   /// Defaults to an empty string if not set.
   final String identifier;
 
-  /// The expected identifier for the node.
+  /// The expected hint overrides for the node.
   ///
   /// Defaults to null if not set.
   final SemanticsHintOverrides? hintOverrides;
