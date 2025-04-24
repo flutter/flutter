@@ -10430,7 +10430,10 @@ void main() {
         expect(controller.selection.baseOffset, 0);
         expect(controller.selection.extentOffset, 22);
       },
-      variant: TargetPlatformVariant.mobile(),
+      variant: const TargetPlatformVariant(<TargetPlatform>{
+        TargetPlatform.android,
+        TargetPlatform.iOS,
+      }),
     );
 
     testWidgets(
