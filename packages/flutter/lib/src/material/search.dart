@@ -336,12 +336,21 @@ abstract class SearchDelegate<T> {
   ///
   /// The value provided for `result` is used as the return value of the call
   /// to [showSearch] that launched the search initially.
-  void close(BuildContext context, T? result) {
+  void close(BuildContext context, T result) {
     _currentBody = null;
     _focusNode?.unfocus();
     Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
+  }
+
+  /// Closes the search page and returns to the underlying route whitout result.
+  void pop(BuildContext context) {
+    _currentBody = null;
+    _focusNode?.unfocus();
+    Navigator.of(context)
+      ..popUntil((Route<dynamic> route) => route == _route)
+      ..pop();
   }
 
   /// The hint text that is shown in the search field when it is empty.
@@ -510,7 +519,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     onKeyEvent: (FocusNode node, KeyEvent event) {
       // When the user presses the escape key, close the search page.
       if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-        widget.delegate.close(context, null);
+        widget.delegate.pop(context);
         return KeyEventResult.handled;
       }
       return KeyEventResult.ignored;
