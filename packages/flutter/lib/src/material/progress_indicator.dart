@@ -911,11 +911,6 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator>
   @override
   void didUpdateWidget(CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller != widget.controller && _controller != widget.controller) {
-      if (oldWidget.controller == null) {
-        _controller.dispose();
-      }
-    }
     if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
     } else if (widget.value != null && _controller.isAnimating) {
