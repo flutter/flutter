@@ -63,7 +63,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityBridgeTest {
 
@@ -2097,7 +2096,7 @@ public class AccessibilityBridgeTest {
     // These fields are declared in the order they should be
     // encoded.
     int id = 0;
-    int flags = 0;
+    long flags = 0;
     int actions = 0;
     int maxValueLength = 0;
     int currentValueLength = 0;
@@ -2156,7 +2155,7 @@ public class AccessibilityBridgeTest {
     protected void addToBuffer(
         ByteBuffer bytes, ArrayList<String> strings, ArrayList<ByteBuffer> stringAttributeArgs) {
       bytes.putInt(id);
-      bytes.putInt(flags);
+      bytes.putLong(flags);
       bytes.putInt(actions);
       bytes.putInt(maxValueLength);
       bytes.putInt(currentValueLength);
