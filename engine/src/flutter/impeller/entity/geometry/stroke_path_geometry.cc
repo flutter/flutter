@@ -130,30 +130,28 @@ class PositionWriter {
 /// @see PathTessellator::PathToStrokedSegments
 class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
  public:
-  StrokePathSegmentReceiver(PositionWriter& vtx_builder,
-                            const Scalar stroke_width,
-                            const Scalar miter_limit,
-                            const Join join,
-                            const Cap cap,
-                            const Scalar scale,
-                            const Tessellator::Trigs& trigs)
-      : vtx_builder_(vtx_builder),
-        half_stroke_width_(stroke_width * 0.5f),
-        maximum_join_cosine_(
-            ComputeMaximumJoinCosine(scale, stroke_width * 0.5f)),
-        minimum_miter_cosine_(ComputeMinimumMiterCosine(miter_limit)),
-        join_(join),
-        cap_(cap),
-        scale_(scale),
-        trigs_(trigs) {
+  static void GenerateStrokeVertices(PositionWriter& vtx_builder,
+                                     const PathSource& source,
+                                     const Scalar stroke_width,
+                                     const Scalar miter_limit,
+                                     const Join join,
+                                     const Cap cap,
+                                     const Scalar scale,
+                                     const Tessellator::Trigs& trigs) {
     // Trigs ensures that it always contains at least 2 entries.
-    FML_DCHECK(trigs_.size() >= 2);
-    FML_DCHECK(trigs_[0].cos == 1.0f);  // Angle == 0 degrees
-    FML_DCHECK(trigs_[0].sin == 0.0f);
-    FML_DCHECK(trigs_.end()[-1].cos == 0.0f);  // Angle == 90 degrees
-    FML_DCHECK(trigs_.end()[-1].sin == 1.0f);
+    FML_DCHECK(trigs.size() >= 2);
+    FML_DCHECK(trigs[0].cos == 1.0f);  // Angle == 0 degrees
+    FML_DCHECK(trigs[0].sin == 0.0f);
+    FML_DCHECK(trigs.end()[-1].cos == 0.0f);  // Angle == 90 degrees
+    FML_DCHECK(trigs.end()[-1].sin == 1.0f);
+
+    StrokePathSegmentReceiver receiver(vtx_builder, stroke_width, miter_limit,
+                                       join, cap, scale, trigs);
+    PathTessellator::PathToStrokedSegments(source, receiver);
   }
 
+ protected:
+  // |SegmentReceiver|
   void BeginContour(Point origin, bool will_be_closed) override {
     if (has_prior_contour_ && origin != last_point_) {
       // We only append these extra points if we have had a prior contour.
@@ -169,6 +167,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     origin_point_ = origin;
   }
 
+  // |SegmentReceiver|
   void RecordLine(Point p1, Point p2) override {
     if (p2 != p1) {
       SeparatedVector2 current_perpendicular = ComputePerpendicular(p1, p2);
@@ -181,18 +180,22 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     }
   }
 
+  // |SegmentReceiver|
   void RecordQuad(Point p1, Point cp, Point p2) override {
     RecordCurve<PathTessellator::Quad>({p1, cp, p2});
   }
 
+  // |SegmentReceiver|
   void RecordConic(Point p1, Point cp, Point p2, Scalar weight) override {
     RecordCurve<PathTessellator::Conic>({p1, cp, p2, weight});
   }
 
+  // |SegmentReceiver|
   void RecordCubic(Point p1, Point cp1, Point cp2, Point p2) override {
     RecordCurve<PathTessellator::Cubic>({p1, cp1, cp2, p2});
   }
 
+  // Utility implementation of |SegmentReceiver| Record<Curve> methods
   template <typename Curve>
   inline void RecordCurve(const Curve& curve) {
     std::optional<Point> start_direction = curve.GetStartDirection();
@@ -250,6 +253,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     }
   }
 
+  // |SegmentReceiver|
   void EndContour(Point origin, bool with_close) override {
     FML_DCHECK(origin == origin_point_);
     if (!has_prior_segment_) {
@@ -295,6 +299,23 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   bool has_prior_contour_ = false;
   bool has_prior_segment_ = false;
   bool contour_needs_cap_ = false;
+
+  StrokePathSegmentReceiver(PositionWriter& vtx_builder,
+                            const Scalar stroke_width,
+                            const Scalar miter_limit,
+                            const Join join,
+                            const Cap cap,
+                            const Scalar scale,
+                            const Tessellator::Trigs& trigs)
+      : vtx_builder_(vtx_builder),
+        half_stroke_width_(stroke_width * 0.5f),
+        maximum_join_cosine_(
+            ComputeMaximumJoinCosine(scale, stroke_width * 0.5f)),
+        minimum_miter_cosine_(ComputeMinimumMiterCosine(miter_limit)),
+        join_(join),
+        cap_(cap),
+        scale_(scale),
+        trigs_(trigs) {}
 
   // Half of the allowed distance between the ends of the perpendiculars.
   static constexpr Scalar kJoinPixelThreshold = 0.25f;
@@ -650,6 +671,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
 };
 }  // namespace
 
+// Private for benchmarking and debugging
 std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
     const PathSource& source,
     Scalar stroke_width,
@@ -660,9 +682,9 @@ std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
   std::vector<Point> points(4096);
   PositionWriter vtx_builder(points);
   Tessellator::Trigs trigs(scale * stroke_width * 0.5f);
-  StrokePathSegmentReceiver receiver(vtx_builder, stroke_width, miter_limit,
-                                     stroke_join, stroke_cap, scale, trigs);
-  PathTessellator::PathToStrokedSegments(source, receiver);
+  StrokePathSegmentReceiver::GenerateStrokeVertices(
+      vtx_builder, source, stroke_width, miter_limit, stroke_join, stroke_cap,
+      scale, trigs);
   auto [arena, extra] = vtx_builder.GetUsedSize();
   FML_DCHECK(extra == 0u);
   points.resize(arena);
@@ -724,10 +746,10 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
       renderer.GetTessellator().GetStrokePointCache());
   Tessellator::Trigs trigs = renderer.GetTessellator().GetTrigsForDeviceRadius(
       scale * stroke_width * 0.5f);
-  StrokePathSegmentReceiver receiver(position_writer, stroke_width,
-                                     miter_limit_, stroke_join_, stroke_cap_,
-                                     scale, trigs);
-  PathTessellator::PathToStrokedSegments(flutter::DlPath(path_), receiver);
+  flutter::DlPath source(path_);
+  StrokePathSegmentReceiver::GenerateStrokeVertices(
+      position_writer, source, stroke_width, miter_limit_, stroke_join_,
+      stroke_cap_, scale, trigs);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
   if (!position_writer.HasOversizedBuffer()) {
