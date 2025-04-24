@@ -1180,6 +1180,18 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
                 : null,
       ),
     );
+    if (widget.errorBuilder != null) {
+      // Add an ephemeral listener, allowing the the image stream to be disposed
+      // (which requires having no listeners) while suppressing its errors, as
+      // expected by an app providing an `errorBuilder`. See
+      // https://github.com/flutter/flutter/issues/97077 for reason.
+      if (newStream.completer == null) {
+        newStream.setCompleter(_EmptyImageCompleter());
+      }
+      newStream.completer!.addEphemeralErrorListener((Object exception, StackTrace? stackTrace) {
+        // Intentionally blank.
+      });
+    }
     _updateSourceStream(newStream);
   }
 
@@ -1404,3 +1416,5 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     description.add(DiagnosticsProperty<bool>('wasSynchronouslyLoaded', _wasSynchronouslyLoaded));
   }
 }
+
+class _EmptyImageCompleter extends ImageStreamCompleter {}
