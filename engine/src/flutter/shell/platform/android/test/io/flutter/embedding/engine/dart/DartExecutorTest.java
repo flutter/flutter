@@ -57,7 +57,7 @@ public class DartExecutorTest {
 
     // Verify that DartExecutor sent our message to FlutterJNI.
     verify(fakeFlutterJni, times(1))
-            .dispatchPlatformMessage(eq("fake_channel"), messageCaptor.capture(), anyInt(), anyInt());
+        .dispatchPlatformMessage(eq("fake_channel"), messageCaptor.capture(), anyInt(), anyInt());
 
     ByteBuffer capturedMessage = messageCaptor.getValue();
     assertEquals(testMessage, capturedMessage);
