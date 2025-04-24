@@ -170,7 +170,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
   // |SegmentReceiver|
   void RecordLine(Point p1, Point p2) override {
     if (p2 != p1) {
-      SeparatedVector2 current_perpendicular = ComputePerpendicular(p1, p2);
+      SeparatedVector2 current_perpendicular = PerpendicularFromPoints(p1, p2);
 
       HandlePreviousJoin(current_perpendicular);
       AppendVertices(p2, current_perpendicular);
@@ -209,9 +209,9 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     if (start_direction.has_value() && end_direction.has_value()) {
       // We now know the curve cannot be degenerate.
       SeparatedVector2 start_perpendicular =
-          ComputePerpendicular(-start_direction.value());
+          PerpendicularFromUnitDirection(-start_direction.value());
       SeparatedVector2 end_perpendicular =
-          ComputePerpendicular(end_direction.value());
+          PerpendicularFromUnitDirection(end_direction.value());
 
       // We join the previous segment to this one with a normal join
       // The join will append the perpendicular at the start of this
@@ -227,7 +227,7 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
       // Handle all intermediate curve points up to but not including the end.
       for (int i = 1; i < count; i++) {
         Point cur = curve.Solve(i / count);
-        SeparatedVector2 cur_perpendicular = ComputePerpendicular(prev, cur);
+        SeparatedVector2 cur_perpendicular = PerpendicularFromPoints(prev, cur);
         if (prev_perpendicular.GetAlignment(cur_perpendicular) <
             trigs_[1].cos) {
           // We only connect 2 curved segments if their change in direction
@@ -407,12 +407,13 @@ class StrokePathSegmentReceiver : public PathTessellator::SegmentReceiver {
     return cosine;
   }
 
-  inline SeparatedVector2 ComputePerpendicular(const Point from,
-                                               const Point to) const {
-    return ComputePerpendicular((to - from).Normalize());
+  inline SeparatedVector2 PerpendicularFromPoints(const Point from,
+                                                  const Point to) const {
+    return PerpendicularFromUnitDirection((to - from).Normalize());
   }
 
-  inline SeparatedVector2 ComputePerpendicular(const Vector2 direction) const {
+  inline SeparatedVector2 PerpendicularFromUnitDirection(
+      const Vector2 direction) const {
     return SeparatedVector2(Vector2{-direction.y, direction.x},
                             half_stroke_width_);
   }
