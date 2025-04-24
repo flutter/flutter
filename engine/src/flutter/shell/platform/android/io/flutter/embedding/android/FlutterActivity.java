@@ -809,9 +809,9 @@ public class FlutterActivity extends Activity
   }
 
   /**
-   * @deprecated This method is outdated because it calls {@code setStatusBarColor},
-   * which is deprecated in Android 15 and above.
-   * Consider using the new WindowInsetsController or other Android 15+ APIs for system UI styling.
+   * @deprecated This method is outdated because it calls {@code setStatusBarColor}, which is
+   *     deprecated in Android 15 and above. Consider using the new WindowInsetsController or other
+   *     Android 15+ APIs for system UI styling.
    */
   @Deprecated
   private void configureStatusBarForFullscreenFlutterExperience() {
