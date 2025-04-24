@@ -399,12 +399,6 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   void close({bool inDispose = false});
 
   @protected
-  void dismiss() {
-    assert(_parent == null);
-    Actions.invoke(menuController._context!, const DismissMenuIntent());
-  }
-
-  @protected
   void closeChildren({bool inDispose = false}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
     for (final _RawMenuAnchorBaseMixin child in List<_RawMenuAnchorBaseMixin>.from(
@@ -469,8 +463,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
           if (isOpen)
             DismissIntent: CallbackAction<DismissIntent>(
               onInvoke: (DismissIntent intent) {
-                root.dismiss();
-                return null;
+                menuController.dismiss();
               },
             ),
           DismissMenuIntent: Action<DismissMenuIntent>.overridable(
@@ -842,16 +835,23 @@ class MenuController {
     Actions.invoke(_context!, const CloseChildrenMenuIntent());
   }
 
-  // ignore: use_setters_to_change_properties
-  void _attach(BuildContext context) {
+  void dismiss() {
+    if (_context != null) {
+      Actions.invoke(_context!, const DismissMenuIntent());
+    }
+  }
+
+  void attach(BuildContext context) {
     _context = context;
   }
 
-  void _detach(BuildContext context) {
+  void detach(BuildContext context) {
     if (_context == context) {
       _context = null;
     }
   }
+
+  AnimationStatus animationStatus = AnimationStatus.dismissed;
 
   /// Returns the [MenuController] of the ancestor [RawMenuAnchor] or
   /// [RawMenuAnchorGroup] nearest to the given `context`, if one exists.
@@ -945,21 +945,21 @@ class _AttachMenuControllerState extends State<_AttachMenuController> {
   @override
   void initState() {
     super.initState();
-    widget.controller._attach(context);
+    widget.controller.attach(context);
   }
 
   @override
   void didUpdateWidget(_AttachMenuController oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      oldWidget.controller._detach(context);
-      widget.controller._attach(context);
+      oldWidget.controller.detach(context);
+      widget.controller.attach(context);
     }
   }
 
   @override
   void dispose() {
-    widget.controller._detach(context);
+    widget.controller.detach(context);
     super.dispose();
   }
 
