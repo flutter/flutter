@@ -19,6 +19,7 @@
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/platform_message_handler.h"
+#include "impeller/core/runtime_types.h"
 #include "impeller/runtime_stage/runtime_stage.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"
@@ -44,20 +45,21 @@ class UIDartState : public tonic::DartState {
   struct Context {
     explicit Context(const TaskRunners& task_runners);
 
-    Context(const TaskRunners& task_runners,
-            fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
-            fml::WeakPtr<IOManager> io_manager,
-            fml::RefPtr<SkiaUnrefQueue> unref_queue,
-            fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
-            fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
-                image_generator_registry,
-            std::string advisory_script_uri,
-            std::string advisory_script_entrypoint,
-            bool deterministic_rendering_enabled,
-            std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
-            bool enable_impeller,
-            bool enable_flutter_gpu,
-            impeller::RuntimeStageBackend runtime_stage_backend);
+    Context(
+        const TaskRunners& task_runners,
+        fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
+        fml::WeakPtr<IOManager> io_manager,
+        fml::RefPtr<SkiaUnrefQueue> unref_queue,
+        fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+        fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+            image_generator_registry,
+        std::string advisory_script_uri,
+        std::string advisory_script_entrypoint,
+        bool deterministic_rendering_enabled,
+        std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner,
+        std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend,
+        bool enable_impeller,
+        bool enable_flutter_gpu);
 
     /// The task runners used by the shell hosting this runtime controller. This
     /// may be used by the isolate to scheduled asynchronous texture uploads or
@@ -101,14 +103,14 @@ class UIDartState : public tonic::DartState {
     /// of shared worker threads.
     std::shared_ptr<fml::ConcurrentTaskRunner> concurrent_task_runner;
 
+    /// The runtime stage backend for fragment shaders.
+    std::shared_future<impeller::RuntimeStageBackend> runtime_stage_backend;
+
     /// Whether Impeller is enabled or not.
     bool enable_impeller = false;
 
     /// Whether flutter_gpu is enabled or not.
     bool enable_flutter_gpu = false;
-
-    /// The expected backend for runtime stage shaders.
-    impeller::RuntimeStageBackend runtime_stage_backend;
   };
 
   Dart_Port main_port() const { return main_port_; }
@@ -180,7 +182,7 @@ class UIDartState : public tonic::DartState {
   /// Whether Flutter GPU is enabled for this application.
   bool IsFlutterGPUEnabled() const;
 
-  /// The expected type for runtime stage shaders.
+  /// The runtime stage to use for fragment shader.s
   impeller::RuntimeStageBackend GetRuntimeStageBackend() const;
 
   virtual Dart_Isolate CreatePlatformIsolate(Dart_Handle entry_point,
