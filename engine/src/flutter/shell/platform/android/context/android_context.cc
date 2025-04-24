@@ -30,9 +30,7 @@ bool AndroidContext::IsValid() const {
 
 void AndroidContext::SetMainSkiaContext(
     const sk_sp<GrDirectContext>& main_context) {
-#if !SLIMPELLER
-  main_context_ = main_context;
-#endif  // !SLIMPELLER
+  NOT_SLIMPELLER(main_context_ = main_context);
 }
 
 sk_sp<GrDirectContext> AndroidContext::GetMainSkiaContext() const {

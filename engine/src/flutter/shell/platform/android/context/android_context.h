@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_CONTEXT_ANDROID_CONTEXT_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_CONTEXT_ANDROID_CONTEXT_H_
 
+#include "flutter/common/macros.h"
 #include "flutter/fml/macros.h"
 #include "flutter/impeller/base/flags.h"
 #include "flutter/impeller/renderer/context.h"
@@ -80,10 +81,7 @@ class AndroidContext {
   const AndroidRenderingAPI rendering_api_;
 
   // This is the Skia context used for on-screen rendering.
-#if !SLIMPELLER
-  sk_sp<GrDirectContext> main_context_;
-#endif  // !SLIMPELLER
-
+  NOT_SLIMPELLER(sk_sp<GrDirectContext> main_context_);
   std::shared_ptr<impeller::Context> impeller_context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidContext);
