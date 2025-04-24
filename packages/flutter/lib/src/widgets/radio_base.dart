@@ -11,12 +11,6 @@ import 'ticker_provider.dart';
 import 'toggleable.dart';
 import 'widget_state.dart';
 
-// Examples can assume:
-// late BuildContext context;
-// enum SingingCharacter { lafayette }
-// late SingingCharacter? _character;
-// late StateSetter setState;
-
 /// Signature for [RadioBase.painterGetter]
 ///
 /// The getter can use `state` to configure the painter before returning.
@@ -143,6 +137,9 @@ class RadioBase<T> extends StatefulWidget {
   final bool autofocus;
 
   /// The getter for the painter that used for painting the radio button.
+  ///
+  /// This getter is used when the build method is called. One is expected
+  /// to use the input `state` to update the painter before returning.
   final RadioPainterGetter painterGetter;
 
   bool get _selected => value == groupValue;
