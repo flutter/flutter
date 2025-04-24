@@ -406,15 +406,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   @mustCallSuper
   void handleViewFocusChanged(ui.ViewFocusEvent event) {}
 
-  /// Called when support for the system context menu changes.
-  ///
-  /// See also:
-  ///
-  ///  * [MediaQuery.supportsShowingSystemContextMenu], which provides access to
-  ///    this value.
-  @protected
-  void handleSupportsShowingSystemContextMenuChanged() {}
-
   Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
     final String method = methodCall.method;
     switch (method) {
