@@ -239,6 +239,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   auto impeller_context_future =
       std::make_shared<impeller::ImpellerContextFuture>(
           impeller_context_promise.get_future());
+  shell->impeller_context_future_ = impeller_context_future;
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetRasterTaskRunner(),
@@ -541,6 +542,11 @@ Shell::~Shell() {
 #endif  //  !SLIMPELLER
 
   vm_->GetServiceProtocol()->RemoveHandler(this);
+  if (impeller_context_future_) {
+    // Ensure impeller::Context initialization has completed before the shell
+    // is torn down.
+    impeller_context_future_->GetContext();
+  }
 
   fml::AutoResetWaitableEvent platiso_latch, ui_latch, gpu_latch,
       platform_latch, io_latch;
