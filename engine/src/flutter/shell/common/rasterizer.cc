@@ -20,7 +20,6 @@
 #include "fml/closure.h"
 #include "fml/make_copyable.h"
 #include "fml/synchronization/waitable_event.h"
-#include "impeller/renderer/context.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkData.h"
 #include "third_party/skia/include/core/SkImage.h"
@@ -74,7 +73,7 @@ fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> Rasterizer::GetSnapshotDelegate()
 }
 
 void Rasterizer::SetImpellerContext(
-    std::shared_ptr<impeller::ImpellerContextFuture> impeller_context) {
+    std::weak_ptr<impeller::Context> impeller_context) {
   impeller_context_ = std::move(impeller_context);
 }
 

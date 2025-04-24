@@ -39,8 +39,7 @@ ShellIOManager::ShellIOManager(
     sk_sp<GrDirectContext> resource_context,
     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
     fml::RefPtr<fml::TaskRunner> unref_queue_task_runner,
-    std::shared_ptr<impeller::ImpellerContextFuture> impeller_context,
-    bool impeller_enabled,
+    std::shared_ptr<impeller::Context> impeller_context,
     fml::TimeDelta unref_queue_drain_delay)
     : resource_context_(std::move(resource_context)),
       resource_context_weak_factory_(
@@ -52,11 +51,11 @@ ShellIOManager::ShellIOManager(
           std::move(unref_queue_task_runner),
           unref_queue_drain_delay,
           resource_context_,
-          /*drain_immediate=*/impeller_enabled)),
+          /*drain_immediate=*/!!impeller_context)),
       is_gpu_disabled_sync_switch_(std::move(is_gpu_disabled_sync_switch)),
       impeller_context_(std::move(impeller_context)),
       weak_factory_(this) {
-  if (!resource_context_ && !impeller_enabled) {
+  if (!resource_context_ && !impeller_context) {
 #ifndef OS_FUCHSIA
     FML_DLOG(WARNING) << "The IO manager was initialized without a resource "
                          "context. Async texture uploads will be disabled. "
@@ -122,7 +121,7 @@ ShellIOManager::GetIsGpuDisabledSyncSwitch() {
 
 // |IOManager|
 std::shared_ptr<impeller::Context> ShellIOManager::GetImpellerContext() const {
-  return impeller_context_->GetContext();
+  return impeller_context_;
 }
 
 }  // namespace flutter
