@@ -1609,6 +1609,36 @@ void main() {
     final DefaultTextStyle textStyle = DefaultTextStyle.of(tester.element(find.text('Title')));
     expect(textStyle.style.color, theme.textTheme.titleLarge!.color);
   });
+
+  testWidgets('FlexibleSpaceBar background when collapsed uses collapsedOpacity', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: FlexibleSpaceBarSettings(
+            currentExtent: 56.0,
+            minExtent: 56.0,
+            maxExtent: 200.0,
+            toolbarOpacity: 1.0,
+            child: FlexibleSpaceBar(
+              background: Container(color: Colors.red),
+              collapsedOpacity: 0.5,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final dynamic backgroundOpacity = tester.firstWidget(
+      find.byWidgetPredicate(
+        (Widget widget) => widget.runtimeType.toString() == '_FlexibleSpaceHeaderOpacity',
+      ),
+    );
+    // accessing private type member.
+    // ignore: avoid_dynamic_calls
+    expect(backgroundOpacity.opacity, 0.5);
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
