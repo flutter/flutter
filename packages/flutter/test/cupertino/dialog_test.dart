@@ -1779,8 +1779,14 @@ void main() {
 
     await tester.tap(find.text('Custom BarrierColor'));
     await tester.pumpAndSettle();
-
     expect(tester.widget<ModalBarrier>(find.byType(ModalBarrier).last).color, equals(Colors.red));
+
+    await tester.tap(find.text('No'));
+    await tester.pumpAndSettle();
+    expect(
+      find.byWidgetPredicate((Widget widget) => widget is ModalBarrier && widget.color == Colors.red),
+      findsNothing,
+    );
   });
 
   testWidgets('CupertinoDialogRoute is state restorable', (WidgetTester tester) async {
