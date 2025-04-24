@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_SOURCE_VK_H_
 
 #include "flutter/fml/status.h"
+#include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/barrier_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -19,7 +20,6 @@ namespace impeller {
 struct FramebufferAndRenderPass {
   SharedHandleVK<vk::Framebuffer> framebuffer = nullptr;
   SharedHandleVK<vk::RenderPass> render_pass = nullptr;
-  SampleCount sample_count = SampleCount::kCount1;
 };
 
 //------------------------------------------------------------------------------
@@ -132,17 +132,21 @@ class TextureSourceVK {
 
   // These methods should only be used by render_pass_vk.h
 
-  /// Store the last framebuffer object used with this texture.
+  /// Store the last framebuffer and render pass object used with this texture.
   ///
-  /// This field is only set if this texture is used as the resolve texture
+  /// This method is only called if this texture is used as the resolve texture
   /// of a render pass. By construction, this framebuffer should be compatible
   /// with any future render passes.
-  void SetCachedFrameData(const FramebufferAndRenderPass& data);
+  void SetCachedFrameData(const FramebufferAndRenderPass& data,
+                          SampleCount sample_count);
 
-  /// Retrieve the last framebuffer object used with this texture.
+  /// Retrieve the last framebuffer and render pass object used with this
+  /// texture for a given sample count.
   ///
-  /// May be nullptr if no previous framebuffer existed.
-  const FramebufferAndRenderPass& GetCachedFrameData() const;
+  /// An empty FramebufferAndRenderPass is returned if there is no cached data
+  /// for a particular sample count.
+  const FramebufferAndRenderPass& GetCachedFrameData(
+      SampleCount sample_count) const;
 
  protected:
   const TextureDescriptor desc_;
@@ -150,7 +154,7 @@ class TextureSourceVK {
   explicit TextureSourceVK(TextureDescriptor desc);
 
  private:
-  FramebufferAndRenderPass frame_data_ = {};
+  std::array<FramebufferAndRenderPass, 2> frame_data_;
   mutable vk::ImageLayout layout_ = vk::ImageLayout::eUndefined;
 };
 

@@ -150,17 +150,13 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   SampleCount sample_count =
       color_image_vk_->GetTextureDescriptor().sample_count;
   if (resolve_image_vk_) {
-    frame_data = TextureVK::Cast(*resolve_image_vk_).GetCachedFrameData();
+    frame_data =
+        TextureVK::Cast(*resolve_image_vk_).GetCachedFrameData(sample_count);
     is_swapchain = TextureVK::Cast(*resolve_image_vk_).IsSwapchainImage();
   } else {
-    frame_data = TextureVK::Cast(*color_image_vk_).GetCachedFrameData();
+    frame_data =
+        TextureVK::Cast(*color_image_vk_).GetCachedFrameData(sample_count);
     is_swapchain = TextureVK::Cast(*color_image_vk_).IsSwapchainImage();
-  }
-  // If the sample count changed from the last cache usage, clear the
-  // cached framebuffer and render pass.
-  if (sample_count != frame_data.sample_count) {
-    frame_data.framebuffer = nullptr;
-    frame_data.render_pass = nullptr;
   }
 
   const auto& target_size = render_target_.GetRenderTargetSize();
@@ -190,12 +186,13 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
 
   frame_data.framebuffer = framebuffer;
   frame_data.render_pass = render_pass_;
-  frame_data.sample_count = sample_count;
 
   if (resolve_image_vk_) {
-    TextureVK::Cast(*resolve_image_vk_).SetCachedFrameData(frame_data);
+    TextureVK::Cast(*resolve_image_vk_)
+        .SetCachedFrameData(frame_data, sample_count);
   } else {
-    TextureVK::Cast(*color_image_vk_).SetCachedFrameData(frame_data);
+    TextureVK::Cast(*color_image_vk_)
+        .SetCachedFrameData(frame_data, sample_count);
   }
 
   // If the resolve image exists and has mipmaps, transition mip levels besides

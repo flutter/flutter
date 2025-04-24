@@ -58,12 +58,14 @@ fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   return {};
 }
 
-void TextureSourceVK::SetCachedFrameData(const FramebufferAndRenderPass& data) {
-  frame_data_ = data;
+void TextureSourceVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
+                                         SampleCount sample_count) {
+  frame_data_[static_cast<int>(sample_count) / 4] = data;
 }
 
-const FramebufferAndRenderPass& TextureSourceVK::GetCachedFrameData() const {
-  return frame_data_;
+const FramebufferAndRenderPass& TextureSourceVK::GetCachedFrameData(
+    SampleCount sample_count) const {
+  return frame_data_[static_cast<int>(sample_count) / 4];
 }
 
 }  // namespace impeller

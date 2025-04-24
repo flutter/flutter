@@ -49,17 +49,21 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   std::shared_ptr<SamplerVK> GetImmutableSamplerVariant(
       const SamplerVK& sampler) const;
 
-  /// Store the last framebuffer object used with this texture.
+  /// Store the last framebuffer and render pass object used with this texture.
   ///
-  /// This field is only set if this texture is used as the resolve texture
+  /// This method is only called if this texture is used as the resolve texture
   /// of a render pass. By construction, this framebuffer should be compatible
   /// with any future render passes.
-  void SetCachedFrameData(const FramebufferAndRenderPass& data);
+  void SetCachedFrameData(const FramebufferAndRenderPass& data,
+                          SampleCount sample_count);
 
-  /// Retrieve the last framebuffer object used with this texture.
+  /// Retrieve the last framebuffer and render pass object used with this
+  /// texture.
   ///
-  /// May be nullptr if no previous framebuffer existed.
-  const FramebufferAndRenderPass& GetCachedFrameData() const;
+  /// An empty FramebufferAndRenderPass is returned if there is no cached data
+  /// for a particular sample count.
+  const FramebufferAndRenderPass& GetCachedFrameData(
+      SampleCount sample_count) const;
 
  private:
   std::weak_ptr<Context> context_;
