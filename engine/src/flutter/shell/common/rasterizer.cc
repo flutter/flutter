@@ -485,8 +485,11 @@ Rasterizer::DoDrawResult Rasterizer::DoDraw(
   }
 
 #if !SLIMPELLER
-  PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
-  persistent_cache->ResetStoredNewShaders();
+  PersistentCache* persistent_cache = nullptr;
+  if (!delegate_.GetSettings().enable_impeller) {
+    persistent_cache = PersistentCache::GetCacheForProcess();
+    persistent_cache->ResetStoredNewShaders();
+  }
 #endif  //  !SLIMPELLER
 
   DoDrawResult result =
@@ -498,7 +501,7 @@ Rasterizer::DoDrawResult Rasterizer::DoDraw(
   }
 
 #if !SLIMPELLER
-  if (persistent_cache->IsDumpingSkp() &&
+  if (persistent_cache && persistent_cache->IsDumpingSkp() &&
       persistent_cache->StoredNewShaders()) {
     auto screenshot =
         ScreenshotLastLayerTree(ScreenshotType::SkiaPicture, false);

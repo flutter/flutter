@@ -122,10 +122,12 @@ void PerformInitializationTasks(Settings& settings) {
       fml::tracing::TraceSetAllowlist(settings.trace_allowlist);
     }
 
-    if (!settings.skia_deterministic_rendering_on_cpu) {
-      SkGraphics::Init();
-    } else {
-      FML_DLOG(INFO) << "Skia deterministic rendering is enabled.";
+    if (!settings.enable_impeller) {
+      if (!settings.skia_deterministic_rendering_on_cpu) {
+        SkGraphics::Init();
+      } else {
+        FML_DLOG(INFO) << "Skia deterministic rendering is enabled.";
+      }
     }
     RegisterCodecsWithSkia();
 
@@ -141,7 +143,9 @@ void PerformInitializationTasks(Settings& settings) {
   });
 
 #if !SLIMPELLER
-  PersistentCache::SetCacheSkSL(settings.cache_sksl);
+  if (!settings.enable_impeller) {
+    PersistentCache::SetCacheSkSL(settings.cache_sksl);
+  }
 #endif  //  !SLIMPELLER
 }
 
@@ -507,8 +511,10 @@ Shell::Shell(DartVMRef vm,
 
 Shell::~Shell() {
 #if !SLIMPELLER
-  PersistentCache::GetCacheForProcess()->RemoveWorkerTaskRunner(
-      task_runners_.GetIOTaskRunner());
+  if (settings_.enable_impeller) {
+    PersistentCache::GetCacheForProcess()->RemoveWorkerTaskRunner(
+        task_runners_.GetIOTaskRunner());
+  }
 #endif  //  !SLIMPELLER
 
   vm_->GetServiceProtocol()->RemoveHandler(this);
@@ -802,14 +808,16 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
   is_set_up_ = true;
 
 #if !SLIMPELLER
-  PersistentCache::GetCacheForProcess()->AddWorkerTaskRunner(
-      task_runners_.GetIOTaskRunner());
+  if (!settings_.enable_impeller) {
+    PersistentCache::GetCacheForProcess()->AddWorkerTaskRunner(
+        task_runners_.GetIOTaskRunner());
 
-  PersistentCache::GetCacheForProcess()->SetIsDumpingSkp(
-      settings_.dump_skp_on_shader_compilation);
+    PersistentCache::GetCacheForProcess()->SetIsDumpingSkp(
+        settings_.dump_skp_on_shader_compilation);
 
-  if (settings_.purge_persistent_cache) {
-    PersistentCache::GetCacheForProcess()->Purge();
+    if (settings_.purge_persistent_cache) {
+      PersistentCache::GetCacheForProcess()->Purge();
+    }
   }
 #endif  //  !SLIMPELLER
 
