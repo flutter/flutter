@@ -2519,6 +2519,10 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   return _activeView;
 }
 
+- (void)reset {
+  [self hideTextInput];
+}
+
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSString* method = call.method;
   id args = call.arguments;
