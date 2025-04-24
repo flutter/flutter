@@ -798,7 +798,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   );
   final Map<String, Object> context = <String, Object>{
     'os': 'ios',
-    'deploymentTarget': '12.0',
+    'deploymentTarget': '13.0',
     'framework': 'Flutter',
     'methodChannelPlugins': iosPlugins,
   };
