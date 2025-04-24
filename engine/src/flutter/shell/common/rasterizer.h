@@ -45,6 +45,7 @@
 namespace impeller {
 class Context;
 class AiksContext;
+class ImpellerContextFuture;
 }  // namespace impeller
 #endif  // !IMPELLER_SUPPORTS_RENDERING
 
