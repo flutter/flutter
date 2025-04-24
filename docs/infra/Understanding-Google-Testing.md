@@ -33,6 +33,8 @@ Google employees can view the test output and provide feedback for next steps.
 In order to track pull requests blocked on Google testing for resolution, have your reviewer add yours to
 the [Github testing queue project](https://github.com/orgs/flutter/projects/200).
 
+Pull requests in the queue are addressed in a FIFO fashion. The project will display where your change is in the queue.
+
 For full guidance on presubmit failures, see the [Fix failing checks](../contributing/testing/Fix-failing-checks.md) doc.
 
 ### There's goldens failures on my PR, but those are expected
@@ -55,7 +57,8 @@ Googlers can go to http://frob and override the results.
 
 ## Where can I get help?
 
-<!-- TODO me: Sync with Matan on the right escalation path here -->
+Work with your reviewer to resolve blocked changes. If there is an infrastructure issue related to Google testing,
+an issue should be filed with the label "team-infra". Confirm with your reviewer before filing one.
 
 GitHub issues with the label "team-infra" are triaged weekly.
 
