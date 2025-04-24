@@ -345,7 +345,7 @@ abstract class SearchDelegate<T> {
   }
 
   /// Closes the search page and returns to the underlying route whitout result.
-  void pop(BuildContext context) {
+  void _pop(BuildContext context) {
     _currentBody = null;
     _focusNode?.unfocus();
     Navigator.of(context)
@@ -519,7 +519,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     onKeyEvent: (FocusNode node, KeyEvent event) {
       // When the user presses the escape key, close the search page.
       if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-        widget.delegate.pop(context);
+        widget.delegate._pop(context);
         return KeyEventResult.handled;
       }
       return KeyEventResult.ignored;
