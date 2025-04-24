@@ -2989,9 +2989,10 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     // Only the cupertino override theme part will be resolved, except for the
     // text theme.
     // If the color comes from the material theme it's not resolved.
+    final CupertinoTextThemeData resolvedTextTheme = super.textTheme.resolveFrom(context);
     return MaterialBasedCupertinoThemeData._(
       _materialTheme,
-      _cupertinoOverrideTheme.copyWith(textTheme: super.textTheme).resolveFrom(context),
+      _cupertinoOverrideTheme.resolveFrom(context).copyWith(textTheme: resolvedTextTheme),
     );
   }
 }
