@@ -1115,7 +1115,7 @@ def run_impeller_golden_tests(build_dir: str, require_skia_gold: bool = False):
         raise RuntimeError(
             """
 The GOLDCTL environment variable is not set. This is required for Skia Gold tests.
-See https://github.com/flutter/engine/tree/main/testing/skia_gold_client#configuring-ci
+See flutter/tree/main/engine/src/flutter/testing/skia_gold_client#configuring-ci
 for more information.
 """
         )

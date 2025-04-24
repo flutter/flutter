@@ -84,7 +84,7 @@ _See also: [What should I work on?](What-should-I-work-on.md)_
 
 ## Tests
 
-Every change in the flutter/engine, flutter/flutter, and flutter/packages repos
+Every change in the flutter/flutter and flutter/packages repos
 must be tested; consider using the code coverage tools to check that all your
 new code is covered by tests (see [Test coverage for package:flutter](./testing/Test-coverage-for-package-flutter.md)).
 
@@ -369,9 +369,9 @@ behavior, reverting an [auto-roller](../infra/Autorollers.md)
 (e.g., an engine-roller commit like https://github.com/flutter/flutter/commit/fdcb57b69eff2162e9aead6dec0f8058788e7608)
 commit could cause some complications:
 
-1. The auto-roller commit usually include multiple commits of the source repo (e.g., engine-roller
-commit includes multiple commits of https://github.com/flutter/engine). This can be applied
-recursively as the engine-roller commit includes a dart-roller commit, or a skia-roller commit.
+1. The auto-roller commit usually include multiple commits of the source repo (e.g., skia-roller
+commit includes multiple commits of https://github.com/google/skia). This can be applied
+recursively as some rollers might include a commit from another roller.
 Therefore, a roller commit could actually include a ton of leaf-level commits, which makes it
 really hard to triage which leaf commit actually caused the regression.
 
