@@ -15,7 +15,7 @@ import 'colors.dart';
 import 'theme.dart';
 import 'thumb_painter.dart';
 
-typedef _SliderValueChanged = void Function(double value, bool isLargeDelta)?;
+typedef _SliderValueChanged = void Function(double value, bool isFastDrag)?;
 
 /// Defines the threshold for determining a "fast" slider drag.
 ///
@@ -231,14 +231,14 @@ class CupertinoSlider extends StatefulWidget {
 }
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
-  void _handleChanged(double value, bool isLargeDelta) {
+  void _handleChanged(double value, bool isFastDrag) {
     assert(widget.onChanged != null);
     final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
     final bool isAtEdge = lerpValue == widget.max || lerpValue == widget.min;
 
     if (lerpValue != widget.value) {
       if (isAtEdge) {
-        _emitHapticFeedback(isLargeDelta);
+        _emitHapticFeedback(isFastDrag);
       }
       widget.onChanged!(lerpValue);
     }
@@ -254,10 +254,10 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     widget.onChangeEnd!(lerpDouble(widget.min, widget.max, value)!);
   }
 
-  void _emitHapticFeedback(bool isLargeDelta) {
+  void _emitHapticFeedback(bool isFastDrag) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
-        if (isLargeDelta) {
+        if (isFastDrag) {
           HapticFeedback.mediumImpact();
         } else {
           HapticFeedback.selectionClick();
