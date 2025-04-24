@@ -239,7 +239,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   auto impeller_context_future =
       std::make_shared<impeller::ImpellerContextFuture>(
           impeller_context_promise.get_future());
-  shell->impeller_context_future_ = impeller_context_future;
 
   fml::TaskRunner::RunNowOrPostTask(
       task_runners.GetRasterTaskRunner(),
@@ -306,28 +305,28 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
   // shell->Setup(std::move(platform_view), ...) at the end.
   fml::TaskRunner::RunNowOrPostTask(
       io_task_runner,
-      [&io_manager_promise,                                                //
-       &weak_io_manager_promise,                                           //
-       &parent_io_manager,                                                 //
-       &unref_queue_promise,                                               //
-       platform_view_ptr,                                                  //
-       io_task_runner,                                                     //
+      [&io_manager_promise,       //
+       &weak_io_manager_promise,  //
+                                  //   &parent_io_manager, //
+       &unref_queue_promise,      //
+       platform_view_ptr,         //
+       io_task_runner,            //
        is_backgrounded_sync_switch = shell->GetIsGpuDisabledSyncSwitch(),  //
        impeller_enabled = settings.enable_impeller,                        //
        impeller_context_future]() {
         TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
         std::shared_ptr<ShellIOManager> io_manager;
-        if (parent_io_manager) {
-          io_manager = parent_io_manager;
-        } else {
-          io_manager = std::make_shared<ShellIOManager>(
-              platform_view_ptr->CreateResourceContext(),  // resource context
-              is_backgrounded_sync_switch,                 // sync switch
-              io_task_runner,           // unref queue task runner
-              impeller_context_future,  // impeller context
-              impeller_enabled          //
-          );
-        }
+        // if (parent_io_manager) {
+        //   io_manager = parent_io_manager;
+        // } else {
+        io_manager = std::make_shared<ShellIOManager>(
+            platform_view_ptr->CreateResourceContext(),  // resource context
+            is_backgrounded_sync_switch,                 // sync switch
+            io_task_runner,           // unref queue task runner
+            impeller_context_future,  // impeller context
+            impeller_enabled          //
+        );
+        // }
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
         io_manager_promise.set_value(io_manager);
@@ -442,7 +441,8 @@ std::unique_ptr<Shell> Shell::CreateWithSnapshot(
                                             std::move(isolate_snapshot),      //
                                             on_create_platform_view,          //
                                             on_create_rasterizer,             //
-                                            on_create_engine, is_gpu_disabled);
+                                            on_create_engine,                 //
+                                            is_gpu_disabled);
         latch.Signal();
       }));
   latch.Wait();
@@ -542,11 +542,6 @@ Shell::~Shell() {
 #endif  //  !SLIMPELLER
 
   vm_->GetServiceProtocol()->RemoveHandler(this);
-  if (impeller_context_future_) {
-    // Ensure impeller::Context initialization has completed before the shell
-    // is torn down.
-    impeller_context_future_->GetContext();
-  }
 
   fml::AutoResetWaitableEvent platiso_latch, ui_latch, gpu_latch,
       platform_latch, io_latch;

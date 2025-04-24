@@ -470,7 +470,6 @@ class Shell final : public PlatformView::Delegate,
   std::shared_ptr<ShellIOManager> io_manager_;   // on IO task runner
   std::shared_ptr<fml::SyncSwitch> is_gpu_disabled_sync_switch_;
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
-  std::shared_ptr<impeller::ImpellerContextFuture> impeller_context_future_;
   std::atomic<bool> route_messages_through_platform_thread_ = false;
 
   fml::TaskRunnerAffineWeakPtr<Engine>
