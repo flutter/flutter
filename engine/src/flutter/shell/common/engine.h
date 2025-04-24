@@ -406,8 +406,8 @@ class Engine final : public RuntimeDelegate, PointerDataDispatcher::Delegate {
          const fml::RefPtr<SkiaUnrefQueue>& unref_queue,
          fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate,
          const std::shared_ptr<fml::SyncSwitch>& gpu_disabled_switch,
-         impeller::RuntimeStageBackend runtime_stage_type =
-             impeller::RuntimeStageBackend::kSkSL);
+         const std::shared_future<impeller::RuntimeStageBackend>&
+             runtime_stage_backend);
 
   //----------------------------------------------------------------------------
   /// @brief      Create a Engine that shares as many resources as
