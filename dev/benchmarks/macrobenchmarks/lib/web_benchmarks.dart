@@ -118,7 +118,7 @@ Future<void> main(List<String> args) async {
 
 /// Shared entrypoint used for DDC, which runs the macrobenchmarks server on a
 /// separate port.
-/// TODO(markzipan): Use `main` in `'web_benchmarks.dart` when Flutter Web supports the `--dart-entrypoint-args` flag.
+// TODO(markzipan): Use `main` in `'web_benchmarks.dart` when Flutter Web supports the `--dart-entrypoint-args` flag.
 // ignore: unreachable_from_main
 Future<void> sharedMain(List<String> args) {
   return main(args);
