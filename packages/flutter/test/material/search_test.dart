@@ -144,12 +144,12 @@ void main() {
 
     await tester.pumpWidget(TestHomePage(delegate: delegate, results: selectedResults));
 
-    // We are on the homepage
+    // We are on the homepage.
     expect(find.text('HomeBody'), findsOneWidget);
     expect(find.text('HomeTitle'), findsOneWidget);
     expect(find.text('Suggestions'), findsNothing);
 
-    // Open search
+    // Open search.
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
@@ -158,18 +158,18 @@ void main() {
     expect(find.text('Suggestions'), findsOneWidget);
     expect(find.text('Bottom'), findsOneWidget);
 
-    // Simulate escape button
+    // Simulate escape button.
     await simulateKeyDownEvent(LogicalKeyboardKey.escape, platform: 'windows');
     await tester.pumpAndSettle();
 
     expect(selectedResults, <String?>[null]);
 
-    // We are on the homepage again
+    // We are on the homepage again.
     expect(find.text('HomeBody'), findsOneWidget);
     expect(find.text('HomeTitle'), findsOneWidget);
     expect(find.text('Suggestions'), findsNothing);
 
-    // Open search again
+    // Open search again.
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
 
