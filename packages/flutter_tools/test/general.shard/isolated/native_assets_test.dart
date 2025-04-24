@@ -60,14 +60,8 @@ void main() {
       final File directSoFile = environment.projectDir.childFile('direct.so');
       directSoFile.writeAsBytesSync(<int>[]);
 
-      CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file]) => CodeAsset(
-        package: 'bar',
-        name: name,
-        linkMode: linkMode,
-        os: OS.linux,
-        architecture: Architecture.x64,
-        file: file,
-      );
+      CodeAsset makeCodeAsset(String name, LinkMode linkMode, [Uri? file]) =>
+          CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
 
       final Map<String, String> environmentDefines = <String, String>{
         kBuildMode: BuildMode.release.cliName,
@@ -217,14 +211,8 @@ void main() {
       final File linkedSoFile = environment.projectDir.childFile('linked.so');
       linkedSoFile.writeAsBytesSync(<int>[]);
 
-      CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode) => CodeAsset(
-        package: 'bar',
-        name: name,
-        linkMode: linkMode,
-        os: OS.linux,
-        architecture: Architecture.x64,
-        file: file,
-      );
+      CodeAsset makeCodeAsset(String name, Uri file, LinkMode linkMode) =>
+          CodeAsset(package: 'bar', name: name, linkMode: linkMode, file: file);
 
       final DartBuildResult result = await runFlutterSpecificDartBuild(
         environmentDefines: <String, String>{

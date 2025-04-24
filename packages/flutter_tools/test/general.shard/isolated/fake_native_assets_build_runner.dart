@@ -46,7 +46,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
             ..setupShared(
               packageRoot: Uri.parse('$package/'),
               packageName: package,
-              outputDirectory: Uri.parse('build-out-dir'),
               outputDirectoryShared: Uri.parse('build-out-dir-shared'),
               outputFile: Uri.file('output.json'),
             )
@@ -76,7 +75,6 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
             ..setupShared(
               packageRoot: Uri.parse('$package/'),
               packageName: package,
-              outputDirectory: Uri.parse('build-out-dir'),
               outputDirectoryShared: Uri.parse('build-out-dir-shared'),
               outputFile: Uri.file('output.json'),
             )
