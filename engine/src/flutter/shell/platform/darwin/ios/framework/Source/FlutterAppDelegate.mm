@@ -357,8 +357,12 @@ static NSString* const kRestorationStateAppModificationKey = @"mod-date";
                                         sessionRole:connectingSceneSession.role];
     config.sceneClass = [UIWindowScene class];
     config.delegateClass = [FlutterAppDelegate class];
-    if ([[NSBundle mainBundle] pathForResource:@"Main" ofType:@"storyboardc"]) {
-      UIStoryboard* storyboard = [UIStoryboard storyboardWithName:@"Main"
+
+    NSString* mainStoryboard =
+        [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIMainStoryboardFile"];
+
+    if (mainStoryboard) {
+      UIStoryboard* storyboard = [UIStoryboard storyboardWithName:mainStoryboard
                                                            bundle:[NSBundle mainBundle]];
       config.storyboard = storyboard;
     }
