@@ -50,7 +50,8 @@ TEST_F(ShellIOManagerTest,
     gl_surface = std::make_unique<TestGLSurface>(SkISize::Make(1, 1));
     io_manager = std::make_unique<ShellIOManager>(
         gl_surface->CreateGrContext(), std::make_shared<fml::SyncSwitch>(),
-        runners.GetIOTaskRunner(), promise.get_future(),
+        runners.GetIOTaskRunner(),
+        std::make_shared<impeller::ImpellerContextFuture>(promise.get_future()),
         /*enable_impeller=*/false, fml::TimeDelta::FromMilliseconds(0));
   });
 
