@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -74,17 +76,11 @@ void main() {
     return results;
   }
 
-  Finder findMenuBarItemLabels() {
-    return find.byWidgetPredicate(
-      (Widget widget) => widget.runtimeType.toString() == '_MenuItemLabel',
-    );
-  }
-
   // Finds the mnemonic associated with the menu item that has the given label.
   Finder findMnemonic(String label) {
     return find
         .descendant(
-          of: find.ancestor(of: find.text(label), matching: findMenuBarItemLabels()),
+          of: find.ancestor(of: find.text(label), matching: find.byType(MenuItemButton)),
           matching: find.byType(Text),
         )
         .last;
@@ -220,10 +216,6 @@ void main() {
     await tester.tap(find.text(TestMenu.mainMenu1.label));
     await tester.pump();
 
-    expect(
-      tester.getRect(find.byType(MenuBar)),
-      equals(const Rect.fromLTRB(145.0, 0.0, 655.0, 48.0)),
-    );
     expect(
       tester.getRect(find.byType(MenuBar)),
       equals(const Rect.fromLTRB(145.0, 0.0, 655.0, 48.0)),
@@ -1361,6 +1353,7 @@ void main() {
         ),
       );
     });
+
     testWidgets('menus can be traversed multiple times', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/150334
       await tester.pumpWidget(
@@ -1368,10 +1361,13 @@ void main() {
           home: Material(
             child: Column(
               children: <Widget>[
-                MenuItemButton(
-                  autofocus: true,
-                  onPressed: () {},
-                  child: const Text('External Focus'),
+                Semantics(
+                  role: SemanticsRole.menu,
+                  child: MenuItemButton(
+                    autofocus: true,
+                    onPressed: () {},
+                    child: const Text('External Focus'),
+                  ),
                 ),
                 MenuBar(
                   controller: controller,
@@ -3125,10 +3121,14 @@ void main() {
           home: Scaffold(
             body: SizedBox(
               width: 200,
-              child: MenuItemButton(
-                overflowAxis: Axis.vertical,
-                onPressed: () {},
-                child: const Text('MenuItem Button does not overflow when child is long'),
+              // This is added because a menu item must be a child of a menu or menu bar.
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: MenuItemButton(
+                  overflowAxis: Axis.vertical,
+                  onPressed: () {},
+                  child: const Text('MenuItem Button does not overflow when child is long'),
+                ),
               ),
             ),
           ),
@@ -3145,10 +3145,16 @@ void main() {
           home: Scaffold(
             body: SizedBox(
               width: constrainedLayout ? 200 : null,
-              child: MenuItemButton(
-                overflowAxis: overflowAxis,
-                onPressed: () {},
-                child: const Text('This is a very long text that will wrap to the multiple lines.'),
+              // This is added because a menu item must be a child of a menu or menu bar.
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: MenuItemButton(
+                  overflowAxis: overflowAxis,
+                  onPressed: () {},
+                  child: const Text(
+                    'This is a very long text that will wrap to the multiple lines.',
+                  ),
+                ),
               ),
             ),
           ),
@@ -3186,10 +3192,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: MenuItemButton(
-              style: MenuItemButton.styleFrom(overlayColor: overlayColor),
-              onPressed: () {},
-              child: const Text('MenuItem'),
+            // This is added because a menu item must be a child of a menu or menu bar.
+            body: Semantics(
+              role: SemanticsRole.menu,
+              child: MenuItemButton(
+                style: MenuItemButton.styleFrom(overlayColor: overlayColor),
+                onPressed: () {},
+                child: const Text('MenuItem'),
+              ),
             ),
           ),
         ),
@@ -3218,7 +3228,14 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/147479.
     testWidgets('MenuItemButton can build when its child is null', (WidgetTester tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: SizedBox(width: 200, child: MenuItemButton()))),
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              child: Semantics(role: SemanticsRole.menu, child: const MenuItemButton()),
+            ),
+          ),
+        ),
       );
 
       expect(tester.takeException(), isNull);
@@ -4152,10 +4169,13 @@ void main() {
           Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
-              child: MenuItemButton(
-                style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
-                onPressed: () {},
-                child: const Text('ABC'),
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: MenuItemButton(
+                  style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+                  onPressed: () {},
+                  child: const Text('ABC'),
+                ),
               ),
             ),
           ),
@@ -4168,20 +4188,25 @@ void main() {
             TestSemantics.root(
               children: <TestSemantics>[
                 TestSemantics.rootChild(
-                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                  label: 'ABC',
-                  rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                  transform: Matrix4.translationValues(356.0, 276.0, 0.0),
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.isEnabled,
-                    SemanticsFlag.isFocusable,
+                  role: SemanticsRole.menu,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      role: SemanticsRole.menuItem,
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasEnabledState,
+                        SemanticsFlag.isEnabled,
+                        SemanticsFlag.isFocusable,
+                      ],
+                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                      label: 'ABC',
+                    ),
                   ],
-                  textDirection: TextDirection.ltr,
                 ),
               ],
             ),
             ignoreId: true,
+            ignoreRect: true,
+            ignoreTransform: true,
           ),
         );
 
@@ -4193,12 +4218,15 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Center(
-              child: MenuItemButton(
-                semanticsLabel: 'TestWidget',
-                shortcut: const SingleActivator(LogicalKeyboardKey.comma),
-                style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
-                onPressed: () {},
-                child: const Text('ABC'),
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: MenuItemButton(
+                  semanticsLabel: 'TestWidget',
+                  shortcut: const SingleActivator(LogicalKeyboardKey.comma),
+                  style: MenuItemButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+                  onPressed: () {},
+                  child: const Text('ABC'),
+                ),
               ),
             ),
           ),
@@ -4214,11 +4242,15 @@ void main() {
           Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
-              child: SubmenuButton(
-                onHover: (bool value) {},
-                style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
-                menuChildren: const <Widget>[],
-                child: const Text('ABC'),
+              // This is added because a menu item must be a child of a menu or menu bar.
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: SubmenuButton(
+                  onHover: (bool value) {},
+                  style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+                  menuChildren: const <Widget>[],
+                  child: const Text('ABC'),
+                ),
               ),
             ),
           ),
@@ -4231,18 +4263,29 @@ void main() {
             TestSemantics.root(
               children: <TestSemantics>[
                 TestSemantics(
-                  rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.hasEnabledState,
-                    SemanticsFlag.hasExpandedState,
+                  role: SemanticsRole.menu,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      flags: <SemanticsFlag>[
+                        SemanticsFlag.hasEnabledState,
+                        SemanticsFlag.hasExpandedState,
+                      ],
+                      role: SemanticsRole.menuItem,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          flags: <SemanticsFlag>[SemanticsFlag.hasEnabledState],
+                          label: 'ABC',
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
                   ],
-                  label: 'ABC',
-                  textDirection: TextDirection.ltr,
                 ),
               ],
             ),
             ignoreTransform: true,
             ignoreId: true,
+            ignoreRect: true,
           ),
         );
 
@@ -4254,16 +4297,20 @@ void main() {
         await tester.pumpWidget(
           MaterialApp(
             home: Center(
-              child: SubmenuButton(
-                style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
-                menuChildren: <Widget>[
-                  MenuItemButton(
-                    style: MenuItemButton.styleFrom(fixedSize: const Size(120.0, 36.0)),
-                    child: const Text('Item 0'),
-                    onPressed: () {},
-                  ),
-                ],
-                child: const Text('ABC'),
+              // This is added because a menu item must be a child of a menu or menu bar.
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: SubmenuButton(
+                  style: SubmenuButton.styleFrom(fixedSize: const Size(88.0, 36.0)),
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      style: MenuItemButton.styleFrom(fixedSize: const Size(120.0, 36.0)),
+                      child: const Text('Item 0'),
+                      onPressed: () {},
+                    ),
+                  ],
+                  child: const Text('ABC'),
+                ),
               ),
             ),
           ),
@@ -4292,35 +4339,25 @@ void main() {
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 4,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.isFocused,
-                                SemanticsFlag.hasEnabledState,
-                                SemanticsFlag.isEnabled,
-                                SemanticsFlag.isFocusable,
-                                SemanticsFlag.hasExpandedState,
-                                SemanticsFlag.isExpanded,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                              label: 'ABC',
                               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
-                            ),
-                            TestSemantics(
-                              id: 6,
-                              rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
+                              role: SemanticsRole.menu,
                               children: <TestSemantics>[
                                 TestSemantics(
-                                  id: 7,
-                                  rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
-                                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                  id: 5,
+                                  rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.hasEnabledState,
+                                    SemanticsFlag.isEnabled,
+                                    SemanticsFlag.hasExpandedState,
+                                    SemanticsFlag.isExpanded,
+                                  ],
+                                  role: SemanticsRole.menuItem,
                                   children: <TestSemantics>[
                                     TestSemantics(
-                                      id: 8,
-                                      label: 'Item 0',
-                                      rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                      id: 6,
+                                      rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
                                       flags: <SemanticsFlag>[
+                                        SemanticsFlag.isFocused,
                                         SemanticsFlag.hasEnabledState,
                                         SemanticsFlag.isEnabled,
                                         SemanticsFlag.isFocusable,
@@ -4328,6 +4365,41 @@ void main() {
                                       actions: <SemanticsAction>[
                                         SemanticsAction.tap,
                                         SemanticsAction.focus,
+                                      ],
+                                      label: 'ABC',
+                                      textDirection: TextDirection.ltr,
+                                      children: <TestSemantics>[
+                                        TestSemantics(
+                                          id: 7,
+                                          rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 64.0),
+                                          role: SemanticsRole.menu,
+                                          children: <TestSemantics>[
+                                            TestSemantics(
+                                              id: 8,
+                                              rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                              flags: <SemanticsFlag>[
+                                                SemanticsFlag.hasImplicitScrolling,
+                                              ],
+                                              children: <TestSemantics>[
+                                                TestSemantics(
+                                                  id: 9,
+                                                  rect: const Rect.fromLTRB(0.0, 0.0, 120.0, 48.0),
+                                                  flags: <SemanticsFlag>[
+                                                    SemanticsFlag.hasEnabledState,
+                                                    SemanticsFlag.isEnabled,
+                                                    SemanticsFlag.isFocusable,
+                                                  ],
+                                                  actions: <SemanticsAction>[
+                                                    SemanticsAction.tap,
+                                                    SemanticsAction.focus,
+                                                  ],
+                                                  label: 'Item 0',
+                                                  role: SemanticsRole.menuItem,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ],
@@ -4369,19 +4441,38 @@ void main() {
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 4,
-                              flags: <SemanticsFlag>[
-                                SemanticsFlag.hasExpandedState,
-                                SemanticsFlag.isFocused,
-                                SemanticsFlag.hasEnabledState,
-                                SemanticsFlag.isEnabled,
-                                SemanticsFlag.isFocusable,
-                              ],
-                              actions: <SemanticsAction>[
-                                SemanticsAction.tap,
-                                SemanticsAction.focus,
-                              ],
-                              label: 'ABC',
+                              role: SemanticsRole.menu,
                               rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 5,
+                                  rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                                  flags: <SemanticsFlag>[
+                                    SemanticsFlag.hasExpandedState,
+                                    SemanticsFlag.hasEnabledState,
+                                    SemanticsFlag.isEnabled,
+                                  ],
+                                  role: SemanticsRole.menuItem,
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      id: 6,
+                                      rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+                                      flags: <SemanticsFlag>[
+                                        SemanticsFlag.isFocused,
+                                        SemanticsFlag.hasEnabledState,
+                                        SemanticsFlag.isEnabled,
+                                        SemanticsFlag.isFocusable,
+                                      ],
+                                      actions: <SemanticsAction>[
+                                        SemanticsAction.tap,
+                                        SemanticsAction.focus,
+                                      ],
+                                      label: 'ABC',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -4457,15 +4548,18 @@ void main() {
           home: Material(
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return SubmenuButton(
-                  focusNode: focusNode,
-                  onFocusChange: (bool value) {
-                    setState(() {
-                      onFocusChangeCalled += 1;
-                    });
-                  },
-                  menuChildren: const <Widget>[MenuItemButton(child: Text('item 0'))],
-                  child: const Text('Submenu 0'),
+                return Semantics(
+                  role: SemanticsRole.menu,
+                  child: SubmenuButton(
+                    focusNode: focusNode,
+                    onFocusChange: (bool value) {
+                      setState(() {
+                        onFocusChangeCalled += 1;
+                      });
+                    },
+                    menuChildren: const <Widget>[MenuItemButton(child: Text('item 0'))],
+                    child: const Text('Submenu 0'),
+                  ),
                 );
               },
             ),
@@ -4513,12 +4607,15 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: SubmenuButton(
-              style: SubmenuButton.styleFrom(overlayColor: overlayColor),
-              menuChildren: <Widget>[
-                MenuItemButton(onPressed: () {}, child: const Text('MenuItemButton')),
-              ],
-              child: const Text('Submenu'),
+            body: Semantics(
+              role: SemanticsRole.menu,
+              child: SubmenuButton(
+                style: SubmenuButton.styleFrom(overlayColor: overlayColor),
+                menuChildren: <Widget>[
+                  MenuItemButton(onPressed: () {}, child: const Text('MenuItemButton')),
+                ],
+                child: const Text('Submenu'),
+              ),
             ),
           ),
         ),
@@ -4599,15 +4696,19 @@ void main() {
         return MaterialApp(
           home: Material(
             child: Center(
-              child: MenuItemButton(
-                style: MenuItemButton.styleFrom(
-                  iconColor: iconColor,
-                  iconSize: iconSize,
-                  disabledIconColor: disabledIconColor,
+              // This is added because a menu item must be a child of a menu or menu bar.
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: MenuItemButton(
+                  style: MenuItemButton.styleFrom(
+                    iconColor: iconColor,
+                    iconSize: iconSize,
+                    disabledIconColor: disabledIconColor,
+                  ),
+                  onPressed: enabled ? () {} : null,
+                  trailingIcon: const Icon(Icons.add),
+                  child: const Text('Button'),
                 ),
-                onPressed: enabled ? () {} : null,
-                trailingIcon: const Icon(Icons.add),
-                child: const Text('Button'),
               ),
             ),
           ),
@@ -4635,15 +4736,18 @@ void main() {
         return MaterialApp(
           home: Material(
             child: Center(
-              child: SubmenuButton(
-                style: SubmenuButton.styleFrom(
-                  iconColor: iconColor,
-                  iconSize: iconSize,
-                  disabledIconColor: disabledIconColor,
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: SubmenuButton(
+                  style: SubmenuButton.styleFrom(
+                    iconColor: iconColor,
+                    iconSize: iconSize,
+                    disabledIconColor: disabledIconColor,
+                  ),
+                  trailingIcon: const Icon(Icons.add),
+                  menuChildren: <Widget>[if (enabled) const Text('Item')],
+                  child: const Text('SubmenuButton'),
                 ),
-                trailingIcon: const Icon(Icons.add),
-                menuChildren: <Widget>[if (enabled) const Text('Item')],
-                child: const Text('SubmenuButton'),
               ),
             ),
           ),
