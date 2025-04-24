@@ -752,7 +752,7 @@ static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
   uint32_t threadHostType = flutter::ThreadHost::Type::kRaster | flutter::ThreadHost::Type::kIo;
-  if (!settings.merged_platform_ui_thread) {
+  if (settings.merged_platform_ui_thread != flutter::Settings::MergedPlatformUIThread::kEnabled) {
     threadHostType |= flutter::ThreadHost::Type::kUi;
   }
 
@@ -839,7 +839,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
   fml::RefPtr<fml::TaskRunner> ui_runner;
-  if (settings.enable_impeller && settings.merged_platform_ui_thread) {
+  if (settings.enable_impeller &&
+      settings.merged_platform_ui_thread == flutter::Settings::MergedPlatformUIThread::kEnabled) {
     ui_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   } else {
     ui_runner = _threadHost->ui_thread->GetTaskRunner();

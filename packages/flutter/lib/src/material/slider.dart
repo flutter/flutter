@@ -1588,7 +1588,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
             _currentDragValue = value;
           }
         case SliderInteraction.slideOnly:
-          onChangeStart?.call(_discretize(value));
+          _active = true;
+          _currentDragValue = value;
       }
 
       if (_active) {
@@ -1635,13 +1636,6 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _handleDragUpdate(DragUpdateDetails details) {
     if (!_state.mounted) {
       return;
-    }
-
-    // for slide only, there is no start interaction trigger, so _active
-    // will be false and needs to be made true.
-    if (!_active && allowedInteraction == SliderInteraction.slideOnly) {
-      _active = true;
-      _currentDragValue = value;
     }
 
     switch (allowedInteraction) {
