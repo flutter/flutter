@@ -1270,7 +1270,6 @@ void main() {
                       style: const TextStyle(height: 4, color: Colors.black45),
                       toolbarOptions: const ToolbarOptions(copy: true, selectAll: true),
                       selectionHeightStyle: ui.BoxHeightStyle.includeLineSpacingTop,
-                      selectionWidthStyle: ui.BoxWidthStyle.max,
                       maxLines: 3,
                     ),
                   ],

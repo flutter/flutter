@@ -1318,7 +1318,11 @@ class RenderEditable extends RenderBox
   List<TextBox> getBoxesForSelection(TextSelection selection) {
     _computeTextMetricsIfNeeded();
     return _textPainter
-        .getBoxesForSelection(selection)
+        .getBoxesForSelection(
+          selection,
+          boxHeightStyle: selectionHeightStyle,
+          boxWidthStyle: selectionWidthStyle,
+        )
         .map(
           (TextBox textBox) => TextBox.fromLTRBD(
             textBox.left + _paintOffset.dx,
