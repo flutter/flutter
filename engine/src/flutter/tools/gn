@@ -395,9 +395,6 @@ def to_gn_args(args):
     if args.target_os != 'ios':
       raise Exception('--simulator is only supported for iOS')
 
-  if args.slimpeller and args.target_os != 'ios':
-    raise Exception('--slimpeller is only supported for iOS.')
-
   runtime_mode = args.runtime_mode
 
   gn_args = {}

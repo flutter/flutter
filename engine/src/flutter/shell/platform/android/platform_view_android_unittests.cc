@@ -16,6 +16,7 @@ namespace testing {
 // https://github.com/flutter/flutter/issues/163742) and has since bit rotted
 // (we fallback to OpenGLES on emulators for performance reasons); either fix
 // the test, or remove it.
+#if !SLIMPELLER
 TEST(AndroidPlatformView, DISABLED_SelectsVulkanBasedOnApiLevel) {
   Settings settings;
   settings.enable_software_rendering = false;
@@ -26,6 +27,7 @@ TEST(AndroidPlatformView, DISABLED_SelectsVulkanBasedOnApiLevel) {
   EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 24),
             AndroidRenderingAPI::kImpellerOpenGLES);
 }
+#endif  // !SLIMPELLER
 
 }  // namespace testing
 }  // namespace flutter

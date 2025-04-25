@@ -106,6 +106,8 @@ void FlutterMain::Init(JNIEnv* env,
 
   AndroidRenderingAPI android_rendering_api =
       SelectedRenderingAPI(settings, api_level);
+
+#if !SLIMPELLER
   switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
@@ -117,6 +119,7 @@ void FlutterMain::Init(JNIEnv* env,
       settings.enable_impeller = true;
       break;
   }
+#endif  // !SLIMPELLER
 
 #if FLUTTER_RELEASE
   // On most platforms the timeline is always disabled in release mode.
@@ -247,6 +250,7 @@ bool FlutterMain::Register(JNIEnv* env) {
 AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
     const flutter::Settings& settings,
     int api_level) {
+#if !SLIMPELLER
   if (settings.enable_software_rendering) {
     if (settings.enable_impeller) {
       FML_CHECK(!settings.enable_impeller)
@@ -275,6 +279,9 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
   }
 
   return AndroidRenderingAPI::kSkiaOpenGLES;
+#else
+  return AndroidRenderingAPI::kImpellerAutoselect;
+#endif  // !SLIMPELLER
 }
 
 }  // namespace flutter

@@ -220,7 +220,7 @@ struct Settings {
 #if FML_OS_ANDROID || FML_OS_IOS || FML_OS_IOS_SIMULATOR
   // On iOS devices, Impeller is the default with no opt-out and this field is
   // const.
-#if FML_OS_IOS || FML_OS_IOS_SIMULATOR
+#if FML_OS_IOS || FML_OS_IOS_SIMULATOR || SLIMPELLER
   static constexpr const
 #endif                              // FML_OS_IOS && !FML_OS_IOS_SIMULATOR
       bool enable_impeller = true;  // NOLINT(readability-identifier-naming)
