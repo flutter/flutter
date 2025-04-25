@@ -41,13 +41,13 @@ sk_sp<GrDirectContext> AndroidContext::GetMainSkiaContext() const {
 #endif  // !SLIMPELLER
 }
 
-std::shared_ptr<impeller::Context> AndroidContext::GetImpellerContext() const {
-  return impeller_context_;
+void AndroidContext::SetImpellerContext(
+    const std::shared_ptr<impeller::Context>& impeller_context) {
+  impeller_context_ = impeller_context;
 }
 
-void AndroidContext::SetImpellerContext(
-    const std::shared_ptr<impeller::Context>& context) {
-  impeller_context_ = context;
+std::shared_ptr<impeller::Context> AndroidContext::GetImpellerContext() const {
+  return impeller_context_;
 }
 
 }  // namespace flutter
