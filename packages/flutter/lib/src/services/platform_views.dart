@@ -155,10 +155,12 @@ class PlatformViewsService {
 
   /// {@macro flutter.services.PlatformViewsService.initAndroidView}
   ///
-  /// This attempts to use the newest and most efficient platform view
+  /// This attempts to use the "Texture Layer Hybrid Composition (TLHC)" platform view
   /// implementation when possible. In cases where that is not supported, it
-  /// falls back to using Hybrid Composition, which is the mode used by
+  /// falls back to using "Hybrid Composition", which is the mode used by
   /// [initExpensiveAndroidView].
+  // Fallback logic for TLHC or HC lives in
+  // engine/src/flutter/shell/platform/android/io/flutter/plugin/platform/PlatformViewsController.java
   static SurfaceAndroidViewController initSurfaceAndroidView({
     required int id,
     required String viewType,
@@ -185,9 +187,10 @@ class PlatformViewsService {
   /// When this factory is used, the Android view and Flutter widgets are
   /// composed at the Android view hierarchy level.
   ///
-  /// Using this method has a performance cost on devices running Android 9 or
-  /// earlier, or on underpowered devices. In most situations, you should use
+  /// Using this method has a performance cost on devices running Android 9 (api 28)
+  /// or earlier, or on underpowered devices. In most situations, you should use
   /// [initAndroidView] or [initSurfaceAndroidView] instead.
+  /// Always creates a "Hybrid Composition (HC)" view.
   static ExpensiveAndroidViewController initExpensiveAndroidView({
     required int id,
     required String viewType,
@@ -215,6 +218,7 @@ class PlatformViewsService {
   ///
   /// This functionality is only supported on Android devices running Vulkan on
   /// API 34 or newer.
+  /// Always creates a "Hybrid Composition++ (HCPP)" view.
   static HybridAndroidViewController initHybridAndroidView({
     required int id,
     required String viewType,
@@ -1092,6 +1096,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
 
 /// Controls an Android view that is composed using the Android view hierarchy.
 /// This controller is created from the [PlatformViewsService.initExpensiveAndroidView] factory.
+// "Hybrid Composition" controller.
 class ExpensiveAndroidViewController extends AndroidViewController {
   ExpensiveAndroidViewController._({
     required super.viewId,
@@ -1145,7 +1150,8 @@ class ExpensiveAndroidViewController extends AndroidViewController {
 }
 
 /// Controls an Android view that is composed using the Android view hierarchy.
-/// This controller is created from the [PlatformViewsService.initExpensiveAndroidView] factory.
+/// This controller is created from the [PlatformViewsService.initHybridAndroidView] factory.
+// "HCPP"
 class HybridAndroidViewController extends AndroidViewController {
   HybridAndroidViewController._({
     required super.viewId,
@@ -1337,7 +1343,7 @@ abstract class _AndroidViewControllerInternals {
 // An AndroidViewController implementation for views whose contents are
 // displayed via a texture rather than directly in a native view.
 //
-// This is used for both Virtual Display and Texture Layer Hybrid Composition.
+// This is used for both Virtual Display (VD) and Texture Layer Hybrid Composition (TLHC).
 class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInternals {
   _TextureAndroidViewControllerInternals();
 

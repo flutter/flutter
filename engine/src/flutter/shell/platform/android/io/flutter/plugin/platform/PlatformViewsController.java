@@ -202,7 +202,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                     + " parent view.");
           }
 
-          // The newer Texture Layer Hybrid Composition mode isn't suppported if any of the
+          // The Texture Layer Hybrid Composition mode isn't supported if any of the
           // following are true:
           // - The embedded view contains any of the VIEW_TYPES_REQUIRE_VIRTUAL_DISPLAY view types.
           //   These views allow out-of-band graphics operations that aren't notified to the Android
