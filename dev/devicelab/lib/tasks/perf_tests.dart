@@ -8,6 +8,7 @@ import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart';
@@ -1720,7 +1721,6 @@ class CompileTest {
       });
 
       /* App Size */
-
       final String appPath =
           '$testDirectory/hello_world_swiftui.xcarchive/Products/Applications/hello_world_swiftui.app';
 
@@ -1729,8 +1729,14 @@ class CompileTest {
       releaseSizeInBytes = await file('$testDirectory/app.tar.gz').length();
 
       /* Time to First Frame */
-      await Process.run('rm', <String>['./results', '-rf']);
+      await Process.run(workingDirectory: testDirectory, 'rm', <String>[
+        '-rf',
+        'benchmarkResults.xcresult'
+      ]).then((ProcessResult results) {
+        print(results.stdout);
+      });
 
+      // Run the benchmarking tests and output the result
       await Process.run(workingDirectory: testDirectory, 'xcodebuild', <String>[
         'test',
         '-project',
@@ -1738,43 +1744,41 @@ class CompileTest {
         '-scheme',
         'hello_world_swiftui',
         '-destination',
-        'platform=iOS,name=Fluttér 的 iPhone',
-        '-only-testing:BenchmarkTests/testLaunchPerformance',
+        'generic/platform=iOS',
+        '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
         '-resultBundlePath',
-        './results/benchmarkResults.xcresult'
+        'benchmarkResults.xcresult'
       ]).then((ProcessResult results) {
-        if (results.exitCode != 0) {
-          print(results.stderr);
-        }
+        print(results.stdout);
       });
 
-      await Process.run('xcrun', <String>[
+      // read the metrics from the test results
+      dynamic metricsJson;
+      await Process.run(workingDirectory: testDirectory, 'xcrun', <String>[
         'xcresulttool',
         'get',
         'test-results',
         'metrics',
         '--path',
-        './results/benchmarkResults.xcresult',
+        'benchmarkResults.xcresult',
         '--format',
-        'json',
-        '>',
-        './results/results.json'
+        'json'
       ]).then((ProcessResult results) {
-        if (results.exitCode != 0) {
-          print(results.stderr);
-        } else {
-          print("done");
-        }
+        print(results.stdout);
+        metricsJson = json.decode(results.stdout.toString());
       });
 
-
-
-      // xcrun xcresulttool get test-results metrics --path PerfTestResults2.xcresult --format json > results.json
+      final dynamic rawMeasurements = metricsJson[0]['testRuns'][0]['metrics'][0]['measurements'];
+      List<double> measurements = <double>[];
+      if (rawMeasurements is List) {
+        measurements = rawMeasurements.map((dynamic e) => double.parse(e.toString())).toList();
+      }
 
       final Map<String, dynamic> metrics = <String, dynamic>{};
       metrics.addAll(<String, dynamic>{
         'release_swiftui_compile_millis': watch.elapsedMilliseconds,
         'release_swiftui_size_bytes': releaseSizeInBytes,
+        'time_to_first_frame': measurements.average
       });
       return TaskResult.success(metrics);
     });
