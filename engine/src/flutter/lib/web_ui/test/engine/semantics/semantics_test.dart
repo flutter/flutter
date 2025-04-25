@@ -2579,13 +2579,28 @@ void _testSelectables() {
           id: 2,
           isSelectable: true,
           isSelected: false,
+          role: ui.SemanticsRole.row,
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
           isSelectable: true,
           isSelected: true,
+          role: ui.SemanticsRole.tab,
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+        // Add two new nodes to test the aria-current fallback
+        tester.updateNode(
+          id: 4,
+          isSelectable: true,
+          isSelected: false,
+          rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+        ),
+        tester.updateNode(
+          id: 5,
+          isSelectable: true,
+          isSelected: true,
+          rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
         ),
       ],
     );
@@ -2594,35 +2609,55 @@ void _testSelectables() {
     expectSemanticsTree(owner(), '''
 <sem>
     <sem></sem>
-    <sem aria-selected="false"></sem>
-    <sem aria-selected="true"></sem>
+    <sem role="row" aria-selected="false"></sem>
+    <sem role="tab" aria-selected="true"></sem>
+    <sem aria-current="false"></sem>
+    <sem aria-current="true"></sem>
 </sem>
 ''');
 
     // Missing attributes cannot be expressed using HTML patterns, so check directly.
-    final nonSelectable = owner().debugSemanticsTree![1]!.element;
+    final nonSelectable = owner().debugSemanticsTree![0]!.element;
     expect(nonSelectable.getAttribute('aria-selected'), isNull);
+    expect(nonSelectable.getAttribute('aria-current'), isNull);
 
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
       isSelectable: true,
       isSelected: true,
+      role: ui.SemanticsRole.row,
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
       isSelectable: true,
       isSelected: false,
+      role: ui.SemanticsRole.tab,
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    // Flip the values for the aria-current fallback nodes
+    tester.updateNode(
+      id: 4,
+      isSelectable: true,
+      isSelected: true,
+      rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+    );
+    tester.updateNode(
+      id: 5,
+      isSelectable: true,
+      isSelected: false,
+      rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
     );
     tester.apply();
 
     expectSemanticsTree(owner(), '''
 <sem>
     <sem></sem>
-    <sem aria-selected="true"></sem>
-    <sem aria-selected="false"></sem>
+    <sem role="row" aria-selected="true"></sem>
+    <sem role="tab" aria-selected="false"></sem>
+    <sem aria-current="true"></sem>
+    <sem aria-current="false"></sem>
 </sem>
 ''');
 
