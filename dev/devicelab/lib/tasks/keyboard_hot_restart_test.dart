@@ -133,8 +133,8 @@ Future<int> runApp({
   final Completer<void> stderrDone = Completer<void>();
 
   void onStdout(String line) {
-    onLine(line, process);
     print('stdout: $line');
+    onLine(line, process);
   }
 
   process.stdout
