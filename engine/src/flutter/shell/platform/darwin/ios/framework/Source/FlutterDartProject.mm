@@ -33,7 +33,6 @@ static BOOL DoesHardwareSupportWideGamut() {
   static dispatch_once_t once_token = 0;
   dispatch_once(&once_token, ^{
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
-    // MTLGPUFamilyApple2 = A9/A10
     result = [device supportsFamily:MTLGPUFamilyApple2];
   });
   return result;

@@ -718,31 +718,21 @@ static void SendFakeTouchEvent(UIScreen* screen,
 }
 
 - (BOOL)stateIsActive {
-  BOOL isActive = YES;
-
+  // [UIApplication sharedApplication API is not available for app extension.
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  if (flutterApplication) {
-    isActive = [self isApplicationStateMatching:UIApplicationStateActive
-                                withApplication:flutterApplication];
-  } else {
-    isActive = [self isSceneStateMatching:UISceneActivationStateForegroundActive];
-  }
+  BOOL isActive = flutterApplication
+                      ? [self isApplicationStateMatching:UIApplicationStateActive
+                                         withApplication:flutterApplication]
+                      : [self isSceneStateMatching:UISceneActivationStateForegroundActive];
   return isActive;
 }
 
 - (BOOL)stateIsBackground {
   // [UIApplication sharedApplication API is not available for app extension.
-  // Assume the app is not in the background if we're unable to get the state.
-  BOOL isBackground = NO;
-
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  if (flutterApplication) {
-    isBackground = [self isApplicationStateMatching:UIApplicationStateBackground
-                                    withApplication:flutterApplication];
-  } else {
-    isBackground = [self isSceneStateMatching:UISceneActivationStateBackground];
-  }
-  return isBackground;
+  return flutterApplication ? [self isApplicationStateMatching:UIApplicationStateBackground
+                                               withApplication:flutterApplication]
+                            : [self isSceneStateMatching:UISceneActivationStateBackground];
 }
 
 - (BOOL)isApplicationStateMatching:(UIApplicationState)match
