@@ -24,13 +24,12 @@ void main() {
           actualValue = value;
         },
         mouseCursor: WidgetStateProperty.all<MouseCursor>(SystemMouseCursors.click),
-        size: const Size(40, 40),
         toggleable: true,
         focusNode: node,
         autofocus: false,
-        painterGetter: (ToggleableStateMixin state) {
+        builder: (ToggleableStateMixin state) {
           actualState = state;
-          return TestPainter();
+          return CustomPaint(size: const Size(40, 40), painter: TestPainter());
         },
       ),
     );

@@ -71,7 +71,7 @@ const double _kInnerRadius = 4.5;
 ///  * [Slider], for selecting a value in a range.
 ///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.io/design/components/selection-controls.html#radio-buttons>
-class Radio<T> extends StatefulWidget {
+class Radio<T> extends StatelessWidget {
   /// Creates a Material Design radio button.
   ///
   /// The radio button itself does not maintain any state. Instead, when the
@@ -331,10 +331,101 @@ class Radio<T> extends StatefulWidget {
   final _RadioType _radioType;
 
   @override
-  State<Radio<T>> createState() => _RadioState<T>();
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMaterial(context));
+    switch (_radioType) {
+      case _RadioType.material:
+        break;
+
+      case _RadioType.adaptive:
+        final ThemeData theme = Theme.of(context);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+          case TargetPlatform.linux:
+          case TargetPlatform.windows:
+            break;
+          case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
+            return CupertinoRadio<T>(
+              value: value,
+              groupValue: groupValue,
+              onChanged: onChanged,
+              mouseCursor: mouseCursor,
+              toggleable: toggleable,
+              activeColor: activeColor,
+              focusColor: focusColor,
+              focusNode: focusNode,
+              autofocus: autofocus,
+              useCheckmarkStyle: useCupertinoCheckmarkStyle,
+            );
+        }
+    }
+
+    final RadioThemeData radioTheme = RadioTheme.of(context);
+    final MaterialStateProperty<MouseCursor> effectiveMouseCursor =
+        MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+          return MaterialStateProperty.resolveAs<MouseCursor?>(mouseCursor, states) ??
+              radioTheme.mouseCursor?.resolve(states) ??
+              MaterialStateProperty.resolveAs<MouseCursor>(
+                MaterialStateMouseCursor.clickable,
+                states,
+              );
+        });
+
+    return RadioBase<T>(
+      value: value,
+      groupValue: groupValue,
+      onChanged: onChanged,
+      mouseCursor: effectiveMouseCursor,
+      toggleable: toggleable,
+      focusNode: focusNode,
+      autofocus: autofocus,
+      builder: (ToggleableStateMixin state) {
+        return _RadioPaint(
+          toggleableState: state,
+          activeColor: activeColor,
+          fillColor: fillColor,
+          hoverColor: hoverColor,
+          focusColor: focusColor,
+          overlayColor: overlayColor,
+          splashRadius: splashRadius,
+          visualDensity: visualDensity,
+          materialTapTargetSize: materialTapTargetSize,
+        );
+      },
+    );
+  }
 }
 
-class _RadioState<T> extends State<Radio<T>> {
+class _RadioPaint extends StatefulWidget {
+  const _RadioPaint({
+    required this.toggleableState,
+    required this.activeColor,
+    required this.fillColor,
+    required this.hoverColor,
+    required this.focusColor,
+    required this.overlayColor,
+    required this.splashRadius,
+    required this.visualDensity,
+    required this.materialTapTargetSize,
+  });
+
+  final ToggleableStateMixin toggleableState;
+  final Color? activeColor;
+  final MaterialStateProperty<Color?>? fillColor;
+  final Color? hoverColor;
+  final Color? focusColor;
+  final MaterialStateProperty<Color?>? overlayColor;
+  final double? splashRadius;
+  final VisualDensity? visualDensity;
+  final MaterialTapTargetSize? materialTapTargetSize;
+
+  @override
+  State<StatefulWidget> createState() => _RadioPaintState();
+}
+
+class _RadioPaintState extends State<_RadioPaint> {
   final _RadioPainter _painter = _RadioPainter();
 
   @override
@@ -355,15 +446,18 @@ class _RadioState<T> extends State<Radio<T>> {
     });
   }
 
-  CustomPainter _getPainter(ToggleableStateMixin state) {
+  @override
+  Widget build(BuildContext context) {
     final RadioThemeData radioTheme = RadioTheme.of(context);
     final RadioThemeData defaults =
         Theme.of(context).useMaterial3 ? _RadioDefaultsM3(context) : _RadioDefaultsM2(context);
 
     // Colors need to be resolved in selected and non selected states separately
     // so that they can be lerped between.
-    final Set<MaterialState> activeStates = state.states..add(MaterialState.selected);
-    final Set<MaterialState> inactiveStates = state.states..remove(MaterialState.selected);
+    final Set<MaterialState> activeStates =
+        widget.toggleableState.states..add(MaterialState.selected);
+    final Set<MaterialState> inactiveStates =
+        widget.toggleableState.states..remove(MaterialState.selected);
     final Color? activeColor =
         widget.fillColor?.resolve(activeStates) ??
         _widgetFillColor.resolve(activeStates) ??
@@ -376,14 +470,16 @@ class _RadioState<T> extends State<Radio<T>> {
     final Color effectiveInactiveColor =
         inactiveColor ?? defaults.fillColor!.resolve(inactiveStates)!;
 
-    final Set<MaterialState> focusedStates = state.states..add(MaterialState.focused);
+    final Set<MaterialState> focusedStates =
+        widget.toggleableState.states..add(MaterialState.focused);
     Color effectiveFocusOverlayColor =
         widget.overlayColor?.resolve(focusedStates) ??
         widget.focusColor ??
         radioTheme.overlayColor?.resolve(focusedStates) ??
         defaults.overlayColor!.resolve(focusedStates)!;
 
-    final Set<MaterialState> hoveredStates = state.states..add(MaterialState.hovered);
+    final Set<MaterialState> hoveredStates =
+        widget.toggleableState.states..add(MaterialState.hovered);
     Color effectiveHoverOverlayColor =
         widget.overlayColor?.resolve(hoveredStates) ??
         widget.hoverColor ??
@@ -404,78 +500,16 @@ class _RadioState<T> extends State<Radio<T>> {
         inactiveColor?.withAlpha(kRadialReactionAlpha) ??
         defaults.overlayColor!.resolve(inactivePressedStates)!;
 
-    if (state.downPosition != null) {
+    if (widget.toggleableState.downPosition != null) {
       effectiveHoverOverlayColor =
-          state.states.contains(MaterialState.selected)
+          widget.toggleableState.states.contains(MaterialState.selected)
               ? effectiveActivePressedOverlayColor
               : effectiveInactivePressedOverlayColor;
       effectiveFocusOverlayColor =
-          state.states.contains(MaterialState.selected)
+          widget.toggleableState.states.contains(MaterialState.selected)
               ? effectiveActivePressedOverlayColor
               : effectiveInactivePressedOverlayColor;
     }
-
-    return _painter
-      ..position = state.position
-      ..reaction = state.reaction
-      ..reactionFocusFade = state.reactionFocusFade
-      ..reactionHoverFade = state.reactionHoverFade
-      ..inactiveReactionColor = effectiveInactivePressedOverlayColor
-      ..reactionColor = effectiveActivePressedOverlayColor
-      ..hoverColor = effectiveHoverOverlayColor
-      ..focusColor = effectiveFocusOverlayColor
-      ..splashRadius = widget.splashRadius ?? radioTheme.splashRadius ?? kRadialReactionRadius
-      ..downPosition = state.downPosition
-      ..isFocused = state.states.contains(MaterialState.focused)
-      ..isHovered = state.states.contains(MaterialState.hovered)
-      ..activeColor = effectiveActiveColor
-      ..inactiveColor = effectiveInactiveColor;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
-    switch (widget._radioType) {
-      case _RadioType.material:
-        break;
-
-      case _RadioType.adaptive:
-        final ThemeData theme = Theme.of(context);
-        switch (theme.platform) {
-          case TargetPlatform.android:
-          case TargetPlatform.fuchsia:
-          case TargetPlatform.linux:
-          case TargetPlatform.windows:
-            break;
-          case TargetPlatform.iOS:
-          case TargetPlatform.macOS:
-            return CupertinoRadio<T>(
-              value: widget.value,
-              groupValue: widget.groupValue,
-              onChanged: widget.onChanged,
-              mouseCursor: widget.mouseCursor,
-              toggleable: widget.toggleable,
-              activeColor: widget.activeColor,
-              focusColor: widget.focusColor,
-              focusNode: widget.focusNode,
-              autofocus: widget.autofocus,
-              useCheckmarkStyle: widget.useCupertinoCheckmarkStyle,
-            );
-        }
-    }
-
-    final RadioThemeData radioTheme = RadioTheme.of(context);
-    final RadioThemeData defaults =
-        Theme.of(context).useMaterial3 ? _RadioDefaultsM3(context) : _RadioDefaultsM2(context);
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor =
-        MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
-          return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
-              radioTheme.mouseCursor?.resolve(states) ??
-              MaterialStateProperty.resolveAs<MouseCursor>(
-                MaterialStateMouseCursor.clickable,
-                states,
-              );
-        });
 
     final MaterialTapTargetSize effectiveMaterialTapTargetSize =
         widget.materialTapTargetSize ??
@@ -495,16 +529,24 @@ class _RadioState<T> extends State<Radio<T>> {
     };
     size += effectiveVisualDensity.baseSizeAdjustment;
 
-    return RadioBase<T>(
-      value: widget.value,
-      groupValue: widget.groupValue,
-      onChanged: widget.onChanged,
-      mouseCursor: effectiveMouseCursor,
+    return CustomPaint(
       size: size,
-      toggleable: widget.toggleable,
-      focusNode: widget.focusNode,
-      autofocus: widget.autofocus,
-      painterGetter: _getPainter,
+      painter:
+          _painter
+            ..position = widget.toggleableState.position
+            ..reaction = widget.toggleableState.reaction
+            ..reactionFocusFade = widget.toggleableState.reactionFocusFade
+            ..reactionHoverFade = widget.toggleableState.reactionHoverFade
+            ..inactiveReactionColor = effectiveInactivePressedOverlayColor
+            ..reactionColor = effectiveActivePressedOverlayColor
+            ..hoverColor = effectiveHoverOverlayColor
+            ..focusColor = effectiveFocusOverlayColor
+            ..splashRadius = widget.splashRadius ?? radioTheme.splashRadius ?? kRadialReactionRadius
+            ..downPosition = widget.toggleableState.downPosition
+            ..isFocused = widget.toggleableState.states.contains(MaterialState.focused)
+            ..isHovered = widget.toggleableState.states.contains(MaterialState.hovered)
+            ..activeColor = effectiveActiveColor
+            ..inactiveColor = effectiveInactiveColor,
     );
   }
 }

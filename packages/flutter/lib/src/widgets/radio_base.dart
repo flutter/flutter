@@ -11,15 +11,19 @@ import 'ticker_provider.dart';
 import 'toggleable.dart';
 import 'widget_state.dart';
 
-/// Signature for [RadioBase.painterGetter]
+/// Signature for [RadioBase.builder]
 ///
-/// The getter can use `state` to configure the painter before returning.
-typedef RadioPainterGetter = CustomPainter Function(ToggleableStateMixin state);
+/// The builder can use `state` to determine the state of the radio and build
+/// the visual.
+///
+/// {@macro flutter.widgets.ToggleableStateMixin.buildToggleableWithChild}
+typedef RadioBuilder = Widget Function(ToggleableStateMixin state);
 
 /// A base class for Radio button that provides basic radio functionalities.
 ///
-/// This widget uses painter returned from `painterGetter` to draw the radio.
-/// Consider using [ToggleablePainter] as a base class to implement the painter.
+/// This widget uses painter returned from `builder` to draw the radio.
+///
+/// {@macro flutter.widgets.ToggleableStateMixin.buildToggleableWithChild}
 ///
 /// This widget allows selection between a number of mutually exclusive values.
 /// When one radio button in a group is selected, the other radio buttons in the
@@ -52,11 +56,10 @@ class RadioBase<T> extends StatefulWidget {
     required this.groupValue,
     required this.onChanged,
     required this.mouseCursor,
-    required this.size,
     required this.toggleable,
     required this.focusNode,
     required this.autofocus,
-    required this.painterGetter,
+    required this.builder,
   });
 
   /// {@template flutter.widget.RadioBase.value}
@@ -127,20 +130,18 @@ class RadioBase<T> extends StatefulWidget {
   /// {@endtemplate}
   final bool toggleable;
 
-  /// The size of canvas for painter returned from [painterGetter] to paint.
-  final Size size;
-
   /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode? focusNode;
 
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// The getter for the painter that used for painting the radio button.
+  /// The builder for the radio button visual.
   ///
-  /// This getter is used when the build method is called. One is expected
-  /// to use the input `state` to update the painter before returning.
-  final RadioPainterGetter painterGetter;
+  /// Use the input `state` to determine the current state of the radio.
+  ///
+  /// {@macro flutter.widgets.ToggleableStateMixin.buildToggleableWithChild}
+  final RadioBuilder builder;
 
   bool get _selected => value == groupValue;
 
@@ -195,12 +196,11 @@ class _RadioBaseState<T> extends State<RadioBase<T>>
       inMutuallyExclusiveGroup: true,
       checked: widget._selected,
       selected: accessibilitySelected,
-      child: buildToggleable(
+      child: buildToggleableWithChild(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
         mouseCursor: widget.mouseCursor,
-        size: widget.size,
-        painter: widget.painterGetter(this),
+        child: widget.builder(this),
       ),
     );
   }

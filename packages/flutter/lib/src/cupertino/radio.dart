@@ -199,15 +199,82 @@ class CupertinoRadio<T> extends StatefulWidget {
 }
 
 class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
-  final _RadioPainter _painter = _RadioPainter();
-
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_internalFocusNode ??= FocusNode());
   FocusNode? _internalFocusNode;
 
   @override
   void dispose() {
-    _painter.dispose();
     _internalFocusNode?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
+        WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
+          return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
+              (states.contains(WidgetState.disabled)
+                  ? SystemMouseCursors.basic
+                  : kIsWeb
+                  ? SystemMouseCursors.click
+                  : SystemMouseCursors.basic);
+        });
+
+    return RadioBase<T>(
+      value: widget.value,
+      groupValue: widget.groupValue,
+      onChanged: widget.onChanged,
+      mouseCursor: effectiveMouseCursor,
+      toggleable: widget.toggleable,
+      focusNode: _effectiveFocusNode,
+      autofocus: widget.autofocus,
+      builder: (ToggleableStateMixin state) {
+        return _RadioPaint(
+          activeColor: widget.activeColor,
+          inactiveColor: widget.inactiveColor,
+          fillColor: widget.fillColor,
+          focusColor: widget.focusColor,
+          useCheckmarkStyle: widget.useCheckmarkStyle,
+          isActive: widget.onChanged != null,
+          toggleableState: state,
+          focused: _effectiveFocusNode.hasFocus,
+        );
+      },
+    );
+  }
+}
+
+class _RadioPaint extends StatefulWidget {
+  const _RadioPaint({
+    required this.focused,
+    required this.toggleableState,
+    required this.activeColor,
+    required this.inactiveColor,
+    required this.fillColor,
+    required this.focusColor,
+    required this.useCheckmarkStyle,
+    required this.isActive,
+  });
+
+  final ToggleableStateMixin toggleableState;
+  final Color? activeColor;
+  final Color? inactiveColor;
+  final Color? fillColor;
+  final Color? focusColor;
+  final bool useCheckmarkStyle;
+  final bool isActive;
+
+  final bool focused;
+  @override
+  State<StatefulWidget> createState() => _RadioPaintState();
+}
+
+class _RadioPaintState extends State<_RadioPaint> {
+  final _RadioPainter _painter = _RadioPainter();
+
+  @override
+  void dispose() {
+    _painter.dispose();
     super.dispose();
   }
 
@@ -248,14 +315,16 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
     });
   }
 
-  CustomPainter _getPainter(ToggleableStateMixin state) {
+  @override
+  Widget build(BuildContext context) {
     // Colors need to be resolved in selected and non selected states separately.
-    final Set<WidgetState> activeStates = state.states..add(WidgetState.selected);
-    final Set<WidgetState> inactiveStates = state.states..remove(WidgetState.selected);
+    final Set<WidgetState> activeStates = widget.toggleableState.states..add(WidgetState.selected);
+    final Set<WidgetState> inactiveStates =
+        widget.toggleableState.states..remove(WidgetState.selected);
 
     // Since the states getter always makes a new set, make a copy to use
     // throughout the lifecycle of this build method.
-    final Set<WidgetState> currentStates = state.states;
+    final Set<WidgetState> currentStates = widget.toggleableState.states;
 
     final Color effectiveActiveColor = _defaultOuterColor.resolve(activeStates);
 
@@ -272,44 +341,23 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
 
     final Color effectiveBorderColor = _defaultBorderColor.resolve(currentStates);
 
-    return _painter
-      ..position = state.position
-      ..reaction = state.reaction
-      ..focusColor = effectiveFocusOverlayColor
-      ..downPosition = state.downPosition
-      ..isFocused = _effectiveFocusNode.hasFocus
-      ..activeColor = effectiveActiveColor
-      ..inactiveColor = effectiveInactiveColor
-      ..fillColor = effectiveFillColor
-      ..value = state.value
-      ..checkmarkStyle = widget.useCheckmarkStyle
-      ..isActive = widget.onChanged != null
-      ..borderColor = effectiveBorderColor
-      ..brightness = CupertinoTheme.of(context).brightness;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
-        WidgetStateProperty.resolveWith<MouseCursor>((Set<WidgetState> states) {
-          return WidgetStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states) ??
-              (states.contains(WidgetState.disabled)
-                  ? SystemMouseCursors.basic
-                  : kIsWeb
-                  ? SystemMouseCursors.click
-                  : SystemMouseCursors.basic);
-        });
-
-    return RadioBase<T>(
-      value: widget.value,
-      groupValue: widget.groupValue,
-      onChanged: widget.onChanged,
-      mouseCursor: effectiveMouseCursor,
+    return CustomPaint(
       size: _size,
-      toggleable: widget.toggleable,
-      focusNode: _effectiveFocusNode,
-      autofocus: widget.autofocus,
-      painterGetter: _getPainter,
+      painter:
+          _painter
+            ..position = widget.toggleableState.position
+            ..reaction = widget.toggleableState.reaction
+            ..focusColor = effectiveFocusOverlayColor
+            ..downPosition = widget.toggleableState.downPosition
+            ..isFocused = widget.focused
+            ..activeColor = effectiveActiveColor
+            ..inactiveColor = effectiveInactiveColor
+            ..fillColor = effectiveFillColor
+            ..value = widget.toggleableState.value
+            ..checkmarkStyle = widget.useCheckmarkStyle
+            ..isActive = widget.isActive
+            ..borderColor = effectiveBorderColor
+            ..brightness = CupertinoTheme.of(context).brightness,
     );
   }
 }
