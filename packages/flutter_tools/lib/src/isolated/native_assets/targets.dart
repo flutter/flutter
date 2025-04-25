@@ -53,7 +53,7 @@ sealed class AssetBuildTarget {
   String get targetString;
 
   List<DataAssetsExtension> get dataAssetExtensions => <DataAssetsExtension>[
-    if (supportedAssetTypes.contains('data')) DataAssetsExtension(),
+    if (supportedAssetTypes.contains('data_assets/data')) DataAssetsExtension(),
   ];
 
   /// Build the list of [AssetBuildTarget]s for a given [TargetPlatform].
@@ -180,7 +180,7 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   Future<void> setCCompilerConfig();
 
   List<CodeAssetExtension> get codeAssetExtensions => <CodeAssetExtension>[
-    if (supportedAssetTypes.contains('native_code'))
+    if (supportedAssetTypes.contains('code_assets/code'))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
