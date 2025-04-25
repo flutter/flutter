@@ -44,13 +44,15 @@ executable("flutter_shell_native_unittests") {
   testonly = true
   sources = [
     "android_context_gl_impeller_unittests.cc",
-    "android_context_gl_unittests.cc",
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
     "image_lru_unittests.cc",
     "platform_view_android_unittests.cc",
   ]
+  if (!slimpeller) {
+    sources += [ "android_context_gl_unittests.cc" ]
+  }
   public_configs = [ "//flutter:config" ]
   deps = [
     ":flutter_shell_native_src",
@@ -83,8 +85,6 @@ source_set("flutter_shell_native_src") {
   sources = [
     "android_context_gl_impeller.cc",
     "android_context_gl_impeller.h",
-    "android_context_gl_skia.cc",
-    "android_context_gl_skia.h",
     "android_context_vk_impeller.cc",
     "android_context_vk_impeller.h",
     "android_display.cc",
@@ -97,10 +97,6 @@ source_set("flutter_shell_native_src") {
     "android_shell_holder.h",
     "android_surface_gl_impeller.cc",
     "android_surface_gl_impeller.h",
-    "android_surface_gl_skia.cc",
-    "android_surface_gl_skia.h",
-    "android_surface_software.cc",
-    "android_surface_software.h",
     "android_surface_vk_impeller.cc",
     "android_surface_vk_impeller.h",
     "apk_asset_provider.cc",
@@ -113,8 +109,6 @@ source_set("flutter_shell_native_src") {
     "image_external_texture_gl.h",
     "image_external_texture_gl_impeller.cc",
     "image_external_texture_gl_impeller.h",
-    "image_external_texture_gl_skia.cc",
-    "image_external_texture_gl_skia.h",
     "image_external_texture_vk_impeller.cc",
     "image_external_texture_vk_impeller.h",
     "image_lru.cc",
@@ -132,13 +126,26 @@ source_set("flutter_shell_native_src") {
     "surface_texture_external_texture.h",
     "surface_texture_external_texture_gl_impeller.cc",
     "surface_texture_external_texture_gl_impeller.h",
-    "surface_texture_external_texture_gl_skia.cc",
-    "surface_texture_external_texture_gl_skia.h",
     "surface_texture_external_texture_vk_impeller.cc",
     "surface_texture_external_texture_vk_impeller.h",
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
   ]
+
+  if (!slimpeller) {
+    sources += [
+      "android_context_gl_skia.cc",
+      "android_context_gl_skia.h",
+      "android_surface_gl_skia.cc",
+      "android_surface_gl_skia.h",
+      "android_surface_software.cc",
+      "android_surface_software.h",
+      "image_external_texture_gl_skia.cc",
+      "image_external_texture_gl_skia.h",
+      "surface_texture_external_texture_gl_skia.cc",
+      "surface_texture_external_texture_gl_skia.h",
+    ]
+  }
 
   sources += get_target_outputs(":icudtl_asm")
 
