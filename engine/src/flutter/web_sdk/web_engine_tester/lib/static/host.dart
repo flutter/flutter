@@ -121,9 +121,10 @@ void main() {
     () {
       final MultiChannel<dynamic> serverChannel = _connectToServer();
       hostLog = (String text) {
-        print('text');
+        print('[host]: $text');
         serverChannel.sink.add({'command': 'log', 'text': text});
       };
+      hostLog('host connected');
       serverChannel.stream.listen((dynamic message) {
         if (message['command'] == 'loadSuite') {
           final int channelId = message['channel'] as int;

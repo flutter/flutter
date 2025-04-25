@@ -896,6 +896,7 @@ class BrowserManager {
 
     future
         .then((WebSocketChannel webSocket) {
+          print('web socket connected');
           if (completer.isCompleted) {
             return;
           }
