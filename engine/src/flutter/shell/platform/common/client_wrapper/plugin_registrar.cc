@@ -14,6 +14,68 @@
 
 namespace flutter {
 
+namespace {
+
+class PluginRegistrarMapImpl : public PluginRegistrarMap {
+  using WrapperMap =
+      std::map<FlutterDesktopPluginRegistrarRef,
+               std::pair<PluginRegistrar*, OnPluginRegistrarDestructed>>;
+ public:
+  ~PluginRegistrarMapImpl() {
+    clear();
+  }
+
+  void* allocate_memory(size_t size) override {
+    return malloc(size);
+  }
+
+  void release_memory(void* address) override {
+    free(address);
+  }
+
+  void emplace(FlutterDesktopPluginRegistrarRef registrar_ref,
+               PluginRegistrar* registrar_wrapper,
+               OnPluginRegistrarDestructed on_destructed) override {
+    auto it = map_.find(registrar_ref);
+    if (it == map_.end()) {
+      map_.emplace(registrar_ref,
+                   std::make_pair(registrar_wrapper, on_destructed));
+    }
+  }
+
+  void erase(FlutterDesktopPluginRegistrarRef registrar_ref) override {
+    auto it = map_.find(registrar_ref);
+    if (it == map_.end())  return;
+
+    PluginRegistrar* registrar_wrapper = it->second.first;
+    OnPluginRegistrarDestructed on_destructed = it->second.second;
+
+    if (registrar_wrapper && on_destructed) {
+      on_destructed(registrar_wrapper);
+    }
+
+    map_.erase(it);
+  }
+
+  void clear() override {
+    for (auto& pair : map_) {
+      PluginRegistrar* registrar_wrapper = pair.second.first;
+      OnPluginRegistrarDestructed on_destructed = pair.second.second;
+
+      if (registrar_wrapper && on_destructed) {
+        on_destructed(registrar_wrapper);
+      }
+    }
+
+    map_.clear();
+  }
+
+ private:
+  WrapperMap map_;
+};
+
+}
+
 // ===== PluginRegistrar =====
 
 PluginRegistrar::PluginRegistrar(FlutterDesktopPluginRegistrarRef registrar)
@@ -51,12 +113,13 @@ PluginRegistrarManager* PluginRegistrarManager::GetInstance() {
   return instance;
 }
 
-PluginRegistrarManager::PluginRegistrarManager() = default;
+PluginRegistrarManager::PluginRegistrarManager()
+    : registrars_(new PluginRegistrarMapImpl()) {}
 
-// static
-void PluginRegistrarManager::OnRegistrarDestroyed(
-    FlutterDesktopPluginRegistrarRef registrar) {
-  GetInstance()->registrars()->erase(registrar);
+PluginRegistrarManager::~PluginRegistrarManager() {
+  if (registrars_) {
+    delete registrars_;
+  }
 }
 
 }  // namespace flutter
