@@ -1624,11 +1624,26 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     // visible only for filled dropdown button, see:
     // https://m2.material.io/components/menus#dropdown-menu
     if (widget._inputDecoration != null) {
+      final bool filled =
+          widget._inputDecoration?.filled ?? Theme.of(context).inputDecorationTheme.filled;
+      final bool oulined =
+          widget._inputDecoration?.border?.isOutline ??
+          Theme.of(context).inputDecorationTheme.border?.isOutline ??
+          false;
+
+      final double suffixIconEndMargin = (filled || oulined) ? 12.0 : 0.0;
       InputDecoration effectiveDecoration = widget._inputDecoration!.copyWith(
         // Override the suffix icon constraints to allow the
         // icon alignment to match the regular dropdown button.
-        suffixIconConstraints: const BoxConstraints(minWidth: 40.0),
-        suffixIcon: effectiveSuffixIcon,
+        suffixIconConstraints: BoxConstraints(
+          minWidth: widget.iconSize + suffixIconEndMargin,
+          minHeight: widget.iconSize,
+        ),
+        // suffixIconGap: 0.0,
+        suffixIcon: Padding(
+          padding: EdgeInsetsGeometry.directional(end: suffixIconEndMargin),
+          child: effectiveSuffixIcon,
+        ),
       );
       if (_hasPrimaryFocus) {
         final Color? focusColor = widget.focusColor ?? effectiveDecoration.focusColor;
