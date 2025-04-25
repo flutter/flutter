@@ -942,8 +942,8 @@ class _MaterialAppState extends State<MaterialApp> {
     return _MaterialInspectorButton(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
-      isDarkTheme: _isDarkTheme(context),
       icon: Icons.close,
+      isDarkTheme: _isDarkTheme(context),
       buttonKey: key,
     );
   }
@@ -954,15 +954,11 @@ class _MaterialAppState extends State<MaterialApp> {
     required String semanticLabel,
     bool isLeftAligned = true,
   }) {
-    final bool isDarkTheme = _isDarkTheme(context);
-    return _MaterialInspectorButton(
+    return _MaterialInspectorButton.iconOnly(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
-      isDarkTheme: isDarkTheme,
       icon: isLeftAligned ? Icons.arrow_right : Icons.arrow_left,
-      iconSize: _MaterialInspectorButton._selectionButtonsSize,
-      backgroundColor: Colors.transparent,
-      foregroundColor: _MaterialInspectorButton._backgroundColor(context, isDarkTheme: isDarkTheme),
+      isDarkTheme: _isDarkTheme(context),
     );
   }
 
@@ -972,19 +968,12 @@ class _MaterialAppState extends State<MaterialApp> {
     required String semanticLabel,
     required bool defaultTapBehaviorEnabled,
   }) {
-    final bool isDarkTheme = _isDarkTheme(context);
-    return _MaterialInspectorButton(
+    return _MaterialInspectorButton.toggle(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
-      isDarkTheme: isDarkTheme,
-      icon: Icons.ads_click,
-      backgroundColor:
-          defaultTapBehaviorEnabled
-              ? _MaterialInspectorButton._backgroundColor(context, isDarkTheme: isDarkTheme)
-              : _MaterialInspectorButton._alternateBackgroundColor(
-                context,
-                isDarkTheme: isDarkTheme,
-              ),
+      icon: CupertinoIcons.cursor_rays,
+      isDarkTheme: _isDarkTheme(context),
+      toggledOn: defaultTapBehaviorEnabled,
     );
   }
 
@@ -1178,48 +1167,51 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 }
 
+enum _MaterialInspectorButtonVariant { filled, toggle, iconOnly }
+
 class _MaterialInspectorButton extends StatelessWidget {
   const _MaterialInspectorButton({
     required this.onPressed,
     required this.semanticLabel,
     required this.icon,
     required this.isDarkTheme,
-    this.iconSize,
     this.buttonKey,
-    this.backgroundColor,
-    this.foregroundColor,
-  });
+  }) : _variant = _MaterialInspectorButtonVariant.filled,
+       _toggledOn = null;
+
+  const _MaterialInspectorButton.toggle({
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+    required this.isDarkTheme,
+    bool toggledOn = true,
+  }) : buttonKey = null,
+       _variant = _MaterialInspectorButtonVariant.toggle,
+       _toggledOn = toggledOn;
+
+  const _MaterialInspectorButton.iconOnly({
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+    required this.isDarkTheme,
+  }) : buttonKey = null,
+       _variant = _MaterialInspectorButtonVariant.iconOnly,
+       _toggledOn = null;
 
   final VoidCallback onPressed;
   final String semanticLabel;
   final IconData icon;
   final bool isDarkTheme;
-  final double? iconSize;
   final GlobalKey? buttonKey;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
+  final _MaterialInspectorButtonVariant _variant;
+  final bool? _toggledOn;
 
-  static Color _foregroundColor(BuildContext context, {required bool isDarkTheme}) {
-    final ThemeData theme = Theme.of(context);
-    return isDarkTheme ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primaryContainer;
-  }
-
-  static Color _backgroundColor(BuildContext context, {required bool isDarkTheme}) {
-    final ThemeData theme = Theme.of(context);
-    return isDarkTheme ? theme.colorScheme.primaryContainer : theme.colorScheme.onPrimaryContainer;
-  }
-
-  static Color _alternateBackgroundColor(BuildContext context, {required bool isDarkTheme}) {
-    final Color backgroundColor = _backgroundColor(context, isDarkTheme: isDarkTheme);
-    final Color foregroundColor = _foregroundColor(context, isDarkTheme: isDarkTheme);
-    return Color.lerp(backgroundColor, foregroundColor, 0.35) ?? backgroundColor;
-  }
-
-  static const double _selectionButtonsSize = 32.0;
-  static const double _selectionButtonsIconSize = 18.0;
-  static const BoxConstraints _selectionButtonsConstraints = BoxConstraints.tightFor(
-    width: _selectionButtonsSize,
-    height: _selectionButtonsSize,
+  static const double _buttonSize = 32.0;
+  static const double _buttonIconSize = 18.0;
+  static const EdgeInsets _buttonPadding = EdgeInsets.zero;
+  static const BoxConstraints _buttonConstraints = BoxConstraints.tightFor(
+    width: _buttonSize,
+    height: _buttonSize,
   );
 
   @override
@@ -1227,27 +1219,62 @@ class _MaterialInspectorButton extends StatelessWidget {
     return IconButton(
       key: buttonKey,
       onPressed: onPressed,
-      iconSize: iconSize ?? _selectionButtonsIconSize,
-      padding: EdgeInsets.zero,
-      constraints: _selectionButtonsConstraints,
-      style: _selectionButtonsIconStyle(
-        context,
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor,
-      ),
+      iconSize:
+          _variant == _MaterialInspectorButtonVariant.iconOnly ? _buttonSize : _buttonIconSize,
+      padding: _buttonPadding,
+      constraints: _buttonConstraints,
+      style: _selectionButtonsIconStyle(context),
       icon: Icon(icon, semanticLabel: semanticLabel),
     );
   }
 
-  ButtonStyle _selectionButtonsIconStyle(
-    BuildContext context, {
-    Color? backgroundColor,
-    Color? foregroundColor,
-  }) {
+  ButtonStyle _selectionButtonsIconStyle(BuildContext context) {
+    final Color foregroundColor = _foregroundColor(context);
+    final Color backgroundColor = _backgroundColor(context);
+
     return IconButton.styleFrom(
-      backgroundColor: backgroundColor ?? _backgroundColor(context, isDarkTheme: isDarkTheme),
-      foregroundColor: foregroundColor ?? _foregroundColor(context, isDarkTheme: isDarkTheme),
+      foregroundColor: foregroundColor,
+      backgroundColor: backgroundColor,
+      side:
+          _variant == _MaterialInspectorButtonVariant.toggle && !_toggledOn!
+              ? BorderSide(color: foregroundColor)
+              : null,
       tapTargetSize: MaterialTapTargetSize.padded,
     );
+  }
+
+  Color _foregroundColor(BuildContext context) {
+    final Color primaryColor = _primaryColor(context);
+    final Color secondaryColor = _secondaryColor(context);
+    switch (_variant) {
+      case _MaterialInspectorButtonVariant.filled:
+        return primaryColor;
+      case _MaterialInspectorButtonVariant.iconOnly:
+        return secondaryColor;
+      case _MaterialInspectorButtonVariant.toggle:
+        return !_toggledOn! ? secondaryColor : primaryColor;
+    }
+  }
+
+  Color _backgroundColor(BuildContext context) {
+    final Color secondaryColor = _secondaryColor(context);
+    switch (_variant) {
+      case _MaterialInspectorButtonVariant.filled:
+        return secondaryColor;
+      case _MaterialInspectorButtonVariant.iconOnly:
+        return Colors.transparent;
+      case _MaterialInspectorButtonVariant.toggle:
+        return !_toggledOn! ? Colors.transparent : secondaryColor;
+    }
+  }
+
+  Color _primaryColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return isDarkTheme ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.primaryContainer;
+  }
+
+  Color _secondaryColor(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return isDarkTheme ? theme.colorScheme.primaryContainer : theme.colorScheme.onPrimaryContainer;
   }
 }
