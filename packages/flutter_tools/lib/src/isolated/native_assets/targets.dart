@@ -38,6 +38,7 @@ import 'ios/native_assets.dart' show getIOSSdk, getNativeIOSArchitecture, target
 import 'linux/native_assets.dart';
 import 'macos/native_assets.dart' show getNativeMacOSArchitecture, targetMacOSVersion;
 import 'macos/native_assets_host.dart';
+import 'native_assets.dart';
 import 'windows/native_assets.dart';
 
 /// This is a translation layer between Flutter, which knows only
@@ -46,14 +47,14 @@ import 'windows/native_assets.dart';
 sealed class AssetBuildTarget {
   const AssetBuildTarget({required this.supportedAssetTypes});
 
-  final List<String> supportedAssetTypes;
+  final List<SupportedAssetTypes> supportedAssetTypes;
 
   List<ProtocolExtension> get extensions;
 
   String get targetString;
 
   List<DataAssetsExtension> get dataAssetExtensions => <DataAssetsExtension>[
-    if (supportedAssetTypes.contains('data_assets/data')) DataAssetsExtension(),
+    if (supportedAssetTypes.contains(SupportedAssetTypes.dataAssets)) DataAssetsExtension(),
   ];
 
   /// Build the list of [AssetBuildTarget]s for a given [TargetPlatform].
@@ -64,7 +65,7 @@ sealed class AssetBuildTarget {
     TargetPlatform targetPlatform,
     Map<String, String> environmentDefines,
     FileSystem fileSystem,
-    List<String> supportedAssetTypes,
+    List<SupportedAssetTypes> supportedAssetTypes,
   ) {
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
@@ -180,7 +181,7 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   Future<void> setCCompilerConfig();
 
   List<CodeAssetExtension> get codeAssetExtensions => <CodeAssetExtension>[
-    if (supportedAssetTypes.contains('code_assets/code'))
+    if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
@@ -246,7 +247,7 @@ final class IOSAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    if (supportedAssetTypes.contains('native_code'))
+    if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
@@ -264,7 +265,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    if (supportedAssetTypes.contains('native_code'))
+    if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
@@ -296,7 +297,7 @@ final class AndroidAssetTarget extends CodeAssetTarget {
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    if (supportedAssetTypes.contains('native_code'))
+    if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,

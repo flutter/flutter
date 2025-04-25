@@ -42,6 +42,8 @@ class FlutterCodeAsset {
   final Target target;
 }
 
+enum SupportedAssetTypes { codeAssets, dataAssets }
+
 /// Invokes the build of all transitive Dart package hooks and prepares assets
 /// to be included in the native build.
 Future<DartHooksResult> runFlutterSpecificHooks({
@@ -63,9 +65,9 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     return DartHooksResult.empty();
   }
 
-  final List<String> supportedAssetTypes = <String>[
-    if (featureFlags.isNativeAssetsEnabled) 'code_assets/code',
-    if (featureFlags.isDartDataAssetsEnabled) 'data_assets/data',
+  final List<SupportedAssetTypes> supportedAssetTypes = <SupportedAssetTypes>[
+    if (featureFlags.isNativeAssetsEnabled) SupportedAssetTypes.codeAssets,
+    if (featureFlags.isDartDataAssetsEnabled) SupportedAssetTypes.dataAssets,
   ];
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
     targetPlatform,
