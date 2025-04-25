@@ -46,12 +46,7 @@ CATransform3D GetCATransform3DFromDlMatrix(const flutter::DlMatrix& matrix) {
 
 class CGPathReceiver final : public flutter::DlPathReceiver {
  public:
-  void SetPathInfo(flutter::DlPathFillType type, bool is_convex) override {
-    // CGPaths do not have an inherit fill type, we would need to remember
-    // the fill type and employ it when we use the path.
-    // see https://github.com/flutter/flutter/issues/164826
-  }
-  void MoveTo(const flutter::DlPoint& p2) override {  //
+  void MoveTo(const flutter::DlPoint& p2, bool will_be_closed) override {  //
     CGPathMoveToPoint(path_ref_, nil, p2.x, p2.y);
   }
   void LineTo(const flutter::DlPoint& p2) override {
@@ -420,6 +415,9 @@ static BOOL _preparedOnce = NO;
 
   CGPathReceiver receiver;
 
+  // TODO(flar): https://github.com/flutter/flutter/issues/164826
+  // CGPaths do not have an inherit fill type, we would need to remember
+  // the fill type and employ it when we use the path.
   dlPath.Dispatch(receiver);
 
   // The `matrix` is based on the physical pixels, convert it to UIKit points.
