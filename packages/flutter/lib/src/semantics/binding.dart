@@ -26,6 +26,7 @@ mixin SemanticsBinding on BindingBase {
     platformDispatcher
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsActionEvent = _handleSemanticsActionEvent
+      ..onGetSemanticsNode = _handleGetSemanticsNode
       ..onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     _handleSemanticsEnabledChanged();
   }

@@ -43,6 +43,9 @@ typedef KeyDataCallback = bool Function(KeyData data);
 /// Signature for [PlatformDispatcher.onSemanticsActionEvent].
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
+/// Signature for [PlatformDispatcher.onGetSemanticsNode].
+typedef GetSemanticsNodeCallback = SemanticsUpdate Function(int viewId, int nodeIDe);
+
 /// Signature for responses to platform messages.
 ///
 /// Used as a parameter to [PlatformDispatcher.sendPlatformMessage] and
@@ -531,21 +534,19 @@ class PlatformDispatcher {
     return PointerDataPacket(data: data);
   }
 
-  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) => (
-    ByteData? packet,
-    PlatformMessageResponseCallback callback,
-  ) {
-    _invoke1<KeyData>(
-      (KeyData keyData) {
-        final bool handled = onKeyData(keyData);
-        final Uint8List response = Uint8List(1);
-        response[0] = handled ? 1 : 0;
-        callback(response.buffer.asByteData());
-      },
-      zone,
-      _unpackKeyData(packet!),
-    );
-  };
+  static ChannelCallback _keyDataListener(KeyDataCallback onKeyData, Zone zone) =>
+      (ByteData? packet, PlatformMessageResponseCallback callback) {
+        _invoke1<KeyData>(
+          (KeyData keyData) {
+            final bool handled = onKeyData(keyData);
+            final Uint8List response = Uint8List(1);
+            response[0] = handled ? 1 : 0;
+            callback(response.buffer.asByteData());
+          },
+          zone,
+          _unpackKeyData(packet!),
+        );
+      };
 
   /// A callback that is invoked when key data is available.
   ///
@@ -577,12 +578,11 @@ class PlatformDispatcher {
 
     int offset = 0;
     final int charDataSize = packet.getUint64(kStride * offset++, _kFakeHostEndian);
-    final String? character =
-        charDataSize == 0
-            ? null
-            : utf8.decoder.convert(
-              packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
-            );
+    final String? character = charDataSize == 0
+        ? null
+        : utf8.decoder.convert(
+            packet.buffer.asUint8List(kStride * (offset + _kKeyDataFieldCount), charDataSize),
+          );
 
     final KeyData keyData = KeyData(
       timeStamp: Duration(microseconds: packet.getUint64(kStride * offset++, _kFakeHostEndian)),
@@ -1344,6 +1344,25 @@ class PlatformDispatcher {
         viewId: viewId,
         arguments: args,
       ),
+    );
+  }
+
+  /// A callback to get semantics node.
+  GetSemanticsNodeCallback? get onGetSemanticsNode => _onGetSemanticsNode;
+  GetSemanticsNodeCallback? _onGetSemanticsNode;
+  Zone _onGetSemanticsNodeZone = Zone.root;
+  set onGetSemanticsNode(GetSemanticsNodeCallback? callback) {
+    _onGetSemanticsNode = callback;
+    _onGetSemanticsNodeZone = Zone.current;
+  }
+
+  // Called from the engine, via hooks.dart
+  SemanticsUpdate _getSemanticsNode(int viewId, int nodeId) {
+    return _invokeAndReturn2<SemanticsUpdate, int, int>(
+      onGetSemanticsNode,
+      _onGetSemanticsNodeZone,
+      viewId,
+      nodeId,
     );
   }
 
