@@ -252,7 +252,7 @@ void main() {
         await modifyPubspec(rootDependency, (YamlEditor editor) {
           editor
             ..update(<String>['flutter', 'assets'], <String>[assets.keys.first])
-            ..update(<String>['dependencies'], <String, String>{'native_assets_cli': '^0.14.0'});
+            ..update(<String>['dependencies'], <String, String>{'native_assets_cli': '^0.17.0'});
         });
 
         final ProcessTestResult result = await runFlutter(
@@ -282,7 +282,7 @@ Future<void> createDataAssetApp(String packageName, Directory root) async {
   await modifyPubspec(
     root,
     (YamlEditor editor) =>
-        editor.update(<String>['dependencies'], <String, String>{'native_assets_cli': '^0.14.0'}),
+        editor.update(<String>['dependencies'], <String, String>{'native_assets_cli': '^0.17.0'}),
   );
 
   final File pubspecFile = root.childFile('pubspec.yaml');
