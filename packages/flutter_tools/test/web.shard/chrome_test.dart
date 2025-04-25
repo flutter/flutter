@@ -30,6 +30,7 @@ const List<String> kChromeArgs = <String>[
   '--disable-default-apps',
   '--disable-translate',
   '--disable-search-engine-choice-screen',
+  '--no-sandbox',
 ];
 
 const List<String> kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
@@ -535,7 +536,6 @@ void main() {
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
           '--remote-debugging-port=12345',
           ...kChromeArgs,
-          '--no-sandbox',
           '--headless',
           '--disable-gpu',
           '--window-size=2400,1800',
@@ -621,7 +621,6 @@ void main() {
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
       ...kChromeArgs,
-      '--no-sandbox',
       '--headless',
       '--disable-gpu',
       '--window-size=2400,1800',
@@ -655,7 +654,6 @@ void main() {
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
       '--remote-debugging-port=12345',
       ...kChromeArgs,
-      '--no-sandbox',
       '--headless',
       '--disable-gpu',
       '--window-size=2400,1800',
@@ -693,7 +691,6 @@ void main() {
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
             '--remote-debugging-port=12345',
             ...kChromeArgs,
-            '--no-sandbox',
             '--headless',
             '--disable-gpu',
             '--window-size=2400,1800',
