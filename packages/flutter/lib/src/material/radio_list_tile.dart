@@ -386,7 +386,7 @@ class RadioListTile<T> extends StatelessWidget {
   /// Whether this list tile is intended to display three lines of text.
   ///
   /// If null, the value from [ListTileThemeData.isThreeLine] is used.
-  /// If that is also null, the value from the [ListTileThemeData] returned by [ThemeData.listTileTheme] is used.
+  /// If that is also null, the value from [ThemeData.listTileTheme] is used.
   /// If still null, the default value is `false`.
   final bool? isThreeLine;
 
