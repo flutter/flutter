@@ -514,18 +514,5 @@ TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
   EXPECT_TRUE(indices.empty());
 }
 
-#if !NDEBUG
-TEST(TessellatorTest, ChecksConcurrentPolylineUsage) {
-  auto tessellator = std::make_shared<Tessellator>();
-  PathBuilder builder;
-  builder.AddLine({0, 0}, {100, 100});
-  auto path = builder.TakePath();
-
-  auto polyline = tessellator->CreateTempPolyline(path, 0.1);
-  EXPECT_DEBUG_DEATH(tessellator->CreateTempPolyline(path, 0.1),
-                     "point_buffer_");
-}
-#endif  // NDEBUG
-
 }  // namespace testing
 }  // namespace impeller

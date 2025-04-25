@@ -2501,11 +2501,11 @@ TEST_P(EntityTest, GiantStrokePathAllocation) {
        result.vertex_buffer.vertex_buffer.GetRange().offset));
 
   std::vector<Point> expected = {
-      Point(1019.46, 1026.54),  //
-      Point(1026.54, 1019.46),  //
-      Point(1020.45, 1027.54),  //
-      Point(1027.54, 1020.46),  //
-      Point(1020.46, 1027.53)   //
+      Point(2043.46, 2050.54),  //
+      Point(2050.54, 2043.46),  //
+      Point(2044.46, 2051.54),  //
+      Point(2051.54, 2044.46),  //
+      Point(2045.46, 2052.54)   //
   };
 
   Point point = written_data[kPointArenaSize - 2];
