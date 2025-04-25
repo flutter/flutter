@@ -87,7 +87,7 @@ user_pref("browser.aboutwelcome.enabled", false);
           url.toString(),
           '--profile',
           temporaryProfileDirectory.path,
-          if (!debug) '--headless',
+          //if (!debug) '--headless',
           '-width $kMaxScreenshotWidth',
           '-height $kMaxScreenshotHeight',
           '-new-window',
