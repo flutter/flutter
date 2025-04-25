@@ -434,11 +434,6 @@ typedef FormFieldErrorBuilder = Widget Function(BuildContext context, String err
 /// Used by [FormField.onSaved].
 typedef FormFieldSetter<T> = void Function(T? newValue);
 
-/// Signature for being notified when a form field is reset.
-///
-/// Used by [FormField.onReset].
-typedef FormFieldResetCallback<T> = void Function(FormFieldState<T> field);
-
 /// Signature for building the widget representing the form field.
 ///
 /// Used by [FormField.builder].
@@ -493,7 +488,7 @@ class FormField<T> extends StatefulWidget {
 
   /// An optional method to call when the form field is reset via
   /// [FormFieldState.reset].
-  final FormFieldResetCallback<T>? onReset;
+  final VoidCallback? onReset;
 
   /// An optional property that forces the [FormFieldState] into an error state
   /// by directly setting the [FormFieldState.errorText] property without
@@ -641,7 +636,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
       _hasInteractedByUser.value = false;
       _errorText.value = null;
     });
-    widget.onReset?.call(this);
+    widget.onReset?.call();
     Form.maybeOf(context)?._fieldDidChange();
   }
 
