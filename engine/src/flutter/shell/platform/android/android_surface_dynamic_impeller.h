@@ -57,6 +57,12 @@ class AndroidSurfaceDynamicImpeller : public AndroidSurface {
       fml::RefPtr<AndroidNativeWindow> window,
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) override;
 
+  // |AndroidSurface|
+  std::unique_ptr<Surface> CreateSnapshotSurface() override;
+
+  // |AndroidSurface|
+  void SetupImpellerSurface() override;
+
  private:
   std::shared_ptr<AndroidContextDynamicImpeller> android_context_;
   std::unique_ptr<AndroidSurfaceVKImpeller> vulkan_surface_;

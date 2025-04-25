@@ -320,16 +320,23 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
           io_manager = parent_io_manager;
         } else {
           io_manager = std::make_shared<ShellIOManager>(
-              platform_view_ptr->CreateResourceContext(),  // resource context
-              is_backgrounded_sync_switch,                 // sync switch
-              io_task_runner,           // unref queue task runner
-              impeller_context_future,  // impeller context
-              impeller_enabled          //
+              nullptr,                      // resource context
+              is_backgrounded_sync_switch,  // sync switch
+              io_task_runner,               // unref queue task runner
+              impeller_context_future,      // impeller context
+              impeller_enabled              //
           );
         }
         weak_io_manager_promise.set_value(io_manager->GetWeakPtr());
         unref_queue_promise.set_value(io_manager->GetSkiaUnrefQueue());
         io_manager_promise.set_value(io_manager);
+
+        // Wait until Impeller context setup is complete before creating the
+        // resource context.
+        io_manager->GetImpellerContext();
+        sk_sp<GrDirectContext> resource_context =
+            platform_view_ptr->CreateResourceContext();
+        io_manager->NotifyResourceContextAvailable(resource_context);
       });
 
   // Send dispatcher_maker to the engine constructor because shell won't have

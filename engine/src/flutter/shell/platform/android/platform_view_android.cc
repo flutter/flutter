@@ -535,6 +535,7 @@ bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
 
 void PlatformViewAndroid::SetupImpellerContext() {
   android_context_->SetupImpellerContext();
+  android_surface_->SetupImpellerSurface();
 }
 
 }  // namespace flutter

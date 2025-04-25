@@ -30,32 +30,32 @@ void AndroidSurfaceDynamicImpeller::TeardownOnScreenContext() {
 
 std::unique_ptr<Surface> AndroidSurfaceDynamicImpeller::CreateGPUSurface(
     GrDirectContext* gr_context) {
-  if (!vulkan_surface_ && !gl_surface_) {
-    std::shared_ptr<impeller::Context> context =
-        android_context_->GetImpellerContext();
-    if (android_context_->RenderingApi() ==
-        AndroidRenderingAPI::kImpellerVulkan) {
-      vulkan_surface_ = std::make_unique<AndroidSurfaceVKImpeller>(
-          android_context_->GetVKContext());
-      if (window_) {
-        vulkan_surface_->SetNativeWindow(window_, jni_facade_);
-      }
-    } else {
-      gl_surface_ = std::make_unique<AndroidSurfaceGLImpeller>(
-          android_context_->GetGLContext());
-      if (window_) {
-        gl_surface_->SetNativeWindow(window_, jni_facade_);
-      }
-    }
-  }
-
   if (vulkan_surface_) {
+    if (window_) {
+      vulkan_surface_->SetNativeWindow(window_, jni_facade_);
+    }
     return vulkan_surface_->CreateGPUSurface(gr_context);
   }
   if (gl_surface_) {
+    if (window_) {
+      gl_surface_->SetNativeWindow(window_, jni_facade_);
+    }
     return gl_surface_->CreateGPUSurface(gr_context);
   }
   return nullptr;
+}
+
+void AndroidSurfaceDynamicImpeller::SetupImpellerSurface() {
+  AndroidRenderingAPI api = android_context_->RenderingApi();
+  if (api == AndroidRenderingAPI::kImpellerVulkan) {
+    vulkan_surface_ = std::make_unique<AndroidSurfaceVKImpeller>(
+        android_context_->GetVKContext());
+  } else if (api == AndroidRenderingAPI::kImpellerOpenGLES) {
+    gl_surface_ = std::make_unique<AndroidSurfaceGLImpeller>(
+        android_context_->GetGLContext());
+  } else {
+    FML_UNREACHABLE();
+  }
 }
 
 bool AndroidSurfaceDynamicImpeller::OnScreenSurfaceResize(const SkISize& size) {
@@ -100,6 +100,17 @@ bool AndroidSurfaceDynamicImpeller::SetNativeWindow(
   window_ = window;
   jni_facade_ = jni_facade;
   return true;
+}
+
+std::unique_ptr<Surface>
+AndroidSurfaceDynamicImpeller::CreateSnapshotSurface() {
+  if (vulkan_surface_) {
+    return vulkan_surface_->CreateSnapshotSurface();
+  }
+  if (gl_surface_) {
+    return gl_surface_->CreateSnapshotSurface();
+  }
+  return nullptr;
 }
 
 std::shared_ptr<impeller::Context>
