@@ -20,6 +20,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'constants.dart';
+import 'focus_traversal.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
@@ -1115,7 +1116,7 @@ class CupertinoActionSheet extends StatefulWidget {
   /// action scroll controller internally.
   final ScrollController? actionScrollController;
 
-  /// {@macro flutter.cupertino.CupertinoTraversalGroup.focusColor}
+  /// {@macro flutter.cupertino.CupertinoFocusTraversalGroup.focusColor}
   final Color? focusColor;
 
   /// The optional cancel button that is grouped separately from the other
@@ -1210,7 +1211,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: CupertinoTraversalGroup(
+      child: CupertinoFocusTraversalGroup(
         focusColor: widget.focusColor,
         child: _ActionSheetButtonBackground(
           isCancel: true,
@@ -1891,8 +1892,8 @@ class _ActionSheetMainSheet extends StatelessWidget {
     );
     return _OverscrollBackground(
       color: backgroundColor,
-      child: CupertinoTraversalGroup(
-        borderRadius: CupertinoTraversalGroup.defaultBorderRadius.copyWith(
+      child: CupertinoFocusTraversalGroup(
+        borderRadius: CupertinoFocusTraversalGroup.defaultBorderRadius.copyWith(
           topLeft: Radius.zero,
           topRight: Radius.zero,
         ),
@@ -2178,96 +2179,6 @@ class _AlertDialogButtonBackgroundState extends State<_AlertDialogButtonBackgrou
           decoration: BoxDecoration(color: CupertinoDynamicColor.resolve(backgroundColor, context)),
           child: widget.child,
         ),
-      ),
-    );
-  }
-}
-
-/// {@template flutter.cupertino.CupertinoTraversalGroup}
-/// A wrapper around [FocusTraversalGroup] to apply a Cupertino-style focus border
-/// around its child when any of child focus nodes gain focus.
-///
-/// The focus border is drawn using a border color specified by [focusColor] and
-/// is rounded by a border radius specified by [borderRadius].
-///
-/// See also:
-///
-/// * <https://developer.apple.com/design/human-interface-guidelines/focus-and-selection/>
-/// {@endtemplate}
-class CupertinoTraversalGroup extends StatefulWidget {
-  /// {@macro flutter.cupertino.CupertinoTraversalGroup}
-  const CupertinoTraversalGroup({
-    this.borderRadius,
-    this.focusColor,
-    required this.child,
-    super.key,
-  });
-
-  /// The radius of the border that highlights active focus.
-  ///
-  /// When [borderRadius] is null, it defaults to [CupertinoTraversalGroup.defaultBorderRadius]
-  final BorderRadiusGeometry? borderRadius;
-
-  /// {@template flutter.cupertino.CupertinoTraversalGroup.focusColor}
-  /// The color of the traversal group border that highlights active focus.
-  ///
-  /// A opacity of [kCupertinoFocusColorOpacity], brightness of [kCupertinoFocusColorBrightness]
-  /// and saturation of [kCupertinoFocusColorSaturation] is automatically applied to this color.
-  ///
-  /// When [focusColor] is null, the widget defaults to [CupertinoColors.activeBlue]
-  /// {@endtemplate}
-  final Color? focusColor;
-
-  /// The child to draw the focused border around.
-  ///
-  /// Since [CupertinoTraversalGroup] can't request focus to itself, this [child] should
-  /// contain widget(s) that can request focus.
-  final Widget child;
-
-  /// The default radius of the border that highlights active focus.
-  static BorderRadius get defaultBorderRadius => kCupertinoButtonSizeBorderRadius[CupertinoButtonSize.large]!;
-
-  @override
-  State<CupertinoTraversalGroup> createState() => CupertinoTraversalGroupState();
-}
-
-/// {@macro flutter.cupertino.CupertinoTraversalGroup}
-class CupertinoTraversalGroupState extends State<CupertinoTraversalGroup> {
-  bool _childHasFocus = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final Color effectiveFocusOutlineColor =
-        HSLColor.fromColor(
-              (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
-                kCupertinoFocusColorOpacity,
-              ),
-            )
-            .withLightness(kCupertinoFocusColorBrightness)
-            .withSaturation(kCupertinoFocusColorSaturation)
-            .toColor();
-
-    return FocusTraversalGroup(
-      onFocusChange: (bool hasFocus) {
-        setState(() {
-          _childHasFocus = hasFocus;
-        });
-      },
-      child: DecoratedBox(
-        position: DecorationPosition.foreground,
-        decoration: BoxDecoration(
-          borderRadius: widget.borderRadius ?? CupertinoTraversalGroup.defaultBorderRadius,
-          border:
-              _childHasFocus
-                  ? Border.fromBorderSide(
-                    BorderSide(
-                      color: effectiveFocusOutlineColor,
-                      width: 3.5,
-                    ),
-                  )
-                  : null,
-        ),
-        child: widget.child,
       ),
     );
   }
