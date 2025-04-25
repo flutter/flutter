@@ -50,7 +50,7 @@ void main() {
   });
 
   tearDown(() {
-    // tryToDelete(tempDirectory);
+    tryToDelete(tempDirectory);
   });
 
   group('dart data assets', () {
@@ -361,24 +361,24 @@ void writeHookLibrary(
   final File hookFile = root.childDirectory('hook').childFile('build.dart');
   available = <String>[for (final String id in available) '"$id"'];
   writeFile(hookFile, '''
-      import 'package:native_assets_cli/data_assets.dart';
+import 'package:native_assets_cli/data_assets.dart';
 
-      void main(List<String> args) async {
-        await build(args, (BuildInput input, BuildOutputBuilder output) async {
-          if(input.config.buildAssetTypes.contains('data')) {
-            for (final id in $available) {
-              output.assets.data.add(
-                DataAsset(
-                  package: input.packageName,
-                  name: id,
-                  file: input.packageRoot.resolve(id),
-                ),
-              );
-            }
-          }
-        });
+void main(List<String> args) async {
+  await build(args, (BuildInput input, BuildOutputBuilder output) async {
+    if (input.config.buildAssetTypes.contains('data_assets/data')) {
+      for (final id in $available) {
+        output.assets.data.add(
+          DataAsset(
+            package: input.packageName,
+            name: id,
+            file: input.packageRoot.resolve(id),
+          ),
+        );
       }
-  ''');
+    }
+  });
+}
+''');
 }
 
 void writeAssets(Map<String, String> dataAssets, Directory root) {
