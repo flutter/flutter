@@ -1877,7 +1877,7 @@ class Scaffold extends StatefulWidget {
   /// A value of 0.0 represents when the bottom sheet covers 70% of the screen,
   /// and 1.0 represents when the bottom sheet fully covers the screen.
   ///
-  /// If this is null, then a non-dismissable [ModalBarrier] with [Color.black] is used. The
+  /// If this is null, then a non-dismissable [ModalBarrier] with [Colors.black] is used. The
   /// barrier is animated to fade in and out as the bottom sheet is opened and closed.
   ///
   /// If the builder returns null, then no scrim is shown.
