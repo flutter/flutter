@@ -230,7 +230,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     if (a is RoundedSuperellipseBorder) {
       return RoundedSuperellipseBorder(
         side: BorderSide.lerp(a.side, side, t),
-        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
       );
     }
     if (a is CircleBorder) {
@@ -249,7 +249,7 @@ class RoundedSuperellipseBorder extends OutlinedBorder with _RRectLikeBorder {
     if (b is RoundedSuperellipseBorder) {
       return RoundedSuperellipseBorder(
         side: BorderSide.lerp(side, b.side, t),
-        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t)!,
+        borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
       );
     }
     if (b is CircleBorder) {
