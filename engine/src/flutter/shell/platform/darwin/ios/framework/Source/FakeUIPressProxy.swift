@@ -32,7 +32,10 @@ public class FakeUIPressProxy: UIPressProxy {
   }
 
   @objc public init(
-    phase: UIPress.Phase, key: UIKey, type: UIEvent.EventType, timestamp: TimeInterval
+    phase: UIPress.Phase,
+    key: UIKey,
+    type: UIEvent.EventType,
+    timestamp: TimeInterval
   ) {
     self.dataPhase = phase
     // Create independent UIKey copy tied to proxy lifetime.
