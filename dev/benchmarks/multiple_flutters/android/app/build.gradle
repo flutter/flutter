@@ -51,10 +51,6 @@ android {
             signingConfig debug.signingConfig
         }
     }
-
-    packagingOptions {
-        doNotStrip("**/*.so")
-    }
 }
 
 dependencies {

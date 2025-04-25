@@ -5,7 +5,6 @@
 #ifndef FLUTTER_LIB_UI_IO_MANAGER_H_
 #define FLUTTER_LIB_UI_IO_MANAGER_H_
 
-#include <future>
 #include "flutter/flow/skia_gpu_object.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/synchronization/sync_switch.h"

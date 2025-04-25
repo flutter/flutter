@@ -182,7 +182,7 @@ class UIDartState : public tonic::DartState {
   /// Whether Flutter GPU is enabled for this application.
   bool IsFlutterGPUEnabled() const;
 
-  /// The runtime stage to use for fragment shader.s
+  /// The runtime stage to use for fragment shaders.
   impeller::RuntimeStageBackend GetRuntimeStageBackend() const;
 
   virtual Dart_Isolate CreatePlatformIsolate(Dart_Handle entry_point,

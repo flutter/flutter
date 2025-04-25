@@ -13,9 +13,9 @@
 #include "flutter/assets/native_assets.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/core/runtime_types.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/shell/common/animator.h"
-#include "impeller/core/runtime_types.h"
 #include "rapidjson/document.h"
 
 namespace flutter {
