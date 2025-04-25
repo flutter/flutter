@@ -35,6 +35,7 @@ public class FakeUIPressProxy: UIPressProxy {
     phase: UIPress.Phase, key: UIKey, type: UIEvent.EventType, timestamp: TimeInterval
   ) {
     self.dataPhase = phase
+    // Create independent UIKey copy tied to proxy lifetime.
     guard let copiedKey = key.copy() as? UIKey else {
       fatalError("Failed to copy UIKey in FakeUIPressProxy initializer")
     }
