@@ -42,14 +42,17 @@ TEST_F(ShellIOManagerTest,
   std::unique_ptr<TestGLSurface> gl_surface;
   std::unique_ptr<ShellIOManager> io_manager;
   fml::RefPtr<MultiFrameCodec> codec;
+  std::promise<std::shared_ptr<impeller::Context>> promise;
+  promise.set_value(nullptr);
 
   // Setup the IO manager.
   PostTaskSync(runners.GetIOTaskRunner(), [&]() {
     gl_surface = std::make_unique<TestGLSurface>(SkISize::Make(1, 1));
     io_manager = std::make_unique<ShellIOManager>(
         gl_surface->CreateGrContext(), std::make_shared<fml::SyncSwitch>(),
-        runners.GetIOTaskRunner(), nullptr,
-        fml::TimeDelta::FromMilliseconds(0));
+        runners.GetIOTaskRunner(),
+        std::make_shared<impeller::ImpellerContextFuture>(promise.get_future()),
+        /*enable_impeller=*/false, fml::TimeDelta::FromMilliseconds(0));
   });
 
   auto isolate = RunDartCodeInIsolate(vm_ref, settings, runners, "emptyMain",

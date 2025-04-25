@@ -83,6 +83,8 @@ source_set("flutter_shell_native_src") {
   visibility = [ ":*" ]
 
   sources = [
+    "android_context_dynamic_impeller.cc",
+    "android_context_dynamic_impeller.h",
     "android_context_gl_impeller.cc",
     "android_context_gl_impeller.h",
     "android_context_vk_impeller.cc",
@@ -95,6 +97,8 @@ source_set("flutter_shell_native_src") {
     "android_environment_gl.h",
     "android_shell_holder.cc",
     "android_shell_holder.h",
+    "android_surface_dynamic_impeller.cc",
+    "android_surface_dynamic_impeller.h",
     "android_surface_gl_impeller.cc",
     "android_surface_gl_impeller.h",
     "android_surface_vk_impeller.cc",
