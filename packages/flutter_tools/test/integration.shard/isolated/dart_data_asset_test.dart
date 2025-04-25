@@ -50,7 +50,7 @@ void main() {
   });
 
   tearDown(() {
-    tryToDelete(tempDirectory);
+    // tryToDelete(tempDirectory);
   });
 
   group('dart data assets', () {
