@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_UI_DART_STATE_H_
 #define FLUTTER_LIB_UI_UI_DART_STATE_H_
 
+#include <future>
 #include <memory>
 #include <string>
 #include <utility>
