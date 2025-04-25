@@ -226,14 +226,14 @@ class DropdownMenu<T> extends StatefulWidget {
   /// An optional icon at the end of the text field.
   ///
   /// Defaults to an [Icon] with [Icons.arrow_drop_down].
-  /// 
+  ///
   /// if [showTrailingIcon] is false, the trailing icon will not be shown.
   final Widget? trailingIcon;
-  
+
   /// Specifies if the [DropdownMenu] should show a [trailingIcon].
-  /// 
+  ///
   /// /// Defaults to true.
-  /// 
+  ///
   /// If [trailingIcon] is set, [DropdownMenu] will use that trailing icon,
   /// otherwise a default trailing icon will be created.
   final bool showTrailingIcon;
