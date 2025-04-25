@@ -545,6 +545,50 @@ public class PlatformPluginTest {
   }
 
   @SuppressWarnings("deprecation")
+  @Config(sdk = API_LEVELS.API_30)
+  @Test
+  public void doEnableEdgeToEdgeWithoutViewOnNewerSdk() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+        PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+    // Does not use view.
+    verify(fakeDecorView, never())
+        .setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    // Should use window.
+    verify(fakeWindow).setDecorFitsSystemWindows(false /* Should be false for edge to edge. */);
+  }
+
+  @SuppressWarnings("deprecation")
+  @Config(sdk = API_LEVELS.API_29)
+  @Test
+  public void doEnableEdgeToEdgeWithViewOnOlderSdk() {
+    View fakeDecorView = mock(View.class);
+    Window fakeWindow = mock(Window.class);
+    Activity mockActivity = mock(Activity.class);
+    when(fakeWindow.getDecorView()).thenReturn(fakeDecorView);
+    when(mockActivity.getWindow()).thenReturn(fakeWindow);
+    PlatformPlugin platformPlugin = new PlatformPlugin(mockActivity, mockPlatformChannel);
+
+    platformPlugin.mPlatformMessageHandler.showSystemUiMode(
+        PlatformChannel.SystemUiMode.EDGE_TO_EDGE);
+    // Older SDK does use view.
+    verify(fakeDecorView)
+        .setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+  }
+
+  @SuppressWarnings("deprecation")
   // SYSTEM_UI_FLAG_*, setSystemUiVisibility
   @Config(sdk = API_LEVELS.API_28)
   @Test

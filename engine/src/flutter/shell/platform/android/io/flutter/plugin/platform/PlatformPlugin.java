@@ -25,6 +25,7 @@ import androidx.activity.OnBackPressedDispatcherOwner;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import io.flutter.Log;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
@@ -41,7 +42,24 @@ public class PlatformPlugin {
   private final PlatformChannel platformChannel;
   @Nullable private final PlatformPluginDelegate platformPluginDelegate;
   private PlatformChannel.SystemChromeStyle currentTheme;
-  private int mEnabledOverlays;
+
+  private class EnabledOverlays {
+    int mOverlays;
+    boolean mEdgeToEdge;
+
+    EnabledOverlays() {
+      mOverlays = DEFAULT_SYSTEM_UI;
+      mEdgeToEdge = false;
+    }
+
+    EnabledOverlays(int overlays) {
+      mOverlays = overlays;
+      mEdgeToEdge = false;
+    }
+  }
+
+  private EnabledOverlays mEnabledOverlays;
+
   private static final String TAG = "PlatformPlugin";
 
   /**
@@ -168,7 +186,7 @@ public class PlatformPlugin {
     this.platformChannel.setPlatformMessageHandler(mPlatformMessageHandler);
     this.platformPluginDelegate = delegate;
 
-    mEnabledOverlays = DEFAULT_SYSTEM_UI;
+    mEnabledOverlays = new EnabledOverlays(DEFAULT_SYSTEM_UI);
   }
 
   /**
@@ -264,7 +282,7 @@ public class PlatformPlugin {
   }
 
   private void setSystemChromeEnabledSystemUIMode(PlatformChannel.SystemUiMode systemUiMode) {
-    int enabledOverlays;
+    EnabledOverlays enabledOverlays = new EnabledOverlays();
 
     if (systemUiMode == PlatformChannel.SystemUiMode.LEAN_BACK) {
       // LEAN BACK
@@ -280,7 +298,7 @@ public class PlatformPlugin {
       // the system overlay has changed. The overlays cannot be dismissed, so adding the callback
       // support will allow users to restore the system ui and dismiss the overlays.
       // Not compatible with top/bottom overlays enabled.
-      enabledOverlays =
+      enabledOverlays.mOverlays =
           View.SYSTEM_UI_FLAG_LAYOUT_STABLE
               | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
               | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -300,7 +318,7 @@ public class PlatformPlugin {
       // the system overlay has changed. The overlays cannot be dismissed, so adding callback
       // support will allow users to restore the system ui and dismiss the overlays.
       // Not compatible with top/bottom overlays enabled.
-      enabledOverlays =
+      enabledOverlays.mOverlays =
           View.SYSTEM_UI_FLAG_IMMERSIVE
               | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
               | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -320,7 +338,7 @@ public class PlatformPlugin {
       // the swipe gesture. The overlays cannot be dismissed, so adding callback support will
       // allow users to restore the system ui and dismiss the overlays.
       // Not compatible with top/bottom overlays enabled.
-      enabledOverlays =
+      enabledOverlays.mOverlays =
           View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
               | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
               | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -339,10 +357,7 @@ public class PlatformPlugin {
       // SDK 29 and up will apply a translucent body scrim behind 2/3 button navigation bars
       // to ensure contrast with buttons on the nav and status bars, unless the contrast is not
       // enforced in the overlay styling.
-      enabledOverlays =
-          View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-              | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-              | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+      enabledOverlays.mEdgeToEdge = true;
     } else {
       // When none of the conditions are matched, return without updating the system UI overlays.
       return;
@@ -380,7 +395,7 @@ public class PlatformPlugin {
       }
     }
 
-    mEnabledOverlays = enabledOverlays;
+    mEnabledOverlays = new EnabledOverlays(enabledOverlays);
     updateSystemUiOverlays();
   }
 
@@ -393,7 +408,13 @@ public class PlatformPlugin {
    * PlatformPlugin}.
    */
   public void updateSystemUiOverlays() {
-    activity.getWindow().getDecorView().setSystemUiVisibility(mEnabledOverlays);
+    // Use the WindowCompat to set Edge-To-Edge.  Call this even if not Edge-To-Edge in case the
+    // flags need to be reset. If Edge-To-Edge, this method should be passed false.
+    WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), !mEnabledOverlays.mEdgeToEdge);
+    if (!mEnabledOverlays.mEdgeToEdge) {
+      // If not Edge-To-Edge, set the appropriate View flags.
+      activity.getWindow().getDecorView().setSystemUiVisibility(mEnabledOverlays.mOverlays);
+    }
     if (currentTheme != null) {
       setSystemChromeSystemUIOverlayStyle(currentTheme);
     }
