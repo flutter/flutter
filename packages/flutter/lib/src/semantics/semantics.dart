@@ -5420,7 +5420,7 @@ class SemanticsConfiguration {
   /// expanded/collapsed state.
   bool? get isExpanded => _flags.hasExpandedState ? _flags.isExpanded : null;
   set isExpanded(bool? value) {
-    _flags = _flags.copyWith(hasExpandedState: true, isExpanded: value!);
+    _flags = _flags.copyWith(hasExpandedState: true, isExpanded: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5441,7 +5441,7 @@ class SemanticsConfiguration {
   /// widget.
   bool? get isEnabled => _flags.hasEnabledState ? _flags.isEnabled : null;
   set isEnabled(bool? value) {
-    _flags = _flags.copyWith(hasEnabledState: true, isEnabled: value!);
+    _flags = _flags.copyWith(hasEnabledState: true, isEnabled: value);
 
     _hasBeenAnnotated = true;
   }
@@ -5458,7 +5458,7 @@ class SemanticsConfiguration {
   bool? get isChecked => _flags.hasCheckedState ? _flags.isChecked : null;
   set isChecked(bool? value) {
     assert(value != true || isCheckStateMixed != true);
-    _flags = _flags.copyWith(hasCheckedState: true, isChecked: value!);
+    _flags = _flags.copyWith(hasCheckedState: true, isChecked: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5487,8 +5487,7 @@ class SemanticsConfiguration {
   /// on/off state.
   bool? get isToggled => _flags.hasToggledState ? _flags.isToggled : null;
   set isToggled(bool? value) {
-    _flags = _flags.copyWith(hasToggledState: true);
-    _flags = _flags.copyWith(isToggled: value!);
+    _flags = _flags.copyWith(hasToggledState: true, isToggled: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5652,8 +5651,7 @@ class SemanticsConfiguration {
   ///  * [SemanticsFlag.isRequired], for a full description of required nodes.
   bool? get isRequired => _flags.hasRequiredState ? _flags.isRequired : null;
   set isRequired(bool? value) {
-    _flags = _flags.copyWith(hasRequiredState: true);
-    _flags = _flags.copyWith(isRequired: value!);
+    _flags = _flags.copyWith(hasRequiredState: true, isRequired: value);
     _hasBeenAnnotated = true;
   }
 
@@ -5827,7 +5825,9 @@ class SemanticsConfiguration {
     if (_actionsAsBits & other._actionsAsBits != 0) {
       return false;
     }
-    if (_flags == other._flags) {
+    if (
+      _flags.hasRepeatedFlags (other._flags)
+    ) {
       return false;
     }
     if (_platformViewId != null && other._platformViewId != null) {

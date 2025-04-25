@@ -608,6 +608,40 @@ class SemanticsFlags {
     }
     return trueFlags;
   }
+
+  bool hasRepeatedFlags(SemanticsFlags other) {
+    return (hasCheckedState && other.hasCheckedState) ||
+        (isChecked && other.isChecked) ||
+        (isSelected && other.isSelected) ||
+        (isButton && other.isButton) ||
+        (isTextField && other.isTextField) ||
+        (isFocused && other.isFocused) ||
+        (hasEnabledState && other.hasEnabledState) ||
+        (isEnabled && other.isEnabled) ||
+        (isInMutuallyExclusiveGroup && other.isInMutuallyExclusiveGroup) ||
+        (isHeader && other.isHeader) ||
+        (isObscured && other.isObscured) ||
+        (scopesRoute && other.scopesRoute) ||
+        (namesRoute && other.namesRoute) ||
+        (isHidden && other.isHidden) ||
+        (isImage && other.isImage) ||
+        (isLiveRegion && other.isLiveRegion) ||
+        (hasToggledState && other.hasToggledState) ||
+        (isToggled && other.isToggled) ||
+        (hasImplicitScrolling && other.hasImplicitScrolling) ||
+        (isMultiline && other.isMultiline) ||
+        (isReadOnly && other.isReadOnly) ||
+        (isFocusable && other.isFocusable) ||
+        (isLink && other.isLink) ||
+        (isSlider && other.isSlider) ||
+        (isKeyboardKey && other.isKeyboardKey) ||
+        (isCheckStateMixed && other.isCheckStateMixed) ||
+        (hasExpandedState && other.hasExpandedState) ||
+        (isExpanded && other.isExpanded) ||
+        (hasSelectedState && other.hasSelectedState) ||
+        (hasRequiredState && other.hasRequiredState) ||
+        (isRequired && other.isRequired);
+  }
 }
 
 // Mirrors engine/src/flutter/lib/ui/semantics.dart
