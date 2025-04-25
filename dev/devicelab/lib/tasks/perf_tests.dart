@@ -1744,7 +1744,7 @@ class CompileTest {
         '-scheme',
         'hello_world_swiftui',
         '-destination',
-        'generic/platform=iOS',
+        'platform=iOS,name=iPhone 11',
         '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
         '-resultBundlePath',
         'benchmarkResults.xcresult'
