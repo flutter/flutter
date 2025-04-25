@@ -173,6 +173,8 @@ class RawMenuAnchor extends StatefulWidget {
     this.consumeOutsideTaps = false,
     this.onOpen,
     this.onClose,
+    this.onOpenRequested,
+    this.onCloseRequested,
     this.useRootOverlay = false,
     this.builder,
     required this.controller,
@@ -185,6 +187,12 @@ class RawMenuAnchor extends StatefulWidget {
 
   /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
+
+  /// A callback that is invoked when [MenuController.open] is called.
+  final VoidCallback? onOpenRequested;
+
+  /// A callback that is invoked when [MenuController.close] is called.
+  final VoidCallback? onCloseRequested;
 
   /// A builder that builds the widget that this [RawMenuAnchor] surrounds.
   ///
@@ -337,7 +345,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     final Size newSize = MediaQuery.sizeOf(context);
     if (_viewSize != null && newSize != _viewSize) {
       // Close the menus if the view changes size.
-      root.close();
+      root.requestClose();
     }
     _viewSize = newSize;
   }
@@ -377,7 +385,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     // Don't just close it on *any* scroll, since we want to be able to scroll
     // menus themselves if they're too big for the view.
     if (isRoot) {
-      close();
+      requestClose();
     }
   }
 
@@ -405,17 +413,60 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
   @protected
   void open({Offset? position});
 
-  /// Close the menu.
+  /// Close the menu and all of its children.
+  ///
+  /// If `inDispose` is true, the menu will close without rebuilding its parent.
+  ///
+  /// Unless the menu needs to be closed immediately, [requestClose] should be
+  /// called instead of [close]. Doing so allows subclasses to control how the
+  /// menu is opened.
   @protected
   void close({bool inDispose = false});
 
+  /// Request that the menu starts opening.
+  ///
+  /// Unless the menu needs to be opened immediately, this method should be
+  /// called instead of [open]. Doing so allows subclasses to control how the
+  /// menu is opened.
+  ///
+  /// The optional `position` argument should specify the location of the menu
+  /// in the local coordinates of the [RawMenuAnchor].
+  void requestOpen({Offset? position}) {
+    assert(_debugMenuInfo('Requesting open $this'));
+    open(position: position);
+  }
+
+  /// Request that the menu starts closing.
+  ///
+  /// Unless this menu needs to be opened immediately, this method should be
+  /// called instead of [open]. Doing so allows subclasses to control how the
+  /// menu is opened.
+  void requestClose() {
+    assert(_debugMenuInfo('Requesting close $this'));
+    close();
+  }
+
+  /// Request that the submenus of this menu be closed.
+  ///
+  /// By default, this method will call [requestClose] on each child of this
+  /// menu, which will trigger the closing sequence of each child.
+  ///
+  /// When `shouldDelegate` is false, [close] will be called on children instead
+  /// of [requestClose]. This closes children without any transitions.
+  ///
+  /// When `inDispose` is true, animations will be skipped and each child will
+  /// close without rebuilding its parent
   @protected
-  void closeChildren({bool inDispose = false}) {
+  void closeChildren({bool inDispose = false, bool shouldDelegate = true}) {
     assert(_debugMenuInfo('Closing children of $this${inDispose ? ' (dispose)' : ''}'));
     for (final _RawMenuAnchorBaseMixin child in List<_RawMenuAnchorBaseMixin>.from(
       _anchorChildren,
     )) {
-      child.close(inDispose: inDispose);
+      if (inDispose || !shouldDelegate) {
+        child.close(inDispose: inDispose);
+      } else {
+        child.requestClose();
+      }
     }
   }
 
@@ -454,10 +505,7 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
 }
 
 class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMixin<RawMenuAnchor> {
-  // This is the global key that is used later to determine the bounding rect
-  // for the anchor's region that the CustomSingleChildLayout's delegate
-  // uses to determine where to place the menu on the screen and to avoid the
-  // view's edges.
+  // The global key used to determine the bounding rect for the anchor.
   final GlobalKey _anchorKey = GlobalKey<_RawMenuAnchorState>(
     debugLabel: kReleaseMode ? null : 'MenuAnchor',
   );
@@ -563,6 +611,24 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
           // Mark dirty, but only if mounted and not in a build.
         });
       }
+    }
+  }
+
+  @override
+  void requestOpen({ui.Offset? position}) {
+    if (widget.onOpenRequested != null) {
+      widget.onOpenRequested!();
+    } else {
+      open(position: position);
+    }
+  }
+
+  @override
+  void requestClose() {
+    if (widget.onCloseRequested != null) {
+      widget.onCloseRequested!();
+    } else {
+      close();
     }
   }
 
@@ -762,8 +828,8 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
   }
 }
 
-/// A controller used to manage a menu created by a [RawMenuAnchor], or
-/// [RawMenuAnchorGroup].
+/// A controller used to manage a menu created by a subclass of [RawMenuAnchor],
+/// such as [MenuAnchor], [MenuBar], [SubmenuButton].
 ///
 /// A [MenuController] is used to control and interrogate a menu after it has
 /// been created, with methods such as [open] and [close], and state accessors
@@ -774,41 +840,43 @@ class _RawMenuAnchorGroupState extends State<RawMenuAnchorGroup>
 /// [MenuBar], [SubmenuButton], or [RawMenuAnchor]. Doing so will not establish
 /// a dependency relationship.
 ///
-/// [MenuController.maybeIsOpenOf] can be used to interrogate the state of a
-/// menu from the [BuildContext] of a widget that is a descendant of a
-/// [MenuAnchor]. Unlike [MenuController.maybeOf], this method will establish a
-/// dependency relationship, so the calling widget will rebuild when the menu
-/// opens and closes, and when the [MenuController] changes.
+/// The controller has some methods that not only query the status of the
+/// nearest ancestor, but also establish a dependency relationship between
+/// the calling widget and the ancestor, such as [maybeIsOpenOf].
 ///
 /// See also:
 ///
 /// * [MenuAnchor], a menu anchor that follows the Material Design guidelines.
 /// * [MenuBar], a widget that creates a menu bar that can take an optional
 ///   [MenuController].
-/// * [SubmenuButton], a Material widget that has a button that manages a
-///   submenu.
-/// * [RawMenuAnchor], a generic widget that manages a submenu.
-/// * [RawMenuAnchorGroup], a generic widget that wraps a group of submenus.
-class MenuController {
-  /// The anchor that this controller controls.
-  ///
-  /// This is set automatically when a [MenuController] is given to the anchor
-  /// it controls.
+/// * [SubmenuButton], a widget that has a button that manages a submenu.
+/// * [RawMenuAnchor], a widget that defines a region that has submenu.
+final class MenuController {
+  // The anchor that this controller controls.
+  //
+  // This is set automatically when a [MenuController] is given to the anchor
+  // it controls.
   _RawMenuAnchorBaseMixin? _anchor;
-
   /// Whether or not the menu associated with this [MenuController] is open.
   bool get isOpen => _anchor?.isOpen ?? false;
 
   /// Opens the menu that this [MenuController] is associated with.
   ///
   /// If `position` is given, then the menu will open at the position given, in
-  /// the coordinate space of the root overlay.
+  /// the coordinate space of the [MenuAnchor] this controller is attached to.
+  ///
+  /// If given, the `position` will override the [MenuAnchor.alignmentOffset]
+  /// given to the [MenuAnchor].
   ///
   /// If the menu's anchor point is scrolled by an ancestor, or the view changes
-  /// size, then any open menus will automatically close.
-  void open({Offset? position}) {
+  /// size, then any open menu will automatically close.
+  void open({Offset? position, bool transition = true}) {
     assert(_anchor != null);
-    _anchor!.open(position: position);
+    if (transition) {
+      _anchor!.requestOpen(position: position);
+    } else {
+      _anchor!.open(position: position);
+    }
   }
 
   /// Close the menu that this [MenuController] is associated with.
@@ -818,8 +886,12 @@ class MenuController {
   ///
   /// If the menu's anchor point is scrolled by an ancestor, or the view changes
   /// size, then any open menu will automatically close.
-  void close() {
-    _anchor?.close();
+  void close({bool transition = true}) {
+    if (transition) {
+      _anchor?.requestClose();
+    } else {
+      _anchor?.close();
+    }
   }
 
   /// Close the children of the menu associated with this [MenuController],
@@ -840,9 +912,8 @@ class MenuController {
     }
   }
 
-  /// Returns the [MenuController] of the ancestor [RawMenuAnchor] or
-  /// [RawMenuAnchorGroup] nearest to the given `context`, if one exists.
-  /// Otherwise, returns null.
+  /// Returns the [MenuController] of the ancestor [RawMenuAnchor] nearest to
+  /// the given `context`, if one exists. Otherwise, returns null.
   ///
   /// This method will not establish a dependency relationship, so the calling
   /// widget will not rebuild when the menu opens and closes, nor when the
@@ -885,7 +956,7 @@ class DismissMenuAction extends DismissAction {
 
   @override
   void invoke(DismissIntent intent) {
-    controller._anchor!.root.close();
+    controller._anchor!.root.requestClose();
   }
 
   @override
