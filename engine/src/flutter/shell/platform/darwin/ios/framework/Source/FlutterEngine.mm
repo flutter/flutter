@@ -246,17 +246,15 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
   // If the application is not available, use the scene for lifecycle notifications if available.
   if (!FlutterSharedApplication.isAvailable) {
-    if (@available(iOS 13.0, *)) {
-      [center addObserver:self
-                 selector:@selector(sceneWillEnterForeground:)
-                     name:UISceneWillEnterForegroundNotification
-                   object:nil];
-      [center addObserver:self
-                 selector:@selector(sceneDidEnterBackground:)
-                     name:UISceneDidEnterBackgroundNotification
-                   object:nil];
-      return;
-    }
+    [center addObserver:self
+               selector:@selector(sceneWillEnterForeground:)
+                   name:UISceneWillEnterForegroundNotification
+                 object:nil];
+    [center addObserver:self
+               selector:@selector(sceneDidEnterBackground:)
+                   name:UISceneDidEnterBackgroundNotification
+                 object:nil];
+    return;
   }
   [center addObserver:self
              selector:@selector(applicationWillEnterForeground:)

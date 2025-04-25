@@ -349,11 +349,7 @@ static void SetStatusBarStyleForSharedApplication(UIStatusBarStyle style) {
   if ([brightness isEqualToString:@"Brightness.dark"]) {
     statusBarStyle = UIStatusBarStyleLightContent;
   } else if ([brightness isEqualToString:@"Brightness.light"]) {
-    if (@available(iOS 13, *)) {
-      statusBarStyle = UIStatusBarStyleDarkContent;
-    } else {
-      statusBarStyle = UIStatusBarStyleDefault;
-    }
+    statusBarStyle = UIStatusBarStyleDarkContent;
   } else {
     return;
   }
