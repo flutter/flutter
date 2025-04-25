@@ -90,9 +90,8 @@ user_pref("browser.aboutwelcome.enabled", false);
           if (!debug) '--headless',
           '-width $kMaxScreenshotWidth',
           '-height $kMaxScreenshotHeight',
-          // On Mac Firefox uses the -- option prefix, while elsewhere it uses the - prefix.
-          '${isMac ? '-' : ''}-new-window',
-          '${isMac ? '-' : ''}-new-instance',
+          '-new-window',
+          '-new-instance',
           '--start-debugger-server $kDevtoolsPort',
         ];
 
