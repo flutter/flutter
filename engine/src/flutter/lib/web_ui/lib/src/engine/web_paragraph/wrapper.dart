@@ -30,21 +30,21 @@ class TextWrapper {
 
   bool isWhitespace(ExtendedTextCluster cluster) {
     return _layout.hasFlag(
-      ui.TextRange(start: cluster.start, end: cluster.end),
+      ui.TextRange(start: cluster.textRange.start, end: cluster.textRange.end),
       CodeUnitFlags.kPartOfWhiteSpaceBreak,
     );
   }
 
   bool isSoftLineBreak(ExtendedTextCluster cluster) {
     return _layout.hasFlag(
-      ui.TextRange(start: cluster.start, end: cluster.end),
+      ui.TextRange(start: cluster.textRange.start, end: cluster.textRange.end),
       CodeUnitFlags.kSoftLineBreakBefore,
     );
   }
 
   bool isHardLineBreak(ExtendedTextCluster cluster) {
     return _layout.hasFlag(
-      ui.TextRange(start: cluster.start, end: cluster.end),
+      ui.TextRange(start: cluster.textRange.start, end: cluster.textRange.end),
       CodeUnitFlags.kHardLineBreakBefore,
     );
   }
@@ -55,12 +55,12 @@ class TextWrapper {
     _widthText = 0.0;
     _widthWhitespaces = 0.0;
     _widthLetters = clusterWidth;
-    _top = 0.0;
   }
 
   void breakLines(double width) {
     // "words":[startLine:whitespaces.start) whitespaces:[whitespaces.start:whitespaces.end) "letters":[whitespaces.end:...)
 
+    _top = 0.0;
     startNewLine(0, 0.0);
 
     bool hardLineBreak = false;
@@ -90,6 +90,7 @@ class TextWrapper {
         // Start a new line
         startNewLine(index, 0.0);
       } else if (isSoftLineBreak(cluster) && index != _startLine) {
+        WebParagraphDebug.log('isSoftLineBreak: $index');
         // Mark the potential line break and then continue with the current cluster as usual
         if (_whitespaces.start == _startLine) {
           // There is one case when we have to ignore this soft line break: if we only had whitespaces so far -
@@ -110,6 +111,9 @@ class TextWrapper {
 
       // Check if we have a (hanging) whitespace which does not affect the line width
       if (isWhitespace(cluster)) {
+        WebParagraphDebug.log(
+          'isWhitespace: $index [${cluster.textRange.start}:${cluster.textRange.end})',
+        );
         if (_whitespaces.end < index) {
           // Start a new (empty) whitespace sequence
           _widthText += _widthWhitespaces + _widthLetters;
@@ -125,6 +129,7 @@ class TextWrapper {
 
       // Check if we exceeded the line width
       if (_widthText + _widthWhitespaces + _widthLetters + widthCluster > width) {
+        WebParagraphDebug.log('exceeded: $index');
         if (_whitespaces.start != _startLine) {
           // There was at least one possible line break so we can use it to break the text
         } else if (index > _startLine) {

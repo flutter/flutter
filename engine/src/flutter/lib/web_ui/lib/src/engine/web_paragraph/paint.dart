@@ -44,27 +44,20 @@ class TextPaint {
     double x,
     double y,
   ) {
-    WebParagraphDebug.log(
-      'paintLineOnCanvasKit: [${line.textRange.start}:${line.textRange.end}) *${line.visualRuns.length} @$x,$y + @${line.bounds.left},${line.bounds.top + line.fontBoundingBoxAscent} ${line.shift}->${line.bounds.width}x${line.bounds.height}',
-    );
-
-    double clusterShift = 0.0;
+    double clusterShiftX = 0.0;
     for (final BidiRun run in line.visualRuns) {
-      WebParagraphDebug.log(
-        'run: [${run.clusterRange.start}:${run.clusterRange.end}) ${run.shift}',
-      );
-      for (int i = run.clusterRange.start; i < run.clusterRange.end; ++i) {
+      final int start = run.bidiLevel.isEven ? run.clusterRange.start : run.clusterRange.end - 1;
+      final int end = run.bidiLevel.isEven ? run.clusterRange.end : run.clusterRange.start - 1;
+      final int step = run.bidiLevel.isEven ? 1 : -1;
+      for (int i = start; i != end; i += step) {
         final clusterText = layout.textClusters[i];
         paintCluster(
           canvas,
           clusterText,
-          ui.Offset(
-            line.shift - line.bounds.left + run.shift,
-            line.bounds.top + line.fontBoundingBoxAscent,
-          ),
+          ui.Offset(line.shift + clusterShiftX, line.bounds.top),
           ui.Offset(x, y),
         );
-        clusterShift += clusterText.bounds.width;
+        clusterShiftX += clusterText.bounds.width;
       }
     }
   }
@@ -77,7 +70,15 @@ class TextPaint {
   ) {
     final WebTextStyle textStyle = webTextCluster.textStyle!;
     textContext.fillStyle = textStyle.foreground?.color.toCssString();
-    textContext.fillTextCluster(webTextCluster.cluster!, clusterOffset.dx, clusterOffset.dy);
+    // We fill the text cluster into a rectange [0,0,w,h]
+    // but we need to shift the y coordinate by the font ascent
+    // becase the text is drawn at the ascent, not at 0
+    textContext.fillTextCluster(
+      webTextCluster.cluster!,
+      /*left:*/ 0,
+      /*top:*/ webTextCluster.textMetrics!.fontBoundingBoxAscent,
+      /*ignore the text cluster shift from the text run*/ {'x': 0, 'y': 0},
+    );
 
     final engine.DomImageBitmap bitmap = textCanvas.transferToImageBitmap();
 
@@ -90,11 +91,23 @@ class TextPaint {
       skImage,
       imageSource: engine.ImageBitmapImageSource(bitmap),
     );
-    final ui.Rect clusterRect = webTextCluster.bounds.translate(clusterOffset.dx, clusterOffset.dy);
+    // This is the bounding rectangle for the text cluster we filled above
+    final ui.Rect sourceRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      webTextCluster.bounds.width,
+      webTextCluster.bounds.height,
+    );
+    // We shift the target rect to the correct x position inside the line and
+    // the correct y position of the line itself
+    // (and then to the paragraph.paint x and y)
+    final ui.Rect targetRect = sourceRect
+        .translate(clusterOffset.dx, clusterOffset.dy)
+        .translate(lineOffset.dx, lineOffset.dy);
     canvas.drawImageRect(
       ckImage,
-      clusterRect,
-      clusterRect.translate(lineOffset.dx + webTextCluster.shift, lineOffset.dy),
+      sourceRect,
+      targetRect,
       ui.Paint()..filterQuality = ui.FilterQuality.none,
     );
     final String text = paragraph.text!.substring(
@@ -102,7 +115,7 @@ class TextPaint {
       webTextCluster.textRange.end,
     );
     WebParagraphDebug.log(
-      'cluster "$text" "${textStyle.foreground?.color.toCssString()}" ${webTextCluster.bounds.left}:${webTextCluster.bounds.right} @${lineOffset.dx},${lineOffset.dy}',
+      'cluster "$text" ${webTextCluster.bounds.left}:${webTextCluster.bounds.right} ${webTextCluster.bounds.top}:${webTextCluster.bounds.bottom} @${clusterOffset.dx},${clusterOffset.dy}',
     );
   }
 

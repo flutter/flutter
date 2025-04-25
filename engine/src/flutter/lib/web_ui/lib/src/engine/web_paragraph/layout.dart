@@ -60,6 +60,7 @@ class TextLayout {
     final List<CodeUnitInfo> flags = canvasKit.CodeUnits.compute(paragraph.text!);
     assert(flags.length == (paragraph.text!.length + 1));
     for (final CodeUnitInfo flag in flags) {
+      // WebParagraphDebug.log('codeUnitFlags[${codeUnitFlags.length}]=${CodeUnitFlags(flag.flags)}');
       codeUnitFlags.add(CodeUnitFlags(flag.flags));
     }
 
@@ -108,8 +109,12 @@ class TextLayout {
           rects.first.width,
           rects.first.height,
         );
-        for (int i = cluster.begin; i < cluster.end; i += 1) {
-          textToClusterMap[i + styledBlock.textRange.start] = textClusters.length;
+        for (
+          int i = cluster.begin + styledBlock.textRange.start;
+          i < cluster.end + styledBlock.textRange.start;
+          i += 1
+        ) {
+          textToClusterMap[i] = textClusters.length;
         }
 
         textClusters.add(
@@ -282,7 +287,6 @@ class TextLayout {
           cluster.textRange.start,
           cluster.textRange.end,
         );
-        ;
         WebParagraphDebug.log(
           'cluster[$i]: [${cluster.bounds.left}:${cluster.bounds.right}) "$clusterText"',
         );
@@ -299,6 +303,7 @@ class TextLayout {
     WebParagraphDebug.log(
       'Line [${line.textRange.start}:${line.textRange.end}) ${line.bounds.left},${line.bounds.top} ${line.bounds.width}x${line.bounds.height} "$lineText"',
     );
+
     return line.bounds.height;
   }
 

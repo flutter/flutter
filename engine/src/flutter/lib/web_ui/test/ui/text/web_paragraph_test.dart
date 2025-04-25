@@ -19,7 +19,7 @@ void main() {
 Future<void> testMain() async {
   setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
   const Rect region = Rect.fromLTWH(0, 0, 500, 500);
-  /*
+
   test('Draw WebParagraph on Canvas2D', () async {
     final engine.DomHTMLCanvasElement canvas = engine.createDomCanvasElement(
       width: 500,
@@ -46,10 +46,13 @@ Future<void> testMain() async {
   test('Draw WebParagraph LTR text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
     expect(recorder, isA<engine.CkPictureRecorder>());
     expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
     final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
 
     canvas.drawRect(const Rect.fromLTWH(0, 0, 100, 100), redPaint);
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Roboto', fontSize: 50);
@@ -66,6 +69,7 @@ Future<void> testMain() async {
   test('Draw WebParagraph LTR text with multiple lines', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
@@ -82,6 +86,7 @@ Future<void> testMain() async {
   test('Draw WebParagraph RTL text 1 line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
     expect(recorder, isA<engine.CkPictureRecorder>());
     expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
@@ -102,20 +107,24 @@ Future<void> testMain() async {
   test('Draw WebParagraph RTL with multiple lines', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
-    builder.addText('إنالسيطرةعلىالعالمعبارةقبيحةللغاية-أفضلأنأسميهاتحسينالعالم');
+    builder.addText(
+      'العربية لغةٌ رسمية في كل دول الوطن العربي إضافة إلى كونها لغة رسمية في تشاد وإريتريا. وهي إحدى اللغات الرسمية الست في منظمة الأمم المتحدة',
+    );
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: 300));
+    paragraph.layout(const ParagraphConstraints(width: 450));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_rtl_multilined.png', region: region);
   });
 
   test('Draw WebParagraph LTR/RTL 1 Line', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(fontFamily: 'Arial', fontSize: 50);
     final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
@@ -124,12 +133,13 @@ Future<void> testMain() async {
     paragraph.layout(const ParagraphConstraints(width: 300));
     paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
-    await matchGoldenFile('web_paragraph_canvas_multilined.png', region: region);
+    await matchGoldenFile('web_paragraph_canvas_mix1_multilined.png', region: region);
   });
 
   test('Draw WebParagraph LTR/RTL multi Line with LTR by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
       textDirection: TextDirection.ltr,
@@ -151,6 +161,7 @@ Future<void> testMain() async {
   test('Draw WebParagraph LTR/RTL multi Line with RTL by default', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
 
     final WebParagraphStyle arialStyle = WebParagraphStyle(
       textDirection: TextDirection.rtl,
@@ -168,10 +179,12 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_canvas_multilined_rtl.png', region: region);
   });
-  */
+
   test('Draw WebParagraph multicolored text', () async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
     expect(recorder, isA<engine.CkPictureRecorder>());
     expect(canvas, isA<engine.CanvasKitCanvas>());
     final Paint blackPaint = Paint()..color = const Color(0xFF000000);
@@ -183,8 +196,16 @@ Future<void> testMain() async {
       fontSize: 20,
       foreground: blackPaint,
     );
-    final WebTextStyle blueStyle = WebTextStyle(foreground: bluePaint, fontSize: 20);
-    final WebTextStyle redStyle = WebTextStyle(foreground: redPaint, fontSize: 20);
+    final WebTextStyle blueStyle = WebTextStyle(
+      foreground: bluePaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
+    final WebTextStyle redStyle = WebTextStyle(
+      foreground: redPaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
     final WebParagraphBuilder builder = WebParagraphBuilder(blackStyle);
 
     builder.pushStyle(redStyle);
@@ -193,10 +214,25 @@ Future<void> testMain() async {
     builder.pushStyle(blueStyle);
     builder.addText('Blue color ');
     builder.pop();
-    builder.addText('Black color');
+    builder.addText('Black color ');
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+
     final WebParagraph paragraph = builder.build();
-    paragraph.layout(const ParagraphConstraints(width: double.infinity));
-    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, Offset.zero);
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multicolored.png', region: region);
   });
