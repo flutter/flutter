@@ -841,14 +841,34 @@ class ListTile extends StatelessWidget {
       ).resolve(states);
     }
 
-    final Color? effectiveIconColor = resolveColor(iconColor, selectedColor, iconColor)
-      ?? resolveColor(tileTheme.iconColor, tileTheme.selectedColor, tileTheme.iconColor)
-      ?? resolveColor(theme.listTileTheme.iconColor, theme.listTileTheme.selectedColor, theme.listTileTheme.iconColor)
-      ?? resolveColor(defaults.iconColor, defaults.selectedColor, defaults.iconColor, theme.disabledColor);
-    final Color? effectiveColor = resolveColor(textColor, selectedColor, textColor)
-      ?? resolveColor(tileTheme.textColor, tileTheme.selectedColor, tileTheme.textColor)
-      ?? resolveColor(theme.listTileTheme.textColor, theme.listTileTheme.selectedColor, theme.listTileTheme.textColor)
-      ?? resolveColor(defaults.textColor, defaults.selectedColor, defaults.textColor, theme.disabledColor);
+    final Color? effectiveIconColor =
+        resolveColor(iconColor, selectedColor, iconColor) ??
+        resolveColor(tileTheme.iconColor, tileTheme.selectedColor, tileTheme.iconColor) ??
+        resolveColor(
+          theme.listTileTheme.iconColor,
+          theme.listTileTheme.selectedColor,
+          theme.listTileTheme.iconColor,
+        ) ??
+        resolveColor(
+          defaults.iconColor,
+          defaults.selectedColor,
+          defaults.iconColor,
+          theme.disabledColor,
+        );
+    final Color? effectiveColor =
+        resolveColor(textColor, selectedColor, textColor) ??
+        resolveColor(tileTheme.textColor, tileTheme.selectedColor, tileTheme.textColor) ??
+        resolveColor(
+          theme.listTileTheme.textColor,
+          theme.listTileTheme.selectedColor,
+          theme.listTileTheme.textColor,
+        ) ??
+        resolveColor(
+          defaults.textColor,
+          defaults.selectedColor,
+          defaults.textColor,
+          theme.disabledColor,
+        );
 
     final IconButtonThemeData currentIconTheme = IconButtonTheme.of(context);
     final IconThemeData iconThemeData = IconThemeData(color: effectiveIconColor);
