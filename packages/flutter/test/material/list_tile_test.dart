@@ -2300,6 +2300,52 @@ void main() {
     },
   );
 
+  testWidgets('ListTile merge its iconButtonThemeData with the parent iconButtonThemeData', (
+    WidgetTester tester,
+  ) async {
+    const Color listTileIconColor = Colors.green;
+    const Icon leadingIcon = Icon(Icons.favorite);
+    const Icon trailingIcon = Icon(Icons.close);
+    const OutlinedBorder shape = RoundedRectangleBorder(side: BorderSide());
+
+    Widget buildFrame() {
+      return MaterialApp(
+        theme: ThemeData(
+          iconButtonTheme: IconButtonThemeData(style: IconButton.styleFrom(shape: shape)),
+        ),
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ListTile(
+                  iconColor: listTileIconColor,
+                  leading: IconButton(icon: leadingIcon, onPressed: () {}),
+                  trailing: IconButton(icon: trailingIcon, onPressed: () {}),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    TextStyle? getIconStyle(WidgetTester tester, IconData icon) =>
+        tester
+            .widget<RichText>(
+              find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+            )
+            .text
+            .style;
+    await tester.pumpWidget(buildFrame());
+
+    final BuildContext listTileContext = tester.element(find.byType(ListTile));
+    final IconButtonThemeData iconButtonThemeData = IconButtonTheme.of(listTileContext);
+
+    expect(iconButtonThemeData.style?.shape?.resolve(<MaterialState>{}), shape);
+    expect(getIconStyle(tester, leadingIcon.icon!)?.color, listTileIconColor);
+    expect(getIconStyle(tester, trailingIcon.icon!)?.color, listTileIconColor);
+  });
+
   testWidgets('ListTile.dense does not throw assertion', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/pull/116908
 
