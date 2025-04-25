@@ -189,7 +189,7 @@ void main() {
 
     expect(
       find.byType(CupertinoPicker),
-      paints..rrect(color: const Color.fromARGB(30, 118, 118, 128)),
+      paints..rsuperellipse(color: const Color.fromARGB(30, 118, 118, 128)),
     );
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF123456)));
 
@@ -217,7 +217,7 @@ void main() {
 
     expect(
       find.byType(CupertinoPicker),
-      paints..rrect(color: const Color.fromARGB(61, 118, 118, 128)),
+      paints..rsuperellipse(color: const Color.fromARGB(61, 118, 118, 128)),
     );
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
   });
@@ -244,7 +244,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoPicker), paints..rrect(color: const Color(0x12345678)));
+    expect(find.byType(CupertinoPicker), paints..rsuperellipse(color: const Color(0x12345678)));
   });
 
   testWidgets('CupertinoPicker.selectionOverlay is nullable', (WidgetTester tester) async {
@@ -267,7 +267,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(CupertinoPicker), isNot(paints..rrect()));
+    expect(find.byType(CupertinoPicker), isNot(paints..rsuperellipse()));
   });
 
   group('scroll', () {
@@ -564,7 +564,8 @@ void main() {
       final Container container = tester.firstWidget<Container>(selectionContainer);
       final EdgeInsetsGeometry? margin = container.margin;
       final BorderRadiusGeometry? borderRadius =
-          (container.decoration as BoxDecoration?)?.borderRadius;
+          ((container.decoration as ShapeDecoration?)?.shape as RoundedSuperellipseBorder?)
+              ?.borderRadius;
 
       expect(margin, isA<EdgeInsetsDirectional>());
       expect(borderRadius, isA<BorderRadiusDirectional>());

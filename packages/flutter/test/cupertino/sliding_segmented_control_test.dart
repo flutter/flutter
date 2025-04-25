@@ -324,7 +324,7 @@ void main() {
       ),
     );
 
-    final BoxDecoration decoration =
+    final ShapeDecoration decoration =
         tester
                 .widget<Container>(
                   find.descendant(
@@ -333,7 +333,7 @@ void main() {
                   ),
                 )
                 .decoration!
-            as BoxDecoration;
+            as ShapeDecoration;
 
     expect(getThumbColor(tester).value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color!.value, CupertinoColors.systemRed.color.value);
@@ -343,7 +343,7 @@ void main() {
     });
     await tester.pump();
 
-    final BoxDecoration decorationDark =
+    final ShapeDecoration decorationDark =
         tester
                 .widget<Container>(
                   find.descendant(
@@ -352,7 +352,7 @@ void main() {
                   ),
                 )
                 .decoration!
-            as BoxDecoration;
+            as ShapeDecoration;
 
     expect(getThumbColor(tester).value, CupertinoColors.systemGreen.darkColor.value);
     expect(decorationDark.color!.value, CupertinoColors.systemRed.darkColor.value);

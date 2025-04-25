@@ -469,9 +469,7 @@ class CupertinoListSection extends StatelessWidget {
                 decoration?.color ?? CupertinoColors.secondarySystemGroupedBackground,
                 context,
               ),
-              shape: RoundedSuperellipseBorder(
-                borderRadius: childrenGroupBorderRadius,
-              ),
+              shape: RoundedSuperellipseBorder(borderRadius: childrenGroupBorderRadius),
             ),
         child: Column(children: childrenWithDividers),
       );

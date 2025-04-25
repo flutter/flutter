@@ -275,7 +275,7 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
               ),
               shape: const RoundedSuperellipseBorder(
                 borderRadius: BorderRadius.all(_kSeparatorRadius),
-              )
+              ),
             ),
             child: child,
           ),
@@ -801,9 +801,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         clipBehavior: Clip.antiAlias,
         padding: widget.padding.resolve(Directionality.of(context)),
         decoration: ShapeDecoration(
-          shape: const RoundedSuperellipseBorder(
-            borderRadius: BorderRadius.all(_kCornerRadius),
-          ),
+          shape: const RoundedSuperellipseBorder(borderRadius: BorderRadius.all(_kCornerRadius)),
           color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
         ),
         child: AnimatedBuilder(
