@@ -70,12 +70,20 @@ final class PreviewDetails {
     String? textScaleFactor,
     String? wrapper,
     String? wrapperLibraryUri = '',
+    String? theme,
+    String? themeLibraryUri = '',
+    String? brightness,
+    String? brightnessLibraryUri = '',
   }) : _name = name,
        _width = width,
        _height = height,
        _textScaleFactor = textScaleFactor,
        _wrapper = wrapper,
-       _wrapperLibraryUri = wrapperLibraryUri;
+       _wrapperLibraryUri = wrapperLibraryUri,
+       _theme = theme,
+       _themeLibraryUri = themeLibraryUri,
+       _brightness = brightness,
+       _brightnessLibraryUri = brightnessLibraryUri;
 
   @visibleForTesting
   PreviewDetails copyWith({
@@ -87,6 +95,10 @@ final class PreviewDetails {
     String? textScaleFactor,
     String? wrapper,
     String? wrapperLibraryUri,
+    String? theme,
+    String? themeLibraryUri,
+    String? brightness,
+    String? brightnessLibraryUri,
   }) {
     return PreviewDetails.test(
       functionName: functionName ?? this.functionName,
@@ -97,6 +109,10 @@ final class PreviewDetails {
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       wrapper: wrapper ?? this.wrapper,
       wrapperLibraryUri: wrapperLibraryUri ?? this.wrapperLibraryUri,
+      theme: theme ?? this.theme,
+      themeLibraryUri: themeLibraryUri ?? this.themeLibraryUri,
+      brightness: brightness ?? this.brightness,
+      brightnessLibraryUri: brightnessLibraryUri ?? this.brightnessLibraryUri,
     );
   }
 
@@ -106,6 +122,10 @@ final class PreviewDetails {
   static const String kTextScaleFactor = 'textScaleFactor';
   static const String kWrapper = 'wrapper';
   static const String kWrapperLibraryUri = 'wrapperLibraryUrl';
+  static const String kTheme = 'theme';
+  static const String kThemeLibraryUri = 'themeLibraryUrl';
+  static const String kBrightness = 'brightness';
+  static const String kBrightnessLibraryUri = 'brightnessLibraryUrl';
 
   /// The name of the function returning the preview.
   final String functionName;
@@ -155,10 +175,24 @@ final class PreviewDetails {
 
   bool get hasWrapper => _wrapper != null;
 
+  String? get theme => _theme;
+  String? _theme;
+
+  String? get themeLibraryUri => _themeLibraryUri;
+  String? _themeLibraryUri;
+
+  String? get brightness => _brightness;
+  String? _brightness;
+
+  String? get brightnessLibraryUri => _brightnessLibraryUri;
+  String? _brightnessLibraryUri;
+
   void _setField({required NamedExpression node}) {
     final String key = node.name.label.name;
     final Expression expression = node.expression;
     final String source = expression.toSource();
+    final String? libraryUri =
+        expression is SimpleIdentifier ? expression.element!.library2!.identifier : null;
     switch (key) {
       case kName:
         _name = source;
@@ -170,7 +204,13 @@ final class PreviewDetails {
         _textScaleFactor = source;
       case kWrapper:
         _wrapper = source;
-        _wrapperLibraryUri = (node.expression as SimpleIdentifier).element!.library2!.identifier;
+        _wrapperLibraryUri = libraryUri;
+      case kTheme:
+        _theme = source;
+        _themeLibraryUri = libraryUri;
+      case kBrightness:
+        _brightness = source;
+        _brightnessLibraryUri = libraryUri;
       default:
         throw StateError('Unknown Preview field "$name": $source');
     }
@@ -190,14 +230,19 @@ final class PreviewDetails {
         other.width == width &&
         other.textScaleFactor == textScaleFactor &&
         other.wrapper == wrapper &&
-        other.wrapperLibraryUri == wrapperLibraryUri;
+        other.wrapperLibraryUri == wrapperLibraryUri &&
+        other.theme == theme &&
+        other.themeLibraryUri == themeLibraryUri &&
+        other.brightness == brightness &&
+        other.brightnessLibraryUri == brightnessLibraryUri;
   }
 
   @override
   String toString() =>
       'PreviewDetails(function: $functionName isBuilder: $isBuilder $kName: $name '
       '$kWidth: $width $kHeight: $height $kTextScaleFactor: $textScaleFactor $kWrapper: $wrapper '
-      '$kWrapperLibraryUri: $wrapperLibraryUri)';
+      '$kWrapperLibraryUri: $wrapperLibraryUri $kTheme: $theme $kThemeLibraryUri: $themeLibraryUri '
+      '$kBrightness: $_brightness $kBrightnessLibraryUri: $_brightnessLibraryUri)';
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
@@ -209,6 +254,10 @@ final class PreviewDetails {
     textScaleFactor,
     wrapper,
     wrapperLibraryUri,
+    theme,
+    themeLibraryUri,
+    brightness,
+    brightnessLibraryUri,
   ]);
 }
 

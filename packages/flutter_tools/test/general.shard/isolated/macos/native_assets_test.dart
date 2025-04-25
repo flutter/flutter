@@ -267,16 +267,12 @@ void main() {
               package: 'bar',
               name: 'bar.dart',
               linkMode: DynamicLoadingBundled(),
-              os: targetOS,
-              architecture: codeConfig.targetArchitecture,
               file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
             ),
             CodeAsset(
               package: 'buz',
               name: 'buz.dart',
               linkMode: DynamicLoadingBundled(),
-              os: targetOS,
-              architecture: codeConfig.targetArchitecture,
               file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
             ),
           ];
@@ -284,7 +280,10 @@ void main() {
             packagesWithNativeAssetsResult: <String>['bar'],
             onBuild:
                 (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                  codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
+                  codeAssets:
+                      buildMode == BuildMode.debug
+                          ? codeAssets(input.config.code.targetOS, input.config.code)
+                          : <CodeAsset>[],
                 ),
             onLink:
                 (LinkInput input) =>
@@ -397,12 +396,17 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         packageConfigFile,
         logger: environment.logger,
       );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
         runPackageName,
+        pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(
