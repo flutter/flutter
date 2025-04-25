@@ -57,6 +57,15 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--web-launch-url',
           'http://localhost:$benchmarksAppPort/index.html',
           '--debug',
+          '--no-web-enable-expression-evaluation',
+          '--web-browser-flag=--disable-popup-blocking',
+          '--web-browser-flag=--bwsi',
+          '--web-browser-flag=--no-first-run',
+          '--web-browser-flag=--no-default-browser-check',
+          '--web-browser-flag=--disable-default-apps',
+          '--web-browser-flag=--disable-translate',
+          '--web-browser-flag=--disable-background-timer-throttling',
+          '--web-browser-flag=--disable-backgrounding-occluded-windows',
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
           if (benchmarkOptions.withHotReload) '--web-experimental-hot-reload',
           '--no-web-resources-cdn',
@@ -303,8 +312,13 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
         await flutterRunProcess.stdin.flush();
         // Give the process a couple of seconds to exit and run shutdown hooks
         // before sending kill signal.
-        await Future<void>.delayed(const Duration(seconds: 2));
-        flutterRunProcess.kill(io.ProcessSignal.sigint);
+        await flutterRunProcess.exitCode.timeout(
+          const Duration(seconds: 2),
+          onTimeout: () {
+            flutterRunProcess!.kill(io.ProcessSignal.sigint);
+            return 0;
+          },
+        );
       }
     }
   });
