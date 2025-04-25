@@ -269,11 +269,13 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
         return Padding(
           padding: _kSeparatorInset,
           child: DecoratedBox(
-            decoration: BoxDecoration(
+            decoration: ShapeDecoration(
               color: _kSeparatorColor.withOpacity(
                 _kSeparatorColor.opacity * separatorOpacityController.value,
               ),
-              borderRadius: const BorderRadius.all(_kSeparatorRadius),
+              shape: const RoundedSuperellipseBorder(
+                borderRadius: BorderRadius.all(_kSeparatorRadius),
+              )
             ),
             child: child,
           ),
@@ -798,8 +800,10 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         // behavior is eyeballed by the iOS 17.5 simulator.
         clipBehavior: Clip.antiAlias,
         padding: widget.padding.resolve(Directionality.of(context)),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(_kCornerRadius),
+        decoration: ShapeDecoration(
+          shape: const RoundedSuperellipseBorder(
+            borderRadius: BorderRadius.all(_kCornerRadius),
+          ),
           color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
         ),
         child: AnimatedBuilder(

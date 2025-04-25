@@ -546,19 +546,19 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               child: FadeTransition(
                 opacity: _opacityAnimation,
                 child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border:
-                        enabled && isFocused
-                            ? Border.fromBorderSide(
-                              BorderSide(
+                  decoration: ShapeDecoration(
+                    shape: RoundedSuperellipseBorder(
+                      side:
+                          enabled && isFocused
+                              ? BorderSide(
                                 color: effectiveFocusOutlineColor,
                                 width: 3.5,
                                 strokeAlign: BorderSide.strokeAlignOutside,
-                              ),
-                            )
-                            : null,
-                    borderRadius:
-                        widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
+                              )
+                              : BorderSide.none,
+                      borderRadius:
+                          widget.borderRadius ?? kCupertinoButtonSizeBorderRadius[widget.sizeStyle],
+                    ),
                     color:
                         backgroundColor != null && !enabled
                             ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
