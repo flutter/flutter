@@ -815,6 +815,35 @@ void main() {
     expect(dropdownMenu.textInputAction, textInputAction);
   });
 
+  testWidgets('Passes restorationId to underlying DropdownMenu', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DropdownMenuFormField<MenuItem>(dropdownMenuEntries: menuEntries)),
+      ),
+    );
+
+    // Check default value.
+    DropdownMenu<MenuItem> dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.restorationId, null);
+
+    const String restorationId = 'dropdown_menu';
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            restorationId: restorationId,
+            dropdownMenuEntries: menuEntries,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(TextField), findsOne);
+
+    dropdownMenu = tester.widget(find.byType(DropdownMenu<MenuItem>));
+    expect(dropdownMenu.restorationId, restorationId);
+  });
+
   testWidgets('Field state is correcly updated', (WidgetTester tester) async {
     final GlobalKey<FormFieldState<MenuItem>> fieldKey = GlobalKey<FormFieldState<MenuItem>>();
 
@@ -1100,4 +1129,51 @@ void main() {
       expect(fieldKey.currentState!.value, MenuItem.menuItem2);
     },
   );
+
+  testWidgets('Selected value is restorable', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<MenuItem>> formFieldState =
+        GlobalKey<FormFieldState<MenuItem>>();
+    const String restorationId = 'dropdown_menu_form_field';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        restorationScopeId: 'app',
+        home: Scaffold(
+          body: DropdownMenuFormField<MenuItem>(
+            key: formFieldState,
+            dropdownMenuEntries: menuEntries,
+            initialSelection: MenuItem.menuItem0,
+            restorationId: restorationId,
+          ),
+        ),
+      ),
+    );
+
+    expect(formFieldState.currentState!.value, MenuItem.menuItem0);
+
+    // Select a different item than the initial one.
+    await tester.tap(find.byType(DropdownMenu<MenuItem>));
+    await tester.pump();
+
+    await tester.tap(findMenuItem(MenuItem.menuItem2));
+    await tester.pump();
+
+    expect(formFieldState.currentState!.value, MenuItem.menuItem2);
+
+    // Needed for restoration data to be updated.
+    await tester.pump();
+
+    final TestRestorationData data = await tester.getRestorationData();
+    await tester.restartAndRestore();
+
+    expect(formFieldState.currentState!.value, MenuItem.menuItem2);
+
+    formFieldState.currentState!.reset();
+    expect(formFieldState.currentState!.value, MenuItem.menuItem0);
+
+    await tester.restoreFrom(data);
+    await tester.pump();
+
+    expect(formFieldState.currentState!.value, MenuItem.menuItem2);
+  });
 }
