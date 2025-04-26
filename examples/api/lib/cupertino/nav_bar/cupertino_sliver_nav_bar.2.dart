@@ -38,7 +38,7 @@ class SliverNavBarExample extends StatelessWidget {
             largeTitle: Text('Contacts'),
             bottom: PreferredSize(
               preferredSize: Size.fromHeight(100),
-              child: Text('Bottom Widget'),
+              child: ColoredBox(color: Color(0xff191970), child: Text('Bottom Widget')),
             ),
             trailing: Icon(CupertinoIcons.add_circled),
           ),

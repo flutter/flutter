@@ -13,8 +13,12 @@ void main() {
     await tester.pumpWidget(const example.SliverNavBarApp());
 
     final Finder preferredSize = find.byType(PreferredSize);
+    final Finder coloredBox = find.descendant(of: preferredSize, matching: find.byType(ColoredBox));
+    final Finder text = find.text('Bottom Widget');
 
     expect(preferredSize, findsOneWidget);
+    expect(coloredBox, findsOneWidget);
+    expect(text, findsOneWidget);
   });
 
   testWidgets('Collapse and expand CupertinoSliverNavigationBar changes title position', (
