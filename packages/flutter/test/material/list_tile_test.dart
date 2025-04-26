@@ -2300,7 +2300,7 @@ void main() {
     },
   );
 
-  testWidgets('ListTile merge its iconButtonThemeData with the parent iconButtonThemeData', (
+  testWidgets('ListTile merges its IconButtonThemeData with parent IconButtonThemeData', (
     WidgetTester tester,
   ) async {
     const Color listTileIconColor = Colors.green;
