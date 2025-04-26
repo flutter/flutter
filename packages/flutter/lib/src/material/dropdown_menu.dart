@@ -1019,22 +1019,25 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       builder: (BuildContext context, MenuController controller, Widget? child) {
         assert(_initialMenu != null);
         final bool isCollapsed = widget.inputDecorationTheme?.isCollapsed ?? false;
-        final Widget trailingButton = widget.showTrailingIcon ? Padding(
-          padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
-          child: IconButton(
-            isSelected: controller.isOpen,
-            constraints: widget.inputDecorationTheme?.suffixIconConstraints,
-            padding: isCollapsed ? EdgeInsets.zero : null,
-            icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
-            selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
-            onPressed:
-                !widget.enabled
-                    ? null
-                    : () {
-                      handlePressed(controller);
-                    },
-          ),
-        ) : const SizedBox.shrink();
+        final Widget trailingButton =
+            widget.showTrailingIcon
+                ? Padding(
+                  padding: isCollapsed ? EdgeInsets.zero : const EdgeInsets.all(4.0),
+                  child: IconButton(
+                    isSelected: controller.isOpen,
+                    constraints: widget.inputDecorationTheme?.suffixIconConstraints,
+                    padding: isCollapsed ? EdgeInsets.zero : null,
+                    icon: widget.trailingIcon ?? const Icon(Icons.arrow_drop_down),
+                    selectedIcon: widget.selectedTrailingIcon ?? const Icon(Icons.arrow_drop_up),
+                    onPressed:
+                        !widget.enabled
+                            ? null
+                            : () {
+                              handlePressed(controller);
+                            },
+                  ),
+                )
+                : const SizedBox.shrink();
 
         final Widget leadingButton = Padding(
           padding: const EdgeInsets.all(8.0),
