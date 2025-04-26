@@ -315,9 +315,8 @@ void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
     FillPathGeometry geom(path);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   } else {
-    StrokePathGeometry geom(path.GetPath(), paint.stroke_width,
-                            paint.stroke_miter, paint.stroke_cap,
-                            paint.stroke_join);
+    StrokePathGeometry geom(path, paint.stroke_width, paint.stroke_miter,
+                            paint.stroke_cap, paint.stroke_join);
     AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
   }
 }

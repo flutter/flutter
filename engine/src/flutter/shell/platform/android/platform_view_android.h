@@ -124,6 +124,9 @@ class PlatformViewAndroid final : public PlatformView {
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
   bool IsSurfaceControlEnabled() const;
 
+  // |PlatformView|
+  void SetupImpellerContext() override;
+
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;
@@ -133,7 +136,7 @@ class PlatformViewAndroid final : public PlatformView {
 
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
-  bool android_use_new_platform_view_ = false;
+  bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|
   void UpdateSemantics(
