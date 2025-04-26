@@ -235,7 +235,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
   /// Parse the given [schemeContent] and extract the `BuildableName`, `BlueprintName` and `ReferencedContainer`
   /// of the `BuildableReference` for the Runner target.
-  (String buildableName, String blueprintName, String referencedContainer) _parseSchemeFile(
+  ({String buildableName, String blueprintName, String referencedContainer}) _parseSchemeFile(
     String schemeFileName,
     String schemeContent,
   ) {
@@ -322,9 +322,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     }
 
     return (
-      'BuildableName = "$buildableName"',
-      'BlueprintName = "$blueprintName"',
-      'ReferencedContainer = "$referencedContainer"',
+      buildableName: buildableName,
+      blueprintName: blueprintName,
+      referencedContainer: referencedContainer,
     );
   }
 
@@ -352,9 +352,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     //     ReferencedContainer = "container:Runner.xcodeproj">
     // </BuildableReference>
     final (
-      String buildableName,
-      String blueprintName,
-      String referencedContainer,
+      :String buildableName,
+      :String blueprintName,
+      :String referencedContainer,
     ) = _parseSchemeFile(schemeFile.basename, schemeContent);
 
     final List<String> schemeLines = LineSplitter.split(schemeContent).toList();
@@ -381,9 +381,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
                   <BuildableReference
                      BuildableIdentifier = "primary"
                      BlueprintIdentifier = "$_runnerNativeTargetIdentifier"
-                     $buildableName
-                     $blueprintName
-                     $referencedContainer
+                     BuildableName = "$buildableName"
+                     BlueprintName = "$blueprintName"
+                     ReferencedContainer = "$referencedContainer"
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>
