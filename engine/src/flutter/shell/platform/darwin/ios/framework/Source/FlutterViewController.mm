@@ -1937,7 +1937,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesBegan:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -1952,7 +1952,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesChanged:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -1967,7 +1967,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesEnded:[NSSet setWithObject:press] withEvent:event];
                   }];
@@ -1982,7 +1982,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   if (@available(iOS 13.4, *)) {
     __weak FlutterViewController* weakSelf = self;
     for (UIPress* press in presses) {
-      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press withEvent:event]
+      [self handlePressEvent:[[FlutterUIPressProxy alloc] initWithPress:press event:event]
                   nextAction:^() {
                     [weakSelf superPressesCancelled:[NSSet setWithObject:press] withEvent:event];
                   }];

@@ -10,9 +10,9 @@
 
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFakeKeyEvents.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterKeyboardManager.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 
 FLUTTER_ASSERT_ARC;

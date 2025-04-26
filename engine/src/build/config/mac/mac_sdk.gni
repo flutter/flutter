@@ -1,7 +1,8 @@
-# Copyright 2014 The Chromium Authors. All rights reserved.
+# Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/config/apple/apple_sdk.gni")
 import("//build/toolchain/rbe.gni")
 
 declare_args() {
@@ -35,10 +36,10 @@ if (mac_sdk_path == "") {
     mac_sdk_min,
   ]
 
-  # The tool will print the SDK path on the first line, and the version on the
-  # second line.
-  find_sdk_lines =
+  # Outputs the SDK path on the first line, and the host toolchain path on the
+  # second.
+  _find_sdk_lines =
       exec_script("//build/mac/find_sdk.py", find_sdk_args, "list lines")
 
-  mac_sdk_path = find_sdk_lines[0]
+  mac_sdk_path = _find_sdk_lines[0]
 }
