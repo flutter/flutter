@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -2953,5 +2954,34 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(textColor(tester, buttonText), hoveredColor);
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
+  });
+
+  testWidgets('OutlinedButton golden test child appears over the outline', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              child: OutlinedButton(
+                onPressed: () {},
+                child: const Badge(
+                  backgroundColor: Colors.green,
+                  label: Text('Ad', style: TextStyle(fontSize: 18)),
+                  child: Icon(Icons.lightbulb_rounded),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(OutlinedButton),
+      matchesGoldenFile('outlined_button_child_over_outline.png'),
+    );
   });
 }

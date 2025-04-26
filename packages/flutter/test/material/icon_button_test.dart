@@ -3375,6 +3375,34 @@ void main() {
     expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
     expect(inkFeatures, paints..rect(color: focusColor));
   }, skip: !isBrowser); // [intended] tests web-specific behavior.
+
+  testWidgets('IconButton golden test child appears over the outline', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RepaintBoundary(
+              child: IconButton.outlined(
+                iconSize: 40,
+                isSelected: false,
+                onPressed: () {},
+                icon: const Badge(
+                  label: Text('Ad', style: TextStyle(fontSize: 18)),
+                  child: Icon(Icons.lightbulb_rounded),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await expectLater(
+      find.byType(IconButton),
+      matchesGoldenFile('icon_button_child_over_outline.png'),
+    );
+  });
 }
 
 Widget buildAllVariants({
