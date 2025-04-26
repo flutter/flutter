@@ -329,163 +329,7 @@ void main() {
 
       for (final SupportedPlatform platform in supportedPlatforms) {
         group('for ${platform.name}', () {
-          testWithoutContext(
-            'fails if scheme is missing BlueprintIdentifier for Runner native target',
-            () async {
-              final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-              final BufferLogger testLogger = BufferLogger.test();
-              final FakeXcodeProject project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
-                logger: testLogger,
-              );
-              _createProjectFiles(project, platform);
-              project.xcodeProjectSchemeFile().writeAsStringSync('');
-
-              final SwiftPackageManagerIntegrationMigration projectMigration =
-                  SwiftPackageManagerIntegrationMigration(
-                    project,
-                    platform,
-                    BuildInfo.debug,
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                    logger: testLogger,
-                    fileSystem: memoryFileSystem,
-                    plistParser: FakePlistParser(),
-                    features: swiftPackageManagerFullyEnabledFlags,
-                  );
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(
-                  message: 'Failed to parse Runner.xcscheme: Could not find BuildableReference',
-                ),
-              );
-            },
-          );
-
-          testWithoutContext(
-            'fails if BuildableName does not follow BlueprintIdentifier in scheme',
-            () async {
-              final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-              final BufferLogger testLogger = BufferLogger.test();
-              final FakeXcodeProject project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
-                logger: testLogger,
-              );
-              _createProjectFiles(project, platform);
-              project.xcodeProjectSchemeFile().writeAsStringSync('''
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
-            BlueprintName = "Runner"
-            ReferencedContainer = "container:Runner.xcodeproj">
-         </BuildableReference>
-''');
-
-              final SwiftPackageManagerIntegrationMigration projectMigration =
-                  SwiftPackageManagerIntegrationMigration(
-                    project,
-                    platform,
-                    BuildInfo.debug,
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                    logger: testLogger,
-                    fileSystem: memoryFileSystem,
-                    plistParser: FakePlistParser(),
-                    features: swiftPackageManagerFullyEnabledFlags,
-                  );
-
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(
-                  message: 'Failed to parse Runner.xcscheme: Could not find BuildableName',
-                ),
-              );
-            },
-          );
-
-          testWithoutContext(
-            'fails if BlueprintName does not follow BuildableName in scheme',
-            () async {
-              final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-              final BufferLogger testLogger = BufferLogger.test();
-              final FakeXcodeProject project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
-                logger: testLogger,
-              );
-              _createProjectFiles(project, platform);
-              project.xcodeProjectSchemeFile().writeAsStringSync('''
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
-            BuildableName = "Runner.app"
-            ReferencedContainer = "container:Runner.xcodeproj">
-         </BuildableReference>
-''');
-
-              final SwiftPackageManagerIntegrationMigration projectMigration =
-                  SwiftPackageManagerIntegrationMigration(
-                    project,
-                    platform,
-                    BuildInfo.debug,
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                    logger: testLogger,
-                    fileSystem: memoryFileSystem,
-                    plistParser: FakePlistParser(),
-                    features: swiftPackageManagerFullyEnabledFlags,
-                  );
-
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(
-                  message: 'Failed to parse Runner.xcscheme: Could not find BlueprintName',
-                ),
-              );
-            },
-          );
-
-          testWithoutContext(
-            'fails if ReferencedContainer does not follow BlueprintName in scheme',
-            () async {
-              final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
-              final BufferLogger testLogger = BufferLogger.test();
-              final FakeXcodeProject project = FakeXcodeProject(
-                platform: platform.name,
-                fileSystem: memoryFileSystem,
-                logger: testLogger,
-              );
-              _createProjectFiles(project, platform);
-              project.xcodeProjectSchemeFile().writeAsStringSync('''
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
-            BuildableName = "Runner.app"
-            BlueprintName = "Runner">
-         </BuildableReference>
-''');
-
-              final SwiftPackageManagerIntegrationMigration projectMigration =
-                  SwiftPackageManagerIntegrationMigration(
-                    project,
-                    platform,
-                    BuildInfo.debug,
-                    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
-                    logger: testLogger,
-                    fileSystem: memoryFileSystem,
-                    plistParser: FakePlistParser(),
-                    features: swiftPackageManagerFullyEnabledFlags,
-                  );
-
-              await expectLater(
-                () => projectMigration.migrate(),
-                throwsToolExit(
-                  message: 'Failed to parse Runner.xcscheme: Could not find ReferencedContainer',
-                ),
-              );
-            },
-          );
-
-          testWithoutContext('fails if cannot find BuildAction in scheme', () async {
+          testWithoutContext('fails if scheme file is empty', () async {
             final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
             final BufferLogger testLogger = BufferLogger.test();
             final FakeXcodeProject project = FakeXcodeProject(
@@ -494,7 +338,36 @@ void main() {
               logger: testLogger,
             );
             _createProjectFiles(project, platform);
-            project.xcodeProjectSchemeFile().writeAsStringSync(_validBuildableReference(platform));
+            project.xcodeProjectSchemeFile().writeAsStringSync('');
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: FakePlistParser(),
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(message: 'Failed to parse Runner.xcscheme: Invalid xml:'),
+            );
+          });
+
+          testWithoutContext('fails if scheme file has no Scheme root node', () async {
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform);
+            project.xcodeProjectSchemeFile().writeAsStringSync('<NotAScheme></NotAScheme>');
 
             final SwiftPackageManagerIntegrationMigration projectMigration =
                 SwiftPackageManagerIntegrationMigration(
@@ -511,7 +384,282 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(
-                message: 'Failed to parse Runner.xcscheme: Could not find BuildAction',
+                message: 'Failed to parse Runner.xcscheme: Could not find Scheme for Runner.',
+              ),
+            );
+          });
+
+          testWithoutContext('fails if Scheme node has no LaunchAction', () async {
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform);
+            project.xcodeProjectSchemeFile().writeAsStringSync('<Scheme></Scheme>');
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: FakePlistParser(),
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+                message: 'Failed to parse Runner.xcscheme: Could not find LaunchAction for Runner.',
+              ),
+            );
+          });
+
+          testWithoutContext('fails if LaunchAction has no BuildableProductRunnable', () async {
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
+<Scheme>
+  <LaunchAction></LaunchAction>
+</Scheme>
+''');
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: FakePlistParser(),
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+                message: 'Failed to parse Runner.xcscheme: Could not find BuildableProductRunnable for Runner.',
+              ),
+            );
+          });
+
+          testWithoutContext('fails if BuildableProductRunnable has no BuildableReference', () async {
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
+<Scheme>
+  <LaunchAction>
+    <BuildableProductRunnable></BuildableProductRunnable>
+  </LaunchAction>
+</Scheme>
+''');
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: FakePlistParser(),
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+                message: 'Failed to parse Runner.xcscheme: Could not find BuildableReference for Runner.',
+              ),
+            );
+          });
+
+          testWithoutContext('fails if BuildableReference has no BlueprintIdentifier', () async {
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
+<Scheme>
+  <LaunchAction>
+    <BuildableProductRunnable>
+      <BuildableReference
+        BuildableIdentifier = "primary"
+        BuildableName = "Runner.app"
+        BlueprintName = "Runner"
+        ReferencedContainer = "container:Runner.xcodeproj">
+    </BuildableProductRunnable>
+  </LaunchAction>
+</Scheme>
+''');
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: FakePlistParser(),
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+               message: 'Failed to parse Runner.xcscheme: Could not find BlueprintIdentifier for Runner.',
+              ),
+            );
+          });
+
+          testWithoutContext('fails if BuildableReference has no BuildableName', () async {
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
+<Scheme>
+  <LaunchAction>
+    <BuildableProductRunnable>
+      <BuildableReference
+        BuildableIdentifier = "primary"
+        BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+        BlueprintName = "Runner"
+        ReferencedContainer = "container:Runner.xcodeproj">
+    </BuildableProductRunnable>
+  </LaunchAction>
+</Scheme>
+''');
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: FakePlistParser(),
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+               message: 'Failed to parse Runner.xcscheme: Could not find BuildableName.',
+              ),
+            );
+          });
+
+          testWithoutContext('fails if BuildableReference has no BlueprintName', () async {
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
+<Scheme>
+  <LaunchAction>
+    <BuildableProductRunnable>
+      <BuildableReference
+        BuildableIdentifier = "primary"
+        BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+        BuildableName = "Runner.app"
+        ReferencedContainer = "container:Runner.xcodeproj">
+    </BuildableProductRunnable>
+  </LaunchAction>
+</Scheme>
+''');
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: FakePlistParser(),
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+               message: 'Failed to parse Runner.xcscheme: Could not find BlueprintName.',
+              ),
+            );
+          });
+
+          testWithoutContext('fails if BuildableReference has no ReferencedContainer', () async {
+            final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+            final BufferLogger testLogger = BufferLogger.test();
+            final FakeXcodeProject project = FakeXcodeProject(
+              platform: platform.name,
+              fileSystem: memoryFileSystem,
+              logger: testLogger,
+            );
+            _createProjectFiles(project, platform);
+            project.xcodeProjectSchemeFile().writeAsStringSync('''
+<Scheme>
+  <LaunchAction>
+    <BuildableProductRunnable>
+      <BuildableReference
+        BuildableIdentifier = "primary"
+        BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+        BuildableName = "Runner.app"
+        BlueprintName = "Runner">
+    </BuildableProductRunnable>
+  </LaunchAction>
+</Scheme>
+''');
+
+            final SwiftPackageManagerIntegrationMigration projectMigration =
+                SwiftPackageManagerIntegrationMigration(
+                  project,
+                  platform,
+                  BuildInfo.debug,
+                  xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+                  logger: testLogger,
+                  fileSystem: memoryFileSystem,
+                  plistParser: FakePlistParser(),
+                  features: swiftPackageManagerFullyEnabledFlags,
+                );
+
+            await expectLater(
+              () => projectMigration.migrate(),
+              throwsToolExit(
+               message: 'Failed to parse Runner.xcscheme: Could not find ReferencedContainer.',
               ),
             );
           });
