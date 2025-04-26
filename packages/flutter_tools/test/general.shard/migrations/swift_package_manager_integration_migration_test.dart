@@ -450,7 +450,8 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(
-                message: 'Failed to parse Runner.xcscheme: Could not find BuildableProductRunnable for Runner.',
+                message:
+                    'Failed to parse Runner.xcscheme: Could not find BuildableProductRunnable for Runner.',
               ),
             );
           });
@@ -487,7 +488,8 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(
-                message: 'Failed to parse Runner.xcscheme: Could not find BuildableReference for Runner.',
+                message:
+                    'Failed to parse Runner.xcscheme: Could not find BuildableReference for Runner.',
               ),
             );
           });
@@ -510,6 +512,7 @@ void main() {
         BuildableName = "Runner.app"
         BlueprintName = "Runner"
         ReferencedContainer = "container:Runner.xcodeproj">
+      </BuildableReference>
     </BuildableProductRunnable>
   </LaunchAction>
 </Scheme>
@@ -530,7 +533,8 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(
-               message: 'Failed to parse Runner.xcscheme: Could not find BlueprintIdentifier for Runner.',
+                message:
+                    'Failed to parse Runner.xcscheme: Could not find BlueprintIdentifier for Runner.',
               ),
             );
           });
@@ -550,9 +554,10 @@ void main() {
     <BuildableProductRunnable>
       <BuildableReference
         BuildableIdentifier = "primary"
-        BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+        BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
         BlueprintName = "Runner"
         ReferencedContainer = "container:Runner.xcodeproj">
+      </BuildableReference>
     </BuildableProductRunnable>
   </LaunchAction>
 </Scheme>
@@ -573,7 +578,7 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(
-               message: 'Failed to parse Runner.xcscheme: Could not find BuildableName.',
+                message: 'Failed to parse Runner.xcscheme: Could not find BuildableName.',
               ),
             );
           });
@@ -593,9 +598,10 @@ void main() {
     <BuildableProductRunnable>
       <BuildableReference
         BuildableIdentifier = "primary"
-        BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+        BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
         BuildableName = "Runner.app"
         ReferencedContainer = "container:Runner.xcodeproj">
+      </BuildableReference>
     </BuildableProductRunnable>
   </LaunchAction>
 </Scheme>
@@ -616,7 +622,7 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(
-               message: 'Failed to parse Runner.xcscheme: Could not find BlueprintName.',
+                message: 'Failed to parse Runner.xcscheme: Could not find BlueprintName.',
               ),
             );
           });
@@ -636,9 +642,10 @@ void main() {
     <BuildableProductRunnable>
       <BuildableReference
         BuildableIdentifier = "primary"
-        BlueprintIdentifier = "97C146ED1CF9000F007C117D"
+        BlueprintIdentifier = "${_runnerNativeTargetIdentifier(platform)}"
         BuildableName = "Runner.app"
         BlueprintName = "Runner">
+      </BuildableReference>
     </BuildableProductRunnable>
   </LaunchAction>
 </Scheme>
@@ -659,7 +666,7 @@ void main() {
             await expectLater(
               () => projectMigration.migrate(),
               throwsToolExit(
-               message: 'Failed to parse Runner.xcscheme: Could not find ReferencedContainer.',
+                message: 'Failed to parse Runner.xcscheme: Could not find ReferencedContainer.',
               ),
             );
           });

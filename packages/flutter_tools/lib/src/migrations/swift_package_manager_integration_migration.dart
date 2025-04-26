@@ -387,7 +387,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
                      BlueprintIdentifier = "$_runnerNativeTargetIdentifier"
                      BuildableName = "$buildableName"
                      BlueprintName = "$blueprintName"
-                     ReferencedContainer = "$referencedContainer"
+                     ReferencedContainer = "$referencedContainer">
                   </BuildableReference>
                </EnvironmentBuildable>
             </ActionContent>
