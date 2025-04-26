@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.subscripts].
+/// Flutter code sample for [FontFeature.subscripts].
 
 void main() => runApp(const ExampleApp());
 
@@ -31,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       'Line from x1,y1 to x2,y2',
       style: TextStyle(
         fontFamily: 'Piazzolla',
-        fontFeatures: <FontFeature>[
-          FontFeature.subscripts(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.subscripts()],
       ),
     );
   }

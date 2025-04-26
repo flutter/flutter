@@ -8,7 +8,6 @@
 # which should be kept in sync with this file:
 #
 #   - analysis_options.yaml (this file)
-#   - https://github.com/flutter/engine/blob/main/analysis_options.yaml
 #   - https://github.com/flutter/packages/blob/main/analysis_options.yaml
 #
 # This file contains the analysis options used for code in the flutter/flutter
@@ -29,6 +28,10 @@ analyzer:
     - "bin/cache/**"
       # Ignore protoc generated files
     - "dev/conductor/lib/proto/*"
+    - "engine/**"
+
+formatter:
+  page_width: 100
 
 linter:
   rules:
@@ -54,6 +57,7 @@ linter:
     - avoid_field_initializers_in_const_classes
     # - avoid_final_parameters # incompatible with prefer_final_parameters
     - avoid_function_literals_in_foreach_calls
+    # - avoid_futureor_void # not yet tested
     # - avoid_implementing_value_types # see https://github.com/dart-lang/linter/issues/4558
     - avoid_init_to_null
     - avoid_js_rounded_ints
@@ -101,6 +105,7 @@ linter:
     - directives_ordering
     # - discarded_futures # too many false positives, similar to unawaited_futures
     # - do_not_use_environment # there are appropriate times to use the environment, especially in our tests and build logic
+    # - document_ignores # not yet tested
     - empty_catches
     - empty_constructor_bodies
     - empty_statements
@@ -113,6 +118,7 @@ linter:
     - implicit_call_tearoffs
     - implicit_reopen
     - invalid_case_patterns
+    - invalid_runtime_check_with_js_interop_types
     # - join_return_with_assignment # not required by flutter style
     - leading_newlines_in_multiline_strings
     - library_annotations
@@ -139,10 +145,11 @@ linter:
     - null_check_on_nullable_type_parameter
     - null_closures
     # - omit_local_variable_types # opposite of always_specify_types
+    # - omit_obvious_local_variable_types # not yet tested
+    # - omit_obvious_property_types # not yet tested
     # - one_member_abstracts # too many false positives
     - only_throw_errors # this does get disabled in a few places where we have legacy code that uses strings et al
     - overridden_fields
-    - package_api_docs
     - package_names
     - package_prefixed_library_names
     # - parameter_assignments # we do this commonly
@@ -197,6 +204,9 @@ linter:
     - sort_constructors_first
     # - sort_pub_dependencies # prevents separating pinned transitive dependencies
     - sort_unnamed_constructors_first
+    # - specify_nonobvious_local_variable_types # not yet tested
+    # - specify_nonobvious_property_types # not yet tested
+    - strict_top_level_inference
     - test_types_in_equals
     - throw_in_finally
     - tighten_type_of_initializing_formals
@@ -204,6 +214,8 @@ linter:
     - type_init_formals
     - type_literal_in_constant_pattern
     # - unawaited_futures # too many false positives, especially with the way AnimationController works
+    # - unintended_html_in_doc_comment # blocked on https://github.com/dart-lang/linter/issues/5065
+    # - unnecessary_async # not yet tested
     - unnecessary_await_in_return
     - unnecessary_brace_in_string_interps
     - unnecessary_breaks
@@ -214,7 +226,7 @@ linter:
     # - unnecessary_lambdas # has false positives: https://github.com/dart-lang/linter/issues/498
     - unnecessary_late
     - unnecessary_library_directive
-    # - unnecessary_library_name # blocked on https://github.com/dart-lang/lints/issues/181#issuecomment-2018919034
+    # - unnecessary_library_name # blocked on https://github.com/dart-lang/dartdoc/issues/3882
     - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_aware_operator_on_extension_on_nullable
@@ -229,9 +241,10 @@ linter:
     - unnecessary_string_interpolations
     - unnecessary_this
     - unnecessary_to_list_in_spreads
+    - unnecessary_underscores
     - unreachable_from_main
     - unrelated_type_equality_checks
-    - unsafe_html
+    # - unsafe_variance # not yet tested
     - use_build_context_synchronously
     - use_colored_box
     # - use_decorated_box # leads to bugs: DecoratedBox and Container are not equivalent (Container inserts extra padding)
@@ -251,5 +264,6 @@ linter:
     - use_super_parameters
     - use_test_throws_matchers
     # - use_to_and_as_if_applicable # has false positives, so we prefer to catch this by code-review
+    - use_truncating_division
     - valid_regexps
     - void_checks

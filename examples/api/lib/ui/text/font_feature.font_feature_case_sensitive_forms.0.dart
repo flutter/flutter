@@ -4,7 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
-/// Flutter code sample for [FontFeature.FontFeature.caseSensitiveForms].
+/// Flutter code sample for [FontFeature.caseSensitiveForms].
 
 void main() => runApp(const ExampleApp());
 
@@ -31,9 +31,7 @@ class ExampleWidget extends StatelessWidget {
       '(A) [A] {A} «A» A/B A•B',
       style: TextStyle(
         fontFamily: 'Piazzolla',
-        fontFeatures: <FontFeature>[
-          FontFeature.caseSensitiveForms(),
-        ],
+        fontFeatures: <FontFeature>[FontFeature.caseSensitiveForms()],
       ),
     );
   }

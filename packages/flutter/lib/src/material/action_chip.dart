@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'choice_chip.dart';
+/// @docImport 'circle_avatar.dart';
+/// @docImport 'elevated_button.dart';
+/// @docImport 'input_chip.dart';
+/// @docImport 'material.dart';
+/// @docImport 'outlined_button.dart';
+/// @docImport 'text_button.dart';
+library;
+
 import 'package:flutter/foundation.dart' show clampDouble;
 import 'package:flutter/widgets.dart';
 
@@ -78,7 +87,8 @@ enum _ChipVariant { flat, elevated }
 ///  * [Wrap], A widget that displays its children in multiple horizontal or
 ///    vertical runs.
 ///  * <https://material.io/design/components/chips.html>
-class ActionChip extends StatelessWidget implements ChipAttributes, TappableChipAttributes, DisabledChipAttributes {
+class ActionChip extends StatelessWidget
+    implements ChipAttributes, TappableChipAttributes, DisabledChipAttributes {
   /// Create a chip that acts like a button.
   ///
   /// The [label], [autofocus], and [clipBehavior] arguments must not be null.
@@ -111,6 +121,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.iconTheme,
     this.avatarBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -147,6 +158,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.iconTheme,
     this.avatarBoxConstraints,
     this.chipAnimationStyle,
+    this.mouseCursor,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -199,6 +211,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   final BoxConstraints? avatarBoxConstraints;
   @override
   final ChipAnimationStyle? chipAnimationStyle;
+  @override
+  final MouseCursor? mouseCursor;
 
   @override
   bool get isEnabled => onPressed != null;
@@ -208,9 +222,10 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    final ChipThemeData? defaults = Theme.of(context).useMaterial3
-      ? _ActionChipDefaultsM3(context, isEnabled, _chipVariant)
-      : null;
+    final ChipThemeData? defaults =
+        Theme.of(context).useMaterial3
+            ? _ActionChipDefaultsM3(context, isEnabled, _chipVariant)
+            : null;
     return RawChip(
       defaultProperties: defaults,
       avatar: avatar,
@@ -238,6 +253,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       iconTheme: iconTheme,
       avatarBoxConstraints: avatarBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
+      mouseCursor: mouseCursor,
     );
   }
 }
@@ -249,6 +265,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
+// dart format off
 class _ActionChipDefaultsM3 extends ChipThemeData {
   _ActionChipDefaultsM3(this.context, this.isEnabled, this._chipVariant)
     : super(
@@ -307,7 +324,7 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
   @override
   BorderSide? get side => _chipVariant == _ChipVariant.flat
     ? isEnabled
-        ? BorderSide(color: _colors.outline)
+        ? BorderSide(color: _colors.outlineVariant)
         : BorderSide(color: _colors.onSurface.withOpacity(0.12))
     : const BorderSide(color: Colors.transparent);
 
@@ -341,5 +358,6 @@ class _ActionChipDefaultsM3 extends ChipThemeData {
     )!;
   }
 }
+// dart format on
 
 // END GENERATED TOKEN PROPERTIES - ActionChip

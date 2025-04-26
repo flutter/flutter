@@ -476,7 +476,7 @@ The following issues were addressed in 426 commits.
 | [flutter/plugins#765](https://github.com/flutter/plugins/pull/765) | Timestamps firestore |
 | [flutter/plugins#407](https://github.com/flutter/plugins/pull/407) | Fix url_launcher for iOS <10 |
 | [flutter/plugins#759](https://github.com/flutter/plugins/pull/759) | Correct usage of StreamBuilder |
-| [flutter/plugins#857](https://github.com/flutter/plugins/pull/857) | Use exoplayer's prefered API for MediaSources |
+| [flutter/plugins#857](https://github.com/flutter/plugins/pull/857) | Use exoplayer's preferred API for MediaSources |
 | [flutter/plugins#813](https://github.com/flutter/plugins/pull/813) | video_player: Fixed null exception when file has no width or height. |
 | [flutter/plugins#853](https://github.com/flutter/plugins/pull/853) | Change android invites dependency to dynamic links |
 | [flutter/plugins#408](https://github.com/flutter/plugins/pull/408) | Fix new formatting errors |

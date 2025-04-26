@@ -146,7 +146,7 @@
   "menuDismissLabel": "மெனுவை மூடும்",
   "lookUpButtonLabel": "தேடு",
   "searchWebButtonLabel": "இணையத்தில் தேடு",
-  "shareButtonLabel": "பகிர்...",
-  "clearButtonTooltip": "Clear text",
-  "selectedDateLabel": "Selected"
+  "shareButtonLabel": "பகிர்",
+  "clearButtonTooltip": "வார்த்தைகளை அழிக்கும்",
+  "selectedDateLabel": "தேர்ந்தெடுக்கப்பட்டது"
 }

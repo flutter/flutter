@@ -60,24 +60,19 @@ class BuildPreviewCommand extends BuildSubCommand {
     try {
       final FlutterProject flutterProject = await _createProject(targetDir);
 
+      final File packageConfigFile = findPackageConfigFileOrDefault(flutterProject.directory);
+
       final BuildInfo buildInfo = BuildInfo(
         BuildMode.debug,
         null, // no flavor
         // users may add icons later
-        packageConfigPath: flutterProject.packageConfigFile.path,
-        packageConfig: await loadPackageConfigWithLogging(
-          flutterProject.packageConfigFile,
-          logger: logger,
-        ),
+        packageConfigPath: packageConfigFile.path,
+        packageConfig: await loadPackageConfigWithLogging(packageConfigFile, logger: logger),
         treeShakeIcons: false,
       );
 
       // TODO(loic-sharma): Support windows-arm64 preview device, https://github.com/flutter/flutter/issues/139949.
-      await buildWindows(
-        flutterProject.windows,
-        buildInfo,
-        TargetPlatform.windows_x64,
-      );
+      await buildWindows(flutterProject.windows, buildInfo, TargetPlatform.windows_x64);
 
       final File previewDevice = targetDir
           .childDirectory(getWindowsBuildDirectory(TargetPlatform.windows_x64))
@@ -109,12 +104,11 @@ class BuildPreviewCommand extends BuildSubCommand {
       'flutter_preview',
       targetDir.path,
     ];
-    final RunResult result = await processUtils.run(
-      cmd,
-      allowReentrantFlutter: true,
-    );
+    final RunResult result = await processUtils.run(cmd, allowReentrantFlutter: true);
     if (result.exitCode != 0) {
-      final StringBuffer buffer = StringBuffer('${cmd.join(' ')} exited with code ${result.exitCode}\n');
+      final StringBuffer buffer = StringBuffer(
+        '${cmd.join(' ')} exited with code ${result.exitCode}\n',
+      );
       buffer.writeln('stdout:\n${result.stdout}\n');
       buffer.writeln('stderr:\n${result.stderr}');
       throw ProcessException(cmd.first, cmd.sublist(1), buffer.toString(), result.exitCode);

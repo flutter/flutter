@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'adaptive_text_selection_toolbar.dart';
+/// @docImport 'desktop_text_selection_toolbar_button.dart';
+library;
+
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
@@ -28,11 +32,8 @@ const double _kToolbarWidth = 222.0;
 ///    toolbar.
 class DesktopTextSelectionToolbar extends StatelessWidget {
   /// Creates a const instance of DesktopTextSelectionToolbar.
-  const DesktopTextSelectionToolbar({
-    super.key,
-    required this.anchor,
-    required this.children,
-  }) : assert(children.length > 0);
+  const DesktopTextSelectionToolbar({super.key, required this.anchor, required this.children})
+    : assert(children.length > 0);
 
   /// {@template flutter.material.DesktopTextSelectionToolbar.anchor}
   /// The point where the toolbar will attempt to position itself as closely as
@@ -76,15 +77,10 @@ class DesktopTextSelectionToolbar extends StatelessWidget {
         _kToolbarScreenPadding,
       ),
       child: CustomSingleChildLayout(
-        delegate: DesktopTextSelectionToolbarLayoutDelegate(
-          anchor: anchor - localAdjustment,
-        ),
+        delegate: DesktopTextSelectionToolbarLayoutDelegate(anchor: anchor - localAdjustment),
         child: _defaultToolbarBuilder(
           context,
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: children,
-          ),
+          Column(mainAxisSize: MainAxisSize.min, children: children),
         ),
       ),
     );

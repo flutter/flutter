@@ -113,6 +113,9 @@ function _wait_for_lock () {
 function upgrade_flutter () (
   mkdir -p "$FLUTTER_ROOT/bin/cache"
 
+  # Ensure the engine.version is populated
+  "$FLUTTER_ROOT/bin/internal/update_engine_version.sh"
+
   local revision="$(cd "$FLUTTER_ROOT"; git rev-parse HEAD)"
   local compilekey="$revision:$FLUTTER_TOOL_ARGS"
 
@@ -143,7 +146,7 @@ function upgrade_flutter () (
     touch "$FLUTTER_ROOT/bin/cache/.dartignore"
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
-    if [[ "$BIN_NAME" == 'dart' ]]; then
+    if [[ "$BIN_NAME" == 'dart' || "$BIN_NAME" == 'flutter-dev' ]]; then
       # Don't try to build tool
       return
     fi
@@ -168,7 +171,7 @@ function upgrade_flutter () (
     fi
 
     # Compile...
-    "$DART" --verbosity=error --disable-dart-dev $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
+    "$DART" --verbosity=error $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind="app-jit" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" --no-enable-mirrors "$SCRIPT_PATH" > /dev/null
     echo "$compilekey" > "$STAMP_PATH"
 
     # Delete any temporary snapshot path.
@@ -254,10 +257,15 @@ function shared::execute() {
   upgrade_flutter 7< "$SHARED_NAME"
 
   case "$BIN_NAME" in
+    flutter-dev)
+      # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
+      # considered as separate space-separated args.
+      exec "$DART" run --resident --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SCRIPT_PATH" "$@"
+      ;;
     flutter*)
       # FLUTTER_TOOL_ARGS aren't quoted below, because it is meant to be
       # considered as separate space-separated args.
-      exec "$DART" --disable-dart-dev --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
+      exec "$DART" --packages="$FLUTTER_TOOLS_DIR/.dart_tool/package_config.json" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
       ;;
     dart*)
       exec "$DART" "$@"

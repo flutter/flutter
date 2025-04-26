@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'overscroll_indicator.dart';
+/// @docImport 'scroll_activity.dart';
+/// @docImport 'scroll_controller.dart';
+/// @docImport 'scroll_physics.dart';
+/// @docImport 'scroll_position.dart';
+/// @docImport 'scroll_view.dart';
+/// @docImport 'scrollable.dart';
+/// @docImport 'viewport.dart';
+library;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
@@ -27,7 +39,7 @@ mixin ViewportNotificationMixin on Notification {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
+    description.add('depth: $depth (${depth == 0 ? "local" : "remote"})');
   }
 }
 
@@ -37,7 +49,7 @@ mixin ViewportNotificationMixin on Notification {
 /// See also:
 ///   * [Viewport], which creates a custom [MultiChildRenderObjectElement] that mixes
 ///     this in.
-mixin ViewportElementMixin  on NotifiableElementMixin {
+mixin ViewportElementMixin on NotifiableElementMixin {
   @override
   bool onNotification(Notification notification) {
     if (notification is ViewportNotificationMixin) {
@@ -116,10 +128,7 @@ mixin ViewportElementMixin  on NotifiableElementMixin {
 ///
 abstract class ScrollNotification extends LayoutChangedNotification with ViewportNotificationMixin {
   /// Initializes fields for subclasses.
-  ScrollNotification({
-    required this.metrics,
-    required this.context,
-  });
+  ScrollNotification({required this.metrics, required this.context});
 
   /// A description of a [Scrollable]'s contents, useful for modeling the state
   /// of its viewport.
@@ -146,11 +155,7 @@ abstract class ScrollNotification extends LayoutChangedNotification with Viewpor
 ///  * [ScrollNotification], which describes the notification lifecycle.
 class ScrollStartNotification extends ScrollNotification {
   /// Creates a notification that a [Scrollable] widget has started scrolling.
-  ScrollStartNotification({
-    required super.metrics,
-    required super.context,
-    this.dragDetails,
-  });
+  ScrollStartNotification({required super.metrics, required super.context, this.dragDetails});
 
   /// If the [Scrollable] started scrolling because of a drag, the details about
   /// that drag start.

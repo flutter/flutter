@@ -1,44 +1,66 @@
-When new Android versions become available, the following steps should be taken in order to fully support the new API version in the Flutter Engine. These steps only change the Engine to build against and target the new API and does not guarantee everything works with the changes in the new android API.
+When new Android versions become available, the following steps should be taken in order to fully support the new API version in the Flutter engine. These steps only change the engine to build against and target the new API and do not guarantee that everything works with the changes in the new Android API.
 
-## Buildroot:
+## Update the [Buildroot](https://github.com/flutter/buildroot):
 
-build/config/android/config.gni: Edit default_android_sdk_version and  default_android_sdk_build_tools_version
+In `build/config/android/config.gni`, edit `default_android_sdk_version` and `default_android_sdk_build_tools_version` to the new Android version.
 
-## SDK and other dependencies:
+**NOTE:** There is an ongoing effort to move the `flutter/buildroot` repo into the `flutter/engine` repo, so this file may have moved by the time you are following these instructions.
 
-Flutter now includes a script to download, package, and upload the Android SDK to CIPD. These CIPD packages are then used as dependencies by the Flutter engine and recipes so that there is a stable archived version of the Android SDK to depend on. The script is located in the Flutter engine repo under `tools/android-sdk/create_cipd_packages.sh`.
+## Upload new SDK and other dependencies to [CIPD](https://chrome-infra-packages.appspot.com/p/flutter/android):
 
-Edit `tools/android-sdk/packages.txt` to refer to the updated versions you want. The format for each line in packages.txt is `<package_name>:<subdirectory_to_upload>`. Typically, each <package_name> should be updated to the latest available version which can be found with the `sdkmanager --list --include_obsolete`. `sdkmanager` can be found in your `commandline-tools` package of the android sdk.
+Flutter now includes a script to download, package, and upload the Android SDK to CIPD. These CIPD packages are then used as dependencies by the Flutter engine and recipes (go/flutter-luci-recipes) so that there is a stable archived version of the Android SDK to depend on. The script is located in the Flutter engine repo under `tools/android-sdk/create_cipd_packages.sh`.
+
+To upload packages to CIPD (either with the script or manually), the  `flutter-cipd-writers` role is required in order to complete this operation. Googlers can apply for access [here](https://grants.corp.google.com/#/grants?request=8h%2Fflutter-cipd-writers). Once this role is granted, `cipd auth-login` must be run in order for cipd to update the user's available roles.
+
+Edit `tools/android-sdk/packages.txt` to refer to the updated versions you want. The format for each line in packages.txt is `<package_name>:<subdirectory_to_upload>`. Typically, each `<package_name>` should be updated to the latest available version which can be found with the `sdkmanager --list --include_obsolete`. `sdkmanager` can be found in your `commandline-tools` package of the android sdk. Additionally, set the `ANDROID_SDK_ROOT` environment variable to your local Android SDK installation.
 
 The script must be run on a Linux or Mac host. Run:
 
-    `$ ./tools/android-sdk/create_cipd_packages.sh <new_version_tag> <path_to_your_local_android_sdk>`
+    `$ cd tools/android-sdk && ./create_cipd_packages.sh <new_version_tag> <path_to_your_local_android_sdk>`
 
-This script will download and re-upload the entire SDK, so it may take a long time to complete. `cmdline-tools` should be installed in your local sdk as the script uses `sdkmanager`. Once the CIPD packages are finished uploading, you can update the sdk version tag used in `.ci.yaml`, `DEPS`, and elsewhere.
+This script will download and re-upload the entire SDK, so it may take a long time to complete. `cmdline-tools` should be installed in your local SDK as the script uses `sdkmanager`. Once the CIPD packages are finished uploading, you can update the SDK version tag used in `.ci.yaml`, `DEPS`, and elsewhere as described [below](#update-the-engine).
 
-It is no longer recommended to upload CIPD android sdk packages manually, but if it must be done, run the following commands to zip and upload each package to CIPD:
+It is no longer recommended to upload CIPD Android SDK packages manually, but if it must be done, run the following commands to zip and upload each package to CIPD:
 
     `$ cipd create -in <your-android-dir>/Android/sdk/<some_package> -name flutter/android/sdk/<some_package> -tag version:<new-version-tag>`
 
-Typically, `<your-android-dir>` is in your home directory under `~/Library/Android`. The `<new-version-tag>` is what you will use to specify the new package you uploaded in the Flutter engine DEPS file.
+Typically, `<your-android-dir>` is in your home directory under `~/Library/Android`. The `<new-version-tag>` is what you will use to specify the new package you uploaded in the Flutter engine `DEPS` file.
 
-The `flutter-cipd-writers` role is required in order to complete this operation. Googlers can apply for access [here](https://grants.corp.google.com/#/grants?request=8h%2Fflutter-cipd-writers) Once this role is granted, `cipd auth-login` must be run in order for cipd to update the user's available roles.
+## Update the [Engine](https://github.com/flutter/engine):
 
-## Engine:
+### Update the compile and target SDK versions we use
 
-* DEPS: Roll buildroot hash
-* DEPS: Change the version parameter under `flutter/android/sdk/all/${{platform}}` to the newly uploaded CIPD version tag. Eg, `'version': 'version:30r2'`
-* Change any references to the old SDK version to the latest in build.gradle across the repo.
-* In `tools/javadoc/gen_javadoc.py`, bump the reference to `android-XX` in `classpath` to the latest version.
-* In `tools/cipd/android_embedding_bundle/build.gradle`, bump `compileSdkVersion XX` to the latest version.
-* In `shell/platform/android/test_runner/build.gradle`, bump `compileSdkVersion XX` to the latest version.
-* In all android projects in `testing`, upgrade the `compileSdkVersion` and `targetSdkVersion` in `android/app/build.gradle`.
+Modify the following files as described:
+* `DEPS`: Roll buildroot hash to that of the PR you used to [update the buildroot](#update-the-buildroot)
+* `DEPS`: Change the version parameter under `flutter/android/sdk/all/${{platform}}` to the newly uploaded CIPD version tag, e.g. `'version': 'version:30r2'`
+* `tools/javadoc/gen_javadoc.py`: Bump the reference to `android-XX` in `classpath` to the latest version.
+* `tools/cipd/android_embedding_bundle/build.gradle`: Bump `compileSdkVersion XX` to the latest version.
+* `shell/platform/android/test_runner/build.gradle`: Bump `compileSdkVersion XX` to the latest version.
+* `shell/platform/android/AndroidManifest.xml`: Bump `android:targetSdkVersion=XX` to the latest version.
+* `testing/android/native_activity/native_activity.gni`: Bump the reference to `build-tools/XX` in `android_buildtools` to the latest **build-tools** version and the reference to `android-XX` in `android_jar` to the latest version.
+* `testing/scenario_app/android/app/build.gradle`: Upgrade `buildToolsVersion` to the latest **build-tools** version and the `compileSdkVersion` and `targetSdkVersion` to the latest version.
+* In all other android projects in `testing`: Upgrade the `compileSdkVersion` and `targetSdkVersion` in `android/app/build.gradle`.
 
-## Flutter LUCI Recipes:
+This list may become outdated, so be sure to change any references to the old SDK version to the latest version in `build.gradle` files across the repo.
 
-Scenario tests recipes/engine/scenarios.py: Update the CIPD hash to the latest version that contains the configuration for the Android Virtual Device (AVD) desired `generic_android<API#>.textpb` and change the script to use the new textpb config and change the API number in the logs. The CIPD package for the AVD launcher can be found at https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/+/ and updating the packages uploaded there is tracked in https://bugs.chromium.org/p/chromium/issues/detail?id=1112429#c7
+### Update our `android_virtual_device` dependency
 
-## Framework, examples and samples
+1. Locate the desired Android Virtual Device (AVD) from https://chrome-infra-packages.appspot.com/p/chromium/tools/android/avd/linux-amd64/. You should look at the most recently updated AVD and verify that
+  it has the desired `generic_android<API#>.textpb` for the API version that you are modifying the engine to support. Then, determine its build_id number by clicking on the AVD instance you would like to use and looking for the build_id tag.
+2. In each of the engine builders (at the time of writing: `ci/builders/standalone/linux_android_emulator_skia.json` & `ci/builders/standalone/linux_android_emulator.json`), find the `android_virtual_device` and `avd_cipd_version` dependency entries and update them to the versions you desire, e.g.
 
-* Templates in tooling: Change `targetSdkVersion` in various `build.gradle.tmpl` files to use the new API version
-* Examples, samples, gallery, etc: Change `targetSdkVersion` in `android/app/build.gradle` for each project to the new API version.
+```json
+{
+    "dependency": "android_virtual_device",
+    "version": "android_<API#>_google_apis_x64.textpb"
+},
+{
+    "dependency": "avd_cipd_version",
+    "version": "build_id:<build_id>"
+}
+```
+
+## Next Steps: Update the Framework, Examples and Samples
+
+* Templates in [the framework](https://github.com/flutter/flutter): Change `targetSdkVersion` in various `build.gradle.tmpl` files to use the new API version
+* [Examples](https://github.com/flutter/flutter/tree/main/examples) and [samples](https://github.com/flutter/samples): Change `targetSdkVersion` in `android/app/build.gradle` for each project to the new API version.

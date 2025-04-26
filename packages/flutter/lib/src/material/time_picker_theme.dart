@@ -2,6 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'color_scheme.dart';
+/// @docImport 'dialog.dart';
+/// @docImport 'icon_button.dart';
+/// @docImport 'text_field.dart';
+/// @docImport 'text_theme.dart';
+/// @docImport 'time_picker.dart';
+library;
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -36,7 +44,6 @@ import 'theme.dart';
 ///    picker theme.
 @immutable
 class TimePickerThemeData with Diagnosticable {
-
   /// Creates a theme that can be used for [TimePickerTheme] or
   /// [ThemeData.timePickerTheme].
   const TimePickerThemeData({
@@ -94,8 +101,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The background color of the AM/PM toggle.
   ///
-  /// If [dayPeriodColor] is a [MaterialStateColor], then the effective
-  /// background color can depend on the [MaterialState.selected] state, i.e.
+  /// If [dayPeriodColor] is a [WidgetStateColor], then the effective
+  /// background color can depend on the [WidgetState.selected] state, i.e.
   /// if the segment is selected or not.
   ///
   /// By default, if the segment is selected, the overall theme's
@@ -119,6 +126,7 @@ class TimePickerThemeData with Diagnosticable {
       return Colors.transparent;
     });
   }
+
   final Color? _dayPeriodColor;
 
   /// The shape of the day period that the time picker uses.
@@ -135,8 +143,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The color of the day period text that represents AM/PM.
   ///
-  /// If [dayPeriodTextColor] is a [MaterialStateColor], then the effective
-  /// text color can depend on the [MaterialState.selected] state, i.e. if the
+  /// If [dayPeriodTextColor] is a [WidgetStateColor], then the effective
+  /// text color can depend on the [WidgetState.selected] state, i.e. if the
   /// text is selected or not.
   ///
   /// By default the overall theme's [ColorScheme.primary] color is used when
@@ -172,8 +180,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The color of the dial text that represents specific hours and minutes.
   ///
-  /// If [dialTextColor] is a [MaterialStateColor], then the effective
-  /// text color can depend on the [MaterialState.selected] state, i.e. if the
+  /// If [dialTextColor] is a [WidgetStateColor], then the effective
+  /// text color can depend on the [WidgetState.selected] state, i.e. if the
   /// text is selected or not.
   ///
   /// If this color is null then the dial's text colors are based on the
@@ -182,8 +190,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The [TextStyle] for the numbers on the time selection dial.
   ///
-  /// If [dialTextStyle]'s [TextStyle.color] is a [MaterialStateColor], then the
-  /// effective text color can depend on the [MaterialState.selected] state,
+  /// If [dialTextStyle]'s [TextStyle.color] is a [WidgetStateColor], then the
+  /// effective text color can depend on the [WidgetState.selected] state,
   /// i.e. if the text is selected or not.
   ///
   /// If this style is null then the dial's text style is based on the theme's
@@ -213,8 +221,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The background color of the hour and minute header segments.
   ///
-  /// If [hourMinuteColor] is a [MaterialStateColor], then the effective
-  /// background color can depend on the [MaterialState.selected] state, i.e.
+  /// If [hourMinuteColor] is a [WidgetStateColor], then the effective
+  /// background color can depend on the [WidgetState.selected] state, i.e.
   /// if the segment is selected or not.
   ///
   /// By default, if the segment is selected, the overall theme's
@@ -234,8 +242,8 @@ class TimePickerThemeData with Diagnosticable {
 
   /// The color of the header text that represents hours and minutes.
   ///
-  /// If [hourMinuteTextColor] is a [MaterialStateColor], then the effective
-  /// text color can depend on the [MaterialState.selected] state, i.e. if the
+  /// If [hourMinuteTextColor] is a [WidgetStateColor], then the effective
+  /// text color can depend on the [WidgetState.selected] state, i.e. if the
   /// text is selected or not.
   ///
   /// By default the overall theme's [ColorScheme.primary] color is used when
@@ -343,7 +351,8 @@ class TimePickerThemeData with Diagnosticable {
       padding: padding ?? this.padding,
       shape: shape ?? this.shape,
       timeSelectorSeparatorColor: timeSelectorSeparatorColor ?? this.timeSelectorSeparatorColor,
-      timeSelectorSeparatorTextStyle: timeSelectorSeparatorTextStyle ?? this.timeSelectorSeparatorTextStyle,
+      timeSelectorSeparatorTextStyle:
+          timeSelectorSeparatorTextStyle ?? this.timeSelectorSeparatorTextStyle,
     );
   }
 
@@ -388,8 +397,18 @@ class TimePickerThemeData with Diagnosticable {
       inputDecorationTheme: t < 0.5 ? a?.inputDecorationTheme : b?.inputDecorationTheme,
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
-      timeSelectorSeparatorColor: MaterialStateProperty.lerp<Color?>(a?.timeSelectorSeparatorColor, b?.timeSelectorSeparatorColor, t, Color.lerp),
-      timeSelectorSeparatorTextStyle: MaterialStateProperty.lerp<TextStyle?>(a?.timeSelectorSeparatorTextStyle, b?.timeSelectorSeparatorTextStyle, t, TextStyle.lerp),
+      timeSelectorSeparatorColor: MaterialStateProperty.lerp<Color?>(
+        a?.timeSelectorSeparatorColor,
+        b?.timeSelectorSeparatorColor,
+        t,
+        Color.lerp,
+      ),
+      timeSelectorSeparatorTextStyle: MaterialStateProperty.lerp<TextStyle?>(
+        a?.timeSelectorSeparatorTextStyle,
+        b?.timeSelectorSeparatorTextStyle,
+        t,
+        TextStyle.lerp,
+      ),
     );
   }
 
@@ -429,60 +448,108 @@ class TimePickerThemeData with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TimePickerThemeData
-        && other.backgroundColor == backgroundColor
-        && other.cancelButtonStyle == cancelButtonStyle
-        && other.confirmButtonStyle == confirmButtonStyle
-        && other.dayPeriodBorderSide == dayPeriodBorderSide
-        && other.dayPeriodColor == dayPeriodColor
-        && other.dayPeriodShape == dayPeriodShape
-        && other.dayPeriodTextColor == dayPeriodTextColor
-        && other.dayPeriodTextStyle == dayPeriodTextStyle
-        && other.dialBackgroundColor == dialBackgroundColor
-        && other.dialHandColor == dialHandColor
-        && other.dialTextColor == dialTextColor
-        && other.dialTextStyle == dialTextStyle
-        && other.elevation == elevation
-        && other.entryModeIconColor == entryModeIconColor
-        && other.helpTextStyle == helpTextStyle
-        && other.hourMinuteColor == hourMinuteColor
-        && other.hourMinuteShape == hourMinuteShape
-        && other.hourMinuteTextColor == hourMinuteTextColor
-        && other.hourMinuteTextStyle == hourMinuteTextStyle
-        && other.inputDecorationTheme == inputDecorationTheme
-        && other.padding == padding
-        && other.shape == shape
-        && other.timeSelectorSeparatorColor == timeSelectorSeparatorColor
-        && other.timeSelectorSeparatorTextStyle == timeSelectorSeparatorTextStyle;
+    return other is TimePickerThemeData &&
+        other.backgroundColor == backgroundColor &&
+        other.cancelButtonStyle == cancelButtonStyle &&
+        other.confirmButtonStyle == confirmButtonStyle &&
+        other.dayPeriodBorderSide == dayPeriodBorderSide &&
+        other.dayPeriodColor == dayPeriodColor &&
+        other.dayPeriodShape == dayPeriodShape &&
+        other.dayPeriodTextColor == dayPeriodTextColor &&
+        other.dayPeriodTextStyle == dayPeriodTextStyle &&
+        other.dialBackgroundColor == dialBackgroundColor &&
+        other.dialHandColor == dialHandColor &&
+        other.dialTextColor == dialTextColor &&
+        other.dialTextStyle == dialTextStyle &&
+        other.elevation == elevation &&
+        other.entryModeIconColor == entryModeIconColor &&
+        other.helpTextStyle == helpTextStyle &&
+        other.hourMinuteColor == hourMinuteColor &&
+        other.hourMinuteShape == hourMinuteShape &&
+        other.hourMinuteTextColor == hourMinuteTextColor &&
+        other.hourMinuteTextStyle == hourMinuteTextStyle &&
+        other.inputDecorationTheme == inputDecorationTheme &&
+        other.padding == padding &&
+        other.shape == shape &&
+        other.timeSelectorSeparatorColor == timeSelectorSeparatorColor &&
+        other.timeSelectorSeparatorTextStyle == timeSelectorSeparatorTextStyle;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ButtonStyle>('cancelButtonStyle', cancelButtonStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<ButtonStyle>('confirmButtonStyle', confirmButtonStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<BorderSide>('dayPeriodBorderSide', dayPeriodBorderSide, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ButtonStyle>('cancelButtonStyle', cancelButtonStyle, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<ButtonStyle>(
+        'confirmButtonStyle',
+        confirmButtonStyle,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<BorderSide>(
+        'dayPeriodBorderSide',
+        dayPeriodBorderSide,
+        defaultValue: null,
+      ),
+    );
     properties.add(ColorProperty('dayPeriodColor', dayPeriodColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('dayPeriodShape', dayPeriodShape, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ShapeBorder>('dayPeriodShape', dayPeriodShape, defaultValue: null),
+    );
     properties.add(ColorProperty('dayPeriodTextColor', dayPeriodTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('dayPeriodTextStyle', dayPeriodTextStyle, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle>('dayPeriodTextStyle', dayPeriodTextStyle, defaultValue: null),
+    );
     properties.add(ColorProperty('dialBackgroundColor', dialBackgroundColor, defaultValue: null));
     properties.add(ColorProperty('dialHandColor', dialHandColor, defaultValue: null));
     properties.add(ColorProperty('dialTextColor', dialTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle?>('dialTextStyle', dialTextStyle, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle?>('dialTextStyle', dialTextStyle, defaultValue: null),
+    );
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(ColorProperty('entryModeIconColor', entryModeIconColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('helpTextStyle', helpTextStyle, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle>('helpTextStyle', helpTextStyle, defaultValue: null),
+    );
     properties.add(ColorProperty('hourMinuteColor', hourMinuteColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('hourMinuteShape', hourMinuteShape, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<ShapeBorder>('hourMinuteShape', hourMinuteShape, defaultValue: null),
+    );
     properties.add(ColorProperty('hourMinuteTextColor', hourMinuteTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('hourMinuteTextStyle', hourMinuteTextStyle, defaultValue: null));
-    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<TextStyle>(
+        'hourMinuteTextStyle',
+        hourMinuteTextStyle,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<InputDecorationTheme>(
+        'inputDecorationTheme',
+        inputDecorationTheme,
+        defaultValue: null,
+      ),
+    );
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('timeSelectorSeparatorColor', timeSelectorSeparatorColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('timeSelectorSeparatorTextStyle', timeSelectorSeparatorTextStyle, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+        'timeSelectorSeparatorColor',
+        timeSelectorSeparatorColor,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<TextStyle?>>(
+        'timeSelectorSeparatorTextStyle',
+        timeSelectorSeparatorTextStyle,
+        defaultValue: null,
+      ),
+    );
   }
 }
 
@@ -494,11 +561,7 @@ class TimePickerThemeData with Diagnosticable {
 class TimePickerTheme extends InheritedTheme {
   /// Creates a time picker theme that controls the configurations for
   /// time pickers displayed in its widget subtree.
-  const TimePickerTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const TimePickerTheme({super.key, required this.data, required super.child});
 
   /// The properties for descendant time picker widgets.
   final TimePickerThemeData data;
@@ -514,7 +577,8 @@ class TimePickerTheme extends InheritedTheme {
   /// TimePickerThemeData theme = TimePickerTheme.of(context);
   /// ```
   static TimePickerThemeData of(BuildContext context) {
-    final TimePickerTheme? timePickerTheme = context.dependOnInheritedWidgetOfExactType<TimePickerTheme>();
+    final TimePickerTheme? timePickerTheme =
+        context.dependOnInheritedWidgetOfExactType<TimePickerTheme>();
     return timePickerTheme?.data ?? Theme.of(context).timePickerTheme;
   }
 

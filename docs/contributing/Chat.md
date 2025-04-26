@@ -2,7 +2,7 @@
 
 <img src="https://github.com/flutter/flutter/assets/551196/1381071b-e482-4e07-b096-60e9219d3ff7" width=300 align=right alt="">
 
-The Flutter team uses a [Discord server](https://discord.com/channels/608014603317936148). [This is invite link for Flutter's Discord server](https://discord.gg/ht477J5PyH). Please do not share either link directly, instead share links to this page.
+The Flutter team uses a [Discord server](https://discord.com/channels/608014603317936148). [This is the invite link for Flutter's Discord server](https://discord.gg/ht477J5PyH). Please do not share either link directly, instead share links to this page.
 
 The server is open to the public, though some channels are intended only for people who are actively contributing. **See the #welcome channel for instructions on posting to the server (you won't be able to see the channels until you acknowledge the rules there).**
 

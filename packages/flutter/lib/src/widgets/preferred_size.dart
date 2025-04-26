@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -62,11 +65,7 @@ abstract class PreferredSizeWidget implements Widget {
 ///  * [AppBar] and [TabBar], which implement PreferredSizeWidget.
 class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a widget that has a preferred size that the parent can query.
-  const PreferredSize({
-    super.key,
-    required this.preferredSize,
-    required this.child,
-  });
+  const PreferredSize({super.key, required this.preferredSize, required this.child});
 
   /// The widget below this widget in the tree.
   ///

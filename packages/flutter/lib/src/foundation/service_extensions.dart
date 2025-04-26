@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'dart:ui';
+///
+/// @docImport 'binding.dart';
+/// @docImport 'debug.dart';
+/// @docImport 'platform.dart';
+library;
+
 /// Service extension constants for the foundation library.
 ///
 /// These constants will be used when registering service extensions in the
@@ -50,7 +57,6 @@ enum FoundationServiceExtensions {
   /// * [BindingBase.initServiceExtensions], where the service extension is
   ///   registered.
   activeDevToolsServerAddress,
-
 
   /// Name of service extension that, when called, will change the value of
   /// [defaultTargetPlatform], which controls which [TargetPlatform] that the

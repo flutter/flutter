@@ -8,15 +8,10 @@ import 'package:flutter_api_samples/material/progress_indicator/linear_progress_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Finds LinearProgressIndicator', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const example.ProgressIndicatorApp(),
-    );
+  testWidgets('Can control LinearProgressIndicator value', (WidgetTester tester) async {
+    await tester.pumpWidget(const example.ProgressIndicatorExampleApp());
 
-    expect(
-      find.bySemanticsLabel('Linear progress indicator').first,
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('Linear progress indicator').first, findsOneWidget);
 
     // Test if LinearProgressIndicator is animating.
     expect(tester.hasRunningAnimations, isTrue);

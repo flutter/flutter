@@ -2,7 +2,7 @@ Several of our dependencies are automatically rolled (updated) by bots.
 
 ## Clang to Engine
 
-We use an auto-roller for Clang on [Linux](https://autoroll.skia.org/r/clang-linux-flutter-engine) and [MacOS](https://autoroll.skia.org/r/clang-mac-flutter-engine) (Windows is pending availability of a Windows Clang package from the Fuchsia infra team). In case of build failures or other errors, ping the #hackers-engine channel on [Discord](../contributing/Chat.md).
+We use an auto-roller for Clang on [Linux](https://autoroll.skia.org/r/clang-linux-flutter-engine) and [macOS](https://autoroll.skia.org/r/clang-mac-flutter-engine) (Windows is pending availability of a Windows Clang package from the Fuchsia infra team). In case of build failures or other errors, ping the #hackers-engine channel on [Discord](../contributing/Chat.md).
 
 These rollers may fail if Clang catches a new compilation warning or error that it previously did not, or if a test relies on undefined behavior that has now changed in the new revision of Clang. It is best to resolve such issues ASAP to let the rollers continue and avoid a pile up of issues to resolve.
 
@@ -10,7 +10,7 @@ The rollers work by updating a [CIPD](https://chrome-infra-packages.appspot.com/
 
 ## Fuchsia SDK to Engine
 
-We use an auto-roller for the Fuchsia SDK on [Linux](https://autoroll.skia.org/r/fuchsia-linux-sdk-flutter-engine) and [MacOS](https://autoroll.skia.org/r/fuchsia-mac-sdk-flutter-engine) (Windows is pending availability of a Windows Fuchsia SDK package from the Fuchsia infra team). In case of build failures or other errors, ping the #hackers-engine channel on [Discord](../contributing/Chat.md).
+We use an auto-roller for the Fuchsia SDK on [Linux](https://autoroll.skia.org/r/fuchsia-linux-sdk-flutter-engine) and [macOS](https://autoroll.skia.org/r/fuchsia-mac-sdk-flutter-engine) (Windows is pending availability of a Windows Fuchsia SDK package from the Fuchsia infra team). In case of build failures or other errors, ping the #hackers-engine channel on [Discord](../contributing/Chat.md).
 
 These rollers may fail if the Fuchsia SDK contains a breaking change. It is best to resolve such issues ASAP to let the rollers continue and avoid a pile up of issues to resolve.
 
@@ -18,7 +18,7 @@ The rollers work by updating a [CIPD](https://chrome-infra-packages.appspot.com/
 
 ## Skia to Engine
 
-We use an auto-roller for Skia rolls. It's status can be viewed at <https://skia-flutter-roll.skia.org/>. In case of  build failures or other errors, ping the Flutter-Skia chat channel. In case you get no response, you can login with an @google.com account and pause the roller (or ask someone with an @google.com account to do so). Please specify a descriptive reason and file a bug to re-enable the rollers as soon as possible.
+We use an auto-roller for Skia rolls. It's status can be viewed at <https://skia-flutter-roll.skia.org/>. In case of  build failures or other errors, ping the Flutter-Skia chat channel. In case you get no response, you can log in with an @google.com account and pause the roller (or ask someone with an @google.com account to do so). Please specify a descriptive reason and file a bug to re-enable the rollers as soon as possible.
 
 The bot updates the `skia_revision` line of <https://github.com/flutter/engine/blob/main/DEPS>.
 

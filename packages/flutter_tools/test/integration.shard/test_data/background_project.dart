@@ -7,12 +7,11 @@ import 'project.dart';
 
 /// Spawns a background isolate that prints a debug message.
 class BackgroundProject extends Project {
-
   @override
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=3.2.0-0 <4.0.0'
+    sdk: ^3.7.0-0
 
   dependencies:
     flutter:
@@ -51,19 +50,21 @@ class BackgroundProject extends Project {
 
   void updateTestIsolatePhrase(String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
-    writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents,
-        writeFutureModifiedDate: true);
+    writeFile(
+      fileSystem.path.join(dir.path, 'lib', 'main.dart'),
+      newMainContents,
+      writeFutureModifiedDate: true,
+    );
   }
 }
 
 // Spawns a background isolate that repeats a message.
 class RepeatingBackgroundProject extends Project {
-
   @override
   final String pubspec = '''
   name: test
   environment:
-    sdk: '>=3.2.0-0 <4.0.0'
+    sdk: ^3.7.0-0
 
   dependencies:
     flutter:

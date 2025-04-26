@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'ink_well.dart';
+/// @docImport 'material.dart';
+/// @docImport 'menu_button_theme.dart';
+library;
+
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -34,9 +39,9 @@ import 'theme_data.dart';
 ///
 /// All of the [MenuStyle] properties are null by default.
 ///
-/// Many of the [MenuStyle] properties are [MaterialStateProperty] objects which
+/// Many of the [MenuStyle] properties are [WidgetStateProperty] objects which
 /// resolve to different values depending on the menu's state. For example the
-/// [Color] properties are defined with `MaterialStateProperty<Color>` and can
+/// [Color] properties are defined with `WidgetStateProperty<Color>` and can
 /// resolve to different colors depending on if the menu is pressed, hovered,
 /// focused, disabled, etc.
 ///
@@ -48,9 +53,9 @@ import 'theme_data.dart';
 /// ```dart
 /// SubmenuButton(
 ///   menuStyle: MenuStyle(
-///     backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-///       (Set<MaterialState> states) {
-///         if (states.contains(MaterialState.focused)) {
+///     backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+///       (Set<WidgetState> states) {
+///         if (states.contains(WidgetState.focused)) {
 ///           return Theme.of(context).colorScheme.primary.withOpacity(0.5);
 ///         }
 ///         return null; // Use the component's default.
@@ -69,7 +74,7 @@ import 'theme_data.dart';
 /// ```dart
 /// const SubmenuButton(
 ///   menuStyle: MenuStyle(
-///     backgroundColor: MaterialStatePropertyAll<Color>(Colors.green),
+///     backgroundColor: WidgetStatePropertyAll<Color>(Colors.green),
 ///   ),
 ///   menuChildren: <Widget>[ /* ... */ ],
 ///   child: Text('Let me play among the stars'),
@@ -83,7 +88,7 @@ import 'theme_data.dart';
 /// MaterialApp(
 ///   theme: ThemeData(
 ///     menuTheme: const MenuThemeData(
-///       style: MenuStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.red)),
+///       style: MenuStyle(backgroundColor: WidgetStatePropertyAll<Color>(Colors.red)),
 ///     ),
 ///   ),
 ///   home: const MyAppHome(),
@@ -226,20 +231,20 @@ class MenuStyle with Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is MenuStyle
-        && other.backgroundColor == backgroundColor
-        && other.shadowColor == shadowColor
-        && other.surfaceTintColor == surfaceTintColor
-        && other.elevation == elevation
-        && other.padding == padding
-        && other.minimumSize == minimumSize
-        && other.fixedSize == fixedSize
-        && other.maximumSize == maximumSize
-        && other.side == side
-        && other.shape == shape
-        && other.mouseCursor == mouseCursor
-        && other.visualDensity == visualDensity
-        && other.alignment == alignment;
+    return other is MenuStyle &&
+        other.backgroundColor == backgroundColor &&
+        other.shadowColor == shadowColor &&
+        other.surfaceTintColor == surfaceTintColor &&
+        other.elevation == elevation &&
+        other.padding == padding &&
+        other.minimumSize == minimumSize &&
+        other.fixedSize == fixedSize &&
+        other.maximumSize == maximumSize &&
+        other.side == side &&
+        other.shape == shape &&
+        other.mouseCursor == mouseCursor &&
+        other.visualDensity == visualDensity &&
+        other.alignment == alignment;
   }
 
   /// Returns a copy of this MenuStyle with the given fields replaced with
@@ -308,16 +313,41 @@ class MenuStyle with Diagnosticable {
       return a;
     }
     return MenuStyle(
-      backgroundColor: MaterialStateProperty.lerp<Color?>(a?.backgroundColor, b?.backgroundColor, t, Color.lerp),
-      shadowColor: MaterialStateProperty.lerp<Color?>(a?.shadowColor, b?.shadowColor, t, Color.lerp),
-      surfaceTintColor: MaterialStateProperty.lerp<Color?>(a?.surfaceTintColor, b?.surfaceTintColor, t, Color.lerp),
+      backgroundColor: MaterialStateProperty.lerp<Color?>(
+        a?.backgroundColor,
+        b?.backgroundColor,
+        t,
+        Color.lerp,
+      ),
+      shadowColor: MaterialStateProperty.lerp<Color?>(
+        a?.shadowColor,
+        b?.shadowColor,
+        t,
+        Color.lerp,
+      ),
+      surfaceTintColor: MaterialStateProperty.lerp<Color?>(
+        a?.surfaceTintColor,
+        b?.surfaceTintColor,
+        t,
+        Color.lerp,
+      ),
       elevation: MaterialStateProperty.lerp<double?>(a?.elevation, b?.elevation, t, lerpDouble),
-      padding:  MaterialStateProperty.lerp<EdgeInsetsGeometry?>(a?.padding, b?.padding, t, EdgeInsetsGeometry.lerp),
+      padding: MaterialStateProperty.lerp<EdgeInsetsGeometry?>(
+        a?.padding,
+        b?.padding,
+        t,
+        EdgeInsetsGeometry.lerp,
+      ),
       minimumSize: MaterialStateProperty.lerp<Size?>(a?.minimumSize, b?.minimumSize, t, Size.lerp),
       fixedSize: MaterialStateProperty.lerp<Size?>(a?.fixedSize, b?.fixedSize, t, Size.lerp),
       maximumSize: MaterialStateProperty.lerp<Size?>(a?.maximumSize, b?.maximumSize, t, Size.lerp),
       side: MaterialStateBorderSide.lerp(a?.side, b?.side, t),
-      shape: MaterialStateProperty.lerp<OutlinedBorder?>(a?.shape, b?.shape, t, OutlinedBorder.lerp),
+      shape: MaterialStateProperty.lerp<OutlinedBorder?>(
+        a?.shape,
+        b?.shape,
+        t,
+        OutlinedBorder.lerp,
+      ),
       mouseCursor: t < 0.5 ? a?.mouseCursor : b?.mouseCursor,
       visualDensity: t < 0.5 ? a?.visualDensity : b?.visualDensity,
       alignment: AlignmentGeometry.lerp(a?.alignment, b?.alignment, t),
@@ -327,18 +357,80 @@ class MenuStyle with Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('surfaceTintColor', surfaceTintColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('minimumSize', minimumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<Size?>>('maximumSize', maximumSize, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
-    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
-    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+        'backgroundColor',
+        backgroundColor,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+        'shadowColor',
+        shadowColor,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<Color?>>(
+        'surfaceTintColor',
+        surfaceTintColor,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<double?>>(
+        'elevation',
+        elevation,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<EdgeInsetsGeometry?>>(
+        'padding',
+        padding,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<Size?>>(
+        'minimumSize',
+        minimumSize,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<Size?>>('fixedSize', fixedSize, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<Size?>>(
+        'maximumSize',
+        maximumSize,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<BorderSide?>>('side', side, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<OutlinedBorder?>>(
+        'shape',
+        shape,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>(
+        'mouseCursor',
+        mouseCursor,
+        defaultValue: null,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null),
+    );
   }
 }

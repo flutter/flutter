@@ -1,6 +1,6 @@
 This wiki is primarily aimed at engineers building or making contributions to Flutter.
 
-If you are new to Flutter, then you will find more general information on the Flutter project, including tutorials and samples, on our Web site at [flutter.dev](https://flutter.dev). For specific information about Flutter's APIs, consider our API reference which can be found at the [api.flutter.dev](https://api.flutter.dev/).
+If you are new to Flutter, then you will find more general information on the Flutter project, including tutorials and samples, on our website at [flutter.dev](https://flutter.dev). For specific information about Flutter's APIs, consider our API reference which can be found at the [api.flutter.dev](https://api.flutter.dev/).
 
 If you want to know what we're likely to do in the future, our [roadmap](./roadmap/Roadmap.md) may be of interest.
 
@@ -28,6 +28,7 @@ If you intend to contribute to Flutter, welcome! You are encouraged to start wit
 * [Reviewing code](./contributing/Tree-hygiene.md#getting-a-code-review)
 * [RFC process](./contributing/issue_hygiene/README.md#how-to-propose-a-specific-change)
 * [Status of popular issues](./contributing/issue_hygiene/Popular-issues.md)
+* [Style guide for Flutter repo](./contributing/Style-guide-for-Flutter-repo.md)
 * [Submitting code, process for](./contributing/Tree-hygiene.md#overview)
 * [Support levels, definitions of](./about/Values.md#support)
 * [Symbolicating stack traces](./engine/Crashes.md)

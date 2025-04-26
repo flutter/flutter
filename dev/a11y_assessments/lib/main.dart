@@ -24,25 +24,30 @@ class App extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xff6750a4),
         contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
-    ));
+      ),
+    );
     final ThemeData darkTheme = ThemeData(
       colorScheme: ColorScheme.fromSeed(
         brightness: Brightness.dark,
         seedColor: const Color(0xff6750a4),
         contrastLevel: MediaQuery.highContrastOf(context) ? 1.0 : 0.0,
-    ));
+      ),
+    );
 
     final Map<String, WidgetBuilder> routes = Map<String, WidgetBuilder>.fromEntries(
-      useCases.map((UseCase useCase) => MapEntry<String, WidgetBuilder>(useCase.route, useCase.build)),
+      useCases.map(
+        (UseCase useCase) => MapEntry<String, WidgetBuilder>(
+          useCase.route,
+          (BuildContext context) => useCase.buildWithTitle(context),
+        ),
+      ),
     );
+
     return MaterialApp(
-      title: 'Accessibility Assessments',
+      title: 'Accessibility Assessments Home Page',
       theme: lightTheme,
       darkTheme: darkTheme,
-      routes: <String, WidgetBuilder>{
-        '/': (_) => const HomePage(),
-        ...routes
-      },
+      routes: <String, WidgetBuilder>{'/': (_) => const HomePage(), ...routes},
     );
   }
 }
@@ -67,21 +72,24 @@ class HomePageState extends State<HomePage> {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Builder(
-          builder: (BuildContext context) {
-            return TextButton(
-              key: Key(useCase.name),
-              onPressed: () => Navigator.of(context).pushNamed(useCase.route),
-              child: Text(useCase.name),
-            );
-          }
-      )
+        builder: (BuildContext context) {
+          return TextButton(
+            key: Key(useCase.name),
+            onPressed:
+                () => Navigator.of(context).pushNamed(useCase.route, arguments: useCase.name),
+            child: Text(useCase.name),
+          );
+        },
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Accessibility Assessments')),
+      appBar: AppBar(
+        title: Semantics(headingLevel: 1, child: const Text('Accessibility Assessments')),
+      ),
       body: Center(
         child: ListView(
           controller: scrollController,
