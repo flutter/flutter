@@ -340,8 +340,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     final String schemeContent = schemeInfo.schemeContent;
 
     // The scheme should have a BuildableReference already in it with a
-    // BlueprintIdentifier matching a Native Target. Copy from it
-    // since BuildableName, BlueprintName, ReferencedContainer, BlueprintIdentifier may have been
+    // BlueprintIdentifier matching the Runner Native Target. Copy from it
+    // since BuildableName, BlueprintName, ReferencedContainer may have been
     // changed from "Runner". Ensures the expected attributes are found.
     // Example:
     // <BuildableReference
