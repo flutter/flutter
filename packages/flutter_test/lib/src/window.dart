@@ -32,6 +32,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     this.reduceMotion = false,
     this.highContrast = false,
     this.onOffSwitchLabels = false,
+    this.noAnnounce = false,
   });
 
   /// An instance of [AccessibilityFeatures] where all the features are enabled.
@@ -43,6 +44,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
     reduceMotion: true,
     highContrast: true,
     onOffSwitchLabels: true,
+    noAnnounce: true,
   );
 
   @override
@@ -67,6 +69,9 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
   final bool onOffSwitchLabels;
 
   @override
+  final bool noAnnounce;
+
+  @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
@@ -78,7 +83,8 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
         other.boldText == boldText &&
         other.reduceMotion == reduceMotion &&
         other.highContrast == highContrast &&
-        other.onOffSwitchLabels == onOffSwitchLabels;
+        other.onOffSwitchLabels == onOffSwitchLabels &&
+        other.noAnnounce == noAnnounce;
   }
 
   @override
@@ -91,6 +97,7 @@ class FakeAccessibilityFeatures implements AccessibilityFeatures {
       reduceMotion,
       highContrast,
       onOffSwitchLabels,
+      noAnnounce,
     );
   }
 

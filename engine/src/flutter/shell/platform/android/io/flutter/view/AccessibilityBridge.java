@@ -503,6 +503,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
       setBoldTextFlag();
     }
 
+    accessibilityFeatureFlags |= AccessibilityFeature.NO_ANNOUNCE.value;
+
     platformViewsAccessibilityDelegate.attachAccessibilityBridge(this);
   }
 
@@ -2174,7 +2176,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     BOLD_TEXT(1 << 3), // NOT SUPPORTED
     REDUCE_MOTION(1 << 4), // NOT SUPPORTED
     HIGH_CONTRAST(1 << 5), // NOT SUPPORTED
-    ON_OFF_SWITCH_LABELS(1 << 6); // NOT SUPPORTED
+    ON_OFF_SWITCH_LABELS(1 << 6), // NOT SUPPORTED
+    NO_ANNOUNCE(1 << 7);
 
     final int value;
 

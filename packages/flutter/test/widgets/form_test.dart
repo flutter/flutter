@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'semantic_utils.dart';
 
 void main() {
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
@@ -174,31 +171,27 @@ void main() {
 
   for (final _PlatformAnnounceScenario test in <_PlatformAnnounceScenario>[
     _PlatformAnnounceScenario(
-      isAnnounceSupported: true,
+      noAnnounce: false,
       testName:
-          'Should announce only the first error message when validate returns errors and isAnnounceSupported = true',
+          'Should announce only the first error message when validate returns errors and noAnnounce = false',
     ),
     _PlatformAnnounceScenario(
-      isAnnounceSupported: false,
+      noAnnounce: true,
       testName:
-          'Should not announce error message when validate returns errors and isAnnounceSupported = false',
+          'Should not announce error message when validate returns errors and noAnnounce = true',
     ),
   ]) {
     testWidgets(test.testName, (WidgetTester tester) async {
-      final MockSemanticsService mockSemanticsService = MockSemanticsService();
-      mockSemanticsService.mockIsAnnounceSupported = test.isAnnounceSupported;
-
       final GlobalKey<FormState> formKey = GlobalKey<FormState>();
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
-            data: const MediaQueryData(),
+            data: MediaQueryData(noAnnounce: test.noAnnounce),
             child: Directionality(
               textDirection: TextDirection.ltr,
               child: Center(
                 child: Material(
                   child: Form(
-                    semanticsService: mockSemanticsService,
                     key: formKey,
                     child: Column(
                       children: <Widget>[
@@ -225,15 +218,15 @@ void main() {
       expect(find.text('First error message'), findsOneWidget);
       expect(find.text('Second error message'), findsOneWidget);
 
-      if (test.isAnnounceSupported) {
+      if (test.noAnnounce) {
+        final CapturedAccessibilityAnnouncement? announcement =
+            tester.takeAnnouncements().firstOrNull;
+        expect(announcement, null);
+      } else {
         final CapturedAccessibilityAnnouncement announcement = tester.takeAnnouncements().single;
         expect(announcement.message, 'First error message');
         expect(announcement.textDirection, TextDirection.ltr);
         expect(announcement.assertiveness, Assertiveness.assertive);
-      } else {
-        final CapturedAccessibilityAnnouncement? announcement =
-            tester.takeAnnouncements().firstOrNull;
-        expect(announcement, null);
       }
     });
   }
@@ -405,8 +398,6 @@ void main() {
   testWidgets('Should announce error text when validateGranularly is called', (
     WidgetTester tester,
   ) async {
-    final MockSemanticsService mockSemantics = MockSemanticsService();
-    mockSemantics.mockIsAnnounceSupported = true;
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     const String validString = 'Valid string';
     String? validator(String? s) => s == validString ? null : 'error';
@@ -421,7 +412,6 @@ void main() {
               child: Material(
                 child: Form(
                   key: formKey,
-                  semanticsService: mockSemantics,
                   child: ListView(
                     children: <Widget>[
                       TextFormField(
@@ -1644,7 +1634,7 @@ void main() {
 }
 
 class _PlatformAnnounceScenario {
-  _PlatformAnnounceScenario({required this.isAnnounceSupported, required this.testName});
-  final bool isAnnounceSupported;
+  _PlatformAnnounceScenario({required this.noAnnounce, required this.testName});
+  final bool noAnnounce;
   final String testName;
 }

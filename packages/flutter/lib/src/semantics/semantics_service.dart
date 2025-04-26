@@ -7,7 +7,6 @@ library;
 
 import 'dart:ui' show TextDirection;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show SystemChannels;
 
 import 'semantics_event.dart' show AnnounceSemanticsEvent, Assertiveness, TooltipSemanticsEvent;
