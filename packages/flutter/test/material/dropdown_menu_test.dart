@@ -4262,7 +4262,7 @@ void main() {
   );
 
   testWidgets(
-    'DropdownMenu does not include the provided trailing icon when showTrailingIcon is false', 
+    'DropdownMenu does not include the provided trailing icon when showTrailingIcon is false',
     (WidgetTester tester) async {
       final ThemeData themeData = ThemeData();
       await tester.pumpWidget(
