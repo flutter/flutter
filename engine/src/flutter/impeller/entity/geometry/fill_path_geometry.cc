@@ -12,7 +12,11 @@
 
 namespace impeller {
 
-FillPathGeometry::FillPathGeometry(const flutter::DlPath& path,
+FillPathGeometry::FillPathGeometry(std::unique_ptr<const PathSource> path,
+                                   std::optional<Rect> inner_rect)
+    : owned_(std::move(path)), path_(*owned_), inner_rect_(inner_rect) {}
+
+FillPathGeometry::FillPathGeometry(const PathSource& path,
                                    std::optional<Rect> inner_rect)
     : path_(path), inner_rect_(inner_rect) {}
 
@@ -59,7 +63,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
 
 GeometryResult::Mode FillPathGeometry::GetResultMode() const {
   const auto& bounding_box = path_.GetBounds();
-  if (path_.IsConvex() || bounding_box.IsEmpty()) {
+  if (path_.GetConvexity() == Convexity::kConvex || bounding_box.IsEmpty()) {
     return GeometryResult::Mode::kNormal;
   }
 

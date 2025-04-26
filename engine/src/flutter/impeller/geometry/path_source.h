@@ -5,11 +5,20 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_
 #define FLUTTER_IMPELLER_GEOMETRY_PATH_SOURCE_H_
 
-#include "impeller/geometry/path.h"
 #include "impeller/geometry/point.h"
 #include "impeller/geometry/rect.h"
 
 namespace impeller {
+
+enum class FillType {
+  kNonZero,  // The default winding order.
+  kOdd,
+};
+
+enum class Convexity {
+  kUnknown,
+  kConvex,
+};
 
 /// @brief   Collection of functions to receive path segments from the
 ///          underlying path representation via the DlPath::Dispatch method.
@@ -49,8 +58,73 @@ class PathSource {
   virtual ~PathSource() = default;
   virtual FillType GetFillType() const = 0;
   virtual Rect GetBounds() const = 0;
-  virtual bool IsConvex() const = 0;
+  virtual Convexity GetConvexity() const = 0;
   virtual void Dispatch(PathReceiver& receiver) const = 0;
+};
+
+template <class T>
+class RectPathSource : public PathSource {
+ public:
+  explicit RectPathSource(const TRect<T>& r) : rect_(r) {}
+
+  // |PathSource|
+  Convexity GetConvexity() const override { return Convexity::kConvex; }
+
+  // |PathSource|
+  FillType GetFillType() const override { return FillType::kNonZero; }
+
+  // |PathSource|
+  Rect GetBounds() const override { return rect_; }
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override {
+    receiver.MoveTo(rect_.GetLeftTop(), true);
+    receiver.LineTo(rect_.GetRightTop());
+    receiver.LineTo(rect_.GetRightBottom());
+    receiver.LineTo(rect_.GetLeftBottom());
+    receiver.LineTo(rect_.GetLeftTop());
+    receiver.Close();
+    receiver.PathEnd();
+  }
+
+ private:
+  Rect rect_;
+};
+
+class OvalPathSource : public PathSource {
+ public:
+  explicit OvalPathSource(const Rect& r) : rect_(r) {}
+
+  // |PathSource|
+  Convexity GetConvexity() const override { return Convexity::kConvex; }
+
+  // |PathSource|
+  FillType GetFillType() const override { return FillType::kNonZero; }
+
+  // |PathSource|
+  Rect GetBounds() const override { return rect_; }
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override {
+    Scalar left = rect_.GetLeft();
+    Scalar right = rect_.GetRight();
+    Scalar top = rect_.GetTop();
+    Scalar bottom = rect_.GetBottom();
+    Point center = rect_.GetCenter();
+
+    receiver.MoveTo(Point(left, center.y), true);
+    receiver.ConicTo(Point(left, top), Point(center.x, top), kSqrt2Over2);
+    receiver.ConicTo(Point(right, top), Point(right, center.y), kSqrt2Over2);
+    receiver.ConicTo(Point(right, bottom), Point(center.x, bottom),
+                     kSqrt2Over2);
+    receiver.ConicTo(Point(left, bottom), Point(left, center.y), kSqrt2Over2);
+
+    receiver.Close();
+    receiver.PathEnd();
+  }
+
+ private:
+  Rect rect_;
 };
 
 }  // namespace impeller

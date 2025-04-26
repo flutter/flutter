@@ -188,7 +188,7 @@ class Canvas {
 
   void Rotate(Radians radians);
 
-  void DrawPath(const flutter::DlPath& path, const Paint& paint);
+  void DrawPath(const PathSource& path, const Paint& paint);
 
   void DrawPaint(const Paint& paint);
 

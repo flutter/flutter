@@ -61,7 +61,9 @@ GeometryResult::Mode Geometry::GetResultMode() const {
 std::unique_ptr<Geometry> Geometry::MakeFillPath(
     const Path& path,
     std::optional<Rect> inner_rect) {
-  return std::make_unique<FillPathGeometry>(flutter::DlPath(path), inner_rect);
+  std::unique_ptr<const PathSource> source =
+      std::make_unique<const flutter::DlPath>(flutter::DlPath(path));
+  return std::make_unique<FillPathGeometry>(std::move(source), inner_rect);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
@@ -73,9 +75,10 @@ std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
   if (miter_limit < 0) {
     miter_limit = 4.0;
   }
-  return std::make_unique<StrokePathGeometry>(flutter::DlPath(path),
-                                              stroke_width, miter_limit,
-                                              stroke_cap, stroke_join);
+  std::unique_ptr<const PathSource> source =
+      std::make_unique<const flutter::DlPath>(flutter::DlPath(path));
+  return std::make_unique<StrokePathGeometry>(
+      std::move(source), stroke_width, miter_limit, stroke_cap, stroke_join);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeCover() {

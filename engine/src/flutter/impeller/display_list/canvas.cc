@@ -306,7 +306,7 @@ void Canvas::RestoreToCount(size_t count) {
   }
 }
 
-void Canvas::DrawPath(const flutter::DlPath& path, const Paint& paint) {
+void Canvas::DrawPath(const PathSource& path, const Paint& paint) {
   Entity entity;
   entity.SetTransform(GetCurrentTransform());
   entity.SetBlendMode(paint.blend_mode);
@@ -564,7 +564,8 @@ void Canvas::DrawLine(const Point& p0,
 
 void Canvas::DrawRect(const Rect& rect, const Paint& paint) {
   if (paint.style == Paint::Style::kStroke) {
-    DrawPath(flutter::DlPath(PathBuilder{}.AddRect(rect)), paint);
+    RectPathSource source(rect);
+    DrawPath(source, paint);
     return;
   }
 
@@ -594,7 +595,8 @@ void Canvas::DrawOval(const Rect& rect, const Paint& paint) {
 
   if (paint.style == Paint::Style::kStroke) {
     // No stroked ellipses yet
-    DrawPath(flutter::DlPath(PathBuilder{}.AddOval(rect)), paint);
+    OvalPathSource source(rect);
+    DrawPath(source, paint);
     return;
   }
 
@@ -629,12 +631,8 @@ void Canvas::DrawRoundRect(const RoundRect& round_rect, const Paint& paint) {
     }
   }
 
-  auto path = PathBuilder{}
-                  .SetConvexity(Convexity::kConvex)
-                  .AddRoundRect(round_rect)
-                  .SetBounds(rect)
-                  .TakePath();
-  DrawPath(flutter::DlPath(path), paint);
+  RoundRectPathSource source(round_rect);
+  DrawPath(source, paint);
 }
 
 void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,

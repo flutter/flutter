@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_GEOMETRY_ROUND_RECT_H_
 #define FLUTTER_IMPELLER_GEOMETRY_ROUND_RECT_H_
 
+#include "flutter/impeller/geometry/path_source.h"
 #include "flutter/impeller/geometry/point.h"
 #include "flutter/impeller/geometry/rect.h"
 #include "flutter/impeller/geometry/rounding_radii.h"
@@ -136,6 +137,61 @@ struct RoundRect {
 
   Rect bounds_;
   RoundingRadii radii_;
+};
+
+class RoundRectPathSource : public PathSource {
+ public:
+  explicit RoundRectPathSource(const RoundRect& round_rect)
+      : round_rect_(round_rect) {}
+
+  // |PathSource|
+  Convexity GetConvexity() const override { return Convexity::kConvex; }
+
+  // |PathSource|
+  FillType GetFillType() const override { return FillType::kNonZero; }
+
+  // |PathSource|
+  Rect GetBounds() const override { return round_rect_.GetBounds(); }
+
+  // |PathSource|
+  void Dispatch(PathReceiver& receiver) const override {
+    Scalar left = round_rect_.GetBounds().GetLeft();
+    Scalar top = round_rect_.GetBounds().GetTop();
+    Scalar right = round_rect_.GetBounds().GetRight();
+    Scalar bottom = round_rect_.GetBounds().GetBottom();
+    const RoundingRadii& radii = round_rect_.GetRadii();
+
+    receiver.MoveTo(Point(left + radii.top_left.width, top), true);
+    receiver.LineTo(Point(right - radii.top_right.width, top));
+
+    receiver.ConicTo(Point(right, top),
+                     Point(right, top + radii.top_right.height),  //
+                     kSqrt2Over2);
+
+    receiver.LineTo(Point(right, bottom - radii.bottom_right.height));
+
+    receiver.ConicTo(Point(right, bottom),
+                     Point(right - radii.bottom_right.width, bottom),  //
+                     kSqrt2Over2);
+
+    receiver.LineTo(Point(left + radii.bottom_left.width, bottom));
+
+    receiver.ConicTo(Point(left, bottom),
+                     Point(left, bottom - radii.bottom_left.height),  //
+                     kSqrt2Over2);
+
+    receiver.LineTo(Point(left, top + radii.top_left.height));
+
+    receiver.ConicTo(Point(left, top),
+                     Point(left + radii.top_left.width, top),  //
+                     kSqrt2Over2);
+
+    receiver.Close();
+    receiver.PathEnd();
+  }
+
+ private:
+  RoundRect round_rect_;
 };
 
 }  // namespace impeller

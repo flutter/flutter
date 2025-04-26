@@ -13,7 +13,13 @@ namespace impeller {
 /// @brief A geometry that is created from a stroked path object.
 class StrokePathGeometry final : public Geometry {
  public:
-  StrokePathGeometry(const flutter::DlPath& path,
+  StrokePathGeometry(std::unique_ptr<const PathSource> path,
+                     Scalar stroke_width,
+                     Scalar miter_limit,
+                     Cap stroke_cap,
+                     Join stroke_join);
+
+  StrokePathGeometry(const PathSource& path,
                      Scalar stroke_width,
                      Scalar miter_limit,
                      Cap stroke_cap,
@@ -57,7 +63,8 @@ class StrokePathGeometry final : public Geometry {
 
   bool SkipRendering() const;
 
-  flutter::DlPath path_;
+  std::unique_ptr<const PathSource> owned_;
+  const PathSource& path_;
   Scalar stroke_width_;
   Scalar miter_limit_;
   Cap stroke_cap_;

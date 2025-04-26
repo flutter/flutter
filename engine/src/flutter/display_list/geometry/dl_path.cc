@@ -256,6 +256,10 @@ DlPathFillType DlPath::GetFillType() const {
   return ToDlFillType(GetSkPath().getFillType());
 }
 
+DlConvexity DlPath::GetConvexity() const {
+  return IsConvex() ? DlConvexity::kConvex : DlConvexity::kUnknown;
+}
+
 DlRect DlPath::GetBounds() const {
   auto& path = data_->path;
   if (path.has_value()) {

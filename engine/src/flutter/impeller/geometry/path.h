@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "impeller/geometry/path_component.h"
+#include "impeller/geometry/path_source.h"
 #include "impeller/geometry/rect.h"
 
 namespace impeller {
@@ -27,16 +28,6 @@ enum class Join {
   kMiter,
   kRound,
   kBevel,
-};
-
-enum class FillType {
-  kNonZero,  // The default winding order.
-  kOdd,
-};
-
-enum class Convexity {
-  kUnknown,
-  kConvex,
 };
 
 //------------------------------------------------------------------------------

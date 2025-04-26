@@ -18,6 +18,7 @@ namespace flutter {
 using DlPathFillType = impeller::FillType;
 using DlPathBuilder = impeller::PathBuilder;
 using DlPathReceiver = impeller::PathReceiver;
+using DlConvexity = impeller::Convexity;
 
 class DlPath : public impeller::PathSource {
  public:
@@ -75,6 +76,7 @@ class DlPath : public impeller::PathSource {
   const SkPath& GetSkPath() const;
   const impeller::Path& GetPath() const;
 
+  // |PathSource|
   void Dispatch(DlPathReceiver& receiver) const override;
 
   /// Intent to render an SkPath multiple times will make the path
@@ -95,15 +97,19 @@ class DlPath : public impeller::PathSource {
 
   bool Contains(const DlPoint& point) const;
 
+  // |PathSource|
   DlRect GetBounds() const override;
+  // |PathSource|
   DlPathFillType GetFillType() const override;
+  // |PathSource|
+  DlConvexity GetConvexity() const override;
 
   bool operator==(const DlPath& other) const;
   bool operator!=(const DlPath& other) const { return !(*this == other); }
 
   bool IsConverted() const;
   bool IsVolatile() const;
-  bool IsConvex() const override;
+  bool IsConvex() const;
 
   DlPath operator+(const DlPath& other) const;
 

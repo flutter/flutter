@@ -692,7 +692,19 @@ std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
   return points;
 }
 
-StrokePathGeometry::StrokePathGeometry(const flutter::DlPath& path,
+StrokePathGeometry::StrokePathGeometry(std::unique_ptr<const PathSource> path,
+                                       Scalar stroke_width,
+                                       Scalar miter_limit,
+                                       Cap stroke_cap,
+                                       Join stroke_join)
+    : owned_(std::move(path)),
+      path_(*owned_),
+      stroke_width_(stroke_width),
+      miter_limit_(miter_limit),
+      stroke_cap_(stroke_cap),
+      stroke_join_(stroke_join) {}
+
+StrokePathGeometry::StrokePathGeometry(const PathSource& path,
                                        Scalar stroke_width,
                                        Scalar miter_limit,
                                        Cap stroke_cap,
