@@ -3376,7 +3376,7 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
   }, skip: !isBrowser); // [intended] tests web-specific behavior.
 
-  testWidgets('IconButton golden test child appears over the outline', (WidgetTester tester) async {
+  testWidgets('IconButton golden test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -3400,7 +3400,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(IconButton),
-      matchesGoldenFile('icon_button_child_over_outline.png'),
+      matchesGoldenFile('icon_button.badge.outline.png'),
     );
   });
 }

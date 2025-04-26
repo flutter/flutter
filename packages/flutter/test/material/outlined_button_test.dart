@@ -1122,7 +1122,8 @@ void main() {
             alignment: Alignment.topLeft,
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
-                shape: const RoundedRectangleBorder(), // default border radius is 0
+                shape: const RoundedRectangleBorder(),
+                // default border radius is 0
                 backgroundColor: fillColor,
                 minimumSize: const Size(64, 36),
               ).copyWith(
@@ -2956,19 +2957,18 @@ void main() {
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
   });
 
-  testWidgets('OutlinedButton golden test child appears over the outline', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('OutlinedButton golden test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
             child: RepaintBoundary(
               child: OutlinedButton(
+                style: OutlinedButton.styleFrom(backgroundColor: Colors.transparent),
                 onPressed: () {},
                 child: const Badge(
                   backgroundColor: Colors.green,
-                  label: Text('Ad', style: TextStyle(fontSize: 18)),
+                  label: Text('Ad', style: TextStyle(fontSize: 18, color: Colors.red)),
                   child: Icon(Icons.lightbulb_rounded),
                 ),
               ),
@@ -2981,7 +2981,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(OutlinedButton),
-      matchesGoldenFile('outlined_button_child_over_outline.png'),
+      matchesGoldenFile('outlined_button.badge.outline.png'),
     );
   });
 }
