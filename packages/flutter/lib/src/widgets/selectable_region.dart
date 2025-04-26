@@ -680,7 +680,7 @@ class SelectableRegionState extends State<SelectableRegion>
 
   void _onTapTrackReset() {
     _isShiftPressed = false;
->>>>>>> ea121f8859e4b13e47a8f845e4586164519588bc
+
   }
 
   void _initTouchGestureRecognizer() {
@@ -763,7 +763,7 @@ class SelectableRegionState extends State<SelectableRegion>
             debugOwner: this,
             supportedDevices: _kLongPressSelectionDevices,
           ),
->>>>>>> ea121f8859e4b13e47a8f845e4586164519588bc
+
           (LongPressGestureRecognizer instance) {
             instance
               ..onLongPressStart = _handleTouchLongPressStart

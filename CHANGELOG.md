@@ -160,7 +160,7 @@ Initial stable release.
 - [flutter/153294](https://github.com/flutter/flutter/pull/153294) [Tool] Fixes an issue in the Flutter tool streamlining the crash message that occurs when running `flutter run -d chrome` and Chrome is closed before Flutter tries to close it.
 - [flutter/153579](https://github.com/flutter/flutter/pull/153579) [Tool] Fixes an issue where users would experience large crash messages when `flutter run` or `flutter debug-adapter` are unable to connect to the Flutter web app.
 
->>>>>>> ea121f8859e4b13e47a8f845e4586164519588bc
+
 ### [3.24.0](https://github.com/flutter/flutter/releases/tag/3.24.0)
 Initial stable release.
 
@@ -176,11 +176,11 @@ Initial stable release.
 - [flutter/149704](https://github.com/flutter/flutter/issues/149704) - [Impeller] Fixes and issue on iOS where flickering may be occur when translating a blurred rounded rectangle.
 - [flutter/149745](https://github.com/flutter/flutter/issues/149745) - [Impeller] Fixes a segfault on iOS when tessellating empty convex polygons.
 - [flutter/149771](https://github.com/flutter/flutter/issues/149771) - [Impeller] Fixes a rendering error on iOS when advanced blend is double scaled.
-<<<<<<< HEAD
+
 - [flutter/53183](https://github.com/flutter/engine/pull/53183) - Fixes an issue where Linux apps show visual corruption on some frames
 =======
 - [flutter/53183](https://github.com/flutter/engine/pull/53183) - Fixes an issue where Linux apps show visual corruption on some frames.
->>>>>>> ea121f8859e4b13e47a8f845e4586164519588bc
+
 - [flutter/149856](https://github.com/flutter/flutter/issues/149856) - Clarifies Flutter Fix log on how to update Kotlin Gradle Plugin that was introduced in Flutter 3.19.
 - [flutter/150617](https://github.com/flutter/flutter/pull/150617) - Fixes a bug in `flutter test` where `--flavor` wasn't considered when validating cached assets, causing the flavor-conditional asset bundling feature to not work as expected.
 - [flutter/150724](https://github.com/flutter/flutter/issues/150724) - Fixes an issue on Web+Linux that prevents users from inputting data using the numpad.

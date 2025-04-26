@@ -535,8 +535,7 @@ void main() {
       expect(edgeEvent.granularity, TextGranularity.word);
     });
 
-=======
->>>>>>> ea121f8859e4b13e47a8f845e4586164519588bc
+
     testWidgets(
       'Horizontal PageView beats SelectionArea child touch drag gestures on iOS',
       (WidgetTester tester) async {
