@@ -250,7 +250,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     final XmlNode schemeNode;
 
     try {
-      if (document.rootElement.name != 'Scheme') {
+      if (document.rootElement.name.local != 'Scheme') {
         throw StateError('The root element is not a Scheme tag.');
       }
 
