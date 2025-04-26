@@ -193,7 +193,11 @@ Future<void> buildMacOS({
     }
   }
 
-  final String arch = globals.os.hostPlatform == HostPlatform.darwin_arm64 ? 'arm64' : 'x86_64';
+  final String arch = switch (globals.os.hostPlatform) {
+    HostPlatform.darwin_arm64 => 'arm64',
+    HostPlatform.darwin_x64 => 'x86_64',
+    _ => throw UnimplementedError('Unsupported platform'),
+  };
   final String destination =
       buildInfo.isDebug ? 'platform=macOS,arch=$arch' : 'generic/platform=macOS';
 
