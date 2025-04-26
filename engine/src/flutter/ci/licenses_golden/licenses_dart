@@ -1,4 +1,4 @@
-Signature: a571af671654dc4820821f07a74d624e
+Signature: eedbfb9d85e32472f6dec45ab8e21b5e
 
 ====================================================================================================
 LIBRARY: dart
@@ -4232,6 +4232,8 @@ ORIGIN: ../../../flutter/third_party/dart/runtime/engine/include/dart_engine.h +
 ORIGIN: ../../../flutter/third_party/dart/runtime/platform/list_queue.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/platform/lockers.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc + ../../../flutter/third_party/dart/LICENSE
+ORIGIN: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.h + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/runtime/vm/simulator_arm64_trampolines.S + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart + ../../../flutter/third_party/dart/LICENSE
 ORIGIN: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart + ../../../flutter/third_party/dart/LICENSE
@@ -4244,6 +4246,8 @@ FILE: ../../../flutter/third_party/dart/runtime/engine/include/dart_engine.h
 FILE: ../../../flutter/third_party/dart/runtime/platform/list_queue.h
 FILE: ../../../flutter/third_party/dart/runtime/platform/lockers.h
 FILE: ../../../flutter/third_party/dart/runtime/tools/generate_dart_api_win_c.dart
+FILE: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.cc
+FILE: ../../../flutter/third_party/dart/runtime/vm/microtask_mirror_queues.h
 FILE: ../../../flutter/third_party/dart/runtime/vm/simulator_arm64_trampolines.S
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/dynamic_module.dart
 FILE: ../../../flutter/third_party/dart/sdk/lib/_internal/wasm/lib/function_patch.dart
@@ -4864,7 +4868,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
   This Source Code Form is "Incompatible With Secondary Licenses", as
   defined by the Mozilla Public License, v. 2.0.
 
-You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/dc6ad1866deda31dd9fc097ec9aae1f6151329c7
+You may obtain a copy of this library's Source Code Form from: https://dart.googlesource.com/sdk/+/bddb7f44a538217da3b0a2bafcd3b5c6493d4064
 /third_party/fallback_root_certificates/
 
 ====================================================================================================
