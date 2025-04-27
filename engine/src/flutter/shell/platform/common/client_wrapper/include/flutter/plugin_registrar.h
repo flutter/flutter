@@ -79,6 +79,8 @@ class Plugin {
   virtual ~Plugin() = default;
 };
 
+typedef PluginRegistrar* (*OnPluginRegistrarConstructed)(
+    FlutterDesktopPluginRegistrarRef);
 typedef void (*OnPluginRegistrarDestructed)(void*);
 
 class PluginRegistrarMap {
@@ -86,9 +88,10 @@ class PluginRegistrarMap {
   virtual ~PluginRegistrarMap() {}
   virtual void* allocate_memory(size_t size) = 0;
   virtual void release_memory(void* address) = 0;
-  virtual void emplace(FlutterDesktopPluginRegistrarRef registrar_ref,
-                       PluginRegistrar* registrar_wrapper,
-                       OnPluginRegistrarDestructed on_destroyed) = 0;
+  virtual PluginRegistrar* emplace_if_needed(
+      FlutterDesktopPluginRegistrarRef registrar_ref,
+      OnPluginRegistrarConstructed on_constructed,
+      OnPluginRegistrarDestructed on_destructed) = 0;
   virtual void erase(FlutterDesktopPluginRegistrarRef registrar_ref) = 0;
   virtual void clear() = 0;
 };
@@ -115,17 +118,13 @@ class PluginRegistrarManager {
   // template types results in undefined behavior.
   template <class T>
   T* GetRegistrar(FlutterDesktopPluginRegistrarRef registrar_ref) {
-    void* memory = registrars_->allocate_memory(sizeof(T));
-    T* registrar_wrapper = new (memory) T(registrar_ref);
-
-    registrars_->emplace(registrar_ref,
-                         registrar_wrapper,
-                         OnRegistrarDestructed<T>);
+    PluginRegistrar* registrar_wrapper = registrars_->emplace_if_needed(
+        registrar_ref, OnRegistrarConstructed<T>, OnRegistrarDestructed<T>);
 
     FlutterDesktopPluginRegistrarSetDestructionHandler(registrar_ref,
                                                        OnRegistrarDestroyed<T>);
 
-    return registrar_wrapper;
+    return static_cast<T*>(registrar_wrapper);
   }
 
   // Destroys all registrar wrappers created by the manager.
@@ -135,6 +134,14 @@ class PluginRegistrarManager {
 
  private:
   PluginRegistrarManager();
+
+  template <class T>
+  static PluginRegistrar* OnRegistrarConstructed(
+      FlutterDesktopPluginRegistrarRef registrar_ref) {
+    auto* registrars = PluginRegistrarManager::GetInstance()->registrars();
+    void* memory = registrars->allocate_memory(sizeof(T));
+    return new (memory) T(registrar_ref);
+  }
 
   template <class T>
   static void OnRegistrarDestructed(void* memory) {

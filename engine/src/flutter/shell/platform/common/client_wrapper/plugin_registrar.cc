@@ -33,13 +33,19 @@ class PluginRegistrarMapImpl : public PluginRegistrarMap {
     free(address);
   }
 
-  void emplace(FlutterDesktopPluginRegistrarRef registrar_ref,
-               PluginRegistrar* registrar_wrapper,
-               OnPluginRegistrarDestructed on_destructed) override {
+  PluginRegistrar* emplace_if_needed(
+      FlutterDesktopPluginRegistrarRef registrar_ref,
+      OnPluginRegistrarConstructed on_constructed,
+      OnPluginRegistrarDestructed on_destructed) override {
     auto it = map_.find(registrar_ref);
     if (it == map_.end()) {
+      auto* registrar_wrapper = on_constructed(registrar_ref);
       map_.emplace(registrar_ref,
                    std::make_pair(registrar_wrapper, on_destructed));
+      return registrar_wrapper;
+    } else {
+      PluginRegistrar* registrar_wrapper = it->second.first;
+      return registrar_wrapper;
     }
   }
 
