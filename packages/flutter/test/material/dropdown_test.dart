@@ -4389,7 +4389,9 @@ void main() {
     expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
   });
 
-  testWidgets('Barrier Dismissible set to false', (WidgetTester tester) async {
+  testWidgets('Dropdown does not close when barrier dismissible set to false', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

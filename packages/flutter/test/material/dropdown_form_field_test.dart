@@ -1383,7 +1383,9 @@ void main() {
     expect(find.text(decorationErrorText), findsNothing);
   });
 
-  testWidgets('barrier Dismissible set to false', (WidgetTester tester) async {
+  testWidgets('dropdown does not close when barrier dismissible set to false', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
