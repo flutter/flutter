@@ -1,0 +1,17 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # Path to the Xcode toolchain (XcodeDefault.xctoolchain).
+  apple_host_toolchain_path = ""
+}
+
+if (apple_host_toolchain_path == "") {
+  # Outputs the SDK path on the first line, and the host toolchain path on the
+  # second.
+  _find_sdk_lines =
+      exec_script("//build/mac/find_sdk.py", ["--print_sdk_path", "1.0"], "list lines")
+
+  apple_host_toolchain_path = _find_sdk_lines[1]
+}

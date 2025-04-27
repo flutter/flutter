@@ -455,6 +455,30 @@ Review licenses that have not been accepted (y/N)?
     expect(sdkMessage.message, 'Emulator version 35.2.10.0 (build_id 12414864) (CL:N/A)');
   });
 
+  testUsingContext('includes emulator version - no emulator path', () async {
+    sdk
+      ..licensesAvailable = true
+      ..platformToolsAvailable = false
+      ..cmdlineToolsAvailable = true
+      ..directory = fileSystem.directory('/foo/bar')
+      ..emulatorPath = null;
+    final ValidationResult validationResult =
+        await AndroidValidator(
+          java: FakeJava(),
+          androidSdk: sdk,
+          logger: logger,
+          platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+          userMessages: UserMessages(),
+          processManager: processManager,
+        ).validate();
+
+    expect(validationResult.type, ValidationType.partial);
+    expect(validationResult.messages.length > 2, isTrue);
+    final ValidationMessage sdkMessage = validationResult.messages[1];
+    expect(sdkMessage.type, ValidationMessageType.information);
+    expect(sdkMessage.message, 'Emulator version unknown');
+  });
+
   testUsingContext('detects license-only SDK installation with cmdline-tools', () async {
     sdk
       ..licensesAvailable = true
