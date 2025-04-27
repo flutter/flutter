@@ -18,6 +18,13 @@ export 'dart:ui' show Brightness, Color;
 
 export 'binding.dart' show SystemUiChangeCallback;
 
+// Examples can assume:
+// import 'dart:ui' as ui;
+// import 'package:flutter/services.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/widgets.dart';
+// late BuildContext context;
+
 /// Specifies a particular device orientation.
 ///
 /// To determine which values correspond to which orientations, first position
@@ -62,7 +69,7 @@ enum DeviceOrientation {
 @immutable
 class ApplicationSwitcherDescription {
   /// Creates an ApplicationSwitcherDescription.
-  const ApplicationSwitcherDescription({ this.label, this.primaryColor });
+  const ApplicationSwitcherDescription({this.label, this.primaryColor});
 
   /// A label and description of the current state of the application.
   final String? label;
@@ -343,13 +350,17 @@ class SystemUiOverlayStyle {
   }) {
     return SystemUiOverlayStyle(
       systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
-      systemNavigationBarDividerColor: systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
-      systemNavigationBarContrastEnforced: systemNavigationBarContrastEnforced ?? this.systemNavigationBarContrastEnforced,
+      systemNavigationBarDividerColor:
+          systemNavigationBarDividerColor ?? this.systemNavigationBarDividerColor,
+      systemNavigationBarContrastEnforced:
+          systemNavigationBarContrastEnforced ?? this.systemNavigationBarContrastEnforced,
       statusBarColor: statusBarColor ?? this.statusBarColor,
       statusBarIconBrightness: statusBarIconBrightness ?? this.statusBarIconBrightness,
       statusBarBrightness: statusBarBrightness ?? this.statusBarBrightness,
-      systemStatusBarContrastEnforced: systemStatusBarContrastEnforced ?? this.systemStatusBarContrastEnforced,
-      systemNavigationBarIconBrightness: systemNavigationBarIconBrightness ?? this.systemNavigationBarIconBrightness,
+      systemStatusBarContrastEnforced:
+          systemStatusBarContrastEnforced ?? this.systemStatusBarContrastEnforced,
+      systemNavigationBarIconBrightness:
+          systemNavigationBarIconBrightness ?? this.systemNavigationBarIconBrightness,
     );
   }
 
@@ -370,15 +381,15 @@ class SystemUiOverlayStyle {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is SystemUiOverlayStyle
-        && other.systemNavigationBarColor == systemNavigationBarColor
-        && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
-        && other.systemNavigationBarContrastEnforced == systemNavigationBarContrastEnforced
-        && other.statusBarColor == statusBarColor
-        && other.statusBarIconBrightness == statusBarIconBrightness
-        && other.statusBarBrightness == statusBarBrightness
-        && other.systemStatusBarContrastEnforced == systemStatusBarContrastEnforced
-        && other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
+    return other is SystemUiOverlayStyle &&
+        other.systemNavigationBarColor == systemNavigationBarColor &&
+        other.systemNavigationBarDividerColor == systemNavigationBarDividerColor &&
+        other.systemNavigationBarContrastEnforced == systemNavigationBarContrastEnforced &&
+        other.statusBarColor == statusBarColor &&
+        other.statusBarIconBrightness == statusBarIconBrightness &&
+        other.statusBarBrightness == statusBarBrightness &&
+        other.systemStatusBarContrastEnforced == systemStatusBarContrastEnforced &&
+        other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
   }
 }
 
@@ -399,6 +410,20 @@ abstract final class SystemChrome {
   /// ## Limitations
   ///
   /// ### Android
+  ///
+  /// Android limits the [orientations](https://developer.android.com/reference/android/R.attr#screenOrientation)
+  /// to the following combinations:
+  ///
+  ///   - None (empty) - Corresponds to unspecified
+  ///   - portraitUp - Corresponds to portrait
+  ///   - landscapeLeft - Corresponds to landscape
+  ///   - portraitDown - Corresponds to reversePortrait
+  ///   - portraitUp, portraitDown - Corresponds to userPortrait
+  ///   - landscapeRight - Corresponds to reverseLandscape
+  ///   - landscapeLeft, landscapeRight - Corresponds to userLandscape
+  ///   - portraitUp, landscapeLeft, landscapeRight - Corresponds to user
+  ///   - portraitUp, portraitDown, landscapeLeft, landscapeRight - Corresponds
+  ///   to fullUser
   ///
   /// Android screens may choose to [letterbox](https://developer.android.com/guide/practices/enhanced-letterboxing)
   /// applications that lock orientation, particularly on larger screens. When
@@ -486,13 +511,12 @@ abstract final class SystemChrome {
   ///
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
-  static Future<void> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
+  static Future<void> setApplicationSwitcherDescription(
+    ApplicationSwitcherDescription description,
+  ) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setApplicationSwitcherDescription',
-      <String, dynamic>{
-        'label': description.label,
-        'primaryColor': description.primaryColor,
-      },
+      <String, dynamic>{'label': description.label, 'primaryColor': description.primaryColor},
     );
   }
 
@@ -534,7 +558,10 @@ abstract final class SystemChrome {
   /// on Android and setting any of the other [SystemUiMode]s will NOT work
   /// unless you perform the migration detailed in
   /// https://docs.flutter.dev/release/breaking-changes/default-systemuimode-edge-to-edge.
-  static Future<void> setEnabledSystemUIMode(SystemUiMode mode, { List<SystemUiOverlay>? overlays }) async {
+  static Future<void> setEnabledSystemUIMode(
+    SystemUiMode mode, {
+    List<SystemUiOverlay>? overlays,
+  }) async {
     if (mode != SystemUiMode.manual) {
       await SystemChannels.platform.invokeMethod<void>(
         'SystemChrome.setEnabledSystemUIMode',
@@ -573,9 +600,7 @@ abstract final class SystemChrome {
     ServicesBinding.instance.setSystemUiChangeCallback(callback);
     // Skip setting up the listener if there is no callback.
     if (callback != null) {
-      await SystemChannels.platform.invokeMethod<void>(
-        'SystemChrome.setSystemUIChangeListener',
-      );
+      await SystemChannels.platform.invokeMethod<void>('SystemChrome.setSystemUIChangeListener');
     }
   }
 
@@ -589,9 +614,7 @@ abstract final class SystemChrome {
   /// On Android, the system UI cannot be changed until 1 second after the previous
   /// change. This is to prevent malware from permanently hiding navigation buttons.
   static Future<void> restoreSystemUIOverlays() async {
-    await SystemChannels.platform.invokeMethod<void>(
-      'SystemChrome.restoreSystemUIOverlays',
-    );
+    await SystemChannels.platform.invokeMethod<void>('SystemChrome.restoreSystemUIOverlays');
   }
 
   /// Specifies the style to use for the system overlays (e.g. the status bar on
@@ -640,6 +663,20 @@ abstract final class SystemChrome {
   /// the system status bar color and the system navigation bar color.
   ///
   /// ** See code in examples/api/lib/services/system_chrome/system_chrome.set_system_u_i_overlay_style.1.dart **
+  /// {@end-tool}
+  ///
+  /// To imperatively set the style of the system overlays, use [SystemChrome.setSystemUIOverlayStyle].
+  ///
+  /// {@tool snippet}
+  /// The following example uses SystemChrome to set the status bar icon brightness based on system brightness.
+  /// ```dart
+  ///   final Brightness brightness = MediaQuery.platformBrightnessOf(context);
+  ///   SystemChrome.setSystemUIOverlayStyle(
+  ///     SystemUiOverlayStyle(
+  ///       statusBarIconBrightness: brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+  ///       ),
+  ///     );
+  /// ```
   /// {@end-tool}
   ///
   /// See also:

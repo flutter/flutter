@@ -81,20 +81,12 @@ class Ticker {
   ///
   /// An optional label can be provided for debugging purposes. That label
   /// will appear in the [toString] output in debug builds.
-  Ticker(this._onTick, { this.debugLabel }) {
+  Ticker(this._onTick, {this.debugLabel}) {
     assert(() {
       _debugCreationStack = StackTrace.current;
       return true;
     }());
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/scheduler.dart',
-        className: '$Ticker',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('scheduler', 'Ticker', this));
   }
 
   TickerFuture? _future;
@@ -105,6 +97,7 @@ class Ticker {
   /// be called.
   bool get muted => _muted;
   bool _muted = false;
+
   /// When set to true, silences the ticker, so that it is no longer ticking. If
   /// a tick is already scheduled, it will unschedule it. This will not
   /// unschedule the next frame, though.
@@ -162,7 +155,7 @@ class Ticker {
   bool get isActive => _future != null;
 
   /// The frame timestamp when the ticker was last started,
-  /// as reported by [SchedulerBinding.currentFrameTimestamp].
+  /// as reported by [SchedulerBinding.currentFrameTimeStamp].
   Duration? _startTime;
 
   /// Starts the clock for this [Ticker]. If the ticker is not [muted], then this
@@ -185,7 +178,9 @@ class Ticker {
       if (isActive) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('A ticker was started twice.'),
-          ErrorDescription('A ticker that is already active cannot be started again without first stopping it.'),
+          ErrorDescription(
+            'A ticker that is already active cannot be started again without first stopping it.',
+          ),
           describeForError('The affected ticker was'),
         ]);
       }
@@ -224,7 +219,7 @@ class Ticker {
   ///
   /// By convention, this method is used by the object that receives the ticks
   /// (as opposed to the [TickerProvider] which created the ticker).
-  void stop({ bool canceled = false }) {
+  void stop({bool canceled = false}) {
     if (!isActive) {
       return;
     }
@@ -244,7 +239,6 @@ class Ticker {
       localFuture._complete();
     }
   }
-
 
   final TickerCallback _onTick;
 
@@ -285,10 +279,13 @@ class Ticker {
   ///
   /// This should only be called if [shouldScheduleTick] is true.
   @protected
-  void scheduleTick({ bool rescheduling = false }) {
+  void scheduleTick({bool rescheduling = false}) {
     assert(!scheduled);
     assert(shouldScheduleTick);
-    _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
+    _animationId = SchedulerBinding.instance.scheduleFrameCallback(
+      _tick,
+      rescheduling: rescheduling,
+    );
   }
 
   /// Cancels the frame callback that was requested by [scheduleTick], if any.
@@ -320,14 +317,18 @@ class Ticker {
     assert(_future == null);
     assert(_startTime == null);
     assert(_animationId == null);
-    assert((originalTicker._future == null) == (originalTicker._startTime == null), 'Cannot absorb Ticker after it has been disposed.');
+    assert(
+      (originalTicker._future == null) == (originalTicker._startTime == null),
+      'Cannot absorb Ticker after it has been disposed.',
+    );
     if (originalTicker._future != null) {
       _future = originalTicker._future;
       _startTime = originalTicker._startTime;
       if (shouldScheduleTick) {
         scheduleTick();
       }
-      originalTicker._future = null; // so that it doesn't get disposed when we dispose of originalTicker
+      originalTicker._future =
+          null; // so that it doesn't get disposed when we dispose of originalTicker
       originalTicker.unscheduleTick();
     }
     originalTicker.dispose();
@@ -345,12 +346,7 @@ class Ticker {
   ///    with a [TickerCanceled] error.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     if (_future != null) {
       final TickerFuture localFuture = _future!;
       _future = null;
@@ -374,7 +370,7 @@ class Ticker {
   late StackTrace _debugCreationStack;
 
   @override
-  String toString({ bool debugIncludeStack = false }) {
+  String toString({bool debugIncludeStack = false}) {
     final StringBuffer buffer = StringBuffer();
     buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
@@ -386,7 +382,9 @@ class Ticker {
       if (debugIncludeStack) {
         buffer.writeln();
         buffer.writeln('The stack trace when the $runtimeType was actually created was:');
-        FlutterError.defaultStackFilter(_debugCreationStack.toString().trimRight().split('\n')).forEach(buffer.writeln);
+        FlutterError.defaultStackFilter(
+          _debugCreationStack.toString().trimRight().split('\n'),
+        ).forEach(buffer.writeln);
       }
       return true;
     }());
@@ -451,6 +449,7 @@ class TickerFuture implements Future<void> {
     void thunk(dynamic value) {
       callback();
     }
+
     orCancel.then<void>(thunk, onError: thunk);
   }
 
@@ -482,17 +481,17 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<void> catchError(Function onError, { bool Function(Object)? test }) {
+  Future<void> catchError(Function onError, {bool Function(Object)? test}) {
     return _primaryCompleter.future.catchError(onError, test: test);
   }
 
   @override
-  Future<R> then<R>(FutureOr<R> Function(void value) onValue, { Function? onError }) {
+  Future<R> then<R>(FutureOr<R> Function(void value) onValue, {Function? onError}) {
     return _primaryCompleter.future.then<R>(onValue, onError: onError);
   }
 
   @override
-  Future<void> timeout(Duration timeLimit, { FutureOr<void> Function()? onTimeout }) {
+  Future<void> timeout(Duration timeLimit, {FutureOr<void> Function()? onTimeout}) {
     return _primaryCompleter.future.timeout(timeLimit, onTimeout: onTimeout);
   }
 
@@ -502,7 +501,12 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}(${ _completed == null ? "active" : _completed! ? "complete" : "canceled" })';
+  String toString() =>
+      '${describeIdentity(this)}(${_completed == null
+          ? "active"
+          : _completed!
+          ? "complete"
+          : "canceled"})';
 }
 
 /// Exception thrown by [Ticker] objects on the [TickerFuture.orCancel] future

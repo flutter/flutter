@@ -30,7 +30,6 @@ void main() {
     final Completer<void> completer = Completer<void>();
     const String matcher = 'The Flutter DevTools debugger and profiler on';
 
-    final String flutterBin = fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter');
     final Process process = await processManager.start(<String>[
       flutterBin,
       'run',

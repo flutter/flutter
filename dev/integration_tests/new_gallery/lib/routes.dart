@@ -55,60 +55,47 @@ class RouteConfiguration {
     ),
     Path(
       r'^' + rally_routes.homeRoute,
-      (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(rally.loadLibrary,
-            () => rally.RallyApp()), // ignore: prefer_const_constructors
-      ),
+      (BuildContext context, String? match) =>
+          StudyWrapper(study: DeferredWidget(rally.loadLibrary, () => rally.RallyApp())),
     ),
     Path(
       r'^' + shrine_routes.homeRoute,
-      (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(shrine.loadLibrary,
-            () => shrine.ShrineApp()), // ignore: prefer_const_constructors
-      ),
+      (BuildContext context, String? match) =>
+          StudyWrapper(study: DeferredWidget(shrine.loadLibrary, () => shrine.ShrineApp())),
     ),
     Path(
       r'^' + crane_routes.defaultRoute,
       (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(crane.loadLibrary,
-            () => crane.CraneApp(), // ignore: prefer_const_constructors
-            placeholder: const DeferredLoadingPlaceholder(name: 'Crane')),
+        study: DeferredWidget(
+          crane.loadLibrary,
+          () => crane.CraneApp(),
+          placeholder: const DeferredLoadingPlaceholder(name: 'Crane'),
+        ),
       ),
     ),
     Path(
       r'^' + fortnightly_routes.defaultRoute,
       (BuildContext context, String? match) => StudyWrapper(
-        study: DeferredWidget(
-            fortnightly.loadLibrary,
-            // ignore: prefer_const_constructors
-            () => fortnightly.FortnightlyApp()),
+        study: DeferredWidget(fortnightly.loadLibrary, () => fortnightly.FortnightlyApp()),
       ),
     ),
     Path(
       r'^' + reply_routes.homeRoute,
-      // ignore: prefer_const_constructors
       (BuildContext context, String? match) =>
           const StudyWrapper(study: reply.ReplyApp(), hasBottomNavBar: true),
     ),
     Path(
       r'^' + starter_app_routes.defaultRoute,
-      (BuildContext context, String? match) => const StudyWrapper(
-        study: starter_app.StarterApp(),
-      ),
+      (BuildContext context, String? match) => const StudyWrapper(study: starter_app.StarterApp()),
     ),
-    Path(
-      r'^/',
-      (BuildContext context, String? match) => const RootPage(),
-    ),
+    Path(r'^/', (BuildContext context, String? match) => const RootPage()),
   ];
 
   /// The route generator callback used when the app is navigated to a named
   /// route. Set it on the [MaterialApp.onGenerateRoute] or
   /// [WidgetsApp.onGenerateRoute] to make use of the [paths] for route
   /// matching.
-  static Route<dynamic>? onGenerateRoute(
-    RouteSettings settings,
-  ) {
+  static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     for (final Path path in paths) {
       final RegExp regExpPattern = RegExp(path.pattern);
       if (regExpPattern.hasMatch(settings.name!)) {
@@ -133,10 +120,7 @@ class RouteConfiguration {
 }
 
 class NoAnimationMaterialPageRoute<T> extends MaterialPageRoute<T> {
-  NoAnimationMaterialPageRoute({
-    required super.builder,
-    super.settings,
-  });
+  NoAnimationMaterialPageRoute({required super.builder, super.settings});
 
   @override
   Widget buildTransitions(
@@ -150,17 +134,16 @@ class NoAnimationMaterialPageRoute<T> extends MaterialPageRoute<T> {
 }
 
 class TwoPanePageRoute<T> extends OverlayRoute<T> {
-  TwoPanePageRoute({
-    required this.builder,
-    super.settings,
-  });
+  TwoPanePageRoute({required this.builder, super.settings});
 
   final WidgetBuilder builder;
 
   @override
   Iterable<OverlayEntry> createOverlayEntries() sync* {
-    yield OverlayEntry(builder: (BuildContext context) {
-      return builder.call(context);
-    });
+    yield OverlayEntry(
+      builder: (BuildContext context) {
+        return builder.call(context);
+      },
+    );
   }
 }

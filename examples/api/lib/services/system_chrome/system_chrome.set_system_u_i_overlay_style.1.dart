@@ -16,13 +16,7 @@ class SystemOverlayStyleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-      ),
-      home: const SystemOverlayStyleExample(),
-    );
+    return const MaterialApp(home: SystemOverlayStyleExample());
   }
 }
 
@@ -69,10 +63,7 @@ class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
             ),
             Expanded(
               child: Center(
-                child: ElevatedButton(
-                  onPressed: _changeColor,
-                  child: const Text('Change Color'),
-                ),
+                child: ElevatedButton(onPressed: _changeColor, child: const Text('Change Color')),
               ),
             ),
           ],

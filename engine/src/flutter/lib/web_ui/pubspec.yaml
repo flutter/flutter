@@ -1,0 +1,62 @@
+name: ui
+publish_to: none
+
+# Keep the SDK version range in sync with pubspecs under web_sdk
+environment:
+  sdk: ^3.7.0-0
+
+dependencies:
+  meta: ^1.14.0
+  web_locale_keymap:
+    path: ../../third_party/web_locale_keymap
+
+  web_test_fonts:
+    path: ../../third_party/web_test_fonts
+
+  web_unicode:
+    path: ../../third_party/web_unicode
+
+
+dev_dependencies:
+  archive: 4.0.3
+  args: any
+  async: any
+  convert: any
+  crypto: any
+  html: 0.15.5
+  http: 1.3.0
+  http_multi_server: any
+  image: 4.5.3
+  package_config: any
+  path: 1.9.1
+  pool: any
+  quiver: 3.2.2
+  shelf: any
+  shelf_packages_handler: any
+  shelf_static: any
+  shelf_web_socket: any
+  stack_trace: any
+  stream_channel: 2.1.4
+  test: 1.25.15
+  test_api: any
+  test_core: any
+  typed_data: any
+  watcher: 1.1.1
+  web_socket_channel: any
+  webdriver: 3.1.0
+  webkit_inspection_protocol: any
+  yaml: 3.1.3
+  web_engine_tester:
+    path: ../../web_sdk/web_engine_tester
+  web_test_utils:
+    path: ../../web_sdk/web_test_utils
+  skia_gold_client:
+    path: ../../testing/skia_gold_client
+
+dependency_overrides:
+  engine_repo_tools:
+    path: ../../tools/pkg/engine_repo_tools
+  git_repo_tools:
+    path: ../../tools/pkg/git_repo_tools
+  skia_gold_client:
+    path: ../../testing/skia_gold_client

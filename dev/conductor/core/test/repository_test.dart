@@ -43,7 +43,7 @@ void main() {
         stdio: stdio,
       );
 
-      final EngineRepository repo = EngineRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
       final File depsFile = fileSystem.file('/DEPS');
       depsFile.writeAsStringSync(generateMockDeps(previousDartRevision));
       await repo.updateDartRevision(nextDartRevision, depsFile: depsFile);
@@ -62,7 +62,7 @@ void main() {
         stdio: stdio,
       );
 
-      final EngineRepository repo = EngineRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
       final File depsFile = fileSystem.file('/DEPS');
       depsFile.writeAsStringSync('''
 vars = {
@@ -73,47 +73,27 @@ vars = {
       );
     });
 
-    test('commit() throws if there are no local changes to commit', () {
+    test('commit() throws if there are no local changes to commit and addFirst = true', () {
       const String commit1 = 'abc123';
       const String commit2 = 'def456';
       const String message = 'This is a commit message.';
       processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'git',
-          'clone',
-          '--origin',
-          'upstream',
-          '--',
-          EngineRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'engine'),
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'checkout',
-          EngineRepository.defaultBranch,
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit1),
-        const FakeCommand(command: <String>[
-          'git',
-          'status',
-          '--porcelain',
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'commit',
-          '--message',
-          message,
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit2),
+        FakeCommand(
+          command: <String>[
+            'git',
+            'clone',
+            '--origin',
+            'upstream',
+            '--',
+            FrameworkRepository.defaultUpstream,
+            fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+          ],
+        ),
+        const FakeCommand(command: <String>['git', 'checkout', FrameworkRepository.defaultBranch]),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit1),
+        const FakeCommand(command: <String>['git', 'status', '--porcelain']),
+        const FakeCommand(command: <String>['git', 'commit', '--message', message]),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit2),
       ]);
 
       final Checkouts checkouts = Checkouts(
@@ -124,9 +104,9 @@ vars = {
         stdio: stdio,
       );
 
-      final EngineRepository repo = EngineRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
       expect(
-        () async => repo.commit(message),
+        () async => repo.commit(message, addFirst: true),
         throwsExceptionWith('Tried to commit with message $message but no changes were present'),
       );
     });
@@ -136,41 +116,21 @@ vars = {
       const String commit2 = 'def456';
       const String message = 'This is a commit message.';
       processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'git',
-          'clone',
-          '--origin',
-          'upstream',
-          '--',
-          EngineRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'engine'),
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'checkout',
-          EngineRepository.defaultBranch,
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit1),
-        const FakeCommand(
-          command: <String>['git', 'status', '--porcelain'],
-          stdout: 'MM path/to/file.txt',
+        FakeCommand(
+          command: <String>[
+            'git',
+            'clone',
+            '--origin',
+            'upstream',
+            '--',
+            FrameworkRepository.defaultUpstream,
+            fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+          ],
         ),
-        const FakeCommand(command: <String>[
-          'git',
-          'commit',
-          '--message',
-          message,
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit2),
+        const FakeCommand(command: <String>['git', 'checkout', FrameworkRepository.defaultBranch]),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit1),
+        const FakeCommand(command: <String>['git', 'commit', '--message', message]),
+        const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit2),
       ]);
 
       final Checkouts checkouts = Checkouts(
@@ -181,163 +141,87 @@ vars = {
         stdio: stdio,
       );
 
-      final EngineRepository repo = EngineRepository(checkouts);
+      final FrameworkRepository repo = FrameworkRepository(checkouts);
       await repo.commit(message);
       expect(processManager.hasRemainingExpectations, false);
     });
 
-    test('updateCandidateBranchVersion() returns false if branch is the same as version file', () async {
-      const String branch = 'flutter-2.15-candidate.3';
-      final File versionFile = fileSystem.file('/release-candidate-branch.version')..writeAsStringSync(branch);
+    test(
+      'updateCandidateBranchVersion() returns false if branch is the same as version file',
+      () async {
+        const String branch = 'flutter-2.15-candidate.3';
+        final File versionFile = fileSystem.file('/release-candidate-branch.version')
+          ..writeAsStringSync(branch);
 
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(rootDir),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
 
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
-      final bool didUpdate = await repo.updateCandidateBranchVersion(branch, versionFile: versionFile);
-      expect(didUpdate, false);
-    });
+        final FrameworkRepository repo = FrameworkRepository(checkouts);
+        final bool didUpdate = await repo.updateCandidateBranchVersion(
+          branch,
+          versionFile: versionFile,
+        );
+        expect(didUpdate, false);
+      },
+    );
 
-    test('updateEngineRevision() returns false if newCommit is the same as version file', () async {
-      const String commit1 = 'abc123';
-      const String commit2 = 'def456';
-      final File engineVersionFile = fileSystem.file('/engine.version')..writeAsStringSync(commit2);
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'git',
-          'clone',
-          '--origin',
-          'upstream',
-          '--',
-          FrameworkRepository.defaultUpstream,
-          fileSystem.path
-              .join(rootDir, 'flutter_conductor_checkouts', 'framework'),
-        ]),
-        const FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: commit1),
-      ]);
+    test(
+      'framework repo set as localUpstream ensures requiredLocalBranches exist locally',
+      () async {
+        const String commit = 'deadbeef';
+        const String candidateBranch = 'flutter-1.2-candidate.3';
+        bool createdCandidateBranch = false;
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              'git',
+              'clone',
+              '--origin',
+              'upstream',
+              '--',
+              FrameworkRepository.defaultUpstream,
+              fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
+            ],
+          ),
+          FakeCommand(
+            command: const <String>['git', 'checkout', candidateBranch, '--'],
+            onRun: (_) => createdCandidateBranch = true,
+          ),
+          const FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
+          const FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
+          const FakeCommand(
+            command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],
+          ),
+          const FakeCommand(
+            command: <String>['git', 'checkout', FrameworkRepository.defaultBranch],
+          ),
+          const FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: commit),
+        ]);
+        final Checkouts checkouts = Checkouts(
+          fileSystem: fileSystem,
+          parentDirectory: fileSystem.directory(rootDir),
+          platform: platform,
+          processManager: processManager,
+          stdio: stdio,
+        );
 
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
+        final Repository repo = FrameworkRepository(
+          checkouts,
+          additionalRequiredLocalBranches: <String>[candidateBranch],
+          localUpstream: true,
+        );
+        // call this so that repo.lazilyInitialize() is called.
+        await repo.checkoutDirectory;
 
-      final FrameworkRepository repo = FrameworkRepository(checkouts);
-      final bool didUpdate = await repo.updateEngineRevision(commit2, engineVersionFile: engineVersionFile);
-      expect(didUpdate, false);
-    });
-
-    test('framework repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
-      const String commit = 'deadbeef';
-      const String candidateBranch = 'flutter-1.2-candidate.3';
-      bool createdCandidateBranch = false;
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'git',
-          'clone',
-          '--origin',
-          'upstream',
-          '--',
-          FrameworkRepository.defaultUpstream,
-          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'framework'),
-        ]),
-        FakeCommand(
-          command: const <String>['git', 'checkout', candidateBranch, '--'],
-          onRun: (_) => createdCandidateBranch = true,
-        ),
-        const FakeCommand(
-          command: <String>['git', 'checkout', 'stable', '--'],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'checkout', 'beta', '--'],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'checkout', FrameworkRepository.defaultBranch, '--'],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'checkout', FrameworkRepository.defaultBranch],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-          stdout: commit,
-        ),
-      ]);
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final Repository repo = FrameworkRepository(
-        checkouts,
-        additionalRequiredLocalBranches: <String>[candidateBranch],
-        localUpstream: true,
-      );
-      // call this so that repo.lazilyInitialize() is called.
-      await repo.checkoutDirectory;
-
-      expect(processManager.hasRemainingExpectations, false);
-      expect(createdCandidateBranch, true);
-    });
-
-    test('engine repo set as localUpstream ensures requiredLocalBranches exist locally', () async {
-      const String commit = 'deadbeef';
-      const String candidateBranch = 'flutter-1.2-candidate.3';
-      bool createdCandidateBranch = false;
-      processManager.addCommands(<FakeCommand>[
-        FakeCommand(command: <String>[
-          'git',
-          'clone',
-          '--origin',
-          'upstream',
-          '--',
-          EngineRepository.defaultUpstream,
-          fileSystem.path.join(rootDir, 'flutter_conductor_checkouts', 'engine'),
-        ]),
-        FakeCommand(
-          command: const <String>['git', 'checkout', candidateBranch, '--'],
-          onRun: (_) => createdCandidateBranch = true,
-        ),
-        const FakeCommand(
-          command: <String>['git', 'checkout', EngineRepository.defaultBranch],
-        ),
-        const FakeCommand(
-          command: <String>['git', 'rev-parse', 'HEAD'],
-          stdout: commit,
-        ),
-      ]);
-      final Checkouts checkouts = Checkouts(
-        fileSystem: fileSystem,
-        parentDirectory: fileSystem.directory(rootDir),
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      );
-
-      final Repository repo = EngineRepository(
-        checkouts,
-        additionalRequiredLocalBranches: <String>[candidateBranch],
-        localUpstream: true,
-      );
-      // call this so that repo.lazilyInitialize() is called.
-      await repo.checkoutDirectory;
-
-      expect(processManager.hasRemainingExpectations, false);
-      expect(createdCandidateBranch, true);
-    });
+        expect(processManager.hasRemainingExpectations, false);
+        expect(createdCandidateBranch, true);
+      },
+    );
 
     test('.listRemoteBranches() parses git output', () async {
       const String remoteName = 'mirror';
@@ -353,25 +237,22 @@ bbbcae73699263764ad4421a4b2ca3952a6f96cb        refs/heads/stable
 Extraneous debug information that should be ignored.
 ''';
       processManager.addCommands(const <FakeCommand>[
-        FakeCommand(command: <String>[
-          'git',
-          'clone',
-          '--origin',
-          'upstream',
-          '--',
-          EngineRepository.defaultUpstream,
-          '${rootDir}flutter_conductor_checkouts/engine',
-        ]),
-        FakeCommand(command: <String>[
-          'git',
-          'checkout',
-          'main',
-        ]),
-        FakeCommand(command: <String>[
-          'git',
-          'rev-parse',
-          'HEAD',
-        ], stdout: revision),
+        FakeCommand(
+          command: <String>[
+            'git',
+            'clone',
+            '--origin',
+            'upstream',
+            '--',
+            FrameworkRepository.defaultUpstream,
+            '${rootDir}flutter_conductor_checkouts/framework',
+          ],
+        ),
+        FakeCommand(command: <String>['git', 'checkout', 'stable', '--']),
+        FakeCommand(command: <String>['git', 'checkout', 'beta', '--']),
+        FakeCommand(command: <String>['git', 'checkout', 'master', '--']),
+        FakeCommand(command: <String>['git', 'checkout', 'master']),
+        FakeCommand(command: <String>['git', 'rev-parse', 'HEAD'], stdout: revision),
         FakeCommand(
           command: <String>['git', 'ls-remote', '--heads', remoteName],
           stdout: lsRemoteOutput,
@@ -385,18 +266,12 @@ Extraneous debug information that should be ignored.
         stdio: stdio,
       );
 
-      final Repository repo = EngineRepository(
-        checkouts,
-        localUpstream: true,
-      );
+      final Repository repo = FrameworkRepository(checkouts, localUpstream: true);
       final List<String> branchNames = await repo.listRemoteBranches(remoteName);
-      expect(branchNames, equals(<String>[
-        'experiment',
-        'feature-a',
-        'feature-b',
-        'fix_bug_1234',
-        'stable',
-      ]));
+      expect(
+        branchNames,
+        equals(<String>['experiment', 'feature-a', 'feature-b', 'fix_bug_1234', 'stable']),
+      );
     });
   });
 }

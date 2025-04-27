@@ -53,14 +53,10 @@ abstract class Signals {
 /// We use a singleton instance of this class to ensure that all handlers for
 /// fatal signals run before this class calls exit().
 class LocalSignals implements Signals {
-  LocalSignals._(
-    this.exitSignals, {
-    ShutdownHooks? shutdownHooks,
-  }) : _shutdownHooks = shutdownHooks ?? globals.shutdownHooks;
+  LocalSignals._(this.exitSignals, {ShutdownHooks? shutdownHooks})
+    : _shutdownHooks = shutdownHooks ?? globals.shutdownHooks;
 
-  static LocalSignals instance = LocalSignals._(
-    Signals.defaultExitSignals,
-  );
+  static LocalSignals instance = LocalSignals._(Signals.defaultExitSignals);
 
   final List<ProcessSignal> exitSignals;
   final ShutdownHooks _shutdownHooks;
@@ -76,7 +72,7 @@ class LocalSignals implements Signals {
 
   // A table mapping (signal) -> low-level signal event stream.
   final Map<ProcessSignal, StreamSubscription<ProcessSignal>> _streamSubscriptions =
-    <ProcessSignal, StreamSubscription<ProcessSignal>>{};
+      <ProcessSignal, StreamSubscription<ProcessSignal>>{};
 
   // The stream controller for errors coming from signal handlers.
   final StreamController<Object> _errorStreamController = StreamController<Object>.broadcast();
@@ -128,7 +124,7 @@ class LocalSignals implements Signals {
 
     // If _handlersList[signal] is empty, then lookup the cached stream
     // controller and unsubscribe from the stream.
-    if (_handlersList.isEmpty) {
+    if (_handlersList[signal]!.isEmpty) {
       await _streamSubscriptions[signal]?.cancel();
     }
     return true;

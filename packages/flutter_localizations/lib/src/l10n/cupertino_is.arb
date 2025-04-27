@@ -27,5 +27,7 @@
   "lookUpButtonLabel": "Look Up",
   "searchWebButtonLabel": "Leita á vefnum",
   "shareButtonLabel": "Deila...",
-  "clearButtonLabel": "Hreinsa"
+  "clearButtonLabel": "Hreinsa",
+  "cancelButtonLabel": "Hætta við",
+  "backButtonLabel": "Til baka"
 }

@@ -38,7 +38,12 @@ import 'theme.dart';
 class TooltipThemeData with Diagnosticable {
   /// Creates the set of properties used to configure [Tooltip]s.
   const TooltipThemeData({
+    @Deprecated(
+      'Use TooltipThemeData.constraints instead. '
+      'This feature was deprecated after v3.30.0-0.1.pre.',
+    )
     this.height,
+    this.constraints,
     this.padding,
     this.margin,
     this.verticalOffset,
@@ -52,12 +57,22 @@ class TooltipThemeData with Diagnosticable {
     this.exitDuration,
     this.triggerMode,
     this.enableFeedback,
-  });
+  }) : assert(
+         height == null || constraints == null,
+         'Only one of `height` and `constraints` may be specified.',
+       );
 
-  /// The height of [Tooltip.child].
+  /// The minimum height of the [Tooltip]'s message.
+  @Deprecated(
+    'Use TooltipThemeData.constraints instead. '
+    'This feature was deprecated after v3.30.0-0.1.pre.',
+  )
   final double? height;
 
-  /// If provided, the amount of space by which to inset [Tooltip.child].
+  /// Constrains the size of the [Tooltip]'s message.
+  final BoxConstraints? constraints;
+
+  /// If provided, the amount of space by which to inset the [Tooltip]'s message.
   final EdgeInsetsGeometry? padding;
 
   /// If provided, the amount of empty space to surround the [Tooltip].
@@ -128,7 +143,12 @@ class TooltipThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TooltipThemeData copyWith({
+    @Deprecated(
+      'Use TooltipThemeData.constraints instead. '
+      'This feature was deprecated after v3.30.0-0.1.pre.',
+    )
     double? height,
+    BoxConstraints? constraints,
     EdgeInsetsGeometry? padding,
     EdgeInsetsGeometry? margin,
     double? verticalOffset,
@@ -145,6 +165,7 @@ class TooltipThemeData with Diagnosticable {
   }) {
     return TooltipThemeData(
       height: height ?? this.height,
+      constraints: constraints ?? this.constraints,
       padding: padding ?? this.padding,
       margin: margin ?? this.margin,
       verticalOffset: verticalOffset ?? this.verticalOffset,
@@ -171,20 +192,22 @@ class TooltipThemeData with Diagnosticable {
     }
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
+      constraints: BoxConstraints.lerp(a?.constraints, b?.constraints, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       margin: EdgeInsetsGeometry.lerp(a?.margin, b?.margin, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
-      preferBelow: t < 0.5 ? a?.preferBelow: b?.preferBelow,
+      preferBelow: t < 0.5 ? a?.preferBelow : b?.preferBelow,
       excludeFromSemantics: t < 0.5 ? a?.excludeFromSemantics : b?.excludeFromSemantics,
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
-      textAlign: t < 0.5 ? a?.textAlign: b?.textAlign,
+      textAlign: t < 0.5 ? a?.textAlign : b?.textAlign,
     );
   }
 
   @override
   int get hashCode => Object.hash(
     height,
+    constraints,
     padding,
     margin,
     verticalOffset,
@@ -201,47 +224,71 @@ class TooltipThemeData with Diagnosticable {
   );
 
   @override
-  bool operator==(Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is TooltipThemeData
-        && other.height == height
-        && other.padding == padding
-        && other.margin == margin
-        && other.verticalOffset == verticalOffset
-        && other.preferBelow == preferBelow
-        && other.excludeFromSemantics == excludeFromSemantics
-        && other.decoration == decoration
-        && other.textStyle == textStyle
-        && other.textAlign == textAlign
-        && other.waitDuration == waitDuration
-        && other.showDuration == showDuration
-        && other.exitDuration == exitDuration
-        && other.triggerMode == triggerMode
-        && other.enableFeedback == enableFeedback;
+    return other is TooltipThemeData &&
+        other.height == height &&
+        other.constraints == constraints &&
+        other.padding == padding &&
+        other.margin == margin &&
+        other.verticalOffset == verticalOffset &&
+        other.preferBelow == preferBelow &&
+        other.excludeFromSemantics == excludeFromSemantics &&
+        other.decoration == decoration &&
+        other.textStyle == textStyle &&
+        other.textAlign == textAlign &&
+        other.waitDuration == waitDuration &&
+        other.showDuration == showDuration &&
+        other.exitDuration == exitDuration &&
+        other.triggerMode == triggerMode &&
+        other.enableFeedback == enableFeedback;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null),
+    );
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
-    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
-    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true));
+    properties.add(
+      FlagProperty(
+        'position',
+        value: preferBelow,
+        ifTrue: 'below',
+        ifFalse: 'above',
+        showName: true,
+      ),
+    );
+    properties.add(
+      FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true),
+    );
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null));
-    properties.add(DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null));
-    properties.add(FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true));
+    properties.add(
+      DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<Duration>('exit duration', exitDuration, defaultValue: null),
+    );
+    properties.add(
+      DiagnosticsProperty<TooltipTriggerMode>('triggerMode', triggerMode, defaultValue: null),
+    );
+    properties.add(
+      FlagProperty('enableFeedback', value: enableFeedback, ifTrue: 'true', showName: true),
+    );
   }
 }
 
@@ -286,11 +333,7 @@ class TooltipThemeData with Diagnosticable {
 class TooltipTheme extends InheritedTheme {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
-  const TooltipTheme({
-    super.key,
-    required this.data,
-    required super.child,
-  });
+  const TooltipTheme({super.key, required this.data, required super.child});
 
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;

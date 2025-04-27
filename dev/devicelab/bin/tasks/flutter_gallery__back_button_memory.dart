@@ -13,7 +13,12 @@ const String activityName = 'io.flutter.demo.gallery.MainActivity';
 /// Measure application memory usage after pausing and resuming the app
 /// with the Android back button.
 class BackButtonMemoryTest extends MemoryTest {
-  BackButtonMemoryTest() : super('${flutterDirectory.path}/dev/integration_tests/flutter_gallery', 'test_memory/back_button.dart', packageName);
+  BackButtonMemoryTest()
+    : super(
+        '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
+        'test_memory/back_button.dart',
+        packageName,
+      );
 
   @override
   AndroidDevice? get device => super.device as AndroidDevice?;
@@ -32,17 +37,18 @@ class BackButtonMemoryTest extends MemoryTest {
       // Push back button, wait for it to be seen by the Flutter app.
       prepareForNextMessage('AppLifecycleState.paused');
       await device!.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
-
-      // Note: post UI/platform merge, we consistently miss this message. From
-      // local logcat it seems to be printed but it does not reach the tool.
-      await receivedNextMessage?.timeout(const Duration(seconds: 4), onTimeout: () {});
+      await receivedNextMessage;
 
       // Give Android time to settle (e.g. run GCs) after closing the app.
       await Future<void>.delayed(const Duration(milliseconds: 100));
 
       // Relaunch the app, wait for it to launch.
       prepareForNextMessage('READY');
-      final String output = await device!.shellEval('am', <String>['start', '-n', '$packageName/$activityName']);
+      final String output = await device!.shellEval('am', <String>[
+        'start',
+        '-n',
+        '$packageName/$activityName',
+      ]);
       print('adb shell am start: $output');
       if (output.contains('Error')) {
         fail('unable to launch activity');

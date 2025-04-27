@@ -26,6 +26,12 @@ abstract class AlignmentGeometry {
   /// const constructors so that they can be used in const expressions.
   const AlignmentGeometry();
 
+  /// Creates an [Alignment].
+  const factory AlignmentGeometry.xy(double x, double y) = Alignment;
+
+  /// Creates a directional alignment, or [AlignmentDirectional].
+  const factory AlignmentGeometry.directional(double start, double y) = AlignmentDirectional;
+
   double get _x;
 
   double get _start;
@@ -44,11 +50,7 @@ abstract class AlignmentGeometry {
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [Alignment] using [resolve].
   AlignmentGeometry add(AlignmentGeometry other) {
-    return _MixedAlignment(
-      _x + other._x,
-      _start + other._start,
-      _y + other._y,
-    );
+    return _MixedAlignment(_x + other._x, _start + other._start, _y + other._y);
   }
 
   /// Returns the negation of the given [AlignmentGeometry] object.
@@ -137,10 +139,7 @@ abstract class AlignmentGeometry {
 
   @override
   bool operator ==(Object other) {
-    return other is AlignmentGeometry
-        && other._x == _x
-        && other._start == _start
-        && other._y == _y;
+    return other is AlignmentGeometry && other._x == _x && other._start == _start && other._y == _y;
   }
 
   @override
@@ -310,10 +309,7 @@ class Alignment extends AlignmentGeometry {
   Offset withinRect(Rect rect) {
     final double halfWidth = rect.width / 2.0;
     final double halfHeight = rect.height / 2.0;
-    return Offset(
-      rect.left + halfWidth + x * halfWidth,
-      rect.top + halfHeight + y * halfHeight,
-    );
+    return Offset(rect.left + halfWidth + x * halfWidth, rect.top + halfHeight + y * halfHeight);
   }
 
   /// Returns a rect of the given size, aligned within given rect as specified
@@ -357,14 +353,14 @@ class Alignment extends AlignmentGeometry {
   static String _stringify(double x, double y) {
     return switch ((x, y)) {
       (-1.0, -1.0) => 'Alignment.topLeft',
-      ( 0.0, -1.0) => 'Alignment.topCenter',
-      ( 1.0, -1.0) => 'Alignment.topRight',
-      (-1.0,  0.0) => 'Alignment.centerLeft',
-      ( 0.0,  0.0) => 'Alignment.center',
-      ( 1.0,  0.0) => 'Alignment.centerRight',
-      (-1.0,  1.0) => 'Alignment.bottomLeft',
-      ( 0.0,  1.0) => 'Alignment.bottomCenter',
-      ( 1.0,  1.0) => 'Alignment.bottomRight',
+      (0.0, -1.0) => 'Alignment.topCenter',
+      (1.0, -1.0) => 'Alignment.topRight',
+      (-1.0, 0.0) => 'Alignment.centerLeft',
+      (0.0, 0.0) => 'Alignment.center',
+      (1.0, 0.0) => 'Alignment.centerRight',
+      (-1.0, 1.0) => 'Alignment.bottomLeft',
+      (0.0, 1.0) => 'Alignment.bottomCenter',
+      (1.0, 1.0) => 'Alignment.bottomRight',
       _ => 'Alignment(${x.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})',
     };
   }
@@ -535,14 +531,14 @@ class AlignmentDirectional extends AlignmentGeometry {
   static String _stringify(double start, double y) {
     return switch ((start, y)) {
       (-1.0, -1.0) => 'AlignmentDirectional.topStart',
-      ( 0.0, -1.0) => 'AlignmentDirectional.topCenter',
-      ( 1.0, -1.0) => 'AlignmentDirectional.topEnd',
-      (-1.0,  0.0) => 'AlignmentDirectional.centerStart',
-      ( 0.0,  0.0) => 'AlignmentDirectional.center',
-      ( 1.0,  0.0) => 'AlignmentDirectional.centerEnd',
-      (-1.0,  1.0) => 'AlignmentDirectional.bottomStart',
-      ( 0.0,  1.0) => 'AlignmentDirectional.bottomCenter',
-      ( 1.0,  1.0) => 'AlignmentDirectional.bottomEnd',
+      (0.0, -1.0) => 'AlignmentDirectional.topCenter',
+      (1.0, -1.0) => 'AlignmentDirectional.topEnd',
+      (-1.0, 0.0) => 'AlignmentDirectional.centerStart',
+      (0.0, 0.0) => 'AlignmentDirectional.center',
+      (1.0, 0.0) => 'AlignmentDirectional.centerEnd',
+      (-1.0, 1.0) => 'AlignmentDirectional.bottomStart',
+      (0.0, 1.0) => 'AlignmentDirectional.bottomCenter',
+      (1.0, 1.0) => 'AlignmentDirectional.bottomEnd',
       _ => 'AlignmentDirectional(${start.toStringAsFixed(1)}, ${y.toStringAsFixed(1)})',
     };
   }
@@ -565,29 +561,17 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator -() {
-    return _MixedAlignment(
-      -_x,
-      -_start,
-      -_y,
-    );
+    return _MixedAlignment(-_x, -_start, -_y);
   }
 
   @override
   _MixedAlignment operator *(double other) {
-    return _MixedAlignment(
-      _x * other,
-      _start * other,
-      _y * other,
-    );
+    return _MixedAlignment(_x * other, _start * other, _y * other);
   }
 
   @override
   _MixedAlignment operator /(double other) {
-    return _MixedAlignment(
-      _x / other,
-      _start / other,
-      _y / other,
-    );
+    return _MixedAlignment(_x / other, _start / other, _y / other);
   }
 
   @override
@@ -601,11 +585,7 @@ class _MixedAlignment extends AlignmentGeometry {
 
   @override
   _MixedAlignment operator %(double other) {
-    return _MixedAlignment(
-      _x % other,
-      _start % other,
-      _y % other,
-    );
+    return _MixedAlignment(_x % other, _start % other, _y % other);
   }
 
   @override
@@ -635,9 +615,7 @@ class _MixedAlignment extends AlignmentGeometry {
 ///    prefix, input, and suffix within an [InputDecorator].
 class TextAlignVertical {
   /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
-  const TextAlignVertical({
-    required this.y,
-  }) : assert(y >= -1.0 && y <= 1.0);
+  const TextAlignVertical({required this.y}) : assert(y >= -1.0 && y <= 1.0);
 
   /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
   /// locations of the top and bottom of the input box.
@@ -646,8 +624,10 @@ class TextAlignVertical {
   /// Aligns a TextField's input Text with the topmost location within a
   /// TextField's input box.
   static const TextAlignVertical top = TextAlignVertical(y: -1.0);
+
   /// Aligns a TextField's input Text to the center of the TextField.
   static const TextAlignVertical center = TextAlignVertical(y: 0.0);
+
   /// Aligns a TextField's input Text with the bottommost location within a
   /// TextField.
   static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);

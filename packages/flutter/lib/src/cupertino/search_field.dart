@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -118,9 +120,9 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.padding = const EdgeInsetsDirectional.fromSTEB(5.5, 8, 5.5, 8),
     this.itemColor = CupertinoColors.secondaryLabel,
     this.itemSize = 20.0,
-    this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 0, 0, 3),
+    this.prefixInsets = const EdgeInsetsDirectional.fromSTEB(6, 8, 0, 8),
     this.prefixIcon = const Icon(CupertinoIcons.search),
-    this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 2),
+    this.suffixInsets = const EdgeInsetsDirectional.fromSTEB(0, 8, 5, 8),
     this.suffixIcon = const Icon(CupertinoIcons.xmark_circle_fill),
     this.suffixMode = OverlayVisibilityMode.editing,
     this.onSuffixTap,
@@ -133,18 +135,23 @@ class CupertinoSearchTextField extends StatefulWidget {
     this.onTap,
     this.autocorrect = true,
     this.enabled,
-  })  : assert(
-          !((decoration != null) && (backgroundColor != null)),
-          'Cannot provide both a background color and a decoration\n'
-          'To provide both, use "decoration: BoxDecoration(color: '
-          'backgroundColor)"',
-        ),
-        assert(
-          !((decoration != null) && (borderRadius != null)),
-          'Cannot provide both a border radius and a decoration\n'
-          'To provide both, use "decoration: BoxDecoration(borderRadius: '
-          'borderRadius)"',
-        );
+    this.cursorWidth = 2.0,
+    this.cursorHeight,
+    this.cursorRadius = const Radius.circular(2.0),
+    this.cursorOpacityAnimates = true,
+    this.cursorColor,
+  }) : assert(
+         !((decoration != null) && (backgroundColor != null)),
+         'Cannot provide both a background color and a decoration\n'
+         'To provide both, use "decoration: BoxDecoration(color: '
+         'backgroundColor)"',
+       ),
+       assert(
+         !((decoration != null) && (borderRadius != null)),
+         'Cannot provide both a border radius and a decoration\n'
+         'To provide both, use "decoration: BoxDecoration(borderRadius: '
+         'borderRadius)"',
+       );
 
   /// Controls the text being edited.
   ///
@@ -269,7 +276,9 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// {@macro flutter.material.textfield.onTap}
   final VoidCallback? onTap;
 
-  /// {@macro flutter.widgets.editableText.autocorrect}
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true.
   final bool autocorrect;
 
   /// Whether to allow the platform to automatically format quotes.
@@ -327,25 +336,37 @@ class CupertinoSearchTextField extends StatefulWidget {
   /// respond to touch events including the [prefixIcon] and [suffixIcon] button.
   final bool? enabled;
 
+  /// {@macro flutter.widgets.editableText.cursorWidth}
+  final double cursorWidth;
+
+  /// {@macro flutter.widgets.editableText.cursorHeight}
+  final double? cursorHeight;
+
+  /// {@macro flutter.widgets.editableText.cursorRadius}
+  final Radius cursorRadius;
+
+  /// {@macro flutter.widgets.editableText.cursorOpacityAnimates}
+  final bool cursorOpacityAnimates;
+
+  /// The color to use when painting the cursor.
+  final Color? cursorColor;
+
   @override
   State<StatefulWidget> createState() => _CupertinoSearchTextFieldState();
 }
 
-class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
-    with RestorationMixin {
+class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField> with RestorationMixin {
   /// Default value for the border radius. Radius value was determined using the
   /// comparison tool in https://github.com/flutter/platform_tests/.
-  final BorderRadius _kDefaultBorderRadius =
-      const BorderRadius.all(Radius.circular(9.0));
+  final BorderRadius _kDefaultBorderRadius = const BorderRadius.all(Radius.circular(9.0));
 
   RestorableTextEditingController? _controller;
 
-  TextEditingController get _effectiveController =>
-      widget.controller ?? _controller!.value;
+  TextEditingController get _effectiveController => widget.controller ?? _controller!.value;
 
   ScrollNotificationObserverState? _scrollNotificationObserver;
+  late double _scaledIconSize;
   double _fadeExtent = 0.0;
-  double? _maxHeight;
 
   @override
   void initState() {
@@ -401,9 +422,10 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
   void _createLocalController([TextEditingValue? value]) {
     assert(_controller == null);
-    _controller = value == null
-        ? RestorableTextEditingController()
-        : RestorableTextEditingController.fromValue(value);
+    _controller =
+        value == null
+            ? RestorableTextEditingController()
+            : RestorableTextEditingController.fromValue(value);
     if (!restorePending) {
       _registerController();
     }
@@ -421,13 +443,14 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   void _handleScrollNotification(ScrollNotification notification) {
-    if (_maxHeight == null) {
-      _maxHeight ??= (context.findRenderObject() as RenderBox?)?.size.height;
-    }
-    else {
-      final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-      final double currentHeight = renderBox?.size.height ?? 0.0;
-      setState(() { _fadeExtent = _calculateScrollOpacity(currentHeight, _maxHeight!); });
+    if (notification is ScrollUpdateNotification) {
+      final double currentHeight = context.size?.height ?? 0.0;
+      setState(() {
+        _fadeExtent = _calculateScrollOpacity(
+          currentHeight,
+          _scaledIconSize + math.max(widget.prefixInsets.vertical, widget.suffixInsets.vertical),
+        );
+      });
     }
   }
 
@@ -444,21 +467,35 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     }
   }
 
+  // Animate the top padding so that the contents of the search field
+  // move upwards when the search text field is resized on scroll.
+  EdgeInsetsGeometry _animatedInsets(BuildContext context, EdgeInsetsGeometry insets) {
+    final EdgeInsets currentInsets = insets.resolve(Directionality.of(context));
+    final EdgeInsetsGeometry? animatedInsets = EdgeInsetsGeometry.lerp(
+      insets,
+      currentInsets.copyWith(top: currentInsets.top / 2),
+      _fadeExtent,
+    );
+    return animatedInsets ?? insets;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final String placeholder = widget.placeholder ??
-        CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
+    final String placeholder =
+        widget.placeholder ?? CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
 
-    final TextStyle placeholderStyle = widget.placeholderStyle ??
+    final TextStyle placeholderStyle =
+        widget.placeholderStyle ??
         TextStyle(color: CupertinoColors.systemGrey.withOpacity(1.0 - _fadeExtent));
 
     // The icon size will be scaled by a factor of the accessibility text scale,
     // to follow the behavior of `UISearchTextField`.
-    final double scaledIconSize = MediaQuery.textScalerOf(context).scale(widget.itemSize);
+    _scaledIconSize = MediaQuery.textScalerOf(context).scale(widget.itemSize);
 
     // If decoration was not provided, create a decoration with the provided
     // background color and border radius.
-    final BoxDecoration decoration = widget.decoration ??
+    final BoxDecoration decoration =
+        widget.decoration ??
         BoxDecoration(
           color: widget.backgroundColor ?? CupertinoColors.tertiarySystemFill,
           borderRadius: widget.borderRadius ?? _kDefaultBorderRadius,
@@ -466,41 +503,26 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
 
     final IconThemeData iconThemeData = IconThemeData(
       color: CupertinoDynamicColor.resolve(widget.itemColor, context),
-      size: scaledIconSize,
-    );
-
-    // Animate the top padding so that the placeholder and editable text
-    // move when the search text field is resized on scroll.
-    final EdgeInsets currentInsets = widget.padding.resolve(Directionality.of(context));
-    final EdgeInsetsGeometry? padding = EdgeInsetsGeometry.lerp(
-      widget.padding,
-      widget.padding.resolve(Directionality.of(context)).copyWith(top: currentInsets.top / 2),
-      _fadeExtent,
+      size: _scaledIconSize,
     );
 
     final Widget prefix = Opacity(
       opacity: 1.0 - _fadeExtent,
       child: Padding(
-        padding: widget.prefixInsets,
-        child: IconTheme(
-          data: iconThemeData,
-          child: widget.prefixIcon,
-        ),
+        padding: _animatedInsets(context, widget.prefixInsets),
+        child: IconTheme(data: iconThemeData, child: widget.prefixIcon),
       ),
     );
 
     final Widget suffix = Opacity(
       opacity: 1.0 - _fadeExtent,
       child: Padding(
-        padding: widget.suffixInsets,
+        padding: _animatedInsets(context, widget.suffixInsets),
         child: CupertinoButton(
           onPressed: widget.onSuffixTap ?? _defaultOnSuffixTap,
           minSize: 0,
           padding: EdgeInsets.zero,
-          child: IconTheme(
-            data: iconThemeData,
-            child: widget.suffixIcon,
-          ),
+          child: IconTheme(data: iconThemeData, child: widget.suffixIcon),
         ),
       ),
     );
@@ -514,10 +536,15 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
       keyboardType: widget.keyboardType,
       onTap: widget.onTap,
       enabled: widget.enabled ?? true,
+      cursorWidth: widget.cursorWidth,
+      cursorHeight: widget.cursorHeight,
+      cursorRadius: widget.cursorRadius,
+      cursorOpacityAnimates: widget.cursorOpacityAnimates,
+      cursorColor: widget.cursorColor,
       suffixMode: widget.suffixMode,
       placeholder: placeholder,
       placeholderStyle: placeholderStyle,
-      padding: padding ?? widget.padding,
+      padding: _animatedInsets(context, widget.padding),
       onChanged: widget.onChanged,
       onSubmitted: widget.onSubmitted,
       focusNode: widget.focusNode,

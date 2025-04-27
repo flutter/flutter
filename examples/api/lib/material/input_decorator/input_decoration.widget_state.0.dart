@@ -14,7 +14,6 @@ class MaterialStateExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecoration Sample')),
         body: const MaterialStateExample(),
@@ -32,12 +31,10 @@ class MaterialStateExample extends StatelessWidget {
       initialValue: 'abc',
       decoration: const InputDecoration(
         prefixIcon: Icon(Icons.person),
-        prefixIconColor: WidgetStateColor.fromMap(
-          <WidgetStatesConstraint, Color>{
-            WidgetState.focused: Colors.green,
-            WidgetState.any:     Colors.grey,
-          },
-        ),
+        prefixIconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
+          WidgetState.focused: Colors.green,
+          WidgetState.any: Colors.grey,
+        }),
       ),
     );
   }

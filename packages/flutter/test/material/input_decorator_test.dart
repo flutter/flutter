@@ -30,9 +30,7 @@ const Widget customLabel = Text.rich(
   TextSpan(
     children: <InlineSpan>[
       TextSpan(text: 'label'),
-      WidgetSpan(
-        child: Text('*', style: TextStyle(color: Colors.red)),
-      ),
+      WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
     ],
   ),
 );
@@ -57,7 +55,7 @@ Widget buildInputDecorator({
   Widget child = const Text(
     inputText,
     // Use a text style compliant with M3 specification (which is bodyLarge for text fields).
-    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400, letterSpacing: 0.5, height: 1.50)
+    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400, letterSpacing: 0.5, height: 1.50),
   ),
 }) {
   Widget widget = InputDecorator(
@@ -87,10 +85,7 @@ Widget buildInputDecorator({
             ),
             child: Align(
               alignment: Alignment.topLeft,
-              child: Directionality(
-                textDirection: textDirection,
-                child: widget,
-              ),
+              child: Directionality(textDirection: textDirection, child: widget),
             ),
           );
         },
@@ -113,7 +108,7 @@ double getBorderBottom(WidgetTester tester) {
 
 Finder findLabel() {
   return find.descendant(
-    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Shaker'),
+    of: find.byType(MatrixTransition),
     matching: find.byWidgetPredicate((Widget w) => w is Text),
   );
 }
@@ -127,12 +122,11 @@ Offset getLabelCenter(WidgetTester tester) {
 }
 
 TextStyle getLabelStyle(WidgetTester tester) {
-  return tester.firstWidget<AnimatedDefaultTextStyle>(
-    find.ancestor(
-      of: findLabel(),
-      matching: find.byType(AnimatedDefaultTextStyle),
-    ),
-  ).style;
+  return tester
+      .firstWidget<AnimatedDefaultTextStyle>(
+        find.ancestor(of: findLabel(), matching: find.byType(AnimatedDefaultTextStyle)),
+      )
+      .style;
 }
 
 Finder findCustomLabel() {
@@ -180,10 +174,10 @@ Finder findHelper() {
 }
 
 TextStyle getHintStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(of: findHint(),
-    matching: find.byType(RichText),
-  )).text.style!;
+  return tester
+      .widget<RichText>(find.descendant(of: findHint(), matching: find.byType(RichText)))
+      .text
+      .style!;
 }
 
 Rect getHelperRect(WidgetTester tester) {
@@ -191,10 +185,10 @@ Rect getHelperRect(WidgetTester tester) {
 }
 
 TextStyle getHelperStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(of: findHelper(),
-    matching: find.byType(RichText),
-  )).text.style!;
+  return tester
+      .widget<RichText>(find.descendant(of: findHelper(), matching: find.byType(RichText)))
+      .text
+      .style!;
 }
 
 Finder findError() {
@@ -206,10 +200,10 @@ Rect getErrorRect(WidgetTester tester) {
 }
 
 TextStyle getErrorStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(of: findError(),
-    matching: find.byType(RichText),
-  )).text.style!;
+  return tester
+      .widget<RichText>(find.descendant(of: findError(), matching: find.byType(RichText)))
+      .text
+      .style!;
 }
 
 Finder findCounter() {
@@ -221,10 +215,10 @@ Rect getCounterRect(WidgetTester tester) {
 }
 
 TextStyle getCounterStyle(WidgetTester tester) {
-  return tester.widget<RichText>(
-    find.descendant(of: findCounter(),
-    matching: find.byType(RichText),
-  )).text.style!;
+  return tester
+      .widget<RichText>(find.descendant(of: findCounter(), matching: find.byType(RichText)))
+      .text
+      .style!;
 }
 
 Finder findDecorator() {
@@ -249,9 +243,9 @@ InputBorder? getBorder(WidgetTester tester) {
     return null;
   }
   final CustomPaint customPaint = tester.widget(findBorderPainter());
-  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  final dynamic /*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
   // ignore: avoid_dynamic_calls
-  final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
+  final dynamic /*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
   // ignore: avoid_dynamic_calls
   final Animation<double> animation = inputBorderPainter.borderAnimation as Animation<double>;
   // ignore: avoid_dynamic_calls
@@ -278,17 +272,14 @@ Color getBorderColor(WidgetTester tester) => getBorderSide(tester)!.color;
 
 Color getContainerColor(WidgetTester tester) {
   final CustomPaint customPaint = tester.widget(findBorderPainter());
-  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  final dynamic /*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
   // ignore: avoid_dynamic_calls
   return inputBorderPainter.blendedColor as Color;
 }
 
 double getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-    find.ancestor(
-      of: find.text(textValue),
-      matching: find.byType(FadeTransition),
-    ).first,
+    find.ancestor(of: find.text(textValue), matching: find.byType(FadeTransition)).first,
   );
   return opacityWidget.opacity.value;
 }
@@ -301,7 +292,9 @@ TextStyle? getIconStyle(WidgetTester tester, IconData icon) {
 }
 
 RenderObject getOverlayColor(WidgetTester tester) {
-  return tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+  return tester.allRenderObjects.firstWhere(
+    (RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures',
+  );
 }
 
 void main() {
@@ -336,10 +329,10 @@ void main() {
 
           expect(getContainerRect(tester).height, containerHeight);
           expect(getBorder(tester), isA<UnderlineInputBorder>());
-          expect(getBorderRadius(tester), const BorderRadius.only(
-            topLeft: Radius.circular(4.0),
-            topRight: Radius.circular(4.0),
-          ));
+          expect(
+            getBorderRadius(tester),
+            const BorderRadius.only(topLeft: Radius.circular(4.0), topRight: Radius.circular(4.0)),
+          );
         });
 
         testWidgets('container has correct color', (WidgetTester tester) async {
@@ -354,11 +347,10 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.fill,
-              color: theme.colorScheme.surfaceContainerHighest,
-            ),
+          expect(
+            findBorderPainter(),
+            paints
+              ..path(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
           );
         });
 
@@ -394,10 +386,10 @@ void main() {
 
           expect(getContainerRect(tester).height, containerHeight);
           expect(getBorder(tester), isA<UnderlineInputBorder>());
-          expect(getBorderRadius(tester), const BorderRadius.only(
-            topLeft: Radius.circular(4.0),
-            topRight: Radius.circular(4.0),
-          ));
+          expect(
+            getBorderRadius(tester),
+            const BorderRadius.only(topLeft: Radius.circular(4.0), topRight: Radius.circular(4.0)),
+          );
         });
 
         testWidgets('container has correct color', (WidgetTester tester) async {
@@ -413,8 +405,9 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(findBorderPainter(), paints
-            ..path(
+          expect(
+            findBorderPainter(),
+            paints..path(
               style: PaintingStyle.fill,
               color: theme.colorScheme.onSurface.withOpacity(0.04),
             ),
@@ -454,10 +447,10 @@ void main() {
 
           expect(getContainerRect(tester).height, containerHeight);
           expect(getBorder(tester), isA<UnderlineInputBorder>());
-          expect(getBorderRadius(tester), const BorderRadius.only(
-            topLeft: Radius.circular(4.0),
-            topRight: Radius.circular(4.0),
-          ));
+          expect(
+            getBorderRadius(tester),
+            const BorderRadius.only(topLeft: Radius.circular(4.0), topRight: Radius.circular(4.0)),
+          );
         });
 
         testWidgets('container has correct color', (WidgetTester tester) async {
@@ -474,8 +467,9 @@ void main() {
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           expect(theme.hoverColor, Colors.black.withOpacity(0.04));
-          expect(findBorderPainter(), paints
-            ..path(
+          expect(
+            findBorderPainter(),
+            paints..path(
               style: PaintingStyle.fill,
               color: Color.alphaBlend(theme.hoverColor, theme.colorScheme.surfaceContainerHighest),
             ),
@@ -515,10 +509,10 @@ void main() {
 
           expect(getContainerRect(tester).height, containerHeight);
           expect(getBorder(tester), isA<UnderlineInputBorder>());
-          expect(getBorderRadius(tester), const BorderRadius.only(
-            topLeft: Radius.circular(4.0),
-            topRight: Radius.circular(4.0),
-          ));
+          expect(
+            getBorderRadius(tester),
+            const BorderRadius.only(topLeft: Radius.circular(4.0), topRight: Radius.circular(4.0)),
+          );
         });
 
         testWidgets('container has correct color', (WidgetTester tester) async {
@@ -534,15 +528,16 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.fill,
-              color: theme.colorScheme.surfaceContainerHighest,
-            ),
+          expect(
+            findBorderPainter(),
+            paints
+              ..path(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
           );
         });
 
-        testWidgets('container has correct color when focused and hovered', (WidgetTester tester) async {
+        testWidgets('container has correct color when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/146573.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -559,11 +554,10 @@ void main() {
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
           final Color focusColor = theme.colorScheme.surfaceContainerHighest;
           final Color hoverColor = theme.hoverColor;
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.fill,
-              color: Color.alphaBlend(hoverColor, focusColor),
-            ),
+          expect(
+            findBorderPainter(),
+            paints
+              ..path(style: PaintingStyle.fill, color: Color.alphaBlend(hoverColor, focusColor)),
           );
         });
 
@@ -584,7 +578,9 @@ void main() {
           expect(getBorderWeight(tester), 2.0);
         });
 
-        testWidgets('active indicator has correct weight and color when focused and hovered', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/145897.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -618,10 +614,10 @@ void main() {
 
           expect(getContainerRect(tester).height, containerHeight);
           expect(getBorder(tester), isA<UnderlineInputBorder>());
-          expect(getBorderRadius(tester), const BorderRadius.only(
-            topLeft: Radius.circular(4.0),
-            topRight: Radius.circular(4.0),
-          ));
+          expect(
+            getBorderRadius(tester),
+            const BorderRadius.only(topLeft: Radius.circular(4.0), topRight: Radius.circular(4.0)),
+          );
         });
 
         testWidgets('container has correct color', (WidgetTester tester) async {
@@ -636,11 +632,10 @@ void main() {
           );
 
           final ThemeData theme = Theme.of(tester.element(findDecorator()));
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.fill,
-              color: theme.colorScheme.surfaceContainerHighest,
-            ),
+          expect(
+            findBorderPainter(),
+            paints
+              ..path(style: PaintingStyle.fill, color: theme.colorScheme.surfaceContainerHighest),
           );
         });
 
@@ -660,7 +655,9 @@ void main() {
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('active indicator has correct weight and color when focused', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color when focused', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -677,7 +674,9 @@ void main() {
           expect(getBorderWeight(tester), 2.0);
         });
 
-        testWidgets('active indicator has correct weight and color when hovered', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color when hovered', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -694,7 +693,9 @@ void main() {
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('active indicator has correct weight and color when focused and hovered', (WidgetTester tester) async {
+        testWidgets('active indicator has correct weight and color when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/145897.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -727,6 +728,155 @@ void main() {
 
         expect(getContainerRect(tester).height, desktopContainerHeight);
       }, variant: TargetPlatformVariant.desktop());
+
+      testWidgets(
+        'default container height is 48dp on all platforms when visual density is VisualDensity.compact',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.compact),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets(
+        'default container height is 56dp on all platforms when visual density if VisualDensity.standard',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.standard,
+                ),
+              ),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.standard),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets('Visual density defined at the decoration level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+            decoration: const InputDecoration(
+              filled: true,
+              labelText: labelText,
+              helperText: helperText,
+              visualDensity: VisualDensity.comfortable,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
+
+      testWidgets('Visual density defined at the input decoration theme level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.comfortable,
+              ),
+            ),
+            decoration: const InputDecoration(
+              filled: true,
+              labelText: labelText,
+              helperText: helperText,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
     });
 
     group('for outlined text field', () {
@@ -759,11 +909,7 @@ void main() {
           );
 
           // Default outlined text field's container is not filled.
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.stroke,
-            ),
-          );
+          expect(findBorderPainter(), paints..path(style: PaintingStyle.stroke));
         });
 
         testWidgets('outline has correct weight and color', (WidgetTester tester) async {
@@ -814,11 +960,7 @@ void main() {
           );
 
           // Default outlined text field's container is not filled.
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.stroke,
-            ),
-          );
+          expect(findBorderPainter(), paints..path(style: PaintingStyle.stroke));
         });
 
         testWidgets('outline has correct weight and color', (WidgetTester tester) async {
@@ -870,11 +1012,7 @@ void main() {
           );
 
           // Default outlined text field's container is not filled.
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.stroke,
-            ),
-          );
+          expect(findBorderPainter(), paints..path(style: PaintingStyle.stroke));
         });
 
         testWidgets('outline has correct weight and color', (WidgetTester tester) async {
@@ -926,11 +1064,7 @@ void main() {
           );
 
           // Default outlined text field's container is not filled.
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.stroke,
-            ),
-          );
+          expect(findBorderPainter(), paints..path(style: PaintingStyle.stroke));
         });
 
         testWidgets('outline has correct weight and color', (WidgetTester tester) async {
@@ -950,7 +1084,9 @@ void main() {
           expect(getBorderWeight(tester), 2.0);
         });
 
-        testWidgets('outline has correct weight and color when focused and hovered', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/145897.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -999,11 +1135,7 @@ void main() {
           );
 
           // Default outlined text field's container is not filled.
-          expect(findBorderPainter(), paints
-            ..path(
-              style: PaintingStyle.stroke,
-            ),
-          );
+          expect(findBorderPainter(), paints..path(style: PaintingStyle.stroke));
         });
 
         testWidgets('outline has correct weight and color', (WidgetTester tester) async {
@@ -1022,7 +1154,9 @@ void main() {
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('outline has correct weight and color when focused', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color when focused', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -1039,7 +1173,9 @@ void main() {
           expect(getBorderWeight(tester), 2.0);
         });
 
-        testWidgets('outline has correct weight and color when hovered', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color when hovered', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -1056,7 +1192,9 @@ void main() {
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('outline has correct weight and color when focused and hovered', (WidgetTester tester) async {
+        testWidgets('outline has correct weight and color when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/145897.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -1089,15 +1227,162 @@ void main() {
 
         expect(getContainerRect(tester).height, desktopContainerHeight);
       }, variant: TargetPlatformVariant.desktop());
+
+      testWidgets(
+        'default container height is 48dp on all platforms when visual density is VisualDensity.compact',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.compact),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets(
+        'default container height is 56dp on all platforms when visual density if VisualDensity.standard',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.standard,
+                ),
+              ),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.standard),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets('Visual density defined at the decoration level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: labelText,
+              helperText: helperText,
+              visualDensity: VisualDensity.comfortable,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
+
+      testWidgets('Visual density defined at the input decoration theme level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.comfortable,
+              ),
+            ),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: labelText,
+              helperText: helperText,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
     });
 
     testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildInputDecorator(
           isEmpty: true,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-          ),
+          decoration: const InputDecoration(border: InputBorder.none),
         ),
       );
       expect(getBorderWeight(tester), 0.0);
@@ -1153,14 +1438,21 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return GestureDetector(
                 onTap: () async {
-                  setState(() { waitIsOver = true; });
+                  setState(() {
+                    waitIsOver = true;
+                  });
                   await completer.future;
-                  setState(() { waitIsOver = false;  });
+                  setState(() {
+                    waitIsOver = false;
+                  });
                 },
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: 'Test',
-                    enabledBorder: !waitIsOver ? null : const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+                    enabledBorder:
+                        !waitIsOver
+                            ? null
+                            : const OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
                   ),
                 ),
               );
@@ -1183,46 +1475,89 @@ void main() {
         borderSide: BorderSide(color: Colors.blue),
         gapPadding: 32.0,
       );
-      expect(outlineInputBorder, const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        gapPadding: 32.0,
-      ));
+      expect(
+        outlineInputBorder,
+        const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue),
+          borderRadius: BorderRadius.all(Radius.circular(9.0)),
+          gapPadding: 32.0,
+        ),
+      );
       expect(outlineInputBorder, isNot(const OutlineInputBorder()));
-      expect(outlineInputBorder, isNot(const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.red),
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        gapPadding: 32.0,
-      )));
-      expect(outlineInputBorder, isNot(const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        gapPadding: 32.0,
-      )));
-      expect(outlineInputBorder, isNot(const OutlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        gapPadding: 33.0,
-      )));
+      expect(
+        outlineInputBorder,
+        isNot(
+          const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.red),
+            borderRadius: BorderRadius.all(Radius.circular(9.0)),
+            gapPadding: 32.0,
+          ),
+        ),
+      );
+      expect(
+        outlineInputBorder,
+        isNot(
+          const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue),
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            gapPadding: 32.0,
+          ),
+        ),
+      );
+      expect(
+        outlineInputBorder,
+        isNot(
+          const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue),
+            borderRadius: BorderRadius.all(Radius.circular(9.0)),
+            gapPadding: 33.0,
+          ),
+        ),
+      );
 
       // UnderlineInputBorder's equality is defined by the borderSide and borderRadius.
       const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(5.0),
+          topRight: Radius.circular(5.0),
+        ),
       );
-      expect(underlineInputBorder, const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      ));
+      expect(
+        underlineInputBorder,
+        const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5.0),
+            topRight: Radius.circular(5.0),
+          ),
+        ),
+      );
       expect(underlineInputBorder, isNot(const UnderlineInputBorder()));
-      expect(underlineInputBorder, isNot(const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.red),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      )));
-      expect(underlineInputBorder, isNot(const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
-      )));
+      expect(
+        underlineInputBorder,
+        isNot(
+          const UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.red),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(5.0),
+              topRight: Radius.circular(5.0),
+            ),
+          ),
+        ),
+      );
+      expect(
+        underlineInputBorder,
+        isNot(
+          const UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(6.0),
+              topRight: Radius.circular(6.0),
+            ),
+          ),
+        ),
+      );
     });
 
     test('InputBorder hashCodes', () {
@@ -1232,48 +1567,93 @@ void main() {
         borderSide: BorderSide(color: Colors.blue),
         gapPadding: 32.0,
       );
-      expect(outlineInputBorder.hashCode, const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        borderSide: BorderSide(color: Colors.blue),
-        gapPadding: 32.0,
-      ).hashCode);
+      expect(
+        outlineInputBorder.hashCode,
+        const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(9.0)),
+          borderSide: BorderSide(color: Colors.blue),
+          gapPadding: 32.0,
+        ).hashCode,
+      );
       expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
-      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        borderSide: BorderSide(color: Colors.red),
-        gapPadding: 32.0,
-      ).hashCode));
-      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        borderSide: BorderSide(color: Colors.blue),
-        gapPadding: 32.0,
-      ).hashCode));
-      expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(9.0)),
-        borderSide: BorderSide(color: Colors.blue),
-        gapPadding: 33.0,
-      ).hashCode));
+      expect(
+        outlineInputBorder.hashCode,
+        isNot(
+          const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(9.0)),
+            borderSide: BorderSide(color: Colors.red),
+            gapPadding: 32.0,
+          ).hashCode,
+        ),
+      );
+      expect(
+        outlineInputBorder.hashCode,
+        isNot(
+          const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            borderSide: BorderSide(color: Colors.blue),
+            gapPadding: 32.0,
+          ).hashCode,
+        ),
+      );
+      expect(
+        outlineInputBorder.hashCode,
+        isNot(
+          const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(9.0)),
+            borderSide: BorderSide(color: Colors.blue),
+            gapPadding: 33.0,
+          ).hashCode,
+        ),
+      );
 
       // UnderlineInputBorder's hashCode is defined by the borderSide and borderRadius.
       const UnderlineInputBorder underlineInputBorder = UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(5.0),
+          topRight: Radius.circular(5.0),
+        ),
       );
-      expect(underlineInputBorder.hashCode, const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      ).hashCode);
-      expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.red),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(5.0), topRight: Radius.circular(5.0)),
-      ).hashCode));
-      expect(underlineInputBorder.hashCode, isNot(const UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.blue),
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(6.0), topRight: Radius.circular(6.0)),
-      ).hashCode));
+      expect(
+        underlineInputBorder.hashCode,
+        const UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.blue),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(5.0),
+            topRight: Radius.circular(5.0),
+          ),
+        ).hashCode,
+      );
+      expect(
+        underlineInputBorder.hashCode,
+        isNot(
+          const UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.red),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(5.0),
+              topRight: Radius.circular(5.0),
+            ),
+          ).hashCode,
+        ),
+      );
+      expect(
+        underlineInputBorder.hashCode,
+        isNot(
+          const UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(6.0),
+              topRight: Radius.circular(6.0),
+            ),
+          ).hashCode,
+        ),
+      );
     });
 
-    testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (WidgetTester tester) async {
+    testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (
+      WidgetTester tester,
+    ) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/34327
       const double largerBorderRadius = 200.0;
       const double smallerBorderRadius = 100.0;
@@ -1305,72 +1685,78 @@ void main() {
       // to be 400.0.
       const double denominator = largerBorderRadius * 2.0;
 
-      const double largerBorderRadiusScaled = largerBorderRadius / denominator * inputDecoratorHeight;
-      const double smallerBorderRadiusScaled = smallerBorderRadius / denominator * inputDecoratorHeight;
+      const double largerBorderRadiusScaled =
+          largerBorderRadius / denominator * inputDecoratorHeight;
+      const double smallerBorderRadiusScaled =
+          smallerBorderRadius / denominator * inputDecoratorHeight;
 
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: const <Offset>[
-            // The border should draw along the four edges of the
-            // InputDecorator.
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..path(
+            style: PaintingStyle.fill,
+            color: const Color(0xFF00FF00),
+            includes: const <Offset>[
+              // The border should draw along the four edges of the
+              // InputDecorator.
 
-            // Top center.
-            Offset(inputDecoratorWidth / 2.0, 0.0),
-            // Bottom center.
-            Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-            // Left center.
-            Offset(0.0, inputDecoratorHeight / 2.0),
-            // Right center.
-            Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+              // Top center.
+              Offset(inputDecoratorWidth / 2.0, 0.0),
+              // Bottom center.
+              Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+              // Left center.
+              Offset(0.0, inputDecoratorHeight / 2.0),
+              // Right center.
+              Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
 
-            // The border path should contain points where each rounded corner
-            // ends.
+              // The border path should contain points where each rounded corner
+              // ends.
 
-            // Bottom-right arc.
-            Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
-            // Top-right arc.
-            Offset(inputDecoratorWidth,0.0 + largerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
-            // Bottom-left arc.
-            Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
-            Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
-            // Top-left arc.
-            Offset(0.0,0.0 + smallerBorderRadiusScaled),
-            Offset(0.0 + smallerBorderRadiusScaled, 0.0),
-          ],
-          excludes: const <Offset>[
-            // The border should not contain the corner points, since the border
-            // is rounded.
+              // Bottom-right arc.
+              Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
+              Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
+              // Top-right arc.
+              Offset(inputDecoratorWidth, 0.0 + largerBorderRadiusScaled),
+              Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
+              // Bottom-left arc.
+              Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
+              Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
+              // Top-left arc.
+              Offset(0.0, 0.0 + smallerBorderRadiusScaled),
+              Offset(0.0 + smallerBorderRadiusScaled, 0.0),
+            ],
+            excludes: const <Offset>[
+              // The border should not contain the corner points, since the border
+              // is rounded.
 
-            // Top-left.
-            Offset.zero,
-            // Top-right.
-            Offset(inputDecoratorWidth, 0.0),
-            // Bottom-left.
-            Offset(0.0, inputDecoratorHeight),
-            // Bottom-right.
-            Offset(inputDecoratorWidth, inputDecoratorHeight),
+              // Top-left.
+              Offset.zero,
+              // Top-right.
+              Offset(inputDecoratorWidth, 0.0),
+              // Bottom-left.
+              Offset(0.0, inputDecoratorHeight),
+              // Bottom-right.
+              Offset(inputDecoratorWidth, inputDecoratorHeight),
 
-            // Corners with larger border ratio should not contain points outside
-            // of the larger radius.
+              // Corners with larger border ratio should not contain points outside
+              // of the larger radius.
 
-            // Bottom-right arc.
-            Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
-            // Top-left arc.
-            Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
-          ],
-        )
-        ..restore(),
+              // Bottom-right arc.
+              Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
+              Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
+              // Top-left arc.
+              Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
+              Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
+            ],
+          )
+          ..restore(),
       );
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
-    testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (WidgetTester tester) async {
+    testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (
+      WidgetTester tester,
+    ) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/82321
       const double borderRadius = 30.0;
       const String labelText = 'label text';
@@ -1398,65 +1784,69 @@ void main() {
       expect(find.text(labelText), findsOneWidget);
       final Rect labelRect = tester.getRect(find.text(labelText));
 
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: <Offset>[
-            // The border should draw along the four edges of the
-            // InputDecorator.
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..path(
+            style: PaintingStyle.fill,
+            color: const Color(0xFF00FF00),
+            includes: <Offset>[
+              // The border should draw along the four edges of the
+              // InputDecorator.
 
-            // Top center.
-            const Offset(inputDecoratorWidth / 2.0, 0.0),
-            // Bottom center.
-            const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-            // Left center.
-            const Offset(0.0, inputDecoratorHeight / 2.0),
-            // Right center.
-            const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+              // Top center.
+              const Offset(inputDecoratorWidth / 2.0, 0.0),
+              // Bottom center.
+              const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+              // Left center.
+              const Offset(0.0, inputDecoratorHeight / 2.0),
+              // Right center.
+              const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
 
-            // The border path should contain points where each rounded corner
-            // ends.
+              // The border path should contain points where each rounded corner
+              // ends.
 
-            // Bottom-right arc.
-            const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
-            const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
-            // Top-right arc.
-            const Offset(inputDecoratorWidth,0.0 + borderRadiusScaled),
-            const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
-            // Bottom-left arc.
-            const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
-            const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
-            // Top-left arc.
-            const Offset(0.0,0.0 + borderRadiusScaled),
-            const Offset(0.0 + borderRadiusScaled, 0.0),
+              // Bottom-right arc.
+              const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
+              const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
+              // Top-right arc.
+              const Offset(inputDecoratorWidth, 0.0 + borderRadiusScaled),
+              const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
+              // Bottom-left arc.
+              const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
+              const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
+              // Top-left arc.
+              const Offset(0.0, 0.0 + borderRadiusScaled),
+              const Offset(0.0 + borderRadiusScaled, 0.0),
 
-            // Gap edges:
-            // gap start x = radius - radius * cos(arc sweep).
-            // gap start y = radius - radius * sin(arc sweep).
-            const Offset(39.49999999999999, 32.284366616798906),
-            Offset(39.49999999999999 + labelRect.width, 0.0),
-          ],
-          excludes: const <Offset>[
-            // The border should not contain the corner points, since the border
-            // is rounded.
+              // Gap edges:
+              // gap start x = radius - radius * cos(arc sweep).
+              // gap start y = radius - radius * sin(arc sweep).
+              const Offset(39.49999999999999, 32.284366616798906),
+              Offset(39.49999999999999 + labelRect.width, 0.0),
+            ],
+            excludes: const <Offset>[
+              // The border should not contain the corner points, since the border
+              // is rounded.
 
-            // Top-left.
-            Offset.zero,
-            // Top-right.
-            Offset(inputDecoratorWidth, 0.0),
-            // Bottom-left.
-            Offset(0.0, inputDecoratorHeight),
-            // Bottom-right.
-            Offset(inputDecoratorWidth, inputDecoratorHeight),
-          ],
-        )
-        ..restore(),
+              // Top-left.
+              Offset.zero,
+              // Top-right.
+              Offset(inputDecoratorWidth, 0.0),
+              // Bottom-left.
+              Offset(0.0, inputDecoratorHeight),
+              // Bottom-right.
+              Offset(inputDecoratorWidth, inputDecoratorHeight),
+            ],
+          )
+          ..restore(),
       );
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
-    testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
+    testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (
+      WidgetTester tester,
+    ) async {
       // Regression test for https://github.com/flutter/flutter/issues/78855.
       const String labelText = 'Flutter';
       const double inputDecoratorHeight = 56.0;
@@ -1478,51 +1868,56 @@ void main() {
       );
 
       expect(find.text(labelText), findsOneWidget);
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          includes: const <Offset>[
-            // Corner points in the middle of the border line should be in the path.
-            // The path is not filled and borderWidth is 4.0 so Offset(2.0, 2.0) is in the path and Offset(1.0, 1.0) is not.
-            // See Skia SkPath::contains method.
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..path(
+            includes: const <Offset>[
+              // Corner points in the middle of the border line should be in the path.
+              // The path is not filled and borderWidth is 4.0 so Offset(2.0, 2.0) is in the path and Offset(1.0, 1.0) is not.
+              // See Skia SkPath::contains method.
 
-            // Top-left.
-            Offset(borderWidth / 2, borderWidth / 2),
-            // Top-right.
-            Offset(inputDecoratorWidth - 1 - borderWidth / 2, borderWidth / 2),
-            // Bottom-left.
-            Offset(borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
-            // Bottom-right.
-            Offset(inputDecoratorWidth - 1 - borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
-          ],
-          excludes: const <Offset>[
-            // The path is not filled and borderWidth is 4.0 so the path should not contains the corner points.
-            // See Skia SkPath::contains method.
+              // Top-left.
+              Offset(borderWidth / 2, borderWidth / 2),
+              // Top-right.
+              Offset(inputDecoratorWidth - 1 - borderWidth / 2, borderWidth / 2),
+              // Bottom-left.
+              Offset(borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
+              // Bottom-right.
+              Offset(
+                inputDecoratorWidth - 1 - borderWidth / 2,
+                inputDecoratorHeight - 1 - borderWidth / 2,
+              ),
+            ],
+            excludes: const <Offset>[
+              // The path is not filled and borderWidth is 4.0 so the path should not contains the corner points.
+              // See Skia SkPath::contains method.
 
-            // Top-left.
-            Offset.zero,
-            // // Top-right.
-            Offset(inputDecoratorWidth - 1, 0),
-            // // Bottom-left.
-            Offset(0, inputDecoratorHeight - 1),
-            // // Bottom-right.
-            Offset(inputDecoratorWidth - 1, inputDecoratorHeight - 1),
-          ],
-        )
-        ..restore(),
+              // Top-left.
+              Offset.zero,
+              // // Top-right.
+              Offset(inputDecoratorWidth - 1, 0),
+              // // Bottom-left.
+              Offset(0, inputDecoratorHeight - 1),
+              // // Bottom-right.
+              Offset(inputDecoratorWidth - 1, inputDecoratorHeight - 1),
+            ],
+          )
+          ..restore(),
       );
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
-    testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+    testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (
+      WidgetTester tester,
+    ) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/15742
       await tester.pumpWidget(
         buildInputDecorator(
           decoration: const InputDecoration(
             filled: true,
             fillColor: Color(0xFF00FF00),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12.0)),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
           ),
         ),
       );
@@ -1530,27 +1925,35 @@ void main() {
       final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
       // Fill is the border's outer path, a rounded rectangle.
-      expect(box, paints..path(
-        style: PaintingStyle.fill,
-        color: const Color(0xFF00FF00),
-        includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
-        excludes: <Offset>[
-          const Offset(1.0, 6.0), // outside the rounded corner, top left.
-          const Offset(800.0 - 1.0, 6.0), // top right.
-          const Offset(1.0, 56.0 - 6.0), // bottom left.
-          const Offset(800 - 1.0, 56.0 - 6.0), // bottom right.
-        ],
-      ));
+      expect(
+        box,
+        paints..path(
+          style: PaintingStyle.fill,
+          color: const Color(0xFF00FF00),
+          includes: <Offset>[const Offset(800.0 / 2.0, 56 / 2.0)],
+          excludes: <Offset>[
+            const Offset(1.0, 6.0), // outside the rounded corner, top left.
+            const Offset(800.0 - 1.0, 6.0), // top right.
+            const Offset(1.0, 56.0 - 6.0), // bottom left.
+            const Offset(800 - 1.0, 56.0 - 6.0), // bottom right.
+          ],
+        ),
+      );
 
       // Border outline. The rrect is the -center- of the 1.0 stroked outline.
-      expect(box, paints..rrect(
-        style: PaintingStyle.stroke,
-        strokeWidth: 1.0,
-        rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
-      ));
+      expect(
+        box,
+        paints..rrect(
+          style: PaintingStyle.stroke,
+          strokeWidth: 1.0,
+          rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+        ),
+      );
     });
 
-    testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+    testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecorator(
           decoration: const InputDecoration(
@@ -1569,34 +1972,57 @@ void main() {
       final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
       // Fill is the border's outer path, a rounded rectangle.
-      expect(box, paints
-        ..drrect(
+      expect(
+        box,
+        paints..drrect(
           style: PaintingStyle.fill,
-          inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.0,
-              bottomRight: const Radius.elliptical(12.0, 11.0),
-              bottomLeft: const Radius.elliptical(12.0, 11.0)),
-          outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.0,
-              bottomRight: const Radius.elliptical(12.0, 12.0),
-              bottomLeft: const Radius.elliptical(12.0, 12.0)),
-      ));
+          inner: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            800.0,
+            47.0,
+            bottomRight: const Radius.elliptical(12.0, 11.0),
+            bottomLeft: const Radius.elliptical(12.0, 11.0),
+          ),
+          outer: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            800.0,
+            48.0,
+            bottomRight: const Radius.elliptical(12.0, 12.0),
+            bottomLeft: const Radius.elliptical(12.0, 12.0),
+          ),
+        ),
+      );
     });
 
-    testWidgets('UnderlineInputBorder clips top border to prevent anti-aliasing glitches', (WidgetTester tester) async {
+    testWidgets('UnderlineInputBorder clips top border to prevent anti-aliasing glitches', (
+      WidgetTester tester,
+    ) async {
       const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
       const UnderlineInputBorder border = UnderlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       );
       expect(
         (Canvas canvas) => border.paint(canvas, canvasRect),
-        paints
-          ..drrect(
-            outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.0,
-                bottomRight: const Radius.elliptical(12.0, 12.0),
-                bottomLeft: const Radius.elliptical(12.0, 12.0)),
-            inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.0,
-                bottomRight: const Radius.elliptical(12.0, 11.0),
-                bottomLeft: const Radius.elliptical(12.0, 11.0)),
+        paints..drrect(
+          outer: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            100.0,
+            100.0,
+            bottomRight: const Radius.elliptical(12.0, 12.0),
+            bottomLeft: const Radius.elliptical(12.0, 12.0),
           ),
+          inner: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            100.0,
+            99.0,
+            bottomRight: const Radius.elliptical(12.0, 11.0),
+            bottomLeft: const Radius.elliptical(12.0, 11.0),
+          ),
+        ),
       );
 
       const UnderlineInputBorder border2 = UnderlineInputBorder(
@@ -1604,20 +2030,31 @@ void main() {
       );
       expect(
         (Canvas canvas) => border2.paint(canvas, canvasRect),
-        paints
-          ..drrect(
-            outer: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 100.0,
-                bottomRight: const Radius.elliptical(50.0, 50.0),
-                bottomLeft: const Radius.elliptical(50.0, 50.0)),
-            inner: RRect.fromLTRBAndCorners(0.0, 0.0, 100.0, 99.0,
-                bottomRight: const Radius.elliptical(50.0, 49.0),
-                bottomLeft: const Radius.elliptical(50.0, 49.0)),
+        paints..drrect(
+          outer: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            100.0,
+            100.0,
+            bottomRight: const Radius.elliptical(50.0, 50.0),
+            bottomLeft: const Radius.elliptical(50.0, 50.0),
           ),
+          inner: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            100.0,
+            99.0,
+            bottomRight: const Radius.elliptical(50.0, 49.0),
+            bottomLeft: const Radius.elliptical(50.0, 49.0),
+          ),
+        ),
         reason: 'clamp is expected',
       );
     });
 
-    testWidgets('UnderlineInputBorder draws bottom border inside container bounds', (WidgetTester tester) async {
+    testWidgets('UnderlineInputBorder draws bottom border inside container bounds', (
+      WidgetTester tester,
+    ) async {
       const Rect canvasRect = Rect.fromLTWH(0, 0, 100, 100);
       const double borderWidth = 2.0;
       const UnderlineInputBorder border = UnderlineInputBorder(
@@ -1625,92 +2062,98 @@ void main() {
       );
       expect(
         (Canvas canvas) => border.paint(canvas, canvasRect),
-        paints
-          ..line(
-            p1: Offset(0, canvasRect.height - borderWidth / 2),
-            p2: Offset(100, canvasRect.height - borderWidth / 2),
-            strokeWidth: borderWidth,
-          ),
+        paints..line(
+          p1: Offset(0, canvasRect.height - borderWidth / 2),
+          p2: Offset(100, canvasRect.height - borderWidth / 2),
+          strokeWidth: borderWidth,
+        ),
       );
     });
 
-    testWidgets('OutlineBorder starts at the right position when border radius is taller than horizontal content padding', (WidgetTester tester) async {
-      // This is a regression test for https://github.com/flutter/flutter/issues/82321.
-      Widget buildFrame(TextDirection textDirection) {
-        return MaterialApp(
-          home: Scaffold(
-            body: Container(
-              padding: const EdgeInsets.all(16.0),
-              alignment: Alignment.center,
-              child: Directionality(
-                textDirection: textDirection,
-                child: RepaintBoundary(
-                  child: InputDecorator(
-                    isFocused: true,
-                    isEmpty: true,
-                    decoration: InputDecoration(
-                      labelText: labelText,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        gapPadding: 0.0,
+    // Regression test for https://github.com/flutter/flutter/issues/82321.
+    // Regression test for https://github.com/flutter/flutter/issues/150109.
+    testWidgets(
+      'OutlineBorder starts at the right position when border radius is taller than horizontal content padding',
+      (WidgetTester tester) async {
+        Widget buildFrame(TextDirection textDirection) {
+          return MaterialApp(
+            home: Scaffold(
+              body: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.center,
+                child: Directionality(
+                  textDirection: textDirection,
+                  child: RepaintBoundary(
+                    child: InputDecorator(
+                      isFocused: true,
+                      isEmpty: true,
+                      decoration: InputDecoration(
+                        labelText: labelText,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                          gapPadding: 0.0,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
+          );
+        }
+
+        await tester.pumpWidget(buildFrame(TextDirection.ltr));
+        RenderBox borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+        // Convert label bottom left offset to border path coordinate system.
+        final Offset labelBottomLeftLocalToBorder = borderBox.globalToLocal(
+          getLabelRect(tester).bottomLeft,
         );
-      }
 
-      await tester.pumpWidget(buildFrame(TextDirection.ltr));
-      RenderBox borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
-      // Convert label bottom left offset to border path coordinate system.
-      final Offset labelBottomLeftLocalToBorder = borderBox.globalToLocal(getLabelRect(tester).bottomLeft);
+        expect(
+          findBorderPainter(),
+          paints
+            ..save()
+            ..path(
+              // The label bottom left corner should not be part of the border.
+              excludes: <Offset>[labelBottomLeftLocalToBorder],
+              // The points just before the label bottom left corner should be part of the border.
+              includes: <Offset>[
+                labelBottomLeftLocalToBorder + const Offset(-1, 0),
+                labelBottomLeftLocalToBorder + const Offset(-1, -1),
+              ],
+            )
+            ..restore(),
+        );
 
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          // The label bottom left corner should not be part of the border.
-          excludes: <Offset>[
-            labelBottomLeftLocalToBorder,
-          ],
-          // The points just before the label bottom left corner should be part of the border.
-          includes: <Offset>[
-            labelBottomLeftLocalToBorder - const Offset(1, 0),
-            labelBottomLeftLocalToBorder - const Offset(1, 1),
-          ],
-        )
-        ..restore(),
-      );
+        await tester.pumpWidget(buildFrame(TextDirection.rtl));
+        borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+        // Convert label bottom right offset to border path coordinate system.
+        final Offset labelBottomRightLocalToBorder = borderBox.globalToLocal(
+          getLabelRect(tester).bottomRight,
+        );
 
-      await tester.pumpWidget(buildFrame(TextDirection.rtl));
-      borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
-      // Convert label bottom right offset to border path coordinate system.
-      Offset labelBottomRightLocalToBorder = borderBox.globalToLocal(getLabelRect(tester).bottomRight);
-      // TODO(bleroux): determine why the position has to be moved by 2 pixels to the right.
-      // See https://github.com/flutter/flutter/issues/150109.
-      labelBottomRightLocalToBorder += const Offset(2, 0);
+        expect(
+          findBorderPainter(),
+          paints
+            ..save()
+            ..path(
+              // The label bottom right corner should not be part of the border.
+              excludes: <Offset>[labelBottomRightLocalToBorder],
+              // The points just after the label bottom right corner should be part of the border.
+              includes: <Offset>[
+                labelBottomRightLocalToBorder + const Offset(1, 0),
+                labelBottomRightLocalToBorder + const Offset(1, -1),
+              ],
+            )
+            ..restore(),
+        );
+      },
+    );
 
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          // The label bottom right corner should not be part of the border.
-          excludes: <Offset>[
-            labelBottomRightLocalToBorder,
-          ],
-          // The points just after the label bottom right corner should be part of the border.
-          includes: <Offset>[
-            labelBottomRightLocalToBorder + const Offset(1, 0),
-            labelBottomRightLocalToBorder + const Offset(1, 1),
-          ],
-        )
-        ..restore(),
-      );
-    });
-
-    testWidgets('OutlineBorder does not draw over label when input decorator is focused and has an icon', (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/18111.
+    // Regression test for https://github.com/flutter/flutter/issues/159942.
+    testWidgets('OutlineBorder does not overlap with the label at the default radius', (
+      WidgetTester tester,
+    ) async {
       Widget buildFrame(TextDirection textDirection) {
         return MaterialApp(
           home: Scaffold(
@@ -1722,11 +2165,9 @@ void main() {
                 child: const RepaintBoundary(
                   child: InputDecorator(
                     isFocused: true,
-                    isEmpty: true,
                     decoration: InputDecoration(
-                      icon: Icon(Icons.insert_link),
                       labelText: labelText,
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(gapPadding: 0.0),
                     ),
                   ),
                 ),
@@ -1737,43 +2178,150 @@ void main() {
       }
 
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      Rect labelRect = getLabelRect(tester);
       RenderBox borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          excludes: <Offset>[
-            borderBox.globalToLocal(getLabelRect(tester).centerLeft),
-            borderBox.globalToLocal(getLabelRect(tester).centerRight),
-          ],
-        )
-        ..restore(),
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..path(
+            // The points of the label edge should be part of the border.
+            includes: <Offset>[
+              borderBox.globalToLocal(labelRect.centerLeft),
+              borderBox.globalToLocal(labelRect.centerRight),
+            ],
+            // The points inside the label should not be part of the border.
+            excludes: <Offset>[
+              borderBox.globalToLocal(labelRect.centerLeft) + const Offset(1, 0),
+              borderBox.globalToLocal(labelRect.centerRight) + const Offset(-1, 0),
+            ],
+          )
+          ..restore(),
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      labelRect = getLabelRect(tester);
       borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          excludes: <Offset>[
-            borderBox.globalToLocal(getLabelRect(tester).centerLeft),
-            borderBox.globalToLocal(getLabelRect(tester).centerRight),
-          ],
-        )
-        ..restore(),
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..path(
+            // The points of the label edge should be part of the border.
+            includes: <Offset>[
+              borderBox.globalToLocal(labelRect.centerLeft),
+              borderBox.globalToLocal(labelRect.centerRight),
+            ],
+            // The points inside the label should not be part of the border.
+            excludes: <Offset>[
+              borderBox.globalToLocal(labelRect.centerLeft) + const Offset(1, 0),
+              borderBox.globalToLocal(labelRect.centerRight) + const Offset(-1, 0),
+            ],
+          )
+          ..restore(),
       );
     });
+
+    testWidgets(
+      'OutlineBorder does not draw over label when input decorator is focused and has an icon',
+      (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/18111.
+        Widget buildFrame(TextDirection textDirection) {
+          return MaterialApp(
+            home: Scaffold(
+              body: Container(
+                padding: const EdgeInsets.all(16.0),
+                alignment: Alignment.center,
+                child: Directionality(
+                  textDirection: textDirection,
+                  child: const RepaintBoundary(
+                    child: InputDecorator(
+                      isFocused: true,
+                      isEmpty: true,
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.insert_link),
+                        labelText: labelText,
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildFrame(TextDirection.ltr));
+        RenderBox borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+        expect(
+          findBorderPainter(),
+          paints
+            ..save()
+            ..path(
+              excludes: <Offset>[
+                borderBox.globalToLocal(getLabelRect(tester).centerLeft),
+                borderBox.globalToLocal(getLabelRect(tester).centerRight),
+              ],
+            )
+            ..restore(),
+        );
+
+        await tester.pumpWidget(buildFrame(TextDirection.rtl));
+        borderBox = InputDecorator.containerOf(tester.element(findBorderPainter()))!;
+        expect(
+          findBorderPainter(),
+          paints
+            ..save()
+            ..path(
+              excludes: <Offset>[
+                borderBox.globalToLocal(getLabelRect(tester).centerLeft),
+                borderBox.globalToLocal(getLabelRect(tester).centerRight),
+              ],
+            )
+            ..restore(),
+        );
+      },
+    );
   });
 
   group('Material3 - InputDecoration label', () {
     group('for filled text field', () {
+      testWidgets('label and input horizontal positions are M3 compliant in LTR', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(filled: true, labelText: labelText),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + 4.0; // Content left padding + default input gap.
+        expect(getLabelRect(tester).left, labelAndInputStart);
+        expect(getInputRect(tester).left, labelAndInputStart);
+      });
+
+      testWidgets('label and input horizontal positions are M3 compliant in RTL', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(filled: true, labelText: labelText),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + 4.0; // Content left padding + default input gap.
+        expect(getLabelRect(tester).right, 800.0 - labelAndInputStart);
+        expect(getInputRect(tester).right, 800.0 - labelAndInputStart);
+      });
+
       group('when field is enabled', () {
         testWidgets('label text has correct style', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
-              decoration: const InputDecoration(
-                filled: true,
-                labelText: labelText,
-              ),
+              decoration: const InputDecoration(filled: true, labelText: labelText),
             ),
           );
 
@@ -1781,7 +2329,10 @@ void main() {
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
           // Current input decorator implementation forces line height to 1.0,
           // this is not compliant with M3 spec.
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor, height: 1.0);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(
+            color: expectedColor,
+            height: 1.0,
+          );
           expect(getLabelStyle(tester), expectedStyle);
         });
       });
@@ -1790,11 +2341,7 @@ void main() {
         testWidgets('label text has correct color', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
-              decoration: const InputDecoration(
-                filled: true,
-                enabled: false,
-                labelText: labelText,
-              ),
+              decoration: const InputDecoration(filled: true, enabled: false, labelText: labelText),
             ),
           );
 
@@ -1808,10 +2355,7 @@ void main() {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
-              decoration: const InputDecoration(
-                filled: true,
-                labelText: labelText,
-              ),
+              decoration: const InputDecoration(filled: true, labelText: labelText),
             ),
           );
 
@@ -1825,10 +2369,7 @@ void main() {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
-              decoration: const InputDecoration(
-                filled: true,
-                labelText: labelText,
-              ),
+              decoration: const InputDecoration(filled: true, labelText: labelText),
             ),
           );
 
@@ -1836,16 +2377,15 @@ void main() {
           expect(getLabelStyle(tester).color, theme.colorScheme.primary);
         });
 
-        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+        testWidgets('label text has correct color when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/146565.
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
               isHovering: true,
-              decoration: const InputDecoration(
-                filled: true,
-                labelText: labelText,
-              ),
+              decoration: const InputDecoration(filled: true, labelText: labelText),
             ),
           );
 
@@ -1902,7 +2442,9 @@ void main() {
           expect(getLabelStyle(tester).color, theme.colorScheme.onErrorContainer);
         });
 
-        testWidgets('label text has correct style when focused and hovered', (WidgetTester tester) async {
+        testWidgets('label text has correct style when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/146565.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -1923,6 +2465,76 @@ void main() {
     });
 
     group('for outlined text field', () {
+      testWidgets('label and input horizontal positions are M3 compliant in LTR', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(border: OutlineInputBorder(), labelText: labelText),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + 4.0; // Content left padding + default input gap.
+        expect(getLabelRect(tester).left, labelAndInputStart);
+        expect(getInputRect(tester).left, labelAndInputStart);
+      });
+
+      testWidgets('label and input horizontal positions are M3 compliant in RTL', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(border: OutlineInputBorder(), labelText: labelText),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + 4.0; // Content left padding + default input gap.
+        expect(getLabelRect(tester).right, 800 - labelAndInputStart);
+        expect(getInputRect(tester).right, 800 - labelAndInputStart);
+      });
+
+      testWidgets('label and input horizontal positions can be adjusted in LTR', (
+        WidgetTester tester,
+      ) async {
+        const double customGap = 6.0;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(gapPadding: customGap),
+              labelText: labelText,
+            ),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + customGap; // Content left padding + input gap.
+        expect(getLabelRect(tester).left, labelAndInputStart);
+        expect(getInputRect(tester).left, labelAndInputStart);
+      });
+
+      testWidgets('label and input horizontal positions can be adjusted in RTL', (
+        WidgetTester tester,
+      ) async {
+        const double customGap = 6.0;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(gapPadding: customGap),
+              labelText: labelText,
+            ),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + customGap; // Content left padding + input gap.
+        expect(getLabelRect(tester).right, 800.0 - labelAndInputStart);
+        expect(getInputRect(tester).right, 800.0 - labelAndInputStart);
+      });
+
       group('when field is enabled', () {
         testWidgets('label text has correct style', (WidgetTester tester) async {
           await tester.pumpWidget(
@@ -1939,7 +2551,10 @@ void main() {
           final Color expectedColor = theme.colorScheme.onSurfaceVariant;
           // Current input decorator implementation forces line height to 1.0,
           // this is not compliant with M3 spec.
-          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(color: expectedColor, height: 1.0);
+          final TextStyle expectedStyle = theme.textTheme.bodyLarge!.copyWith(
+            color: expectedColor,
+            height: 1.0,
+          );
           expect(getLabelStyle(tester), expectedStyle);
         });
       });
@@ -1997,8 +2612,9 @@ void main() {
           expect(getLabelStyle(tester).color, theme.colorScheme.primary);
         });
 
-
-        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+        testWidgets('label text has correct color when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/146565.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -2065,7 +2681,9 @@ void main() {
           expect(getLabelStyle(tester).color, theme.colorScheme.onErrorContainer);
         });
 
-        testWidgets('label text has correct color when focused and hovered', (WidgetTester tester) async {
+        testWidgets('label text has correct color when focused and hovered', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/146565.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -2084,6 +2702,35 @@ void main() {
         });
       });
     });
+
+    testWidgets(
+      'Label and input for non-filled and non-outlined text field have no horizontal padding in LTR',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(decoration: const InputDecoration(labelText: labelText)),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        expect(getLabelRect(tester).left, 0.0);
+        expect(getInputRect(tester).left, 0.0);
+      },
+    );
+
+    testWidgets(
+      'Label and input for non-filled and non-outlined text field have no horizontal padding in RTL',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(labelText: labelText),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        expect(getLabelRect(tester).right, 800.0);
+        expect(getInputRect(tester).right, 800.0);
+      },
+    );
 
     testWidgets('floatingLabelStyle overrides default style', (WidgetTester tester) async {
       const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
@@ -2110,10 +2757,7 @@ void main() {
         buildInputDecorator(
           isEmpty: true,
           isFocused: true, // Label appears floating above input field.
-          decoration: const InputDecoration(
-            labelText: labelText,
-            labelStyle: labelStyle,
-          ),
+          decoration: const InputDecoration(labelText: labelText, labelStyle: labelStyle),
         ),
       );
 
@@ -2141,44 +2785,42 @@ void main() {
       expect(getLabelStyle(tester).fontSize, floatingLabelStyle.fontSize);
     });
 
-    testWidgets('InputDecorationTheme labelStyle overrides default style', (WidgetTester tester) async {
+    testWidgets('InputDecorationTheme labelStyle overrides default style', (
+      WidgetTester tester,
+    ) async {
       const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
 
       await tester.pumpWidget(
         buildInputDecorator(
           isEmpty: true, // Label appears inline, on top of the input field.
-          inputDecorationTheme: const InputDecorationTheme(
-            labelStyle: labelStyle,
-          ),
-          decoration: const InputDecoration(
-            labelText: labelText,
-          ),
+          inputDecorationTheme: const InputDecorationTheme(labelStyle: labelStyle),
+          decoration: const InputDecoration(labelText: labelText),
         ),
       );
 
       expect(getLabelStyle(tester).color, labelStyle.color);
     });
 
-    testWidgets('InputDecorationTheme floatingLabelStyle overrides default style', (WidgetTester tester) async {
+    testWidgets('InputDecorationTheme floatingLabelStyle overrides default style', (
+      WidgetTester tester,
+    ) async {
       const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
 
       await tester.pumpWidget(
         buildInputDecorator(
           isEmpty: true,
           isFocused: true, // Label appears floating above input field.
-          inputDecorationTheme: const InputDecorationTheme(
-            floatingLabelStyle: floatingLabelStyle,
-          ),
-          decoration: const InputDecoration(
-            labelText: labelText,
-          ),
+          inputDecorationTheme: const InputDecorationTheme(floatingLabelStyle: floatingLabelStyle),
+          decoration: const InputDecoration(labelText: labelText),
         ),
       );
 
       expect(getLabelStyle(tester).color, floatingLabelStyle.color);
     });
 
-    testWidgets('floatingLabelStyle is always used when FloatingLabelBehavior.always', (WidgetTester tester) async {
+    testWidgets('floatingLabelStyle is always used when FloatingLabelBehavior.always', (
+      WidgetTester tester,
+    ) async {
       // Regression test for https://github.com/flutter/flutter/issues/147231.
       const TextStyle labelStyle = TextStyle(color: Colors.amber, fontSize: 16.0);
       const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
@@ -2220,11 +2862,7 @@ void main() {
   group('Material3 - InputDecoration labelText layout', () {
     testWidgets('The label appears above input', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            labelText: labelText,
-          ),
-        ),
+        buildInputDecorator(decoration: const InputDecoration(labelText: labelText)),
       );
 
       // Overall height for this InputDecorator is 56dp on mobile:
@@ -2242,14 +2880,11 @@ void main() {
       expect(getInputRect(tester).bottom, 48.0);
     });
 
-    testWidgets('The label appears within the input when there is no text content', (WidgetTester tester) async {
+    testWidgets('The label appears within the input when there is no text content', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        buildInputDecorator(
-          isEmpty: true,
-          decoration: const InputDecoration(
-            labelText: labelText,
-          ),
-        ),
+        buildInputDecorator(isEmpty: true, decoration: const InputDecoration(labelText: labelText)),
       );
 
       expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
@@ -2300,9 +2935,7 @@ void main() {
     );
 
     testWidgets('Floating label animation duration and curve', (WidgetTester tester) async {
-      Future<void> pumpInputDecorator({
-        required bool isFocused,
-      }) async {
+      Future<void> pumpInputDecorator({required bool isFocused}) async {
         return tester.pumpWidget(
           buildInputDecorator(
             isEmpty: true,
@@ -2314,6 +2947,7 @@ void main() {
           ),
         );
       }
+
       await pumpInputDecorator(isFocused: false);
       expect(getLabelRect(tester).top, 20.0);
 
@@ -2348,7 +2982,9 @@ void main() {
       expect(getLabelRect(tester).top, 20.0);
     });
 
-    testWidgets('InputDecorator withdraws label when not empty or focused', (WidgetTester tester) async {
+    testWidgets('InputDecorator withdraws label when not empty or focused', (
+      WidgetTester tester,
+    ) async {
       Future<void> pumpDecorator({
         required bool focused,
         bool enabled = true,
@@ -2374,82 +3010,84 @@ void main() {
 
       await pumpDecorator(focused: false);
       await tester.pump(kTransitionDuration);
-      const Size labelSize= Size(82.5, 16);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+      const Size labelSize = Size(82.5, 16);
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: false, empty: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: true);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: true, empty: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: false, enabled: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: false, empty: false, enabled: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       // Focused and disabled happens with NavigationMode.directional.
       await pumpDecorator(focused: true, enabled: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: true, empty: false, enabled: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
     });
 
-    testWidgets('InputDecorator floating label width scales when focused', (WidgetTester tester) async {
+    testWidgets('InputDecorator floating label width scales when focused', (
+      WidgetTester tester,
+    ) async {
       final String longStringA = String.fromCharCodes(List<int>.generate(200, (_) => 65));
       final String longStringB = String.fromCharCodes(List<int>.generate(200, (_) => 66));
 
-      await tester.pumpWidget(Center(
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: buildInputDecorator(
-            isEmpty: true,
-            decoration: InputDecoration(
-              labelText: longStringA,
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: buildInputDecorator(
+              isEmpty: true,
+              decoration: InputDecoration(labelText: longStringA),
             ),
           ),
         ),
-      ));
+      );
 
       expect(
         find.text(longStringA),
         paints..clipRect(rect: const Rect.fromLTWH(0, 0, 100.0, 16.0)),
       );
 
-      await tester.pumpWidget(Center(
-        child: SizedBox(
-          width: 100,
-          height: 100,
-          child: buildInputDecorator(
-            isFocused: true,
-            isEmpty: true,
-            decoration: InputDecoration(
-              labelText: longStringB,
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 100,
+            height: 100,
+            child: buildInputDecorator(
+              isFocused: true,
+              isEmpty: true,
+              decoration: InputDecoration(labelText: longStringB),
             ),
           ),
         ),
-      ));
+      );
 
       await tester.pump(kTransitionDuration);
 
@@ -2461,11 +3099,14 @@ void main() {
           }
           final Rect clipRect = arguments[0] as Rect;
           // _kFinalLabelScale = 0.75
-          expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 100 / 0.75, 16.0), epsilon: 1e-5));
+          expect(
+            clipRect,
+            rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 100 / 0.75, 16.0), epsilon: 1e-5),
+          );
           return true;
         }),
       );
-    }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+    }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
 
     testWidgets('InputDecorator floating label Y coordinate', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/54028
@@ -2474,9 +3115,7 @@ void main() {
           isEmpty: true,
           decoration: const InputDecoration(
             labelText: labelText,
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(width: 4),
-            ),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 4)),
             floatingLabelBehavior: FloatingLabelBehavior.always,
           ),
         ),
@@ -2494,10 +3133,7 @@ void main() {
         buildInputDecorator(
           isEmpty: true,
           visualDensity: VisualDensity.compact,
-          decoration: const InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-          ),
+          decoration: const InputDecoration(labelText: labelText, hintText: hintText),
         ),
       );
 
@@ -2522,10 +3158,7 @@ void main() {
           isEmpty: true,
           isFocused: true,
           visualDensity: VisualDensity.compact,
-          decoration: const InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-          ),
+          decoration: const InputDecoration(labelText: labelText, hintText: hintText),
         ),
       );
       await tester.pump(kTransitionDuration);
@@ -2544,10 +3177,7 @@ void main() {
         buildInputDecorator(
           isFocused: true,
           visualDensity: VisualDensity.compact,
-          decoration: const InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-          ),
+          decoration: const InputDecoration(labelText: labelText, hintText: hintText),
         ),
       );
       await tester.pump(kTransitionDuration);
@@ -2563,15 +3193,14 @@ void main() {
       expect(getBorderWeight(tester), 2.0);
     });
 
-    testWidgets('InputDecorator respects increased theme visualDensity', (WidgetTester tester) async {
+    testWidgets('InputDecorator respects increased theme visualDensity', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecorator(
           isEmpty: true,
           visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
-          decoration: const InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-          ),
+          decoration: const InputDecoration(labelText: labelText, hintText: hintText),
         ),
       );
 
@@ -2596,10 +3225,7 @@ void main() {
           isEmpty: true,
           isFocused: true,
           visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
-          decoration: const InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-          ),
+          decoration: const InputDecoration(labelText: labelText, hintText: hintText),
         ),
       );
       await tester.pump(kTransitionDuration);
@@ -2618,10 +3244,7 @@ void main() {
         buildInputDecorator(
           isFocused: true,
           visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
-          decoration: const InputDecoration(
-            labelText: labelText,
-            hintText: hintText,
-          ),
+          decoration: const InputDecoration(labelText: labelText, hintText: hintText),
         ),
       );
       await tester.pump(kTransitionDuration);
@@ -2641,11 +3264,7 @@ void main() {
   group('Material3 - InputDecoration label layout', () {
     testWidgets('The label appears above input', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration(
-            label: customLabel,
-          ),
-        ),
+        buildInputDecorator(decoration: const InputDecoration(label: customLabel)),
       );
 
       // Overall height for this InputDecorator is 56dp on mobile:
@@ -2661,14 +3280,11 @@ void main() {
       expect(getInputRect(tester).bottom, 48.0);
     });
 
-    testWidgets('The label appears within the input when there is no text content', (WidgetTester tester) async {
+    testWidgets('The label appears within the input when there is no text content', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
-        buildInputDecorator(
-          isEmpty: true,
-          decoration: const InputDecoration(
-            label: customLabel,
-          ),
-        ),
+        buildInputDecorator(isEmpty: true, decoration: const InputDecoration(label: customLabel)),
       );
 
       expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
@@ -2720,9 +3336,7 @@ void main() {
     );
 
     testWidgets('Floating label animation duration and curve', (WidgetTester tester) async {
-      Future<void> pumpInputDecorator({
-        required bool isFocused,
-      }) async {
+      Future<void> pumpInputDecorator({required bool isFocused}) async {
         return tester.pumpWidget(
           buildInputDecorator(
             isEmpty: true,
@@ -2734,6 +3348,7 @@ void main() {
           ),
         );
       }
+
       await pumpInputDecorator(isFocused: false);
       // Label line height is forced to 1.0 and font size is 16.0,
       // the label should be vertically centered (20 pixels above and below).
@@ -2770,50 +3385,44 @@ void main() {
       expect(getCustomLabelRect(tester).top, 20.0);
     });
 
-    testWidgets('InputDecorationTheme floatingLabelStyle overrides label widget styles when the widget is a text widget (focused)', (WidgetTester tester) async {
-      const TextStyle style16 = TextStyle(fontSize: 16.0);
-      final TextStyle floatingLabelStyle = style16.merge(const TextStyle(color: Colors.indigo));
+    testWidgets(
+      'InputDecorationTheme floatingLabelStyle overrides label widget styles when the widget is a text widget (focused)',
+      (WidgetTester tester) async {
+        const TextStyle style16 = TextStyle(fontSize: 16.0);
+        final TextStyle floatingLabelStyle = style16.merge(const TextStyle(color: Colors.indigo));
 
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isEmpty: true,
-          isFocused: true, // Label appears floating above input field.
-          inputDecorationTheme: InputDecorationTheme(
-            floatingLabelStyle: floatingLabelStyle,
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true,
+            isFocused: true, // Label appears floating above input field.
+            inputDecorationTheme: InputDecorationTheme(floatingLabelStyle: floatingLabelStyle),
+            decoration: const InputDecoration(label: Text.rich(TextSpan(text: 'label'))),
           ),
-          decoration: const InputDecoration(
-            label: Text.rich(
-              TextSpan(text: 'label'),
-            ),
+        );
+
+        // Verify that the styles were passed along.
+        expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      },
+    );
+
+    testWidgets(
+      'InputDecorationTheme labelStyle overrides label widget styles when the widget is a text widget',
+      (WidgetTester tester) async {
+        const TextStyle styleDefaultSize = TextStyle(fontSize: 16.0);
+        final TextStyle labelStyle = styleDefaultSize.merge(const TextStyle(color: Colors.purple));
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            isEmpty: true, // Label appears inline, on top of the input field.
+            inputDecorationTheme: InputDecorationTheme(labelStyle: labelStyle),
+            decoration: const InputDecoration(label: Text.rich(TextSpan(text: 'label'))),
           ),
-        ),
-      );
+        );
 
-      // Verify that the styles were passed along.
-      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
-    });
-
-    testWidgets('InputDecorationTheme labelStyle overrides label widget styles when the widget is a text widget', (WidgetTester tester) async {
-      const TextStyle styleDefaultSize = TextStyle(fontSize: 16.0);
-      final TextStyle labelStyle = styleDefaultSize.merge(const TextStyle(color: Colors.purple));
-
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isEmpty: true, // Label appears inline, on top of the input field.
-          inputDecorationTheme: InputDecorationTheme(
-            labelStyle: labelStyle,
-          ),
-          decoration: const InputDecoration(
-            label: Text.rich(
-              TextSpan(text: 'label'),
-            ),
-          ),
-        ),
-      );
-
-      // Verify that the styles were passed along.
-      expect(getLabelStyle(tester).color, labelStyle.color);
-    });
+        // Verify that the styles were passed along.
+        expect(getLabelStyle(tester).color, labelStyle.color);
+      },
+    );
   });
 
   group('Material3 - InputDecoration hint', () {
@@ -2823,14 +3432,13 @@ void main() {
       //   24 - Input and hint (font size = 16, line height = 1.5)
       //   12 - Bottom padding
       group('when field is enabled', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -2843,13 +3451,12 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -2866,10 +3473,7 @@ void main() {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -2884,15 +3488,13 @@ void main() {
       });
 
       group('when field is disabled', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
-              decoration: const InputDecoration(
-                enabled: false,
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(enabled: false, filled: true, hintText: hintText),
             ),
           );
 
@@ -2905,14 +3507,12 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
-              decoration: const InputDecoration(
-                enabled: false,
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(enabled: false, filled: true, hintText: hintText),
             ),
           );
 
@@ -2929,11 +3529,7 @@ void main() {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
-              decoration: const InputDecoration(
-                enabled: false,
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(enabled: false, filled: true, hintText: hintText),
             ),
           );
 
@@ -2948,15 +3544,14 @@ void main() {
       });
 
       group('when field is hovered', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
               isEmpty: true,
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -2969,14 +3564,13 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -2994,10 +3588,7 @@ void main() {
             buildInputDecorator(
               isHovering: true,
               isEmpty: true,
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -3012,15 +3603,14 @@ void main() {
       });
 
       group('when field is focused', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
               isEmpty: true,
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -3033,14 +3623,13 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -3058,10 +3647,7 @@ void main() {
             buildInputDecorator(
               isFocused: true,
               isEmpty: true,
-              decoration: const InputDecoration(
-                filled: true,
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(filled: true, hintText: hintText),
             ),
           );
 
@@ -3076,7 +3662,9 @@ void main() {
       });
 
       group('when field is in error', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3097,7 +3685,9 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3148,7 +3738,9 @@ void main() {
       //   24 - Input/Hint (font size = 16, line height = 1.5)
       //    8 - Bottom padding
       group('when field is enabled', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3169,7 +3761,9 @@ void main() {
           expect(getHintOpacity(tester), 0.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3191,7 +3785,9 @@ void main() {
       });
 
       group('when field is disabled', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3213,7 +3809,9 @@ void main() {
           expect(getHintOpacity(tester), 0.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3236,7 +3834,9 @@ void main() {
       });
 
       group('when field is hovered', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -3258,7 +3858,9 @@ void main() {
           expect(getHintOpacity(tester), 0.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -3281,7 +3883,9 @@ void main() {
       });
 
       group('when field is focused', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -3303,7 +3907,9 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -3348,7 +3954,9 @@ void main() {
       });
 
       group('when field is in error', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3370,7 +3978,9 @@ void main() {
           expect(getHintOpacity(tester), 0.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3399,14 +4009,13 @@ void main() {
       //   24 - Input and hint (font size = 16, line height = 1.5)
       //   16 - Bottom padding
       group('when field is enabled', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3419,13 +4028,12 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3442,10 +4050,7 @@ void main() {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3460,7 +4065,9 @@ void main() {
       });
 
       group('when field is disabled', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3481,7 +4088,9 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3524,15 +4133,14 @@ void main() {
       });
 
       group('when field is hovered', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
               isEmpty: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3545,14 +4153,13 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3570,10 +4177,7 @@ void main() {
             buildInputDecorator(
               isHovering: true,
               isEmpty: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3588,15 +4192,14 @@ void main() {
       });
 
       group('when field is focused', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
               isEmpty: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3609,14 +4212,13 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3634,10 +4236,7 @@ void main() {
             buildInputDecorator(
               isFocused: true,
               isEmpty: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: hintText,
-              ),
+              decoration: const InputDecoration(border: OutlineInputBorder(), hintText: hintText),
             ),
           );
 
@@ -3652,7 +4251,9 @@ void main() {
       });
 
       group('when field is in error', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3673,7 +4274,9 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3722,7 +4325,9 @@ void main() {
       //   24 - Input and hint (font size = 16, line height = 1.5)
       //   16 - Bottom padding
       group('when field is enabled', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3743,7 +4348,9 @@ void main() {
           expect(getHintOpacity(tester), 0.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3765,7 +4372,9 @@ void main() {
       });
 
       group('when field is disabled', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3787,7 +4396,9 @@ void main() {
           expect(getHintOpacity(tester), 0.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3810,7 +4421,9 @@ void main() {
       });
 
       group('when field is hovered', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -3832,7 +4445,9 @@ void main() {
           expect(getHintOpacity(tester), 0.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isHovering: true,
@@ -3855,7 +4470,9 @@ void main() {
       });
 
       group('when field is focused', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -3877,7 +4494,9 @@ void main() {
           expect(getHintOpacity(tester), 1.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -3922,7 +4541,9 @@ void main() {
       });
 
       group('when field is in error', () {
-        testWidgets('hint and input align vertically when decorator is empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isEmpty: true,
@@ -3944,7 +4565,9 @@ void main() {
           expect(getHintOpacity(tester), 0.0);
         });
 
-        testWidgets('hint and input align vertically when decorator is not empty', (WidgetTester tester) async {
+        testWidgets('hint and input align vertically when decorator is not empty', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -3968,7 +4591,9 @@ void main() {
     });
 
     group('InputDecoration.alignLabelWithHint', () {
-      testWidgets('positions InputDecoration.labelText vertically aligned with the hint', (WidgetTester tester) async {
+      testWidgets('positions InputDecoration.labelText vertically aligned with the hint', (
+        WidgetTester tester,
+      ) async {
         await tester.pumpWidget(
           buildInputDecorator(
             isEmpty: true,
@@ -3984,7 +4609,9 @@ void main() {
         expect(getLabelCenter(tester).dy, getHintCenter(tester).dy);
       });
 
-      testWidgets('positions InputDecoration.label vertically aligned with the hint', (WidgetTester tester) async {
+      testWidgets('positions InputDecoration.label vertically aligned with the hint', (
+        WidgetTester tester,
+      ) async {
         await tester.pumpWidget(
           buildInputDecorator(
             isEmpty: true,
@@ -4001,10 +4628,15 @@ void main() {
       });
 
       group('in non-expanded multiline TextField', () {
-        testWidgets('positions the label correctly when strut is disabled', (WidgetTester tester) async {
+        testWidgets('positions the label correctly when strut is disabled', (
+          WidgetTester tester,
+        ) async {
           final FocusNode focusNode = FocusNode();
           final TextEditingController controller = TextEditingController();
-          addTearDown(() { focusNode.dispose(); controller.dispose();});
+          addTearDown(() {
+            focusNode.dispose();
+            controller.dispose();
+          });
 
           Widget buildFrame(bool alignLabelWithHint) {
             return MaterialApp(
@@ -4053,10 +4685,15 @@ void main() {
           focusNode.unfocus();
         });
 
-        testWidgets('positions the label correctly when strut style is set to default', (WidgetTester tester) async {
+        testWidgets('positions the label correctly when strut style is set to default', (
+          WidgetTester tester,
+        ) async {
           final FocusNode focusNode = FocusNode();
           final TextEditingController controller = TextEditingController();
-          addTearDown(() { focusNode.dispose(); controller.dispose();});
+          addTearDown(() {
+            focusNode.dispose();
+            controller.dispose();
+          });
 
           Widget buildFrame(bool alignLabelWithHint) {
             return MaterialApp(
@@ -4109,7 +4746,10 @@ void main() {
         testWidgets('positions the label correctly', (WidgetTester tester) async {
           final FocusNode focusNode = FocusNode();
           final TextEditingController controller = TextEditingController();
-          addTearDown(() { focusNode.dispose(); controller.dispose();});
+          addTearDown(() {
+            focusNode.dispose();
+            controller.dispose();
+          });
 
           Widget buildFrame(bool alignLabelWithHint) {
             return MaterialApp(
@@ -4158,10 +4798,15 @@ void main() {
           focusNode.unfocus();
         });
 
-        testWidgets('positions the label correctly when border is outlined', (WidgetTester tester) async {
+        testWidgets('positions the label correctly when border is outlined', (
+          WidgetTester tester,
+        ) async {
           final FocusNode focusNode = FocusNode();
           final TextEditingController controller = TextEditingController();
-          addTearDown(() { focusNode.dispose(); controller.dispose();});
+          addTearDown(() {
+            focusNode.dispose();
+            controller.dispose();
+          });
 
           Widget buildFrame(bool alignLabelWithHint) {
             return MaterialApp(
@@ -4179,9 +4824,7 @@ void main() {
                         labelText: labelText,
                         alignLabelWithHint: alignLabelWithHint,
                         hintText: hintText,
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
+                        border: const OutlineInputBorder(borderRadius: BorderRadius.zero),
                       ),
                     ),
                   ),
@@ -4220,7 +4863,9 @@ void main() {
       });
 
       group('Horizontal alignment', () {
-        testWidgets('Label for outlined decoration aligns horizontally with prefixIcon by default', (WidgetTester tester) async {
+        testWidgets('Label for outlined decoration aligns horizontally with prefixIcon by default', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/113537.
           await tester.pumpWidget(
             buildInputDecorator(
@@ -4233,36 +4878,38 @@ void main() {
             ),
           );
 
-          // 12 is the left padding.
-          // TODO(bleroux): consider changing this padding because from M3 soec this should be 16.
-          expect(getLabelRect(tester).left, 12.0);
-          // TODO(bleroux): consider changing the input text position because, based on M3 spec,
-          // the expected horizontal position is 52 (12 padding, 24 icon, 16 gap between icon and input).
+          // Label left padding is 16.0 (12.0 right padding for a decoration with icons + 4.0 extra padding for the floating label)
+          expect(getLabelRect(tester).left, 16.0);
+          // Based on M3 spec, the expected horizontal position is 52 (12 padding, 24 icon, 16 gap between icon and input).
           // See https://m3.material.io/components/text-fields/specs#1ad2798c-ab41-4f0c-9a97-295ab9b37f33
           // (Note that the diagrams on the spec for outlined text field are wrong but the table for
           // outlined text fields and the diagrams for filled text field point to these values).
-          // The 48.0 value come from icon min interactive width and height.
-          expect(getInputRect(tester).left, 48.0);
+          expect(getInputRect(tester).left, 52.0);
         });
 
-        testWidgets('Label for outlined decoration aligns horizontally with input when alignLabelWithHint is true', (WidgetTester tester) async {
-          // Regression test for https://github.com/flutter/flutter/issues/113537.
-          await tester.pumpWidget(
-            buildInputDecorator(
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.ac_unit),
-                labelText: labelText,
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
+        testWidgets(
+          'Label for outlined decoration aligns horizontally with input when alignLabelWithHint is true',
+          (WidgetTester tester) async {
+            // Regression test for https://github.com/flutter/flutter/issues/113537.
+            await tester.pumpWidget(
+              buildInputDecorator(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.ac_unit),
+                  labelText: labelText,
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
+                isFocused: true,
               ),
-              isFocused: true,
-            ),
-          );
+            );
 
-          expect(getLabelRect(tester).left, getInputRect(tester).left);
-        });
+            expect(getLabelRect(tester).left, getInputRect(tester).left);
+          },
+        );
 
-        testWidgets('Label for filled decoration is horizontally aligned with text by default', (WidgetTester tester) async {
+        testWidgets('Label for filled decoration is horizontally aligned with text by default', (
+          WidgetTester tester,
+        ) async {
           // Regression test for https://github.com/flutter/flutter/issues/113537.
           // See https://github.com/flutter/flutter/pull/115540.
           await tester.pumpWidget(
@@ -4292,10 +4939,7 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             isEmpty: true,
-            decoration: const InputDecoration(
-              labelText: labelText,
-              hintText: hintText,
-            ),
+            decoration: const InputDecoration(labelText: labelText, hintText: hintText),
           ),
         );
 
@@ -4307,10 +4951,7 @@ void main() {
           buildInputDecorator(
             isEmpty: true,
             isFocused: true,
-            decoration: const InputDecoration(
-              labelText: labelText,
-              hintText: hintText,
-            ),
+            decoration: const InputDecoration(labelText: labelText, hintText: hintText),
           ),
         );
 
@@ -4331,10 +4972,7 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             isEmpty: true,
-            decoration: const InputDecoration(
-              labelText: labelText,
-              hintText: hintText,
-            ),
+            decoration: const InputDecoration(labelText: labelText, hintText: hintText),
           ),
         );
 
@@ -4417,10 +5055,7 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             isEmpty: true,
-            decoration: const InputDecoration(
-              labelText: labelText,
-              hintText: hintText,
-            ),
+            decoration: const InputDecoration(labelText: labelText, hintText: hintText),
             inputDecorationTheme: const InputDecorationTheme(
               hintFadeDuration: Duration(milliseconds: 120),
             ),
@@ -4435,10 +5070,7 @@ void main() {
           buildInputDecorator(
             isEmpty: true,
             isFocused: true,
-            decoration: const InputDecoration(
-              labelText: labelText,
-              hintText: hintText,
-            ),
+            decoration: const InputDecoration(labelText: labelText, hintText: hintText),
             inputDecorationTheme: const InputDecorationTheme(
               hintFadeDuration: Duration(milliseconds: 120),
             ),
@@ -4460,10 +5092,7 @@ void main() {
         await tester.pumpWidget(
           buildInputDecorator(
             isEmpty: true,
-            decoration: const InputDecoration(
-              labelText: labelText,
-              hintText: hintText,
-            ),
+            decoration: const InputDecoration(labelText: labelText, hintText: hintText),
             inputDecorationTheme: const InputDecorationTheme(
               hintFadeDuration: Duration(milliseconds: 120),
             ),
@@ -4483,22 +5112,32 @@ void main() {
       });
     });
 
+    testWidgets('InputDecorator throws Assertion Error when hint and hintText are provided', (
+      WidgetTester tester,
+    ) async {
+      expect(() {
+        buildInputDecorator(
+          decoration: InputDecoration(
+            hintText: 'Enter text here',
+            hint: const Text('Enter text here', style: TextStyle(fontSize: 20.0)),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('InputDecorator shows hint widget', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(decoration: const InputDecoration(hint: Text('hint'))),
+      );
+      expect(find.text('hint'), findsOneWidget);
+    });
+
     testWidgets('hint style overflow works', (WidgetTester tester) async {
       final String hintText = 'hint text' * 20;
-      const TextStyle hintStyle = TextStyle(
-        fontSize: 14.0,
-        overflow: TextOverflow.fade,
-      );
-      final InputDecoration decoration = InputDecoration(
-        hintText: hintText,
-        hintStyle: hintStyle,
-      );
+      const TextStyle hintStyle = TextStyle(fontSize: 14.0, overflow: TextOverflow.fade);
+      final InputDecoration decoration = InputDecoration(hintText: hintText, hintStyle: hintStyle);
 
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: decoration,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecorator(decoration: decoration));
       await tester.pump(kTransitionDuration);
 
       final Finder hintTextFinder = find.text(hintText);
@@ -4506,64 +5145,48 @@ void main() {
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
     });
 
-    testWidgets('Widget height collapses from hint height when maintainHintHeight is false', (WidgetTester tester) async {
+    testWidgets('Widget height collapses from hint height when maintainHintSize is false', (
+      WidgetTester tester,
+    ) async {
       final String hintText = 'hint' * 20;
       final InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: decoration,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecorator(decoration: decoration));
       expect(tester.getSize(find.byType(InputDecorator)).height, 48.0);
     });
 
     testWidgets('Widget height stays at hint height by default', (WidgetTester tester) async {
       final String hintText = 'hint' * 20;
-      final InputDecoration decoration = InputDecoration(
-        hintMaxLines: 3,
-        hintText: hintText,
-      );
+      final InputDecoration decoration = InputDecoration(hintMaxLines: 3, hintText: hintText);
 
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: decoration,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecorator(decoration: decoration));
       final double hintHeight = tester.getSize(find.text(hintText)).height;
       final double inputHeight = tester.getSize(find.byType(InputDecorator)).height;
       expect(inputHeight, hintHeight + 16.0);
     });
 
-    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintHeight is false', (WidgetTester tester) async {
+    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintSize is false', (
+      WidgetTester tester,
+    ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
         hintFadeDuration: Duration(milliseconds: 120),
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       // Build once with empty content.
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: decoration,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecorator(decoration: decoration));
 
       // Hint is not exist.
       expect(find.text(hintText), findsNothing);
 
       // Rebuild with empty content.
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isEmpty: true,
-          decoration: decoration,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecorator(isEmpty: true, decoration: decoration));
 
       // The hint's opacity animates from 0.0 to 1.0.
       // The animation's default duration is 20ms.
@@ -4578,31 +5201,24 @@ void main() {
       expect(hintOpacity120ms, 1.0);
     });
 
-    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintHeight is false', (WidgetTester tester) async {
+    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintSize is false', (
+      WidgetTester tester,
+    ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
         hintFadeDuration: Duration(milliseconds: 120),
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       // Build once with empty content.
-      await tester.pumpWidget(
-        buildInputDecorator(
-          isEmpty: true,
-          decoration: decoration,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecorator(isEmpty: true, decoration: decoration));
 
       // Hint is visible (opacity 1.0).
       expect(getHintOpacity(tester), 1.0);
 
       // Rebuild with non-empty content.
-      await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: decoration,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecorator(decoration: decoration));
 
       // The hint's opacity animates from 1.0 to 0.0.
       // The animation's default duration is 20ms.
@@ -4637,18 +5253,13 @@ void main() {
     const double bottomPadding = 8.0;
     const double helperGap = 4.0;
     const double helperHeight = 16.0;
-    const double containerHeight = topPadding + floatingLabelHeight + labelInputGap + inputHeight + bottomPadding; // 56.0
+    const double containerHeight =
+        topPadding + floatingLabelHeight + labelInputGap + inputHeight + bottomPadding; // 56.0
     const double fullHeight = containerHeight + helperGap + helperHeight; // 76.0
     const double errorHeight = helperHeight;
-    // TODO(bleroux): consider changing this padding because, from the M3 specification, it should be 16.
-    const double helperStartPadding = 12.0;
-    const double counterEndPadding = 12.0;
-
-    // Actual size varies a little on web platforms with HTML renderer.
-    // TODO(bleroux): remove closeTo usage when https://github.com/flutter/flutter/issues/99933 is fixed.
-    final Matcher closeToFullHeight = closeTo(fullHeight, 0.1);
-    final Matcher closeToHelperHeight = closeTo(helperHeight, 0.1);
-    final Matcher closeToErrorHeight = closeTo(errorHeight, 0.1);
+    const double hintHeight = inputHeight;
+    const double helperStartPadding = 16.0;
+    const double counterEndPadding = 16.0;
 
     group('for filled text field', () {
       group('when field is enabled', () {
@@ -4664,13 +5275,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4708,13 +5319,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4753,13 +5364,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4798,13 +5409,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4830,7 +5441,9 @@ void main() {
       });
 
       group('when field is in error', () {
-        testWidgets('Error and counter are visible, helper is not visible', (WidgetTester tester) async {
+        testWidgets('Error and counter are visible, helper is not visible', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -4863,13 +5476,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getErrorRect(tester).top, containerHeight + helperGap);
-          expect(getErrorRect(tester).height, closeToErrorHeight);
+          expect(getErrorRect(tester).height, errorHeight);
           expect(getErrorRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToErrorHeight);
+          expect(getCounterRect(tester).height, errorHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4892,7 +5505,9 @@ void main() {
           final TextStyle expectedStyle = theme.textTheme.bodySmall!.copyWith(color: expectedColor);
           expect(getErrorStyle(tester), expectedStyle);
           final Color expectedCounterColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedCounterStyle = theme.textTheme.bodySmall!.copyWith(color: expectedCounterColor);
+          final TextStyle expectedCounterStyle = theme.textTheme.bodySmall!.copyWith(
+            color: expectedCounterColor,
+          );
           expect(getCounterStyle(tester), expectedCounterStyle);
         });
       });
@@ -4912,13 +5527,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4956,13 +5571,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5001,13 +5616,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5046,13 +5661,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5078,7 +5693,9 @@ void main() {
       });
 
       group('when field is in error', () {
-        testWidgets('Error and counter are visible, helper is not visible', (WidgetTester tester) async {
+        testWidgets('Error and counter are visible, helper is not visible', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecorator(
               isFocused: true,
@@ -5111,13 +5728,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getErrorRect(tester).top, containerHeight + helperGap);
-          expect(getErrorRect(tester).height, closeToErrorHeight);
+          expect(getErrorRect(tester).height, errorHeight);
           expect(getErrorRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToErrorHeight);
+          expect(getCounterRect(tester).height, errorHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5140,7 +5757,9 @@ void main() {
           final TextStyle expectedStyle = theme.textTheme.bodySmall!.copyWith(color: expectedColor);
           expect(getErrorStyle(tester), expectedStyle);
           final Color expectedCounterColor = theme.colorScheme.onSurfaceVariant;
-          final TextStyle expectedCounterStyle = theme.textTheme.bodySmall!.copyWith(color: expectedCounterColor);
+          final TextStyle expectedCounterStyle = theme.textTheme.bodySmall!.copyWith(
+            color: expectedCounterColor,
+          );
           expect(getCounterStyle(tester), expectedCounterStyle);
         });
       });
@@ -5162,10 +5781,15 @@ void main() {
 
         final Rect errorRect = tester.getRect(find.text(threeLines));
         expect(errorRect.height, closeTo(errorHeight * maxLines, 0.25));
-        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * maxLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(containerHeight + helperGap + errorHeight * maxLines, 0.25),
+        );
       });
 
-      testWidgets('Error height is correct when errorMaxLines is restricted', (WidgetTester tester) async {
+      testWidgets('Error height is correct when errorMaxLines is restricted', (
+        WidgetTester tester,
+      ) async {
         const int maxLines = 2;
         await tester.pumpWidget(
           buildInputDecorator(
@@ -5180,27 +5804,36 @@ void main() {
 
         final Rect errorRect = tester.getRect(find.text(threeLines));
         expect(errorRect.height, closeTo(errorHeight * maxLines, 0.25));
-        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * maxLines, 0.25));
-      });
-
-      testWidgets('Error height is correct when errorMaxLines is bigger than the number of lines in errorText', (WidgetTester tester) async {
-        const int numberOfLines = 2;
-        const int maxLines = 3;
-        await tester.pumpWidget(
-          buildInputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'label',
-              errorText: twoLines,
-              errorMaxLines: maxLines,
-              filled: true,
-            ),
-          ),
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(containerHeight + helperGap + errorHeight * maxLines, 0.25),
         );
-
-        final Rect errorRect = tester.getRect(find.text(twoLines));
-        expect(errorRect.height, closeTo(errorHeight * numberOfLines, 0.25));
-        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
       });
+
+      testWidgets(
+        'Error height is correct when errorMaxLines is bigger than the number of lines in errorText',
+        (WidgetTester tester) async {
+          const int numberOfLines = 2;
+          const int maxLines = 3;
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'label',
+                errorText: twoLines,
+                errorMaxLines: maxLines,
+                filled: true,
+              ),
+            ),
+          );
+
+          final Rect errorRect = tester.getRect(find.text(twoLines));
+          expect(errorRect.height, closeTo(errorHeight * numberOfLines, 0.25));
+          expect(
+            getDecoratorRect(tester).height,
+            closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25),
+          );
+        },
+      );
 
       testWidgets('Error height is not limited by default', (WidgetTester tester) async {
         const int numberOfLines = 3;
@@ -5216,7 +5849,44 @@ void main() {
 
         final Rect errorRect = tester.getRect(find.text(threeLines));
         expect(errorRect.height, closeTo(errorHeight * numberOfLines, 0.25));
-        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25),
+        );
+      });
+
+      testWidgets('InputDecorationTheme hintMaxLines behaves as default value', (
+        WidgetTester tester,
+      ) async {
+        const int numberOfLines = 2;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationTheme(hintMaxLines: numberOfLines),
+            decoration: const InputDecoration(hintText: threeLines),
+          ),
+        );
+
+        final Rect hintRect = tester.getRect(find.text(threeLines));
+        expect(hintRect.height, closeTo(hintHeight * numberOfLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(topPadding + hintHeight * numberOfLines + bottomPadding, 0.25),
+        );
+      });
+
+      testWidgets('InputDecoration hintMaxLines default expands with hintText', (
+        WidgetTester tester,
+      ) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationTheme(),
+            decoration: const InputDecoration(hintText: threeLines),
+          ),
+        );
+
+        final Size hintSize = tester.getSize(find.byType(InputDecorator));
+        expect(hintSize.height, topPadding + hintHeight * numberOfLines + bottomPadding);
       });
 
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
@@ -5234,10 +5904,15 @@ void main() {
 
         final Rect helperRect = tester.getRect(find.text(threeLines));
         expect(helperRect.height, closeTo(helperHeight * maxLines, 0.25));
-        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * maxLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(containerHeight + helperGap + helperHeight * maxLines, 0.25),
+        );
       });
 
-      testWidgets('Helper height is correct when maxLines is restricted', (WidgetTester tester) async {
+      testWidgets('Helper height is correct when maxLines is restricted', (
+        WidgetTester tester,
+      ) async {
         const int maxLines = 2;
         await tester.pumpWidget(
           buildInputDecorator(
@@ -5252,27 +5927,36 @@ void main() {
 
         final Rect helperRect = tester.getRect(find.text(threeLines));
         expect(helperRect.height, closeTo(helperHeight * maxLines, 0.25));
-        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * maxLines, 0.25));
-      });
-
-      testWidgets('Helper height is correct when helperMaxLines is bigger than the number of lines in helperText', (WidgetTester tester) async {
-        const int numberOfLines = 2;
-        const int maxLines = 3;
-        await tester.pumpWidget(
-          buildInputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'label',
-              helperText: twoLines,
-              helperMaxLines: maxLines,
-              filled: true,
-            ),
-          ),
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(containerHeight + helperGap + helperHeight * maxLines, 0.25),
         );
-
-        final Rect helperRect = tester.getRect(find.text(twoLines));
-        expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
-        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
       });
+
+      testWidgets(
+        'Helper height is correct when helperMaxLines is bigger than the number of lines in helperText',
+        (WidgetTester tester) async {
+          const int numberOfLines = 2;
+          const int maxLines = 3;
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'label',
+                helperText: twoLines,
+                helperMaxLines: maxLines,
+                filled: true,
+              ),
+            ),
+          );
+
+          final Rect helperRect = tester.getRect(find.text(twoLines));
+          expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
+          expect(
+            getDecoratorRect(tester).height,
+            closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25),
+          );
+        },
+      );
 
       testWidgets('Helper height is not limited by default', (WidgetTester tester) async {
         const int numberOfLines = 3;
@@ -5288,7 +5972,10 @@ void main() {
 
         final Rect helperRect = tester.getRect(find.text(threeLines));
         expect(helperRect.height, closeTo(helperHeight * numberOfLines, 0.25));
-        expect(getDecoratorRect(tester).height, closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(containerHeight + helperGap + helperHeight * numberOfLines, 0.25),
+        );
       });
     });
 
@@ -5305,18 +5992,17 @@ void main() {
         expect(find.text('helper'), findsOneWidget);
       });
 
-      testWidgets('InputDecorator throws when helper text and helper widget are provided', (WidgetTester tester) async {
-        expect(
-          () {
-            buildInputDecorator(
-              decoration: InputDecoration(
-                helperText: 'helperText',
-                helper: const Text('helper', style: TextStyle(fontSize: 20.0)),
-              ),
-            );
-          },
-          throwsAssertionError,
-        );
+      testWidgets('InputDecorator throws when helper text and helper widget are provided', (
+        WidgetTester tester,
+      ) async {
+        expect(() {
+          buildInputDecorator(
+            decoration: InputDecoration(
+              helperText: 'helperText',
+              helper: const Text('helper', style: TextStyle(fontSize: 20.0)),
+            ),
+          );
+        }, throwsAssertionError);
       });
     });
 
@@ -5333,22 +6019,23 @@ void main() {
         expect(find.text('error'), findsOneWidget);
       });
 
-      testWidgets('InputDecorator throws when error text and error widget are provided', (WidgetTester tester) async {
-        expect(
-          () {
-            buildInputDecorator(
-              decoration: InputDecoration(
-                errorText: 'errorText',
-                error: const Text('error', style: TextStyle(fontSize: 20.0)),
-              ),
-            );
-          },
-          throwsAssertionError,
-        );
+      testWidgets('InputDecorator throws when error text and error widget are provided', (
+        WidgetTester tester,
+      ) async {
+        expect(() {
+          buildInputDecorator(
+            decoration: InputDecoration(
+              errorText: 'errorText',
+              error: const Text('error', style: TextStyle(fontSize: 20.0)),
+            ),
+          );
+        }, throwsAssertionError);
       });
     });
 
-    testWidgets('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {
+    testWidgets('InputDecorator with counter does not crash when given a 0 size', (
+      WidgetTester tester,
+    ) async {
       // Regression test for https://github.com/flutter/flutter/issues/129611
       await tester.pumpWidget(
         Center(
@@ -5452,7 +6139,7 @@ void main() {
 
     group('for filled text field', () {
       group('when field is enabled', () {
-        testWidgets('prefixIcon is correctly positioned', (WidgetTester tester) async {
+        testWidgets('prefixIcon is correctly positioned - LTR', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -5472,9 +6159,42 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
+        });
+
+        testWidgets('prefixIcon is correctly positioned - RTL', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              textDirection: TextDirection.rtl,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                prefixIcon: Icon(prefixIcon),
+              ),
+            ),
+          );
+
+          // By default, the prefix icon is rendered inside a 48x48 constrained box.
+          expect(getPrefixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getPrefixIconStyle(tester).fontSize, 24.0);
+          // Prefix icon is vertically centered inside the container.
+          expect(getPrefixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Right padding is 12 per Material 3 spec.
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findPrefixIconInnerRichText()).right,
+            12.0,
+          );
+          // Check the padding between the prefix icon and the input.
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findPrefixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5493,7 +6213,7 @@ void main() {
           expect(getPrefixIconStyle(tester).color, expectedColor);
         });
 
-        testWidgets('suffixIcon is correctly positioned', (WidgetTester tester) async {
+        testWidgets('suffixIcon is correctly positioned - LTR', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecorator(
               decoration: const InputDecoration(
@@ -5511,11 +6231,44 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
+        });
+
+        testWidgets('suffixIcon is correctly positioned - RTL', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildInputDecorator(
+              textDirection: TextDirection.rtl,
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                suffixIcon: Icon(suffixIcon),
+              ),
+            ),
+          );
+
+          // By default, the suffix icon is rendered inside a 48x48 constrained box.
+          expect(getSuffixIconRect(tester).size, const Size(48.0, 48.0));
+          // The icon size is 24 per Material 3 spec.
+          expect(getSuffixIconStyle(tester).fontSize, 24.0);
+          // Suffix icon is vertically centered inside the container.
+          expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
+          // Left padding is 12 per Material 3 spec.
+          expect(tester.getRect(findSuffixIconInnerRichText()).left, 12.0);
+          // Check the padding between the suffix icon and the input.
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findSuffixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5557,9 +6310,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5598,11 +6353,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5645,9 +6405,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5686,11 +6448,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5733,9 +6500,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5774,11 +6543,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5821,9 +6595,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5880,11 +6656,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -5946,9 +6727,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -5985,11 +6768,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6031,9 +6819,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -6072,11 +6862,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6119,9 +6914,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -6160,11 +6957,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6207,9 +7009,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -6248,11 +7052,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6295,9 +7104,11 @@ void main() {
           // Left padding is 12 per Material 3 spec.
           expect(tester.getRect(findPrefixIconInnerRichText()).left, 12.0);
           // Check the padding between the prefix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149408.
-          expect(getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            getInputRect(tester).left - tester.getRect(findPrefixIconInnerRichText()).right,
+            16.0,
+          );
         });
 
         testWidgets('prefixIcon has correct color', (WidgetTester tester) async {
@@ -6354,11 +7165,16 @@ void main() {
           // Suffix icon is vertically centered inside the container.
           expect(getSuffixIconRect(tester).center.dy, getContainerRect(tester).center.dy);
           // Right padding is 12 per Material 3 spec.
-          expect(getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right, 12.0);
+          expect(
+            getDecoratorRect(tester).right - tester.getRect(findSuffixIconInnerRichText()).right,
+            12.0,
+          );
           // Check the padding between the suffix icon and the input.
-          // TODO(bleroux): the gap between the icon and the input should be 16 based on M3 specification.
-          // See https://github.com/flutter/flutter/issues/149409.
-          expect(tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right, 12.0);
+          // The gap between the icon and the input should be 16 based on M3 specification.
+          expect(
+            tester.getRect(findSuffixIconInnerRichText()).left - getInputRect(tester).right,
+            16.0,
+          );
         });
 
         testWidgets('suffixIcon has correct color', (WidgetTester tester) async {
@@ -6398,7 +7214,9 @@ void main() {
       });
     });
 
-    testWidgets('InputDecorator iconColor/prefixIconColor/suffixIconColor', (WidgetTester tester) async {
+    testWidgets('InputDecorator iconColor/prefixIconColor/suffixIconColor', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -6417,9 +7235,18 @@ void main() {
         ),
       );
 
-      expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.cabin).first).data.color, Colors.amber);
-      expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.sailing).first).data.color, Colors.green);
-      expect(tester.widget<IconTheme>(find.widgetWithIcon(IconTheme,Icons.close).first).data.color, Colors.red);
+      expect(
+        tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.cabin).first).data.color,
+        Colors.amber,
+      );
+      expect(
+        tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.sailing).first).data.color,
+        Colors.green,
+      );
+      expect(
+        tester.widget<IconTheme>(find.widgetWithIcon(IconTheme, Icons.close).first).data.color,
+        Colors.red,
+      );
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/139916.
@@ -6444,7 +7271,7 @@ void main() {
                     ),
                   ),
                 );
-              }
+              },
             ),
           ),
         ),
@@ -6452,10 +7279,12 @@ void main() {
 
       expect(tapped, isFalse);
 
-      double prefixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
-        of: find.byType(Icon),
-        matching: find.byType(AnimatedOpacity),
-      )).opacity;
+      double prefixOpacity =
+          tester
+              .widget<AnimatedOpacity>(
+                find.ancestor(of: find.byType(Icon), matching: find.byType(AnimatedOpacity)),
+              )
+              .opacity;
 
       // Initially the prefix icon should be hidden.
       expect(prefixOpacity, 0.0);
@@ -6470,10 +7299,12 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pump();
 
-      prefixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
-        of: find.byType(Icon),
-        matching: find.byType(AnimatedOpacity),
-      )).opacity;
+      prefixOpacity =
+          tester
+              .widget<AnimatedOpacity>(
+                find.ancestor(of: find.byType(Icon), matching: find.byType(AnimatedOpacity)),
+              )
+              .opacity;
 
       // The prefix icon should be visible.
       expect(prefixOpacity, 1.0);
@@ -6508,7 +7339,7 @@ void main() {
                     ),
                   ),
                 );
-              }
+              },
             ),
           ),
         ),
@@ -6516,10 +7347,12 @@ void main() {
 
       expect(tapped, isFalse);
 
-      double suffixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
-        of: find.byType(Icon),
-        matching: find.byType(AnimatedOpacity),
-      )).opacity;
+      double suffixOpacity =
+          tester
+              .widget<AnimatedOpacity>(
+                find.ancestor(of: find.byType(Icon), matching: find.byType(AnimatedOpacity)),
+              )
+              .opacity;
 
       // Initially the suffix icon should be hidden.
       expect(suffixOpacity, 0.0);
@@ -6534,10 +7367,12 @@ void main() {
       await tester.tap(find.byType(TextField));
       await tester.pump();
 
-      suffixOpacity = tester.widget<AnimatedOpacity>(find.ancestor(
-        of: find.byType(Icon),
-        matching: find.byType(AnimatedOpacity),
-      )).opacity;
+      suffixOpacity =
+          tester
+              .widget<AnimatedOpacity>(
+                find.ancestor(of: find.byType(Icon), matching: find.byType(AnimatedOpacity)),
+              )
+              .opacity;
 
       // The suffix icon should be visible.
       expect(suffixOpacity, 1.0);
@@ -6558,11 +7393,7 @@ void main() {
 
     testWidgets('Decoration height is set to input height on mobile', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration.collapsed(
-            hintText: hintText,
-          ),
-        ),
+        buildInputDecorator(decoration: const InputDecoration.collapsed(hintText: hintText)),
       );
 
       expect(getDecoratorRect(tester).size, const Size(800.0, inputHeight));
@@ -6575,9 +7406,7 @@ void main() {
         buildInputDecorator(
           isEmpty: true,
           isFocused: true,
-          decoration: const InputDecoration.collapsed(
-            hintText: hintText,
-          ),
+          decoration: const InputDecoration.collapsed(hintText: hintText),
         ),
       );
       await tester.pumpAndSettle();
@@ -6593,11 +7422,7 @@ void main() {
     testWidgets('Decoration height is set to input height on desktop', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/150763.
       await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration.collapsed(
-            hintText: hintText,
-          ),
-        ),
+        buildInputDecorator(decoration: const InputDecoration.collapsed(hintText: hintText)),
       );
 
       expect(getDecoratorRect(tester).size, const Size(800.0, inputHeight));
@@ -6610,9 +7435,7 @@ void main() {
         buildInputDecorator(
           isEmpty: true,
           isFocused: true,
-          decoration: const InputDecoration.collapsed(
-            hintText: hintText,
-          ),
+          decoration: const InputDecoration.collapsed(hintText: hintText),
         ),
       );
       await tester.pumpAndSettle();
@@ -6627,11 +7450,7 @@ void main() {
 
     testWidgets('InputDecoration.collapsed defaults to no border', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecorator(
-          decoration: const InputDecoration.collapsed(
-            hintText: hintText,
-          ),
-        ),
+        buildInputDecorator(decoration: const InputDecoration.collapsed(hintText: hintText)),
       );
 
       expect(getBorderWeight(tester), 0.0);
@@ -6653,10 +7472,7 @@ void main() {
     testWidgets('InputDecoration.collapsed accepts hintMaxLines', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildInputDecorator(
-          decoration: const InputDecoration.collapsed(
-            hintText: threeLines,
-            hintMaxLines: 2,
-          ),
+          decoration: const InputDecoration.collapsed(hintText: threeLines, hintMaxLines: 2),
         ),
       );
 
@@ -6704,9 +7520,7 @@ void main() {
     test('InputDecorationTheme.isCollapsed is applied', () {
       final InputDecoration decoration = const InputDecoration(
         hintText: 'Hello, Flutter!',
-      ).applyDefaults(const InputDecorationTheme(
-        isCollapsed: true,
-      ));
+      ).applyDefaults(const InputDecorationTheme(isCollapsed: true));
 
       expect(decoration.isCollapsed, true);
     });
@@ -6745,10 +7559,7 @@ void main() {
                 TextFormField(
                   buildCounter: buildCounter,
                   maxLength: maxLength,
-                  decoration: InputDecoration(
-                    counterText: counterText,
-                    counter: counter,
-                  ),
+                  decoration: InputDecoration(counterText: counterText, counter: counter),
                 ),
               ],
             ),
@@ -6778,18 +7589,17 @@ void main() {
       required int? maxLength,
       required bool isFocused,
     }) {
-      return Text(
-        '$currentLength of $maxLength',
-        key: buildCounterKey,
-      );
+      return Text('$currentLength of $maxLength', key: buildCounterKey);
     }
 
-    await tester.pumpWidget(buildFrame(
-      counterText: counterText,
-      counter: counter,
-      buildCounter: buildCounter,
-      maxLength: maxLength,
-    ));
+    await tester.pumpWidget(
+      buildFrame(
+        counterText: counterText,
+        counter: counter,
+        buildCounter: buildCounter,
+        maxLength: maxLength,
+      ),
+    );
     counterFinder = find.byKey(counterKey);
     expect(counterFinder, findsOneWidget);
     expect(find.text(counterText), findsNothing);
@@ -6797,11 +7607,9 @@ void main() {
 
     // When counter is null but counterText and buildCounter are set, shows the
     // counterText.
-    await tester.pumpWidget(buildFrame(
-      counterText: counterText,
-      buildCounter: buildCounter,
-      maxLength: maxLength,
-    ));
+    await tester.pumpWidget(
+      buildFrame(counterText: counterText, buildCounter: buildCounter, maxLength: maxLength),
+    );
     expect(find.text(counterText), findsOneWidget);
     counterFinder = find.byKey(counterKey);
     expect(counterFinder, findsNothing);
@@ -6809,10 +7617,7 @@ void main() {
 
     // When counter and counterText are null but buildCounter is set, shows the
     // generated widget.
-    await tester.pumpWidget(buildFrame(
-      buildCounter: buildCounter,
-      maxLength: maxLength,
-    ));
+    await tester.pumpWidget(buildFrame(buildCounter: buildCounter, maxLength: maxLength));
     expect(find.byKey(buildCounterKey), findsOneWidget);
     expect(counterFinder, findsNothing);
     expect(find.text(counterText), findsNothing);
@@ -6824,10 +7629,7 @@ void main() {
 
     // When no maxLength, can still show a counter
     maxLength = null;
-    await tester.pumpWidget(buildFrame(
-      buildCounter: buildCounter,
-      maxLength: maxLength,
-    ));
+    await tester.pumpWidget(buildFrame(buildCounter: buildCounter, maxLength: maxLength));
     expect(find.byKey(buildCounterKey), findsOneWidget);
   });
 
@@ -6869,21 +7671,25 @@ void main() {
     );
 
     final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
-    final Iterable<String> nodeNames = renderer.debugDescribeChildren()
-      .map((DiagnosticsNode node) => node.name!);
-    expect(nodeNames, unorderedEquals(<String>[
-      'container',
-      'counter',
-      'helperError',
-      'hint',
-      'icon',
-      'input',
-      'label',
-      'prefix',
-      'prefixIcon',
-      'suffix',
-      'suffixIcon',
-    ]));
+    final Iterable<String> nodeNames = renderer.debugDescribeChildren().map(
+      (DiagnosticsNode node) => node.name!,
+    );
+    expect(
+      nodeNames,
+      unorderedEquals(<String>[
+        'container',
+        'counter',
+        'helperError',
+        'hint',
+        'icon',
+        'input',
+        'label',
+        'prefix',
+        'prefixIcon',
+        'suffix',
+        'suffixIcon',
+      ]),
+    );
 
     final Set<Object> nodeValues = Set<Object>.from(
       renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
@@ -6891,13 +7697,13 @@ void main() {
     expect(nodeValues.length, 11);
   });
 
-  testWidgets('InputDecorationTheme.applyDefaults initializes empty field', (WidgetTester tester) async {
+  testWidgets('InputDecorationTheme.applyDefaults initializes empty field', (
+    WidgetTester tester,
+  ) async {
     const TextStyle themeStyle = TextStyle(color: Color(0xFF00FFFF));
     const Color themeColor = Color(0xFF00FF00);
     const InputBorder themeInputBorder = OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Color(0xFF0000FF),
-      ),
+      borderSide: BorderSide(color: Color(0xFF0000FF)),
     );
 
     final InputDecoration decoration = const InputDecoration().applyDefaults(
@@ -6916,10 +7722,20 @@ void main() {
         iconColor: themeColor,
         prefixStyle: themeStyle,
         prefixIconColor: themeColor,
-        prefixIconConstraints: BoxConstraints(minWidth: 10, maxWidth: 10, minHeight: 30, maxHeight: 30),
+        prefixIconConstraints: BoxConstraints(
+          minWidth: 10,
+          maxWidth: 10,
+          minHeight: 30,
+          maxHeight: 30,
+        ),
         suffixStyle: themeStyle,
         suffixIconColor: themeColor,
-        suffixIconConstraints: BoxConstraints(minWidth: 20, maxWidth: 20, minHeight: 40, maxHeight: 40),
+        suffixIconConstraints: BoxConstraints(
+          minWidth: 20,
+          maxWidth: 20,
+          minHeight: 40,
+          maxHeight: 40,
+        ),
         counterStyle: themeStyle,
         filled: true,
         fillColor: themeColor,
@@ -6950,10 +7766,16 @@ void main() {
     expect(decoration.iconColor, themeColor);
     expect(decoration.prefixStyle, themeStyle);
     expect(decoration.prefixIconColor, themeColor);
-    expect(decoration.prefixIconConstraints, const BoxConstraints(minWidth: 10, maxWidth: 10, minHeight: 30, maxHeight: 30));
+    expect(
+      decoration.prefixIconConstraints,
+      const BoxConstraints(minWidth: 10, maxWidth: 10, minHeight: 30, maxHeight: 30),
+    );
     expect(decoration.suffixStyle, themeStyle);
     expect(decoration.suffixIconColor, themeColor);
-    expect(decoration.suffixIconConstraints, const BoxConstraints(minWidth: 20, maxWidth: 20, minHeight: 40, maxHeight: 40));
+    expect(
+      decoration.suffixIconConstraints,
+      const BoxConstraints(minWidth: 20, maxWidth: 20, minHeight: 40, maxHeight: 40),
+    );
     expect(decoration.counterStyle, themeStyle);
     expect(decoration.filled, true);
     expect(decoration.fillColor, themeColor);
@@ -6966,25 +7788,31 @@ void main() {
     expect(decoration.enabledBorder, themeInputBorder);
     expect(decoration.border, InputBorder.none);
     expect(decoration.alignLabelWithHint, true);
-    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+    expect(
+      decoration.constraints,
+      const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+    );
   });
 
-  testWidgets('InputDecorationTheme.applyDefaults does not override non-null fields', (WidgetTester tester) async {
+  testWidgets('InputDecorationTheme.applyDefaults does not override non-null fields', (
+    WidgetTester tester,
+  ) async {
     const TextStyle themeStyle = TextStyle(color: Color(0xFF00FFFF));
     const Color themeColor = Color(0xFF00FF00);
     const InputBorder themeInputBorder = OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Color(0xFF0000FF),
-      ),
+      borderSide: BorderSide(color: Color(0xFF0000FF)),
     );
     const TextStyle decorationStyle = TextStyle(color: Color(0xFFFFFF00));
     const Color decorationColor = Color(0xFF0000FF);
     const InputBorder decorationInputBorder = OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Color(0xFFFF00FF),
-      ),
+      borderSide: BorderSide(color: Color(0xFFFF00FF)),
     );
-    const BoxConstraints decorationConstraints = BoxConstraints(minWidth: 40, maxWidth: 50, minHeight: 60, maxHeight: 70);
+    const BoxConstraints decorationConstraints = BoxConstraints(
+      minWidth: 40,
+      maxWidth: 50,
+      minHeight: 60,
+      maxHeight: 70,
+    );
 
     final InputDecoration decoration = const InputDecoration(
       labelStyle: decorationStyle,
@@ -7085,12 +7913,18 @@ void main() {
     expect(decoration.constraints, decorationConstraints);
   });
 
-  testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (WidgetTester tester) async {
-    final MaterialStateTextStyle themeStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+  testWidgets('InputDecorationTheme.inputDecoration with MaterialState', (
+    WidgetTester tester,
+  ) async {
+    final MaterialStateTextStyle themeStyle = MaterialStateTextStyle.resolveWith((
+      Set<MaterialState> states,
+    ) {
       return const TextStyle(color: Colors.green);
     });
 
-    final MaterialStateTextStyle decorationStyle =  MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+    final MaterialStateTextStyle decorationStyle = MaterialStateTextStyle.resolveWith((
+      Set<MaterialState> states,
+    ) {
       return const TextStyle(color: Colors.blue);
     });
 
@@ -7128,10 +7962,15 @@ void main() {
     expect(decoration.fillColor, Colors.red);
     expect(decoration.border, InputBorder.none);
     expect(decoration.alignLabelWithHint, true);
-    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+    expect(
+      decoration.constraints,
+      const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+    );
 
     // InputDecoration (baseDecoration) defines InputDecoration properties
-    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((Set<MaterialState> states) {
+    final MaterialStateOutlineInputBorder border = MaterialStateOutlineInputBorder.resolveWith((
+      Set<MaterialState> states,
+    ) {
       return const OutlineInputBorder();
     });
     decoration = InputDecoration(
@@ -7186,7 +8025,55 @@ void main() {
     expect(decoration.fillColor, Colors.blue);
     expect(decoration.border, isA<MaterialStateOutlineInputBorder>());
     expect(decoration.alignLabelWithHint, false);
-    expect(decoration.constraints, const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40));
+    expect(
+      decoration.constraints,
+      const BoxConstraints(minWidth: 10, maxWidth: 20, minHeight: 30, maxHeight: 40),
+    );
+  });
+
+  testWidgets('InputDecoration with WidgetStateInputBorder', (WidgetTester tester) async {
+    const WidgetStateInputBorder outlineInputBorder =
+        WidgetStateInputBorder.fromMap(<WidgetStatesConstraint, InputBorder>{
+          WidgetState.focused: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.blue, width: 4.0),
+          ),
+          WidgetState.hovered: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.cyan, width: 8.0),
+          ),
+          WidgetState.any: OutlineInputBorder(),
+        });
+
+    RenderObject getBorder() {
+      return tester.renderObject(
+        find.descendant(of: find.byType(TextField), matching: find.byType(CustomPaint)),
+      );
+    }
+
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            focusNode: focusNode,
+            decoration: const InputDecoration(border: outlineInputBorder),
+          ),
+        ),
+      ),
+    );
+    expect(getBorder(), paints..rrect(strokeWidth: 1.0));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(getBorder(), paints..rrect(color: Colors.blue, strokeWidth: 4.0));
+
+    focusNode.unfocus();
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: tester.getCenter(find.byType(TextField)));
+    await tester.pumpAndSettle();
+    expect(getBorder(), paints..rrect(color: Colors.cyan, strokeWidth: 8.0));
+
+    focusNode.dispose();
   });
 
   testWidgets('InputDecorator constrained to 0x0', (WidgetTester tester) async {
@@ -7195,15 +8082,14 @@ void main() {
       Material(
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: UnconstrainedBox(child: ConstrainedBox(
-            constraints: BoxConstraints.tight(Size.zero),
-            child: const InputDecorator(
-              decoration: InputDecoration(
-                labelText: 'XP',
-                border: OutlineInputBorder(),
+          child: UnconstrainedBox(
+            child: ConstrainedBox(
+              constraints: BoxConstraints.tight(Size.zero),
+              child: const InputDecorator(
+                decoration: InputDecoration(labelText: 'XP', border: OutlineInputBorder()),
               ),
             ),
-          )),
+          ),
         ),
       ),
     );
@@ -7212,44 +8098,41 @@ void main() {
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305
     expect(
-      const InputDecorationTheme(
-        contentPadding: EdgeInsetsDirectional.only(start: 5.0),
-      ).toString(),
+      const InputDecorationTheme(contentPadding: EdgeInsetsDirectional.only(start: 5.0)).toString(),
       contains('contentPadding: EdgeInsetsDirectional(5.0, 0.0, 0.0, 0.0)'),
     );
 
     // Regression test for https://github.com/flutter/flutter/issues/20374
     expect(
-      const InputDecorationTheme(
-        contentPadding: EdgeInsets.only(left: 5.0),
-      ).toString(),
+      const InputDecorationTheme(contentPadding: EdgeInsets.only(left: 5.0)).toString(),
       contains('contentPadding: EdgeInsets(5.0, 0.0, 0.0, 0.0)'),
     );
 
     // Verify that the toString() method succeeds.
-    final String debugString = const InputDecorationTheme(
-      labelStyle: TextStyle(height: 1.0),
-      helperStyle: TextStyle(height: 2.0),
-      helperMaxLines: 5,
-      hintStyle: TextStyle(height: 3.0),
-      errorStyle: TextStyle(height: 4.0),
-      errorMaxLines: 5,
-      isDense: true,
-      contentPadding: EdgeInsets.only(right: 6.0),
-      isCollapsed: true,
-      prefixStyle: TextStyle(height: 7.0),
-      suffixStyle: TextStyle(height: 8.0),
-      counterStyle: TextStyle(height: 9.0),
-      filled: true,
-      fillColor: Color(0x00000010),
-      focusColor: Color(0x00000020),
-      errorBorder: UnderlineInputBorder(),
-      focusedBorder: OutlineInputBorder(),
-      focusedErrorBorder: UnderlineInputBorder(),
-      disabledBorder: OutlineInputBorder(),
-      enabledBorder: UnderlineInputBorder(),
-      border: OutlineInputBorder(),
-    ).toString();
+    final String debugString =
+        const InputDecorationTheme(
+          labelStyle: TextStyle(height: 1.0),
+          helperStyle: TextStyle(height: 2.0),
+          helperMaxLines: 5,
+          hintStyle: TextStyle(height: 3.0),
+          errorStyle: TextStyle(height: 4.0),
+          errorMaxLines: 5,
+          isDense: true,
+          contentPadding: EdgeInsets.only(right: 6.0),
+          isCollapsed: true,
+          prefixStyle: TextStyle(height: 7.0),
+          suffixStyle: TextStyle(height: 8.0),
+          counterStyle: TextStyle(height: 9.0),
+          filled: true,
+          fillColor: Color(0x00000010),
+          focusColor: Color(0x00000020),
+          errorBorder: UnderlineInputBorder(),
+          focusedBorder: OutlineInputBorder(),
+          focusedErrorBorder: UnderlineInputBorder(),
+          disabledBorder: OutlineInputBorder(),
+          enabledBorder: UnderlineInputBorder(),
+          border: OutlineInputBorder(),
+        ).toString();
 
     // Spot check
     expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
@@ -7262,7 +8145,12 @@ void main() {
 
   testWidgets('InputDecorationTheme implements debugFillDescription', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const BoxConstraints constraints = BoxConstraints(minWidth: 10, maxWidth: 10, minHeight: 30, maxHeight: 30);
+    const BoxConstraints constraints = BoxConstraints(
+      minWidth: 10,
+      maxWidth: 10,
+      minHeight: 30,
+      maxHeight: 30,
+    );
     const InputDecorationTheme(
       labelStyle: TextStyle(),
       floatingLabelStyle: TextStyle(),
@@ -7299,9 +8187,11 @@ void main() {
       alignLabelWithHint: true,
       constraints: constraints,
     ).debugFillProperties(builder);
-    final List<String> description = builder.properties
-        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString()).toList();
+    final List<String> description =
+        builder.properties
+            .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+            .map((DiagnosticsNode n) => n.toString())
+            .toList();
     expect(description, <String>[
       'labelStyle: TextStyle(<all styles inherited>)',
       'floatingLabelStyle: TextStyle(<all styles inherited>)',
@@ -7340,7 +8230,9 @@ void main() {
     ]);
   });
 
-  testWidgets("InputDecorator label width isn't affected by prefix or suffix", (WidgetTester tester) async {
+  testWidgets("InputDecorator label width isn't affected by prefix or suffix", (
+    WidgetTester tester,
+  ) async {
     const String labelText = 'My Label';
     const String prefixText = 'The five boxing wizards jump quickly.';
     const String suffixText = 'Suffix';
@@ -7401,7 +8293,9 @@ void main() {
     expect(getOpacity(tester, prefixText), 1.0);
   });
 
-  testWidgets('Prefix and suffix are not visible when decorator is empty', (WidgetTester tester) async {
+  testWidgets('Prefix and suffix are not visible when decorator is empty', (
+    WidgetTester tester,
+  ) async {
     const String prefixText = 'Prefix';
     const String suffixText = 'Suffix';
 
@@ -7422,41 +8316,45 @@ void main() {
     expect(getOpacity(tester, suffixText), 0.0);
   });
 
-  testWidgets('Prefix and suffix are visible when decorator is empty and floating behavior is FloatingBehavior.always', (WidgetTester tester) async {
-    const String prefixText = 'Prefix';
-    const String suffixText = 'Suffix';
+  testWidgets(
+    'Prefix and suffix are visible when decorator is empty and floating behavior is FloatingBehavior.always',
+    (WidgetTester tester) async {
+      const String prefixText = 'Prefix';
+      const String suffixText = 'Suffix';
 
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isEmpty: true,
-        decoration: const InputDecoration(
-          filled: true,
-          labelText: labelText,
-          prefixText: prefixText,
-          suffixText: suffixText,
-          floatingLabelBehavior: FloatingLabelBehavior.always,
+      await tester.pumpWidget(
+        buildInputDecorator(
+          isEmpty: true,
+          decoration: const InputDecoration(
+            filled: true,
+            labelText: labelText,
+            prefixText: prefixText,
+            suffixText: suffixText,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+          ),
         ),
-      ),
-    );
+      );
 
-    // Prefix and suffix are visible.
-    expect(getOpacity(tester, prefixText), 1.0);
-    expect(getOpacity(tester, suffixText), 1.0);
-  });
+      // Prefix and suffix are visible.
+      expect(getOpacity(tester, prefixText), 1.0);
+      expect(getOpacity(tester, suffixText), 1.0);
+    },
+  );
 
-  testWidgets('OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/64427.
-    const String labelText = 'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
+  testWidgets(
+    'OutlineInputBorder and InputDecorator long labels and in Floating, the width should ignore the icon width',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/64427.
+      const String labelText =
+          'Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.';
 
-    Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
+      Widget getLabeledInputDecorator(FloatingLabelBehavior floatingLabelBehavior) => MaterialApp(
         home: Material(
           child: SizedBox(
             width: 300,
             child: TextField(
               decoration: InputDecoration(
-                border: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.greenAccent),
-                ),
+                border: const OutlineInputBorder(borderSide: BorderSide(color: Colors.greenAccent)),
                 suffixIcon: const Icon(Icons.arrow_drop_down),
                 floatingLabelBehavior: floatingLabelBehavior,
                 labelText: labelText,
@@ -7466,103 +8364,98 @@ void main() {
         ),
       );
 
-    await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.never));
+      await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.never));
 
-    final double labelWidth = getLabelRect(tester).width;
+      final double labelWidth = getLabelRect(tester).width;
 
-    await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.always));
-    await tester.pump(kTransitionDuration);
+      await tester.pumpWidget(getLabeledInputDecorator(FloatingLabelBehavior.always));
+      await tester.pump(kTransitionDuration);
 
-    final double floatedLabelWidth = getLabelRect(tester).width;
+      final double floatedLabelWidth = getLabelRect(tester).width;
 
-    expect(floatedLabelWidth, greaterThan(labelWidth));
+      expect(floatedLabelWidth, greaterThan(labelWidth));
 
-    final Widget target = getLabeledInputDecorator(FloatingLabelBehavior.auto);
-    await tester.pumpWidget(target);
-    await tester.pump(kTransitionDuration);
+      final Widget target = getLabeledInputDecorator(FloatingLabelBehavior.auto);
+      await tester.pumpWidget(target);
+      await tester.pump(kTransitionDuration);
 
-    expect(getLabelRect(tester).width, labelWidth);
+      expect(getLabelRect(tester).width, labelWidth);
 
-    // Click for Focus.
-    await tester.tap(find.byType(TextField));
-    // Default animation duration is 167ms.
-    await tester.pumpFrames(target, const Duration(milliseconds: 80));
+      // Click for Focus.
+      await tester.tap(find.byType(TextField));
+      // Default animation duration is 167ms.
+      await tester.pumpFrames(target, const Duration(milliseconds: 80));
 
-    expect(getLabelRect(tester).width, greaterThan(labelWidth));
-    expect(getLabelRect(tester).width, lessThanOrEqualTo(floatedLabelWidth));
+      expect(getLabelRect(tester).width, greaterThan(labelWidth));
+      expect(getLabelRect(tester).width, lessThanOrEqualTo(floatedLabelWidth));
 
-    await tester.pump(kTransitionDuration);
+      await tester.pump(kTransitionDuration);
 
-    expect(getLabelRect(tester).width, floatedLabelWidth);
-  });
+      expect(getLabelRect(tester).width, floatedLabelWidth);
+    },
+  );
 
-  testWidgets('given enough space, constrained and unconstrained heights result in the same size widget', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/65572.
-    final UniqueKey keyUnconstrained = UniqueKey();
-    final UniqueKey keyConstrained = UniqueKey();
+  testWidgets(
+    'given enough space, constrained and unconstrained heights result in the same size widget',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/65572.
+      final UniqueKey keyUnconstrained = UniqueKey();
+      final UniqueKey keyConstrained = UniqueKey();
 
-    Widget getInputDecorator(VisualDensity visualDensity) {
-      return MaterialApp(
-        home: Material(
-          child: Builder(
-            builder: (BuildContext context) {
-              return Theme(
-                data: Theme.of(context).copyWith(visualDensity: visualDensity),
-                child: Center(
-                  child: Row(
-                    children: <Widget>[
-                      SizedBox(
-                        width: 35.0,
-                        child: TextField(
-                          key: keyUnconstrained,
+      Widget getInputDecorator(VisualDensity visualDensity) {
+        return MaterialApp(
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Theme(
+                  data: Theme.of(context).copyWith(visualDensity: visualDensity),
+                  child: Center(
+                    child: Row(
+                      children: <Widget>[
+                        SizedBox(width: 35.0, child: TextField(key: keyUnconstrained)),
+                        SizedBox(
+                          width: 35.0,
+                          // 48 is the height that this TextField would take when
+                          // laid out with no constraints.
+                          height: 48.0,
+                          child: TextField(key: keyConstrained),
                         ),
-                      ),
-                      SizedBox(
-                        width: 35.0,
-                        // 48 is the height that this TextField would take when
-                        // laid out with no constraints.
-                        height: 48.0,
-                        child: TextField(
-                          key: keyConstrained,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    await tester.pumpWidget(getInputDecorator(VisualDensity.standard));
-    final double constrainedHeight = tester.getSize(find.byKey(keyConstrained)).height;
-    final double unConstrainedHeight = tester.getSize(find.byKey(keyUnconstrained)).height;
-    expect(constrainedHeight, equals(unConstrainedHeight));
+      await tester.pumpWidget(getInputDecorator(VisualDensity.standard));
+      final double constrainedHeight = tester.getSize(find.byKey(keyConstrained)).height;
+      final double unConstrainedHeight = tester.getSize(find.byKey(keyUnconstrained)).height;
+      expect(constrainedHeight, equals(unConstrainedHeight));
 
-    await tester.pumpWidget(getInputDecorator(VisualDensity.compact));
-    final double constrainedHeightCompact = tester.getSize(find.byKey(keyConstrained)).height;
-    final double unConstrainedHeightCompact = tester.getSize(find.byKey(keyUnconstrained)).height;
-    expect(constrainedHeightCompact, equals(unConstrainedHeightCompact));
-  });
+      await tester.pumpWidget(getInputDecorator(VisualDensity.compact));
+      final double constrainedHeightCompact = tester.getSize(find.byKey(keyConstrained)).height;
+      final double unConstrainedHeightCompact = tester.getSize(find.byKey(keyUnconstrained)).height;
+      expect(constrainedHeightCompact, equals(unConstrainedHeightCompact));
+    },
+  );
 
-  testWidgets('A vertically constrained TextField still positions its text inside of itself', (WidgetTester tester) async {
+  testWidgets('A vertically constrained TextField still positions its text inside of itself', (
+    WidgetTester tester,
+  ) async {
     final TextEditingController controller = TextEditingController(text: 'A');
     addTearDown(controller.dispose);
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: SizedBox(
-            width: 200,
-            height: 28,
-            child: TextField(
-              controller: controller,
-            ),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(width: 200, height: 28, child: TextField(controller: controller)),
           ),
         ),
       ),
-    ));
+    );
 
     final double textFieldTop = tester.getTopLeft(find.byType(TextField)).dy;
     final double textFieldBottom = tester.getBottomLeft(find.byType(TextField)).dy;
@@ -7574,67 +8467,66 @@ void main() {
     expect(textTop, lessThan(textFieldBottom));
   });
 
-  testWidgets('Visual density is included in the intrinsic height calculation', (WidgetTester tester) async {
+  testWidgets('Visual density is included in the intrinsic height calculation', (
+    WidgetTester tester,
+  ) async {
     final UniqueKey key = UniqueKey();
     final UniqueKey intrinsicHeightKey = UniqueKey();
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return Theme(
-              data: Theme.of(context).copyWith(visualDensity: VisualDensity.compact),
-              child: Center(
-                child: Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: 35.0,
-                      child: TextField(
-                        key: key,
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Theme(
+                data: Theme.of(context).copyWith(visualDensity: VisualDensity.compact),
+                child: Center(
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(width: 35.0, child: TextField(key: key)),
+                      SizedBox(
+                        width: 35.0,
+                        child: IntrinsicHeight(child: TextField(key: intrinsicHeightKey)),
                       ),
-                    ),
-                    SizedBox(
-                      width: 35.0,
-                      child: IntrinsicHeight(
-                        child: TextField(
-                          key: intrinsicHeightKey,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
-    ));
+    );
 
     final double height = tester.getSize(find.byKey(key)).height;
     final double intrinsicHeight = tester.getSize(find.byKey(intrinsicHeightKey)).height;
     expect(intrinsicHeight, equals(height));
   });
 
-  testWidgets('Min intrinsic height for TextField with no content padding', (WidgetTester tester) async {
+  testWidgets('Min intrinsic height for TextField with no content padding', (
+    WidgetTester tester,
+  ) async {
     // Regression test for: https://github.com/flutter/flutter/issues/75509
-    await tester.pumpWidget(const MaterialApp(
-      home: Material(
-        child: Center(
-          child: IntrinsicHeight(
-            child: Column(
-              children: <Widget>[
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Label Text',
-                    helperText: 'Helper Text',
-                    contentPadding: EdgeInsets.zero,
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: IntrinsicHeight(
+              child: Column(
+                children: <Widget>[
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Label Text',
+                      helperText: 'Helper Text',
+                      contentPadding: EdgeInsets.zero,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(tester.takeException(), isNull);
   });
@@ -7644,28 +8536,28 @@ void main() {
     addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: SizedBox(
-            width: 100.0,
-            child: IntrinsicHeight(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: controller,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      prefixIcon: Icon(Icons.search),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              child: IntrinsicHeight(
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      controller: controller,
+                      maxLines: null,
+                      decoration: const InputDecoration(prefixIcon: Icon(Icons.search)),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(tester.takeException(), isNull);
   });
@@ -7675,28 +8567,28 @@ void main() {
     addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: SizedBox(
-            width: 100.0,
-            child: IntrinsicHeight(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: controller,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      suffixIcon: Icon(Icons.search),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              child: IntrinsicHeight(
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      controller: controller,
+                      maxLines: null,
+                      decoration: const InputDecoration(suffixIcon: Icon(Icons.search)),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(tester.takeException(), isNull);
   });
@@ -7706,28 +8598,28 @@ void main() {
     addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: SizedBox(
-            width: 100.0,
-            child: IntrinsicHeight(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: controller,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      prefix: Text('prefix'),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              child: IntrinsicHeight(
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      controller: controller,
+                      maxLines: null,
+                      decoration: const InputDecoration(prefix: Text('prefix')),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(tester.takeException(), isNull);
   });
@@ -7737,28 +8629,28 @@ void main() {
     addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: SizedBox(
-            width: 100.0,
-            child: IntrinsicHeight(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: controller,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      suffix: Text('suffix'),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              child: IntrinsicHeight(
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      controller: controller,
+                      maxLines: null,
+                      decoration: const InputDecoration(suffix: Text('suffix')),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(tester.takeException(), isNull);
   });
@@ -7768,28 +8660,28 @@ void main() {
     addTearDown(controller.dispose);
 
     // Regression test for: https://github.com/flutter/flutter/issues/87403
-    await tester.pumpWidget(MaterialApp(
-      home: Material(
-        child: Center(
-          child: SizedBox(
-            width: 100.0,
-            child: IntrinsicHeight(
-              child: Column(
-                children: <Widget>[
-                  TextField(
-                    controller: controller,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.search),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: SizedBox(
+              width: 100.0,
+              child: IntrinsicHeight(
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      controller: controller,
+                      maxLines: null,
+                      decoration: const InputDecoration(icon: Icon(Icons.search)),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    ));
+    );
 
     expect(tester.takeException(), isNull);
   });
@@ -7798,15 +8690,25 @@ void main() {
     const EdgeInsetsGeometry padding = EdgeInsetsDirectional.only(end: 24, start: 12);
 
     const InputDecoration decorationWithoutIcons = InputDecoration(contentPadding: padding);
-    const InputDecoration decorationWithPrefix = InputDecoration(contentPadding: padding, prefixIcon: Icon(Icons.search));
-    const InputDecoration decorationWithSuffix = InputDecoration(contentPadding: padding, suffixIcon: Icon(Icons.search));
+    const InputDecoration decorationWithPrefix = InputDecoration(
+      contentPadding: padding,
+      prefixIcon: Icon(Icons.search),
+    );
+    const InputDecoration decorationWithSuffix = InputDecoration(
+      contentPadding: padding,
+      suffixIcon: Icon(Icons.search),
+    );
     const InputDecoration decorationWithAffixes = InputDecoration(
       contentPadding: padding,
       prefixIcon: Icon(Icons.search),
       suffixIcon: Icon(Icons.search),
     );
 
-    Future<Size> measureText(WidgetTester tester, InputDecoration decoration, TextDirection direction) async {
+    Future<Size> measureText(
+      WidgetTester tester,
+      InputDecoration decoration,
+      TextDirection direction,
+    ) async {
       await tester.pumpWidget(
         buildInputDecorator(
           decoration: decoration,
@@ -7818,49 +8720,183 @@ void main() {
     }
 
     testWidgets('with prefixIcon in LTR', (WidgetTester tester) async {
-      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
-      final Size textSizeWithPrefixIcon = await measureText(tester, decorationWithPrefix, TextDirection.ltr);
+      final Size textSizeWithoutIcon = await measureText(
+        tester,
+        decorationWithoutIcons,
+        TextDirection.ltr,
+      );
+      final Size textSizeWithPrefixIcon = await measureText(
+        tester,
+        decorationWithPrefix,
+        TextDirection.ltr,
+      );
 
       expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcon.width));
     });
 
     testWidgets('with suffixIcon in LTR', (WidgetTester tester) async {
-      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
-      final Size textSizeWithSuffixIcon = await measureText(tester, decorationWithSuffix, TextDirection.ltr);
+      final Size textSizeWithoutIcon = await measureText(
+        tester,
+        decorationWithoutIcons,
+        TextDirection.ltr,
+      );
+      final Size textSizeWithSuffixIcon = await measureText(
+        tester,
+        decorationWithSuffix,
+        TextDirection.ltr,
+      );
 
       expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcon.width));
     });
 
     testWidgets('with prefixIcon and suffixIcon in LTR', (WidgetTester tester) async {
-      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.ltr);
-      final Size textSizeWithIcons = await measureText(tester, decorationWithAffixes, TextDirection.ltr);
+      final Size textSizeWithoutIcon = await measureText(
+        tester,
+        decorationWithoutIcons,
+        TextDirection.ltr,
+      );
+      final Size textSizeWithIcons = await measureText(
+        tester,
+        decorationWithAffixes,
+        TextDirection.ltr,
+      );
 
       expect(textSizeWithIcons.width, equals(textSizeWithoutIcon.width));
     });
 
     testWidgets('with prefixIcon in RTL', (WidgetTester tester) async {
-      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
-      final Size textSizeWithPrefixIcon = await measureText(tester, decorationWithPrefix, TextDirection.rtl);
+      final Size textSizeWithoutIcon = await measureText(
+        tester,
+        decorationWithoutIcons,
+        TextDirection.rtl,
+      );
+      final Size textSizeWithPrefixIcon = await measureText(
+        tester,
+        decorationWithPrefix,
+        TextDirection.rtl,
+      );
 
       expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcon.width));
     });
 
     testWidgets('with suffixIcon in RTL', (WidgetTester tester) async {
-      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
-      final Size textSizeWithSuffixIcon = await measureText(tester, decorationWithSuffix, TextDirection.rtl);
+      final Size textSizeWithoutIcon = await measureText(
+        tester,
+        decorationWithoutIcons,
+        TextDirection.rtl,
+      );
+      final Size textSizeWithSuffixIcon = await measureText(
+        tester,
+        decorationWithSuffix,
+        TextDirection.rtl,
+      );
 
       expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcon.width));
     });
 
     testWidgets('with prefixIcon and suffixIcon in RTL', (WidgetTester tester) async {
-      final Size textSizeWithoutIcon = await measureText(tester, decorationWithoutIcons, TextDirection.rtl);
-      final Size textSizeWithIcons = await measureText(tester, decorationWithAffixes, TextDirection.rtl);
+      final Size textSizeWithoutIcon = await measureText(
+        tester,
+        decorationWithoutIcons,
+        TextDirection.rtl,
+      );
+      final Size textSizeWithIcons = await measureText(
+        tester,
+        decorationWithAffixes,
+        TextDirection.rtl,
+      );
 
       expect(textSizeWithIcons.width, equals(textSizeWithoutIcon.width));
     });
+
+    testWidgets('depends on hint width and content width when decorator is empty', (
+      WidgetTester tester,
+    ) async {
+      const InputDecoration decorationWithHint = InputDecoration(
+        contentPadding: EdgeInsets.zero,
+        hintText: 'Hint',
+      );
+      const double hintTextWidth = 66.0;
+      const double smallContentWidth = 20.0;
+      const double largeContentWidth = 80.0;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decorationWithHint,
+          useIntrinsicWidth: true,
+          isEmpty: true,
+          child: const SizedBox(width: smallContentWidth),
+        ),
+      );
+
+      // Decorator width depends on the hint because the hint is larger than the content.
+      expect(getDecoratorRect(tester).width, hintTextWidth);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decorationWithHint,
+          useIntrinsicWidth: true,
+          isEmpty: true,
+          child: const SizedBox(width: largeContentWidth),
+        ),
+      );
+
+      // Decorator width depends on the content because the content is larger than the hint.
+      expect(getDecoratorRect(tester).width, largeContentWidth);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/93337.
+    testWidgets(
+      'depends on content width when decorator is not empty and maintainHintSize is false',
+      (WidgetTester tester) async {
+        const InputDecoration decorationWithHint = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          hintText: 'Hint',
+          maintainHintSize: false,
+        );
+        const double contentWidth = 20.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithHint,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
+
+        // The hint width is ignored even if larger than the content width.
+        expect(getDecoratorRect(tester).width, contentWidth);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/93337.
+    testWidgets(
+      'depends on content width when decorator is not empty and maintainHintSize is true',
+      (WidgetTester tester) async {
+        const InputDecoration decorationWithHint = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          hintText: 'Hint',
+        );
+        const double contentWidth = 20.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithHint,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
+
+        // The hint width is ignored even if larger than the content width.
+        const double hintTextWidth = 66.0;
+        expect(getDecoratorRect(tester).width, hintTextWidth);
+      },
+    );
   });
 
-  testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (WidgetTester tester) async {
+  testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/141448.
     final FocusNode focusNode = FocusNode();
     addTearDown(focusNode.dispose);
@@ -7870,9 +8906,7 @@ void main() {
         home: Material(
           child: TextField(
             focusNode: focusNode,
-            decoration: const InputDecoration(
-              labelText: 'label',
-            ),
+            decoration: const InputDecoration(labelText: 'label'),
           ),
         ),
       ),
@@ -7898,9 +8932,9 @@ void main() {
   });
 
   test('InputDecorationTheme copyWith, ==, hashCode basics', () {
-      expect(const InputDecorationTheme(), const InputDecorationTheme().copyWith());
-      expect(const InputDecorationTheme().hashCode, const InputDecorationTheme().copyWith().hashCode);
-    });
+    expect(const InputDecorationTheme(), const InputDecorationTheme().copyWith());
+    expect(const InputDecorationTheme().hashCode, const InputDecorationTheme().copyWith().hashCode);
+  });
 
   test('InputDecorationTheme copyWith correctly copies and replaces values', () {
     const InputDecorationTheme original = InputDecorationTheme(
@@ -7940,47 +8974,18 @@ void main() {
       counterStyle: TextStyle(color: Color(0x00000f10)),
       filled: true,
       fillColor: Color(0x00000f11),
-      activeIndicatorBorder: BorderSide(
-        color: Color(0x00000f12),
-      ),
-      outlineBorder: BorderSide(
-        color: Color(0x00000f13),
-      ),
+      activeIndicatorBorder: BorderSide(color: Color(0x00000f12)),
+      outlineBorder: BorderSide(color: Color(0x00000f13)),
       focusColor: Color(0x00000f14),
       hoverColor: Color(0x00000f15),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(2.0)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Color(0x00000f16),
-        ),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Color(0x00000f17),
-        ),
-      ),
-      disabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Color(0x00000f18),
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Color(0x00000f19),
-        ),
-      ),
-      border: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: Color(0x00000f20),
-        ),
-      ),
+      errorBorder: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(2.0))),
+      focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0x00000f16))),
+      focusedErrorBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0x00000f17))),
+      disabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0x00000f18))),
+      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0x00000f19))),
+      border: OutlineInputBorder(borderSide: BorderSide(color: Color(0x00000f20))),
       alignLabelWithHint: true,
-      constraints: BoxConstraints(
-        minHeight: 1.0,
-        minWidth: 1.0,
-      ),
+      constraints: BoxConstraints(minHeight: 1.0, minWidth: 1.0),
     );
 
     final InputDecorationTheme inputDecorationTheme = ThemeData().inputDecorationTheme;
@@ -8044,10 +9049,7 @@ void main() {
         data: IconButtonThemeData(style: iconButtonStyle),
         child: buildInputDecorator(
           decoration: InputDecoration(
-            prefixIcon: IconButton(
-              onPressed: () {},
-              icon: const Icon(prefixIcon),
-            ),
+            prefixIcon: IconButton(onPressed: () {}, icon: const Icon(prefixIcon)),
           ),
         ),
       ),
@@ -8066,9 +9068,7 @@ void main() {
     expect(getIconStyle(tester, prefixIcon)?.color, foregroundColor);
 
     final Offset center = tester.getCenter(find.byIcon(prefixIcon));
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
@@ -8099,10 +9099,7 @@ void main() {
         data: IconButtonThemeData(style: iconButtonStyle),
         child: buildInputDecorator(
           decoration: InputDecoration(
-            suffixIcon: IconButton(
-              onPressed: () {},
-              icon: const Icon(suffixIcon),
-            ),
+            suffixIcon: IconButton(onPressed: () {}, icon: const Icon(suffixIcon)),
           ),
         ),
       ),
@@ -8121,16 +9118,16 @@ void main() {
     expect(getIconStyle(tester, suffixIcon)?.color, foregroundColor);
 
     final Offset center = tester.getCenter(find.byIcon(suffixIcon));
-    final TestGesture gesture = await tester.createGesture(
-      kind: PointerDeviceKind.mouse,
-    );
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(getOverlayColor(tester), paints..rect(color: overlayColor));
   });
 
-  testWidgets('Prefix IconButton color respects IconButtonTheme foreground color states', (WidgetTester tester) async {
+  testWidgets('Prefix IconButton color respects IconButtonTheme foreground color states', (
+    WidgetTester tester,
+  ) async {
     const IconData prefixIcon = Icons.person;
     const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
@@ -8149,10 +9146,7 @@ void main() {
         iconButtonTheme: IconButtonThemeData(style: iconButtonStyle),
         decoration: InputDecoration(
           errorText: 'error',
-          prefixIcon: IconButton(
-            onPressed: () {},
-            icon: const Icon(prefixIcon),
-          ),
+          prefixIcon: IconButton(onPressed: () {}, icon: const Icon(prefixIcon)),
         ),
       ),
     );
@@ -8164,19 +9158,18 @@ void main() {
       buildInputDecorator(
         iconButtonTheme: IconButtonThemeData(style: iconButtonStyle),
         decoration: InputDecoration(
-          prefixIcon: IconButton(
-            onPressed: () {},
-            icon: const Icon(prefixIcon),
-          ),
+          prefixIcon: IconButton(onPressed: () {}, icon: const Icon(prefixIcon)),
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(getIconStyle(tester, prefixIcon)?.color, iconColor);
   });
 
-  testWidgets('Suffix IconButton color respects IconButtonTheme foreground color states', (WidgetTester tester) async {
+  testWidgets('Suffix IconButton color respects IconButtonTheme foreground color states', (
+    WidgetTester tester,
+  ) async {
     const IconData suffixIcon = Icons.search;
     const Color iconErrorColor = Color(0xffff0000);
     const Color iconColor = Color(0xff00ff00);
@@ -8195,10 +9188,7 @@ void main() {
         iconButtonTheme: IconButtonThemeData(style: iconButtonStyle),
         decoration: InputDecoration(
           errorText: 'error',
-          suffixIcon: IconButton(
-            onPressed: () {},
-            icon: const Icon(suffixIcon),
-          ),
+          suffixIcon: IconButton(onPressed: () {}, icon: const Icon(suffixIcon)),
         ),
       ),
     );
@@ -8210,14 +9200,11 @@ void main() {
       buildInputDecorator(
         iconButtonTheme: IconButtonThemeData(style: iconButtonStyle),
         decoration: InputDecoration(
-          suffixIcon: IconButton(
-            onPressed: () {},
-            icon: const Icon(suffixIcon),
-          ),
+          suffixIcon: IconButton(onPressed: () {}, icon: const Icon(suffixIcon)),
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(getIconStyle(tester, suffixIcon)?.color, iconColor);
   });
@@ -8240,10 +9227,7 @@ void main() {
       TextStyle? baseStyle,
       TextAlignVertical? textAlignVertical,
       VisualDensity? visualDensity,
-      Widget child = const Text(
-        'text',
-        style: TextStyle(fontSize: 16.0),
-      ),
+      Widget child = const Text('text', style: TextStyle(fontSize: 16.0)),
     }) {
       Widget widget = InputDecorator(
         expands: expands,
@@ -8273,10 +9257,7 @@ void main() {
                 ),
                 child: Align(
                   alignment: Alignment.topLeft,
-                  child: Directionality(
-                    textDirection: textDirection,
-                    child: widget,
-                  ),
+                  child: Directionality(textDirection: textDirection, child: widget),
                 ),
               );
             },
@@ -8291,9 +9272,7 @@ void main() {
         buildInputDecoratorM2(
           // isEmpty: false (default)
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            labelText: 'label',
-          ),
+          decoration: const InputDecoration(labelText: 'label'),
         ),
       );
       await tester.pumpAndSettle();
@@ -8318,9 +9297,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            labelText: 'label',
-          ),
+          decoration: const InputDecoration(labelText: 'label'),
         ),
       );
       await tester.pumpAndSettle();
@@ -8362,9 +9339,7 @@ void main() {
         buildInputDecoratorM2(
           // isEmpty: false (default)
           isFocused: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-          ),
+          decoration: const InputDecoration(labelText: 'label'),
         ),
       );
       await tester.pumpAndSettle();
@@ -8378,12 +9353,7 @@ void main() {
 
       // isEmpty: true causes the label to be aligned with the input text
       await tester.pumpWidget(
-        buildInputDecoratorM2(
-          isEmpty: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-          ),
-        ),
+        buildInputDecoratorM2(isEmpty: true, decoration: const InputDecoration(labelText: 'label')),
       );
 
       // The label animates downwards from it's initial position
@@ -8410,9 +9380,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           isFocused: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-          ),
+          decoration: const InputDecoration(labelText: 'label'),
         ),
       );
 
@@ -8439,10 +9407,7 @@ void main() {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           isEmpty: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            enabled: false,
-          ),
+          decoration: const InputDecoration(labelText: 'label', enabled: false),
         ),
       );
       await tester.pumpAndSettle();
@@ -8458,11 +9423,7 @@ void main() {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           isEmpty: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            enabled: false,
-            filled: true,
-          ),
+          decoration: const InputDecoration(labelText: 'label', enabled: false, filled: true),
         ),
       );
       await tester.pumpAndSettle();
@@ -8488,7 +9449,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
       expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
-      expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+      expect(
+        tester.getBottomLeft(find.text('label')).dy,
+        tester.getBottomLeft(find.text('hint')).dy,
+      );
     });
 
     testWidgets('InputDecorator input/label widget layout', (WidgetTester tester) async {
@@ -8504,10 +9468,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8542,10 +9503,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8568,10 +9526,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8594,10 +9549,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8630,10 +9582,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8659,10 +9608,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8699,10 +9645,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8713,7 +9656,7 @@ void main() {
 
       // The label animates upwards from it's initial position
       // above the input text. The animation's duration is 167ms.
-          {
+      {
         await tester.pump(const Duration(milliseconds: 50));
         final double labelY50ms = tester.getTopLeft(find.byKey(key)).dy;
         expect(labelY50ms, inExclusiveRange(12.0, 28.0));
@@ -8741,10 +9684,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8756,7 +9696,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
       expect(tester.getTopLeft(find.text('text')).dy, 28.0);
-      expect(tester.getBottomLeft(find.text('text')).dy,44.0);
+      expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
       expect(tester.getTopLeft(find.byKey(key)).dy, 20.0);
       expect(tester.getBottomLeft(find.byKey(key)).dy, 36.0);
       expect(getBorderWeight(tester), 0.0);
@@ -8771,10 +9711,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8802,10 +9739,7 @@ void main() {
               TextSpan(
                 children: <InlineSpan>[
                   TextSpan(text: 'label'),
-                  WidgetSpan(
-                    child: Text('*', style: TextStyle(color: Colors.red),
-                    ),
-                  ),
+                  WidgetSpan(child: Text('*', style: TextStyle(color: Colors.red))),
                 ],
               ),
               key: key,
@@ -8821,10 +9755,10 @@ void main() {
       expect(tester.getBottomLeft(find.byKey(key)).dy, tester.getBottomLeft(find.text('hint')).dy);
     });
 
-    testWidgets('InputDecorator floating label animation duration and curve', (WidgetTester tester) async {
-      Future<void> pumpInputDecorator({
-        required bool isFocused,
-      }) async {
+    testWidgets('InputDecorator floating label animation duration and curve', (
+      WidgetTester tester,
+    ) async {
+      Future<void> pumpInputDecorator({required bool isFocused}) async {
         return tester.pumpWidget(
           buildInputDecoratorM2(
             isEmpty: true,
@@ -8836,6 +9770,7 @@ void main() {
           ),
         );
       }
+
       await pumpInputDecorator(isFocused: false);
       expect(tester.getTopLeft(find.text('label')).dy, 20.0);
 
@@ -8876,7 +9811,10 @@ void main() {
           const String text = 'text';
           final FocusNode focusNode = FocusNode();
           final TextEditingController controller = TextEditingController();
-          addTearDown(() { focusNode.dispose(); controller.dispose();});
+          addTearDown(() {
+            focusNode.dispose();
+            controller.dispose();
+          });
 
           Widget buildFrame(bool alignLabelWithHint) {
             return MaterialApp(
@@ -8916,7 +9854,10 @@ void main() {
           await tester.pumpWidget(buildFrame(true));
           await tester.pumpAndSettle();
           expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
-          expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+          expect(
+            tester.getBottomLeft(find.text('label')).dy,
+            tester.getBottomLeft(find.text('hint')).dy,
+          );
 
           // Entering text still happens at the top.
           await tester.enterText(find.byType(TextField), text);
@@ -8929,7 +9870,10 @@ void main() {
           const String text = 'text';
           final FocusNode focusNode = FocusNode();
           final TextEditingController controller = TextEditingController();
-          addTearDown(() { focusNode.dispose(); controller.dispose();});
+          addTearDown(() {
+            focusNode.dispose();
+            controller.dispose();
+          });
           Widget buildFrame(bool alignLabelWithHint) {
             return MaterialApp(
               theme: ThemeData(useMaterial3: false),
@@ -8967,7 +9911,10 @@ void main() {
           await tester.pumpWidget(buildFrame(true));
           await tester.pumpAndSettle();
           expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
-          expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+          expect(
+            tester.getBottomLeft(find.text('label')).dy,
+            tester.getBottomLeft(find.text('hint')).dy,
+          );
 
           // Entering text still happens at the top.
           await tester.enterText(find.byType(InputDecorator), text);
@@ -9024,7 +9971,10 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.getTopLeft(find.text('label')).dy, 28.0);
           expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
-          expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+          expect(
+            tester.getBottomLeft(find.text('label')).dy,
+            tester.getBottomLeft(find.text('hint')).dy,
+          );
 
           // Entering text still happens at the top.
           await tester.enterText(find.byType(InputDecorator), text);
@@ -9055,9 +10005,7 @@ void main() {
                       labelText: 'label',
                       alignLabelWithHint: alignLabelWithHint,
                       hintText: 'hint',
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
+                      border: const OutlineInputBorder(borderRadius: BorderRadius.zero),
                     ),
                   ),
                 ),
@@ -9083,7 +10031,10 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.getTopLeft(find.text('label')).dy, 292.0);
           expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
-          expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+          expect(
+            tester.getBottomLeft(find.text('label')).dy,
+            tester.getBottomLeft(find.text('hint')).dy,
+          );
 
           // Entering text still happens in the center.
           await tester.enterText(find.byType(InputDecorator), text);
@@ -9104,13 +10055,14 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(hintText: 'hint'),
         ),
       );
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+      expect(
+        tester.getSize(find.byType(InputDecorator)),
+        const Size(800.0, kMinInteractiveDimension),
+      );
       expect(tester.getTopLeft(find.text('text')).dy, 16.0);
       expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
       expect(tester.getTopLeft(find.text('hint')).dy, 16.0);
@@ -9127,10 +10079,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9149,7 +10098,6 @@ void main() {
       //   16 - label (font size 16dps)
       //   20 - bottom padding (empty input text still appears here)
 
-
       // The label is not floating so it's vertically centered.
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
       expect(tester.getTopLeft(find.text('text')).dy, 28.0);
@@ -9165,10 +10113,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           isFocused: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9198,10 +10143,7 @@ void main() {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           isFocused: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9235,11 +10177,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-            isDense: true,
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint', isDense: true),
         ),
       );
 
@@ -9273,11 +10211,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           isFocused: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-            isDense: true,
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint', isDense: true),
         ),
       );
       await tester.pumpAndSettle();
@@ -9295,10 +10229,7 @@ void main() {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           isEmpty: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9310,10 +10241,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           isFocused: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9334,10 +10262,7 @@ void main() {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           isEmpty: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9422,17 +10347,16 @@ void main() {
       }
     });
 
-    testWidgets('InputDecorator custom hint animation duration from theme', (WidgetTester tester) async {
+    testWidgets('InputDecorator custom hint animation duration from theme', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           inputDecorationTheme: const InputDecorationTheme(
             hintFadeDuration: Duration(milliseconds: 120),
           ),
           isEmpty: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9447,10 +10371,7 @@ void main() {
           ),
           isEmpty: true,
           isFocused: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9474,10 +10395,7 @@ void main() {
             hintFadeDuration: Duration(milliseconds: 120),
           ),
           isEmpty: true,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -9501,9 +10419,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-          ),
+          decoration: const InputDecoration(border: InputBorder.none),
         ),
       );
       expect(getBorderWeight(tester), 0.0);
@@ -9828,11 +10744,7 @@ void main() {
 
     testWidgets('InputDecorator shows helper text', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecoratorM2(
-          decoration: const InputDecoration(
-            helperText: 'helperText',
-          ),
-        ),
+        buildInputDecoratorM2(decoration: const InputDecoration(helperText: 'helperText')),
       );
 
       expect(find.text('helperText'), findsOneWidget);
@@ -9850,34 +10762,30 @@ void main() {
       expect(find.text('helper'), findsOneWidget);
     });
 
-    testWidgets('InputDecorator throws when helper text and helper widget are provided',
-        (WidgetTester tester) async {
-      expect(
-        () {
-          buildInputDecoratorM2(
-            decoration: InputDecoration(
-              helperText: 'helperText',
-              helper: const Text('helper', style: TextStyle(fontSize: 20.0)),
-            ),
-          );
-        },
-        throwsAssertionError,
-      );
+    testWidgets('InputDecorator throws when helper text and helper widget are provided', (
+      WidgetTester tester,
+    ) async {
+      expect(() {
+        buildInputDecoratorM2(
+          decoration: InputDecoration(
+            helperText: 'helperText',
+            helper: const Text('helper', style: TextStyle(fontSize: 20.0)),
+          ),
+        );
+      }, throwsAssertionError);
     });
 
     testWidgets('InputDecorator shows error text', (WidgetTester tester) async {
       await tester.pumpWidget(
-        buildInputDecoratorM2(
-          decoration: const InputDecoration(
-            errorText: 'errorText',
-          ),
-        ),
+        buildInputDecoratorM2(decoration: const InputDecoration(errorText: 'errorText')),
       );
 
       expect(find.text('errorText'), findsOneWidget);
     });
 
-    testWidgets('InputDecoration shows error border for errorText and error widget', (WidgetTester tester) async {
+    testWidgets('InputDecoration shows error border for errorText and error widget', (
+      WidgetTester tester,
+    ) async {
       const InputBorder errorBorder = OutlineInputBorder(
         borderSide: BorderSide(color: Colors.red, width: 1.5),
       );
@@ -9973,27 +10881,24 @@ void main() {
     testWidgets('InputDecorator shows error widget', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
-          decoration: const InputDecoration(
-            error: Text('error', style: TextStyle(fontSize: 20.0)),
-          ),
+          decoration: const InputDecoration(error: Text('error', style: TextStyle(fontSize: 20.0))),
         ),
       );
 
       expect(find.text('error'), findsOneWidget);
     });
 
-    testWidgets('InputDecorator throws when error text and error widget are provided', (WidgetTester tester) async {
-      expect(
-        () {
-          buildInputDecoratorM2(
-            decoration: InputDecoration(
-              errorText: 'errorText',
-              error: const Text('error', style: TextStyle(fontSize: 20.0)),
-            ),
-          );
-        },
-        throwsAssertionError,
-      );
+    testWidgets('InputDecorator throws when error text and error widget are provided', (
+      WidgetTester tester,
+    ) async {
+      expect(() {
+        buildInputDecoratorM2(
+          decoration: InputDecoration(
+            errorText: 'errorText',
+            error: const Text('error', style: TextStyle(fontSize: 20.0)),
+          ),
+        );
+      }, throwsAssertionError);
     });
 
     testWidgets('InputDecorator prefix/suffix texts', (WidgetTester tester) async {
@@ -10001,11 +10906,7 @@ void main() {
         buildInputDecoratorM2(
           // isEmpty: false (default)
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            prefixText: 'p',
-            suffixText: 's',
-            filled: true,
-          ),
+          decoration: const InputDecoration(prefixText: 'p', suffixText: 's', filled: true),
         ),
       );
 
@@ -10017,7 +10918,10 @@ void main() {
       // The prefix and suffix wrap the input text and are left and right justified
       // respectively. They should have the same height as the input text (16).
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+      expect(
+        tester.getSize(find.byType(InputDecorator)),
+        const Size(800.0, kMinInteractiveDimension),
+      );
       expect(tester.getSize(find.text('text')).height, 16.0);
       expect(tester.getSize(find.text('p')).height, 16.0);
       expect(tester.getSize(find.text('s')).height, 16.0);
@@ -10029,8 +10933,14 @@ void main() {
 
       // layout is a row: [p text s]
       expect(tester.getTopLeft(find.text('p')).dx, 12.0);
-      expect(tester.getTopRight(find.text('p')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
-      expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
+      expect(
+        tester.getTopRight(find.text('p')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx),
+      );
+      expect(
+        tester.getTopRight(find.text('text')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx),
+      );
     });
 
     testWidgets('InputDecorator icon/prefix/suffix', (WidgetTester tester) async {
@@ -10052,7 +10962,10 @@ void main() {
       //   16 - input text (font size 16dps)
       //   12 - bottom padding
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+      expect(
+        tester.getSize(find.byType(InputDecorator)),
+        const Size(800.0, kMinInteractiveDimension),
+      );
       expect(tester.getSize(find.text('text')).height, 16.0);
       expect(tester.getSize(find.text('p')).height, 16.0);
       expect(tester.getSize(find.text('s')).height, 16.0);
@@ -10067,9 +10980,18 @@ void main() {
 
       // layout is a row: [icon, p text s]
       expect(tester.getTopLeft(find.byType(Icon)).dx, 0.0);
-      expect(tester.getTopRight(find.byType(Icon)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx));
-      expect(tester.getTopRight(find.text('p')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
-      expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
+      expect(
+        tester.getTopRight(find.byType(Icon)).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx),
+      );
+      expect(
+        tester.getTopRight(find.text('p')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx),
+      );
+      expect(
+        tester.getTopRight(find.text('text')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx),
+      );
     });
 
     testWidgets('InputDecorator prefix/suffix widgets', (WidgetTester tester) async {
@@ -10080,16 +11002,8 @@ void main() {
           // isEmpty: false (default)
           // isFocused: false (default)
           decoration: const InputDecoration(
-            prefix: Padding(
-              key: pKey,
-              padding: EdgeInsets.all(4.0),
-              child: Text('p'),
-            ),
-            suffix: Padding(
-              key: sKey,
-              padding: EdgeInsets.all(4.0),
-              child: Text('s'),
-            ),
+            prefix: Padding(key: pKey, padding: EdgeInsets.all(4.0), child: Text('p')),
+            suffix: Padding(key: sKey, padding: EdgeInsets.all(4.0), child: Text('s')),
             filled: true,
           ),
         ),
@@ -10120,7 +11034,10 @@ void main() {
       // layout is a row: [prefix text suffix]
       expect(tester.getTopLeft(find.byKey(pKey)).dx, 12.0);
       expect(tester.getTopRight(find.byKey(pKey)).dx, tester.getTopLeft(find.text('text')).dx);
-      expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopRight(find.byKey(sKey)).dx));
+      expect(
+        tester.getTopRight(find.text('text')).dx,
+        lessThanOrEqualTo(tester.getTopRight(find.byKey(sKey)).dx),
+      );
     });
 
     testWidgets('InputDecorator tall prefix', (WidgetTester tester) async {
@@ -10130,18 +11047,11 @@ void main() {
           // isEmpty: false (default)
           // isFocused: false (default)
           decoration: const InputDecoration(
-            prefix: SizedBox(
-              key: pKey,
-              height: 100,
-              width: 10,
-            ),
+            prefix: SizedBox(key: pKey, height: 100, width: 10),
             filled: true,
           ),
           // Set the fontSize so that everything works out to whole numbers.
-          child: const Text(
-            'text',
-            style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-          ),
+          child: const Text('text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
         ),
       );
 
@@ -10175,18 +11085,11 @@ void main() {
           // isFocused: false (default)
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            prefix: SizedBox(
-              key: pKey,
-              height: 100,
-              width: 10,
-            ),
+            prefix: SizedBox(key: pKey, height: 100, width: 10),
             filled: true,
           ),
           // Set the fontSize so that everything works out to whole numbers.
-          child: const Text(
-            'text',
-            style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-          ),
+          child: const Text('text', style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
         ),
       );
 
@@ -10245,24 +11148,28 @@ void main() {
       expect(tester.getTopLeft(find.byIcon(Icons.satellite)).dy, 0.0);
       expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
 
-
       // layout is a row: [icon text icon]
       expect(tester.getTopLeft(find.byIcon(Icons.pages)).dx, 0.0);
-      expect(tester.getTopRight(find.byIcon(Icons.pages)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
-      expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx));
+      expect(
+        tester.getTopRight(find.byIcon(Icons.pages)).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx),
+      );
+      expect(
+        tester.getTopRight(find.text('text')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.byIcon(Icons.satellite)).dx),
+      );
     });
 
-    testWidgets('Material2 - InputDecorator suffixIcon color in error state', (WidgetTester tester) async {
+    testWidgets('Material2 - InputDecorator suffixIcon color in error state', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: false),
           home: Material(
             child: TextField(
               decoration: InputDecoration(
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {},
-                ),
+                suffixIcon: IconButton(icon: const Icon(Icons.close), onPressed: () {}),
                 errorText: 'Error state',
                 filled: true,
               ),
@@ -10275,22 +11182,18 @@ void main() {
       expect(getIconStyle(tester, Icons.close)?.color, theme.colorScheme.error);
     });
 
-    testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (WidgetTester tester) async {
+    testWidgets('InputDecorator prefixIconConstraints/suffixIconConstraints', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           // isEmpty: false (default)
           // isFocused: false (default)
           decoration: const InputDecoration(
             prefixIcon: Icon(Icons.pages),
-            prefixIconConstraints: BoxConstraints(
-              minWidth: 32,
-              minHeight: 32,
-            ),
+            prefixIconConstraints: BoxConstraints(minWidth: 32, minHeight: 32),
             suffixIcon: Icon(Icons.satellite),
-            suffixIconConstraints: BoxConstraints(
-              minWidth: 25,
-              minHeight: 25,
-            ),
+            suffixIconConstraints: BoxConstraints(minWidth: 25, minHeight: 25),
             isDense: true, // has to be true to go below 48px height
           ),
         ),
@@ -10312,7 +11215,9 @@ void main() {
       expect(tester.getTopRight(find.byIcon(Icons.satellite)).dx, 800.0);
     });
 
-    testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (WidgetTester tester) async {
+    testWidgets('prefix/suffix icons are centered when smaller than 48 by 48', (
+      WidgetTester tester,
+    ) async {
       const Key prefixKey = Key('prefix');
       await tester.pumpWidget(
         buildInputDecoratorM2(
@@ -10343,10 +11248,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           visualDensity: VisualDensity.compact,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -10366,10 +11268,7 @@ void main() {
           isEmpty: true,
           isFocused: true,
           visualDensity: VisualDensity.compact,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -10400,10 +11299,7 @@ void main() {
         buildInputDecoratorM2(
           isFocused: true,
           visualDensity: VisualDensity.compact,
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -10421,26 +11317,25 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
       expect(tester.getTopLeft(find.text('text')).dy, 24.0);
-      expect(tester.getBottomLeft(find.text('text')).dy,40.0);
+      expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
       expect(tester.getTopLeft(find.text('label')).dy, 8.0);
       expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
       expect(tester.getTopLeft(find.text('hint')).dy, 24.0);
-      expect(tester.getBottomLeft(find.text('hint')).dy,40.0);
+      expect(tester.getBottomLeft(find.text('hint')).dy, 40.0);
       expect(getOpacity(tester, 'hint'), 0.0);
       expect(getBorderBottom(tester), 48.0);
       expect(getBorderWeight(tester), 2.0);
     });
 
-    testWidgets('InputDecorator respects increased theme visualDensity', (WidgetTester tester) async {
+    testWidgets('InputDecorator respects increased theme visualDensity', (
+      WidgetTester tester,
+    ) async {
       // Label is visible, hint is not (opacity 0.0).
       await tester.pumpWidget(
         buildInputDecoratorM2(
           isEmpty: true,
           visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -10460,10 +11355,7 @@ void main() {
           isEmpty: true,
           isFocused: true,
           visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -10494,10 +11386,7 @@ void main() {
         buildInputDecoratorM2(
           isFocused: true,
           visualDensity: const VisualDensity(horizontal: 2.0, vertical: 2.0),
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -10525,7 +11414,9 @@ void main() {
       expect(getBorderWeight(tester), 2.0);
     });
 
-    testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (WidgetTester tester) async {
+    testWidgets('prefix/suffix icons increase height of decoration when larger than 48 by 48', (
+      WidgetTester tester,
+    ) async {
       const Key prefixKey = Key('prefix');
       await tester.pumpWidget(
         buildInputDecoratorM2(
@@ -10557,13 +11448,13 @@ void main() {
 
       testWidgets('InputDecoratorThemeData constraints', (WidgetTester tester) async {
         await tester.pumpWidget(
-            buildInputDecoratorM2(
-              theme: ThemeData(
-                inputDecorationTheme: const InputDecorationTheme(
-                  constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
-                ),
+          buildInputDecoratorM2(
+            theme: ThemeData(
+              inputDecorationTheme: const InputDecorationTheme(
+                constraints: BoxConstraints(maxWidth: 300, maxHeight: 40),
               ),
             ),
+          ),
         );
 
         // Theme settings should make it 300x40 pixels
@@ -10599,15 +11490,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true, // so we have a tall input where align can vary
-              decoration: const InputDecoration(
-                filled: true,
-              ),
+              decoration: const InputDecoration(filled: true),
               textAlignVertical: TextAlignVertical.top, // default when no border
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10622,15 +11508,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true,
-              decoration: const InputDecoration(
-                filled: true,
-              ),
+              decoration: const InputDecoration(filled: true),
               textAlignVertical: TextAlignVertical.center,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10645,15 +11526,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true,
-              decoration: const InputDecoration(
-                filled: true,
-              ),
+              decoration: const InputDecoration(filled: true),
               textAlignVertical: TextAlignVertical.bottom,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10668,15 +11544,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true,
-              decoration: const InputDecoration(
-                filled: true,
-              ),
+              decoration: const InputDecoration(filled: true),
               textAlignVertical: const TextAlignVertical(y: 0.75),
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10714,16 +11585,14 @@ void main() {
           );
 
           // Vertical components: contentPadding.vertical, densityOffset.y, child
-          final double childVerticalSpaceAffordance = totalHeight
-                                                    - visualDensity.baseSizeAdjustment.dy
-                                                    - contentPadding.vertical;
+          final double childVerticalSpaceAffordance =
+              totalHeight - visualDensity.baseSizeAdjustment.dy - contentPadding.vertical;
 
           // TextAlignVertical.center is specified so `child` needs to be centered
           // in the available space.
           final double childMargin = (childVerticalSpaceAffordance - childHeight) / 2;
-          final double childTop = visualDensity.baseSizeAdjustment.dy / 2.0
-                                + contentPadding.top
-                                + childMargin;
+          final double childTop =
+              visualDensity.baseSizeAdjustment.dy / 2.0 + contentPadding.top + childMargin;
 
           expect(
             tester.getTopLeft(find.byKey(key)).dy,
@@ -10740,16 +11609,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true, // so we have a tall input where align can vary
-              decoration: const InputDecoration(
-                filled: true,
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(filled: true, border: OutlineInputBorder()),
               textAlignVertical: TextAlignVertical.top,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10765,16 +11628,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true,
-              decoration: const InputDecoration(
-                filled: true,
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(filled: true, border: OutlineInputBorder()),
               textAlignVertical: TextAlignVertical.center, // default when border
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10789,16 +11646,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true,
-              decoration: const InputDecoration(
-                filled: true,
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(filled: true, border: OutlineInputBorder()),
               textAlignVertical: TextAlignVertical.bottom,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10816,19 +11667,12 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               decoration: const InputDecoration(
-                prefix: SizedBox(
-                  key: pKey,
-                  height: 100,
-                  width: 10,
-                ),
+                prefix: SizedBox(key: pKey, height: 100, width: 10),
                 filled: true,
               ),
               textAlignVertical: TextAlignVertical.top, // default when no border
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10845,19 +11689,12 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               decoration: const InputDecoration(
-                prefix: SizedBox(
-                  key: pKey,
-                  height: 100,
-                  width: 10,
-                ),
+                prefix: SizedBox(key: pKey, height: 100, width: 10),
                 filled: true,
               ),
               textAlignVertical: TextAlignVertical.center,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10874,19 +11711,12 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               decoration: const InputDecoration(
-                prefix: SizedBox(
-                  key: pKey,
-                  height: 100,
-                  width: 10,
-                ),
+                prefix: SizedBox(key: pKey, height: 100, width: 10),
                 filled: true,
               ),
               textAlignVertical: TextAlignVertical.bottom,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10907,19 +11737,12 @@ void main() {
               expands: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                prefix: SizedBox(
-                  key: pKey,
-                  height: 100,
-                  width: 10,
-                ),
+                prefix: SizedBox(key: pKey, height: 100, width: 10),
                 filled: true,
               ),
               textAlignVertical: TextAlignVertical.center, // default when border
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10928,7 +11751,9 @@ void main() {
           expect(tester.getTopLeft(find.byKey(pKey)).dy, 247.5);
         });
 
-        testWidgets('InputDecorator tall prefix with border align top', (WidgetTester tester) async {
+        testWidgets('InputDecorator tall prefix with border align top', (
+          WidgetTester tester,
+        ) async {
           const Key pKey = Key('p');
           const String text = 'text';
           await tester.pumpWidget(
@@ -10938,19 +11763,12 @@ void main() {
               expands: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                prefix: SizedBox(
-                  key: pKey,
-                  height: 100,
-                  width: 10,
-                ),
+                prefix: SizedBox(key: pKey, height: 100, width: 10),
                 filled: true,
               ),
               textAlignVertical: TextAlignVertical.top,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10961,7 +11779,9 @@ void main() {
           expect(tester.getTopLeft(find.byKey(pKey)).dy, 24.0);
         });
 
-        testWidgets('InputDecorator tall prefix with border align bottom', (WidgetTester tester) async {
+        testWidgets('InputDecorator tall prefix with border align bottom', (
+          WidgetTester tester,
+        ) async {
           const Key pKey = Key('p');
           const String text = 'text';
           await tester.pumpWidget(
@@ -10971,19 +11791,12 @@ void main() {
               expands: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                prefix: SizedBox(
-                  key: pKey,
-                  height: 100,
-                  width: 10,
-                ),
+                prefix: SizedBox(key: pKey, height: 100, width: 10),
                 filled: true,
               ),
               textAlignVertical: TextAlignVertical.bottom,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -10992,7 +11805,9 @@ void main() {
           expect(tester.getTopLeft(find.byKey(pKey)).dy, 479.0);
         });
 
-        testWidgets('InputDecorator tall prefix with border align double', (WidgetTester tester) async {
+        testWidgets('InputDecorator tall prefix with border align double', (
+          WidgetTester tester,
+        ) async {
           const Key pKey = Key('p');
           const String text = 'text';
           await tester.pumpWidget(
@@ -11002,19 +11817,12 @@ void main() {
               expands: true,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                prefix: SizedBox(
-                  key: pKey,
-                  height: 100,
-                  width: 10,
-                ),
+                prefix: SizedBox(key: pKey, height: 100, width: 10),
                 filled: true,
               ),
               textAlignVertical: const TextAlignVertical(y: 0.1),
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -11032,16 +11840,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true, // so we have a tall input where align can vary
-              decoration: const InputDecoration(
-                labelText: 'label',
-                filled: true,
-              ),
+              decoration: const InputDecoration(labelText: 'label', filled: true),
               textAlignVertical: TextAlignVertical.top, // default
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -11057,16 +11859,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true, // so we have a tall input where align can vary
-              decoration: const InputDecoration(
-                labelText: 'label',
-                filled: true,
-              ),
+              decoration: const InputDecoration(labelText: 'label', filled: true),
               textAlignVertical: TextAlignVertical.center,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -11082,16 +11878,10 @@ void main() {
               // isEmpty: false (default)
               // isFocused: false (default)
               expands: true, // so we have a tall input where align can vary
-              decoration: const InputDecoration(
-                labelText: 'label',
-                filled: true,
-              ),
+              decoration: const InputDecoration(labelText: 'label', filled: true),
               textAlignVertical: TextAlignVertical.bottom,
               // Set the fontSize so that everything works out to whole numbers.
-              child: const Text(
-                text,
-                style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0),
-              ),
+              child: const Text(text, style: TextStyle(fontFamily: 'FlutterTest', fontSize: 20.0)),
             ),
           );
 
@@ -11106,11 +11896,7 @@ void main() {
       group('default alignment', () {
         testWidgets('Centers when border', (WidgetTester tester) async {
           await tester.pumpWidget(
-            buildInputDecoratorM2(
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-            ),
+            buildInputDecoratorM2(decoration: const InputDecoration(border: OutlineInputBorder())),
           );
 
           expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
@@ -11123,10 +11909,7 @@ void main() {
         testWidgets('Centers when border and label', (WidgetTester tester) async {
           await tester.pumpWidget(
             buildInputDecoratorM2(
-              decoration: const InputDecoration(
-                labelText: 'label',
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: 'label', border: OutlineInputBorder()),
             ),
           );
 
@@ -11142,10 +11925,7 @@ void main() {
             buildInputDecoratorM2(
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.fromLTRB(
-                  12.0, 14.0,
-                  8.0, 14.0,
-                ),
+                contentPadding: EdgeInsets.fromLTRB(12.0, 14.0, 8.0, 14.0),
               ),
             ),
           );
@@ -11157,36 +11937,37 @@ void main() {
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('Centers when border and contentPadding and label', (WidgetTester tester) async {
+        testWidgets('Centers when border and contentPadding and label', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecoratorM2(
               decoration: const InputDecoration(
                 labelText: 'label',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.fromLTRB(
-                  12.0, 14.0,
-                  8.0, 14.0,
-                ),
+                contentPadding: EdgeInsets.fromLTRB(12.0, 14.0, 8.0, 14.0),
               ),
             ),
           );
-          expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+          expect(
+            tester.getSize(find.byType(InputDecorator)),
+            const Size(800.0, kMinInteractiveDimension),
+          );
           expect(tester.getTopLeft(find.text('text')).dy, 16.0);
           expect(tester.getBottomLeft(find.text('text')).dy, 32.0);
           expect(getBorderBottom(tester), 48.0);
           expect(getBorderWeight(tester), 1.0);
         });
 
-        testWidgets('Centers when border and lopsided contentPadding and label', (WidgetTester tester) async {
+        testWidgets('Centers when border and lopsided contentPadding and label', (
+          WidgetTester tester,
+        ) async {
           await tester.pumpWidget(
             buildInputDecoratorM2(
               decoration: const InputDecoration(
                 labelText: 'label',
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.fromLTRB(
-                  12.0, 104.0,
-                  8.0, 0.0,
-                ),
+                contentPadding: EdgeInsets.fromLTRB(12.0, 104.0, 8.0, 0.0),
               ),
             ),
           );
@@ -11216,24 +11997,27 @@ void main() {
           expect(getBorderWeight(tester), 2.0);
         });
 
-        testWidgets('Floating label for filled input decoration is horizontally aligned with text', (WidgetTester tester) async {
-          // Regression test added in https://github.com/flutter/flutter/pull/115540.
-          await tester.pumpWidget(
-            buildInputDecoratorM2(
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.ac_unit),
-                labelText: 'label',
-                filled: true,
+        testWidgets(
+          'Floating label for filled input decoration is horizontally aligned with text',
+          (WidgetTester tester) async {
+            // Regression test added in https://github.com/flutter/flutter/pull/115540.
+            await tester.pumpWidget(
+              buildInputDecoratorM2(
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.ac_unit),
+                  labelText: 'label',
+                  filled: true,
+                ),
+                isFocused: true,
               ),
-              isFocused: true,
-            ),
-          );
+            );
 
-          expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-          expect(tester.getTopLeft(find.text('label')).dx, 48.0);
-          expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
-          expect(getBorderWeight(tester), 2.0);
-        });
+            expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+            expect(tester.getTopLeft(find.text('label')).dx, 48.0);
+            expect(tester.getBottomLeft(find.text('text')).dx, 48.0);
+            expect(getBorderWeight(tester), 2.0);
+          },
+        );
       });
 
       group('3 point interpolation alignment', () {
@@ -11244,10 +12028,7 @@ void main() {
               textAlignVertical: TextAlignVertical.top,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.fromLTRB(
-                  12.0, 24.0,
-                  8.0, 2.0,
-                ),
+                contentPadding: EdgeInsets.fromLTRB(12.0, 24.0, 8.0, 2.0),
               ),
             ),
           );
@@ -11267,10 +12048,7 @@ void main() {
               textAlignVertical: TextAlignVertical.center,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.fromLTRB(
-                  12.0, 24.0,
-                  8.0, 2.0,
-                ),
+                contentPadding: EdgeInsets.fromLTRB(12.0, 24.0, 8.0, 2.0),
               ),
             ),
           );
@@ -11290,10 +12068,7 @@ void main() {
               textAlignVertical: TextAlignVertical.bottom,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.fromLTRB(
-                  12.0, 24.0,
-                  8.0, 2.0,
-                ),
+                contentPadding: EdgeInsets.fromLTRB(12.0, 24.0, 8.0, 2.0),
               ),
             ),
           );
@@ -11313,10 +12088,7 @@ void main() {
               textAlignVertical: TextAlignVertical.top,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.fromLTRB(
-                  12.0, 504.0,
-                  8.0, 0.0,
-                ),
+                contentPadding: EdgeInsets.fromLTRB(12.0, 504.0, 8.0, 0.0),
               ),
             ),
           );
@@ -11331,15 +12103,14 @@ void main() {
       });
     });
 
-    testWidgets('counter text has correct right margin - LTR, not dense', (WidgetTester tester) async {
+    testWidgets('counter text has correct right margin - LTR, not dense', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           // isEmpty: false (default)
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            counterText: 'test',
-            filled: true,
-          ),
+          decoration: const InputDecoration(counterText: 'test', filled: true),
         ),
       );
 
@@ -11350,16 +12121,15 @@ void main() {
       expect(tester.getRect(find.text('test')).right, dx - 12.0);
     });
 
-    testWidgets('counter text has correct right margin - RTL, not dense', (WidgetTester tester) async {
+    testWidgets('counter text has correct right margin - RTL, not dense', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           textDirection: TextDirection.rtl,
           // isEmpty: false (default)
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            counterText: 'test',
-            filled: true,
-          ),
+          decoration: const InputDecoration(counterText: 'test', filled: true),
         ),
       );
 
@@ -11374,11 +12144,7 @@ void main() {
         buildInputDecoratorM2(
           // isEmpty: false (default)
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            counterText: 'test',
-            filled: true,
-            isDense: true,
-          ),
+          decoration: const InputDecoration(counterText: 'test', filled: true, isDense: true),
         ),
       );
 
@@ -11395,11 +12161,7 @@ void main() {
           textDirection: TextDirection.rtl,
           // isEmpty: false (default)
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            counterText: 'test',
-            filled: true,
-            isDense: true,
-          ),
+          decoration: const InputDecoration(counterText: 'test', filled: true, isDense: true),
         ),
       );
 
@@ -11470,11 +12232,7 @@ void main() {
           // isEmpty: false (default)
           // isFocused: false (default)
           textDirection: TextDirection.rtl,
-          decoration: const InputDecoration(
-            prefixText: 'p',
-            suffixText: 's',
-            filled: true,
-          ),
+          decoration: const InputDecoration(prefixText: 'p', suffixText: 's', filled: true),
         ),
       );
 
@@ -11483,7 +12241,10 @@ void main() {
       //   16 - input text (font size 16dps)
       //   12 - bottom padding
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
+      expect(
+        tester.getSize(find.byType(InputDecorator)),
+        const Size(800.0, kMinInteractiveDimension),
+      ); // 40 bumped up to minimum.
       expect(tester.getSize(find.text('text')).height, 16.0);
       expect(tester.getSize(find.text('p')).height, 16.0);
       expect(tester.getSize(find.text('s')).height, 16.0);
@@ -11493,8 +12254,14 @@ void main() {
 
       // layout is a row: [s text p]
       expect(tester.getTopLeft(find.text('s')).dx, 12.0);
-      expect(tester.getTopRight(find.text('s')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
-      expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx));
+      expect(
+        tester.getTopRight(find.text('s')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx),
+      );
+      expect(
+        tester.getTopRight(find.text('text')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx),
+      );
     });
 
     testWidgets('InputDecorator contentPadding RTL layout', (WidgetTester tester) async {
@@ -11539,11 +12306,7 @@ void main() {
     group('inputText width', () {
       testWidgets('outline textField', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorM2(
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-            ),
-          ),
+          buildInputDecoratorM2(decoration: const InputDecoration(border: OutlineInputBorder())),
         );
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
         expect(tester.getTopLeft(find.text('text')).dx, 12.0);
@@ -11565,11 +12328,7 @@ void main() {
       });
       testWidgets('filled textField', (WidgetTester tester) async {
         await tester.pumpWidget(
-          buildInputDecoratorM2(
-            decoration: const InputDecoration(
-              filled: true,
-            ),
-          ),
+          buildInputDecoratorM2(decoration: const InputDecoration(filled: true)),
         );
         expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
         expect(tester.getTopLeft(find.text('text')).dx, 12.0);
@@ -11849,8 +12608,14 @@ void main() {
 
       // layout is a row: [p text s]
       expect(tester.getTopLeft(find.text('p')).dx, 12.0);
-      expect(tester.getTopRight(find.text('p')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
-      expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
+      expect(
+        tester.getTopRight(find.text('p')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx),
+      );
+      expect(
+        tester.getTopRight(find.text('text')).dx,
+        lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx),
+      );
 
       expect(getBorderBottom(tester), 32.0);
       expect(getBorderWeight(tester), 2.0);
@@ -11864,14 +12629,19 @@ void main() {
       //   16 - input text (font size 16dps)
       //   12 - bottom padding
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 40 bumped up to minimum.
+      expect(
+        tester.getSize(find.byType(InputDecorator)),
+        const Size(800.0, kMinInteractiveDimension),
+      ); // 40 bumped up to minimum.
       expect(tester.getSize(find.text('text')).height, 16.0);
       expect(tester.getTopLeft(find.text('text')).dy, 16.0);
       expect(getBorderBottom(tester), kMinInteractiveDimension); // 40 bumped up to minimum.
       expect(getBorderWeight(tester), 1.0);
     });
 
-    testWidgets('contentPadding smaller than kMinInteractiveDimension', (WidgetTester tester) async {
+    testWidgets('contentPadding smaller than kMinInteractiveDimension', (
+      WidgetTester tester,
+    ) async {
       // Regression test for https://github.com/flutter/flutter/issues/42449
       const double verticalPadding = 1.0;
       await tester.pumpWidget(
@@ -11937,7 +12707,10 @@ void main() {
       //   16 - input text (font size 16dps)
       //    2 - total vertical padding
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension));
+      expect(
+        tester.getSize(find.byType(InputDecorator)),
+        const Size(800.0, kMinInteractiveDimension),
+      );
       expect(tester.getSize(find.text('text')).height, 16.0);
       expect(tester.getTopLeft(find.text('text')).dy, 16.0);
       expect(getOpacity(tester, 'hint'), 0.0);
@@ -11949,9 +12722,7 @@ void main() {
         buildInputDecoratorM2(
           // isEmpty: false (default),
           // isFocused: false (default)
-          decoration: const InputDecoration.collapsed(
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration.collapsed(hintText: 'hint'),
         ),
       );
 
@@ -11970,9 +12741,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           isFocused: true,
-          decoration: const InputDecoration.collapsed(
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration.collapsed(hintText: 'hint'),
         ),
       );
       await tester.pumpAndSettle();
@@ -11993,10 +12762,7 @@ void main() {
         buildInputDecoratorM2(
           isEmpty: true,
           baseStyle: style,
-          decoration: const InputDecoration(
-            hintText: 'hint',
-            labelText: 'label',
-          ),
+          decoration: const InputDecoration(hintText: 'hint', labelText: 'label'),
           child: const Text('text', style: style),
         ),
       );
@@ -12016,7 +12782,10 @@ void main() {
       //      10 - label (font size 10dps)
       //   17.75 - bottom padding (empty input text still appears here)
 
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, kMinInteractiveDimension)); // 45.5 bumped up to minimum.
+      expect(
+        tester.getSize(find.byType(InputDecorator)),
+        const Size(800.0, kMinInteractiveDimension),
+      ); // 45.5 bumped up to minimum.
       expect(tester.getSize(find.text('hint')).height, 10.0);
       expect(tester.getSize(find.text('label')).height, 10.0);
       expect(tester.getSize(find.text('text')).height, 10.0);
@@ -12067,7 +12836,9 @@ void main() {
       expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
     });
 
-    testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
+    testWidgets('InputDecoration outline shape with no border and no floating placeholder', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           // isFocused: false (default)
@@ -12091,45 +12862,44 @@ void main() {
       expect(getBorderWeight(tester), 0.0);
     });
 
-    testWidgets('InputDecoration outline shape with no border and no floating placeholder not empty', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        buildInputDecoratorM2(
-          // isEmpty: false (default)
-          // isFocused: false (default)
-          decoration: const InputDecoration(
-            border: OutlineInputBorder(borderSide: BorderSide.none),
-            floatingLabelBehavior: FloatingLabelBehavior.never,
-            labelText: 'label',
+    testWidgets(
+      'InputDecoration outline shape with no border and no floating placeholder not empty',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecoratorM2(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(borderSide: BorderSide.none),
+              floatingLabelBehavior: FloatingLabelBehavior.never,
+              labelText: 'label',
+            ),
           ),
-        ),
-      );
+        );
 
-      // Overall height for this InputDecorator is 56dps. Layout is:
-      //   20 - top padding
-      //   16 - label (font size 16dps)
-      //   20 - bottom padding
-      //    expect(tester.widget<Text>(find.text('prefix')).style.color, prefixStyle.color);
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-      expect(tester.getTopLeft(find.text('label')).dy, 20.0);
-      expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 0.0);
+        // Overall height for this InputDecorator is 56dps. Layout is:
+        //   20 - top padding
+        //   16 - label (font size 16dps)
+        //   20 - bottom padding
+        //    expect(tester.widget<Text>(find.text('prefix')).style.color, prefixStyle.color);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+        expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+        expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+        expect(getBorderBottom(tester), 56.0);
+        expect(getBorderWeight(tester), 0.0);
 
-      // The label should not be seen.
-      expect(getOpacity(tester, 'label'), 0.0);
-    });
+        // The label should not be seen.
+        expect(getOpacity(tester, 'label'), 0.0);
+      },
+    );
 
     testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           isEmpty: true, // label appears, vertically centered
           // isFocused: false (default)
-          inputDecorationTheme: const InputDecorationTheme(
-            border: OutlineInputBorder(),
-          ),
-          decoration: const InputDecoration(
-            labelText: 'label',
-          ),
+          inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
+          decoration: const InputDecoration(labelText: 'label'),
         ),
       );
 
@@ -12153,10 +12923,7 @@ void main() {
             border: OutlineInputBorder(),
             isDense: true,
           ),
-          decoration: const InputDecoration(
-            labelText: 'label',
-            hintText: 'hint',
-          ),
+          decoration: const InputDecoration(labelText: 'label', hintText: 'hint'),
         ),
       );
 
@@ -12239,7 +13006,9 @@ void main() {
     testWidgets('InputDecorationTheme style overrides (focused)', (WidgetTester tester) async {
       const TextStyle defaultStyle = TextStyle(fontSize: 16.0);
       final TextStyle labelStyle = defaultStyle.merge(const TextStyle(color: Colors.red));
-      final TextStyle floatingLabelStyle = defaultStyle.merge(const TextStyle(color: Colors.indigo));
+      final TextStyle floatingLabelStyle = defaultStyle.merge(
+        const TextStyle(color: Colors.indigo),
+      );
       final TextStyle hintStyle = defaultStyle.merge(const TextStyle(color: Colors.green));
       final TextStyle prefixStyle = defaultStyle.merge(const TextStyle(color: Colors.blue));
       final TextStyle suffixStyle = defaultStyle.merge(const TextStyle(color: Colors.purple));
@@ -12322,21 +13091,25 @@ void main() {
       );
 
       final RenderObject renderer = tester.renderObject(find.byType(InputDecorator));
-      final Iterable<String> nodeNames = renderer.debugDescribeChildren()
-        .map((DiagnosticsNode node) => node.name!);
-      expect(nodeNames, unorderedEquals(<String>[
-        'container',
-        'counter',
-        'helperError',
-        'hint',
-        'icon',
-        'input',
-        'label',
-        'prefix',
-        'prefixIcon',
-        'suffix',
-        'suffixIcon',
-      ]));
+      final Iterable<String> nodeNames = renderer.debugDescribeChildren().map(
+        (DiagnosticsNode node) => node.name!,
+      );
+      expect(
+        nodeNames,
+        unorderedEquals(<String>[
+          'container',
+          'counter',
+          'helperError',
+          'hint',
+          'icon',
+          'input',
+          'label',
+          'prefix',
+          'prefixIcon',
+          'suffix',
+          'suffixIcon',
+        ]),
+      );
 
       final Set<Object> nodeValues = Set<Object>.from(
         renderer.debugDescribeChildren().map<Object>((DiagnosticsNode node) => node.value!),
@@ -12350,10 +13123,7 @@ void main() {
         buildInputDecoratorM2(
           // isEmpty: false (default)
           // isFocused: false (default)
-          decoration: const InputDecoration(
-            labelText: 'label',
-            border: InputBorder.none,
-          ),
+          decoration: const InputDecoration(labelText: 'label', border: InputBorder.none),
         ),
       );
 
@@ -12363,7 +13133,9 @@ void main() {
       expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     });
 
-    testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+    testWidgets('InputDecorator OutlineInputBorder fillColor is clipped by border', (
+      WidgetTester tester,
+    ) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/15742
 
       await tester.pumpWidget(
@@ -12373,9 +13145,7 @@ void main() {
           decoration: const InputDecoration(
             filled: true,
             fillColor: Color(0xFF00FF00),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12.0)),
-            ),
+            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12.0))),
           ),
         ),
       );
@@ -12383,27 +13153,35 @@ void main() {
       final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
       // Fill is the border's outer path, a rounded rectangle
-      expect(box, paints..path(
-        style: PaintingStyle.fill,
-        color: const Color(0xFF00FF00),
-        includes: <Offset>[const Offset(800.0/2.0, 56/2.0)],
-        excludes: <Offset>[
-          const Offset(1.0, 6.0), // outside the rounded corner, top left
-          const Offset(800.0 - 1.0, 6.0), // top right
-          const Offset(1.0, 56.0 - 6.0), // bottom left
-          const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
-        ],
-      ));
+      expect(
+        box,
+        paints..path(
+          style: PaintingStyle.fill,
+          color: const Color(0xFF00FF00),
+          includes: <Offset>[const Offset(800.0 / 2.0, 56 / 2.0)],
+          excludes: <Offset>[
+            const Offset(1.0, 6.0), // outside the rounded corner, top left
+            const Offset(800.0 - 1.0, 6.0), // top right
+            const Offset(1.0, 56.0 - 6.0), // bottom left
+            const Offset(800 - 1.0, 56.0 - 6.0), // bottom right
+          ],
+        ),
+      );
 
       // Border outline. The rrect is the -center- of the 1.0 stroked outline.
-      expect(box, paints..rrect(
-        style: PaintingStyle.stroke,
-        strokeWidth: 1.0,
-        rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
-      ));
+      expect(
+        box,
+        paints..rrect(
+          style: PaintingStyle.stroke,
+          strokeWidth: 1.0,
+          rrect: RRect.fromLTRBR(0.5, 0.5, 799.5, 55.5, const Radius.circular(11.5)),
+        ),
+      );
     });
 
-    testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (WidgetTester tester) async {
+    testWidgets('InputDecorator UnderlineInputBorder fillColor is clipped by border', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           // isEmpty: false (default)
@@ -12424,111 +13202,121 @@ void main() {
       final RenderBox box = tester.renderObject(find.byType(InputDecorator));
 
       // Fill is the border's outer path, a rounded rectangle
-      expect(box, paints
-      ..drrect(
-        style: PaintingStyle.fill,
-        inner: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 47.0,
+      expect(
+        box,
+        paints..drrect(
+          style: PaintingStyle.fill,
+          inner: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            800.0,
+            47.0,
             bottomRight: const Radius.elliptical(12.0, 11.0),
-            bottomLeft: const Radius.elliptical(12.0, 11.0)),
-        outer: RRect.fromLTRBAndCorners(0.0, 0.0, 800.0, 48.0,
+            bottomLeft: const Radius.elliptical(12.0, 11.0),
+          ),
+          outer: RRect.fromLTRBAndCorners(
+            0.0,
+            0.0,
+            800.0,
+            48.0,
             bottomRight: const Radius.elliptical(12.0, 12.0),
-            bottomLeft: const Radius.elliptical(12.0, 12.0)),
-      ));
+            bottomLeft: const Radius.elliptical(12.0, 12.0),
+          ),
+        ),
+      );
     });
 
-    testWidgets(
-      'InputDecorator OutlineBorder focused label with icon',
-      (WidgetTester tester) async {
-        // This is a regression test for https://github.com/flutter/flutter/issues/82321
-        Widget buildFrame(TextDirection textDirection) {
-          return MaterialApp(
-            theme: ThemeData(useMaterial3: false),
-            home: Scaffold(
-              body: Container(
-                padding: const EdgeInsets.all(16.0),
-                alignment: Alignment.center,
-                child: Directionality(
-                  textDirection: textDirection,
-                  child: RepaintBoundary(
-                    child: InputDecorator(
-                      isFocused: true,
-                      isEmpty: true,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFF00FF00),
-                        labelText: 'label text',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30.0),
-                          gapPadding: 0.0,
-                        ),
+    testWidgets('InputDecorator OutlineBorder focused label with icon', (
+      WidgetTester tester,
+    ) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/82321
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: Directionality(
+                textDirection: textDirection,
+                child: RepaintBoundary(
+                  child: InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFF00FF00),
+                      labelText: 'label text',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        gapPadding: 0.0,
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          );
-        }
-
-        await tester.pumpWidget(buildFrame(TextDirection.ltr));
-        await expectLater(
-          find.byType(InputDecorator),
-          matchesGoldenFile('m2_input_decorator.outline_label.ltr.png'),
+          ),
         );
+      }
 
-        await tester.pumpWidget(buildFrame(TextDirection.rtl));
-        await expectLater(
-          find.byType(InputDecorator),
-          matchesGoldenFile('m2_input_decorator.outline_label.rtl.png'),
-        );
-      },
-    );
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('m2_input_decorator.outline_label.ltr.png'),
+      );
 
-    testWidgets(
-      'InputDecorator OutlineBorder focused label with icon',
-      (WidgetTester tester) async {
-        // Regression test for https://github.com/flutter/flutter/issues/18111
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('m2_input_decorator.outline_label.rtl.png'),
+      );
+    });
 
-        Widget buildFrame(TextDirection textDirection) {
-          return MaterialApp(
-            theme: ThemeData(useMaterial3: false),
-            home: Scaffold(
-              body: Container(
-                padding: const EdgeInsets.all(16.0),
-                alignment: Alignment.center,
-                child: Directionality(
-                  textDirection: textDirection,
-                  child: const RepaintBoundary(
-                    child: InputDecorator(
-                      isFocused: true,
-                      isEmpty: true,
-                      decoration: InputDecoration(
-                        icon: Icon(Icons.insert_link),
-                        labelText: 'primaryLink',
-                        hintText: 'Primary link to story',
-                        border: OutlineInputBorder(),
-                      ),
+    testWidgets('InputDecorator OutlineBorder focused label with icon', (
+      WidgetTester tester,
+    ) async {
+      // Regression test for https://github.com/flutter/flutter/issues/18111
+
+      Widget buildFrame(TextDirection textDirection) {
+        return MaterialApp(
+          theme: ThemeData(useMaterial3: false),
+          home: Scaffold(
+            body: Container(
+              padding: const EdgeInsets.all(16.0),
+              alignment: Alignment.center,
+              child: Directionality(
+                textDirection: textDirection,
+                child: const RepaintBoundary(
+                  child: InputDecorator(
+                    isFocused: true,
+                    isEmpty: true,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.insert_link),
+                      labelText: 'primaryLink',
+                      hintText: 'Primary link to story',
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
               ),
             ),
-          );
-        }
-
-        await tester.pumpWidget(buildFrame(TextDirection.ltr));
-        await expectLater(
-          find.byType(InputDecorator),
-          matchesGoldenFile('m2_input_decorator.outline_icon_label.ltr.png'),
+          ),
         );
+      }
 
-        await tester.pumpWidget(buildFrame(TextDirection.rtl));
-        await expectLater(
-          find.byType(InputDecorator),
-          matchesGoldenFile('m2_input_decorator.outline_icon_label.rtl.png'),
-        );
-      },
-    );
+      await tester.pumpWidget(buildFrame(TextDirection.ltr));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('m2_input_decorator.outline_icon_label.ltr.png'),
+      );
+
+      await tester.pumpWidget(buildFrame(TextDirection.rtl));
+      await expectLater(
+        find.byType(InputDecorator),
+        matchesGoldenFile('m2_input_decorator.outline_icon_label.rtl.png'),
+      );
+    });
 
     testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {
       const Color fillColor = Color(0x0A000000);
@@ -12548,7 +13336,9 @@ void main() {
               enabled: enabled,
               filled: filled,
               hoverColor: hoverColor,
-              disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+              disabledBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: disabledColor),
+              ),
               border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
             ),
           ),
@@ -12628,7 +13418,9 @@ void main() {
               filled: filled,
               focusColor: focusColor,
               focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: focusColor)),
-              disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+              disabledBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: disabledColor),
+              ),
               border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
             ),
           ),
@@ -12663,7 +13455,9 @@ void main() {
       expect(getBorderColor(tester), equals(disabledColor));
     });
 
-    testWidgets('InputDecorator withdraws label when not empty or focused', (WidgetTester tester) async {
+    testWidgets('InputDecorator withdraws label when not empty or focused', (
+      WidgetTester tester,
+    ) async {
       Future<void> pumpDecorator({
         required bool focused,
         bool enabled = true,
@@ -12689,7 +13483,7 @@ void main() {
 
       await pumpDecorator(focused: false);
       await tester.pumpAndSettle();
-      const Size labelSize= Size(80, 16);
+      const Size labelSize = Size(80, 16);
       expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
@@ -12737,66 +13531,37 @@ void main() {
       final Color hoverColor = Color.alphaBlend(theme.hoverColor.withOpacity(0.12), enabledColor);
 
       // Enabled
-      await tester.pumpWidget(
-        buildInputDecoratorM2(
-          theme: theme,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecoratorM2(theme: theme));
       await tester.pumpAndSettle();
       expect(getBorderColor(tester), enabledColor);
 
       // Filled
       await tester.pumpWidget(
-        buildInputDecoratorM2(
-          theme: theme,
-          decoration: const InputDecoration(
-            filled: true,
-          ),
-        ),
+        buildInputDecoratorM2(theme: theme, decoration: const InputDecoration(filled: true)),
       );
       await tester.pumpAndSettle();
       expect(getBorderColor(tester), theme.hintColor);
 
       // Hovering
-      await tester.pumpWidget(
-        buildInputDecoratorM2(
-          theme: theme,
-          isHovering: true,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecoratorM2(theme: theme, isHovering: true));
       await tester.pumpAndSettle();
       expect(getBorderColor(tester), hoverColor);
 
       // Focused
-      await tester.pumpWidget(
-        buildInputDecoratorM2(
-          theme: theme,
-          isFocused: true,
-        ),
-      );
+      await tester.pumpWidget(buildInputDecoratorM2(theme: theme, isFocused: true));
       await tester.pumpAndSettle();
       expect(getBorderColor(tester), theme.colorScheme.primary);
 
       // Error
       await tester.pumpWidget(
-        buildInputDecoratorM2(
-          theme: theme,
-          decoration: const InputDecoration(
-            errorText: 'Nope',
-          ),
-        ),
+        buildInputDecoratorM2(theme: theme, decoration: const InputDecoration(errorText: 'Nope')),
       );
       await tester.pumpAndSettle();
       expect(getBorderColor(tester), theme.colorScheme.error);
 
       // Disabled
       await tester.pumpWidget(
-        buildInputDecoratorM2(
-          theme: theme,
-          decoration: const InputDecoration(
-            enabled: false,
-          ),
-        ),
+        buildInputDecoratorM2(theme: theme, decoration: const InputDecoration(enabled: false)),
       );
       await tester.pumpAndSettle();
       expect(getBorderColor(tester), disabledColor);
@@ -12805,10 +13570,7 @@ void main() {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           theme: theme,
-          decoration: const InputDecoration(
-            enabled: false,
-            filled: true,
-          ),
+          decoration: const InputDecoration(enabled: false, filled: true),
         ),
       );
       await tester.pumpAndSettle();
@@ -12950,7 +13712,9 @@ void main() {
       expect(getBorder(tester), disabledBorder);
     });
 
-    testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (WidgetTester tester) async {
+    testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (
+      WidgetTester tester,
+    ) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/34327
       const double largerBorderRadius = 200.0;
       const double smallerBorderRadius = 100.0;
@@ -12989,72 +13753,78 @@ void main() {
       // to be 400.0.
       const double denominator = largerBorderRadius * 2.0;
 
-      const double largerBorderRadiusScaled = largerBorderRadius / denominator * inputDecoratorHeight;
-      const double smallerBorderRadiusScaled = smallerBorderRadius / denominator * inputDecoratorHeight;
+      const double largerBorderRadiusScaled =
+          largerBorderRadius / denominator * inputDecoratorHeight;
+      const double smallerBorderRadiusScaled =
+          smallerBorderRadius / denominator * inputDecoratorHeight;
 
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: const <Offset>[
-            // The border should draw along the four edges of the
-            // InputDecorator.
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..path(
+            style: PaintingStyle.fill,
+            color: const Color(0xFF00FF00),
+            includes: const <Offset>[
+              // The border should draw along the four edges of the
+              // InputDecorator.
 
-            // Top center
-            Offset(inputDecoratorWidth / 2.0, 0.0),
-            // Bottom center
-            Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-            // Left center
-            Offset(0.0, inputDecoratorHeight / 2.0),
-            // Right center
-            Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+              // Top center
+              Offset(inputDecoratorWidth / 2.0, 0.0),
+              // Bottom center
+              Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+              // Left center
+              Offset(0.0, inputDecoratorHeight / 2.0),
+              // Right center
+              Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
 
-            // The border path should contain points where each rounded corner
-            // ends.
+              // The border path should contain points where each rounded corner
+              // ends.
 
-            // Bottom-right arc
-            Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
-            // Top-right arc
-            Offset(inputDecoratorWidth,0.0 + largerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
-            // Bottom-left arc
-            Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
-            Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
-            // Top-left arc
-            Offset(0.0,0.0 + smallerBorderRadiusScaled),
-            Offset(0.0 + smallerBorderRadiusScaled, 0.0),
-          ],
-          excludes: const <Offset>[
-            // The border should not contain the corner points, since the border
-            // is rounded.
+              // Bottom-right arc
+              Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
+              Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
+              // Top-right arc
+              Offset(inputDecoratorWidth, 0.0 + largerBorderRadiusScaled),
+              Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
+              // Bottom-left arc
+              Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
+              Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
+              // Top-left arc
+              Offset(0.0, 0.0 + smallerBorderRadiusScaled),
+              Offset(0.0 + smallerBorderRadiusScaled, 0.0),
+            ],
+            excludes: const <Offset>[
+              // The border should not contain the corner points, since the border
+              // is rounded.
 
-            // Top-left
-            Offset.zero,
-            // Top-right
-            Offset(inputDecoratorWidth, 0.0),
-            // Bottom-left
-            Offset(0.0, inputDecoratorHeight),
-            // Bottom-right
-            Offset(inputDecoratorWidth, inputDecoratorHeight),
+              // Top-left
+              Offset.zero,
+              // Top-right
+              Offset(inputDecoratorWidth, 0.0),
+              // Bottom-left
+              Offset(0.0, inputDecoratorHeight),
+              // Bottom-right
+              Offset(inputDecoratorWidth, inputDecoratorHeight),
 
-            // Corners with larger border ratio should not contain points outside
-            // of the larger radius.
+              // Corners with larger border ratio should not contain points outside
+              // of the larger radius.
 
-            // Bottom-right arc
-            Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
-            // Top-left arc
-            Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
-            Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
-          ],
-        )
-        ..restore(),
+              // Bottom-right arc
+              Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
+              Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
+              // Top-left arc
+              Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
+              Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
+            ],
+          )
+          ..restore(),
       );
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
-    testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (WidgetTester tester) async {
+    testWidgets('rounded OutlineInputBorder with zero padding just wraps the label', (
+      WidgetTester tester,
+    ) async {
       // This is a regression test for https://github.com/flutter/flutter/issues/82321
       const double borderRadius = 30.0;
       const String labelText = 'label text';
@@ -13088,65 +13858,69 @@ void main() {
       expect(find.text(labelText), findsOneWidget);
       final Rect labelRect = tester.getRect(find.text(labelText));
 
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          style: PaintingStyle.fill,
-          color: const Color(0xFF00FF00),
-          includes: <Offset>[
-            // The border should draw along the four edges of the
-            // InputDecorator.
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..path(
+            style: PaintingStyle.fill,
+            color: const Color(0xFF00FF00),
+            includes: <Offset>[
+              // The border should draw along the four edges of the
+              // InputDecorator.
 
-            // Top center
-            const Offset(inputDecoratorWidth / 2.0, 0.0),
-            // Bottom center
-            const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
-            // Left center
-            const Offset(0.0, inputDecoratorHeight / 2.0),
-            // Right center
-            const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+              // Top center
+              const Offset(inputDecoratorWidth / 2.0, 0.0),
+              // Bottom center
+              const Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+              // Left center
+              const Offset(0.0, inputDecoratorHeight / 2.0),
+              // Right center
+              const Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
 
-            // The border path should contain points where each rounded corner
-            // ends.
+              // The border path should contain points where each rounded corner
+              // ends.
 
-            // Bottom-right arc
-            const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
-            const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
-            // Top-right arc
-            const Offset(inputDecoratorWidth,0.0 + borderRadiusScaled),
-            const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
-            // Bottom-left arc
-            const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
-            const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
-            // Top-left arc
-            const Offset(0.0,0.0 + borderRadiusScaled),
-            const Offset(0.0 + borderRadiusScaled, 0.0),
+              // Bottom-right arc
+              const Offset(inputDecoratorWidth, inputDecoratorHeight - borderRadiusScaled),
+              const Offset(inputDecoratorWidth - borderRadiusScaled, inputDecoratorHeight),
+              // Top-right arc
+              const Offset(inputDecoratorWidth, 0.0 + borderRadiusScaled),
+              const Offset(inputDecoratorWidth - borderRadiusScaled, 0.0),
+              // Bottom-left arc
+              const Offset(0.0, inputDecoratorHeight - borderRadiusScaled),
+              const Offset(0.0 + borderRadiusScaled, inputDecoratorHeight),
+              // Top-left arc
+              const Offset(0.0, 0.0 + borderRadiusScaled),
+              const Offset(0.0 + borderRadiusScaled, 0.0),
 
-            // Gap edges
-            // gap start x = radius - radius * cos(arc sweep)
-            // gap start y = radius - radius * sin(arc sweep)
-            const Offset(39.49999999999999, 32.284366616798906),
-            Offset(39.49999999999999 + labelRect.width, 0.0),
-          ],
-          excludes: const <Offset>[
-            // The border should not contain the corner points, since the border
-            // is rounded.
+              // Gap edges
+              // gap start x = radius - radius * cos(arc sweep)
+              // gap start y = radius - radius * sin(arc sweep)
+              const Offset(39.49999999999999, 32.284366616798906),
+              Offset(39.49999999999999 + labelRect.width, 0.0),
+            ],
+            excludes: const <Offset>[
+              // The border should not contain the corner points, since the border
+              // is rounded.
 
-            // Top-left
-            Offset.zero,
-            // Top-right
-            Offset(inputDecoratorWidth, 0.0),
-            // Bottom-left
-            Offset(0.0, inputDecoratorHeight),
-            // Bottom-right
-            Offset(inputDecoratorWidth, inputDecoratorHeight),
-          ],
-        )
-        ..restore(),
+              // Top-left
+              Offset.zero,
+              // Top-right
+              Offset(inputDecoratorWidth, 0.0),
+              // Bottom-left
+              Offset(0.0, inputDecoratorHeight),
+              // Bottom-right
+              Offset(inputDecoratorWidth, inputDecoratorHeight),
+            ],
+          )
+          ..restore(),
       );
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
-  testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (WidgetTester tester) async {
+    testWidgets('OutlineInputBorder with BorderRadius.zero should draw a rectangular border', (
+      WidgetTester tester,
+    ) async {
       // Regression test for https://github.com/flutter/flutter/issues/78855
       const String labelText = 'Flutter';
 
@@ -13175,38 +13949,43 @@ void main() {
       );
 
       expect(find.text(labelText), findsOneWidget);
-      expect(findBorderPainter(), paints
-        ..save()
-        ..path(
-          includes: const <Offset>[
-            // Corner points in the middle of the border line should be in the path.
-            // The path is not filled and borderWidth is 4.0 so Offset(2.0, 2.0) is in the path and Offset(1.0, 1.0) is not.
-            // See Skia SkPath::contains method.
+      expect(
+        findBorderPainter(),
+        paints
+          ..save()
+          ..path(
+            includes: const <Offset>[
+              // Corner points in the middle of the border line should be in the path.
+              // The path is not filled and borderWidth is 4.0 so Offset(2.0, 2.0) is in the path and Offset(1.0, 1.0) is not.
+              // See Skia SkPath::contains method.
 
-            // Top-left
-            Offset(borderWidth / 2, borderWidth / 2),
-            // Top-right
-            Offset(inputDecoratorWidth - 1 - borderWidth / 2, borderWidth / 2),
-            // Bottom-left
-            Offset(borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
-            // Bottom-right
-            Offset(inputDecoratorWidth - 1 - borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
-          ],
-          excludes: const <Offset>[
-            // The path is not filled and borderWidth is 4.0 so the path should not contains the corner points.
-            // See Skia SkPath::contains method.
+              // Top-left
+              Offset(borderWidth / 2, borderWidth / 2),
+              // Top-right
+              Offset(inputDecoratorWidth - 1 - borderWidth / 2, borderWidth / 2),
+              // Bottom-left
+              Offset(borderWidth / 2, inputDecoratorHeight - 1 - borderWidth / 2),
+              // Bottom-right
+              Offset(
+                inputDecoratorWidth - 1 - borderWidth / 2,
+                inputDecoratorHeight - 1 - borderWidth / 2,
+              ),
+            ],
+            excludes: const <Offset>[
+              // The path is not filled and borderWidth is 4.0 so the path should not contains the corner points.
+              // See Skia SkPath::contains method.
 
-            // Top-left
-            Offset.zero,
-            // // Top-right
-            Offset(inputDecoratorWidth - 1, 0),
-            // // Bottom-left
-            Offset(0, inputDecoratorHeight - 1),
-            // // Bottom-right
-            Offset(inputDecoratorWidth - 1, inputDecoratorHeight - 1),
-          ],
-        )
-        ..restore(),
+              // Top-left
+              Offset.zero,
+              // // Top-right
+              Offset(inputDecoratorWidth - 1, 0),
+              // // Bottom-left
+              Offset(0, inputDecoratorHeight - 1),
+              // // Bottom-right
+              Offset(inputDecoratorWidth - 1, inputDecoratorHeight - 1),
+            ],
+          )
+          ..restore(),
       );
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/55317
 
@@ -13222,10 +14001,7 @@ void main() {
       // The dense theme uses ideographic baselines
       Widget buildFrame(bool alignLabelWithHint) {
         return MaterialApp(
-          theme: ThemeData(
-            useMaterial3: false,
-            textTheme: typography.dense,
-          ),
+          theme: ThemeData(useMaterial3: false, textTheme: typography.dense),
           home: Material(
             child: Directionality(
               textDirection: TextDirection.ltr,
@@ -13236,9 +14012,7 @@ void main() {
                   labelText: 'label',
                   alignLabelWithHint: alignLabelWithHint,
                   hintText: 'hint',
-                  hintStyle: const TextStyle(
-                    fontFamily: 'Cough',
-                  ),
+                  hintStyle: const TextStyle(fontFamily: 'Cough'),
                 ),
               ),
             ),
@@ -13264,9 +14038,7 @@ void main() {
           isEmpty: true,
           decoration: const InputDecoration(
             labelText: 'label',
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(width: 4),
-            ),
+            enabledBorder: OutlineInputBorder(borderSide: BorderSide(width: 4)),
             floatingLabelBehavior: FloatingLabelBehavior.always,
           ),
         ),
@@ -13279,7 +14051,9 @@ void main() {
       expect(tester.getTopLeft(find.text('label')).dy, -4.0);
     });
 
-    testWidgets('InputDecorator floating label obeys floatingLabelBehavior', (WidgetTester tester) async {
+    testWidgets('InputDecorator floating label obeys floatingLabelBehavior', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           decoration: const InputDecoration(
@@ -13295,7 +14069,9 @@ void main() {
       expect(tester.getTopLeft(find.text('label')).dy, 20.0);
     });
 
-    testWidgets('InputDecorator hint is displayed when floatingLabelBehavior is always', (WidgetTester tester) async {
+    testWidgets('InputDecorator hint is displayed when floatingLabelBehavior is always', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         buildInputDecoratorM2(
           // isFocused: false (default)
@@ -13312,7 +14088,9 @@ void main() {
       expect(getOpacity(tester, 'hint'), 1.0);
     });
 
-    testWidgets('InputDecorator floating label width scales when focused', (WidgetTester tester) async {
+    testWidgets('InputDecorator floating label width scales when focused', (
+      WidgetTester tester,
+    ) async {
       final String longStringA = String.fromCharCodes(List<int>.generate(200, (_) => 65));
       final String longStringB = String.fromCharCodes(List<int>.generate(200, (_) => 66));
 
@@ -13324,9 +14102,7 @@ void main() {
             child: buildInputDecoratorM2(
               // isFocused: false (default)
               isEmpty: true,
-              decoration: InputDecoration(
-                labelText: longStringA,
-              ),
+              decoration: InputDecoration(labelText: longStringA),
             ),
           ),
         ),
@@ -13347,9 +14123,7 @@ void main() {
             child: buildInputDecoratorM2(
               isFocused: true,
               isEmpty: true,
-              decoration: InputDecoration(
-                labelText: longStringB,
-              ),
+              decoration: InputDecoration(labelText: longStringB),
             ),
           ),
         ),
@@ -13365,11 +14139,14 @@ void main() {
           }
           final Rect clipRect = arguments[0] as Rect;
           // _kFinalLabelScale = 0.75
-          expect(clipRect, rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 100 / 0.75, 16.0), epsilon: 1e-5));
+          expect(
+            clipRect,
+            rectMoreOrLessEquals(const Rect.fromLTWH(0, 0, 100 / 0.75, 16.0), epsilon: 1e-5),
+          );
           return true;
         }),
       );
-    }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
+    }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/44020
 
     testWidgets('textAlignVertical can be updated', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/56933
@@ -13384,9 +14161,7 @@ void main() {
               setState = setter;
               return InputDecorator(
                 textAlignVertical: alignment,
-                decoration: const InputDecoration(
-                  hintText: hintText,
-                ),
+                decoration: const InputDecoration(hintText: hintText),
               );
             },
           ),
@@ -13411,97 +14186,89 @@ void main() {
       expect(tester.getTopLeft(find.text(hintText)).dy, topPosition);
     });
 
-    testWidgets('InputDecorationTheme floatingLabelStyle overrides label widget styles when the widget is a text widget (focused)', (WidgetTester tester) async {
-      const TextStyle style16 = TextStyle(fontSize: 16.0);
-      final TextStyle floatingLabelStyle = style16.merge(const TextStyle(color: Colors.indigo));
+    testWidgets(
+      'InputDecorationTheme floatingLabelStyle overrides label widget styles when the widget is a text widget (focused)',
+      (WidgetTester tester) async {
+        const TextStyle style16 = TextStyle(fontSize: 16.0);
+        final TextStyle floatingLabelStyle = style16.merge(const TextStyle(color: Colors.indigo));
 
-      // This test also verifies that the default InputDecorator provides a
-      // "small concession to backwards compatibility" by not padding on
-      // the left and right. If filled is true or an outline border is
-      // provided then the horizontal padding is included.
+        // This test also verifies that the default InputDecorator provides a
+        // "small concession to backwards compatibility" by not padding on
+        // the left and right. If filled is true or an outline border is
+        // provided then the horizontal padding is included.
 
-      await tester.pumpWidget(
-        buildInputDecoratorM2(
-          isEmpty: true,
-          isFocused: true, // Label appears floating above input field.
-          inputDecorationTheme: InputDecorationTheme(
-            floatingLabelStyle: floatingLabelStyle,
-            // filled: false (default) - don't pad by left/right 12dps
-          ),
-          decoration: const InputDecoration(
-            label: Text.rich(
-              TextSpan(text: 'label'),
+        await tester.pumpWidget(
+          buildInputDecoratorM2(
+            isEmpty: true,
+            isFocused: true, // Label appears floating above input field.
+            inputDecorationTheme: InputDecorationTheme(
+              floatingLabelStyle: floatingLabelStyle,
+              // filled: false (default) - don't pad by left/right 12dps
             ),
+            decoration: const InputDecoration(label: Text.rich(TextSpan(text: 'label'))),
           ),
-        ),
-      );
+        );
 
-      // Overall height for this InputDecorator is 56dps:
-      //   12 - top padding
-      //   12 - floating label (font size 16dps * 0.75 = 12)
-      //    4 - floating label / input text gap
-      //   16 - input text (font size 16dps)
-      //   12 - bottom padding
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-      expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-      expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 2.0);
+        // Overall height for this InputDecorator is 56dps:
+        //   12 - top padding
+        //   12 - floating label (font size 16dps * 0.75 = 12)
+        //    4 - floating label / input text gap
+        //   16 - input text (font size 16dps)
+        //   12 - bottom padding
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+        expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+        expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+        expect(getBorderBottom(tester), 56.0);
+        expect(getBorderWeight(tester), 2.0);
 
-      // Verify that the styles were passed along
-      expect(getLabelStyle(tester).color, floatingLabelStyle.color);
-    });
+        // Verify that the styles were passed along
+        expect(getLabelStyle(tester).color, floatingLabelStyle.color);
+      },
+    );
 
-    testWidgets('InputDecorationTheme labelStyle overrides label widget styles when the widget is a text widget', (WidgetTester tester) async {
-      const TextStyle styleDefaultSize = TextStyle(fontSize: 16.0);
-      final TextStyle labelStyle = styleDefaultSize.merge(const TextStyle(color: Colors.purple));
+    testWidgets(
+      'InputDecorationTheme labelStyle overrides label widget styles when the widget is a text widget',
+      (WidgetTester tester) async {
+        const TextStyle styleDefaultSize = TextStyle(fontSize: 16.0);
+        final TextStyle labelStyle = styleDefaultSize.merge(const TextStyle(color: Colors.purple));
 
-      // This test also verifies that the default InputDecorator provides a
-      // "small concession to backwards compatibility" by not padding on
-      // the left and right. If filled is true or an outline border is
-      // provided then the horizontal padding is included.
+        // This test also verifies that the default InputDecorator provides a
+        // "small concession to backwards compatibility" by not padding on
+        // the left and right. If filled is true or an outline border is
+        // provided then the horizontal padding is included.
 
-      await tester.pumpWidget(
-        buildInputDecoratorM2(
-          isEmpty: true, // Label appears inline, on top of the input field.
-          inputDecorationTheme: InputDecorationTheme(
-            labelStyle: labelStyle,
-            // filled: false (default) - don't pad by left/right 12dps
-          ),
-          decoration: const InputDecoration(
-            label: Text.rich(
-              TextSpan(text: 'label'),
+        await tester.pumpWidget(
+          buildInputDecoratorM2(
+            isEmpty: true, // Label appears inline, on top of the input field.
+            inputDecorationTheme: InputDecorationTheme(
+              labelStyle: labelStyle,
+              // filled: false (default) - don't pad by left/right 12dps
             ),
+            decoration: const InputDecoration(label: Text.rich(TextSpan(text: 'label'))),
           ),
-        ),
-      );
+        );
 
-      // Overall height for this InputDecorator is 56dps:
-      //   12 - top padding
-      //   12 - floating label (font size 16dps * 0.75 = 12)
-      //    4 - floating label / input text gap
-      //   16 - input text (font size 16dps)
-      //   12 - bottom padding
-      expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-      expect(tester.getTopLeft(find.text('label')).dy, 20.0);
-      expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
-      expect(getBorderBottom(tester), 56.0);
-      expect(getBorderWeight(tester), 1.0);
+        // Overall height for this InputDecorator is 56dps:
+        //   12 - top padding
+        //   12 - floating label (font size 16dps * 0.75 = 12)
+        //    4 - floating label / input text gap
+        //   16 - input text (font size 16dps)
+        //   12 - bottom padding
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
+        expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+        expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
+        expect(getBorderBottom(tester), 56.0);
+        expect(getBorderWeight(tester), 1.0);
 
-      // Verify that the styles were passed along
-      expect(getLabelStyle(tester).color, labelStyle.color);
-    });
+        // Verify that the styles were passed along
+        expect(getLabelStyle(tester).color, labelStyle.color);
+      },
+    );
 
     testWidgets('hint style overflow works', (WidgetTester tester) async {
       final String hintText = 'hint text' * 20;
-      const TextStyle hintStyle = TextStyle(
-        fontSize: 14.0,
-        overflow: TextOverflow.fade,
-      );
-      final InputDecoration decoration = InputDecoration(
-        hintText: hintText,
-        hintStyle: hintStyle,
-      );
+      const TextStyle hintStyle = TextStyle(fontSize: 14.0, overflow: TextOverflow.fade);
+      final InputDecoration decoration = InputDecoration(hintText: hintText, hintStyle: hintStyle);
 
       await tester.pumpWidget(
         buildInputDecoratorM2(
@@ -13537,10 +14304,8 @@ void main() {
       expect(find.byType(InputDecorator), findsOneWidget);
       expect(find.byType(Icon), findsOneWidget);
 
-      final Offset(dx: double decoratorRight) =
-          tester.getTopRight(find.byType(InputDecorator));
-      final Offset(dx: double prefixRight) =
-          tester.getTopRight(find.byType(Icon));
+      final Offset(dx: double decoratorRight) = tester.getTopRight(find.byType(InputDecorator));
+      final Offset(dx: double prefixRight) = tester.getTopRight(find.byType(Icon));
 
       // The prefix is inside the decorator.
       expect(decoratorRight, lessThanOrEqualTo(prefixRight));
@@ -13568,26 +14333,40 @@ void main() {
 
         const EdgeInsetsGeometry padding = EdgeInsetsDirectional.only(end: 24, start: 12);
 
-        final Size textSizeWithoutIcons = await measureText(const InputDecoration(
-          contentPadding: padding,
-        ));
+        final Size textSizeWithoutIcons = await measureText(
+          const InputDecoration(contentPadding: padding),
+        );
 
-        final Size textSizeWithPrefixIcon = await measureText(const InputDecoration(
-          contentPadding: padding,
-          prefixIcon: Focus(child: Icon(Icons.search)),
-        ));
+        final Size textSizeWithPrefixIcon = await measureText(
+          const InputDecoration(
+            contentPadding: padding,
+            prefixIcon: Focus(child: Icon(Icons.search)),
+          ),
+        );
 
-        final Size textSizeWithSuffixIcon = await measureText(const InputDecoration(
-          contentPadding: padding,
-          suffixIcon: Focus(child: Icon(Icons.search)),
-        ));
+        final Size textSizeWithSuffixIcon = await measureText(
+          const InputDecoration(
+            contentPadding: padding,
+            suffixIcon: Focus(child: Icon(Icons.search)),
+          ),
+        );
 
-        expect(textSizeWithPrefixIcon.width, equals(textSizeWithoutIcons.width), reason: 'text width is different with prefixIcon and $direction');
-        expect(textSizeWithSuffixIcon.width, equals(textSizeWithoutIcons.width), reason: 'text width is different with prefixIcon and $direction');
+        expect(
+          textSizeWithPrefixIcon.width,
+          equals(textSizeWithoutIcons.width),
+          reason: 'text width is different with prefixIcon and $direction',
+        );
+        expect(
+          textSizeWithSuffixIcon.width,
+          equals(textSizeWithoutIcons.width),
+          reason: 'text width is different with prefixIcon and $direction',
+        );
       }
     });
 
-    testWidgets('InputDecorator with counter does not crash when given a 0 size', (WidgetTester tester) async {
+    testWidgets('InputDecorator with counter does not crash when given a 0 size', (
+      WidgetTester tester,
+    ) async {
       // Regression test for https://github.com/flutter/flutter/issues/129611
       const InputDecoration decoration = InputDecoration(
         contentPadding: EdgeInsetsDirectional.all(99),
@@ -13599,9 +14378,7 @@ void main() {
         Center(
           child: SizedBox.square(
             dimension: 0.0,
-            child: buildInputDecoratorM2(
-              decoration: decoration,
-            ),
+            child: buildInputDecoratorM2(decoration: decoration),
           ),
         ),
       );
@@ -13612,7 +14389,9 @@ void main() {
     });
   });
 
-  testWidgets('UnderlineInputBorder with BorderStyle.none should not show anything', (WidgetTester tester) async {
+  testWidgets('UnderlineInputBorder with BorderStyle.none should not show anything', (
+    WidgetTester tester,
+  ) async {
     // Regression test for https://github.com/flutter/flutter/issues/143746
     const InputDecoration decoration = InputDecoration(
       enabledBorder: UnderlineInputBorder(

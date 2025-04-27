@@ -8,29 +8,25 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 void main() {
-  runApp(
-      const PlatformViewApp()
-  );
+  runApp(const PlatformViewApp());
 }
 
 class PlatformViewApp extends StatefulWidget {
-  const PlatformViewApp({
-    super.key,
-  });
+  const PlatformViewApp({super.key});
 
   @override
   PlatformViewAppState createState() => PlatformViewAppState();
 }
 
 class PlatformViewAppState extends State<PlatformViewApp> {
-
   Widget _getBannerWidget() {
     // Test IDs from Admob:
     // https://developers.google.com/admob/ios/test-ads
     // https://developers.google.com/admob/android/test-ads
-    final String bannerId = Platform.isAndroid
-        ? 'ca-app-pub-3940256099942544/6300978111'
-        : 'ca-app-pub-3940256099942544/2934735716';
+    final String bannerId =
+        Platform.isAndroid
+            ? 'ca-app-pub-3940256099942544/6300978111'
+            : 'ca-app-pub-3940256099942544/2934735716';
     final BannerAd bannerAd = BannerAd(
       adUnitId: bannerId,
       request: const AdRequest(),
@@ -39,20 +35,15 @@ class PlatformViewAppState extends State<PlatformViewApp> {
     );
     bannerAd.load();
     return Align(
-        alignment: Alignment.bottomCenter,
-        // Use 320x50 Admob standard banner size.
-        child: SizedBox(
-          width: 320,
-          height: 50,
-          child: AdWidget(ad: bannerAd),
-        ),
+      alignment: Alignment.bottomCenter,
+      // Use 320x50 Admob standard banner size.
+      child: SizedBox(width: 320, height: 50, child: AdWidget(ad: bannerAd)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.light(),
       title: 'Advanced Layout',
       home: Scaffold(
         appBar: AppBar(title: const Text('Platform View Bottom Ad Banner')),
@@ -67,7 +58,9 @@ class PlatformViewAppState extends State<PlatformViewApp> {
                     elevation: 2,
                     child: ListTile(
                       title: Text('Breaking News!'),
-                      subtitle: Text('Huge breaking news! Here is huge and breaking news which is both huge and breaking.'),
+                      subtitle: Text(
+                        'Huge breaking news! Here is huge and breaking news which is both huge and breaking.',
+                      ),
                       leading: FlutterLogo(),
                     ),
                   );
@@ -75,8 +68,8 @@ class PlatformViewAppState extends State<PlatformViewApp> {
               ),
             ),
             _getBannerWidget(),
-          ]
-        )
+          ],
+        ),
       ),
     );
   }

@@ -20,6 +20,9 @@ import '../material_localizations.dart';
 // bottom of this file, and used by the [_MaterialLocalizationsDelegate.load]
 // method defined in `flutter_localizations/lib/src/material_localizations.dart`.
 
+// TODO(goderbauer): Extend the generator to properly format the output.
+// dart format off
+
 /// The translations for Afrikaans (`af`).
 class MaterialLocalizationAf extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Afrikaans.
@@ -3986,6 +3989,502 @@ class MaterialLocalizationBn extends GlobalMaterialLocalizations {
 
   @override
   String get viewLicensesButtonLabel => 'লাইসেন্স দেখুন';
+}
+
+/// The translations for Tibetan (`bo`).
+class MaterialLocalizationBo extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Tibetan.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationBo({
+    super.localeName = 'bo',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get aboutListTileTitleRaw => r'སྐོར། $applicationName';
+
+  @override
+  String get alertDialogLabel => 'གསལ་བརྡ།';
+
+  @override
+  String get anteMeridiemAbbreviation => 'སྔ་དྲོ';
+
+  @override
+  String get backButtonTooltip => 'ཕྱིར་ལོག';
+
+  @override
+  String get bottomSheetLabel => 'ཤོག་ལྷེ་འོག་མ།';
+
+  @override
+  String get calendarModeButtonLabel => 'ལོ་ཐོར་བསྒྱུར་བ།';
+
+  @override
+  String get cancelButtonLabel => 'ཕྱིར་འཐེན།';
+
+  @override
+  String get clearButtonTooltip => 'ཡི་གེ་གཙང་བཟོ།';
+
+  @override
+  String get closeButtonLabel => 'སྒོ་རྒྱག་པ།';
+
+  @override
+  String get closeButtonTooltip => 'སྒོ་རྒྱག་པ།';
+
+  @override
+  String get collapsedHint => 'ཁྱབ་སྤེལ་ཟིན།';
+
+  @override
+  String get collapsedIconTapHint => 'ཁྱབ་སྤེལ།';
+
+  @override
+  String get continueButtonLabel => 'མུ་མཐུད་པ།';
+
+  @override
+  String get copyButtonLabel => 'བཤུས།';
+
+  @override
+  String get currentDateLabel => 'དེ་རིང་།';
+
+  @override
+  String get cutButtonLabel => 'གཅོད།';
+
+  @override
+  String get dateHelpText => 'ལོ། ལོ། ལོ། ལོ།/ཟླ། ཟླ།/ཚེས། ཚེས།';
+
+  @override
+  String get dateInputLabel => 'ཟླ་ཚེས་ནང་འཇུག';
+
+  @override
+  String get dateOutOfRangeLabel => 'ཁྱབ་ཚོད་ནང་མ་ཚུད།';
+
+  @override
+  String get datePickerHelpText => 'ཟླ་ཚེས་འདེམས་པ།';
+
+  @override
+  String get dateRangeEndDateSemanticLabelRaw => r'ཟླ་ཚེས་མཇུག་བསྡུ། $fullDate';
+
+  @override
+  String get dateRangeEndLabel => 'ཟླ་ཚེས་མཇུག་བསྡུ།';
+
+  @override
+  String get dateRangePickerHelpText => 'ཁྱབ་ཚོད་འདེམས་པ།';
+
+  @override
+  String get dateRangeStartDateSemanticLabelRaw => r'ཟླ་ཚེས་འགོ་འཛུགས། $fullDate';
+
+  @override
+  String get dateRangeStartLabel => 'ཟླ་ཚེས་འགོ་འཛུགས།';
+
+  @override
+  String get dateSeparator => '/';
+
+  @override
+  String get deleteButtonTooltip => 'བསུབ་པ།';
+
+  @override
+  String get dialModeButtonLabel => 'ཆུ་ཚོད་འདེམས་སྒྲུག་ལ་བསྒྱུར་བ།';
+
+  @override
+  String get dialogLabel => 'ཟིན་དེབ།';
+
+  @override
+  String get drawerLabel => 'ཕྱོགས་སྟོན་ཐོ་གཞུང་།';
+
+  @override
+  String get expandedHint => 'ཕྱོགས་བསྡུས།';
+
+  @override
+  String get expandedIconTapHint => 'ཕྱོགས་བསྡུ།';
+
+  @override
+  String get expansionTileCollapsedHint => 'ཁྱབ་སྤེལ་ཆེད་ཐེངས་གཉིས་གནོན།';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'ཞིབ་རྒྱས་ཆེད་ཁྱབ་སྤེལ།';
+
+  @override
+  String get expansionTileExpandedHint => 'ཕྱོགས་བསྡུའི་ཆེད་ཐེངས་གཉིས་གནོན།';
+
+  @override
+  String get expansionTileExpandedTapHint => 'ཕྱོགས་བསྡུ།';
+
+  @override
+  String get firstPageTooltip => 'ཤོག་ངོ་ཐོག་མ།';
+
+  @override
+  String get hideAccountsLabel => 'ཁ་བྱང་བསྐུང་བ།';
+
+  @override
+  String get inputDateModeButtonLabel => 'ནང་འཇུག་ལ་བསྒྱུར་བ།';
+
+  @override
+  String get inputTimeModeButtonLabel => 'ཡི་གེ་ནང་འཇུག་ལ་བསྒྱུར་བ།';
+
+  @override
+  String get invalidDateFormatLabel => 'སྒྲོམ་གཞི་ནོར་འཁྲུལ།';
+
+  @override
+  String get invalidDateRangeLabel => 'ཁྱབ་ཚོད་ནོར་འཁྲུལ།';
+
+  @override
+  String get invalidTimeLabel => 'ཆུ་ཚོད་ནོར་འཁྲུལ་མེད་པར་ནང་འཇུག';
+
+  @override
+  String get keyboardKeyAlt => 'ཨལ་ཊི།';
+
+  @override
+  String get keyboardKeyAltGraph => 'ཨལ་ཊི་ཇི་ཨར།';
+
+  @override
+  String get keyboardKeyBackspace => 'ཕྱིར་འགྲོ།';
+
+  @override
+  String get keyboardKeyCapsLock => 'ཡིག་ཆེན།';
+
+  @override
+  String get keyboardKeyChannelDown => 'བརྒྱུད་ལམ་གཤམ།';
+
+  @override
+  String get keyboardKeyChannelUp => 'བརྒྱུད་ལམ་སྟེང་།';
+
+  @override
+  String get keyboardKeyControl => 'སྟངས་འཛིན།';
+
+  @override
+  String get keyboardKeyDelete => 'བསུབ།';
+
+  @override
+  String get keyboardKeyEject => 'ཕྱིར་འདོན།';
+
+  @override
+  String get keyboardKeyEnd => 'རྫོགས།';
+
+  @override
+  String get keyboardKeyEscape => 'ཕྱིར་ཐོན།';
+
+  @override
+  String get keyboardKeyFn => 'བྱེད་སྒོ།';
+
+  @override
+  String get keyboardKeyHome => 'ཁྱིམ།';
+
+  @override
+  String get keyboardKeyInsert => 'ནང་འཛུལ།';
+
+  @override
+  String get keyboardKeyMeta => 'བརྗེས་སྒྱུར།';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'བཀའ་རྒྱ།';
+
+  @override
+  String get keyboardKeyMetaWindows => 'སྒེའུ་ཁུང་།';
+
+  @override
+  String get keyboardKeyNumLock => 'ཨང་གྲངས་མཐེབ་གནོན།';
+
+  @override
+  String get keyboardKeyNumpad0 => 'ཨང་གྲངས། 0';
+
+  @override
+  String get keyboardKeyNumpad1 => 'ཨང་གྲངས། 1';
+
+  @override
+  String get keyboardKeyNumpad2 => 'ཨང་གྲངས། 2';
+
+  @override
+  String get keyboardKeyNumpad3 => 'ཨང་གྲངས། 3';
+
+  @override
+  String get keyboardKeyNumpad4 => 'ཨང་གྲངས། 4';
+
+  @override
+  String get keyboardKeyNumpad5 => 'ཨང་གྲངས། 5';
+
+  @override
+  String get keyboardKeyNumpad6 => 'ཨང་གྲངས། 6';
+
+  @override
+  String get keyboardKeyNumpad7 => 'ཨང་གྲངས། 7';
+
+  @override
+  String get keyboardKeyNumpad8 => 'ཨང་གྲངས། 8';
+
+  @override
+  String get keyboardKeyNumpad9 => 'ཨང་གྲངས། 9';
+
+  @override
+  String get keyboardKeyNumpadAdd => 'ཨང་གྲངས། +';
+
+  @override
+  String get keyboardKeyNumpadComma => 'ཨང་གྲངས། ,';
+
+  @override
+  String get keyboardKeyNumpadDecimal => 'ཨང་གྲངས། .';
+
+  @override
+  String get keyboardKeyNumpadDivide => 'ཨང་གྲངས། /';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'ཨང་གྲངས་ནང་འཇུག';
+
+  @override
+  String get keyboardKeyNumpadEqual => 'ཨང་གྲངས། =';
+
+  @override
+  String get keyboardKeyNumpadMultiply => 'ཨང་གྲངས། *';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => 'ཨང་གྲངས། (';
+
+  @override
+  String get keyboardKeyNumpadParenRight => 'ཨང་གྲངས། )';
+
+  @override
+  String get keyboardKeyNumpadSubtract => 'ཨང་གྲངས། -';
+
+  @override
+  String get keyboardKeyPageDown => 'ཤོག་ངོ་འོག་འགྲོ།';
+
+  @override
+  String get keyboardKeyPageUp => 'ཤོག་ངོའི་སྒང་འགྲོ།';
+
+  @override
+  String get keyboardKeyPower => 'གློག་སྤར།';
+
+  @override
+  String get keyboardKeyPowerOff => 'གློག་གསོད།';
+
+  @override
+  String get keyboardKeyPrintScreen => 'ཤོག་ངོ་བཤུས།';
+
+  @override
+  String get keyboardKeyScrollLock => 'གོང་འོག་འགྲོ་བྱེད།';
+
+  @override
+  String get keyboardKeySelect => 'འདེམས།';
+
+  @override
+  String get keyboardKeyShift => 'བརྗེ་སྒྱུར་མཐེབ་གནོན་ཤིབ་ཊི།';
+
+  @override
+  String get keyboardKeySpace => 'བར་སྟོང་།';
+
+  @override
+  String get lastPageTooltip => 'ཤོག་ངོ་མཐའ་མ།';
+
+  @override
+  String? get licensesPackageDetailTextFew => null;
+
+  @override
+  String? get licensesPackageDetailTextMany => null;
+
+  @override
+  String? get licensesPackageDetailTextOne => 'ལག་ཁྱེར། 1';
+
+  @override
+  String get licensesPackageDetailTextOther => r'$licenseCount ལག་ཁྱེར་ཁག';
+
+  @override
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => null;
+
+  @override
+  String get licensesPageTitle => 'ལག་ཁྱེར་ཁག';
+
+  @override
+  String get lookUpButtonLabel => 'འཚོལ་བ།';
+
+  @override
+  String get menuBarMenuLabel => 'ཐོ་གཞུང་གི་མཐེབ་གནོན་ཐོ་གཞུང་།';
+
+  @override
+  String get menuDismissLabel => 'ཐོ་གཞུང་འདོར་བ།';
+
+  @override
+  String get modalBarrierDismissLabel => 'འདོར་བ།';
+
+  @override
+  String get moreButtonTooltip => 'ཇེ་མང་།';
+
+  @override
+  String get nextMonthTooltip => 'ཟླ་བ་རྗེས་མ།';
+
+  @override
+  String get nextPageTooltip => 'ཤོག་ངོ་རྗེས་མ།';
+
+  @override
+  String get okButtonLabel => 'འདོད།';
+
+  @override
+  String get openAppDrawerTooltip => 'ཕྱོགས་སྟོན་ཐོ་གཞུང་ཁ་ཕྱེ་བ།';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow ཡི་ $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow ཡི་སྐོར། $rowCount';
+
+  @override
+  String get pasteButtonLabel => 'འཕོས་པ།';
+
+  @override
+  String get popupMenuLabel => 'བསྐུང་སྟོན་ཐོ་གཞུང་།';
+
+  @override
+  String get postMeridiemAbbreviation => 'ཕྱི་དྲོ།';
+
+  @override
+  String get previousMonthTooltip => 'ཟླ་བ་སྔོན་མ།';
+
+  @override
+  String get previousPageTooltip => 'ཤོག་ངོ་སྔོན་མ།';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'བསྐྱར་གསོ།';
+
+  @override
+  String? get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountOne => 'ཡིག་འབྲུ་ 1 ལྷག་ལུས།';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount ཡིག་འབྲུ་ལྷག་ལུས་རྣམས།';
+
+  @override
+  String? get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'འོག་ལ་འགྲོ།';
+
+  @override
+  String get reorderItemLeft => 'གཡོན་ལ་འགྲོ།';
+
+  @override
+  String get reorderItemRight => 'གཡས་ལ་འགྲོ།';
+
+  @override
+  String get reorderItemToEnd => 'མཇུག་བསྡུ་སར་འགྲོ།';
+
+  @override
+  String get reorderItemToStart => 'འགོ་འཛུགས་སར་འགྲོ།';
+
+  @override
+  String get reorderItemUp => 'སྒང་ལ་འགྲོ།';
+
+  @override
+  String get rowsPerPageTitle => 'ཤོག་ལྷེ་རེའི་འཕྲེད་ཐིག:';
+
+  @override
+  String get saveButtonLabel => 'ཉར་ཚགས།';
+
+  @override
+  String get scanTextButtonLabel => 'ཡི་གེ་བཤེར་འབེབས།';
+
+  @override
+  String get scrimLabel => 'ཤོག་ཚོས།';
+
+  @override
+  String get scrimOnTapHintRaw => r'སྒོ་རྒྱག་པ། $modalRouteContentName';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.dense;
+
+  @override
+  String get searchFieldLabel => 'འཚོལ་བཤེར།';
+
+  @override
+  String get searchWebButtonLabel => 'དྲ་ཐོག་འཚོལ་བཤེར།';
+
+  @override
+  String get selectAllButtonLabel => 'ཚང་འདེམས།';
+
+  @override
+  String get selectYearSemanticsLabel => 'ལོ་འདེམས།';
+
+  @override
+  String get selectedDateLabel => 'བདམས་པ།';
+
+  @override
+  String? get selectedRowCountTitleFew => null;
+
+  @override
+  String? get selectedRowCountTitleMany => null;
+
+  @override
+  String? get selectedRowCountTitleOne => 'ཅ་དངོས་ 1 བདམས་པ།';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount ཅ་དངོས་དུ་མ་བདམས་པ།';
+
+  @override
+  String? get selectedRowCountTitleTwo => null;
+
+  @override
+  String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'མཉམ་སྤྱོད།';
+
+  @override
+  String get showAccountsLabel => 'ཁ་བྱང་སྟོན་པ།';
+
+  @override
+  String get showMenuTooltip => 'ཐོ་གཞུང་སྟོན་པ།';
+
+  @override
+  String get signedInLabel => 'དྲ་འཛུལ་ཟིན།';
+
+  @override
+  String get tabLabelRaw => r'འཛར་གནོན་ $tabIndex ཡི $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+
+  @override
+  String get timePickerDialHelpText => 'ཆུ་ཚོད་འདེམས་པ།';
+
+  @override
+  String get timePickerHourLabel => 'ཆུ་ཚོད།';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'ཆུ་ཚོད་འདེམས་པ།';
+
+  @override
+  String get timePickerInputHelpText => 'ཆུ་ཚོད་ནང་འཇུག';
+
+  @override
+  String get timePickerMinuteLabel => 'སྐར་མ།';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'སྐར་མ་འདེམས་པ།';
+
+  @override
+  String get unspecifiedDate => 'ཟླ་ཚེས།';
+
+  @override
+  String get unspecifiedDateRange => 'ཟླ་ཚེས་ཁྱབ་ཚོད།';
+
+  @override
+  String get viewLicensesButtonLabel => 'ལག་ཁྱེར་ཁག་ལྟ་བ།';
 }
 
 /// The translations for Bosnian (`bs`).
@@ -16162,6 +16661,502 @@ class MaterialLocalizationFrCa extends MaterialLocalizationFr {
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.frenchCanadian;
 }
 
+/// The translations for Irish (`ga`).
+class MaterialLocalizationGa extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Irish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationGa({
+    super.localeName = 'ga',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get aboutListTileTitleRaw => r'Maidir le $applicationName';
+
+  @override
+  String get alertDialogLabel => 'Foláireamh';
+
+  @override
+  String get anteMeridiemAbbreviation => 'R.N.';
+
+  @override
+  String get backButtonTooltip => 'Siar';
+
+  @override
+  String get bottomSheetLabel => 'Bileog Íochtarach';
+
+  @override
+  String get calendarModeButtonLabel => 'Athraigh go féilire';
+
+  @override
+  String get cancelButtonLabel => 'Cealaigh';
+
+  @override
+  String get clearButtonTooltip => 'Glan an téacs';
+
+  @override
+  String get closeButtonLabel => 'Dún';
+
+  @override
+  String get closeButtonTooltip => 'Dún';
+
+  @override
+  String get collapsedHint => 'Leathnaithe';
+
+  @override
+  String get collapsedIconTapHint => 'Leathnaigh';
+
+  @override
+  String get continueButtonLabel => 'Lean ar aghaidh';
+
+  @override
+  String get copyButtonLabel => 'Cóipeáil';
+
+  @override
+  String get currentDateLabel => 'Inniu';
+
+  @override
+  String get cutButtonLabel => 'Gearr';
+
+  @override
+  String get dateHelpText => 'll/mm/bbbb';
+
+  @override
+  String get dateInputLabel => 'Cuir Isteach Dáta';
+
+  @override
+  String get dateOutOfRangeLabel => 'Lasmuigh den raon.';
+
+  @override
+  String get datePickerHelpText => 'Roghnaigh dáta';
+
+  @override
+  String get dateRangeEndDateSemanticLabelRaw => r'Dáta deiridh $fullDate';
+
+  @override
+  String get dateRangeEndLabel => 'Dáta Deiridh';
+
+  @override
+  String get dateRangePickerHelpText => 'Roghnaigh raon';
+
+  @override
+  String get dateRangeStartDateSemanticLabelRaw => r'Dáta tosaigh $fullDate';
+
+  @override
+  String get dateRangeStartLabel => 'Dáta Tosaigh';
+
+  @override
+  String get dateSeparator => '/';
+
+  @override
+  String get deleteButtonTooltip => 'Scrios';
+
+  @override
+  String get dialModeButtonLabel => 'Athraigh go mód roghnóra aghaidh an chloig';
+
+  @override
+  String get dialogLabel => 'Dialóg';
+
+  @override
+  String get drawerLabel => 'Roghchlár nascleanúna';
+
+  @override
+  String get expandedHint => 'Laghdaithe';
+
+  @override
+  String get expandedIconTapHint => 'Laghdaigh';
+
+  @override
+  String get expansionTileCollapsedHint => 'tapáil faoi dhó chun leathnú';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'Leathnaigh chun tuilleadh sonraí a fháil';
+
+  @override
+  String get expansionTileExpandedHint => 'tapáil faoi dhó chun laghdú';
+
+  @override
+  String get expansionTileExpandedTapHint => 'Laghdaigh';
+
+  @override
+  String get firstPageTooltip => 'An chéad leathanach';
+
+  @override
+  String get hideAccountsLabel => 'Folaigh cuntais';
+
+  @override
+  String get inputDateModeButtonLabel => 'Athraigh go hionchur';
+
+  @override
+  String get inputTimeModeButtonLabel => 'Athraigh go mód ionchuir téacs';
+
+  @override
+  String get invalidDateFormatLabel => 'Formáid neamhbhailí.';
+
+  @override
+  String get invalidDateRangeLabel => 'Raon neamhbhailí.';
+
+  @override
+  String get invalidTimeLabel => 'Cuir isteach am bailí';
+
+  @override
+  String get keyboardKeyAlt => 'Alt';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyBackspace => 'Cúlspás';
+
+  @override
+  String get keyboardKeyCapsLock => 'Glas Ceannlitreacha';
+
+  @override
+  String get keyboardKeyChannelDown => 'Cainéal Síos';
+
+  @override
+  String get keyboardKeyChannelUp => 'Cainéal Suas';
+
+  @override
+  String get keyboardKeyControl => 'Ctrl';
+
+  @override
+  String get keyboardKeyDelete => 'Del';
+
+  @override
+  String get keyboardKeyEject => 'Caith amach';
+
+  @override
+  String get keyboardKeyEnd => 'End';
+
+  @override
+  String get keyboardKeyEscape => 'Esc';
+
+  @override
+  String get keyboardKeyFn => 'Fn';
+
+  @override
+  String get keyboardKeyHome => 'Baile';
+
+  @override
+  String get keyboardKeyInsert => 'Insert';
+
+  @override
+  String get keyboardKeyMeta => 'Meta';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'Ordú';
+
+  @override
+  String get keyboardKeyMetaWindows => 'Win';
+
+  @override
+  String get keyboardKeyNumLock => 'Uimhirghlas';
+
+  @override
+  String get keyboardKeyNumpad0 => 'Num 0';
+
+  @override
+  String get keyboardKeyNumpad1 => 'Num 1';
+
+  @override
+  String get keyboardKeyNumpad2 => 'Num 2';
+
+  @override
+  String get keyboardKeyNumpad3 => 'Num 3';
+
+  @override
+  String get keyboardKeyNumpad4 => 'Num 4';
+
+  @override
+  String get keyboardKeyNumpad5 => 'Num 5';
+
+  @override
+  String get keyboardKeyNumpad6 => 'Num 6';
+
+  @override
+  String get keyboardKeyNumpad7 => 'Num 7';
+
+  @override
+  String get keyboardKeyNumpad8 => 'Num 8';
+
+  @override
+  String get keyboardKeyNumpad9 => 'Num 9';
+
+  @override
+  String get keyboardKeyNumpadAdd => 'Num +';
+
+  @override
+  String get keyboardKeyNumpadComma => 'Num ,';
+
+  @override
+  String get keyboardKeyNumpadDecimal => 'Num .';
+
+  @override
+  String get keyboardKeyNumpadDivide => 'Num /';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
+
+  @override
+  String get keyboardKeyNumpadEqual => 'Num =';
+
+  @override
+  String get keyboardKeyNumpadMultiply => 'Num *';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => 'Num (';
+
+  @override
+  String get keyboardKeyNumpadParenRight => 'Num )';
+
+  @override
+  String get keyboardKeyNumpadSubtract => 'Num -';
+
+  @override
+  String get keyboardKeyPageDown => 'PgDown';
+
+  @override
+  String get keyboardKeyPageUp => 'PgUp';
+
+  @override
+  String get keyboardKeyPower => 'Cumhacht';
+
+  @override
+  String get keyboardKeyPowerOff => 'Múch';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Priontáil Scáileán';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scrollghlas';
+
+  @override
+  String get keyboardKeySelect => 'Roghnaigh';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
+  String get keyboardKeySpace => 'Space';
+
+  @override
+  String get lastPageTooltip => 'An leathanach deiridh';
+
+  @override
+  String? get licensesPackageDetailTextFew => r'$licenseCount cheadúnas';
+
+  @override
+  String? get licensesPackageDetailTextMany => r'$licenseCount gceadúnas';
+
+  @override
+  String? get licensesPackageDetailTextOne => 'Aon cheadúnas amháin';
+
+  @override
+  String get licensesPackageDetailTextOther => r'$licenseCount ceadúnas';
+
+  @override
+  String? get licensesPackageDetailTextTwo => r'$licenseCount cheadúnas';
+
+  @override
+  String? get licensesPackageDetailTextZero => null;
+
+  @override
+  String get licensesPageTitle => 'Ceadúnais';
+
+  @override
+  String get lookUpButtonLabel => 'Cuardaigh';
+
+  @override
+  String get menuBarMenuLabel => 'Roghchlár an bharra roghchláir';
+
+  @override
+  String get menuDismissLabel => 'Ruaig an roghchlár';
+
+  @override
+  String get modalBarrierDismissLabel => 'Ruaig';
+
+  @override
+  String get moreButtonTooltip => 'Tuilleadh';
+
+  @override
+  String get nextMonthTooltip => 'An chéad mhí eile';
+
+  @override
+  String get nextPageTooltip => 'An chéad leathanach eile';
+
+  @override
+  String get okButtonLabel => 'Ceart go leor';
+
+  @override
+  String get openAppDrawerTooltip => 'Oscail an roghchlár nascleanúna';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow-$lastRow de $rowCount';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow de thuairim is $rowCount';
+
+  @override
+  String get pasteButtonLabel => 'Greamaigh';
+
+  @override
+  String get popupMenuLabel => 'Roghchlár aníos';
+
+  @override
+  String get postMeridiemAbbreviation => 'I.N.';
+
+  @override
+  String get previousMonthTooltip => 'An mhí roimhe';
+
+  @override
+  String get previousPageTooltip => 'An leathanach roimhe seo';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'Athnuaigh';
+
+  @override
+  String? get remainingTextFieldCharacterCountFew => r'$remainingCount charachtar fágtha';
+
+  @override
+  String? get remainingTextFieldCharacterCountMany => r'$remainingCount gcarachtar fágtha';
+
+  @override
+  String? get remainingTextFieldCharacterCountOne => 'Aon charachtar amháin fágtha';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount carachtar fágtha';
+
+  @override
+  String? get remainingTextFieldCharacterCountTwo => r'$remainingCount charachtar fágtha';
+
+  @override
+  String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'Bog síos';
+
+  @override
+  String get reorderItemLeft => 'Bog ar chlé';
+
+  @override
+  String get reorderItemRight => 'Bog ar dheis';
+
+  @override
+  String get reorderItemToEnd => 'Bog chuig an deireadh';
+
+  @override
+  String get reorderItemToStart => 'Bog chuig an tús';
+
+  @override
+  String get reorderItemUp => 'Bog suas';
+
+  @override
+  String get rowsPerPageTitle => 'Rónna in aghaidh an leathanaigh:';
+
+  @override
+  String get saveButtonLabel => 'Sábháil';
+
+  @override
+  String get scanTextButtonLabel => 'Scan téacs';
+
+  @override
+  String get scrimLabel => 'Scrioma';
+
+  @override
+  String get scrimOnTapHintRaw => r'Dún $modalRouteContentName';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => 'Cuardaigh';
+
+  @override
+  String get searchWebButtonLabel => 'Cuardaigh an Gréasán';
+
+  @override
+  String get selectAllButtonLabel => 'Roghnaigh gach rud';
+
+  @override
+  String get selectYearSemanticsLabel => 'Roghnaigh bliain';
+
+  @override
+  String get selectedDateLabel => 'Roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleFew => r'$selectedRowCount mhír roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleMany => r'$selectedRowCount mír roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleOne => 'Aon mhír amháin roghnaithe';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount mír roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleTwo => r'$selectedRowCount mhír roghnaithe';
+
+  @override
+  String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'Comhroinn';
+
+  @override
+  String get showAccountsLabel => 'Taispeáin cuntais';
+
+  @override
+  String get showMenuTooltip => 'Taispeáin an roghchlár';
+
+  @override
+  String get signedInLabel => 'Sínithe isteach';
+
+  @override
+  String get tabLabelRaw => r'Cluaisín $tabIndex de $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+
+  @override
+  String get timePickerDialHelpText => 'Roghnaigh am';
+
+  @override
+  String get timePickerHourLabel => 'Uair';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'Roghnaigh uaireanta';
+
+  @override
+  String get timePickerInputHelpText => 'Cuir isteach am';
+
+  @override
+  String get timePickerMinuteLabel => 'Nóiméad';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'Roghnaigh nóiméid';
+
+  @override
+  String get unspecifiedDate => 'Dáta';
+
+  @override
+  String get unspecifiedDateRange => 'Raon Dátaí';
+
+  @override
+  String get viewLicensesButtonLabel => 'Féach ar cheadúnais';
+}
+
 /// The translations for Galician (`gl`).
 class MaterialLocalizationGl extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Galician.
@@ -17765,13 +18760,13 @@ class MaterialLocalizationHe extends GlobalMaterialLocalizations {
   String get expandedIconTapHint => 'כיווץ';
 
   @override
-  String get expansionTileCollapsedHint => 'כדי להרחיב, יש להקיש הקשה כפולה';
+  String get expansionTileCollapsedHint => 'כדי להרחיב, יש ללחוץ לחיצה כפולה';
 
   @override
   String get expansionTileCollapsedTapHint => 'ניתן להרחיב להצגת פרטים נוספים';
 
   @override
-  String get expansionTileExpandedHint => 'כדי לכווץ, יש להקיש הקשה כפולה';
+  String get expansionTileExpandedHint => 'כדי לכווץ, יש ללחוץ לחיצה כפולה';
 
   @override
   String get expansionTileExpandedTapHint => 'כיווץ';
@@ -18612,7 +19607,7 @@ class MaterialLocalizationHi extends GlobalMaterialLocalizations {
   String get tabLabelRaw => r'$tabCount का टैब $tabIndex';
 
   @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.a_space_h_colon_mm;
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.h_colon_mm_space_a;
 
   @override
   String get timePickerDialHelpText => 'समय चुनें';
@@ -21189,7 +22184,7 @@ class MaterialLocalizationIt extends GlobalMaterialLocalizations {
   String get cutButtonLabel => 'Taglia';
 
   @override
-  String get dateHelpText => 'mm/gg/aaaa';
+  String get dateHelpText => 'gg/mm/aaaa';
 
   @override
   String get dateInputLabel => 'Inserisci data';
@@ -26696,13 +27691,13 @@ class MaterialLocalizationMk extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedHint => 'допри двапати за проширување';
 
   @override
-  String get expansionTileCollapsedTapHint => 'Прошири за повеќе детали';
+  String get expansionTileCollapsedTapHint => 'проширување за повеќе детали';
 
   @override
   String get expansionTileExpandedHint => 'допрете двапати за собирање';
 
   @override
-  String get expansionTileExpandedTapHint => 'Собери';
+  String get expansionTileExpandedTapHint => 'собирање';
 
   @override
   String get firstPageTooltip => 'Прва страница';
@@ -31848,7 +32843,7 @@ class MaterialLocalizationOr extends GlobalMaterialLocalizations {
   String? get licensesPackageDetailTextZero => 'No licenses';
 
   @override
-  String get licensesPageTitle => 'ଲାଇସେନ୍ସଗୁଡ଼କ';
+  String get licensesPageTitle => 'ଲାଇସେନ୍ସ';
 
   @override
   String get lookUpButtonLabel => 'ଉପରକୁ ଦେଖନ୍ତୁ';
@@ -41496,6 +42491,502 @@ class MaterialLocalizationTr extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => 'Lisansları göster';
 }
 
+/// The translations for Uighur Uyghur (`ug`).
+class MaterialLocalizationUg extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Uighur Uyghur.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationUg({
+    super.localeName = 'ug',
+    required super.fullYearFormat,
+    required super.compactDateFormat,
+    required super.shortDateFormat,
+    required super.mediumDateFormat,
+    required super.longDateFormat,
+    required super.yearMonthFormat,
+    required super.shortMonthDayFormat,
+    required super.decimalFormat,
+    required super.twoDigitZeroPaddedFormat,
+  });
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName ھەققىدە';
+
+  @override
+  String get alertDialogLabel => 'ئاگاھلاندۇرۇش';
+
+  @override
+  String get anteMeridiemAbbreviation => 'چۈشتىن بۇرۇن';
+
+  @override
+  String get backButtonTooltip => 'قايتىش';
+
+  @override
+  String get bottomSheetLabel => 'ئاستىنقى كۆزنەك';
+
+  @override
+  String get calendarModeButtonLabel => 'كالېندارغا ئۆتۈش';
+
+  @override
+  String get cancelButtonLabel => 'بىكار قىلىش';
+
+  @override
+  String get clearButtonTooltip => 'تېكىستنى تازىلاش';
+
+  @override
+  String get closeButtonLabel => 'يېپىش';
+
+  @override
+  String get closeButtonTooltip => 'يېپىش';
+
+  @override
+  String get collapsedHint => 'يېيىلدى';
+
+  @override
+  String get collapsedIconTapHint => 'يېيىش';
+
+  @override
+  String get continueButtonLabel => 'داۋاملاشتۇرۇش';
+
+  @override
+  String get copyButtonLabel => 'كۆچۈرۈش';
+
+  @override
+  String get currentDateLabel => 'بۈگۈن';
+
+  @override
+  String get cutButtonLabel => 'كېسىش';
+
+  @override
+  String get dateHelpText => 'dd-mm-yyyy';
+
+  @override
+  String get dateInputLabel => 'چېسلا كىرگۈزۈش';
+
+  @override
+  String get dateOutOfRangeLabel => 'دائىرىدىن چىقىپ كەتتى';
+
+  @override
+  String get datePickerHelpText => 'چېسلا تاللاش';
+
+  @override
+  String get dateRangeEndDateSemanticLabelRaw => r'ئاخىرلىشىش ۋاقتى fullDate$';
+
+  @override
+  String get dateRangeEndLabel => 'ئاخىرلىشىش ۋاقتى';
+
+  @override
+  String get dateRangePickerHelpText => 'دائىرە تاللاش';
+
+  @override
+  String get dateRangeStartDateSemanticLabelRaw => r'باشلىنىش ۋاقتى fullDate$';
+
+  @override
+  String get dateRangeStartLabel => 'باشلىنىش ۋاقتى';
+
+  @override
+  String get dateSeparator => '-';
+
+  @override
+  String get deleteButtonTooltip => 'ئۆچۈرۈش';
+
+  @override
+  String get dialModeButtonLabel => 'ئىشكالا تاختىسىدا تاللاش ھالىتىگە ئۆتۈش';
+
+  @override
+  String get dialogLabel => 'دىئالوگ';
+
+  @override
+  String get drawerLabel => 'يېتەگلىگۈچى تىزىملىكى';
+
+  @override
+  String get expandedHint => 'يىغىلدى';
+
+  @override
+  String get expandedIconTapHint => 'يىغىش';
+
+  @override
+  String get expansionTileCollapsedHint => 'يېيىش ئۈچۈن قوش چېكىڭ';
+
+  @override
+  String get expansionTileCollapsedTapHint => 'تېخىمۇ كۆپ تەپسىلاتلار ئۈچۈن يېيىڭ';
+
+  @override
+  String get expansionTileExpandedHint => 'يىغىش ئۈچۈن قوش چېكىڭ';
+
+  @override
+  String get expansionTileExpandedTapHint => 'يىغىش';
+
+  @override
+  String get firstPageTooltip => 'بىرىنچى بەت';
+
+  @override
+  String get hideAccountsLabel => 'ھېساباتنى يوشۇرۇش';
+
+  @override
+  String get inputDateModeButtonLabel => 'خەت كىرگۈزۈشكە ئۆتۈش';
+
+  @override
+  String get inputTimeModeButtonLabel => 'خەت كىرگۈزۈش ھالىتىگە ئۆتۈش';
+
+  @override
+  String get invalidDateFormatLabel => 'فورمات ئىناۋەتسىز.';
+
+  @override
+  String get invalidDateRangeLabel => 'دائىرە ئىناۋەتسىز.';
+
+  @override
+  String get invalidTimeLabel => 'ئىناۋەتلىك بىر ۋاقىت كىرگۈزۈڭ';
+
+  @override
+  String get keyboardKeyAlt => 'Alt';
+
+  @override
+  String get keyboardKeyAltGraph => 'AltGr';
+
+  @override
+  String get keyboardKeyBackspace => 'Backspace';
+
+  @override
+  String get keyboardKeyCapsLock => 'Caps Lock';
+
+  @override
+  String get keyboardKeyChannelDown => 'ئاستىنقى قانال';
+
+  @override
+  String get keyboardKeyChannelUp => 'يۇقىرىقى قانال';
+
+  @override
+  String get keyboardKeyControl => 'Ctrl';
+
+  @override
+  String get keyboardKeyDelete => 'Del';
+
+  @override
+  String get keyboardKeyEject => 'Eject';
+
+  @override
+  String get keyboardKeyEnd => 'End';
+
+  @override
+  String get keyboardKeyEscape => 'Esc';
+
+  @override
+  String get keyboardKeyFn => 'Fn';
+
+  @override
+  String get keyboardKeyHome => 'باشبەت';
+
+  @override
+  String get keyboardKeyInsert => 'قىستۇرۇش';
+
+  @override
+  String get keyboardKeyMeta => 'مېتا';
+
+  @override
+  String get keyboardKeyMetaMacOs => 'بۇيرۇق';
+
+  @override
+  String get keyboardKeyMetaWindows => 'Win';
+
+  @override
+  String get keyboardKeyNumLock => 'Num Lock';
+
+  @override
+  String get keyboardKeyNumpad0 => 'Num 0';
+
+  @override
+  String get keyboardKeyNumpad1 => 'Num 1';
+
+  @override
+  String get keyboardKeyNumpad2 => 'Num 2';
+
+  @override
+  String get keyboardKeyNumpad3 => 'Num 3';
+
+  @override
+  String get keyboardKeyNumpad4 => 'Num 4';
+
+  @override
+  String get keyboardKeyNumpad5 => 'Num 5';
+
+  @override
+  String get keyboardKeyNumpad6 => 'Num 6';
+
+  @override
+  String get keyboardKeyNumpad7 => 'Num 7';
+
+  @override
+  String get keyboardKeyNumpad8 => 'Num 8';
+
+  @override
+  String get keyboardKeyNumpad9 => 'Num 9';
+
+  @override
+  String get keyboardKeyNumpadAdd => '+ Num';
+
+  @override
+  String get keyboardKeyNumpadComma => ', Num';
+
+  @override
+  String get keyboardKeyNumpadDecimal => '. Num';
+
+  @override
+  String get keyboardKeyNumpadDivide => '/ Num';
+
+  @override
+  String get keyboardKeyNumpadEnter => 'Num Enter';
+
+  @override
+  String get keyboardKeyNumpadEqual => '= Num';
+
+  @override
+  String get keyboardKeyNumpadMultiply => '* Num';
+
+  @override
+  String get keyboardKeyNumpadParenLeft => ') Num';
+
+  @override
+  String get keyboardKeyNumpadParenRight => '( Num';
+
+  @override
+  String get keyboardKeyNumpadSubtract => '- Num';
+
+  @override
+  String get keyboardKeyPageDown => 'PgDown';
+
+  @override
+  String get keyboardKeyPageUp => 'PgUp';
+
+  @override
+  String get keyboardKeyPower => 'توك';
+
+  @override
+  String get keyboardKeyPowerOff => 'ئېتىش';
+
+  @override
+  String get keyboardKeyPrintScreen => 'Print Screen';
+
+  @override
+  String get keyboardKeyScrollLock => 'Scroll Lock';
+
+  @override
+  String get keyboardKeySelect => 'تاللاش';
+
+  @override
+  String get keyboardKeyShift => 'Shift';
+
+  @override
+  String get keyboardKeySpace => 'بوشلۇق';
+
+  @override
+  String get lastPageTooltip => 'ئاخىرقى بەت';
+
+  @override
+  String? get licensesPackageDetailTextFew => null;
+
+  @override
+  String? get licensesPackageDetailTextMany => null;
+
+  @override
+  String? get licensesPackageDetailTextOne => '1 ئىجازەتنامە';
+
+  @override
+  String get licensesPackageDetailTextOther => r'$licenseCount ئىجازەتنامە';
+
+  @override
+  String? get licensesPackageDetailTextTwo => null;
+
+  @override
+  String? get licensesPackageDetailTextZero => null;
+
+  @override
+  String get licensesPageTitle => 'ئىجازەتننامىلەر';
+
+  @override
+  String get lookUpButtonLabel => 'ئىزدەش';
+
+  @override
+  String get menuBarMenuLabel => 'تىزىملىك بالدىقى تىزىملىكى';
+
+  @override
+  String get menuDismissLabel => 'تىزىملىكنى بىكار قىلىش';
+
+  @override
+  String get modalBarrierDismissLabel => 'بىكار قىلىش';
+
+  @override
+  String get moreButtonTooltip => 'تېخىمۇ كۆپ';
+
+  @override
+  String get nextMonthTooltip => 'كېيىنكى ئاي';
+
+  @override
+  String get nextPageTooltip => 'كېيىنكى بەت';
+
+  @override
+  String get okButtonLabel => 'ماقۇل';
+
+  @override
+  String get openAppDrawerTooltip => 'يېتەكچى تىزىملىكىنى ئېچىىش';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'جەمئىي $rowCount قۇر $firstRow-دىن $lastRow-گىچە';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'تەخمىنەن جەمئىي $rowCount قۇر $firstRow-دىن $lastRow-گىچە';
+
+  @override
+  String get pasteButtonLabel => 'چاپلاش';
+
+  @override
+  String get popupMenuLabel => 'سەكرىمە تىزىملىك';
+
+  @override
+  String get postMeridiemAbbreviation => 'چۈشتىن كېيىن';
+
+  @override
+  String get previousMonthTooltip => 'ئالدىنقى ئاي';
+
+  @override
+  String get previousPageTooltip => 'ئالدىنقى بەت';
+
+  @override
+  String get refreshIndicatorSemanticLabel => 'يېڭىلاش';
+
+  @override
+  String? get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountOne => '1 ھەرپ-بەلگە قالدى';
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount ھەرپ-بەلگە قالدى';
+
+  @override
+  String? get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String? get remainingTextFieldCharacterCountZero => null;
+
+  @override
+  String get reorderItemDown => 'ئاستىغا يۆتكەش';
+
+  @override
+  String get reorderItemLeft => 'سولغا يۆتكەش';
+
+  @override
+  String get reorderItemRight => 'ئوڭغا يۆتكەش';
+
+  @override
+  String get reorderItemToEnd => 'ئاخىرىغا يۆتكەش';
+
+  @override
+  String get reorderItemToStart => 'باشلىنىشقا يۆتكەش';
+
+  @override
+  String get reorderItemUp => 'يۇقىرىغا يۆتكەش';
+
+  @override
+  String get rowsPerPageTitle => 'ھەر بەتتىكى قۇر سانى:';
+
+  @override
+  String get saveButtonLabel => 'ساقلاش';
+
+  @override
+  String get scanTextButtonLabel => 'تېكىستنى سايىلەش';
+
+  @override
+  String get scrimLabel => 'Scrim';
+
+  @override
+  String get scrimOnTapHintRaw => r'$modalRouteContentName نى يېپىش';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.tall;
+
+  @override
+  String get searchFieldLabel => 'ئىزدەش';
+
+  @override
+  String get searchWebButtonLabel => 'توردا ئىزدەش';
+
+  @override
+  String get selectAllButtonLabel => 'ھەممىنى تاللاش';
+
+  @override
+  String get selectYearSemanticsLabel => 'يىل تاللاش';
+
+  @override
+  String get selectedDateLabel => 'تاللاندى';
+
+  @override
+  String? get selectedRowCountTitleFew => null;
+
+  @override
+  String? get selectedRowCountTitleMany => null;
+
+  @override
+  String? get selectedRowCountTitleOne => '1 ماددا تاللاندى';
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount ماددا تاللاندى';
+
+  @override
+  String? get selectedRowCountTitleTwo => null;
+
+  @override
+  String? get selectedRowCountTitleZero => null;
+
+  @override
+  String get shareButtonLabel => 'ھەمبەھرلەش';
+
+  @override
+  String get showAccountsLabel => 'ھېساباتنى كۆرسىتىش';
+
+  @override
+  String get showMenuTooltip => 'تىزىملىكنى كۆرسىتىش';
+
+  @override
+  String get signedInLabel => 'تىزىملاپ كىردىڭىز';
+
+  @override
+  String get tabLabelRaw => r'بەتكۈچ $tabIndex جەمئىي $tabCount';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.HH_colon_mm;
+
+  @override
+  String get timePickerDialHelpText => 'ۋاقىت تاللاش';
+
+  @override
+  String get timePickerHourLabel => 'سائەت';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'سائەت تاللاش';
+
+  @override
+  String get timePickerInputHelpText => 'ۋاقىت كىرگۈزۈش';
+
+  @override
+  String get timePickerMinuteLabel => 'مىنۇت';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'مىنۇت تاللاش';
+
+  @override
+  String get unspecifiedDate => 'چېسلا';
+
+  @override
+  String get unspecifiedDateRange => 'چېسلا دائىرىسى';
+
+  @override
+  String get viewLicensesButtonLabel => 'ئىجازەتنامىلەرنى كۆرۈش';
+}
+
 /// The translations for Ukrainian (`uk`).
 class MaterialLocalizationUk extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Ukrainian.
@@ -45033,6 +46524,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'be', // Belarusian
   'bg', // Bulgarian
   'bn', // Bengali Bangla
+  'bo', // Tibetan
   'bs', // Bosnian
   'ca', // Catalan Valencian
   'cs', // Czech
@@ -45048,6 +46540,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'fi', // Finnish
   'fil', // Filipino Pilipino
   'fr', // French
+  'ga', // Irish
   'gl', // Galician
   'gsw', // Swiss German Alemannic Alsatian
   'gu', // Gujarati
@@ -45098,6 +46591,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'th', // Thai
   'tl', // Tagalog
   'tr', // Turkish
+  'ug', // Uighur Uyghur
   'uk', // Ukrainian
   'ur', // Urdu
   'uz', // Uzbek
@@ -45124,6 +46618,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `be` - Belarusian
 ///  * `bg` - Bulgarian
 ///  * `bn` - Bengali Bangla
+///  * `bo` - Tibetan
 ///  * `bs` - Bosnian
 ///  * `ca` - Catalan Valencian
 ///  * `cs` - Czech
@@ -45139,6 +46634,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `fi` - Finnish
 ///  * `fil` - Filipino Pilipino
 ///  * `fr` - French (plus one country variation)
+///  * `ga` - Irish
 ///  * `gl` - Galician
 ///  * `gsw` - Swiss German Alemannic Alsatian
 ///  * `gu` - Gujarati
@@ -45189,6 +46685,7 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `th` - Thai
 ///  * `tl` - Tagalog
 ///  * `tr` - Turkish
+///  * `ug` - Uighur Uyghur
 ///  * `uk` - Ukrainian
 ///  * `ur` - Urdu
 ///  * `uz` - Uzbek
@@ -45228,6 +46725,8 @@ GlobalMaterialLocalizations? getMaterialTranslation(
       return MaterialLocalizationBg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bn':
       return MaterialLocalizationBn(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'bo':
+      return MaterialLocalizationBo(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'bs':
       return MaterialLocalizationBs(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ca':
@@ -45330,6 +46829,8 @@ GlobalMaterialLocalizations? getMaterialTranslation(
       }
       return MaterialLocalizationFr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     }
+    case 'ga':
+      return MaterialLocalizationGa(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gl':
       return MaterialLocalizationGl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'gsw':
@@ -45444,6 +46945,8 @@ GlobalMaterialLocalizations? getMaterialTranslation(
       return MaterialLocalizationTl(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'tr':
       return MaterialLocalizationTr(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'ug':
+      return MaterialLocalizationUg(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'uk':
       return MaterialLocalizationUk(fullYearFormat: fullYearFormat, compactDateFormat: compactDateFormat, shortDateFormat: shortDateFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, shortMonthDayFormat: shortMonthDayFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ur':

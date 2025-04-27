@@ -1,0 +1,58 @@
+name: web_sdk_tests
+
+# Keep the SDK version range in sync with lib/web_ui/pubspec.yaml
+environment:
+  sdk: ^3.7.0-0
+
+dependencies:
+  args: any # see dependency_overrides
+  path: any # see dependency_overrides
+
+dev_dependencies:
+  # Using the bundled analyzer (see dependency_overrides) to always be
+  # up-to-date instead of a version from pub, which may not have the latest
+  # language features enabled.
+  analyzer: any
+  test: 1.24.8
+
+dependency_overrides: # Must include all transitive dependencies from the "any" packages above.
+  _fe_analyzer_shared:
+    path: ../third_party/dart/pkg/_fe_analyzer_shared
+  analyzer:
+    path: ../third_party/dart/pkg/analyzer
+  args:
+    path: ../third_party/dart/third_party/pkg/core/pkgs/args
+  async:
+    path: ../third_party/dart/third_party/pkg/core/pkgs/async
+  collection:
+    path: ../third_party/dart/third_party/pkg/core/pkgs/collection
+  convert:
+    path: ../third_party/dart/third_party/pkg/core/pkgs/convert
+  crypto:
+    path: ../third_party/dart/third_party/pkg/core/pkgs/crypto
+  dart_internal:
+    path: ../third_party/dart/pkg/dart_internal
+  file:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/file
+  glob:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/glob
+  meta:
+    path: ../third_party/dart/pkg/meta
+  package_config:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/package_config
+  path:
+    path: ../third_party/dart/third_party/pkg/core/pkgs/path
+  pub_semver:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/pub_semver
+  source_span:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/source_span
+  string_scanner:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/string_scanner
+  term_glyph:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/term_glyph
+  typed_data:
+    path: ../third_party/dart/third_party/pkg/core/pkgs/typed_data
+  watcher:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/watcher
+  yaml:
+    path: ../third_party/dart/third_party/pkg/tools/pkgs/yaml

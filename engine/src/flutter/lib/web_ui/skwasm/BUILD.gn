@@ -1,0 +1,72 @@
+# Copyright 2019 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/toolchain/wasm.gni")
+
+wasm_lib("skwasm") {
+  public_configs = [ "//flutter:config" ]
+
+  sources = [
+    "canvas.cpp",
+    "contour_measure.cpp",
+    "data.cpp",
+    "export.h",
+    "filters.cpp",
+    "fonts.cpp",
+    "helpers.h",
+    "image.cpp",
+    "paint.cpp",
+    "path.cpp",
+    "picture.cpp",
+    "shaders.cpp",
+    "skwasm_support.h",
+    "string.cpp",
+    "surface.cpp",
+    "text/line_metrics.cpp",
+    "text/paragraph.cpp",
+    "text/paragraph_builder.cpp",
+    "text/paragraph_style.cpp",
+    "text/strut_style.cpp",
+    "text/text_style.cpp",
+    "vertices.cpp",
+    "wrappers.h",
+  ]
+
+  cflags = [ "-mreference-types" ]
+
+  ldflags = [
+    "-std=c++20",
+    "-lGL",
+    "-sUSE_WEBGL2=1",
+    "-sMAX_WEBGL_VERSION=2",
+    "-sOFFSCREENCANVAS_SUPPORT",
+    "-sALLOW_MEMORY_GROWTH",
+    "-sALLOW_TABLE_GROWTH",
+    "-lexports.js",
+    "-sEXPORTED_FUNCTIONS=[stackAlloc]",
+    "-sEXPORTED_RUNTIME_METHODS=[addFunction,wasmExports,wasmMemory,stackAlloc]",
+    "-sINCOMING_MODULE_JS_API=[instantiateWasm,locateFile,noExitRuntime,mainScriptUrlOrBlob,wasmMemory,wasm,skwasmSingleThreaded]",
+    "-sUSE_ES6_IMPORT_META=0",
+    "--js-library",
+    rebase_path("library_skwasm_support.js"),
+  ]
+
+  inputs = [ rebase_path("library_skwasm_support.js") ]
+
+  if (is_debug) {
+    ldflags += [
+      "-sASSERTIONS=1",
+      "-sGL_ASSERTIONS=1",
+      "-sSTACK_OVERFLOW_CHECK=2",
+    ]
+  } else {
+    ldflags += [ "--closure=1" ]
+  }
+
+  deps = [
+    "//flutter/skia",
+    "//flutter/skia/modules/skparagraph",
+    "//flutter/skia/modules/skunicode",
+  ]
+}

@@ -3,31 +3,23 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_api_samples/painting/gradient/linear_gradient.0.dart'
-    as example;
+import 'package:flutter_api_samples/painting/gradient/linear_gradient.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('finds a gradient', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: example.MoodyGradient(),
-      ),
-    );
+    await tester.pumpWidget(const MaterialApp(home: example.MoodyGradient()));
 
     expect(find.byType(example.MoodyGradient), findsOneWidget);
   });
 
   testWidgets('gradient matches golden', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(useMaterial3: true),
-        home: const SizedBox(
+      const MaterialApp(
+        home: SizedBox(
           width: 800,
           height: 600,
-          child: RepaintBoundary(
-            child: example.MoodyGradient(),
-          ),
+          child: RepaintBoundary(child: example.MoodyGradient()),
         ),
       ),
     );

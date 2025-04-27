@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
+
 class User {
-  const User({
-    required this.email,
-    required this.name,
-  });
+  const User({required this.email, required this.name});
 
   final String email;
   final String name;
@@ -213,7 +214,12 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (
+              BuildContext context,
+              TextEditingController textEditingController,
+              FocusNode focusNode,
+              VoidCallback onFieldSubmitted,
+            ) {
               return Container(key: fieldKey);
             },
           ),
@@ -237,7 +243,11 @@ void main() {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder: (
+              BuildContext context,
+              AutocompleteOnSelected<String> onSelected,
+              Iterable<String> options,
+            ) {
               return Container(key: optionsKey);
             },
           ),
@@ -255,16 +265,22 @@ void main() {
     expect(find.byKey(optionsKey), findsOneWidget);
   });
 
-  testWidgets('the default Autocomplete options widget has a maximum height of 200', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(home: Scaffold(
-      body: Autocomplete<String>(
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          return kOptions.where((String option) {
-            return option.contains(textEditingValue.text.toLowerCase());
-          });
-        },
+  testWidgets('the default Autocomplete options widget has a maximum height of 200', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
       ),
-    )));
+    );
 
     final Finder listFinder = find.byType(ListView);
     final Finder inputFinder = find.byType(TextFormField);
@@ -278,17 +294,20 @@ void main() {
 
   testWidgets('the options height restricts to max desired height', (WidgetTester tester) async {
     const double desiredHeight = 150.0;
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-      body: Autocomplete<String>(
-        optionsMaxHeight: desiredHeight,
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          return kOptions.where((String option) {
-            return option.contains(textEditingValue.text.toLowerCase());
-          });
-        },
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsMaxHeight: desiredHeight,
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
       ),
-    )));
+    );
 
     /// entering "a" returns 9 items from kOptions so basically the
     /// height of 9 options would be beyond `desiredHeight=150`,
@@ -305,53 +324,58 @@ void main() {
     expect(resultingHeight, equals(desiredHeight));
   });
 
-  testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight', (WidgetTester tester) async {
-    // Returns a Future with the height of the default [Autocomplete] options widget
-    // after the provided text had been entered into the [Autocomplete] field.
-    Future<double> getDefaultOptionsHeight(
-        WidgetTester tester, String enteredText) async {
+  testWidgets(
+    'The height of options shrinks to height of resulting items, if less than maxHeight',
+    (WidgetTester tester) async {
+      // Returns a Future with the height of the default [Autocomplete] options widget
+      // after the provided text had been entered into the [Autocomplete] field.
+      Future<double> getDefaultOptionsHeight(WidgetTester tester, String enteredText) async {
+        final Finder listFinder = find.byType(ListView);
+        final Finder inputFinder = find.byType(TextFormField);
+        final TextFormField field = inputFinder.evaluate().first.widget as TextFormField;
+        field.controller!.clear();
+        await tester.tap(inputFinder);
+        await tester.enterText(inputFinder, enteredText);
+        await tester.pump();
+        final Size baseSize = tester.getSize(listFinder);
+        return baseSize.height;
+      }
+
+      const double maxOptionsHeight = 250.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Autocomplete<String>(
+              optionsMaxHeight: maxOptionsHeight,
+              optionsBuilder: (TextEditingValue textEditingValue) {
+                return kOptions.where((String option) {
+                  return option.contains(textEditingValue.text.toLowerCase());
+                });
+              },
+            ),
+          ),
+        ),
+      );
+
       final Finder listFinder = find.byType(ListView);
-      final Finder inputFinder = find.byType(TextFormField);
-      final TextFormField field = inputFinder.evaluate().first.widget as TextFormField;
-      field.controller!.clear();
-      await tester.tap(inputFinder);
-      await tester.enterText(inputFinder, enteredText);
-      await tester.pump();
-      final Size baseSize = tester.getSize(listFinder);
-      return baseSize.height;
-    }
+      expect(listFinder, findsNothing);
 
-    const double maxOptionsHeight = 250.0;
-    await tester.pumpWidget(MaterialApp(
-      home: Scaffold(
-      body: Autocomplete<String>(
-        optionsMaxHeight: maxOptionsHeight,
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          return kOptions.where((String option) {
-            return option.contains(textEditingValue.text.toLowerCase());
-          });
-        },
-      ),
-    )));
+      // Entering `a` returns 9 items(height > `maxOptionsHeight`) from the kOptions
+      // so height gets restricted to `maxOptionsHeight =250`.
+      final double nineItemsHeight = await getDefaultOptionsHeight(tester, 'a');
+      expect(nineItemsHeight, equals(maxOptionsHeight));
 
-    final Finder listFinder = find.byType(ListView);
-    expect(listFinder, findsNothing);
+      // Returns 2 Items (height < `maxOptionsHeight`)
+      // so options height shrinks to 2 Items combined height.
+      final double twoItemsHeight = await getDefaultOptionsHeight(tester, 'el');
+      expect(twoItemsHeight, lessThan(maxOptionsHeight));
 
-    // Entering `a` returns 9 items(height > `maxOptionsHeight`) from the kOptions
-    // so height gets restricted to `maxOptionsHeight =250`.
-    final double nineItemsHeight = await getDefaultOptionsHeight(tester, 'a');
-    expect(nineItemsHeight, equals(maxOptionsHeight));
-
-    // Returns 2 Items (height < `maxOptionsHeight`)
-    // so options height shrinks to 2 Items combined height.
-    final double twoItemsHeight = await getDefaultOptionsHeight(tester, 'el');
-    expect(twoItemsHeight, lessThan(maxOptionsHeight));
-
-    // Returns 1 item (height < `maxOptionsHeight`) from `kOptions`
-    // so options height shrinks to 1 items height.
-    final double oneItemsHeight = await getDefaultOptionsHeight(tester, 'elep');
-    expect(oneItemsHeight, lessThan(twoItemsHeight));
-  });
+      // Returns 1 item (height < `maxOptionsHeight`) from `kOptions`
+      // so options height shrinks to 1 items height.
+      final double oneItemsHeight = await getDefaultOptionsHeight(tester, 'elep');
+      expect(oneItemsHeight, lessThan(twoItemsHeight));
+    },
+  );
 
   testWidgets('initialValue sets initial text field value', (WidgetTester tester) async {
     late String lastSelection;
@@ -376,10 +400,7 @@ void main() {
     // The field is always rendered, but the options are not unless needed.
     expect(find.byType(TextFormField), findsOneWidget);
     expect(find.byType(ListView), findsNothing);
-    expect(
-      tester.widget<TextFormField>(find.byType(TextFormField)).controller!.text,
-      'lem',
-    );
+    expect(tester.widget<TextFormField>(find.byType(TextFormField)).controller!.text, 'lem');
 
     // Focus the empty field. All the options are displayed.
     await tester.tap(find.byType(TextFormField));
@@ -403,7 +424,9 @@ void main() {
   // Ensures that the option with the given label has a given background color
   // if given, or no background if color is null.
   void checkOptionHighlight(WidgetTester tester, String label, Color? color) {
-    final RenderBox renderBox = tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
+    final RenderBox renderBox = tester.renderObject<RenderBox>(
+      find.ancestor(matching: find.byType(Container), of: find.text(label)),
+    );
     if (color != null) {
       // Check to see that the container is painted with the highlighted background color.
       expect(renderBox, paints..rect(color: color));
@@ -414,13 +437,13 @@ void main() {
     }
   }
 
-  testWidgets('keyboard navigation of the options properly highlights the option', (WidgetTester tester) async {
+  testWidgets('keyboard navigation of the options properly highlights the option', (
+    WidgetTester tester,
+  ) async {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
-          focusColor: highlightColor,
-        ),
+        theme: ThemeData(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -453,11 +476,13 @@ void main() {
     checkOptionHighlight(tester, 'elephant', highlightColor);
   });
 
-  testWidgets('keyboard navigation keeps the highlighted option scrolled into view', (WidgetTester tester) async {
+  testWidgets('keyboard navigation keeps the highlighted option scrolled into view', (
+    WidgetTester tester,
+  ) async {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(focusColor: highlightColor),
+        theme: ThemeData(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -497,10 +522,7 @@ void main() {
 
     // Highlighted item 'lemur' should be centered in the options popup.
     checkOptionHighlight(tester, 'lemur', highlightColor);
-    expect(
-      tester.getCenter(find.text('lemur')).dy,
-      equals(optionsGroupRect.center.dy),
-    );
+    expect(tester.getCenter(find.text('lemur')).dy, equals(optionsGroupRect.center.dy));
 
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown); // Select 'mouse'.
     await tester.pumpAndSettle();
@@ -527,8 +549,10 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-        .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual =
+          tester
+              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+              .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
@@ -537,14 +561,17 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: Autocomplete<String>(
-              optionsViewOpenDirection: OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
+              optionsViewOpenDirection:
+                  OptionsViewOpenDirection.down, // ignore: avoid_redundant_argument_values
               optionsBuilder: (TextEditingValue textEditingValue) => <String>['a'],
             ),
           ),
         ),
       );
-      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-        .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual =
+          tester
+              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+              .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.down));
     });
 
@@ -561,13 +588,250 @@ void main() {
           ),
         ),
       );
-      final OptionsViewOpenDirection actual = tester.widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
-        .optionsViewOpenDirection;
+      final OptionsViewOpenDirection actual =
+          tester
+              .widget<RawAutocomplete<String>>(find.byType(RawAutocomplete<String>))
+              .optionsViewOpenDirection;
       expect(actual, equals(OptionsViewOpenDirection.up));
 
       await tester.tap(find.byType(RawAutocomplete<String>));
       await tester.enterText(find.byType(RawAutocomplete<String>), 'a');
+      await tester.pump();
       expect(find.text('aa').hitTestable(), findsOneWidget);
     });
+  });
+
+  testWidgets('can jump to options that are not yet built', (WidgetTester tester) async {
+    const Color highlightColor = Color(0xFF112233);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(focusColor: highlightColor),
+        home: Scaffold(
+          body: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              return kOptions.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextFormField));
+    await tester.pump();
+    expect(find.byType(ListView), findsOneWidget);
+    final ListView list = find.byType(ListView).evaluate().first.widget as ListView;
+    expect(list.semanticChildCount, kOptions.length);
+
+    Finder optionFinder(int index) {
+      return find.ancestor(
+        matching: find.byType(Container),
+        of: find.text(kOptions.elementAt(index)),
+      );
+    }
+
+    expect(optionFinder(0), findsOneWidget);
+    expect(optionFinder(kOptions.length - 1), findsNothing);
+
+    // Jump to the bottom.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pumpAndSettle();
+    expect(optionFinder(0), findsNothing);
+    expect(optionFinder(kOptions.length - 1), findsOneWidget);
+    checkOptionHighlight(tester, kOptions.last, highlightColor);
+
+    // Jump to the top.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
+    await tester.pumpAndSettle();
+    expect(optionFinder(0), findsOneWidget);
+    expect(optionFinder(kOptions.length - 1), findsNothing);
+    checkOptionHighlight(tester, kOptions.first, highlightColor);
+  });
+
+  testWidgets('Autocomplete suggestions are hit-tested before ListTiles', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  const List<String> options = <String>['Apple', 'Banana', 'Cherry'];
+                  return options.where(
+                    (String option) => option.toLowerCase().contains(textEditingValue.text),
+                  );
+                },
+              ),
+              for (int i = 0; i < 3; i++) ListTile(title: Text('Item $i'), onTap: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // Check the semantics tree based on hit-testing order.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 7,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Item 2',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 6,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Item 1',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 5,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Item 0',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 8,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 9,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 13,
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      id: 12,
+                                      tags: <SemanticsTag>[
+                                        const SemanticsTag('RenderViewport.twoPane'),
+                                      ],
+                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                      actions: <SemanticsAction>[
+                                        SemanticsAction.tap,
+                                        SemanticsAction.focus,
+                                      ],
+                                      label: 'Cherry',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                    TestSemantics(
+                                      id: 11,
+                                      tags: <SemanticsTag>[
+                                        const SemanticsTag('RenderViewport.twoPane'),
+                                      ],
+                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                      actions: <SemanticsAction>[
+                                        SemanticsAction.tap,
+                                        SemanticsAction.focus,
+                                      ],
+                                      label: 'Banana',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                    TestSemantics(
+                                      id: 10,
+                                      tags: <SemanticsTag>[
+                                        const SemanticsTag('RenderViewport.twoPane'),
+                                      ],
+                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                      actions: <SemanticsAction>[
+                                        SemanticsAction.tap,
+                                        SemanticsAction.focus,
+                                      ],
+                                      label: 'Apple',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocused,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                            SemanticsAction.setSelection,
+                            SemanticsAction.setText,
+                            SemanticsAction.focus,
+                            if (kIsWeb) SemanticsAction.paste,
+                          ],
+                          textDirection: TextDirection.ltr,
+                          textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                          validationResult: SemanticsValidationResult.valid,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+      ),
+    );
+
+    final Finder cherryFinder = find.text('Cherry');
+    expect(cherryFinder, findsOneWidget);
+
+    await tester.tap(cherryFinder);
+    await tester.pump();
+
+    expect(find.widgetWithText(TextField, 'Cherry'), findsOneWidget);
+    semantics.dispose();
   });
 }
