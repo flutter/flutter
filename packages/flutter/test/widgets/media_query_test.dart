@@ -1748,14 +1748,14 @@ void main() {
     final Widget showWidth = Builder(
       builder: (BuildContext context) {
         widthBuildCount++;
-        return Text('width: ${MediaQuery.widthOf(context)}');
+        return Text('width: ${MediaQuery.widthOf(context).toStringAsFixed(1)}');
       },
     );
 
     final Widget showHeight = Builder(
       builder: (BuildContext context) {
         heightBuildCount++;
-        return Text('height: ${MediaQuery.heightOf(context)}');
+        return Text('height: ${MediaQuery.heightOf(context).toStringAsFixed(1)}');
       },
     );
 
