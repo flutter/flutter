@@ -30,7 +30,7 @@ import 'android_sdk.dart';
 // Please see the README before changing any of these values.
 
 // See https://gradle.org/releases
-const String templateDefaultGradleVersion = '8.12';
+const String templateDefaultGradleVersion = '8.14';
 
 // See https://mvnrepository.com/artifact/com.android.tools.build/gradle
 const String templateAndroidGradlePluginVersion = '8.7.3';
@@ -61,7 +61,7 @@ const String oneMajorVersionHigherJavaVersion = '24';
 //
 // Supported here means supported by the tooling for
 // flutter analyze --suggestions and does not imply broader flutter support.
-const String maxKnownAndSupportedGradleVersion = '8.12';
+const String maxKnownAndSupportedGradleVersion = '8.14';
 
 // Update this with new KGP versions come out including minor versions.
 //
