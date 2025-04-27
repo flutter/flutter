@@ -60,9 +60,7 @@ class PluginRegistrarMapImpl : public PluginRegistrarMap {
     map_.erase(it);
   }
 
-  void Clear() override {
-    ClearAndDestruct();
-  }
+  void Clear() override { ClearAndDestruct(); }
 
  private:
   void ClearAndDestruct() {
