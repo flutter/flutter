@@ -7,7 +7,7 @@ _If you are a contributor or team of contributors with long-term plans for [cont
 # 2025
 
 This roadmap is aspirational. It represents primarily content gathered from those of us who work on Flutter as employees of Google. By now non-Google contributors outnumber those employed by Google, so this is not an exhaustive list of all the new and exciting things that we hope will come to Flutter this year!
-As aways in the software business it can be difficult to accurately forecast engineering work — even more so for an open source project. So please be mindful that what we cover here is a statement of intent and not a guarantee.
+As always in the software business it can be difficult to accurately forecast engineering work — even more so for an open source project. So please be mindful that what we cover here is a statement of intent and not a guarantee.
 
 ## Accessibility
 In 2024 we completed validation of several key use cases for accessibility on mobile platforms (iOS and Android). In 2025 we plan to focus on further accessibility support for the web platform.
