@@ -20,18 +20,13 @@ class PluginRegistrarMapImpl : public PluginRegistrarMap {
   using WrapperMap =
       std::map<FlutterDesktopPluginRegistrarRef,
                std::pair<PluginRegistrar*, OnPluginRegistrarDestructed>>;
+
  public:
-  ~PluginRegistrarMapImpl() {
-    clear();
-  }
+  ~PluginRegistrarMapImpl() { clear(); }
 
-  void* allocate_memory(size_t size) override {
-    return malloc(size);
-  }
+  void* allocate_memory(size_t size) override { return malloc(size); }
 
-  void release_memory(void* address) override {
-    free(address);
-  }
+  void release_memory(void* address) override { free(address); }
 
   PluginRegistrar* emplace_if_needed(
       FlutterDesktopPluginRegistrarRef registrar_ref,
@@ -51,7 +46,8 @@ class PluginRegistrarMapImpl : public PluginRegistrarMap {
 
   void erase(FlutterDesktopPluginRegistrarRef registrar_ref) override {
     auto it = map_.find(registrar_ref);
-    if (it == map_.end())  return;
+    if (it == map_.end())
+      return;
 
     PluginRegistrar* registrar_wrapper = it->second.first;
     OnPluginRegistrarDestructed on_destructed = it->second.second;
@@ -80,7 +76,7 @@ class PluginRegistrarMapImpl : public PluginRegistrarMap {
   WrapperMap map_;
 };
 
-}
+}  // namespace
 
 // ===== PluginRegistrar =====
 

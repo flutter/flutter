@@ -160,9 +160,7 @@ class PluginRegistrarManager {
     registrars->erase(registrar);
   }
 
-  PluginRegistrarMap* registrars() {
-    return registrars_;
-  }
+  PluginRegistrarMap* registrars() { return registrars_; }
 
   PluginRegistrarMap* registrars_;
 };
