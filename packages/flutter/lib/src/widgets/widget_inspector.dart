@@ -2288,9 +2288,8 @@ mixin WidgetInspectorService {
 
               final ParentData? parentData = renderObject.parentData;
               if (parentData is FlexParentData) {
-                final flexFactor = parentData.flex;
-                if(flexFactor != null) {
-                  additionalJson['flexFactor'] = flexFactor;
+                if(parentData.flex != null) {
+                  additionalJson['flexFactor'] = parentData.flex!;
                 }
                 additionalJson['flexFit'] = (parentData.fit ?? FlexFit.tight).name;
               } else if (parentData is BoxParentData) {
