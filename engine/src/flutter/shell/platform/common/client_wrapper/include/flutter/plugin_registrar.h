@@ -146,7 +146,7 @@ class PluginRegistrarManager {
   template <class T>
   static void OnRegistrarDestructed(void* memory) {
     if (memory) {
-      T* registrar_wrapper = (T*)(memory);
+      T* registrar_wrapper = static_cast<T*>(memory);
       registrar_wrapper->~T();
 
       auto* registrars = PluginRegistrarManager::GetInstance()->registrars();
