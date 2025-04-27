@@ -11,8 +11,10 @@
 #include "flutter/impeller/toolkit/egl/surface.h"
 #include "impeller/entity/gles/entity_shaders_gles.h"
 #include "impeller/entity/gles/framebuffer_blend_shaders_gles.h"
+#if !SLIMPELLER
 #include "impeller/entity/gles3/entity_shaders_gles.h"
 #include "impeller/entity/gles3/framebuffer_blend_shaders_gles.h"
+#endif  // !SLIMPELLER
 
 namespace flutter {
 
@@ -57,9 +59,6 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
     FML_LOG(ERROR) << "Could not create OpenGL proc table.";
     return nullptr;
   }
-  bool is_gles3 = proc_table->GetDescription()->GetGlVersion().IsAtLeast(
-      impeller::Version{3, 0, 0});
-
   std::vector<std::shared_ptr<fml::Mapping>> gles2_shader_mappings = {
       std::make_shared<fml::NonOwnedMapping>(
           impeller_entity_shaders_gles_data,
@@ -68,6 +67,11 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
           impeller_framebuffer_blend_shaders_gles_data,
           impeller_framebuffer_blend_shaders_gles_length),
   };
+
+// To maximally reduce code size, only load the older GLES2 shaders.
+#if !SLIMPELLER
+  bool is_gles3 = proc_table->GetDescription()->GetGlVersion().IsAtLeast(
+      impeller::Version{3, 0, 0});
 
   std::vector<std::shared_ptr<fml::Mapping>> gles3_shader_mappings = {
       std::make_shared<fml::NonOwnedMapping>(
@@ -79,9 +83,15 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
   };
 
   auto context = impeller::ContextGLES::Create(
-      std::move(proc_table),
+      impeller::Flags{}, std::move(proc_table),
       is_gles3 ? gles3_shader_mappings : gles2_shader_mappings,
       enable_gpu_tracing);
+#else
+  auto context =
+      impeller::ContextGLES::Create(impeller::Flags{}, std::move(proc_table),
+                                    gles2_shader_mappings, enable_gpu_tracing);
+#endif  // !SLIMPELLER
+
   if (!context) {
     FML_LOG(ERROR) << "Could not create OpenGLES Impeller Context.";
     return nullptr;
@@ -251,6 +261,10 @@ bool AndroidContextGLImpeller::OnscreenContextClearCurrent() {
 std::unique_ptr<impeller::egl::Surface>
 AndroidContextGLImpeller::CreateOnscreenSurface(EGLNativeWindowType window) {
   return display_->CreateWindowSurface(*onscreen_config_, window);
+}
+
+AndroidRenderingAPI AndroidContextGLImpeller::RenderingApi() const {
+  return AndroidRenderingAPI::kImpellerOpenGLES;
 }
 
 }  // namespace flutter

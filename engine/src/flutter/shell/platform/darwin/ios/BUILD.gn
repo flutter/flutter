@@ -22,6 +22,20 @@ shell_gpu_configuration("ios_gpu_configuration") {
   enable_metal = true
 }
 
+config("config_ios") {
+  include_dirs = [ target_gen_dir ]
+}
+
+config("config_swift") {
+  configs = [ ":config_ios" ]
+  lib_dirs = ios_swift_lib_paths
+
+  # Allow use of @testable imports in debug builds and when tests are enabled.
+  if (flutter_runtime_mode == "debug" || enable_unittests) {
+    swiftflags = [ "-enable-testing" ]
+  }
+}
+
 # The headers that will be copied to the Flutter.framework and be accessed
 # from outside the Flutter engine source root.
 _flutter_framework_headers = [
@@ -39,18 +53,27 @@ _flutter_framework_headers = [
 
 _flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
 
+source_set("InternalFlutterSwift") {
+  visibility = [ ":*" ]
+  configs += [ ":config_swift" ]
+
+  sources = [ "framework/Source/UIPressProxy.swift" ]
+}
+
 source_set("flutter_framework_source") {
   visibility = [ ":*" ]
   cflags_objc = flutter_cflags_objc
   cflags_objcc = flutter_cflags_objcc
 
   defines = [ "FLUTTER_FRAMEWORK=1" ]
-  if (darwin_extension_safe) {
-    defines += [ "APPLICATION_EXTENSION_API_ONLY=1" ]
-  }
   public_configs = [
     ":ios_gpu_configuration_config",
     "//flutter:config",
+  ]
+
+  configs += [
+    ":config_ios",
+    "//build/config/ios:ios_application_extension",
   ]
 
   sources = [
@@ -88,6 +111,8 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterRestorationPlugin.mm",
     "framework/Source/FlutterSemanticsScrollView.h",
     "framework/Source/FlutterSemanticsScrollView.mm",
+    "framework/Source/FlutterSharedApplication.h",
+    "framework/Source/FlutterSharedApplication.mm",
     "framework/Source/FlutterSpellCheckPlugin.h",
     "framework/Source/FlutterSpellCheckPlugin.mm",
     "framework/Source/FlutterTextInputDelegate.h",
@@ -95,8 +120,6 @@ source_set("flutter_framework_source") {
     "framework/Source/FlutterTextInputPlugin.mm",
     "framework/Source/FlutterTextureRegistryRelay.h",
     "framework/Source/FlutterTextureRegistryRelay.mm",
-    "framework/Source/FlutterUIPressProxy.h",
-    "framework/Source/FlutterUIPressProxy.mm",
     "framework/Source/FlutterUndoManagerDelegate.h",
     "framework/Source/FlutterUndoManagerPlugin.h",
     "framework/Source/FlutterUndoManagerPlugin.mm",
@@ -167,6 +190,7 @@ source_set("flutter_framework_source") {
   }
 
   deps = [
+    ":InternalFlutterSwift",
     ":ios_gpu_configuration",
     "//flutter/common:common",
     "//flutter/common/graphics",
@@ -188,6 +212,15 @@ source_set("flutter_framework_source") {
 platform_frameworks_path =
     rebase_path("$ios_sdk_path/../../Library/Frameworks/")
 
+source_set("ios_test_flutter_swift") {
+  testonly = true
+  visibility = [ ":*" ]
+  configs += [ ":config_swift" ]
+
+  sources = [ "framework/Source/FakeUIPressProxy.swift" ]
+  deps = [ ":InternalFlutterSwift" ]
+}
+
 shared_library("ios_test_flutter") {
   testonly = true
   visibility = [ "*" ]
@@ -205,6 +238,7 @@ shared_library("ios_test_flutter") {
     "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib",
   ]
   frameworks = [ "XCTest.framework" ]
+  configs += [ ":config_ios" ]
   configs -= [
     "//build/config/gcc:symbol_visibility_hidden",
     "//build/config:symbol_visibility_hidden",
@@ -225,6 +259,7 @@ shared_library("ios_test_flutter") {
     "framework/Source/FlutterPlatformViewsTest.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegateTest.mm",
     "framework/Source/FlutterRestorationPluginTest.mm",
+    "framework/Source/FlutterSharedApplicationTest.mm",
     "framework/Source/FlutterSpellCheckPluginTest.mm",
     "framework/Source/FlutterTextInputPluginTest.mm",
     "framework/Source/FlutterTextureRegistryRelayTest.mm",
@@ -244,9 +279,11 @@ shared_library("ios_test_flutter") {
     "platform_message_handler_ios_test.mm",
   ]
   deps = [
+    ":InternalFlutterSwift",
     ":flutter_framework",
     ":flutter_framework_source",
     ":ios_gpu_configuration",
+    ":ios_test_flutter_swift",
     "//flutter/common:common",
     "//flutter/lib/ui:ui",
     "//flutter/shell/platform/darwin/common:framework_common",
@@ -262,10 +299,6 @@ shared_library("ios_test_flutter") {
     ":ios_gpu_configuration_config",
     "//flutter:config",
   ]
-
-  if (darwin_extension_safe) {
-    defines = [ "APPLICATION_EXTENSION_API_ONLY=1" ]
-  }
 }
 
 shared_library("create_flutter_framework_dylib") {
@@ -275,15 +308,15 @@ shared_library("create_flutter_framework_dylib") {
 
   ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
 
-  if (darwin_extension_safe) {
-    ldflags += [ "-fapplication-extension" ]
-  }
-
   public = _flutter_framework_headers
 
-  deps = [ ":flutter_framework_source" ]
+  deps = [
+    ":InternalFlutterSwift",
+    ":flutter_framework_source",
+  ]
 
   public_configs = [ "//flutter:config" ]
+  configs += [ "//build/config/ios:ios_application_extension" ]
 }
 
 copy("copy_dylib") {
@@ -375,9 +408,11 @@ copy("copy_license") {
 shared_library("copy_and_verify_framework_module") {
   framework_search_path = rebase_path("$root_out_dir")
   visibility = [ ":*" ]
-  cflags_objc = [
+  cflags_objc = [ "-F$framework_search_path" ]
+  ldflags = [
     "-F$framework_search_path",
-    "-fapplication-extension",
+    "-Xlinker",
+    "-fatal_warnings",
   ]
 
   sources = [ "framework/Source/FlutterUmbrellaImport.m" ]
@@ -388,16 +423,7 @@ shared_library("copy_and_verify_framework_module") {
     ":copy_framework_privacy_manifest",
   ]
 
-  if (darwin_extension_safe) {
-    ldflags = [
-      "-F$framework_search_path",
-      "-fapplication-extension",
-      "-Xlinker",
-      "-fatal_warnings",
-    ]
-    deps += [ ":copy_dylib" ]
-    frameworks = [ "Flutter.framework" ]
-  }
+  configs += [ "//build/config/ios:ios_application_extension" ]
 }
 
 group("universal_flutter_framework") {

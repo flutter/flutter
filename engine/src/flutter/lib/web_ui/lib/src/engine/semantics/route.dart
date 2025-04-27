@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../dom.dart';
 import '../semantics.dart';
 import '../util.dart';
 
@@ -137,7 +136,7 @@ class SemanticDialog extends SemanticRouteBase {
 /// Setting this role will also set aria-modal to true, which helps screen
 /// reader better understand this section of screen.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 ///
 /// See also:
 ///

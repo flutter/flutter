@@ -4,6 +4,7 @@
 
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/template.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'build_info.dart';
@@ -349,6 +350,51 @@ class IosProject extends XcodeBasedProject {
   // The string starts with `applinks:` and ignores the query param which starts with `?`.
   static final RegExp _associatedDomainPattern = RegExp(r'^applinks:([^?]+)');
 
+  static const String _lldbPythonHelperTemplateName = 'flutter_lldb_helper.py';
+
+  static const String _lldbInitTemplate = '''
+#
+# Generated file, do not edit.
+#
+
+command script import --relative-to-command-file $_lldbPythonHelperTemplateName
+''';
+
+  static const String _lldbPythonHelperTemplate = r'''
+#
+# Generated file, do not edit.
+#
+
+import lldb
+
+def handle_new_rx_page(frame: lldb.SBFrame, bp_loc, extra_args, intern_dict):
+    """Intercept NOTIFY_DEBUGGER_ABOUT_RX_PAGES and touch the pages."""
+    base = frame.register["x0"].GetValueAsAddress()
+    page_len = frame.register["x1"].GetValueAsUnsigned()
+
+    # Note: NOTIFY_DEBUGGER_ABOUT_RX_PAGES will check contents of the
+    # first page to see if handled it correctly. This makes diagnosing
+    # misconfiguration (e.g. missing breakpoint) easier.
+    data = bytearray(page_len)
+    data[0:8] = b'IHELPED!'
+
+    error = lldb.SBError()
+    frame.GetThread().GetProcess().WriteMemory(base, data, error)
+    if not error.Success():
+        print(f'Failed to write into {base}[+{page_len}]', error)
+        return
+
+def __lldb_init_module(debugger: lldb.SBDebugger, _):
+    target = debugger.GetDummyTarget()
+    # Caveat: must use BreakpointCreateByRegEx here and not
+    # BreakpointCreateByName. For some reasons callback function does not
+    # get carried over from dummy target for the later.
+    bp = target.BreakpointCreateByRegex("^NOTIFY_DEBUGGER_ABOUT_RX_PAGES$")
+    bp.SetScriptCallbackFunction('{}.handle_new_rx_page'.format(__name__))
+    bp.SetAutoContinue(True)
+    print("-- LLDB integration loaded --")
+''';
+
   Directory get ephemeralModuleDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
 
@@ -610,7 +656,8 @@ class IosProject extends XcodeBasedProject {
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {
-    await _regenerateFromTemplateIfNeeded();
+    await _regenerateModuleFromTemplateIfNeeded();
+    await _updateLLDBIfNeeded();
     if (!_flutterLibRoot.existsSync()) {
       return;
     }
@@ -708,12 +755,51 @@ class IosProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
+        featureFlags: featureFlags,
         targetOverride: bundle.defaultMainPath,
       );
     }
   }
 
-  Future<void> _regenerateFromTemplateIfNeeded() async {
+  Future<void> _updateLLDBIfNeeded() async {
+    if (globals.cache.isOlderThanToolsStamp(lldbInitFile) ||
+        globals.cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
+      if (isModule) {
+        // When building a module project for Add-to-App, provide instructions
+        // to manually add the LLDB Init File to their native Xcode project.
+        globals.logger.printWarning(
+          'Debugging Flutter on new iOS versions requires an LLDB Init File. '
+          'To ensure debug mode works, please complete one of the following in '
+          'your native Xcode project:\n'
+          '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and Test actions, set LLDB Init File to: \n\n'
+          '    ${lldbInitFile.path}\n\n'
+          '  * If you are already using an LLDB Init File, please append the '
+          'following to your LLDB Init File:\n\n'
+          '    command source ${lldbInitFile.path}\n',
+        );
+      }
+      await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, globals.templateRenderer);
+      await _renderTemplateToFile(
+        _lldbPythonHelperTemplate,
+        null,
+        lldbHelperPythonFile,
+        globals.templateRenderer,
+      );
+    }
+  }
+
+  Future<void> _renderTemplateToFile(
+    String template,
+    Object? context,
+    File file,
+    TemplateRenderer templateRenderer,
+  ) async {
+    final String renderedTemplate = templateRenderer.renderString(template, context);
+    await file.create(recursive: true);
+    await file.writeAsString(renderedTemplate);
+  }
+
+  Future<void> _regenerateModuleFromTemplateIfNeeded() async {
     if (!isModule) {
       return;
     }
@@ -783,6 +869,14 @@ class IosProject extends XcodeBasedProject {
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
   }
 
+  File get lldbInitFile {
+    return ephemeralDirectory.childFile('flutter_lldbinit');
+  }
+
+  File get lldbHelperPythonFile {
+    return ephemeralDirectory.childFile(_lldbPythonHelperTemplateName);
+  }
+
   Future<void> _overwriteFromTemplate(String path, Directory target) async {
     final Template template = await Template.fromName(
       path,
@@ -800,6 +894,9 @@ class IosProject extends XcodeBasedProject {
       logger: globals.logger,
       config: globals.config,
       terminal: globals.terminal,
+      fileSystem: globals.fs,
+      fileSystemUtils: globals.fsUtils,
+      plistParser: globals.plistParser,
     );
 
     final String projectName = parent.manifest.appName;
@@ -875,6 +972,7 @@ class MacOSProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
+        featureFlags: featureFlags,
         useMacOSConfig: true,
       );
     }

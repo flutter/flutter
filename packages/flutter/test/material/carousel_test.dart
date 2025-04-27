@@ -1432,6 +1432,357 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/166067.
+  testWidgets('CarouselView should not crash when using PageStorageKey', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return const <Widget>[SliverAppBar()];
+            },
+            body: CustomScrollView(
+              key: const PageStorageKey<String>('key1'),
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 50),
+                    child: CarouselView.weighted(
+                      flexWeights: const <int>[1, 2],
+                      consumeMaxWeight: false,
+                      children: List<Widget>.generate(20, (int index) {
+                        return ColoredBox(
+                          color: Colors.primaries[index % Colors.primaries.length].withValues(
+                            alpha: 0.8,
+                          ),
+                          child: const SizedBox.expand(),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/160679.
+  testWidgets('Does not crash when parent size is zero', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 0,
+            child: CarouselView(itemExtent: 40.0, children: <Widget>[FlutterLogo()]),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('itemExtent can be set to double.infinity', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: CarouselView(itemExtent: double.infinity, children: <Widget>[FlutterLogo()]),
+        ),
+      ),
+    );
+
+    // Item extent is clamped to screen size.
+    final Size logoSize = tester.getSize(find.byType(FlutterLogo));
+    const double itemHorizontalPadding = 8.0; // Default padding.
+    expect(logoSize.width, 800.0 - itemHorizontalPadding);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/163436.
+  testWidgets('Does not crash when initial viewport dimension is zero and itemExtent is fixed', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(Size.zero);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    const double fixedItemExtent = 60.0;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: CarouselView(itemExtent: fixedItemExtent, children: <Widget>[FlutterLogo()]),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/163436.
+  testWidgets('Does not crash when initial viewport dimension is zero and itemExtent is infinite', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(Size.zero);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: CarouselView(itemExtent: double.infinity, children: <Widget>[FlutterLogo()]),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/163436.
+  testWidgets('itemExtent is applied when viewport dimension is updated', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    const double itemExtent = 60.0;
+    bool showScrollbars = false;
+
+    Future<void> updateSurfaceSizeAndPump(Size size) async {
+      await tester.binding.setSurfaceSize(size);
+
+      // At startup, a warm-up frame can be produced before the Flutter engine has reported the
+      // initial view metrics. As a result, the first frame can be produced with a size of zero.
+      // This leads to several instances of _CarouselPosition being created and
+      // _CarouselPosition.absorb to be called.
+      // To correctly simulate this behavior in the test environment, one solution is to
+      // update the ScrollConfiguration. For instance by changing the ScrollBehavior.scrollbars
+      // value on each build.
+      showScrollbars = !showScrollbars;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ScrollConfiguration(
+                behavior: const ScrollBehavior().copyWith(scrollbars: showScrollbars),
+                child: const CarouselView(
+                  itemExtent: itemExtent,
+                  children: <Widget>[FlutterLogo()],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Simulate an initial zero viewport dimension.
+    await updateSurfaceSizeAndPump(Size.zero);
+    await updateSurfaceSizeAndPump(const Size(500, 400));
+
+    final Size logoSize = tester.getSize(find.byType(FlutterLogo));
+    const double itemHorizontalPadding = 8.0; // Default padding.
+    expect(logoSize.width, itemExtent - itemHorizontalPadding);
+  });
+
+  group('CarouselController.animateToItem', () {
+    testWidgets('CarouselView.weighted horizontal, not reversed, flexWeights [7,1]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[7, 1],
+        numberOfChildren: 20,
+        scrollDirection: Axis.horizontal,
+        reverse: false,
+      );
+    });
+
+    testWidgets('CarouselView.weighted horizontal, reversed, flexWeights [7,1]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[7, 1],
+        numberOfChildren: 20,
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+      );
+    });
+
+    testWidgets('CarouselView.weighted vertical, not reversed, flexWeights [7,1]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[7, 1],
+        numberOfChildren: 20,
+        scrollDirection: Axis.vertical,
+        reverse: false,
+      );
+    });
+
+    testWidgets('CarouselView.weighted vertical, reversed, flexWeights [7,1]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[7, 1],
+        numberOfChildren: 20,
+        scrollDirection: Axis.vertical,
+        reverse: true,
+      );
+    });
+
+    testWidgets(
+      'CarouselView.weighted horizontal, not reversed, flexWeights [1,7] and consumeMaxWeight false',
+      (WidgetTester tester) async {
+        await runCarouselTest(
+          tester: tester,
+          flexWeights: <int>[1, 7],
+          numberOfChildren: 20,
+          scrollDirection: Axis.horizontal,
+          reverse: false,
+          consumeMaxWeight: false,
+        );
+      },
+    );
+
+    testWidgets('CarouselView.weighted horizontal, reversed, flexWeights [1,7]', (
+      WidgetTester tester,
+    ) async {
+      await runCarouselTest(
+        tester: tester,
+        flexWeights: <int>[1, 7],
+        numberOfChildren: 20,
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+      );
+    });
+
+    testWidgets(
+      'CarouselView.weighted vertical, not reversed, flexWeights [1,7] and consumeMaxWeight false',
+      (WidgetTester tester) async {
+        await runCarouselTest(
+          tester: tester,
+          flexWeights: <int>[1, 7],
+          numberOfChildren: 20,
+          scrollDirection: Axis.vertical,
+          consumeMaxWeight: false,
+          reverse: false,
+        );
+      },
+    );
+
+    testWidgets(
+      'CarouselView.weighted vertical, reversed, flexWeights [1,7] and consumeMaxWeight false',
+      (WidgetTester tester) async {
+        await runCarouselTest(
+          tester: tester,
+          flexWeights: <int>[1, 7],
+          numberOfChildren: 20,
+          scrollDirection: Axis.vertical,
+          consumeMaxWeight: false,
+          reverse: true,
+        );
+      },
+    );
+
+    testWidgets(
+      'CarouselView.weighted vertical, reversed, flexWeights [1,7] and consumeMaxWeight',
+      (WidgetTester tester) async {
+        await runCarouselTest(
+          tester: tester,
+          flexWeights: <int>[1, 7],
+          numberOfChildren: 20,
+          scrollDirection: Axis.vertical,
+          reverse: true,
+        );
+      },
+    );
+
+    testWidgets('CarouselView horizontal, not reversed', (WidgetTester tester) async {
+      await runCarouselTest(
+        tester: tester,
+        numberOfChildren: 20,
+        scrollDirection: Axis.horizontal,
+        reverse: false,
+      );
+    });
+
+    testWidgets('CarouselView horizontal, reversed', (WidgetTester tester) async {
+      await runCarouselTest(
+        tester: tester,
+        numberOfChildren: 10,
+        scrollDirection: Axis.horizontal,
+        reverse: true,
+      );
+    });
+
+    testWidgets('CarouselView vertical, not reversed', (WidgetTester tester) async {
+      await runCarouselTest(
+        tester: tester,
+        numberOfChildren: 10,
+        scrollDirection: Axis.vertical,
+        reverse: false,
+      );
+    });
+
+    testWidgets('CarouselView vertical, reversed', (WidgetTester tester) async {
+      await runCarouselTest(
+        tester: tester,
+        numberOfChildren: 10,
+        scrollDirection: Axis.vertical,
+        reverse: true,
+      );
+    });
+
+    testWidgets('CarouselView positions items correctly', (WidgetTester tester) async {
+      const int numberOfChildren = 5;
+      final CarouselController controller = CarouselController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CarouselView.weighted(
+              flexWeights: const <int>[2, 3, 1],
+              controller: controller,
+              itemSnapping: true,
+              children: List<Widget>.generate(numberOfChildren, (int index) {
+                return Center(child: Text('Item $index'));
+              }),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Get the RenderBox of the CarouselView to determine its position and boundaries.
+      final RenderBox carouselBox = tester.renderObject(find.byType(CarouselView));
+      final Offset carouselPos = carouselBox.localToGlobal(Offset.zero);
+      final double carouselLeft = carouselPos.dx;
+      final double carouselRight = carouselLeft + carouselBox.size.width;
+
+      for (int i = 0; i < numberOfChildren; i++) {
+        controller.animateToItem(i, curve: Curves.easeInOut);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Item $i'), findsOneWidget);
+
+        // Get the item's RenderBox and determine its position.
+        final RenderBox itemBox = tester.renderObject(find.text('Item $i'));
+        final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
+
+        // Validate that the item is positioned within the CarouselView boundaries.
+        expect(itemRect.left, greaterThanOrEqualTo(carouselLeft));
+        expect(itemRect.right, lessThanOrEqualTo(carouselRight));
+      }
+    });
+  });
 }
 
 Finder getItem(int index) {
@@ -1449,4 +1800,78 @@ Future<TestGesture> hoverPointerOverCarouselItem(WidgetTester tester, Key key) a
   await gesture.addPointer();
   await gesture.moveTo(center);
   return gesture;
+}
+
+Future<void> runCarouselTest({
+  required WidgetTester tester,
+  List<int> flexWeights = const <int>[],
+  bool consumeMaxWeight = true,
+  required int numberOfChildren,
+  required Axis scrollDirection,
+  required bool reverse,
+}) async {
+  final CarouselController controller = CarouselController();
+  addTearDown(controller.dispose);
+  await tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(
+        body:
+            (flexWeights.isEmpty)
+                ? CarouselView(
+                  scrollDirection: scrollDirection,
+                  reverse: reverse,
+                  controller: controller,
+                  itemSnapping: true,
+                  itemExtent: 300,
+                  children: List<Widget>.generate(numberOfChildren, (int index) {
+                    return Center(child: Text('Item $index'));
+                  }),
+                )
+                : CarouselView.weighted(
+                  flexWeights: flexWeights,
+                  scrollDirection: scrollDirection,
+                  reverse: reverse,
+                  controller: controller,
+                  itemSnapping: true,
+                  consumeMaxWeight: consumeMaxWeight,
+                  children: List<Widget>.generate(numberOfChildren, (int index) {
+                    return Center(child: Text('Item $index'));
+                  }),
+                ),
+      ),
+    ),
+  );
+
+  double realOffset() {
+    return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+  }
+
+  // Calculate the index of the middle item.
+  // The calculation depends on the scroll direction (normal or reverse).
+  // For reverse scrolling, the middle item is calculated taking into account the end of the list,
+  // reversing the calculation so that the item that appears in the middle when scrolling is the correct one.
+  // For normal scrolling, we simply get the middle item.
+  final int middleIndex =
+      reverse
+          ? (numberOfChildren - 1 - (numberOfChildren / 2).round())
+          : (numberOfChildren / 2).round();
+
+  controller.animateToItem(
+    middleIndex,
+    duration: const Duration(milliseconds: 100),
+    curve: Curves.easeInOut,
+  );
+  await tester.pumpAndSettle();
+
+  // Verify that the middle item is visible.
+  expect(find.text('Item $middleIndex'), findsOneWidget);
+  expect(realOffset(), controller.offset);
+
+  // Scroll to the first item.
+  controller.animateToItem(0, duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
+  await tester.pumpAndSettle();
+
+  // Verify that the first item is visible.
+  expect(find.text('Item 0'), findsOneWidget);
+  expect(realOffset(), controller.offset);
 }

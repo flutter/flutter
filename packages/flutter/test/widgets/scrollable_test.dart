@@ -1626,7 +1626,7 @@ void main() {
   testWidgets('resolvedPhysics getter', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(platform: TargetPlatform.android),
+        theme: ThemeData(platform: TargetPlatform.android),
         home: const CustomScrollView(
           physics: AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[SliverToBoxAdapter(child: SizedBox(height: 2000.0))],

@@ -40,28 +40,54 @@ void main() {
         expect(generatedPreviewFile, isNot(exists));
 
         // Populate the generated preview file.
-        codeGenerator.populatePreviewsInGeneratedPreviewScaffold(<PreviewPath, List<String>>{
-          (path: '', uri: Uri(path: 'foo.dart')): <String>['preview'],
-          (path: '', uri: Uri(path: 'src/bar.dart')): <String>['barPreview1', 'barPreview2'],
-        });
+        codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
+          <PreviewPath, List<PreviewDetails>>{
+            (path: '', uri: Uri(path: 'foo.dart')): <PreviewDetails>[
+              PreviewDetails(functionName: 'preview', isBuilder: false),
+            ],
+            (path: '', uri: Uri(path: 'src/bar.dart')): <PreviewDetails>[
+              PreviewDetails(functionName: 'barPreview1', isBuilder: false),
+              PreviewDetails.test(
+                functionName: 'barPreview2',
+                isBuilder: false,
+                brightness: 'brightnessConstant',
+                brightnessLibraryUri: 'brightness.dart',
+              ),
+              PreviewDetails.test(
+                functionName: 'barPreview3',
+                isBuilder: true,
+                name: 'Foo',
+                width: '123',
+                height: '456',
+                textScaleFactor: '50',
+                wrapper: 'wrapper',
+                wrapperLibraryUri: 'wrapper.dart',
+                brightness: 'Brightness.dark',
+                theme: 'myThemeCallback',
+                themeLibraryUri: 'theme.dart',
+              ),
+            ],
+          },
+        );
         expect(generatedPreviewFile, exists);
 
         // Check that the generated file contains:
         // - An import of the widget preview library
-        // - Prefixed imports for both 'foo.dart' and 'src/bar.dart'
+        // - Prefixed imports for 'foo.dart', 'src/bar.dart', 'wrapper.dart',
+        //   'brightness.dart', and 'theme.dart'
         // - A top-level function 'List<WidgetPreview> previews()'
-        // - A returned list containing function calls to 'preview()' from 'foo.dart' and 'barPreview1()'
-        //   and 'barPreview2()' from 'src/bar.dart'
+        // - A returned list containing function calls to 'preview()' from 'foo.dart' and
+        //   'barPreview1()', 'barPreview2()', and 'barPreview3()' from 'src/bar.dart'
         //
         // The generated file is unfortunately unformatted.
         const String expectedGeneratedPreviewFileContents = '''
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'foo.dart' as _i1;import 'src/bar.dart' as _i2;import 'package:flutter/widgets.dart';List<WidgetPreview> previews() => [_i1.preview(), _i2.barPreview1(), _i2.barPreview2(), ];''';
+import 'widget_preview.dart' as _i1;import 'foo.dart' as _i2;import 'src/bar.dart' as _i3;import 'brightness.dart' as _i4;import 'theme.dart' as _i5;import '' as _i6;import 'wrapper.dart' as _i7;import 'package:flutter/widgets.dart' as _i8;List<_i1.WidgetPreview> previews() => [_i1.WidgetPreview(builder: () => _i2.preview()), _i1.WidgetPreview(builder: () => _i3.barPreview1()), _i1.WidgetPreview(brightness: _i4.brightnessConstant, builder: () => _i3.barPreview2(), ), _i1.WidgetPreview(name: Foo, height: 456.0, width: 123.0, textScaleFactor: 50.0, theme: _i5.myThemeCallback(), brightness: _i6.Brightness.dark, builder: () => _i7.wrapper(_i8.Builder(builder: _i3.barPreview3())), ), ];''';
         expect(generatedPreviewFile.readAsStringSync(), expectedGeneratedPreviewFileContents);
 
         // Regenerate the generated file with no previews.
         codeGenerator.populatePreviewsInGeneratedPreviewScaffold(
-          const <PreviewPath, List<String>>{},
+          const <PreviewPath, List<PreviewDetails>>{},
         );
         expect(generatedPreviewFile, exists);
 
@@ -69,7 +95,8 @@ import 'foo.dart' as _i1;import 'src/bar.dart' as _i2;import 'package:flutter/wi
         // - An import of the widget preview library
         // - A top-level function 'List<WidgetPreview> previews()' that returns an empty list.
         const String emptyGeneratedPreviewFileContents = '''
-import 'package:flutter/widgets.dart';List<WidgetPreview> previews() => [];''';
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'widget_preview.dart' as _i1;List<_i1.WidgetPreview> previews() => [];''';
         expect(generatedPreviewFile.readAsStringSync(), emptyGeneratedPreviewFileContents);
       },
     );

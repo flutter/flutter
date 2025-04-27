@@ -20,10 +20,6 @@ bool SemanticsNode::HasAction(SemanticsAction action) const {
   return (actions & static_cast<int32_t>(action)) != 0;
 }
 
-bool SemanticsNode::HasFlag(SemanticsFlags flag) const {
-  return (flags & static_cast<int32_t>(flag)) != 0;
-}
-
 bool SemanticsNode::IsPlatformViewNode() const {
   return platformViewId > kMinPlatformViewId;
 }

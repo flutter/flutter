@@ -798,7 +798,7 @@ void main() {
   });
 
   testWidgets('MaterialApp animates theme changes', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
     await tester.pumpWidget(
       MaterialApp(
@@ -820,7 +820,6 @@ void main() {
     // Change to dark theme
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
         themeMode: ThemeMode.dark,
         home: Builder(
@@ -842,7 +841,7 @@ void main() {
   });
 
   testWidgets('MaterialApp theme animation can be turned off', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
     int scaffoldRebuilds = 0;
 
@@ -872,7 +871,6 @@ void main() {
     // Change to dark theme
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light(),
         darkTheme: ThemeData.dark(),
         themeMode: ThemeMode.dark,
         themeAnimationDuration: Duration.zero,
@@ -1338,7 +1336,6 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           scrollBehavior: const MaterialScrollBehavior(),
           home: ListView(
             children: const <Widget>[SizedBox(height: 1000.0, width: 1000.0, child: Text('Test'))],
@@ -1393,7 +1390,6 @@ void main() {
     (WidgetTester tester) async {
       Widget buildFrame(Clip clipBehavior) {
         return MaterialApp(
-          theme: ThemeData(useMaterial3: true),
           home: Column(
             children: <Widget>[
               SizedBox(
@@ -1580,7 +1576,7 @@ void main() {
   );
 
   testWidgets('Override theme animation using AnimationStyle', (WidgetTester tester) async {
-    final ThemeData lightTheme = ThemeData.light();
+    final ThemeData lightTheme = ThemeData();
     final ThemeData darkTheme = ThemeData.dark();
 
     Widget buildWidget({ThemeMode themeMode = ThemeMode.light, AnimationStyle? animationStyle}) {

@@ -17,6 +17,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
@@ -372,6 +373,27 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       );
     }
 
+    if (!project.isModule && buildInfos.any((BuildInfo info) => info.isDebug)) {
+      // Add-to-App must manually add the LLDB Init File to their native Xcode
+      // project, so provide the files and instructions.
+      final File lldbInitSourceFile = project.ios.lldbInitFile;
+      final File lldbInitTargetFile = outputDirectory.childFile(lldbInitSourceFile.basename);
+      final File lldbHelperPythonFile = project.ios.lldbHelperPythonFile;
+      lldbInitSourceFile.copySync(lldbInitTargetFile.path);
+      lldbHelperPythonFile.copySync(outputDirectory.childFile(lldbHelperPythonFile.basename).path);
+      globals.printStatus(
+        '\nDebugging Flutter on new iOS versions requires an LLDB Init File. To '
+        'ensure debug mode works, please complete one of the following in your '
+        'native Xcode project:\n'
+        '  * Open Xcode > Product > Scheme > Edit Scheme. For both the Run and '
+        'Test actions, set LLDB Init File to: \n\n'
+        '    ${lldbInitTargetFile.path}\n\n'
+        '  * If you are already using an LLDB Init File, please append the '
+        'following to your LLDB Init File:\n\n'
+        '    command source ${lldbInitTargetFile.path}\n',
+      );
+    }
+
     return FlutterCommandResult.success();
   }
 
@@ -423,7 +445,7 @@ LICENSE
   s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
   s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra_release/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
   s.documentation_url     = 'https://docs.flutter.dev'
-  s.platform              = :ios, '12.0'
+  s.platform              = :ios, '13.0'
   s.vendored_frameworks   = 'Flutter.xcframework'
 end
 ''';
@@ -468,6 +490,11 @@ end
     final Status status = globals.logger.startProgress(' ├─Building App.xcframework...');
     final List<Directory> frameworks = <Directory>[];
 
+    // Dev dependencies are removed from release builds if the explicit package
+    // dependencies flag is on.
+    final bool devDependenciesEnabled =
+        !featureFlags.isExplicitPackageDependenciesEnabled || !buildInfo.mode.isRelease;
+
     try {
       for (final EnvironmentType sdkType in EnvironmentType.values) {
         final Directory outputBuildDirectory = switch (sdkType) {
@@ -490,6 +517,7 @@ end
               globals.artifacts!,
             ).map((DarwinArch e) => e.name).join(' '),
             kSdkRoot: await globals.xcode!.sdkLocation(sdkType),
+            kDevDependenciesEnabled: devDependenciesEnabled.toString(),
             ...buildInfo.toBuildSystemEnvironment(),
           },
           artifacts: globals.artifacts!,

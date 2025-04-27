@@ -344,6 +344,15 @@ abstract class SearchDelegate<T> {
       ..pop(result);
   }
 
+  /// Closes the search page and returns to the underlying route whitout result.
+  void _pop(BuildContext context) {
+    _currentBody = null;
+    _focusNode?.unfocus();
+    Navigator.of(context)
+      ..popUntil((Route<dynamic> route) => route == _route)
+      ..pop();
+  }
+
   /// The hint text that is shown in the search field when it is empty.
   ///
   /// If this value is set to null, the value of
@@ -370,7 +379,9 @@ abstract class SearchDelegate<T> {
   /// Defaults to the default value specified in [TextField].
   final TextInputType? keyboardType;
 
-  /// {@macro flutter.widgets.editableText.autocorrect}
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true.
   final bool autocorrect;
 
   /// {@macro flutter.services.TextInputConfiguration.enableSuggestions}
@@ -504,7 +515,16 @@ class _SearchPage<T> extends StatefulWidget {
 class _SearchPageState<T> extends State<_SearchPage<T>> {
   // This node is owned, but not hosted by, the search page. Hosting is done by
   // the text field.
-  FocusNode focusNode = FocusNode();
+  late final FocusNode focusNode = FocusNode(
+    onKeyEvent: (FocusNode node, KeyEvent event) {
+      // When the user presses the escape key, close the search page.
+      if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+        widget.delegate._pop(context);
+        return KeyEventResult.handled;
+      }
+      return KeyEventResult.ignored;
+    },
+  );
 
   @override
   void initState() {

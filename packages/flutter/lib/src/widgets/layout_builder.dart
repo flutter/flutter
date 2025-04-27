@@ -19,37 +19,35 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 
 /// An abstract superclass for widgets that defer their building until layout.
 ///
-/// Similar to the [Builder] widget except that the framework calls the [builder]
-/// function at layout time and provides the constraints that this widget should
-/// adhere to. This is useful when the parent constrains the child's size and layout,
-/// and doesn't depend on the child's intrinsic size.
+/// Similar to the [Builder] widget except that the implementation calls the [builder]
+/// function at layout time and provides the [LayoutInfoType] that is required to
+/// configure the child widget subtree.
 ///
-/// {@template flutter.widgets.ConstrainedLayoutBuilder}
-/// The [builder] function is called in the following situations:
+/// This is useful when the child widget tree relies on information that are only
+/// available during layout, and doesn't depend on the child's intrinsic size.
 ///
-/// * The first time the widget is laid out.
-/// * When the parent widget passes different layout constraints.
-/// * When the parent widget updates this widget.
-/// * When the dependencies that the [builder] function subscribes to change.
+/// The [LayoutInfoType] should typically be immutable. The equality of the
+/// [LayoutInfoType] type is used by the implementation to avoid unnecessary
+/// rebuilds: if the new [LayoutInfoType] computed during layout is the same as
+/// (defined by `LayoutInfoType.==`) the previous [LayoutInfoType], the
+/// implementation will try to avoid calling the [builder] again unless
+/// [updateShouldRebuild] returns true. The corresponding [RenderObject] produced
+/// by this widget retains the most up-to-date [LayoutInfoType] for this purpose,
+/// which may keep a [LayoutInfoType] object in memory until the widget is removed
+/// from the tree.
 ///
-/// The [builder] function is _not_ called during layout if the parent passes
-/// the same constraints repeatedly.
-/// {@endtemplate}
-///
-/// Subclasses must return a [RenderObject] that mixes in
-/// [RenderConstrainedLayoutBuilder].
-abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints>
-    extends RenderObjectWidget {
+/// Subclasses must return a [RenderObject] that mixes in [RenderAbstractLayoutBuilderMixin].
+abstract class AbstractLayoutBuilder<LayoutInfoType> extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
-  const ConstrainedLayoutBuilder({super.key, required this.builder});
-
-  @override
-  RenderObjectElement createElement() => _LayoutBuilderElement<ConstraintType>(this);
+  const AbstractLayoutBuilder({super.key});
 
   /// Called at layout time to construct the widget tree.
   ///
   /// The builder must not return null.
-  final Widget Function(BuildContext context, ConstraintType constraints) builder;
+  Widget Function(BuildContext context, LayoutInfoType layoutInfo) get builder;
+
+  @override
+  RenderObjectElement createElement() => _LayoutBuilderElement<LayoutInfoType>(this);
 
   /// Whether [builder] needs to be called again even if the layout constraints
   /// are the same.
@@ -71,17 +69,49 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints>
   ///  * [Element.update], the method that actually updates the widget's
   ///    configuration.
   @protected
-  bool updateShouldRebuild(covariant ConstrainedLayoutBuilder<ConstraintType> oldWidget) => true;
+  bool updateShouldRebuild(covariant AbstractLayoutBuilder<LayoutInfoType> oldWidget) => true;
+
+  @override
+  RenderAbstractLayoutBuilderMixin<LayoutInfoType, RenderObject> createRenderObject(
+    BuildContext context,
+  );
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
 
-class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderObjectElement {
-  _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> super.widget);
+/// A specialized [AbstractLayoutBuilder] whose widget subtree depends on the
+/// incoming [ConstraintType] that will be imposed on the widget.
+///
+/// {@template flutter.widgets.ConstrainedLayoutBuilder}
+/// The [builder] function is called in the following situations:
+///
+/// * The first time the widget is laid out.
+/// * When the parent widget passes different layout constraints.
+/// * When the parent widget updates this widget and [updateShouldRebuild] returns `true`.
+/// * When the dependencies that the [builder] function subscribes to change.
+///
+/// The [builder] function is _not_ called during layout if the parent passes
+/// the same constraints repeatedly.
+///
+/// In the event that an ancestor skips the layout of this subtree so the
+/// constraints become outdated, the `builder` rebuilds with the last known
+/// constraints.
+/// {@endtemplate}
+abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints>
+    extends AbstractLayoutBuilder<ConstraintType> {
+  /// Creates a widget that defers its building until layout.
+  const ConstrainedLayoutBuilder({super.key, required this.builder});
 
   @override
-  RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject =>
-      super.renderObject as RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>;
+  final Widget Function(BuildContext context, ConstraintType constraints) builder;
+}
+
+class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
+  _LayoutBuilderElement(AbstractLayoutBuilder<LayoutInfoType> super.widget);
+
+  @override
+  RenderAbstractLayoutBuilderMixin<LayoutInfoType, RenderObject> get renderObject =>
+      super.renderObject as RenderAbstractLayoutBuilderMixin<LayoutInfoType, RenderObject>;
 
   Element? _child;
 
@@ -107,7 +137,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
       SchedulerPhase.persistentCallbacks => false,
     };
     if (!deferMarkNeedsLayout) {
-      renderObject.markNeedsLayout();
+      renderObject.scheduleLayoutCallback();
       return;
     }
     _deferredCallbackScheduled = true;
@@ -119,7 +149,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     // This method is only called when the render tree is stable, if the Element
     // is deactivated it will never be reincorporated back to the tree.
     if (mounted) {
-      renderObject.markNeedsLayout();
+      renderObject.scheduleLayoutCallback();
     }
   }
 
@@ -140,21 +170,21 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot); // Creates the renderObject.
-    renderObject.updateCallback(_rebuildWithConstraints);
+    renderObject._updateCallback(_rebuildWithConstraints);
   }
 
   @override
-  void update(ConstrainedLayoutBuilder<ConstraintType> newWidget) {
+  void update(AbstractLayoutBuilder<LayoutInfoType> newWidget) {
     assert(widget != newWidget);
-    final ConstrainedLayoutBuilder<ConstraintType> oldWidget =
-        widget as ConstrainedLayoutBuilder<ConstraintType>;
+    final AbstractLayoutBuilder<LayoutInfoType> oldWidget =
+        widget as AbstractLayoutBuilder<LayoutInfoType>;
     super.update(newWidget);
     assert(widget == newWidget);
 
-    renderObject.updateCallback(_rebuildWithConstraints);
+    renderObject._updateCallback(_rebuildWithConstraints);
     if (newWidget.updateShouldRebuild(oldWidget)) {
       _needsBuild = true;
-      renderObject.markNeedsLayout();
+      renderObject.scheduleLayoutCallback();
     }
   }
 
@@ -164,7 +194,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     // to performRebuild since this call already does what performRebuild does,
     // So the element is clean as soon as this method returns and does not have
     // to be added to the dirty list or marked as dirty.
-    renderObject.markNeedsLayout();
+    renderObject.scheduleLayoutCallback();
     _needsBuild = true;
   }
 
@@ -176,29 +206,31 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     // Force the callback to be called, even if the layout constraints are the
     // same. This is because that callback may depend on the updated widget
     // configuration, or an inherited widget.
-    renderObject.markNeedsLayout();
+    renderObject.scheduleLayoutCallback();
     _needsBuild = true;
     super.performRebuild(); // Calls widget.updateRenderObject (a no-op in this case).
   }
 
   @override
   void unmount() {
-    renderObject.updateCallback(null);
+    renderObject._callback = null;
     super.unmount();
   }
 
-  // The constraints that were passed to this class last time it was laid out.
-  // These constraints are compared to the new constraints to determine whether
-  // [ConstrainedLayoutBuilder.builder] needs to be called.
-  ConstraintType? _previousConstraints;
+  // The LayoutInfoType that was used to invoke the layout callback with last time,
+  // during layout. The `_previousLayoutInfo` value is compared to the new one
+  // to determine whether [LayoutBuilderBase.builder] needs to be called.
+  LayoutInfoType? _previousLayoutInfo;
   bool _needsBuild = true;
 
-  void _rebuildWithConstraints(ConstraintType constraints) {
+  void _rebuildWithConstraints(Constraints _) {
+    final LayoutInfoType layoutInfo = renderObject.layoutInfo;
     @pragma('vm:notify-debugger-on-exception')
     void updateChildCallback() {
       Widget built;
       try {
-        built = (widget as ConstrainedLayoutBuilder<ConstraintType>).builder(this, constraints);
+        assert(layoutInfo == renderObject.layoutInfo);
+        built = (widget as AbstractLayoutBuilder<LayoutInfoType>).builder(this, layoutInfo);
         debugWidgetBuilderValue(widget, built);
       } catch (e, stack) {
         built = ErrorWidget.builder(
@@ -231,12 +263,12 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
         _child = updateChild(null, built, slot);
       } finally {
         _needsBuild = false;
-        _previousConstraints = constraints;
+        _previousLayoutInfo = layoutInfo;
       }
     }
 
     final VoidCallback? callback =
-        _needsBuild || (constraints != _previousConstraints) ? updateChildCallback : null;
+        _needsBuild || (layoutInfo != _previousLayoutInfo) ? updateChildCallback : null;
     owner!.buildScope(this, callback);
   }
 
@@ -256,7 +288,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   @override
   void removeRenderObjectChild(RenderObject child, Object? slot) {
-    final RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> renderObject =
+    final RenderAbstractLayoutBuilderMixin<LayoutInfoType, RenderObject> renderObject =
         this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
@@ -264,35 +296,59 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 }
 
-/// Generic mixin for [RenderObject]s created by [ConstrainedLayoutBuilder].
+/// Generic mixin for [RenderObject]s created by an [AbstractLayoutBuilder] with
+/// the the same `LayoutInfoType`.
 ///
-/// Provides a callback that should be called at layout time, typically in
-/// [RenderObject.performLayout].
-mixin RenderConstrainedLayoutBuilder<
-  ConstraintType extends Constraints,
-  ChildType extends RenderObject
->
-    on RenderObjectWithChildMixin<ChildType> {
-  LayoutCallback<ConstraintType>? _callback;
+/// Provides a [layoutCallback] implementation which, if needed, invokes
+/// [AbstractLayoutBuilder]'s builder callback.
+///
+/// Implementers can override the [layoutInfo] implementation with a value
+/// that is safe to access in [layoutCallback], which is called in
+/// [performLayout]. The default [layoutInfo] returns the incoming
+/// [Constraints].
+///
+/// This mixin replaces [RenderConstrainedLayoutBuilder].
+mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderObject>
+    on RenderObjectWithChildMixin<ChildType>, RenderObjectWithLayoutCallbackMixin {
+  LayoutCallback<Constraints>? _callback;
 
   /// Change the layout callback.
-  void updateCallback(LayoutCallback<ConstraintType>? value) {
+  void _updateCallback(LayoutCallback<Constraints> value) {
     if (value == _callback) {
       return;
     }
     _callback = value;
-    markNeedsLayout();
+    scheduleLayoutCallback();
   }
 
-  /// Invoke the callback supplied via [updateCallback].
+  /// Invokes the builder callback supplied via [AbstractLayoutBuilder] and
+  /// rebuilds the [AbstractLayoutBuilder]'s widget tree, if needed.
   ///
-  /// Typically this results in [ConstrainedLayoutBuilder.builder] being called
-  /// during layout.
-  void rebuildIfNecessary() {
-    assert(_callback != null);
-    invokeLayoutCallback(_callback!);
-  }
+  /// No further work will be done if [layoutInfo] has not changed since the last
+  /// time this method was called, and [AbstractLayoutBuilder.updateShouldRebuild]
+  /// returned `false` when the widget was rebuilt.
+  ///
+  /// This method should typically be called as soon as possible in the class's
+  /// [performLayout] implementation, before any layout work is done.
+  @visibleForOverriding
+  @override
+  void layoutCallback() => _callback!(constraints);
+
+  /// The information to invoke the [AbstractLayoutBuilder.builder] callback with.
+  ///
+  /// This is typically the information that are only made available in
+  /// [performLayout], which is inaccessible for regular [Builder] widget,
+  /// such as the incoming [Constraints], which are the default value.
+  @protected
+  LayoutInfoType get layoutInfo => constraints as LayoutInfoType;
 }
+
+/// Generic mixin for [RenderObject]s created by an [AbstractLayoutBuilder] with
+/// the the same `LayoutInfoType`.
+///
+/// Use [RenderAbstractLayoutBuilderMixin] instead, which replaces this mixin.
+typedef RenderConstrainedLayoutBuilder<LayoutInfoType, ChildType extends RenderObject> =
+    RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType>;
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///
@@ -329,13 +385,16 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const LayoutBuilder({super.key, required super.builder});
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+  RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> createRenderObject(
+    BuildContext context,
+  ) => _RenderLayoutBuilder();
 }
 
 class _RenderLayoutBuilder extends RenderBox
     with
         RenderObjectWithChildMixin<RenderBox>,
-        RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
+        RenderObjectWithLayoutCallbackMixin,
+        RenderAbstractLayoutBuilderMixin<BoxConstraints, RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
@@ -387,7 +446,7 @@ class _RenderLayoutBuilder extends RenderBox
   @override
   void performLayout() {
     final BoxConstraints constraints = this.constraints;
-    rebuildIfNecessary();
+    runLayoutCallback();
     if (child != null) {
       child!.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child!.size);

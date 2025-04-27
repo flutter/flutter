@@ -844,6 +844,15 @@ class _TabBarScrollController extends ScrollController {
   }
 }
 
+/// Signature for [TabBar] callbacks that report that an underlying value has
+/// changed for a given [Tab] at `index`.
+///
+/// Used for [TabBar.onHover] and [TabBar.onFocusChange] callbacks The provided
+/// `value` being true indicates focus has been gained, or a pointer has hovered
+/// over the tab, with false indicated focus has been lost or the pointer has
+/// exited hovering.
+typedef TabValueChanged<T> = void Function(T value, int index);
+
 /// A Material Design primary tab bar.
 ///
 /// Primary tabs are placed at the top of the content pane under a top app bar.
@@ -932,6 +941,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.mouseCursor,
     this.enableFeedback,
     this.onTap,
+    this.onHover,
+    this.onFocusChange,
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
@@ -985,6 +996,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.mouseCursor,
     this.enableFeedback,
     this.onTap,
+    this.onHover,
+    this.onFocusChange,
     this.physics,
     this.splashFactory,
     this.splashBorderRadius,
@@ -1252,6 +1265,46 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// callbacks should not make changes to the TabController since that would
   /// interfere with the default tap handler.
   final ValueChanged<int>? onTap;
+
+  /// An optional callback that's called when a [Tab]'s hover state in the
+  /// [TabBar] changes.
+  ///
+  /// Called when a pointer enters or exits the ink response area of the [Tab].
+  ///
+  /// The value passed to the callback is true if a pointer has entered the
+  /// [Tab] at `index` and false if a pointer has exited.
+  ///
+  /// When hover is moved from one tab directly to another, this will be called
+  /// twice. First to represent hover exiting the initial tab, and then second
+  /// for the pointer entering hover over the next tab.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to customize a [Tab] in response to hovering over a
+  /// [TabBar].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.onHover.dart **
+  /// {@end-tool}
+  final TabValueChanged<bool>? onHover;
+
+  /// An optional callback that's called when a [Tab]'s focus state in the
+  /// [TabBar] changes.
+  ///
+  /// Called when the node fo the [Tab] at `index` gains or loses focus.
+  ///
+  /// The value passed to the callback is true if the node has gained focus for
+  /// the [Tab] at `index` and false if focus has been lost.
+  ///
+  /// When focus is moved from one tab directly to another, this will be called
+  /// twice. First to represent focus being lost by the initially focused tab,
+  /// and then second for the next tab gaining focus.
+  ///
+  /// {@tool dartpad}
+  /// This sample shows how to customize a [Tab] based on focus traversal in
+  /// enclosing [TabBar].
+  ///
+  /// ** See code in examples/api/lib/material/tabs/tab_bar.onFocusChange.dart **
+  /// {@end-tool}
+  final TabValueChanged<bool>? onFocusChange;
 
   /// How the [TabBar]'s scroll view should respond to user input.
   ///
@@ -1894,6 +1947,12 @@ class _TabBarState extends State<TabBar> {
         mouseCursor: effectiveMouseCursor,
         onTap: () {
           _handleTap(index);
+        },
+        onHover: (bool value) {
+          widget.onHover?.call(value, index);
+        },
+        onFocusChange: (bool value) {
+          widget.onFocusChange?.call(value, index);
         },
         enableFeedback: widget.enableFeedback ?? true,
         overlayColor: widget.overlayColor ?? tabBarTheme.overlayColor ?? defaultOverlay,
@@ -2571,7 +2630,7 @@ class _TabsDefaultsM2 extends TabBarThemeData {
 
   final BuildContext context;
   late final ColorScheme _colors = Theme.of(context).colorScheme;
-  late final bool isDark = Theme.of(context).brightness == Brightness.dark;
+  late final bool isDark = Theme.brightnessOf(context) == Brightness.dark;
   late final Color primaryColor = isDark ? Colors.grey[900]! : Colors.blue;
   final bool isScrollable;
 

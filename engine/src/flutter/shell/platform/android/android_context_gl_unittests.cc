@@ -36,7 +36,7 @@ TaskRunners MakeTaskRunners(const std::string& thread_label,
 
 class TestImpellerContext : public impeller::Context {
  public:
-  TestImpellerContext() {}
+  TestImpellerContext() : Context(impeller::Flags{}) {}
 
   ~TestImpellerContext() {}
 
@@ -96,9 +96,12 @@ class TestAndroidContext : public AndroidContext {
  public:
   TestAndroidContext(const std::shared_ptr<impeller::Context>& impeller_context,
                      AndroidRenderingAPI rendering_api)
-      : AndroidContext(rendering_api) {
+      : AndroidContext(rendering_api), impeller_context_(impeller_context) {
     SetImpellerContext(impeller_context);
   }
+
+ private:
+  std::shared_ptr<impeller::Context> impeller_context_;
 };
 
 TEST(AndroidContextGl, Create) {

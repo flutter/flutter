@@ -12,6 +12,8 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/TextInputSemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 
+#include "flutter/common/constants.h"
+
 #pragma GCC diagnostic error "-Wundeclared-selector"
 
 FLUTTER_ASSERT_ARC
@@ -65,7 +67,6 @@ AccessibilityBridge::AccessibilityBridge(
 AccessibilityBridge::~AccessibilityBridge() {
   [accessibility_channel_ setMessageHandler:nil];
   clearState();
-  view_controller_.viewIfLoaded.accessibilityElements = nil;
 }
 
 UIView<UITextInput>* AccessibilityBridge::textInputView() {
@@ -235,14 +236,20 @@ void AccessibilityBridge::UpdateSemantics(
   }
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, flutter::SemanticsAction action) {
-  platform_view_->DispatchSemanticsAction(uid, action, {});
+void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
+                                                  flutter::SemanticsAction action) {
+  // TODO(team-ios): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action, {});
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(int32_t uid,
+void AccessibilityBridge::DispatchSemanticsAction(int32_t node_uid,
                                                   flutter::SemanticsAction action,
                                                   fml::MallocMapping args) {
-  platform_view_->DispatchSemanticsAction(uid, action, std::move(args));
+  // TODO(team-ios): Remove implicit view assumption.
+  // https://github.com/flutter/flutter/issues/142845
+  platform_view_->DispatchSemanticsAction(kFlutterImplicitViewId, node_uid, action,
+                                          std::move(args));
 }
 
 static void ReplaceSemanticsObject(SemanticsObject* oldObject,
@@ -260,15 +267,13 @@ static void ReplaceSemanticsObject(SemanticsObject* oldObject,
 
 static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
                                      const fml::WeakPtr<AccessibilityBridge>& weak_ptr) {
-  if (node.HasFlag(flutter::SemanticsFlags::kIsTextField) &&
-      !node.HasFlag(flutter::SemanticsFlags::kIsReadOnly)) {
+  if (node.flags.isTextField && !node.flags.isReadOnly) {
     // Text fields are backed by objects that implement UITextInput.
     return [[TextInputSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
-  } else if (!node.HasFlag(flutter::SemanticsFlags::kIsInMutuallyExclusiveGroup) &&
-             (node.HasFlag(flutter::SemanticsFlags::kHasToggledState) ||
-              node.HasFlag(flutter::SemanticsFlags::kHasCheckedState))) {
+  } else if (!node.flags.isInMutuallyExclusiveGroup &&
+             (node.flags.hasToggledState || node.flags.hasCheckedState)) {
     return [[FlutterSwitchSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
-  } else if (node.HasFlag(flutter::SemanticsFlags::kHasImplicitScrolling)) {
+  } else if (node.flags.hasImplicitScrolling) {
     return [[FlutterScrollableSemanticsObject alloc] initWithBridge:weak_ptr uid:node.id];
   } else if (node.IsPlatformViewNode()) {
     FlutterPlatformViewsController* platformViewsController =
@@ -283,12 +288,6 @@ static SemanticsObject* CreateObject(const flutter::SemanticsNode& node,
   }
 }
 
-static bool DidFlagChange(const flutter::SemanticsNode& oldNode,
-                          const flutter::SemanticsNode& newNode,
-                          SemanticsFlags flag) {
-  return oldNode.HasFlag(flag) != newNode.HasFlag(flag);
-}
-
 SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
                                                         flutter::SemanticsNodeUpdates& updates) {
   SemanticsObject* object = objects_[@(uid)];
@@ -301,11 +300,13 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
     if (nodeEntry != updates.end()) {
       // There's an update for this node
       flutter::SemanticsNode node = nodeEntry->second;
-      if (DidFlagChange(object.node, node, flutter::SemanticsFlags::kIsTextField) ||
-          DidFlagChange(object.node, node, flutter::SemanticsFlags::kIsReadOnly) ||
-          DidFlagChange(object.node, node, flutter::SemanticsFlags::kHasCheckedState) ||
-          DidFlagChange(object.node, node, flutter::SemanticsFlags::kHasToggledState) ||
-          DidFlagChange(object.node, node, flutter::SemanticsFlags::kHasImplicitScrolling)) {
+      if (object.node.flags.isTextField != node.flags.isTextField ||
+          object.node.flags.isReadOnly != node.flags.isReadOnly ||
+          object.node.flags.hasCheckedState != node.flags.hasCheckedState ||
+          object.node.flags.hasToggledState != node.flags.hasToggledState ||
+          object.node.flags.hasImplicitScrolling != node.flags.hasImplicitScrolling
+
+      ) {
         // The node changed its type. In this case, we cannot reuse the existing
         // SemanticsObject implementation. Instead, we replace it with a new
         // instance.
@@ -374,6 +375,7 @@ void AccessibilityBridge::clearState() {
   [objects_ removeAllObjects];
   previous_route_id_ = 0;
   previous_routes_.clear();
+  view_controller_.viewIfLoaded.accessibilityElements = nil;
 }
 
 }  // namespace flutter

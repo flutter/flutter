@@ -74,9 +74,6 @@ class MockLogSink : public component_testing::LocalComponentImpl,
     }
   }
 
-  void Connect(fuchsia_logger::LogSinkConnectRequest& request,
-               ConnectCompleter::Sync& completer) override {}
-
   void ConnectStructured(
       fuchsia_logger::LogSinkConnectStructuredRequest& request,
       ConnectStructuredCompleter::Sync& completer) override {}
@@ -87,6 +84,10 @@ class MockLogSink : public component_testing::LocalComponentImpl,
                                           fidl::kIgnoreBindingClosure)),
               ZX_OK);
   }
+
+  void handle_unknown_method(
+      fidl::UnknownMethodMetadata<fuchsia_logger::LogSink> metadata,
+      fidl::UnknownMethodCompleter::Sync& completer) override {}
 
  private:
   bool first_call_ = true;

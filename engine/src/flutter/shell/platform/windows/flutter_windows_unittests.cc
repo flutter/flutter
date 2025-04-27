@@ -82,8 +82,8 @@ TEST_F(WindowsTest, LaunchMain) {
 
 // Verify there is no unexpected output from launching main.
 TEST_F(WindowsTest, LaunchMainHasNoOutput) {
-  // Replace stdout & stderr stream buffers with our own.
-  StreamCapture stdout_capture(&std::cout);
+  // Replace stderr stream buffer with our own.  (stdout may contain expected
+  // output printed by Dart, such as the Dart VM service startup message)
   StreamCapture stderr_capture(&std::cerr);
 
   auto& context = GetContext();
@@ -91,11 +91,9 @@ TEST_F(WindowsTest, LaunchMainHasNoOutput) {
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
 
-  stdout_capture.Stop();
   stderr_capture.Stop();
 
-  // Verify stdout & stderr have no output.
-  EXPECT_TRUE(stdout_capture.GetOutput().empty());
+  // Verify stderr has no output.
   EXPECT_TRUE(stderr_capture.GetOutput().empty());
 }
 
@@ -535,7 +533,7 @@ TEST_F(WindowsTest, Lifecycle) {
   modifier.SetLifecycleManager(std::move(lifecycle_manager));
 
   EXPECT_CALL(*lifecycle_manager_ptr,
-              SetLifecycleState(AppLifecycleState::kResumed))
+              SetLifecycleState(AppLifecycleState::kInactive))
       .WillOnce([lifecycle_manager_ptr](AppLifecycleState state) {
         lifecycle_manager_ptr->WindowsLifecycleManager::SetLifecycleState(
             state);
@@ -548,10 +546,12 @@ TEST_F(WindowsTest, Lifecycle) {
             state);
       });
 
+  FlutterDesktopViewControllerProperties properties = {0, 0};
+
   // Create a controller. This launches the engine and sets the app lifecycle
   // to the "resumed" state.
   ViewControllerPtr controller{
-      FlutterDesktopViewControllerCreate(0, 0, engine.release())};
+      FlutterDesktopEngineCreateViewController(engine.get(), &properties)};
 
   FlutterDesktopViewRef view =
       FlutterDesktopViewControllerGetView(controller.get());
@@ -565,6 +565,17 @@ TEST_F(WindowsTest, Lifecycle) {
   // "hidden" app lifecycle event.
   ::MoveWindow(hwnd, /* X */ 0, /* Y */ 0, /* nWidth*/ 100, /* nHeight*/ 100,
                /* bRepaint*/ false);
+
+  while (lifecycle_manager_ptr->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
+
+  // Resets the view, simulating the window being hidden.
+  controller.reset();
+
+  while (lifecycle_manager_ptr->IsUpdateStateScheduled()) {
+    PumpMessage();
+  }
 }
 
 TEST_F(WindowsTest, GetKeyboardStateHeadless) {

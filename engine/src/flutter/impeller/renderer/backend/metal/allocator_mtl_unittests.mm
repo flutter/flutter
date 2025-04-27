@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/testing/testing.h"
+#include "impeller/core/device_buffer_descriptor.h"
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/playground/playground_test.h"
 #include "impeller/renderer/backend/metal/allocator_mtl.h"
 #include "impeller/renderer/backend/metal/context_mtl.h"
 #include "impeller/renderer/backend/metal/formats_mtl.h"
-#include "impeller/renderer/backend/metal/lazy_drawable_holder.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "impeller/renderer/capabilities.h"
 
@@ -68,6 +68,22 @@ TEST_P(AllocatorMTLTest, DebugTraceMemoryStatistics) {
   // After all textures are out of scope, memory has been decremented.
   EXPECT_EQ(allocator->DebugGetHeapUsage().ConvertTo<MebiBytes>().GetSize(),
             0u);
+}
+
+TEST_P(AllocatorMTLTest, ManagedMemory) {
+  auto& context_mtl = ContextMTL::Cast(*GetContext());
+  auto allocator = std::make_unique<AllocatorMTL>(context_mtl.GetMTLDevice(),
+                                                  "test-allocator");
+  allocator->DebugSetSupportsUMA(false);
+
+  DeviceBufferDescriptor desc;
+  desc.size = 100;
+  desc.storage_mode = StorageMode::kHostVisible;
+
+  auto buffer = allocator->CreateBuffer(desc);
+  ASSERT_TRUE(buffer);
+
+  EXPECT_NE(buffer->OnGetContents(), nullptr);
 }
 
 }  // namespace testing

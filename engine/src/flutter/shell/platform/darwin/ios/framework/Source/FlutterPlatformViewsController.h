@@ -139,6 +139,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (const flutter::EmbeddedViewParams&)compositionParamsForView:(int64_t)viewId;
 
+- (std::vector<int64_t>&)previousCompositionOrder;
+
 @end
 
 NS_ASSUME_NONNULL_END

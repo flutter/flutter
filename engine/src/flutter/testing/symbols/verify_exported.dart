@@ -98,15 +98,25 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       NmEntry entry,
     ) {
       final bool cSymbol =
-          (entry.type == '(__DATA,__common)' || entry.type == '(__DATA,__const)') &&
+          (entry.type == '(__DATA,__common)' ||
+              entry.type == '(__DATA,__const)' ||
+              entry.type == '(__DATA_CONST,__const)') &&
           entry.name.startsWith('_Flutter');
       final bool cInternalSymbol =
           entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
       final bool objcSymbol =
-          entry.type == '(__DATA,__objc_data)' &&
+          (entry.type == '(__DATA,__objc_data)' || entry.type == '(__DATA,__data)') &&
           (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
               entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'));
-      return !(cSymbol || cInternalSymbol || objcSymbol);
+      // Swift's name mangling uses s followed by symbol length followed by symbol.
+      final RegExp swiftInternalRegExp = RegExp(r'^_\$s\d+InternalFlutterSwift');
+      final bool swiftInternalSymbol =
+          (entry.type == '(__TEXT,__text)' ||
+              entry.type == '(__TEXT,__const)' ||
+              entry.type == '(__TEXT,__constg_swiftt)' ||
+              entry.type == '(__DATA,__objc_data)') &&
+          swiftInternalRegExp.hasMatch(entry.name);
+      return !(cSymbol || cInternalSymbol || objcSymbol || swiftInternalSymbol);
     });
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
@@ -150,7 +160,8 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
     for (final String key in entryMap.keys) {
       final bool isValidFlutterGpuSymbol =
           key.startsWith('InternalFlutterGpu') && entryMap[key] == 'T';
-      if (!isValidFlutterGpuSymbol && entryMap[key] != expectedSymbols[key]) {
+      final bool isLibcxxSymbol = key.endsWith('_lcxx_override');
+      if (!isValidFlutterGpuSymbol && !isLibcxxSymbol && entryMap[key] != expectedSymbols[key]) {
         badSymbols[key] = entryMap[key]!;
       }
     }

@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_COMMON_RASTERIZER_H_
 #define FLUTTER_SHELL_COMMON_RASTERIZER_H_
 
+#include <future>
 #include <memory>
 #include <optional>
 #include <unordered_map>
@@ -44,6 +45,7 @@
 namespace impeller {
 class Context;
 class AiksContext;
+class ImpellerContextFuture;
 }  // namespace impeller
 #endif  // !IMPELLER_SUPPORTS_RENDERING
 
@@ -205,7 +207,8 @@ class Rasterizer final : public SnapshotDelegate,
   ///
   ~Rasterizer();
 
-  void SetImpellerContext(std::weak_ptr<impeller::Context> impeller_context);
+  void SetImpellerContext(
+      std::shared_ptr<impeller::ImpellerContextFuture> impeller_context);
 
   //----------------------------------------------------------------------------
   /// @brief      Rasterizers may be created well before an on-screen surface is
@@ -671,12 +674,21 @@ class Rasterizer final : public SnapshotDelegate,
   }
 
   // |SnapshotController::Delegate|
+  bool IsAiksContextInitialized() const override {
+#if IMPELLER_SUPPORTS_RENDERING
+    return surface_ && surface_->GetAiksContext();
+#else
+    return false;
+#endif
+  }
+
+  // |SnapshotController::Delegate|
   std::shared_ptr<impeller::AiksContext> GetAiksContext() const override {
 #if IMPELLER_SUPPORTS_RENDERING
     if (surface_) {
       return surface_->GetAiksContext();
     }
-    if (auto context = impeller_context_.lock()) {
+    if (auto context = impeller_context_->GetContext()) {
       return std::make_shared<impeller::AiksContext>(
           context, impeller::TypographerContextSkia::Make());
     }
@@ -748,7 +760,7 @@ class Rasterizer final : public SnapshotDelegate,
   bool is_torn_down_ = false;
   Delegate& delegate_;
   [[maybe_unused]] MakeGpuImageBehavior gpu_image_behavior_;
-  std::weak_ptr<impeller::Context> impeller_context_;
+  std::shared_ptr<impeller::ImpellerContextFuture> impeller_context_;
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<SnapshotSurfaceProducer> snapshot_surface_producer_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;

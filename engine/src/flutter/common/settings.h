@@ -16,6 +16,7 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/task_queue_id.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/fml/unique_fd.h"
 
@@ -70,8 +71,10 @@ class FrameTiming {
 };
 
 using TaskObserverAdd =
-    std::function<void(intptr_t /* key */, fml::closure /* callback */)>;
-using TaskObserverRemove = std::function<void(intptr_t /* key */)>;
+    std::function<fml::TaskQueueId(intptr_t /* key */,
+                                   fml::closure /* callback */)>;
+using TaskObserverRemove =
+    std::function<void(fml::TaskQueueId /* queue */, intptr_t /* key */)>;
 using UnhandledExceptionCallback =
     std::function<bool(const std::string& /* error */,
                        const std::string& /* stack trace */)>;
@@ -217,7 +220,7 @@ struct Settings {
 #if FML_OS_ANDROID || FML_OS_IOS || FML_OS_IOS_SIMULATOR
   // On iOS devices, Impeller is the default with no opt-out and this field is
   // const.
-#if FML_OS_IOS || FML_OS_IOS_SIMULATOR
+#if FML_OS_IOS || FML_OS_IOS_SIMULATOR || SLIMPELLER
   static constexpr const
 #endif                              // FML_OS_IOS && !FML_OS_IOS_SIMULATOR
       bool enable_impeller = true;  // NOLINT(readability-identifier-naming)
@@ -225,8 +228,16 @@ struct Settings {
   bool enable_impeller = false;
 #endif
 
+  bool enable_flutter_gpu = false;
+
   // Enable android surface control swapchains where supported.
   bool enable_surface_control = false;
+
+  // Whether to lazily initialize impeller PSO state.
+  bool impeller_enable_lazy_shader_mode = false;
+
+  // An experimental mode that antialiases lines.
+  bool impeller_antialiased_lines = false;
 
   // Log a warning during shell initialization if Impeller is not enabled.
   bool warn_on_impeller_opt_out = false;
@@ -351,9 +362,20 @@ struct Settings {
   /// This is used by the runOnPlatformThread API.
   bool enable_platform_isolates = false;
 
-  // If true, the UI thread is the platform thread on supported
-  // platforms.
-  bool merged_platform_ui_thread = true;
+  enum class MergedPlatformUIThread {
+    // Use separate threads for the UI and platform task runners.
+    kDisabled,
+    // Use the platform thread for both the UI and platform task runners.
+    kEnabled,
+    // Start the engine on a separate UI thread and then move the UI task
+    // runner to the platform thread after the engine is initialized.
+    // This can improve app launch latency by allowing other work to run on
+    // the platform thread during engine startup.
+    kMergeAfterLaunch
+  };
+
+  MergedPlatformUIThread merged_platform_ui_thread =
+      MergedPlatformUIThread::kEnabled;
 };
 
 }  // namespace flutter

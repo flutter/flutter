@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -126,6 +128,7 @@ class CustomMenu extends StatelessWidget {
           child: Semantics(
             scopesRoute: true,
             explicitChildNodes: true,
+            role: SemanticsRole.menu,
             child: TapRegion(
               groupId: info.tapRegionGroupId,
               onTapOutside: (PointerDownEvent event) {
@@ -168,7 +171,6 @@ class RawMenuAnchorApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData.from(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blue,
           dynamicSchemeVariant: DynamicSchemeVariant.vibrant,

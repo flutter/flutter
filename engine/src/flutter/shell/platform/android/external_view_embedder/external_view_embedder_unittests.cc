@@ -340,17 +340,15 @@ TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
 
     // Add an Android view.
     MutatorsStack stack1;
-    SkMatrix matrix1;
-    matrix1.setIdentity();
-    SkMatrix scale = SkMatrix::Scale(1.5, 1.5);
-    SkMatrix trans = SkMatrix::Translate(100, 100);
-    matrix1.setConcat(scale, trans);
+    DlMatrix scale = DlMatrix::MakeScale({1.5, 1.5, 1});
+    DlMatrix trans = DlMatrix::MakeTranslation({100, 100});
+    DlMatrix matrix1 = scale * trans;
     stack1.PushTransform(scale);
     stack1.PushTransform(trans);
     // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
     // the offsetPixels, but not the sizePoints.
     auto view_params_1 = std::make_unique<EmbeddedViewParams>(
-        matrix1, SkSize::Make(200, 200), stack1);
+        ToSkMatrix(matrix1), SkSize::Make(200, 200), stack1);
 
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
     // This is the recording canvas flow writes to.
@@ -411,17 +409,15 @@ TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
 
     // Add an Android view.
     MutatorsStack stack1;
-    SkMatrix matrix1;
-    matrix1.setIdentity();
-    SkMatrix scale = SkMatrix::Scale(1.5, 1.5);
-    SkMatrix trans = SkMatrix::Translate(100, 100);
-    matrix1.setConcat(scale, trans);
+    DlMatrix scale = DlMatrix::MakeScale({1.5, 1.5, 1});
+    DlMatrix trans = DlMatrix::MakeTranslation({100, 100});
+    DlMatrix matrix1 = scale * trans;
     stack1.PushTransform(scale);
     stack1.PushTransform(trans);
     // TODO(egarciad): Investigate why Flow applies the device pixel ratio to
     // the offsetPixels, but not the sizePoints.
     auto view_params_1 = std::make_unique<EmbeddedViewParams>(
-        matrix1, SkSize::Make(200, 200), stack1);
+        ToSkMatrix(matrix1), SkSize::Make(200, 200), stack1);
 
     embedder->PrerollCompositeEmbeddedView(0, std::move(view_params_1));
     // This is the recording canvas flow writes to.
@@ -623,7 +619,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrameOverlayComposition) {
     // Add first Android view.
     SkMatrix matrix;
     MutatorsStack stack;
-    stack.PushTransform(SkMatrix::Translate(0, 0));
+    stack.PushTransform(DlMatrix::MakeTranslation({0, 0}));
 
     embedder->PrerollCompositeEmbeddedView(
         0, std::make_unique<EmbeddedViewParams>(matrix, SkSize::Make(200, 200),
@@ -644,7 +640,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrameOverlayComposition) {
     // Add second Android view.
     SkMatrix matrix;
     MutatorsStack stack;
-    stack.PushTransform(SkMatrix::Translate(0, 100));
+    stack.PushTransform(DlMatrix::MakeTranslation({0, 100}));
 
     embedder->PrerollCompositeEmbeddedView(
         1, std::make_unique<EmbeddedViewParams>(matrix, SkSize::Make(100, 100),
@@ -730,7 +726,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFramePlatformViewWithoutAnyOverlay) {
     // Add Android view.
     SkMatrix matrix;
     MutatorsStack stack;
-    stack.PushTransform(SkMatrix::Translate(0, 0));
+    stack.PushTransform(DlMatrix::MakeTranslation({0, 0}));
 
     embedder->PrerollCompositeEmbeddedView(
         0, std::make_unique<EmbeddedViewParams>(matrix, SkSize::Make(200, 200),

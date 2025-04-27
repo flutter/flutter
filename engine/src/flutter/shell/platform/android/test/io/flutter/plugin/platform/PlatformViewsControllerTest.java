@@ -67,7 +67,6 @@ import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowDialog;
 import org.robolectric.shadows.ShadowSurfaceView;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class PlatformViewsControllerTest {
   // An implementation of PlatformView that counts invocations of its lifecycle callbacks.
@@ -1621,7 +1620,7 @@ public class PlatformViewsControllerTest {
 
           @NonNull
           @Override
-          public SurfaceProducer createSurfaceProducer() {
+          public SurfaceProducer createSurfaceProducer(SurfaceLifecycle lifecycle) {
             return new SurfaceProducer() {
               @Override
               public void setCallback(SurfaceProducer.Callback cb) {}

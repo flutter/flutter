@@ -103,6 +103,7 @@ void testMain() {
       expect(inputElement.tagName.toLowerCase(), 'input');
       expect(inputElement.value, '');
       expect(inputElement.disabled, isFalse);
+      expect(inputElement.getAttribute('aria-required'), isNull);
     });
 
     test('renders a password field', () {
@@ -114,6 +115,22 @@ void testMain() {
       final textFieldRole = node.semanticRole! as SemanticTextField;
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.disabled, isFalse);
+    });
+
+    test('renders text fields with input types', () {
+      const inputTypeEnumToString = <ui.SemanticsInputType, String>{
+        ui.SemanticsInputType.none: 'text',
+        ui.SemanticsInputType.text: 'text',
+        ui.SemanticsInputType.url: 'url',
+        ui.SemanticsInputType.phone: 'tel',
+        ui.SemanticsInputType.search: 'search',
+        ui.SemanticsInputType.email: 'email',
+      };
+      for (final ui.SemanticsInputType type in ui.SemanticsInputType.values) {
+        createTextFieldSemantics(value: 'text', inputType: type);
+
+        expectSemanticsTree(owner(), '<sem><input type="${inputTypeEnumToString[type]}" /></sem>');
+      }
     });
 
     test('renders a disabled text field', () {
@@ -473,6 +490,16 @@ void testMain() {
         expect(strategy.domElement, tester.getTextField(2).editableElement);
       }
     });
+
+    test('renders a required text field', () {
+      createTextFieldSemantics(isRequired: true, value: 'hello');
+      expectSemanticsTree(owner(), '''<sem><input aria-required="true" /></sem>''');
+    });
+
+    test('renders a not required text field', () {
+      createTextFieldSemantics(isRequired: false, value: 'hello');
+      expectSemanticsTree(owner(), '''<sem><input aria-required="false" /></sem>''');
+    });
   });
 }
 
@@ -483,9 +510,11 @@ SemanticsObject createTextFieldSemantics({
   bool isFocused = false,
   bool isMultiline = false,
   bool isObscured = false,
+  bool? isRequired,
   ui.Rect rect = const ui.Rect.fromLTRB(0, 0, 100, 50),
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
+  ui.SemanticsInputType inputType = ui.SemanticsInputType.text,
 }) {
   final tester = SemanticsTester(owner());
   tester.updateNode(
@@ -497,11 +526,14 @@ SemanticsObject createTextFieldSemantics({
     isFocused: isFocused,
     isMultiline: isMultiline,
     isObscured: isObscured,
+    hasRequiredState: isRequired != null,
+    isRequired: isRequired,
     hasTap: true,
     rect: rect,
     textDirection: ui.TextDirection.ltr,
     textSelectionBase: textSelectionBase,
     textSelectionExtent: textSelectionExtent,
+    inputType: inputType,
   );
   tester.apply();
   return tester.getSemanticsObject(0);

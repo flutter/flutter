@@ -170,18 +170,19 @@ group("unittests") {
   public_deps = []
   if (is_android) {
     public_deps += [
+      "//flutter/impeller/renderer/backend/vulkan:vulkan_android_apk_unittests",
+      "//flutter/impeller/renderer/backend/vulkan:vulkan_android_unittests",
       "//flutter/impeller/toolkit/android:apk_unittests",
       "//flutter/impeller/toolkit/android:unittests",
       "//flutter/shell/platform/android:flutter_shell_native_unittests",
     ]
   }
 
-  if (is_ios) {
-    public_deps += [ "//flutter/shell/platform/darwin/ios:ios_test_flutter" ]
-  }
-
   # Compile all unittests targets if enabled.
   if (enable_unittests) {
+    if (is_ios) {
+      public_deps += [ "//flutter/shell/platform/darwin/ios:ios_test_flutter" ]
+    }
     public_deps += [
       "//flutter/assets:assets_unittests",
       "//flutter/display_list:display_list_rendertests",

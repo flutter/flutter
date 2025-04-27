@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 class User {
   const User({required this.email, required this.name});
@@ -439,7 +443,7 @@ void main() {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(focusColor: highlightColor),
+        theme: ThemeData(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -478,7 +482,7 @@ void main() {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(focusColor: highlightColor),
+        theme: ThemeData(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -601,7 +605,7 @@ void main() {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(focusColor: highlightColor),
+        theme: ThemeData(focusColor: highlightColor),
         home: Scaffold(
           body: Autocomplete<String>(
             optionsBuilder: (TextEditingValue textEditingValue) {
@@ -647,5 +651,187 @@ void main() {
     expect(optionFinder(0), findsOneWidget);
     expect(optionFinder(kOptions.length - 1), findsNothing);
     checkOptionHighlight(tester, kOptions.first, highlightColor);
+  });
+
+  testWidgets('Autocomplete suggestions are hit-tested before ListTiles', (
+    WidgetTester tester,
+  ) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              Autocomplete<String>(
+                optionsBuilder: (TextEditingValue textEditingValue) {
+                  const List<String> options = <String>['Apple', 'Banana', 'Cherry'];
+                  return options.where(
+                    (String option) => option.toLowerCase().contains(textEditingValue.text),
+                  );
+                },
+              ),
+              for (int i = 0; i < 3; i++) ListTile(title: Text('Item $i'), onTap: () {}),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    // Check the semantics tree based on hit-testing order.
+    expect(
+      semantics,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics(
+              id: 1,
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  children: <TestSemantics>[
+                    TestSemantics(
+                      id: 3,
+                      flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 7,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Item 2',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 6,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Item 1',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 5,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isButton,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Item 0',
+                          textDirection: TextDirection.ltr,
+                        ),
+                        TestSemantics(
+                          id: 8,
+                          children: <TestSemantics>[
+                            TestSemantics(
+                              id: 9,
+                              children: <TestSemantics>[
+                                TestSemantics(
+                                  id: 13,
+                                  flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                                  children: <TestSemantics>[
+                                    TestSemantics(
+                                      id: 12,
+                                      tags: <SemanticsTag>[
+                                        const SemanticsTag('RenderViewport.twoPane'),
+                                      ],
+                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                      actions: <SemanticsAction>[
+                                        SemanticsAction.tap,
+                                        SemanticsAction.focus,
+                                      ],
+                                      label: 'Cherry',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                    TestSemantics(
+                                      id: 11,
+                                      tags: <SemanticsTag>[
+                                        const SemanticsTag('RenderViewport.twoPane'),
+                                      ],
+                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                      actions: <SemanticsAction>[
+                                        SemanticsAction.tap,
+                                        SemanticsAction.focus,
+                                      ],
+                                      label: 'Banana',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                    TestSemantics(
+                                      id: 10,
+                                      tags: <SemanticsTag>[
+                                        const SemanticsTag('RenderViewport.twoPane'),
+                                      ],
+                                      flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                                      actions: <SemanticsAction>[
+                                        SemanticsAction.tap,
+                                        SemanticsAction.focus,
+                                      ],
+                                      label: 'Apple',
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        TestSemantics(
+                          id: 4,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.isTextField,
+                            SemanticsFlag.isFocused,
+                            SemanticsFlag.hasEnabledState,
+                            SemanticsFlag.isEnabled,
+                          ],
+                          actions: <SemanticsAction>[
+                            SemanticsAction.tap,
+                            SemanticsAction.setSelection,
+                            SemanticsAction.setText,
+                            SemanticsAction.focus,
+                            if (kIsWeb) SemanticsAction.paste,
+                          ],
+                          textDirection: TextDirection.ltr,
+                          textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
+                          validationResult: SemanticsValidationResult.valid,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+        childOrder: DebugSemanticsDumpOrder.inverseHitTest,
+      ),
+    );
+
+    final Finder cherryFinder = find.text('Cherry');
+    expect(cherryFinder, findsOneWidget);
+
+    await tester.tap(cherryFinder);
+    await tester.pump();
+
+    expect(find.widgetWithText(TextField, 'Cherry'), findsOneWidget);
+    semantics.dispose();
   });
 }

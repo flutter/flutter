@@ -626,6 +626,60 @@ class PaintingContext extends ClipContext {
     }
   }
 
+  /// Clip further painting using a rounded superellipse.
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.offset}
+  ///
+  /// The `bounds` argument is used to specify the region of the canvas (in the
+  /// caller's coordinate system) into which `painter` will paint.
+  ///
+  /// The `clipRSuperellipse` argument specifies the rounded-superellipse (in the caller's
+  /// coordinate system) to use to clip the painting done by `painter`. It
+  /// should not include the `offset`.
+  ///
+  /// The `painter` callback will be called while the `clipRSuperellipse` is applied. It
+  /// is called synchronously during the call to [pushClipRSuperellipse].
+  ///
+  /// The `clipBehavior` argument controls how the rounded rectangle is clipped.
+  ///
+  /// Hit tests are performed based on the bounding box of the [RSuperellipse].
+  ///
+  /// {@macro flutter.rendering.PaintingContext.pushClipRect.oldLayer}
+  ClipRSuperellipseLayer? pushClipRSuperellipse(
+    bool needsCompositing,
+    Offset offset,
+    Rect bounds,
+    RSuperellipse clipRSuperellipse,
+    PaintingContextCallback painter, {
+    Clip clipBehavior = Clip.antiAlias,
+    ClipRSuperellipseLayer? oldLayer,
+  }) {
+    if (clipBehavior == Clip.none) {
+      painter(this, offset);
+      return null;
+    }
+    final Rect offsetBounds = bounds.shift(offset);
+    final RSuperellipse offsetShape = clipRSuperellipse.shift(offset);
+    if (needsCompositing) {
+      final ClipRSuperellipseLayer layer = oldLayer ?? ClipRSuperellipseLayer();
+      layer
+        ..clipRSuperellipse = offsetShape
+        ..clipBehavior = clipBehavior;
+      pushLayer(layer, painter, offset, childPaintBounds: offsetBounds);
+      return layer;
+    } else {
+      clipRSuperellipseAndPaint(
+        offsetShape,
+        clipBehavior,
+        offsetBounds,
+        () => painter(this, offset),
+      );
+      return null;
+    }
+  }
+
   /// Clip further painting using a path.
   ///
   /// {@macro flutter.rendering.PaintingContext.pushClipRect.needsCompositing}
@@ -1034,6 +1088,21 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   bool _shouldMergeDirtyNodes = false;
   List<RenderObject> _nodesNeedingLayout = <RenderObject>[];
 
+  /// The [RenderObject]s representing relayout boundaries which need to be laid out
+  /// in the next [flushLayout] pass.
+  ///
+  /// Relayout boundaries are added when they are marked for layout.
+  /// Subclasses of [PipelineOwner] may use them to invalidate caches or
+  /// otherwise make performance optimizations. Since nodes may be marked for
+  /// layout at any time, they are best checked during [flushLayout].
+  ///
+  /// Relayout boundaries owned by child [PipelineOwner]s are not included here.
+  ///
+  /// Boundaries appear in an arbitrary order, and may appear multiple times.
+  @protected
+  @nonVirtual
+  Iterable<RenderObject> get nodesNeedingLayout => _nodesNeedingLayout;
+
   /// Whether this pipeline is currently in the layout phase.
   ///
   /// Specifically, whether [flushLayout] is currently running.
@@ -1177,6 +1246,19 @@ base class PipelineOwner with DiagnosticableTreeMixin {
   }
 
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
+
+  /// The [RenderObject]s which need to be painted in the next [flushPaint] pass.
+  ///
+  /// [RenderObject]s marked with [RenderObject.isRepaintBoundary] are added
+  /// when they are marked needing paint. Subclasses of [PipelineOwner] may use them
+  /// to invalidate caches or otherwise make performance optimizations.
+  /// Since nodes may be marked for layout at any time, they are best checked during
+  /// [flushPaint].
+  ///
+  /// Marked children of child [PipelineOwner]s are not included here.
+  @protected
+  @nonVirtual
+  Iterable<RenderObject> get nodesNeedingPaint => _nodesNeedingPaint;
 
   /// Whether this pipeline is currently in the paint phase.
   ///
@@ -2540,7 +2622,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialLayout() {
     assert(!_debugDisposed);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingLayout);
     assert(_relayoutBoundary == null);
     _relayoutBoundary = this;
@@ -2554,7 +2636,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   @pragma('vm:notify-debugger-on-exception')
   void _layoutWithoutResize() {
     assert(_needsLayout);
-    assert(_relayoutBoundary == this);
+    assert(_relayoutBoundary == this || this is RenderObjectWithLayoutCallbackMixin);
     RenderObject? debugPreviousActiveLayout;
     assert(!_debugMutationsLocked);
     assert(!_doingThisLayoutWithCallback);
@@ -2658,7 +2740,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
     final bool isRelayoutBoundary =
-        !parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject;
+        !parentUsesSize || sizedByParent || constraints.isTight || parent == null;
     final RenderObject relayoutBoundary = isRelayoutBoundary ? this : parent!._relayoutBoundary!;
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
@@ -2823,6 +2905,13 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// parentUsesSize ensures that this render object will undergo layout if the
   /// child undergoes layout. Otherwise, the child can change its layout
   /// information without informing this render object.
+  ///
+  /// Some special [RenderObject] subclasses (such as the one used by
+  /// [OverlayPortal.overlayChildLayoutBuilder]) call [applyPaintTransform] in
+  /// their [performLayout] implementation. To ensure such [RenderObject]s get
+  /// the up-to-date paint transform, [RenderObject] subclasses should typically
+  /// update the paint transform (as reported by [applyPaintTransform]) in this
+  /// method instead of [paint].
   @protected
   void performLayout();
 
@@ -3023,8 +3112,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       return;
     }
     _needsCompositingBitsUpdate = true;
-    if (parent is RenderObject) {
-      final RenderObject parent = this.parent!;
+    final RenderObject? parent = this.parent;
+    if (parent != null) {
       if (parent._needsCompositingBitsUpdate) {
         return;
       }
@@ -3035,9 +3124,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
       }
     }
     // parent is fine (or there isn't one), but we are dirty
-    if (owner != null) {
-      owner!._nodesNeedingCompositingBitsUpdate.add(this);
-    }
+    owner?._nodesNeedingCompositingBitsUpdate.add(this);
   }
 
   late bool _needsCompositing; // initialized in the constructor
@@ -3245,7 +3332,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(_layerHandle.layer != null);
     assert(!_layerHandle.layer!.attached);
     RenderObject? node = parent;
-    while (node is RenderObject) {
+    while (node != null) {
       if (node.isRepaintBoundary) {
         if (node._layerHandle.layer == null) {
           // Looks like the subtree here has never been painted. Let it handle itself.
@@ -3270,7 +3357,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialPaint(ContainerLayer rootLayer) {
     assert(rootLayer.attached);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layerHandle.layer == null);
@@ -3288,7 +3375,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     assert(!_debugDisposed);
     assert(rootLayer.attached);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layerHandle.layer != null); // use scheduleInitialPaint the first time
@@ -3337,8 +3424,8 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     }
     assert(() {
       if (_needsCompositingBitsUpdate) {
-        if (parent is RenderObject) {
-          final RenderObject parent = this.parent!;
+        final RenderObject? parent = this.parent;
+        if (parent != null) {
           bool visitedByParent = false;
           parent.visitChildren((RenderObject child) {
             if (child == this) {
@@ -3442,8 +3529,9 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   /// Applies the transform that would be applied when painting the given child
   /// to the given matrix.
   ///
-  /// Used by coordinate conversion functions to translate coordinates local to
-  /// one render object into coordinates local to another render object.
+  /// Used by coordinate conversion functions ([getTransformTo], for example) to
+  /// translate coordinates local to one render object into coordinates local to
+  /// another render object.
   ///
   /// Some RenderObjects will provide a zeroed out matrix in this method,
   /// indicating that the child should not paint anything or respond to hit
@@ -3615,7 +3703,7 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
   void scheduleInitialSemantics() {
     assert(!_debugDisposed);
     assert(attached);
-    assert(parent is! RenderObject);
+    assert(parent == null);
     assert(!owner!._debugDoingSemantics);
     assert(_semantics.parentDataDirty || !_semantics.built);
     assert(owner!._semanticsOwner != null);
@@ -3951,14 +4039,12 @@ abstract class RenderObject with DiagnosticableTreeMixin implements HitTestTarge
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
   }) {
-    if (parent is RenderObject) {
-      parent!.showOnScreen(
-        descendant: descendant ?? this,
-        rect: rect,
-        duration: duration,
-        curve: curve,
-      );
-    }
+    parent?.showOnScreen(
+      descendant: descendant ?? this,
+      rect: rect,
+      duration: duration,
+      curve: curve,
+    );
   }
 
   /// Adds a debug representation of a [RenderObject] optimized for including in
@@ -4071,6 +4157,77 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
     return child != null
         ? <DiagnosticsNode>[child!.toDiagnosticsNode(name: 'child')]
         : <DiagnosticsNode>[];
+  }
+}
+
+/// A mixin for managing [RenderObject] with a [layoutCallback], which will be
+/// invoked during this [RenderObject]'s layout process if scheduled using
+/// [scheduleLayoutCallback].
+///
+/// A layout callback is typically a callback that mutates the [RenderObject]'s
+/// render subtree during the [RenderObject]'s layout process. When an ancestor
+/// [RenderObject] chooses to skip laying out this [RenderObject] in its
+/// [performLayout] implementation (for example, for performance reasons, an
+/// [Overlay] may skip laying out an offstage [OverlayEntry] while keeping it in
+/// the tree), normally the [layoutCallback] will not be invoked because the
+/// [layout] method will not be called. This can be undesirable when the
+/// [layoutCallback] involves rebuilding dirty widgets (most notably, the
+/// [LayoutBuilder] widget). Unlike render subtrees, typically all dirty widgets
+/// (even off-screen ones) in a widget tree must be rebuilt. This mixin makes
+/// sure once scheduled, the [layoutCallback] method will be invoked even if it's
+/// skipped by an ancestor [RenderObject], unless this [RenderObject] has never
+/// been laid out.
+///
+/// Subclasses must not invoke the layout callback directly. Instead, call
+/// [runLayoutCallback] in the [performLayout] implementation.
+///
+/// See also:
+///
+///  * [LayoutBuilder] and [SliverLayoutBuilder], which use the mixin.
+mixin RenderObjectWithLayoutCallbackMixin on RenderObject {
+  // The initial value of this flag must be set to true to prevent the layout
+  // callback from being scheduled when the subtree has never been laid out (in
+  // which case the `constraints` or any other layout information is unknown).
+  bool _needsRebuild = true;
+
+  /// The layout callback to be invoked during [performLayout].
+  ///
+  /// This method should not be invoked directly. Instead, call
+  /// [runLayoutCallback] in the [performLayout] implementation. This callback
+  /// will be invoked using [invokeLayoutCallback].
+  @visibleForOverriding
+  void layoutCallback();
+
+  /// Invokes [layoutCallback] with [invokeLayoutCallback].
+  ///
+  /// This method must be called in [performLayout], typically as early as
+  /// possible before any layout work is done, to avoid re-dirtying any child
+  /// [RenderObject]s.
+  @mustCallSuper
+  void runLayoutCallback() {
+    assert(debugDoingThisLayout);
+    invokeLayoutCallback((_) => layoutCallback());
+    _needsRebuild = false;
+  }
+
+  /// Informs the framework that the layout callback has been updated and must be
+  /// invoked again when this [RenderObject] is ready for layout, even when an
+  /// ancestor [RenderObject] chooses to skip laying out this render subtree.
+  @mustCallSuper
+  void scheduleLayoutCallback() {
+    if (_needsRebuild) {
+      assert(debugNeedsLayout);
+      return;
+    }
+    _needsRebuild = true;
+    // This ensures that the layout callback will be run even if an ancestor
+    // chooses to not lay out this subtree (for example, obstructed OverlayEntries
+    // with `maintainState` set to true), to maintain the widget tree integrity
+    // (making sure global keys are unique, for example).
+    owner?._nodesNeedingLayout.add(this);
+    // In an active tree, markNeedsLayout is needed to inform the layout boundary
+    // that its child size may change.
+    super.markNeedsLayout();
   }
 }
 

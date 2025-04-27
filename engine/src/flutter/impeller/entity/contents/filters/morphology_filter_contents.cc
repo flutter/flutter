@@ -113,7 +113,7 @@ std::optional<Entity> DirectionalMorphologyFilterContents::RenderFilter(
     pass.SetCommandLabel("Morphology Filter");
     auto options = OptionsFromPass(pass);
     options.primitive_type = PrimitiveType::kTriangleStrip;
-    options.blend_mode = BlendMode::kSource;
+    options.blend_mode = BlendMode::kSrc;
     pass.SetPipeline(renderer.GetMorphologyFilterPipeline(options));
     pass.SetVertexBuffer(CreateVertexBuffer(vertices, host_buffer));
 

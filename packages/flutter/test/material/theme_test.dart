@@ -13,7 +13,7 @@ void main() {
   const TextTheme defaultGeometryThemeM3 = Typography.englishLike2021;
 
   test('ThemeDataTween control test', () {
-    final ThemeData light = ThemeData.light();
+    final ThemeData light = ThemeData();
     final ThemeData dark = ThemeData.dark();
     final ThemeDataTween tween = ThemeDataTween(begin: light, end: dark);
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
@@ -45,6 +45,92 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
+  });
+
+  group('Theme.brightnessOf', () {
+    testWidgets('return correct brightness when just media query is given', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(platformBrightness: Brightness.dark),
+          child: SizedBox(),
+        ),
+      );
+
+      expect(Theme.brightnessOf(tester.element(find.byType(SizedBox))), equals(Brightness.dark));
+    });
+
+    testWidgets('return correct brightness with overriding theme brightness over media query', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: Theme(data: ThemeData(brightness: Brightness.light), child: const SizedBox()),
+        ),
+      );
+
+      expect(Theme.brightnessOf(tester.element(find.byType(SizedBox))), equals(Brightness.light));
+    });
+
+    testWidgets('returns Brightness.light when no theme or media query is present', (
+      WidgetTester tester,
+    ) async {
+      // Prevent the implicitly added View from adding a MediaQuery
+      await tester.pumpWidget(
+        RawView(view: FakeFlutterView(tester.view, viewId: 77), child: const SizedBox()),
+        wrapWithView: false,
+      );
+
+      expect(Theme.brightnessOf(tester.element(find.byType(SizedBox))), equals(Brightness.light));
+    });
+  });
+
+  group('Theme.maybeBrightnessOf', () {
+    testWidgets('return correct brightness when just media query is given', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        const MediaQuery(
+          data: MediaQueryData(platformBrightness: Brightness.dark),
+          child: SizedBox(),
+        ),
+      );
+
+      expect(
+        Theme.maybeBrightnessOf(tester.element(find.byType(SizedBox))),
+        equals(Brightness.dark),
+      );
+    });
+
+    testWidgets('return correct brightness with overriding theme brightness over media query', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(platformBrightness: Brightness.dark),
+          child: Theme(data: ThemeData(brightness: Brightness.light), child: const SizedBox()),
+        ),
+      );
+
+      expect(
+        Theme.maybeBrightnessOf(tester.element(find.byType(SizedBox))),
+        equals(Brightness.light),
+      );
+    });
+
+    testWidgets('returns null when no theme or media query is present', (
+      WidgetTester tester,
+    ) async {
+      // Prevent the implicitly added View from adding a MediaQuery
+      await tester.pumpWidget(
+        RawView(view: FakeFlutterView(tester.view, viewId: 77), child: const SizedBox()),
+        wrapWithView: false,
+      );
+
+      expect(Theme.maybeBrightnessOf(tester.element(find.byType(SizedBox))), isNull);
+    });
   });
 
   testWidgets('Theme overrides selection style', (WidgetTester tester) async {
@@ -119,7 +205,7 @@ void main() {
     late BuildContext capturedContextM3;
     await tester.pumpWidget(
       Theme(
-        data: ThemeData(useMaterial3: true),
+        data: ThemeData(),
         child: Builder(
           builder: (BuildContext context) {
             capturedContextM3 = context;
@@ -131,12 +217,12 @@ void main() {
 
     expect(
       Theme.of(capturedContextM3),
-      equals(ThemeData.localize(ThemeData.fallback(useMaterial3: true), defaultGeometryThemeM3)),
+      equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryThemeM3)),
     );
   });
 
   testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
-    final ThemeData light = ThemeData.light();
+    final ThemeData light = ThemeData();
     final ThemeData dark = ThemeData.dark();
 
     // Same input, same output.
@@ -168,7 +254,7 @@ void main() {
   testWidgets('Material3 - ThemeData with null typography uses proper defaults', (
     WidgetTester tester,
   ) async {
-    final ThemeData m3Theme = ThemeData(useMaterial3: true);
+    final ThemeData m3Theme = ThemeData();
     expect(m3Theme.typography, Typography.material2021(colorScheme: m3Theme.colorScheme));
   });
 
@@ -510,7 +596,7 @@ void main() {
     late ThemeData theme;
     await tester.pumpWidget(
       Theme(
-        data: ThemeData(useMaterial3: true),
+        data: ThemeData(),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Builder(
@@ -610,7 +696,7 @@ void main() {
     });
 
     testWidgets('Material3 - Default light theme has defaults', (WidgetTester tester) async {
-      final CupertinoThemeData themeM3 = await testTheme(tester, ThemeData(useMaterial3: true));
+      final CupertinoThemeData themeM3 = await testTheme(tester, ThemeData());
 
       expect(themeM3.brightness, Brightness.light);
       expect(themeM3.primaryColor, const Color(0xff6750a4));
@@ -635,10 +721,7 @@ void main() {
     });
 
     testWidgets('Material3 - Dark theme has defaults', (WidgetTester tester) async {
-      final CupertinoThemeData themeM3 = await testTheme(
-        tester,
-        ThemeData.dark(useMaterial3: true),
-      );
+      final CupertinoThemeData themeM3 = await testTheme(tester, ThemeData.dark());
 
       expect(themeM3.brightness, Brightness.dark);
       expect(themeM3.primaryColor, const Color(0xffd0bcff));
@@ -652,7 +735,7 @@ void main() {
       await testTheme(tester, ThemeData.dark());
       expect(CupertinoTheme.brightnessOf(context!), Brightness.dark);
 
-      await testTheme(tester, ThemeData.light());
+      await testTheme(tester, ThemeData());
       expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
 
       // Overridable by cupertinoOverrideTheme.
@@ -703,7 +786,6 @@ void main() {
           cupertinoOverrideTheme: const CupertinoThemeData(
             scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
           ),
-          useMaterial3: true,
         ),
       );
 
@@ -746,7 +828,6 @@ void main() {
             // The bar colors ignore all things material except brightness.
             barBackgroundColor: CupertinoColors.black,
           ),
-          useMaterial3: true,
         ),
       );
 
@@ -780,7 +861,7 @@ void main() {
     ) async {
       CupertinoThemeData themeM3 = await testTheme(
         tester,
-        ThemeData(useMaterial3: true, colorScheme: const ColorScheme.light(primary: Colors.red)),
+        ThemeData(colorScheme: const ColorScheme.light(primary: Colors.red)),
       );
 
       expect(buildCount, 1);
@@ -788,7 +869,7 @@ void main() {
 
       themeM3 = await testTheme(
         tester,
-        ThemeData(useMaterial3: true, colorScheme: const ColorScheme.light(primary: Colors.orange)),
+        ThemeData(colorScheme: const ColorScheme.light(primary: Colors.orange)),
       );
 
       expect(buildCount, 2);
@@ -912,7 +993,6 @@ void main() {
         CupertinoThemeData theme = await testTheme(
           tester,
           ThemeData(
-            useMaterial3: true,
             colorScheme: const ColorScheme.light(primary: Colors.purple),
             cupertinoOverrideTheme: const CupertinoThemeData(
               primaryContrastingColor: CupertinoColors.destructiveRed,
@@ -927,7 +1007,6 @@ void main() {
         theme = await testTheme(
           tester,
           ThemeData(
-            useMaterial3: true,
             colorScheme: const ColorScheme.light(primary: Colors.green),
             cupertinoOverrideTheme: const CupertinoThemeData(
               primaryContrastingColor: CupertinoColors.destructiveRed,
@@ -980,7 +1059,6 @@ void main() {
         final CupertinoThemeData originalTheme = await testTheme(
           tester,
           ThemeData(
-            useMaterial3: true,
             colorScheme: const ColorScheme.light(primary: Colors.purple),
             cupertinoOverrideTheme: const CupertinoThemeData(
               primaryContrastingColor: CupertinoColors.activeOrange,
@@ -995,7 +1073,6 @@ void main() {
         final CupertinoThemeData theme = await testTheme(
           tester,
           ThemeData(
-            useMaterial3: true,
             colorScheme: const ColorScheme.light(primary: Colors.blue),
             cupertinoOverrideTheme: copiedTheme,
           ),
@@ -1037,7 +1114,7 @@ void main() {
     ) async {
       final CupertinoThemeData originalTheme = await testTheme(
         tester,
-        ThemeData(useMaterial3: true, colorScheme: const ColorScheme.light(primary: Colors.purple)),
+        ThemeData(colorScheme: const ColorScheme.light(primary: Colors.purple)),
       );
 
       final CupertinoThemeData copiedTheme = originalTheme.copyWith(
@@ -1047,7 +1124,6 @@ void main() {
       final CupertinoThemeData theme = await testTheme(
         tester,
         ThemeData(
-          useMaterial3: true,
           colorScheme: const ColorScheme.light(primary: Colors.blue),
           cupertinoOverrideTheme: copiedTheme,
         ),
@@ -1251,4 +1327,12 @@ class _TextStyleProxy implements TextStyle {
   TextStyle merge(TextStyle? other) {
     throw UnimplementedError();
   }
+}
+
+class FakeFlutterView extends TestFlutterView {
+  FakeFlutterView(TestFlutterView view, {required this.viewId})
+    : super(view: view, display: view.display, platformDispatcher: view.platformDispatcher);
+
+  @override
+  final int viewId;
 }

@@ -29,20 +29,20 @@ operations.
 ## USAGE EXAMPLES
 
 Engine build definition files using the Build Definition Language can be found in the
-[flutter/engine/ci/builders](https://github.com/flutter/engine/tree/main/ci/builders) directory.
+[ci/builders](https://github.com/flutter/flutter/tree/master/engine/src/flutter/ci/builders) directory.
 
 The [engine orchestrator recipe](https://flutter.googlesource.com/recipes/+/refs/heads/main/recipes/engine_v2/)
 reads each file in that directory, shards their builds, collects artifacts and
 uploads them to the Google Cloud Storage bucket.
 
-The [.ci.yaml file](https://github.com/flutter/engine/blob/main/.ci.yaml) at the
-root of the `flutter/engine` repository puts all the components together.
+The [.ci.yaml file](https://github.com/flutter/flutter/blob/master/engine/src/flutter/.ci.yaml) at the
+`engine/src/flutter` dir of the `flutter/flutter` repository puts all the components together.
 Builds are specified in that file using a property pointing to the build definition
 file to be used by engine\_v2 recipes. Full documentation of the `.ci.yaml` file format
 can be found [in the Cocoon repository here](https://github.com/flutter/cocoon/blob/main/CI_YAML.md).
 
 The following is a sample build configuration referencing
-[android\_aot\_engine.json](https://github.com/flutter/engine/blob/main/ci/builders/mac_android_aot_engine.json)
+[android\_aot\_engine.json](https://github.com/flutter/flutter/blob/master/engine/src/flutter/ci/builders/mac_android_aot_engine.json)
 in the `config_name` under `properties`:
 
 ```yaml
@@ -52,7 +52,7 @@ in the `config_name` under `properties`:
     properties:
       config_name: mac_android_aot_engine
       $flutter/osx_sdk : >-
-        { "sdk_version": "15a240d" }
+        { "sdk_version": "16c5032a" }
 
 ```
 
@@ -90,12 +90,12 @@ file:
 Note: tests, generators and archives can be omited if empty.
 
 Build configuration files have to be checked into the
-[engine_checkout/ci/builder](https://github.com/flutter/engine/tree/main/ci/builders)
+[engine_checkout/ci/builders](https://github.com/flutter/flutter/tree/master/engine/src/flutter/ci/builders)
 directory where engine v2 recipes will be reading them from.
 
 Configurations with a single build are supported. Single build configurations
 are located have to be checked into the
-[engine_checkout/ci/builder/standalone](https://github.com/flutter/engine/tree/main/ci/builders/standalone)
+[engine_checkout/ci/builder/standalone](https://github.com/flutter/flutter/tree/master/engine/src/flutter/ci/builders/standalone)
 
 A configuration file defines a top-level builder that will show up as a column
 in the
@@ -237,13 +237,13 @@ They are usually used to add or remove gclient dependencies.
 ```
 
 The example above is used to avoid downloading the
-[android sdk dependencies](https://cs.opensource.google/flutter/engine/+/main:DEPS;l=80)
+[android sdk dependencies](https://cs.opensource.google/flutter/flutter/+/master:DEPS;l=92)
 in builders that do not need it.
 
 #### GN
 
 A list of strings representing flags passed to the
-[tools/gn](https://github.com/flutter/engine/blob/main/tools/gn) script. The strings can be in the form of “--flag=value” or
+[tools/gn](https://github.com/flutter/flutter/tree/master/engine/src/flutter/tools/gn) script. The strings can be in the form of “--flag=value” or
 “--flag” followed by “value”.
 
 ```json
@@ -276,7 +276,7 @@ and “target” which is a list of strings with the Ninja targets to build.
 In the example above the ninja command will use the configuration for
 host\_debug and will build artifacts and embedder targets as described
 by the
-[flutter/build/archives/BUILD.gn](https://github.com/flutter/engine/blob/main/build/archives/BUILD.gn)
+[flutter/build/archives/BUILD.gn](https://github.com/flutter/flutter/tree/master/engine/src/flutter/build/archives/BUILD.gn)
 file.
 
 #### Tests
@@ -451,7 +451,7 @@ Global tests currently support two different scenarios:
   sharded tests using the engine artifacts archived to GCS.
 * complicated engine tests that require the outputs from multiple subbuilds
   with [tester_engine](https://flutter.googlesource.com/recipes/+/refs/heads/main/recipes/engine_v2/tester_engine.py).
-  This workflow checks out [flutter/engine] and operates over the dependencies passed to it using cas.
+  This workflow checks out [flutter/flutter] and operates over the dependencies passed to it using cas.
 
 Note: the supported scenarios can be later extended to support running devicelab tests although a
 [smart scheduler](https://github.com/flutter/flutter/issues/128294) is a prerequisite for

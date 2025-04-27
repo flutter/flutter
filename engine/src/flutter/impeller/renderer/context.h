@@ -5,10 +5,13 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_CONTEXT_H_
 #define FLUTTER_IMPELLER_RENDERER_CONTEXT_H_
 
+#include <future>
 #include <memory>
 #include <string>
 
 #include "fml/closure.h"
+#include "impeller/base/flags.h"
+#include "impeller/base/thread_safety.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/capabilities.h"
@@ -20,6 +23,22 @@ namespace impeller {
 class ShaderLibrary;
 class CommandBuffer;
 class PipelineLibrary;
+
+/// A wrapper for provided a deferred initialization of impeller to various
+/// engine subsystems.
+class ImpellerContextFuture {
+ public:
+  explicit ImpellerContextFuture(
+      std::future<std::shared_ptr<impeller::Context>> context);
+
+  std::shared_ptr<impeller::Context> GetContext();
+
+ private:
+  std::mutex mutex_;
+  std::future<std::shared_ptr<impeller::Context>> future_;
+  std::shared_ptr<impeller::Context> context_;
+  bool did_wait_ = false;
+};
 
 //------------------------------------------------------------------------------
 /// @brief      To do anything rendering related with Impeller, you need a
@@ -57,7 +76,7 @@ class Context {
   /// This number was arbitrarily chosen. The idea is that this is a somewhat
   /// rare situation where tasks happen to get executed in that tiny amount of
   /// time while an app is being backgrounded but still executing.
-  static constexpr int32_t kMaxTasksAwaitingGPU = 64;
+  static constexpr int32_t kMaxTasksAwaitingGPU = 1024;
 
   //----------------------------------------------------------------------------
   /// @brief      Destroys an Impeller context.
@@ -245,9 +264,12 @@ class Context {
   /// @brief Submit the command buffer that renders to the onscreen surface.
   virtual bool SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer);
 
- protected:
-  Context();
+  const Flags& GetFlags() const { return flags_; }
 
+ protected:
+  explicit Context(const Flags& flags);
+
+  Flags flags_;
   std::vector<std::function<void()>> per_frame_task_;
 
  private:
