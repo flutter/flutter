@@ -1000,7 +1000,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
     this.padding,
-    this.barrierDismissible = true,
+    this.barrierDismissible,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(
@@ -1049,7 +1049,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
     this.padding,
-    this.barrierDismissible = true,
+    this.barrierDismissible,
     required InputDecoration inputDecoration,
     required bool isEmpty,
   }) : assert(
@@ -1294,8 +1294,8 @@ class DropdownButton<T> extends StatefulWidget {
   final BorderRadius? borderRadius;
 
   /// Determines whether tapping outside the dropdown will close it.
-  /// Defaults to `true` and cannot be `null`.
-  final bool barrierDismissible;
+  /// Defaults to `true`.
+  final bool? barrierDismissible;
 
   final InputDecoration? _inputDecoration;
 
@@ -1444,7 +1444,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       menuMaxHeight: widget.menuMaxHeight,
       enableFeedback: widget.enableFeedback ?? true,
       borderRadius: widget.borderRadius,
-      barrierDismissible: widget.barrierDismissible,
+      barrierDismissible: widget.barrierDismissible ?? true,
     );
 
     focusNode?.requestFocus();
@@ -1748,7 +1748,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     AlignmentGeometry alignment = AlignmentDirectional.centerStart,
     BorderRadius? borderRadius,
     EdgeInsetsGeometry? padding,
-    bool barrierDismissible = true,
+    this.barrierDismissible,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
   }) : assert(
@@ -1836,7 +1836,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                  inputDecoration: effectiveDecoration,
                  isEmpty: isEmpty,
                  padding: padding,
-                 barrierDismissible: barrierDismissible,
+                 barrierDismissible: barrierDismissible ?? true,
                ),
              ),
            );
@@ -1856,8 +1856,8 @@ class DropdownButtonFormField<T> extends FormField<T> {
   final InputDecoration decoration;
 
   /// Determines whether tapping outside the dropdown will close it.
-  /// Defaults to `true` and cannot be `null`.
-  final bool barrierDismissible = true;
+  /// Defaults to `true`.
+  final bool? barrierDismissible;
 
   @override
   FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
