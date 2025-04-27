@@ -22,7 +22,7 @@ class PluginRegistrarMapImpl : public PluginRegistrarMap {
                std::pair<PluginRegistrar*, OnPluginRegistrarDestructed>>;
 
  public:
-  ~PluginRegistrarMapImpl() { clear(); }
+  ~PluginRegistrarMapImpl() { clear_and_destruct(); }
 
   void* allocate_memory(size_t size) override { return malloc(size); }
 
@@ -46,8 +46,9 @@ class PluginRegistrarMapImpl : public PluginRegistrarMap {
 
   void erase(FlutterDesktopPluginRegistrarRef registrar_ref) override {
     auto it = map_.find(registrar_ref);
-    if (it == map_.end())
+    if (it == map_.end()) {
       return;
+    }
 
     PluginRegistrar* registrar_wrapper = it->second.first;
     OnPluginRegistrarDestructed on_destructed = it->second.second;
@@ -60,6 +61,11 @@ class PluginRegistrarMapImpl : public PluginRegistrarMap {
   }
 
   void clear() override {
+    clear_and_destruct();
+  }
+
+ private:
+  void clear_and_destruct() {
     for (auto& pair : map_) {
       PluginRegistrar* registrar_wrapper = pair.second.first;
       OnPluginRegistrarDestructed on_destructed = pair.second.second;
