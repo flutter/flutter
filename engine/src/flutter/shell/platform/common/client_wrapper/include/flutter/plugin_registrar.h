@@ -86,14 +86,14 @@ typedef void (*OnPluginRegistrarDestructed)(void*);
 class PluginRegistrarMap {
  public:
   virtual ~PluginRegistrarMap() {}
-  virtual void* allocate_memory(size_t size) = 0;
-  virtual void release_memory(void* address) = 0;
-  virtual PluginRegistrar* emplace_if_needed(
+  virtual void* AllocateMemory(size_t size) = 0;
+  virtual void ReleaseMemory(void* address) = 0;
+  virtual PluginRegistrar* EmplaceIfNeeded(
       FlutterDesktopPluginRegistrarRef registrar_ref,
       OnPluginRegistrarConstructed on_constructed,
       OnPluginRegistrarDestructed on_destructed) = 0;
-  virtual void erase(FlutterDesktopPluginRegistrarRef registrar_ref) = 0;
-  virtual void clear() = 0;
+  virtual void Erase(FlutterDesktopPluginRegistrarRef registrar_ref) = 0;
+  virtual void Clear() = 0;
 };
 
 // A singleton to own PluginRegistrars. This is intended for use in plugins,
@@ -118,7 +118,7 @@ class PluginRegistrarManager {
   // template types results in undefined behavior.
   template <class T>
   T* GetRegistrar(FlutterDesktopPluginRegistrarRef registrar_ref) {
-    PluginRegistrar* registrar_wrapper = registrars_->emplace_if_needed(
+    PluginRegistrar* registrar_wrapper = registrars_->EmplaceIfNeeded(
         registrar_ref, OnRegistrarConstructed<T>, OnRegistrarDestructed<T>);
 
     FlutterDesktopPluginRegistrarSetDestructionHandler(registrar_ref,
@@ -130,7 +130,7 @@ class PluginRegistrarManager {
   // Destroys all registrar wrappers created by the manager.
   //
   // This is intended primarily for use in tests.
-  void Reset() { registrars_->clear(); }
+  void Reset() { registrars_->Clear(); }
 
  private:
   PluginRegistrarManager();
@@ -139,7 +139,7 @@ class PluginRegistrarManager {
   static PluginRegistrar* OnRegistrarConstructed(
       FlutterDesktopPluginRegistrarRef registrar_ref) {
     auto* registrars = PluginRegistrarManager::GetInstance()->registrars();
-    void* memory = registrars->allocate_memory(sizeof(T));
+    void* memory = registrars->AllocateMemory(sizeof(T));
     return new (memory) T(registrar_ref);
   }
 
@@ -150,14 +150,14 @@ class PluginRegistrarManager {
       registrar_wrapper->~T();
 
       auto* registrars = PluginRegistrarManager::GetInstance()->registrars();
-      registrars->release_memory(memory);
+      registrars->ReleaseMemory(memory);
     }
   }
 
   template <class T>
   static void OnRegistrarDestroyed(FlutterDesktopPluginRegistrarRef registrar) {
     auto* registrars = PluginRegistrarManager::GetInstance()->registrars();
-    registrars->erase(registrar);
+    registrars->Erase(registrar);
   }
 
   PluginRegistrarMap* registrars() { return registrars_; }
