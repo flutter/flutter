@@ -30,6 +30,11 @@ enum class Join {
   kBevel,
 };
 
+enum class Convexity {
+  kUnknown,
+  kConvex,
+};
+
 //------------------------------------------------------------------------------
 /// @brief      Paths are lightweight objects that describe a collection of
 ///             linear, quadratic, or cubic segments. These segments may be

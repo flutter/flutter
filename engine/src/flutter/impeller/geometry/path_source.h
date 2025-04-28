@@ -15,11 +15,6 @@ enum class FillType {
   kOdd,
 };
 
-enum class Convexity {
-  kUnknown,
-  kConvex,
-};
-
 /// @brief   Collection of functions to receive path segments from the
 ///          underlying path representation via the DlPath::Dispatch method.
 ///
@@ -58,7 +53,7 @@ class PathSource {
   virtual ~PathSource() = default;
   virtual FillType GetFillType() const = 0;
   virtual Rect GetBounds() const = 0;
-  virtual Convexity GetConvexity() const = 0;
+  virtual bool IsConvex() const = 0;
   virtual void Dispatch(PathReceiver& receiver) const = 0;
 };
 
@@ -68,7 +63,7 @@ class RectPathSource : public PathSource {
   explicit RectPathSource(const TRect<T>& r) : rect_(r) {}
 
   // |PathSource|
-  Convexity GetConvexity() const override { return Convexity::kConvex; }
+  bool IsConvex() const override { return true; }
 
   // |PathSource|
   FillType GetFillType() const override { return FillType::kNonZero; }
@@ -88,7 +83,7 @@ class RectPathSource : public PathSource {
   }
 
  private:
-  Rect rect_;
+  const Rect& rect_;
 };
 
 class OvalPathSource : public PathSource {
@@ -96,7 +91,7 @@ class OvalPathSource : public PathSource {
   explicit OvalPathSource(const Rect& r) : rect_(r) {}
 
   // |PathSource|
-  Convexity GetConvexity() const override { return Convexity::kConvex; }
+  bool IsConvex() const override { return true; }
 
   // |PathSource|
   FillType GetFillType() const override { return FillType::kNonZero; }
@@ -124,7 +119,7 @@ class OvalPathSource : public PathSource {
   }
 
  private:
-  Rect rect_;
+  const Rect& rect_;
 };
 
 }  // namespace impeller

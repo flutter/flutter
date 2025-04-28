@@ -294,7 +294,8 @@ bool CornerContains(const RoundSuperellipseParam::Quadrant& param,
 
 class RoundSuperellipseBuilder {
  public:
-  explicit RoundSuperellipseBuilder(PathBuilder& builder) : builder_(builder) {}
+  explicit RoundSuperellipseBuilder(PathReceiver& receiver)
+      : receiver_(receiver) {}
 
   // Draws an arc representing 1/4 of a rounded superellipse.
   //
@@ -307,14 +308,14 @@ class RoundSuperellipseBuilder {
     auto transform = Matrix::MakeTranslateScale(param.signed_scale * scale_sign,
                                                 param.offset);
     if (param.top.se_n < 2 || param.right.se_n < 2) {
-      builder_.LineTo(transform * (param.top.offset +
-                                   Point(param.top.se_a, param.top.se_a)));
+      receiver_.LineTo(transform * (param.top.offset +
+                                    Point(param.top.se_a, param.top.se_a)));
       if (!reverse) {
-        builder_.LineTo(transform *
-                        (param.top.offset + Point(param.top.se_a, 0)));
+        receiver_.LineTo(transform *
+                         (param.top.offset + Point(param.top.se_a, 0)));
       } else {
-        builder_.LineTo(transform *
-                        (param.top.offset + Point(0, param.top.se_a)));
+        receiver_.LineTo(transform *
+                         (param.top.offset + Point(0, param.top.se_a)));
       }
       return;
     }
@@ -386,17 +387,17 @@ class RoundSuperellipseBuilder {
     auto se_points = SuperellipseArcPoints(param);
 
     if (!reverse) {
-      builder_.CubicCurveTo(transform * se_points[1], transform * se_points[2],
-                            transform * se_points[3]);
-      builder_.CubicCurveTo(transform * circle_points[1],
-                            transform * circle_points[2],
-                            transform * circle_points[3]);
+      receiver_.CubicTo(transform * se_points[1], transform * se_points[2],
+                        transform * se_points[3]);
+      receiver_.CubicTo(transform * circle_points[1],
+                        transform * circle_points[2],
+                        transform * circle_points[3]);
     } else {
-      builder_.CubicCurveTo(transform * circle_points[2],
-                            transform * circle_points[1],
-                            transform * circle_points[0]);
-      builder_.CubicCurveTo(transform * se_points[2], transform * se_points[1],
-                            transform * se_points[0]);
+      receiver_.CubicTo(transform * circle_points[2],
+                        transform * circle_points[1],
+                        transform * circle_points[0]);
+      receiver_.CubicTo(transform * se_points[2], transform * se_points[1],
+                        transform * se_points[0]);
     }
   };
 
@@ -446,7 +447,7 @@ class RoundSuperellipseBuilder {
                                      frac * kPrecomputedVariables[left + 1][1]};
   }
 
-  PathBuilder& builder_;
+  PathReceiver& receiver_;
 
   // A matrix that swaps the coordinates of a point.
   // clang-format off
@@ -496,13 +497,49 @@ RoundSuperellipseParam RoundSuperellipseParam::MakeBoundsRadii(
   };
 }
 
+namespace {
+class ImpellerPathReceiver : public PathReceiver {
+ public:
+  explicit ImpellerPathReceiver(PathBuilder& path_builder)
+      : path_builder_(path_builder) {}
+
+  virtual void MoveTo(const Point& p2, bool will_be_closed) override {
+    path_builder_.MoveTo(p2);
+  }
+  virtual void LineTo(const Point& p2) override { path_builder_.LineTo(p2); }
+  virtual void QuadTo(const Point& cp, const Point& p2) override {
+    path_builder_.QuadraticCurveTo(cp, p2);
+  }
+  virtual bool ConicTo(const Point& cp,
+                       const Point& p2,
+                       Scalar weight) override {
+    path_builder_.QuadraticCurveTo(cp, p2, weight);
+    return true;
+  }
+  virtual void CubicTo(const Point& cp1,
+                       const Point& cp2,
+                       const Point& p2) override {
+    path_builder_.CubicCurveTo(cp1, cp2, p2);
+  }
+  virtual void Close() override { path_builder_.Close(); }
+
+ private:
+  PathBuilder& path_builder_;
+};
+}  // namespace
+
 void RoundSuperellipseParam::AddToPath(PathBuilder& path_builder) const {
-  RoundSuperellipseBuilder builder(path_builder);
+  ImpellerPathReceiver receiver(path_builder);
+  AddToPath(receiver);
+}
+
+void RoundSuperellipseParam::AddToPath(PathReceiver& receiver) const {
+  RoundSuperellipseBuilder builder(receiver);
 
   Point start = top_right.offset +
                 top_right.signed_scale *
                     (top_right.top.offset + Point(0, top_right.top.se_a));
-  path_builder.MoveTo(start);
+  receiver.MoveTo(start, true);
 
   if (all_corners_same) {
     builder.AddQuadrant(top_right, /*reverse=*/false, Point(1, 1));
@@ -516,8 +553,9 @@ void RoundSuperellipseParam::AddToPath(PathBuilder& path_builder) const {
     builder.AddQuadrant(top_left, /*reverse=*/true);
   }
 
-  path_builder.LineTo(start);
-  path_builder.Close();
+  receiver.LineTo(start);
+  receiver.Close();
+  receiver.PathEnd();
 }
 
 bool RoundSuperellipseParam::Contains(const Point& point) const {

@@ -63,7 +63,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
 
 GeometryResult::Mode FillPathGeometry::GetResultMode() const {
   const auto& bounding_box = path_.GetBounds();
-  if (path_.GetConvexity() == Convexity::kConvex || bounding_box.IsEmpty()) {
+  if (path_.IsConvex() || bounding_box.IsEmpty()) {
     return GeometryResult::Mode::kNormal;
   }
 

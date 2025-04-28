@@ -109,6 +109,9 @@ struct RoundSuperellipseParam {
   // Add a path of this rounded superellipse to the provided path builder.
   void AddToPath(PathBuilder& path) const;
 
+  // Add a path of this rounded superellipse to the provided path receiver.
+  void AddToPath(PathReceiver& receiver) const;
+
   // A factor used to calculate the "gap", defined as the distance from the
   // midpoint of the curved corners to the nearest sides of the bounding box.
   //

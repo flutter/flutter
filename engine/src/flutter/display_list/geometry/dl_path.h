@@ -18,7 +18,6 @@ namespace flutter {
 using DlPathFillType = impeller::FillType;
 using DlPathBuilder = impeller::PathBuilder;
 using DlPathReceiver = impeller::PathReceiver;
-using DlConvexity = impeller::Convexity;
 
 class DlPath : public impeller::PathSource {
  public:
@@ -101,15 +100,14 @@ class DlPath : public impeller::PathSource {
   DlRect GetBounds() const override;
   // |PathSource|
   DlPathFillType GetFillType() const override;
-  // |PathSource|
-  DlConvexity GetConvexity() const override;
 
   bool operator==(const DlPath& other) const;
   bool operator!=(const DlPath& other) const { return !(*this == other); }
 
   bool IsConverted() const;
   bool IsVolatile() const;
-  bool IsConvex() const;
+  // |PathSource|
+  bool IsConvex() const override;
 
   DlPath operator+(const DlPath& other) const;
 

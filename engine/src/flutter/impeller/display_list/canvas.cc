@@ -650,12 +650,8 @@ void Canvas::DrawRoundSuperellipse(const RoundSuperellipse& rse,
     return;
   }
 
-  auto path = PathBuilder{}
-                  .SetConvexity(Convexity::kConvex)
-                  .AddRoundSuperellipse(rse)
-                  .SetBounds(rse.GetBounds())
-                  .TakePath();
-  DrawPath(flutter::DlPath(path), paint);
+  RoundSuperellipsePathSource source(rse);
+  DrawPath(source, paint);
 }
 
 void Canvas::DrawCircle(const Point& center,

@@ -145,7 +145,7 @@ class RoundRectPathSource : public PathSource {
       : round_rect_(round_rect) {}
 
   // |PathSource|
-  Convexity GetConvexity() const override { return Convexity::kConvex; }
+  bool IsConvex() const override { return true; }
 
   // |PathSource|
   FillType GetFillType() const override { return FillType::kNonZero; }
@@ -191,7 +191,7 @@ class RoundRectPathSource : public PathSource {
   }
 
  private:
-  RoundRect round_rect_;
+  const RoundRect& round_rect_;
 };
 
 }  // namespace impeller

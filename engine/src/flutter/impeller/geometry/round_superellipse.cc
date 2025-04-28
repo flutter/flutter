@@ -38,4 +38,9 @@ RoundRect RoundSuperellipse::ToApproximateRoundRect() const {
   return RoundRect::MakeRectRadii(GetBounds(), GetRadii());
 }
 
+void RoundSuperellipsePathSource::Dispatch(PathReceiver& receiver) const {
+  RoundSuperellipseParam::MakeBoundsRadii(rse_.GetBounds(), rse_.GetRadii())
+      .AddToPath(receiver);
+}
+
 }  // namespace impeller
