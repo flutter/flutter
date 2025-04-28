@@ -73,7 +73,8 @@ std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
   if (miter_limit < 0) {
     miter_limit = 4.0;
   }
-  return std::make_unique<StrokePathGeometry>(path, stroke_width, miter_limit,
+  return std::make_unique<StrokePathGeometry>(flutter::DlPath(path),
+                                              stroke_width, miter_limit,
                                               stroke_cap, stroke_join);
 }
 

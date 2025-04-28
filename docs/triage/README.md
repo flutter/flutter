@@ -337,6 +337,8 @@ During these meetings, we go through the following lists:
 * [Bugs flagged for additional triage](https://github.com/flutter/flutter/issues?q=is%3Aopen+label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+no%3Aassignee): figure out what should be done with the bug, then remove the `will need additional triage` label.
 * [flutter-pub-roller-bot](https://github.com/flutter/flutter/pulls/flutter-pub-roller-bot): check that the pub auto roller is chugging along. If it has gotten trivially stuck, such as having a merge conflict, close the PR so that it can open a new one. If it is non-trivially stuck, file an issue for `team-infra`.
 * [The stale PRs](https://github.com/pulls?q=is%3Aopen+is%3Apr+archived%3Afalse+user%3Aflutter+-repo%3Aflutter%2Fwebsite-cms+sort%3Aupdated-asc+): examine the 25 least-recently updated PRs, if the least recently updated one was updated more than 2 months ago.
+* [Google Testing Queue](https://github.com/orgs/flutter/projects/200): Check to see that PRs blocked on Google testing are making progress.
+  * Each PR should have an assignee for resolution. Assignees with multiple PRs are only expected to be making progress on one at a time in FIFO order. Evaluate if load balancing is needed if an assignee is overloaded, this can happen coincidentally from time to time.
 
 ## Self test issue
 

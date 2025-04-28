@@ -285,6 +285,8 @@ class _SegmentSeparatorState extends State<_SegmentSeparator>
 
 /// An iOS 13 style segmented control.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=esnBf6V4C34}
+///
 /// Displays the widgets provided in the [Map] of [children] in a horizontal list.
 /// It allows the user to select between a number of mutually exclusive options,
 /// by tapping or dragging within the segmented control.

@@ -41,10 +41,6 @@ bool EmbedderSurfaceMetalSkia::IsValid() const {
 }
 
 std::unique_ptr<Surface> EmbedderSurfaceMetalSkia::CreateGPUSurface() API_AVAILABLE(ios(13.0)) {
-  if (@available(iOS 13.0, *)) {
-  } else {
-    return nullptr;
-  }
   if (!IsValid()) {
     return nullptr;
   }
