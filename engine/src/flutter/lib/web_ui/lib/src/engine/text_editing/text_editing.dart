@@ -1700,6 +1700,18 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   ///   positioning the input field.
   bool _canPosition = true;
 
+  /// Timer that is used to throttle `selectionchange` events.
+  ///
+  /// This is only used for iOS. On iOS, when input is tapped, multiple
+  /// `selectionchange` events can be fired in quick succession. The first one
+  /// is correct, but the next ones may contain incorrect selection data.
+  ///
+  /// To work around this, we throttle the `selectionchange` handler to only
+  /// allow one event every [_selectionChangeThrottleDelay]. Subsequent events
+  /// during this delay are ignored.
+  Timer? _selectionChangeThrottleTimer;
+  static const Duration _selectionChangeThrottleDelay = Duration(milliseconds: 150);
+
   @override
   void initializeTextEditing(
     InputConfiguration inputConfig, {
@@ -1740,7 +1752,25 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
     );
 
     subscriptions.add(
-      DomSubscription(domDocument, 'selectionchange', createDomEventListener(handleChange)),
+      DomSubscription(
+        domDocument,
+        'selectionchange',
+        createDomEventListener((DomEvent event) {
+          if (_selectionChangeThrottleTimer == null) {
+            handleChange(event);
+
+            _selectionChangeThrottleTimer = Timer(_selectionChangeThrottleDelay, () {
+              _selectionChangeThrottleTimer?.cancel();
+              _selectionChangeThrottleTimer = null;
+            });
+          } else {
+            event.preventDefault();
+            if (lastEditingState != null) {
+              setEditingState(lastEditingState);
+            }
+          }
+        }),
+      ),
     );
 
     subscriptions.add(
