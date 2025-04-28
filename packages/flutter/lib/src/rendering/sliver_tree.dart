@@ -287,6 +287,12 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
   }
 
   @override
+  double childCrossAxisPosition(covariant RenderObject child) {
+    final TreeSliverNodeParentData parentData = child.parentData! as TreeSliverNodeParentData;
+    return parentData.depth * indentation;
+  }
+
+  @override
   double indexToLayoutOffset(double itemExtent, int index) {
     // itemExtent is deprecated in the super class, we ignore it because we use
     // the builder anyways.
