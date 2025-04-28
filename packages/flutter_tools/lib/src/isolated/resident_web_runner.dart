@@ -23,13 +23,13 @@ import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
 import '../cache.dart';
 import '../dart/language_version.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../hook_runner.dart' show hookRunner;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_devtools_handler.dart';
@@ -124,7 +124,7 @@ class ResidentWebRunner extends ResidentRunner {
            platform: platform,
            outputPreferences: outputPreferences,
          ),
-         dartBuilder: FlutterHookRunnerNative(),
+         dartBuilder: hookRunner,
        );
 
   final FileSystem _fileSystem;

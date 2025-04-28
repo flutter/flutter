@@ -16,13 +16,13 @@ import '../base/platform.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../build_system/targets/hook_runner_native.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../daemon.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../hook_runner.dart' show hookRunner;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
@@ -513,7 +513,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterDevices,
           target: targetFile,
           debuggingOptions: debuggingOptions,
-          dartBuilder: FlutterHookRunnerNative(),
+          dartBuilder: hookRunner,
         );
   }
 
@@ -552,7 +552,7 @@ class HotRunnerFactory {
     stayResident: stayResident,
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
-    dartBuilder: FlutterHookRunnerNative(),
+    dartBuilder: hookRunner,
     logger: logger,
   );
 }
