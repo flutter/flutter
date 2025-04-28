@@ -2143,7 +2143,7 @@ void main() {
   ) async {
     // This test verifies that if an errorBuilder is provided, FlutterError.reportError
     // is NOT called, even if the Image widget is removed from the tree before the
-    // image load fails. This ensures the fix involving _hadErrorHandlerListener works.
+    // image load fails. Regression test for https://github.com/flutter/flutter/issues/97077.
 
     // 1. Setup: Capture FlutterError reports
     final List<FlutterErrorDetails> reportedErrors = <FlutterErrorDetails>[];
