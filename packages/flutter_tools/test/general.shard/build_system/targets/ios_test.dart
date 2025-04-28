@@ -33,7 +33,7 @@ final Platform macPlatform = FakePlatform(
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
-  '-miphoneos-version-min=12.0',
+  '-miphoneos-version-min=13.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -132,7 +132,7 @@ void main() {
               fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc'),
             ),
             '-dynamiclib',
-            '-miphonesimulator-version-min=12.0',
+            '-miphonesimulator-version-min=13.0',
             '-Xlinker',
             '-rpath',
             '-Xlinker',

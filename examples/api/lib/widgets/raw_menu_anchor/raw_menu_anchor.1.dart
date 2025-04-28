@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -91,66 +93,70 @@ class _RawMenuAnchorGroupExampleState extends State<RawMenuAnchorGroupExample> {
             clipBehavior: Clip.hardEdge,
             child: RawMenuAnchorGroup(
               controller: controller,
-              child: Row(
-                children: <Widget>[
-                  for (int i = 0; i < menuItems.length; i++)
-                    CustomSubmenu(
-                      focusNode: focusNodes[i],
-                      anchor: Builder(
-                        builder: (BuildContext context) {
-                          final MenuController submenuController = MenuController.maybeOf(context)!;
-                          final MenuItem item = menuItems[i];
-                          final ButtonStyle openBackground = MenuItemButton.styleFrom(
-                            backgroundColor: const Color(0x0D1A1A1A),
-                          );
-                          return MergeSemantics(
-                            child: Semantics(
-                              expanded: controller.isOpen,
-                              child: MenuItemButton(
-                                style: submenuController.isOpen ? openBackground : null,
-                                onHover: (bool value) {
-                                  // If any submenu in the menu bar is already open, other
-                                  // submenus should open on hover. Otherwise, blur the menu item
-                                  // button if the menu button is no longer hovered.
-                                  if (controller.isOpen) {
-                                    if (value) {
+              child: Semantics(
+                role: SemanticsRole.menu,
+                child: Row(
+                  children: <Widget>[
+                    for (int i = 0; i < menuItems.length; i++)
+                      CustomSubmenu(
+                        focusNode: focusNodes[i],
+                        anchor: Builder(
+                          builder: (BuildContext context) {
+                            final MenuController submenuController =
+                                MenuController.maybeOf(context)!;
+                            final MenuItem item = menuItems[i];
+                            final ButtonStyle openBackground = MenuItemButton.styleFrom(
+                              backgroundColor: const Color(0x0D1A1A1A),
+                            );
+                            return MergeSemantics(
+                              child: Semantics(
+                                expanded: controller.isOpen,
+                                child: MenuItemButton(
+                                  style: submenuController.isOpen ? openBackground : null,
+                                  onHover: (bool value) {
+                                    // If any submenu in the menu bar is already open, other
+                                    // submenus should open on hover. Otherwise, blur the menu item
+                                    // button if the menu button is no longer hovered.
+                                    if (controller.isOpen) {
+                                      if (value) {
+                                        submenuController.open();
+                                      }
+                                    } else if (!value) {
+                                      Focus.of(context).unfocus();
+                                    }
+                                  },
+                                  onPressed: () {
+                                    if (submenuController.isOpen) {
+                                      submenuController.close();
+                                    } else {
                                       submenuController.open();
                                     }
-                                  } else if (!value) {
-                                    Focus.of(context).unfocus();
-                                  }
-                                },
-                                onPressed: () {
-                                  if (submenuController.isOpen) {
-                                    submenuController.close();
-                                  } else {
-                                    submenuController.open();
-                                  }
-                                },
-                                leadingIcon: item.leading,
-                                child: Text(item.label),
+                                  },
+                                  leadingIcon: item.leading,
+                                  child: Text(item.label),
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                      children: <Widget>[
-                        for (final MenuItem child in menuItems[i].children ?? <MenuItem>[])
-                          MenuItemButton(
-                            onPressed: () {
-                              setState(() {
-                                _selected = child;
-                              });
+                            );
+                          },
+                        ),
+                        children: <Widget>[
+                          for (final MenuItem child in menuItems[i].children ?? <MenuItem>[])
+                            MenuItemButton(
+                              onPressed: () {
+                                setState(() {
+                                  _selected = child;
+                                });
 
-                              // Close the menu bar after a selection.
-                              controller.close();
-                            },
-                            leadingIcon: child.leading,
-                            child: Text(child.label),
-                          ),
-                      ],
-                    ),
-                ],
+                                // Close the menu bar after a selection.
+                                controller.close();
+                              },
+                              leadingIcon: child.leading,
+                              child: Text(child.label),
+                            ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

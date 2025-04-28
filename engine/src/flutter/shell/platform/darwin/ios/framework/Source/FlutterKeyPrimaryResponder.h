@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERKEYPRIMARYRESPONDER_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERKEYPRIMARYRESPONDER_H_
 
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUIPressProxy.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 
 typedef void (^FlutterAsyncKeyCallback)(BOOL handled);
 

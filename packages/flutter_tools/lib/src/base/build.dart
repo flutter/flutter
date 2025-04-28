@@ -266,7 +266,7 @@ class AOTSnapshotter {
         // When the minimum version is updated, remember to update
         // template MinimumOSVersion.
         // https://github.com/flutter/flutter/pull/62902
-        '-miphoneos-version-min=12.0',
+        '-miphoneos-version-min=13.0',
       if (sdkRoot != null) ...<String>['-isysroot', sdkRoot],
     ];
 

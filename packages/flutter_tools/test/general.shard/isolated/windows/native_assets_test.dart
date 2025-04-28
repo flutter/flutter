@@ -89,8 +89,6 @@ void main() {
               package: 'bar',
               name: 'bar.dart',
               linkMode: DynamicLoadingBundled(),
-              os: OS.windows,
-              architecture: Architecture.x64,
               file: dylibAfterCompiling.uri,
             ),
           ];

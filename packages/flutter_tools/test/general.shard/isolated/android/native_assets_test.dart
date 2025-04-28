@@ -75,8 +75,6 @@ void main() {
             package: 'bar',
             name: 'bar.dart',
             linkMode: DynamicLoadingBundled(),
-            os: OS.android,
-            architecture: Architecture.arm64,
             file: Uri.file('libbar.so'),
           ),
         ];

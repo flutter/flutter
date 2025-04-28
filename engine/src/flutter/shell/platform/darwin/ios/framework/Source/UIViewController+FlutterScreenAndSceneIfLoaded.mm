@@ -20,14 +20,11 @@ FLUTTER_ASSERT_ARC
 }
 
 - (UIScreen*)flutterScreenIfViewLoaded {
-  if (@available(iOS 13.0, *)) {
-    if (self.viewIfLoaded == nil) {
-      FML_LOG(WARNING) << "Trying to access the screen before the view is loaded.";
-      return nil;
-    }
-    return [self flutterWindowSceneIfViewLoaded].screen;
+  if (self.viewIfLoaded == nil) {
+    FML_LOG(WARNING) << "Trying to access the screen before the view is loaded.";
+    return nil;
   }
-  return UIScreen.mainScreen;
+  return [self flutterWindowSceneIfViewLoaded].screen;
 }
 
 @end

@@ -47,6 +47,8 @@ class AndroidSurface {
 
   virtual std::shared_ptr<impeller::Context> GetImpellerContext();
 
+  virtual void SetupImpellerSurface();
+
  protected:
   AndroidSurface();
 };

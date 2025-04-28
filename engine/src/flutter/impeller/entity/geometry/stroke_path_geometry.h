@@ -13,7 +13,7 @@ namespace impeller {
 /// @brief A geometry that is created from a stroked path object.
 class StrokePathGeometry final : public Geometry {
  public:
-  StrokePathGeometry(const Path& path,
+  StrokePathGeometry(const flutter::DlPath& path,
                      Scalar stroke_width,
                      Scalar miter_limit,
                      Cap stroke_cap,
@@ -45,7 +45,7 @@ class StrokePathGeometry final : public Geometry {
 
   // Private for benchmarking and debugging
   static std::vector<Point> GenerateSolidStrokeVertices(
-      const Path::Polyline& polyline,
+      const PathSource& source,
       Scalar stroke_width,
       Scalar miter_limit,
       Join stroke_join,
@@ -57,7 +57,7 @@ class StrokePathGeometry final : public Geometry {
 
   bool SkipRendering() const;
 
-  Path path_;
+  flutter::DlPath path_;
   Scalar stroke_width_;
   Scalar miter_limit_;
   Cap stroke_cap_;
