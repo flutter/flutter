@@ -42,9 +42,6 @@ public class ConnectionCollection: NSObject {
 
   /// Creates an error connection from an error code.
   @objc public static func makeErrorConnection(errorCode: Int64) -> ConnectionId {
-    if errorCode < 0 {
-      return -1 * errorCode
-    }
-    return errorCode
+    return abs(errorCode)
   }
 }
