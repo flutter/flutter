@@ -635,7 +635,7 @@ String _getAgpLocation(FlutterProject project) {
 ${project.android.settingsGradleFile.path},
 in the 'plugins' closure (by the number following "com.android.application").
  Alternatively, if your project was created with an older version of the templates, it is likely
-in the buildscript.dependencies closure of the top-level build.gradle.kts:
+in the buildscript.dependencies closure of the top-level build.gradle:
 ${project.android.hostAppGradleFile.path},
 as the number following "com.android.tools.build:gradle:".''';
 }
