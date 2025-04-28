@@ -116,8 +116,7 @@ abstract class ChromiumDevice extends Device {
     // for the web initialization and server logic.
     String url;
     if (debuggingOptions.webLaunchUrl != null) {
-      final RegExp pattern = RegExp(r'^(https?:\/\/)[^\s]+');
-      if (pattern.hasMatch(debuggingOptions.webLaunchUrl!)) {
+      if (isLaunchUrlValid(debuggingOptions.webLaunchUrl!)) {
         url = debuggingOptions.webLaunchUrl!;
       } else {
         throwToolExit('"${debuggingOptions.webLaunchUrl}" is not a valid HTTP URL.');
@@ -139,6 +138,12 @@ abstract class ChromiumDevice extends Device {
     }
     _logger.sendEvent('app.webLaunchUrl', <String, Object>{'url': url, 'launched': launchChrome});
     return LaunchResult.succeeded(vmServiceUri: Uri.parse(url));
+  }
+
+  @visibleForTesting
+  bool isLaunchUrlValid(String launchUrl) {
+    final RegExp pattern = RegExp(r'^(https?:\/\/)[^\s]+');
+    return pattern.hasMatch(launchUrl);
   }
 
   @override
