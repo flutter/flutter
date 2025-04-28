@@ -113,6 +113,20 @@ Future<void> testMain() async {
     });
 
     group('determine composition state', () {
+      test('should return editing state if extentOffset is null', () {
+        final EditingState editingState = EditingState(
+          text: 'Test',
+          baseOffset: 0,
+          extentOffset: 0,
+        );
+
+        final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
+            _MockWithCompositionAwareMixin();
+        mockWithCompositionAwareMixin.composingText = 'Test';
+
+        expect(mockWithCompositionAwareMixin.determineCompositionState(editingState), editingState);
+      });
+
       test('should return editing state if composingText is null', () {
         final EditingState editingState = EditingState(
           text: 'Test',
@@ -127,7 +141,7 @@ Future<void> testMain() async {
       });
 
       test('should return editing state if text is null', () {
-        final EditingState editingState = EditingState(baseOffset: 0, extentOffset: 0);
+        final EditingState editingState = EditingState(text: '', baseOffset: 0, extentOffset: 0);
 
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
             _MockWithCompositionAwareMixin();

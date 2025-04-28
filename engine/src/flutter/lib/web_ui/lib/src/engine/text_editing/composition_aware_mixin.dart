@@ -74,7 +74,7 @@ mixin CompositionAwareMixin {
   }
 
   EditingState determineCompositionState(EditingState editingState) {
-    if (composingText == null || editingState.text == null) {
+    if (composingText == null) {
       return editingState;
     }
 

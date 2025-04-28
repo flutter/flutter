@@ -260,7 +260,12 @@ def setup_rbe(args):
   return rbe_gn_args
 
 
-# Find the locations of the macOS and iOS SDKs under flutter/prebuilts.
+# Returns a mapping of gn variables to paths of the macOS and iOS SDKs found
+# under //flutter/prebuilts directory.
+#
+# `gclient sync` populates symlinks under:
+# * //flutter/prebuilts/Platforms: for Apple Platforms.
+# * //flutter/prebuilts/SDKs: for Apple SDKs and the host toolchain.
 def setup_apple_sdks():
   sdks_gn_args = {}
 
@@ -272,18 +277,33 @@ def setup_apple_sdks():
   if running_on_luci:
     return sdks_gn_args
 
-  prefixes = [
+  # Populate args for SDKs in //flutter/prebuilts/SDKs.
+  sdk_prefixes = [
       ('MacOSX', 'mac_sdk_path'),
       ('iPhoneOS', 'ios_device_sdk_path'),
       ('iPhoneSimulator', 'ios_simulator_sdk_path'),
-      ('XcodeDefault.xctoolchain', 'apple_host_toolchain_path'),
+      ('XcodeDefault.xctoolchain', 'mac_host_toolchain_path'),
   ]
   sdks_path = os.path.join(SRC_ROOT, 'flutter', 'prebuilts', 'SDKs')
   sdk_entries = os.listdir(sdks_path)
-  for (prefix, arg) in prefixes:
+  for (prefix, arg) in sdk_prefixes:
     for entry in sdk_entries:
       if entry.startswith(prefix):
         sdks_gn_args[arg] = os.path.join(sdks_path, entry)
+
+  # Populate args for SDKs in //flutter/prebuilts/Platforms.
+  platform_prefixes = [
+      ('MacOSX', 'mac_platform_path'),
+      ('iPhoneOS', 'ios_device_platform_path'),
+      ('iPhoneSimulator', 'ios_simulator_platform_path'),
+  ]
+  platforms_path = os.path.join(SRC_ROOT, 'flutter', 'prebuilts', 'Platforms')
+  platform_entries = os.listdir(platforms_path)
+  for (prefix, arg) in platform_prefixes:
+    for entry in platform_entries:
+      if entry.startswith(prefix):
+        sdks_gn_args[arg] = os.path.join(platforms_path, entry)
+
   return sdks_gn_args
 
 

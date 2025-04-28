@@ -4,7 +4,7 @@
 
 assert(is_ios)
 
-import("//build/config/ios/ios_sdk.gni")
+import("//build/config/apple/apple_sdk.gni")
 import("//build/toolchain/clang.gni")
 import("//build/toolchain/toolchain.gni")
 import("//flutter/common/config.gni")
@@ -210,9 +210,6 @@ source_set("flutter_framework_source") {
 }
 
 if (enable_ios_unittests) {
-  platform_frameworks_path =
-      rebase_path("$ios_sdk_path/../../Library/Frameworks/")
-
   source_set("ios_test_flutter_swift") {
     testonly = true
     visibility = [ ":*" ]
@@ -230,12 +227,12 @@ if (enable_ios_unittests) {
     cflags_objcc = flutter_cflags_objcc
     cflags = [
       "-fvisibility=default",
-      "-F$platform_frameworks_path",
+      "-F$ios_platform_path/Developer/Library/Frameworks",
       "-mios-simulator-version-min=$ios_testing_deployment_target",
     ]
 
     ldflags = [
-      "-F$platform_frameworks_path",
+      "-F$ios_platform_path/Developer/Library/Frameworks",
       "-Wl,-install_name,@rpath/Frameworks/libios_test_flutter.dylib",
     ]
     frameworks = [ "XCTest.framework" ]

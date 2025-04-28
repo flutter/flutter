@@ -617,7 +617,7 @@ class TextEditingDeltaState {
       // If the deletion is forward, [deltaStart] is set to the new editing state baseOffset
       // and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
       final int deletedLength =
-          newTextEditingDeltaState.oldText.length - newEditingState.text!.length;
+          newTextEditingDeltaState.oldText.length - newEditingState.text.length;
       final bool backwardDeletion = newEditingState.baseOffset != lastEditingState?.baseOffset;
       if (backwardDeletion) {
         newTextEditingDeltaState.deltaStart = newTextEditingDeltaState.deltaEnd - deletedLength;
@@ -671,7 +671,7 @@ class TextEditingDeltaState {
         newTextEditingDeltaState.deltaText,
         replacementRange,
       );
-      final bool isDeltaVerified = textAfterDelta == newEditingState.text!;
+      final bool isDeltaVerified = textAfterDelta == newEditingState.text;
 
       if (!isDeltaVerified) {
         // 1. Find all matches for deltaText.
@@ -679,7 +679,7 @@ class TextEditingDeltaState {
         // new editing state's text value.
         final bool isPeriodInsertion = newTextEditingDeltaState.deltaText.contains('.');
         final RegExp deltaTextPattern = RegExp(RegExp.escape(newTextEditingDeltaState.deltaText));
-        for (final Match match in deltaTextPattern.allMatches(newEditingState.text!)) {
+        for (final Match match in deltaTextPattern.allMatches(newEditingState.text)) {
           String textAfterMatch;
           int actualEnd;
           final bool isMatchWithinOldTextBounds =
@@ -700,7 +700,7 @@ class TextEditingDeltaState {
             );
           }
 
-          if (textAfterMatch == newEditingState.text!) {
+          if (textAfterMatch == newEditingState.text) {
             newTextEditingDeltaState.deltaStart = match.start;
             newTextEditingDeltaState.deltaEnd = actualEnd;
             break;
@@ -787,15 +787,15 @@ class TextEditingDeltaState {
 /// The current text and selection state of a text field.
 class EditingState {
   EditingState({
-    this.text,
-    int? baseOffset,
-    int? extentOffset,
+    required this.text,
+    required int baseOffset,
+    required int extentOffset,
     this.composingBaseOffset = -1,
     this.composingExtentOffset = -1,
   }) : // Don't allow negative numbers.
-       baseOffset = math.max(0, baseOffset ?? 0),
+       baseOffset = math.max(0, baseOffset),
        // Don't allow negative numbers.
-       extentOffset = math.max(0, extentOffset ?? 0);
+       extentOffset = math.max(0, extentOffset);
 
   /// Creates an [EditingState] instance using values from an editing state Map
   /// coming from Flutter.
@@ -817,20 +817,18 @@ class EditingState {
   /// -1, if so 0 assigned to the [baseOffset] and [extentOffset]. -1 is not a
   /// valid selection range for input DOM elements.
   factory EditingState.fromFrameworkMessage(Map<String, dynamic> flutterEditingState) {
-    final String? text = flutterEditingState.tryString('text');
-
+    final String text = flutterEditingState.readString('text');
     final int selectionBase = flutterEditingState.readInt('selectionBase');
     final int selectionExtent = flutterEditingState.readInt('selectionExtent');
-
-    final int? composingBase = flutterEditingState.tryInt('composingBase');
-    final int? composingExtent = flutterEditingState.tryInt('composingExtent');
+    final int composingBase = flutterEditingState.readInt('composingBase');
+    final int composingExtent = flutterEditingState.readInt('composingExtent');
 
     return EditingState(
       text: text,
       baseOffset: selectionBase,
       extentOffset: selectionExtent,
-      composingBaseOffset: composingBase ?? -1,
-      composingExtentOffset: composingExtent ?? -1,
+      composingBaseOffset: composingBase,
+      composingExtentOffset: composingExtent,
     );
   }
 
@@ -839,35 +837,39 @@ class EditingState {
   ///
   /// [domElement] can be a [InputElement] or a [TextAreaElement] depending on
   /// the [InputType] of the text field.
-  factory EditingState.fromDomElement(DomHTMLElement? domElement) {
-    if (domElement != null && domElement.isA<DomHTMLInputElement>()) {
-      final DomHTMLInputElement element = domElement as DomHTMLInputElement;
+  factory EditingState.fromDomElement(DomHTMLElement domElement) {
+    if (domElement.isA<DomHTMLInputElement>()) {
+      final element = domElement as DomHTMLInputElement;
+      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
+      final selectionStart = element.selectionStart?.toInt() ?? 0;
       if (element.selectionDirection == 'backward') {
         return EditingState(
           text: element.value,
-          baseOffset: element.selectionEnd?.toInt(),
-          extentOffset: element.selectionStart?.toInt(),
+          baseOffset: selectionEnd,
+          extentOffset: selectionStart,
         );
       } else {
         return EditingState(
           text: element.value,
-          baseOffset: element.selectionStart?.toInt(),
-          extentOffset: element.selectionEnd?.toInt(),
+          baseOffset: selectionStart,
+          extentOffset: selectionEnd,
         );
       }
-    } else if (domElement != null && domElement.isA<DomHTMLTextAreaElement>()) {
-      final DomHTMLTextAreaElement element = domElement as DomHTMLTextAreaElement;
+    } else if (domElement.isA<DomHTMLTextAreaElement>()) {
+      final element = domElement as DomHTMLTextAreaElement;
+      final selectionEnd = element.selectionEnd?.toInt() ?? 0;
+      final selectionStart = element.selectionStart?.toInt() ?? 0;
       if (element.selectionDirection == 'backward') {
         return EditingState(
           text: element.value,
-          baseOffset: element.selectionEnd?.toInt(),
-          extentOffset: element.selectionStart?.toInt(),
+          baseOffset: selectionEnd,
+          extentOffset: selectionStart,
         );
       } else {
         return EditingState(
           text: element.value,
-          baseOffset: element.selectionStart?.toInt(),
-          extentOffset: element.selectionEnd?.toInt(),
+          baseOffset: selectionStart,
+          extentOffset: selectionEnd,
         );
       }
     } else {
@@ -908,7 +910,7 @@ class EditingState {
   };
 
   /// The current text being edited.
-  final String? text;
+  final String text;
 
   /// The offset at which the text selection originates.
   final int baseOffset;
@@ -1273,7 +1275,7 @@ abstract class DefaultTextEditingStrategy
 
   TextEditingDeltaState? _editingDeltaState;
   TextEditingDeltaState get editingDeltaState {
-    _editingDeltaState ??= TextEditingDeltaState(oldText: lastEditingState!.text!);
+    _editingDeltaState ??= TextEditingDeltaState(oldText: lastEditingState!.text);
     return _editingDeltaState!;
   }
 
