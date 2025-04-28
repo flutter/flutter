@@ -13,7 +13,7 @@ For more information on embedders, see the
 > [!CAUTION]
 > This is a best effort attempt to document the Windows embedder. It is not
 > guaranteed to be up to date or complete. If you find a discrepancy, please
-> [send a pull request](https://github.com/flutter/engine/compare)!
+> [send a pull request](https://github.com/flutter/flutter/compare)!
 
 See also:
 

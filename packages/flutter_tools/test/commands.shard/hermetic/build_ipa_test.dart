@@ -1583,7 +1583,7 @@ void main() {
         'CFBundleDisplayName': 'Awesome Gallery',
         // Will not use CFBundleName since CFBundleDisplayName is present.
         'CFBundleName': 'Awesome Gallery 2',
-        'MinimumOSVersion': '17.0',
+        'MinimumOSVersion': '18.0',
         'CFBundleVersion': '666',
         'CFBundleShortVersionString': '12.34.56',
       };
@@ -1604,7 +1604,7 @@ void main() {
           '    • Version Number: 12.34.56\n'
           '    • Build Number: 666\n'
           '    • Display Name: Awesome Gallery\n'
-          '    • Deployment Target: 17.0\n'
+          '    • Deployment Target: 18.0\n'
           '    • Bundle Identifier: io.flutter.someProject\n',
         ),
       );
@@ -1645,7 +1645,7 @@ void main() {
         'CFBundleIdentifier': 'io.flutter.someProject',
         // Will use CFBundleName since CFBundleDisplayName is absent.
         'CFBundleName': 'Awesome Gallery',
-        'MinimumOSVersion': '17.0',
+        'MinimumOSVersion': '18.0',
         'CFBundleVersion': '666',
         'CFBundleShortVersionString': '12.34.56',
       };
@@ -1666,7 +1666,7 @@ void main() {
           '    • Version Number: 12.34.56\n'
           '    • Build Number: 666\n'
           '    • Display Name: Awesome Gallery\n'
-          '    • Deployment Target: 17.0\n'
+          '    • Deployment Target: 18.0\n'
           '    • Bundle Identifier: io.flutter.someProject\n',
         ),
       );
