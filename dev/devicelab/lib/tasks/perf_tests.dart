@@ -1752,11 +1752,15 @@ class CompileTest {
         '-scheme',
         'hello_world_swiftui',
         '-destination',
+        // 'platform=iOS,name=Fluttér 的 iPhone',
         'platform=iOS,arch=arm64',
         '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
         '-resultBundlePath',
         'benchmarkResults.xcresult',
-        '-verbose'
+        '-verbose',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         print(results.stdout);
       });
