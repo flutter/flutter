@@ -6,7 +6,6 @@
 
 #import "ContinuousTexture.h"
 #import "FlutterEngine+ScenariosTest.h"
-#import "SceneDelegate.h"
 #import "ScreenBeforeFlutter.h"
 #import "TextPlatformView.h"
 
@@ -221,14 +220,4 @@
   self.window.rootViewController = rootViewController;
 }
 
-- (UISceneConfiguration*)application:(UIApplication*)application
-    configurationForConnectingSceneSession:(UISceneSession*)connectingSceneSession
-                                   options:(UISceneConnectionOptions*)options
-    API_AVAILABLE(ios(13.0)) {
-  UISceneConfiguration* result =
-      [[UISceneConfiguration alloc] initWithName:nil
-                                     sessionRole:connectingSceneSession.configuration.role];
-  result.delegateClass = [SceneDelegate class];
-  return result;
-}
 @end
