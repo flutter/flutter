@@ -3382,7 +3382,8 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor));
   }, skip: !isBrowser); // [intended] tests web-specific behavior.
 
-  testWidgets('IconButton golden test', (WidgetTester tester) async {
+  testWidgets("IconButton's outline should be behind its child", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/167431
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

@@ -2962,7 +2962,8 @@ void main() {
     expect(iconStyle(tester, buttonIcon).color, hoveredColor);
   });
 
-  testWidgets('OutlinedButton golden test', (WidgetTester tester) async {
+  testWidgets("OutlinedButton's outline should be behind its child", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/167431
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
