@@ -2156,19 +2156,13 @@ void main() {
     final _TestImageProvider provider = _TestImageProvider();
     final Exception testException = Exception('Network failed');
     final StackTrace testStack = StackTrace.current;
-    bool errorBuilderWasConfigured = false; // Track that the builder was passed
 
-    // Function to build the widget with the Image
     Widget buildImage() {
-      errorBuilderWasConfigured = true; // Set flag here
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Image(
           image: provider,
-          errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
-            // This shouldn't be called if the widget is disposed before error completion
-            return const SizedBox(width: 10, height: 10); // Placeholder widget
-          },
+          errorBuilder: (_, _, _) => const SizedBox(width: 10, height: 10),
         ),
       );
     }
@@ -2176,7 +2170,6 @@ void main() {
     // 2. Pump the widget with the Image.
     await tester.pumpWidget(buildImage());
     expect(find.byType(Image), findsOneWidget);
-    expect(errorBuilderWasConfigured, isTrue); // Sanity check: Builder was configured
     expect(reportedErrors, isEmpty); // No errors yet
 
     // 3. Remove the Image widget from the tree.
@@ -2198,6 +2191,70 @@ void main() {
     // Also check takeException as a standard backup.
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'errorBuilder prevents FlutterError report only if errorBuilder is non-null when widget is disposed',
+    (WidgetTester tester) async {
+      // This test verifies that if an errorBuilder is provided, FlutterError.reportError
+      // is called, only if the errorBuilder stays present when the widget is unmounted.
+
+      // 1. Setup: Capture FlutterError reports
+      final List<FlutterErrorDetails> reportedErrors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = reportedErrors.add;
+      addTearDown(() {
+        FlutterError.onError = oldHandler;
+      }); // Ensure handler is restored
+
+      final _TestImageProvider provider = _TestImageProvider();
+      final Exception testException = Exception('Network failed');
+      final StackTrace testStack = StackTrace.current;
+
+      // Function to build the widget with the Image
+      Widget buildImage({required bool hasErrorBuilder}) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Image(
+            image: provider,
+            errorBuilder:
+                hasErrorBuilder ? (_, _, _) => const SizedBox(width: 10, height: 10) : null,
+          ),
+        );
+      }
+
+      // 2. Pump the widget with an errorBuilder
+      await tester.pumpWidget(buildImage(hasErrorBuilder: true));
+      expect(find.byType(Image), findsOneWidget);
+      expect(reportedErrors, isEmpty); // No errors yet
+
+      // 3. Update the widget with no errorBuilder
+      await tester.pumpWidget(buildImage(hasErrorBuilder: false));
+      expect(find.byType(Image), findsOneWidget);
+      expect(reportedErrors, isEmpty); // No errors yet
+
+      // 4. Remove the Image widget from the tree.
+      await tester.pumpWidget(const SizedBox.shrink());
+      expect(find.byType(Image), findsNothing);
+
+      // 5. Now, make the image provider fail *after* the widget state is disposed.
+      provider.fail(testException, testStack);
+
+      // 5. Allow asynchronous error propagation to complete robustly.
+      await tester.pumpAndSettle();
+      // Restore the handler now in case `expect`s in step 6 fail.
+      FlutterError.onError = oldHandler;
+
+      // 6. Verify that a FlutterError was reported via the onError handler
+      expect(
+        reportedErrors,
+        isNotEmpty,
+        reason:
+            'FlutterError.onError should be called when an errorBuilder was not provided eventually.',
+      );
+      // Also check takeException as a standard backup.
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 @immutable
