@@ -23,7 +23,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   String windowsBuildDirectory(FlutterProject project) =>
-      nativeAssetsBuildUri(project.directory.uri, OS.windows.name, globals.fs).toFilePath();
+      nativeAssetsBuildUri(project.directory.uri, OS.windows.name).toFilePath();
 }
 
 Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
@@ -58,7 +58,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name, globals.fs);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
 
   final Map<String, String> environmentDefines = <String, String>{

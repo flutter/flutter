@@ -55,7 +55,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName, fileSystem);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName);
   final Directory buildDir = fileSystem.directory(buildUri);
   if (!await buildDir.exists()) {
     // Ensure the folder exists so the native build system can copy it even
@@ -107,7 +107,7 @@ Future<void> installCodeAssets({
   required Uri nativeAssetsFileUri,
 }) async {
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name, fileSystem);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
   final bool flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
@@ -345,11 +345,9 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
 
 /// This should be the same for different archs, debug/release, etc.
 /// It should work for all macOS.
-Uri nativeAssetsBuildUri(Uri projectUri, String osName, FileSystem fileSystem) {
+Uri nativeAssetsBuildUri(Uri projectUri, String osName) {
   final String buildDir = getBuildDirectory();
-  return Uri.directory(
-    fileSystem.path.join(projectUri.toFilePath(), buildDir, 'native_assets', osName),
-  );
+  return projectUri.resolve('$buildDir/native_assets/$osName/');
 }
 
 Map<FlutterCodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(
