@@ -11,12 +11,7 @@
 #include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/core/SkImageFilter.h"
-#include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
-#include "third_party/skia/include/core/SkString.h"
-#include "third_party/tonic/typed_data/dart_byte_data.h"
-#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
 
@@ -61,9 +56,10 @@ constexpr float kStrokeMiterLimitDefault = 4.0f;
 enum MaskFilterType { kNull, kBlur };
 
 namespace {
-DlColor ReadColor(const tonic::DartByteData& byte_data) {
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
+DlColor ReadColor(const std::vector<uint8_t>& byte_data) {
+  const uint32_t* uint_data =
+      reinterpret_cast<const uint32_t*>(byte_data.data());
+  const float* float_data = reinterpret_cast<const float*>(byte_data.data());
 
   float red = float_data[kColorRedIndex];
   float green = float_data[kColorGreenIndex];
@@ -79,7 +75,7 @@ DlColor ReadColor(const tonic::DartByteData& byte_data) {
 }
 }  // namespace
 
-Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data)
+Paint::Paint(Dart_Handle paint_objects, std::vector<uint8_t>& paint_data)
     : paint_objects_(paint_objects), paint_data_(paint_data) {}
 
 const DlPaint* Paint::paint(DlPaint& paint,
@@ -88,11 +84,11 @@ const DlPaint* Paint::paint(DlPaint& paint,
   if (isNull()) {
     return nullptr;
   }
-  tonic::DartByteData byte_data(paint_data_);
-  FML_CHECK(byte_data.length_in_bytes() == kDataByteCount);
+  FML_CHECK(paint_data_.size() == kDataByteCount);
 
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
+  const uint32_t* uint_data =
+      reinterpret_cast<const uint32_t*>(paint_data_.data());
+  const float* float_data = reinterpret_cast<const float*>(paint_data_.data());
 
   Dart_Handle values[kObjectCount];
   if (Dart_IsNull(paint_objects_)) {
@@ -159,7 +155,7 @@ const DlPaint* Paint::paint(DlPaint& paint,
   }
 
   if (flags.applies_alpha_or_color()) {
-    paint.setColor(ReadColor(byte_data));
+    paint.setColor(ReadColor(paint_data_));
   }
 
   if (flags.applies_blend()) {
@@ -215,11 +211,11 @@ void Paint::toDlPaint(DlPaint& paint, DlTileMode tile_mode) const {
   }
   FML_DCHECK(paint == DlPaint());
 
-  tonic::DartByteData byte_data(paint_data_);
-  FML_CHECK(byte_data.length_in_bytes() == kDataByteCount);
+  FML_CHECK(paint_data_.size() == kDataByteCount);
 
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
+  const uint32_t* uint_data =
+      reinterpret_cast<const uint32_t*>(paint_data_.data());
+  const float* float_data = reinterpret_cast<const float*>(paint_data_.data());
 
   Dart_Handle values[kObjectCount];
   if (!Dart_IsNull(paint_objects_)) {
@@ -259,7 +255,7 @@ void Paint::toDlPaint(DlPaint& paint, DlTileMode tile_mode) const {
 
   paint.setAntiAlias(uint_data[kIsAntiAliasIndex] == 0);
 
-  paint.setColor(ReadColor(byte_data));
+  paint.setColor(ReadColor(paint_data_));
 
   uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
   uint32_t blend_mode = encoded_blend_mode ^ kBlendModeDefault;
@@ -303,26 +299,26 @@ void Paint::toDlPaint(DlPaint& paint, DlTileMode tile_mode) const {
 
 }  // namespace flutter
 
-namespace tonic {
+// namespace tonic {
 
-flutter::Paint DartConverter<flutter::Paint>::FromArguments(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
-  Dart_Handle paint_objects = Dart_GetNativeArgument(args, index);
-  FML_DCHECK(!CheckAndHandleError(paint_objects));
+// flutter::Paint DartConverter<flutter::Paint>::FromArguments(
+//     Dart_NativeArguments args,
+//     int index,
+//     Dart_Handle& exception) {
+//   Dart_Handle paint_objects = Dart_GetNativeArgument(args, index);
+//   FML_DCHECK(!CheckAndHandleError(paint_objects));
 
-  Dart_Handle paint_data = Dart_GetNativeArgument(args, index + 1);
-  FML_DCHECK(!CheckAndHandleError(paint_data));
+//   Dart_Handle paint_data = Dart_GetNativeArgument(args, index + 1);
+//   FML_DCHECK(!CheckAndHandleError(paint_data));
 
-  return flutter::Paint(paint_objects, paint_data);
-}
+//   return flutter::Paint(paint_objects, paint_data);
+// }
 
-flutter::PaintData DartConverter<flutter::PaintData>::FromArguments(
-    Dart_NativeArguments args,
-    int index,
-    Dart_Handle& exception) {
-  return flutter::PaintData();
-}
+// flutter::PaintData DartConverter<flutter::PaintData>::FromArguments(
+//     Dart_NativeArguments args,
+//     int index,
+//     Dart_Handle& exception) {
+//   return flutter::PaintData();
+// }
 
-}  // namespace tonic
+// }  // namespace tonic

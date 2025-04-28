@@ -42,8 +42,14 @@ void Canvas::Create(Dart_Handle wrapper,
   canvas->AssociateWithDartWrapper(wrapper);
 }
 
+static constexpr size_t kPaintBytes = 68;
+
 Canvas::Canvas(sk_sp<DisplayListBuilder> builder)
-    : display_list_builder_(std::move(builder)) {}
+    : paint_bytes_(std::vector<uint8_t>(kPaintBytes)),
+      display_list_builder_(std::move(builder)) {
+  paint_byte_wrapper_ = Dart_NewExternalTypedData(
+      Dart_TypedData_kUint8, paint_bytes_.data(), paint_bytes_.size());
+}
 
 Canvas::~Canvas() {}
 
@@ -53,9 +59,8 @@ void Canvas::save() {
   }
 }
 
-void Canvas::saveLayerWithoutBounds(Dart_Handle paint_objects,
-                                    Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+void Canvas::saveLayerWithoutBounds(Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -72,9 +77,8 @@ void Canvas::saveLayer(double left,
                        double top,
                        double right,
                        double bottom,
-                       Dart_Handle paint_objects,
-                       Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                       Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   DlRect bounds = DlRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
@@ -227,9 +231,8 @@ void Canvas::drawLine(double x1,
                       double y1,
                       double x2,
                       double y2,
-                      Dart_Handle paint_objects,
-                      Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                      Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -240,8 +243,8 @@ void Canvas::drawLine(double x1,
   }
 }
 
-void Canvas::drawPaint(Dart_Handle paint_objects, Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+void Canvas::drawPaint(Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -261,9 +264,8 @@ void Canvas::drawRect(double left,
                       double top,
                       double right,
                       double bottom,
-                      Dart_Handle paint_objects,
-                      Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                      Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -275,10 +277,8 @@ void Canvas::drawRect(double left,
   }
 }
 
-void Canvas::drawRRect(const RRect& rrect,
-                       Dart_Handle paint_objects,
-                       Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+void Canvas::drawRRect(const RRect& rrect, Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -290,9 +290,8 @@ void Canvas::drawRRect(const RRect& rrect,
 
 void Canvas::drawDRRect(const RRect& outer,
                         const RRect& inner,
-                        Dart_Handle paint_objects,
-                        Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                        Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -303,9 +302,8 @@ void Canvas::drawDRRect(const RRect& outer,
 }
 
 void Canvas::drawRSuperellipse(const RSuperellipse* rse,
-                               Dart_Handle paint_objects,
-                               Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                               Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -319,9 +317,8 @@ void Canvas::drawOval(double left,
                       double top,
                       double right,
                       double bottom,
-                      Dart_Handle paint_objects,
-                      Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                      Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -336,9 +333,8 @@ void Canvas::drawOval(double left,
 void Canvas::drawCircle(double x,
                         double y,
                         double radius,
-                        Dart_Handle paint_objects,
-                        Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                        Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -356,9 +352,8 @@ void Canvas::drawArc(double left,
                      double startAngle,
                      double sweepAngle,
                      bool useCenter,
-                     Dart_Handle paint_objects,
-                     Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                     Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
@@ -375,10 +370,8 @@ void Canvas::drawArc(double left,
   }
 }
 
-void Canvas::drawPath(const CanvasPath* path,
-                      Dart_Handle paint_objects,
-                      Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+void Canvas::drawPath(const CanvasPath* path, Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (!path) {
@@ -397,9 +390,8 @@ Dart_Handle Canvas::drawImage(const CanvasImage* image,
                               double x,
                               double y,
                               Dart_Handle paint_objects,
-                              Dart_Handle paint_data,
                               int filterQualityIndex) {
-  Paint paint(paint_objects, paint_data);
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (!image) {
@@ -436,9 +428,8 @@ Dart_Handle Canvas::drawImageRect(const CanvasImage* image,
                                   double dst_right,
                                   double dst_bottom,
                                   Dart_Handle paint_objects,
-                                  Dart_Handle paint_data,
                                   int filterQualityIndex) {
-  Paint paint(paint_objects, paint_data);
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (!image) {
@@ -479,9 +470,8 @@ Dart_Handle Canvas::drawImageNine(const CanvasImage* image,
                                   double dst_right,
                                   double dst_bottom,
                                   Dart_Handle paint_objects,
-                                  Dart_Handle paint_data,
                                   int bitmapSamplingIndex) {
-  Paint paint(paint_objects, paint_data);
+  Paint paint(paint_objects, paint_bytes_);
 
   FML_DCHECK(paint.isNotNull());
   if (!image) {
@@ -528,10 +518,9 @@ void Canvas::drawPicture(Picture* picture) {
 }
 
 void Canvas::drawPoints(Dart_Handle paint_objects,
-                        Dart_Handle paint_data,
                         DlPointMode point_mode,
                         const tonic::Float32List& points) {
-  Paint paint(paint_objects, paint_data);
+  Paint paint(paint_objects, paint_bytes_);
 
   static_assert(sizeof(DlPoint) == sizeof(float) * 2,
                 "DlPoint doesn't use floats.");
@@ -559,9 +548,8 @@ void Canvas::drawPoints(Dart_Handle paint_objects,
 
 void Canvas::drawVertices(const Vertices* vertices,
                           DlBlendMode blend_mode,
-                          Dart_Handle paint_objects,
-                          Dart_Handle paint_data) {
-  Paint paint(paint_objects, paint_data);
+                          Dart_Handle paint_objects) {
+  Paint paint(paint_objects, paint_bytes_);
 
   if (!vertices) {
     Dart_ThrowException(
@@ -577,7 +565,6 @@ void Canvas::drawVertices(const Vertices* vertices,
 }
 
 Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
-                              Dart_Handle paint_data,
                               int filterQualityIndex,
                               CanvasImage* atlas,
                               Dart_Handle transforms_handle,
@@ -585,7 +572,7 @@ Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
                               Dart_Handle colors_handle,
                               DlBlendMode blend_mode,
                               Dart_Handle cull_rect_handle) {
-  Paint paint(paint_objects, paint_data);
+  Paint paint(paint_objects, paint_bytes_);
 
   if (!atlas) {
     return ToDart(
@@ -664,6 +651,10 @@ void Canvas::Invalidate() {
   if (dart_wrapper()) {
     ClearDartWrapper();
   }
+}
+
+Dart_Handle Canvas::GetPaintByteData() {
+  return paint_byte_wrapper_;
 }
 
 }  // namespace flutter

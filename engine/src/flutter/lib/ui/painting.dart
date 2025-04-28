@@ -6545,17 +6545,18 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void saveLayer(Rect? bounds, Paint paint) {
     if (bounds == null) {
-      _saveLayerWithoutBounds(paint._objects, paint._data);
+      _copyBytesIntoCanvas(paint);
+      _saveLayerWithoutBounds(paint._objects);
     } else {
       assert(_rectIsValid(bounds));
-      _saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint._objects, paint._data);
+      _saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint._objects);
     }
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle)>(symbol: 'Canvas::saveLayerWithoutBounds')
-  external void _saveLayerWithoutBounds(List<Object?>? paintObjects, ByteData paintData);
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'Canvas::saveLayerWithoutBounds')
+  external void _saveLayerWithoutBounds(List<Object?>? paintObjects);
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle)>(
     symbol: 'Canvas::saveLayer',
   )
   external void _saveLayer(
@@ -6564,7 +6565,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double right,
     double bottom,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
@@ -6699,10 +6699,11 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   void drawLine(Offset p1, Offset p2, Paint paint) {
     assert(_offsetIsValid(p1));
     assert(_offsetIsValid(p2));
-    _drawLine(p1.dx, p1.dy, p2.dx, p2.dy, paint._objects, paint._data);
+    _copyBytesIntoCanvas(paint);
+    _drawLine(p1.dx, p1.dy, p2.dx, p2.dy, paint._objects);
   }
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle)>(
     symbol: 'Canvas::drawLine',
   )
   external void _drawLine(
@@ -6711,27 +6712,28 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double x2,
     double y2,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
   void drawPaint(Paint paint) {
-    _drawPaint(paint._objects, paint._data);
+    _copyBytesIntoCanvas(paint);
+    _drawPaint(paint._objects);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle)>(symbol: 'Canvas::drawPaint')
-  external void _drawPaint(List<Object?>? paintObjects, ByteData paintData);
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'Canvas::drawPaint')
+  external void _drawPaint(List<Object?>? paintObjects);
 
   @override
   void drawRect(Rect rect, Paint paint) {
     assert(_rectIsValid(rect));
     rect = _sorted(rect);
     if (paint.style != PaintingStyle.fill || !rect.isEmpty) {
-      _drawRect(rect.left, rect.top, rect.right, rect.bottom, paint._objects, paint._data);
+       _copyBytesIntoCanvas(paint);
+      _drawRect(rect.left, rect.top, rect.right, rect.bottom, paint._objects);
     }
   }
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle)>(
     symbol: 'Canvas::drawRect',
   )
   external void _drawRect(
@@ -6740,48 +6742,48 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double right,
     double bottom,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
   void drawRRect(RRect rrect, Paint paint) {
     assert(_rrectIsValid(rrect));
-    _drawRRect(rrect._getValue32(), paint._objects, paint._data);
+     _copyBytesIntoCanvas(paint);
+    _drawRRect(rrect._getValue32(), paint._objects);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(symbol: 'Canvas::drawRRect')
-  external void _drawRRect(Float32List rrect, List<Object?>? paintObjects, ByteData paintData);
+  @Native<Void Function(Pointer<Void>, Handle, Handle)>(symbol: 'Canvas::drawRRect')
+  external void _drawRRect(Float32List rrect, List<Object?>? paintObjects);
 
   @override
   void drawDRRect(RRect outer, RRect inner, Paint paint) {
     assert(_rrectIsValid(outer));
     assert(_rrectIsValid(inner));
-    _drawDRRect(outer._getValue32(), inner._getValue32(), paint._objects, paint._data);
+     _copyBytesIntoCanvas(paint);
+    _drawDRRect(outer._getValue32(), inner._getValue32(), paint._objects);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Handle, Handle, Handle)>(
     symbol: 'Canvas::drawDRRect',
   )
   external void _drawDRRect(
     Float32List outer,
     Float32List inner,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
   void drawRSuperellipse(RSuperellipse rsuperellipse, Paint paint) {
     assert(_rsuperellipseIsValid(rsuperellipse));
-    _drawRSuperellipse(rsuperellipse._native(), paint._objects, paint._data);
+     _copyBytesIntoCanvas(paint);
+    _drawRSuperellipse(rsuperellipse._native(), paint._objects);
   }
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle)>(
     symbol: 'Canvas::drawRSuperellipse',
   )
   external void _drawRSuperellipse(
     _NativeRSuperellipse rsuperellipse,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
@@ -6789,11 +6791,12 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     assert(_rectIsValid(rect));
     rect = _sorted(rect);
     if (paint.style != PaintingStyle.fill || !rect.isEmpty) {
-      _drawOval(rect.left, rect.top, rect.right, rect.bottom, paint._objects, paint._data);
+       _copyBytesIntoCanvas(paint);
+      _drawOval(rect.left, rect.top, rect.right, rect.bottom, paint._objects);
     }
   }
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Double, Handle)>(
     symbol: 'Canvas::drawOval',
   )
   external void _drawOval(
@@ -6802,16 +6805,16 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double right,
     double bottom,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
   void drawCircle(Offset c, double radius, Paint paint) {
     assert(_offsetIsValid(c));
-    _drawCircle(c.dx, c.dy, radius, paint._objects, paint._data);
+     _copyBytesIntoCanvas(paint);
+    _drawCircle(c.dx, c.dy, radius, paint._objects);
   }
 
-  @Native<Void Function(Pointer<Void>, Double, Double, Double, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Double, Double, Double, Handle)>(
     symbol: 'Canvas::drawCircle',
   )
   external void _drawCircle(
@@ -6819,12 +6822,12 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double y,
     double radius,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
   void drawArc(Rect rect, double startAngle, double sweepAngle, bool useCenter, Paint paint) {
     assert(_rectIsValid(rect));
+     _copyBytesIntoCanvas(paint);
     _drawArc(
       rect.left,
       rect.top,
@@ -6834,7 +6837,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       sweepAngle,
       useCenter,
       paint._objects,
-      paint._data,
     );
   }
 
@@ -6849,7 +6851,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       Double,
       Bool,
       Handle,
-      Handle,
     )
   >(symbol: 'Canvas::drawArc')
   external void _drawArc(
@@ -6861,27 +6862,27 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double sweepAngle,
     bool useCenter,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
   void drawPath(Path path, Paint paint) {
-    _drawPath(path as _NativePath, paint._objects, paint._data);
+     _copyBytesIntoCanvas(paint);
+    _drawPath(path as _NativePath, paint._objects);
   }
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle, Handle)>(symbol: 'Canvas::drawPath')
-  external void _drawPath(_NativePath path, List<Object?>? paintObjects, ByteData paintData);
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Handle)>(symbol: 'Canvas::drawPath')
+  external void _drawPath(_NativePath path, List<Object?>? paintObjects);
 
   @override
   void drawImage(Image image, Offset offset, Paint paint) {
     assert(!image.debugDisposed);
     assert(_offsetIsValid(offset));
+     _copyBytesIntoCanvas(paint);
     final String? error = _drawImage(
       image._image,
       offset.dx,
       offset.dy,
       paint._objects,
-      paint._data,
       paint.filterQuality.index,
     );
     if (error != null) {
@@ -6889,7 +6890,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     }
   }
 
-  @Native<Handle Function(Pointer<Void>, Pointer<Void>, Double, Double, Handle, Handle, Int32)>(
+  @Native<Handle Function(Pointer<Void>, Pointer<Void>, Double, Double, Handle, Int32)>(
     symbol: 'Canvas::drawImage',
   )
   external String? _drawImage(
@@ -6897,7 +6898,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double x,
     double y,
     List<Object?>? paintObjects,
-    ByteData paintData,
     int filterQualityIndex,
   );
 
@@ -6906,6 +6906,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     assert(!image.debugDisposed);
     assert(_rectIsValid(src));
     assert(_rectIsValid(dst));
+     _copyBytesIntoCanvas(paint);
     final String? error = _drawImageRect(
       image._image,
       src.left,
@@ -6917,7 +6918,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       dst.right,
       dst.bottom,
       paint._objects,
-      paint._data,
       paint.filterQuality.index,
     );
     if (error != null) {
@@ -6937,7 +6937,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       Double,
       Double,
       Double,
-      Handle,
       Handle,
       Int32,
     )
@@ -6953,7 +6952,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double dstRight,
     double dstBottom,
     List<Object?>? paintObjects,
-    ByteData paintData,
     int filterQualityIndex,
   );
 
@@ -6962,6 +6960,7 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     assert(!image.debugDisposed);
     assert(_rectIsValid(center));
     assert(_rectIsValid(dst));
+    _copyBytesIntoCanvas(paint);
     final String? error = _drawImageNine(
       image._image,
       center.left,
@@ -6973,7 +6972,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       dst.right,
       dst.bottom,
       paint._objects,
-      paint._data,
       paint.filterQuality.index,
     );
     if (error != null) {
@@ -6994,7 +6992,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
       Double,
       Double,
       Handle,
-      Handle,
       Int32,
     )
   >(symbol: 'Canvas::drawImageNine')
@@ -7009,7 +7006,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double dstRight,
     double dstBottom,
     List<Object?>? paintObjects,
-    ByteData paintData,
     int filterQualityIndex,
   );
 
@@ -7033,7 +7029,8 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
 
   @override
   void drawPoints(PointMode pointMode, List<Offset> points, Paint paint) {
-    _drawPoints(paint._objects, paint._data, pointMode.index, _encodePointList(points));
+     _copyBytesIntoCanvas(paint);
+    _drawPoints(paint._objects, pointMode.index, _encodePointList(points));
   }
 
   @override
@@ -7041,13 +7038,13 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     if (points.length % 2 != 0) {
       throw ArgumentError('"points" must have an even number of values.');
     }
-    _drawPoints(paint._objects, paint._data, pointMode.index, points);
+     _copyBytesIntoCanvas(paint);
+    _drawPoints(paint._objects, pointMode.index, points);
   }
 
-  @Native<Void Function(Pointer<Void>, Handle, Handle, Int32, Handle)>(symbol: 'Canvas::drawPoints')
+  @Native<Void Function(Pointer<Void>, Handle, Int32, Handle)>(symbol: 'Canvas::drawPoints')
   external void _drawPoints(
     List<Object?>? paintObjects,
-    ByteData paintData,
     int pointMode,
     Float32List points,
   );
@@ -7055,17 +7052,17 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   @override
   void drawVertices(Vertices vertices, BlendMode blendMode, Paint paint) {
     assert(!vertices.debugDisposed);
-    _drawVertices(vertices, blendMode.index, paint._objects, paint._data);
+     _copyBytesIntoCanvas(paint);
+    _drawVertices(vertices, blendMode.index, paint._objects);
   }
 
-  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int32, Handle, Handle)>(
+  @Native<Void Function(Pointer<Void>, Pointer<Void>, Int32, Handle)>(
     symbol: 'Canvas::drawVertices',
   )
   external void _drawVertices(
     Vertices vertices,
     int blendMode,
     List<Object?>? paintObjects,
-    ByteData paintData,
   );
 
   @override
@@ -7117,9 +7114,9 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     final Float32List? cullRectBuffer = cullRect?._getValue32();
     final int qualityIndex = paint.filterQuality.index;
 
+    _copyBytesIntoCanvas(paint);
     final String? error = _drawAtlas(
       paint._objects,
-      paint._data,
       qualityIndex,
       atlas._image,
       rstTransformBuffer,
@@ -7160,9 +7157,9 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     }
     final int qualityIndex = paint.filterQuality.index;
 
+    _copyBytesIntoCanvas(paint);
     final String? error = _drawAtlas(
       paint._objects,
-      paint._data,
       qualityIndex,
       atlas._image,
       rstTransforms,
@@ -7181,7 +7178,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     Handle Function(
       Pointer<Void>,
       Handle,
-      Handle,
       Int32,
       Pointer<Void>,
       Handle,
@@ -7193,7 +7189,6 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
   >(symbol: 'Canvas::drawAtlas')
   external String? _drawAtlas(
     List<Object?>? paintObjects,
-    ByteData paintData,
     int filterQualityIndex,
     _Image atlas,
     Float32List rstTransforms,
@@ -7217,6 +7212,15 @@ base class _NativeCanvas extends NativeFieldWrapperClass1 implements Canvas {
     double elevation,
     bool transparentOccluder,
   );
+
+  void _copyBytesIntoCanvas(Paint paint) {
+    final Uint8List dst =  _getPaintByteData();
+    final Uint8List src = paint._data.buffer.asUint8List();
+    dst.setAll(0, src);
+  }
+
+  @Native<Handle Function(Pointer<Void>)>(symbol: 'Canvas::GetPaintByteData')
+  external Uint8List _getPaintByteData();
 
   @override
   String toString() => 'Canvas(recording: ${_recorder != null})';
