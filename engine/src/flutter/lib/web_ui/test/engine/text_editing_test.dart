@@ -424,6 +424,78 @@ Future<void> testMain() async {
       expect(event.defaultPrevented, isTrue);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/167902.
+    test('Does not trigger input action in multiline mode when shift is pressed '
+        'and TextInputAction.done', () {
+      final InputConfiguration config = InputConfiguration(
+        viewId: kImplicitViewId,
+        inputType: EngineInputType.multiline,
+      );
+      editingStrategy!.enable(config, onChange: trackEditingState, onAction: trackInputAction);
+
+      // No input action so far.
+      expect(lastInputAction, isNull);
+
+      final DomKeyboardEvent event = dispatchKeyboardEvent(
+        editingStrategy!.domElement!,
+        'keydown',
+        keyCode: _kReturnKeyCode,
+        shiftKey: true,
+      );
+
+      // No input action is triggered.
+      expect(lastInputAction, isNull);
+      // And default behavior of keyboard event is not prevented.
+      expect(event.defaultPrevented, isFalse);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/167902.
+    test('Triggers input action in multiline mode when shift is pressed '
+        'and TextInputAction.newline', () {
+      final InputConfiguration config = InputConfiguration(
+        viewId: kImplicitViewId,
+        inputType: EngineInputType.multiline,
+        inputAction: 'TextInputAction.newline',
+      );
+      editingStrategy!.enable(config, onChange: trackEditingState, onAction: trackInputAction);
+
+      // No input action so far.
+      expect(lastInputAction, isNull);
+
+      final DomKeyboardEvent event = dispatchKeyboardEvent(
+        editingStrategy!.domElement!,
+        'keydown',
+        keyCode: _kReturnKeyCode,
+        shiftKey: true,
+      );
+
+      // Input action is triggered.
+      expect(lastInputAction, 'TextInputAction.newline');
+      // And default behavior of keyboard event is not prevented.
+      expect(event.defaultPrevented, isFalse);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/167902.
+    test('Triggers input action in single line mode when shift is pressed', () {
+      final InputConfiguration config = InputConfiguration(viewId: kImplicitViewId);
+      editingStrategy!.enable(config, onChange: trackEditingState, onAction: trackInputAction);
+
+      // No input action so far.
+      expect(lastInputAction, isNull);
+
+      final DomKeyboardEvent event = dispatchKeyboardEvent(
+        editingStrategy!.domElement!,
+        'keydown',
+        keyCode: _kReturnKeyCode,
+        shiftKey: true,
+      );
+
+      // Input action is triggered.
+      expect(lastInputAction, 'TextInputAction.done');
+      // And default behavior of keyboard event is prevented.
+      expect(event.defaultPrevented, isTrue);
+    });
+
     test('Does not prevent default behavior when TextInputAction.newline', () {
       // Regression test for https://github.com/flutter/flutter/issues/145051.
       final InputConfiguration config = InputConfiguration(
@@ -3770,11 +3842,16 @@ Future<void> testMain() async {
   });
 }
 
-DomKeyboardEvent dispatchKeyboardEvent(DomEventTarget target, String type, {required int keyCode}) {
+DomKeyboardEvent dispatchKeyboardEvent(
+  DomEventTarget target,
+  String type, {
+  required int keyCode,
+  bool shiftKey = false,
+}) {
   final Object jsKeyboardEvent = js_util.getProperty<Object>(domWindow, 'KeyboardEvent');
   final List<dynamic> eventArgs = <dynamic>[
     type,
-    js_util.jsify(<String, dynamic>{'keyCode': keyCode, 'cancelable': true}),
+    js_util.jsify(<String, dynamic>{'keyCode': keyCode, 'cancelable': true, 'shiftKey': shiftKey}),
   ];
   final DomKeyboardEvent event = js_util.callConstructor<DomKeyboardEvent>(
     jsKeyboardEvent,
