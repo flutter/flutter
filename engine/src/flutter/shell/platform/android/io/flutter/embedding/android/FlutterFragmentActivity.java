@@ -372,9 +372,9 @@ public class FlutterFragmentActivity extends FragmentActivity
   /**
    * Returns the ID of the {@code FlutterView} created by the instance of the {@code
    * FlutterFragment} that belongs to this {@code FlutterFragmentActivity} instance.
-   * 
-   * May return null if the {@code flutterViewId} has not yet been initialized, which
-   * is done when the {@code FlutterView} is created.
+   *
+   * <p>May return null if the {@code flutterViewId} has not yet been initialized, which is done
+   * when the {@code FlutterView} is created.
    */
   @Nullable
   public int getFlutterFragmentViewId() {
