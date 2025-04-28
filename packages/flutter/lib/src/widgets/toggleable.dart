@@ -351,11 +351,12 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// example), consider providing [CustomPaint] with a subclass of
   /// [ToggleablePainter] as a [CustomPaint.painter], which implements logic
   /// to draw a radial ink reaction for this control. The painter is usually
-  /// configured with the [reaction], [position], [reactionHoverFade], and
-  /// [reactionFocusFade] animation provided by this mixin. It is expected to
-  /// draw the visuals of the Toggleable based on the current value of these
-  /// animations. The animations are triggered by this mixin to transition the
-  /// Toggleable from one state to another.
+  /// configured with the [ToggleableStateMixin.reaction],
+  /// [ToggleableStateMixin.position], [ToggleableStateMixin.reactionHoverFade],
+  /// and [ToggleableStateMixin.reactionFocusFade] animation provided by this
+  /// mixin. It is expected to draw the visuals of the Toggleable based on the
+  /// current value of these animations. The animations are triggered by this
+  /// mixin to transition the Toggleable from one state to another.
   /// {@endtemplate}
   ///
   /// Material Toggleables must provide a [mouseCursor] which resolves to a
