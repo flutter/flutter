@@ -4046,9 +4046,9 @@ class ColorFilter implements ImageFilter {
   /// Creates a color filter that applies the given saturation to the RGB
   /// channels.
   factory ColorFilter.saturation(double saturation) {
-    const r = 0.2126;
-    const g = 0.7152;
-    const b = 0.0722;
+    const double r = 0.2126;
+    const double g = 0.7152;
+    const double b = 0.0722;
     final double invSat = 1 - saturation;
 
     // https://github.com/flutter/flutter/issues/166589#issuecomment-2779794114
