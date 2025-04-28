@@ -711,6 +711,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         flutterHookResult: await dartBuilder?.runHooks(
           targetPlatform: TargetPlatform.web_javascript,
           environment: environment,
+          logger: _logger,
         ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,

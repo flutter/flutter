@@ -34,8 +34,8 @@ class FlutterHookResult {
 
   FlutterHookResult.empty()
     : this(
-        buildStart: DateTime(2025),
-        buildEnd: DateTime(2025),
+        buildStart: DateTime.fromMillisecondsSinceEpoch(0),
+        buildEnd: DateTime.fromMillisecondsSinceEpoch(0),
         dataAssets: <HookAsset>[],
         dependencies: <Uri>[],
       );
@@ -49,9 +49,11 @@ class FlutterHookResult {
   /// outputs.
   final DateTime buildEnd;
 
+  /// The dependencies of the build are used to check if the build needs to be
+  /// rerun.
   final List<Uri> dependencies;
 
-  /// Whether caller may need to re-run the dart build.
+  /// Whether caller may need to re-run the Dart build.
   bool hasAnyModifiedFiles(FileSystem fileSystem) =>
       _wasAnyFileModifiedSince(fileSystem, buildStart, dependencies);
 
@@ -83,6 +85,10 @@ class FlutterHookResult {
   }
 }
 
+/// A convenience class to wrap native assets
+///
+/// When translating from a `DartHooksResult` to a [FlutterHookResult], where we
+/// need to have different classes to not import `isolated/` stuff.
 class HookAsset {
   HookAsset({required this.file, required this.name, required this.package});
 
@@ -283,9 +289,9 @@ class ManifestAssetBundle implements AssetBundle {
   @override
   bool needsBuild({String manifestPath = defaultManifestPath}) {
     if (!wasBuiltOnce() ||
-        // We need to re-run the dart build.
+        // We need to re-run the Dart build.
         _lastHookResult.hasAnyModifiedFiles(_fileSystem) ||
-        // We don't have to re-run the dart build, but some files the dart build
+        // We don't have to re-run the Dart build, but some files the Dart build
         // wants us to bundle have changed contents.
         _lastHookResult.isOutputDirty(_fileSystem)) {
       return true;
@@ -490,10 +496,9 @@ class ManifestAssetBundle implements AssetBundle {
       final String baseDir;
       final Uri relativeUri;
       if (fileUri.isAbsolute) {
-        final List<String> pathSegments = fileUri.pathSegments;
-        baseDir =
-            fileUri.replace(pathSegments: pathSegments.take(pathSegments.length - 1)).toFilePath();
-        relativeUri = Uri(pathSegments: <String>[pathSegments.last]);
+        final String filePath = fileUri.toFilePath();
+        baseDir = _fileSystem.path.dirname(filePath);
+        relativeUri = Uri(path: _fileSystem.path.basename(filePath));
       } else {
         baseDir = package.root.toFilePath();
         relativeUri = fileUri;
@@ -502,7 +507,7 @@ class ManifestAssetBundle implements AssetBundle {
       final _Asset asset = _Asset(
         baseDir: baseDir,
         relativeUri: relativeUri,
-        entryUri: Uri.parse('packages/${dataAsset.package}/${dataAsset.name}'),
+        entryUri: Uri.parse(_fileSystem.path.join('packages', dataAsset.package, dataAsset.name)),
         package: package,
       );
       if (assetVariants.containsKey(asset)) {

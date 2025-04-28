@@ -84,6 +84,7 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
+    Logger? logger,
     super.projectRootPath,
     super.dillOutputPath,
     super.stayResident,
@@ -100,6 +101,7 @@ class HotRunner extends ResidentRunner {
        _reassembleHelper = reassembleHelper,
        _nativeAssetsYamlFile = nativeAssetsYamlFile,
        _analytics = analytics,
+       _logger = logger,
        super(hotMode: true);
 
   final StopwatchFactory _stopwatchFactory;
@@ -139,6 +141,8 @@ class HotRunner extends ResidentRunner {
   final String? _nativeAssetsYamlFile;
 
   String? flavor;
+
+  final Logger? _logger;
 
   @override
   bool get supportsDetach => stopAppDuringCleanup;
@@ -513,6 +517,7 @@ class HotRunner extends ResidentRunner {
         flutterHookResult: await dartBuilder?.runHooks(
           targetPlatform: targetPlatform,
           environment: environment,
+          logger: _logger,
         ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         flavor: debuggingOptions.buildInfo.flavor,

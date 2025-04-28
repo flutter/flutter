@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../../asset.dart';
+import '../../base/logger.dart' show Logger;
 import '../../build_info.dart';
 import '../../globals.dart' as globals;
 import '../../hook_runner.dart' show FlutterHookRunner;
@@ -17,13 +18,14 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
   Future<FlutterHookResult> runHooks({
     required TargetPlatform targetPlatform,
     required Environment environment,
+    Logger? logger,
   }) async {
-    globals.printTrace('runDartBuild() with ${environment.defines} and $targetPlatform');
+    logger?.printTrace('runDartBuild() with ${environment.defines} and $targetPlatform');
     if (_flutterHookResult != null && !_flutterHookResult!.hasAnyModifiedFiles(globals.fs)) {
-      globals.printTrace('runDartBuild() - up-to-date already');
+      logger?.printTrace('runDartBuild() - up-to-date already');
       return _flutterHookResult!;
     }
-    globals.printTrace('runDartBuild() - will perform dart build');
+    logger?.printTrace('runDartBuild() - will perform dart build');
 
     final BuildResult lastBuild = await globals.buildSystem.build(
       DartBuild(specifiedTargetPlatform: targetPlatform),
@@ -31,15 +33,15 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
     );
     if (!lastBuild.success) {
       for (final ExceptionMeasurement exceptionMeasurement in lastBuild.exceptions.values) {
-        globals.printError(
+        logger?.printError(
           exceptionMeasurement.exception.toString(),
-          stackTrace: globals.logger.isVerbose ? exceptionMeasurement.stackTrace : null,
+          stackTrace: logger.isVerbose ? exceptionMeasurement.stackTrace : null,
         );
       }
     }
 
     final DartHooksResult hookResult = await DartBuild.loadHookResult(environment);
-    globals.printTrace('runDartBuild() - done');
+    logger?.printTrace('runDartBuild() - done');
     return _flutterHookResult = hookResult.asFlutterResult;
   }
 }

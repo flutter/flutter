@@ -507,6 +507,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
           flutterProject: flutterProject,
           nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
           analytics: analytics,
+          logger: _logger,
         )
         : ColdRunner(
           flutterDevices,
@@ -538,6 +539,7 @@ class HotRunnerFactory {
     FlutterProject? flutterProject,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
+    Logger? logger,
   }) => HotRunner(
     devices,
     target: target,
@@ -551,5 +553,6 @@ class HotRunnerFactory {
     nativeAssetsYamlFile: nativeAssetsYamlFile,
     analytics: analytics,
     dartBuilder: FlutterHookRunnerNative(),
+    logger: logger,
   );
 }

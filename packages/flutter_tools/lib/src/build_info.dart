@@ -719,9 +719,14 @@ DarwinArch getDarwinArchForName(String arch) {
   };
 }
 
-List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) =>
-    defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
-    <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
+List<DarwinArch> getDarwinArchsFromEnv(Map<String, String> defines) {
+  const List<DarwinArch> defaultDarwinArchitectures = <DarwinArch>[
+    DarwinArch.x86_64,
+    DarwinArch.arm64,
+  ];
+  return defines[kDarwinArchs]?.split(' ').map(getDarwinArchForName).toList() ??
+      defaultDarwinArchitectures;
+}
 
 String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
   return switch (platform) {
