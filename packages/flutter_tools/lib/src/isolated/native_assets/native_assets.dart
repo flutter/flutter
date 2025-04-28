@@ -347,7 +347,7 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
 /// It should work for all macOS.
 Uri nativeAssetsBuildUri(Uri projectUri, String osName, FileSystem fileSystem) {
   final String buildDir = getBuildDirectory();
-  return Uri.file(
+  return Uri.directory(
     fileSystem.path.join(projectUri.toFilePath(), buildDir, 'native_assets', osName),
   );
 }
