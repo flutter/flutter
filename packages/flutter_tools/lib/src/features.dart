@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
@@ -277,8 +275,7 @@ class Feature {
 }
 
 /// A description of the conditions to enable a feature for a particular channel.
-@immutable
-final class FeatureChannelSetting {
+class FeatureChannelSetting {
   const FeatureChannelSetting({this.available = false, this.enabledByDefault = false});
 
   /// Whether the feature is available on this channel.
@@ -291,19 +288,4 @@ final class FeatureChannelSetting {
   ///
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
-
-  @override
-  bool operator ==(Object other) {
-    return other is FeatureChannelSetting &&
-        available == other.available &&
-        enabledByDefault == other.enabledByDefault;
-  }
-
-  @override
-  int get hashCode => Object.hash(available, enabledByDefault);
-
-  @override
-  String toString() {
-    return 'FeatureChannelSetting <available: $available, enabledByDefault: $enabledByDefault>';
-  }
 }

@@ -608,9 +608,6 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         errors.addAll(pluginErrors);
       case 'generate':
         break;
-      case 'config':
-        // Futher validation is defined in FlutterFeaturesConfig.
-        break;
       case 'deferred-components':
         _validateDeferredComponents(kvp, errors);
       case 'disable-swift-package-manager':
