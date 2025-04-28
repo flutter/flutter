@@ -2036,6 +2036,33 @@ void main() {
 
     expect(elements.length, 1, reason: 'No DecoratedBox matches the specified criteria.');
   });
+
+  testWidgets('Check for Directionality', (WidgetTester tester) async {
+    Future<void> pumpWidget({required bool isLTR}) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Directionality(
+            textDirection: isLTR ? TextDirection.ltr : TextDirection.rtl,
+            child: const CupertinoAlertDialog(
+              actions: <CupertinoDialogAction>[
+                CupertinoDialogAction(isDefaultAction: true, child: Text('No')),
+                CupertinoDialogAction(child: Text('Yes')),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await pumpWidget(isLTR: true);
+    Offset yesButton = tester.getCenter(find.text('Yes'));
+    Offset noButton = tester.getCenter(find.text('No'));
+    expect(yesButton.dx > noButton.dx, true);
+    await pumpWidget(isLTR: false);
+    yesButton = tester.getCenter(find.text('Yes'));
+    noButton = tester.getCenter(find.text('No'));
+    expect(yesButton.dx > noButton.dx, false);
+  });
 }
 
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
@@ -2124,6 +2151,7 @@ class _RestorableDialogTestWidget extends StatelessWidget {
 // The `theme` will be applied to the app and determines the background.
 class TestScaffoldApp extends StatefulWidget {
   const TestScaffoldApp({super.key, required this.theme, required this.dialog});
+
   final CupertinoThemeData theme;
   final Widget dialog;
 
