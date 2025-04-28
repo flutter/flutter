@@ -1694,6 +1694,11 @@ class CompileTest {
   Future<TaskResult> runSwiftUIApp() async {
     return inDirectory<TaskResult>(testDirectory, () async {
       await Process.run('xcodebuild', <String>['clean', '-allTargets']);
+      final Map<String, String> environment = Platform.environment;
+      final String developmentTeam = environment['FLUTTER_XCODE_DEVELOPMENT_TEAM'] ?? 'S8QB4VV633';
+      final String? codeSignStyle = environment['FLUTTER_XCODE_CODE_SIGN_STYLE'];
+      final String? provisioningProfile =
+      environment['FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER'];
 
       /* Compile Time */
       int releaseSizeInBytes = 0;
@@ -1712,6 +1717,9 @@ class CompileTest {
         '-archivePath',
         '$testDirectory/hello_world_swiftui',
         'archive',
+        'DEVELOPMENT_TEAM=$developmentTeam',
+        'CODE_SIGN_STYLE=$codeSignStyle',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         watch.stop();
         print(results.stdout);
