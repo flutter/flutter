@@ -31,7 +31,7 @@ void main() {
           testWithoutContext('throw if invalid platform', () async {
             final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
             final BufferLogger testLogger = BufferLogger.test();
-            final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+            final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
               fs: testFileSystem,
               fakeFlutterVersion: FakeFlutterVersion(),
             );
@@ -44,7 +44,7 @@ void main() {
               fileSystem: testFileSystem,
               featureFlags: TestFeatureFlags(),
               logger: testLogger,
-              analytics: fakeAnalytics,
+              analytics: testAnalytics,
             );
 
             await expectLater(
@@ -119,7 +119,7 @@ void main() {
               () async {
                 final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
                 final BufferLogger testLogger = BufferLogger.test();
-                final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                   fs: testFileSystem,
                   fakeFlutterVersion: FakeFlutterVersion(),
                 );
@@ -156,7 +156,7 @@ void main() {
                   fileSystem: testFileSystem,
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                   logger: testLogger,
-                  analytics: fakeAnalytics,
+                  analytics: testAnalytics,
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -164,7 +164,7 @@ void main() {
                 expect(testLogger.statusText, isEmpty);
                 expect(cocoaPods.podfileSetup, isFalse);
                 expect(
-                  fakeAnalytics.sentEvents,
+                  testAnalytics.sentEvents,
                   contains(
                     Event.flutterInjectDarwinPlugins(
                       platform: platform.name,
@@ -187,7 +187,7 @@ void main() {
               () async {
                 final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
                 final BufferLogger testLogger = BufferLogger.test();
-                final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                   fs: testFileSystem,
                   fakeFlutterVersion: FakeFlutterVersion(),
                 );
@@ -225,7 +225,7 @@ void main() {
                   fileSystem: testFileSystem,
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                   logger: testLogger,
-                  analytics: fakeAnalytics,
+                  analytics: testAnalytics,
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -233,7 +233,7 @@ void main() {
                 expect(testLogger.statusText, isEmpty);
                 expect(cocoaPods.podfileSetup, isFalse);
                 expect(
-                  fakeAnalytics.sentEvents,
+                  testAnalytics.sentEvents,
                   contains(
                     Event.flutterInjectDarwinPlugins(
                       platform: platform.name,
@@ -256,7 +256,7 @@ void main() {
               () async {
                 final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
                 final BufferLogger testLogger = BufferLogger.test();
-                final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                   fs: testFileSystem,
                   fakeFlutterVersion: FakeFlutterVersion(),
                 );
@@ -297,7 +297,7 @@ void main() {
                   fileSystem: testFileSystem,
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                   logger: testLogger,
-                  analytics: fakeAnalytics,
+                  analytics: testAnalytics,
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -320,7 +320,7 @@ void main() {
                 expect(testLogger.statusText, isEmpty);
                 expect(cocoaPods.podfileSetup, isFalse);
                 expect(
-                  fakeAnalytics.sentEvents,
+                  testAnalytics.sentEvents,
                   contains(
                     Event.flutterInjectDarwinPlugins(
                       platform: platform.name,
@@ -343,7 +343,7 @@ void main() {
               () async {
                 final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
                 final BufferLogger testLogger = BufferLogger.test();
-                final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+                final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                   fs: testFileSystem,
                   fakeFlutterVersion: FakeFlutterVersion(),
                 );
@@ -385,7 +385,7 @@ void main() {
                   fileSystem: testFileSystem,
                   featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                   logger: testLogger,
-                  analytics: fakeAnalytics,
+                  analytics: testAnalytics,
                 );
                 await dependencyManagement.setUp(platform: platform);
                 expect(swiftPackageManager.generated, isTrue);
@@ -412,7 +412,7 @@ void main() {
                 expect(testLogger.statusText, isEmpty);
                 expect(cocoaPods.podfileSetup, isFalse);
                 expect(
-                  fakeAnalytics.sentEvents,
+                  testAnalytics.sentEvents,
                   contains(
                     Event.flutterInjectDarwinPlugins(
                       platform: platform.name,
@@ -433,7 +433,7 @@ void main() {
             testWithoutContext('with mixed plugins', () async {
               final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
               final BufferLogger testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                 fs: testFileSystem,
                 fakeFlutterVersion: FakeFlutterVersion(),
               );
@@ -482,7 +482,7 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                 logger: testLogger,
-                analytics: fakeAnalytics,
+                analytics: testAnalytics,
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
@@ -490,7 +490,7 @@ void main() {
               expect(testLogger.statusText, isEmpty);
               expect(cocoaPods.podfileSetup, isTrue);
               expect(
-                fakeAnalytics.sentEvents,
+                testAnalytics.sentEvents,
                 contains(
                   Event.flutterInjectDarwinPlugins(
                     platform: platform.name,
@@ -512,7 +512,7 @@ void main() {
             testWithoutContext('but project already migrated', () async {
               final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
               final BufferLogger testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                 fs: testFileSystem,
                 fakeFlutterVersion: FakeFlutterVersion(),
               );
@@ -549,7 +549,7 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(isSwiftPackageManagerEnabled: true),
                 logger: testLogger,
-                analytics: fakeAnalytics,
+                analytics: testAnalytics,
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isTrue);
@@ -557,7 +557,7 @@ void main() {
               expect(testLogger.statusText, isEmpty);
               expect(cocoaPods.podfileSetup, isTrue);
               expect(
-                fakeAnalytics.sentEvents,
+                testAnalytics.sentEvents,
                 contains(
                   Event.flutterInjectDarwinPlugins(
                     platform: platform.name,
@@ -577,7 +577,7 @@ void main() {
             testWithoutContext('with only CocoaPod plugins', () async {
               final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
               final BufferLogger testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                 fs: testFileSystem,
                 fakeFlutterVersion: FakeFlutterVersion(),
               );
@@ -604,7 +604,7 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(),
                 logger: testLogger,
-                analytics: fakeAnalytics,
+                analytics: testAnalytics,
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isFalse);
@@ -612,7 +612,7 @@ void main() {
               expect(testLogger.statusText, isEmpty);
               expect(cocoaPods.podfileSetup, isTrue);
               expect(
-                fakeAnalytics.sentEvents,
+                testAnalytics.sentEvents,
                 contains(
                   Event.flutterInjectDarwinPlugins(
                     platform: platform.name,
@@ -632,7 +632,7 @@ void main() {
             testWithoutContext('with only Swift Package Manager plugins', () async {
               final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
               final BufferLogger testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                 fs: testFileSystem,
                 fakeFlutterVersion: FakeFlutterVersion(),
               );
@@ -659,7 +659,7 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(),
                 logger: testLogger,
-                analytics: fakeAnalytics,
+                analytics: testAnalytics,
               );
               await expectLater(
                 () => dependencyManagement.setUp(platform: platform),
@@ -673,13 +673,13 @@ void main() {
               );
               expect(swiftPackageManager.generated, isFalse);
               expect(cocoaPods.podfileSetup, isFalse);
-              expect(fakeAnalytics.sentEvents, isEmpty);
+              expect(testAnalytics.sentEvents, isEmpty);
             });
 
             testWithoutContext('when project is a module', () async {
               final MemoryFileSystem testFileSystem = MemoryFileSystem.test();
               final BufferLogger testLogger = BufferLogger.test();
-              final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+              final FakeAnalytics testAnalytics = getInitializedFakeAnalyticsInstance(
                 fs: testFileSystem,
                 fakeFlutterVersion: FakeFlutterVersion(),
               );
@@ -706,14 +706,14 @@ void main() {
                 fileSystem: testFileSystem,
                 featureFlags: TestFeatureFlags(),
                 logger: testLogger,
-                analytics: fakeAnalytics,
+                analytics: testAnalytics,
               );
               await dependencyManagement.setUp(platform: platform);
               expect(swiftPackageManager.generated, isFalse);
               expect(testLogger.warningText, isEmpty);
               expect(testLogger.statusText, isEmpty);
               expect(cocoaPods.podfileSetup, isFalse);
-              expect(fakeAnalytics.sentEvents, isEmpty);
+              expect(testAnalytics.sentEvents, isEmpty);
             });
           });
         });
