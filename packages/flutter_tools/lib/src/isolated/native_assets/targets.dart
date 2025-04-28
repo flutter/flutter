@@ -47,10 +47,15 @@ import 'windows/native_assets.dart';
 sealed class AssetBuildTarget {
   const AssetBuildTarget({required this.supportedAssetTypes});
 
+  /// The asset types supported by this target.
+  ///
+  /// For example, native code assets might not be supported on the web.
   final List<SupportedAssetTypes> supportedAssetTypes;
 
+  /// The [ProtocolExtension]s are defined per asset type.
   List<ProtocolExtension> get extensions;
 
+  /// A human readable string representing this target.
   String get targetString;
 
   List<DataAssetsExtension> get dataAssetExtensions => <DataAssetsExtension>[
@@ -61,98 +66,119 @@ sealed class AssetBuildTarget {
   ///
   /// It needs access to other parameters such as the [fileSystem] or
   /// [environmentDefines] to retrieve options for some of the targets.
-  static List<AssetBuildTarget> targetsFor(
-    TargetPlatform targetPlatform,
-    Map<String, String> environmentDefines,
-    FileSystem fileSystem,
-    List<SupportedAssetTypes> supportedAssetTypes,
-  ) {
+  static List<AssetBuildTarget> targetsFor({
+    required TargetPlatform targetPlatform,
+    required Map<String, String> environmentDefines,
+    required FileSystem fileSystem,
+    required List<SupportedAssetTypes> supportedAssetTypes,
+  }) {
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
-        return <AssetBuildTarget>[
-          WindowsAssetTarget(
-            architecture: Architecture.x64,
-            supportedAssetTypes: supportedAssetTypes,
-          ),
-        ];
+        return _windowsTarget(supportedAssetTypes, Architecture.x64);
       case TargetPlatform.linux_x64:
-        return <AssetBuildTarget>[
-          LinuxAssetTarget(
-            architecture: Architecture.x64,
-            supportedAssetTypes: supportedAssetTypes,
-          ),
-        ];
+        return _linuxTarget(supportedAssetTypes, Architecture.x64);
       case TargetPlatform.linux_arm64:
-        return <AssetBuildTarget>[
-          LinuxAssetTarget(
-            architecture: Architecture.arm64,
-            supportedAssetTypes: supportedAssetTypes,
-          ),
-        ];
+        return _linuxTarget(supportedAssetTypes, Architecture.arm64);
       case TargetPlatform.windows_arm64:
-        return <AssetBuildTarget>[
-          WindowsAssetTarget(
-            architecture: Architecture.arm64,
-            supportedAssetTypes: supportedAssetTypes,
-          ),
-        ];
+        return _windowsTarget(supportedAssetTypes, Architecture.arm64);
       case TargetPlatform.darwin:
-        return getDarwinArchsFromEnv(environmentDefines)
-            .map(getNativeMacOSArchitecture)
-            .map(
-              (Architecture architecture) => MacOSAssetTarget(
-                architecture: architecture,
-                supportedAssetTypes: supportedAssetTypes,
-              ),
-            )
-            .toList();
+        return _macTargets(environmentDefines, supportedAssetTypes);
       case TargetPlatform.android:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        final String? androidArchsEnvironment = environmentDefines[kAndroidArchs];
-        final List<AndroidArch> androidArchs = _androidArchs(
-          targetPlatform,
-          androidArchsEnvironment,
-        );
-        return androidArchs
-            .map(getNativeAndroidArchitecture)
-            .map(
-              (Architecture architecture) => AndroidAssetTarget(
-                architecture: architecture,
-                supportedAssetTypes: supportedAssetTypes,
-                environmentDefines: environmentDefines,
-              ),
-            )
-            .toList();
+        return _androidTargets(targetPlatform, environmentDefines, supportedAssetTypes);
       case TargetPlatform.ios:
-        final List<DarwinArch> iosArchs =
-            _emptyToNull(
-              environmentDefines[kIosArchs],
-            )?.split(' ').map(getIOSArchForName).toList() ??
-            <DarwinArch>[DarwinArch.arm64];
-        return iosArchs
-            .map(getNativeIOSArchitecture)
-            .map(
-              (Architecture architecture) => IOSAssetTarget(
-                environmentDefines: environmentDefines,
-                fileSystem: fileSystem,
-                architecture: architecture,
-                supportedAssetTypes: supportedAssetTypes,
-              ),
-            )
-            .toList();
+        return _iosTargets(environmentDefines, fileSystem, supportedAssetTypes);
       case TargetPlatform.web_javascript:
-        return <AssetBuildTarget>[WebAssetTarget(supportedAssetTypes: supportedAssetTypes)];
+        return _webTarget(supportedAssetTypes);
       case TargetPlatform.tester:
-        return <AssetBuildTarget>[
-          FlutterTesterAssetTarget(supportedAssetTypes: supportedAssetTypes),
-        ];
+        return _flutterTesterTarget(supportedAssetTypes);
       case TargetPlatform.fuchsia_arm64:
       case TargetPlatform.fuchsia_x64:
-        throw UnsupportedError('No targets defined for target platform $targetPlatform.');
+        throwToolExit('No targets defined for target platform $targetPlatform.');
     }
+  }
+
+  static List<AssetBuildTarget> _linuxTarget(
+    List<SupportedAssetTypes> supportedAssetTypes,
+    Architecture architecture,
+  ) {
+    return <AssetBuildTarget>[
+      LinuxAssetTarget(architecture: architecture, supportedAssetTypes: supportedAssetTypes),
+    ];
+  }
+
+  static List<AssetBuildTarget> _windowsTarget(
+    List<SupportedAssetTypes> supportedAssetTypes,
+    Architecture architecture,
+  ) {
+    return <AssetBuildTarget>[
+      WindowsAssetTarget(architecture: architecture, supportedAssetTypes: supportedAssetTypes),
+    ];
+  }
+
+  static List<MacOSAssetTarget> _macTargets(
+    Map<String, String> environmentDefines,
+    List<SupportedAssetTypes> supportedAssetTypes,
+  ) {
+    return getDarwinArchsFromEnv(environmentDefines)
+        .map(getNativeMacOSArchitecture)
+        .map(
+          (Architecture architecture) => MacOSAssetTarget(
+            architecture: architecture,
+            supportedAssetTypes: supportedAssetTypes,
+          ),
+        )
+        .toList();
+  }
+
+  static List<AndroidAssetTarget> _androidTargets(
+    TargetPlatform targetPlatform,
+    Map<String, String> environmentDefines,
+    List<SupportedAssetTypes> supportedAssetTypes,
+  ) {
+    return _androidArchs(targetPlatform, environmentDefines[kAndroidArchs])
+        .map(getNativeAndroidArchitecture)
+        .map(
+          (Architecture architecture) => AndroidAssetTarget(
+            architecture: architecture,
+            supportedAssetTypes: supportedAssetTypes,
+            environmentDefines: environmentDefines,
+          ),
+        )
+        .toList();
+  }
+
+  static List<IOSAssetTarget> _iosTargets(
+    Map<String, String> environmentDefines,
+    FileSystem fileSystem,
+    List<SupportedAssetTypes> supportedAssetTypes,
+  ) {
+    final List<DarwinArch> iosArchitectures =
+        _emptyToNull(environmentDefines[kIosArchs])?.split(' ').map(getIOSArchForName).toList() ??
+        <DarwinArch>[DarwinArch.arm64];
+    return iosArchitectures
+        .map(getNativeIOSArchitecture)
+        .map(
+          (Architecture architecture) => IOSAssetTarget(
+            environmentDefines: environmentDefines,
+            fileSystem: fileSystem,
+            architecture: architecture,
+            supportedAssetTypes: supportedAssetTypes,
+          ),
+        )
+        .toList();
+  }
+
+  static List<AssetBuildTarget> _webTarget(List<SupportedAssetTypes> supportedAssetTypes) =>
+      <AssetBuildTarget>[WebAssetTarget(supportedAssetTypes: supportedAssetTypes)];
+
+  static List<AssetBuildTarget> _flutterTesterTarget(
+    List<SupportedAssetTypes> supportedAssetTypes,
+  ) {
+    return <AssetBuildTarget>[FlutterTesterAssetTarget(supportedAssetTypes: supportedAssetTypes)];
   }
 }
 
@@ -180,15 +206,17 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 
   Future<void> setCCompilerConfig();
 
-  List<CodeAssetExtension> get codeAssetExtensions => <CodeAssetExtension>[
-    if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
-      CodeAssetExtension(
-        targetArchitecture: architecture,
-        linkModePreference: LinkModePreference.dynamic,
-        cCompiler: cCompilerConfigSync,
-        targetOS: os,
-      ),
-  ];
+  List<CodeAssetExtension> get codeAssetExtensions {
+    return <CodeAssetExtension>[
+      if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
+        CodeAssetExtension(
+          targetArchitecture: architecture,
+          linkModePreference: LinkModePreference.dynamic,
+          cCompiler: cCompilerConfigSync,
+          targetOS: os,
+        ),
+    ];
+  }
 
   @override
   String get targetString => '${os.name}_${architecture.name}';
@@ -246,17 +274,19 @@ final class IOSAssetTarget extends CodeAssetTarget {
   }
 
   @override
-  List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
-      CodeAssetExtension(
-        targetArchitecture: architecture,
-        linkModePreference: LinkModePreference.dynamic,
-        cCompiler: cCompilerConfigSync,
-        targetOS: OS.iOS,
-        iOS: _getIOSConfig(environmentDefines, fileSystem),
-      ),
-    ...dataAssetExtensions,
-  ];
+  List<ProtocolExtension> get extensions {
+    return <ProtocolExtension>[
+      if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
+        CodeAssetExtension(
+          targetArchitecture: architecture,
+          linkModePreference: LinkModePreference.dynamic,
+          cCompiler: cCompilerConfigSync,
+          targetOS: OS.iOS,
+          iOS: _getIOSConfig(environmentDefines, fileSystem),
+        ),
+      ...dataAssetExtensions,
+    ];
+  }
 }
 
 final class MacOSAssetTarget extends CodeAssetTarget {
@@ -264,17 +294,19 @@ final class MacOSAssetTarget extends CodeAssetTarget {
     : super(os: OS.macOS);
 
   @override
-  List<ProtocolExtension> get extensions => <ProtocolExtension>[
-    if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
-      CodeAssetExtension(
-        targetArchitecture: architecture,
-        linkModePreference: LinkModePreference.dynamic,
-        cCompiler: cCompilerConfigSync,
-        targetOS: OS.macOS,
-        macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
-      ),
-    ...dataAssetExtensions,
-  ];
+  List<ProtocolExtension> get extensions {
+    return <ProtocolExtension>[
+      if (supportedAssetTypes.contains(SupportedAssetTypes.codeAssets))
+        CodeAssetExtension(
+          targetArchitecture: architecture,
+          linkModePreference: LinkModePreference.dynamic,
+          cCompiler: cCompilerConfigSync,
+          targetOS: OS.macOS,
+          macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
+        ),
+      ...dataAssetExtensions,
+    ];
+  }
 
   @override
   Future<void> setCCompilerConfig() async => cCompilerConfigSync = await cCompilerConfigMacOS();
@@ -325,10 +357,12 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
         supportedAssetTypes: supportedAssetTypes,
         architecture: architecture,
       ),
-      OS() => throw UnsupportedError('Flutter tester supports only linux, windows and macOS.'),
+      OS() => throw UnsupportedError('Flutter tester supports only Linux, Windows and MacOS.'),
     };
   }
 
+  /// The Flutter tester is a headless Flutter, but can run on different targets
+  /// itself. The subtarget thus captures the target OS, architecture, etc.
   late final CodeAssetTarget subtarget;
 
   @override

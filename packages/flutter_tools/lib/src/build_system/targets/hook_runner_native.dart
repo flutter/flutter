@@ -40,8 +40,10 @@ class FlutterHookRunnerNative implements FlutterHookRunner {
       }
     }
 
-    final DartHooksResult hookResult = await DartBuild.loadHookResult(environment);
+    final DartHooksResult dartHooksResult = await DartBuild.loadHookResult(environment);
+    final FlutterHookResult flutterHookResult = dartHooksResult.asFlutterResult;
+    _flutterHookResult = flutterHookResult;
     logger?.printTrace('runDartBuild() - done');
-    return _flutterHookResult = hookResult.asFlutterResult;
+    return flutterHookResult;
   }
 }

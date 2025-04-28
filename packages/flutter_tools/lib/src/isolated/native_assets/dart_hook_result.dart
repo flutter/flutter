@@ -28,34 +28,48 @@ final class DartHooksResult {
       dependencies = const <Uri>[];
 
   factory DartHooksResult.fromJson(Map<String, Object?> json) {
-    final DateTime buildStart = DateTime.parse((json[_buildStartKey] as String?)!);
-    final DateTime buildEnd = DateTime.parse((json[_buildEndKey] as String?)!);
-    final List<Uri> dependencies = <Uri>[
-      for (final Object? encodedUri in json[_dependenciesKey] as List<Object?>? ?? <Object?>[])
-        Uri.parse(encodedUri! as String),
-    ];
-    final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[
-      for (final Object? json in json[_codeAssetsKey]! as List<Object?>)
-        FlutterCodeAsset(
-          codeAsset: CodeAsset.fromEncoded(
-            EncodedAsset.fromJson(
-              (json! as Map<String, Object?>)[_assetKey]! as Map<String, Object?>,
+    if (json case {
+      _buildStartKey: final String buildStartString,
+      _buildEndKey: final String buildEndString,
+      _dependenciesKey: final List<Object?>? dependenciesList,
+      _codeAssetsKey: final List<Object?> codeAssetsList,
+      _dataAssetsKey: final List<Object?>? dataAssetsList,
+    }) {
+      final DateTime buildStart = DateTime.parse(buildStartString);
+      final DateTime buildEnd = DateTime.parse(buildEndString);
+      final List<Uri> dependencies = <Uri>[
+        for (final Object? encodedUri in dependenciesList ?? <Object?>[])
+          Uri.parse(encodedUri! as String),
+      ];
+      final List<FlutterCodeAsset> codeAssets = <FlutterCodeAsset>[
+        for (final (Map<String, Object?> codeAsset, String target) in codeAssetsList.map(
+          (Object? codeJson) => switch (codeJson) {
+            {_assetKey: final Map<String, Object?> codeAsset, _targetKey: final String target} => (
+              codeAsset,
+              target,
             ),
+            _ => throw UnimplementedError(),
+          },
+        ))
+          FlutterCodeAsset(
+            codeAsset: CodeAsset.fromEncoded(EncodedAsset.fromJson(codeAsset)),
+            target: Target.fromString(target),
           ),
-          target: Target.fromString((json as Map<String, Object?>)[_targetKey]! as String),
-        ),
-    ];
-    final List<DataAsset> dataAssets = <DataAsset>[
-      for (final Object? json in json[_dataAssetsKey] as List<Object?>? ?? const <Object?>[])
-        DataAsset.fromEncoded(EncodedAsset.fromJson(json! as Map<String, Object?>)),
-    ];
-    return DartHooksResult(
-      buildStart: buildStart,
-      buildEnd: buildEnd,
-      codeAssets: codeAssets,
-      dataAssets: dataAssets,
-      dependencies: dependencies,
-    );
+      ];
+      final List<DataAsset> dataAssets = <DataAsset>[
+        for (final Object? dataAssetJson in dataAssetsList ?? const <Object?>[])
+          DataAsset.fromEncoded(EncodedAsset.fromJson(dataAssetJson! as Map<String, Object?>)),
+      ];
+      return DartHooksResult(
+        buildStart: buildStart,
+        buildEnd: buildEnd,
+        codeAssets: codeAssets,
+        dataAssets: dataAssets,
+        dependencies: dependencies,
+      );
+    } else {
+      throw ArgumentError('Invalid json $json');
+    }
   }
 
   /// The timestamp at which we start a build - so the timestamp of the inputs.

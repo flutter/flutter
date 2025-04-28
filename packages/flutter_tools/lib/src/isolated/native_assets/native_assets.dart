@@ -42,6 +42,8 @@ class FlutterCodeAsset {
   final Target target;
 }
 
+/// Matching [CodeAsset] and [DataAsset] in native assets - but Flutter could
+/// support more asset types in the future.
 enum SupportedAssetTypes { codeAssets, dataAssets }
 
 /// Invokes the build of all transitive Dart package hooks and prepares assets
@@ -53,7 +55,7 @@ Future<DartHooksResult> runFlutterSpecificHooks({
   required Uri projectUri,
   required FileSystem fileSystem,
 }) async {
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetPlatform.osName, fileSystem);
   final Directory buildDir = fileSystem.directory(buildUri);
   if (!await buildDir.exists()) {
     // Ensure the folder exists so the native build system can copy it even
@@ -70,10 +72,10 @@ Future<DartHooksResult> runFlutterSpecificHooks({
     if (featureFlags.isDartDataAssetsEnabled) SupportedAssetTypes.dataAssets,
   ];
   final List<AssetBuildTarget> targets = AssetBuildTarget.targetsFor(
-    targetPlatform,
-    environmentDefines,
-    fileSystem,
-    supportedAssetTypes,
+    targetPlatform: targetPlatform,
+    environmentDefines: environmentDefines,
+    fileSystem: fileSystem,
+    supportedAssetTypes: supportedAssetTypes,
   );
 
   // This is ugly, but sadly necessary as fetching the cCompilerConfig is async,
@@ -105,7 +107,7 @@ Future<void> installCodeAssets({
   required Uri nativeAssetsFileUri,
 }) async {
   final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
-  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name);
+  final Uri buildUri = nativeAssetsBuildUri(projectUri, targetOS.name, fileSystem);
   final bool flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
@@ -343,9 +345,11 @@ Future<void> ensureNoNativeAssetsOrOsIsSupported(
 
 /// This should be the same for different archs, debug/release, etc.
 /// It should work for all macOS.
-Uri nativeAssetsBuildUri(Uri projectUri, String osName) {
+Uri nativeAssetsBuildUri(Uri projectUri, String osName, FileSystem fileSystem) {
   final String buildDir = getBuildDirectory();
-  return projectUri.resolve('$buildDir/native_assets/$osName/');
+  return Uri.parse(
+    fileSystem.path.join(projectUri.toFilePath(), buildDir, 'native_assets', osName),
+  );
 }
 
 Map<FlutterCodeAsset, KernelAsset> _assetTargetLocationsWindowsLinux(

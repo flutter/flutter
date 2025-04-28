@@ -29,6 +29,7 @@ class DartBuild extends Target {
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
 
+  /// The target OS and architecture that we are building for.
   final TargetPlatform? specifiedTargetPlatform;
 
   @override

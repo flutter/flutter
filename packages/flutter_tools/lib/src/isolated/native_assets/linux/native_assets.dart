@@ -12,7 +12,6 @@ import '../../../globals.dart' as globals;
 /// Flutter expects `clang++` to be on the path on Linux hosts.
 ///
 /// Search for the accompanying `clang`, `ar`, and `ld`.
-
 Future<CCompilerConfig> cCompilerConfigLinux() async {
   const String kClangPlusPlusBinary = 'clang++';
   const String kClangBinary = 'clang';
