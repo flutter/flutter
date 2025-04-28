@@ -984,29 +984,17 @@ hooks = [
       'terminal.x64,terminal.qemu-arm64',
     ]
   },
-  # The following two scripts check if they are running in the LUCI
-  # environment, and do nothing if so. This is because Xcode is not yet
-  # installed in CI when these hooks are run.
+  # The following script checks if it is running in the LUCI environment,
+  # and does nothing if so. This is because Xcode is not yet installed in CI
+  # when this hook is run.
   {
-    'name': 'Find the iOS device SDKs',
+    'name': 'Find the iOS and macOS SDKs',
     'pattern': '.',
     'condition': 'host_os == "mac"',
     'action': [
       'python3',
-      'engine/src/build/config/ios/ios_sdk.py',
-      # This cleans up entries under flutter/prebuilts for this script and the
-      # following script.
+      'engine/src/build/mac/apple_sdk.py',
       '--as-gclient-hook'
-    ]
-  },
-  {
-    'name': 'Find the macOS SDK',
-    'pattern': '.',
-    'condition': 'host_os == "mac"',
-    'action': [
-      'python3',
-      'engine/src/build/mac/find_sdk.py',
-      '--as-gclient-hook',
     ]
   },
   {
