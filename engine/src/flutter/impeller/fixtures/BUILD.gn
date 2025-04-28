@@ -83,6 +83,7 @@ impeller_shaders("shader_fixtures") {
 }
 
 impellerc("runtime_stages") {
+  mnemonic = "IMPELLERC_IPLR"
   shaders = [
     "ink_sparkle.frag",
     "runtime_stage_example.frag",
