@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -87,7 +88,7 @@ user_pref("browser.aboutwelcome.enabled", false);
           url.toString(),
           '--profile',
           temporaryProfileDirectory.path,
-          //if (!debug) '--headless',
+          if (!debug) '--headless',
           '-width $kMaxScreenshotWidth',
           '-height $kMaxScreenshotHeight',
           '-new-window',
@@ -96,6 +97,12 @@ user_pref("browser.aboutwelcome.enabled", false);
         ];
 
         final Process process = await Process.start(installation.executable, args);
+        process.stdout
+            .transform<String>(const Utf8Decoder(allowMalformed: true))
+            .listen((String string) => print('[Firefox:stdout] $string'));
+        process.stderr
+            .transform<String>(const Utf8Decoder(allowMalformed: true))
+            .listen((String string) => print('[Firefox:stderr] $string'));
 
         remoteDebuggerCompleter.complete(
           getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')),
