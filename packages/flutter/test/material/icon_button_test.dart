@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -3405,10 +3404,7 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    await expectLater(
-      find.byType(IconButton),
-      matchesGoldenFile('icon_button.badge.outline.png'),
-    );
+    await expectLater(find.byType(IconButton), matchesGoldenFile('icon_button.badge.outline.png'));
   });
 }
 
