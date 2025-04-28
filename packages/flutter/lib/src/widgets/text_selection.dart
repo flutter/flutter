@@ -2676,7 +2676,7 @@ class TextSelectionGestureDetectorBuilder {
   ///    callback.
   @protected
   void onSingleLongTapEnd(LongPressEndDetails details) {
-    _longTapCleanup();
+    _onSingleLongTapEndOrCancel();
     if (shouldShowSelectionToolbar) {
       editableText.showToolbar();
     }
@@ -2684,7 +2684,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapCancel].
   ///
-  /// By default, it hides magnifier and floating cursor if necesasary.
+  /// By default, it hides the magnifier and the floating cursor if necessary.
   ///
   /// See also:
   ///
@@ -2692,7 +2692,7 @@ class TextSelectionGestureDetectorBuilder {
   ///   this callback.
   @protected
   void onSingleLongTapCancel() {
-    _longTapCleanup();
+    _onSingleLongTapEndOrCancel();
   }
 
   /// Handler for [TextSelectionGestureDetector.onSecondaryTap].
@@ -2766,7 +2766,7 @@ class TextSelectionGestureDetectorBuilder {
     }
   }
 
-  void _longTapCleanup(){
+  void _onSingleLongTapEndOrCancel(){
     _hideMagnifierIfSupportedByPlatform();
     _longPressStartedWithoutFocus = false;
     _dragStartViewportOffset = 0.0;
@@ -3341,7 +3341,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called after [onSingleLongTapStart] when the pointer is lifted.
   final GestureLongPressEndCallback? onSingleLongTapEnd;
 
-  /// Called after [onSingleLongTapStart] when the pointer is cancelled.
+  /// Called after [onSingleLongTapStart] when the pointer is canceled.
   final GestureLongPressCancelCallback? onSingleLongTapCancel;
 
   /// Called after a momentary hold or a short tap that is close in space and
