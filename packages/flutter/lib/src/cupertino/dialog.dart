@@ -17,7 +17,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'colors.dart';
+import 'constants.dart';
+import 'focus_traversal.dart';
 import 'interface_level.dart';
 import 'localizations.dart';
 import 'scrollbar.dart';
@@ -1077,6 +1080,7 @@ class CupertinoActionSheet extends StatefulWidget {
     this.messageScrollController,
     this.actionScrollController,
     this.cancelButton,
+    this.focusColor,
   }) : assert(
          actions != null || title != null || message != null || cancelButton != null,
          'An action sheet must have a non-null value for at least one of the following arguments: '
@@ -1113,6 +1117,9 @@ class CupertinoActionSheet extends StatefulWidget {
   /// Defaults to null, which means the [CupertinoActionSheet] will create an
   /// action scroll controller internally.
   final ScrollController? actionScrollController;
+
+  /// {@macro flutter.cupertino.CupertinoFocusTraversalGroup.focusColor}
+  final Color? focusColor;
 
   /// The optional cancel button that is grouped separately from the other
   /// actions.
@@ -1201,15 +1208,19 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
         (widget.actions != null || widget.message != null || widget.title != null)
             ? _kActionSheetCancelButtonPadding
             : 0.0;
+
     return Padding(
       padding: EdgeInsets.only(top: cancelPadding),
-      child: _ActionSheetButtonBackground(
-        isCancel: true,
-        pressed: _pressedIndex == _kCancelButtonIndex,
-        onPressStateChange: (bool state) {
-          _onPressedUpdate(_kCancelButtonIndex, state);
-        },
-        child: widget.cancelButton!,
+      child: CupertinoFocusTraversalGroup(
+        focusColor: widget.focusColor,
+        child: _ActionSheetButtonBackground(
+          isCancel: true,
+          pressed: _pressedIndex == _kCancelButtonIndex,
+          onPressStateChange: (bool state) {
+            _onPressedUpdate(_kCancelButtonIndex, state);
+          },
+          child: widget.cancelButton!,
+        ),
       ),
     );
   }
@@ -1313,6 +1324,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
               contentSection: _buildContent(context),
               actions: widget.actions ?? List<Widget>.empty(),
               dividerColor: CupertinoDynamicColor.resolve(_kActionSheetButtonDividerColor, context),
+              focusColor: widget.focusColor,
             ),
           ),
         ),
@@ -1370,7 +1382,9 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
 /// The content of a typical action button in a [CupertinoActionSheet].
 ///
 /// This widget draws the content of a button, i.e. the text, while the
-/// background of the button is drawn by [CupertinoActionSheet].
+/// background of the button is drawn by [CupertinoActionSheet]. When
+/// [focusNode] has focus, this widget will draw the background of color
+/// [focusColor].
 ///
 /// See also:
 ///
@@ -1384,6 +1398,8 @@ class CupertinoActionSheetAction extends StatefulWidget {
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     this.mouseCursor,
+    this.focusNode,
+    this.focusColor,
     required this.child,
   });
 
@@ -1409,6 +1425,17 @@ class CupertinoActionSheetAction extends StatefulWidget {
   /// [MouseCursor.defer] on other platforms.
   final MouseCursor? mouseCursor;
 
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode? focusNode;
+
+  /// The color of the background that highlights active focus.
+  ///
+  /// A transparency of [kCupertinoButtonTintedOpacityLight] (light mode) or
+  /// [kCupertinoButtonTintedOpacityDark] (dark mode) is automatically applied to this color.
+  ///
+  /// When [focusColor] is null, defaults to [CupertinoColors.activeBlue].
+  final Color? focusColor;
+
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Text] widget.
@@ -1420,6 +1447,8 @@ class CupertinoActionSheetAction extends StatefulWidget {
 
 class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     implements _SlideTarget {
+  bool _isFocused = false;
+
   // |_SlideTarget|
   @override
   bool didEnter({required bool fromPointerDown, required bool innerEnabled}) {
@@ -1461,8 +1490,61 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     };
   }
 
+  void _onShowFocusHighlight(bool showHighlight) {
+    setState(() {
+      _isFocused = showHighlight;
+    });
+  }
+
+  late final Map<Type, Action<Intent>> _actionMap = <Type, Action<Intent>>{
+    ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: _handleTap),
+  };
+
+  void _handleTap([Intent? _]) {
+    widget.onPressed();
+    context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
+  }
+
+  Color get effectiveFocusBackgroundColor =>
+      HSLColor.fromColor(
+        (widget.focusColor ?? CupertinoColors.activeBlue).withOpacity(
+          CupertinoTheme.brightnessOf(context) == Brightness.light
+              ? kCupertinoButtonTintedOpacityLight
+              : kCupertinoButtonTintedOpacityDark,
+        ),
+      ).toColor();
+
   @override
   Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: widget.mouseCursor ?? (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
+      child: MetaData(
+        metaData: this,
+        behavior: HitTestBehavior.opaque,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: _kActionSheetButtonMinHeight),
+          child: FocusableActionDetector(
+            actions: _actionMap,
+            focusNode: widget.focusNode,
+            onShowFocusHighlight: _onShowFocusHighlight,
+            child: Semantics(
+              button: true,
+              onTap: widget.onPressed,
+              child:
+                  _isFocused
+                      ? DecoratedBox(
+                        decoration: BoxDecoration(color: effectiveFocusBackgroundColor),
+                        child: _buildContent(),
+                      )
+                      : _buildContent(),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent() {
     // The context scale factor is derived from the current body size and the
     // standard body size in "large".
     const double higLargeBodySize = 17.0;
@@ -1483,36 +1565,21 @@ class _CupertinoActionSheetActionState extends State<CupertinoActionSheetAction>
     if (widget.isDefaultAction) {
       style = style.copyWith(fontWeight: FontWeight.w600);
     }
-
     final double verticalPadding =
         _kActionSheetButtonVerticalPaddingBase +
         fontSize * _kActionSheetButtonVerticalPaddingFactor;
 
-    return MouseRegion(
-      cursor: widget.mouseCursor ?? (kIsWeb ? SystemMouseCursors.click : MouseCursor.defer),
-      child: MetaData(
-        metaData: this,
-        behavior: HitTestBehavior.opaque,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: _kActionSheetButtonMinHeight),
-          child: Semantics(
-            button: true,
-            onTap: widget.onPressed,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                _kActionSheetButtonHorizontalPadding,
-                verticalPadding,
-                _kActionSheetButtonHorizontalPadding,
-                verticalPadding,
-              ),
-              child: DefaultTextStyle(
-                style: style,
-                textAlign: TextAlign.center,
-                child: Center(child: widget.child),
-              ),
-            ),
-          ),
-        ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        _kActionSheetButtonHorizontalPadding,
+        verticalPadding,
+        _kActionSheetButtonHorizontalPadding,
+        verticalPadding,
+      ),
+      child: DefaultTextStyle(
+        style: style,
+        textAlign: TextAlign.center,
+        child: Center(child: widget.child),
       ),
     );
   }
@@ -1603,19 +1670,25 @@ class _ActionSheetButtonBackgroundState extends State<_ActionSheetButtonBackgrou
         child: widget.child,
       );
     } else {
-      child = DecoratedBox(
-        decoration: ShapeDecoration(
-          shape: const RoundedSuperellipseBorder(
-            borderRadius: BorderRadius.all(Radius.circular(_kCornerRadius)),
+      const BorderRadius borderRadius = BorderRadius.all(Radius.circular(_kCornerRadius));
+
+      child = ClipRRect(
+        borderRadius: borderRadius,
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+            shape: const RoundedSuperellipseBorder(
+              borderRadius: borderRadius,
+            ),
+            color: CupertinoDynamicColor.resolve(
+              widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,
+              context,
+            ),
           ),
-          color: CupertinoDynamicColor.resolve(
-            widget.pressed ? _kActionSheetCancelPressedColor : _kActionSheetCancelColor,
-            context,
-          ),
+          child: widget.child,
         ),
-        child: widget.child,
       );
     }
+
     return MetaData(metaData: this, child: child);
   }
 }
@@ -1782,6 +1855,7 @@ class _ActionSheetActionSection extends StatelessWidget {
         ),
       );
     }
+
     return CupertinoScrollbar(
       controller: scrollController,
       child: SingleChildScrollView(
@@ -1801,6 +1875,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
     required this.actions,
     required this.contentSection,
     required this.dividerColor,
+    required this.focusColor,
   });
 
   final int? pressedIndex;
@@ -1809,6 +1884,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
   final List<Widget> actions;
   final Widget? contentSection;
   final Color dividerColor;
+  final Color? focusColor;
 
   Widget _scrolledActionsSection(BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.resolve(
@@ -1817,13 +1893,20 @@ class _ActionSheetMainSheet extends StatelessWidget {
     );
     return _OverscrollBackground(
       color: backgroundColor,
-      child: _ActionSheetActionSection(
-        actions: actions,
-        scrollController: scrollController,
-        dividerColor: dividerColor,
-        backgroundColor: backgroundColor,
-        pressedIndex: pressedIndex,
-        onPressedUpdate: onPressedUpdate,
+      child: CupertinoFocusTraversalGroup(
+        borderRadius: CupertinoFocusTraversalGroup.defaultBorderRadius.copyWith(
+          topLeft: Radius.zero,
+          topRight: Radius.zero,
+        ),
+        focusColor: focusColor,
+        child: _ActionSheetActionSection(
+          actions: actions,
+          scrollController: scrollController,
+          dividerColor: dividerColor,
+          backgroundColor: backgroundColor,
+          pressedIndex: pressedIndex,
+          onPressedUpdate: onPressedUpdate,
+        ),
       ),
     );
   }
@@ -1851,6 +1934,7 @@ class _ActionSheetMainSheet extends StatelessWidget {
     if (contentSection == null) {
       return _scrolledActionsSection(context);
     }
+
     return _PriorityColumn(
       top: contentSection!,
       bottom: _dividerAndActionsSection(context),
