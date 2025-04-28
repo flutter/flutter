@@ -97,6 +97,15 @@ class DarwinDependencyManagement {
       useCocoapods = _plugins.isNotEmpty;
     }
 
+    if (useCocoapods) {
+      await _cocoapods.setupPodfile(xcodeProject);
+    }
+    /// The user may have a custom maintained Podfile that they're running `pod install`
+    /// on themselves.
+    else if (xcodeProject.podfile.existsSync() && xcodeProject.podfileLock.existsSync()) {
+      _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
+    }
+
     final Event event = Event.flutterInjectDarwinPlugins(
       platform: platform.name,
       isModule: _project.isModule,
@@ -111,15 +120,6 @@ class DarwinDependencyManagement {
     );
 
     _analytics.send(event);
-
-    if (useCocoapods) {
-      await _cocoapods.setupPodfile(xcodeProject);
-    }
-    /// The user may have a custom maintained Podfile that they're running `pod install`
-    /// on themselves.
-    else if (xcodeProject.podfile.existsSync() && xcodeProject.podfileLock.existsSync()) {
-      _cocoapods.addPodsDependencyToFlutterXcconfig(xcodeProject);
-    }
   }
 
   /// Returns count of total number of plugins, number of Swift Package Manager
