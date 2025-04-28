@@ -299,11 +299,12 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   custom_task_runners.thread_priority_setter =
       &WindowsPlatformThreadPrioritySetter;
 
-  if (project_->ui_thread_policy() ==
-      FlutterUIThreadPolicy::RunOnPlatformThread) {
-    FML_LOG(WARNING)
-        << "Running with merged platform and UI thread. Experimental.";
+  if (project_->ui_thread_policy() !=
+      FlutterUIThreadPolicy::RunOnSeparateThread) {
     custom_task_runners.ui_task_runner = &platform_task_runner;
+  } else {
+    FML_LOG(WARNING) << "Running with unmerged platform and UI threads. This "
+                        "will be removed in future.";
   }
 
   FlutterProjectArgs args = {};
