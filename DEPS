@@ -100,10 +100,6 @@ vars = {
   # Checkout Linux dependencies only when building on Linux.
   'download_linux_deps': 'host_os == "linux"',
 
-  # The minimum macOS SDK version. This must match the setting in
-  # //flutter/tools/gn.
-  'mac_sdk_min': '10.14',
-
   # Checkout Fuchsia dependencies only on Linux. This is the umbrella flag which
   # controls the behavior of all fuchsia related flags. I.e. any fuchsia related
   # logic or condition may not work if this flag is False.
@@ -1011,7 +1007,6 @@ hooks = [
       'python3',
       'engine/src/build/mac/find_sdk.py',
       '--as-gclient-hook',
-      Var('mac_sdk_min')
     ]
   },
   {
