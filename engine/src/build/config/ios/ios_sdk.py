@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import argparse
-import errno
 import os
 import shutil
 import subprocess
@@ -20,28 +19,6 @@ SDKs = ['iphoneos', 'iphonesimulator']
 PREBUILTS = os.path.realpath(os.path.join(
   os.path.dirname(__file__), os.pardir, os.pardir, os.pardir, 'flutter', 'prebuilts',
 ))
-
-
-def run_command_with_retry(command, timeout=10, retries=3):
-  """
-  Runs a command using subprocess.check_output with timeout and retry logic.
-
-  Args:
-      command: A list representing the command and its arguments.
-      timeout: The maximum time (in seconds) to wait for each command execution.
-      retries: The number of times to retry the command if it times out.
-
-  Returns:
-      The output of the command as a bytes object if successful, otherwise
-      raises a CalledProcessError.
-  """
-  for attempt in range(1, retries + 1):
-    try:
-      result = subprocess.check_output(command, timeout=timeout)
-      return result.decode('utf-8').strip()
-    except subprocess.TimeoutExpired:
-      if attempt >= retries:
-        raise  # Re-raise the TimeoutExpired error after all retries
 
 
 def main(argv):
@@ -98,7 +75,7 @@ def main(argv):
       sdk,
       '--show-sdk-path',
     ]
-    sdk_output = run_command_with_retry(command, timeout=300)
+    sdk_output = subprocess.check_output(command, timeout=300).decode('utf-8').strip()
     if symlink_path:
       symlink_target = os.path.join(sdks_path, os.path.basename(sdk_output))
       symlink(sdk_output, symlink_target)
