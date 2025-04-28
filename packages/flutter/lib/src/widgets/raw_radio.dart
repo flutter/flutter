@@ -70,8 +70,6 @@ class RawRadio<T> extends StatefulWidget {
   ///   builder: _myBuilder
   /// )
   /// ```
-  ///
-  /// The all arguments except `key` are required:
   const RawRadio({
     super.key,
     required this.value,
