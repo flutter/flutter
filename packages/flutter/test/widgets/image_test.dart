@@ -2181,6 +2181,8 @@ void main() {
 
     // 5. Allow asynchronous error propagation to complete robustly.
     await tester.pumpAndSettle();
+    // Restore the handler now in case `expect`s in step 6 fail.
+    FlutterError.onError = oldHandler;
 
     // 6. CRITICAL ASSERTION: Verify that no FlutterError was reported via the onError handler
     expect(

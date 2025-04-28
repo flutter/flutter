@@ -1306,9 +1306,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     // Reason: When an app provides an `Image` widget with an `errorBuilder`, it
     // expects the widget to never report errors through `FlutterError` in any
     // cases. This is hard if the stream fails after the disposal, because an
-    // image stream must have no listeners to be disposed, which has nothing to
-    // suppress the errors. Luckily there's ephemeral listener, which also
-    // suppresses the error but does not hinder disposal. For more details, see
+    // image stream must have no listeners to be disposed, which then has
+    // nothing to suppress the errors. This is solve with the help of an
+    // ephemeral listener, which also suppresses the error but does not hinder
+    // disposal. For more details, see
     // https://github.com/flutter/flutter/issues/97077 .
     if (widget.errorBuilder != null) {
       if (_imageStream!.completer == null) {
