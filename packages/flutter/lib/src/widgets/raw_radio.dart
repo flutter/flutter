@@ -11,12 +11,6 @@ import 'ticker_provider.dart';
 import 'toggleable.dart';
 import 'widget_state.dart';
 
-// Examples can assume:
-// late BuildContext context;
-// enum SingingCharacter { lafayette }
-// late SingingCharacter? _character;
-// late Function _myBuilder;
-
 /// Signature for [RawRadio.builder]
 ///
 /// The builder can use `state` to determine the state of the radio and build
@@ -55,21 +49,6 @@ class RawRadio<T> extends StatefulWidget {
   /// widgets that use a radio button will listen for the [onChanged] callback
   /// and rebuild the radio button with a new [groupValue] to update the visual
   /// appearance of the radio button.
-  ///
-  /// For example:
-  ///
-  /// ```dart
-  /// RawRadio<SingingCharacter>(
-  ///   value: SingingCharacter.lafayette,
-  ///   groupValue: _character,
-  ///   onChanged: (SingingCharacter? newValue) {
-  ///     setState(() {
-  ///       _character = newValue;
-  ///     });
-  ///   },
-  ///   builder: _myBuilder
-  /// )
-  /// ```
   const RawRadio({
     super.key,
     required this.value,
