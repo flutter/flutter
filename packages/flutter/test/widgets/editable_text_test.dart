@@ -16241,6 +16241,38 @@ void main() {
       expect(controller.selection, initialSelection);
     }, variant: TargetPlatformVariant.all());
 
+    // Regression test for https://github.com/flutter/flutter/issues/163399.
+    testWidgets('when selectAllOnFocus is turned on', (WidgetTester tester) async {
+      controller.text = 'Text';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            key: ValueKey<String>(controller.text),
+            controller: controller,
+            focusNode: focusNode,
+            style: Typography.material2018().black.titleMedium!,
+            cursorColor: Colors.blue,
+            backgroundCursorColor: Colors.grey,
+            selectAllOnFocus: true,
+          ),
+        ),
+      );
+
+      expect(focusNode.hasFocus, isFalse);
+      const TextSelection initialSelection = TextSelection.collapsed(offset: 1);
+      controller.selection = initialSelection;
+
+      // Tab to focus the field.
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, isTrue);
+      expect(
+        controller.selection,
+        TextSelection(baseOffset: 0, extentOffset: controller.text.length),
+      );
+    }, variant: TargetPlatformVariant.all());
+
     // Regression test for https://github.com/flutter/flutter/issues/156078.
     testWidgets('when having focus regained after the app resumed', (WidgetTester tester) async {
       Future<void> setAppLifeCycleState(AppLifecycleState state) async {

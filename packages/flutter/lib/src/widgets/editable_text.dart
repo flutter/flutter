@@ -1801,11 +1801,9 @@ class EditableText extends StatefulWidget {
   bool get selectionEnabled => enableInteractiveSelection;
 
   /// {@template flutter.widgets.editableText.selectAllOnFocus}
-  /// Whether or not this field should highlight all text when gaining focus on
-  /// web or desktop.
+  /// Whether or not this field should select all text when gaining focus
   ///
-  /// By default this will highlight the text field on web and desktop, and can
-  /// only be turned off on those two platforms.
+  /// By default this will select all text on web and desktop
   /// {@endtemplate}
   final bool selectAllOnFocus;
 
@@ -4665,14 +4663,9 @@ class EditableTextState extends State<EditableText>
 
   TextSelection? _adjustedSelectionWhenFocused() {
     TextSelection? selection;
-    final bool isDesktop = switch (defaultTargetPlatform) {
-      TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
-      TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
-    };
     final bool shouldSelectAll =
         widget.selectAllOnFocus &&
         widget.selectionEnabled &&
-        (kIsWeb || isDesktop) &&
         !_isMultiline &&
         !_nextFocusChangeIsInternal &&
         !_justResumed;
