@@ -120,10 +120,8 @@ class PluginRegistrarManager {
   T* GetRegistrar(FlutterDesktopPluginRegistrarRef registrar_ref) {
     PluginRegistrar* registrar_wrapper = registrars_->EmplaceIfNeeded(
         registrar_ref, OnRegistrarConstructed<T>, OnRegistrarDestructed<T>);
-
     FlutterDesktopPluginRegistrarSetDestructionHandler(registrar_ref,
-                                                       OnRegistrarDestroyed<T>);
-
+                                                       OnRegistrarDestroyed);
     return static_cast<T*>(registrar_wrapper);
   }
 
@@ -154,7 +152,6 @@ class PluginRegistrarManager {
     }
   }
 
-  template <class T>
   static void OnRegistrarDestroyed(FlutterDesktopPluginRegistrarRef registrar) {
     auto* registrars = PluginRegistrarManager::GetInstance()->registrars();
     registrars->Erase(registrar);

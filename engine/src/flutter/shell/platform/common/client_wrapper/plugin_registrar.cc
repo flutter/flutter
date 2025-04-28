@@ -122,10 +122,6 @@ PluginRegistrarManager* PluginRegistrarManager::GetInstance() {
 PluginRegistrarManager::PluginRegistrarManager()
     : registrars_(new PluginRegistrarMapImpl()) {}
 
-PluginRegistrarManager::~PluginRegistrarManager() {
-  if (registrars_) {
-    delete registrars_;
-  }
-}
+PluginRegistrarManager::~PluginRegistrarManager() { delete registrars_; }
 
 }  // namespace flutter
