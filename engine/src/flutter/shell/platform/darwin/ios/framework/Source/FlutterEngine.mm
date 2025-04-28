@@ -246,17 +246,15 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 - (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
   // If the application is not available, use the scene for lifecycle notifications if available.
   if (!FlutterSharedApplication.isAvailable) {
-    if (@available(iOS 13.0, *)) {
-      [center addObserver:self
-                 selector:@selector(sceneWillEnterForeground:)
-                     name:UISceneWillEnterForegroundNotification
-                   object:nil];
-      [center addObserver:self
-                 selector:@selector(sceneDidEnterBackground:)
-                     name:UISceneDidEnterBackgroundNotification
-                   object:nil];
-      return;
-    }
+    [center addObserver:self
+               selector:@selector(sceneWillEnterForeground:)
+                   name:UISceneWillEnterForegroundNotification
+                 object:nil];
+    [center addObserver:self
+               selector:@selector(sceneDidEnterBackground:)
+                   name:UISceneDidEnterBackgroundNotification
+                 object:nil];
+    return;
   }
   [center addObserver:self
              selector:@selector(applicationWillEnterForeground:)
@@ -752,7 +750,7 @@ static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
   uint32_t threadHostType = flutter::ThreadHost::Type::kRaster | flutter::ThreadHost::Type::kIo;
-  if (!settings.merged_platform_ui_thread) {
+  if (settings.merged_platform_ui_thread != flutter::Settings::MergedPlatformUIThread::kEnabled) {
     threadHostType |= flutter::ThreadHost::Type::kUi;
   }
 
@@ -839,7 +837,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
   fml::RefPtr<fml::TaskRunner> ui_runner;
-  if (settings.enable_impeller && settings.merged_platform_ui_thread) {
+  if (settings.enable_impeller &&
+      settings.merged_platform_ui_thread == flutter::Settings::MergedPlatformUIThread::kEnabled) {
     ui_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   } else {
     ui_runner = _threadHost->ui_thread->GetTaskRunner();
@@ -867,8 +866,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
                    << entrypoint.UTF8String;
   } else {
-    // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-    FML_LOG(INFO) << "Enabled VM Service Publication: " << settings.enable_vm_service_publication;
     [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
     if ([FlutterEngine isProfilerEnabled]) {

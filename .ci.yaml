@@ -286,7 +286,7 @@ platform_properties:
         ]
       os: Mac-14
       cpu: x86
-      device_os: iOS-17
+      device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
@@ -304,7 +304,7 @@ platform_properties:
         ]
       os: Mac-14
       cpu: x86
-      device_os: iOS-17
+      device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
@@ -322,7 +322,7 @@ platform_properties:
         ]
       os: Mac-14
       cpu: arm64
-      device_os: iOS-17
+      device_os: iOS-17|iOS-18
       $flutter/osx_sdk : >-
         {
           "sdk_version": "16c5032a"
@@ -375,7 +375,6 @@ targets:
   # are intentionally running it in the devicelab to ensure that it does not
   # run on a VM in order to avoid noisy results from the benchmark.
   - name: Linux analyzer_benchmark
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/161306
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
@@ -585,6 +584,7 @@ targets:
   - name: Linux docs_publish
     recipe: flutter/docs
     presubmit: false
+    backfill: false
     timeout: 60
     dimensions:
       os: "Linux"
@@ -603,7 +603,6 @@ targets:
         ]
       tags: >
         ["framework", "hostonly", "linux"]
-      backfill: "false"
       validation: docs
       validation_name: Docs
       firebase_project: main-docs-flutter-prod
@@ -1241,7 +1240,6 @@ targets:
       - DEPS
 
   - name: Linux tool_integration_tests_1_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1270,7 +1268,6 @@ targets:
       - DEPS
 
   - name: Linux tool_integration_tests_2_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1299,7 +1296,6 @@ targets:
       - DEPS
 
   - name: Linux tool_integration_tests_3_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1412,7 +1408,6 @@ targets:
       - DEPS
 
   - name: Linux tool_integration_tests_7_7
-    bringup: true
     recipe: flutter/flutter_drone
     timeout: 60
     properties:
@@ -1515,10 +1510,12 @@ targets:
       test_timeout_secs: "2700"
     runIf:
       - packages/flutter_tools/templates/**
+      - packages/flutter_tools/gradle/**
       - .ci.yaml
       - engine/**
       - DEPS
       - dev/devicelab/bin/tasks/android_java11_dependency_smoke_tests.dart
+      - dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
 
   - name: Linux android_java17_dependency_smoke_tests
     recipe: devicelab/devicelab_drone
@@ -1537,10 +1534,12 @@ targets:
       test_timeout_secs: "2700"
     runIf:
       - packages/flutter_tools/templates/**
+      - packages/flutter_tools/gradle/**
       - .ci.yaml
       - engine/**
       - DEPS
       - dev/devicelab/bin/tasks/android_java17_dependency_smoke_tests.dart
+      - dev/devicelab/lib/framework/dependency_smoke_test_task_definition.dart
 
   - name: Linux tool_tests_commands
     recipe: flutter/flutter_drone
@@ -1592,7 +1591,6 @@ targets:
   - name: Linux tool_tests_widget_preview_scaffold
     recipe: flutter/flutter_drone
     timeout: 60
-    bringup: true
     properties:
       add_recipes_cq: "true"
       dependencies: >-
@@ -1663,6 +1661,34 @@ targets:
       tags: >
         ["devicelab","hostonly", "linux"]
       task_name: web_benchmarks_canvaskit
+
+  - name: Linux web_benchmarks_ddc
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
+      tags: >
+        ["devicelab","hostonly", "linux"]
+      task_name: web_benchmarks_ddc
+
+  - name: Linux web_benchmarks_ddc_hot_reload
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "chrome_and_driver", "version": "version:125.0.6422.141"}
+        ]
+      tags: >
+        ["devicelab","hostonly", "linux"]
+      task_name: web_benchmarks_ddc_hot_reload
 
   - name: Linux web_benchmarks_skwasm
     recipe: devicelab/devicelab_drone
@@ -2380,6 +2406,27 @@ targets:
         ["devicelab", "android", "linux", "pixel", "7pro"]
       task_name: static_path_tessellation_perf__timeline_summary
 
+
+  # Uses Impeller.
+  - name: Linux_pixel_7pro dynamic_path_stroke_tessellation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: dynamic_path_stroke_tessellation_perf__timeline_summary
+
+  # Uses Impeller.
+  - name: Linux_pixel_7pro static_path_stroke_tessellation_perf__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux", "pixel", "7pro"]
+      task_name: static_path_stroke_tessellation_perf__timeline_summary
+
   # Uses Impeller.
   - name: Linux_pixel_7pro hello_world_impeller
     recipe: devicelab/devicelab_drone
@@ -2706,7 +2753,6 @@ targets:
   # linux mokey benchmark
   - name: Linux_mokey flutter_engine_group_performance
     recipe: devicelab/devicelab_drone
-    bringup: true # https://github.com/flutter/flutter/issues/149666
     presubmit: false
     timeout: 60
     properties:
@@ -2758,7 +2804,6 @@ targets:
   - name: Linux_mokey flutter_gallery_lazy__start_up
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -2938,6 +2983,7 @@ targets:
       task_name: image_list_reported_duration
 
   - name: Linux_pixel_7pro integration_ui_driver
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/167638
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -3606,6 +3652,24 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: dynamic_path_tessellation_perf_ios__timeline_summary
+
+  - name: Mac_ios static_path_stroke_tessellation_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: static_path_stroke_tessellation_perf_ios__timeline_summary
+
+  - name: Mac_ios dynamic_path_stroke_tessellation_perf_ios__timeline_summary
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: dynamic_path_stroke_tessellation_perf_ios__timeline_summary
 
   - name: Staging_build_linux analyze
     presubmit: false
@@ -4718,7 +4782,6 @@ targets:
   - name: Mac_mokey microbenchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
-    bringup: true # TODO(codefu): https://github.com/flutter/flutter/issues/156506
     timeout: 60
     properties:
       tags: >
@@ -4768,7 +4831,6 @@ targets:
 
   # mac mokey test
   - name: Mac_mokey run_release_test
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/153830
     recipe: devicelab/devicelab_drone
     presubmit: false
     runIf:
@@ -4957,7 +5019,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
-      task_name: imitation_game_swiftui__compile
+      task_name: imitation_game_flutter__compile
 
   - name: Mac_arm64_ios imitation_game_swiftui
     recipe: devicelab/devicelab_drone
@@ -4967,7 +5029,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "ios", "mac", "arm64"]
-      task_name: imitation_game_flutter__compile
+      task_name: imitation_game_swiftui__compile
 
   - name: Mac_x64 hot_mode_dev_cycle_macos_target__benchmark
     recipe: devicelab/devicelab_drone
@@ -5138,9 +5200,9 @@ targets:
       task_name: macos_chrome_dev_mode
 
   - name: Mac_ios microbenchmarks_ios
-    bringup: true # Flakey https://github.com/flutter/flutter/issues/156457
     recipe: devicelab/devicelab_drone
     presubmit: false
+    bringup: true
     timeout: 60
     properties:
       tags: >
@@ -5388,7 +5450,7 @@ targets:
         ["devicelab", "ios", "mac"]
       task_name: flutter_gallery__transition_perf_e2e_ios
       drone_dimensions: >
-        ["device_os=iOS-17","os=Mac-14", "cpu=x86"]
+        ["device_os=iOS-17|iOS-18","os=Mac-14", "cpu=x86"]
 
   - name: Mac_ios animated_blur_backdrop_filter_perf_ios__timeline_summary
     recipe: devicelab/devicelab_drone
@@ -5544,6 +5606,16 @@ targets:
       tags: >
         ["devicelab", "hostonly", "mac", "arm64"]
       task_name: run_release_test_macos
+
+  - name: Mac_ios keyboard_hot_restart_ios
+    recipe: devicelab/devicelab_drone
+    bringup: true
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "ios", "mac"]
+      task_name: keyboard_hot_restart_ios
 
   - name: Windows build_tests_1_9
     recipe: flutter/flutter_drone
@@ -6091,7 +6163,6 @@ targets:
       - DEPS
 
   - name: Windows_arm64 plugin_test_windows
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/163122
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60

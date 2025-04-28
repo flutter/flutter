@@ -5,6 +5,7 @@
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/geometry/dl_path.h"
 #include "impeller/geometry/geometry_asserts.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
@@ -87,7 +88,7 @@ TEST(TessellatorTest, TessellateConvex) {
     std::vector<uint16_t> indices;
     // Sanity check simple rectangle.
     Tessellator::TessellateConvexInternal(
-        PathBuilder{}.AddRect(Rect::MakeLTRB(0, 0, 10, 10)).TakePath(), points,
+        flutter::DlPath::MakeRect(Rect::MakeLTRB(0, 0, 10, 10)), points,
         indices, 1.0);
 
     // Note: the origin point is repeated but not referenced in the indices
@@ -102,10 +103,9 @@ TEST(TessellatorTest, TessellateConvex) {
     std::vector<Point> points;
     std::vector<uint16_t> indices;
     Tessellator::TessellateConvexInternal(
-        PathBuilder{}
-            .AddRect(Rect::MakeLTRB(0, 0, 10, 10))
-            .AddRect(Rect::MakeLTRB(20, 20, 30, 30))
-            .TakePath(),
+        flutter::DlPath(PathBuilder{}
+                            .AddRect(Rect::MakeLTRB(0, 0, 10, 10))
+                            .AddRect(Rect::MakeLTRB(20, 20, 30, 30))),
         points, indices, 1.0);
 
     std::vector<Point> expected = {{0, 0},   {10, 0},  {10, 10}, {0, 10},
@@ -117,7 +117,7 @@ TEST(TessellatorTest, TessellateConvex) {
   }
 }
 
-// Filled Paths without an explicit close should still be closed
+// Filled Paths without an explicit close should still be closed implicitly
 TEST(TessellatorTest, TessellateConvexUnclosedPath) {
   std::vector<Point> points;
   std::vector<uint16_t> indices;
@@ -128,9 +128,11 @@ TEST(TessellatorTest, TessellateConvexUnclosedPath) {
                   .LineTo({100, 100})
                   .LineTo({0, 100})
                   .TakePath();
-  Tessellator::TessellateConvexInternal(path, points, indices, 1.0);
+  Tessellator::TessellateConvexInternal(flutter::DlPath(path), points, indices,
+                                        1.0);
 
-  std::vector<Point> expected = {{0, 0}, {100, 0}, {100, 100}, {0, 100}};
+  std::vector<Point> expected = {
+      {0, 0}, {100, 0}, {100, 100}, {0, 100}, {0, 0}};
   std::vector<uint16_t> expected_indices = {0, 1, 3, 2};
   EXPECT_EQ(points, expected);
   EXPECT_EQ(indices, expected_indices);
@@ -497,32 +499,20 @@ TEST(TessellatorTest, FilledRoundRectTessellationVertices) {
 }
 
 TEST(TessellatorTest, EarlyReturnEmptyConvexShape) {
-  // This path is not technically empty (it has a size in one dimension),
-  // but is otherwise completely flat.
+  // This path is not technically empty (it has a size in one dimension), but
+  // it contains only move commands and no actual path segment definitions.
   PathBuilder builder;
   builder.MoveTo({0, 0});
   builder.MoveTo({10, 10}, /*relative=*/true);
 
   std::vector<Point> points;
   std::vector<uint16_t> indices;
-  Tessellator::TessellateConvexInternal(builder.TakePath(), points, indices,
-                                        3.0);
+  Tessellator::TessellateConvexInternal(flutter::DlPath(builder), points,
+                                        indices, 3.0);
 
   EXPECT_TRUE(points.empty());
+  EXPECT_TRUE(indices.empty());
 }
-
-#if !NDEBUG
-TEST(TessellatorTest, ChecksConcurrentPolylineUsage) {
-  auto tessellator = std::make_shared<Tessellator>();
-  PathBuilder builder;
-  builder.AddLine({0, 0}, {100, 100});
-  auto path = builder.TakePath();
-
-  auto polyline = tessellator->CreateTempPolyline(path, 0.1);
-  EXPECT_DEBUG_DEATH(tessellator->CreateTempPolyline(path, 0.1),
-                     "point_buffer_");
-}
-#endif  // NDEBUG
 
 }  // namespace testing
 }  // namespace impeller

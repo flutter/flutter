@@ -585,6 +585,128 @@ Future<void> testMain() async {
       expect(editingStrategy.domElement!.style.width, '10px');
       expect(editingStrategy.domElement!.style.height, '10px');
     });
+
+    test('does not blur input when size is updated', () async {
+      final PlatformMessagesSpy spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      editingStrategy!.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
+      expect(editingStrategy!.isEnabled, isTrue);
+
+      final inputElement = editingStrategy!.domElement!;
+      expect(domDocument.activeElement, inputElement);
+
+      int blurCount = 0;
+      final blurListener = createDomEventListener((_) {
+        blurCount++;
+      });
+      inputElement.addEventListener('blur', blurListener);
+
+      final sizeCompleter = Completer<void>();
+      testTextEditing.acceptCommand(
+        TextInputSetEditableSizeAndTransform(
+          geometry: EditableTextGeometry(
+            width: 240,
+            height: 60,
+            globalTransform: Matrix4.translationValues(11, 12, 0).storage,
+          ),
+        ),
+        sizeCompleter.complete,
+      );
+      await sizeCompleter.future;
+
+      expect(blurCount, isZero);
+      // `TextInputClient.onConnectionClosed` shouldn't have been called.
+      expect(spy.messages, isEmpty);
+
+      inputElement.removeEventListener('blur', blurListener);
+      spy.tearDown();
+    });
+
+    test('closes input connection when window/iframe loses focus', () async {
+      final PlatformMessagesSpy spy = PlatformMessagesSpy();
+      spy.setUp();
+
+      textEditing.configuration = singlelineConfig;
+
+      final showCompleter = Completer<void>();
+      textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+      await showCompleter.future;
+
+      expect(textEditing.isEditing, isTrue);
+
+      expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+      final event = createDomEvent('Event', 'blur');
+      editingStrategy!.handleBlur(event);
+
+      expect(spy.messages, hasLength(1));
+      expect(spy.messages[0].channel, 'flutter/textinput');
+      expect(spy.messages[0].methodName, 'TextInputClient.onConnectionClosed');
+
+      spy.tearDown();
+    });
+
+    test(
+      'keeps focus within window/iframe when the focus moves within the flutter view in Chrome but not Safari',
+      () async {
+        final PlatformMessagesSpy spy = PlatformMessagesSpy();
+        spy.setUp();
+
+        textEditing.configuration = singlelineConfig;
+
+        final showCompleter = Completer<void>();
+        textEditing.acceptCommand(const TextInputShow(), showCompleter.complete);
+        await showCompleter.future;
+
+        // The "setSizeAndTransform" message has to be here before we call
+        // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+        // we don't put the input element into the DOM until we get its correct
+        // dimensions from the framework.
+        final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+          150,
+          50,
+          Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+        );
+        textEditing.channel.handleTextInput(
+          codec.encodeMethodCall(setSizeAndTransform),
+          (ByteData? data) {},
+        );
+
+        expect(textEditing.isEditing, isTrue);
+
+        expect(domDocument.activeElement, textEditing.strategy.domElement);
+
+        final flutterView =
+            EnginePlatformDispatcher.instance.viewManager.findViewForElement(
+              textEditing.strategy.domElement,
+            )!;
+
+        flutterView.dom.rootElement.focusWithoutScroll();
+        expect(spy.messages, isEmpty);
+
+        if (isSafari) {
+          // In Safari the web engine does not respond to blur, so there's no
+          // expectation that the input element keep focus.
+          expect(domDocument.activeElement, flutterView.dom.rootElement);
+        } else if (isFirefox) {
+          // This is a mysterious behavior in Firefox. Even though the engine does
+          // call <input>.focus() the browser doesn't move focus to the target
+          // element. This only happens in the test harness. When testing
+          // manually, Firefox happily moves focus to the input element.
+          expect(domDocument.activeElement, flutterView.dom.rootElement);
+        } else {
+          expect(domDocument.activeElement, textEditing.strategy.domElement);
+        }
+
+        spy.tearDown();
+      },
+    );
   });
 
   group('$HybridTextEditing', () {
@@ -838,6 +960,56 @@ Future<void> testMain() async {
 
       // Confirm that [HybridTextEditing] didn't send any messages.
       expect(spy.messages, isEmpty);
+    });
+
+    test('Does not align content in autofill group elements', () {
+      final setClient = MethodCall('TextInput.setClient', <dynamic>[
+        123,
+        createFlutterConfig('text'),
+      ]);
+      sendFrameworkMessage(codec.encodeMethodCall(setClient));
+
+      const setEditingState = MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
+
+      const show = MethodCall('TextInput.show');
+      sendFrameworkMessage(codec.encodeMethodCall(show));
+
+      // The "setSizeAndTransform" message has to be here before we call
+      // checkInputEditingState, since on some platforms (e.g. Desktop Safari)
+      // we don't put the input element into the DOM until we get its correct
+      // dimensions from the framework.
+      final MethodCall setSizeAndTransform = configureSetSizeAndTransformMethodCall(
+        150,
+        50,
+        Matrix4.translationValues(10.0, 20.0, 30.0).storage.toList(),
+      );
+      sendFrameworkMessage(codec.encodeMethodCall(setSizeAndTransform));
+
+      // Form elements
+      {
+        final formElement = textEditing!.configuration!.autofillGroup!.formElement;
+        expect(formElement.style.alignContent, isEmpty);
+
+        // Should contain one <input type="text"> and one <input type="submit">
+        expect(formElement.children, hasLength(2));
+
+        final inputElement = formElement.children.first;
+        expect(inputElement.style.alignContent, isEmpty);
+
+        final submitElement = formElement.children.last;
+        expect(submitElement.style.alignContent, isEmpty);
+      }
+
+      // Active element
+      {
+        final DomHTMLElement activeElement = textEditing!.strategy.activeDomElement;
+        expect(activeElement.style.alignContent, isEmpty);
+      }
     });
 
     test('focus and connection with blur', () async {
@@ -3585,6 +3757,16 @@ Future<void> testMain() async {
       // though it supports forced-colors. Safari doesn't support forced-colors
       // so this isn't a problem there.
     }, skip: isFirefox || isSafari);
+
+    test('Multi-line text area scrollbars are zero-width', () {
+      final allowedScrollbarWidthValues = <String>[
+        'none',
+        // Safari introduced scrollbarWidth support in 18.2. Older Safari versions
+        // return empty string instead of 'none'.
+        if (isSafari) '',
+      ];
+      expect(allowedScrollbarWidthValues, contains(createMultilineTextArea().style.scrollbarWidth));
+    });
   });
 }
 

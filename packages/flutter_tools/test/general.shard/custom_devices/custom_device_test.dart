@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -523,6 +524,100 @@ void main() {
       expect(await device.stopApp(app), true);
       expect(runDebugCompleter.isCompleted, true);
       expect(forwardPortCompleter.isCompleted, true);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'custom device command string interpolation end-to-end test',
+    () async {
+      final Completer<void> runDebugCompleter = Completer<void>();
+
+      final CustomDeviceConfig config = testConfig.copyWith(
+        platform: TargetPlatform.linux_arm64,
+        postBuildCommand: const <String>[
+          'testpostbuild',
+          r'--buildMode=${buildMode}',
+          r'--icuDataPath=${icuDataPath}',
+          r'--engineRevision=${engineRevision}',
+        ],
+        runDebugCommand: const <String>[
+          'testrundebug',
+          r'--buildMode=${buildMode}',
+          r'--icuDataPath=${icuDataPath}',
+          r'--engineRevision=${engineRevision}',
+        ],
+      );
+
+      final List<Pattern> commandArgumentsPattern = <Pattern>[
+        RegExp(r'--buildMode=.*'),
+        RegExp(r'--icuDataPath=.*'),
+        RegExp(r'--engineRevision=.*'),
+      ];
+
+      final String expectedIcuDataPath = globals.artifacts!.getArtifactPath(
+        Artifact.icuData,
+        platform: config.platform,
+      );
+      final String expectedEngineRevision = globals.flutterVersion.engineRevision;
+
+      final List<String> expectedCommandArguments = <String>[
+        '--buildMode=debug',
+        '--icuDataPath=$expectedIcuDataPath',
+        '--engineRevision=$expectedEngineRevision',
+      ];
+
+      final List<String> expectedRunDebugCommand = <String>[
+        'testrundebug',
+        ...expectedCommandArguments,
+      ];
+      final List<String> expectedPostBuildCommand = <String>[
+        'testpostbuild',
+        ...expectedCommandArguments,
+      ];
+
+      final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>['testpostbuild', ...commandArgumentsPattern],
+          onRun: (List<String> command) => expect(command, expectedPostBuildCommand),
+        ),
+        FakeCommand(command: config.uninstallCommand),
+        FakeCommand(command: config.installCommand),
+        FakeCommand(
+          command: <Pattern>['testrundebug', ...commandArgumentsPattern],
+          completer: runDebugCompleter,
+          onRun: (List<String> command) => expect(command, expectedRunDebugCommand),
+          stdout: 'The Dart VM service is listening on http://127.0.0.1:12345/abcd/\n',
+        ),
+        FakeCommand(
+          command: config.forwardPortCommand!,
+          stdout: testConfigForwardPortSuccessOutput,
+        ),
+      ]);
+
+      // CustomDevice.startApp doesn't care whether we pass a prebuilt app or
+      // buildable app as long as we pass prebuiltApplication as false
+      final PrebuiltLinuxApp app = PrebuiltLinuxApp(executable: 'testexecutable');
+
+      // finally start actually testing things
+      final CustomDevice device = CustomDevice(
+        config: config,
+        logger: BufferLogger.test(),
+        processManager: processManager,
+      );
+
+      await device.startApp(
+        app,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        bundleBuilder: FakeBundleBuilder(),
+      );
+      expect(runDebugCompleter.isCompleted, false);
+
+      expect(await device.stopApp(app), true);
+      expect(runDebugCompleter.isCompleted, true);
     },
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),

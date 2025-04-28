@@ -89,8 +89,6 @@ void main() {
               package: 'bar',
               name: 'bar.dart',
               linkMode: DynamicLoadingBundled(),
-              os: OS.windows,
-              architecture: Architecture.x64,
               file: dylibAfterCompiling.uri,
             ),
           ];
@@ -260,12 +258,17 @@ void main() {
         packageConfigFile,
         logger: environment.logger,
       );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
         runPackageName,
+        pubspecFile.path,
       );
       final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2012 The Chromium Authors. All rights reserved.
+# Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -65,7 +65,6 @@ def main():
                     action="store", type="string", dest="symlink",
                     help="Whether to create a symlink in the buildroot to the SDK.")
   (options, args) = parser.parse_args()
-  min_sdk_version = args[0]
 
   # On CI, Xcode is not yet installed when gclient hooks are being run.
   # This is because the version of Xcode that CI installs might depend on the
@@ -91,7 +90,11 @@ def main():
       '|sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer| '
       'if you are using Xcode 4.') % job.returncode)
 
-  # xcrun --sdk macosx  --show-sdk-path
+  # Locate the host toolchain.
+  xcode_dir = run_command_with_retry(['xcode-select', '-print-path'], timeout=300)
+  toolchain_dir = os.path.join(xcode_dir, 'Toolchains/XcodeDefault.xctoolchain')
+
+  # Locate the target SDK.
   sdk_command = [
     'xcrun',
     '--sdk',
@@ -101,12 +104,17 @@ def main():
   sdk_output = run_command_with_retry(sdk_command, timeout=300)
   if symlink_path:
     sdks_path = os.path.join(symlink_path, 'SDKs')
+    # Symlink the host toolchain.
+    toolchain_target = os.path.join(sdks_path, 'XcodeDefault.xctoolchain')
+    symlink(toolchain_dir, toolchain_target)
+    # Symlink the SDK.
     symlink_target = os.path.join(sdks_path, os.path.basename(sdk_output))
     symlink(sdk_output, symlink_target)
     sdk_output = symlink_target
 
   if not options.as_gclient_hook:
     print(sdk_output)
+    print(toolchain_dir)
   return 0
 
 

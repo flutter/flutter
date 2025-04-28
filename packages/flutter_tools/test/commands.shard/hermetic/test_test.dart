@@ -613,7 +613,7 @@ resolution: workspace
         onError: (Object error) async {
           expect(error, isA<ToolExit>());
           // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('the Dart compiler exited unexpectedly.'));
+          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
           caughtToolExit = true;
 
           final File isolateSpawningTesterPackageConfigFile = fs
@@ -695,7 +695,7 @@ resolution: workspace
         onError: (Object error) async {
           expect(error, isA<ToolExit>());
           // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('the Dart compiler exited unexpectedly.'));
+          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
           caughtToolExit = true;
 
           final File childTestIsolateSpawnerSourceFile = fs
@@ -762,7 +762,7 @@ const List<String> packageTestArgs = <String>[
         onError: (Object error) async {
           expect(error, isA<ToolExit>());
           // We expect this message because we are using a fake ProcessManager.
-          expect((error as ToolExit).message, contains('the Dart compiler exited unexpectedly.'));
+          expect((error as ToolExit).message, contains('The Dart compiler exited unexpectedly.'));
           caughtToolExit = true;
 
           final File childTestIsolateSpawnerSourceFile = fs
