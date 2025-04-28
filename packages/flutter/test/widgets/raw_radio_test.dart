@@ -11,13 +11,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RadioBase control test', (WidgetTester tester) async {
+  testWidgets('RawRadio control test', (WidgetTester tester) async {
     final FocusNode node = FocusNode();
     addTearDown(node.dispose);
     int? actualValue;
     ToggleableStateMixin? actualState;
     await tester.pumpWidget(
-      RadioBase<int>(
+      RawRadio<int>(
         value: 0,
         groupValue: 1,
         onChanged: (int? value) {
@@ -36,7 +36,7 @@ void main() {
     expect(actualState!.tristate, isTrue);
     expect(actualState!.value, isFalse);
 
-    await tester.tap(find.byType(RadioBase<int>));
+    await tester.tap(find.byType(RawRadio<int>));
     await tester.pump();
 
     expect(actualValue, 0);

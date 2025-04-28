@@ -141,13 +141,13 @@ class Radio<T> extends StatelessWidget {
     this.useCupertinoCheckmarkStyle = false,
   }) : _radioType = _RadioType.adaptive;
 
-  /// {@macro flutter.widget.RadioBase.value}
+  /// {@macro flutter.widget.RawRadio.value}
   final T value;
 
-  /// {@macro flutter.widget.RadioBase.groupValue}
+  /// {@macro flutter.widget.RawRadio.groupValue}
   final T? groupValue;
 
-  /// {@macro flutter.widget.RadioBase.onChanged}
+  /// {@macro flutter.widget.RawRadio.onChanged}
   ///
   /// For example:
   ///
@@ -164,13 +164,13 @@ class Radio<T> extends StatelessWidget {
   /// ```
   final ValueChanged<T?>? onChanged;
 
-  /// {@macro flutter.widget.RadioBase.mouseCursor}
+  /// {@macro flutter.widget.RawRadio.mouseCursor}
   ///
   /// If null, then the value of [RadioThemeData.mouseCursor] is used.
   /// If that is also null, then [WidgetStateMouseCursor.clickable] is used.
   final MouseCursor? mouseCursor;
 
-  /// {@macro flutter.widget.RadioBase.toggleable}
+  /// {@macro flutter.widget.RawRadio.toggleable}
   ///
   /// {@tool dartpad}
   /// This example shows how to enable deselecting a radio button by setting the
@@ -373,7 +373,7 @@ class Radio<T> extends StatelessWidget {
               );
         });
 
-    return RadioBase<T>(
+    return RawRadio<T>(
       value: value,
       groupValue: groupValue,
       onChanged: onChanged,

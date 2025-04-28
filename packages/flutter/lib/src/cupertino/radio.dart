@@ -116,13 +116,13 @@ class CupertinoRadio<T> extends StatefulWidget {
     this.useCheckmarkStyle = false,
   });
 
-  /// {@macro flutter.widget.RadioBase.value}
+  /// {@macro flutter.widget.RawRadio.value}
   final T value;
 
-  /// {@macro flutter.widget.RadioBase.groupValue}
+  /// {@macro flutter.widget.RawRadio.groupValue}
   final T? groupValue;
 
-  /// {@macro flutter.widget.RadioBase.onChanged}
+  /// {@macro flutter.widget.RawRadio.onChanged}
   ///
   /// For example:
   ///
@@ -139,7 +139,7 @@ class CupertinoRadio<T> extends StatefulWidget {
   /// ```
   final ValueChanged<T?>? onChanged;
 
-  /// {@macro flutter.widget.RadioBase.mouseCursor}
+  /// {@macro flutter.widget.RawRadio.mouseCursor}
   ///
   /// If null, then [SystemMouseCursors.basic] is used when this radio button is disabled.
   /// When this radio button is enabled, [SystemMouseCursors.click] is used on Web, and
@@ -152,7 +152,7 @@ class CupertinoRadio<T> extends StatefulWidget {
   ///    either a [MouseCursor] or a [WidgetStateProperty<MouseCursor>].
   final MouseCursor? mouseCursor;
 
-  /// {@macro flutter.widget.RadioBase.toggleable}
+  /// {@macro flutter.widget.RawRadio.toggleable}
   ///
   /// {@tool dartpad}
   /// This example shows how to enable deselecting a radio button by setting the
@@ -220,7 +220,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> {
                   : SystemMouseCursors.basic);
         });
 
-    return RadioBase<T>(
+    return RawRadio<T>(
       value: widget.value,
       groupValue: widget.groupValue,
       onChanged: widget.onChanged,

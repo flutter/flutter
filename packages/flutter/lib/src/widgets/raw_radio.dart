@@ -11,7 +11,13 @@ import 'ticker_provider.dart';
 import 'toggleable.dart';
 import 'widget_state.dart';
 
-/// Signature for [RadioBase.builder]
+// Examples can assume:
+// late BuildContext context;
+// enum SingingCharacter { lafayette }
+// late SingingCharacter? _character;
+// late Function _myBuilder;
+
+/// Signature for [RawRadio.builder]
 ///
 /// The builder can use `state` to determine the state of the radio and build
 /// the visual.
@@ -19,9 +25,9 @@ import 'widget_state.dart';
 /// {@macro flutter.widgets.ToggleableStateMixin.buildToggleableWithChild}
 typedef RadioBuilder = Widget Function(ToggleableStateMixin state);
 
-/// A base class for Radio button that provides basic radio functionalities.
+/// A Radio button that provides basic radio functionalities.
 ///
-/// This widget uses painter returned from `builder` to draw the radio.
+/// Provide the `builder` to draw UI for radio.
 ///
 /// {@macro flutter.widgets.ToggleableStateMixin.buildToggleableWithChild}
 ///
@@ -38,9 +44,10 @@ typedef RadioBuilder = Widget Function(ToggleableStateMixin state);
 ///
 /// See also:
 ///
-///  * [Radio], which uses this widget to build a material styled radio button.
-///  * [CupertinoRadio], which uses this widget to build a iOS styled radio button.
-class RadioBase<T> extends StatefulWidget {
+///  * [Radio], which uses this widget to build a Material styled radio button.
+///  * [CupertinoRadio], which uses this widget to build a Cupertino styled
+///    radio button.
+class RawRadio<T> extends StatefulWidget {
   /// Creates a radio button.
   ///
   /// The radio button itself does not maintain any state. Instead, when the
@@ -49,8 +56,23 @@ class RadioBase<T> extends StatefulWidget {
   /// and rebuild the radio button with a new [groupValue] to update the visual
   /// appearance of the radio button.
   ///
+  /// For example:
+  ///
+  /// ```dart
+  /// RawRadio<SingingCharacter>(
+  ///   value: SingingCharacter.lafayette,
+  ///   groupValue: _character,
+  ///   onChanged: (SingingCharacter? newValue) {
+  ///     setState(() {
+  ///       _character = newValue;
+  ///     });
+  ///   },
+  ///   builder: _myBuilder
+  /// )
+  /// ```
+  ///
   /// The all arguments except `key` are required:
-  const RadioBase({
+  const RawRadio({
     super.key,
     required this.value,
     required this.groupValue,
@@ -62,12 +84,12 @@ class RadioBase<T> extends StatefulWidget {
     required this.builder,
   });
 
-  /// {@template flutter.widget.RadioBase.value}
+  /// {@template flutter.widget.RawRadio.value}
   /// The value represented by this radio button.
   /// {@endtemplate}
   final T value;
 
-  /// {@template flutter.widget.RadioBase.groupValue}
+  /// {@template flutter.widget.RawRadio.groupValue}
   /// The currently selected value for a group of radio buttons.
   ///
   /// This radio button is considered selected if its [value] matches the
@@ -75,7 +97,7 @@ class RadioBase<T> extends StatefulWidget {
   /// {@endtemplate}
   final T? groupValue;
 
-  /// {@template flutter.widget.RadioBase.onChanged}
+  /// {@template flutter.widget.RawRadio.onChanged}
   /// Called when the user selects this radio button.
   ///
   /// The radio button passes [value] as a parameter to this callback. The radio
@@ -85,7 +107,10 @@ class RadioBase<T> extends StatefulWidget {
   /// If null, the radio button will be displayed as disabled.
   ///
   /// The provided callback will not be invoked if this radio button is already
-  /// selected.
+  /// selected and [toggleable] is not set to true.
+  ///
+  /// If the [toggleable] is set to true, tapping a already selected radio will
+  /// invoke this callback with `null` as value.
   ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
@@ -93,7 +118,7 @@ class RadioBase<T> extends StatefulWidget {
   /// {@endtemplate}
   final ValueChanged<T?>? onChanged;
 
-  /// {@template flutter.widget.RadioBase.mouseCursor}
+  /// {@template flutter.widget.RawRadio.mouseCursor}
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
@@ -105,20 +130,17 @@ class RadioBase<T> extends StatefulWidget {
   ///  * [WidgetState.focused].
   ///  * [WidgetState.disabled].
   /// {@endtemplate}
-  ///
-  /// If null, then the value of [RadioThemeData.mouseCursor] is used.
-  /// If that is also null, then [WidgetStateMouseCursor.clickable] is used.
   final WidgetStateProperty<MouseCursor> mouseCursor;
 
-  /// {@template flutter.widget.RadioBase.toggleable}
+  /// {@template flutter.widget.RawRadio.toggleable}
   /// Set to true if this radio button is allowed to be returned to an
   /// indeterminate state by selecting it again when selected.
   ///
   /// To indicate returning to an indeterminate state, [onChanged] will be
   /// called with null.
   ///
-  /// If true, [onChanged] can be called with [value] when selected while
-  /// [groupValue] != [value], or with null when selected again while
+  /// If true, [onChanged] is called with [value] when selected while
+  /// [groupValue] != [value], and with null when selected again while
   /// [groupValue] == [value].
   ///
   /// If false, [onChanged] will be called with [value] when it is selected
@@ -146,10 +168,10 @@ class RadioBase<T> extends StatefulWidget {
   bool get _selected => value == groupValue;
 
   @override
-  State<RadioBase<T>> createState() => _RadioBaseState<T>();
+  State<RawRadio<T>> createState() => _RawRadioState<T>();
 }
 
-class _RadioBaseState<T> extends State<RadioBase<T>>
+class _RawRadioState<T> extends State<RawRadio<T>>
     with TickerProviderStateMixin, ToggleableStateMixin {
   void _handleChanged(bool? selected) {
     if (selected == null) {
@@ -162,7 +184,7 @@ class _RadioBaseState<T> extends State<RadioBase<T>>
   }
 
   @override
-  void didUpdateWidget(RadioBase<T> oldWidget) {
+  void didUpdateWidget(RawRadio<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget._selected != oldWidget._selected) {
       animateToValue();
