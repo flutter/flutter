@@ -9,9 +9,18 @@ class ConnectionCollectionTest: XCTestCase {
   func testAcquireAndRelease() {
     let connections = ConnectionCollection()
     let connectionID = connections.acquireConnection(forChannel: "foo")
-    XCTAssertGreaterThan(0, connectionID)
+    XCTAssertGreaterThan(connectionID, 0)
     XCTAssertEqual("foo", connections.cleanupConnection(withID: connectionID))
     XCTAssertEqual("", connections.cleanupConnection(withID: connectionID))
+  }
+
+  func testUniqueIDs() {
+    let connections = ConnectionCollection()
+    let firstConnectionID = connections.acquireConnection(forChannel: "foo")
+    let secondConnectionID = connections.acquireConnection(forChannel: "bar")
+    XCTAssertNotEqual(firstConnectionID, secondConnectionID)
+    XCTAssertEqual("foo", connections.cleanupConnection(withID: firstConnectionID))
+    XCTAssertEqual("bar", connections.cleanupConnection(withID: secondConnectionID))
   }
 
   func testErrorConnectionWithNegativeCode() {
