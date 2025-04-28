@@ -1747,7 +1747,8 @@ class CompileTest {
         'platform=iOS,arch=arm64',
         '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
         '-resultBundlePath',
-        'benchmarkResults.xcresult'
+        'benchmarkResults.xcresult',
+        '-verbose'
       ]).then((ProcessResult results) {
         print(results.stdout);
       });
