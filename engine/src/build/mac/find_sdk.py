@@ -65,7 +65,6 @@ def main():
                     action="store", type="string", dest="symlink",
                     help="Whether to create a symlink in the buildroot to the SDK.")
   (options, args) = parser.parse_args()
-  min_sdk_version = args[0]
 
   # On CI, Xcode is not yet installed when gclient hooks are being run.
   # This is because the version of Xcode that CI installs might depend on the

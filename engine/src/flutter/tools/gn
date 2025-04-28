@@ -264,10 +264,6 @@ def setup_rbe(args):
 def setup_apple_sdks():
   sdks_gn_args = {}
 
-  # These are needed on a macOS host regardless of target.
-  # This value should agree with the 'mac_sdk_min' value in the DEPS file.
-  sdks_gn_args['mac_sdk_min'] = '10.14'
-
   # The MACOSX_DEPLOYMENT_TARGET variable used when compiling.
   # Must be of the form x.x.x for Info.plist files.
   sdks_gn_args['mac_deployment_target'] = '10.14.0'
