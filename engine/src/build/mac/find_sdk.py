@@ -31,28 +31,6 @@ def parse_version(version_str):
   return [int(x) for x in re.findall(r'(\d+)', version_str)]
 
 
-def run_command_with_retry(command, timeout=10, retries=3):
-  """
-  Runs a command using subprocess.check_output with timeout and retry logic.
-
-  Args:
-      command: A list representing the command and its arguments.
-      timeout: The maximum time (in seconds) to wait for each command execution.
-      retries: The number of times to retry the command if it times out.
-
-  Returns:
-      The output of the command as a bytes object if successful, otherwise
-      raises a CalledProcessError.
-  """
-  for attempt in range(1, retries + 1):
-    try:
-      result = subprocess.check_output(command, timeout=timeout)
-      return result.decode('utf-8').strip()
-    except subprocess.TimeoutExpired:
-      if attempt >= retries:
-        raise  # Re-raise the TimeoutExpired error after all retries
-
-
 def main():
   parser = OptionParser()
   parser.add_option("--print_sdk_path",
@@ -91,7 +69,7 @@ def main():
       'if you are using Xcode 4.') % job.returncode)
 
   # Locate the host toolchain.
-  xcode_dir = run_command_with_retry(['xcode-select', '-print-path'], timeout=300)
+  xcode_dir = subprocess.check_output(['xcode-select', '-print-path'], timeout=300).decode('utf-8').strip()
   toolchain_dir = os.path.join(xcode_dir, 'Toolchains/XcodeDefault.xctoolchain')
 
   # Locate the target SDK.
@@ -101,7 +79,7 @@ def main():
     'macosx',
     '--show-sdk-path',
   ]
-  sdk_output = run_command_with_retry(sdk_command, timeout=300)
+  sdk_output = subprocess.check_output(sdk_command, timeout=300).decode('utf-8').strip()
   if symlink_path:
     sdks_path = os.path.join(symlink_path, 'SDKs')
     # Symlink the host toolchain.
