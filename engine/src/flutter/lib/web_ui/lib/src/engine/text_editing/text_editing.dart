@@ -1706,7 +1706,7 @@ class IOSTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   /// `selectionchange` events can be fired in quick succession. The first one
   /// is correct, but the next ones may contain incorrect selection data.
   ///
-  /// To work around this, we throttle the `selectionchange` handler to only
+  /// To work around this, the `selectionchange` handler is throttled to only
   /// allow one event every [_selectionChangeThrottleDelay]. Subsequent events
   /// during this delay are ignored.
   Timer? _selectionChangeThrottleTimer;
