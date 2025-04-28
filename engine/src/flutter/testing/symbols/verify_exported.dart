@@ -105,10 +105,18 @@ int _checkIos(String outPath, String nmPath, Iterable<String> builds) {
       final bool cInternalSymbol =
           entry.type == '(__TEXT,__text)' && entry.name.startsWith('_InternalFlutter');
       final bool objcSymbol =
-          entry.type == '(__DATA,__objc_data)' &&
+          (entry.type == '(__DATA,__objc_data)' || entry.type == '(__DATA,__data)') &&
           (entry.name.startsWith(r'_OBJC_METACLASS_$_Flutter') ||
               entry.name.startsWith(r'_OBJC_CLASS_$_Flutter'));
-      return !(cSymbol || cInternalSymbol || objcSymbol);
+      // Swift's name mangling uses s followed by symbol length followed by symbol.
+      final RegExp swiftInternalRegExp = RegExp(r'^_\$s\d+InternalFlutterSwift');
+      final bool swiftInternalSymbol =
+          (entry.type == '(__TEXT,__text)' ||
+              entry.type == '(__TEXT,__const)' ||
+              entry.type == '(__TEXT,__constg_swiftt)' ||
+              entry.type == '(__DATA,__objc_data)') &&
+          swiftInternalRegExp.hasMatch(entry.name);
+      return !(cSymbol || cInternalSymbol || objcSymbol || swiftInternalSymbol);
     });
     if (unexpectedEntries.isNotEmpty) {
       print('ERROR: $libFlutter exports unexpected symbols:');
