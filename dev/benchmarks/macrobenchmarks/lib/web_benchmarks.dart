@@ -7,6 +7,7 @@ import 'dart:convert' show json;
 import 'dart:js_interop';
 import 'dart:math' as math;
 
+import 'package:args/args.dart';
 import 'package:web/web.dart' as web;
 
 import 'src/web/bench_build_image.dart';
@@ -81,9 +82,28 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchImageDecoding.benchmarkName: () => BenchImageDecoding(),
 };
 
-final LocalBenchmarkServerClient _client = LocalBenchmarkServerClient();
+late final LocalBenchmarkServerClient _client;
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
+  final ArgParser parser =
+      ArgParser()..addOption(
+        'port',
+        abbr: 'p',
+        help:
+            'The port of the local benchmark server used that implements the '
+            'API required for orchestrating macrobenchmarks.',
+      );
+  final ArgResults argResults = parser.parse(args);
+  Uri serverOrigin;
+  if (argResults.wasParsed('port')) {
+    final int port = int.parse(argResults['port'] as String);
+    serverOrigin = Uri.http('localhost:$port');
+  } else {
+    serverOrigin = Uri.base;
+  }
+
+  _client = LocalBenchmarkServerClient(serverOrigin);
+
   // Check if the benchmark server wants us to run a specific benchmark.
   final String nextBenchmark = await _client.requestNextBenchmark();
 
@@ -94,6 +114,14 @@ Future<void> main() async {
 
   await _runBenchmark(nextBenchmark);
   web.window.location.reload();
+}
+
+/// Shared entrypoint used for DDC, which runs the macrobenchmarks server on a
+/// separate port.
+// TODO(markzipan): Use `main` in `'web_benchmarks.dart` when Flutter Web supports the `--dart-entrypoint-args` flag.
+// ignore: unreachable_from_main
+Future<void> sharedMain(List<String> args) {
+  return main(args);
 }
 
 Future<void> _runBenchmark(String benchmarkName) async {
@@ -310,8 +338,14 @@ class TimeseriesVisualization {
 /// implement a manual fallback. This allows debugging benchmarks using plain
 /// `flutter run`.
 class LocalBenchmarkServerClient {
+  LocalBenchmarkServerClient(this.serverOrigin);
+
   /// This value is returned by [requestNextBenchmark].
   static const String kManualFallback = '__manual_fallback__';
+
+  /// The origin (e.g., http://localhost:1234) of the benchmark server that
+  /// hosts the macrobenchmarking API.
+  final Uri serverOrigin;
 
   /// Whether we fell back to manual mode.
   ///
@@ -320,13 +354,20 @@ class LocalBenchmarkServerClient {
   /// provides API for automatically picking the next benchmark to run.
   bool isInManualMode = false;
 
+  Map<String, String> get headers => <String, String>{
+    'Access-Control-Allow-Headers': 'Origin, Content-Type, Accept',
+    'Access-Control-Allow-Methods': 'Post',
+    'Access-Control-Allow-Origin': serverOrigin.path,
+  };
+
   /// Asks the local server for the name of the next benchmark to run.
   ///
   /// Returns [kManualFallback] if local server is not available (uses 404 as a
   /// signal).
   Future<String> requestNextBenchmark() async {
     final web.XMLHttpRequest request = await _requestXhr(
-      '/next-benchmark',
+      serverOrigin.resolve('next-benchmark'),
+      requestHeaders: headers,
       method: 'POST',
       mimeType: 'application/json',
       sendData: json.encode(benchmarks.keys.toList()),
@@ -358,7 +399,8 @@ class LocalBenchmarkServerClient {
   Future<void> startPerformanceTracing(String benchmarkName) async {
     _checkNotManualMode();
     await _requestXhr(
-      '/start-performance-tracing?label=$benchmarkName',
+      serverOrigin.resolve('start-performance-tracing?label=$benchmarkName'),
+      requestHeaders: headers,
       method: 'POST',
       mimeType: 'application/json',
     );
@@ -367,7 +409,12 @@ class LocalBenchmarkServerClient {
   /// Stops the performance tracing session started by [startPerformanceTracing].
   Future<void> stopPerformanceTracing() async {
     _checkNotManualMode();
-    await _requestXhr('/stop-performance-tracing', method: 'POST', mimeType: 'application/json');
+    await _requestXhr(
+      serverOrigin.resolve('stop-performance-tracing'),
+      requestHeaders: headers,
+      method: 'POST',
+      mimeType: 'application/json',
+    );
   }
 
   /// Sends the profile data collected by the benchmark to the local benchmark
@@ -375,7 +422,8 @@ class LocalBenchmarkServerClient {
   Future<void> sendProfileData(Profile profile) async {
     _checkNotManualMode();
     final web.XMLHttpRequest request = await _requestXhr(
-      '/profile-data',
+      serverOrigin.resolve('profile-data'),
+      requestHeaders: headers,
       method: 'POST',
       mimeType: 'application/json',
       sendData: json.encode(profile.toJson()),
@@ -394,7 +442,8 @@ class LocalBenchmarkServerClient {
   Future<void> reportError(dynamic error, StackTrace stackTrace) async {
     _checkNotManualMode();
     await _requestXhr(
-      '/on-error',
+      serverOrigin.resolve('on-error'),
+      requestHeaders: headers,
       method: 'POST',
       mimeType: 'application/json',
       sendData: json.encode(<String, dynamic>{'error': '$error', 'stackTrace': '$stackTrace'}),
@@ -405,7 +454,8 @@ class LocalBenchmarkServerClient {
   Future<void> printToConsole(String report) async {
     _checkNotManualMode();
     await _requestXhr(
-      '/print-to-console',
+      serverOrigin.resolve('print-to-console'),
+      requestHeaders: headers,
       method: 'POST',
       mimeType: 'text/plain',
       sendData: report,
@@ -415,7 +465,7 @@ class LocalBenchmarkServerClient {
   /// This is the same as calling [html.HttpRequest.request] but it doesn't
   /// crash on 404, which we use to detect `flutter run`.
   Future<web.XMLHttpRequest> _requestXhr(
-    String url, {
+    Uri url, {
     String? method,
     bool? withCredentials,
     String? responseType,
@@ -427,7 +477,7 @@ class LocalBenchmarkServerClient {
     final web.XMLHttpRequest xhr = web.XMLHttpRequest();
 
     method ??= 'GET';
-    xhr.open(method, url, true);
+    xhr.open(method, '$url', true);
 
     if (withCredentials != null) {
       xhr.withCredentials = withCredentials;
