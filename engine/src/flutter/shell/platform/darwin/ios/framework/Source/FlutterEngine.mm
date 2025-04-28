@@ -1266,7 +1266,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection {
   if (_shell && _shell->IsSetup()) {
-    NSString* channel = [self.connections cleanup:connection];
+    NSString* channel = [self.connections cleanupConnectionWithID:connection];
     if (channel.length > 0) {
       self.platformView->GetPlatformMessageHandlerIos()->SetMessageHandler(channel.UTF8String, nil,
                                                                            nil);

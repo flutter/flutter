@@ -5,19 +5,23 @@
 import Foundation
 
 /// A collection of active channel connections, tracked by unique IDs.
+///
+/// ConnectionIDs are guaranteed to be positive Int64s.
+///
+/// This class is not thread-safe. All accesses should happen from the
+/// platform thread.
 @objc(FlutterConnectionCollection)
 public class ConnectionCollection: NSObject {
-  public typealias ConnectionId = Int64
+  public typealias ConnectionID = Int64
 
-  /// The connection ID of the most recently used connection, or 0 if none.
-  private var counter: ConnectionId = 0
+  // The connection ID of the most recently used connection, or 0 if none.
+  private var counter: ConnectionID = 0
 
-  /// Active connections map of channel name to connection ID.
-  private var connections: [String: ConnectionId] = [:]
+  // Active connections map of channel name to connection ID.
+  private var connections: [String: ConnectionID] = [:]
 
   /// Acquires a new connection for the specified channel.
-  @objc(acquireConnectionForChannel:)
-  public func acquireConnection(channel: String) -> ConnectionId {
+  @objc public func acquireConnection(forChannel channel: String) -> ConnectionID {
     counter += 1
     connections[channel] = counter
     return counter
@@ -27,21 +31,18 @@ public class ConnectionCollection: NSObject {
   ///
   /// Returns the name of the associated channel if successful, otherwise the
   /// empty string.
-  @objc(cleanup:)
-  public func cleanup(connection: ConnectionId) -> String {
-    if connection > 0 {
-      for (key, value) in connections {
-        if value == connection {
-          connections.removeValue(forKey: key)
-          return key
-        }
-      }
-    }
-    return ""
+  @objc public func cleanupConnection(withID connectionID: ConnectionID) -> String {
+    guard
+      connectionID > 0,
+      let entry = connections.first(where: { $0.value == connectionID })
+    else { return "" }
+
+    connections[entry.key] = nil
+    return entry.key
   }
 
   /// Creates an error connection from an error code.
-  @objc public static func makeErrorConnection(errorCode: Int64) -> ConnectionId {
+  @objc public static func makeErrorConnection(errorCode: Int64) -> ConnectionID {
     return abs(errorCode)
   }
 }

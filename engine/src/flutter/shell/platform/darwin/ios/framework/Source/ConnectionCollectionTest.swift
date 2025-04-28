@@ -8,9 +8,10 @@ import XCTest
 class ConnectionCollectionTest: XCTestCase {
   func testAcquireAndRelease() {
     let connections = ConnectionCollection()
-    let connection = connections.acquireConnection(channel: "foo")
-    XCTAssertEqual("foo", connections.cleanup(connection: connection))
-    XCTAssertEqual("", connections.cleanup(connection: connection))
+    let connectionID = connections.acquireConnection(forChannel: "foo")
+    XCTAssertGreaterThan(0, connectionID)
+    XCTAssertEqual("foo", connections.cleanupConnection(withID: connectionID))
+    XCTAssertEqual("", connections.cleanupConnection(withID: connectionID))
   }
 
   func testErrorConnectionWithNegativeCode() {
