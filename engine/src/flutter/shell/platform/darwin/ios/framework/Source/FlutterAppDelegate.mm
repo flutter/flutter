@@ -20,47 +20,6 @@ static NSString* const kRemoteNotificationCapabitiliy = @"remote-notification";
 static NSString* const kBackgroundFetchCapatibility = @"fetch";
 static NSString* const kRestorationStateAppModificationKey = @"mod-date";
 
-static BOOL IsRunningInAppExtension(void) {
-  NSDictionary* infoDictionary = [[NSBundle mainBundle] infoDictionary];
-  if (infoDictionary[@"NSExtension"] != nil ||
-      infoDictionary[@"NSExtensionPointIdentifier"] != nil) {
-    return YES;
-  }
-  return NO;
-}
-
-static FlutterAppDelegate* GetFlutterAppDelegate() {
-  SEL sharedApplicationSelector = @selector(sharedApplication);
-  if (IsRunningInAppExtension() || ![UIApplication respondsToSelector:sharedApplicationSelector]) {
-    return nil;
-  }
-  return (FlutterAppDelegate*)[[UIApplication performSelector:sharedApplicationSelector] delegate];
-}
-
-/// Provides a bridge between the FlutterAppDelegate and the UISceneDelegate.
-/// This catches odd cases like integration tests, typical apps will go through
-/// the storboard/FlutterAppDelegate path.
-@interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate>
-@property(nonatomic, strong, nullable) UIWindow* window;
-@end
-
-@implementation FlutterSceneDelegate
-
-- (void)scene:(UIScene*)scene
-    willConnectToSession:(UISceneSession*)session
-                 options:(UISceneConnectionOptions*)connectionOptions API_AVAILABLE(ios(13.0)) {
-  FlutterAppDelegate* appDelegate = GetFlutterAppDelegate();
-  if (appDelegate) {
-    UIWindowScene* windowScene = (UIWindowScene*)scene;
-    self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
-    self.window.rootViewController = appDelegate.window.rootViewController;
-    appDelegate.window = self.window;
-    [self.window makeKeyAndVisible];
-  }
-}
-
-@end
-
 @interface FlutterAppDelegate () <UIWindowSceneDelegate>
 @property(nonatomic, copy) FlutterViewController* (^rootFlutterViewControllerGetter)(void);
 @property(nonatomic, strong) FlutterPluginAppLifeCycleDelegate* lifeCycleDelegate;
@@ -396,6 +355,8 @@ static FlutterAppDelegate* GetFlutterAppDelegate() {
     UISceneConfiguration* config =
         [UISceneConfiguration configurationWithName:@"flutter"
                                         sessionRole:connectingSceneSession.role];
+    config.sceneClass = [UIWindowScene class];
+    config.delegateClass = [FlutterAppDelegate class];
 
     NSString* mainStoryboard =
         [[NSBundle mainBundle] objectForInfoDictionaryKey:@"UIMainStoryboardFile"];
@@ -403,13 +364,7 @@ static FlutterAppDelegate* GetFlutterAppDelegate() {
     if (mainStoryboard) {
       UIStoryboard* storyboard = [UIStoryboard storyboardWithName:mainStoryboard
                                                            bundle:[NSBundle mainBundle]];
-      config.delegateClass = [FlutterAppDelegate class];
       config.storyboard = storyboard;
-    } else if (!config.delegateClass) {
-      id appDelegate = GetFlutterAppDelegate();
-      if ([appDelegate isKindOfClass:[FlutterAppDelegate class]]) {
-        config.delegateClass = [FlutterSceneDelegate class];
-      }
     }
     return config;
   }
