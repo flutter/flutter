@@ -11,6 +11,15 @@ import 'package:flutter_tools/src/flutter_manifest.dart';
 
 import '../src/common.dart';
 
+const Feature _noConfigFeature = Feature(name: 'example');
+const Feature _configOnlyFeature = Feature(name: 'example', configSetting: 'enable-flag');
+const Feature _envOnlyFeature = Feature(name: 'example', environmentOverride: 'ENABLE_FLAG');
+const Feature _configAndEnvFeature = Feature(
+  name: 'example',
+  configSetting: 'enable-flag',
+  environmentOverride: 'ENABLE_FLAG',
+);
+
 void main() {
   bool? isEnabled(
     Feature feature, {
@@ -147,23 +156,14 @@ void main() {
     );
   });
 
-  test('overrides from environment take precedence over configuration', () {
+  test('overrides from environment are lowest priority', () {
     expect(
       isEnabled(
         _configAndEnvFeature,
         environment: <String, String>{'ENABLE_FLAG': 'true'},
         globalConfig: <String, Object>{'enable-flag': false},
       ),
-      isTrue,
+      isFalse,
     );
   });
 }
-
-const Feature _noConfigFeature = Feature(name: 'example');
-const Feature _configOnlyFeature = Feature(name: 'example', configSetting: 'enable-flag');
-const Feature _envOnlyFeature = Feature(name: 'example', environmentOverride: 'ENABLE_FLAG');
-const Feature _configAndEnvFeature = Feature(
-  name: 'example',
-  configSetting: 'enable-flag',
-  environmentOverride: 'ENABLE_FLAG',
-);

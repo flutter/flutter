@@ -16,7 +16,7 @@ interface class FlutterFeaturesConfig {
   ///
   /// [globalConfig] reads values stored by the `flutter config` tool, which
   /// are normally in the user's `%HOME` directory (varies by system), while
-  /// [projectManfiest] reads values from the _current_ Flutter project's
+  /// [projectManifest] reads values from the _current_ Flutter project's
   /// `pubspec.yaml`
   const FlutterFeaturesConfig({
     required Config globalConfig,
@@ -37,9 +37,49 @@ interface class FlutterFeaturesConfig {
   /// If the feature was not configured, or cannot be configured, returns `null`.
   ///
   /// The value is resolved, if possible, in the following order, where if a
-  /// step resolves to a boolean value, no further steps are attempted.
+  /// step resolves to a boolean value, no further steps are attempted:
   ///
-  /// ## Environment Variable
+  ///
+  /// ## 1. Local Project Configuration
+  ///
+  /// If [Feature.configSetting] is `null`, this step is skipped.
+  ///
+  /// If the value defined by the key `$configSetting` is set in `pubspec.yaml`,
+  /// it is returned as a boolean value.
+  ///
+  /// Assuming there is a setting where `configSetting: 'enable-foo'`:
+  ///
+  /// ```yaml
+  /// # true
+  /// flutter:
+  ///   config:
+  ///     enable-foo: true
+  ///
+  /// # false
+  /// flutter:
+  ///   config:
+  ///     enable-foo: false
+  /// ```
+  ///
+  /// ## 2. Global Tool Configuration
+  ///
+  /// If [Feature.configSetting] is `null`, this step is skipped.
+  ///
+  /// If the value defined by the key `$configSetting` is set in the global
+  /// (platform dependent) configuration file, it is returned as a boolean
+  /// value.
+  ///
+  /// Assuming there is a setting where `configSetting: 'enable-foo'`:
+  ///
+  /// ```sh
+  /// # future runs will treat the value as true
+  /// flutter config --enable-foo
+  ///
+  /// # future runs will treat the value as false
+  /// flutter config --no-enable-foo
+  /// ```
+  ///
+  /// ## 3. Environment Variable
   ///
   /// If [Feature.environmentOverride] is `null`, this step is skipped.
   ///
@@ -61,47 +101,8 @@ interface class FlutterFeaturesConfig {
   /// # false
   /// ENABLE_FOO=any-other-value flutter some-command
   /// ```
-  ///
-  /// ## Local Project Configuration
-  ///
-  /// If [Feature.configSetting] is `null`, this step is skipped.
-  ///
-  /// If the value defined by the key `$configSetting` is set in `pubspec.yaml`,
-  /// it is returned as a boolean value.
-  ///
-  /// Assuming there is a setting where `configSetting: 'enable-foo'`:
-  ///
-  /// ```yaml
-  /// # true
-  /// flutter:
-  ///   config:
-  ///     enable-foo: true
-  ///
-  /// # false
-  /// flutter:
-  ///   config:
-  ///     enable-foo: false
-  /// ```
-  ///
-  /// ## Global Tool Configuration
-  ///
-  /// If [Feature.configSetting] is `null`, this step is skipped.
-  ///
-  /// If the value defined by the key `$configSetting` is set in the global
-  /// (platform dependent) configuration file, it is returned as a boolean
-  /// value.
-  ///
-  /// Assuming there is a setting where `configSetting: 'enable-foo'`:
-  ///
-  /// ```sh
-  /// # future runs will treat the value as true
-  /// flutter config --enable-foo
-  ///
-  /// # future runs will treat the value as false
-  /// flutter config --no-enable-foo
-  /// ```
   bool? isEnabled(Feature feature) {
-    return _isEnabledByPlatformEnvironment(feature) ?? _isEnabledByConfigValue(feature);
+    return _isEnabledByConfigValue(feature) ?? _isEnabledByPlatformEnvironment(feature);
   }
 
   bool? _isEnabledByConfigValue(Feature feature) {

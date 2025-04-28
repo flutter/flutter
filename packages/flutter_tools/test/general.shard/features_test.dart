@@ -47,7 +47,7 @@ void main() {
       expect(feature.getSettingForChannel('unknown'), masterSetting);
     });
 
-    testWithoutContext('reads from configuration if avaialble', () {
+    testWithoutContext('reads from configuration if available', () {
       const Feature exampleFeature = Feature(
         name: 'example',
         master: FeatureChannelSetting(available: true),
@@ -72,9 +72,15 @@ void main() {
       expect(flags.isEnabled(exampleFeature), false);
     });
 
-    FileSystem createFsWithPubspec(String pubspec) {
+    FileSystem createFsWithPubspec() {
       final FileSystem fs = MemoryFileSystem.test();
-      fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync(pubspec);
+      fs.currentDirectory.childFile('pubspec.yaml').writeAsStringSync('''
+        flutter:
+          config:
+            enable-foo: true
+            enable-bar: false
+            enable-baz: true
+      ''');
       return fs;
     }
 
@@ -115,14 +121,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         ProcessManager: FakeProcessManager.empty,
-        FileSystem:
-            () => createFsWithPubspec('''
-        flutter:
-          config:
-            enable-foo: true
-            enable-bar: false
-            enable-baz: true
-        '''),
+        FileSystem: createFsWithPubspec,
       },
     );
   });

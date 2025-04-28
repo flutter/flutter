@@ -254,8 +254,6 @@ void main() {
         containsIgnoringWhitespace('Analytics reporting is currently enabled'),
       );
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
-
-    testUsingContext('overriden by the content in pubspec.yaml', () async {});
   });
 }
 
