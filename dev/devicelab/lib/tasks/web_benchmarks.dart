@@ -66,6 +66,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           '--web-browser-flag=--disable-translate',
           '--web-browser-flag=--disable-background-timer-throttling',
           '--web-browser-flag=--disable-backgrounding-occluded-windows',
+          '--web-browser-flag=--no-sandbox',
           '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
           if (benchmarkOptions.withHotReload) '--web-experimental-hot-reload',
           '--no-web-resources-cdn',
