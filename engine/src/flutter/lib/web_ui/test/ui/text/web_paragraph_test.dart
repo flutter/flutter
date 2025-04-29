@@ -236,4 +236,88 @@ Future<void> testMain() async {
     await drawPictureUsingCurrentRenderer(recorder.endRecording());
     await matchGoldenFile('web_paragraph_multicolored.png', region: region);
   });
+
+  test('Draw WebParagraph multicolored background text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    expect(recorder, isA<engine.CkPictureRecorder>());
+    expect(canvas, isA<engine.CanvasKitCanvas>());
+    final Paint blackPaint = Paint()..color = const Color(0xFF000000);
+    final Paint redPaint = Paint()..color = const Color(0xFFFF0000);
+    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+    final Paint whitePaint = Paint()..color = const Color(0xFFFFFFFF);
+
+    final WebParagraphStyle blackStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: whitePaint,
+      background: blackPaint,
+    );
+    final WebTextStyle blueStyle = WebTextStyle(
+      foreground: whitePaint,
+      background: bluePaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
+    final WebTextStyle redStyle = WebTextStyle(
+      foreground: whitePaint,
+      background: redPaint,
+      fontSize: 20,
+      fontFamily: 'Roboto',
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(blackStyle);
+
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+    builder.pushStyle(redStyle);
+    builder.addText('Red color ');
+    builder.pop();
+    builder.pushStyle(blueStyle);
+    builder.addText('Blue color ');
+    builder.pop();
+    builder.addText('Black color ');
+
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 250));
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_multicolored_background.png', region: region);
+  });
+
+  test('Draw WebParagraph One line text', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder, region);
+    canvas.drawColor(const Color(0xFFFFFFFF), BlendMode.src);
+
+    //final Paint greyPaint = Paint()..color = const Color(0xFF444444);
+    final Paint bluePaint = Paint()..color = const Color(0xFF0000FF);
+
+    final WebParagraphStyle arialStyle = WebParagraphStyle(
+      fontFamily: 'Roboto',
+      fontSize: 20,
+      foreground: bluePaint,
+    );
+    final WebParagraphBuilder builder = WebParagraphBuilder(arialStyle);
+    builder.addText('Red color Blue color Black color Red color Blue color ');
+    final WebParagraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: double.infinity));
+    //canvas.drawRect(const Rect.fromLTWH(0, 0, 500, 50), greyPaint);
+    paragraph.paintOnCanvasKit(canvas as engine.CanvasKitCanvas, const Offset(0, 0));
+    await drawPictureUsingCurrentRenderer(recorder.endRecording());
+    await matchGoldenFile('web_paragraph_canvas_text.png', region: region);
+  });
 }

@@ -69,6 +69,38 @@ class TextPaint {
     ui.Offset lineOffset,
   ) {
     final WebTextStyle textStyle = webTextCluster.textStyle!;
+
+    // Define the text cluster bounds
+    final ui.Rect sourceRect = ui.Rect.fromLTWH(
+      0,
+      0,
+      webTextCluster.bounds.width,
+      webTextCluster.bounds.height,
+    );
+
+    // We shift the target rect to the correct x position inside the line and
+    // the correct y position of the line itself
+    // (and then to the paragraph.paint x and y)
+    double tail = webTextCluster.bounds.left - webTextCluster.bounds.left.floorToDouble();
+    if (tail >= 0.5) {
+      tail -= 1.0;
+    }
+    final ui.Rect targetRect = sourceRect
+        .translate(clusterOffset.dx, clusterOffset.dy)
+        .translate(lineOffset.dx, lineOffset.dy)
+        .translate(-tail, 0);
+
+    if (textStyle.background != null) {
+      // Draw the background color
+      final ui.Rect backgroundRect = ui.Rect.fromLTWH(
+        targetRect.left + tail,
+        targetRect.top,
+        targetRect.width + 1,
+        targetRect.height,
+      );
+      canvas.drawRect(backgroundRect, textStyle.background!);
+    }
+
     textContext.fillStyle = textStyle.foreground?.color.toCssString();
     // We fill the text cluster into a rectange [0,0,w,h]
     // but we need to shift the y coordinate by the font ascent
@@ -91,19 +123,7 @@ class TextPaint {
       skImage,
       imageSource: engine.ImageBitmapImageSource(bitmap),
     );
-    // This is the bounding rectangle for the text cluster we filled above
-    final ui.Rect sourceRect = ui.Rect.fromLTWH(
-      0,
-      0,
-      webTextCluster.bounds.width,
-      webTextCluster.bounds.height,
-    );
-    // We shift the target rect to the correct x position inside the line and
-    // the correct y position of the line itself
-    // (and then to the paragraph.paint x and y)
-    final ui.Rect targetRect = sourceRect
-        .translate(clusterOffset.dx, clusterOffset.dy)
-        .translate(lineOffset.dx, lineOffset.dy);
+
     canvas.drawImageRect(
       ckImage,
       sourceRect,
