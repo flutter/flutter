@@ -1162,8 +1162,8 @@ void main() {
 
       expect(
         find.byType(CupertinoActivityIndicator),
-        paints..rrect(
-          rrect: const RRect.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
+        paints..rsuperellipse(
+          rsuperellipse: const RSuperellipse.fromLTRBXY(-1, -10 / 3, 1, -10, 1, 1),
           color: const Color(0x935D3FD3),
         ),
       );

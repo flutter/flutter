@@ -58,7 +58,7 @@ int getChildCount(WidgetTester tester) {
       .length;
 }
 
-ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
+ui.RSuperellipse getSurroundingShape(WidgetTester tester, {int child = 0}) {
   return ((getRenderSegmentedControl(tester)
                       as RenderBoxContainerDefaultsMixin<
                         RenderBox,
@@ -68,7 +68,7 @@ ui.RRect getSurroundingRect(WidgetTester tester, {int child = 0}) {
                   .parentData!
               as dynamic)
           .surroundingRect
-      as ui.RRect;
+      as ui.RSuperellipse;
 }
 
 Size getChildSize(WidgetTester tester, {int child = 0}) {
@@ -703,9 +703,9 @@ void main() {
 
     expect(childWidth, 200.0);
 
-    expect(childWidth, getSurroundingRect(tester).width);
-    expect(childWidth, getSurroundingRect(tester, child: 1).width);
-    expect(childWidth, getSurroundingRect(tester, child: 2).width);
+    expect(childWidth, getSurroundingShape(tester).width);
+    expect(childWidth, getSurroundingShape(tester, child: 1).width);
+    expect(childWidth, getSurroundingShape(tester, child: 2).width);
   });
 
   testWidgets('Width is finite in unbounded space', (WidgetTester tester) async {
