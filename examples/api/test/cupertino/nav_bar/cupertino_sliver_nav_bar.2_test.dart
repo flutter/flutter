@@ -69,7 +69,7 @@ void main() {
   ) async {
     await tester.pumpWidget(const example.SliverNavBarApp());
 
-    // Navigate to a page that has back button
+    // Navigate to a page that has a back button.
     final Finder nextButton = find.text('Go to Next Page');
     expect(nextButton, findsOneWidget);
     await tester.tap(nextButton);
