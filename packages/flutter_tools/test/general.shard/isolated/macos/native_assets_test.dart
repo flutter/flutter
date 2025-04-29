@@ -15,7 +15,8 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/code_assets.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
