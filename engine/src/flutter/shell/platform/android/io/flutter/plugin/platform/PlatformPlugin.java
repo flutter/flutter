@@ -403,7 +403,13 @@ public class PlatformPlugin {
     updateSystemUiOverlays();
   }
 
-  @SuppressWarnings("deprecation")
+  /**
+   * @deprecated This method is outdated because it calls {@code setStatusBarColor}, {@code
+   *     setNavigationBarColor} and {@code setNavigationBarDividerColor}, which are deprecated in
+   *     Android 15 and above. Consider using the new WindowInsetsController or other Android 15+
+   *     APIs for system UI styling.
+   */
+  @Deprecated
   private void setSystemChromeSystemUIOverlayStyle(
       PlatformChannel.SystemChromeStyle systemChromeStyle) {
     Window window = activity.getWindow();

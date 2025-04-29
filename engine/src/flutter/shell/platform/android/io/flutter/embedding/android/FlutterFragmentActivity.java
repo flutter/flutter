@@ -600,6 +600,12 @@ public class FlutterFragmentActivity extends FragmentActivity
     }
   }
 
+  /**
+   * @deprecated This method is outdated because it calls {@code setStatusBarColor}, which is
+   *     deprecated in Android 15 and above. Consider using the new WindowInsetsController or other
+   *     Android 15+ APIs for system UI styling.
+   */
+  @Deprecated
   private void configureStatusBarForFullscreenFlutterExperience() {
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
