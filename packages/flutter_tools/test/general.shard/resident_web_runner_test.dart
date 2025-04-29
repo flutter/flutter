@@ -46,8 +46,8 @@ import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
 import '../src/fakes.dart' as test_fakes;
 import '../src/package_config.dart';
-import '../src/throwing_pub.dart';
 import '../src/test_build_system.dart';
+import '../src/throwing_pub.dart';
 
 const List<VmServiceExpectation> kAttachLogExpectations = <VmServiceExpectation>[
   FakeVmServiceRequest(method: 'streamListen', args: <String, Object>{'streamId': 'Stdout'}),
