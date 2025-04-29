@@ -81,9 +81,9 @@ wasm_toolchain("canvaskit_experimental_webparagraph") {
     skia_icu_bidi_third_party_dir = "//flutter/third_party/canvaskit/icu_bidi"
 
     skia_enable_skparagraph = false
-    skia_canvaskit_enable_paragraph = false
-    skia_enable_shaper = false
-    skia_enable_harfbuzz = false
+    # TODO(mdebbar): This can't be set to false now because it causes font registration to fail.
+    # Once we update the font registration logic, we can come back and uncomment the next line.
+    # skia_canvaskit_enable_paragraph = false
 
     # TODO(mdebbar): Set these to false once all image decoding can be done
     # using the browser's built-in codecs.
