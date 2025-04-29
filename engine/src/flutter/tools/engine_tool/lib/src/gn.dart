@@ -52,7 +52,7 @@ interface class Gn {
     );
     if (process.exitCode != 0) {
       // If the error was in the format:
-      // "The input testing/scenario_app:scenario_app matches no targets, configs or files."
+      // "The input testing/foo:foo matches no targets, configs or files."
       //
       // Then report a nicer error, versus a fatal error.
       final stdout = process.stdout;
@@ -155,10 +155,8 @@ sealed class BuildTarget {
         // Remove the leading // from the path.
         executable: json.stringList('outputs').first.substring(2),
       ),
-      'shared_library' || 'static_library' => LibraryBuildTarget(
-        label: Label.parseGn(label),
-        testOnly: testOnly,
-      ),
+      'shared_library' ||
+      'static_library' => LibraryBuildTarget(label: Label.parseGn(label), testOnly: testOnly),
       'action' => BuildTarget._parseFromAction(label, testOnly: testOnly, json: json),
       'group' => GroupBuildTarget(
         label: Label.parseGn(label),

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:quiver/testing/async.dart';
@@ -62,9 +63,6 @@ void runSemanticsTests() {
   group('Roles', () {
     _testRoleLifecycle();
   });
-  group('Text', () {
-    _testText();
-  });
   group('labels', () {
     _testLabels();
   });
@@ -89,6 +87,9 @@ void runSemanticsTests() {
   group('selectables', () {
     _testSelectables();
   });
+  group('expandables', () {
+    _testExpandables();
+  });
   group('tappable', () {
     _testTappable();
   });
@@ -110,17 +111,42 @@ void runSemanticsTests() {
   group('accessibility builder', () {
     _testEngineAccessibilityBuilder();
   });
+  group('alert', () {
+    _testAlerts();
+  });
   group('group', () {
     _testGroup();
   });
   group('route', () {
     _testRoute();
+    _testDialogs();
   });
   group('focusable', () {
     _testFocusable();
   });
   group('link', () {
     _testLink();
+  });
+  group('tabs', () {
+    _testTabs();
+  });
+  group('table', () {
+    _testTables();
+  });
+  group('list', () {
+    _testLists();
+  });
+  group('controlsNodes', () {
+    _testControlsNodes();
+  });
+  group('menu', () {
+    _testMenus();
+  });
+  group('requirable', () {
+    _testRequirable();
+  });
+  group('SemanticsValidationResult', () {
+    _testSemanticsValidationResult();
   });
 }
 
@@ -139,10 +165,8 @@ void _testSemanticRole() {
 
     tester.expectSemantics('''
 <sem id="flt-semantic-node-0">
-  <sem-c>
     <sem id="flt-semantic-node-372"></sem>
     <sem id="flt-semantic-node-599"></sem>
-  </sem-c>
 </sem>''');
 
     tester.updateNode(
@@ -156,10 +180,8 @@ void _testSemanticRole() {
 
     tester.expectSemantics('''
 <sem id="flt-semantic-node-0">
-  <sem-c>
     <sem id="flt-semantic-node-372" flt-semantics-identifier="test-id-123"></sem>
     <sem id="flt-semantic-node-599"></sem>
-  </sem-c>
 </sem>''');
 
     tester.updateNode(
@@ -174,11 +196,9 @@ void _testSemanticRole() {
 
     tester.expectSemantics('''
 <sem id="flt-semantic-node-0">
-  <sem-c>
     <sem id="flt-semantic-node-372"></sem>
     <sem id="flt-semantic-node-599" flt-semantics-identifier="test-id-211"></sem>
     <sem id="flt-semantic-node-612" flt-semantics-identifier="test-id-333"></sem>
-  </sem-c>
 </sem>''');
   });
 }
@@ -198,7 +218,7 @@ void _testRoleLifecycle() {
       tester.expectSemantics('<sem role="button"></sem>');
 
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
-      expect(node.semanticRole?.kind, SemanticRoleKind.button);
+      expect(node.semanticRole?.kind, EngineSemanticsRole.button);
       expect(
         node.semanticRole?.debugSemanticBehaviorTypes,
         containsAll(<Type>[Focusable, Tappable, LabelAndValue]),
@@ -221,7 +241,7 @@ void _testRoleLifecycle() {
       tester.expectSemantics('<sem role="button">a label</sem>');
 
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
-      expect(node.semanticRole?.kind, SemanticRoleKind.button);
+      expect(node.semanticRole?.kind, EngineSemanticsRole.button);
       expect(
         node.semanticRole?.debugSemanticBehaviorTypes,
         containsAll(<Type>[Focusable, Tappable, LabelAndValue]),
@@ -284,6 +304,50 @@ void _testEngineAccessibilityBuilder() {
     builder.reduceMotion = true;
     features = builder.build();
     expect(features.reduceMotion, isTrue);
+  });
+}
+
+void _testAlerts() {
+  test('nodes with alert role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.alert,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.alert);
+    expect(object.element.getAttribute('role'), 'alert');
+  });
+
+  test('nodes with status role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.status,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.status);
+    expect(object.element.getAttribute('role'), 'status');
   });
 }
 
@@ -457,9 +521,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>Hello</span></sem>
-  </sem-c>
 </sem>''');
 
     // Update
@@ -467,9 +529,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>World</span></sem>
-  </sem-c>
 </sem>''');
 
     // Remove
@@ -477,9 +537,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -500,9 +558,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>Hello</span></sem>
-  </sem-c>
 </sem>''');
 
     // Update
@@ -515,9 +571,7 @@ void _testEngineSemanticsOwner() {
     expect(tree[1]!.element.tagName.toLowerCase(), 'a');
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <a style="display: block;">Hello</a>
-  </sem-c>
 </sem>''');
     expect(existingParent, tree[1]!.element.parent);
 
@@ -539,9 +593,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>tooltip</span></sem>
-  </sem-c>
 </sem>''');
 
     // Update
@@ -549,9 +601,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>tooltip\nHello</span></sem>
-  </sem-c>
 </sem>''');
 
     // Remove
@@ -559,9 +609,7 @@ void _testEngineSemanticsOwner() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -653,7 +701,7 @@ void _testEngineSemanticsOwner() {
     );
 
     // Rudely replace the role with a mock, and trigger an update.
-    final MockRole mockRole = MockRole(SemanticRoleKind.generic, semanticsObject);
+    final MockRole mockRole = MockRole(EngineSemanticsRole.generic, semanticsObject);
     semanticsObject.semanticRole = mockRole;
 
     pumpSemantics(label: 'World');
@@ -786,7 +834,7 @@ void _testHeader() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-<header aria-label="Header of the page"><sem-c><sem></sem></sem-c></header>
+<header aria-label="Header of the page"><sem></sem></header>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -856,58 +904,6 @@ void _testLongestIncreasingSubsequence() {
   });
 }
 
-void _testText() {
-  test('renders a piece of plain text', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(builder, label: 'plain text', rect: const ui.Rect.fromLTRB(0, 0, 100, 50));
-    owner().updateSemantics(builder.build());
-
-    expectSemanticsTree(owner(), '''<sem><span>plain text</span></sem>''');
-
-    final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.generic);
-    expect(node.semanticRole!.behaviors!.map((m) => m.runtimeType).toList(), <Type>[
-      Focusable,
-      LiveRegion,
-      RouteName,
-      LabelAndValue,
-    ]);
-    semantics().semanticsEnabled = false;
-  });
-
-  test('renders a tappable piece of text', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
-
-    final SemanticsTester tester = SemanticsTester(owner());
-    tester.updateNode(
-      id: 0,
-      hasTap: true,
-      label: 'tappable text',
-      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
-    );
-    tester.apply();
-
-    expectSemanticsTree(owner(), '''<sem flt-tappable=""><span>tappable text</span></sem>''');
-
-    final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.generic);
-    expect(node.semanticRole!.behaviors!.map((m) => m.runtimeType).toList(), <Type>[
-      Focusable,
-      LiveRegion,
-      RouteName,
-      LabelAndValue,
-      Tappable,
-    ]);
-    semantics().semanticsEnabled = false;
-  });
-}
-
 void _testLabels() {
   test('computeDomSemanticsLabel combines tooltip, label, value, and hint', () {
     expect(computeDomSemanticsLabel(tooltip: 'tooltip'), 'tooltip');
@@ -945,7 +941,7 @@ label hint''');
 }
 
 void _testContainer() {
-  test('container node has no transform when there is no rect offset', () async {
+  test('child node has no transform when there is no rect offset', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -962,35 +958,30 @@ void _testContainer() {
     updateNode(builder, id: 1, transform: Matrix4.identity().toFloat64(), rect: zeroOffsetRect);
 
     owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <sem-c>
-    <sem></sem>
-  </sem-c>
-</sem>''');
+    expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
     final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-    final DomElement container = owner().semanticsHost.querySelector('flt-semantics-container')!;
+    final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
 
     if (isMacOrIOS) {
       expect(parentElement.style.top, '0px');
       expect(parentElement.style.left, '0px');
-      expect(container.style.top, '0px');
-      expect(container.style.left, '0px');
+      expect(childElement.style.top, '0px');
+      expect(childElement.style.left, '0px');
     } else {
       expect(parentElement.style.top, '');
       expect(parentElement.style.left, '');
-      expect(container.style.top, '');
-      expect(container.style.left, '');
+      expect(childElement.style.top, '');
+      expect(childElement.style.left, '');
     }
     expect(parentElement.style.transform, '');
     expect(parentElement.style.transformOrigin, '');
-    expect(container.style.transform, '');
-    expect(container.style.transformOrigin, '');
+    expect(childElement.style.transform, '');
+    expect(childElement.style.transformOrigin, '');
     semantics().semanticsEnabled = false;
   });
 
-  test('container node compensates for rect offset', () async {
+  test('child node transform compensates for parent rect offset', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -1007,19 +998,14 @@ void _testContainer() {
       builder,
       id: 1,
       transform: Matrix4.identity().toFloat64(),
-      rect: const ui.Rect.fromLTRB(10, 10, 20, 20),
+      rect: const ui.Rect.fromLTRB(0, 0, 5, 5),
     );
 
     owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <sem-c>
-    <sem></sem>
-  </sem-c>
-</sem>''');
+    expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
     final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-    final DomElement container = owner().semanticsHost.querySelector('flt-semantics-container')!;
+    final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
 
     expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
     if (isSafari) {
@@ -1028,63 +1014,103 @@ void _testContainer() {
         parentElement.style.transformOrigin,
         anyOf(contains('0px 0px 0px'), contains('0px 0px')),
       );
+      expect(
+        childElement.style.transformOrigin,
+        anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+      );
     } else {
       expect(parentElement.style.transformOrigin, '0px 0px 0px');
+      expect(childElement.style.transformOrigin, '0px 0px 0px');
     }
-    expect(container.style.top, '-10px');
-    expect(container.style.left, '-10px');
+    expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -10, -10)');
+    expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+    expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
+
     semantics().semanticsEnabled = false;
   });
 
-  test('0 offsets are not removed for voiceover', () async {
-    semantics()
-      ..debugOverrideTimestampFunction(() => _testTime)
-      ..semanticsEnabled = true;
+  test(
+    'child node transform compensates for parent rect offset when parent rect changed',
+    () async {
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      transform: Matrix4.identity().toFloat64(),
-      rect: const ui.Rect.fromLTRB(0, 0, 20, 20),
-      childrenInHitTestOrder: Int32List.fromList(<int>[1]),
-      childrenInTraversalOrder: Int32List.fromList(<int>[1]),
-    );
-    updateNode(
-      builder,
-      id: 1,
-      transform: Matrix4.identity().toFloat64(),
-      rect: const ui.Rect.fromLTRB(10, 10, 20, 20),
-    );
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(10, 10, 20, 20),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(
+        builder,
+        id: 1,
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 5, 5),
+      );
 
-    owner().updateSemantics(builder.build());
-    expectSemanticsTree(owner(), '''
-<sem>
-  <sem-c>
-    <sem></sem>
-  </sem-c>
-</sem>''');
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
 
-    final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
-    final DomElement container = owner().semanticsHost.querySelector('flt-semantics-container')!;
+      final DomElement parentElement = owner().semanticsHost.querySelector('flt-semantics')!;
+      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-1')!;
 
-    if (isMacOrIOS) {
-      expect(parentElement.style.top, '0px');
-      expect(parentElement.style.left, '0px');
-      expect(container.style.top, '0px');
-      expect(container.style.left, '0px');
-    } else {
-      expect(parentElement.style.top, '');
-      expect(parentElement.style.left, '');
-      expect(container.style.top, '');
-      expect(container.style.left, '');
-    }
-    expect(parentElement.style.transform, '');
-    expect(parentElement.style.transformOrigin, '');
-    expect(container.style.transform, '');
-    expect(container.style.transformOrigin, '');
+      expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 10, 10)');
+      if (isSafari) {
+        // macOS 13 returns different values than macOS 12.
+        expect(
+          parentElement.style.transformOrigin,
+          anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+        );
+        expect(
+          childElement.style.transformOrigin,
+          anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+        );
+      } else {
+        expect(parentElement.style.transformOrigin, '0px 0px 0px');
+        expect(childElement.style.transformOrigin, '0px 0px 0px');
+      }
+      expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -10, -10)');
+      expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+      expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
 
-    semantics().semanticsEnabled = false;
-  });
+      final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+
+      updateNode(
+        builder2,
+        transform: Matrix4.identity().toFloat64(),
+        rect: const ui.Rect.fromLTRB(33, 33, 20, 20),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+      );
+
+      owner().updateSemantics(builder2.build());
+      expectSemanticsTree(owner(), '''<sem><sem></sem></sem>''');
+
+      expect(parentElement.style.transform, 'matrix(1, 0, 0, 1, 33, 33)');
+      if (isSafari) {
+        // macOS 13 returns different values than macOS 12.
+        expect(
+          parentElement.style.transformOrigin,
+          anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+        );
+        expect(
+          childElement.style.transformOrigin,
+          anyOf(contains('0px 0px 0px'), contains('0px 0px')),
+        );
+      } else {
+        expect(parentElement.style.transformOrigin, '0px 0px 0px');
+        expect(childElement.style.transformOrigin, '0px 0px 0px');
+      }
+      expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -33, -33)');
+      expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+      expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
+
+      semantics().semanticsEnabled = false;
+    },
+  );
 
   test('renders in traversal order, hit-tests in reverse z-index order', () async {
     semantics()
@@ -1107,12 +1133,10 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 4"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
     }
 
@@ -1127,12 +1151,10 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 4"></sem>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
     }
 
@@ -1147,12 +1169,10 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 1"></sem>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 4"></sem>
-  </sem-c>
 </sem>''');
     }
 
@@ -1167,12 +1187,10 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 4"></sem>
     <sem style="z-index: 1"></sem>
     <sem style="z-index: 3"></sem>
-  </sem-c>
 </sem>''');
     }
 
@@ -1196,10 +1214,8 @@ void _testContainer() {
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
@@ -1232,10 +1248,8 @@ void _testContainer() {
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
@@ -1243,7 +1257,6 @@ void _testContainer() {
 
     semantics().semanticsEnabled = false;
   });
-
   test('container can be opaque if it is a text field', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -1263,10 +1276,8 @@ void _testContainer() {
     expectSemanticsTree(owner(), '''
 <sem>
   <input>
-  <sem-c>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
@@ -1307,20 +1318,14 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
   <sem>
-    <sem-c>
       <sem style="z-index: 2">
-        <sem-c>
           <sem style="z-index: 2"></sem>
           <sem style="z-index: 1"></sem>
-        </sem-c>
       </sem>
       <sem style="z-index: 1">
-        <sem-c>
           <sem style="z-index: 2"></sem>
           <sem style="z-index: 1"></sem>
-        </sem-c>
       </sem>
-    </sem-c>
   </sem>''');
 
       expect(
@@ -1347,15 +1352,11 @@ void _testContainer() {
       owner().updateSemantics(builder.build());
       expectSemanticsTree(owner(), '''
   <sem>
-    <sem-c>
       <sem style="z-index: 2">
-        <sem-c>
           <sem style="z-index: 3"></sem>
           <sem style="z-index: 2"></sem>
           <sem style="z-index: 1"></sem>
-        </sem-c>
       </sem>
-    </sem-c>
   </sem>''');
 
       expect(owner().debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 3, 4, 6]));
@@ -1363,9 +1364,233 @@ void _testContainer() {
 
     semantics().semanticsEnabled = false;
   });
+
+  test('node updated with role change', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+      );
+      updateNode(
+        builder,
+        id: 1,
+        childrenInTraversalOrder: Int32List.fromList(<int>[3, 4]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[3, 4]),
+      );
+      updateNode(
+        builder,
+        id: 2,
+        childrenInTraversalOrder: Int32List.fromList(<int>[5, 6]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[5, 6]),
+      );
+      updateNode(builder, id: 3);
+      updateNode(builder, id: 4);
+      updateNode(builder, id: 5);
+      updateNode(builder, id: 6);
+
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '''
+  <sem>
+      <sem style="z-index: 2">
+          <sem style="z-index: 2"></sem>
+          <sem style="z-index: 1"></sem>
+      </sem>
+      <sem style="z-index: 1">
+          <sem style="z-index: 2"></sem>
+          <sem style="z-index: 1"></sem>
+      </sem>
+  </sem>''');
+
+      expect(
+        owner().debugSemanticsTree!.keys.toList(),
+        unorderedEquals(<int>[0, 1, 2, 3, 4, 5, 6]),
+      );
+    }
+
+    // update node #2 with a new role
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+      );
+      updateNode(
+        builder,
+        id: 1,
+        childrenInTraversalOrder: Int32List.fromList(<int>[3, 4]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[3, 4]),
+      );
+      updateNode(
+        builder,
+        id: 2,
+        role: ui.SemanticsRole.table,
+        childrenInTraversalOrder: Int32List.fromList(<int>[5, 6]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[5, 6]),
+      );
+      updateNode(builder, id: 3);
+      updateNode(builder, id: 4);
+      updateNode(builder, id: 5);
+      updateNode(builder, id: 6);
+
+      owner().updateSemantics(builder.build());
+      expectSemanticsTree(owner(), '''
+  <sem>
+      <sem style="z-index: 2">
+          <sem style="z-index: 2"></sem>
+          <sem style="z-index: 1"></sem>
+      </sem>
+      <sem style="z-index: 1">
+          <sem style="z-index: 2"></sem>
+          <sem style="z-index: 1"></sem>
+      </sem>
+  </sem>''');
+
+      expect(
+        owner().debugSemanticsTree!.keys.toList(),
+        unorderedEquals(<int>[0, 1, 2, 3, 4, 5, 6]),
+      );
+    }
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('reparented nodes have correct transform and position', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1, 2]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1, 2]),
+        rect: const ui.Rect.fromLTRB(11, 11, 111, 111),
+      );
+      updateNode(builder, id: 1, rect: const ui.Rect.fromLTRB(10, 10, 20, 20));
+      updateNode(
+        builder,
+        id: 2,
+        childrenInTraversalOrder: Int32List.fromList(<int>[3]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[3]),
+        rect: const ui.Rect.fromLTRB(22, 22, 222, 222),
+      );
+
+      updateNode(builder, id: 3);
+
+      owner().updateSemantics(builder.build());
+
+      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-3')!;
+
+      expectSemanticsTree(owner(), '''
+  <sem>
+      <sem style="z-index: 2"></sem>
+      <sem style="z-index: 1">
+        <sem></sem>
+      </sem>
+  </sem>''');
+
+      expect(owner().debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 2, 3]));
+
+      expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -22, -22)');
+      expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+      expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
+    }
+
+    // Remove node #2 => expect nodes #2 to be removed and #3 reparented.
+    {
+      final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+      updateNode(
+        builder,
+        childrenInTraversalOrder: Int32List.fromList(<int>[1]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[1]),
+      );
+      updateNode(
+        builder,
+        id: 1,
+        childrenInTraversalOrder: Int32List.fromList(<int>[3]),
+        childrenInHitTestOrder: Int32List.fromList(<int>[3]),
+        rect: const ui.Rect.fromLTRB(11, 11, 111, 111),
+      );
+      updateNode(builder, id: 3);
+      owner().updateSemantics(builder.build());
+
+      final DomElement childElement = owner().semanticsHost.querySelector('#flt-semantic-node-3')!;
+      expectSemanticsTree(owner(), '''
+    <sem>
+        <sem style="z-index: 2">
+            <sem ></sem>
+        </sem>
+    </sem>''');
+
+      expect(owner().debugSemanticsTree!.keys.toList(), unorderedEquals(<int>[0, 1, 3]));
+      expect(childElement.style.transform, 'matrix(1, 0, 0, 1, -11, -11)');
+      expect(childElement.style.left == '0px' || childElement.style.left == '', isTrue);
+      expect(childElement.style.top == '0px' || childElement.style.top == '', isTrue);
+    }
+
+    semantics().semanticsEnabled = false;
+  });
 }
 
 void _testVerticalScrolling() {
+  test('recognizes scrollable node when scroll actions not available', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+  <sem role="group" style="touch-action: none">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+  </sem>''');
+
+    final DomElement scrollable = findScrollable(owner());
+    expect(scrollable.scrollTop, isZero);
+    semantics().semanticsEnabled = false;
+  });
+
+  test('scroll events ignored when actions not available', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+    );
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+  <sem role="group" style="touch-action: none">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+  </sem>''');
+
+    final scrollable = owner().debugSemanticsTree![0]!.semanticRole! as SemanticScrollable;
+    final scrollEvent = createDomEvent('Event', 'scroll') as JSAny;
+    final listener = scrollable.scrollListener!;
+    expect(() => listener.callAsFunction(null, scrollEvent), returnsNormally);
+
+    semantics().semanticsEnabled = false;
+  });
+
   test('renders an empty scrollable node', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -1374,6 +1599,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1386,7 +1612,7 @@ void _testVerticalScrolling() {
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
-    expect(scrollable.scrollTop, isPositive);
+    expect(scrollable.scrollTop, 0);
     semantics().semanticsEnabled = false;
   });
 
@@ -1398,6 +1624,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1415,17 +1642,15 @@ void _testVerticalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-y: scroll">
 <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral scrollTop
-    // is still a positive number.
-    expect(scrollable.scrollTop, isPositive);
+    // is 0.
+    expect(scrollable.scrollTop, 0);
 
     semantics().semanticsEnabled = false;
   });
@@ -1450,6 +1675,7 @@ void _testVerticalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
@@ -1470,27 +1696,14 @@ void _testVerticalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-y: scroll">
   <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
     expect(scrollable, isNotNull);
-
-    // When there's more content than the available size the neutral scrollTop
-    // is greater than 0 with a maximum of 10 or 9.
-    int browserMaxScrollDiff = 0;
-    // The max scroll value varies between `9` and `10` for Safari desktop
-    // browsers.
-    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
-      browserMaxScrollDiff = 1;
-    }
-
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollTop, 0);
 
     Future<ui.SemanticsActionEvent> capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollTop = 20;
@@ -1498,21 +1711,112 @@ void _testVerticalScrolling() {
     ui.SemanticsActionEvent capturedEvent = await capturedEventFuture;
 
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollUp);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    final Float64List expectedOffset = Float64List(2);
+    expectedOffset[0] = 0.0;
+    expectedOffset[1] = 20.0;
+    Float64List message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
+
+    // Update scrollPosition to scrollTop value.
+    final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder2,
+      scrollPosition: 20.0,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+    owner().updateSemantics(builder2.build());
 
     capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollTop = 5;
     capturedEvent = await capturedEventFuture;
 
-    expect(scrollable.scrollTop >= (5 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollTop, 5);
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollDown);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollTop >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    expectedOffset[0] = 0.0;
+    expectedOffset[1] = 5.0;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
+  });
+
+  test('scrollable switches to pointer event mode on a wheel event', () async {
+    final actionLog = <ui.SemanticsActionEvent>[];
+    ui.PlatformDispatcher.instance.onSemanticsActionEvent = actionLog.add;
+
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    addTearDown(() async {
+      semantics().semanticsEnabled = false;
+    });
+
+    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+
+    for (int id = 1; id <= 3; id++) {
+      updateNode(
+        builder,
+        id: id,
+        transform: Matrix4.translationValues(0, 50.0 * id, 0).toFloat64(),
+        rect: const ui.Rect.fromLTRB(0, 0, 50, 50),
+      );
+    }
+
+    owner().updateSemantics(builder.build());
+    expectSemanticsTree(owner(), '''
+<sem style="touch-action: none; overflow-y: scroll">
+  <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+    <sem style="z-index: 3"></sem>
+    <sem style="z-index: 2"></sem>
+    <sem style="z-index: 1"></sem>
+</sem>''');
+
+    final DomElement scrollable = owner().debugSemanticsTree![0]!.element;
+    expect(scrollable, isNotNull);
+
+    // Initially, starting at "scrollTop" 0, everything should be
+    // in browser gesture mode, react to DOM scroll events, and generate
+    // semantic actions.
+    expect(scrollable.scrollTop, 0);
+    expect(semantics().gestureMode, GestureMode.browserGestures);
+    scrollable.scrollTop = 20;
+    expect(scrollable.scrollTop, 20);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(actionLog, hasLength(1));
+    final capturedEvent = actionLog.removeLast();
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+
+    // Now, starting at the "scrollTop" 20 we set, observing a DOM "wheel" event should
+    // swap into pointer event mode, and the scrollable becomes a plain clip,
+    // i.e. `overflow: hidden`.
+    expect(scrollable.scrollTop, 20);
+    expect(semantics().gestureMode, GestureMode.browserGestures);
+    expect(scrollable.style.overflowY, 'scroll');
+
+    semantics().receiveGlobalEvent(createDomEvent('Event', 'wheel'));
+    expect(semantics().gestureMode, GestureMode.pointerEvents);
+    expect(scrollable.style.overflowY, 'hidden');
   });
 }
 
@@ -1525,6 +1829,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1547,6 +1852,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1564,17 +1870,15 @@ void _testHorizontalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-x: scroll">
 <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
     expect(scrollable, isNotNull);
 
     // When there's less content than the available size the neutral
-    // scrollLeft is still a positive number.
-    expect(scrollable.scrollLeft, isPositive);
+    // scrollLeft is still 0.
+    expect(scrollable.scrollLeft, 0);
 
     semantics().semanticsEnabled = false;
   });
@@ -1599,6 +1903,7 @@ void _testHorizontalScrolling() {
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
     updateNode(
       builder,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
       actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
       transform: Matrix4.identity().toFloat64(),
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
@@ -1619,26 +1924,14 @@ void _testHorizontalScrolling() {
     expectSemanticsTree(owner(), '''
 <sem style="touch-action: none; overflow-x: scroll">
   <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
-  <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement scrollable = findScrollable(owner());
     expect(scrollable, isNotNull);
-
-    // When there's more content than the available size the neutral scrollTop
-    // is greater than 0 with a maximum of 10.
-    int browserMaxScrollDiff = 0;
-    // The max scroll value varies between `9` and `10` for Safari desktop
-    // browsers.
-    if (ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit &&
-        ui_web.browser.operatingSystem == ui_web.OperatingSystem.macOs) {
-      browserMaxScrollDiff = 1;
-    }
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollLeft, 0);
 
     Future<ui.SemanticsActionEvent> capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollLeft = 20;
@@ -1646,21 +1939,44 @@ void _testHorizontalScrolling() {
     ui.SemanticsActionEvent capturedEvent = await capturedEventFuture;
 
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollLeft);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll position back to neutral.
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    final Float64List expectedOffset = Float64List(2);
+    expectedOffset[0] = 20.0;
+    expectedOffset[1] = 0.0;
+    Float64List message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
+
+    // Update scrollPosition to scrollLeft value.
+    final ui.SemanticsUpdateBuilder builder2 = ui.SemanticsUpdateBuilder();
+    updateNode(
+      builder2,
+      scrollPosition: 20.0,
+      flags: 0 | ui.SemanticsFlag.hasImplicitScrolling.index,
+      actions: 0 | ui.SemanticsAction.scrollLeft.index | ui.SemanticsAction.scrollRight.index,
+      transform: Matrix4.identity().toFloat64(),
+      rect: const ui.Rect.fromLTRB(0, 0, 50, 100),
+      childrenInHitTestOrder: Int32List.fromList(<int>[1, 2, 3]),
+      childrenInTraversalOrder: Int32List.fromList(<int>[1, 2, 3]),
+    );
+    owner().updateSemantics(builder2.build());
 
     capturedEventFuture = captureSemanticsEvent();
     scrollable.scrollLeft = 5;
     capturedEvent = await capturedEventFuture;
 
-    expect(scrollable.scrollLeft >= (5 - browserMaxScrollDiff), isTrue);
+    expect(scrollable.scrollLeft, 5);
     expect(capturedEvent.nodeId, 0);
-    expect(capturedEvent.type, ui.SemanticsAction.scrollRight);
-    expect(capturedEvent.arguments, isNull);
-    // Engine semantics returns scroll top back to neutral.
-    expect(scrollable.scrollLeft >= (10 - browserMaxScrollDiff), isTrue);
+    expect(capturedEvent.type, ui.SemanticsAction.scrollToOffset);
+    expect(capturedEvent.arguments, isNotNull);
+    expectedOffset[0] = 5.0;
+    expectedOffset[1] = 0.0;
+    message =
+        const StandardMessageCodec().decodeMessage(capturedEvent.arguments! as ByteData)
+            as Float64List;
+    expect(message, expectedOffset);
   });
 }
 
@@ -1686,7 +2002,7 @@ void _testIncrementables() {
 </sem>''');
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.incrementable);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.incrementable);
     expect(
       reason: 'Incrementables use custom focus management',
       node.semanticRole!.debugSemanticBehaviorTypes,
@@ -1881,7 +2197,7 @@ void _testTextField() {
     //                https://github.com/flutter/flutter/issues/147200
     expect(inputElement.value, '');
 
-    expect(node.semanticRole?.kind, SemanticRoleKind.textField);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.textField);
     expect(
       reason: 'Text fields use custom focus management',
       node.semanticRole!.debugSemanticBehaviorTypes,
@@ -1920,7 +2236,7 @@ void _testCheckables() {
 ''');
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.checkable);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.checkable);
     expect(
       reason: 'Checkables use generic semantic behaviors',
       node.semanticRole!.debugSemanticBehaviorTypes,
@@ -2143,6 +2459,49 @@ void _testCheckables() {
     semantics().semanticsEnabled = false;
   });
 
+  test('renders a radio button group', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.radioGroup,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 40),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          isEnabled: true,
+          hasEnabledState: true,
+          hasCheckedState: true,
+          isInMutuallyExclusiveGroup: true,
+          isChecked: false,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 20),
+        ),
+        tester.updateNode(
+          id: 2,
+          isEnabled: true,
+          hasEnabledState: true,
+          hasCheckedState: true,
+          isInMutuallyExclusiveGroup: true,
+          isChecked: true,
+          rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem role="radiogroup">
+    <sem aria-checked="false"></sem>
+    <sem aria-checked="true"></sem>
+</sem>
+''');
+
+    semantics().semanticsEnabled = false;
+  });
+
   test('sends focus events', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -2220,13 +2579,28 @@ void _testSelectables() {
           id: 2,
           isSelectable: true,
           isSelected: false,
+          role: ui.SemanticsRole.row,
           rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
         ),
         tester.updateNode(
           id: 3,
           isSelectable: true,
           isSelected: true,
+          role: ui.SemanticsRole.tab,
           rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+        // Add two new nodes to test the aria-current fallback
+        tester.updateNode(
+          id: 4,
+          isSelectable: true,
+          isSelected: false,
+          rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+        ),
+        tester.updateNode(
+          id: 5,
+          isSelectable: true,
+          isSelected: true,
+          rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
         ),
       ],
     );
@@ -2234,40 +2608,56 @@ void _testSelectables() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
-    <sem aria-selected="false"></sem>
-    <sem aria-selected="true"></sem>
-  </sem-c>
+    <sem role="row" aria-selected="false"></sem>
+    <sem role="tab" aria-selected="true"></sem>
+    <sem aria-current="false"></sem>
+    <sem aria-current="true"></sem>
 </sem>
 ''');
 
     // Missing attributes cannot be expressed using HTML patterns, so check directly.
-    final nonSelectable = owner().debugSemanticsTree![1]!.element;
+    final nonSelectable = owner().debugSemanticsTree![0]!.element;
     expect(nonSelectable.getAttribute('aria-selected'), isNull);
+    expect(nonSelectable.getAttribute('aria-current'), isNull);
 
     // Flip the values and check that that ARIA attribute is updated.
     tester.updateNode(
       id: 2,
       isSelectable: true,
       isSelected: true,
+      role: ui.SemanticsRole.row,
       rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
     );
     tester.updateNode(
       id: 3,
       isSelectable: true,
       isSelected: false,
+      role: ui.SemanticsRole.tab,
       rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    // Flip the values for the aria-current fallback nodes
+    tester.updateNode(
+      id: 4,
+      isSelectable: true,
+      isSelected: true,
+      rect: const ui.Rect.fromLTRB(0, 60, 100, 80),
+    );
+    tester.updateNode(
+      id: 5,
+      isSelectable: true,
+      isSelected: false,
+      rect: const ui.Rect.fromLTRB(0, 80, 100, 100),
     );
     tester.apply();
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem></sem>
-    <sem aria-selected="true"></sem>
-    <sem aria-selected="false"></sem>
-  </sem-c>
+    <sem role="row" aria-selected="true"></sem>
+    <sem role="tab" aria-selected="false"></sem>
+    <sem aria-current="true"></sem>
+    <sem aria-current="false"></sem>
 </sem>
 ''');
 
@@ -2294,7 +2684,7 @@ void _testSelectables() {
     expectSemanticsTree(owner(), '<sem flt-tappable role="checkbox" aria-checked="true"></sem>');
 
     final node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole!.kind, SemanticRoleKind.checkable);
+    expect(node.semanticRole!.kind, EngineSemanticsRole.checkable);
     expect(node.semanticRole!.debugSemanticBehaviorTypes, isNot(contains(Selectable)));
     expect(node.element.getAttribute('aria-selected'), isNull);
 
@@ -2302,8 +2692,75 @@ void _testSelectables() {
   });
 }
 
+void _testExpandables() {
+  test('renders and updates non-expandable, expanded, and unexpanded nodes', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, isSelectable: false, rect: const ui.Rect.fromLTRB(0, 0, 100, 20)),
+        tester.updateNode(
+          id: 2,
+          isExpandable: true,
+          isExpanded: false,
+          rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+        ),
+        tester.updateNode(
+          id: 3,
+          isExpandable: true,
+          isExpanded: true,
+          rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+    <sem></sem>
+    <sem aria-expanded="false"></sem>
+    <sem aria-expanded="true"></sem>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final nonExpandable = owner().debugSemanticsTree![1]!.element;
+    expect(nonExpandable.getAttribute('aria-expanded'), isNull);
+
+    // Flip the values and check that that ARIA attribute is updated.
+    tester.updateNode(
+      id: 2,
+      isExpandable: true,
+      isExpanded: true,
+      rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+    );
+    tester.updateNode(
+      id: 3,
+      isExpandable: true,
+      isExpanded: false,
+      rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+    <sem></sem>
+    <sem aria-expanded="true"></sem>
+    <sem aria-expanded="false"></sem>
+</sem>
+''');
+
+    semantics().semanticsEnabled = false;
+  });
+}
+
 void _testTappable() {
-  test('renders an enabled tappable widget', () async {
+  test('renders an enabled button', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -2325,28 +2782,30 @@ void _testTappable() {
 ''');
 
     final SemanticsObject node = owner().debugSemanticsTree![0]!;
-    expect(node.semanticRole?.kind, SemanticRoleKind.button);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.button);
     expect(node.semanticRole?.debugSemanticBehaviorTypes, containsAll(<Type>[Focusable, Tappable]));
     expect(tester.getSemanticsObject(0).element.tabIndex, 0);
 
     semantics().semanticsEnabled = false;
   });
 
-  test('renders a disabled tappable widget', () async {
+  test('renders a disabled button', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
 
-    final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    updateNode(
-      builder,
-      actions: 0 | ui.SemanticsAction.tap.index,
-      flags: 0 | ui.SemanticsFlag.hasEnabledState.index | ui.SemanticsFlag.isButton.index,
-      transform: Matrix4.identity().toFloat64(),
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      isFocusable: true,
+      hasTap: true,
+      hasEnabledState: true,
+      isEnabled: false,
+      isButton: true,
       rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
     );
+    tester.apply();
 
-    owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
 <sem role="button" aria-disabled="true"></sem>
 ''');
@@ -2354,7 +2813,40 @@ void _testTappable() {
     semantics().semanticsEnabled = false;
   });
 
-  test('can switch tappable between enabled and disabled', () async {
+  test('tappable leaf node is a button', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      isFocusable: true,
+      hasEnabledState: true,
+      isEnabled: true,
+
+      // Not a button
+      isButton: false,
+
+      // But has a tap action and no children
+      hasTap: true,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem role="button" flt-tappable></sem>
+''');
+
+    final SemanticsObject node = owner().debugSemanticsTree![0]!;
+    expect(node.semanticRole?.kind, EngineSemanticsRole.button);
+    expect(node.semanticRole?.debugSemanticBehaviorTypes, containsAll(<Type>[Focusable, Tappable]));
+    expect(tester.getSemanticsObject(0).element.tabIndex, 0);
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('can switch a button between enabled and disabled', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -2387,7 +2879,7 @@ void _testTappable() {
     semantics().semanticsEnabled = false;
   });
 
-  test('focuses on tappable after element has been attached', () async {
+  test('focuses on a button after element has been attached', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -2513,9 +3005,7 @@ void _testTappable() {
 
     expectSemanticsTree(owner(), '''
 <sem flt-tappable role="button">
-  <sem-c>
     <sem flt-tappable role="button"></sem>
-  </sem-c>
 </sem>
 ''');
 
@@ -2606,9 +3096,7 @@ void _testImage() {
     expectSemanticsTree(owner(), '''
 <sem>
   <sem-img role="img" aria-label="Test Image Label"></sem-img>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -2658,9 +3146,7 @@ void _testImage() {
     expectSemanticsTree(owner(), '''
 <sem>
   <sem-img role="img"></sem-img>
-  <sem-c>
     <sem></sem>
-  </sem-c>
 </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -2877,11 +3363,9 @@ void _testPlatformView() {
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem style="z-index: 3"></sem>
     <sem style="z-index: 2" aria-owns="flt-pv-0"></sem>
     <sem style="z-index: 1"></sem>
-  </sem-c>
 </sem>''');
 
     final DomElement root = owner().semanticsHost.querySelector('#flt-semantic-node-0')!;
@@ -2975,7 +3459,7 @@ void _testGroup() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-<sem role="group" aria-label="this is a label for a group of elements"><sem-c><sem></sem></sem-c></sem>
+<sem role="group" aria-label="this is a label for a group of elements"><sem></sem></sem>
 ''');
 
     semantics().semanticsEnabled = false;
@@ -3007,10 +3491,10 @@ void _testRoute() {
 
     owner().updateSemantics(builder.build());
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label="this is a route label"><sem-c><sem></sem></sem-c></sem>
+      <sem role="dialog" aria-label="this is a route label"><sem></sem></sem>
     ''');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.route);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
 
     semantics().semanticsEnabled = false;
   });
@@ -3046,10 +3530,10 @@ void _testRoute() {
 
     // But still sets the dialog role.
     expectSemanticsTree(owner(), '''
-      <sem role="dialog" aria-label=""><sem-c><sem></sem></sem-c></sem>
+      <sem role="dialog" aria-label=""><sem></sem></sem>
     ''');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.route);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
 
     semantics().semanticsEnabled = false;
   });
@@ -3078,21 +3562,17 @@ void _testRoute() {
 
       expectSemanticsTree(owner(), '''
         <sem role="dialog" aria-describedby="flt-semantic-node-2">
-          <sem-c>
             <sem>
-              <sem-c>
                 <sem><span>$label</span></sem>
-              </sem-c>
             </sem>
-          </sem-c>
         </sem>
       ''');
     }
 
     pumpSemantics(label: 'Route label');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.route);
-    expect(owner().debugSemanticsTree![2]!.semanticRole?.kind, SemanticRoleKind.generic);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
+    expect(owner().debugSemanticsTree![2]!.semanticRole?.kind, EngineSemanticsRole.generic);
     expect(
       owner().debugSemanticsTree![2]!.semanticRole?.debugSemanticBehaviorTypes,
       contains(RouteName),
@@ -3116,7 +3596,7 @@ void _testRoute() {
       <sem role="dialog"></sem>
     ''');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.route);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.route);
     expect(owner().debugSemanticsTree![0]!.semanticRole?.behaviors, isNot(contains(RouteName)));
 
     semantics().semanticsEnabled = false;
@@ -3144,17 +3624,13 @@ void _testRoute() {
 
     expectSemanticsTree(owner(), '''
       <sem>
-        <sem-c>
           <sem>
-            <sem-c>
               <sem><span>Hello</span></sem>
-            </sem-c>
           </sem>
-        </sem-c>
       </sem>
     ''');
 
-    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, SemanticRoleKind.generic);
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.generic);
     expect(
       owner().debugSemanticsTree![2]!.semanticRole?.debugSemanticBehaviorTypes,
       contains(RouteName),
@@ -3327,16 +3803,12 @@ void _testRoute() {
 
     tester.expectSemantics('''
 <flt-semantics>
-  <flt-semantics-container>
     <flt-semantics>
-      <flt-semantics-container>
         <flt-semantics id="flt-semantic-node-2">
           <span tabindex="-1">Heading</span>
         </flt-semantics>
         <flt-semantics role="button" tabindex="0" flt-tappable="">Click me!</flt-semantics>
-      </flt-semantics-container>
     </flt-semantics>
-  </flt-semantics-container>
 </flt-semantics>''');
 
     final DomElement span = owner().debugSemanticsTree![2]!.element.querySelectorAll('span').single;
@@ -3364,6 +3836,95 @@ void _testRoute() {
 
     expect(capturedActions, isEmpty);
     expect(domDocument.activeElement, flutterViewRoot);
+
+    semantics().semanticsEnabled = false;
+  });
+}
+
+void _testDialogs() {
+  test('nodes with dialog role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.dialog,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.dialog);
+    expect(object.element.getAttribute('role'), 'dialog');
+  });
+
+  test('nodes with alertdialog role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.alertDialog,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.alertDialog);
+    expect(object.element.getAttribute('role'), 'alertdialog');
+  });
+
+  test('dialog can be described by a descendant', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    void pumpSemantics({required String label}) {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.dialog,
+        transform: Matrix4.identity().toFloat64(),
+        children: <SemanticsNodeUpdate>[
+          tester.updateNode(
+            id: 1,
+            children: <SemanticsNodeUpdate>[
+              tester.updateNode(id: 2, namesRoute: true, label: label),
+            ],
+          ),
+        ],
+      );
+      tester.apply();
+
+      expectSemanticsTree(owner(), '''
+        <sem role="dialog" aria-describedby="flt-semantic-node-2">
+            <sem>
+                <sem><span>$label</span></sem>
+            </sem>
+        </sem>
+      ''');
+    }
+
+    pumpSemantics(label: 'Route label');
+
+    expect(owner().debugSemanticsTree![0]!.semanticRole?.kind, EngineSemanticsRole.dialog);
+    expect(owner().debugSemanticsTree![2]!.semanticRole?.kind, EngineSemanticsRole.generic);
+    expect(
+      owner().debugSemanticsTree![2]!.semanticRole?.debugSemanticBehaviorTypes,
+      contains(RouteName),
+    );
+
+    pumpSemantics(label: 'Updated route label');
 
     semantics().semanticsEnabled = false;
   });
@@ -3508,15 +4069,13 @@ void _testFocusable() {
 
     expectSemanticsTree(owner(), '''
 <sem>
-  <sem-c>
     <sem><span>focusable text</span></sem>
-  </sem-c>
 </sem>
 ''');
 
     final SemanticsObject node = owner().debugSemanticsTree![1]!;
     expect(node.isFocusable, isTrue);
-    expect(node.semanticRole?.kind, SemanticRoleKind.generic);
+    expect(node.semanticRole?.kind, EngineSemanticsRole.generic);
     expect(node.semanticRole?.debugSemanticBehaviorTypes, contains(Focusable));
 
     final DomElement element = node.element;
@@ -3581,6 +4140,739 @@ void _testLink() {
   });
 }
 
+void _testTabs() {
+  test('nodes with tab role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.tab,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tab);
+    expect(object.element.getAttribute('role'), 'tab');
+  });
+
+  test('nodes with tab panel role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.tabPanel,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tabPanel);
+    expect(object.element.getAttribute('role'), 'tabpanel');
+  });
+
+  test('nodes with tab bar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.tabBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.tabList);
+    expect(object.element.getAttribute('role'), 'tablist');
+  });
+}
+
+void _testTables() {
+  test('nodes with table role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.table,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.table);
+    expect(object.element.getAttribute('role'), 'table');
+  });
+
+  test('nodes with cell role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.cell,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.cell);
+    expect(object.element.getAttribute('role'), 'cell');
+  });
+
+  test('nodes with row role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.row,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.row);
+    expect(object.element.getAttribute('role'), 'row');
+  });
+
+  test('nodes with column header  role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.columnHeader,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.columnHeader);
+    expect(object.element.getAttribute('role'), 'columnheader');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testMenus() {
+  test('nodes with menu role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menu,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menu);
+    expect(object.element.getAttribute('role'), 'menu');
+  });
+
+  test('menu can have non-immidiate menu item nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menu,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(
+      object.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
+  });
+
+  test('nested menus have correct menu item nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menu,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(
+              id: 4,
+              role: ui.SemanticsRole.menuItem,
+              isExpandable: true,
+              isExpanded: true,
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(
+                  id: 5,
+                  role: ui.SemanticsRole.menu,
+                  children: <SemanticsNodeUpdate>[
+                    tester.updateNode(
+                      id: 6,
+                      children: <SemanticsNodeUpdate>[
+                        tester.updateNode(id: 7, role: ui.SemanticsRole.menuItem),
+                        tester.updateNode(id: 8, role: ui.SemanticsRole.menuItem),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject object0 = tester.getSemanticsObject(0);
+    expect(
+      object0.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
+    final SemanticsObject object1 = tester.getSemanticsObject(5);
+    expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
+  });
+
+  test('menu bar can have non-immidiate menu item nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menuBar,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 4, role: ui.SemanticsRole.menuItem),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject object = tester.getSemanticsObject(0);
+    expect(
+      object.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
+  });
+
+  test('menu bar and its submenu have correct menu item nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.menuBar,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(id: 2, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(id: 3, role: ui.SemanticsRole.menuItem),
+            tester.updateNode(
+              id: 4,
+              role: ui.SemanticsRole.menuItem,
+              isExpandable: true,
+              isExpanded: true,
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(
+                  id: 5,
+                  role: ui.SemanticsRole.menu,
+                  children: <SemanticsNodeUpdate>[
+                    tester.updateNode(
+                      id: 6,
+                      children: <SemanticsNodeUpdate>[
+                        tester.updateNode(id: 7, role: ui.SemanticsRole.menuItem),
+                        tester.updateNode(id: 8, role: ui.SemanticsRole.menuItem),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    final SemanticsObject object0 = tester.getSemanticsObject(0);
+    expect(
+      object0.element.getAttribute('aria-owns'),
+      'flt-semantic-node-2 flt-semantic-node-3 flt-semantic-node-4',
+    );
+    final SemanticsObject object1 = tester.getSemanticsObject(5);
+    expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
+  });
+
+  test('nodes with menuitem role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItem,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItem);
+    expect(object.element.getAttribute('role'), 'menuitem');
+  });
+
+  test('nodes with menuitem role and hasPopup attribute', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics(bool isExpandable) {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItem,
+        isExpandable: isExpandable,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object0 = pumpSemantics(true);
+    expect(object0.semanticRole?.kind, EngineSemanticsRole.menuItem);
+    expect(object0.element.getAttribute('role'), 'menuitem');
+    expect(object0.element.getAttribute('aria-haspopup'), 'menu');
+
+    final SemanticsObject object1 = pumpSemantics(false);
+    expect(object1.element.getAttribute('role'), 'menuitem');
+    expect(object1.element.getAttribute('aria-haspopup'), isNull);
+  });
+
+  test('nodes with menubar role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuBar,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuBar);
+    expect(object.element.getAttribute('role'), 'menubar');
+  });
+
+  test('nodes with menuitemcheckbox role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItemCheckbox,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItemCheckbox);
+    expect(object.element.getAttribute('role'), 'menuitemcheckbox');
+  });
+
+  test('nodes with menuitemRadio role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.menuItemRadio,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.menuItemRadio);
+    expect(object.element.getAttribute('role'), 'menuitemradio');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testLists() {
+  test('nodes with list role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.list,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.list);
+    expect(object.element.getAttribute('role'), 'list');
+  });
+
+  test('nodes with list item role', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    SemanticsObject pumpSemantics() {
+      final SemanticsTester tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        role: ui.SemanticsRole.listItem,
+        rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      );
+      tester.apply();
+      return tester.getSemanticsObject(0);
+    }
+
+    final SemanticsObject object = pumpSemantics();
+    expect(object.semanticRole?.kind, EngineSemanticsRole.listItem);
+    expect(object.element.getAttribute('role'), 'listitem');
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testControlsNodes() {
+  test('can have multiple controlled nodes', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+      ],
+    );
+    tester.apply();
+
+    SemanticsObject object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-1');
+
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['b'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+      ],
+    );
+    tester.apply();
+
+    object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-2');
+
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a', 'b'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+      ],
+    );
+    tester.apply();
+
+    object = tester.getSemanticsObject(0);
+    expect(object.element.getAttribute('aria-controls'), 'flt-semantic-node-1 flt-semantic-node-2');
+
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a', 'b', 'c'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+        tester.updateNode(id: 3, identifier: 'c'),
+        tester.updateNode(id: 4, identifier: 'd'),
+      ],
+    );
+    tester.apply();
+
+    object = tester.getSemanticsObject(0);
+    expect(
+      object.element.getAttribute('aria-controls'),
+      'flt-semantic-node-1 flt-semantic-node-2 flt-semantic-node-3',
+    );
+
+    tester.updateNode(
+      id: 0,
+      controlsNodes: <String>['a', 'b', 'd'],
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, identifier: 'a'),
+        tester.updateNode(id: 2, identifier: 'b'),
+        tester.updateNode(id: 3, identifier: 'c'),
+        tester.updateNode(id: 4, identifier: 'd'),
+      ],
+    );
+    tester.apply();
+
+    object = tester.getSemanticsObject(0);
+    expect(
+      object.element.getAttribute('aria-controls'),
+      'flt-semantic-node-1 flt-semantic-node-2 flt-semantic-node-4',
+    );
+  });
+
+  semantics().semanticsEnabled = false;
+}
+
+void _testRequirable() {
+  test('renders and updates non-requirable, required, and unrequired nodes', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(id: 1, isSelectable: false, rect: const ui.Rect.fromLTRB(0, 0, 100, 20)),
+        tester.updateNode(
+          id: 2,
+          hasRequiredState: true,
+          isRequired: false,
+          rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+        ),
+        tester.updateNode(
+          id: 3,
+          hasRequiredState: true,
+          isRequired: true,
+          rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+    <sem></sem>
+    <sem aria-required="false"></sem>
+    <sem aria-required="true"></sem>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final notRequirable1 = owner().debugSemanticsTree![1]!.element;
+    expect(notRequirable1.getAttribute('aria-required'), isNull);
+
+    // Flip the values and check that that ARIA attribute is updated.
+    tester.updateNode(
+      id: 2,
+      hasRequiredState: true,
+      isRequired: true,
+      rect: const ui.Rect.fromLTRB(0, 20, 100, 40),
+    );
+    tester.updateNode(
+      id: 3,
+      hasRequiredState: true,
+      isRequired: false,
+      rect: const ui.Rect.fromLTRB(0, 40, 100, 60),
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+    <sem></sem>
+    <sem aria-required="true"></sem>
+    <sem aria-required="false"></sem>
+</sem>
+''');
+
+    // Remove the ARIA attribute
+    tester.updateNode(id: 2, hasRequiredState: false, rect: const ui.Rect.fromLTRB(0, 20, 100, 40));
+    tester.updateNode(id: 3, hasRequiredState: false, rect: const ui.Rect.fromLTRB(0, 40, 100, 60));
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem>
+    <sem></sem>
+    <sem></sem>
+    <sem></sem>
+</sem>
+''');
+
+    // Missing attributes cannot be expressed using HTML patterns, so check directly.
+    final notRequirable2 = owner().debugSemanticsTree![2]!.element;
+    expect(notRequirable2.getAttribute('aria-required'), isNull);
+
+    final notRequirable3 = owner().debugSemanticsTree![3]!.element;
+    expect(notRequirable3.getAttribute('aria-required'), isNull);
+
+    semantics().semanticsEnabled = false;
+  });
+}
+
+void _testSemanticsValidationResult() {
+  test('renders validation result', () {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final SemanticsTester tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        // This node does not validate its contents and should not have an
+        // aria-invalid attribute at all.
+        tester.updateNode(id: 1),
+        // This node is valid. aria-invalid should be "false".
+        tester.updateNode(id: 2, validationResult: ui.SemanticsValidationResult.valid),
+        // This node is invalid. aria-invalid should be "true".
+        tester.updateNode(id: 3, validationResult: ui.SemanticsValidationResult.invalid),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0" aria-invalid--missing>
+  <sem id="flt-semantic-node-1" aria-invalid--missing></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid="true"></sem>
+</sem>''');
+
+    // Shift all values, observe that the values changed accordingly
+    tester.updateNode(
+      id: 0,
+      children: <SemanticsNodeUpdate>[
+        // This node is valid. aria-invalid should be "false".
+        tester.updateNode(id: 1, validationResult: ui.SemanticsValidationResult.valid),
+        // This node is invalid. aria-invalid should be "true".
+        tester.updateNode(id: 2, validationResult: ui.SemanticsValidationResult.invalid),
+        // This node does not validate its contents and should not have an
+        // aria-invalid attribute at all.
+        tester.updateNode(id: 3),
+      ],
+    );
+    tester.apply();
+
+    tester.expectSemantics('''
+<sem id="flt-semantic-node-0" aria-invalid--missing>
+  <sem id="flt-semantic-node-1" aria-invalid="false"></sem>
+  <sem id="flt-semantic-node-2" aria-invalid="true"></sem>
+  <sem id="flt-semantic-node-3" aria-invalid--missing></sem>
+</sem>''');
+  });
+}
+
 /// A facade in front of [ui.SemanticsUpdateBuilder.updateNode] that
 /// supplies default values for semantics attributes.
 void updateNode(
@@ -3620,6 +4912,9 @@ void updateNode(
   Int32List? additionalActions,
   int headingLevel = 0,
   String? linkUrl,
+  List<String>? controlsNodes,
+  ui.SemanticsRole role = ui.SemanticsRole.none,
+  ui.SemanticsInputType inputType = ui.SemanticsInputType.none,
 }) {
   transform ??= Float64List.fromList(Matrix4.identity().storage);
   childrenInTraversalOrder ??= Int32List(0);
@@ -3627,6 +4922,7 @@ void updateNode(
   additionalActions ??= Int32List(0);
   builder.updateNode(
     id: id,
+    role: role,
     flags: flags,
     actions: actions,
     maxValueLength: maxValueLength,
@@ -3661,6 +4957,8 @@ void updateNode(
     additionalActions: additionalActions,
     headingLevel: headingLevel,
     linkUrl: linkUrl,
+    controlsNodes: controlsNodes,
+    inputType: inputType,
   );
 }
 

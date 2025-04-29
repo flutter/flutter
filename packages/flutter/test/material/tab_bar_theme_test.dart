@@ -7,7 +7,6 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -196,7 +195,7 @@ void main() {
     // Test default label color and label styles.
     await tester.pumpWidget(buildTabBar(useMaterial3: true));
 
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
     expect(selectedLabel.text.style!.fontFamily, equals(theme.textTheme.titleSmall!.fontFamily));
     expect(selectedLabel.text.style!.fontSize, equals(14.0));
@@ -251,7 +250,7 @@ void main() {
     // Test default label color and label styles.
     await tester.pumpWidget(buildTabBar(secondaryTabBar: true, useMaterial3: true));
 
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
     expect(selectedLabel.text.style!.fontFamily, equals(theme.textTheme.titleSmall!.fontFamily));
     expect(selectedLabel.text.style!.fontSize, equals(14.0));
@@ -509,7 +508,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(tabBarTheme: tabBarTheme, useMaterial3: true),
+        theme: ThemeData(tabBarTheme: tabBarTheme),
         home: Scaffold(
           body: RepaintBoundary(
             key: _painterKey,
@@ -704,7 +703,6 @@ void main() {
   ) async {
     final ThemeData theme = ThemeData(
       tabBarTheme: const TabBarThemeData(indicatorSize: TabBarIndicatorSize.tab),
-      useMaterial3: true,
     );
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
@@ -753,7 +751,6 @@ void main() {
   ) async {
     final ThemeData theme = ThemeData(
       tabBarTheme: const TabBarThemeData(indicatorSize: TabBarIndicatorSize.label),
-      useMaterial3: true,
     );
     final List<Widget> tabs = List<Widget>.generate(4, (int index) {
       return Tab(text: 'Tab $index');
@@ -811,7 +808,6 @@ void main() {
             dividerColor: dividerColor,
             dividerHeight: dividerHeight,
           ),
-          useMaterial3: true,
         ),
         home: Scaffold(
           appBar: AppBar(
@@ -841,7 +837,6 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
-          useMaterial3: true,
           tabBarTheme: const TabBarThemeData(dividerColor: Colors.pink, dividerHeight: 5.0),
         ),
         home: Scaffold(
@@ -869,10 +864,7 @@ void main() {
     // Test non-scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.center),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.center)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -899,10 +891,7 @@ void main() {
     // Test scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.start),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.start)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -935,10 +924,7 @@ void main() {
     /// Test non-scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.fill),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.fill)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -966,10 +952,7 @@ void main() {
     /// Test scrollable tab bar.
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.center),
-          useMaterial3: true,
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(tabAlignment: TabAlignment.center)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -1445,15 +1428,14 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildTabBar(theme: ThemeData(useMaterial3: true)));
+    await tester.pumpWidget(buildTabBar(theme: ThemeData()));
 
     RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(tabBarBox, paints..rrect(color: ThemeData(useMaterial3: true).colorScheme.primary));
+    expect(tabBarBox, paints..rrect(color: ThemeData().colorScheme.primary));
 
     await tester.pumpWidget(
       buildTabBar(
         theme: ThemeData(
-          useMaterial3: true,
           tabBarTheme: const TabBarThemeData(indicatorColor: tabBarThemeIndicatorColor),
         ),
       ),
@@ -1474,13 +1456,11 @@ void main() {
     final TabController controller = TabController(vsync: const TestVSync(), length: tabs.length);
     addTearDown(controller.dispose);
 
-    const Color themeIndicatorColor = Color(0xffff0000);
     const Color tabBarThemeIndicatorColor = Color(0xffffff00);
 
-    Widget buildTabBar({Color? themeIndicatorColor, Color? tabBarThemeIndicatorColor}) {
+    Widget buildTabBar({Color? tabBarThemeIndicatorColor}) {
       return MaterialApp(
         theme: ThemeData(
-          indicatorColor: themeIndicatorColor,
           tabBarTheme: TabBarThemeData(indicatorColor: tabBarThemeIndicatorColor),
           useMaterial3: false,
         ),
@@ -1493,15 +1473,9 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildTabBar(themeIndicatorColor: themeIndicatorColor));
-
-    RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-    expect(tabBarBox, paints..line(color: themeIndicatorColor));
-
     await tester.pumpWidget(buildTabBar(tabBarThemeIndicatorColor: tabBarThemeIndicatorColor));
-    await tester.pumpAndSettle();
 
-    tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox, paints..line(color: tabBarThemeIndicatorColor));
   });
 
@@ -1627,7 +1601,6 @@ void main() {
       labelSize = tester.getSize(find.text('Tab 1'));
       expect(labelSize, equals(const Size(140.5, 40.0)));
     },
-    skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/87543
   );
 
   testWidgets('TabBarTheme indicatorAnimation can customize tab indicator animation', (
@@ -1700,42 +1673,27 @@ void main() {
     await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.elastic));
     await tester.pumpAndSettle();
 
-    // Ease in sine (accelerating).
-    double accelerateInterpolation(double fraction) {
-      return 1.0 - math.cos((fraction * math.pi) / 2.0);
-    }
-
-    void expectIndicatorAttrs(RenderBox tabBarBox, {required Rect rect, required Rect targetRect}) {
-      const double indicatorWeight = 3.0;
-      final double tabChangeProgress = (controller.index - controller.animation!.value).abs();
-      final double leftFraction = accelerateInterpolation(tabChangeProgress);
-      final double rightFraction = accelerateInterpolation(tabChangeProgress);
-
-      final RRect rrect = RRect.fromLTRBAndCorners(
-        lerpDouble(rect.left, targetRect.left, leftFraction)!,
-        tabBarBox.size.height - indicatorWeight,
-        lerpDouble(rect.right, targetRect.right, rightFraction)!,
-        tabBarBox.size.height,
-        topLeft: const Radius.circular(3.0),
-        topRight: const Radius.circular(3.0),
-      );
-
-      expect(tabBarBox, paints..rrect(rrect: rrect));
-    }
-
-    Rect rect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
-    Rect targetRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
-
     // Idle at tab 0.
-    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+    const Rect currentRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    const Rect fromRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect toRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.0),
+      ),
+    );
 
     // Start moving tab indicator.
     controller.offset = 0.2;
     await tester.pump();
-
-    rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
-    targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
-    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+    toRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.2),
+      ),
+    );
   });
 
   testWidgets('TabBar inherits splashBorderRadius from theme', (WidgetTester tester) async {

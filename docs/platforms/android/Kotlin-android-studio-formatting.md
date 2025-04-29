@@ -13,15 +13,9 @@ then there is good news! Android Studio can be configured to use `ktlint` to aut
 
    a. On Mac, this is `Android Studio > Settings > Plugins > ` Search for `ktlint`.
 
-2. Set the ruleset to be the same as the version used in [`.ci.yaml`](../../../.ci.yaml) (as of writing this is 1.1.1), and the baseline to be `dev/bots/test/analyze-test-input/ktlint-baseline.xml`.
+2. Set the ruleset to be the same as the version used in [`.ci.yaml`](../../../.ci.yaml) (as of writing this is 1.5), and the baseline to be `dev/bots/test/analyze-test-input/ktlint-baseline.xml`.
 
    a. Both of these options should be available under `Android Studio > Settings > Tools > ktlint`.
 
 3. Additionally, Kotlin code in the Flutter repository currently uses some additional rules for compatibility with older versions of Kotlin.
-These rules can only be configured by an `.editorconfig` file in the directory from which Android Studio was opened. To configure these rules, create a new `.editorconfig` file in the root of your flutter repository with the following content
-```
-[*.{kt,kts}]
-# Disable trailing commas to allow compatibility with Kotlin versions less than 1.4.
-ij_kotlin_allow_trailing_comma = false
-ij_kotlin_allow_trailing_comma_on_call_site = false
-```
+These rules can only be configured by an `.editorconfig` file in the directory from which Android Studio was opened. To configure these rules, create a copy of the [`.editorconfig`](../../../dev/bots/test/analyze-test-input/.editorconfig) that is used by tests in the root directory you intend to open with Android Studio.

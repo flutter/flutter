@@ -15,12 +15,14 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
-import 'package:native_assets_cli/code_assets_builder.dart' hide BuildMode;
+import 'package:native_assets_cli/code_assets.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 import '../fake_native_assets_build_runner.dart';
 
 void main() {
@@ -30,6 +32,7 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Uri projectUri;
+  late String runPackageName;
 
   setUp(() {
     processManager = FakeProcessManager.empty();
@@ -46,6 +49,7 @@ void main() {
     );
     environment.buildDir.createSync(recursive: true);
     projectUri = environment.projectDir.uri;
+    runPackageName = environment.projectDir.basename;
   });
 
   for (final bool flutterTester in <bool>[false, true]) {
@@ -264,31 +268,30 @@ void main() {
               package: 'bar',
               name: 'bar.dart',
               linkMode: DynamicLoadingBundled(),
-              os: targetOS,
-              architecture: codeConfig.targetArchitecture,
               file: Uri.file('${codeConfig.targetArchitecture}/libbar.dylib'),
             ),
             CodeAsset(
               package: 'buz',
               name: 'buz.dart',
               linkMode: DynamicLoadingBundled(),
-              os: targetOS,
-              architecture: codeConfig.targetArchitecture,
               file: Uri.file('${codeConfig.targetArchitecture}/libbuz.dylib'),
             ),
           ];
           final FakeFlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
-            packagesWithNativeAssetsResult: <Package>[Package('bar', projectUri)],
+            packagesWithNativeAssetsResult: <String>['bar'],
             onBuild:
-                (BuildConfig config) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                  codeAssets: codeAssets(config.targetOS, config.codeConfig),
+                (BuildInput input) => FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                  codeAssets:
+                      buildMode == BuildMode.debug
+                          ? codeAssets(input.config.code.targetOS, input.config.code)
+                          : <CodeAsset>[],
                 ),
             onLink:
-                (LinkConfig config) =>
+                (LinkInput input) =>
                     buildMode == BuildMode.debug
                         ? null
                         : FakeFlutterNativeAssetsBuilderResult.fromAssets(
-                          codeAssets: codeAssets(config.targetOS, config.codeConfig),
+                          codeAssets: codeAssets(input.config.code.targetOS, input.config.code),
                         ),
           );
           final Map<String, String> environmentDefines = <String, String>{
@@ -324,8 +327,8 @@ void main() {
           expect(
             (globals.logger as BufferLogger).traceText,
             stringContainsInOrder(<String>[
-              'Building native assets for macos $expectedArchsBeingBuilt $buildMode.',
-              'Building native assets for macos $expectedArchsBeingBuilt $buildMode done.',
+              'Building native assets for macos $expectedArchsBeingBuilt.',
+              'Building native assets for macos $expectedArchsBeingBuilt done.',
             ]),
           );
           final String nativeAssetsFileContent =
@@ -386,24 +389,27 @@ InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault
         return;
       }
 
-      final File packageConfigFile = fileSystem
-          .directory(projectUri)
-          .childDirectory('.dart_tool')
-          .childFile('package_config.json');
-      await packageConfigFile.parent.create();
-      await packageConfigFile.create();
+      final File packageConfigFile = writePackageConfigFile(
+        directory: fileSystem.directory(projectUri),
+        mainLibName: 'my_app',
+      );
       final PackageConfig packageConfig = await loadPackageConfigWithLogging(
         packageConfigFile,
         logger: environment.logger,
       );
+      final File pubspecFile = fileSystem.file(projectUri.resolve('pubspec.yaml'));
+      await pubspecFile.writeAsString('''
+name: my_app
+''');
       final FlutterNativeAssetsBuildRunner runner = FlutterNativeAssetsBuildRunnerImpl(
-        projectUri,
         packageConfigFile.path,
         packageConfig,
         fileSystem,
         logger,
+        runPackageName,
+        pubspecFile.path,
       );
-      final CCompilerConfig result = await runner.cCompilerConfig;
+      final CCompilerConfig result = (await runner.cCompilerConfig)!;
       expect(
         result.compiler,
         Uri.file(

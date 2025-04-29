@@ -16,13 +16,16 @@ namespace testing {
 class DlMetalSurfaceInstance : public DlSurfaceInstance {
  public:
   explicit DlMetalSurfaceInstance(std::unique_ptr<TestMetalSurface> metal_surface)
-      : metal_surface_(std::move(metal_surface)) {}
+      : metal_surface_(std::move(metal_surface)),
+        adapter_(metal_surface_->GetSurface()->getCanvas()) {}
   ~DlMetalSurfaceInstance() = default;
 
   sk_sp<SkSurface> sk_surface() const override { return metal_surface_->GetSurface(); }
+  DlCanvas* GetCanvas() override { return &adapter_; }
 
  private:
   std::unique_ptr<TestMetalSurface> metal_surface_;
+  DlSkCanvasAdapter adapter_;
 };
 
 bool DlMetalSurfaceProvider::InitializeSurface(size_t width, size_t height, PixelFormat format) {
@@ -88,7 +91,9 @@ sk_sp<DlImage> DlMetalSurfaceProvider::MakeImpellerImage(const sk_sp<DisplayList
 
 void DlMetalSurfaceProvider::InitScreenShotter() const {
   if (!snapshotter_) {
-    snapshotter_.reset(new MetalScreenshotter(/*enable_wide_gamut=*/false));
+    impeller::PlaygroundSwitches switches;
+    switches.enable_wide_gamut = false;
+    snapshotter_.reset(new MetalScreenshotter(switches));
     auto typographer = impeller::TypographerContextSkia::Make();
     aiks_context_.reset(
         new impeller::AiksContext(snapshotter_->GetPlayground().GetContext(), typographer));

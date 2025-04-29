@@ -728,6 +728,155 @@ void main() {
 
         expect(getContainerRect(tester).height, desktopContainerHeight);
       }, variant: TargetPlatformVariant.desktop());
+
+      testWidgets(
+        'default container height is 48dp on all platforms when visual density is VisualDensity.compact',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.compact),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets(
+        'default container height is 56dp on all platforms when visual density if VisualDensity.standard',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.standard,
+                ),
+              ),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.standard),
+              decoration: const InputDecoration(
+                filled: true,
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets('Visual density defined at the decoration level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+            decoration: const InputDecoration(
+              filled: true,
+              labelText: labelText,
+              helperText: helperText,
+              visualDensity: VisualDensity.comfortable,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
+
+      testWidgets('Visual density defined at the input decoration theme level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.comfortable,
+              ),
+            ),
+            decoration: const InputDecoration(
+              filled: true,
+              labelText: labelText,
+              helperText: helperText,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
     });
 
     group('for outlined text field', () {
@@ -1078,6 +1227,155 @@ void main() {
 
         expect(getContainerRect(tester).height, desktopContainerHeight);
       }, variant: TargetPlatformVariant.desktop());
+
+      testWidgets(
+        'default container height is 48dp on all platforms when visual density is VisualDensity.compact',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.compact),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 48.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets(
+        'default container height is 56dp on all platforms when visual density if VisualDensity.standard',
+        (WidgetTester tester) async {
+          // Visual density configured at the decoration level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the input decoration theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(
+                inputDecorationTheme: const InputDecorationTheme(
+                  visualDensity: VisualDensity.standard,
+                ),
+              ),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+
+          // Visual density configured at the theme level.
+          await tester.pumpWidget(
+            buildInputDecorator(
+              theme: ThemeData(visualDensity: VisualDensity.standard),
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: labelText,
+                helperText: helperText,
+              ),
+            ),
+          );
+
+          expect(getContainerRect(tester).height, 56.0);
+        },
+        variant: TargetPlatformVariant.all(),
+      );
+
+      testWidgets('Visual density defined at the decoration level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.standard,
+              ),
+            ),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: labelText,
+              helperText: helperText,
+              visualDensity: VisualDensity.comfortable,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
+
+      testWidgets('Visual density defined at the input decoration theme level takes precedence', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            theme: ThemeData(
+              visualDensity: VisualDensity.compact,
+              inputDecorationTheme: const InputDecorationTheme(
+                visualDensity: VisualDensity.comfortable,
+              ),
+            ),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: labelText,
+              helperText: helperText,
+            ),
+          ),
+        );
+
+        expect(getContainerRect(tester).height, 52.0);
+      });
     });
 
     testWidgets('InputDecorator with no input border', (WidgetTester tester) async {
@@ -1988,6 +2286,37 @@ void main() {
 
   group('Material3 - InputDecoration label', () {
     group('for filled text field', () {
+      testWidgets('label and input horizontal positions are M3 compliant in LTR', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(filled: true, labelText: labelText),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + 4.0; // Content left padding + default input gap.
+        expect(getLabelRect(tester).left, labelAndInputStart);
+        expect(getInputRect(tester).left, labelAndInputStart);
+      });
+
+      testWidgets('label and input horizontal positions are M3 compliant in RTL', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(filled: true, labelText: labelText),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + 4.0; // Content left padding + default input gap.
+        expect(getLabelRect(tester).right, 800.0 - labelAndInputStart);
+        expect(getInputRect(tester).right, 800.0 - labelAndInputStart);
+      });
+
       group('when field is enabled', () {
         testWidgets('label text has correct style', (WidgetTester tester) async {
           await tester.pumpWidget(
@@ -2136,6 +2465,76 @@ void main() {
     });
 
     group('for outlined text field', () {
+      testWidgets('label and input horizontal positions are M3 compliant in LTR', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(border: OutlineInputBorder(), labelText: labelText),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + 4.0; // Content left padding + default input gap.
+        expect(getLabelRect(tester).left, labelAndInputStart);
+        expect(getInputRect(tester).left, labelAndInputStart);
+      });
+
+      testWidgets('label and input horizontal positions are M3 compliant in RTL', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(border: OutlineInputBorder(), labelText: labelText),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + 4.0; // Content left padding + default input gap.
+        expect(getLabelRect(tester).right, 800 - labelAndInputStart);
+        expect(getInputRect(tester).right, 800 - labelAndInputStart);
+      });
+
+      testWidgets('label and input horizontal positions can be adjusted in LTR', (
+        WidgetTester tester,
+      ) async {
+        const double customGap = 6.0;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(gapPadding: customGap),
+              labelText: labelText,
+            ),
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + customGap; // Content left padding + input gap.
+        expect(getLabelRect(tester).left, labelAndInputStart);
+        expect(getInputRect(tester).left, labelAndInputStart);
+      });
+
+      testWidgets('label and input horizontal positions can be adjusted in RTL', (
+        WidgetTester tester,
+      ) async {
+        const double customGap = 6.0;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(gapPadding: customGap),
+              labelText: labelText,
+            ),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        const double labelAndInputStart = 12.0 + customGap; // Content left padding + input gap.
+        expect(getLabelRect(tester).right, 800.0 - labelAndInputStart);
+        expect(getInputRect(tester).right, 800.0 - labelAndInputStart);
+      });
+
       group('when field is enabled', () {
         testWidgets('label text has correct style', (WidgetTester tester) async {
           await tester.pumpWidget(
@@ -2303,6 +2702,35 @@ void main() {
         });
       });
     });
+
+    testWidgets(
+      'Label and input for non-filled and non-outlined text field have no horizontal padding in LTR',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(decoration: const InputDecoration(labelText: labelText)),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        expect(getLabelRect(tester).left, 0.0);
+        expect(getInputRect(tester).left, 0.0);
+      },
+    );
+
+    testWidgets(
+      'Label and input for non-filled and non-outlined text field have no horizontal padding in RTL',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: const InputDecoration(labelText: labelText),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+
+        expect(getDecoratorRect(tester).size, const Size(800.0, 56.0));
+        expect(getLabelRect(tester).right, 800.0);
+        expect(getInputRect(tester).right, 800.0);
+      },
+    );
 
     testWidgets('floatingLabelStyle overrides default style', (WidgetTester tester) async {
       const TextStyle floatingLabelStyle = TextStyle(color: Colors.indigo, fontSize: 16.0);
@@ -2583,43 +3011,43 @@ void main() {
       await pumpDecorator(focused: false);
       await tester.pump(kTransitionDuration);
       const Size labelSize = Size(82.5, 16);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: false, empty: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: true);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: true, empty: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       await pumpDecorator(focused: false, enabled: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: false, empty: false, enabled: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
 
       // Focused and disabled happens with NavigationMode.directional.
       await pumpDecorator(focused: true, enabled: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, 20)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, 20)));
       expect(getLabelRect(tester).size, equals(labelSize));
 
       await pumpDecorator(focused: true, empty: false, enabled: false);
       await tester.pump(kTransitionDuration);
-      expect(getLabelRect(tester).topLeft, equals(const Offset(12, -5.5)));
+      expect(getLabelRect(tester).topLeft, equals(const Offset(16, -5.5)));
       expect(getLabelRect(tester).size, equals(labelSize * 0.75));
     });
 
@@ -4684,6 +5112,26 @@ void main() {
       });
     });
 
+    testWidgets('InputDecorator throws Assertion Error when hint and hintText are provided', (
+      WidgetTester tester,
+    ) async {
+      expect(() {
+        buildInputDecorator(
+          decoration: InputDecoration(
+            hintText: 'Enter text here',
+            hint: const Text('Enter text here', style: TextStyle(fontSize: 20.0)),
+          ),
+        );
+      }, throwsAssertionError);
+    });
+
+    testWidgets('InputDecorator shows hint widget', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        buildInputDecorator(decoration: const InputDecoration(hint: Text('hint'))),
+      );
+      expect(find.text('hint'), findsOneWidget);
+    });
+
     testWidgets('hint style overflow works', (WidgetTester tester) async {
       final String hintText = 'hint text' * 20;
       const TextStyle hintStyle = TextStyle(fontSize: 14.0, overflow: TextOverflow.fade);
@@ -4697,14 +5145,14 @@ void main() {
       expect(hintTextWidget.style!.overflow, decoration.hintStyle!.overflow);
     });
 
-    testWidgets('Widget height collapses from hint height when maintainHintHeight is false', (
+    testWidgets('Widget height collapses from hint height when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       final String hintText = 'hint' * 20;
       final InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       await tester.pumpWidget(buildInputDecorator(decoration: decoration));
@@ -4721,14 +5169,14 @@ void main() {
       expect(inputHeight, hintHeight + 16.0);
     });
 
-    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintHeight is false', (
+    testWidgets('hintFadeDuration applies to hint fade-in when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
         hintFadeDuration: Duration(milliseconds: 120),
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       // Build once with empty content.
@@ -4753,14 +5201,14 @@ void main() {
       expect(hintOpacity120ms, 1.0);
     });
 
-    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintHeight is false', (
+    testWidgets('hintFadeDuration applies to hint fade-out when maintainHintSize is false', (
       WidgetTester tester,
     ) async {
       const InputDecoration decoration = InputDecoration(
         hintText: hintText,
         hintMaxLines: 3,
         hintFadeDuration: Duration(milliseconds: 120),
-        maintainHintHeight: false,
+        maintainHintSize: false,
       );
 
       // Build once with empty content.
@@ -4809,15 +5257,9 @@ void main() {
         topPadding + floatingLabelHeight + labelInputGap + inputHeight + bottomPadding; // 56.0
     const double fullHeight = containerHeight + helperGap + helperHeight; // 76.0
     const double errorHeight = helperHeight;
-    // TODO(bleroux): consider changing this padding because, from the M3 specification, it should be 16.
-    const double helperStartPadding = 12.0;
-    const double counterEndPadding = 12.0;
-
-    // Actual size varies a little on web platforms with HTML renderer.
-    // TODO(bleroux): remove closeTo usage when https://github.com/flutter/flutter/issues/99933 is fixed.
-    final Matcher closeToFullHeight = closeTo(fullHeight, 0.1);
-    final Matcher closeToHelperHeight = closeTo(helperHeight, 0.1);
-    final Matcher closeToErrorHeight = closeTo(errorHeight, 0.1);
+    const double hintHeight = inputHeight;
+    const double helperStartPadding = 16.0;
+    const double counterEndPadding = 16.0;
 
     group('for filled text field', () {
       group('when field is enabled', () {
@@ -4833,13 +5275,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4877,13 +5319,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4922,13 +5364,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -4967,13 +5409,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5034,13 +5476,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getErrorRect(tester).top, containerHeight + helperGap);
-          expect(getErrorRect(tester).height, closeToErrorHeight);
+          expect(getErrorRect(tester).height, errorHeight);
           expect(getErrorRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToErrorHeight);
+          expect(getCounterRect(tester).height, errorHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5085,13 +5527,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5129,13 +5571,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5174,13 +5616,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5219,13 +5661,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getHelperRect(tester).top, containerHeight + helperGap);
-          expect(getHelperRect(tester).height, closeToHelperHeight);
+          expect(getHelperRect(tester).height, helperHeight);
           expect(getHelperRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToHelperHeight);
+          expect(getCounterRect(tester).height, helperHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5286,13 +5728,13 @@ void main() {
             ),
           );
 
-          expect(getDecoratorRect(tester).height, closeToFullHeight);
+          expect(getDecoratorRect(tester).height, fullHeight);
           expect(getBorderBottom(tester), containerHeight);
           expect(getErrorRect(tester).top, containerHeight + helperGap);
-          expect(getErrorRect(tester).height, closeToErrorHeight);
+          expect(getErrorRect(tester).height, errorHeight);
           expect(getErrorRect(tester).left, helperStartPadding);
           expect(getCounterRect(tester).top, containerHeight + helperGap);
-          expect(getCounterRect(tester).height, closeToErrorHeight);
+          expect(getCounterRect(tester).height, errorHeight);
           expect(getCounterRect(tester).right, 800 - counterEndPadding);
         });
 
@@ -5411,6 +5853,40 @@ void main() {
           getDecoratorRect(tester).height,
           closeTo(containerHeight + helperGap + errorHeight * numberOfLines, 0.25),
         );
+      });
+
+      testWidgets('InputDecorationTheme hintMaxLines behaves as default value', (
+        WidgetTester tester,
+      ) async {
+        const int numberOfLines = 2;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationTheme(hintMaxLines: numberOfLines),
+            decoration: const InputDecoration(hintText: threeLines),
+          ),
+        );
+
+        final Rect hintRect = tester.getRect(find.text(threeLines));
+        expect(hintRect.height, closeTo(hintHeight * numberOfLines, 0.25));
+        expect(
+          getDecoratorRect(tester).height,
+          closeTo(topPadding + hintHeight * numberOfLines + bottomPadding, 0.25),
+        );
+      });
+
+      testWidgets('InputDecoration hintMaxLines default expands with hintText', (
+        WidgetTester tester,
+      ) async {
+        const int numberOfLines = 3;
+        await tester.pumpWidget(
+          buildInputDecorator(
+            inputDecorationTheme: const InputDecorationTheme(),
+            decoration: const InputDecoration(hintText: threeLines),
+          ),
+        );
+
+        final Size hintSize = tester.getSize(find.byType(InputDecorator));
+        expect(hintSize.height, topPadding + hintHeight * numberOfLines + bottomPadding);
       });
 
       testWidgets('Helper height grows to accommodate helper text', (WidgetTester tester) async {
@@ -8332,6 +8808,90 @@ void main() {
 
       expect(textSizeWithIcons.width, equals(textSizeWithoutIcon.width));
     });
+
+    testWidgets('depends on hint width and content width when decorator is empty', (
+      WidgetTester tester,
+    ) async {
+      const InputDecoration decorationWithHint = InputDecoration(
+        contentPadding: EdgeInsets.zero,
+        hintText: 'Hint',
+      );
+      const double hintTextWidth = 66.0;
+      const double smallContentWidth = 20.0;
+      const double largeContentWidth = 80.0;
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decorationWithHint,
+          useIntrinsicWidth: true,
+          isEmpty: true,
+          child: const SizedBox(width: smallContentWidth),
+        ),
+      );
+
+      // Decorator width depends on the hint because the hint is larger than the content.
+      expect(getDecoratorRect(tester).width, hintTextWidth);
+
+      await tester.pumpWidget(
+        buildInputDecorator(
+          decoration: decorationWithHint,
+          useIntrinsicWidth: true,
+          isEmpty: true,
+          child: const SizedBox(width: largeContentWidth),
+        ),
+      );
+
+      // Decorator width depends on the content because the content is larger than the hint.
+      expect(getDecoratorRect(tester).width, largeContentWidth);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/93337.
+    testWidgets(
+      'depends on content width when decorator is not empty and maintainHintSize is false',
+      (WidgetTester tester) async {
+        const InputDecoration decorationWithHint = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          hintText: 'Hint',
+          maintainHintSize: false,
+        );
+        const double contentWidth = 20.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithHint,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
+
+        // The hint width is ignored even if larger than the content width.
+        expect(getDecoratorRect(tester).width, contentWidth);
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/93337.
+    testWidgets(
+      'depends on content width when decorator is not empty and maintainHintSize is true',
+      (WidgetTester tester) async {
+        const InputDecoration decorationWithHint = InputDecoration(
+          contentPadding: EdgeInsets.zero,
+          hintText: 'Hint',
+        );
+        const double contentWidth = 20.0;
+
+        await tester.pumpWidget(
+          buildInputDecorator(
+            decoration: decorationWithHint,
+            useIntrinsicWidth: true,
+            child: const SizedBox(width: contentWidth),
+          ),
+        );
+
+        // The hint width is ignored even if larger than the content width.
+        const double hintTextWidth = 66.0;
+        expect(getDecoratorRect(tester).width, hintTextWidth);
+      },
+    );
   });
 
   testWidgets('Ensure the height of labelStyle remains unchanged when TextField is focused', (
@@ -8602,7 +9162,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(getIconStyle(tester, prefixIcon)?.color, iconColor);
   });
@@ -8644,7 +9204,7 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(getIconStyle(tester, suffixIcon)?.color, iconColor);
   });

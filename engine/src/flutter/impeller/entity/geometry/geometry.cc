@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "impeller/entity/contents/content_context.h"
+#include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/geometry/circle_geometry.h"
 #include "impeller/entity/geometry/cover_geometry.h"
 #include "impeller/entity/geometry/ellipse_geometry.h"
@@ -15,6 +16,7 @@
 #include "impeller/entity/geometry/line_geometry.h"
 #include "impeller/entity/geometry/rect_geometry.h"
 #include "impeller/entity/geometry/round_rect_geometry.h"
+#include "impeller/entity/geometry/round_superellipse_geometry.h"
 #include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/geometry/rect.h"
 
@@ -59,7 +61,7 @@ GeometryResult::Mode Geometry::GetResultMode() const {
 std::unique_ptr<Geometry> Geometry::MakeFillPath(
     const Path& path,
     std::optional<Rect> inner_rect) {
-  return std::make_unique<FillPathGeometry>(path, inner_rect);
+  return std::make_unique<FillPathGeometry>(flutter::DlPath(path), inner_rect);
 }
 
 std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
@@ -71,7 +73,8 @@ std::unique_ptr<Geometry> Geometry::MakeStrokePath(const Path& path,
   if (miter_limit < 0) {
     miter_limit = 4.0;
   }
-  return std::make_unique<StrokePathGeometry>(path, stroke_width, miter_limit,
+  return std::make_unique<StrokePathGeometry>(flutter::DlPath(path),
+                                              stroke_width, miter_limit,
                                               stroke_cap, stroke_join);
 }
 
@@ -108,6 +111,12 @@ std::unique_ptr<Geometry> Geometry::MakeStrokedCircle(const Point& center,
 std::unique_ptr<Geometry> Geometry::MakeRoundRect(const Rect& rect,
                                                   const Size& radii) {
   return std::make_unique<RoundRectGeometry>(rect, radii);
+}
+
+std::unique_ptr<Geometry> Geometry::MakeRoundSuperellipse(
+    const Rect& rect,
+    Scalar corner_radius) {
+  return std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
 }
 
 bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {

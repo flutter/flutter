@@ -74,6 +74,9 @@ class SurfaceContextVK : public Context,
   RuntimeStageBackend GetRuntimeStageBackend() const override;
 
   // |Context|
+  bool SubmitOnscreen(std::shared_ptr<CommandBuffer> cmd_buffer) override;
+
+  // |Context|
   void Shutdown() override;
 
   [[nodiscard]] bool SetWindowSurface(vk::UniqueSurfaceKHR surface,
@@ -92,6 +95,9 @@ class SurfaceContextVK : public Context,
   /// @brief Mark the current swapchain configuration as dirty, forcing it to be
   ///        recreated on the next frame.
   void UpdateSurfaceSize(const ISize& size) const;
+
+  /// @brief Can be called when the surface is destroyed to reduce memory usage.
+  void TeardownSwapchain();
 
   // |Context|
   void InitializeCommonlyUsedShadersIfNeeded() const override;

@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
@@ -34,6 +35,8 @@ void main() {
   late FileSystem fileSystem;
   late BufferLogger logger;
   late Platform platform;
+  late Terminal terminal;
+  late OutputPreferences outputPreferences;
   late FakeDeviceManager fakeDeviceManager;
   late FakeSignals signals;
 
@@ -41,6 +44,8 @@ void main() {
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
     platform = FakePlatform();
+    terminal = Terminal.test();
+    outputPreferences = OutputPreferences.test();
     fakeDeviceManager = FakeDeviceManager();
     signals = FakeSignals();
   });
@@ -54,12 +59,108 @@ void main() {
   });
 
   testUsingContext(
+    'fails if the specified --target is not found',
+    () async {
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: signals,
+      );
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      await expectLater(
+        () => createTestCommandRunner(
+          command,
+        ).run(<String>['drive', '--no-pub', '--target', 'lib/app.dart']),
+        throwsToolExit(message: 'Target file "lib/app.dart" not found'),
+      );
+
+      expect(logger.errorText, isEmpty);
+      expect(logger.statusText, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.empty(),
+    },
+  );
+
+  testUsingContext(
+    'fails if the default --target is not found',
+    () async {
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: signals,
+      );
+      fileSystem.file('lib/app.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/app_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['drive', '--no-pub']),
+        throwsToolExit(message: 'Target file "lib/main.dart" not found'),
+      );
+
+      expect(logger.errorText, isEmpty);
+      expect(logger.statusText, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.empty(),
+    },
+  );
+
+  testUsingContext(
+    'fails with an informative error message if --target looks like --driver',
+    () async {
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: signals,
+      );
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      await expectLater(
+        () => createTestCommandRunner(
+          command,
+        ).run(<String>['drive', '--no-pub', '--target', 'test_driver/main_test.dart']),
+        throwsToolExit(message: 'Test file not found: /test_driver/main_test_test.dart'),
+      );
+
+      expect(
+        logger.errorText,
+        contains('The file path passed to --target should be an app entrypoint'),
+      );
+      expect(logger.statusText, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.empty(),
+    },
+  );
+
+  testUsingContext(
     'warns if screenshot is not supported but continues test',
     () async {
       final DriveCommand command = DriveCommand(
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
       );
       fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -100,6 +201,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
         flutterDriverFactory: FailingFakeFlutterDriverFactory(),
       );
@@ -141,6 +244,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
       );
       fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -181,6 +286,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
         flutterDriverFactory: FailingFakeFlutterDriverFactory(),
       );
@@ -233,6 +340,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
       );
 
@@ -277,8 +386,10 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: Signals.test(),
-        flutterDriverFactory: NeverEndingFlutterDriverFactory(() {}),
+        flutterDriverFactory: FakeFlutterDriverFactory(),
       );
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -342,10 +453,15 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: Signals.test(),
-        flutterDriverFactory: NeverEndingFlutterDriverFactory(() {
-          signal.controller.add(signal);
-        }),
+        flutterDriverFactory: FakeFlutterDriverFactory(
+          onStartTest: () {
+            signal.controller.add(signal);
+            return Completer<int>().future;
+          },
+        ),
         signalsToHandle: <ProcessSignal>{signalUnderTest},
       );
 
@@ -397,6 +513,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
       );
 
@@ -434,6 +552,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
       );
 
@@ -450,7 +570,6 @@ void main() {
           '--trace-systrace',
           '--trace-to-file=path/to/trace.binpb',
           '--verbose-system-logs',
-          '--null-assertions',
           '--native-null-assertions',
           '--enable-impeller',
           '--trace-systrace',
@@ -471,7 +590,6 @@ void main() {
       expect(options.traceSystrace, true);
       expect(options.traceToFile, 'path/to/trace.binpb');
       expect(options.verboseSystemLogs, true);
-      expect(options.nullAssertions, true);
       expect(options.nativeNullAssertions, true);
       expect(options.enableImpeller, ImpellerStatus.enabled);
       expect(options.traceSystrace, true);
@@ -494,6 +612,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
       );
 
@@ -528,6 +648,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
       );
 
@@ -562,6 +684,8 @@ void main() {
         fileSystem: fileSystem,
         logger: logger,
         platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
         signals: signals,
       );
 
@@ -587,6 +711,145 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       DeviceManager: () => fakeDeviceManager,
     },
+  );
+
+  testUsingContext(
+    '--use-existing-app keeps the app running',
+    () async {
+      bool wasStopped = false;
+
+      final FakeProcessSignal signal = FakeProcessSignal();
+      final ProcessSignal signalUnderTest = ProcessSignal(signal);
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: Signals.test(),
+        flutterDriverFactory: FakeFlutterDriverFactory(
+          onStartTest: () async {
+            signal.controller.add(signal);
+            return 0;
+          },
+          onStop: () {
+            wasStopped = true;
+          },
+        ),
+        signalsToHandle: <ProcessSignal>{signalUnderTest},
+      );
+
+      final Device screenshotDevice = ThrowingScreenshotDevice();
+      fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      final Future<void> runningCommand = createTestCommandRunner(command).run(<String>[
+        'drive',
+        '-d',
+        screenshotDevice.id,
+        '--no-pub',
+        '--use-existing-app',
+        'http://localhost:8181',
+      ]);
+
+      signal.controller.add(io.ProcessSignal.sigint);
+      await runningCommand;
+      expect(
+        wasStopped,
+        false,
+        reason: 'Using --use-existing-app without --no-keep-app-running does not stop the app',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
+
+  testUsingContext(
+    '--no-keep-app-running always stops the app running',
+    () async {
+      bool wasStopped = false;
+
+      final FakeProcessSignal signal = FakeProcessSignal();
+      final ProcessSignal signalUnderTest = ProcessSignal(signal);
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: Signals.test(),
+        flutterDriverFactory: FakeFlutterDriverFactory(
+          onStartTest: () async {
+            signal.controller.add(signal);
+            return 0;
+          },
+          onStop: () {
+            wasStopped = true;
+          },
+        ),
+        signalsToHandle: <ProcessSignal>{signalUnderTest},
+      );
+
+      final Device screenshotDevice = ThrowingScreenshotDevice();
+      fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      final Future<void> runningCommand = createTestCommandRunner(command).run(<String>[
+        'drive',
+        '-d',
+        screenshotDevice.id,
+        '--no-pub',
+        '--no-keep-app-running',
+        '--use-existing-app',
+        'http://localhost:8181',
+      ]);
+
+      signal.controller.add(io.ProcessSignal.sigint);
+      await runningCommand;
+      expect(
+        wasStopped,
+        true,
+        reason: 'Using --use-existing-app with --no-keep-app-running stops the app',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
+
+  testUsingContext(
+    'flutter drive --help explains how to use the command',
+    () async {
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: signals,
+      );
+
+      await createTestCommandRunner(command).run(<String>['drive', '--help']);
+
+      expect(
+        logger.statusText,
+        stringContainsInOrder(<String>['flutter drive', '--target', '--driver']),
+      );
+    },
+    overrides: <Type, Generator>{Logger: () => logger},
   );
 }
 
@@ -617,6 +880,9 @@ class ScreenshotDevice extends Fake implements Device {
 
   @override
   final String name = 'FakeDevice';
+
+  @override
+  String get displayName => name;
 
   @override
   final Category category = Category.mobile;
@@ -670,24 +936,29 @@ class FakePub extends Fake implements Pub {
   }) async {}
 }
 
-/// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].
-class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFactory {
-  NeverEndingFlutterDriverFactory(this.callback);
+/// A [FlutterDriverFactory] that creates a [FakeDriverService].
+class FakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
+  FakeFlutterDriverFactory({this.onStartTest, this.onStop});
 
-  final void Function() callback;
+  final Future<int> Function()? onStartTest;
+  final void Function()? onStop;
 
   @override
-  DriverService createDriverService(bool web) => NeverEndingDriverService(callback);
+  DriverService createDriverService(bool web) {
+    return FakeDriverService(onStartTest: onStartTest, onStop: onStop);
+  }
 }
 
 /// A [DriverService] that will return a Future from [startTest] that will never complete.
 ///
 /// This is to simulate when the test will take a long time, but a signal is
 /// expected to interrupt the process.
-class NeverEndingDriverService extends Fake implements DriverService {
-  NeverEndingDriverService(this.callback);
+class FakeDriverService extends Fake implements DriverService {
+  FakeDriverService({this.onStartTest, this.onStop});
 
-  final void Function() callback;
+  final Future<int> Function()? onStartTest;
+  final void Function()? onStop;
+
   @override
   Future<void> reuseApplication(
     Uri vmServiceUri,
@@ -699,7 +970,6 @@ class NeverEndingDriverService extends Fake implements DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,
@@ -710,9 +980,13 @@ class NeverEndingDriverService extends Fake implements DriverService {
     List<String>? browserDimension,
     String? profileMemory,
   }) async {
-    callback();
-    // return a Future that will never complete.
-    return Completer<int>().future;
+    final Future<int> result = onStartTest?.call() ?? Completer<int>().future;
+    return result;
+  }
+
+  @override
+  Future<void> stop({String? userIdentifier}) async {
+    return onStop?.call();
   }
 }
 
@@ -733,7 +1007,6 @@ class FailingFakeDriverService extends Fake implements DriverService {
   Future<int> startTest(
     String testFile,
     List<String> arguments,
-    Map<String, String> environment,
     PackageConfig packageConfig, {
     bool? headless,
     String? chromeBinary,

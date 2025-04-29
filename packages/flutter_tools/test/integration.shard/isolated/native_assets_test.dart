@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This test exercises the embedding of the native assets mapping in dill files.
-// An initial dill file is created by `flutter assemble` and used for running
-// the application. This dill must contain the mapping.
-// When doing hot reload, this mapping must stay in place.
-// When doing a hot restart, a new dill file is pushed. This dill file must also
-// contain the native assets mapping.
-// When doing a hot reload, this mapping must stay in place.
+// This test exercises dynamic libraries added to a flutter app or package.
+// It covers:
+//  * `flutter run`, including hot reload and hot restart
+//  * `flutter test`
+//  * `flutter build`
 
 @Timeout(Duration(minutes: 10))
 library;
@@ -20,7 +18,8 @@ import 'package:file/file.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/code_assets.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 
 import '../../src/common.dart';
 import '../test_utils.dart' show fileSystem, flutterBin, platform;
@@ -456,7 +455,7 @@ void expectDylibIsBundledWithFrameworks(Directory appDirectory, String buildMode
 /// This inspects the build configuration to see if the C compiler was configured.
 void expectCCompilerIsConfigured(Directory appDirectory) {
   final Directory nativeAssetsBuilderDir = appDirectory.childDirectory(
-    '.dart_tool/native_assets_builder/',
+    '.dart_tool/native_assets_builder/$packageName/',
   );
   for (final Directory subDir in nativeAssetsBuilderDir.listSync().whereType<Directory>()) {
     // We only want to look at build/link hook invocation directories. The
@@ -466,14 +465,16 @@ void expectCCompilerIsConfigured(Directory appDirectory) {
       continue;
     }
 
-    final File configFile = subDir.childFile('config.json');
-    expect(configFile, exists);
-    final Map<String, Object?> config =
-        json.decode(configFile.readAsStringSync()) as Map<String, Object?>;
-    if (!(config['supported_asset_types']! as List<dynamic>).contains(CodeAsset.type)) {
+    final File inputFile = subDir.childFile('input.json');
+    expect(inputFile, exists);
+    final Map<String, Object?> inputContents =
+        json.decode(inputFile.readAsStringSync()) as Map<String, Object?>;
+    final BuildInput input = BuildInput(inputContents);
+    final BuildConfig config = input.config;
+    if (!config.buildCodeAssets) {
       continue;
     }
-    expect((config['c_compiler']! as Map<String, Object?>)['cc'], isNotNull);
+    expect(config.code.cCompiler?.compiler, isNot(isNull));
   }
 }
 

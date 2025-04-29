@@ -393,7 +393,7 @@ class ListTile extends StatelessWidget {
     this.title,
     this.subtitle,
     this.trailing,
-    this.isThreeLine = false,
+    this.isThreeLine,
     this.dense,
     this.visualDensity,
     this.shape,
@@ -425,7 +425,7 @@ class ListTile extends StatelessWidget {
     this.minTileHeight,
     this.titleAlignment,
     this.internalAddSemanticForOnTap = true,
-  }) : assert(!isThreeLine || subtitle != null);
+  }) : assert(isThreeLine != true || subtitle != null);
 
   /// A widget to display before the title.
   ///
@@ -482,7 +482,12 @@ class ListTile extends StatelessWidget {
   ///
   /// When using a [Text] widget for [title] and [subtitle], you can enforce
   /// line limits using [Text.maxLines].
-  final bool isThreeLine;
+  ///
+  /// See also:
+  ///
+  /// * [ListTileTheme.of], which returns the nearest [ListTileTheme]'s
+  ///   [ListTileThemeData].
+  final bool? isThreeLine;
 
   /// {@template flutter.material.ListTile.dense}
   /// Whether this list tile is part of a vertically dense list.
@@ -605,10 +610,12 @@ class ListTile extends StatelessWidget {
 
   /// The tile's internal padding.
   ///
-  /// Insets a [ListTile]'s contents: its [leading], [title], [subtitle],
-  /// and [trailing] widgets.
+  /// Insets a [ListTile]'s contents: its [leading], [title], [subtitle], and [trailing] widgets.
   ///
-  /// If null, `EdgeInsets.symmetric(horizontal: 16.0)` is used.
+  /// If this property is null, then [ListTileThemeData.contentPadding] is used. If that is also
+  /// null and [ThemeData.useMaterial3] is true, then a default value of
+  /// `EdgeInsetsDirectional.only(start: 16.0, end: 24.0)` will be used. Otherwise, a default value
+  /// of `EdgeInsets.symmetric(horizontal: 16.0)` will be used.
   final EdgeInsetsGeometry? contentPadding;
 
   /// Whether this list tile is interactive.
@@ -985,7 +992,11 @@ class ListTile extends StatelessWidget {
                   trailing: trailingIcon,
                   isDense: _isDenseLayout(theme, tileTheme),
                   visualDensity: visualDensity ?? tileTheme.visualDensity ?? theme.visualDensity,
-                  isThreeLine: isThreeLine,
+                  isThreeLine:
+                      isThreeLine ??
+                      tileTheme.isThreeLine ??
+                      theme.listTileTheme.isThreeLine ??
+                      false,
                   textDirection: textDirection,
                   titleBaselineType:
                       titleStyle.textBaseline ?? defaults.titleTextStyle!.textBaseline!,
@@ -1019,7 +1030,6 @@ class ListTile extends StatelessWidget {
         ifTrue: 'THREE_LINE',
         ifFalse: 'TWO_LINE',
         showName: true,
-        defaultValue: false,
       ),
     );
     properties.add(
@@ -1484,18 +1494,36 @@ class _RenderListTile extends RenderBox
     final Size? leadingSize = leading == null ? null : getSize(leading, iconConstraints);
     final Size? trailingSize = trailing == null ? null : getSize(trailing, iconConstraints);
 
-    assert(
-      tileWidth != leadingSize?.width || tileWidth == 0.0,
-      'Leading widget consumes entire tile width. Please use a sized widget, '
-      'or consider replacing ListTile with a custom widget '
-      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
-    );
-    assert(
-      tileWidth != trailingSize?.width || tileWidth == 0.0,
-      'Trailing widget consumes entire tile width. Please use a sized widget, '
-      'or consider replacing ListTile with a custom widget '
-      '(see https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4)',
-    );
+    assert(() {
+      if (tileWidth == 0.0) {
+        return true;
+      }
+
+      String? overflowedWidget;
+      if (tileWidth == leadingSize?.width) {
+        overflowedWidget = 'Leading';
+      } else if (tileWidth == trailingSize?.width) {
+        overflowedWidget = 'Trailing';
+      }
+
+      if (overflowedWidget == null) {
+        return true;
+      }
+
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          '$overflowedWidget widget consumes the entire tile width (including ListTile.contentPadding).',
+        ),
+        ErrorDescription(
+          'Either resize the tile width so that the ${overflowedWidget.toLowerCase()} widget plus any content padding '
+          'do not exceed the tile width, or use a sized widget, or consider replacing '
+          'ListTile with a custom widget.',
+        ),
+        ErrorHint(
+          'See also: https://api.flutter.dev/flutter/material/ListTile-class.html#material.ListTile.4',
+        ),
+      ]);
+    }());
 
     final double titleStart =
         leadingSize == null

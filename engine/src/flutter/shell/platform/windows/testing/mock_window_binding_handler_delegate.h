@@ -53,6 +53,10 @@ class MockWindowBindingHandlerDelegate : public WindowBindingHandlerDelegate {
               OnKey,
               (int, int, int, char32_t, bool, bool, KeyEventCallback),
               (override));
+  MOCK_METHOD(void,
+              OnFocus,
+              (FlutterViewFocusState, FlutterViewFocusDirection),
+              (override));
   MOCK_METHOD(void, OnComposeBegin, (), (override));
   MOCK_METHOD(void, OnComposeCommit, (), (override));
   MOCK_METHOD(void, OnComposeEnd, (), (override));

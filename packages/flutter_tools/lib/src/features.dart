@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 
 /// The current [FeatureFlags] implementation.
@@ -48,9 +50,6 @@ abstract class FeatureFlags {
   /// Whether native assets compilation and bundling is enabled.
   bool get isNativeAssetsEnabled => false;
 
-  /// Whether native assets compilation and bundling is enabled.
-  bool get isPreviewDeviceEnabled => true;
-
   /// Whether Swift Package Manager dependency management is enabled.
   bool get isSwiftPackageManagerEnabled => false;
 
@@ -75,7 +74,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterCustomDevicesFeature,
   cliAnimation,
   nativeAssets,
-  previewDevice,
   swiftPackageManager,
   explicitPackageDependencies,
 ];
@@ -159,15 +157,6 @@ const Feature nativeAssets = Feature(
   master: FeatureChannelSetting(available: true),
 );
 
-/// Enable Flutter preview prebuilt device.
-const Feature previewDevice = Feature(
-  name: 'Flutter preview prebuilt device',
-  configSetting: 'enable-flutter-preview',
-  environmentOverride: 'FLUTTER_PREVIEW_DEVICE',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-);
-
 /// Enable Swift Package Manager as a darwin dependency manager.
 const Feature swiftPackageManager = Feature(
   name: 'support for Swift Package Manager for iOS and macOS',
@@ -179,7 +168,7 @@ const Feature swiftPackageManager = Feature(
 );
 
 /// Enable explicit resolution and generation of package dependencies.
-const Feature explicitPackageDependencies = Feature(
+const Feature explicitPackageDependencies = Feature.fullyEnabled(
   name: 'support for dev_dependency plugins',
   configSetting: 'explicit-package-dependencies',
   extraHelpText:
@@ -191,9 +180,6 @@ const Feature explicitPackageDependencies = Feature(
       'See also:\n'
       '* https://flutter.dev/to/flutter-plugins-configuration.\n'
       '* https://flutter.dev/to/flutter-gen-deprecation.',
-  master: FeatureChannelSetting(available: true),
-  beta: FeatureChannelSetting(available: true),
-  stable: FeatureChannelSetting(available: true),
 );
 
 /// A [Feature] is a process for conditionally enabling tool features.
@@ -291,7 +277,8 @@ class Feature {
 }
 
 /// A description of the conditions to enable a feature for a particular channel.
-class FeatureChannelSetting {
+@immutable
+final class FeatureChannelSetting {
   const FeatureChannelSetting({this.available = false, this.enabledByDefault = false});
 
   /// Whether the feature is available on this channel.
@@ -304,4 +291,19 @@ class FeatureChannelSetting {
   ///
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
+
+  @override
+  bool operator ==(Object other) {
+    return other is FeatureChannelSetting &&
+        available == other.available &&
+        enabledByDefault == other.enabledByDefault;
+  }
+
+  @override
+  int get hashCode => Object.hash(available, enabledByDefault);
+
+  @override
+  String toString() {
+    return 'FeatureChannelSetting <available: $available, enabledByDefault: $enabledByDefault>';
+  }
 }

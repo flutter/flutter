@@ -14,6 +14,7 @@
 /// @docImport 'raw_keyboard.dart';
 /// @docImport 'raw_keyboard_android.dart';
 /// @docImport 'raw_keyboard_fuchsia.dart';
+/// @docImport 'scribe.dart';
 /// @docImport 'system_chrome.dart';
 /// @docImport 'system_navigator.dart';
 /// @docImport 'system_sound.dart';
@@ -399,6 +400,13 @@ abstract final class SystemChannels {
   ///
   ///  * [PlatformViewsService] for the available operations on this channel.
   static const MethodChannel platform_views = MethodChannel('flutter/platform_views');
+
+  /// A [MethodChannel] for controlling platform views.
+  ///
+  /// See also:
+  ///
+  ///  * [PlatformViewsService] for the available operations on this channel.
+  static const MethodChannel platform_views_2 = MethodChannel('flutter/platform_views_2');
 
   /// A [MethodChannel] for configuring the Skia graphics library.
   ///

@@ -72,7 +72,12 @@ std::shared_ptr<BlitPass> CommandBufferVK::OnCreateBlitPass() {
   if (!IsValid()) {
     return nullptr;
   }
-  auto pass = std::shared_ptr<BlitPassVK>(new BlitPassVK(shared_from_this()));
+  auto context = context_.lock();
+  if (!context) {
+    return nullptr;
+  }
+  auto pass = std::shared_ptr<BlitPassVK>(new BlitPassVK(
+      shared_from_this(), ContextVK::Cast(*context).GetWorkarounds()));
   if (!pass->IsValid()) {
     return nullptr;
   }
@@ -155,13 +160,14 @@ bool CommandBufferVK::Track(const std::shared_ptr<const Texture>& texture) {
 
 fml::StatusOr<vk::DescriptorSet> CommandBufferVK::AllocateDescriptorSets(
     const vk::DescriptorSetLayout& layout,
+    PipelineKey pipeline_key,
     const ContextVK& context) {
   if (!IsValid()) {
     return fml::Status(fml::StatusCode::kUnknown, "command encoder invalid");
   }
 
-  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(layout,
-                                                                      context);
+  return tracked_objects_->GetDescriptorPool().AllocateDescriptorSets(
+      layout, pipeline_key, context);
 }
 
 void CommandBufferVK::PushDebugGroup(std::string_view label) const {

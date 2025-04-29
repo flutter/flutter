@@ -41,7 +41,8 @@ Future<void> runWebTest(WebTest test) async {
   final Completer<void> completer = Completer<void>();
   await ui_web.bootstrapEngine(runApp: () => completer.complete());
   await completer.future;
-  webGoldenComparator = DefaultWebGoldenComparator(test.goldensUri);
+
+  goldenFileComparator = HttpProxyGoldenComparator(test.goldensUri);
 
   /// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window
   /// size for the purposes of testing.

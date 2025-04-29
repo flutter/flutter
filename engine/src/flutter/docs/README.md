@@ -1,4 +1,4 @@
-This is an index of team-facing documentation for the [flutter/engine repository](https://github.com/flutter/engine/).
+This is an index of team-facing documentation for the [flutter/engine team](https://github.com/flutter/flutter/tree/main/engine).
 
 - [Accessibility on Windows](https://github.com/flutter/flutter/blob/master/docs/platforms/desktop/windows/Accessibility-on-Windows.md)
 - [Code signing metadata](./release/Code-signing-metadata.md) for engine binaries
@@ -24,9 +24,7 @@ This is an index of team-facing documentation for the [flutter/engine repository
 - [Supporting legacy platforms](Supporting-legacy-platforms.md)
 - [Testing Android Changes in the Devicelab on an Emulator](https://github.com/flutter/flutter/blob/master/docs/platforms/android/Testing-Android-Changes-in-the-Devicelab-on-an-Emulator.md)
 - [Testing the engine](./testing/Testing-the-engine.md)
-- [Testing presubmit Engine PRs with the Flutter framework](Testing-presubmit-Engine-PRs-with-the-Flutter-framework.md)
 - [The Engine architecture](https://github.com/flutter/flutter/blob/master/docs/about/The-Engine-architecture.md)
 - [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/master/docs/platforms/android/Upgrading-Engine's-Android-API-version.md)
 - [Using the Dart Development Service (DDS) and Flutter DevTools with a custom Flutter Engine Embedding](./Using-the-Dart-Development-Service-(DDS)-and-Flutter-DevTools-with-a-custom-Flutter-Engine-Embedding.md)
 - [Using Sanitizers with the Flutter Engine](./Using-Sanitizers-with-the-Flutter-Engine.md)
-- [Why we have a separate engine repo](https://github.com/flutter/flutter/blob/master/docs/about/Why-we-have-a-separate-engine-repo.md)

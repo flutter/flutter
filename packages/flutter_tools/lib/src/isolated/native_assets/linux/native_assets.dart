@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/code_assets.dart';
 
 import '../../../base/common.dart';
 import '../../../base/file_system.dart';
@@ -37,9 +37,11 @@ Future<CCompilerConfig> cCompilerConfigLinux() async {
     }
     binaryPaths[binary] = binaryFile.uri;
   }
-  return CCompilerConfig(
-    archiver: binaryPaths[kArBinary],
-    compiler: binaryPaths[kClangBinary],
-    linker: binaryPaths[kLdBinary],
-  );
+  final Uri? archiver = binaryPaths[kArBinary];
+  final Uri? compiler = binaryPaths[kClangBinary];
+  final Uri? linker = binaryPaths[kLdBinary];
+  if (archiver == null || compiler == null || linker == null) {
+    throwToolExit('Clang could not be found.');
+  }
+  return CCompilerConfig(archiver: archiver, compiler: compiler, linker: linker);
 }

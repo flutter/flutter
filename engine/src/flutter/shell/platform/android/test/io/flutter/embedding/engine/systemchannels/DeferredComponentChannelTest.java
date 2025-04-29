@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
 
 class TestDeferredComponentManager implements DeferredComponentManager {
   DeferredComponentChannel channel;
@@ -53,14 +52,13 @@ class TestDeferredComponentManager implements DeferredComponentManager {
   public void destroy() {}
 }
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class DeferredComponentChannelTest {
   @Test
   public void deferredComponentChannel_installCompletesResults() {
     MethodChannel rawChannel = mock(MethodChannel.class);
     FlutterJNI mockFlutterJNI = mock(FlutterJNI.class);
-    DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class));
+    DartExecutor dartExecutor = new DartExecutor(mockFlutterJNI, mock(AssetManager.class), 0);
     TestDeferredComponentManager testDeferredComponentManager = new TestDeferredComponentManager();
     DeferredComponentChannel fakeDeferredComponentChannel =
         new DeferredComponentChannel(dartExecutor);

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 /// @docImport 'app.dart';
+/// @docImport 'color_scheme.dart';
 /// @docImport 'page.dart';
 /// @docImport 'predictive_back_page_transitions_builder.dart';
 library;
@@ -334,9 +335,8 @@ class _ZoomEnterTransition extends StatefulWidget {
 
 class _ZoomEnterTransitionState extends State<_ZoomEnterTransition>
     with _ZoomTransitionBase<_ZoomEnterTransition> {
-  // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
-  // support this functionality and the canvaskit backend uses a single thread for UI and raster
-  // work which diminishes the impact of this performance improvement.
+  // See SnapshotWidget doc comment, this is disabled on web because the canvaskit backend uses a
+  // single thread for UI and raster work which diminishes the impact of this performance improvement.
   @override
   bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
@@ -446,9 +446,8 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition>
     with _ZoomTransitionBase<_ZoomExitTransition> {
   late _ZoomExitTransitionPainter delegate;
 
-  // See SnapshotWidget doc comment, this is disabled on web because the HTML backend doesn't
-  // support this functionality and the canvaskit backend uses a single thread for UI and raster
-  // work which diminishes the impact of this performance improvement.
+  // See SnapshotWidget doc comment, this is disabled on web because the canvaskit backend uses a
+  // single thread for UI and raster work which diminishes the impact of this performance improvement.
   @override
   bool get useSnapshot => !kIsWeb && widget.allowSnapshotting;
 
@@ -764,7 +763,7 @@ class FadeForwardsPageTransitionsBuilder extends PageTransitionsBuilder {
         Animation<double> secondaryAnimation,
         bool allowSnapshotting,
         Widget? child,
-      ) => _delegatedTransition(context, animation, backgroundColor, child);
+      ) => _delegatedTransition(context, secondaryAnimation, backgroundColor, child);
 
   // Used by all of the sliding transition animations.
   static const Curve _transitionCurve = Curves.easeInOutCubicEmphasized;
@@ -1019,6 +1018,9 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
   const CupertinoPageTransitionsBuilder();
 
   @override
+  Duration get transitionDuration => CupertinoRouteTransitionMixin.kTransitionDuration;
+
+  @override
   DelegatedTransitionBuilder? get delegatedTransition =>
       CupertinoPageTransition.delegatedTransition;
 
@@ -1075,8 +1077,8 @@ class PageTransitionsTheme with Diagnosticable {
   /// Constructs an object that selects a transition based on the platform.
   ///
   /// By default the list of builders is: [ZoomPageTransitionsBuilder]
-  /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
-  /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
+  /// for [TargetPlatform.android], [TargetPlatform.windows] and [TargetPlatform.linux]
+  /// and [CupertinoPageTransitionsBuilder] for [TargetPlatform.iOS] and [TargetPlatform.macOS].
   const PageTransitionsTheme({
     Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders,
   }) : _builders = builders;
@@ -1086,6 +1088,8 @@ class PageTransitionsTheme with Diagnosticable {
         TargetPlatform.android: ZoomPageTransitionsBuilder(),
         TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+        TargetPlatform.linux: ZoomPageTransitionsBuilder(),
       };
 
   /// The [PageTransitionsBuilder]s supported by this theme.

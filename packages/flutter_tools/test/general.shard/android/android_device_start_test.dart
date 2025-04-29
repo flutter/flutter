@@ -89,11 +89,6 @@ void main() {
       );
       processManager.addCommand(
         const FakeCommand(
-          command: <String>['adb', '-s', '1234', 'shell', 'pm', 'list', 'packages', 'FlutterApp'],
-        ),
-      );
-      processManager.addCommand(
-        const FakeCommand(
           command: <String>['adb', '-s', '1234', 'install', '-t', '-r', 'app-debug.apk'],
         ),
       );
@@ -218,22 +213,6 @@ void main() {
           'adb',
           '-s',
           '1234',
-          'shell',
-          'pm',
-          'list',
-          'packages',
-          '--user',
-          '10',
-          'FlutterApp',
-        ],
-      ),
-    );
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'adb',
-          '-s',
-          '1234',
           'install',
           '-t',
           '-r',
@@ -277,15 +256,13 @@ void main() {
           '--ez', 'trace-systrace', 'true',
           '--es', 'trace-to-file', 'path/to/trace.binpb',
           '--ez', 'endless-trace-buffer', 'true',
-          '--ez', 'dump-skp-on-shader-compilation', 'true',
-          '--ez', 'cache-sksl', 'true',
           '--ez', 'purge-persistent-cache', 'true',
           '--ez', 'enable-impeller', 'true',
           '--ez', 'enable-checked-mode', 'true',
           '--ez', 'verify-entry-points', 'true',
           '--ez', 'start-paused', 'true',
           '--ez', 'disable-service-auth-codes', 'true',
-          '--es', 'dart-flags', 'foo,--null_assertions',
+          '--es', 'dart-flags', 'foo',
           '--ez', 'use-test-fonts', 'true',
           '--ez', 'verbose-logging', 'true',
           '--user', '10',
@@ -310,13 +287,10 @@ void main() {
         traceSystrace: true,
         traceToFile: 'path/to/trace.binpb',
         endlessTraceBuffer: true,
-        dumpSkpOnShaderCompilation: true,
-        cacheSkSL: true,
         purgePersistentCache: true,
         useTestFonts: true,
         verboseSystemLogs: true,
         enableImpeller: ImpellerStatus.enabled,
-        nullAssertions: true,
       ),
       platformArgs: <String, dynamic>{},
       userIdentifier: '10',

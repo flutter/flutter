@@ -13,6 +13,9 @@ import("//flutter/impeller/tools/args.gni")
 # * When the `single_invocation` argument is true, `impellerc` is only
 #   invoked once via `compiled_action` or `action`.
 template("_impellerc") {
+  if (!defined(invoker.mnemonic)) {
+    mnemonic = "IMPELLERC"
+  }
   if (invoker.single_invocation) {
     compiled_action(target_name) {
       forward_variables_from(invoker, "*")
@@ -94,6 +97,7 @@ template("impellerc") {
              ])
 
   _impellerc(target_name) {
+    forward_variables_from(invoker, [ "mnemonic" ])
     pool = "//build/toolchain:toolchain_pool"
     shader_bundle = defined(invoker.shader_bundle)
 

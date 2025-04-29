@@ -51,12 +51,13 @@ class DisplayListGLComplexityCalculator
     void drawRoundRect(const DlRoundRect& rrect) override;
     void drawDiffRoundRect(const DlRoundRect& outer,
                            const DlRoundRect& inner) override;
+    void drawRoundSuperellipse(const DlRoundSuperellipse& rse) override;
     void drawPath(const DlPath& path) override;
     void drawArc(const DlRect& oval_bounds,
                  DlScalar start_degrees,
                  DlScalar sweep_degrees,
                  bool use_center) override;
-    void drawPoints(DlCanvas::PointMode mode,
+    void drawPoints(DlPointMode mode,
                     uint32_t count,
                     const DlPoint points[]) override;
     void drawVertices(const std::shared_ptr<DlVertices>& vertices,
@@ -85,7 +86,7 @@ class DisplayListGLComplexityCalculator
                     DlScalar dpr) override;
 
    protected:
-    void ImageRect(const SkISize& size,
+    void ImageRect(const DlISize& size,
                    bool texture_backed,
                    bool render_with_attributes,
                    bool enforce_src_edges) override;

@@ -315,7 +315,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
   Future<void> runNativeTests(String buildTarget) async {
     // Native unit tests rely on building the app first to generate necessary
     // build files.
-    await build(buildTarget, validateNativeBuildProject: false);
+    await build(buildTarget, validateNativeBuildProject: false, buildMode: 'debug');
 
     switch (buildTarget) {
       case 'apk':
@@ -353,7 +353,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
                 'build',
                 'linux',
                 'x64',
-                'release',
+                'debug',
                 'plugins',
                 'plugintest',
                 'plugintest_test',
@@ -370,6 +370,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
           destination: 'platform=macOS',
           configuration: 'Debug',
           testName: 'native_plugin_unit_tests_macos',
+          extraOptions: <String>['-parallel-testing-enabled', 'NO'],
           skipCodesign: true,
         )) {
           throw TaskResult.failure('Platform unit tests failed');
@@ -384,7 +385,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
                 arch,
                 'plugins',
                 'plugintest',
-                'Release',
+                'Debug',
                 'plugintest_test.exe',
               ),
               <String>[],
@@ -479,7 +480,7 @@ end
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
     }
     final String versionString =
-        target == 'ios' ? "s.platform = :ios, '12.0'" : "s.platform = :osx, '10.11'";
+        target == 'ios' ? "s.platform = :ios, '13.0'" : "s.platform = :osx, '10.11'";
     String podspecContent = podspec.readAsStringSync();
     if (!podspecContent.contains(versionString)) {
       throw TaskResult.failure(
@@ -509,8 +510,10 @@ s.dependency 'AppAuth', '1.6.0'
     String target, {
     bool validateNativeBuildProject = true,
     bool configOnly = false,
+    String buildMode = 'release',
     Directory? localEngine,
   }) async {
+    assert(const <String>{'debug', 'release', 'profile'}.contains(buildMode));
     await inDirectory(Directory(rootPath), () async {
       final String buildOutput = await evalFlutter(
         'build',
@@ -519,6 +522,7 @@ s.dependency 'AppAuth', '1.6.0'
           '-v',
           if (target == 'ios') '--no-codesign',
           if (configOnly) '--config-only',
+          if (buildMode != 'release') '--$buildMode',
           if (localEngine != null)
           // The engine directory is of the form <fake-source-path>/out/<fakename>,
           // which has to be broken up into the component flags.

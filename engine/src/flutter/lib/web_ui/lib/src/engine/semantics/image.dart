@@ -9,10 +9,10 @@ import 'semantics.dart';
 ///
 /// Uses aria img role to convey this semantic information to the element.
 ///
-/// Screen-readers takes advantage of "aria-label" to describe the visual.
+/// Screen-readers take advantage of "aria-label" to describe the visual.
 class SemanticImage extends SemanticRole {
   SemanticImage(SemanticsObject semanticsObject)
-    : super.blank(SemanticRoleKind.image, semanticsObject) {
+    : super.blank(EngineSemanticsRole.image, semanticsObject) {
     // The following behaviors can coexist with images. `LabelAndValue` is
     // not used because this behavior uses special auxiliary elements to
     // supply ARIA labels.

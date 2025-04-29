@@ -25,6 +25,7 @@ import 'material.dart';
 import 'material_state.dart';
 import 'outlined_button.dart';
 import 'text_button.dart';
+import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip.dart';
 
@@ -86,6 +87,11 @@ abstract class ButtonStyleButton extends StatefulWidget {
     required this.clipBehavior,
     this.statesController,
     this.isSemanticButton = true,
+    @Deprecated(
+      'Remove this parameter as it is now ignored. '
+      'Use ButtonStyle.iconAlignment instead. '
+      'This feature was deprecated after v3.28.0-1.0.pre.',
+    )
     this.iconAlignment,
     this.tooltip,
     required this.child,
@@ -158,6 +164,11 @@ abstract class ButtonStyleButton extends StatefulWidget {
   final bool? isSemanticButton;
 
   /// {@macro flutter.material.ButtonStyleButton.iconAlignment}
+  @Deprecated(
+    'Remove this parameter as it is now ignored. '
+    'Use ButtonStyle.iconAlignment instead. '
+    'This feature was deprecated after v3.28.0-1.0.pre.',
+  )
   final IconAlignment? iconAlignment;
 
   /// Text that describes the action that will occur when the button is pressed or
@@ -362,6 +373,8 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final IconThemeData iconTheme = IconTheme.of(context);
     final ButtonStyle? widgetStyle = widget.style;
     final ButtonStyle? themeStyle = widget.themeStyleOf(context);
     final ButtonStyle defaultStyle = widget.defaultStyleOf(context);
@@ -377,6 +390,16 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       return effectiveValue((ButtonStyle? style) {
         return getProperty(style)?.resolve(statesController.value);
       });
+    }
+
+    Color? effectiveIconColor() {
+      return widgetStyle?.iconColor?.resolve(statesController.value) ??
+          themeStyle?.iconColor?.resolve(statesController.value) ??
+          widgetStyle?.foregroundColor?.resolve(statesController.value) ??
+          themeStyle?.foregroundColor?.resolve(statesController.value) ??
+          defaultStyle.iconColor?.resolve(statesController.value) ??
+          // Fallback to foregroundColor if iconColor is null.
+          defaultStyle.foregroundColor?.resolve(statesController.value);
     }
 
     final double? resolvedElevation = resolve<double?>((ButtonStyle? style) => style?.elevation);
@@ -399,7 +422,7 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
     final Size? resolvedMinimumSize = resolve<Size?>((ButtonStyle? style) => style?.minimumSize);
     final Size? resolvedFixedSize = resolve<Size?>((ButtonStyle? style) => style?.fixedSize);
     final Size? resolvedMaximumSize = resolve<Size?>((ButtonStyle? style) => style?.maximumSize);
-    final Color? resolvedIconColor = resolve<Color?>((ButtonStyle? style) => style?.iconColor);
+    final Color? resolvedIconColor = effectiveIconColor();
     final double? resolvedIconSize = resolve<double?>((ButtonStyle? style) => style?.iconSize);
     final BorderSide? resolvedSide = resolve<BorderSide?>((ButtonStyle? style) => style?.side);
     final OutlinedBorder? resolvedShape = resolve<OutlinedBorder?>(
@@ -525,26 +548,26 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
       result = resolvedBackgroundBuilder(context, statesController.value, result);
     }
 
-    result = InkWell(
-      onTap: widget.onPressed,
-      onLongPress: widget.onLongPress,
-      onHover: widget.onHover,
-      mouseCursor: mouseCursor,
-      enableFeedback: resolvedEnableFeedback,
-      focusNode: widget.focusNode,
-      canRequestFocus: widget.enabled,
-      onFocusChange: widget.onFocusChange,
-      autofocus: widget.autofocus,
-      splashFactory: resolvedSplashFactory,
-      overlayColor: overlayColor,
-      highlightColor: Colors.transparent,
-      customBorder: resolvedShape!.copyWith(side: resolvedSide),
-      statesController: statesController,
-      child: IconTheme.merge(
-        data: IconThemeData(
-          color: resolvedIconColor ?? resolvedForegroundColor,
-          size: resolvedIconSize,
-        ),
+    result = AnimatedTheme(
+      duration: resolvedAnimationDuration,
+      data: theme.copyWith(
+        iconTheme: iconTheme.merge(IconThemeData(color: resolvedIconColor, size: resolvedIconSize)),
+      ),
+      child: InkWell(
+        onTap: widget.onPressed,
+        onLongPress: widget.onLongPress,
+        onHover: widget.onHover,
+        mouseCursor: mouseCursor,
+        enableFeedback: resolvedEnableFeedback,
+        focusNode: widget.focusNode,
+        canRequestFocus: widget.enabled,
+        onFocusChange: widget.onFocusChange,
+        autofocus: widget.autofocus,
+        splashFactory: resolvedSplashFactory,
+        overlayColor: overlayColor,
+        highlightColor: Colors.transparent,
+        customBorder: resolvedShape!.copyWith(side: resolvedSide),
+        statesController: statesController,
         child: result,
       ),
     );

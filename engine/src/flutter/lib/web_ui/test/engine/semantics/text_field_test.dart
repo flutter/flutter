@@ -103,6 +103,7 @@ void testMain() {
       expect(inputElement.tagName.toLowerCase(), 'input');
       expect(inputElement.value, '');
       expect(inputElement.disabled, isFalse);
+      expect(inputElement.getAttribute('aria-required'), isNull);
     });
 
     test('renders a password field', () {
@@ -114,6 +115,22 @@ void testMain() {
       final textFieldRole = node.semanticRole! as SemanticTextField;
       final inputElement = textFieldRole.editableElement as DomHTMLInputElement;
       expect(inputElement.disabled, isFalse);
+    });
+
+    test('renders text fields with input types', () {
+      const inputTypeEnumToString = <ui.SemanticsInputType, String>{
+        ui.SemanticsInputType.none: 'text',
+        ui.SemanticsInputType.text: 'text',
+        ui.SemanticsInputType.url: 'url',
+        ui.SemanticsInputType.phone: 'tel',
+        ui.SemanticsInputType.search: 'search',
+        ui.SemanticsInputType.email: 'email',
+      };
+      for (final ui.SemanticsInputType type in ui.SemanticsInputType.values) {
+        createTextFieldSemantics(value: 'text', inputType: type);
+
+        expectSemanticsTree(owner(), '<sem><input type="${inputTypeEnumToString[type]}" /></sem>');
+      }
     });
 
     test('renders a disabled text field', () {
@@ -153,7 +170,7 @@ void testMain() {
       int actionCount = 0;
       strategy.enable(
         singlelineConfig,
-        onChange: (_, __) {
+        onChange: (_, _) {
           changeCount++;
         },
         onAction: (_) {
@@ -218,7 +235,7 @@ void testMain() {
     });
 
     test('Does not overwrite text value and selection editing state on semantic updates', () {
-      strategy.enable(singlelineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
       final textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
@@ -242,7 +259,7 @@ void testMain() {
     test('Updates editing state when receiving framework messages from the text input channel', () {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
-      strategy.enable(singlelineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
       final textFieldSemantics = createTextFieldSemantics(
         value: 'hello',
@@ -266,6 +283,8 @@ void testMain() {
         'text': 'updated',
         'selectionBase': 2,
         'selectionExtent': 3,
+        'composingBase': -1,
+        'composingExtent': -1,
       });
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState), testTextEditing);
 
@@ -280,7 +299,7 @@ void testMain() {
     test('Gives up focus after DOM blur', () {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
-      strategy.enable(singlelineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
       final textFieldSemantics = createTextFieldSemantics(value: 'hello', isFocused: true);
 
       final textField = textFieldSemantics.semanticRole! as SemanticTextField;
@@ -294,7 +313,7 @@ void testMain() {
     });
 
     test('Does not dispose and recreate dom elements in persistent mode', () async {
-      strategy.enable(singlelineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
       // It doesn't create a new DOM element.
       expect(strategy.domElement, isNull);
@@ -323,7 +342,7 @@ void testMain() {
     });
 
     test('Refocuses when setting editing state', () {
-      strategy.enable(singlelineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
       createTextFieldSemantics(value: 'hello', isFocused: true);
       expect(strategy.domElement, isNotNull);
@@ -334,7 +353,7 @@ void testMain() {
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
 
       // The input will have focus after editing state is set and semantics updated.
-      strategy.setEditingState(EditingState(text: 'foo'));
+      strategy.setEditingState(EditingState(text: 'foo', baseOffset: 0, extentOffset: 0));
 
       // NOTE: at this point some browsers, e.g. some versions of Safari will
       //       have set the focus on the editing element as a result of setting
@@ -352,7 +371,7 @@ void testMain() {
     });
 
     test('Works in multi-line mode', () {
-      strategy.enable(multilineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(multilineConfig, onChange: (_, _) {}, onAction: (_) {});
       createTextFieldSemantics(value: 'hello', isFocused: true, isMultiline: true);
 
       final textArea = strategy.domElement! as DomHTMLTextAreaElement;
@@ -360,7 +379,7 @@ void testMain() {
 
       expect(owner().semanticsHost.ownerDocument?.activeElement, strategy.domElement);
 
-      strategy.enable(singlelineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
       textArea.blur();
       expect(owner().semanticsHost.ownerDocument?.activeElement, domDocument.body);
@@ -373,7 +392,7 @@ void testMain() {
     });
 
     test('multi-line and obscured', () {
-      strategy.enable(multilineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(multilineConfig, onChange: (_, _) {}, onAction: (_) {});
       createTextFieldSemantics(
         value: 'hello',
         isFocused: true,
@@ -391,7 +410,7 @@ void testMain() {
     }, skip: ui_web.browser.browserEngine == ui_web.BrowserEngine.firefox);
 
     test('Does not position or size its DOM element', () {
-      strategy.enable(singlelineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
       // Send width and height that are different from semantics values on
       // purpose.
@@ -450,7 +469,7 @@ void testMain() {
     }
 
     test('Changes focus from one text field to another through a semantics update', () {
-      strategy.enable(singlelineConfig, onChange: (_, __) {}, onAction: (_) {});
+      strategy.enable(singlelineConfig, onChange: (_, _) {}, onAction: (_) {});
 
       // Switch between the two fields a few times.
       for (int i = 0; i < 5; i++) {
@@ -473,6 +492,16 @@ void testMain() {
         expect(strategy.domElement, tester.getTextField(2).editableElement);
       }
     });
+
+    test('renders a required text field', () {
+      createTextFieldSemantics(isRequired: true, value: 'hello');
+      expectSemanticsTree(owner(), '''<sem><input aria-required="true" /></sem>''');
+    });
+
+    test('renders a not required text field', () {
+      createTextFieldSemantics(isRequired: false, value: 'hello');
+      expectSemanticsTree(owner(), '''<sem><input aria-required="false" /></sem>''');
+    });
   });
 }
 
@@ -483,9 +512,11 @@ SemanticsObject createTextFieldSemantics({
   bool isFocused = false,
   bool isMultiline = false,
   bool isObscured = false,
+  bool? isRequired,
   ui.Rect rect = const ui.Rect.fromLTRB(0, 0, 100, 50),
   int textSelectionBase = 0,
   int textSelectionExtent = 0,
+  ui.SemanticsInputType inputType = ui.SemanticsInputType.text,
 }) {
   final tester = SemanticsTester(owner());
   tester.updateNode(
@@ -497,11 +528,14 @@ SemanticsObject createTextFieldSemantics({
     isFocused: isFocused,
     isMultiline: isMultiline,
     isObscured: isObscured,
+    hasRequiredState: isRequired != null,
+    isRequired: isRequired,
     hasTap: true,
     rect: rect,
     textDirection: ui.TextDirection.ltr,
     textSelectionBase: textSelectionBase,
     textSelectionExtent: textSelectionExtent,
+    inputType: inputType,
   );
   tester.apply();
   return tester.getSemanticsObject(0);

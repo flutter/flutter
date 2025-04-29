@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -271,6 +272,9 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     BuildContext context,
     EditableTextState editableTextState,
   ) {
+    if (defaultTargetPlatform == TargetPlatform.iOS && SystemContextMenu.isSupported(context)) {
+      return SystemContextMenu.editableText(editableTextState: editableTextState);
+    }
     return CupertinoAdaptiveTextSelectionToolbar.editableText(editableTextState: editableTextState);
   }
 
@@ -360,7 +364,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
     super.didChange(value);
 
     if (value != null && _effectiveController.text != value) {
-      _effectiveController.text = value;
+      _effectiveController.value = TextEditingValue(text: value);
     }
   }
 
@@ -368,7 +372,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   void reset() {
     // Set the controller value before calling super.reset() to let
     // _handleControllerChanged suppress the change.
-    _effectiveController.text = widget.initialValue!;
+    _effectiveController.value = TextEditingValue(text: widget.initialValue ?? '');
     super.reset();
     _cupertinoTextFormFieldRow.onChanged?.call(_effectiveController.text);
   }

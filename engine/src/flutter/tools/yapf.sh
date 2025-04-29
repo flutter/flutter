@@ -43,12 +43,14 @@ if command -v python3.10 &> /dev/null; then
   PYTHON_EXEC="python3.10"
 elif command -v python3.11 &> /dev/null; then
   PYTHON_EXEC="python3.11"
+elif command -v python3.12 &> /dev/null; then
+  PYTHON_EXEC="python3.12"
 else
   python3 -c "
 import sys
 version = sys.version_info
-if (version.major, version.minor) > (3, 11):
-    print(f'Error: The yapf Python formatter requires Python version 3.11 or '
+if (version.major, version.minor) > (3, 12):
+    print(f'Error: The yapf Python formatter requires Python version 3.12 or '
           f'earlier. The installed python3 version is '
           f'{version.major}.{version.minor}.',
           file=sys.stderr)

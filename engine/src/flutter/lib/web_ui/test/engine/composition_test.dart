@@ -43,7 +43,7 @@ GloballyPositionedTextEditingStrategy _enableEditingStrategy({
 
   owner.debugTextEditingStrategyOverride = editingStrategy;
 
-  editingStrategy.enable(owner.configuration!, onChange: onChange ?? (_, __) {}, onAction: (_) {});
+  editingStrategy.enable(owner.configuration!, onChange: onChange ?? (_, _) {}, onAction: (_) {});
   return editingStrategy;
 }
 
@@ -114,7 +114,11 @@ Future<void> testMain() async {
 
     group('determine composition state', () {
       test('should return editing state if extentOffset is null', () {
-        final EditingState editingState = EditingState(text: 'Test');
+        final EditingState editingState = EditingState(
+          text: 'Test',
+          baseOffset: 0,
+          extentOffset: 0,
+        );
 
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
             _MockWithCompositionAwareMixin();
@@ -137,7 +141,7 @@ Future<void> testMain() async {
       });
 
       test('should return editing state if text is null', () {
-        final EditingState editingState = EditingState(baseOffset: 0, extentOffset: 0);
+        final EditingState editingState = EditingState(text: '', baseOffset: 0, extentOffset: 0);
 
         final _MockWithCompositionAwareMixin mockWithCompositionAwareMixin =
             _MockWithCompositionAwareMixin();

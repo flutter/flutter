@@ -153,11 +153,18 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRunningRootIsolate(
     return {};
   }
 
-  if (settings.root_isolate_create_callback) {
-    // Isolate callbacks always occur in isolate scope and before user code has
-    // had a chance to run.
+  {
     tonic::DartState::Scope scope(isolate.get());
-    settings.root_isolate_create_callback(*isolate.get());
+    if (settings.merged_platform_ui_thread !=
+        Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+      Dart_SetCurrentThreadOwnsIsolate();
+    }
+
+    if (settings.root_isolate_create_callback) {
+      // Isolate callbacks always occur in isolate scope and before user code
+      // has had a chance to run.
+      settings.root_isolate_create_callback(*isolate.get());
+    }
   }
 
   if (root_isolate_create_callback) {
@@ -345,6 +352,7 @@ Dart_Isolate DartIsolate::CreatePlatformIsolate(Dart_Handle entry_point,
       }
       old_task_observer_add(key, callback);
     });
+    return platform_task_runner->GetTaskQueueId();
   };
 
   UIDartState::Context context(task_runners);
@@ -510,7 +518,13 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate) {
     SetMessageHandlingTaskRunner(GetTaskRunners().GetPlatformTaskRunner(),
                                  true);
   } else {
-    SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner(), false);
+    // When running with custom UI task runner post directly to runner (there is
+    // no task queue).
+    bool post_directly_to_runner =
+        GetTaskRunners().GetUITaskRunner() &&
+        !GetTaskRunners().GetUITaskRunner()->GetTaskQueueId().is_valid();
+    SetMessageHandlingTaskRunner(GetTaskRunners().GetUITaskRunner(),
+                                 post_directly_to_runner);
   }
 
   if (tonic::CheckAndHandleError(
@@ -1361,6 +1375,11 @@ void DartIsolate::DartIsolateCleanupCallback(
 
 std::weak_ptr<DartIsolate> DartIsolate::GetWeakIsolatePtr() {
   return std::static_pointer_cast<DartIsolate>(shared_from_this());
+}
+
+void DartIsolate::SetOwnerToCurrentThread() {
+  tonic::DartIsolateScope isolate_scope(isolate());
+  Dart_SetCurrentThreadOwnsIsolate();
 }
 
 void DartIsolate::AddIsolateShutdownCallback(const fml::closure& closure) {

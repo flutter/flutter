@@ -2,23 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
-import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
+import '../../../src/package_config.dart';
 
 final Platform macPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -27,7 +33,7 @@ final Platform macPlatform = FakePlatform(
 
 const List<String> _kSharedConfig = <String>[
   '-dynamiclib',
-  '-miphoneos-version-min=12.0',
+  '-miphoneos-version-min=13.0',
   '-Xlinker',
   '-rpath',
   '-Xlinker',
@@ -42,6 +48,32 @@ const List<String> _kSharedConfig = <String>[
   '-isysroot',
   'path/to/iPhoneOS.sdk',
 ];
+
+const String _kPluginsFileWithoutDevDependencies = '''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "foo_package",
+        "dev_dependency": false
+      }
+    ]
+  }
+}
+''';
+
+const String _kPluginsFileWithDevDependencies = '''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "foo_package",
+        "dev_dependency": true
+      }
+    ]
+  }
+}
+''';
 
 void main() {
   late Environment environment;
@@ -71,7 +103,6 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
-      usage: usage,
       analytics: fakeAnalytics,
     );
   });
@@ -101,7 +132,7 @@ void main() {
               fileSystem.path.join('.tmp_rand0', 'flutter_tools_stub_source.rand0', 'debug_app.cc'),
             ),
             '-dynamiclib',
-            '-miphonesimulator-version-min=12.0',
+            '-miphonesimulator-version-min=13.0',
             '-Xlinker',
             '-rpath',
             '-Xlinker',
@@ -197,7 +228,6 @@ void main() {
   testUsingContext(
     'DebugIosApplicationBundle',
     () async {
-      environment.defines[kBundleSkSLPath] = 'bundle.sksl';
       environment.defines[kBuildMode] = 'debug';
       environment.defines[kCodesignIdentity] = 'ABC123';
       // Precompiled dart data
@@ -209,11 +239,8 @@ void main() {
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
       // Project info
-      fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -226,16 +253,6 @@ void main() {
           .childDirectory('App.framework')
           .childFile('App')
           .createSync(recursive: true);
-      // sksl bundle
-      fileSystem
-          .file('bundle.sksl')
-          .writeAsStringSync(
-            json.encode(<String, Object>{
-              'engineRevision': '2',
-              'platform': 'ios',
-              'data': <String, Object>{'A': 'B'},
-            }),
-          );
 
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
@@ -272,16 +289,111 @@ void main() {
       expect(assetDirectory.childFile('AssetManifest.json'), exists);
       expect(assetDirectory.childFile('vm_snapshot_data'), exists);
       expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
-      expect(assetDirectory.childFile('io.flutter.shaders.json'), exists);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
+    'DebugIosApplicationBundle with flavor',
+    () async {
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kCodesignIdentity] = 'ABC123';
+      environment.defines[kFlavor] = 'vanilla';
+      environment.defines[kXcodeConfiguration] = 'Debug-strawberry';
+      fileSystem.directory('/ios/Runner.xcodeproj').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+  name: example
+  flutter:
+    assets:
+      - assets/common/
+      - path: assets/vanilla/
+        flavors:
+          - vanilla
+      - path: assets/strawberry/
+        flavors:
+          - strawberry
+  ''');
+
+      fileSystem.file('assets/common/image.png').createSync(recursive: true);
+      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      // Precompiled dart data
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      // Project info
+      fileSystem
+          .directory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
+      // Plist file
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+          .createSync(recursive: true);
+      // App kernel
+      environment.buildDir.childFile('app.dill').createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync();
+      // Stub framework
+      environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .createSync(recursive: true);
+
+      final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+      final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+      ]);
+      await const DebugIosApplicationBundle().build(environment);
+
       expect(
-        assetDirectory.childFile('io.flutter.shaders.json').readAsStringSync(),
-        '{"data":{"A":"B"}}',
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/common/image.png'),
+        exists,
+      );
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/vanilla/ice-cream.png'),
+        isNot(exists),
+      );
+      expect(
+        fileSystem.file(
+          '${frameworkDirectory.path}/flutter_assets/assets/strawberry/ice-cream.png',
+        ),
+        exists,
       );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
       Platform: () => macPlatform,
+      XcodeProjectInterpreter:
+          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 
@@ -306,11 +418,8 @@ void main() {
       // Project info
       fileSystem
           .file('pubspec.yaml')
-          .writeAsStringSync('name: hello\nflutter:\n  shaders:\n    - shader.glsl');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+          .writeAsStringSync('name: my_app\nflutter:\n  shaders:\n    - shader.glsl');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -332,7 +441,6 @@ void main() {
         const FakeCommand(
           command: <String>[
             'HostArtifact.impellerc',
-            '--sksl',
             '--runtime-stage-metal',
             '--iplr',
             '--sl=/App.framework/flutter_assets/shader.glsl',
@@ -391,11 +499,9 @@ void main() {
       environment.defines[kXcodeAction] = 'build';
 
       // Project info
-      fileSystem.file('pubspec.yaml').writeAsStringSync('name: hello');
-      fileSystem
-          .directory('.dart_tool')
-          .childFile('package_config.json')
-          .createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFile(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+
       // Plist file
       fileSystem
           .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
@@ -505,10 +611,6 @@ void main() {
 
       await const ReleaseIosApplicationBundle().build(environment);
       expect(
-        usage.events,
-        contains(const TestUsageEvent('assemble', 'ios-archive', label: 'success')),
-      );
-      expect(
         fakeAnalytics.sentEvents,
         contains(
           Event.appleUsageEvent(workflow: 'assemble', parameter: 'ios-archive', result: 'success'),
@@ -532,10 +634,6 @@ void main() {
       await expectLater(
         () => const ReleaseIosApplicationBundle().build(environment),
         throwsA(const TypeMatcher<FileSystemException>()),
-      );
-      expect(
-        usage.events,
-        contains(const TestUsageEvent('assemble', 'ios-archive', label: 'fail')),
       );
       expect(
         fakeAnalytics.sentEvents,
@@ -1084,4 +1182,285 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     });
   });
+
+  group('DebugIosLLDBInit', () {
+    testUsingContext(
+      'prints warning if missing LLDB Init File in all schemes',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '18.4.1';
+
+        final StringBuffer buffer = await capturedConsolePrint(() async {
+          await const DebugIosLLDBInit().build(environment);
+        });
+        expect(
+          buffer.toString(),
+          contains('warning: Debugging Flutter on new iOS versions requires an LLDB Init File.'),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+
+    testUsingContext(
+      'skips if targetting simulator',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneSimulator.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '18.4.1';
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+
+    testUsingContext(
+      'skips if iOS version is less than 18.4',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+        environment.defines[kTargetDeviceOSVersion] = '18.3.1';
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+
+    testUsingContext(
+      'does not throw error if there is an LLDB Init File in any scheme',
+      () async {
+        const String projectPath = 'path/to/project';
+        fileSystem.directory(projectPath).createSync(recursive: true);
+        fileSystem
+            .directory(projectPath)
+            .childDirectory('MyProject.xcodeproj')
+            .childDirectory('xcshareddata')
+            .childDirectory('xcschemes')
+            .childFile('MyProject.xcscheme')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(r'customLLDBInitFile = "some/path/.lldbinit"');
+        environment.defines[kIosArchs] = 'arm64';
+        environment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kSrcRoot] = projectPath;
+
+        await const DebugIosLLDBInit().build(environment);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Platform: () => macPlatform,
+      },
+    );
+  });
+
+  group('CheckDevDependenciesIos', () {
+    testUsingContext('throws if build mode define missing', () async {
+      environment.defines[kDevDependenciesEnabled] = 'true';
+
+      await expectLater(
+        const CheckDevDependenciesIos().build(environment),
+        throwsA(const TypeMatcher<MissingDefineException>()),
+      );
+    });
+
+    testUsingContext('throws if dev dependencies define missing', () async {
+      const String projectPath = 'path/to/project';
+      fileSystem.directory(projectPath).createSync(recursive: true);
+      environment.defines[kBuildMode] = 'debug';
+
+      await expectLater(
+        const CheckDevDependenciesIos().build(environment),
+        throwsA(const TypeMatcher<MissingDefineException>()),
+      );
+    });
+
+    testUsingContext('does not throw if dev dependencies enabled in debug mode', () async {
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kDevDependenciesEnabled] = 'true';
+
+      await const CheckDevDependenciesIos().build(environment);
+    });
+
+    testUsingContext('does not throw if dev dependencies disabled in release mode', () async {
+      const String projectPath = 'path/to/project';
+      fileSystem.directory(projectPath).createSync(recursive: true);
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await const CheckDevDependenciesIos().build(environment);
+    });
+
+    testUsingContext('does not throw if dev dependencies disabled in profile mode', () async {
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await const CheckDevDependenciesIos().build(environment);
+    });
+
+    testUsingContext('does not throw if there are no dependencies', () async {
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await const CheckDevDependenciesIos().build(environment);
+    });
+
+    testUsingContext('does not throw if there are no dev dependencies', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+      pluginsFile.writeAsStringSync(_kPluginsFileWithoutDevDependencies);
+
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await const CheckDevDependenciesIos().build(environment);
+
+      expect(
+        logger.traceText,
+        contains('Ignoring dev dependencies error as the project has no dev dependencies'),
+      );
+    });
+
+    testUsingContext('throws if dev dependencies disabled in debug mode', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
+
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await expectLater(
+        const CheckDevDependenciesIos().build(environment),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.toString(),
+            'description',
+            contains('Dev dependencies disabled in debug build'),
+          ),
+        ),
+      );
+    });
+
+    testUsingContext('throws if dev dependencies enabled in release mode', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
+
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kDevDependenciesEnabled] = 'true';
+
+      await expectLater(
+        const CheckDevDependenciesIos().build(environment),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.toString(),
+            'description',
+            contains('Dev dependencies enabled in release build'),
+          ),
+        ),
+      );
+    });
+
+    testUsingContext('throws if dev dependencies disabled in profile mode', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
+
+      environment.defines[kBuildMode] = 'profile';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await expectLater(
+        const CheckDevDependenciesIos().build(environment),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.toString(),
+            'description',
+            contains('Dev dependencies disabled in profile build'),
+          ),
+        ),
+      );
+    });
+
+    testUsingContext(
+      'assumes project has dev dependencies if .flutter-plugins-dependencies is malformed',
+      () async {
+        final Directory projectDir = fileSystem.currentDirectory;
+        final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('This is not valid JSON');
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kDevDependenciesEnabled] = 'false';
+
+        await expectLater(
+          const CheckDevDependenciesIos().build(environment),
+          throwsA(
+            isA<ToolExit>().having(
+              (ToolExit e) => e.toString(),
+              'description',
+              contains('Dev dependencies disabled in debug build'),
+            ),
+          ),
+        );
+      },
+    );
+  });
+}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+
+  @override
+  final bool isInstalled;
+
+  List<String> schemes;
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
+  }
+}
+
+/// Capture console print events into a string buffer.
+Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
+  final StringBuffer buffer = StringBuffer();
+  await runZoned<Future<void>>(
+    () async {
+      // Service the event loop.
+      await body();
+    },
+    zoneSpecification: ZoneSpecification(
+      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+        buffer.writeln(line);
+      },
+    ),
+  );
+  return buffer;
 }

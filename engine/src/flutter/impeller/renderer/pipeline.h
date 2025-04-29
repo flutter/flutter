@@ -18,6 +18,8 @@
 
 namespace impeller {
 
+using PipelineKey = uint64_t;
+
 class PipelineLibrary;
 template <typename PipelineDescriptor_>
 class Pipeline;
@@ -88,43 +90,40 @@ using PipelineRef = raw_ptr<Pipeline<PipelineDescriptor>>;
 extern template class Pipeline<PipelineDescriptor>;
 extern template class Pipeline<ComputePipelineDescriptor>;
 
+/// @brief Create a pipeline for the given descriptor.
+///
+/// If `async` is true, the compilation is performed on a worker thread. The
+/// returned future will complete once that work is done. If `async` is false,
+/// the work is done on the current thread.
+///
+/// It is more performant to set async to false than to spawn a
+/// worker and immediately block on the future completion.
 PipelineFuture<PipelineDescriptor> CreatePipelineFuture(
     const Context& context,
-    std::optional<PipelineDescriptor> desc);
+    std::optional<PipelineDescriptor> desc,
+    bool async = true);
 
 PipelineFuture<ComputePipelineDescriptor> CreatePipelineFuture(
     const Context& context,
     std::optional<ComputePipelineDescriptor> desc);
 
-/// Holds a reference to a Pipeline used for rendering while also maintaining
-/// the vertex shader and fragment shader types at compile-time.
+/// Holds a reference to a Pipeline used for rendering.
 ///
-/// See also:
-///   - impeller::ContentContext::Variants - the typical container for
-///     RenderPipelineHandles.
-template <class VertexShader_, class FragmentShader_>
-class RenderPipelineHandle {
-  static_assert(
-      ShaderStageCompatibilityChecker<VertexShader_, FragmentShader_>::Check(),
-      "The output slots for the fragment shader don't have matches in the "
-      "vertex shader's output slots. This will result in a linker error.");
-
+/// @see RenderPipelineHandle the templated subclass that stores compile-time
+/// shader information.
+class GenericRenderPipelineHandle {
  public:
-  using VertexShader = VertexShader_;
-  using FragmentShader = FragmentShader_;
-  using Builder = PipelineBuilder<VertexShader, FragmentShader>;
+  explicit GenericRenderPipelineHandle(const Context& context,
+                                       std::optional<PipelineDescriptor> desc,
+                                       bool async = true)
+      : GenericRenderPipelineHandle(
+            CreatePipelineFuture(context, std::move(desc), /*async=*/async)) {}
 
-  explicit RenderPipelineHandle(const Context& context)
-      : RenderPipelineHandle(CreatePipelineFuture(
-            context,
-            Builder::MakeDefaultPipelineDescriptor(context))) {}
-
-  explicit RenderPipelineHandle(const Context& context,
-                                std::optional<PipelineDescriptor> desc)
-      : RenderPipelineHandle(CreatePipelineFuture(context, desc)) {}
-
-  explicit RenderPipelineHandle(PipelineFuture<PipelineDescriptor> future)
+  explicit GenericRenderPipelineHandle(
+      PipelineFuture<PipelineDescriptor> future)
       : pipeline_future_(std::move(future)) {}
+
+  virtual ~GenericRenderPipelineHandle() = default;
 
   std::shared_ptr<Pipeline<PipelineDescriptor>> WaitAndGet() {
     if (did_wait_) {
@@ -146,6 +145,40 @@ class RenderPipelineHandle {
   std::shared_ptr<Pipeline<PipelineDescriptor>> pipeline_;
   bool did_wait_ = false;
 
+  GenericRenderPipelineHandle(const GenericRenderPipelineHandle&) = delete;
+
+  GenericRenderPipelineHandle& operator=(const GenericRenderPipelineHandle&) =
+      delete;
+};
+
+/// Holds a reference to a Pipeline used for rendering while also maintaining
+/// the vertex shader and fragment shader types at compile-time.
+///
+/// See also:
+///   - impeller::ContentContext::Variants - the typical container for
+///     RenderPipelineHandles.
+template <class VertexShader_, class FragmentShader_>
+class RenderPipelineHandle : public GenericRenderPipelineHandle {
+ public:
+  using VertexShader = VertexShader_;
+  using FragmentShader = FragmentShader_;
+  using Builder = PipelineBuilder<VertexShader, FragmentShader>;
+
+  explicit RenderPipelineHandle(const Context& context, bool async = true)
+      : GenericRenderPipelineHandle(CreatePipelineFuture(
+            context,
+            Builder::MakeDefaultPipelineDescriptor(context),
+            async)) {}
+
+  explicit RenderPipelineHandle(const Context& context,
+                                std::optional<PipelineDescriptor> desc,
+                                bool async = true)
+      : GenericRenderPipelineHandle(context, desc, async) {}
+
+  explicit RenderPipelineHandle(PipelineFuture<PipelineDescriptor> future)
+      : GenericRenderPipelineHandle(std::move(future)) {}
+
+ private:
   RenderPipelineHandle(const RenderPipelineHandle&) = delete;
 
   RenderPipelineHandle& operator=(const RenderPipelineHandle&) = delete;

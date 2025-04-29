@@ -54,51 +54,36 @@ void main() {
   );
   final String testGenDefaultsPath = path.join('test', 'analyze-gen-defaults');
 
-  test(
-    'analyze.dart - verifyDeprecations',
-    () async {
-      final String result = await capture(
-        () => verifyDeprecations(testRootPath, minimumMatches: 2),
-        shouldHaveErrors: true,
-      );
-      final String lines = <String>[
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:14: Deprecation notice does not match required pattern. There might be a missing space character at the end of the line.',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:20: Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: STYLE_GUIDE_URL',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:27: Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "Also bad grammar".',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:31: Deprecation notice does not match required pattern.',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:34: Deprecation notice does not match required pattern.',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:39: Deprecation notice does not match required pattern. It might be missing the line saying "This feature was deprecated after...".',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:43: Deprecation notice does not match required pattern. There might not be an explanatory message.',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:50: End of deprecation notice does not match required pattern.',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:53: Unexpected deprecation notice indent.',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:72: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:78: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
-            '║ test/analyze-test-input/root/packages/foo/deprecation.dart:101: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
-          ]
-          .map((String line) {
-            return line
-                .replaceAll('/', Platform.isWindows ? r'\' : '/')
-                .replaceAll(
-                  'STYLE_GUIDE_URL',
-                  'https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md',
-                )
-                .replaceAll(
-                  'RELEASES_URL',
-                  'https://flutter.dev/docs/development/tools/sdk/releases',
-                );
-          })
-          .join('\n');
-      expect(
-        result,
-        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-        '$lines\n'
-        '║ See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes\n'
-        '╚═══════════════════════════════════════════════════════════════════════════════\n',
-      );
-    },
-    // TODO(goderbauer): Update and re-enable this after formatting changes have landed.
-    skip: true,
-  );
+  test('matchesErrorsInFile matcher basic test', () async {
+    final String result = await capture(() async {
+      foundError(<String>[
+        'meta.dart:5: error #1',
+        'meta.dart:5: error #2',
+        'meta.dart:6: error #3',
+        '',
+        'Error summary',
+      ]);
+    }, shouldHaveErrors: true);
+    final File fixture = File(path.join(testRootPath, 'packages', 'foo', 'meta.dart'));
+    expect(result, matchesErrorsInFile(fixture, endsWith: <String>['', 'Error summary']));
+  });
+
+  test('analyze.dart - verifyDeprecations', () async {
+    final String result = await capture(
+      () => verifyDeprecations(testRootPath, minimumMatches: 2),
+      shouldHaveErrors: true,
+    );
+    final File fixture = File(path.join(testRootPath, 'packages', 'foo', 'deprecation.dart'));
+    expect(
+      result,
+      matchesErrorsInFile(
+        fixture,
+        endsWith: <String>[
+          'See: https://github.com/flutter/flutter/blob/main/docs/contributing/Tree-hygiene.md#handling-breaking-changes',
+        ],
+      ),
+    );
+  });
 
   test('analyze.dart - verifyGoldenTags', () async {
     final List<String> result = (await capture(
@@ -288,8 +273,20 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    expect(result, contains(':16'));
-    expect(result, isNot(contains(':13')));
+    final File fixture = File(path.join(testRootPath, 'packages', 'flutter', 'lib', 'bar.dart'));
+    expect(
+      result,
+      matchesErrorsInFile(
+        fixture,
+        endsWith: <String>[
+          '',
+          'Fields annotated with @_debugOnly must null initialize,',
+          'to ensure both the field and initializer are removed from profile/release mode.',
+          'These fields should be written as:',
+          'field = kDebugMode ? <DebugValue> : null;',
+        ],
+      ),
+    );
   });
 
   test('analyze.dart - verifyTabooDocumentation', () async {
@@ -298,9 +295,21 @@ void main() {
       shouldHaveErrors: true,
     );
 
-    expect(result, isNot(contains(':19')));
-    expect(result, contains(':20'));
-    expect(result, contains(':21'));
+    final File fixture = File(
+      path.join(testRootPath, 'packages', 'flutter', 'lib', 'taboo_words.dart'),
+    );
+    expect(
+      result,
+      matchesErrorsInFile(
+        fixture,
+        endsWith: <String>[
+          '',
+          'Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.',
+          'In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.',
+          'Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.',
+        ],
+      ),
+    );
   });
 
   test('analyze.dart - clampDouble', () async {
@@ -312,21 +321,19 @@ void main() {
       ),
       shouldHaveErrors: true,
     );
-    final String lines = <String>[
-      '║ packages/flutter/lib/bar.dart:37: input.clamp(0.0, 2)',
-      '║ packages/flutter/lib/bar.dart:38: input.toDouble().clamp(0, 2)',
-      '║ packages/flutter/lib/bar.dart:42: nullableInt?.clamp(0, 2.0)',
-      '║ packages/flutter/lib/bar.dart:43: nullableDouble?.clamp(0, 2)',
-      '║ packages/flutter/lib/bar.dart:48: nullableInt?.clamp',
-      '║ packages/flutter/lib/bar.dart:50: nullableDouble?.clamp',
-    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
+
+    final File fixture = File(
+      path.join(testRootPath, 'packages', 'flutter', 'lib', 'double_clamp.dart'),
+    );
     expect(
       result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ \n'
-      '║ For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n',
+      matchesErrorsInFile(
+        fixture,
+        endsWith: <String>[
+          '', // empty line before the last sentence.
+          'For performance reasons, we use a custom "clampDouble" function instead of using "double.clamp".',
+        ],
+      ),
     );
   });
 
@@ -339,27 +346,20 @@ void main() {
       ),
       shouldHaveErrors: true,
     );
-    final String lines = <String>[
-      '║ packages/flutter/lib/stopwatch.dart:20: Stopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:22: Stopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:28: StopwatchAtHome()',
-      '║ packages/flutter/lib/stopwatch.dart:33: StopwatchAtHome.new',
-      '║ packages/flutter/lib/stopwatch.dart:37: StopwatchAtHome.create',
-      '║ packages/flutter/lib/stopwatch.dart:44: externallib.MyStopwatch.create()',
-      '║ packages/flutter/lib/stopwatch.dart:49: externallib.MyStopwatch.new',
-      '║ packages/flutter/lib/stopwatch.dart:55: externallib.stopwatch',
-      '║ packages/flutter/lib/stopwatch.dart:57: externallib.createMyStopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:59: externallib.createStopwatch()',
-      '║ packages/flutter/lib/stopwatch.dart:61: externallib.createMyStopwatch',
-    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
+
+    final File fixture = File(
+      path.join(testRootPath, 'packages', 'flutter', 'lib', 'stopwatch.dart'),
+    );
     expect(
       result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ \n'
-      '║ Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.\n'
-      '║ A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n',
+      matchesErrorsInFile(
+        fixture,
+        endsWith: <String>[
+          '',
+          'Stopwatches introduce flakes by falling out of sync with the FakeAsync used in testing.',
+          'A Stopwatch that stays in sync with FakeAsync is available through the Gesture or Test bindings, through samplingClock.',
+        ],
+      ),
     );
   });
 
@@ -372,21 +372,18 @@ void main() {
       ),
       shouldHaveErrors: true,
     );
-    final String lines = <String>[
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:12: computeMaxIntrinsicWidth(). Consider calling getMaxIntrinsicWidth instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:16: f = computeMaxIntrinsicWidth. Consider calling getMaxIntrinsicWidth instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:23: computeDryBaseline(). Consider calling getDryBaseline instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:24: computeDryLayout(). Consider calling getDryLayout instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:31: computeDistanceToActualBaseline(). Consider calling getDistanceToBaseline, or getDistanceToActualBaseline instead.',
-      '║ packages/flutter/lib/renderbox_intrinsics.dart:36: computeMaxIntrinsicHeight(). Consider calling getMaxIntrinsicHeight instead.',
-    ].map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/')).join('\n');
+    final File fixture = File(
+      path.join(testRootPath, 'packages', 'flutter', 'lib', 'renderbox_intrinsics.dart'),
+    );
     expect(
       result,
-      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════\n'
-      '$lines\n'
-      '║ \n'
-      '║ Typically the get* methods should be used to obtain the intrinsics of a RenderBox.\n'
-      '╚═══════════════════════════════════════════════════════════════════════════════\n',
+      matchesErrorsInFile(
+        fixture,
+        endsWith: <String>[
+          '',
+          'Typically the get* methods should be used to obtain the intrinsics of a RenderBox.',
+        ],
+      ),
     );
   });
 

@@ -22,7 +22,7 @@ import 'semantics.dart';
 class SemanticIncrementable extends SemanticRole {
   SemanticIncrementable(SemanticsObject semanticsObject)
     : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
-      super.blank(SemanticRoleKind.incrementable, semanticsObject) {
+      super.blank(EngineSemanticsRole.incrementable, semanticsObject) {
     // The following generic roles can coexist with incrementables. Generic focus
     // management is not used by this role because the root DOM element is not
     // the one being focused on, but the internal `<input>` element.
@@ -36,12 +36,12 @@ class SemanticIncrementable extends SemanticRole {
 
     _element.addEventListener(
       'change',
-      createDomEventListener((_) {
+      createDomEventListener((DomEvent _) {
         if (_element.disabled!) {
           return;
         }
         _pendingResync = true;
-        final int newInputValue = int.parse(_element.value!);
+        final int newInputValue = int.parse(_element.value);
         if (newInputValue > _currentSurrogateValue) {
           _currentSurrogateValue += 1;
           EnginePlatformDispatcher.instance.invokeOnSemanticsAction(
@@ -102,6 +102,11 @@ class SemanticIncrementable extends SemanticRole {
   /// This field is used to determine whether the HTML DOM of the semantics
   /// tree should be updated.
   bool _pendingResync = false;
+
+  @override
+  void updateValidationResult() {
+    SemanticRole.updateAriaInvalid(_element, semanticsObject.validationResult);
+  }
 
   @override
   void update() {

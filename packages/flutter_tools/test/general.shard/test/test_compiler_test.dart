@@ -22,6 +22,7 @@ import '../../src/context.dart';
 import '../../src/fake_pub_deps.dart';
 import '../../src/fakes.dart';
 import '../../src/logging_logger.dart';
+import '../../src/package_config.dart';
 
 final Platform linuxPlatform = FakePlatform(environment: <String, String>{});
 
@@ -46,9 +47,13 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    fileSystem.file('pubspec.yaml').createSync();
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync('''
+name: foo
+''');
     fileSystem.file('test/foo.dart').createSync(recursive: true);
-    fileSystem.directory('.dart_tool').childFile('package_config.json').createSync(recursive: true);
+    writePackageConfigFile(mainLibName: 'foo', directory: fileSystem.currentDirectory);
     residentCompiler = FakeResidentCompiler(fileSystem);
     logger = LoggingLogger();
   });
@@ -63,7 +68,11 @@ void main() {
         residentCompiler,
       );
 
-      expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart.dill');
+      final Uri input = Uri.parse('test/foo.dart');
+      expect(
+        await testCompiler.compile(input),
+        TestCompilerComplete(outputPath: 'test/foo.dart.dill', mainUri: input),
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -86,7 +95,11 @@ void main() {
         precompiledDillPath: 'precompiled.dill',
       );
 
-      expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'abc.dill');
+      final Uri input = Uri.parse('test/foo.dart');
+      expect(
+        await testCompiler.compile(input),
+        TestCompilerComplete(outputPath: 'abc.dill', mainUri: input),
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -99,16 +112,25 @@ void main() {
   );
 
   testUsingContext(
-    'TestCompiler reports null when a compile fails',
+    'TestCompiler reports an error when a compile fails',
     () async {
-      residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 1, <Uri>[]);
+      residentCompiler.compilerOutput = const CompilerOutput(
+        'abc.dill',
+        1,
+        <Uri>[],
+        errorMessage: 'A big bad happened',
+      );
       final FakeTestCompiler testCompiler = FakeTestCompiler(
         debugBuild,
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         residentCompiler,
       );
 
-      expect(await testCompiler.compile(Uri.parse('test/foo.dart')), null);
+      final Uri input = Uri.parse('test/foo.dart');
+      expect(
+        await testCompiler.compile(input),
+        TestCompilerFailure(error: 'A big bad happened', mainUri: input),
+      );
       expect(residentCompiler.didShutdown, true);
     },
     overrides: <Type, Generator>{
@@ -132,7 +154,12 @@ void main() {
         residentCompiler,
         testTimeRecorder: testTimeRecorder,
       );
-      expect(await testCompiler.compile(Uri.parse('test/foo.dart')), 'test/foo.dart.dill');
+
+      final Uri input = Uri.parse('test/foo.dart');
+      expect(
+        await testCompiler.compile(Uri.parse('test/foo.dart')),
+        TestCompilerComplete(outputPath: 'test/foo.dart.dill', mainUri: input),
+      );
       testTimeRecorder.print();
 
       // Expect one message for each phase.
@@ -194,20 +221,11 @@ dependencies:
     sdk: flutter
   a_plugin: 1.0.0
 ''');
-      fileSystem.directory('.dart_tool').childFile('package_config.json')
-        ..createSync(recursive: true)
-        ..writeAsStringSync('''
-{
-  "configVersion": 2,
-  "packages": [
-    {
-      "name": "a_plugin",
-      "rootUri": "/a_plugin/",
-      "packageUri": "lib/"
-    }
-  ]
-}
-''');
+      writePackageConfigFile(
+        directory: fileSystem.currentDirectory,
+        mainLibName: 'foo',
+        packages: <String, String>{'a_plugin': '/a_plugin'},
+      );
       fakeDartPlugin.childFile('pubspec.yaml')
         ..createSync(recursive: true)
         ..writeAsStringSync('''
@@ -289,6 +307,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     bool checkDartPluginRegistry = false,
     File? dartPluginRegistrant,
     Uri? nativeAssetsYaml,
+    bool recompileRestart = false,
   }) async {
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);

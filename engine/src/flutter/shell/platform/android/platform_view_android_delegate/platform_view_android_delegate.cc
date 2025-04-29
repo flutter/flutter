@@ -37,6 +37,104 @@ void putStringAttributesIntoBuffer(
   }
 }
 
+int64_t flagsToInt64(flutter::SemanticsFlags flags) {
+  int64_t result = 0;
+  if (flags.hasCheckedState) {
+    result |= (INT64_C(1) << 0);
+  }
+  if (flags.isChecked) {
+    result |= (INT64_C(1) << 1);
+  }
+  if (flags.isSelected) {
+    result |= (INT64_C(1) << 2);
+  }
+  if (flags.isButton) {
+    result |= (INT64_C(1) << 3);
+  }
+  if (flags.isTextField) {
+    result |= (INT64_C(1) << 4);
+  }
+  if (flags.isFocused) {
+    result |= (INT64_C(1) << 5);
+  }
+  if (flags.hasEnabledState) {
+    result |= (INT64_C(1) << 6);
+  }
+  if (flags.isEnabled) {
+    result |= (INT64_C(1) << 7);
+  }
+  if (flags.isInMutuallyExclusiveGroup) {
+    result |= (INT64_C(1) << 8);
+  }
+  if (flags.isHeader) {
+    result |= (INT64_C(1) << 9);
+  }
+  if (flags.isObscured) {
+    result |= (INT64_C(1) << 10);
+  }
+  if (flags.scopesRoute) {
+    result |= (INT64_C(1) << 11);
+  }
+  if (flags.namesRoute) {
+    result |= (INT64_C(1) << 12);
+  }
+  if (flags.isHidden) {
+    result |= (INT64_C(1) << 13);
+  }
+  if (flags.isImage) {
+    result |= (INT64_C(1) << 14);
+  }
+  if (flags.isLiveRegion) {
+    result |= (INT64_C(1) << 15);
+  }
+  if (flags.hasToggledState) {
+    result |= (INT64_C(1) << 16);
+  }
+  if (flags.isToggled) {
+    result |= (INT64_C(1) << 17);
+  }
+  if (flags.hasImplicitScrolling) {
+    result |= (INT64_C(1) << 18);
+  }
+  if (flags.isMultiline) {
+    result |= (INT64_C(1) << 19);
+  }
+  if (flags.isReadOnly) {
+    result |= (INT64_C(1) << 20);
+  }
+  if (flags.isFocusable) {
+    result |= (INT64_C(1) << 21);
+  }
+  if (flags.isLink) {
+    result |= (INT64_C(1) << 22);
+  }
+  if (flags.isSlider) {
+    result |= (INT64_C(1) << 23);
+  }
+  if (flags.isKeyboardKey) {
+    result |= (INT64_C(1) << 24);
+  }
+  if (flags.isCheckStateMixed) {
+    result |= (INT64_C(1) << 25);
+  }
+  if (flags.hasExpandedState) {
+    result |= (INT64_C(1) << 26);
+  }
+  if (flags.isExpanded) {
+    result |= (INT64_C(1) << 27);
+  }
+  if (flags.hasSelectedState) {
+    result |= (INT64_C(1) << 28);
+  }
+  if (flags.hasRequiredState) {
+    result |= (INT64_C(1) << 29);
+  }
+  if (flags.isRequired) {
+    result |= (INT64_C(1) << 30);
+  }
+  return result;
+}
+
 PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
     : jni_facade_(std::move(jni_facade)){};
@@ -44,12 +142,6 @@ PlatformViewAndroidDelegate::PlatformViewAndroidDelegate(
 void PlatformViewAndroidDelegate::UpdateSemantics(
     const flutter::SemanticsNodeUpdates& update,
     const flutter::CustomAccessibilityActionUpdates& actions) {
-  constexpr size_t kBytesPerNode = 48 * sizeof(int32_t);
-  constexpr size_t kBytesPerChild = sizeof(int32_t);
-  constexpr size_t kBytesPerCustomAction = sizeof(int32_t);
-  constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
-  constexpr size_t kBytesPerStringAttribute = 4 * sizeof(int32_t);
-
   {
     size_t num_bytes = 0;
     for (const auto& value : update) {
@@ -91,7 +183,9 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       // sending.
       const flutter::SemanticsNode& node = value.second;
       buffer_int32[position++] = node.id;
-      buffer_int32[position++] = node.flags;
+      int64_t flags = flagsToInt64(node.flags);
+      std::memcpy(&buffer_int32[position], &flags, 8);
+      position += 2;
       buffer_int32[position++] = node.actions;
       buffer_int32[position++] = node.maxValueLength;
       buffer_int32[position++] = node.currentValueLength;
@@ -163,6 +257,13 @@ void PlatformViewAndroidDelegate::UpdateSemantics(
       } else {
         buffer_int32[position++] = strings.size();
         strings.push_back(node.tooltip);
+      }
+
+      if (node.linkUrl.empty()) {
+        buffer_int32[position++] = -1;
+      } else {
+        buffer_int32[position++] = strings.size();
+        strings.push_back(node.linkUrl);
       }
 
       buffer_int32[position++] = node.textDirection;

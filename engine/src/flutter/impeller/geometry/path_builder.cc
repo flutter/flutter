@@ -4,9 +4,11 @@
 
 #include "path_builder.h"
 
+#include <array>
 #include <cmath>
 
 #include "impeller/geometry/path_component.h"
+#include "impeller/geometry/round_superellipse_param.h"
 
 namespace impeller {
 
@@ -18,7 +20,7 @@ PathBuilder::~PathBuilder() = default;
 
 Path PathBuilder::CopyPath(FillType fill) {
   prototype_.fill = fill;
-  prototype_.single_countour =
+  prototype_.single_contour =
       current_contour_location_ == 0u ||
       (contour_count_ == 2 &&
        prototype_.components.back() == Path::ComponentType::kContour);
@@ -28,7 +30,7 @@ Path PathBuilder::CopyPath(FillType fill) {
 Path PathBuilder::TakePath(FillType fill) {
   prototype_.fill = fill;
   UpdateBounds();
-  prototype_.single_countour =
+  prototype_.single_contour =
       current_contour_location_ == 0u ||
       (contour_count_ == 2 &&
        prototype_.components.back() == Path::ComponentType::kContour);
@@ -94,6 +96,17 @@ PathBuilder& PathBuilder::QuadraticCurveTo(Point controlPoint,
   return *this;
 }
 
+PathBuilder& PathBuilder::ConicCurveTo(Point controlPoint,
+                                       Point point,
+                                       Scalar weight,
+                                       bool relative) {
+  point = relative ? current_ + point : point;
+  controlPoint = relative ? current_ + controlPoint : controlPoint;
+  AddConicComponent(current_, controlPoint, point, weight);
+  current_ = point;
+  return *this;
+}
+
 PathBuilder& PathBuilder::SetConvexity(Convexity value) {
   prototype_.convexity = value;
   return *this;
@@ -111,22 +124,33 @@ PathBuilder& PathBuilder::CubicCurveTo(Point controlPoint1,
   return *this;
 }
 
-PathBuilder& PathBuilder::AddQuadraticCurve(Point p1, Point cp, Point p2) {
+PathBuilder& PathBuilder::AddQuadraticCurve(const Point& p1,
+                                            const Point& cp,
+                                            const Point& p2) {
   MoveTo(p1);
   AddQuadraticComponent(p1, cp, p2);
   return *this;
 }
 
-PathBuilder& PathBuilder::AddCubicCurve(Point p1,
-                                        Point cp1,
-                                        Point cp2,
-                                        Point p2) {
+PathBuilder& PathBuilder::AddConicCurve(const Point& p1,
+                                        const Point& cp,
+                                        const Point& p2,
+                                        Scalar weight) {
+  MoveTo(p1);
+  AddConicComponent(p1, cp, p2, weight);
+  return *this;
+}
+
+PathBuilder& PathBuilder::AddCubicCurve(const Point& p1,
+                                        const Point& cp1,
+                                        const Point& cp2,
+                                        const Point& p2) {
   MoveTo(p1);
   AddCubicComponent(p1, cp1, cp2, p2);
   return *this;
 }
 
-PathBuilder& PathBuilder::AddRect(Rect rect) {
+PathBuilder& PathBuilder::AddRect(const Rect& rect) {
   auto origin = rect.GetOrigin();
   auto size = rect.GetSize();
 
@@ -216,6 +240,19 @@ PathBuilder& PathBuilder::AddRoundRect(RoundRect round_rect) {
 
   Close();
 
+  return *this;
+}
+
+PathBuilder& PathBuilder::AddRoundSuperellipse(RoundSuperellipse rse) {
+  if (rse.IsRect()) {
+    AddRect(rse.GetBounds());
+  } else if (rse.IsOval()) {
+    AddOval(rse.GetBounds());
+  } else {
+    impeller::RoundSuperellipseParam::MakeBoundsRadii(rse.GetBounds(),
+                                                      rse.GetRadii())
+        .AddToPath(*this);
+  }
   return *this;
 }
 
@@ -315,6 +352,28 @@ void PathBuilder::AddQuadraticComponent(const Point& p1,
   points.push_back(p2);
   prototype_.components.push_back(Path::ComponentType::kQuadratic);
   prototype_.bounds.reset();
+}
+
+void PathBuilder::AddConicComponent(const Point& p1,
+                                    const Point& cp,
+                                    const Point& p2,
+                                    Scalar weight) {
+  if (!std::isfinite(weight)) {
+    AddLinearComponent(p1, cp);
+    AddLinearComponent(cp, p2);
+  } else if (weight <= 0) {
+    AddLinearComponent(p1, p2);
+  } else if (weight == 1) {
+    AddQuadraticComponent(p1, cp, p2);
+  } else {
+    auto& points = prototype_.points;
+    points.push_back(p1);
+    points.push_back(cp);
+    points.push_back(p2);
+    points.emplace_back(weight, weight);
+    prototype_.components.push_back(Path::ComponentType::kConic);
+    prototype_.bounds.reset();
+  }
 }
 
 void PathBuilder::AddCubicComponent(const Point& p1,
@@ -450,13 +509,13 @@ PathBuilder& PathBuilder::AddLine(const Point& p1, const Point& p2) {
 PathBuilder& PathBuilder::AddPath(const Path& path) {
   auto& points = prototype_.points;
   auto& components = prototype_.components;
+  size_t source_offset = points.size();
 
   points.insert(points.end(), path.data_->points.begin(),
                 path.data_->points.end());
   components.insert(components.end(), path.data_->components.begin(),
                     path.data_->components.end());
 
-  size_t source_offset = points.size();
   for (auto component : path.data_->components) {
     if (component == Path::ComponentType::kContour) {
       current_contour_location_ = source_offset;
@@ -485,6 +544,13 @@ PathBuilder& PathBuilder::Shift(Point offset) {
         quad->p1 += offset;
         quad->p2 += offset;
         quad->cp += offset;
+      } break;
+      case Path::ComponentType::kConic: {
+        auto* conic =
+            reinterpret_cast<ConicPathComponent*>(&points[storage_offset]);
+        conic->p1 += offset;
+        conic->p2 += offset;
+        conic->cp += offset;
       } break;
       case Path::ComponentType::kCubic: {
         auto* cubic =
@@ -566,6 +632,13 @@ std::optional<std::pair<Point, Point>> PathBuilder::GetMinMaxCoveragePoints()
              reinterpret_cast<const QuadraticPathComponent*>(
                  &points[storage_offset])
                  ->Extrema()) {
+          clamp(extrema);
+        }
+        break;
+      case Path::ComponentType::kConic:
+        for (const auto& extrema : reinterpret_cast<const ConicPathComponent*>(
+                                       &points[storage_offset])
+                                       ->Extrema()) {
           clamp(extrema);
         }
         break;

@@ -5,19 +5,17 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
@@ -58,15 +56,6 @@ final vm_service.VM fakeVM = vm_service.VM(
   version: '',
   systemIsolateGroups: <vm_service.IsolateGroupRef>[],
   systemIsolates: <vm_service.IsolateRef>[],
-);
-
-final FlutterView fakeFlutterView = FlutterView(id: 'a', uiIsolate: fakeUnpausedIsolate);
-
-final FakeVmServiceRequest listViews = FakeVmServiceRequest(
-  method: kListViewsMethod,
-  jsonResponse: <String, Object>{
-    'views': <Object>[fakeFlutterView.toJson()],
-  },
 );
 
 final FakeVmServiceRequest getVM = FakeVmServiceRequest(
@@ -139,6 +128,7 @@ void main() {
     final DriverService driverService = setUpDriverService(
       processManager: processManager,
       vmService: fakeVmServiceHost.vmService,
+      platform: FakePlatform(environment: <String, String>{'FOO': 'BAR'}),
     );
     final Device device = FakeDevice(
       LaunchResult.succeeded(vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/')),
@@ -149,12 +139,9 @@ void main() {
       device,
       DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
     );
-    final int testResult = await driverService.startTest(
-      'foo.test',
-      <String>['--enable-experiment=non-nullable'],
-      <String, String>{'FOO': 'BAR'},
-      PackageConfig(<Package>[Package('test', Uri.base)]),
-    );
+    final int testResult = await driverService.startTest('foo.test', <String>[
+      '--enable-experiment=non-nullable',
+    ], PackageConfig(<Package>[Package('test', Uri.base)]));
 
     expect(testResult, 23);
   });
@@ -180,6 +167,7 @@ void main() {
         processManager: processManager,
         vmService: fakeVmServiceHost.vmService,
         devtoolsLauncher: launcher,
+        platform: FakePlatform(environment: <String, String>{'FOO': 'BAR'}),
       );
       final Device device = FakeDevice(
         LaunchResult.succeeded(vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/')),
@@ -193,7 +181,6 @@ void main() {
       final int testResult = await driverService.startTest(
         'foo.test',
         <String>['--enable-experiment=non-nullable'],
-        <String, String>{'FOO': 'BAR'},
         PackageConfig(<Package>[Package('test', Uri.base)]),
         profileMemory: 'devtools_memory.json',
       );
@@ -222,6 +209,7 @@ void main() {
       final DriverService driverService = setUpDriverService(
         processManager: processManager,
         vmService: fakeVmServiceHost.vmService,
+        platform: FakePlatform(environment: <String, String>{'FOO': 'BAR'}),
       );
       final Device device = FakeDevice(
         LaunchResult.succeeded(vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/')),
@@ -232,12 +220,9 @@ void main() {
         device,
         DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
       );
-      final int testResult = await driverService.startTest(
-        'foo.test',
-        <String>['--enable-experiment=non-nullable'],
-        <String, String>{'FOO': 'BAR'},
-        PackageConfig.empty,
-      );
+      final int testResult = await driverService.startTest('foo.test', <String>[
+        '--enable-experiment=non-nullable',
+      ], PackageConfig.empty);
 
       expect(testResult, 23);
     },
@@ -276,7 +261,6 @@ void main() {
       final int testResult = await driverService.startTest(
         'foo.test',
         <String>[],
-        <String, String>{},
         PackageConfig(<Package>[Package('test', Uri.base)]),
       );
 
@@ -309,51 +293,6 @@ void main() {
     expect(device.didUninstallApp, true);
     expect(device.didDispose, true);
   });
-
-  // FlutterVersion requires context.
-  testUsingContext(
-    'Writes SkSL to file when provided with out file',
-    () async {
-      final MemoryFileSystem fileSystem = MemoryFileSystem.test();
-      final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
-        requests: <FakeVmServiceRequest>[
-          listViews,
-          const FakeVmServiceRequest(
-            method: '_flutter.getSkSLs',
-            args: <String, Object>{'viewId': 'a'},
-            jsonResponse: <String, Object>{
-              'SkSLs': <String, Object>{'A': 'B'},
-            },
-          ),
-        ],
-      );
-      final FakeProcessManager processManager = FakeProcessManager.empty();
-      final DriverService driverService = setUpDriverService(
-        processManager: processManager,
-        vmService: fakeVmServiceHost.vmService,
-      );
-      final FakeDevice device = FakeDevice(
-        LaunchResult.succeeded(vmServiceUri: Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/')),
-      );
-
-      await driverService.start(
-        BuildInfo.profile,
-        device,
-        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
-      );
-      await driverService.stop(writeSkslOnExit: fileSystem.file('out.json'));
-
-      expect(device.didStopApp, true);
-      expect(device.didUninstallApp, true);
-      expect(json.decode(fileSystem.file('out.json').readAsStringSync()), <String, Object>{
-        'platform': 'android',
-        'name': 'test',
-        'engineRevision': 'abcdefghijklmnopqrstuvwxyz',
-        'data': <String, Object>{'A': 'B'},
-      });
-    },
-    overrides: <Type, Generator>{FlutterVersion: () => FakeFlutterVersion()},
-  );
 
   testWithoutContext('Can connect to existing application and stop it during cleanup', () async {
     final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
@@ -483,6 +422,7 @@ void main() {
 
 FlutterDriverService setUpDriverService({
   Logger? logger,
+  Platform? platform,
   ProcessManager? processManager,
   FlutterVmService? vmService,
   DevtoolsLauncher? devtoolsLauncher,
@@ -491,6 +431,7 @@ FlutterDriverService setUpDriverService({
   return FlutterDriverService(
     applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
     logger: logger,
+    platform: platform ?? FakePlatform(),
     processUtils: ProcessUtils(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
@@ -502,7 +443,6 @@ FlutterDriverService setUpDriverService({
       ReloadSources? reloadSources,
       Restart? restart,
       CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
       FlutterProject? flutterProject,
       PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
       io.CompressionOptions compression = io.CompressionOptions.compressionDefault,

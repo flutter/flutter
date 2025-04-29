@@ -57,38 +57,38 @@ FakeProcessLister powershellUnavailable() {
 
 /// The expected validation result object for
 /// a passing windows version test
-const ValidationResult validWindows11ValidationResult = ValidationResult(
+ValidationResult validWindows11ValidationResult = ValidationResult(
   ValidationType.success,
-  <ValidationMessage>[],
+  const <ValidationMessage>[],
   statusInfo: '11 Pro 64-bit, 23H2, 2009',
 );
 
 /// The expected validation result object for
 /// a passing windows version test
-const ValidationResult invalidWindowsValidationResult = ValidationResult(
+ValidationResult invalidWindowsValidationResult = ValidationResult(
   ValidationType.missing,
-  <ValidationMessage>[],
+  const <ValidationMessage>[],
   statusInfo: 'Unable to confirm if installed Windows version is 10 or greater',
 );
 
-const ValidationResult ofdFoundRunning =
-    ValidationResult(ValidationType.partial, <ValidationMessage>[
+ValidationResult ofdFoundRunning =
+    ValidationResult(ValidationType.partial, const <ValidationMessage>[
       ValidationMessage.hint(
         'The Topaz OFD Security Module was detected on your machine. '
         'You may need to disable it to build Flutter applications.',
       ),
     ], statusInfo: 'Problem detected with Windows installation');
 
-const ValidationResult powershellUnavailableResult =
-    ValidationResult(ValidationType.partial, <ValidationMessage>[
+ValidationResult powershellUnavailableResult =
+    ValidationResult(ValidationType.partial, const <ValidationMessage>[
       ValidationMessage.hint(
         'Failed to find ${ProcessLister.powershell} or ${ProcessLister.pwsh} on PATH',
       ),
     ], statusInfo: 'Problem detected with Windows installation');
 
-const ValidationResult getProcessFailed = ValidationResult(
+ValidationResult getProcessFailed = ValidationResult(
   ValidationType.partial,
-  <ValidationMessage>[ValidationMessage.hint('Get-Process failed to complete')],
+  const <ValidationMessage>[ValidationMessage.hint('Get-Process failed to complete')],
   statusInfo: 'Problem detected with Windows installation',
 );
 
@@ -291,7 +291,6 @@ OS 版本:          10.0.22621 暂缺 Build 22621
     try {
       final ProcessResult result = await processLister.getProcessesWithPath();
       expect(result.stdout, ProcessLister.powershell);
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
       fail('Unexpected exception: $e');
     }
@@ -312,7 +311,6 @@ OS 版本:          10.0.22621 暂缺 Build 22621
       try {
         final ProcessResult result = await processLister.getProcessesWithPath();
         expect(result.stdout, ProcessLister.pwsh);
-        // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         fail('Unexpected exception: $e');
       }
@@ -332,7 +330,6 @@ OS 版本:          10.0.22621 暂缺 Build 22621
         fail('Should have thrown, but successfully ran ${result.stdout}');
       } on StateError {
         // Expected
-        // ignore: avoid_catches_without_on_clauses
       } catch (e) {
         fail('Unexpected exception: $e');
       }

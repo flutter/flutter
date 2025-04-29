@@ -766,6 +766,52 @@ void main() {
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
     });
 
+    testWidgets(
+      'delegated transitions are removed when secondary animation is dismissed and next route is removed',
+      (WidgetTester tester) async {
+        final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorKey: navigator,
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+                },
+              ),
+            ),
+            home: const Text('home'),
+          ),
+        );
+
+        // Push first page with custom transition builder.
+        final Route<void> firstRoute = CupertinoSheetRoute<void>(
+          builder: (_) {
+            return const Text('Page One');
+          },
+        );
+
+        navigator.currentState!.push(firstRoute);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Page One'), findsOneWidget);
+        final Finder cupertinoSheetDelegatedTransitionFinder = find.ancestor(
+          of: find.ancestor(of: find.byType(ClipRRect), matching: find.byType(AnimatedBuilder)),
+          matching: find.byType(ScaleTransition),
+        );
+        expect(cupertinoSheetDelegatedTransitionFinder, findsOneWidget);
+
+        navigator.currentState!.pop();
+        await tester.pumpAndSettle();
+
+        // Verify home is still visible without transitions.
+        expect(find.text('home'), findsOneWidget);
+
+        // Verify the delegated transition is removed.
+        expect(cupertinoSheetDelegatedTransitionFinder, findsNothing);
+      },
+    );
+
     testWidgets('secondary animation is kDismissed after train hopping finishes and pop', (
       WidgetTester tester,
     ) async {
@@ -959,7 +1005,7 @@ void main() {
                     barrierLabel: 'barrier_label',
                     barrierColor: const Color(0x00000000),
                     transitionDuration: Duration.zero,
-                    pageBuilder: (BuildContext innerContext, _, __) {
+                    pageBuilder: (BuildContext innerContext, _, _) {
                       return const SizedBox();
                     },
                   );
@@ -994,7 +1040,7 @@ void main() {
                   showGeneralDialog<void>(
                     context: context,
                     transitionDuration: Duration.zero,
-                    pageBuilder: (BuildContext innerContext, _, __) {
+                    pageBuilder: (BuildContext innerContext, _, _) {
                       return const SizedBox();
                     },
                   );
@@ -1034,7 +1080,7 @@ void main() {
                   showGeneralDialog<void>(
                     context: context,
                     transitionDuration: Duration.zero,
-                    pageBuilder: (BuildContext innerContext, _, __) {
+                    pageBuilder: (BuildContext innerContext, _, _) {
                       return const SizedBox();
                     },
                   );
@@ -1079,7 +1125,7 @@ void main() {
                       showGeneralDialog<void>(
                         context: context,
                         transitionDuration: Duration.zero,
-                        pageBuilder: (BuildContext innerContext, _, __) {
+                        pageBuilder: (BuildContext innerContext, _, _) {
                           return const SizedBox();
                         },
                       );
@@ -1120,7 +1166,7 @@ void main() {
                         useRootNavigator: false,
                         context: context,
                         transitionDuration: Duration.zero,
-                        pageBuilder: (BuildContext innerContext, _, __) {
+                        pageBuilder: (BuildContext innerContext, _, _) {
                           return const SizedBox();
                         },
                       );
@@ -1155,7 +1201,7 @@ void main() {
                     onPressed: () {
                       showGeneralDialog<void>(
                         context: context,
-                        pageBuilder: (BuildContext innerContext, _, __) {
+                        pageBuilder: (BuildContext innerContext, _, _) {
                           return const SizedBox();
                         },
                       );
@@ -1205,7 +1251,7 @@ void main() {
 
         showGeneralDialog<void>(
           context: context,
-          pageBuilder: (BuildContext context, _, __) {
+          pageBuilder: (BuildContext context, _, _) {
             return const Placeholder();
           },
           anchorPoint: const Offset(1000, 0),
@@ -1243,7 +1289,7 @@ void main() {
 
         showGeneralDialog<void>(
           context: context,
-          pageBuilder: (BuildContext context, _, __) {
+          pageBuilder: (BuildContext context, _, _) {
             return const Placeholder();
           },
         );
@@ -1280,7 +1326,7 @@ void main() {
 
         showGeneralDialog<void>(
           context: context,
-          pageBuilder: (BuildContext context, _, __) {
+          pageBuilder: (BuildContext context, _, _) {
             return const Placeholder();
           },
         );
@@ -2624,6 +2670,84 @@ void main() {
       expect(notifications.first.canHandlePop, isFalse);
       expect(notifications.last.canHandlePop, isTrue);
     });
+  });
+
+  testWidgets("ModalRoute's default directionalTraversalEdgeBehavior is the same as Navigator's", (
+    WidgetTester tester,
+  ) async {
+    Future<void> pumpWith(TraversalEdgeBehavior behavior) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            key: UniqueKey(),
+            routeDirectionalTraversalEdgeBehavior: behavior,
+            onGenerateRoute: (RouteSettings settings) {
+              return MaterialPageRoute<void>(
+                builder: (BuildContext context) {
+                  return const Center(child: Text('page'));
+                },
+                settings: settings,
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    for (final TraversalEdgeBehavior element in TraversalEdgeBehavior.values) {
+      await pumpWith(element);
+      await tester.pumpAndSettle();
+      final FocusScopeNode focusScope = FocusScope.of(tester.element(find.text('page')));
+      expect(focusScope.directionalTraversalEdgeBehavior, element);
+    }
+  });
+
+  testWidgets('requestFocus works correctly in showGeneralDialog.', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+    final FocusNode focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        home: Scaffold(body: TextField(focusNode: focusNode)),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pump();
+    expect(focusNode.hasFocus, true);
+
+    showGeneralDialog<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: true,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, true);
+    expect(focusNode.hasFocus, false);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(focusNode.hasFocus, true);
+
+    showGeneralDialog<void>(
+      context: navigatorKey.currentContext!,
+      requestFocus: false,
+      pageBuilder:
+          (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) => const Text('dialog'),
+    );
+    await tester.pumpAndSettle();
+    expect(FocusScope.of(tester.element(find.text('dialog'))).hasFocus, false);
+    expect(focusNode.hasFocus, true);
   });
 }
 

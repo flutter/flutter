@@ -4,7 +4,9 @@
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -18,6 +20,9 @@ void main() {
       final BufferLogger logger = BufferLogger.test();
       final WebDriverService service = WebDriverService(
         logger: logger,
+        terminal: Terminal.test(),
+        platform: FakePlatform(),
+        outputPreferences: OutputPreferences.test(),
         processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.empty()),
         dartSdkPath: 'dart',
       );
@@ -26,7 +31,6 @@ void main() {
         await service.startTest(
           'foo.test',
           <String>[],
-          <String, String>{},
           PackageConfig(<Package>[Package('test', Uri.base)]),
           driverPort: 1,
           headless: true,

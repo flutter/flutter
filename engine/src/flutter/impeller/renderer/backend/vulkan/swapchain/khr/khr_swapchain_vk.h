@@ -37,6 +37,10 @@ class KHRSwapchainVK final : public SwapchainVK {
   // |SwapchainVK|
   void UpdateSurfaceSize(const ISize& size) override;
 
+  // |SwapchainVK|
+  void AddFinalCommandBuffer(
+      std::shared_ptr<CommandBuffer> cmd_buffer) const override;
+
  private:
   friend class SwapchainVK;
 
@@ -52,6 +56,8 @@ class KHRSwapchainVK final : public SwapchainVK {
   KHRSwapchainVK(const KHRSwapchainVK&) = delete;
 
   KHRSwapchainVK& operator=(const KHRSwapchainVK&) = delete;
+
+  std::unique_ptr<Surface> AcquireNextDrawable(size_t resize_retry_count);
 };
 
 }  // namespace impeller

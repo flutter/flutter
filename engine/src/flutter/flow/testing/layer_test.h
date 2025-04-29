@@ -40,7 +40,7 @@ template <typename BaseT>
 class LayerTestBase : public CanvasTestBase<BaseT> {
   using TestT = CanvasTestBase<BaseT>;
 
-  const SkRect k_dl_bounds_ = SkRect::MakeWH(500, 500);
+  const DlRect k_dl_bounds_ = DlRect::MakeWH(500, 500);
 
  public:
   LayerTestBase()

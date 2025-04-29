@@ -10,15 +10,16 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcode_build_settings.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart';
 
 const String xcodebuild = '/usr/bin/xcodebuild';
 
@@ -61,7 +62,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
   });
@@ -181,7 +181,6 @@ void main() {
       fileSystem: fileSystem,
       platform: platform,
       processManager: fakeProcessManager,
-      usage: TestUsage(),
       analytics: const NoOpAnalytics(),
     );
     fileSystem.file(xcodebuild).deleteSync();
@@ -568,7 +567,6 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: fakeProcessManager,
-        usage: TestUsage(),
         analytics: const NoOpAnalytics(),
       );
 
@@ -598,7 +596,6 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: fakeProcessManager,
-        usage: TestUsage(),
         analytics: const NoOpAnalytics(),
       );
 
@@ -631,7 +628,6 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
         processManager: fakeProcessManager,
-        usage: TestUsage(),
         analytics: const NoOpAnalytics(),
       );
 
@@ -919,12 +915,15 @@ Information about project "Runner":
         <String>[
           'debug (free)',
           'Debug paid',
+          'debug (premium)',
           'profile - Free',
           'Profile-Paid',
+          'Profile-Premium',
           'release - Free',
           'Release-Paid',
+          'release-premium',
         ],
-        <String>['Free', 'Paid'],
+        <String>['Free', 'Paid', 'premium'],
         logger,
       );
 
@@ -955,6 +954,30 @@ Information about project "Runner":
       expect(
         info.buildConfigurationFor(
           const BuildInfo(
+            BuildMode.debug,
+            'premium',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'premium',
+        ),
+        'debug (premium)',
+      );
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
+            BuildMode.debug,
+            'premium',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'Premium',
+        ),
+        'debug (premium)',
+      );
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
             BuildMode.profile,
             'FREE',
             treeShakeIcons: false,
@@ -967,6 +990,30 @@ Information about project "Runner":
       expect(
         info.buildConfigurationFor(
           const BuildInfo(
+            BuildMode.profile,
+            'paid',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'paid',
+        ),
+        'Profile-Paid',
+      );
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
+            BuildMode.profile,
+            'premium',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'Premium',
+        ),
+        'Profile-Premium',
+      );
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
             BuildMode.release,
             'paid',
             treeShakeIcons: false,
@@ -975,6 +1022,18 @@ Information about project "Runner":
           'Paid',
         ),
         'Release-Paid',
+      );
+      expect(
+        info.buildConfigurationFor(
+          const BuildInfo(
+            BuildMode.release,
+            'PREMIUM',
+            treeShakeIcons: false,
+            packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          'PREMIUM',
+        ),
+        'release-premium',
       );
     },
   );
@@ -1050,6 +1109,7 @@ Information about project "Runner":
     late Artifacts localIosArtifacts;
     late FakePlatform macOS;
     late FileSystem fs;
+    late FeatureFlags featureFlags;
 
     setUp(() {
       fs = MemoryFileSystem.test();
@@ -1059,6 +1119,7 @@ Information about project "Runner":
       );
       macOS = FakePlatform(operatingSystem: 'macos');
       fs.file(xcodebuild).createSync(recursive: true);
+      featureFlags = TestFeatureFlags();
     });
 
     group('arm simulator', () {
@@ -1115,7 +1176,11 @@ Build settings for action build and target plugin2:
 				''',
             ),
           ]);
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            featureFlags: featureFlags,
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(
@@ -1167,7 +1232,11 @@ Build settings for action build and target plugin2:
               exitCode: 1,
             ),
           ]);
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            featureFlags: featureFlags,
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(
@@ -1231,7 +1300,11 @@ Build settings for action build and target plugin2:
 				''',
             ),
           ]);
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            featureFlags: featureFlags,
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(
@@ -1274,7 +1347,11 @@ Build settings for action build and target plugin2:
         fs.directory('path/to/project'),
       );
       await expectLater(
-        () => updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo),
+        () => updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          featureFlags: featureFlags,
+        ),
         throwsToolExit(message: '32-bit iOS local engine binaries are not supported.'),
       );
     });
@@ -1289,6 +1366,7 @@ Build settings for action build and target plugin2:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
+          featureFlags: featureFlags,
           useMacOSConfig: true,
         );
 
@@ -1330,6 +1408,7 @@ Build settings for action build and target plugin2:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
+          featureFlags: featureFlags,
           useMacOSConfig: true,
         );
 
@@ -1366,7 +1445,11 @@ Build settings for action build and target plugin2:
       final FlutterProject project = FlutterProject.fromDirectoryTest(
         fs.directory('path/to/project'),
       );
-      await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+      await updateGeneratedXcodeProperties(
+        project: project,
+        buildInfo: buildInfo,
+        featureFlags: featureFlags,
+      );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
@@ -1385,7 +1468,11 @@ Build settings for action build and target plugin2:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fs.directory('path/to/project'),
         );
-        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          featureFlags: featureFlags,
+        );
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.existsSync(), isTrue);
@@ -1415,7 +1502,11 @@ Build settings for action build and target plugin2:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fs.directory('path/to/project'),
         );
-        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          featureFlags: featureFlags,
+        );
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.existsSync(), isTrue);
@@ -1441,7 +1532,11 @@ Build settings for action build and target plugin2:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            featureFlags: featureFlags,
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -1476,7 +1571,11 @@ Build settings for action build and target plugin2:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            featureFlags: featureFlags,
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -1528,6 +1627,7 @@ Build settings for action build and target plugin2:
       await updateGeneratedXcodeProperties(
         project: FlutterProject.fromDirectoryTest(fs.directory('path/to/project')),
         buildInfo: buildInfo,
+        featureFlags: featureFlags,
       );
 
       final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -1765,6 +1865,7 @@ flutter:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            featureFlags: featureFlags,
             configurationBuildDir: 'path/to/project/build/ios/iphoneos',
           );
 
@@ -1790,7 +1891,11 @@ flutter:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            featureFlags: featureFlags,
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);

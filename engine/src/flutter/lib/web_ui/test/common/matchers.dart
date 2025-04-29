@@ -5,13 +5,12 @@
 /// Provides utilities for testing engine code.
 library matchers;
 
+import 'dart:js_interop';
 import 'dart:math' as math;
 
 import 'package:html/dom.dart' as html;
 import 'package:html/parser.dart' as html;
-
 import 'package:test/test.dart';
-
 import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart';
 
@@ -21,38 +20,6 @@ import 'package:ui/ui.dart';
 /// precision loss in calculations. Differences below this threshold are safe
 /// to disregard.
 const double precisionErrorTolerance = 1e-10;
-
-/// Enumerates all persisted surfaces in the tree rooted at [root].
-///
-/// If [root] is `null` returns all surfaces from the last rendered scene.
-///
-/// Surfaces are returned in a depth-first order.
-Iterable<PersistedSurface> enumerateSurfaces([PersistedSurface? root]) {
-  root ??= SurfaceSceneBuilder.debugLastFrameScene;
-  final List<PersistedSurface> surfaces = <PersistedSurface>[root!];
-
-  root.visitChildren((PersistedSurface surface) {
-    surfaces.addAll(enumerateSurfaces(surface));
-  });
-
-  return surfaces;
-}
-
-/// Enumerates all pictures nested under [root].
-///
-/// If [root] is `null` returns all pictures from the last rendered scene.
-Iterable<PersistedPicture> enumeratePictures([PersistedSurface? root]) {
-  root ??= SurfaceSceneBuilder.debugLastFrameScene;
-  return enumerateSurfaces(root).whereType<PersistedPicture>();
-}
-
-/// Enumerates all offset surfaces nested under [root].
-///
-/// If [root] is `null` returns all pictures from the last rendered scene.
-Iterable<PersistedOffset> enumerateOffsets([PersistedSurface? root]) {
-  root ??= SurfaceSceneBuilder.debugLastFrameScene;
-  return enumerateSurfaces(root).whereType<PersistedOffset>();
-}
 
 /// Computes the distance between two values.
 ///
@@ -110,7 +77,7 @@ double _rectDistance(Rect a, Rect b) {
 }
 
 double _sizeDistance(Size a, Size b) {
-  final Offset delta = (b - a) as Offset; // ignore: unnecessary_parenthesis
+  final Offset delta = (b - a) as Offset;
   return delta.distance;
 }
 
@@ -291,22 +258,26 @@ class HtmlPatternMatcher extends Matcher {
 
   @override
   bool matches(final Object? object, Map<Object?, Object?> matchState) {
-    if (object is! DomElement) {
+    // TODO(srujzs): Replace this with `!object.isJSAny` once we have that API
+    // in `dart:js_interop`.
+    // https://github.com/dart-lang/sdk/issues/56905
+    // ignore: invalid_runtime_check_with_js_interop_types
+    if (object is! JSAny || !object.isA<DomElement>()) {
       return false;
     }
 
     final List<String> mismatches = <String>[];
     matchState['mismatches'] = mismatches;
 
-    final html.Element element = html.parseFragment(object.outerHTML).children.single;
-    matchElements(_Breadcrumbs.root, mismatches, element, pattern);
+    final html.Element element =
+        html.parseFragment((object as DomElement).outerHTML).children.single;
+    _matchElements(_Breadcrumbs.root, mismatches, element, pattern);
     return mismatches.isEmpty;
   }
 
   static bool _areTagsEqual(html.Element a, html.Element b) {
     const Map<String, String> synonyms = <String, String>{
       'sem': 'flt-semantics',
-      'sem-c': 'flt-semantics-container',
       'sem-img': 'flt-semantics-img',
       'sem-tf': 'flt-semantics-text-field',
     };
@@ -325,7 +296,7 @@ class HtmlPatternMatcher extends Matcher {
     return aName == bName;
   }
 
-  void matchElements(
+  void _matchElements(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -342,24 +313,30 @@ class HtmlPatternMatcher extends Matcher {
       return;
     }
 
-    matchAttributes(breadcrumb, mismatches, element, pattern);
-    matchChildren(breadcrumb, mismatches, element, pattern);
+    _matchAttributes(breadcrumb, mismatches, element, pattern);
+    _matchChildren(breadcrumb, mismatches, element, pattern);
   }
 
-  void matchAttributes(
+  void _matchAttributes(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
     html.Element pattern,
   ) {
     for (final MapEntry<Object, String> attribute in pattern.attributes.entries) {
-      final String expectedName = attribute.key as String;
+      final (expectedName, expectMissing) = _parseExpectedAttributeName(attribute.key as String);
       final String expectedValue = attribute.value;
       final _Breadcrumbs breadcrumb = parent.attribute(expectedName);
 
       if (expectedName == 'style') {
         // Style is a complex attribute that deserves a special comparison algorithm.
-        matchStyle(parent, mismatches, element, pattern);
+        _matchStyle(parent, mismatches, element, pattern);
+      } else if (expectMissing) {
+        if (element.attributes.containsKey(expectedName)) {
+          mismatches.add(
+            '$breadcrumb: expected attribute $expectedName="${element.attributes[expectedName]}" to be missing but it was present.',
+          );
+        }
       } else {
         if (!element.attributes.containsKey(expectedName)) {
           mismatches.add('$breadcrumb: attribute $expectedName="$expectedValue" missing.');
@@ -376,6 +353,13 @@ class HtmlPatternMatcher extends Matcher {
     }
   }
 
+  (String name, bool expectMissing) _parseExpectedAttributeName(String attributeName) {
+    if (attributeName.endsWith('--missing')) {
+      return (attributeName.substring(0, attributeName.indexOf('--missing')), true);
+    }
+    return (attributeName, false);
+  }
+
   static Map<String, String> parseStyle(html.Element element) {
     final Map<String, String> result = <String, String>{};
 
@@ -390,7 +374,7 @@ class HtmlPatternMatcher extends Matcher {
     return result;
   }
 
-  void matchStyle(
+  void _matchStyle(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -445,7 +429,7 @@ class HtmlPatternMatcher extends Matcher {
     return cleanNodes;
   }
 
-  void matchChildren(
+  void _matchChildren(
     _Breadcrumbs parent,
     List<String> mismatches,
     html.Element element,
@@ -466,7 +450,7 @@ class HtmlPatternMatcher extends Matcher {
       final html.Node actualChild = actualChildNodes[i];
 
       if (expectedChild is html.Element && actualChild is html.Element) {
-        matchElements(parent, mismatches, actualChild, expectedChild);
+        _matchElements(parent, mismatches, actualChild, expectedChild);
       } else if (expectedChild is html.Text && actualChild is html.Text) {
         if (expectedChild.data != actualChild.data) {
           mismatches.add(
@@ -511,4 +495,18 @@ class HtmlPatternMatcher extends Matcher {
 
     return mismatchDescription;
   }
+}
+
+Matcher listEqual(List<int> source, {int tolerance = 0}) {
+  return predicate((List<int> target) {
+    if (source.length != target.length) {
+      return false;
+    }
+    for (int i = 0; i < source.length; i += 1) {
+      if ((source[i] - target[i]).abs() > tolerance) {
+        return false;
+      }
+    }
+    return true;
+  }, source.toString());
 }

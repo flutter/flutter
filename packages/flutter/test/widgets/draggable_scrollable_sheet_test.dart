@@ -99,7 +99,7 @@ void main() {
                   child: ListView.separated(
                     physics: const BouncingScrollPhysics(),
                     controller: scrollController,
-                    separatorBuilder: (_, __) => const Divider(),
+                    separatorBuilder: (_, _) => const Divider(),
                     itemCount: 100,
                     itemBuilder:
                         (_, int index) => SizedBox(
@@ -415,7 +415,7 @@ void main() {
                   return ListView.separated(
                     physics: const BouncingScrollPhysics(),
                     controller: scrollController,
-                    separatorBuilder: (_, __) => const Divider(),
+                    separatorBuilder: (_, _) => const Divider(),
                     itemCount: 100,
                     itemBuilder:
                         (_, int index) => SizedBox(
@@ -1891,5 +1891,31 @@ void main() {
     await pumpWidgetAndFling();
     expect(receivedNotification!.shouldCloseOnMinExtent, isFalse);
     controller.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/140701
+  testWidgets('DraggableScrollableSheet snaps exactly to minChildSize', (
+    WidgetTester tester,
+  ) async {
+    double? lastExtent;
+
+    await tester.pumpWidget(
+      boilerplateWidget(
+        null,
+        snap: true,
+        onDraggableScrollableNotification: (DraggableScrollableNotification notification) {
+          lastExtent = notification.extent;
+          return false;
+        },
+      ),
+    );
+
+    // One of the conditions for reproducing the round-off error.
+    await tester.fling(find.text('Item 1'), const Offset(0, 100), 2000);
+    await tester.pumpFrames(
+      tester.widget(find.byType(Directionality)),
+      const Duration(milliseconds: 500),
+    );
+    expect(lastExtent, .25);
   });
 }

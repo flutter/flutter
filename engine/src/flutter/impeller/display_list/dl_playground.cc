@@ -40,18 +40,14 @@ bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
   }
   return Playground::OpenPlaygroundHere(
       [&context, &callback](RenderTarget& render_target) -> bool {
-        static bool wireframe = false;
-        if (ImGui::IsKeyPressed(ImGuiKey_Z)) {
-          wireframe = !wireframe;
-          context.GetContentContext().SetWireframe(wireframe);
-        }
-        return RenderToOnscreen(
+        return RenderToTarget(
             context.GetContentContext(),  //
             render_target,                //
             callback(),                   //
             SkIRect::MakeWH(render_target.GetRenderTargetSize().width,
                             render_target.GetRenderTargetSize().height),  //
-            /*reset_host_buffer=*/true                                    //
+            /*reset_host_buffer=*/true,                                   //
+            /*is_onscreen=*/false                                         //
         );
       });
 }

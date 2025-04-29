@@ -35,12 +35,10 @@ class BuildInfo {
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
     List<String>? dartDefines,
-    this.bundleSkSLPath,
     List<String>? dartExperiments,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
     required this.packageConfigPath,
-    this.nullSafetyMode = NullSafetyMode.sound,
     this.codeSizeDirectory,
     this.androidGradleDaemon = true,
     this.androidSkipBuildDependencyValidation = false,
@@ -56,11 +54,6 @@ class BuildInfo {
        dartExperiments = dartExperiments ?? const <String>[];
 
   final BuildMode mode;
-
-  /// The null safety mode the application should be run in.
-  ///
-  /// If not provided, defaults to [NullSafetyMode.autodetect].
-  final NullSafetyMode nullSafetyMode;
 
   /// Whether the build should subset icon fonts.
   final bool treeShakeIcons;
@@ -117,11 +110,6 @@ class BuildInfo {
 
   /// Whether to apply dart source code obfuscation.
   final bool dartObfuscation;
-
-  /// An optional path to a JSON containing object SkSL shaders.
-  ///
-  /// Currently this is only supported for Android builds.
-  final String? bundleSkSLPath;
 
   /// Additional constant values to be made available in the Dart program.
   ///
@@ -265,9 +253,16 @@ class BuildInfo {
   /// so the uncapitalized flavor name is used to compute the output file name
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
 
-  /// The module system DDC is targeting, or null if not using DDC.
+  /// The module system DDC is targeting, or null if not using DDC or the
+  /// associated flag isn't present.
   // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  DdcModuleFormat? get ddcModuleFormat => _ddcModuleFormatFromFrontEndArgs(extraFrontEndOptions);
+  DdcModuleFormat? get ddcModuleFormat =>
+      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).ddcModuleFormat;
+
+  /// Whether to enable canary features when using DDC, or null if not using
+  /// DDC or the associated flag isn't present.
+  bool? get canaryFeatures =>
+      _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(extraFrontEndOptions).canaryFeatures;
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -287,7 +282,6 @@ class BuildInfo {
       if (splitDebugInfoPath != null) kSplitDebugInfo: splitDebugInfoPath!,
       kTrackWidgetCreation: trackWidgetCreation.toString(),
       kIconTreeShakerFlag: treeShakeIcons.toString(),
-      if (bundleSkSLPath != null) kBundleSkSLPath: bundleSkSLPath!,
       if (codeSizeDirectory != null) kCodeSizeDirectory: codeSizeDirectory!,
       if (fileSystemRoots.isNotEmpty) kFileSystemRoots: fileSystemRoots.join(','),
       if (fileSystemScheme != null) kFileSystemScheme: fileSystemScheme!,
@@ -316,7 +310,6 @@ class BuildInfo {
       'TREE_SHAKE_ICONS': treeShakeIcons.toString(),
       if (performanceMeasurementFile != null)
         'PERFORMANCE_MEASUREMENT_FILE': performanceMeasurementFile!,
-      if (bundleSkSLPath != null) 'BUNDLE_SKSL_PATH': bundleSkSLPath!,
       'PACKAGE_CONFIG': packageConfigPath,
       if (codeSizeDirectory != null) 'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
       if (flavor != null) 'FLAVOR': flavor!,
@@ -341,7 +334,6 @@ class BuildInfo {
       '-Ptree-shake-icons=$treeShakeIcons',
       if (performanceMeasurementFile != null)
         '-Pperformance-measurement-file=$performanceMeasurementFile',
-      if (bundleSkSLPath != null) '-Pbundle-sksl-path=$bundleSkSLPath',
       if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
       for (final String projectArg in androidProjectArgs) '-P$projectArg',
     ];
@@ -925,7 +917,7 @@ const String kAndroidArchs = 'AndroidArchs';
 ///
 /// If not provided, defaults to `minSdkVersion` from gradle_utils.dart.
 ///
-/// This is passed in by flutter.groovy's invocation of `flutter assemble`.
+/// This is passed in by the Flutter Gradle plugin's invocation of `flutter assemble`.
 ///
 /// For more info, see:
 /// https://developer.android.com/ndk/guides/sdk-versions#minsdkversion
@@ -968,14 +960,27 @@ const String kIconTreeShakerFlag = 'TreeShakeIcons';
 /// Controls whether a web build should use local canvaskit or the CDN
 const String kUseLocalCanvasKitFlag = 'UseLocalCanvasKit';
 
-/// The input key for an SkSL bundle path.
-const String kBundleSkSLPath = 'BundleSkSLPath';
-
 /// The define to pass build name
 const String kBuildName = 'BuildName';
 
 /// The app flavor to build.
 const String kFlavor = 'Flavor';
+
+/// Environment variable of the flavor to be set in dartDefines to be accessed
+/// by the [appFlavor] service.
+const String kAppFlavor = 'FLUTTER_APP_FLAVOR';
+
+/// The Xcode configuration used to build the project.
+const String kXcodeConfiguration = 'Configuration';
+
+/// The Xcode build setting SRCROOT. Identifies the directory containing the
+/// Xcode target's source files.
+const String kSrcRoot = 'SrcRoot';
+
+/// The Xcode build setting TARGET_DEVICE_OS_VERSION. The iOS version of the
+/// target device. Only available if a specific device is being targeted during
+/// the build.
+const String kTargetDeviceOSVersion = 'TargetDeviceOSVersion';
 
 /// The define to pass build number
 const String kBuildNumber = 'BuildNumber';
@@ -990,6 +995,9 @@ const String kXcodeAction = 'Action';
 /// Will be "PrepareFramework" when copying the Flutter/FlutterMacOS framework
 /// to the BUILT_PRODUCTS_DIR prior to the build.
 const String kXcodePreAction = 'PreBuildAction';
+
+// Whether the last Flutter tool invocation enabled dev dependencies.
+const String kDevDependenciesEnabled = 'DevDependenciesEnabled';
 
 final Converter<String, String> _defineEncoder = utf8.encoder.fuse(base64.encoder);
 final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decoder);
@@ -1028,31 +1036,28 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
       .toList();
 }
 
-/// The null safety runtime mode the app should be built in.
-enum NullSafetyMode {
-  sound,
-  unsound,
-
-  /// The null safety mode was not detected. Only supported for 'flutter test'.
-  autodetect,
-}
-
 /// Indicates the module system DDC is targeting.
 enum DdcModuleFormat { amd, ddc }
 
 // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-DdcModuleFormat? _ddcModuleFormatFromFrontEndArgs(List<String>? extraFrontEndArgs) {
-  if (extraFrontEndArgs == null) {
-    return null;
-  }
-  const String ddcModuleFormatString = '--dartdevc-module-format=';
-  for (final String flag in extraFrontEndArgs) {
-    if (flag.startsWith(ddcModuleFormatString)) {
-      final String moduleFormatString = flag.substring(ddcModuleFormatString.length, flag.length);
-      return DdcModuleFormat.values.byName(moduleFormatString);
+({DdcModuleFormat? ddcModuleFormat, bool? canaryFeatures})
+_ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(List<String>? extraFrontEndArgs) {
+  DdcModuleFormat? ddcModuleFormat;
+  bool? canaryFeatures;
+  if (extraFrontEndArgs != null) {
+    const String ddcModuleFormatArg = '--dartdevc-module-format=';
+    const String canaryFeaturesArg = '--dartdevc-canary';
+    for (final String flag in extraFrontEndArgs) {
+      if (flag.startsWith(ddcModuleFormatArg)) {
+        final String moduleFormatString = flag.substring(ddcModuleFormatArg.length, flag.length);
+        assert(ddcModuleFormat == null);
+        ddcModuleFormat = DdcModuleFormat.values.byName(moduleFormatString);
+      } else if (flag == canaryFeaturesArg) {
+        canaryFeatures = true;
+      }
     }
   }
-  return null;
+  return (ddcModuleFormat: ddcModuleFormat, canaryFeatures: canaryFeatures);
 }
 
 String _getCurrentHostPlatformArchName() {

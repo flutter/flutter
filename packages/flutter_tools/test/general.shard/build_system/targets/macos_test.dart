@@ -5,19 +5,47 @@
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
-import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
 import '../../../src/fakes.dart';
+
+const String _kPluginsFileWithoutDevDependencies = '''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "foo_package",
+        "dev_dependency": false
+      }
+    ]
+  }
+}
+''';
+
+const String _kPluginsFileWithDevDependencies = '''
+{
+  "plugins": {
+    "ios": [
+      {
+        "name": "foo_package",
+        "dev_dependency": true
+      }
+    ]
+  }
+}
+''';
 
 void main() {
   late Environment environment;
@@ -34,7 +62,6 @@ void main() {
   late FakeCommand lipoInfoFatCommand;
   late FakeCommand lipoVerifyX86_64Command;
   late FakeCommand lipoExtractX86_64Command;
-  late TestUsage usage;
   late FakeAnalytics fakeAnalytics;
 
   setUp(() {
@@ -42,7 +69,6 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    usage = TestUsage();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
       fakeFlutterVersion: FakeFlutterVersion(),
@@ -60,7 +86,6 @@ void main() {
       logger: logger,
       fileSystem: fileSystem,
       engineVersion: '2',
-      usage: usage,
       analytics: fakeAnalytics,
     );
 
@@ -417,7 +442,6 @@ void main() {
             artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
           )
           .createSync();
-      environment.defines[kBundleSkSLPath] = 'bundle.sksl';
       fileSystem
           .file(
             artifacts.getArtifactPath(
@@ -437,16 +461,6 @@ void main() {
           )
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      // sksl bundle
-      fileSystem
-          .file('bundle.sksl')
-          .writeAsStringSync(
-            json.encode(<String, Object>{
-              'engineRevision': '2',
-              'platform': 'ios',
-              'data': <String, Object>{'A': 'B'},
-            }),
-          );
 
       final String inputKernel = '${environment.buildDir.path}/app.dill';
       fileSystem.file(inputKernel)
@@ -474,17 +488,97 @@ void main() {
         fileSystem.file('App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data'),
         exists,
       );
-
-      final File skslFile = fileSystem.file(
-        'App.framework/Versions/A/Resources/flutter_assets/io.flutter.shaders.json',
-      );
-
-      expect(skslFile, exists);
-      expect(skslFile.readAsStringSync(), '{"data":{"A":"B"}}');
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'debug macOS application copies correct assets with flavor',
+    () async {
+      fileSystem
+          .directory(
+            artifacts.getArtifactPath(Artifact.flutterMacOSFramework, mode: BuildMode.debug),
+          )
+          .createSync();
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmSnapshotData,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.isolateSnapshotData,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
+      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
+
+      final String inputKernel = '${environment.buildDir.path}/app.dill';
+      fileSystem.file(inputKernel)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('testing');
+      environment.buildDir.childFile('native_assets.json').createSync();
+
+      environment.defines[kXcodeConfiguration] = 'Debug-strawberry';
+      fileSystem.directory('/macos/Runner.xcodeproj').createSync(recursive: true);
+
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+  name: example
+  flutter:
+    assets:
+      - assets/common/
+      - path: assets/vanilla/
+        flavors:
+          - vanilla
+      - path: assets/strawberry/
+        flavors:
+          - strawberry
+  ''');
+
+      fileSystem.file('assets/common/image.png').createSync(recursive: true);
+      fileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      fileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      fileSystem
+          .directory('.dart_tool')
+          .childFile('package_config.json')
+          .createSync(recursive: true);
+
+      await const DebugMacOSBundleFlutterAssets().build(environment);
+      final Directory frameworkDirectory = environment.outputDir.childDirectory(
+        '/App.framework/Versions/A/Resources/',
+      );
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/common/image.png'),
+        exists,
+      );
+      expect(
+        fileSystem.file('${frameworkDirectory.path}/flutter_assets/assets/vanilla/ice-cream.png'),
+        isNot(exists),
+      );
+      expect(
+        fileSystem.file(
+          '${frameworkDirectory.path}/flutter_assets/assets/strawberry/ice-cream.png',
+        ),
+        exists,
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      XcodeProjectInterpreter:
+          () => FakeXcodeProjectInterpreter(schemes: <String>['Runner', 'strawberry']),
     },
   );
 
@@ -606,10 +700,6 @@ void main() {
 
       await const ReleaseMacOSBundleFlutterAssets().build(environment);
       expect(
-        usage.events,
-        contains(const TestUsageEvent('assemble', 'macos-archive', label: 'success')),
-      );
-      expect(
         fakeAnalytics.sentEvents,
         contains(
           Event.appleUsageEvent(
@@ -636,10 +726,6 @@ void main() {
       await expectLater(
         () => const ReleaseMacOSBundleFlutterAssets().build(environment),
         throwsA(const TypeMatcher<FileSystemException>()),
-      );
-      expect(
-        usage.events,
-        contains(const TestUsageEvent('assemble', 'macos-archive', label: 'fail')),
       );
       expect(
         fakeAnalytics.sentEvents,
@@ -755,7 +841,7 @@ void main() {
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshot.TargetPlatform.darwin.release_arm64',
+            'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
             '--deterministic',
             '--snapshot_kind=app-aot-assembly',
             '--assembly=${environment.buildDir.childFile('arm64/snapshot_assembly.S').path}',
@@ -764,7 +850,7 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
-            'Artifact.genSnapshot.TargetPlatform.darwin.release_x64',
+            'Artifact.genSnapshotX64.TargetPlatform.darwin.release',
             '--deterministic',
             '--snapshot_kind=app-aot-assembly',
             '--assembly=${environment.buildDir.childFile('x86_64/snapshot_assembly.S').path}',
@@ -913,4 +999,174 @@ void main() {
       ProcessManager: () => processManager,
     },
   );
+
+  group('CheckDevDependenciesMacOS', () {
+    testUsingContext('throws if build mode define missing', () async {
+      environment.defines.remove(kBuildMode);
+      environment.defines[kDevDependenciesEnabled] = 'true';
+
+      await expectLater(
+        const CheckDevDependenciesMacOS().build(environment),
+        throwsA(const TypeMatcher<MissingDefineException>()),
+      );
+    });
+
+    testUsingContext('throws if dev dependencies define missing', () async {
+      const String projectPath = 'path/to/project';
+      fileSystem.directory(projectPath).createSync(recursive: true);
+      environment.defines[kBuildMode] = 'debug';
+
+      await expectLater(
+        const CheckDevDependenciesMacOS().build(environment),
+        throwsA(const TypeMatcher<MissingDefineException>()),
+      );
+    });
+
+    testUsingContext('does not throw if dev dependencies enabled in debug mode', () async {
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kDevDependenciesEnabled] = 'true';
+
+      await const CheckDevDependenciesMacOS().build(environment);
+    });
+
+    testUsingContext('does not throw if dev dependencies disabled in release mode', () async {
+      const String projectPath = 'path/to/project';
+      fileSystem.directory(projectPath).createSync(recursive: true);
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await const CheckDevDependenciesMacOS().build(environment);
+    });
+
+    testUsingContext('does not throw if dev dependencies disabled in profile mode', () async {
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await const CheckDevDependenciesMacOS().build(environment);
+    });
+
+    testUsingContext('does not throw if there are no dependencies', () async {
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await const CheckDevDependenciesMacOS().build(environment);
+    });
+
+    testUsingContext('does not throw if there are no dev dependencies', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+      pluginsFile.writeAsStringSync(_kPluginsFileWithoutDevDependencies);
+
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await const CheckDevDependenciesMacOS().build(environment);
+
+      expect(
+        logger.traceText,
+        contains('Ignoring dev dependencies error as the project has no dev dependencies'),
+      );
+    });
+
+    testUsingContext('throws if dev dependencies disabled in debug mode', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
+
+      environment.defines[kBuildMode] = 'debug';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await expectLater(
+        const CheckDevDependenciesMacOS().build(environment),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.toString(),
+            'description',
+            contains('Dev dependencies disabled in debug build'),
+          ),
+        ),
+      );
+    });
+
+    testUsingContext('throws if dev dependencies enabled in release mode', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
+
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kDevDependenciesEnabled] = 'true';
+
+      await expectLater(
+        const CheckDevDependenciesMacOS().build(environment),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.toString(),
+            'description',
+            contains('Dev dependencies enabled in release build'),
+          ),
+        ),
+      );
+    });
+
+    testUsingContext('throws if dev dependencies disabled in profile mode', () async {
+      final Directory projectDir = fileSystem.currentDirectory;
+      final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+      pluginsFile.writeAsStringSync(_kPluginsFileWithDevDependencies);
+
+      environment.defines[kBuildMode] = 'profile';
+      environment.defines[kDevDependenciesEnabled] = 'false';
+
+      await expectLater(
+        const CheckDevDependenciesMacOS().build(environment),
+        throwsA(
+          isA<ToolExit>().having(
+            (ToolExit e) => e.toString(),
+            'description',
+            contains('Dev dependencies disabled in profile build'),
+          ),
+        ),
+      );
+    });
+
+    testUsingContext(
+      'assumes project has dev dependencies if .flutter-plugins-dependencies is malformed',
+      () async {
+        final Directory projectDir = fileSystem.currentDirectory;
+        final File pluginsFile = projectDir.childFile('.flutter-plugins-dependencies');
+
+        pluginsFile.writeAsStringSync('This is not valid JSON');
+        environment.defines[kBuildMode] = 'debug';
+        environment.defines[kDevDependenciesEnabled] = 'false';
+
+        await expectLater(
+          const CheckDevDependenciesMacOS().build(environment),
+          throwsA(
+            isA<ToolExit>().having(
+              (ToolExit e) => e.toString(),
+              'description',
+              contains('Dev dependencies disabled in debug build'),
+            ),
+          ),
+        );
+      },
+    );
+  });
+}
+
+class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
+  FakeXcodeProjectInterpreter({this.isInstalled = true, this.schemes = const <String>['Runner']});
+
+  @override
+  final bool isInstalled;
+
+  List<String> schemes;
+
+  @override
+  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+    return XcodeProjectInfo(<String>[], <String>[], schemes, BufferLogger.test());
+  }
 }

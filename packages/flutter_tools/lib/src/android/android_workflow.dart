@@ -60,6 +60,45 @@ class AndroidWorkflow implements Workflow {
   bool get canListEmulators => canListDevices && _androidSdk?.emulatorPath != null;
 }
 
+Future<String?> getEmulatorVersion(AndroidSdk androidSdk, ProcessManager processManager) async {
+  try {
+    if (!processManager.canRun(androidSdk.emulatorPath)) {
+      return null;
+    }
+
+    final ProcessResult result = await processManager.run(<Object>[
+      androidSdk.emulatorPath!,
+      '-version',
+    ]);
+
+    if (result.exitCode != 0) {
+      return null;
+    }
+
+    final String output = result.stdout.toString().trim();
+
+    final String versionLine = output
+        .split('\n')
+        .firstWhere((String line) => line.contains('Android emulator version'), orElse: () => '');
+
+    if (versionLine.isNotEmpty) {
+      final RegExp regex = RegExp(r'Android emulator version\s+(.*)');
+      final Match? match = regex.firstMatch(versionLine);
+      if (match != null && match.groupCount >= 1) {
+        return match.group(1)?.trim();
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } on Exception catch (e, _) {
+    return null;
+  } on Error catch (_) {
+    return null;
+  }
+}
+
 /// A validator that checks if the Android SDK and Java SDK are available and
 /// installed correctly.
 ///
@@ -74,11 +113,13 @@ class AndroidValidator extends DoctorValidator {
     required Logger logger,
     required Platform platform,
     required UserMessages userMessages,
+    required ProcessManager processManager,
   }) : _java = java,
        _androidSdk = androidSdk,
        _logger = logger,
        _platform = platform,
        _userMessages = userMessages,
+       _processManager = processManager,
        super('Android toolchain - develop for Android devices');
 
   final Java? _java;
@@ -86,6 +127,7 @@ class AndroidValidator extends DoctorValidator {
   final Logger _logger;
   final Platform _platform;
   final UserMessages _userMessages;
+  final ProcessManager _processManager;
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -134,7 +176,7 @@ class AndroidValidator extends DoctorValidator {
   }
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     final AndroidSdk? androidSdk = _androidSdk;
     if (androidSdk == null) {
@@ -155,10 +197,23 @@ class AndroidValidator extends DoctorValidator {
     }
 
     messages.add(ValidationMessage(_userMessages.androidSdkLocation(androidSdk.directory.path)));
+    messages.add(
+      ValidationMessage(
+        'Emulator version ${await getEmulatorVersion(androidSdk, _processManager) ?? 'unknown'}',
+      ),
+    );
 
     _task = 'Validating Android SDK command line tools are available';
     if (!androidSdk.cmdlineToolsAvailable) {
-      messages.add(ValidationMessage.error(_userMessages.androidMissingCmdTools));
+      messages.add(
+        const ValidationMessage.error(
+          'cmdline-tools component is missing.\n'
+          'Try installing or updating Android Studio.\n'
+          'Alternatively, download the tools from https://developer.android.com/studio#command-line-tools-only '
+          'and make sure to set the ANDROID_HOME environment variable.\n'
+          'See https://developer.android.com/studio/command-line for more details.',
+        ),
+      );
       return ValidationResult(ValidationType.missing, messages);
     }
 
@@ -267,7 +322,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
     // Match pre-existing early termination behavior

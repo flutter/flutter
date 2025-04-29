@@ -15,8 +15,8 @@ import 'package:flutter_devicelab/framework/framework.dart';
 //           https://developer.android.com/build/releases/past-releases/agp-8-4-0-release-notes.
 // - Kotlin: No methodology as of yet.
 // (*) - support range defined in packages/flutter_tools/gradle/src/main/kotlin/dependency_version_checker.gradle.kts.
-// Note that compileSdk 35 requires AGP 8.1.0+, so override to compileSdk 34 for AGP 8.0.
 List<VersionTuple> versionTuples = <VersionTuple>[
+  // compileSdk 35 requires AGP 8.1.0+, so override to compileSdk 34 for AGP 8.0.
   VersionTuple(
     agpVersion: '8.0.0',
     gradleVersion: '8.0',
@@ -29,8 +29,12 @@ List<VersionTuple> versionTuples = <VersionTuple>[
   VersionTuple(agpVersion: '8.4.0', gradleVersion: '8.6', kotlinVersion: '1.8.22'),
   VersionTuple(agpVersion: '8.5.0', gradleVersion: '8.7', kotlinVersion: '1.8.22'),
   VersionTuple(agpVersion: '8.6.0', gradleVersion: '8.7', kotlinVersion: '1.8.22'),
-  VersionTuple(agpVersion: '8.7.0', gradleVersion: '8.9', kotlinVersion: '1.8.22'),
+  VersionTuple(agpVersion: '8.7.0', gradleVersion: '8.12', kotlinVersion: '2.1.0'),
 ];
+// TODO(jesswrd): Re enable the following VersionTuples after splitting the test target into multiple.
+//                See https://github.com/flutter/flutter/issues/167495.
+//  VersionTuple(agpVersion: '8.7.0', gradleVersion: '8.9', kotlinVersion: '1.8.22'),
+//  VersionTuple(agpVersion: '8.7.0', gradleVersion: '8.9', kotlinVersion: '2.1.0'),
 
 Future<void> main() async {
   /// The [FileSystem] for the integration test environment.

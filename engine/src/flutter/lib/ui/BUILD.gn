@@ -38,7 +38,6 @@ source_set("ui") {
     "dart_ui.h",
     "dart_wrapper.h",
     "floating_point.h",
-    "io_manager.cc",
     "io_manager.h",
     "isolate_name_server/isolate_name_server.cc",
     "isolate_name_server/isolate_name_server.h",
@@ -103,6 +102,8 @@ source_set("ui") {
     "painting/picture_recorder.h",
     "painting/rrect.cc",
     "painting/rrect.h",
+    "painting/rsuperellipse.cc",
+    "painting/rsuperellipse.h",
     "painting/shader.cc",
     "painting/shader.h",
     "painting/single_frame_codec.cc",
@@ -154,6 +155,8 @@ source_set("ui") {
     "window/pointer_data_packet.h",
     "window/pointer_data_packet_converter.cc",
     "window/pointer_data_packet_converter.h",
+    "window/view_focus.cc",
+    "window/view_focus.h",
     "window/viewport_metrics.cc",
     "window/viewport_metrics.h",
   ]
@@ -165,7 +168,7 @@ source_set("ui") {
     "//flutter/shell/common:display",
     "//flutter/shell/common:platform_message_handler",
     "//flutter/skia/modules/skparagraph",
-    "//flutter/third_party/txt",
+    "//flutter/txt",
   ]
 
   deps = [
@@ -226,7 +229,7 @@ if (enable_unittests) {
       "fixtures/FontManifest.json",
       "fixtures/unmultiplied_alpha.png",
       "fixtures/WideGamutIndexed.png",
-      "//flutter/third_party/txt/third_party/fonts/Roboto-Medium.ttf",
+      "//flutter/txt/third_party/fonts/Roboto-Medium.ttf",
     ]
   }
 

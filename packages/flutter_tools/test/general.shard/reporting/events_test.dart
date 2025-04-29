@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
-import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
 
@@ -58,100 +56,6 @@ void main() {
       contains(const TestUsageEvent('doctor-result', 'FakeGroupedValidator', label: 'crash')),
     );
   });
-
-  testWithoutContext('Reports null safe analytics events', () {
-    final TestUsage usage = TestUsage();
-    final PackageConfig packageConfig = PackageConfig(<Package>[
-      Package('foo', Uri.parse('file:///foo/'), languageVersion: LanguageVersion(2, 12)),
-      Package('bar', Uri.parse('file:///fizz/'), languageVersion: LanguageVersion(2, 1)),
-      Package('baz', Uri.parse('file:///bar/'), languageVersion: LanguageVersion(2, 2)),
-    ]);
-
-    NullSafetyAnalysisEvent(packageConfig, NullSafetyMode.sound, 'foo', usage).send();
-
-    expect(
-      usage.events,
-      unorderedEquals(<TestUsageEvent>[
-        const TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'runtime-mode',
-          label: 'NullSafetyMode.sound',
-        ),
-        TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'stats',
-          parameters: CustomDimensions.fromMap(<String, String>{'cd49': '1', 'cd50': '3'}),
-        ),
-        const TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'language-version',
-          label: '2.12',
-        ),
-      ]),
-    );
-  });
-
-  testWithoutContext('Does not crash if main package is missing', () {
-    final TestUsage usage = TestUsage();
-    final PackageConfig packageConfig = PackageConfig(<Package>[
-      Package('foo', Uri.parse('file:///foo/lib/'), languageVersion: LanguageVersion(2, 12)),
-      Package('bar', Uri.parse('file:///fizz/lib/'), languageVersion: LanguageVersion(2, 1)),
-      Package('baz', Uri.parse('file:///bar/lib/'), languageVersion: LanguageVersion(2, 2)),
-    ]);
-
-    NullSafetyAnalysisEvent(
-      packageConfig,
-      NullSafetyMode.sound,
-      'something-unrelated',
-      usage,
-    ).send();
-
-    expect(
-      usage.events,
-      unorderedEquals(<TestUsageEvent>[
-        const TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'runtime-mode',
-          label: 'NullSafetyMode.sound',
-        ),
-        TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'stats',
-          parameters: CustomDimensions.fromMap(<String, String>{'cd49': '1', 'cd50': '3'}),
-        ),
-      ]),
-    );
-  });
-
-  testWithoutContext('a null language version is treated as unmigrated', () {
-    final TestUsage usage = TestUsage();
-    final PackageConfig packageConfig = PackageConfig(<Package>[
-      Package('foo', Uri.parse('file:///foo/lib/')),
-    ]);
-
-    NullSafetyAnalysisEvent(
-      packageConfig,
-      NullSafetyMode.sound,
-      'something-unrelated',
-      usage,
-    ).send();
-
-    expect(
-      usage.events,
-      unorderedEquals(<TestUsageEvent>[
-        const TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'runtime-mode',
-          label: 'NullSafetyMode.sound',
-        ),
-        TestUsageEvent(
-          NullSafetyAnalysisEvent.kNullSafetyCategory,
-          'stats',
-          parameters: CustomDimensions.fromMap(<String, String>{'cd49': '0', 'cd50': '1'}),
-        ),
-      ]),
-    );
-  });
 }
 
 class FakeGroupedValidator extends GroupedValidator {
@@ -162,7 +66,7 @@ class FakeDoctorValidator extends DoctorValidator {
   FakeDoctorValidator(super.title);
 
   @override
-  Future<ValidationResult> validate() async {
+  Future<ValidationResult> validateImpl() async {
     return ValidationResult.crash(Object());
   }
 }

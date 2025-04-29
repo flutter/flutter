@@ -46,7 +46,7 @@ Future<void> testMain() async {
         <sem><span>Hello</span></sem>''');
 
       final SemanticsObject node = owner().debugSemanticsTree![0]!;
-      expect(node.semanticRole?.kind, SemanticRoleKind.generic);
+      expect(node.semanticRole?.kind, EngineSemanticsRole.generic);
       expect(
         reason: 'A node with a label should get a LabelAndValue role',
         node.semanticRole!.debugSemanticBehaviorTypes,
@@ -110,9 +110,7 @@ Future<void> testMain() async {
 
     expectSemanticsTree(owner(), '''
       <sem aria-label="I am a parent" role="group">
-        <sem-c>
           <sem><span>I am a child</span></sem>
-        </sem-c>
       </sem>''');
 
     semantics().semanticsEnabled = false;
@@ -159,9 +157,7 @@ Future<void> testMain() async {
 
       expectSemanticsTree(owner(), '''
         <sem aria-label="I am a parent" role="group">
-          <sem-c>
             <sem><span>I am a child</span></sem>
-          </sem-c>
         </sem>''');
     }
 

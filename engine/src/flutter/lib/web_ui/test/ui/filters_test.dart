@@ -30,6 +30,7 @@ Future<void> testMain() async {
     expect(codec.frameCount, 1);
 
     final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
     final ui.Image image = info.image;
     expect(image.width, 128);
     expect(image.height, 128);
@@ -52,14 +53,14 @@ Future<void> testMain() async {
       ui.Paint()..imageFilter = ui.ImageFilter.dilate(radiusX: 5.0, radiusY: 5.0),
     );
     await matchGoldenFile('ui_filter_dilate_imagefilter.png', region: region);
-  }, skip: isHtml); // HTML renderer does not support the dilate filter
+  });
 
   test('erode filter', () async {
     await drawTestImageWithPaint(
       ui.Paint()..imageFilter = ui.ImageFilter.erode(radiusX: 5.0, radiusY: 5.0),
     );
     await matchGoldenFile('ui_filter_erode_imagefilter.png', region: region);
-  }, skip: isHtml); // HTML renderer does not support the erode filter
+  });
 
   test('matrix filter', () async {
     await drawTestImageWithPaint(
@@ -93,7 +94,7 @@ Future<void> testMain() async {
     );
     await drawTestImageWithPaint(ui.Paint()..imageFilter = filter);
     await matchGoldenFile('ui_filter_composed_imagefilters.png', region: region);
-  }, skip: isHtml); // Only Skwasm and CanvasKit implement composable filters right now.
+  });
 
   test('compose with colorfilter', () async {
     final ui.ImageFilter filter = ui.ImageFilter.compose(
@@ -102,7 +103,7 @@ Future<void> testMain() async {
     );
     await drawTestImageWithPaint(ui.Paint()..imageFilter = filter);
     await matchGoldenFile('ui_filter_composed_colorfilter.png', region: region);
-  }, skip: isHtml); // Only Skwasm and CanvasKit implements composable filters right now.
+  });
 
   test('color filter as image filter', () async {
     const ui.ColorFilter colorFilter = ui.ColorFilter.mode(
@@ -135,40 +136,36 @@ Future<void> testMain() async {
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_linear_to_srgb_colorfilter.png', region: region);
     expect(colorFilter.toString(), 'ColorFilter.linearToSrgbGamma()');
-  }, skip: isHtml); // HTML renderer hasn't implemented this.
+  });
 
   test('srgbToLinearGamma color filter', () async {
     const ui.ColorFilter colorFilter = ui.ColorFilter.srgbToLinearGamma();
     await drawTestImageWithPaint(ui.Paint()..colorFilter = colorFilter);
     await matchGoldenFile('ui_filter_srgb_to_linear_colorfilter.png', region: region);
     expect(colorFilter.toString(), 'ColorFilter.srgbToLinearGamma()');
-  }, skip: isHtml); // HTML renderer hasn't implemented this.
+  });
 
   test('matrix color filter', () async {
     const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
-      0.393,
-      0.769,
-      0.189,
-      0,
-      0,
-      0.349,
-      0.686,
-      0.168,
-      0,
-      0,
-      0.272,
-      0.534,
-      0.131,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
+      0.393, 0.769, 0.189, 0, 0, // row
+      0.349, 0.686, 0.168, 0, 0, // row
+      0.272, 0.534, 0.131, 0, 0, // row
+      0, 0, 0, 1, 0, // row
     ]);
     await drawTestImageWithPaint(ui.Paint()..colorFilter = sepia);
     await matchGoldenFile('ui_filter_matrix_colorfilter.png', region: region);
+    expect(sepia.toString(), startsWith('ColorFilter.matrix([0.393, 0.769, 0.189, '));
+  });
+
+  test('matrix color filter with 0..255 translation values', () async {
+    const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
+      0.393, 0.769, 0.189, 0, 50.0, // row
+      0.349, 0.686, 0.168, 0, 50.0, // row
+      0.272, 0.534, 0.131, 0, 50.0, // row
+      0, 0, 0, 1, 0, // row
+    ]);
+    await drawTestImageWithPaint(ui.Paint()..colorFilter = sepia);
+    await matchGoldenFile('ui_filter_matrix_colorfilter_with_translation.png', region: region);
     expect(sepia.toString(), startsWith('ColorFilter.matrix([0.393, 0.769, 0.189, '));
   });
 
@@ -179,26 +176,10 @@ Future<void> testMain() async {
 
   test('invert colors with color filter', () async {
     const ui.ColorFilter sepia = ui.ColorFilter.matrix(<double>[
-      0.393,
-      0.769,
-      0.189,
-      0,
-      0,
-      0.349,
-      0.686,
-      0.168,
-      0,
-      0,
-      0.272,
-      0.534,
-      0.131,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
+      0.393, 0.769, 0.189, 0, 0, // row
+      0.349, 0.686, 0.168, 0, 0, // row
+      0.272, 0.534, 0.131, 0, 0, // row
+      0, 0, 0, 1, 0, // row
     ]);
 
     await drawTestImageWithPaint(
@@ -431,62 +412,31 @@ Future<void> testMain() async {
     return ui.Rect.fromLTWH(0, 0, offset * columns + pad, offset * rows + pad);
   }
 
-  test(
-    'Rendering ops with ImageFilter blur with default tile mode',
-    () async {
-      final region = await renderingOpsWithTileMode(null);
-      await matchGoldenFile(
-        'ui_filter_blurred_rendering_with_default_tile_mode.png',
-        region: region,
-      );
-    },
-    // HTML renderer doesn't have tile modes
-    skip: isHtml,
-  );
+  test('Rendering ops with ImageFilter blur with default tile mode', () async {
+    final region = await renderingOpsWithTileMode(null);
+    await matchGoldenFile('ui_filter_blurred_rendering_with_default_tile_mode.png', region: region);
+  });
 
-  test(
-    'Rendering ops with ImageFilter blur with clamp tile mode',
-    () async {
-      final region = await renderingOpsWithTileMode(ui.TileMode.clamp);
-      await matchGoldenFile('ui_filter_blurred_rendering_with_clamp_tile_mode.png', region: region);
-    },
-    // HTML renderer doesn't have tile modes
-    skip: isHtml,
-  );
+  test('Rendering ops with ImageFilter blur with clamp tile mode', () async {
+    final region = await renderingOpsWithTileMode(ui.TileMode.clamp);
+    await matchGoldenFile('ui_filter_blurred_rendering_with_clamp_tile_mode.png', region: region);
+  });
 
-  test(
-    'Rendering ops with ImageFilter blur with decal tile mode',
-    () async {
-      final region = await renderingOpsWithTileMode(ui.TileMode.decal);
-      await matchGoldenFile('ui_filter_blurred_rendering_with_decal_tile_mode.png', region: region);
-    },
-    // HTML renderer doesn't have tile modes
-    skip: isHtml,
-  );
+  test('Rendering ops with ImageFilter blur with decal tile mode', () async {
+    final region = await renderingOpsWithTileMode(ui.TileMode.decal);
+    await matchGoldenFile('ui_filter_blurred_rendering_with_decal_tile_mode.png', region: region);
+  });
 
-  test(
-    'Rendering ops with ImageFilter blur with mirror tile mode',
-    () async {
-      final region = await renderingOpsWithTileMode(ui.TileMode.mirror);
-      await matchGoldenFile(
-        'ui_filter_blurred_rendering_with_mirror_tile_mode.png',
-        region: region,
-      );
-    },
-    // HTML renderer doesn't have tile modes
-    skip: isHtml,
-  );
+  test('Rendering ops with ImageFilter blur with mirror tile mode', () async {
+    final region = await renderingOpsWithTileMode(ui.TileMode.mirror);
+    await matchGoldenFile('ui_filter_blurred_rendering_with_mirror_tile_mode.png', region: region);
+  });
 
-  test(
-    'Rendering ops with ImageFilter blur with repeated tile mode',
-    () async {
-      final region = await renderingOpsWithTileMode(ui.TileMode.repeated);
-      await matchGoldenFile(
-        'ui_filter_blurred_rendering_with_repeated_tile_mode.png',
-        region: region,
-      );
-    },
-    // HTML renderer doesn't have tile modes
-    skip: isHtml,
-  );
+  test('Rendering ops with ImageFilter blur with repeated tile mode', () async {
+    final region = await renderingOpsWithTileMode(ui.TileMode.repeated);
+    await matchGoldenFile(
+      'ui_filter_blurred_rendering_with_repeated_tile_mode.png',
+      region: region,
+    );
+  });
 }

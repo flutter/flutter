@@ -109,6 +109,7 @@ import java.util.Set;
 public class FlutterView extends FrameLayout
     implements MouseCursorPlugin.MouseCursorViewDelegate, KeyboardManager.ViewDelegate {
   private static final String TAG = "FlutterView";
+  private static final String GBOARD_PACKAGE_NAME = "com.google.android.inputmethod.latin";
 
   // Internal view hierarchy references.
   @Nullable private FlutterSurfaceView flutterSurfaceView;
@@ -689,14 +690,7 @@ public class FlutterView extends FrameLayout
         (SYSTEM_UI_FLAG_HIDE_NAVIGATION & getWindowSystemUiVisibility()) == 0;
 
     if (Build.VERSION.SDK_INT >= API_LEVELS.API_30) {
-      int mask = 0;
-      if (navigationBarVisible) {
-        mask = mask | android.view.WindowInsets.Type.navigationBars();
-      }
-      if (statusBarVisible) {
-        mask = mask | android.view.WindowInsets.Type.statusBars();
-      }
-      Insets uiInsets = insets.getInsets(mask);
+      Insets uiInsets = insets.getInsets(android.view.WindowInsets.Type.systemBars());
       viewportMetrics.viewPaddingTop = uiInsets.top;
       viewportMetrics.viewPaddingRight = uiInsets.right;
       viewportMetrics.viewPaddingBottom = uiInsets.bottom;
@@ -1129,7 +1123,8 @@ public class FlutterView extends FrameLayout
             this,
             this.flutterEngine.getTextInputChannel(),
             this.flutterEngine.getScribeChannel(),
-            this.flutterEngine.getPlatformViewsController());
+            this.flutterEngine.getPlatformViewsController(),
+            this.flutterEngine.getPlatformViewsController2());
 
     try {
       textServicesManager =
@@ -1169,6 +1164,11 @@ public class FlutterView extends FrameLayout
         .getPlatformViewsController()
         .attachToFlutterRenderer(this.flutterEngine.getRenderer());
 
+    this.flutterEngine.getPlatformViewsController2().attachAccessibilityBridge(accessibilityBridge);
+    this.flutterEngine
+        .getPlatformViewsController2()
+        .attachToFlutterRenderer(this.flutterEngine.getRenderer());
+
     // Inform the Android framework that it should retrieve a new InputConnection
     // now that an engine is attached.
     // TODO(mattcarroll): once this is proven to work, move this line ot TextInputPlugin
@@ -1186,6 +1186,7 @@ public class FlutterView extends FrameLayout
     sendViewportMetricsToFlutter();
 
     flutterEngine.getPlatformViewsController().attachToView(this);
+    flutterEngine.getPlatformViewsController2().attachToView(this);
 
     // Notify engine attachment listeners of the attachment.
     for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
@@ -1226,9 +1227,11 @@ public class FlutterView extends FrameLayout
     getContext().getContentResolver().unregisterContentObserver(systemSettingsObserver);
 
     flutterEngine.getPlatformViewsController().detachFromView();
+    flutterEngine.getPlatformViewsController2().detachFromView();
 
     // Disconnect the FlutterEngine's PlatformViewsController from the AccessibilityBridge.
     flutterEngine.getPlatformViewsController().detachAccessibilityBridge();
+    flutterEngine.getPlatformViewsController2().detachAccessibilityBridge();
 
     // Disconnect and clean up the AccessibilityBridge.
     accessibilityBridge.release();
@@ -1443,13 +1446,14 @@ public class FlutterView extends FrameLayout
       if (Build.VERSION.SDK_INT >= API_LEVELS.API_31) {
         List<SpellCheckerInfo> enabledSpellCheckerInfos =
             textServicesManager.getEnabledSpellCheckerInfos();
-        boolean gboardSpellCheckerEnabled =
-            enabledSpellCheckerInfos.stream()
-                .anyMatch(
-                    spellCheckerInfo ->
-                        spellCheckerInfo
-                            .getPackageName()
-                            .equals("com.google.android.inputmethod.latin"));
+        boolean gboardSpellCheckerEnabled = false;
+
+        for (SpellCheckerInfo spellCheckerInfo : enabledSpellCheckerInfos) {
+          if (spellCheckerInfo.getPackageName().equals(GBOARD_PACKAGE_NAME)) {
+            gboardSpellCheckerEnabled = true;
+            break;
+          }
+        }
 
         // Checks if enabled spell checker is the one that is suppported by Gboard, which is
         // the one Flutter supports by default.

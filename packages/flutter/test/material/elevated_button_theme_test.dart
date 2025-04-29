@@ -6,6 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TextStyle iconStyle(WidgetTester tester, IconData icon) {
+    final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+    );
+    return iconRichText.text.style!;
+  }
+
   test('ElevatedButtonThemeData lerp special cases', () {
     expect(ElevatedButtonThemeData.lerp(null, null, 0), null);
     const ElevatedButtonThemeData data = ElevatedButtonThemeData();
@@ -18,7 +25,7 @@ void main() {
     const ColorScheme colorScheme = ColorScheme.light();
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.from(colorScheme: colorScheme, useMaterial3: true),
+        theme: ThemeData.from(colorScheme: colorScheme),
         home: Scaffold(
           body: Center(child: ElevatedButton(onPressed: () {}, child: const Text('button'))),
         ),
@@ -263,17 +270,14 @@ void main() {
     );
   });
 
-  testWidgets('Material3 - ElevatedButton repsects Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('Material3 - ElevatedButton respects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
 
     Widget buildFrame({Color? overallShadowColor, Color? themeShadowColor, Color? shadowColor}) {
       return MaterialApp(
-        theme: ThemeData.from(
-          useMaterial3: true,
-          colorScheme: colorScheme.copyWith(shadow: overallShadowColor),
-        ),
+        theme: ThemeData.from(colorScheme: colorScheme.copyWith(shadow: overallShadowColor)),
         home: Scaffold(
           body: Center(
             child: ElevatedButtonTheme(
@@ -334,7 +338,7 @@ void main() {
     expect(material.shadowColor, shadowColor);
   });
 
-  testWidgets('Material2 - ElevatedButton repsects Theme shadowColor', (WidgetTester tester) async {
+  testWidgets('Material2 - ElevatedButton respects Theme shadowColor', (WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     const Color shadowColor = Color(0xff000001);
     const Color overriddenColor = Color(0xff000002);
@@ -442,4 +446,33 @@ void main() {
 
     expect(buttonTopRight.dx, iconTopRight.dx + 24.0);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/162839.
+  testWidgets(
+    'ElevatedButton icon uses provided ElevatedButtonTheme foregroundColor over default icon color',
+    (WidgetTester tester) async {
+      const Color foregroundColor = Color(0xFFFFA500);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(foregroundColor: foregroundColor),
+            ),
+          ),
+          home: Material(
+            child: Center(
+              child: ElevatedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.add),
+                label: const Text('Button'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(iconStyle(tester, Icons.add).color, foregroundColor);
+    },
+  );
 }

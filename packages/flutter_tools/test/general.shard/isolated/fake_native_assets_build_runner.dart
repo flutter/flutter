@@ -4,75 +4,61 @@
 
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
-import 'package:package_config/package_config_types.dart';
+import 'package:native_assets_cli/code_assets.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 
-export 'package:native_assets_cli/code_assets_builder.dart' show CodeAsset, DynamicLoadingBundled;
+export 'package:native_assets_cli/code_assets.dart' show CodeAsset, DynamicLoadingBundled;
 
 /// Mocks all logic instead of using `package:native_assets_builder`, which
 /// relies on doing process calls to `pub` and the local file system.
 class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunner {
   FakeFlutterNativeAssetsBuildRunner({
-    this.hasPackageConfigResult = true,
-    this.packagesWithNativeAssetsResult = const <Package>[],
+    this.packagesWithNativeAssetsResult = const <String>[],
     this.onBuild,
     this.onLink,
     this.buildResult = const FakeFlutterNativeAssetsBuilderResult(),
     this.linkResult = const FakeFlutterNativeAssetsBuilderResult(),
-    CCompilerConfig? cCompilerConfigResult,
-    CCompilerConfig? ndkCCompilerConfigResult,
-  }) : cCompilerConfigResult = cCompilerConfigResult ?? CCompilerConfig(),
-       ndkCCompilerConfigResult = ndkCCompilerConfigResult ?? CCompilerConfig();
+    this.cCompilerConfigResult,
+    this.ndkCCompilerConfigResult,
+  });
 
-  final BuildResult? Function(BuildConfig)? onBuild;
-  final LinkResult? Function(LinkConfig)? onLink;
+  // TODO(dcharkes): Cleanup this fake https://github.com/flutter/flutter/issues/162061
+  final BuildResult? Function(BuildInput)? onBuild;
+  final LinkResult? Function(LinkInput)? onLink;
   final BuildResult? buildResult;
   final LinkResult? linkResult;
-  final bool hasPackageConfigResult;
-  final List<Package> packagesWithNativeAssetsResult;
-  final CCompilerConfig cCompilerConfigResult;
-  final CCompilerConfig ndkCCompilerConfigResult;
+  final List<String> packagesWithNativeAssetsResult;
+  final CCompilerConfig? cCompilerConfigResult;
+  final CCompilerConfig? ndkCCompilerConfigResult;
 
   int buildInvocations = 0;
   int linkInvocations = 0;
-  int hasPackageConfigInvocations = 0;
   int packagesWithNativeAssetsInvocations = 0;
-  BuildMode? lastBuildMode;
 
   @override
   Future<BuildResult?> build({
-    required List<String> supportedAssetTypes,
-    required BuildConfigValidator configValidator,
-    required BuildConfigCreator configCreator,
-    required BuildValidator buildValidator,
-    required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
-    required BuildMode buildMode,
-    required OS targetOS,
-    required Uri workingDirectory,
+    required List<ProtocolExtension> extensions,
     required bool linkingEnabled,
   }) async {
     BuildResult? result = buildResult;
-    for (final Package package in packagesWithNativeAssetsResult) {
-      final BuildConfigBuilder configBuilder =
-          configCreator()
-            ..setupHookConfig(
-              packageRoot: package.root,
-              packageName: package.name,
-              targetOS: targetOS,
-              supportedAssetTypes: supportedAssetTypes,
-              buildMode: buildMode,
-            )
-            ..setupBuildConfig(dryRun: false, linkingEnabled: linkingEnabled)
-            ..setupBuildRunConfig(
-              outputDirectory: Uri.parse('build-out-dir'),
+    for (final String package in packagesWithNativeAssetsResult) {
+      final BuildInputBuilder input =
+          BuildInputBuilder()
+            ..setupShared(
+              packageRoot: Uri.parse('$package/'),
+              packageName: package,
               outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-            );
-      final BuildConfig buildConfig = BuildConfig(configBuilder.json);
+              outputFile: Uri.file('output.json'),
+            )
+            ..setupBuildInput()
+            ..config.setupBuild(linkingEnabled: linkingEnabled);
+      for (final ProtocolExtension extension in extensions) {
+        extension.setupBuildInput(input);
+      }
+      final BuildInput buildConfig = BuildInput(input.json);
       if (onBuild != null) {
         result = onBuild!(buildConfig);
       }
-      lastBuildMode = buildConfig.buildMode;
       buildInvocations++;
     }
     return result;
@@ -80,60 +66,43 @@ class FakeFlutterNativeAssetsBuildRunner implements FlutterNativeAssetsBuildRunn
 
   @override
   Future<LinkResult?> link({
-    required List<String> supportedAssetTypes,
-    required LinkConfigCreator configCreator,
-    required LinkConfigValidator configValidator,
-    required LinkValidator linkValidator,
-    required ApplicationAssetValidator applicationAssetValidator,
-    required bool includeParentEnvironment,
-    required BuildMode buildMode,
-    required OS targetOS,
-    required Uri workingDirectory,
+    required List<ProtocolExtension> extensions,
     required BuildResult buildResult,
   }) async {
     LinkResult? result = linkResult;
-    for (final Package package in packagesWithNativeAssetsResult) {
-      final LinkConfigBuilder configBuilder =
-          configCreator()
-            ..setupHookConfig(
-              packageRoot: package.root,
-              packageName: package.name,
-              targetOS: targetOS,
-              supportedAssetTypes: supportedAssetTypes,
-              buildMode: buildMode,
-            )
-            ..setupLinkRunConfig(
-              outputDirectory: Uri.parse('build-out-dir'),
+    for (final String package in packagesWithNativeAssetsResult) {
+      final LinkInputBuilder input =
+          LinkInputBuilder()
+            ..setupShared(
+              packageRoot: Uri.parse('$package/'),
+              packageName: package,
               outputDirectoryShared: Uri.parse('build-out-dir-shared'),
-              recordedUsesFile: null,
-            );
-      final LinkConfig buildConfig = LinkConfig(configBuilder.json);
+              outputFile: Uri.file('output.json'),
+            )
+            ..setupLink(assets: buildResult.encodedAssets, recordedUsesFile: null);
+      for (final ProtocolExtension extension in extensions) {
+        extension.setupLinkInput(input);
+      }
+      final LinkInput buildConfig = LinkInput(input.json);
       if (onLink != null) {
         result = onLink!(buildConfig);
       }
-      lastBuildMode = buildMode;
       linkInvocations++;
     }
     return result;
   }
 
   @override
-  Future<bool> hasPackageConfig() async {
-    hasPackageConfigInvocations++;
-    return hasPackageConfigResult;
-  }
-
-  @override
-  Future<List<Package>> packagesWithNativeAssets() async {
+  Future<List<String>> packagesWithNativeAssets() async {
     packagesWithNativeAssetsInvocations++;
     return packagesWithNativeAssetsResult;
   }
 
   @override
-  Future<CCompilerConfig> get cCompilerConfig async => cCompilerConfigResult;
+  Future<CCompilerConfig?> get cCompilerConfig async => cCompilerConfigResult;
 
   @override
-  Future<CCompilerConfig> get ndkCCompilerConfig async => cCompilerConfigResult;
+  Future<CCompilerConfig?> get ndkCCompilerConfig async => cCompilerConfigResult;
 }
 
 final class FakeFlutterNativeAssetsBuilderResult implements BuildResult, LinkResult {

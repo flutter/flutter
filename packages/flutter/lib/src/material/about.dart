@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/cupertino.dart';
+///
 /// @docImport 'drawer.dart';
 /// @docImport 'list_tile_theme.dart';
 library;
@@ -299,14 +301,20 @@ void showLicensePage({
   String? applicationLegalese,
   bool useRootNavigator = false,
 }) {
+  final CapturedThemes themes = InheritedTheme.capture(
+    from: context,
+    to: Navigator.of(context, rootNavigator: useRootNavigator).context,
+  );
   Navigator.of(context, rootNavigator: useRootNavigator).push(
     MaterialPageRoute<void>(
       builder:
-          (BuildContext context) => LicensePage(
-            applicationName: applicationName,
-            applicationVersion: applicationVersion,
-            applicationIcon: applicationIcon,
-            applicationLegalese: applicationLegalese,
+          (BuildContext context) => themes.wrap(
+            LicensePage(
+              applicationName: applicationName,
+              applicationVersion: applicationVersion,
+              applicationIcon: applicationIcon,
+              applicationLegalese: applicationLegalese,
+            ),
           ),
     ),
   );
@@ -1451,7 +1459,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
   Widget _lateralUI(BuildContext context) {
     _builtLayout = _LayoutMode.lateral;
     return _MasterDetailScaffold(
-      actionBuilder: (_, __) => const <Widget>[],
+      actionBuilder: (_, _) => const <Widget>[],
       detailPageBuilder:
           (BuildContext context, Object? args, ScrollController? scrollController) =>
               widget.detailPageBuilder(context, args ?? _cachedDetailArguments, scrollController),

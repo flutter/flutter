@@ -18,7 +18,7 @@ void main() {
   testWidgets(
     'Material3 - Default values are used when no NavigationRail or NavigationRailThemeData properties are specified',
     (WidgetTester tester) async {
-      final ThemeData theme = ThemeData.light(useMaterial3: true);
+      final ThemeData theme = ThemeData();
       // Material 3 defaults
       await tester.pumpWidget(
         MaterialApp(
@@ -327,8 +327,8 @@ Material _railMaterial(WidgetTester tester) {
 
 ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
   return tester
-          .firstWidget<Container>(
-            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Container)),
+          .firstWidget<Ink>(
+            find.descendant(of: find.byType(NavigationIndicator), matching: find.byType(Ink)),
           )
           .decoration
       as ShapeDecoration?;

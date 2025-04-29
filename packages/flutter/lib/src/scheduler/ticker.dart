@@ -86,15 +86,7 @@ class Ticker {
       _debugCreationStack = StackTrace.current;
       return true;
     }());
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectCreated(
-        library: 'package:flutter/scheduler.dart',
-        className: '$Ticker',
-        object: this,
-      );
-    }
+    assert(debugMaybeDispatchCreated('scheduler', 'Ticker', this));
   }
 
   TickerFuture? _future;
@@ -163,7 +155,7 @@ class Ticker {
   bool get isActive => _future != null;
 
   /// The frame timestamp when the ticker was last started,
-  /// as reported by [SchedulerBinding.currentFrameTimestamp].
+  /// as reported by [SchedulerBinding.currentFrameTimeStamp].
   Duration? _startTime;
 
   /// Starts the clock for this [Ticker]. If the ticker is not [muted], then this
@@ -354,12 +346,7 @@ class Ticker {
   ///    with a [TickerCanceled] error.
   @mustCallSuper
   void dispose() {
-    // TODO(polina-c): stop duplicating code across disposables
-    // https://github.com/flutter/flutter/issues/137435
-    if (kFlutterMemoryAllocationsEnabled) {
-      FlutterMemoryAllocations.instance.dispatchObjectDisposed(object: this);
-    }
-
+    assert(debugMaybeDispatchDisposed(this));
     if (_future != null) {
       final TickerFuture localFuture = _future!;
       _future = null;

@@ -101,6 +101,8 @@ struct TSize {
     };
   }
 
+  constexpr Type MinDimension() const { return std::min(width, height); }
+
   constexpr Type MaxDimension() const { return std::max(width, height); }
 
   constexpr TSize Abs() const { return {std::fabs(width), std::fabs(height)}; }
@@ -131,12 +133,13 @@ struct TSize {
                  static_cast<Type>(std::ceil(other.height))};
   }
 
+  /// Return the mip count of the texture.
   constexpr size_t MipCount() const {
     constexpr size_t minimum_mip = 1u;
-    if (IsEmpty()) {
+    if (IsEmpty() || width <= 0 || height <= 0) {
       return minimum_mip;
     }
-    size_t result = std::max(ceil(log2(width)), ceil(log2(height)));
+    size_t result = std::min(log2(width), log2(height));
     return std::max(result, minimum_mip);
   }
 };

@@ -22,10 +22,12 @@
 #include "flutter/shell/common/variable_refresh_rate_display.h"
 #import "flutter/shell/platform/darwin/common/command_line.h"
 #import "flutter/shell/platform/darwin/common/framework/Source/FlutterBinaryMessengerRelay.h"
+#import "flutter/shell/platform/darwin/ios/InternalFlutterSwift/InternalFlutterSwift.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartVMServicePublisher.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterIndirectScribbleDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSpellCheckPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextureRegistryRelay.h"
@@ -33,7 +35,6 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterUndoManagerPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterViewController_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/connection_collection.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/platform_message_response_darwin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/profiler_metrics_ios.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
@@ -116,6 +117,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 @property(nonatomic, copy) NSString* initialRoute;
 @property(nonatomic, strong) id<NSObject> flutterViewControllerWillDeallocObserver;
 @property(nonatomic, strong) FlutterDartVMServicePublisher* publisher;
+@property(nonatomic, strong) FlutterConnectionCollection* connections;
 @property(nonatomic, assign) int64_t nextTextureId;
 
 #pragma mark - Channel properties
@@ -157,7 +159,10 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 
   FlutterBinaryMessengerRelay* _binaryMessenger;
   FlutterTextureRegistryRelay* _textureRegistry;
-  std::unique_ptr<flutter::ConnectionCollection> _connections;
+}
+
+- (int64_t)engineIdentifier {
+  return reinterpret_cast<int64_t>((__bridge void*)self);
 }
 
 - (instancetype)init {
@@ -215,7 +220,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   [self recreatePlatformViewsController];
   _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
   _textureRegistry = [[FlutterTextureRegistryRelay alloc] initWithParent:self];
-  _connections.reset(new flutter::ConnectionCollection());
+  _connections = [[FlutterConnectionCollection alloc] init];
 
   NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
   [center addObserver:self
@@ -223,15 +228,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
                  name:UIApplicationDidReceiveMemoryWarningNotification
                object:nil];
 
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    [self setUpSceneLifecycleNotifications:center];
-  } else {
-    [self setUpApplicationLifecycleNotifications:center];
-  }
-#else
-  [self setUpApplicationLifecycleNotifications:center];
-#endif
+  [self setUpLifecycleNotifications:center];
 
   [center addObserver:self
              selector:@selector(onLocaleUpdated:)
@@ -241,18 +238,24 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
   return self;
 }
 
-- (void)setUpSceneLifecycleNotifications:(NSNotificationCenter*)center API_AVAILABLE(ios(13.0)) {
-  [center addObserver:self
-             selector:@selector(sceneWillEnterForeground:)
-                 name:UISceneWillEnterForegroundNotification
-               object:nil];
-  [center addObserver:self
-             selector:@selector(sceneDidEnterBackground:)
-                 name:UISceneDidEnterBackgroundNotification
-               object:nil];
++ (FlutterEngine*)engineForIdentifier:(int64_t)identifier {
+  NSAssert([[NSThread currentThread] isMainThread], @"Must be called on the main thread.");
+  return (__bridge FlutterEngine*)reinterpret_cast<void*>(identifier);
 }
 
-- (void)setUpApplicationLifecycleNotifications:(NSNotificationCenter*)center {
+- (void)setUpLifecycleNotifications:(NSNotificationCenter*)center {
+  // If the application is not available, use the scene for lifecycle notifications if available.
+  if (!FlutterSharedApplication.isAvailable) {
+    [center addObserver:self
+               selector:@selector(sceneWillEnterForeground:)
+                   name:UISceneWillEnterForegroundNotification
+                 object:nil];
+    [center addObserver:self
+               selector:@selector(sceneDidEnterBackground:)
+                   name:UISceneDidEnterBackgroundNotification
+                 object:nil];
+    return;
+  }
   [center addObserver:self
              selector:@selector(applicationWillEnterForeground:)
                  name:UIApplicationWillEnterForegroundNotification
@@ -264,7 +267,7 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
 }
 
 - (void)recreatePlatformViewsController {
-  _renderingApi = flutter::GetRenderingAPIForProcess(FlutterView.forceSoftwareRendering);
+  _renderingApi = flutter::GetRenderingAPIForProcess(/*force_software=*/false);
   _platformViewsController = [[FlutterPlatformViewsController alloc] init];
 }
 
@@ -704,9 +707,13 @@ static constexpr int kNumProfilerSamplesPerSec = 5;
           libraryURI:(NSString*)libraryOrNil
       entrypointArgs:(NSArray<NSString*>*)entrypointArgs {
   // Launch the Dart application with the inferred run configuration.
-  self.shell.RunEngine([self.dartProject runConfigurationForEntrypoint:entrypoint
-                                                          libraryOrNil:libraryOrNil
-                                                        entrypointArgs:entrypointArgs]);
+  flutter::RunConfiguration configuration =
+      [self.dartProject runConfigurationForEntrypoint:entrypoint
+                                         libraryOrNil:libraryOrNil
+                                       entrypointArgs:entrypointArgs];
+
+  configuration.SetEngineId(self.engineIdentifier);
+  self.shell.RunEngine(std::move(configuration));
 }
 
 - (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
@@ -743,7 +750,7 @@ static flutter::ThreadHost MakeThreadHost(NSString* thread_label,
   fml::MessageLoop::EnsureInitializedForCurrentThread();
 
   uint32_t threadHostType = flutter::ThreadHost::Type::kRaster | flutter::ThreadHost::Type::kIo;
-  if (!settings.enable_impeller || !settings.merged_platform_ui_thread) {
+  if (settings.merged_platform_ui_thread != flutter::Settings::MergedPlatformUIThread::kEnabled) {
     threadHostType |= flutter::ThreadHost::Type::kUi;
   }
 
@@ -802,8 +809,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     self.initialRoute = [NSString stringWithUTF8String:settings.route.c_str()];
   }
 
-  FlutterView.forceSoftwareRendering = settings.enable_software_rendering;
-
   auto platformData = [self.dartProject defaultPlatformData];
 
   SetEntryPoint(&settings, entrypoint, libraryURI);
@@ -832,7 +837,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
       [](flutter::Shell& shell) { return std::make_unique<flutter::Rasterizer>(shell); };
 
   fml::RefPtr<fml::TaskRunner> ui_runner;
-  if (settings.enable_impeller && settings.merged_platform_ui_thread) {
+  if (settings.enable_impeller &&
+      settings.merged_platform_ui_thread == flutter::Settings::MergedPlatformUIThread::kEnabled) {
     ui_runner = fml::MessageLoop::GetCurrent().GetTaskRunner();
   } else {
     ui_runner = _threadHost->ui_thread->GetTaskRunner();
@@ -844,19 +850,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                     _threadHost->io_thread->GetTaskRunner()          // io
   );
 
-#if APPLICATION_EXTENSION_API_ONLY
-  if (@available(iOS 13.0, *)) {
-    _isGpuDisabled = self.viewController.flutterWindowSceneIfViewLoaded.activationState ==
-                     UISceneActivationStateBackground;
-  } else {
-    // [UIApplication sharedApplication API is not available for app extension.
-    // We intialize the shell assuming the GPU is required.
-    _isGpuDisabled = NO;
-  }
-#else
-  _isGpuDisabled =
-      [UIApplication sharedApplication].applicationState == UIApplicationStateBackground;
-#endif
+  // Disable GPU if the app or scene is running in the background.
+  self.isGpuDisabled = self.viewController.stateIsBackground;
 
   // Create the shell. This is a blocking operation.
   std::unique_ptr<flutter::Shell> shell = flutter::Shell::Create(
@@ -871,8 +866,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     FML_LOG(ERROR) << "Could not start a shell FlutterEngine with entrypoint: "
                    << entrypoint.UTF8String;
   } else {
-    // TODO(vashworth): Remove once done debugging https://github.com/flutter/flutter/issues/129836
-    FML_LOG(INFO) << "Enabled VM Service Publication: " << settings.enable_vm_service_publication;
     [self setUpShell:std::move(shell)
         withVMServicePublication:settings.enable_vm_service_publication];
     if ([FlutterEngine isProfilerEnabled]) {
@@ -1048,6 +1041,21 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
     willDismissEditMenuWithTextInputClient:(int)client {
   [self.platformChannel invokeMethod:@"ContextMenu.onDismissSystemContextMenu"
                            arguments:@[ @(client) ]];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+           shareSelectedText:(NSString*)selectedText {
+  [self.platformPlugin showShareViewController:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    searchWebWithSelectedText:(NSString*)selectedText {
+  [self.platformPlugin searchWeb:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+          lookUpSelectedText:(NSString*)selectedText {
+  [self.platformPlugin showLookUpViewController:selectedText];
 }
 
 #pragma mark - FlutterViewEngineDelegate
@@ -1248,19 +1256,19 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   if (_shell && _shell->IsSetup()) {
     self.platformView->GetPlatformMessageHandlerIos()->SetMessageHandler(channel.UTF8String,
                                                                          handler, taskQueue);
-    return _connections->AquireConnection(channel.UTF8String);
+    return [self.connections acquireConnectionForChannel:channel];
   } else {
     NSAssert(!handler, @"Setting a message handler before the FlutterEngine has been run.");
     // Setting a handler to nil for a channel that has not yet been set up is a no-op.
-    return flutter::ConnectionCollection::MakeErrorConnection(-1);
+    return [FlutterConnectionCollection makeErrorConnectionWithErrorCode:-1L];
   }
 }
 
 - (void)cleanUpConnection:(FlutterBinaryMessengerConnection)connection {
   if (_shell && _shell->IsSetup()) {
-    std::string channel = _connections->CleanupConnection(connection);
-    if (!channel.empty()) {
-      self.platformView->GetPlatformMessageHandlerIos()->SetMessageHandler(channel.c_str(), nil,
+    NSString* channel = [self.connections cleanupConnectionWithID:connection];
+    if (channel.length > 0) {
+      self.platformView->GetPlatformMessageHandlerIos()->SetMessageHandler(channel.UTF8String, nil,
                                                                            nil);
     }
   }
@@ -1316,7 +1324,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 #pragma mark - Notifications
 
-#if APPLICATION_EXTENSION_API_ONLY
 - (void)sceneWillEnterForeground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
   [self flutterWillEnterForeground:notification];
 }
@@ -1324,7 +1331,7 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)sceneDidEnterBackground:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
   [self flutterDidEnterBackground:notification];
 }
-#else
+
 - (void)applicationWillEnterForeground:(NSNotification*)notification {
   [self flutterWillEnterForeground:notification];
 }
@@ -1332,7 +1339,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 - (void)applicationDidEnterBackground:(NSNotification*)notification {
   [self flutterDidEnterBackground:notification];
 }
-#endif
 
 - (void)flutterWillEnterForeground:(NSNotification*)notification {
   [self setIsGpuDisabled:NO];
@@ -1438,6 +1444,8 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
                                          libraryOrNil:libraryURI
                                        entrypointArgs:entrypointArgs];
 
+  configuration.SetEngineId(result.engineIdentifier);
+
   fml::WeakPtr<flutter::PlatformView> platform_view = _shell->GetPlatformView();
   FML_DCHECK(platform_view);
   // Static-cast safe since this class always creates PlatformViewIOS instances.
@@ -1480,10 +1488,6 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
 - (FlutterDartProject*)project {
   return self.dartProject;
-}
-
-- (BOOL)isUsingImpeller {
-  return self.project.isImpellerEnabled;
 }
 
 @end

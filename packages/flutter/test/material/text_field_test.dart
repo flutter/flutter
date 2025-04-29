@@ -1923,7 +1923,6 @@ void main() {
             .simulatedAccessibilityTraversal(startNode: find.semantics.byLabel('prefix1'))
             .map((SemanticsNode node) => node.label + node.value)
             .toList();
-
     expect(orders, <String>['prefix1', 'abc', 'suffix1', 'prefix2', 'def', 'suffix2']);
   });
 
@@ -5530,12 +5529,12 @@ void main() {
       ),
     );
     final double iconRight = tester.getTopRight(find.byType(Icon)).dx;
-    // Per https://material.io/go/design-text-fields#text-fields-layout
-    // There's a 16 dps gap between the right edge of the icon and the text field's
-    // container, and the 12dps more padding between the left edge of the container
-    // and the left edge of the input and label.
-    expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
-    expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
+    // There's a 16 pixels gap between the right edge of the icon and the text field's
+    // container, and, per https://material.io/go/design-text-fields#text-fields-layout,
+    // 16 pixels more padding between the left edge of the container and the left edge
+    // of the input and label.
+    expect(iconRight + 16.0 + 16.0, equals(tester.getTopLeft(find.text('label')).dx));
+    expect(iconRight + 16.0 + 16.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
   });
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
@@ -6351,7 +6350,6 @@ void main() {
     final TextEditingController textController = _textEditingController();
     final ThemeData theme = ThemeData.from(
       colorScheme: const ColorScheme.light().copyWith(error: Colors.deepPurpleAccent),
-      useMaterial3: true,
     );
     await tester.pumpWidget(
       boilerplate(
@@ -6780,7 +6778,7 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -6939,7 +6937,7 @@ void main() {
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );
 
-    final ThemeData theme = ThemeData.light(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     Widget buildFrame(bool enabled) {
       return MaterialApp(
@@ -9285,7 +9283,6 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/23994
 
     final ThemeData themeData = ThemeData(
-      useMaterial3: true,
       textTheme: TextTheme(bodyLarge: TextStyle(color: Colors.blue[500])),
     );
 
@@ -11529,7 +11526,7 @@ void main() {
   );
 
   testWidgets(
-    'Toolbar hides on scroll start and re-appears on scroll end on Android and iOS',
+    'Toolbar hides on scroll start and re-appears on scroll end on Android',
     (WidgetTester tester) async {
       final TextEditingController controller = _textEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure ' * 20,
@@ -11586,10 +11583,7 @@ void main() {
       expect(renderEditable.selectionStartInViewport.value, true);
       expect(renderEditable.selectionEndInViewport.value, true);
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{
-      TargetPlatform.android,
-      TargetPlatform.iOS,
-    }),
+    variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
 
   testWidgets(
@@ -13323,6 +13317,7 @@ void main() {
       scrollPadding: EdgeInsets.zero,
       scrollPhysics: ClampingScrollPhysics(),
       enableInteractiveSelection: false,
+      hintLocales: <Locale>[Locale('en'), Locale('fr')],
     ).debugFillProperties(builder);
 
     final List<String> description =
@@ -13353,6 +13348,7 @@ void main() {
       'scrollPadding: EdgeInsets.zero',
       'selection disabled',
       'scrollPhysics: ClampingScrollPhysics',
+      'hintLocales: [en, fr]',
     ]);
   });
 
@@ -16150,6 +16146,43 @@ void main() {
       },
       skip: kIsWeb, // [intended] on web the browser handles the context menu.
     );
+
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        _updateMediaQueryFromView(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          _updateMediaQueryFromView(tester);
+        });
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Material(
+              child: TextField(controller: _textEditingController(text: 'one two three')),
+            ),
+          ),
+        );
+
+        // No context menu shown.
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
   });
 
   group('magnifier builder', () {
@@ -17506,6 +17539,16 @@ void main() {
     },
     variant: TargetPlatformVariant.all(),
   );
+
+  testWidgets('hintLocales is passed to EditableText', (WidgetTester tester) async {
+    const List<Locale> hintLocales = <Locale>[Locale('en'), Locale('fr')];
+    await tester.pumpWidget(
+      const MaterialApp(home: Material(child: TextField(hintLocales: hintLocales))),
+    );
+
+    final EditableText editableText = tester.widget(find.byType(EditableText));
+    expect(editableText.hintLocales, hintLocales);
+  });
 }
 
 /// A Simple widget for testing the obscure text.
@@ -17670,4 +17713,24 @@ TextEditingController _textEditingController({String text = ''}) {
   final TextEditingController result = TextEditingController(text: text);
   addTearDown(result.dispose);
   return result;
+}
+
+// Trigger MediaQuery to update itself based on the View, which is not
+// recreated between tests. This is necessary when changing something on
+// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
+// TODO(justinmc): This hack can be removed if
+// https://github.com/flutter/flutter/issues/165519 is fixed.
+void _updateMediaQueryFromView(WidgetTester tester) {
+  expect(find.byType(MediaQuery), findsOneWidget);
+  final WidgetsBindingObserver widgetsBindingObserver =
+      tester.state(
+            find.ancestor(
+              of: find.byType(MediaQuery),
+              matching: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
+              ),
+            ),
+          )
+          as WidgetsBindingObserver;
+  widgetsBindingObserver.didChangeMetrics();
 }

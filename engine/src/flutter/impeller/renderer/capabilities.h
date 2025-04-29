@@ -116,6 +116,16 @@ class Capabilities {
   /// Note that this may be smaller than the maximum allocatable texture size.
   virtual ISize GetMaximumRenderPassAttachmentSize() const = 0;
 
+  /// @brief Whether the XR formats are supported on this device.
+  ///
+  /// This is only ever true for iOS and macOS devices. We may need
+  /// to revisit this API when approaching wide gamut rendering for
+  /// Vulkan and GLES.
+  virtual bool SupportsExtendedRangeFormats() const = 0;
+
+  /// @brief The minimum alignment of uniform value offsets in bytes.
+  virtual size_t GetMinimumUniformAlignment() const = 0;
+
  protected:
   Capabilities();
 
@@ -154,11 +164,15 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsDeviceTransientTextures(bool value);
 
+  CapabilitiesBuilder& SetSupportsExtendedRangeFormats(bool value);
+
   CapabilitiesBuilder& SetDefaultGlyphAtlasFormat(PixelFormat value);
 
   CapabilitiesBuilder& SetSupportsTriangleFan(bool value);
 
   CapabilitiesBuilder& SetMaximumRenderPassAttachmentSize(ISize size);
+
+  CapabilitiesBuilder& SetMinimumUniformAlignment(size_t value);
 
   std::unique_ptr<Capabilities> Build();
 
@@ -173,12 +187,14 @@ class CapabilitiesBuilder {
   bool supports_decal_sampler_address_mode_ = false;
   bool supports_device_transient_textures_ = false;
   bool supports_triangle_fan_ = false;
+  bool supports_extended_range_formats_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_depth_stencil_format_ = std::nullopt;
   std::optional<PixelFormat> default_glyph_atlas_format_ = std::nullopt;
   std::optional<ISize> default_maximum_render_pass_attachment_size_ =
       std::nullopt;
+  size_t minimum_uniform_alignment_ = 256;
 
   CapabilitiesBuilder(const CapabilitiesBuilder&) = delete;
 

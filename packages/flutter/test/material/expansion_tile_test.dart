@@ -553,7 +553,7 @@ void main() {
   });
 
   testWidgets('ExpansionTile default iconColor, textColor', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -755,6 +755,7 @@ void main() {
         hasTapAction: true,
         hasFocusAction: true,
         hasEnabledState: true,
+        hasSelectedState: true,
         isEnabled: true,
         isFocused: true,
         isFocusable: true,
@@ -771,6 +772,7 @@ void main() {
         hasTapAction: true,
         hasFocusAction: true,
         hasEnabledState: true,
+        hasSelectedState: true,
         isEnabled: true,
         isFocusable: true,
         label: 'Second Expansion Tile',
@@ -1194,7 +1196,7 @@ void main() {
     // Override the animation duration.
     await tester.pumpWidget(
       buildExpansionTile(
-        animationStyle: AnimationStyle(duration: const Duration(milliseconds: 800)),
+        animationStyle: const AnimationStyle(duration: Duration(milliseconds: 800)),
       ),
     );
     await tester.pumpAndSettle();
@@ -1225,7 +1227,7 @@ void main() {
     // Override the animation curve.
     await tester.pumpWidget(
       buildExpansionTile(
-        animationStyle: AnimationStyle(
+        animationStyle: const AnimationStyle(
           curve: Easing.emphasizedDecelerate,
           reverseCurve: Easing.emphasizedAccelerate,
         ),
@@ -1492,6 +1494,8 @@ void main() {
     expect(controller.isExpanded, isFalse);
     await tester.pumpAndSettle();
     expect(find.text('Child 0'), findsNothing);
+
+    controller.dispose();
   });
 
   testWidgets(
@@ -1530,6 +1534,8 @@ void main() {
       expect(controller.isExpanded, isFalse);
       await tester.pump();
       expect(tester.hasRunningAnimations, isFalse);
+
+      controller.dispose();
     },
   );
 
@@ -1658,6 +1664,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Child 0'), findsOneWidget);
     expect(controller.isExpanded, isTrue);
+
+    controller.dispose();
   });
 
   testWidgets(

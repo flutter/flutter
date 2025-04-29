@@ -152,6 +152,9 @@ Future<void> run(List<String> arguments) async {
   printProgress('Internationalization...');
   await verifyInternationalizations(flutterRoot, dart);
 
+  printProgress('Localization files of stocks app...');
+  await verifyStockAppLocalizations(flutterRoot);
+
   printProgress('Integration test timeouts...');
   await verifyIntegrationTestTimeouts(flutterRoot);
 
@@ -163,6 +166,9 @@ Future<void> run(List<String> arguments) async {
 
   printProgress('Lint Kotlin files...');
   await lintKotlinFiles(flutterRoot);
+
+  printProgress('Lint generated Kotlin files from templates...');
+  await lintKotlinTemplatedFiles(flutterRoot);
 
   // Ensure that all package dependencies are in sync.
   printProgress('Package dependencies...');
@@ -694,18 +700,17 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
       '// flutter_ignore: deprecation_syntax (see analyze.dart)';
 
   /// Some deprecation notices are exempt for historical reasons. They must have an issue listed.
-  final RegExp legacyDeprecation = RegExp(
-    r'// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+$',
+  static final RegExp legacyDeprecation = RegExp(
+    r'// flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/\d+',
   );
 
-  final RegExp _deprecationMessagePattern = RegExp(r"^ *'(?<message>.+) '$");
-  final RegExp _deprecationVersionPattern = RegExp(
-    r"'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.',?$",
+  static final RegExp deprecationVersionPattern = RegExp(
+    r'This feature was deprecated after v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<build>-\d+\.\d+\.pre)?\.$',
   );
 
-  String _errorWithLineInfo(AstNode node, {required String error}) {
+  void _addErrorWithLineInfo(AstNode node, {required String error}) {
     final int lineNumber = parseResult.lineInfo.getLocation(node.offset).lineNumber;
-    return '$filePath:$lineNumber: $error';
+    errors.add('$filePath:$lineNumber: $error');
   }
 
   @override
@@ -718,111 +723,107 @@ class _DeprecationMessagesVisitor extends RecursiveAstVisitor<void> {
     if (!shouldCheckAnnotation) {
       return;
     }
-    final NodeList<StringLiteral> strings;
-    try {
-      strings = switch (node.arguments?.arguments) {
-        null || NodeList<Expression>(first: AdjacentStrings(strings: []), length: 1) =>
-          throw _errorWithLineInfo(
-            node,
-            error:
-                '@Deprecated annotation should take exactly one string as parameter, got ${node.arguments}',
-          ),
-        NodeList<Expression>(
-          first: AdjacentStrings(:final NodeList<StringLiteral> strings),
-          length: 1,
-        ) =>
-          strings,
-        final NodeList<Expression> expressions =>
-          throw _errorWithLineInfo(
-            node,
-            error:
-                '@Deprecated annotation should take exactly one string as parameter, but got $expressions',
-          ),
-      };
-    } catch (error) {
-      errors.add(error.toString());
+    final NodeList<Expression>? arguments = node.arguments?.arguments;
+    if (arguments == null || arguments.length != 1) {
+      _addErrorWithLineInfo(
+        node,
+        error: 'A @Deprecation annotation must have exactly one deprecation notice String.',
+      );
+      return;
+    }
+    final Expression deprecationNotice = arguments.first;
+    if (deprecationNotice is! AdjacentStrings) {
+      _addErrorWithLineInfo(node, error: 'Deprecation notice must be an adjacent string.');
+      return;
+    }
+    final List<StringLiteral> strings = deprecationNotice.strings;
+    final Iterator<StringLiteral> deprecationMessageIterator = strings.iterator;
+    final bool isNotEmpty = deprecationMessageIterator.moveNext();
+    assert(isNotEmpty); // An AdjacentString always has 2 or more string literals.
+
+    final [...List<StringLiteral> messageLiterals, StringLiteral versionLiteral] = strings;
+
+    // Verify the version literal has the correct pattern.
+    final RegExpMatch? versionMatch =
+        versionLiteral is SimpleStringLiteral
+            ? deprecationVersionPattern.firstMatch(versionLiteral.value)
+            : null;
+    if (versionMatch == null) {
+      _addErrorWithLineInfo(
+        versionLiteral,
+        error:
+            'Deprecation notice must end with a line saying "This feature was deprecated after...".',
+      );
       return;
     }
 
-    final Iterator<StringLiteral> deprecationMessageIterator = strings.iterator;
-    final bool isNotEmpty = deprecationMessageIterator.moveNext();
-    assert(isNotEmpty);
-
-    try {
-      RegExpMatch? versionMatch;
-      String? message;
-      do {
-        final StringLiteral deprecationString = deprecationMessageIterator.current;
-        final String line = deprecationString.toSource();
-        final RegExpMatch? messageMatch = _deprecationMessagePattern.firstMatch(line);
-        if (messageMatch == null) {
-          String possibleReason = '';
-          if (line.trimLeft().startsWith('"')) {
-            possibleReason =
-                ' You might have used double quotes (") for the string instead of single quotes (\').';
-          } else if (!line.contains("'")) {
-            possibleReason =
-                ' It might be missing the line saying "This feature was deprecated after...".';
-          } else if (!line.trimRight().endsWith(" '")) {
-            if (line.contains('This feature was deprecated')) {
-              possibleReason = ' There might not be an explanatory message.';
-            } else {
-              possibleReason = ' There might be a missing space character at the end of the line.';
-            }
-          }
-          throw _errorWithLineInfo(
-            deprecationString,
-            error: 'Deprecation notice does not match required pattern.$possibleReason',
-          );
-        }
-        if (message == null) {
-          message = messageMatch.namedGroup('message');
-          final String firstChar = String.fromCharCode(message!.runes.first);
-          if (firstChar.toUpperCase() != firstChar) {
-            throw _errorWithLineInfo(
-              deprecationString,
-              error:
-                  'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md',
-            );
-          }
-        } else {
-          message += messageMatch.namedGroup('message')!;
-        }
-        if (!deprecationMessageIterator.moveNext()) {
-          throw _errorWithLineInfo(
-            deprecationString,
-            error: ' It might be missing the line saying "This feature was deprecated after...".',
-          );
-        }
-        versionMatch = _deprecationVersionPattern.firstMatch(
-          deprecationMessageIterator.current.toSource(),
-        );
-      } while (versionMatch == null);
-
-      final int major = int.parse(versionMatch.namedGroup('major')!);
-      final int minor = int.parse(versionMatch.namedGroup('minor')!);
-      final int patch = int.parse(versionMatch.namedGroup('patch')!);
-      final bool hasBuild = versionMatch.namedGroup('build') != null;
-      // There was a beta release that was mistakenly labeled 3.1.0 without a build.
-      final bool specialBeta = major == 3 && minor == 1 && patch == 0;
-      if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
-        if (!hasBuild) {
-          throw _errorWithLineInfo(
-            deprecationMessageIterator.current,
-            error:
-                'Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.',
-          );
-        }
-      }
-      if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?')) {
-        throw _errorWithLineInfo(
-          node,
+    final int major = int.parse(versionMatch.namedGroup('major')!);
+    final int minor = int.parse(versionMatch.namedGroup('minor')!);
+    final int patch = int.parse(versionMatch.namedGroup('patch')!);
+    final bool hasBuild = versionMatch.namedGroup('build') != null;
+    // There was a beta release that was mistakenly labeled 3.1.0 without a build.
+    final bool specialBeta = major == 3 && minor == 1 && patch == 0;
+    if (!specialBeta && (major > 1 || (major == 1 && minor >= 20))) {
+      if (!hasBuild) {
+        _addErrorWithLineInfo(
+          versionLiteral,
           error:
-              'Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "$message".',
+              'Deprecation notice does not accurately indicate a beta branch version number; please see https://flutter.dev/docs/development/tools/sdk/releases to find the latest beta build version number.',
         );
+        return;
       }
-    } catch (error) {
-      errors.add(error.toString());
+    }
+
+    // Verify the version literal has the correct pattern.
+    assert(messageLiterals.isNotEmpty); // An AdjacentString always has 2 or more string literals.
+    for (final StringLiteral message in messageLiterals) {
+      if (message is! SingleStringLiteral) {
+        _addErrorWithLineInfo(
+          message,
+          error: 'Deprecation notice does not match required pattern.',
+        );
+        return;
+      }
+      if (!message.isSingleQuoted) {
+        _addErrorWithLineInfo(
+          message,
+          error:
+              'Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
+        );
+        return;
+      }
+    }
+    final String fullExplanation =
+        messageLiterals
+            .map((StringLiteral message) => message.stringValue ?? '')
+            .join()
+            .trimRight();
+    if (fullExplanation.isEmpty) {
+      _addErrorWithLineInfo(
+        messageLiterals.last,
+        error:
+            'Deprecation notice should be a grammatically correct sentence and end with a period; There might not be an explanatory message.',
+      );
+      return;
+    }
+    final String firstChar = String.fromCharCode(fullExplanation.runes.first);
+    if (firstChar.toUpperCase() != firstChar) {
+      _addErrorWithLineInfo(
+        messageLiterals.first,
+        error:
+            'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide: https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md',
+      );
+      return;
+    }
+    if (!fullExplanation.endsWith('.') &&
+        !fullExplanation.endsWith('?') &&
+        !fullExplanation.endsWith('!')) {
+      _addErrorWithLineInfo(
+        messageLiterals.last,
+        error:
+            'Deprecation notice should be a grammatically correct sentence and end with a period; notice appears to be "$fullExplanation".',
+      );
+      return;
     }
   }
 }
@@ -868,7 +869,7 @@ Future<void> verifyNoMissingLicense(String workingDirectory, {bool checkMinimums
   await _verifyNoMissingLicenseForExtension(
     workingDirectory,
     'java',
-    overrideMinimumMatches ?? 39,
+    overrideMinimumMatches ?? 1,
     _generateLicense('// '),
   );
   await _verifyNoMissingLicenseForExtension(
@@ -1317,6 +1318,49 @@ Future<void> verifyInternationalizations(String workingDirectory, String dartExe
   }
 }
 
+Future<void> verifyStockAppLocalizations(String workingDirectory) async {
+  final Directory appRoot = Directory(
+    path.join(workingDirectory, 'dev', 'benchmarks', 'test_apps', 'stocks'),
+  );
+  if (!appRoot.existsSync()) {
+    foundError(<String>['Stocks app does not exist at expected location: ${appRoot.path}']);
+  }
+
+  // Regenerate the localizations.
+  final String flutterExecutable = path.join(
+    workingDirectory,
+    'bin',
+    'flutter${Platform.isWindows ? '.bat' : ''}',
+  );
+  await _evalCommand(flutterExecutable, const <String>['gen-l10n'], workingDirectory: appRoot.path);
+  final Directory i10nDirectory = Directory(path.join(appRoot.path, 'lib', 'i18n'));
+  if (!i10nDirectory.existsSync()) {
+    foundError(<String>[
+      'Localization files for stocks app not found at expected location: ${i10nDirectory.path}',
+    ]);
+  }
+
+  // Check that regeneration did not dirty the tree.
+  final EvalResult result = await _evalCommand('git', <String>[
+    'diff',
+    '--name-only',
+    '--exit-code',
+    i10nDirectory.path,
+  ], workingDirectory: workingDirectory);
+  if (result.exitCode == 1) {
+    foundError(<String>[
+      'The following localization files for the stocks app appear to be out of date:',
+      ...(const LineSplitter().convert(result.stdout).map((String line) => ' * $line')),
+      'Run "flutter gen-l10n" in "${path.relative(appRoot.path, from: workingDirectory)}" to regenerate.',
+    ]);
+  } else if (result.exitCode != 0) {
+    foundError(<String>[
+      'Failed to run "git diff" on localization files of stocks app:',
+      result.stderr,
+    ]);
+  }
+}
+
 /// Verifies that all instances of "checked mode" have been migrated to "debug mode".
 Future<void> verifyNoCheckedMode(String workingDirectory) async {
   final String flutterPackages = path.join(workingDirectory, 'packages');
@@ -1591,6 +1635,7 @@ Future<void> verifyRepositoryLinks(String workingDirectory) async {
     'glfw/glfw',
     'GoogleCloudPlatform/artifact-registry-maven-tools',
     'material-components/material-components-android', // TODO(guidezpl): remove when https://github.com/material-components/material-components-android/issues/4144 is closed
+    'ninja-build/ninja',
     'torvalds/linux',
     'tpn/winsdk-10',
   };
@@ -1701,7 +1746,7 @@ class Hash256 {
 // We have a policy of not checking in binaries into this repository.
 // If you are adding/changing template images, use the flutter_template_images
 // package and a .img.tmpl placeholder instead.
-// If you have other binaries to add, please consult Hixie for advice.
+// If you have other binaries to add, please consult johnmccutchan for advice.
 final Set<Hash256> _legacyBinaries = <Hash256>{
   // DEFAULT ICON IMAGES
 
@@ -2058,7 +2103,7 @@ Future<void> verifyNoBinaries(String workingDirectory, {Set<Hash256>? legacyBina
   // We have a policy of not checking in binaries into this repository.
   // If you are adding/changing template images, use the flutter_template_images
   // package and a .img.tmpl placeholder instead.
-  // If you have other binaries to add, please consult Hixie for advice.
+  // If you have other binaries to add, please consult johnmccutchan for advice.
   assert(
     _legacyBinaries
             .expand<int>((Hash256 hash) => <int>[hash.a, hash.b, hash.c, hash.d])
@@ -2339,10 +2384,7 @@ class _DebugOnlyFieldVisitor extends RecursiveAstVisitor<void> {
   final List<AstNode> errors = <AstNode>[];
 
   static const String _kDebugOnlyAnnotation = '_debugOnly';
-  static final RegExp _nullInitializedField = RegExp(
-    r'kDebugMode \? [\w<> ,{}()]+ : null;',
-    multiLine: true,
-  );
+  static final RegExp _nullInitializedField = RegExp(r'kDebugMode \? [\w<> ,{}()]+ : null;');
 
   @override
   void visitFieldDeclaration(FieldDeclaration node) {
@@ -2351,7 +2393,7 @@ class _DebugOnlyFieldVisitor extends RecursiveAstVisitor<void> {
       (Annotation annotation) => annotation.name.name == _kDebugOnlyAnnotation,
     )) {
       if (!node.toSource().contains(_nullInitializedField)) {
-        errors.add(node);
+        errors.add(node.fields); // Use the fields node for line number.
       }
     }
   }
@@ -2373,17 +2415,19 @@ Future<void> verifyNullInitializedDebugExpensiveFields(
     final _DebugOnlyFieldVisitor visitor = _DebugOnlyFieldVisitor(parsedFile);
     visitor.visitCompilationUnit(parsedFile.unit);
     for (final AstNode badNode in visitor.errors) {
-      errors.add('${file.path}:${parsedFile.lineInfo.getLocation(badNode.offset).lineNumber}');
+      errors.add(
+        '${file.path}:${parsedFile.lineInfo.getLocation(badNode.offset).lineNumber}: fields annotated with @_debugOnly must null initialize.',
+      );
     }
   }
   if (errors.isNotEmpty) {
     foundError(<String>[
-      '${bold}ERROR: ${red}fields annotated with @_debugOnly must null initialize.$reset',
-      'to ensure both the field and initializer are removed from profile/release mode.',
-      'These fields should be written as:\n',
-      'field = kDebugMode ? <DebugValue> : null;\n',
-      'Errors were found in the following files:',
       ...errors,
+      '',
+      '$bold${red}Fields annotated with @_debugOnly must null initialize,$reset',
+      'to ensure both the field and initializer are removed from profile/release mode.',
+      'These fields should be written as:',
+      'field = kDebugMode ? <DebugValue> : null;',
     ]);
   }
 }
@@ -2410,12 +2454,73 @@ Future<void> verifyTabooDocumentation(String workingDirectory, {int minimumMatch
   }
   if (errors.isNotEmpty) {
     foundError(<String>[
+      ...errors,
+      '',
       '${bold}Avoid the word "simply" in documentation. See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#use-the-passive-voice-recommend-do-not-require-never-say-things-are-simple for details.$reset',
       '${bold}In many cases these words can be omitted without loss of generality; in other cases it may require a bit of rewording to avoid implying that the task is simple.$reset',
       '${bold}Similarly, avoid using "note:" or the phrase "note that". See https://github.com/flutter/flutter/blob/main/docs/contributing/Style-guide-for-Flutter-repo.md#avoid-empty-prose for details.$reset',
-      ...errors,
     ]);
   }
+}
+
+final Map<String, String> _kKotlinTemplateKeys = <String, String>{
+  'androidIdentifier': 'dummyPackage',
+  'pluginClass': 'PluginClass',
+  'projectName': 'dummy',
+  'agpVersion': '0.0.0.1',
+  'kotlinVersion': '0.0.0.1',
+};
+
+final String _kKotlinTemplateRelativePath = path.join('packages', 'flutter_tools', 'templates');
+
+const List<String> _kKotlinExtList = <String>['.kt.tmpl', '.kts.tmpl'];
+const String _kKotlinTmplExt = '.tmpl';
+final RegExp _kKotlinTemplatePattern = RegExp(r'{{(.*?)}}');
+
+/// Copy kotlin template files from [_kKotlinTemplateRelativePath] into a system tmp folder
+/// then replace template values with values from [_kKotlinTemplateKeys] or "'dummy'" if an
+/// unknown key is found. Then run ktlint on the tmp folder to check for lint errors in the
+/// generated Kotlin files.
+Future<void> lintKotlinTemplatedFiles(String workingDirectory) async {
+  final String templatePath = path.join(workingDirectory, _kKotlinTemplateRelativePath);
+  final Iterable<File> files = Directory(templatePath)
+      .listSync(recursive: true)
+      .toList()
+      .whereType<File>()
+      .where((File file) => _kKotlinExtList.contains(path.extension(file.path, 2)));
+
+  if (files.isEmpty) {
+    foundError(<String>['No Kotlin template files found']);
+    return;
+  }
+
+  final Directory tempDir = Directory.systemTemp.createTempSync('template_output');
+  for (final File templateFile in files) {
+    final String inputContent = await templateFile.readAsString();
+    final String modifiedContent = inputContent.replaceAllMapped(
+      _kKotlinTemplatePattern,
+      (Match match) => _kKotlinTemplateKeys[match[1]] ?? 'dummy',
+    );
+
+    String outputFilename = path.basename(templateFile.path);
+    outputFilename = outputFilename.substring(
+      0,
+      outputFilename.length - _kKotlinTmplExt.length,
+    ); // Remove '.tmpl' from file path
+
+    // Ensure the first letter of the generated class is uppercase (instead of pluginClass)
+    outputFilename = outputFilename.substring(0, 1).toUpperCase() + outputFilename.substring(1);
+
+    final String relativePath = path.dirname(path.relative(templateFile.path, from: templatePath));
+    final String outputDir = path.join(tempDir.path, relativePath);
+    await Directory(outputDir).create(recursive: true);
+    final String outputFile = path.join(outputDir, outputFilename);
+    final File output = File(outputFile);
+    await output.writeAsString(modifiedContent);
+  }
+  return lintKotlinFiles(tempDir.path).whenComplete(() {
+    tempDir.deleteSync(recursive: true);
+  });
 }
 
 Future<void> lintKotlinFiles(String workingDirectory) async {
@@ -2557,8 +2662,8 @@ const Set<String> kExecutableAllowlist = <String>{
   'bin/flutter-dev',
   'bin/internal/update_dart_sdk.sh',
   'bin/internal/update_engine_version.sh',
+  'bin/internal/content_aware_hash.sh',
 
-  'dev/bots/accept_android_sdk_licenses.sh',
   'dev/bots/codelabs_build_test.sh',
   'dev/bots/docs.sh',
 

@@ -737,39 +737,6 @@ void main() {
     expect(tapOutsideCount, 3);
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/134341.
-  testWidgets('onTapOutside is not called upon tap outside when field is not focused', (
-    WidgetTester tester,
-  ) async {
-    int tapOutsideCount = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                const Text('Outside'),
-                TextFormField(
-                  onTapOutside: (PointerEvent event) {
-                    tapOutsideCount += 1;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.pump();
-
-    expect(tapOutsideCount, 0);
-    await tester.tap(find.byType(TextFormField));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    await tester.tap(find.text('Outside'));
-    expect(tapOutsideCount, 0);
-  });
-
   // Regression test for https://github.com/flutter/flutter/issues/127597.
   testWidgets(
     'The second TextFormField is clicked, triggers the onTapOutside callback of the previous TextFormField',
@@ -1663,4 +1630,82 @@ void main() {
     expect(find.text(forceErrorText), findsOne);
     expect(find.text(decorationErrorText), findsNothing);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/135292.
+  testWidgets('Widget returned by errorBuilder is shown', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              autovalidateMode: AutovalidateMode.always,
+              validator: (String? value) => 'validation error',
+              errorBuilder: (BuildContext context, String errorText) => Text('**$errorText**'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pump();
+
+    expect(find.text('**validation error**'), findsOneWidget);
+  });
+
+  group('context menu', () {
+    testWidgets(
+      'iOS uses the system context menu by default if supported',
+      (WidgetTester tester) async {
+        TestWidgetsFlutterBinding.instance.platformDispatcher.supportsShowingSystemContextMenu =
+            true;
+        _updateMediaQueryFromView(tester);
+        addTearDown(() {
+          TestWidgetsFlutterBinding.instance.platformDispatcher
+              .resetSupportsShowingSystemContextMenu();
+          _updateMediaQueryFromView(tester);
+        });
+
+        final TextEditingController controller = TextEditingController(text: 'one two three');
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(
+          MaterialApp(home: Material(child: TextField(controller: controller))),
+        );
+
+        // No context menu shown.
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsNothing);
+
+        // Double tap to select the first word and show the menu.
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tapAt(textOffsetToPosition(tester, 1));
+        await tester.pump(SelectionOverlay.fadeDuration);
+
+        expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
+        expect(find.byType(SystemContextMenu), findsOneWidget);
+      },
+      skip: kIsWeb, // [intended] on web the browser handles the context menu.
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+  });
+}
+
+// Trigger MediaQuery to update itself based on the View, which is not
+// recreated between tests. This is necessary when changing something on
+// TestPlatformDispatcher and expecting it to be picked up by MediaQuery.
+// TODO(justinmc): This hack can be removed if
+// https://github.com/flutter/flutter/issues/165519 is fixed.
+void _updateMediaQueryFromView(WidgetTester tester) {
+  expect(find.byType(MediaQuery), findsOneWidget);
+  final WidgetsBindingObserver widgetsBindingObserver =
+      tester.state(
+            find.ancestor(
+              of: find.byType(MediaQuery),
+              matching: find.byWidgetPredicate(
+                (Widget w) => '${w.runtimeType}' == '_MediaQueryFromView',
+              ),
+            ),
+          )
+          as WidgetsBindingObserver;
+  widgetsBindingObserver.didChangeMetrics();
 }

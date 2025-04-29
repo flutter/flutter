@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/runner/local_engine.dart';
 
 import '../../src/common.dart';
 
-const String kEngineRoot = '/flutter/engine';
+const String kEngineRoot = '/flutter/flutter/engine';
 const String kArbitraryEngineRoot = '/arbitrary/engine';
 const String kPackageConfig = '.dart_tool/package_config.json';
 
@@ -372,11 +372,11 @@ void main() {
         localHostEngine: 'host_debug',
       ),
       matchesEngineBuildPaths(
-        hostEngine: 'flutter/engine/src/out/host_debug',
-        targetEngine: 'flutter/engine/src/out/ios_debug',
+        hostEngine: 'flutter/flutter/engine/src/out/host_debug',
+        targetEngine: 'flutter/flutter/engine/src/out/ios_debug',
       ),
     );
-    expect(logger.traceText, contains('Local engine source at flutter/engine/src'));
+    expect(logger.traceText, contains('Local engine source at flutter/flutter/engine/src'));
   });
 
   testWithoutContext('fails if --local-engine is specified and --local-engine-src-path '
@@ -482,6 +482,32 @@ void main() {
       );
     },
   );
+
+  testWithoutContext('fails if --local-engine-host is used without --local-engine', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final Directory localEngine = fileSystem.directory(
+      '$kArbitraryEngineRoot/src/out/android_debug_unopt_arm64/',
+    )..createSync(recursive: true);
+    fileSystem
+        .directory('$kArbitraryEngineRoot/src/out/host_debug_unopt/')
+        .createSync(recursive: true);
+
+    final BufferLogger logger = BufferLogger.test();
+    final LocalEngineLocator localEngineLocator = LocalEngineLocator(
+      fileSystem: fileSystem,
+      flutterRoot: 'flutter/flutter',
+      logger: logger,
+      userMessages: UserMessages(),
+      platform: FakePlatform(environment: <String, String>{}),
+    );
+
+    await expectLater(
+      localEngineLocator.findEnginePath(localHostEngine: localEngine.path),
+      throwsToolExit(
+        message: 'You must specify --local-engine if you are using --local-engine-host.',
+      ),
+    );
+  });
 }
 
 Matcher matchesEngineBuildPaths({String? hostEngine, String? targetEngine}) {

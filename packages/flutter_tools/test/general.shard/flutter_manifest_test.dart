@@ -7,9 +7,9 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/yaml.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:yaml_edit/yaml_edit.dart';
 
 import '../src/common.dart';
 
@@ -1490,7 +1490,6 @@ flutter:
           FontAsset(Uri(path: 'assetUri'), weight: 100, style: 'normal'),
         ]),
       ],
-      models: <Uri>[Uri(path: 'modelUri')],
       shaders: <Uri>[Uri(path: 'shaderUri')],
       deferredComponents: <DeferredComponent>[
         DeferredComponent(
@@ -1512,9 +1511,7 @@ flutter:
       ],
     );
 
-    final YamlEditor editor = YamlEditor('');
-    editor.update(const <String>[], updatedManifest.toYaml());
-    expect(editor.toString(), '''
+    expect(encodeYamlAsString(updatedManifest.toYaml()), '''
 name: test
 dependencies:
   flutter:
@@ -1537,8 +1534,6 @@ flutter:
           asset: assetUri
   shaders:
     - shaderUri
-  models:
-    - modelUri
   deferred-components:
     - name: deferredComponent
       libraries:
@@ -1551,6 +1546,35 @@ flutter:
             - package: package:deferredComponent
               args:
                 - deferredComponentArg''');
+  });
+
+  testWithoutContext('FlutterManifest can parse workspace', () async {
+    const String manifest = '''
+name: test
+workspace:
+- pkgs/bar
+- pkgs/foo
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.workspace, <String>['pkgs/bar', 'pkgs/foo']);
+  });
+
+  testWithoutContext('FlutterManifest can parse empty workspace', () async {
+    const String manifest = '''
+name: test
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.workspace, isEmpty);
   });
 }
 

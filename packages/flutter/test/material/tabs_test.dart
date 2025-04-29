@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -335,7 +334,7 @@ void main() {
   testWidgets('TabBar default selected/unselected label style (primary)', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     const String selectedValue = 'A';
@@ -363,7 +362,7 @@ void main() {
   testWidgets('TabBar default selected/unselected label style (secondary)', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     const String selectedValue = 'A';
@@ -509,7 +508,7 @@ void main() {
   });
 
   testWidgets('TabBar default overlay (primary)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B'];
 
     const String selectedValue = 'A';
@@ -558,7 +557,7 @@ void main() {
   });
 
   testWidgets('TabBar default overlay (secondary)', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B'];
 
     const String selectedValue = 'A';
@@ -2724,48 +2723,44 @@ void main() {
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(tabBarBox.size.height, 48.0);
 
-    // Ease in sine (accelerating).
-    double accelerateInterpolation(double fraction) {
-      return 1.0 - math.cos((fraction * math.pi) / 2.0);
-    }
+    const Rect currentRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    const Rect fromRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect toRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.0),
+      ),
+    );
 
-    void expectIndicatorAttrs(RenderBox tabBarBox, {required Rect rect, required Rect targetRect}) {
-      const double indicatorWeight = 3.0;
-      final double tabChangeProgress = (controller.index - controller.animation!.value).abs();
-      final double leftFraction = accelerateInterpolation(tabChangeProgress);
-      final double rightFraction = accelerateInterpolation(tabChangeProgress);
-
-      final RRect rrect = RRect.fromLTRBAndCorners(
-        lerpDouble(rect.left, targetRect.left, leftFraction)!,
-        tabBarBox.size.height - indicatorWeight,
-        lerpDouble(rect.right, targetRect.right, rightFraction)!,
-        tabBarBox.size.height,
-        topLeft: const Radius.circular(3.0),
-        topRight: const Radius.circular(3.0),
-      );
-
-      expect(tabBarBox, paints..rrect(rrect: rrect));
-    }
-
-    Rect rect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
-    Rect targetRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
-
-    // Idle at tab 0.
-    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
-
-    // Peak stretch at 20%.
     controller.offset = 0.2;
     await tester.pump();
-    rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
-    targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
-    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+    toRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.2),
+      ),
+    );
 
-    // Idle at tab 1.
+    controller.offset = 0.5;
+    await tester.pump();
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.5),
+      ),
+    );
+
     controller.offset = 1;
     await tester.pump();
-    rect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
-    targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
-    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+    // When the animation is completed, no stretch is applied.
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 1.0),
+      ),
+    );
   });
 
   testWidgets('TabBar with indicatorWeight, indicatorPadding (LTR)', (WidgetTester tester) async {
@@ -3753,6 +3748,8 @@ void main() {
       tabBarBox,
       paints..line(
         strokeWidth: indicatorWeight,
+        // In RTL, the elastic tab animation expands the width of the tab with a negative offset
+        // when jumping from the first tab to the last tab in a scrollable tab bar.
         p1: const Offset(4951.0, indicatorY),
         p2: const Offset(5049.0, indicatorY),
       ),
@@ -3760,7 +3757,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 501));
 
-    // Tab 99 out of 100 selected, appears on the far left because RTL
+    // Tab 99 out of 100 selected, appears on the far left because RTL.
     indicatorLeft = indicatorWeight / 2.0;
     indicatorRight = 100.0 - indicatorWeight / 2.0;
     expect(
@@ -3897,26 +3894,35 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 4,
-                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.hasSelectedState,
-                        SemanticsFlag.isSelected,
-                        SemanticsFlag.isFocusable,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 232.0, 600.0),
+                      role: SemanticsRole.tabBar,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 5,
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isSelected,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          label: 'TAB #0${kIsWeb ? '' : '\nTab 1 of 2'}',
+                          rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                          role: SemanticsRole.tab,
+                          transform: Matrix4.translationValues(0.0, 276.0, 0.0),
+                        ),
+                        TestSemantics(
+                          id: 6,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'TAB #1${kIsWeb ? '' : '\nTab 2 of 2'}',
+                          rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                          role: SemanticsRole.tab,
+                          transform: Matrix4.translationValues(116.0, 276.0, 0.0),
+                        ),
                       ],
-                      label: 'TAB #0\nTab 1 of 2',
-                      rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
-                      transform: Matrix4.translationValues(0.0, 276.0, 0.0),
-                    ),
-                    TestSemantics(
-                      id: 5,
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.hasSelectedState,
-                        SemanticsFlag.isFocusable,
-                      ],
-                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                      label: 'TAB #1\nTab 2 of 2',
-                      rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
-                      transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                     ),
                   ],
                 ),
@@ -3953,8 +3959,8 @@ void main() {
       ),
     );
 
-    const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
-    const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
+    const String tab0title = 'This is a very wide tab #0${kIsWeb ? '' : '\nTab 1 of 20'}';
+    const String tab10title = 'This is a very wide tab #10${kIsWeb ? '' : '\nTab 11 of 20'}';
 
     const List<SemanticsFlag> hiddenFlags = <SemanticsFlag>[
       SemanticsFlag.isHidden,
@@ -4165,26 +4171,35 @@ void main() {
                   children: <TestSemantics>[
                     TestSemantics(
                       id: 4,
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.hasSelectedState,
-                        SemanticsFlag.isSelected,
-                        SemanticsFlag.isFocusable,
+                      rect: const Rect.fromLTRB(0.0, 0.0, 232.0, 600.0),
+                      role: SemanticsRole.tabBar,
+                      children: <TestSemantics>[
+                        TestSemantics(
+                          id: 5,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isSelected,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Semantics override 0${kIsWeb ? '' : '\nTab 1 of 2'}',
+                          rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                          role: SemanticsRole.tab,
+                          transform: Matrix4.translationValues(0.0, 276.0, 0.0),
+                        ),
+                        TestSemantics(
+                          id: 6,
+                          flags: <SemanticsFlag>[
+                            SemanticsFlag.hasSelectedState,
+                            SemanticsFlag.isFocusable,
+                          ],
+                          actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                          label: 'Semantics override 1${kIsWeb ? '' : '\nTab 2 of 2'}',
+                          rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                          role: SemanticsRole.tab,
+                          transform: Matrix4.translationValues(116.0, 276.0, 0.0),
+                        ),
                       ],
-                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                      label: 'Semantics override 0\nTab 1 of 2',
-                      rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
-                      transform: Matrix4.translationValues(0.0, 276.0, 0.0),
-                    ),
-                    TestSemantics(
-                      id: 5,
-                      flags: <SemanticsFlag>[
-                        SemanticsFlag.hasSelectedState,
-                        SemanticsFlag.isFocusable,
-                      ],
-                      actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-                      label: 'Semantics override 1\nTab 2 of 2',
-                      rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
-                      transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                     ),
                   ],
                 ),
@@ -5984,33 +5999,46 @@ void main() {
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             TestSemantics(
-              label: 'TAB1\nTab 1 of 2',
-              flags: <SemanticsFlag>[
-                SemanticsFlag.isFocusable,
-                SemanticsFlag.isSelected,
-                SemanticsFlag.hasSelectedState,
-              ],
               id: 2,
-              rect: TestSemantics.fullScreen,
-              actions: 1 | SemanticsAction.focus.index,
+              role: SemanticsRole.tabBar,
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'TAB1${kIsWeb ? '' : '\nTab 1 of 2'}',
+                  flags: <SemanticsFlag>[
+                    SemanticsFlag.isFocusable,
+                    SemanticsFlag.isSelected,
+                    SemanticsFlag.hasSelectedState,
+                  ],
+                  id: 3,
+                  rect: TestSemantics.fullScreen,
+                  actions: 1 | SemanticsAction.focus.index,
+                  role: SemanticsRole.tab,
+                ),
+                TestSemantics(
+                  label: 'TAB2${kIsWeb ? '' : '\nTab 2 of 2'}',
+                  flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
+                  id: 4,
+                  rect: TestSemantics.fullScreen,
+                  actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
+                  role: SemanticsRole.tab,
+                ),
+              ],
             ),
             TestSemantics(
-              label: 'TAB2\nTab 2 of 2',
-              flags: <SemanticsFlag>[SemanticsFlag.isFocusable, SemanticsFlag.hasSelectedState],
-              id: 3,
-              rect: TestSemantics.fullScreen,
-              actions: <SemanticsAction>[SemanticsAction.tap, SemanticsAction.focus],
-            ),
-            TestSemantics(
-              id: 4,
+              id: 5,
               rect: TestSemantics.fullScreen,
               children: <TestSemantics>[
                 TestSemantics(
-                  id: 6,
+                  id: 7,
                   rect: TestSemantics.fullScreen,
                   actions: <SemanticsAction>[SemanticsAction.scrollLeft],
                   children: <TestSemantics>[
-                    TestSemantics(id: 5, rect: TestSemantics.fullScreen, label: 'PAGE1'),
+                    TestSemantics(
+                      id: 6,
+                      rect: TestSemantics.fullScreen,
+                      label: 'PAGE1',
+                      role: SemanticsRole.tabPanel,
+                    ),
                   ],
                 ),
               ],
@@ -6161,7 +6189,7 @@ void main() {
     // TabBarTheme splashFactory and overlayColor
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData.light().copyWith(
+        theme: ThemeData(
           tabBarTheme: TabBarThemeData(splashFactory: splashFactory, overlayColor: overlayColor),
         ),
         home: DefaultTabController(
@@ -6321,7 +6349,7 @@ void main() {
                             : null,
                   ),
                   body: LayoutBuilder(
-                    builder: (_, __) {
+                    builder: (_, _) {
                       return tabTextContent.isNotEmpty
                           ? TabBarView(
                             children:
@@ -6430,7 +6458,7 @@ void main() {
 
   testWidgets('Tab has correct selected/unselected hover color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     await tester.pumpWidget(buildFrame(tabs: tabs, value: 'C', useMaterial3: theme.useMaterial3));
@@ -6457,7 +6485,7 @@ void main() {
 
   testWidgets('Tab has correct selected/unselected focus color', (WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     await tester.pumpWidget(
@@ -6483,7 +6511,7 @@ void main() {
   });
 
   testWidgets('Tab has correct selected/unselected pressed color', (WidgetTester tester) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B', 'C'];
 
     await tester.pumpWidget(
@@ -6551,7 +6579,7 @@ void main() {
   testWidgets('TabAlignment.fill only supports non-scrollable tab bar', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B'];
 
     // Test TabAlignment.fill with non-scrollable tab bar.
@@ -6583,7 +6611,7 @@ void main() {
   testWidgets('TabAlignment.start & TabAlignment.startOffset only supports scrollable tab bar', (
     WidgetTester tester,
   ) async {
-    final ThemeData theme = ThemeData(useMaterial3: true);
+    final ThemeData theme = ThemeData();
     final List<String> tabs = <String>['A', 'B'];
 
     // Test TabAlignment.start with scrollable tab bar.
@@ -6868,10 +6896,7 @@ void main() {
     const Color dividerColor = Colors.yellow;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          useMaterial3: true,
-          tabBarTheme: const TabBarThemeData(dividerColor: dividerColor),
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(dividerColor: dividerColor)),
         home: Scaffold(
           appBar: AppBar(
             bottom: TabBar(
@@ -6893,10 +6918,7 @@ void main() {
     const Color dividerColor = Colors.yellow;
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(
-          useMaterial3: true,
-          tabBarTheme: const TabBarThemeData(dividerColor: dividerColor),
-        ),
+        theme: ThemeData(tabBarTheme: const TabBarThemeData(dividerColor: dividerColor)),
         home: Scaffold(
           body: DefaultTabController(
             length: 2,
@@ -7511,7 +7533,6 @@ void main() {
       labelSize = tester.getSize(find.text('Tab 1'));
       expect(labelSize, equals(const Size(140.5, 40.0)));
     },
-    skip: isBrowser && !isSkiaWeb, // https://github.com/flutter/flutter/issues/87543
   );
 
   // This is a regression test for https://github.com/flutter/flutter/issues/150000.
@@ -7723,42 +7744,26 @@ void main() {
     await tester.pumpWidget(buildTab(indicatorAnimation: TabIndicatorAnimation.elastic));
     await tester.pumpAndSettle();
 
-    // Ease in sine (accelerating).
-    double accelerateInterpolation(double fraction) {
-      return 1.0 - math.cos((fraction * math.pi) / 2.0);
-    }
-
-    void expectIndicatorAttrs(RenderBox tabBarBox, {required Rect rect, required Rect targetRect}) {
-      const double indicatorWeight = 3.0;
-      final double tabChangeProgress = (controller.index - controller.animation!.value).abs();
-      final double leftFraction = accelerateInterpolation(tabChangeProgress);
-      final double rightFraction = accelerateInterpolation(tabChangeProgress);
-
-      final RRect rrect = RRect.fromLTRBAndCorners(
-        lerpDouble(rect.left, targetRect.left, leftFraction)!,
-        tabBarBox.size.height - indicatorWeight,
-        lerpDouble(rect.right, targetRect.right, rightFraction)!,
-        tabBarBox.size.height,
-        topLeft: const Radius.circular(3.0),
-        topRight: const Radius.circular(3.0),
-      );
-
-      expect(tabBarBox, paints..rrect(rrect: rrect));
-    }
-
-    Rect rect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
-    Rect targetRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
-
     // Idle at tab 0.
-    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+    const Rect currentRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    const Rect fromRect = Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    Rect toRect = const Rect.fromLTRB(75.0, 0.0, 125.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.0),
+      ),
+    );
 
-    // Start moving tab indicator.
     controller.offset = 0.2;
     await tester.pump();
-
-    rect = const Rect.fromLTRB(115.0, 0.0, 165.0, 48.0);
-    targetRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
-    expectIndicatorAttrs(tabBarBox, rect: rect, targetRect: targetRect);
+    toRect = const Rect.fromLTRB(275.0, 0.0, 325.0, 48.0);
+    expect(
+      tabBarBox,
+      paints..rrect(
+        rrect: tabIndicatorRRectElasticAnimation(tabBarBox, currentRect, fromRect, toRect, 0.2),
+      ),
+    );
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/155518.
@@ -7804,5 +7809,1329 @@ void main() {
       tester.getSize(find.byIcon(unselectedIcon)),
       Size(theme.iconTheme.size!, theme.iconTheme.size!),
     );
+  });
+
+  testWidgets('Elastic Tab animation does not overflow target tab - LTR', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicatorAnimation: TabIndicatorAnimation.elastic,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    double indicatorLeft = 92.50662931979836;
+    double indicatorRight = 241.31938023664574;
+    final Rect labelRect = tester.getRect(find.byType(Tab).at(2));
+
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorRight, lessThan(labelRect.right));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    indicatorLeft = 192.50227846755732;
+    indicatorRight = 282.61484607849377;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorRight, lessThan(labelRect.right));
+
+    // Let the animation complete.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Elastic Tab animation does not overflow target tab - RTL', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicatorAnimation: TabIndicatorAnimation.elastic,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    double indicatorLeft = 558.6806197633543;
+    double indicatorRight = 707.4933706802017;
+    final Rect labelRect = tester.getRect(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRect.left));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    indicatorLeft = 517.3851539215062;
+    indicatorRight = 607.497721532442;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRect.left));
+
+    // Let the animation complete.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Linear Tab animation does not overflow target tab - LTR', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicatorAnimation: TabIndicatorAnimation.linear,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    double indicatorLeft = 131.26358723640442;
+    double indicatorRight = 199.26358723640442;
+    final Rect labelRect = tester.getRect(find.byType(Tab).at(2));
+
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorRight, lessThan(labelRect.right));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    indicatorLeft = 201.00625545158982;
+    indicatorRight = 269.0062554515898;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorRight, lessThan(labelRect.right));
+
+    // Let the animation complete.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Linear Tab animation does not overflow target tab - RTL', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicatorAnimation: TabIndicatorAnimation.linear,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    double indicatorLeft = 600.7364127635956;
+    double indicatorRight = 668.7364127635956;
+    final Rect labelRect = tester.getRect(find.byType(Tab).at(2));
+
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRect.left));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    indicatorLeft = 530.9937445484102;
+    indicatorRight = 598.9937445484102;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRect.left));
+
+    // Let the animation complete.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('Elastic Tab animation does not overflow target tab in a scrollable tab bar - LTR', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            isScrollable: true,
+            indicatorAnimation: TabIndicatorAnimation.elastic,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    double indicatorLeft = 159.14390228994424;
+    double indicatorRight = 791.2121709715643;
+    Offset labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorRight, lessThan(labelRectRight.dx));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    indicatorLeft = 346.2357603195887;
+    indicatorRight = 976.195212100479;
+    labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, lessThan(labelRectRight.dx));
+
+    // Let the animation complete.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    indicatorLeft = 390.1999969482422;
+    indicatorRight = 982.4000091552734;
+    labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, lessThan(labelRectRight.dx));
+  });
+
+  testWidgets('Elastic Tab animation does not overflow target tab in a scrollable tab bar - RTL', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            isScrollable: true,
+            indicatorAnimation: TabIndicatorAnimation.elastic,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    double indicatorLeft = 1495.1878305543146;
+    double indicatorRight = 2127.2560992359345;
+    Offset labelRectLeft = tester.getBottomLeft(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRectLeft.dx));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    indicatorLeft = 1310.2047894254;
+    indicatorRight = 1940.1642412062902;
+    labelRectLeft = tester.getBottomLeft(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRectLeft.dx));
+
+    // Let the animation complete.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    indicatorLeft = 1303.9999923706055;
+    indicatorRight = 1896.2000045776367;
+    labelRectLeft = tester.getBottomLeft(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRectLeft.dx));
+  });
+
+  testWidgets('Linear Tab animation does not overflow target tab in a scrollable tab bar - LTR', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            isScrollable: true,
+            indicatorAnimation: TabIndicatorAnimation.linear,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    double indicatorLeft = 159.9711660555031;
+    double indicatorRight = 453.47531034110943;
+    Offset labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorRight, lessThan(labelRectRight.dx));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    indicatorLeft = 349.4619934677845;
+    indicatorRight = 888.8090538538061;
+    labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, lessThan(labelRectRight.dx));
+
+    // Let the animation complete.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    indicatorLeft = 390.1999969482422;
+    indicatorRight = 982.4000091552734;
+    labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, lessThan(labelRectRight.dx));
+  });
+
+  testWidgets('Linear Tab animation does not overflow target tab in a scrollable tab bar - RTL', (
+    WidgetTester tester,
+  ) async {
+    final List<Widget> tabs = <Widget>[
+      const Tab(text: 'Short'),
+      const Tab(text: 'A Bit Longer Text'),
+      const Tab(text: 'An Extremely Long Tab Label That Overflows'),
+      const Tab(text: 'Tiny'),
+      const Tab(text: 'Moderate Length'),
+      const Tab(text: 'Just Right'),
+      const Tab(text: 'Supercalifragilisticexpialidocious'),
+      const Tab(text: 'Longer Than Usual'),
+    ];
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        textDirection: TextDirection.rtl,
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            isScrollable: true,
+            indicatorAnimation: TabIndicatorAnimation.linear,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    double indicatorLeft = 1832.9246911847695;
+    double indicatorRight = 2126.428835470376;
+    Offset labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRectRight.dx));
+
+    await tester.pump(const Duration(milliseconds: 100));
+
+    indicatorLeft = 1397.590947672073;
+    indicatorRight = 1936.9380080580945;
+    labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRectRight.dx));
+
+    // Let the animation complete.
+    await tester.pump(const Duration(milliseconds: 200));
+
+    indicatorLeft = 1303.9999923706055;
+    indicatorRight = 1896.2000045776367;
+    labelRectRight = tester.getBottomRight(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+    expect(indicatorLeft, greaterThan(labelRectRight.dx));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/160631
+  testWidgets('Elastic Tab animation when skipping tabs', (WidgetTester tester) async {
+    final List<Widget> tabs = List<Widget>.generate(10, (int index) => Tab(text: 'Tab $index'));
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicatorAnimation: TabIndicatorAnimation.elastic,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    double indicatorLeft = 157.20182277404584;
+    double indicatorRight = 222.89187686279502;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    Rect labelRect = tester.getRect(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(Tab).last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    indicatorLeft = 670.2063797091604;
+    indicatorRight = 780.1215690197826;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    labelRect = tester.getRect(find.byType(Tab).last);
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    indicatorLeft = 100.43249254881991;
+    indicatorRight = 219.19270890381662;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    labelRect = tester.getRect(find.byType(Tab).at(1));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/162098
+  testWidgets('Linear Tab animation when skipping tabs', (WidgetTester tester) async {
+    final List<Widget> tabs = List<Widget>.generate(10, (int index) => Tab(text: 'Tab $index'));
+
+    final TabController controller = createTabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    Widget buildTabBar() {
+      return boilerplate(
+        child: Container(
+          alignment: Alignment.topLeft,
+          child: TabBar(
+            indicatorAnimation: TabIndicatorAnimation.linear,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildTabBar());
+
+    await tester.tap(find.byType(Tab).at(2));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    double indicatorLeft = 164.00500436127186;
+    double indicatorRight = 212.00500436127186;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    Rect labelRect = tester.getRect(find.byType(Tab).at(2));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(Tab).last);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    indicatorLeft = 694.0175152644515;
+    indicatorRight = 742.0175152644515;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    labelRect = tester.getRect(find.byType(Tab).last);
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(Tab).at(1));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    indicatorLeft = 143.97998255491257;
+    indicatorRight = 191.97998255491257;
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          indicatorLeft,
+          45.0,
+          indicatorRight,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    labelRect = tester.getRect(find.byType(Tab).at(1));
+    expect(
+      find.byType(TabBar),
+      paints..rrect(
+        rrect: RRect.fromLTRBAndCorners(
+          labelRect.left,
+          45.0,
+          labelRect.right,
+          48.0,
+          topLeft: const Radius.circular(3.0),
+          topRight: const Radius.circular(3.0),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('onHover is triggered when mouse pointer is over a tab', (WidgetTester tester) async {
+    final List<({bool hover, int index})> hoverEvents = <({bool hover, int index})>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                onHover: (bool value, int index) {
+                  hoverEvents.add((hover: value, index: index));
+                },
+                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[Text('Tab 1 View'), Text('Tab 2 View'), Text('Tab 3 View')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(hoverEvents.isEmpty, isTrue);
+
+    // Hover over the first tab.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+      pointer: 1,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.text('Tab 1')));
+    await tester.pump();
+
+    // Hover entered first tab.
+    expect(hoverEvents, <({bool hover, int index})>[(hover: true, index: 0)]);
+
+    await gesture.moveTo(tester.getCenter(find.text('Tab 2')));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+    ]);
+
+    await gesture.moveTo(tester.getCenter(find.text('Tab 3')));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+      (hover: false, index: 1), // Second tab hover exit
+      (hover: true, index: 2), // Third tab hover enter
+    ]);
+
+    await gesture.moveTo(tester.getCenter(find.byType(TabBarView)));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+      (hover: false, index: 1), // Second tab hover exit
+      (hover: true, index: 2), // Third tab hover enter
+      (hover: false, index: 2), // Third tab hover exit
+    ]);
+
+    hoverEvents.clear();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar.secondary(
+                onHover: (bool value, int index) {
+                  hoverEvents.add((hover: value, index: index));
+                },
+                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[Text('Tab 1 View'), Text('Tab 2 View'), Text('Tab 3 View')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(hoverEvents.isEmpty, isTrue);
+
+    // Hover over the first tab.
+    await gesture.moveTo(tester.getCenter(find.text('Tab 1')));
+    await tester.pump();
+
+    // Hover enters first tab.
+    expect(hoverEvents, <({bool hover, int index})>[(hover: true, index: 0)]);
+
+    await gesture.moveTo(tester.getCenter(find.text('Tab 2')));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+    ]);
+
+    await gesture.moveTo(tester.getCenter(find.text('Tab 3')));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+      (hover: false, index: 1), // Second tab hover exit
+      (hover: true, index: 2), // Third tab hover enter
+    ]);
+
+    await gesture.moveTo(tester.getCenter(find.byType(TabBarView)));
+    await tester.pump();
+
+    expect(hoverEvents, <({bool hover, int index})>[
+      (hover: true, index: 0), // First tab hover enter
+      (hover: false, index: 0), // First tab hover exit
+      (hover: true, index: 1), // Second tab hover enter
+      (hover: false, index: 1), // Second tab hover exit
+      (hover: true, index: 2), // Third tab hover enter
+      (hover: false, index: 2), // Third tab hover exit
+    ]);
+  });
+
+  testWidgets('onFocusChange is triggered when tabs gain and lose focus', (
+    WidgetTester tester,
+  ) async {
+    final List<({bool focus, int index})> focusEvents = <({bool focus, int index})>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                onFocusChange: (bool value, int index) {
+                  focusEvents.add((focus: value, index: index));
+                },
+                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[Text('Tab 1 View'), Text('Tab 2 View'), Text('Tab 3 View')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusEvents.isEmpty, isTrue);
+
+    // Focus on the first tab.
+    Element tabElement = tester.element(find.text('Tab 1'));
+    FocusNode node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+
+    // Focus gained at first tab.
+    expect(focusEvents, <({bool focus, int index})>[(focus: true, index: 0)]);
+
+    tabElement = tester.element(find.text('Tab 2'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+    ]);
+
+    tabElement = tester.element(find.text('Tab 3'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+    expect(node.hasFocus, isTrue);
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+      (focus: false, index: 1), // Second tab loses focus
+      (focus: true, index: 2), // Third tab gains focus
+    ]);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(node.hasFocus, isFalse);
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+      (focus: false, index: 1), // Second tab loses focus
+      (focus: true, index: 2), // Third tab gains focus
+      (focus: false, index: 2), // Third tab loses focus
+    ]);
+
+    focusEvents.clear();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar.secondary(
+                onFocusChange: (bool value, int index) {
+                  focusEvents.add((focus: value, index: index));
+                },
+                tabs: const <Widget>[Tab(text: 'Tab 1'), Tab(text: 'Tab 2'), Tab(text: 'Tab 3')],
+              ),
+            ),
+            body: const TabBarView(
+              children: <Widget>[Text('Tab 1 View'), Text('Tab 2 View'), Text('Tab 3 View')],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusEvents.isEmpty, isTrue);
+
+    // Focus on the first tab.
+    tabElement = tester.element(find.text('Tab 1'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+
+    // Focus gained at first tab.
+    expect(focusEvents, <({bool focus, int index})>[(focus: true, index: 0)]);
+
+    tabElement = tester.element(find.text('Tab 2'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+    ]);
+
+    tabElement = tester.element(find.text('Tab 3'));
+    node = Focus.of(tabElement);
+    node.requestFocus();
+    await tester.pump();
+    expect(node.hasFocus, isTrue);
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+      (focus: false, index: 1), // Second tab loses focus
+      (focus: true, index: 2), // Third tab gains focus
+    ]);
+
+    node.unfocus();
+    await tester.pump();
+
+    expect(node.hasFocus, isFalse);
+    expect(focusEvents, <({bool focus, int index})>[
+      (focus: true, index: 0), // First tab gains focus
+      (focus: false, index: 0), // First tab loses focus
+      (focus: true, index: 1), // Second tab gains focus
+      (focus: false, index: 1), // Second tab loses focus
+      (focus: true, index: 2), // Third tab gains focus
+      (focus: false, index: 2), // Third tab loses focus
+    ]);
   });
 }

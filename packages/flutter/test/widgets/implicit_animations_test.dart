@@ -610,7 +610,7 @@ void main() {
         child: ValueListenableBuilder<Curve>(
           valueListenable: curve,
           builder:
-              (_, Curve c, __) => AnimatedOpacity(
+              (_, Curve c, _) => AnimatedOpacity(
                 key: key,
                 opacity: 1.0,
                 duration: const Duration(seconds: 1),
@@ -955,7 +955,7 @@ class _TestAnimatedThemeWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
     return AnimatedTheme(
-      data: toggle ? ThemeData.dark() : ThemeData.light(),
+      data: toggle ? ThemeData.dark() : ThemeData(),
       duration: duration,
       onEnd: widget.callback,
       child: child,

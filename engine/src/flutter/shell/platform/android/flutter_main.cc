@@ -5,34 +5,33 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <android/log.h>
+#include <sys/system_properties.h>
+#include <cstring>
 #include <optional>
+#include <string>
 #include <vector>
 
 #include "common/settings.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
-#include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/fml/native_library.h"
-#include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
-#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/android/proc_table.h"
-#include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "txt/platform.h"
 
 namespace flutter {
 
-constexpr int kMinimumAndroidApiLevelForVulkan = 29;
+constexpr int kMinimumAndroidApiLevelForImpeller = 29;
 
 extern "C" {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
@@ -48,8 +47,9 @@ fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 
 }  // anonymous namespace
 
-FlutterMain::FlutterMain(const flutter::Settings& settings)
-    : settings_(settings) {}
+FlutterMain::FlutterMain(const flutter::Settings& settings,
+                         flutter::AndroidRenderingAPI android_rendering_api)
+    : settings_(settings), android_rendering_api_(android_rendering_api) {}
 
 FlutterMain::~FlutterMain() = default;
 
@@ -65,6 +65,10 @@ const flutter::Settings& FlutterMain::GetSettings() const {
   return settings_;
 }
 
+flutter::AndroidRenderingAPI FlutterMain::GetAndroidRenderingAPI() {
+  return android_rendering_api_;
+}
+
 void FlutterMain::Init(JNIEnv* env,
                        jclass clazz,
                        jobject context,
@@ -72,7 +76,8 @@ void FlutterMain::Init(JNIEnv* env,
                        jstring kernelPath,
                        jstring appStoragePath,
                        jstring engineCachesPath,
-                       jlong initTimeMillis) {
+                       jlong initTimeMillis,
+                       jint api_level) {
   std::vector<std::string> args;
   args.push_back("flutter");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
@@ -95,18 +100,26 @@ void FlutterMain::Init(JNIEnv* env,
           "Dart DevTools.");
     }
   }
+  // The API level must be provided from java, as the NDK function
+  // android_get_device_api_level() is only available on API 24 and greater, and
+  // Flutter still supports 21, 22, and 23.
 
-  settings.android_rendering_api = SelectedRenderingAPI(settings);
-  switch (settings.android_rendering_api) {
+  AndroidRenderingAPI android_rendering_api =
+      SelectedRenderingAPI(settings, api_level);
+
+#if !SLIMPELLER
+  switch (android_rendering_api) {
     case AndroidRenderingAPI::kSoftware:
     case AndroidRenderingAPI::kSkiaOpenGLES:
       settings.enable_impeller = false;
       break;
     case AndroidRenderingAPI::kImpellerOpenGLES:
     case AndroidRenderingAPI::kImpellerVulkan:
+    case AndroidRenderingAPI::kImpellerAutoselect:
       settings.enable_impeller = true;
       break;
   }
+#endif  // !SLIMPELLER
 
 #if FLUTTER_RELEASE
   // On most platforms the timeline is always disabled in release mode.
@@ -137,11 +150,15 @@ void FlutterMain::Init(JNIEnv* env,
   }
 
   settings.task_observer_add = [](intptr_t key, const fml::closure& callback) {
-    fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
+    fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
+    fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key,
+                                                               callback);
+    return queue_id;
   };
 
-  settings.task_observer_remove = [](intptr_t key) {
-    fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
+  settings.task_observer_remove = [](fml::TaskQueueId queue_id, intptr_t key) {
+    fml::MessageLoopTaskQueues::GetInstance()->RemoveTaskObserver(queue_id,
+                                                                  key);
   };
 
   settings.log_message_callback = [](const std::string& tag,
@@ -167,8 +184,7 @@ void FlutterMain::Init(JNIEnv* env,
 
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
-  g_flutter_main.reset(new FlutterMain(settings));
-
+  g_flutter_main.reset(new FlutterMain(settings, android_rendering_api));
   g_flutter_main->SetupDartVMServiceUriCallback(env);
 }
 
@@ -211,7 +227,7 @@ bool FlutterMain::Register(JNIEnv* env) {
       {
           .name = "nativeInit",
           .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
-                       "lang/String;Ljava/lang/String;Ljava/lang/String;J)V",
+                       "lang/String;Ljava/lang/String;Ljava/lang/String;JI)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
       {
@@ -232,15 +248,17 @@ bool FlutterMain::Register(JNIEnv* env) {
 
 // static
 AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
-    const flutter::Settings& settings) {
+    const flutter::Settings& settings,
+    int api_level) {
+#if !SLIMPELLER
   if (settings.enable_software_rendering) {
-    FML_CHECK(!settings.enable_impeller)
-        << "Impeller does not support software rendering. Either disable "
-           "software rendering or disable impeller.";
+    if (settings.enable_impeller) {
+      FML_CHECK(!settings.enable_impeller)
+          << "Impeller does not support software rendering. Either disable "
+             "software rendering or disable impeller.";
+    }
     return AndroidRenderingAPI::kSoftware;
   }
-  constexpr AndroidRenderingAPI kVulkanUnsupportedFallback =
-      AndroidRenderingAPI::kImpellerOpenGLES;
 
   // Debug/Profile only functionality for testing a specific
   // backend configuration.
@@ -255,31 +273,15 @@ AndroidRenderingAPI FlutterMain::SelectedRenderingAPI(
   }
 #endif
 
-  if (settings.enable_impeller) {
-    // Vulkan must only be used on API level 29+, as older API levels do not
-    // have requisite features to support platform views.
-    //
-    // Even if this check returns true, Impeller may determine it cannot use
-    // Vulkan for some other reason, such as a missing required extension or
-    // feature.
-    int api_level = android_get_device_api_level();
-    if (api_level < kMinimumAndroidApiLevelForVulkan) {
-      return kVulkanUnsupportedFallback;
-    }
-    // Determine if Vulkan is supported by creating a Vulkan context and
-    // checking if it is valid.
-    impeller::ScopedValidationDisable disable_validation;
-    auto vulkan_backend = std::make_unique<AndroidContextVKImpeller>(
-        AndroidContext::ContextSettings{.enable_validation = false,
-                                        .enable_gpu_tracing = false,
-                                        .quiet = true});
-    if (!vulkan_backend->IsValid()) {
-      return kVulkanUnsupportedFallback;
-    }
-    return AndroidRenderingAPI::kImpellerVulkan;
+  if (settings.enable_impeller &&
+      api_level >= kMinimumAndroidApiLevelForImpeller) {
+    return AndroidRenderingAPI::kImpellerAutoselect;
   }
 
   return AndroidRenderingAPI::kSkiaOpenGLES;
+#else
+  return AndroidRenderingAPI::kImpellerAutoselect;
+#endif  // !SLIMPELLER
 }
 
 }  // namespace flutter

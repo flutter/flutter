@@ -43,9 +43,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class KeyboardManagerTest {
   public static final int SCAN_KEY_A = 0x1e;
@@ -1663,6 +1661,68 @@ public class KeyboardManagerTest {
         Type.kUp,
         physicalKey,
         LOGICAL_SHIFT_LEFT,
+        null,
+        true,
+        DeviceType.kKeyboard);
+    calls.clear();
+  }
+
+  // Regression test for https://github.com/flutter/flutter/issues/164626.
+  @Test
+  public void synchronizeModifiersForZeroedScanCodeOnRepeatEvent() {
+    // Test if ShiftLeft can be correctly synchronized during down events of
+    // ShiftLeft that have 0 for their metaState and 0 for their scanCode.
+    final KeyboardTester tester = new KeyboardTester();
+    final ArrayList<CallRecord> calls = new ArrayList<>();
+
+    tester.recordEmbedderCallsTo(calls);
+    tester.respondToTextInputWith(true); // Suppress redispatching
+
+    // Test: repeat event when the meta state is 0 and scanCode is 0.
+    final KeyEvent shiftLeftKeyEvent =
+        new FakeKeyEvent(ACTION_DOWN, 0, KEYCODE_SHIFT_LEFT, 1, '\0', 0);
+    // Compute physicalKey in the same way as KeyboardManager.getPhysicalKey.
+    final Long shiftLeftPhysicalKey = KEYCODE_SHIFT_LEFT | KeyboardMap.kAndroidPlane;
+
+    assertEquals(tester.keyboardManager.handleEvent(shiftLeftKeyEvent), true);
+    assertEquals(calls.size(), 2);
+    assertEmbedderEventEquals(
+        calls.get(0).keyData,
+        Type.kDown,
+        shiftLeftPhysicalKey,
+        LOGICAL_SHIFT_LEFT,
+        null,
+        false,
+        DeviceType.kKeyboard);
+    assertEmbedderEventEquals(
+        calls.get(1).keyData,
+        Type.kUp,
+        shiftLeftPhysicalKey,
+        LOGICAL_SHIFT_LEFT,
+        null,
+        true,
+        DeviceType.kKeyboard);
+    calls.clear();
+
+    // Similar check for AltLeft.
+    final KeyEvent altLeftKeyEvent = new FakeKeyEvent(ACTION_DOWN, 0, KEYCODE_ALT_LEFT, 1, '\0', 0);
+    final Long altLeftPhysicalKey = KEYCODE_ALT_LEFT | KeyboardMap.kAndroidPlane;
+
+    assertEquals(tester.keyboardManager.handleEvent(altLeftKeyEvent), true);
+    assertEquals(calls.size(), 2);
+    assertEmbedderEventEquals(
+        calls.get(0).keyData,
+        Type.kDown,
+        altLeftPhysicalKey,
+        LOGICAL_ALT_LEFT,
+        null,
+        false,
+        DeviceType.kKeyboard);
+    assertEmbedderEventEquals(
+        calls.get(1).keyData,
+        Type.kUp,
+        altLeftPhysicalKey,
+        LOGICAL_ALT_LEFT,
         null,
         true,
         DeviceType.kKeyboard);

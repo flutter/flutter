@@ -63,12 +63,21 @@ In the framework, update the following `.ci.yaml` entry:
 
 In the engine, you may follow [Upgrading Engine's Android API version](https://github.com/flutter/flutter/blob/main/docs/platforms/android/Upgrading-Engine's-Android-API-version.md) to update the AVD dependency.
 
-Example Framework PR: https://github.com/flutter/flutter/pull/152498, Example Engine PR: https://github.com/flutter/engine/pull/54186
+- Example Framework PR: <https://github.com/flutter/flutter/pull/152498>.
+- Example Engine PR: <https://github.com/flutter/engine/pull/54186>.
 
-In flutter/packages, modify https://github.com/flutter/packages/blob/main/.cirrus.yml “firebase_test_lab_script”
-Specifically the value for “--device” `./script/tool_runner.sh firebase-test-lab --device model=redfin,version=30 --exclude=script/configs/exclude_integration_Android.yaml`.
+##### Update Java Version in CI (Only for Java LTS Release)
 
-Example PR: https://github.com/flutter/packages/pull/4430
+Every few years Java releases a new Java LTS (long-term support) version, which typically
+becomes the industry standard for a few years. As users adopt the new Java LTS version, either
+directly or as part of the latest Android SDK, we want to update our CI to test against the new Java version
+to identify and address potential compatibility issues.
+
+Upload the new Java Version package to CIPD following the instructions [here](/docs/platforms/android/Uploading-New-Java-Version-to-CIPD.md).
+
+Update the usages of the current Java version to the new Java version in CI.
+
+- Example PR: <https://github.com/flutter/flutter/pull/165210>.
 
 #### Update documentation
 

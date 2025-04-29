@@ -118,7 +118,7 @@ class _RenderExclusiveMouseRegion extends RenderMouseRegion {
 /// {@tool dartpad}
 /// This example covers most of the attributes available in Tooltip.
 /// `decoration` has been used to give a gradient and borderRadius to Tooltip.
-/// `height` has been used to set a specific height of the Tooltip.
+/// `constraints` has been used to set the minimum width of the Tooltip.
 /// `preferBelow` is true; the tooltip will prefer showing below [Tooltip]'s child widget.
 /// However, it may show the tooltip above if there's not enough space
 /// below the widget.
@@ -169,7 +169,12 @@ class Tooltip extends StatefulWidget {
     super.key,
     this.message,
     this.richMessage,
+    @Deprecated(
+      'Use Tooltip.constraints instead. '
+      'This feature was deprecated after v3.30.0-0.1.pre.',
+    )
     this.height,
+    this.constraints,
     this.padding,
     this.margin,
     this.verticalOffset,
@@ -186,16 +191,15 @@ class Tooltip extends StatefulWidget {
     this.enableFeedback,
     this.onTriggered,
     this.mouseCursor,
+    this.ignorePointer,
     this.child,
   }) : assert(
          (message == null) != (richMessage == null),
          'Either `message` or `richMessage` must be specified',
        ),
        assert(
-         richMessage == null || textStyle == null,
-         'If `richMessage` is specified, `textStyle` will have no effect. '
-         'If you wish to provide a `textStyle` for a rich tooltip, add the '
-         '`textStyle` directly to the `richMessage` InlineSpan.',
+         height == null || constraints == null,
+         'Only one of `height` and `constraints` may be specified.',
        );
 
   /// The text to display in the tooltip.
@@ -208,12 +212,22 @@ class Tooltip extends StatefulWidget {
   /// Only one of [message] and [richMessage] may be non-null.
   final InlineSpan? richMessage;
 
-  /// The height of the tooltip's [child].
-  ///
-  /// If the [child] is null, then this is the tooltip's intrinsic height.
+  /// The minimum height of the [Tooltip]'s message.
+  @Deprecated(
+    'Use Tooltip.constraints instead. '
+    'This feature was deprecated after v3.30.0-0.1.pre.',
+  )
   final double? height;
 
-  /// The amount of space by which to inset the tooltip's [child].
+  /// Constrains the size of the [Tooltip]'s message.
+  ///
+  /// If null, then the [TooltipThemeData.constraints] of the ambient [ThemeData.tooltipTheme]
+  /// will be used. If that is also null, then a default value will be picked based on the current
+  /// platform. For desktop platforms, the default value is `BoxConstraints(minHeight: 24.0)`,
+  /// while for mobile platforms the default value is `BoxConstraints(minHeight: 32.0)`.
+  final BoxConstraints? constraints;
+
+  /// The amount of space by which to inset the [Tooltip]'s message.
   ///
   /// On mobile, defaults to 16.0 logical pixels horizontally and 4.0 vertically.
   /// On desktop, defaults to 8.0 logical pixels horizontally and 4.0 vertically.
@@ -230,6 +244,10 @@ class Tooltip extends StatefulWidget {
   /// If this property is null, then [TooltipThemeData.margin] is used.
   /// If [TooltipThemeData.margin] is also null, the default margin is
   /// 0.0 logical pixels on all sides.
+  ///
+  /// See also:
+  ///
+  ///  * [constraints], which allow setting an explicit size for the tooltip.
   final EdgeInsetsGeometry? margin;
 
   /// The vertical gap between the widget and the displayed tooltip.
@@ -363,6 +381,17 @@ class Tooltip extends StatefulWidget {
   /// If this property is null, [MouseCursor.defer] will be used.
   final MouseCursor? mouseCursor;
 
+  /// Whether this tooltip should be invisible to hit testing.
+  ///
+  /// If no value is passed, pointer events are ignored unless the tooltip has a
+  /// [richMessage] instead of a [message].
+  ///
+  /// See also:
+  ///
+  /// * [IgnorePointer], for more information about how pointer events are
+  /// handled or ignored.
+  final bool? ignorePointer;
+
   static final List<TooltipState> _openedTooltips = <TooltipState>[];
 
   /// Dismiss all of the tooltips that are currently shown on the screen,
@@ -406,6 +435,9 @@ class Tooltip extends StatefulWidget {
       ),
     );
     properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(
+      DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null),
+    );
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
@@ -831,9 +863,12 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     };
 
     final TooltipThemeData tooltipTheme = _tooltipTheme;
+    final BoxConstraints defaultConstraints = BoxConstraints(
+      minHeight: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
+    );
     final _TooltipOverlay overlayChild = _TooltipOverlay(
       richMessage: widget.richMessage ?? TextSpan(text: widget.message),
-      height: widget.height ?? tooltipTheme.height ?? _getDefaultTooltipHeight(),
+      constraints: widget.constraints ?? tooltipTheme.constraints ?? defaultConstraints,
       padding: widget.padding ?? tooltipTheme.padding ?? _getDefaultPadding(),
       margin: widget.margin ?? tooltipTheme.margin ?? _defaultMargin,
       onEnter: _handleMouseEnter,
@@ -846,6 +881,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       verticalOffset:
           widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
       preferBelow: widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
+      ignorePointer: widget.ignorePointer ?? widget.message != null,
     );
 
     return SelectionContainer.maybeOf(context) == null
@@ -960,43 +996,46 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
-    required this.height,
     required this.richMessage,
+    required this.constraints,
     this.padding,
     this.margin,
     this.decoration,
-    this.textStyle,
-    this.textAlign,
+    required this.textStyle,
+    required this.textAlign,
     required this.animation,
     required this.target,
     required this.verticalOffset,
     required this.preferBelow,
+    required this.ignorePointer,
     this.onEnter,
     this.onExit,
   });
 
   final InlineSpan richMessage;
-  final double height;
+  final BoxConstraints constraints;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Decoration? decoration;
-  final TextStyle? textStyle;
-  final TextAlign? textAlign;
+  final TextStyle textStyle;
+  final TextAlign textAlign;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
   final bool preferBelow;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
+  final bool ignorePointer;
 
   @override
   Widget build(BuildContext context) {
     Widget result = FadeTransition(
       opacity: animation,
       child: ConstrainedBox(
-        constraints: BoxConstraints(minHeight: height),
+        constraints: constraints,
         child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.bodyMedium!,
+          style: textStyle,
+          textAlign: textAlign,
           child: Semantics(
             container: true,
             child: Container(
@@ -1024,7 +1063,7 @@ class _TooltipOverlay extends StatelessWidget {
           verticalOffset: verticalOffset,
           preferBelow: preferBelow,
         ),
-        child: result,
+        child: IgnorePointer(ignoring: ignorePointer, child: result),
       ),
     );
   }

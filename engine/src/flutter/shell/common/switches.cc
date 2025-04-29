@@ -443,7 +443,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_asset_fonts =
       !command_line.HasOption(FlagForSwitch(Switch::DisableAssetFonts));
 
-#if FML_OS_IOS || FML_OS_IOS_SIMULATOR
+#if FML_OS_IOS || FML_OS_IOS_SIMULATOR || SLIMPELLER
 // On these configurations, the Impeller flags are completely ignored with the
 // default taking hold.
 #else   // FML_OS_IOS && !FML_OS_IOS_SIMULATOR
@@ -526,11 +526,36 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.enable_platform_isolates =
       command_line.HasOption(FlagForSwitch(Switch::EnablePlatformIsolates));
 
-  settings.disable_surface_control = command_line.HasOption(
-      FlagForSwitch(Switch::DisableAndroidSurfaceControl));
+  settings.enable_surface_control = command_line.HasOption(
+      FlagForSwitch(Switch::EnableAndroidSurfaceControl));
 
-  settings.merged_platform_ui_thread = !command_line.HasOption(
-      FlagForSwitch(Switch::DisableMergedPlatformUIThread));
+  if (command_line.HasOption(
+          FlagForSwitch(Switch::DisableMergedPlatformUIThread))) {
+    settings.merged_platform_ui_thread =
+        Settings::MergedPlatformUIThread::kDisabled;
+  } else if (command_line.HasOption(
+                 FlagForSwitch(Switch::MergedPlatformUIThread))) {
+    std::string merged_platform_ui;
+    command_line.GetOptionValue(FlagForSwitch(Switch::MergedPlatformUIThread),
+                                &merged_platform_ui);
+    if (merged_platform_ui == "enabled") {
+      settings.merged_platform_ui_thread =
+          Settings::MergedPlatformUIThread::kEnabled;
+    } else if (merged_platform_ui == "disabled") {
+      settings.merged_platform_ui_thread =
+          Settings::MergedPlatformUIThread::kDisabled;
+    } else if (merged_platform_ui == "mergeAfterLaunch") {
+      settings.merged_platform_ui_thread =
+          Settings::MergedPlatformUIThread::kMergeAfterLaunch;
+    }
+  }
+
+  settings.enable_flutter_gpu =
+      command_line.HasOption(FlagForSwitch(Switch::EnableFlutterGPU));
+  settings.impeller_enable_lazy_shader_mode =
+      command_line.HasOption(FlagForSwitch(Switch::ImpellerLazyShaderMode));
+  settings.impeller_antialiased_lines =
+      command_line.HasOption(FlagForSwitch(Switch::ImpellerAntialiasLines));
 
   return settings;
 }

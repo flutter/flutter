@@ -41,6 +41,8 @@ import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
 import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
+import 'flutter_features_config.dart';
+import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 import 'ios/ios_workflow.dart';
 import 'ios/iproxy.dart';
@@ -121,6 +123,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             logger: globals.logger,
             platform: globals.platform,
             userMessages: globals.userMessages,
+            processManager: globals.processManager,
           ),
       AndroidWorkflow:
           () => AndroidWorkflow(androidSdk: globals.androidSdk, featureFlags: featureFlags),
@@ -167,7 +170,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             logger: globals.logger,
             platform: globals.platform,
             xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-            usage: globals.flutterUsage,
             analytics: globals.analytics,
           ),
       CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!, globals.userMessages),
@@ -233,7 +235,15 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       FeatureFlags:
           () => FlutterFeatureFlags(
             flutterVersion: globals.flutterVersion,
-            config: globals.config,
+            featuresConfig: FlutterFeaturesConfig(
+              globalConfig: globals.config,
+              platform: globals.platform,
+              projectManifest: FlutterManifest.createFromPath(
+                globals.fs.path.join(globals.fs.currentDirectory.path, 'pubspec.yaml'),
+                fileSystem: globals.fs,
+                logger: globals.logger,
+              ),
+            ),
             platform: globals.platform,
           ),
       FlutterVersion: () => FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!),
@@ -289,11 +299,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
                   ),
       MacOSWorkflow: () => MacOSWorkflow(featureFlags: featureFlags, platform: globals.platform),
       MDnsVmServiceDiscovery:
-          () => MDnsVmServiceDiscovery(
-            logger: globals.logger,
-            flutterUsage: globals.flutterUsage,
-            analytics: globals.analytics,
-          ),
+          () => MDnsVmServiceDiscovery(logger: globals.logger, analytics: globals.analytics),
       OperatingSystemUtils:
           () => OperatingSystemUtils(
             fileSystem: globals.fs,
@@ -328,7 +334,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             processManager: globals.processManager,
             botDetector: globals.botDetector,
             platform: globals.platform,
-            usage: globals.flutterUsage,
           ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
@@ -385,7 +390,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
             processManager: globals.processManager,
             platform: globals.platform,
             fileSystem: globals.fs,
-            usage: globals.flutterUsage,
             analytics: globals.analytics,
           ),
     },

@@ -53,18 +53,8 @@ void main() {
     tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform_test.');
 
     for (final HostArtifact artifact in <HostArtifact>[
-      HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSoundSdk,
-      HostArtifact.webPrecompiledAmdCanvaskitAndHtmlSdk,
-      HostArtifact.webPrecompiledAmdCanvaskitSoundSdk,
       HostArtifact.webPrecompiledAmdCanvaskitSdk,
-      HostArtifact.webPrecompiledAmdSoundSdk,
-      HostArtifact.webPrecompiledAmdSdk,
-      HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSoundSdk,
-      HostArtifact.webPrecompiledDdcCanvaskitAndHtmlSdk,
-      HostArtifact.webPrecompiledDdcCanvaskitSoundSdk,
-      HostArtifact.webPrecompiledDdcCanvaskitSdk,
-      HostArtifact.webPrecompiledDdcSoundSdk,
-      HostArtifact.webPrecompiledDdcSdk,
+      HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk,
     ]) {
       final File artifactFile = artifacts.getHostArtifact(artifact) as File;
       artifactFile.createSync();
@@ -112,7 +102,7 @@ void main() {
         shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
       );
       final String contents = await response.readAsString();
-      expect(contents, HostArtifact.webPrecompiledAmdCanvaskitSoundSdk.name);
+      expect(contents, HostArtifact.webPrecompiledAmdCanvaskitSdk.name);
       await webPlatform.close();
     },
     overrides: <Type, Generator>{
@@ -123,7 +113,7 @@ void main() {
   );
 
   testUsingContext(
-    'FlutterWebPlatform serves the correct dart_sdk.js (ddc module system) for the passed web renderer',
+    'FlutterWebPlatform serves the correct dart_sdk.js (ddc library bundle module system) for the passed web renderer',
     () async {
       final ChromiumLauncher chromiumLauncher = ChromiumLauncher(
         fileSystem: fileSystem,
@@ -142,7 +132,7 @@ void main() {
           '',
           packageConfigPath: '.dart_tool/package_config.json',
           treeShakeIcons: false,
-          extraFrontEndOptions: <String>['--dartdevc-module-format=ddc'],
+          extraFrontEndOptions: <String>['--dartdevc-module-format=ddc', '--canary'],
         ),
         webMemoryFS: WebMemoryFS(),
         fileSystem: fileSystem,
@@ -164,7 +154,7 @@ void main() {
         shelf.Request('GET', Uri.parse('http://localhost/dart_sdk.js')),
       );
       final String contents = await response.readAsString();
-      expect(contents, HostArtifact.webPrecompiledDdcCanvaskitSoundSdk.name);
+      expect(contents, HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk.name);
       await webPlatform.close();
     },
     overrides: <Type, Generator>{

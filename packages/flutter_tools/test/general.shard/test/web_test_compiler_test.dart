@@ -34,7 +34,7 @@ void main() {
       platform: platform,
     );
     final FakeProcessManager processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
+      const FakeCommand(
         command: <Pattern>[
           'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
           'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
@@ -43,7 +43,6 @@ void main() {
           '--incremental',
           '--target=dartdevc',
           '--experimental-emit-debug-metadata',
-          '-DFLUTTER_WEB_AUTO_DETECT=false',
           '-DFLUTTER_WEB_USE_SKIA=true',
           '-DFLUTTER_WEB_USE_SKWASM=false',
           '--output-dill',
@@ -60,11 +59,10 @@ void main() {
           '--filesystem-scheme',
           'org-dartlang-app',
           '--initialize-from-dill',
-          RegExp(r'^build\/(?:[a-z0-9]{32})\.cache\.dill$'),
+          'build/cache.dill',
           '--platform',
-          'file:///HostArtifact.webPlatformKernelFolder/ddc_outline_sound.dill',
+          'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
           '--verbosity=error',
-          '--sound-null-safety',
         ],
         stdout: 'result abc\nline0\nline1\nabc\nabc build/out 0',
       ),

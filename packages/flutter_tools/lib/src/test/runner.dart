@@ -26,9 +26,9 @@ import 'test_wrapper.dart';
 import 'watcher.dart';
 import 'web_test_compiler.dart';
 
-/// A class that abstracts launching the test process from the test runner.
-abstract class FlutterTestRunner {
-  const factory FlutterTestRunner() = _FlutterTestRunnerImpl;
+/// Launching the `flutter_tester` process from the test runner.
+interface class FlutterTestRunner {
+  const FlutterTestRunner();
 
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
@@ -55,6 +55,7 @@ abstract class FlutterTestRunner {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool ignoreTimeouts = false,
     bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
@@ -63,74 +64,7 @@ abstract class FlutterTestRunner {
     String? integrationTestUserIdentifier,
     TestTimeRecorder? testTimeRecorder,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    BuildInfo? buildInfo,
-  });
-
-  /// Runs tests using the experimental strategy of spawning each test in a
-  /// separate lightweight Engine.
-  Future<int> runTestsBySpawningLightweightEngines(
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
-    bool machine = false,
-    bool updateGoldens = false,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool failFast = false,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  });
-}
-
-class _FlutterTestRunnerImpl implements FlutterTestRunner {
-  const _FlutterTestRunnerImpl();
-
-  @override
-  Future<int> runTests(
-    TestWrapper testWrapper,
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
-    bool enableVmService = false,
-    bool machine = false,
-    String? precompiledDillPath,
-    Map<String, String>? precompiledDillFiles,
-    bool updateGoldens = false,
-    TestWatcher? watcher,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    Directory? coverageDirectory,
-    bool web = false,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool failFast = false,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    Device? integrationTestDevice,
-    String? integrationTestUserIdentifier,
-    TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    BuildInfo? buildInfo,
+    required BuildInfo buildInfo,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -142,6 +76,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
       if (fileReporter != null) '--file-reporter=$fileReporter',
       if (timeout != null) ...<String>['--timeout', timeout],
+      if (ignoreTimeouts) '--ignore-timeouts',
       if (concurrency != null) '--concurrency=$concurrency',
       for (final String name in names) ...<String>['--name', name],
       for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
@@ -184,7 +119,6 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
           flutterTesterBinPath: flutterTesterBinPath,
           flutterProject: flutterProject,
           pauseAfterLoad: debuggingOptions.startPaused,
-          nullAssertions: debuggingOptions.nullAssertions,
           buildInfo: debuggingOptions.buildInfo,
           webMemoryFS: result,
           logger: globals.logger,
@@ -218,7 +152,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     final loader.FlutterPlatform platform = loader.installHook(
       testWrapper: testWrapper,
-      shellPath: flutterTesterBinPath,
+      flutterTesterBinPath: flutterTesterBinPath,
       debuggingOptions: debuggingOptions,
       watcher: watcher,
       enableVmService: enableVmService,
@@ -236,6 +170,9 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       testTimeRecorder: testTimeRecorder,
       nativeAssetsBuilder: nativeAssetsBuilder,
       buildInfo: buildInfo,
+      fileSystem: globals.fs,
+      logger: globals.logger,
+      processManager: globals.processManager,
     );
 
     try {
@@ -634,7 +571,8 @@ class SpawnPlugin extends PlatformPlugin {
     testTimeRecorder?.stop(TestTimePhases.Compile, testTimeRecorderStopwatch!);
   }
 
-  @override
+  /// Runs tests using the experimental strategy of spawning each test in a
+  /// separate lightweight Engine.
   Future<int> runTestsBySpawningLightweightEngines(
     List<Uri> testFiles, {
     required DebuggingOptions debuggingOptions,
@@ -652,6 +590,7 @@ class SpawnPlugin extends PlatformPlugin {
     String? reporter,
     String? fileReporter,
     String? timeout,
+    bool ignoreTimeouts = false,
     bool failFast = false,
     bool runSkipped = false,
     int? shardIndex,
@@ -701,6 +640,7 @@ class SpawnPlugin extends PlatformPlugin {
       if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
       if (fileReporter != null) '--file-reporter=$fileReporter',
       if (timeout != null) ...<String>['--timeout', timeout],
+      if (ignoreTimeouts) '--ignore-timeouts',
       if (concurrency != null) '--concurrency=$concurrency',
       for (final String name in names) ...<String>['--name', name],
       for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
@@ -760,7 +700,6 @@ class SpawnPlugin extends PlatformPlugin {
       '--disable-asset-fonts',
       '--packages=${debuggingOptions.buildInfo.packageConfigPath}',
       if (testAssetDirectory != null) '--flutter-assets-dir=$testAssetDirectory',
-      if (debuggingOptions.nullAssertions) '--dart-flags=--null_assertions',
       ...debuggingOptions.dartEntrypointArgs,
       rootTestIsolateSpawnerDillFile.absolute.path,
     ];

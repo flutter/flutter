@@ -56,21 +56,25 @@ std::unique_ptr<RuntimeController> RuntimeController::Spawn(
     const fml::closure& p_isolate_shutdown_callback,
     const std::shared_ptr<const fml::Mapping>& p_persistent_isolate_data,
     fml::WeakPtr<IOManager> io_manager,
-    fml::WeakPtr<ImageDecoder> image_decoder,
-    fml::WeakPtr<ImageGeneratorRegistry> image_generator_registry,
+    fml::TaskRunnerAffineWeakPtr<ImageDecoder> image_decoder,
+    fml::TaskRunnerAffineWeakPtr<ImageGeneratorRegistry>
+        image_generator_registry,
     fml::TaskRunnerAffineWeakPtr<SnapshotDelegate> snapshot_delegate) const {
-  UIDartState::Context spawned_context{context_.task_runners,
-                                       std::move(snapshot_delegate),
-                                       std::move(io_manager),
-                                       context_.unref_queue,
-                                       std::move(image_decoder),
-                                       std::move(image_generator_registry),
-                                       advisory_script_uri,
-                                       advisory_script_entrypoint,
-                                       context_.deterministic_rendering_enabled,
-                                       context_.concurrent_task_runner,
-                                       context_.enable_impeller,
-                                       context_.runtime_stage_backend};
+  UIDartState::Context spawned_context{
+      context_.task_runners,
+      std::move(snapshot_delegate),
+      std::move(io_manager),
+      context_.unref_queue,
+      std::move(image_decoder),
+      std::move(image_generator_registry),
+      advisory_script_uri,
+      advisory_script_entrypoint,
+      context_.deterministic_rendering_enabled,
+      context_.concurrent_task_runner,
+      context_.runtime_stage_backend,
+      context_.enable_impeller,
+      context_.enable_flutter_gpu,
+  };
   auto result =
       std::make_unique<RuntimeController>(p_client,                      //
                                           vm_,                           //
@@ -207,6 +211,14 @@ bool RuntimeController::RemoveView(int64_t view_id) {
   }
 
   return platform_configuration->RemoveView(view_id);
+}
+
+bool RuntimeController::SendViewFocusEvent(const ViewFocusEvent& event) {
+  auto* platform_configuration = GetPlatformConfigurationIfAvailable();
+  if (!platform_configuration) {
+    return false;
+  }
+  return platform_configuration->SendFocusEvent(event);
 }
 
 bool RuntimeController::ViewExists(int64_t view_id) const {
@@ -375,13 +387,14 @@ bool RuntimeController::DispatchPointerDataPacket(
   return false;
 }
 
-bool RuntimeController::DispatchSemanticsAction(int32_t node_id,
+bool RuntimeController::DispatchSemanticsAction(int64_t view_id,
+                                                int32_t node_id,
                                                 SemanticsAction action,
                                                 fml::MallocMapping args) {
   TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
                "basic");
   if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
-    platform_configuration->DispatchSemanticsAction(node_id, action,
+    platform_configuration->DispatchSemanticsAction(view_id, node_id, action,
                                                     std::move(args));
     return true;
   }
@@ -439,9 +452,11 @@ void RuntimeController::CheckIfAllViewsRendered() {
 }
 
 // |PlatformConfigurationClient|
-void RuntimeController::UpdateSemantics(SemanticsUpdate* update) {
+void RuntimeController::UpdateSemantics(int64_t view_id,
+                                        SemanticsUpdate* update) {
   if (platform_data_.semantics_enabled) {
-    client_.UpdateSemantics(update->takeNodes(), update->takeActions());
+    client_.UpdateSemantics(view_id, update->takeNodes(),
+                            update->takeActions());
   }
 }
 
@@ -529,7 +544,8 @@ bool RuntimeController::LaunchRootIsolate(
     std::optional<std::string> dart_entrypoint_library,
     const std::vector<std::string>& dart_entrypoint_args,
     std::unique_ptr<IsolateConfiguration> isolate_configuration,
-    std::shared_ptr<NativeAssetsManager> native_assets_manager) {
+    std::shared_ptr<NativeAssetsManager> native_assets_manager,
+    std::optional<int64_t> engine_id) {
   if (root_isolate_.lock()) {
     FML_LOG(ERROR) << "Root isolate was already running.";
     return false;
@@ -577,6 +593,11 @@ bool RuntimeController::LaunchRootIsolate(
     platform_configuration->DidCreateIsolate();
     if (!FlushRuntimeStateToIsolate()) {
       FML_DLOG(ERROR) << "Could not set up initial isolate state.";
+    }
+    if (engine_id) {
+      if (!platform_configuration->SetEngineId(*engine_id)) {
+        FML_DLOG(ERROR) << "Could not set engine identifier.";
+      }
     }
   } else {
     FML_DCHECK(false) << "RuntimeController created without window binding.";
@@ -649,8 +670,20 @@ double RuntimeController::GetScaledFontSize(double unscaled_font_size,
   return client_.GetScaledFontSize(unscaled_font_size, configuration_id);
 }
 
+void RuntimeController::RequestViewFocusChange(
+    const ViewFocusChangeRequest& request) {
+  client_.RequestViewFocusChange(request);
+}
+
 void RuntimeController::ShutdownPlatformIsolates() {
   platform_isolate_manager_->ShutdownPlatformIsolates();
+}
+
+void RuntimeController::SetRootIsolateOwnerToCurrentThread() {
+  std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();
+  if (root_isolate) {
+    root_isolate->SetOwnerToCurrentThread();
+  }
 }
 
 RuntimeController::Locale::Locale(std::string language_code_,

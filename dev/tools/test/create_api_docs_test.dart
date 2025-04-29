@@ -197,7 +197,7 @@ void main() {
           .childDirectory('user')
           .childDirectory('flutter')
           .childDirectory('bin')
-          .childDirectory('internal');
+          .childDirectory('cache');
       flutterHome.childFile('engine.realm')
         ..createSync(recursive: true)
         ..writeAsStringSync('realm');

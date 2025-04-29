@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:js_interop';
 
 import 'package:meta/meta.dart';
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
@@ -78,6 +79,15 @@ abstract class SemanticsEnabler {
   /// Or if the received [DomEvent] is suitable/enough for enabling the
   /// semantics. See [tryEnableSemantics].
   bool shouldEnableSemantics(DomEvent event) {
+    // Simply tabbing into the placeholder element should not cause semantics
+    // to be enabled. The user should actually click on the placeholder.
+    if (event.isA<DomKeyboardEvent>()) {
+      event as DomKeyboardEvent;
+      if (event.key == 'Tab') {
+        return true;
+      }
+    }
+
     if (!isWaitingToEnableSemantics) {
       // Forward to framework as normal.
       return true;
@@ -184,7 +194,7 @@ class DesktopSemanticsEnabler extends SemanticsEnabler {
       createDomEventListener((DomEvent event) {
         tryEnableSemantics(event);
       }),
-      true,
+      true.toJS,
     );
 
     // Adding roles to semantics placeholder. 'aria-live' will make sure that
@@ -382,7 +392,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       createDomEventListener((DomEvent event) {
         tryEnableSemantics(event);
       }),
-      true,
+      true.toJS,
     );
 
     placeholder

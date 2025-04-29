@@ -13,11 +13,12 @@
 #include "impeller/renderer/backend/vulkan/gpu_tracer_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/khr/khr_swapchain_image_vk.h"
 #include "impeller/renderer/backend/vulkan/swapchain/surface_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/context.h"
 
 namespace impeller {
 
-static constexpr size_t kMaxFramesInFlight = 3u;
+static constexpr size_t kMaxFramesInFlight = 2u;
 
 struct KHRFrameSynchronizerVK {
   vk::UniqueFence acquire;
@@ -25,6 +26,8 @@ struct KHRFrameSynchronizerVK {
   vk::UniqueSemaphore present_ready;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
   bool is_valid = false;
+  // Whether the renderer attached an onscreen command buffer to render to.
+  bool has_onscreen = false;
 
   explicit KHRFrameSynchronizerVK(const vk::Device& device) {
     auto acquire_res = device.createFenceUnique(
@@ -183,10 +186,9 @@ KHRSwapchainImplVK::KHRSwapchainImplVK(const std::shared_ptr<Context>& context,
                      : surface_caps.maxImageCount  // max zero means no limit
       );
   swapchain_info.imageArrayLayers = 1u;
-  // Swapchain images are primarily used as color attachments (via resolve),
-  // blit targets, or input attachments.
+  // Swapchain images are primarily used as color attachments (via resolve) or
+  // input attachments.
   swapchain_info.imageUsage = vk::ImageUsageFlagBits::eColorAttachment |
-                              vk::ImageUsageFlagBits::eTransferDst |
                               vk::ImageUsageFlagBits::eInputAttachment;
   swapchain_info.preTransform = vk::SurfaceTransformFlagBitsKHR::eIdentity;
   swapchain_info.compositeAlpha = composite.value();
@@ -274,6 +276,38 @@ KHRSwapchainImplVK::~KHRSwapchainImplVK() {
 
 const ISize& KHRSwapchainImplVK::GetSize() const {
   return size_;
+}
+
+std::optional<ISize> KHRSwapchainImplVK::GetCurrentUnderlyingSurfaceSize()
+    const {
+  if (!IsValid()) {
+    return std::nullopt;
+  }
+
+  auto context = context_.lock();
+  if (!context) {
+    return std::nullopt;
+  }
+
+  auto& vk_context = ContextVK::Cast(*context);
+  const auto [result, surface_caps] =
+      vk_context.GetPhysicalDevice().getSurfaceCapabilitiesKHR(surface_.get());
+  if (result != vk::Result::eSuccess) {
+    return std::nullopt;
+  }
+
+  // From the spec: `currentExtent` is the current width and height of the
+  // surface, or the special value (0xFFFFFFFF, 0xFFFFFFFF) indicating that the
+  // surface size will be determined by the extent of a swapchain targeting the
+  // surface.
+  constexpr uint32_t kCurrentExtentsPlaceholder = 0xFFFFFFFF;
+  if (surface_caps.currentExtent.width == kCurrentExtentsPlaceholder ||
+      surface_caps.currentExtent.height == kCurrentExtentsPlaceholder) {
+    return std::nullopt;
+  }
+
+  return ISize::MakeWH(surface_caps.currentExtent.width,
+                       surface_caps.currentExtent.height);
 }
 
 bool KHRSwapchainImplVK::IsValid() const {
@@ -378,6 +412,13 @@ KHRSwapchainImplVK::AcquireResult KHRSwapchainImplVK::AcquireNextDrawable() {
       )};
 }
 
+void KHRSwapchainImplVK::AddFinalCommandBuffer(
+    std::shared_ptr<CommandBuffer> cmd_buffer) {
+  const auto& sync = synchronizers_[current_frame_];
+  sync->final_cmd_buffer = std::move(cmd_buffer);
+  sync->has_onscreen = true;
+}
+
 bool KHRSwapchainImplVK::Present(
     const std::shared_ptr<KHRSwapchainImageVK>& image,
     uint32_t index) {
@@ -393,7 +434,10 @@ bool KHRSwapchainImplVK::Present(
   //----------------------------------------------------------------------------
   /// Transition the image to color-attachment-optimal.
   ///
-  sync->final_cmd_buffer = context.CreateCommandBuffer();
+  if (!sync->has_onscreen) {
+    sync->final_cmd_buffer = context.CreateCommandBuffer();
+  }
+  sync->has_onscreen = false;
   if (!sync->final_cmd_buffer) {
     return false;
   }

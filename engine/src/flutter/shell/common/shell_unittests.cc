@@ -117,6 +117,11 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
               (override));
 
   MOCK_METHOD(void,
+              OnPlatformViewSendViewFocusEvent,
+              (const ViewFocusEvent& event),
+              (override));
+
+  MOCK_METHOD(void,
               OnPlatformViewSetNextFrameCallback,
               (const fml::closure& closure),
               (override));
@@ -138,7 +143,10 @@ class MockPlatformViewDelegate : public PlatformView::Delegate {
 
   MOCK_METHOD(void,
               OnPlatformViewDispatchSemanticsAction,
-              (int32_t id, SemanticsAction action, fml::MallocMapping args),
+              (int64_t view_id,
+               int32_t id,
+               SemanticsAction action,
+               fml::MallocMapping args),
               (override));
 
   MOCK_METHOD(void,
@@ -1011,7 +1019,7 @@ TEST_F(ShellTest, PushBackdropFilterToVisitedPlatformViews) {
   // Make sure the filterRect is in global coordinates (contains the (1,1)
   // translation).
   ASSERT_EQ(mutator->GetFilterMutation().GetFilterRect(),
-            SkRect::MakeLTRB(1, 1, 31, 31));
+            DlRect::MakeLTRB(1, 1, 31, 31));
 
   DestroyShell(std::move(shell));
 #endif  // OS_FUCHSIA
@@ -1998,7 +2006,7 @@ class MockTexture : public Texture {
 
   // Called from raster thread.
   void Paint(PaintContext& context,
-             const SkRect& bounds,
+             const DlRect& bounds,
              bool freeze,
              const DlImageSampling) override {}
 
@@ -4336,7 +4344,7 @@ TEST_F(ShellTest, SemanticsActionsFlushMessageLoop) {
       CREATE_NATIVE_ENTRY([&](auto args) { latch.CountDown(); }));
 
   task_runners.GetPlatformTaskRunner()->PostTask([&] {
-    SendSemanticsAction(shell.get(), 0, SemanticsAction::kTap,
+    SendSemanticsAction(shell.get(), 456, 0, SemanticsAction::kTap,
                         fml::MallocMapping(nullptr, 0));
   });
   latch.Wait();
@@ -4371,6 +4379,42 @@ TEST_F(ShellTest, PointerPacketFlushMessageLoop) {
 
   DispatchFakePointerData(shell.get(), 23);
   latch.Wait();
+
+  DestroyShell(std::move(shell), task_runners);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+// Verifies a pointer event will flush the dart event loop.
+TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  EXPECT_EQ(task_runners.GetPlatformTaskRunner(),
+            task_runners.GetUITaskRunner());
+  auto shell = CreateShell(settings, task_runners);
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("testDispatchEvents");
+
+  RunEngine(shell.get(), std::move(configuration));
+  fml::CountDownLatch latch(1);
+  bool did_invoke_callback = false;
+  AddNativeCallback(
+      // The Dart native function names aren't very consistent but this is
+      // just the native function name of the second vm entrypoint in the
+      // fixture.
+      "NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
+        did_invoke_callback = true;
+        latch.CountDown();
+      }));
+
+  DispatchFakePointerData(shell.get(), 23);
+  EXPECT_FALSE(did_invoke_callback);
+  latch.Wait();
+  EXPECT_TRUE(did_invoke_callback);
 
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
@@ -4806,94 +4850,6 @@ TEST_F(ShellTest, IgnoresBadAddViewsBeforeLaunchingIsolate) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, RuntimeStageBackendDefaultsToSkSLWithoutImpeller) {
-  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  Settings settings = CreateSettingsForFixture();
-  settings.enable_impeller = false;
-  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      "io.flutter.test." + GetCurrentTestName() + ".",
-      ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
-          ThreadHost::Type::kIo | ThreadHost::Type::kUi));
-  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
-                           thread_host.raster_thread->GetTaskRunner(),
-                           thread_host.ui_thread->GetTaskRunner(),
-                           thread_host.io_thread->GetTaskRunner());
-  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
-  ASSERT_TRUE(shell);
-
-  fml::AutoResetWaitableEvent latch;
-  AddNativeCallback("NotifyNative", CREATE_NATIVE_ENTRY([&latch](auto args) {
-                      auto backend =
-                          UIDartState::Current()->GetRuntimeStageBackend();
-                      EXPECT_EQ(backend, impeller::RuntimeStageBackend::kSkSL);
-                      latch.Signal();
-                    }));
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("mainNotifyNative");
-  RunEngine(shell.get(), std::move(configuration));
-
-  latch.Wait();
-
-  DestroyShell(std::move(shell), task_runners);
-}
-
-#if IMPELLER_SUPPORTS_RENDERING
-TEST_F(ShellTest, RuntimeStageBackendWithImpeller) {
-  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
-  Settings settings = CreateSettingsForFixture();
-  settings.enable_impeller = true;
-  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
-      "io.flutter.test." + GetCurrentTestName() + ".",
-      ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
-          ThreadHost::Type::kIo | ThreadHost::Type::kUi));
-  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
-                           thread_host.raster_thread->GetTaskRunner(),
-                           thread_host.ui_thread->GetTaskRunner(),
-                           thread_host.io_thread->GetTaskRunner());
-  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
-  ASSERT_TRUE(shell);
-
-  fml::AutoResetWaitableEvent latch;
-
-  impeller::Context::BackendType impeller_backend;
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetPlatformTaskRunner(),
-      [platform_view = shell->GetPlatformView(), &latch, &impeller_backend]() {
-        auto impeller_context = platform_view->GetImpellerContext();
-        EXPECT_TRUE(impeller_context);
-        impeller_backend = impeller_context->GetBackendType();
-        latch.Signal();
-      });
-  latch.Wait();
-
-  AddNativeCallback(
-      "NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
-        auto backend = UIDartState::Current()->GetRuntimeStageBackend();
-        switch (impeller_backend) {
-          case impeller::Context::BackendType::kMetal:
-            EXPECT_EQ(backend, impeller::RuntimeStageBackend::kMetal);
-            break;
-          case impeller::Context::BackendType::kOpenGLES:
-            EXPECT_EQ(backend, impeller::RuntimeStageBackend::kOpenGLES3);
-            break;
-          case impeller::Context::BackendType::kVulkan:
-            EXPECT_EQ(backend, impeller::RuntimeStageBackend::kVulkan);
-            break;
-        }
-        latch.Signal();
-      }));
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("mainNotifyNative");
-  RunEngine(shell.get(), std::move(configuration));
-
-  latch.Wait();
-
-  DestroyShell(std::move(shell), task_runners);
-}
-#endif  // IMPELLER_SUPPORTS_RENDERING
-
 TEST_F(ShellTest, WillLogWarningWhenImpellerIsOptedOut) {
 #if !IMPELLER_SUPPORTS_RENDERING
   GTEST_SKIP() << "This platform doesn't support Impeller.";
@@ -4913,6 +4869,159 @@ TEST_F(ShellTest, WillLogWarningWhenImpellerIsOptedOut) {
                   "[Action Required] The application opted out of Impeller") !=
               std::string::npos);
   ASSERT_TRUE(shell);
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, SendViewFocusEvent) {
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+  fml::AutoResetWaitableEvent latch;
+  std::string last_event;
+
+  AddNativeCallback(
+      "NotifyNative",
+      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { latch.Signal(); }));
+
+  AddNativeCallback("NotifyMessage",
+                    CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                      const auto message_from_dart =
+                          tonic::DartConverter<std::string>::FromDart(
+                              Dart_GetNativeArgument(args, 0));
+                      last_event = message_from_dart;
+                      latch.Signal();
+                    }));
+  fml::AutoResetWaitableEvent check_latch;
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell->IsSetup());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+
+  configuration.SetEntrypoint("testSendViewFocusEvent");
+  RunEngine(shell.get(), std::move(configuration));
+  latch.Wait();
+  latch.Reset();
+
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
+    shell->GetPlatformView()->SendViewFocusEvent(ViewFocusEvent(
+        1, ViewFocusState::kFocused, ViewFocusDirection::kUndefined));
+  });
+  latch.Wait();
+  ASSERT_EQ(last_event,
+            "1 ViewFocusState.focused ViewFocusDirection.undefined");
+
+  latch.Reset();
+  PostSync(shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
+    shell->GetPlatformView()->SendViewFocusEvent(ViewFocusEvent(
+        2, ViewFocusState::kUnfocused, ViewFocusDirection::kBackward));
+  });
+  latch.Wait();
+  ASSERT_EQ(last_event,
+            "2 ViewFocusState.unfocused ViewFocusDirection.backward");
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, ProvidesEngineId) {
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+  fml::AutoResetWaitableEvent latch;
+
+  std::optional<int> reported_handle = std::nullopt;
+
+  AddNativeCallback(
+      "ReportEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        Dart_Handle arg = Dart_GetNativeArgument(args, 0);
+        if (Dart_IsNull(arg)) {
+          reported_handle = std::nullopt;
+        } else {
+          reported_handle = tonic::DartConverter<int64_t>::FromDart(arg);
+        }
+        latch.Signal();
+      }));
+  fml::AutoResetWaitableEvent check_latch;
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell->IsSetup());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEngineId(99);
+  configuration.SetEntrypoint("providesEngineId");
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+  ASSERT_EQ(reported_handle, 99);
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, ProvidesNullEngineId) {
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners task_runners = GetTaskRunnersForFixture();
+  fml::AutoResetWaitableEvent latch;
+
+  std::optional<int> reported_handle = std::nullopt;
+
+  AddNativeCallback(
+      "ReportEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+        Dart_Handle arg = Dart_GetNativeArgument(args, 0);
+        if (Dart_IsNull(arg)) {
+          reported_handle = std::nullopt;
+        } else {
+          reported_handle = tonic::DartConverter<int64_t>::FromDart(arg);
+        }
+        latch.Signal();
+      }));
+  fml::AutoResetWaitableEvent check_latch;
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell->IsSetup());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("providesEngineId");
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+  ASSERT_EQ(reported_handle, std::nullopt);
+  DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, MergeUIAndPlatformThreadsAfterLaunch) {
+  Settings settings = CreateSettingsForFixture();
+  settings.merged_platform_ui_thread =
+      Settings::MergedPlatformUIThread::kMergeAfterLaunch;
+  ThreadHost thread_host(ThreadHost::ThreadHostConfig(
+      "io.flutter.test." + GetCurrentTestName() + ".",
+      ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster |
+          ThreadHost::Type::kIo | ThreadHost::Type::kUi));
+  TaskRunners task_runners("test", thread_host.platform_thread->GetTaskRunner(),
+                           thread_host.raster_thread->GetTaskRunner(),
+                           thread_host.ui_thread->GetTaskRunner(),
+                           thread_host.io_thread->GetTaskRunner());
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+  ASSERT_TRUE(shell);
+
+  ASSERT_FALSE(fml::TaskRunnerChecker::RunsOnTheSameThread(
+      task_runners.GetUITaskRunner()->GetTaskQueueId(),
+      task_runners.GetPlatformTaskRunner()->GetTaskQueueId()));
+
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback(
+      "NotifyNative", CREATE_NATIVE_ENTRY([&](auto args) {
+        ASSERT_TRUE(
+            task_runners.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+        latch.Signal();
+      }));
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("mainNotifyNative");
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
+
+  ASSERT_TRUE(fml::TaskRunnerChecker::RunsOnTheSameThread(
+      task_runners.GetUITaskRunner()->GetTaskQueueId(),
+      task_runners.GetPlatformTaskRunner()->GetTaskQueueId()));
+
   DestroyShell(std::move(shell), task_runners);
 }
 

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:js_interop';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -230,7 +229,7 @@ Future<void> testMain() async {
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
         await matchGoldenFile('${name}_fragment_shader_sampler.png', region: drawRegion);
-      }, skip: isHtml); // HTML doesn't support fragment shaders
+      });
 
       test('drawVertices with image shader', () async {
         final ui.Image image = await generateImage();
@@ -275,7 +274,7 @@ Future<void> testMain() async {
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
         await matchGoldenFile('${name}_drawVertices_imageShader.png', region: drawRegion);
-      }, skip: isHtml); // https://github.com/flutter/flutter/issues/127454;
+      });
 
       test('toByteData_rgba', () async {
         final ui.Image image = await generateImage();
@@ -294,7 +293,7 @@ Future<void> testMain() async {
         final ByteData? pngData = await image.toByteData(format: ui.ImageByteFormat.png);
         expect(pngData, isNotNull);
         expect(pngData!.lengthInBytes, isNonZero);
-      }, skip: isHtml); // https://github.com/flutter/flutter/issues/126611
+      });
     });
   }
 
@@ -347,32 +346,29 @@ Future<void> testMain() async {
     return completer.future;
   });
 
-  // https://github.com/flutter/flutter/issues/126603
-  if (!isHtml) {
-    emitImageTests('decodeImageFromPixels_scaled', () {
-      final Uint8List pixels = generatePixelData(50, 50, (double x, double y) {
-        final double r = sqrt(x * x + y * y);
-        final double theta = atan2(x, y);
-        return ui.Color.fromRGBO(
-          (255 * (sin(r * 10.0) + 1.0) / 2.0).round(),
-          (255 * (sin(theta * 10.0) + 1.0) / 2.0).round(),
-          0,
-          1,
-        );
-      });
-      final Completer<ui.Image> completer = Completer<ui.Image>();
-      ui.decodeImageFromPixels(
-        pixels,
-        50,
-        50,
-        ui.PixelFormat.rgba8888,
-        completer.complete,
-        targetWidth: 150,
-        targetHeight: 150,
+  emitImageTests('decodeImageFromPixels_scaled', () {
+    final Uint8List pixels = generatePixelData(50, 50, (double x, double y) {
+      final double r = sqrt(x * x + y * y);
+      final double theta = atan2(x, y);
+      return ui.Color.fromRGBO(
+        (255 * (sin(r * 10.0) + 1.0) / 2.0).round(),
+        (255 * (sin(theta * 10.0) + 1.0) / 2.0).round(),
+        0,
+        1,
       );
-      return completer.future;
     });
-  }
+    final Completer<ui.Image> completer = Completer<ui.Image>();
+    ui.decodeImageFromPixels(
+      pixels,
+      50,
+      50,
+      ui.PixelFormat.rgba8888,
+      completer.complete,
+      targetWidth: 150,
+      targetHeight: 150,
+    );
+    return completer.future;
+  });
 
   emitImageTests('codec_uri', () async {
     final ui.Codec codec = await renderer.instantiateImageCodecFromUrl(
@@ -381,6 +377,7 @@ Future<void> testMain() async {
     expect(codec.frameCount, 1);
 
     final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
     return info.image;
   });
 
@@ -393,6 +390,7 @@ Future<void> testMain() async {
     expect(codec.frameCount, 1);
 
     final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
     expect(info.image.width, 3024);
     expect(info.image.height, 4032);
   });
@@ -423,17 +421,18 @@ Future<void> testMain() async {
       image.src = url;
       await completer.future;
 
-      final DomImageBitmap bitmap = await createImageBitmap(image as JSObject);
+      final DomImageBitmap bitmap = await createImageBitmap(image);
+      domWindow.URL.revokeObjectURL(url);
 
-      expect(bitmap.width.toDartInt, 150);
-      expect(bitmap.height.toDartInt, 150);
+      expect(bitmap.width, 150);
+      expect(bitmap.height, 150);
       final ui.Image uiImage = await renderer.createImageFromImageBitmap(bitmap);
 
       if (isSkwasm && isMultiThreaded) {
         // Multi-threaded skwasm transfers the bitmap to the web worker, so it should be
         // disposed/consumed.
-        expect(bitmap.width.toDartInt, 0);
-        expect(bitmap.height.toDartInt, 0);
+        expect(bitmap.width, 0);
+        expect(bitmap.height, 0);
       }
       return uiImage;
     });
@@ -441,7 +440,7 @@ Future<void> testMain() async {
 
   // This API doesn't work in headless Firefox due to requiring WebGL
   // See https://github.com/flutter/flutter/issues/109265
-  if (!isFirefox && !isHtml) {
+  if (!isFirefox) {
     emitImageTests('svg_image_bitmap_texture_source', () async {
       final DomBlob svgBlob = createDomBlob(
         <String>[
@@ -471,6 +470,7 @@ Future<void> testMain() async {
         height: 150,
         transferOwnership: false,
       );
+      domWindow.URL.revokeObjectURL(url);
       return uiImage;
     });
   }
@@ -485,6 +485,7 @@ Future<void> testMain() async {
     expect(codec.frameCount, 1);
 
     final ui.FrameInfo info = await codec.getNextFrame();
+    codec.dispose();
     return info.image;
   });
 }

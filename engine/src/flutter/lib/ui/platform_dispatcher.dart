@@ -174,9 +174,9 @@ class PlatformDispatcher {
   ///
   /// Presently, on Android and Web this collection will only contain the
   /// display that the current window is on. On iOS, it will only contains the
-  /// main display on the phone or tablet. On Desktop, it will contain only
-  /// a main display with a valid refresh rate but invalid size and device
-  /// pixel ratio values.
+  /// main display on the phone or tablet. On Desktops other than Linux, it will
+  /// contain only a main display with a valid refresh rate but invalid size and
+  /// device pixel ratio values.
   // TODO(dnfield): Update these docs when https://github.com/flutter/flutter/issues/125939
   // and https://github.com/flutter/flutter/issues/125938 are resolved.
   Iterable<Display> get displays => _displays.values;
@@ -301,6 +301,17 @@ class PlatformDispatcher {
     _invoke(onMetricsChanged, _onMetricsChangedZone);
   }
 
+  void _sendViewFocusEvent(ViewFocusEvent event) {
+    _invoke1<ViewFocusEvent>(onViewFocusChange, _onViewFocusChangeZone, event);
+  }
+
+  /// Opaque engine identifier for the engine running current isolate. Can be used
+  /// in native code to retrieve the engine instance.
+  /// The identifier is valid while the isolate is running.
+  int? get engineId => _engineId;
+
+  int? _engineId;
+
   // Called from the engine, via hooks.dart.
   //
   // Updates the available displays.
@@ -384,8 +395,13 @@ class PlatformDispatcher {
     required ViewFocusState state,
     required ViewFocusDirection direction,
   }) {
-    // TODO(tugorez): implement this method. At the moment will be a no op call.
+    _requestViewFocusChange(viewId, state.index, direction.index);
   }
+
+  @Native<Void Function(Int64, Int64, Int64)>(
+    symbol: 'PlatformConfigurationNativeApi::RequestViewFocusChange',
+  )
+  external static void _requestViewFocusChange(int viewId, int state, int direction);
 
   /// A callback invoked when any view begins a frame.
   ///
@@ -923,10 +939,12 @@ class PlatformDispatcher {
     call `updateSemantics`.
   ''')
   void updateSemantics(SemanticsUpdate update) =>
-      _updateSemantics(update as _NativeSemanticsUpdate);
+      _updateSemantics(_implicitViewId!, update as _NativeSemanticsUpdate);
 
-  @Native<Void Function(Pointer<Void>)>(symbol: 'PlatformConfigurationNativeApi::UpdateSemantics')
-  external static void _updateSemantics(_NativeSemanticsUpdate update);
+  @Native<Void Function(Int64, Pointer<Void>)>(
+    symbol: 'PlatformConfigurationNativeApi::UpdateSemantics',
+  )
+  external static void _updateSemantics(int viewId, _NativeSemanticsUpdate update);
 
   /// The system-reported default locale of the device.
   ///
@@ -1316,14 +1334,14 @@ class PlatformDispatcher {
   }
 
   // Called from the engine, via hooks.dart
-  void _dispatchSemanticsAction(int nodeId, int action, ByteData? args) {
+  void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args) {
     _invoke1<SemanticsActionEvent>(
       onSemanticsActionEvent,
       _onSemanticsActionEventZone,
       SemanticsActionEvent(
         type: SemanticsAction.fromIndex(action)!,
         nodeId: nodeId,
-        viewId: 0, // TODO(goderbauer): Wire up the real view ID.
+        viewId: viewId,
         arguments: args,
       ),
     );
@@ -1506,6 +1524,251 @@ class PlatformDispatcher {
   // configurationId does not match any configuration.
   @Native<Double Function(Double, Int)>(symbol: 'PlatformConfigurationNativeApi::GetScaledFontSize')
   external static double _getScaledFontSize(double unscaledFontSize, int configurationId);
+}
+
+/// A color specified in the operating system UI color palette.
+///
+/// As of the current release, system colors are supported on web only. To check
+/// if the current platform supports system colors, use the static
+/// [platformProvidesSystemColors] field. If the field is `false`, other
+/// functions in this class will throw [UnsupportedError].
+///
+/// This class is typically used in conjunction with
+/// [AccessibilityFeatures.highContrast]. In particular, on Windows, when a user
+/// enables high-contrast mode, they may also pick specific colors that should
+/// be used by application user interfaces. While it is common for applications
+/// to use custom color themes and design languages, in high-contrast mode it is
+/// recommended that widgets use system-specified colors to make content more
+/// legible for users.
+///
+/// The "light" system colors are available through [SystemColor.light], and the "dark" system
+/// colors are available through [SystemColor.dark].
+///
+/// Example:
+///
+/// ```dart
+/// import 'dart:ui';
+///
+/// Color getSystemAccentColor() {
+///   Color? systemAccentColor;
+///   if (SystemColor.platformProvidesSystemColors) {
+///     if (PlatformDispatcher.instance.platformBrightness == Brightness.light) {
+///       systemAccentColor = SystemColor.light.accentColor.value;
+///     } else {
+///       systemAccentColor = SystemColor.dark.accentColor.value;
+///     }
+///   }
+///
+///   return systemAccentColor ?? const Color(0xFF007AFF);
+/// }
+/// ```
+///
+/// See also:
+///
+///   * https://drafts.csswg.org/css-color/#css-system-colors
+///   * https://developer.mozilla.org/en-US/docs/Web/CSS/system-color
+///   * https://developer.mozilla.org/en-US/docs/Web/CSS/@media/forced-colors
+final class SystemColor {
+  /// Creates an instance of a system color.
+  ///
+  /// [name] is the name of the color. System colors provided by [SystemColorPalette], such as
+  /// [SystemColorPalette.accentColor] and [SystemColorPalette.buttonText], use standard names
+  /// defined by the [W3C CSS specification](https://drafts.csswg.org/css-color/#css-system-colors).
+  ///
+  /// [value] is the color value, if this color name is supported, and null if
+  /// it's unsupported.
+  const SystemColor({required this.name, this.value});
+
+  /// Standard system color name, as defined by W3C CSS specification.
+  ///
+  /// System color names in Flutter are case-sensitive. This is so that color
+  /// names can be easily used as [Map] keys. This is in contrast to CSS, where
+  /// system color names are not case-sensitive. That is, specifying
+  /// `background-color: aCcEnTcOlOr` is equivalent to specifying
+  /// `background-color: AccentColor`.
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  final String name;
+
+  /// The color value used for the color named [name], if supported.
+  ///
+  /// If [isSupported] is false, the [value] is null. If [isSupported] is true,
+  /// the [value] is not null.
+  final Color? value;
+
+  /// Returns true if the current platform provides the system color with the
+  /// given [name].
+  ///
+  /// See also:
+  ///
+  ///   * [platformProvidesSystemColors], which returns whether the current
+  ///     platform provides system colors.
+  bool get isSupported => value != null;
+
+  /// Returns true if the current platform provides system colors.
+  ///
+  /// As of the current release, system colors are supported on web only.
+  ///
+  /// See also:
+  ///
+  ///   * [isSupported], which returns whether a specific color is supported.
+  static bool get platformProvidesSystemColors => false;
+
+  /// A palette of system colors for light mode.
+  static final SystemColorPalette light = SystemColorPalette._(Brightness.light);
+
+  /// A palette of system colors for dark mode.
+  static final SystemColorPalette dark = SystemColorPalette._(Brightness.dark);
+}
+
+/// A palette of system colors specified in the operating system for a given [brightness].
+///
+/// The getters in this class, such as [accentColor] and [buttonText], provide standard system
+/// colors defined by the [W3C CSS specification](https://drafts.csswg.org/css-color/#css-system-colors).
+final class SystemColorPalette {
+  SystemColorPalette._(this.brightness);
+
+  /// The brightness mode for which this palette is defined.
+  final Brightness brightness;
+
+  static UnsupportedError _systemColorUnsupportedError() {
+    return UnsupportedError('SystemColor not supported on the current platform.');
+  }
+
+  /// Returns system color named "AccentColor".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get accentColor => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "AccentColorText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get accentColorText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "ActiveText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get activeText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "ButtonBorder".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get buttonBorder => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "ButtonFace".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get buttonFace => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "ButtonText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get buttonText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "Canvas".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get canvas => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "CanvasText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get canvasText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "Field".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get field => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "FieldText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get fieldText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "GrayText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get grayText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "Highlight".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get highlight => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "HighlightText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get highlightText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "LinkText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get linkText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "Mark".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get mark => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "MarkText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get markText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "SelectedItem".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get selectedItem => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "SelectedItemText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get selectedItemText => throw _systemColorUnsupportedError();
+
+  /// Returns system color named "VisitedText".
+  ///
+  /// See also:
+  ///
+  ///   * https://drafts.csswg.org/css-color/#css-system-colors
+  SystemColor get visitedText => throw _systemColorUnsupportedError();
 }
 
 /// Configuration of the platform.

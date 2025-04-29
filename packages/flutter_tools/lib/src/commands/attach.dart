@@ -23,6 +23,7 @@ import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../ios/devices.dart';
+import '../ios/simulators.dart';
 import '../macos/macos_ipad_device.dart';
 import '../mdns_discovery.dart';
 import '../project.dart';
@@ -85,7 +86,6 @@ class AttachCommand extends FlutterCommand {
     usesDartDefineOption();
     usesDeviceUserOption();
     addEnableExperimentation(hide: !verboseHelp);
-    addNullSafetyModeOptions(hide: !verboseHelp);
     usesInitializeFromDillOption(hide: !verboseHelp);
     usesNativeAssetsOption(hide: !verboseHelp);
     argParser
@@ -218,6 +218,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   @override
   Future<void> validateCommand() async {
+    // ARM macOS as an iOS target is hidden, except for attach.
+    MacOSDesignedForIPadDevices.allowDiscovery = true;
+
     await super.validateCommand();
 
     final Device? targetDevice = await findTargetDevice();
@@ -310,12 +313,24 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         logger: _logger,
       );
 
-      _logger.printStatus('Waiting for a connection from Flutter on ${device.name}...');
+      _logger.printStatus('Waiting for a connection from Flutter on ${device.displayName}...');
       final Status discoveryStatus = _logger.startSpinner(
         timeout: const Duration(seconds: 30),
         slowWarningCallback: () {
-          // On iOS we rely on mDNS to find Dart VM Service. Remind the user to allow local network permissions on the device.
-          if (_isIOSDevice(device)) {
+          // On iOS we rely on mDNS to find Dart VM Service.
+          if (device is IOSSimulator) {
+            // mDNS on simulators stopped working in macOS 15.4.
+            // See https://github.com/flutter/flutter/issues/166333.
+            return 'The Dart VM Service was not discovered after 30 seconds. '
+                'This may be due to limited mDNS support in the iOS Simulator.\n\n'
+                'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
+                'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
+                "If you don't see your app in the Settings, uninstall the app and rerun to see the prompt again.\n\n"
+                'If you do not receive a prompt, either run "flutter attach" before starting the '
+                'app or use the Dart VM service URL from the Xcode console with '
+                '"flutter attach --debug-url=<URL>".\n';
+          } else if (_isIOSDevice(device)) {
+            // Remind the user to allow local network permissions on the device.
             return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n\n'
                 'Click "Allow" to the prompt on your device asking if you would like to find and connect devices on your local network. '
                 'If you selected "Don\'t Allow", you can turn it on in Settings > Your App Name > Local Network. '
@@ -324,6 +339,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
           return 'The Dart VM Service was not discovered after 30 seconds. This is taking much longer than expected...\n';
         },
+        warningColor: TerminalColor.cyan,
       );
 
       vmServiceUri = vmServiceDiscovery.uris;
@@ -421,10 +437,14 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         if (runner.exited || !runner.isWaitingForVmService) {
           break;
         }
-        _logger.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
+        _logger.printStatus(
+          'Waiting for a new connection from Flutter on '
+          '${device.displayName}...',
+        );
       }
     } on RPCError catch (err) {
       if (err.code == RPCErrorKind.kServiceDisappeared.code ||
+          err.code == RPCErrorKind.kConnectionDisposed.code ||
           err.message.contains('Service connection disposed')) {
         throwToolExit('Lost connection to device.');
       }

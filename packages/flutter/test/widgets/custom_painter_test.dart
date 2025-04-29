@@ -288,6 +288,94 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
+  testWidgets('provides semantic role', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      CustomPaint(
+        foregroundPainter: _PainterWithSemantics(
+          semantics: const CustomPainterSemantics(
+            rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+            properties: SemanticsProperties(
+              role: SemanticsRole.table,
+              label: 'this is a table',
+              textDirection: TextDirection.rtl,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semanticsTester,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  role: SemanticsRole.table,
+                  label: 'this is a table',
+                  rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    semanticsTester.dispose();
+  });
+
+  testWidgets('provides semantic validation result', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      CustomPaint(
+        foregroundPainter: _PainterWithSemantics(
+          semantics: const CustomPainterSemantics(
+            rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+            properties: SemanticsProperties(
+              textField: true,
+              label: 'email address',
+              textDirection: TextDirection.ltr,
+              validationResult: SemanticsValidationResult.invalid,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semanticsTester,
+      hasSemantics(
+        TestSemantics.root(
+          children: <TestSemantics>[
+            TestSemantics.rootChild(
+              id: 1,
+              rect: TestSemantics.fullScreen,
+              children: <TestSemantics>[
+                TestSemantics(
+                  id: 2,
+                  flags: <SemanticsFlag>[SemanticsFlag.isTextField],
+                  label: 'email address',
+                  validationResult: SemanticsValidationResult.invalid,
+                  rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    semanticsTester.dispose();
+  });
+
   testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
     await tester.pumpWidget(
       CustomPaint(
@@ -476,6 +564,7 @@ void _defineTests() {
               liveRegion: true,
               toggled: true,
               expanded: true,
+              isRequired: true,
             ),
           ),
         ),
@@ -529,6 +618,7 @@ void _defineTests() {
               image: true,
               liveRegion: true,
               expanded: true,
+              isRequired: true,
             ),
           ),
         ),

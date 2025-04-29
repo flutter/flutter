@@ -73,7 +73,7 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
               child: Text('Item $index'),
             );
           },
-          separatorBuilder: (_, __) => const Divider(indent: 20, endIndent: 20, thickness: 2),
+          separatorBuilder: (_, _) => const Divider(indent: 20, endIndent: 20, thickness: 2),
         ),
       ],
     );
@@ -89,10 +89,7 @@ class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
     }
 
     return MaterialApp(
-      theme: ThemeData.from(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-      ),
+      theme: ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey)),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Listening to a ScrollPosition'),
