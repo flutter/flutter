@@ -44,7 +44,7 @@ typedef KeyDataCallback = bool Function(KeyData data);
 typedef SemanticsActionEventCallback = void Function(SemanticsActionEvent action);
 
 /// Signature for [PlatformDispatcher.onGetSemanticsNode].
-typedef GetSemanticsNodeCallback = SemanticsUpdate Function(int viewId, int nodeIDe);
+typedef GetSemanticsNodeCallback = SemanticsUpdate Function(int viewId, int nodeId);
 
 /// Signature for responses to platform messages.
 ///

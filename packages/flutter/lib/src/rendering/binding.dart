@@ -485,6 +485,11 @@ mixin RendererBinding
     );
   }
 
+  @override
+  ui.SemanticsUpdate handleGetSemanticsNode(int viewId, int nodeId) {
+    return _viewIdToRenderView[viewId]!.owner!.semanticsOwner!.getSemanticsNode(nodeId);
+  }
+
   void _handleWebFirstFrame(Duration _) {
     assert(kIsWeb);
     const MethodChannel methodChannel = MethodChannel('flutter/service_worker');

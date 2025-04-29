@@ -7,7 +7,9 @@
 /// @docImport 'semantics.dart';
 library;
 
-import 'dart:ui' as ui show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdateBuilder;
+import 'dart:ui'
+    as ui
+    show AccessibilityFeatures, SemanticsActionEvent, SemanticsUpdate, SemanticsUpdateBuilder;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +28,7 @@ mixin SemanticsBinding on BindingBase {
     platformDispatcher
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsActionEvent = _handleSemanticsActionEvent
-      ..onGetSemanticsNode = _handleGetSemanticsNode
+      ..onGetSemanticsNode = handleGetSemanticsNode
       ..onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     _handleSemanticsEnabledChanged();
   }
@@ -154,6 +156,8 @@ mixin SemanticsBinding on BindingBase {
     }
     performSemanticsAction(decodedAction);
   }
+
+  ui.SemanticsUpdate handleGetSemanticsNode(int viewId, int nodeId);
 
   /// Called whenever the platform requests an action to be performed on a
   /// [SemanticsNode].
