@@ -340,6 +340,28 @@ void main() {
     expect(dateFormat.locale, 'cy');
     expect(dateFormat.format(DateTime(2023, 4, 10, 2, 32)), equals('10 Ebr 2023'));
   });
+
+  testWidgets('ga is initialized correctly by Flutter when DateFormat is used', (
+    WidgetTester tester,
+  ) async {
+    late DateFormat dateFormat;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ga'),
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Builder(
+          builder: (BuildContext context) {
+            dateFormat = DateFormat.yMMMd('ga');
+            return Container();
+          },
+        ),
+      ),
+    );
+
+    expect(dateFormat.locale, 'ga');
+    expect(dateFormat.format(DateTime(2023, 4, 10, 2, 32)), equals('10 Aib 2023'));
+  });
 }
 
 enum DateType { year, medium, full, monthYear }
