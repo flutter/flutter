@@ -113,6 +113,19 @@ void main() {
       await start(expressionEvaluation: true);
       await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
     });
+
+    testWithoutContext('evaluated expression includes correctly mapped stack trace', () async {
+      await start(expressionEvaluation: true);
+      await breakInTopLevelFunction(flutter);
+      // Test that the call comes from some Dart getter called `current` (the
+      // location of which will be compiler-specific) and that the lines and
+      // file name of the current location is correct and reports a Dart path.
+      await evaluateStackTraceCurrent(flutter, <String>[
+        'get current',
+        'package:test/main.dart 24:5',
+        'package:test/main.dart 15:7',
+      ]);
+    });
   });
 
   group('Flutter test for web', () {
@@ -181,6 +194,12 @@ void main() {
       await startPaused(expressionEvaluation: true);
       await evaluateWebLibraryBooleanFromEnvironmentInLibrary(flutter);
     });
+
+    testWithoutContext('evaluated expression includes correctly mapped stack trace', () async {
+      await startPaused(expressionEvaluation: true);
+      await breakInMethod(flutter);
+      await evaluateStackTraceCurrent(flutter, <String>['get current', 'test.dart 6:9']);
+    });
   });
 }
 
@@ -246,6 +265,15 @@ Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(FlutterTestDriver
   expectInstance(res, InstanceKind.kBool, true.toString());
 }
 
+Future<void> evaluateStackTraceCurrent(
+  FlutterTestDriver flutter,
+  List<String> stackTraceStrings,
+) async {
+  final LibraryRef library = await getRootLibrary(flutter);
+  final ObjRef res = await flutter.evaluate(library.id!, 'StackTrace.current.toString()');
+  expectInstance(res, InstanceKind.kString, stringContainsInOrder(stackTraceStrings));
+}
+
 Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
   // `isolate.rootLib` returns incorrect library, so find the
   // entrypoint manually here instead.
@@ -255,12 +283,12 @@ Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
   return isolate.libraries!.firstWhere((LibraryRef l) => l.uri!.contains('org-dartlang-app'));
 }
 
-void expectInstance(ObjRef result, String kind, String message) {
+void expectInstance(ObjRef result, String kind, Object matcher) {
   expect(
     result,
     const TypeMatcher<InstanceRef>()
         .having((InstanceRef instance) => instance.kind, 'kind', kind)
-        .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message),
+        .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', matcher),
   );
 }
 
