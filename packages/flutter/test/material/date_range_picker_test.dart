@@ -1251,15 +1251,22 @@ void main() {
       addTearDown(tester.view.reset);
       tester.view.physicalSize = const Size(720, 1280);
       tester.view.devicePixelRatio = 1.0;
+      initialEntryMode = DatePickerEntryMode.input;
+
+      // Text fields and header are visible by default.
+      await preparePicker(tester, useMaterial3: true, (Future<DateTimeRange?> range) async {
+        expect(find.byType(TextField), findsNWidgets(2));
+        expect(find.text('Select range'), findsOne);
+      });
 
       // Simulate the portait mode on a device with a small display when the virtual
       // keyboard is visible.
       tester.view.viewInsets = const FakeViewPadding(bottom: 1000);
+      await tester.pumpAndSettle();
 
-      initialEntryMode = DatePickerEntryMode.input;
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
-        expect(find.byType(TextField), findsNWidgets(2));
-      });
+      // Text fields are visible and header is hidden
+      expect(find.byType(TextField), findsNWidgets(2));
+      expect(find.text('Select range'), findsNothing);
     });
   });
 

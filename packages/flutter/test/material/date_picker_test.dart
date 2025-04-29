@@ -1669,15 +1669,22 @@ void main() {
       addTearDown(tester.view.reset);
       tester.view.physicalSize = const Size(720, 1280);
       tester.view.devicePixelRatio = 1.0;
+      initialEntryMode = DatePickerEntryMode.input;
+
+      // Text field and header are visible by default.
+      await prepareDatePicker(tester, useMaterial3: true, (Future<DateTime?> range) async {
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.text('Select date'), findsOne);
+      });
 
       // Simulate the portait mode on a device with a small display when the virtual
       // keyboard is visible.
       tester.view.viewInsets = const FakeViewPadding(bottom: 1000);
+      await tester.pumpAndSettle();
 
-      initialEntryMode = DatePickerEntryMode.input;
-      await prepareDatePicker(tester, (Future<DateTime?> date) async {
-        expect(find.byType(TextField), findsOneWidget);
-      });
+      // Text field is visible and header is hidden.
+      expect(find.byType(TextField), findsOneWidget);
+      expect(find.text('Select date'), findsNothing);
     });
 
     // This is a regression test for https://github.com/flutter/flutter/issues/139120.
