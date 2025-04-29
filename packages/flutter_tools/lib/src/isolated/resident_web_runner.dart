@@ -435,7 +435,8 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     final String targetPlatform = getNameForTargetPlatform(TargetPlatform.web_javascript);
     final String sdkName = await device!.device!.sdkNameAndVersion;
 
-    late UpdateFSReport report;
+    // Will be null if there is no report.
+    final UpdateFSReport? report;
     if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
       await runSourceGenerators();
       // Don't reset the resident compiler for web, since the extra recompile is
@@ -469,6 +470,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         return OperationResult(1, 'Failed to recompile application.');
       }
     } else {
+      report = null;
       try {
         final WebBuilder webBuilder = WebBuilder(
           logger: _logger,
@@ -490,8 +492,9 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       }
     }
 
-    late Duration reloadDuration;
-    late Duration reassembleDuration;
+    // Both will be null when not assigned.
+    Duration? reloadDuration;
+    Duration? reassembleDuration;
     try {
       if (!deviceIsDebuggable) {
         _logger.printStatus('Recompile complete. Page requires refresh.');
@@ -578,12 +581,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           fullRestart: true,
           reason: reason,
           overallTimeInMs: elapsed.inMilliseconds,
-          syncedBytes: report.syncedBytes,
-          invalidatedSourcesCount: report.invalidatedSourcesCount,
-          transferTimeInMs: report.transferDuration.inMilliseconds,
-          compileTimeInMs: report.compileDuration.inMilliseconds,
-          findInvalidatedTimeInMs: report.findInvalidatedDuration.inMilliseconds,
-          scannedSourcesCount: report.scannedSourcesCount,
+          syncedBytes: report?.syncedBytes,
+          invalidatedSourcesCount: report?.invalidatedSourcesCount,
+          transferTimeInMs: report?.transferDuration.inMilliseconds,
+          compileTimeInMs: report?.compileDuration.inMilliseconds,
+          findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
+          scannedSourcesCount: report?.scannedSourcesCount,
         ).send();
         _analytics.send(
           Event.hotRunnerInfo(
@@ -594,12 +597,12 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             fullRestart: true,
             reason: reason,
             overallTimeInMs: elapsed.inMilliseconds,
-            syncedBytes: report.syncedBytes,
-            invalidatedSourcesCount: report.invalidatedSourcesCount,
-            transferTimeInMs: report.transferDuration.inMilliseconds,
-            compileTimeInMs: report.compileDuration.inMilliseconds,
-            findInvalidatedTimeInMs: report.findInvalidatedDuration.inMilliseconds,
-            scannedSourcesCount: report.scannedSourcesCount,
+            syncedBytes: report?.syncedBytes,
+            invalidatedSourcesCount: report?.invalidatedSourcesCount,
+            transferTimeInMs: report?.transferDuration.inMilliseconds,
+            compileTimeInMs: report?.compileDuration.inMilliseconds,
+            findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
+            scannedSourcesCount: report?.scannedSourcesCount,
           ),
         );
       } else {
@@ -618,14 +621,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
           fullRestart: false,
           reason: reason,
           overallTimeInMs: elapsed.inMilliseconds,
-          syncedBytes: report.syncedBytes,
-          invalidatedSourcesCount: report.invalidatedSourcesCount,
-          transferTimeInMs: report.transferDuration.inMilliseconds,
-          compileTimeInMs: report.compileDuration.inMilliseconds,
-          findInvalidatedTimeInMs: report.findInvalidatedDuration.inMilliseconds,
-          scannedSourcesCount: report.scannedSourcesCount,
-          reassembleTimeInMs: reassembleDuration.inMilliseconds,
-          reloadVMTimeInMs: reloadDuration.inMilliseconds,
+          syncedBytes: report?.syncedBytes,
+          invalidatedSourcesCount: report?.invalidatedSourcesCount,
+          transferTimeInMs: report?.transferDuration.inMilliseconds,
+          compileTimeInMs: report?.compileDuration.inMilliseconds,
+          findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
+          scannedSourcesCount: report?.scannedSourcesCount,
+          reassembleTimeInMs: reassembleDuration?.inMilliseconds,
+          reloadVMTimeInMs: reloadDuration?.inMilliseconds,
         ).send();
         _analytics.send(
           Event.hotRunnerInfo(
@@ -636,14 +639,14 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
             fullRestart: false,
             reason: reason,
             overallTimeInMs: elapsed.inMilliseconds,
-            syncedBytes: report.syncedBytes,
-            invalidatedSourcesCount: report.invalidatedSourcesCount,
-            transferTimeInMs: report.transferDuration.inMilliseconds,
-            compileTimeInMs: report.compileDuration.inMilliseconds,
-            findInvalidatedTimeInMs: report.findInvalidatedDuration.inMilliseconds,
-            scannedSourcesCount: report.scannedSourcesCount,
-            reassembleTimeInMs: reassembleDuration.inMilliseconds,
-            reloadVMTimeInMs: reloadDuration.inMilliseconds,
+            syncedBytes: report?.syncedBytes,
+            invalidatedSourcesCount: report?.invalidatedSourcesCount,
+            transferTimeInMs: report?.transferDuration.inMilliseconds,
+            compileTimeInMs: report?.compileDuration.inMilliseconds,
+            findInvalidatedTimeInMs: report?.findInvalidatedDuration.inMilliseconds,
+            scannedSourcesCount: report?.scannedSourcesCount,
+            reassembleTimeInMs: reassembleDuration?.inMilliseconds,
+            reloadVMTimeInMs: reloadDuration?.inMilliseconds,
           ),
         );
       }
