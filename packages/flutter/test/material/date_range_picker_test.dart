@@ -1243,6 +1243,24 @@ void main() {
         expect(tester.takeException(), null);
       });
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/140311.
+    testWidgets('Text field stays visible when orientation is portrait and height is reduced', (
+      WidgetTester tester,
+    ) async {
+      addTearDown(tester.view.reset);
+      tester.view.physicalSize = const Size(720, 1280);
+      tester.view.devicePixelRatio = 1.0;
+
+      // Simulate the portait mode on a device with a small display when the virtual
+      // keyboard is visible.
+      tester.view.viewInsets = const FakeViewPadding(bottom: 1000);
+
+      initialEntryMode = DatePickerEntryMode.input;
+      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+        expect(find.byType(TextField), findsNWidgets(2));
+      });
+    });
   });
 
   testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
