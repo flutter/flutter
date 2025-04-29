@@ -1719,7 +1719,7 @@ class CompileTest {
         'archive',
         'DEVELOPMENT_TEAM=$developmentTeam',
         'CODE_SIGN_STYLE=$codeSignStyle',
-        // 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         watch.stop();
         print(results.stdout);
@@ -1760,7 +1760,7 @@ class CompileTest {
         '-verbose',
         'DEVELOPMENT_TEAM=$developmentTeam',
         'CODE_SIGN_STYLE=$codeSignStyle',
-        // 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         print(results.stdout);
       });
