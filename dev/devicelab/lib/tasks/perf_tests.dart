@@ -1763,6 +1763,10 @@ class CompileTest {
         'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         print(results.stdout);
+        Directory dir = Directory(testDirectory);
+        dir.list(recursive: false).forEach((f) {
+          print(f);
+        });
       });
 
       // read the metrics from the test results
