@@ -446,7 +446,7 @@ class LocalizationOptions {
 
   /// The `format-args` argument.
   ///
-  /// Arguments applied to `format` command.
+  /// Arguments provided to `dart format` when formatting the generated files.
   final List<String> formatArgs;
 
   /// The `use-escaping` argument.
