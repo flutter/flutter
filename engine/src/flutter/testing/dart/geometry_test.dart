@@ -712,11 +712,11 @@ void main() {
         0.0,
         294.0,
         28.0,
-        topLeft: Radius.circular(0.0),
-        topRight: Radius.circular(3.0),
-        bottomRight: Radius.circular(3.0),
-        bottomLeft: Radius.circular(0.0),
-      ).contains(Offset(147.0, 14.0)),
+        topLeft: const Radius.circular(0.0),
+        topRight: const Radius.circular(3.0),
+        bottomRight: const Radius.circular(3.0),
+        bottomLeft: const Radius.circular(0.0),
+      ).contains(const Offset(147.0, 14.0)),
       isFalse,
     );
   });
