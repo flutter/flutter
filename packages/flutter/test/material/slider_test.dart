@@ -3572,12 +3572,12 @@ void main() {
     expect(
       material,
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect(color: CupertinoColors.white),
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse(color: CupertinoColors.white),
     );
   });
 
@@ -3600,12 +3600,12 @@ void main() {
     expect(
       material,
       paints
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect()
-        ..rrect(color: color),
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse()
+        ..rsuperellipse(color: color),
     );
   });
 
