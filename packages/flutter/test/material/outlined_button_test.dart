@@ -2984,7 +2984,6 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
     await expectLater(
       find.byType(OutlinedButton),
       matchesGoldenFile('outlined_button.badge.outline.png'),

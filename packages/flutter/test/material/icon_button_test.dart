@@ -3403,7 +3403,6 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
     await expectLater(find.byType(IconButton), matchesGoldenFile('icon_button.badge.outline.png'));
   });
 }
