@@ -68,7 +68,10 @@ source_set("InternalFlutterSwift") {
   visibility = [ ":*" ]
   configs += [ ":config_ios" ]
 
-  sources = [ "framework/Source/UIPressProxy.swift" ]
+  sources = [
+    "framework/Source/ConnectionCollection.swift",
+    "framework/Source/UIPressProxy.swift",
+  ]
 }
 
 source_set("flutter_framework_source") {
@@ -149,8 +152,6 @@ source_set("flutter_framework_source") {
     "framework/Source/UIViewController+FlutterScreenAndSceneIfLoaded.mm",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
-    "framework/Source/connection_collection.h",
-    "framework/Source/connection_collection.mm",
     "framework/Source/overlay_layer_pool.h",
     "framework/Source/overlay_layer_pool.mm",
     "framework/Source/platform_message_response_darwin.h",
@@ -224,7 +225,10 @@ if (enable_ios_unittests) {
     testonly = true
     visibility = [ ":*" ]
     configs += [ ":config_ios_test" ]
-    sources = [ "framework/Source/FakeUIPressProxy.swift" ]
+    sources = [
+      "framework/Source/ConnectionCollectionTest.swift",
+      "framework/Source/FakeUIPressProxy.swift",
+    ]
     frameworks = [ "XCTest.framework" ]
     deps = [ ":InternalFlutterSwift" ]
   }
@@ -278,7 +282,6 @@ if (enable_ios_unittests) {
       "framework/Source/VsyncWaiterIosTest.mm",
       "framework/Source/accessibility_bridge_test.mm",
       "framework/Source/availability_version_check_test.mm",
-      "framework/Source/connection_collection_test.mm",
       "ios_context_noop_unittests.mm",
       "ios_surface_noop_unittests.mm",
       "platform_message_handler_ios_test.mm",
