@@ -472,8 +472,7 @@ void DlDispatcherBase::clipRoundRect(const DlRoundRect& rrect,
     RoundRectGeometry geom(rrect.GetBounds(), rrect.GetRadii().top_left);
     GetCanvas().ClipGeometry(geom, clip_op);
   } else {
-    RoundRectPathSource source(rrect);
-    FillPathGeometry geom(source);
+    FillPathGeometry geom(rrect);
     GetCanvas().ClipGeometry(geom, clip_op);
   }
 }

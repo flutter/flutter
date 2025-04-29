@@ -12,14 +12,6 @@
 
 namespace impeller {
 
-FillPathGeometry::FillPathGeometry(std::unique_ptr<const PathSource> path,
-                                   std::optional<Rect> inner_rect)
-    : owned_(std::move(path)), path_(*owned_), inner_rect_(inner_rect) {}
-
-FillPathGeometry::FillPathGeometry(const PathSource& path,
-                                   std::optional<Rect> inner_rect)
-    : path_(path), inner_rect_(inner_rect) {}
-
 FillPathGeometry::~FillPathGeometry() {}
 
 GeometryResult FillPathGeometry::GetPositionBuffer(
@@ -28,7 +20,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
     RenderPass& pass) const {
   auto& host_buffer = renderer.GetTransientsBuffer();
 
-  const auto& bounding_box = path_.GetBounds();
+  const auto& bounding_box = source_.GetBounds();
   if (bounding_box.IsEmpty()) {
     return GeometryResult{
         .type = PrimitiveType::kTriangle,
@@ -48,7 +40,7 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
       renderer.GetDeviceCapabilities().SupportsTriangleFan() &&
       supports_primitive_restart;
   VertexBuffer vertex_buffer = renderer.GetTessellator().TessellateConvex(
-      path_, host_buffer, entity.GetTransform().GetMaxBasisLengthXY(),
+      source_, host_buffer, entity.GetTransform().GetMaxBasisLengthXY(),
       /*supports_primitive_restart=*/supports_primitive_restart,
       /*supports_triangle_fan=*/supports_triangle_fan);
 
@@ -62,12 +54,12 @@ GeometryResult FillPathGeometry::GetPositionBuffer(
 }
 
 GeometryResult::Mode FillPathGeometry::GetResultMode() const {
-  const auto& bounding_box = path_.GetBounds();
-  if (path_.IsConvex() || bounding_box.IsEmpty()) {
+  const auto& bounding_box = source_.GetBounds();
+  if (source_.IsConvex() || bounding_box.IsEmpty()) {
     return GeometryResult::Mode::kNormal;
   }
 
-  switch (path_.GetFillType()) {
+  switch (source_.GetFillType()) {
     case FillType::kNonZero:
       return GeometryResult::Mode::kNonZero;
     case FillType::kOdd:
@@ -79,7 +71,7 @@ GeometryResult::Mode FillPathGeometry::GetResultMode() const {
 
 std::optional<Rect> FillPathGeometry::GetCoverage(
     const Matrix& transform) const {
-  return path_.GetBounds().TransformAndClipBounds(transform);
+  return source_.GetBounds().TransformAndClipBounds(transform);
 }
 
 bool FillPathGeometry::CoversArea(const Matrix& transform,

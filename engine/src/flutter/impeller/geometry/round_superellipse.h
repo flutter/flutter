@@ -161,7 +161,7 @@ class RoundSuperellipsePathSource : public PathSource {
   void Dispatch(PathReceiver& receiver) const override;
 
  private:
-  const RoundSuperellipse& rse_;
+  const RoundSuperellipse rse_;
 };
 
 }  // namespace impeller

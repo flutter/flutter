@@ -21,7 +21,9 @@
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/entity.h"
 #include "impeller/entity/entity_pass_clip_stack.h"
+#include "impeller/entity/geometry/fill_path_geometry.h"
 #include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/stroke_path_geometry.h"
 #include "impeller/entity/geometry/vertices_geometry.h"
 #include "impeller/entity/inline_pass_context.h"
 #include "impeller/geometry/matrix.h"
@@ -188,7 +190,7 @@ class Canvas {
 
   void Rotate(Radians radians);
 
-  void DrawPath(const PathSource& path, const Paint& paint);
+  void DrawPath(const flutter::DlPath& path, const Paint& paint);
 
   void DrawPaint(const Paint& paint);
 
@@ -316,6 +318,22 @@ class Canvas {
 
   /// @brief Skip all rendering/clipping entities until next restore.
   void SkipUntilMatchingRestore(size_t total_content_depth);
+
+  template <typename Source>
+  void DrawSource(Source source, const Paint& paint) {
+    Entity entity;
+    entity.SetTransform(GetCurrentTransform());
+    entity.SetBlendMode(paint.blend_mode);
+
+    if (paint.style == Paint::Style::kFill) {
+      FillPathGeometry geom(source);
+      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    } else {
+      StrokePathGeometry geom(source, paint.stroke_width, paint.stroke_miter,
+                              paint.stroke_cap, paint.stroke_join);
+      AddRenderEntityWithFiltersToCurrentPass(entity, &geom, paint);
+    }
+  }
 
   void SetupRenderPass();
 

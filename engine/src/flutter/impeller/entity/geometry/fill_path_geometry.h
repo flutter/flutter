@@ -8,20 +8,19 @@
 #include <optional>
 
 #include "flutter/display_list/geometry/dl_path.h"
-#include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/path_geometry_base.h"
 #include "impeller/geometry/path_source.h"
 #include "impeller/geometry/rect.h"
 
 namespace impeller {
 
 /// @brief A geometry that is created from a filled path object.
-class FillPathGeometry final : public Geometry {
+class FillPathGeometry final : public PathGeometryBase {
  public:
-  explicit FillPathGeometry(std::unique_ptr<const PathSource> path,
-                            std::optional<Rect> inner_rect = std::nullopt);
-
-  explicit FillPathGeometry(const PathSource& path,
-                            std::optional<Rect> inner_rect = std::nullopt);
+  template <typename T>
+  explicit FillPathGeometry(const T& t,
+                            std::optional<Rect> inner_rect = std::nullopt)
+      : PathGeometryBase(t), inner_rect_(inner_rect) {}
 
   ~FillPathGeometry() override;
 
@@ -40,8 +39,6 @@ class FillPathGeometry final : public Geometry {
   // |Geometry|
   GeometryResult::Mode GetResultMode() const override;
 
-  std::unique_ptr<const PathSource> owned_;
-  const PathSource& path_;
   std::optional<Rect> inner_rect_;
 
   FillPathGeometry(const FillPathGeometry&) = delete;

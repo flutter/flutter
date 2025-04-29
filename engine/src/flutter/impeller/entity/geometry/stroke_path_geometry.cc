@@ -692,29 +692,6 @@ std::vector<Point> StrokePathGeometry::GenerateSolidStrokeVertices(
   return points;
 }
 
-StrokePathGeometry::StrokePathGeometry(std::unique_ptr<const PathSource> path,
-                                       Scalar stroke_width,
-                                       Scalar miter_limit,
-                                       Cap stroke_cap,
-                                       Join stroke_join)
-    : owned_(std::move(path)),
-      path_(*owned_),
-      stroke_width_(stroke_width),
-      miter_limit_(miter_limit),
-      stroke_cap_(stroke_cap),
-      stroke_join_(stroke_join) {}
-
-StrokePathGeometry::StrokePathGeometry(const PathSource& path,
-                                       Scalar stroke_width,
-                                       Scalar miter_limit,
-                                       Cap stroke_cap,
-                                       Join stroke_join)
-    : path_(path),
-      stroke_width_(stroke_width),
-      miter_limit_(miter_limit),
-      stroke_cap_(stroke_cap),
-      stroke_join_(stroke_join) {}
-
 StrokePathGeometry::~StrokePathGeometry() = default;
 
 Scalar StrokePathGeometry::GetStrokeWidth() const {
@@ -760,7 +737,7 @@ GeometryResult StrokePathGeometry::GetPositionBuffer(
   Tessellator::Trigs trigs = renderer.GetTessellator().GetTrigsForDeviceRadius(
       scale * stroke_width * 0.5f);
   StrokePathSegmentReceiver::GenerateStrokeVertices(
-      position_writer, path_, stroke_width, miter_limit_, stroke_join_,
+      position_writer, source_, stroke_width, miter_limit_, stroke_join_,
       stroke_cap_, scale, trigs);
 
   const auto [arena_length, oversized_length] = position_writer.GetUsedSize();
@@ -815,7 +792,7 @@ GeometryResult::Mode StrokePathGeometry::GetResultMode() const {
 
 std::optional<Rect> StrokePathGeometry::GetCoverage(
     const Matrix& transform) const {
-  auto path_bounds = path_.GetBounds();
+  auto path_bounds = source_.GetBounds();
   if (path_bounds.IsEmpty()) {
     return std::nullopt;
   }

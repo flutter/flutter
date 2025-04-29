@@ -83,7 +83,7 @@ class RectPathSource : public PathSource {
   }
 
  private:
-  const Rect& rect_;
+  const Rect rect_;
 };
 
 class OvalPathSource : public PathSource {
@@ -119,7 +119,7 @@ class OvalPathSource : public PathSource {
   }
 
  private:
-  const Rect& rect_;
+  const Rect rect_;
 };
 
 }  // namespace impeller

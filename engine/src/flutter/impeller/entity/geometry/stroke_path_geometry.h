@@ -5,25 +5,25 @@
 #ifndef FLUTTER_IMPELLER_ENTITY_GEOMETRY_STROKE_PATH_GEOMETRY_H_
 #define FLUTTER_IMPELLER_ENTITY_GEOMETRY_STROKE_PATH_GEOMETRY_H_
 
-#include "impeller/entity/geometry/geometry.h"
+#include "impeller/entity/geometry/path_geometry_base.h"
 #include "impeller/geometry/matrix.h"
 
 namespace impeller {
 
 /// @brief A geometry that is created from a stroked path object.
-class StrokePathGeometry final : public Geometry {
+class StrokePathGeometry final : public PathGeometryBase {
  public:
-  StrokePathGeometry(std::unique_ptr<const PathSource> path,
-                     Scalar stroke_width,
-                     Scalar miter_limit,
-                     Cap stroke_cap,
-                     Join stroke_join);
-
-  StrokePathGeometry(const PathSource& path,
-                     Scalar stroke_width,
-                     Scalar miter_limit,
-                     Cap stroke_cap,
-                     Join stroke_join);
+  template <typename T>
+  explicit StrokePathGeometry(const T& t,
+                              Scalar stroke_width,
+                              Scalar miter_limit,
+                              Cap stroke_cap,
+                              Join stroke_join)
+      : PathGeometryBase(t),
+        stroke_width_(stroke_width),
+        miter_limit_(miter_limit),
+        stroke_cap_(stroke_cap),
+        stroke_join_(stroke_join) {}
 
   ~StrokePathGeometry() override;
 
@@ -63,12 +63,10 @@ class StrokePathGeometry final : public Geometry {
 
   bool SkipRendering() const;
 
-  std::unique_ptr<const PathSource> owned_;
-  const PathSource& path_;
-  Scalar stroke_width_;
-  Scalar miter_limit_;
-  Cap stroke_cap_;
-  Join stroke_join_;
+  const Scalar stroke_width_;
+  const Scalar miter_limit_;
+  const Cap stroke_cap_;
+  const Join stroke_join_;
 
   StrokePathGeometry(const StrokePathGeometry&) = delete;
 

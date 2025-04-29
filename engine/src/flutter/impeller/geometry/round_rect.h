@@ -191,7 +191,7 @@ class RoundRectPathSource : public PathSource {
   }
 
  private:
-  const RoundRect& round_rect_;
+  const RoundRect round_rect_;
 };
 
 }  // namespace impeller
