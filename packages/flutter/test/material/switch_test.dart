@@ -4243,7 +4243,6 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(useMaterial3: true),
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
@@ -4366,7 +4365,7 @@ void main() {
     Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
         key: UniqueKey(),
-        theme: ThemeData(platform: platform, useMaterial3: true),
+        theme: ThemeData(platform: platform),
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(

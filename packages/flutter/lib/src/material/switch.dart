@@ -108,7 +108,7 @@ class Switch extends StatelessWidget {
     required this.value,
     required this.onChanged,
     @Deprecated(
-      'Use activeThumbColor or activeTrackColor instead. '
+      'Use activeThumbColor instead. '
       'This feature was deprecated after v3.31.0-2.0.pre.',
     )
     this.activeColor,
