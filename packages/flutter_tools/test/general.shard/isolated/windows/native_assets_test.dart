@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_cli/code_assets.dart' as native_assets_cli;
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/code_assets.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../../src/common.dart';
@@ -89,8 +89,6 @@ void main() {
               package: 'bar',
               name: 'bar.dart',
               linkMode: DynamicLoadingBundled(),
-              os: OS.windows,
-              architecture: Architecture.x64,
               file: dylibAfterCompiling.uri,
             ),
           ];

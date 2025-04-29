@@ -1480,7 +1480,7 @@ extension type DomHTMLTextAreaElement._(JSObject _) implements DomHTMLElement {
   external double? get selectionEnd;
   external set selectionStart(double? value);
   external set selectionEnd(double? value);
-  external String? get value;
+  external String get value;
 
   @JS('setSelectionRange')
   external void _setSelectionRange(int start, int end, [String direction]);
@@ -1855,7 +1855,7 @@ extension type DomHTMLInputElement._(JSObject _) implements DomHTMLElement {
   external String? type;
   external set max(String? value);
   external set min(String value);
-  external String? value;
+  external String value;
   external bool? disabled;
   external String placeholder;
   external String? name;
