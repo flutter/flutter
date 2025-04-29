@@ -2307,23 +2307,31 @@ class _AlertDialogActionsLayout extends MultiChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderAlertDialogActionsLayout(dividerThickness: _dividerThickness);
+    return _RenderAlertDialogActionsLayout(
+      dividerThickness: _dividerThickness,
+      textDirection: Directionality.of(context),
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, _RenderAlertDialogActionsLayout renderObject) {
-    renderObject.dividerThickness = _dividerThickness;
+    renderObject
+      ..dividerThickness = _dividerThickness
+      ..textDirection = Directionality.of(context);
   }
 }
 
 class _RenderAlertDialogActionsLayout extends RenderFlex {
-  _RenderAlertDialogActionsLayout({List<RenderBox>? children, required double dividerThickness})
-    : _dividerThickness = dividerThickness,
-      super(
-        direction: Axis.vertical,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-      ) {
+  _RenderAlertDialogActionsLayout({
+    List<RenderBox>? children,
+    required double dividerThickness,
+    super.textDirection,
+  }) : _dividerThickness = dividerThickness,
+       super(
+         direction: Axis.vertical,
+         mainAxisSize: MainAxisSize.min,
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+       ) {
     addAll(children);
   }
 
@@ -2405,12 +2413,17 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
     final double height = getMinIntrinsicHeight(overallWidth);
     size = Size(overallWidth, height);
 
+    final bool ltr = textDirection == TextDirection.ltr;
     RenderBox slot = firstChild!;
-    double x = 0;
+    double x = ltr ? 0 : (overallWidth - slotWidth);
     while (true) {
       slot.layout(BoxConstraints.tight(Size(slotWidth, height)), parentUsesSize: true);
       (slot.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += slot.size.width;
+      if (ltr) {
+        x += slot.size.width;
+      } else {
+        x -= slot.size.width;
+      }
 
       final RenderBox? divider = childAfter(slot);
       if (divider == null) {
@@ -2418,8 +2431,11 @@ class _RenderAlertDialogActionsLayout extends RenderFlex {
       }
       divider.layout(BoxConstraints.tight(Size(dividerThickness, height)));
       (divider.parentData! as FlexParentData).offset = Offset(x, 0);
-      x += dividerThickness;
-
+      if (ltr) {
+        x += dividerThickness;
+      } else {
+        x -= dividerThickness;
+      }
       slot = childAfter(divider)!;
     }
   }
