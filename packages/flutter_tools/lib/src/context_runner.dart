@@ -41,6 +41,8 @@ import 'flutter_application_package.dart';
 import 'flutter_cache.dart';
 import 'flutter_device_manager.dart';
 import 'flutter_features.dart';
+import 'flutter_features_config.dart';
+import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 import 'ios/ios_workflow.dart';
 import 'ios/iproxy.dart';
@@ -233,7 +235,15 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       FeatureFlags:
           () => FlutterFeatureFlags(
             flutterVersion: globals.flutterVersion,
-            config: globals.config,
+            featuresConfig: FlutterFeaturesConfig(
+              globalConfig: globals.config,
+              platform: globals.platform,
+              projectManifest: FlutterManifest.createFromPath(
+                globals.fs.path.join(globals.fs.currentDirectory.path, 'pubspec.yaml'),
+                fileSystem: globals.fs,
+                logger: globals.logger,
+              ),
+            ),
             platform: globals.platform,
           ),
       FlutterVersion: () => FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!),
