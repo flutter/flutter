@@ -72,7 +72,7 @@ bool NotEquals(const T* a, const U* b) {
 }
 
 template <class T, class U>
-bool NotEquals(std::shared_ptr<const T> a, const U* b) {
+bool NotEquals(std::shared_ptr<const T>& a, const U* b) {
   return !Equals(a.get(), b);
 }
 

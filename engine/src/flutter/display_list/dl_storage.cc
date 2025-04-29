@@ -16,12 +16,28 @@ void DisplayListStorage::realloc(size_t count) {
   allocated_ = count;
 }
 
+uint32_t NextPowerOfTwoSize(uint32_t x) {
+  if (x == 0) {
+    return 1;
+  }
+
+  --x;
+
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  x |= x >> 16;
+
+  return x + 1;
+}
+
 uint8_t* DisplayListStorage::allocate(size_t needed) {
   if (used_ + needed > allocated_) {
     static_assert(is_power_of_two(kDLPageSize),
                   "This math needs updating for non-pow2.");
-    // Next greater multiple of DL_BUILDER_PAGE.
-    size_t new_size = (used_ + needed + kDLPageSize) & ~(kDLPageSize - 1);
+    // NPOT, with minimum size of kDLPageSize.
+    size_t new_size = NextPowerOfTwoSize(used_ + needed + kDLPageSize);
     size_t old_size = allocated_;
     realloc(new_size);
     FML_CHECK(ptr_.get());

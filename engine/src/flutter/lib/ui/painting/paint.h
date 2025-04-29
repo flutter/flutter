@@ -5,58 +5,18 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PAINT_H_
 #define FLUTTER_LIB_UI_PAINTING_PAINT_H_
 
-#include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_op_flags.h"
-#include "third_party/tonic/converter/dart_converter.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter {
 
-class Paint {
- public:
-  Paint() = default;
-  Paint(Dart_Handle paint_objects, std::vector<uint8_t>& byte_data);
-
-  const DlPaint* paint(DlPaint& paint,
-                       const DisplayListAttributeFlags& flags,
-                       DlTileMode tile_mode) const;
-
-  void toDlPaint(DlPaint& paint, DlTileMode tile_mode) const;
-
-  bool isNull() const { return paint_data_.empty(); }
-  bool isNotNull() const { return !paint_data_.empty(); }
-
- private:
-  friend struct tonic::DartConverter<Paint>;
-
-  Dart_Handle paint_objects_;
-  // note: this is a copy.
-  std::vector<uint8_t> paint_data_;
-};
-
-// The PaintData argument is a placeholder to receive encoded data for Paint
-// objects. The data is actually processed by DartConverter<Paint>, which reads
-// both at the given index and at the next index (which it assumes is a byte
-// data for a Paint object).
-class PaintData {};
+DlPaint* CreatePaint(DlPaint& paint,
+                     const DisplayListAttributeFlags& flags,
+                     DlTileMode tile_mode,
+                     Dart_Handle paint_objects,
+                     bool has_paint_objects,
+                     std::vector<uint8_t>& byte_data);
 
 }  // namespace flutter
-
-// namespace tonic {
-
-// template <>
-// struct DartConverter<flutter::Paint> {
-//   static flutter::Paint FromArguments(Dart_NativeArguments args,
-//                                       int index,
-//                                       Dart_Handle& exception);
-// };
-
-// template <>
-// struct DartConverter<flutter::PaintData> {
-//   static flutter::PaintData FromArguments(Dart_NativeArguments args,
-//                                           int index,
-//                                           Dart_Handle& exception);
-// };
-
-// }  // namespace tonic
 
 #endif  // FLUTTER_LIB_UI_PAINTING_PAINT_H_

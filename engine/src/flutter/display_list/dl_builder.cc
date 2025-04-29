@@ -4,6 +4,7 @@
 
 #include "flutter/display_list/dl_builder.h"
 
+#include "display_list/effects/dl_mask_filter.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_op_flags.h"
@@ -369,17 +370,17 @@ void DisplayListBuilder::SetAttributesFromPaint(
     setStrokeJoin(paint.getStrokeJoin());
   }
   if (flags.applies_shader()) {
-    setColorSource(paint.getColorSource().get());
+    setColorSource(paint.getColorSourcePtr());
   }
   if (flags.applies_color_filter()) {
     setInvertColors(paint.isInvertColors());
-    setColorFilter(paint.getColorFilter().get());
+    setColorFilter(paint.getColorFilterPtr());
   }
   if (flags.applies_image_filter()) {
-    setImageFilter(paint.getImageFilter().get());
+    setImageFilter(paint.getImageFilterPtr());
   }
   if (flags.applies_mask_filter()) {
-    setMaskFilter(paint.getMaskFilter().get());
+    setMaskFilter(paint.getMaskFilterPtr());
   }
 }
 
@@ -1823,7 +1824,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   }
 
   if (flags.applies_mask_filter()) {
-    auto filter = current_.getMaskFilter();
+    const DlMaskFilter* filter = current_.getMaskFilterPtr();
     if (filter) {
       switch (filter->type()) {
         case DlMaskFilterType::kBlur: {
@@ -1841,7 +1842,7 @@ bool DisplayListBuilder::AdjustBoundsForPaint(DlRect& bounds,
   // a layer.
 
   if (flags.applies_image_filter()) {
-    auto filter = current_.getImageFilterPtr();
+    const DlImageFilter* filter = current_.getImageFilterPtr();
     if (filter) {
       DlRect dl_bounds;
       if (!filter->map_local_bounds(bounds, dl_bounds)) {

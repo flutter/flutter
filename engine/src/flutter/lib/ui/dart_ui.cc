@@ -174,6 +174,7 @@ typedef CanvasPath Path;
   V(Canvas, skew)                                \
   V(Canvas, transform)                           \
   V(Canvas, translate)                           \
+  V(Canvas, GetPaintByteData)                    \
   V(Codec, dispose)                              \
   V(Codec, frameCount)                           \
   V(Codec, getNextFrame)                         \

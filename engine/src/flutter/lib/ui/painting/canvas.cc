@@ -6,6 +6,7 @@
 
 #include <cmath>
 
+#include "display_list/dl_sampling_options.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/lib/ui/floating_point.h"
 #include "flutter/lib/ui/painting/image.h"
@@ -46,10 +47,7 @@ static constexpr size_t kPaintBytes = 68;
 
 Canvas::Canvas(sk_sp<DisplayListBuilder> builder)
     : paint_bytes_(std::vector<uint8_t>(kPaintBytes)),
-      display_list_builder_(std::move(builder)) {
-  paint_byte_wrapper_ = Dart_NewExternalTypedData(
-      Dart_TypedData_kUint8, paint_bytes_.data(), paint_bytes_.size());
-}
+      display_list_builder_(std::move(builder)) {}
 
 Canvas::~Canvas() {}
 
@@ -59,14 +57,13 @@ void Canvas::save() {
   }
 }
 
-void Canvas::saveLayerWithoutBounds(Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+void Canvas::saveLayerWithoutBounds(Dart_Handle paint_objects,
+                                    bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
     const DlPaint* save_paint =
-        paint.paint(dl_paint, kSaveLayerWithPaintFlags, DlTileMode::kDecal);
+        CreatePaint(dl_paint, kSaveLayerWithPaintFlags, DlTileMode::kDecal,
+                    paint_objects, has_paint_objects, paint_bytes_);
     FML_DCHECK(save_paint);
     TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
     builder()->SaveLayer(std::nullopt, save_paint);
@@ -77,16 +74,15 @@ void Canvas::saveLayer(double left,
                        double top,
                        double right,
                        double bottom,
-                       Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                       Dart_Handle paint_objects,
+                       bool has_paint_objects) {
   DlRect bounds = DlRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                    SafeNarrow(right), SafeNarrow(bottom));
   if (display_list_builder_) {
     DlPaint dl_paint;
     const DlPaint* save_paint =
-        paint.paint(dl_paint, kSaveLayerWithPaintFlags, DlTileMode::kDecal);
+        CreatePaint(dl_paint, kSaveLayerWithPaintFlags, DlTileMode::kDecal,
+                    paint_objects, has_paint_objects, paint_bytes_);
     FML_DCHECK(save_paint);
     TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
     builder()->SaveLayer(bounds, save_paint);
@@ -231,31 +227,22 @@ void Canvas::drawLine(double x1,
                       double y1,
                       double x2,
                       double y2,
-                      Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                      Dart_Handle paint_objects,
+                      bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawLineFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawLineFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawLine(DlPoint(SafeNarrow(x1), SafeNarrow(y1)),
                         DlPoint(SafeNarrow(x2), SafeNarrow(y2)), dl_paint);
   }
 }
 
-void Canvas::drawPaint(Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+void Canvas::drawPaint(Dart_Handle paint_objects, bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawPaintFlags, DlTileMode::kClamp);
-    std::shared_ptr<DlImageFilter> filter = dl_paint.getImageFilter();
-    if (filter && !filter->asColorFilter()) {
-      // drawPaint does an implicit saveLayer if an DlImageFilter is
-      // present that cannot be replaced by an DlColorFilter.
-      TRACE_EVENT0("flutter", "ui.Canvas::saveLayer (Recorded)");
-    }
+    CreatePaint(dl_paint, kDrawPaintFlags, DlTileMode::kClamp, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawPaint(dl_paint);
   }
 }
@@ -264,51 +251,48 @@ void Canvas::drawRect(double left,
                       double top,
                       double right,
                       double bottom,
-                      Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                      Dart_Handle paint_objects,
+                      bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawRectFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawRectFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawRect(DlRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                          SafeNarrow(right), SafeNarrow(bottom)),
                         dl_paint);
   }
 }
 
-void Canvas::drawRRect(const RRect& rrect, Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+void Canvas::drawRRect(const RRect& rrect,
+                       Dart_Handle paint_objects,
+                       bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawRRectFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawRRectFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawRoundRect(rrect.rrect, dl_paint);
   }
 }
 
 void Canvas::drawDRRect(const RRect& outer,
                         const RRect& inner,
-                        Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                        Dart_Handle paint_objects,
+                        bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawDRRectFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawDRRectFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawDiffRoundRect(outer.rrect, inner.rrect, dl_paint);
   }
 }
 
 void Canvas::drawRSuperellipse(const RSuperellipse* rse,
-                               Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                               Dart_Handle paint_objects,
+                               bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawDRRectFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawDRRectFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawRoundSuperellipse(rse->rsuperellipse(), dl_paint);
   }
 }
@@ -317,13 +301,12 @@ void Canvas::drawOval(double left,
                       double top,
                       double right,
                       double bottom,
-                      Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                      Dart_Handle paint_objects,
+                      bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawOvalFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawOvalFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawOval(DlRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top),
                                          SafeNarrow(right), SafeNarrow(bottom)),
                         dl_paint);
@@ -333,13 +316,12 @@ void Canvas::drawOval(double left,
 void Canvas::drawCircle(double x,
                         double y,
                         double radius,
-                        Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                        Dart_Handle paint_objects,
+                        bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawCircleFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawCircleFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawCircle(DlPoint(SafeNarrow(x), SafeNarrow(y)),
                           SafeNarrow(radius), dl_paint);
   }
@@ -352,15 +334,13 @@ void Canvas::drawArc(double left,
                      double startAngle,
                      double sweepAngle,
                      bool useCenter,
-                     Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                     Dart_Handle paint_objects,
+                     bool has_paint_objects) {
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint,
-                useCenter ? kDrawArcWithCenterFlags : kDrawArcNoCenterFlags,
-                DlTileMode::kDecal);
+    CreatePaint(
+        dl_paint, useCenter ? kDrawArcWithCenterFlags : kDrawArcNoCenterFlags,
+        DlTileMode::kDecal, paint_objects, has_paint_objects, paint_bytes_);
     builder()->DrawArc(
         DlRect::MakeLTRB(SafeNarrow(left), SafeNarrow(top), SafeNarrow(right),
                          SafeNarrow(bottom)),
@@ -370,10 +350,9 @@ void Canvas::drawArc(double left,
   }
 }
 
-void Canvas::drawPath(const CanvasPath* path, Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+void Canvas::drawPath(const CanvasPath* path,
+                      Dart_Handle paint_objects,
+                      bool has_paint_objects) {
   if (!path) {
     Dart_ThrowException(
         ToDart("Canvas.drawPath called with non-genuine Path."));
@@ -381,7 +360,8 @@ void Canvas::drawPath(const CanvasPath* path, Dart_Handle paint_objects) {
   }
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawPathFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawPathFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawPath(path->path(), dl_paint);
   }
 }
@@ -390,15 +370,13 @@ Dart_Handle Canvas::drawImage(const CanvasImage* image,
                               double x,
                               double y,
                               Dart_Handle paint_objects,
-                              int filterQualityIndex) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                              bool has_paint_objects,
+                              int filter_quality_index) {
   if (!image) {
     return ToDart("Canvas.drawImage called with non-genuine Image.");
   }
 
-  auto dl_image = image->image();
+  const sk_sp<DlImage>& dl_image = image->image();
   if (!dl_image) {
     return Dart_Null();
   }
@@ -407,11 +385,13 @@ Dart_Handle Canvas::drawImage(const CanvasImage* image,
     return ToDart(error.value());
   }
 
-  auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
+  DlImageSampling sampling =
+      ImageFilter::SamplingFromIndex(filter_quality_index);
   if (display_list_builder_) {
     DlPaint dl_paint;
     const DlPaint* opt_paint =
-        paint.paint(dl_paint, kDrawImageWithPaintFlags, DlTileMode::kClamp);
+        CreatePaint(dl_paint, kDrawImageWithPaintFlags, DlTileMode::kClamp,
+                    paint_objects, has_paint_objects, paint_bytes_);
     builder()->DrawImage(dl_image, DlPoint(SafeNarrow(x), SafeNarrow(y)),
                          sampling, opt_paint);
   }
@@ -428,10 +408,8 @@ Dart_Handle Canvas::drawImageRect(const CanvasImage* image,
                                   double dst_right,
                                   double dst_bottom,
                                   Dart_Handle paint_objects,
-                                  int filterQualityIndex) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                                  bool has_paint_objects,
+                                  int filter_quality_index) {
   if (!image) {
     return ToDart("Canvas.drawImageRect called with non-genuine Image.");
   }
@@ -449,11 +427,12 @@ Dart_Handle Canvas::drawImageRect(const CanvasImage* image,
                                 SafeNarrow(src_right), SafeNarrow(src_bottom));
   DlRect dst = DlRect::MakeLTRB(SafeNarrow(dst_left), SafeNarrow(dst_top),
                                 SafeNarrow(dst_right), SafeNarrow(dst_bottom));
-  auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
+  auto sampling = ImageFilter::SamplingFromIndex(filter_quality_index);
   if (display_list_builder_) {
     DlPaint dl_paint;
     const DlPaint* opt_paint =
-        paint.paint(dl_paint, kDrawImageRectWithPaintFlags, DlTileMode::kClamp);
+        CreatePaint(dl_paint, kDrawImageRectWithPaintFlags, DlTileMode::kClamp,
+                    paint_objects, has_paint_objects, paint_bytes_);
     builder()->DrawImageRect(dl_image, src, dst, sampling, opt_paint,
                              DlSrcRectConstraint::kFast);
   }
@@ -470,18 +449,16 @@ Dart_Handle Canvas::drawImageNine(const CanvasImage* image,
                                   double dst_right,
                                   double dst_bottom,
                                   Dart_Handle paint_objects,
-                                  int bitmapSamplingIndex) {
-  Paint paint(paint_objects, paint_bytes_);
-
-  FML_DCHECK(paint.isNotNull());
+                                  bool has_paint_objects,
+                                  int bitmap_sampling_index) {
   if (!image) {
     return ToDart("Canvas.drawImageNine called with non-genuine Image.");
   }
-  auto dl_image = image->image();
+  const sk_sp<DlImage>& dl_image = image->image();
   if (!dl_image) {
     return Dart_Null();
   }
-  auto error = dl_image->get_error();
+  std::optional<std::string> error = dl_image->get_error();
   if (error) {
     return ToDart(error.value());
   }
@@ -492,11 +469,12 @@ Dart_Handle Canvas::drawImageNine(const CanvasImage* image,
   DlIRect icenter = DlIRect::Round(center);
   DlRect dst = DlRect::MakeLTRB(SafeNarrow(dst_left), SafeNarrow(dst_top),
                                 SafeNarrow(dst_right), SafeNarrow(dst_bottom));
-  auto filter = ImageFilter::FilterModeFromIndex(bitmapSamplingIndex);
+  auto filter = ImageFilter::FilterModeFromIndex(bitmap_sampling_index);
   if (display_list_builder_) {
     DlPaint dl_paint;
     const DlPaint* opt_paint =
-        paint.paint(dl_paint, kDrawImageNineWithPaintFlags, DlTileMode::kClamp);
+        CreatePaint(dl_paint, kDrawImageNineWithPaintFlags, DlTileMode::kClamp,
+                    paint_objects, has_paint_objects, paint_bytes_);
     builder()->DrawImageNine(dl_image, icenter, dst, filter, opt_paint);
   }
   return Dart_Null();
@@ -518,25 +496,26 @@ void Canvas::drawPicture(Picture* picture) {
 }
 
 void Canvas::drawPoints(Dart_Handle paint_objects,
+                        bool has_paint_objects,
                         DlPointMode point_mode,
                         const tonic::Float32List& points) {
-  Paint paint(paint_objects, paint_bytes_);
-
   static_assert(sizeof(DlPoint) == sizeof(float) * 2,
                 "DlPoint doesn't use floats.");
 
-  FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     DlPaint dl_paint;
     switch (point_mode) {
       case DlPointMode::kPoints:
-        paint.paint(dl_paint, kDrawPointsAsPointsFlags, DlTileMode::kDecal);
+        CreatePaint(dl_paint, kDrawPointsAsPointsFlags, DlTileMode::kDecal,
+                    paint_objects, has_paint_objects, paint_bytes_);
         break;
       case DlPointMode::kLines:
-        paint.paint(dl_paint, kDrawPointsAsLinesFlags, DlTileMode::kDecal);
+        CreatePaint(dl_paint, kDrawPointsAsLinesFlags, DlTileMode::kDecal,
+                    paint_objects, has_paint_objects, paint_bytes_);
         break;
       case DlPointMode::kPolygon:
-        paint.paint(dl_paint, kDrawPointsAsPolygonFlags, DlTileMode::kDecal);
+        CreatePaint(dl_paint, kDrawPointsAsPolygonFlags, DlTileMode::kDecal,
+                    paint_objects, has_paint_objects, paint_bytes_);
         break;
     }
     builder()->DrawPoints(point_mode,
@@ -548,39 +527,38 @@ void Canvas::drawPoints(Dart_Handle paint_objects,
 
 void Canvas::drawVertices(const Vertices* vertices,
                           DlBlendMode blend_mode,
-                          Dart_Handle paint_objects) {
-  Paint paint(paint_objects, paint_bytes_);
-
+                          Dart_Handle paint_objects,
+                          bool has_paint_objects) {
   if (!vertices) {
     Dart_ThrowException(
         ToDart("Canvas.drawVertices called with non-genuine Vertices."));
     return;
   }
-  FML_DCHECK(paint.isNotNull());
+
   if (display_list_builder_) {
     DlPaint dl_paint;
-    paint.paint(dl_paint, kDrawVerticesFlags, DlTileMode::kDecal);
+    CreatePaint(dl_paint, kDrawVerticesFlags, DlTileMode::kDecal, paint_objects,
+                has_paint_objects, paint_bytes_);
     builder()->DrawVertices(vertices->vertices(), blend_mode, dl_paint);
   }
 }
 
 Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
-                              int filterQualityIndex,
+                              bool has_paint_objects,
+                              int filter_quality_index,
                               CanvasImage* atlas,
                               Dart_Handle transforms_handle,
                               Dart_Handle rects_handle,
                               Dart_Handle colors_handle,
                               DlBlendMode blend_mode,
                               Dart_Handle cull_rect_handle) {
-  Paint paint(paint_objects, paint_bytes_);
-
   if (!atlas) {
     return ToDart(
         "Canvas.drawAtlas or Canvas.drawRawAtlas called with "
         "non-genuine Image.");
   }
 
-  auto dl_image = atlas->image();
+  const sk_sp<DlImage>& dl_image = atlas->image();
   auto error = dl_image->get_error();
   if (error) {
     return ToDart(error.value());
@@ -591,9 +569,9 @@ Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
   static_assert(sizeof(DlRect) == sizeof(float) * 4,
                 "DlRect doesn't use floats.");
 
-  auto sampling = ImageFilter::SamplingFromIndex(filterQualityIndex);
+  DlImageSampling sampling =
+      ImageFilter::SamplingFromIndex(filter_quality_index);
 
-  FML_DCHECK(paint.isNotNull());
   if (display_list_builder_) {
     tonic::Float32List transforms(transforms_handle);
     tonic::Float32List rects(rects_handle);
@@ -608,7 +586,8 @@ Dart_Handle Canvas::drawAtlas(Dart_Handle paint_objects,
 
     DlPaint dl_paint;
     const DlPaint* opt_paint =
-        paint.paint(dl_paint, kDrawAtlasWithPaintFlags, DlTileMode::kClamp);
+        CreatePaint(dl_paint, kDrawAtlasWithPaintFlags, DlTileMode::kClamp,
+                    paint_objects, has_paint_objects, paint_bytes_);
     builder()->DrawAtlas(
         dl_image, reinterpret_cast<const DlRSTransform*>(transforms.data()),
         reinterpret_cast<const DlRect*>(rects.data()), dl_color.data(),
@@ -654,7 +633,8 @@ void Canvas::Invalidate() {
 }
 
 Dart_Handle Canvas::GetPaintByteData() {
-  return paint_byte_wrapper_;
+  return Dart_NewExternalTypedData(Dart_TypedData_kUint8, paint_bytes_.data(),
+                                   paint_bytes_.size());
 }
 
 }  // namespace flutter
