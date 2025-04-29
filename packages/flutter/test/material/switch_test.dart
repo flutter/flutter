@@ -4188,6 +4188,54 @@ void main() {
 
     expect(tester.getSize(find.byType(Switch)), const Size(60.0, 56.0));
   });
+
+  testWidgets('CupertinoSwitch should not stay in intermediate position during drag', (
+    WidgetTester tester,
+  ) async {
+    bool value = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: CupertinoSwitch(
+                value: value,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    value = newValue;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(value, isFalse);
+
+    final Rect switchRect = tester.getRect(find.byType(CupertinoSwitch));
+
+    final TestGesture gesture = await tester.startGesture(switchRect.centerLeft);
+    await gesture.moveBy(Offset(switchRect.width * 0.6, 0.0));
+    await tester.pump();
+
+    expect(value, isTrue);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(value, isTrue);
+
+    final TestGesture gesture2 = await tester.startGesture(switchRect.centerRight);
+    await gesture2.moveBy(Offset(-switchRect.width * 0.6, 0.0));
+    await tester.pump();
+
+    expect(value, isFalse);
+
+    await gesture2.up();
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+  });
 }
 
 class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
