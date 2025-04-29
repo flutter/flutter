@@ -27,6 +27,7 @@ import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
 import io.flutter.embedding.android.MotionEventTracker;
+import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.FlutterOverlaySurface;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.*;
@@ -72,6 +73,8 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
   // The View currently rendering the Flutter UI associated with these platform views.
   private FlutterView flutterView;
+
+  private FlutterJNI flutterJNI = null;
 
   // The texture registry maintaining the textures into which the embedded views will be rendered.
   @Nullable private TextureRegistry textureRegistry;
@@ -951,6 +954,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
       return null;
     }
     return platformView.getView();
+  }
+
+  public void setFlutterJNI(FlutterJNI flutterJNI) {
+    this.flutterJNI = flutterJNI;
   }
 
   @Override

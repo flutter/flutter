@@ -387,6 +387,8 @@ public class FlutterEngine implements ViewUtils.DisplayUpdater {
     platformViewsController2.setRegistry(platformViewsController.getRegistry());
     platformViewsController2.setFlutterJNI(flutterJNI);
 
+    platformViewsController.setFlutterJNI(flutterJNI);
+
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.setPlatformViewsController(platformViewsController);
     flutterJNI.setPlatformViewsController2(platformViewsController2);
