@@ -11,8 +11,6 @@ import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
-import '../web_paragraph/paragraph.dart';
-
 bool get isExperimentalWebParagraph =>
     configuration.canvasKitVariant == CanvasKitVariant.experimentalWebParagraph;
 
