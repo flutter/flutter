@@ -1753,7 +1753,7 @@ class CompileTest {
         'hello_world_swiftui',
         '-destination',
         // 'platform=iOS,name=Fluttér 的 iPhone',
-        'platform=iOS,name=Fluttér 的 iPhone',
+        'platform=iOS',
         '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
         '-resultBundlePath',
         'benchmarkResults.xcresult',
