@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/code_assets.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';

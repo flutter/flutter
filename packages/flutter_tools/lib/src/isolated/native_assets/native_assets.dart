@@ -6,7 +6,8 @@
 
 import 'package:logging/logging.dart' as logging;
 import 'package:native_assets_builder/native_assets_builder.dart';
-import 'package:native_assets_cli/code_assets_builder.dart';
+import 'package:native_assets_cli/code_assets.dart';
+import 'package:native_assets_cli/native_assets_cli.dart';
 import 'package:package_config/package_config_types.dart';
 
 import '../../base/common.dart';

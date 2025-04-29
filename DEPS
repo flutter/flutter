@@ -14,7 +14,7 @@ vars = {
   'flutter_git': 'https://flutter.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'llvm_git': 'https://llvm.googlesource.com',
-  'skia_revision': '8e1521a40bd233906c31fb15818b7a4566f7782d',
+  'skia_revision': '3ab8765a1512cb18dde76a7d1a2ae641fa8f21b5',
 
   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.
@@ -264,7 +264,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/google/flatbuffers' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
 
   'engine/src/flutter/third_party/icu':
-   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '4239b1559d11d4fa66c100543eda4161e060311e',
+   Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'c9fb4b3a6fb54aa8c20a03bbcaa0a4a985ffd34b',
 
    'engine/src/flutter/third_party/gtest-parallel':
    Var('chromium_git') + '/external/github.com/google/gtest-parallel' + '@' + '38191e2733d7cbaeaef6a3f1a942ddeb38a2ad14',
@@ -809,7 +809,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': 'dtMOzWwcSUe3z6-1cgllupQK7lwt605-OhhBgZ5SsscC'
+        'version': 'RlQprtM7XbYtyrgDzNVWyHAjTLR_ScW_Ebe1nGMCn1AC'
        }
      ],
      'condition': 'download_fuchsia_deps and not download_fuchsia_sdk',
@@ -984,29 +984,17 @@ hooks = [
       'terminal.x64,terminal.qemu-arm64',
     ]
   },
-  # The following two scripts check if they are running in the LUCI
-  # environment, and do nothing if so. This is because Xcode is not yet
-  # installed in CI when these hooks are run.
+  # The following script checks if it is running in the LUCI environment,
+  # and does nothing if so. This is because Xcode is not yet installed in CI
+  # when this hook is run.
   {
-    'name': 'Find the iOS device SDKs',
+    'name': 'Find the iOS and macOS SDKs',
     'pattern': '.',
     'condition': 'host_os == "mac"',
     'action': [
       'python3',
-      'engine/src/build/config/ios/ios_sdk.py',
-      # This cleans up entries under flutter/prebuilts for this script and the
-      # following script.
+      'engine/src/build/mac/apple_sdk.py',
       '--as-gclient-hook'
-    ]
-  },
-  {
-    'name': 'Find the macOS SDK',
-    'pattern': '.',
-    'condition': 'host_os == "mac"',
-    'action': [
-      'python3',
-      'engine/src/build/mac/find_sdk.py',
-      '--as-gclient-hook',
     ]
   },
   {
