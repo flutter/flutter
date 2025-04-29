@@ -1782,8 +1782,11 @@ class CompileTest {
         'json'
       ]).then((ProcessResult results) {
         Directory dir = Directory(testDirectory);
-        dir.list(recursive: false).forEach((f) {
+        dir.list(recursive: false).forEach((FileSystemEntity f) {
           print(f);
+          if (f is File) {
+            print(f.lengthSync());
+          }
         });
         print(results.stdout);
         metricsJson = json.decode(results.stdout.toString());
