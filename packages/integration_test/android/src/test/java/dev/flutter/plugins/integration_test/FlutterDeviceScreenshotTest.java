@@ -40,7 +40,7 @@ public class FlutterDeviceScreenshotTest extends AndroidJUnitRunner {
             FlutterView mockFlutterView = mock(FlutterView.class);
             FlutterActivity mockFlutterActivity = mock(FlutterActivity.class);
 
-            when(mockFlutterActivity.findViewById(FlutterActivity.flutterViewId))
+            when(mockFlutterActivity.findViewById(123))
                     .thenReturn(mockFlutterView);
             assertEquals(
                     FlutterDeviceScreenshot.getFlutterView(mockFlutterActivity),
