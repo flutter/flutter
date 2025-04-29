@@ -835,4 +835,33 @@ void main() {
     final Material materialWidget = _getMaterialDialog(tester);
     expect(materialWidget.clipBehavior, Clip.antiAlias);
   });
+
+  testWidgets('DialogThemeData.constraints is respected if Dialog.constraints is null', (
+    WidgetTester tester,
+  ) async {
+    const BoxConstraints themeConstraints = BoxConstraints(maxWidth: 500, maxHeight: 500);
+    const DialogThemeData dialogTheme = DialogThemeData(
+      alignment: Alignment.center,
+      constraints: themeConstraints,
+    );
+
+    final Dialog dialog = Dialog(
+      child: SizedBox.expand(
+        child: Container(color: Colors.amber),
+      ),
+    );
+
+    await tester.pumpWidget(
+      _appWithDialog(tester, dialog, theme: ThemeData(dialogTheme: dialogTheme)),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Verify that the dialog respects the constraints from the theme
+    final Finder dialogFinder = find.byType(Container);
+    final RenderBox renderBox = tester.renderObject(dialogFinder);
+
+    expect(renderBox.constraints.maxWidth, themeConstraints.maxWidth);
+    expect(renderBox.constraints.maxHeight, themeConstraints.maxHeight);
+  });
 }

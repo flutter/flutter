@@ -44,10 +44,19 @@ const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, v
 /// ** See code in examples/api/lib/material/dialog/dialog.0.dart **
 /// {@end-tool}
 ///
-/// {@tool dartpad}
+/// {@tool snippet}
 /// This sample shows a [Dialog] using [BoxConstraints].
 ///
-/// ** See code in examples/api/lib/material/dialog/dialog.1.dart **
+/// ```dart
+/// const Dialog(
+///     constraints: BoxConstraints(maxWidth: 500, minHeight: 300),
+///     child: Column(
+///     mainAxisSize: MainAxisSize.min,
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: <Widget>[],
+///    ),
+///  );
+/// ```
 /// {@end-tool}
 ///
 /// See also:
@@ -265,7 +274,7 @@ class Dialog extends StatelessWidget {
             : _DialogDefaultsM2(context);
 
     final BoxConstraints boxConstraints =
-        constraints ?? defaults.constraints ?? const BoxConstraints(minWidth: 280.0);
+        constraints ?? dialogTheme.constraints ?? const BoxConstraints(minWidth: 280.0);
 
     Widget dialogChild;
 
