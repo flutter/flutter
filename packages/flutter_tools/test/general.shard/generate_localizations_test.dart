@@ -85,7 +85,6 @@ void main() {
     String? yamlFile,
     String? outputPathString,
     String? outputFileString,
-    bool enableFormatting = true,
     String? headerString,
     String? headerFile,
     String? untranslatedMessagesFile,
@@ -117,7 +116,6 @@ void main() {
         templateArbFileName: defaultTemplateArbFileName,
         outputFileString: outputFileString ?? defaultOutputFileString,
         classNameString: defaultClassNameString,
-        enableFormatting: enableFormatting,
         headerString: headerString,
         headerFile: headerFile,
         logger: logger,
@@ -836,7 +834,6 @@ import 'package:intl/intl.dart' as intl;
 import 'bar.dart';
 
 // ignore_for_file: type=lint
-// dart format on
 
 /// The translations for English (`en`).
 class FooEn extends Foo {
@@ -950,7 +947,6 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
-// dart format on
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {
@@ -986,7 +982,6 @@ import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
-// dart format on
 
 /// The translations for English (`en`).
 class AppLocalizationsEn extends AppLocalizations {

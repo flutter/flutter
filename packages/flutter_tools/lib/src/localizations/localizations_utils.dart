@@ -345,7 +345,6 @@ class LocalizationOptions {
     bool? requiredResourceAttributes,
     bool? nullableGetter,
     bool? format,
-    List<String>? formatArgs,
     bool? useEscaping,
     bool? suppressWarnings,
     bool? relaxSyntax,
@@ -358,7 +357,6 @@ class LocalizationOptions {
        requiredResourceAttributes = requiredResourceAttributes ?? false,
        nullableGetter = nullableGetter ?? true,
        format = format ?? true,
-       formatArgs = formatArgs ?? const <String>[],
        useEscaping = useEscaping ?? false,
        suppressWarnings = suppressWarnings ?? false,
        relaxSyntax = relaxSyntax ?? false,
@@ -444,11 +442,6 @@ class LocalizationOptions {
   /// Whether or not to format the generated files.
   final bool format;
 
-  /// The `format-args` argument.
-  ///
-  /// Arguments provided to `dart format` when formatting the generated files.
-  final List<String> formatArgs;
-
   /// The `use-escaping` argument.
   ///
   /// Whether or not the ICU escaping syntax is used.
@@ -519,7 +512,6 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     requiredResourceAttributes: _tryReadBool(yamlNode, 'required-resource-attributes', logger),
     nullableGetter: _tryReadBool(yamlNode, 'nullable-getter', logger),
     format: _tryReadBool(yamlNode, 'format', logger),
-    formatArgs: _tryReadStringList(yamlNode, 'format-args', logger),
     useEscaping: _tryReadBool(yamlNode, 'use-escaping', logger),
     suppressWarnings: _tryReadBool(yamlNode, 'suppress-warnings', logger),
     relaxSyntax: _tryReadBool(yamlNode, 'relax-syntax', logger),
@@ -557,7 +549,6 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     requiredResourceAttributes: command.boolArg('required-resource-attributes'),
     nullableGetter: command.boolArg('nullable-getter'),
     format: command.boolArg('format'),
-    formatArgs: command.stringsArg('format-arg'),
     useEscaping: command.boolArg('use-escaping'),
     suppressWarnings: command.boolArg('suppress-warnings'),
     useNamedParameters: command.boolArg('use-named-parameters'),

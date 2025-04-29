@@ -300,64 +300,8 @@ flutter:
   );
 
   testUsingContext(
-    'dart format is run when --format-arg is passed',
-    () async {
-      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
-        ..createSync(recursive: true);
-      arbFile.writeAsStringSync('''
-{
-  "helloWorld": "Hello, World!",
-  "@helloWorld": {
-    "description": "Sample description"
-  }
-}''');
-      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
-      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>[
-            'Artifact.engineDartBinary',
-            'format',
-            '/lib/l10n/app_localizations_en.dart',
-            '/lib/l10n/app_localizations.dart',
-            '--page-width=120',
-            '--enable-experiment',
-          ],
-        ),
-      );
-
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        artifacts: artifacts,
-        processManager: processManager,
-      );
-
-      await createTestCommandRunner(command).run(<String>[
-        'gen-l10n',
-        '--format',
-        '--format-arg',
-        '--page-width=120',
-        '--format-arg',
-        '--enable-experiment',
-      ]);
-
-      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
-      expect(outputDirectory.existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
-
-  testUsingContext(
     'dart format is not run when --no-format is passed',
-    () async {
+        () async {
       final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
         ..createSync(recursive: true);
       arbFile.writeAsStringSync('''
@@ -459,57 +403,6 @@ format: false
 ''');
       final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
-        fileSystem: fileSystem,
-        logger: logger,
-        artifacts: artifacts,
-        processManager: processManager,
-      );
-      await createTestCommandRunner(command).run(<String>['gen-l10n']);
-
-      final Directory outputDirectory = fileSystem.directory(fileSystem.path.join('lib', 'l10n'));
-      expect(outputDirectory.existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations_en.dart').existsSync(), true);
-      expect(outputDirectory.childFile('app_localizations.dart').existsSync(), true);
-      expect(processManager, hasNoRemainingExpectations);
-    },
-    overrides: <Type, Generator>{
-      FeatureFlags: enableExplicitPackageDependencies,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
-
-  testUsingContext(
-    'dart format with args',
-    () async {
-      final File arbFile = fileSystem.file(fileSystem.path.join('lib', 'l10n', 'app_en.arb'))
-        ..createSync(recursive: true);
-      arbFile.writeAsStringSync('''
-{
-  "helloWorld": "Hello, World!",
-  "@helloWorld": {
-    "description": "Sample description"
-  }
-}''');
-      final File configFile = fileSystem.file('l10n.yaml')..createSync();
-      configFile.writeAsStringSync('''
-format-args: ['--page-width', '120']
-''');
-      final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
-      pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
-      processManager.addCommand(
-        const FakeCommand(
-          command: <String>[
-            'Artifact.engineDartBinary',
-            'format',
-            '/lib/l10n/app_localizations_en.dart',
-            '/lib/l10n/app_localizations.dart',
-            '--page-width',
-            '120',
-          ],
-        ),
-      );
       final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
         fileSystem: fileSystem,
         logger: logger,

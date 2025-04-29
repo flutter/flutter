@@ -200,10 +200,6 @@ class GenerateLocalizationsCommand extends FlutterCommand {
       help:
           'When specified, the "dart format" command is run after generating the localization files.',
     );
-    argParser.addMultiOption(
-      'format-arg',
-      help: 'Additional arguments of the "dart format" command.',
-    );
     argParser.addFlag(
       'use-escaping',
       help:

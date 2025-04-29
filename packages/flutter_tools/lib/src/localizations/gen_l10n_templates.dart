@@ -19,7 +19,6 @@ import 'package:intl/intl.dart' as intl;
 @(messageClassImports)
 
 // ignore_for_file: type=lint
-// dart format @(format)
 
 /// Callers can lookup localized strings with an instance of @(class)
 /// returned by `@(class).of(context)`.
@@ -179,7 +178,6 @@ import 'package:intl/intl.dart' as intl;
 import '@(fileName)';
 
 // ignore_for_file: type=lint
-// dart format @(format)
 
 /// The translations for @(language) (`@(localeName)`).
 class @(class) extends @(baseClass) {

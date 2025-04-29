@@ -63,7 +63,6 @@ Future<LocalizationsGenerator> generateLocalizations({
             outputPathString: options.outputDir,
             classNameString: options.outputClass,
             preferredSupportedLocales: options.preferredSupportedLocales,
-            enableFormatting: options.format,
             headerString: options.header,
             headerFile: options.headerFile,
             useDeferredLoading: options.useDeferredLoading,
@@ -92,12 +91,11 @@ Future<LocalizationsGenerator> generateLocalizations({
       return generator;
     }
     final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final List<String> args = <String>['format', ...formatFileList, ...options.formatArgs];
-    final List<String> command = <String>[dartBinary, ...args];
+    final List<String> command = <String>[dartBinary, 'format', ...formatFileList];
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
       throw ProcessException(dartBinary, command, '''
-`dart ${args.join(' ')}` failed with exit code ${result.exitCode}
+`dart format` failed with exit code ${result.exitCode}
 
 stdout:\n${result.stdout}\n
 stderr:\n${result.stderr}''', result.exitCode);
@@ -543,7 +541,6 @@ class LocalizationsGenerator {
     required String outputFileString,
     required String classNameString,
     List<String>? preferredSupportedLocales,
-    bool enableFormatting = true,
     String? headerString,
     String? headerFile,
     bool useDeferredLoading = false,
@@ -582,7 +579,6 @@ class LocalizationsGenerator {
       templateArbFile: templateArbFileFromFileName(templateArbFileName, inputDirectory),
       baseOutputFile: outputDirectory.childFile(outputFileString),
       preferredSupportedLocales: preferredSupportedLocalesFromLocales(preferredSupportedLocales),
-      enableFormatting: enableFormatting,
       header: headerFromFile(headerString, headerFile, inputDirectory),
       useDeferredLoading: useDeferredLoading,
       untranslatedMessagesFile: _untranslatedMessagesFileFromPath(
@@ -613,7 +609,6 @@ class LocalizationsGenerator {
     required this.baseOutputFile,
     required this.className,
     this.preferredSupportedLocales = const <LocaleInfo>[],
-    required this.enableFormatting,
     this.header = '',
     this.useDeferredLoading = false,
     required this.inputsAndOutputsListFile,
@@ -721,10 +716,6 @@ class LocalizationsGenerator {
   /// The supported locales as found in the arb files located in
   /// [inputDirectory].
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
-
-  /// Whether `dart format` should be applied to the generated Dart localization
-  /// file.
-  final bool enableFormatting;
 
   /// The header to be prepended to the generated Dart localization file.
   final String header;
@@ -1093,7 +1084,6 @@ class LocalizationsGenerator {
 
     return classFileTemplate
         .replaceAll('@(header)', header.isEmpty ? '' : '$header\n\n')
-        .replaceAll('@(format)', enableFormatting ? 'on' : 'off')
         .replaceAll('@(language)', describeLocale(locale.toString()))
         .replaceAll('@(baseClass)', className)
         .replaceAll('@(fileName)', fileName)
@@ -1239,7 +1229,6 @@ class LocalizationsGenerator {
 
     return fileTemplate
         .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
-        .replaceAll('@(format)', enableFormatting ? 'on' : 'off')
         .replaceAll('@(class)', className)
         .replaceAll(
           '@(methods)',

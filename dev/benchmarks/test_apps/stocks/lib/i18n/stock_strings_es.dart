@@ -9,7 +9,6 @@ import 'package:intl/intl.dart' as intl;
 import 'stock_strings.dart';
 
 // ignore_for_file: type=lint
-// dart format on
 
 /// The translations for Spanish Castilian (`es`).
 class StockStringsEs extends StockStrings {
