@@ -1719,7 +1719,7 @@ class CompileTest {
         'archive',
         'DEVELOPMENT_TEAM=$developmentTeam',
         'CODE_SIGN_STYLE=$codeSignStyle',
-        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+        // 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         watch.stop();
         print(results.stdout);
@@ -1753,14 +1753,14 @@ class CompileTest {
         'hello_world_swiftui',
         '-destination',
         // 'platform=iOS,name=Fluttér 的 iPhone',
-        'platform=iOS,arch=arm64',
+        'platform=iOS,name=Fluttér 的 iPhone',
         '-only-testing:BenchmarkTests/BenchmarkTests/testTimeToFirstFrame',
         '-resultBundlePath',
         'benchmarkResults.xcresult',
         '-verbose',
         'DEVELOPMENT_TEAM=$developmentTeam',
         'CODE_SIGN_STYLE=$codeSignStyle',
-        'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
+        // 'PROVISIONING_PROFILE_SPECIFIER=$provisioningProfile',
       ]).then((ProcessResult results) {
         print(results.stdout);
       });
@@ -1777,6 +1777,10 @@ class CompileTest {
         '--format',
         'json'
       ]).then((ProcessResult results) {
+        Directory dir = Directory(testDirectory);
+        dir.list(recursive: false).forEach((f) {
+          print(f);
+        });
         print(results.stdout);
         metricsJson = json.decode(results.stdout.toString());
       });
