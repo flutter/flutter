@@ -68,6 +68,8 @@ test-bundles:
 run-configs:
   - name: chrome-experimental-webparagraph
     browser: chrome
+    browser-flags:
+      - --enable-features=ExtendedTextMetrics
     canvaskit-variant: experimentalWebParagraph
 
   - name: chrome

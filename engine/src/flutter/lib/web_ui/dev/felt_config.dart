@@ -40,6 +40,7 @@ class RunConfiguration {
   RunConfiguration(
     this.name,
     this.browser,
+    this.browserFlags,
     this.variant,
     this.crossOriginIsolated,
     this.forceSingleThreadedSkwasm,
@@ -47,6 +48,7 @@ class RunConfiguration {
 
   final String name;
   final BrowserName browser;
+  final List<String> browserFlags;
   final CanvasKitVariant? variant;
   final bool crossOriginIsolated;
   final bool forceSingleThreadedSkwasm;
@@ -179,6 +181,8 @@ class FeltConfig {
       final YamlMap runConfigYaml = node as YamlMap;
       final String name = runConfigYaml['name'] as String;
       final BrowserName browser = BrowserName.values.byName(runConfigYaml['browser'] as String);
+      final List<String> browserFlags =
+          (runConfigYaml['browser-flags'] as YamlList?)?.cast<String>() ?? <String>[];
       final dynamic variantNode = runConfigYaml['canvaskit-variant'];
       final CanvasKitVariant? variant =
           variantNode == null ? null : CanvasKitVariant.values.byName(variantNode as String);
@@ -188,6 +192,7 @@ class FeltConfig {
       final RunConfiguration runConfig = RunConfiguration(
         name,
         browser,
+        browserFlags,
         variant,
         crossOriginIsolated,
         forceSingleThreadedSkwasm,
