@@ -97,7 +97,7 @@ class FlutterPlugin : Plugin<Project> {
             repositories.maven {
                 url = uri(repository!!)
             }
-            if (plugins.hasPlugin("com.android.application")) {
+            if (plugins.hasPlugin("com.android.application") && hasProperty("android.injected.invoked.from.ide")) {
                 dependencies.add("compileOnly", "io.flutter:flutter_embedding_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:armeabi_v7a_debug:$engineVersion")
                 dependencies.add("compileOnly", "io.flutter:arm64_v8a_debug:$engineVersion")
