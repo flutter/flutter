@@ -640,7 +640,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/java/openjdk/${{platform}}',
-        'version': 'version:21'
+        'version': 'version:17'
        }
      ],
      # Always download the JDK since java is required for running the formatter.
