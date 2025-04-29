@@ -1456,6 +1456,31 @@ flutter:
       );
 
       testUsingContext(
+        'Injecting does not overwrite unchanged registrant files',
+        () async {
+          createFakePlugin(fs);
+
+          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+
+          final File registrantHeader = linuxProject.managedDirectory.childFile(
+            'generated_plugin_registrant.h',
+          );
+          final DateTime headerLastModified = registrantHeader.lastModifiedSync();
+
+          await injectPlugins(flutterProject, releaseMode: false, linuxPlatform: true);
+
+          // Check that the last modified date is the same.
+          expect(registrantHeader.lastModifiedSync(), headerLastModified);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          FeatureFlags: enableExplicitPackageDependencies,
+          Pub: FakePubWithPrimedDeps.new,
+        },
+      );
+
+      testUsingContext(
         'Injecting creates generated macos registrant, but does not include Dart-only plugins',
         () async {
           flutterProject.isModule = true;
