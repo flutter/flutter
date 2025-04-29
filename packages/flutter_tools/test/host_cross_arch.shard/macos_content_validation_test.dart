@@ -72,6 +72,30 @@ void main() {
       final String artifactStat = frameworkArtifact.statSync().mode.toRadixString(8);
       expect(artifactStat, '40755');
 
+      // Verify Info.plist has correct engine version and build mode
+      final File engineStamp = fileSystem.file(
+        fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine.stamp'),
+      );
+      expect(engineStamp, exists);
+      final String engineVersion = engineStamp.readAsStringSync().trim();
+
+      final File infoPlist = fileSystem.file(
+        fileSystem.path.joinAll(<String>[
+          xcframeworkArtifact.path,
+          'macos-arm64_x86_64',
+          'FlutterMacOS.framework',
+          'Versions',
+          'A',
+          'Resources',
+          'Info.plist',
+        ]),
+      );
+      expect(infoPlist, exists);
+
+      final String infoPlistContents = infoPlist.readAsStringSync();
+      expect(infoPlistContents, contains(engineVersion));
+      expect(infoPlistContents, contains(buildMode.toLowerCase()));
+
       if (buildMode == 'Release') {
         final Directory dsymArtifact = fileSystem.directory(
           fileSystem.path.joinAll(<String>[

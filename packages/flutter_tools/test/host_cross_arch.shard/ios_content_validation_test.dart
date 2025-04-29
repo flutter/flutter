@@ -296,6 +296,42 @@ void main() {
             expect(grepResult.exitCode, 1);
           });
         });
+
+        for (final String arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
+          test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
+            final Directory xcframeworkArtifact = fileSystem.directory(
+              fileSystem.path.join(
+                flutterRoot,
+                'bin',
+                'cache',
+                'artifacts',
+                'engine',
+                'ios',
+                'Flutter.xcframework',
+              ),
+            );
+            // Verify Info.plist has correct engine version and build mode
+            final File engineStamp = fileSystem.file(
+              fileSystem.path.join(flutterRoot, 'bin', 'cache', 'engine.stamp'),
+            );
+            expect(engineStamp, exists);
+            final String engineVersion = engineStamp.readAsStringSync().trim();
+
+            final File infoPlist = fileSystem.file(
+              fileSystem.path.joinAll(<String>[
+                xcframeworkArtifact.path,
+                'ios-arm64',
+                'Flutter.framework',
+                'Info.plist',
+              ]),
+            );
+            expect(infoPlist, exists);
+
+            final String infoPlistContents = infoPlist.readAsStringSync();
+            expect(infoPlistContents, contains(engineVersion));
+            expect(infoPlistContents, contains(buildMode.cliName));
+          });
+        }
       }
 
       testWithoutContext('builds all plugin architectures for simulator', () {
