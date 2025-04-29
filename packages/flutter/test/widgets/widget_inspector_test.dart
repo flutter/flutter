@@ -846,6 +846,26 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
       );
     });
 
+    testWidgets("WidgetInspector isn't inserted into the widget tree when "
+        'debugWillManuallyInjectWidgetInspector is set', (WidgetTester tester) async {
+      final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+      // Disable automatic insertion of WidgetInspector into the widget tree by WidgetsApp.
+      binding.debugWillManuallyInjectWidgetInspector = true;
+
+      await tester.pumpWidget(WidgetsApp(color: Colors.red, builder: (_, _) => const Text('Foo')));
+
+      // Verify that the widget inspector is disabled and there's no instances of WidgetInspector
+      // in the tree.
+      final Finder widgetInspectorFinder = find.byType(WidgetInspector);
+      expect(binding.debugShowWidgetInspectorOverride, false);
+      expect(widgetInspectorFinder, findsNothing);
+
+      // Enable the widget inspector and verify WidgetInspector hasn't been inserted into the tree.
+      binding.debugShowWidgetInspectorOverride = true;
+      await tester.pump();
+      expect(widgetInspectorFinder, findsNothing);
+    });
+
     testWidgets(
       'WidgetInspector Exit Selection Mode button',
       (WidgetTester tester) async {
