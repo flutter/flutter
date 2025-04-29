@@ -644,8 +644,6 @@ def to_gn_args(args):
     gn_args['arm_float_abi'] = args.arm_float_abi
 
   if args.dart_dynamic_modules:
-    if not args.prebuilt_dart_sdk:
-      print('--dart-dynamic-modules can only be used with --no-prebuilt-dart-sdk')
     gn_args['dart_dynamic_modules'] = True
 
   if args.no_enable_unittests:
@@ -1167,8 +1165,7 @@ def parse_args(args):
       '--dart-dynamic-modules',
       default=False,
       action='store_true',
-      help='Whether to include the Dart dynamic module interpreter in the Dart '
-      'sdk build. Must be used with --no-prebuilt-dart-sdk.'
+      help='Whether to include the Dart dynamic module interpreter in the build.'
   )
   parser.add_argument(
       '--no-dart-dynamic-modules', dest='dart-dynamic-modules', action='store_false'
