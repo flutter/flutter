@@ -49,6 +49,7 @@ if (enable_unittests) {
   }
 
   impellerc("compile_supported_glsl_shaders") {
+    mnemonic = "IMPELLERC_SKSL"
     shaders = test_shaders
     shader_target_flags = [ "--sksl" ]
     intermediates_subdir = "iplr"
