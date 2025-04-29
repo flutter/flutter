@@ -3,7 +3,7 @@
 ### How do I enable Impeller to try it out myself?
 
 See the instructions in the README on how to [try Impeller in
-Flutter](https://github.com/flutter/engine/tree/main/impeller#try-impeller-in-flutter).
+Flutter](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller#try-impeller-in-flutter).
 
 Support on some platforms is further along than on others. The current priority
 for the team is to support iOS, Android, Desktops, and Embedder API users (in
@@ -17,7 +17,7 @@ tracker](https://github.com/flutter/flutter/issues/new/choose).
 Please explicitly mention that this is an Impeller specific regression. You can
 quickly swap between the Impeller and Skia backends using the command line flag
 flag detailed in [section in the README on how to try
-Impeller](https://github.com/flutter/engine/tree/main/impeller#try-impeller-in-flutter).
+Impeller](https://github.com/flutter/flutter/tree/main/engine/src/flutter/impeller#try-impeller-in-flutter).
 
 Reduced test cases are the most useful. Please also report any performance
 regressions.

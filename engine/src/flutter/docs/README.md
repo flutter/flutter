@@ -1,4 +1,4 @@
-This is an index of team-facing documentation for the [flutter/engine repository](https://github.com/flutter/engine/).
+This is an index of team-facing documentation for the [flutter/engine team](https://github.com/flutter/flutter/tree/main/engine).
 
 - [Accessibility on Windows](https://github.com/flutter/flutter/blob/master/docs/platforms/desktop/windows/Accessibility-on-Windows.md)
 - [Code signing metadata](./release/Code-signing-metadata.md) for engine binaries
