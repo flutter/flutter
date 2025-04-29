@@ -203,7 +203,7 @@ void main() {
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en', 'GB'));
-    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu, 23 Jul');
+    expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu 23 Jul');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, 23 July 2015');
 
     localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('es'));
