@@ -2835,11 +2835,11 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   /// as selecting the edge of the bounding box.
   static const double _edgeHitMargin = 2.0;
 
-  ValueNotifier<bool> get _defaultInspectorTapBehaviorEnabledNotifier =>
-      WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabledNotifier;
+  ValueNotifier<bool> get _selectionOnTapEnabledNotifier =>
+      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledNotifier;
 
-  bool get _isSelectModeWithDefaultTapBehavior =>
-      isSelectMode && _defaultInspectorTapBehaviorEnabledNotifier.value;
+  bool get _isSelectModeWithSelectionOnTapEnabled =>
+      isSelectMode && _selectionOnTapEnabledNotifier.value;
 
   @override
   void initState() {
@@ -2849,7 +2849,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.addListener(
       _selectionInformationChanged,
     );
-    _defaultInspectorTapBehaviorEnabledNotifier.addListener(_selectionInformationChanged);
+    _selectionOnTapEnabledNotifier.addListener(_selectionInformationChanged);
     selection = WidgetInspectorService.instance.selection;
     isSelectMode = WidgetsBinding.instance.debugShowWidgetInspectorOverride;
   }
@@ -2860,7 +2860,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
     WidgetsBinding.instance.debugShowWidgetInspectorOverrideNotifier.removeListener(
       _selectionInformationChanged,
     );
-    _defaultInspectorTapBehaviorEnabledNotifier.removeListener(_selectionInformationChanged);
+    _selectionOnTapEnabledNotifier.removeListener(_selectionInformationChanged);
     super.dispose();
   }
 
@@ -2945,7 +2945,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   }
 
   void _inspectAt(Offset position) {
-    if (!_isSelectModeWithDefaultTapBehavior) {
+    if (!_isSelectModeWithSelectionOnTapEnabled) {
       return;
     }
 
@@ -2986,7 +2986,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
   }
 
   void _handleTap() {
-    if (!_isSelectModeWithDefaultTapBehavior) {
+    if (!_isSelectModeWithSelectionOnTapEnabled) {
       return;
     }
     if (_lastPointerLocation != null) {
@@ -3010,7 +3010,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
           behavior: HitTestBehavior.opaque,
           excludeFromSemantics: true,
           child: IgnorePointer(
-            ignoring: _isSelectModeWithDefaultTapBehavior,
+            ignoring: _isSelectModeWithSelectionOnTapEnabled,
             key: _ignorePointerKey,
             child: widget.child,
           ),
@@ -3528,7 +3528,7 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
     }
 
     final String buttonLabel = 'Move to the ${_leftAligned ? 'right' : 'left'}';
-    return _TooltipGestureDetector(
+    return _WidgetInspectorButton(
       button: buttonBuilder(
         context,
         onPressed: () {
@@ -3547,7 +3547,7 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
 
   Widget get _exitWidgetSelectionButton {
     const String buttonLabel = 'Exit Select Widget mode';
-    return _TooltipGestureDetector(
+    return _WidgetInspectorButton(
       button: widget.exitWidgetSelectionButtonBuilder(
         context,
         onPressed: _exitWidgetSelectionMode,
@@ -3566,26 +3566,24 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
     if (buttonBuilder == null) {
       return null;
     }
+    final ValueNotifier<bool> selectionOnTapEnabledNotifier =
+        WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledNotifier;
 
-    return _TooltipGestureDetector(
+    return _WidgetInspectorButton(
       button: buttonBuilder(
         context,
         onPressed: () {
-          final bool defaultTapBehaviorEnabled =
-              WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled;
-          WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled =
-              !defaultTapBehaviorEnabled;
+          final bool selectionOnTapEnabled = selectionOnTapEnabledNotifier.value;
+          selectionOnTapEnabledNotifier.value = !selectionOnTapEnabled;
           WidgetInspectorService.instance.selection.clear();
         },
         semanticLabel: 'Change widget selection mode for taps',
-        defaultTapBehaviorEnabled:
-            WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled,
+        defaultTapBehaviorEnabled: selectionOnTapEnabledNotifier.value,
       ),
       onTooltipVisible: () {
-        final bool defaultTapBehaviorEnabled =
-            WidgetsBinding.instance.debugWidgetInspectorDefaultTapBehaviorEnabled;
+        final bool selectionOnTapEnabled = selectionOnTapEnabledNotifier.value;
         _changeTooltipMessage(
-          defaultTapBehaviorEnabled
+          selectionOnTapEnabled
               ? 'Disable widget selection for taps'
               : 'Enable widget selection for taps',
         );
@@ -3658,8 +3656,8 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
   }
 }
 
-class _TooltipGestureDetector extends StatefulWidget {
-  const _TooltipGestureDetector({
+class _WidgetInspectorButton extends StatefulWidget {
+  const _WidgetInspectorButton({
     required this.button,
     required this.onTooltipVisible,
     required this.onTooltipHidden,
@@ -3673,10 +3671,10 @@ class _TooltipGestureDetector extends StatefulWidget {
   static const Duration _tooltipDelayDuration = Duration(milliseconds: 100);
 
   @override
-  State<_TooltipGestureDetector> createState() => _TooltipGestureDetectorState();
+  State<_WidgetInspectorButton> createState() => _WidgetInspectorButtonState();
 }
 
-class _TooltipGestureDetectorState extends State<_TooltipGestureDetector> {
+class _WidgetInspectorButtonState extends State<_WidgetInspectorButton> {
   Timer? _tooltipVisibleTimer;
   Timer? _tooltipHiddenTimer;
 
@@ -3696,18 +3694,18 @@ class _TooltipGestureDetectorState extends State<_TooltipGestureDetector> {
       children: <Widget>[
         GestureDetector(
           onLongPress: () {
-            _tooltipVisibleAfter(_TooltipGestureDetector._tooltipDelayDuration);
+            _tooltipVisibleAfter(_WidgetInspectorButton._tooltipDelayDuration);
             _tooltipHiddenAfter(
-              _TooltipGestureDetector._tooltipShownOnLongPressDuration +
-                  _TooltipGestureDetector._tooltipDelayDuration,
+              _WidgetInspectorButton._tooltipShownOnLongPressDuration +
+                  _WidgetInspectorButton._tooltipDelayDuration,
             );
           },
           child: MouseRegion(
             onEnter: (_) {
-              _tooltipVisibleAfter(_TooltipGestureDetector._tooltipDelayDuration);
+              _tooltipVisibleAfter(_WidgetInspectorButton._tooltipDelayDuration);
             },
             onExit: (_) {
-              _tooltipHiddenAfter(_TooltipGestureDetector._tooltipDelayDuration);
+              _tooltipHiddenAfter(_WidgetInspectorButton._tooltipDelayDuration);
             },
             child: widget.button,
           ),

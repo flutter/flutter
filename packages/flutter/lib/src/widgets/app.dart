@@ -1043,7 +1043,7 @@ class WidgetsApp extends StatefulWidget {
 
   /// Builds the widget the [WidgetInspector] uses to exit selection mode.
   ///
-  /// This lets [MaterialApp] and [CupertinoApp] to use an appropriately styled
+  /// This lets [MaterialApp] and [CupertinoApp] use an appropriately styled
   /// button for their design systems without requiring [WidgetInspector] to
   /// depend on the Material or Cupertino packages.
   final ExitWidgetSelectionButtonBuilder? exitWidgetSelectionButtonBuilder;
@@ -1051,7 +1051,7 @@ class WidgetsApp extends StatefulWidget {
   /// Builds the widget the [WidgetInspector] uses to move the exit selection
   /// mode button.
   ///
-  /// This lets [MaterialApp] and [CupertinoApp] to use an appropriately styled
+  /// This lets [MaterialApp] and [CupertinoApp] use an appropriately styled
   /// button for their design systems without requiring [WidgetInspector] to
   /// depend on the Material or Cupertino packages.
   final MoveExitWidgetSelectionButtonBuilder? moveExitWidgetSelectionButtonBuilder;
@@ -1059,7 +1059,7 @@ class WidgetsApp extends StatefulWidget {
   /// Builds the widget the [WidgetInspector] uses to change the default
   /// behavior when tapping on widgets in the app.
   ///
-  /// This lets [MaterialApp] and [CupertinoApp] to use an appropriately styled
+  /// This lets [MaterialApp] and [CupertinoApp] use an appropriately styled
   /// button for their design systems without requiring [WidgetInspector] to
   /// depend on the Material or Cupertino packages.
   final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
