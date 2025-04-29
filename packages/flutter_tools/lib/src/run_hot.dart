@@ -84,6 +84,7 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
+    Logger? logger,
     super.projectRootPath,
     super.dillOutputPath,
     super.stayResident,
@@ -94,11 +95,13 @@ class HotRunner extends ResidentRunner {
     ReassembleHelper reassembleHelper = _defaultReassembleHelper,
     String? nativeAssetsYamlFile,
     required Analytics analytics,
+    super.dartBuilder,
   }) : _stopwatchFactory = stopwatchFactory,
        _reloadSourcesHelper = reloadSourcesHelper,
        _reassembleHelper = reassembleHelper,
        _nativeAssetsYamlFile = nativeAssetsYamlFile,
        _analytics = analytics,
+       _logger = logger,
        super(hotMode: true);
 
   final StopwatchFactory _stopwatchFactory;
@@ -125,7 +128,13 @@ class HotRunner extends ResidentRunner {
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
 
-  String? _targetPlatform;
+  String? _targetPlatformName;
+  TargetPlatform get _targetPlatform =>
+      _targetPlatformName != null
+          ? getTargetPlatformForName(_targetPlatformName!)
+          : throw ArgumentError(
+            'Access to the target platform needs a call to _calculateTargetPlatform first',
+          );
   String? _sdkName;
   bool? _emulator;
 
@@ -133,26 +142,28 @@ class HotRunner extends ResidentRunner {
 
   String? flavor;
 
+  final Logger? _logger;
+
   @override
   bool get supportsDetach => stopAppDuringCleanup;
 
   Future<void> _calculateTargetPlatform() async {
-    if (_targetPlatform != null) {
+    if (_targetPlatformName != null) {
       return;
     }
 
     switch (flutterDevices.length) {
       case 1:
         final Device device = flutterDevices.first.device!;
-        _targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
+        _targetPlatformName = getNameForTargetPlatform(await device.targetPlatform);
         _sdkName = await device.sdkNameAndVersion;
         _emulator = await device.isLocalEmulator;
       case > 1:
-        _targetPlatform = 'multiple';
+        _targetPlatformName = 'multiple';
         _sdkName = 'multiple';
         _emulator = false;
       default:
-        _targetPlatform = 'unknown';
+        _targetPlatformName = 'unknown';
         _sdkName = 'unknown';
         _emulator = false;
     }
@@ -303,8 +314,13 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
 
+    await _calculateTargetPlatform();
+
     final Stopwatch initialUpdateDevFSsTimer = Stopwatch()..start();
-    final UpdateFSReport devfsResult = await _updateDevFS(fullRestart: needsFullRestart);
+    final UpdateFSReport devfsResult = await _updateDevFS(
+      fullRestart: needsFullRestart,
+      targetPlatform: _targetPlatform,
+    );
     _addBenchmarkData(
       'hotReloadInitialDevFSSyncMilliseconds',
       initialUpdateDevFSsTimer.elapsed.inMilliseconds,
@@ -437,7 +453,7 @@ class HotRunner extends ResidentRunner {
       appStartedCompleter?.future.then((_) {
         HotEvent(
           'reload-ready',
-          targetPlatform: _targetPlatform!,
+          targetPlatform: _targetPlatformName!,
           sdkName: _sdkName!,
           emulator: _emulator!,
           fullRestart: false,
@@ -449,7 +465,7 @@ class HotRunner extends ResidentRunner {
         _analytics.send(
           Event.hotRunnerInfo(
             label: 'reload-ready',
-            targetPlatform: _targetPlatform!,
+            targetPlatform: _targetPlatformName!,
             sdkName: _sdkName!,
             emulator: _emulator!,
             fullRestart: false,
@@ -489,12 +505,20 @@ class HotRunner extends ResidentRunner {
     ];
   }
 
-  Future<UpdateFSReport> _updateDevFS({bool fullRestart = false}) async {
+  Future<UpdateFSReport> _updateDevFS({
+    bool fullRestart = false,
+    required TargetPlatform targetPlatform,
+  }) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       globals.printTrace('Updating assets');
       final int result = await assetBundle.build(
+        flutterHookResult: await dartBuilder?.runHooks(
+          targetPlatform: targetPlatform,
+          environment: environment,
+          logger: _logger,
+        ),
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         flavor: debuggingOptions.buildInfo.flavor,
       );
@@ -609,7 +633,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch restartTimer = Stopwatch()..start();
     UpdateFSReport updatedDevFS;
     try {
-      updatedDevFS = await _updateDevFS(fullRestart: true);
+      updatedDevFS = await _updateDevFS(fullRestart: true, targetPlatform: _targetPlatform);
     } finally {
       hotRunnerConfig!.updateDevFSComplete();
     }
@@ -787,7 +811,7 @@ class HotRunner extends ResidentRunner {
 
     if (fullRestart) {
       final OperationResult result = await _fullRestartHelper(
-        targetPlatform: _targetPlatform,
+        targetPlatform: _targetPlatformName,
         sdkName: _sdkName,
         emulator: _emulator,
         reason: reason,
@@ -804,7 +828,7 @@ class HotRunner extends ResidentRunner {
       return result;
     }
     final OperationResult result = await _hotReloadHelper(
-      targetPlatform: _targetPlatform,
+      targetPlatform: _targetPlatformName,
       sdkName: _sdkName,
       emulator: _emulator,
       reason: reason,
@@ -1026,7 +1050,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch devFSTimer = Stopwatch()..start();
     UpdateFSReport updatedDevFS;
     try {
-      updatedDevFS = await _updateDevFS();
+      updatedDevFS = await _updateDevFS(targetPlatform: _targetPlatform);
     } finally {
       hotRunnerConfig!.updateDevFSComplete();
     }
@@ -1188,7 +1212,10 @@ class HotRunner extends ResidentRunner {
               assetsDirectory: deviceAssetsDirectoryUri,
               uiIsolateId: view.uiIsolate!.id,
               viewId: view.id,
-              windows: device.targetPlatform == TargetPlatform.windows_x64,
+              windows:
+                  (device.targetPlatform == TargetPlatform.tester && globals.platform.isWindows) ||
+                  device.targetPlatform == TargetPlatform.windows_x64 ||
+                  device.targetPlatform == TargetPlatform.windows_arm64,
             ),
           ),
         );

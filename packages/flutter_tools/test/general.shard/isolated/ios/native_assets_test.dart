@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:native_assets_cli/code_assets_builder.dart';
 
@@ -198,7 +199,7 @@ void main() {
           kSdkRoot: '.../iPhone Simulator',
           kIosArchs: 'arm64 x86_64',
         };
-        final DartBuildResult dartBuildResult = await runFlutterSpecificDartBuild(
+        final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
@@ -206,7 +207,7 @@ void main() {
           buildRunner: buildRunner,
         );
         await installCodeAssets(
-          dartBuildResult: dartBuildResult,
+          dartHookResult: dartHookResult,
           environmentDefines: environmentDefines,
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
@@ -216,8 +217,8 @@ void main() {
         expect(
           (globals.logger as BufferLogger).traceText,
           stringContainsInOrder(<String>[
-            'Building native assets for ios [arm64, x64].',
-            'Building native assets for ios [arm64, x64] done.',
+            'Building native assets for ios_arm64, ios_x64.',
+            'Building native assets for ios_arm64, ios_x64 done.',
           ]),
         );
         expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
