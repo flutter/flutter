@@ -97,7 +97,7 @@ void main() {
       MaterialApp(
         home: Form(
           key: formKey,
-          child: FormField(
+          child: FormField<String>(
             builder: (_) => const SizedBox.shrink(),
             onReset: () {
               resetCalled = true;
