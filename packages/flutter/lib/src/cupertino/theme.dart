@@ -498,7 +498,7 @@ class NoDefaultCupertinoThemeData {
   /// Defaults to [CupertinoColors.systemBackground].
   final Color? scaffoldBackgroundColor;
 
-  /// Color of the selection handle.
+  /// The color of the selection handles on the text field.
   ///
   /// Defaults to [CupertinoColors.systemBlue].
   final Color? selectionHandleColor;
