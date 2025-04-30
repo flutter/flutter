@@ -77,7 +77,7 @@ enum ButtonBarLayoutBehavior {
 ///
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
-class ButtonTheme extends InheritedTheme<ButtonThemeData, Object?> {
+class ButtonTheme extends InheritedTheme<ButtonThemeData> {
   /// Creates a button theme.
   ButtonTheme({
     super.key,

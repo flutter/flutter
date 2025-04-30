@@ -88,7 +88,7 @@ class IconButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [IconButton]'s defaults.
 ///  * [ThemeData.iconButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [IconButton]s below the overall [Theme].
-class IconButtonTheme extends InheritedTheme<IconButtonThemeData, Object?> {
+class IconButtonTheme extends InheritedTheme<IconButtonThemeData> {
   /// Create a [IconButtonTheme].
   const IconButtonTheme({super.key, required this.data, required super.child});
 

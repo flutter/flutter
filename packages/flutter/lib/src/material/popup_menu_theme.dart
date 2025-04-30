@@ -257,7 +257,7 @@ class PopupMenuThemeData with Diagnosticable {
 ///
 /// Values specified here are used for popup menu properties that are not
 /// given an explicit non-null value.
-class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData, Object?> {
+class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData> {
   /// Creates a popup menu theme that controls the configurations for
   /// popup menus in its widget subtree.
   const PopupMenuTheme({super.key, required this.data, required super.child});

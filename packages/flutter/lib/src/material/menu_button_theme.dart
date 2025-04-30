@@ -103,7 +103,7 @@ class MenuButtonThemeData with Diagnosticable {
 /// * [ThemeData.menuButtonTheme], which can be used to override the default
 ///   [ButtonStyle] for [MenuItemButton]s and [SubmenuButton]s below the overall
 ///   [Theme].
-class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData, Object?> {
+class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData> {
   /// Create a [MenuButtonTheme].
   const MenuButtonTheme({super.key, required this.data, required super.child});
 

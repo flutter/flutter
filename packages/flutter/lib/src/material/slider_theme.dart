@@ -54,7 +54,7 @@ import 'theme.dart';
 ///    the [RangeSlider]'s track.
 ///  * [RangeSliderTickMarkShape], which can be used to create custom shapes for
 ///    the [RangeSlider]'s tick marks.
-class SliderTheme extends InheritedTheme<SliderThemeData, Object?> {
+class SliderTheme extends InheritedTheme<SliderThemeData> {
   /// Applies the given theme [data] to [child].
   const SliderTheme({super.key, required this.data, required super.child});
 

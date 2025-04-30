@@ -270,7 +270,7 @@ class NavigationBarThemeData with Diagnosticable {
 ///
 ///  * [ThemeData.navigationBarTheme], which describes the
 ///    [NavigationBarThemeData] in the overall theme for the application.
-class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData, Object?> {
+class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationBarThemeData] properties for a [NavigationBar].
   const NavigationBarTheme({super.key, required this.data, required super.child});

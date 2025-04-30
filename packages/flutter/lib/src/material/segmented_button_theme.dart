@@ -100,7 +100,7 @@ class SegmentedButtonThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [SegmentedButton] properties that are not
 /// given an explicit non-null value.
-class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData, Object?> {
+class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData> {
   /// Creates a [SegmentedButtonTheme] that controls visual parameters for
   /// descendent [SegmentedButton]s.
   const SegmentedButtonTheme({super.key, required this.data, required super.child});

@@ -234,7 +234,7 @@ class NavigationDrawerThemeData with Diagnosticable {
 ///
 ///  * [ThemeData.navigationDrawerTheme], which describes the
 ///    [NavigationDrawerThemeData] in the overall theme for the application.
-class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData, Object?> {
+class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData> {
   /// Creates a navigation rail theme that controls the
   /// [NavigationDrawerThemeData] properties for a [NavigationDrawer].
   const NavigationDrawerTheme({super.key, required this.data, required super.child});

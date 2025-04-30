@@ -26,7 +26,7 @@ import 'inherited_theme.dart';
 /// See also:
 ///  * [TextSelectionTheme]: which also creates a [DefaultSelectionStyle] for
 ///    the subtree.
-class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle, Object?> {
+class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle> {
   /// Creates a default selection style widget that specifies the selection
   /// properties for all widgets below it in the widget tree.
   const DefaultSelectionStyle({

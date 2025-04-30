@@ -110,7 +110,7 @@ class DropdownMenuThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [DropdownMenu] properties that are not
 /// given an explicit non-null value.
-class DropdownMenuTheme extends InheritedTheme<DropdownMenuThemeData, Object?> {
+class DropdownMenuTheme extends InheritedTheme<DropdownMenuThemeData> {
   /// Creates a [DropdownMenuTheme] that controls visual parameters for
   /// descendant [DropdownMenu]s.
   const DropdownMenuTheme({super.key, required this.data, required super.child});

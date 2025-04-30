@@ -358,7 +358,7 @@ class ListTileThemeData with Diagnosticable {
 ///
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
-class ListTileTheme extends InheritedTheme<ListTileThemeData, Object?> {
+class ListTileTheme extends InheritedTheme<ListTileThemeData> {
   /// Creates a list tile theme that defines the color and style parameters for
   /// descendant [ListTile]s.
   ///

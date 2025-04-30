@@ -163,7 +163,7 @@ class BadgeThemeData with Diagnosticable {
 ///
 /// Values specified here override the defaults for [Badge] properties which
 /// are not given an explicit non-null value.
-class BadgeTheme extends InheritedTheme<BadgeThemeData, Object?> {
+class BadgeTheme extends InheritedTheme<BadgeThemeData> {
   /// Creates a theme that overrides the default color parameters for [Badge]s
   /// in this widget's subtree.
   const BadgeTheme({super.key, required this.data, required super.child});

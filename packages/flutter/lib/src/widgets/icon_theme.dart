@@ -22,7 +22,7 @@ import 'inherited_theme.dart';
 /// Controls the default properties of icons in a widget subtree.
 ///
 /// The icon theme is honored by [Icon] and [ImageIcon] widgets.
-class IconTheme extends InheritedTheme<IconThemeData, Object?> {
+class IconTheme extends InheritedTheme<IconThemeData> {
   /// Creates an icon theme that controls properties of descendant widgets.
   const IconTheme({super.key, required this.data, required super.child});
 

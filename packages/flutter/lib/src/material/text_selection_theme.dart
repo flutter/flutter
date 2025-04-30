@@ -141,7 +141,7 @@ class TextSelectionThemeData with Diagnosticable {
 ///
 /// This widget also creates a [DefaultSelectionStyle] for its subtree with
 /// [data].
-class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData, Object?> {
+class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData> {
   /// Creates a text selection theme widget that specifies the text
   /// selection properties for all widgets below it in the widget tree.
   const TextSelectionTheme({super.key, required this.data, required Widget child})

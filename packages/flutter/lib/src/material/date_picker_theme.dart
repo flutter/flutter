@@ -966,7 +966,7 @@ class DatePickerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [DatePickerDialog] properties that are not
 /// given an explicit non-null value.
-class DatePickerTheme extends InheritedTheme<DatePickerThemeData, Object?> {
+class DatePickerTheme extends InheritedTheme<DatePickerThemeData> {
   /// Creates a [DatePickerTheme] that controls visual parameters for
   /// descendent [DatePickerDialog]s.
   const DatePickerTheme({super.key, required this.data, required super.child});

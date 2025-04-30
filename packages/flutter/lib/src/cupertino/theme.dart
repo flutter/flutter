@@ -151,7 +151,7 @@ class CupertinoTheme extends StatelessWidget {
 }
 
 /// Provides a [CupertinoTheme] to all descendents.
-class InheritedCupertinoTheme extends InheritedTheme<CupertinoThemeData, Object?> {
+class InheritedCupertinoTheme extends InheritedTheme<CupertinoThemeData> {
   /// Creates an [InheritedTheme] that provides a [CupertinoTheme] to all
   /// descendents.
   const InheritedCupertinoTheme({super.key, required this.theme, required super.child});

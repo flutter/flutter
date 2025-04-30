@@ -155,7 +155,7 @@ class CarouselViewThemeData with Diagnosticable {
 ///  * [CarouselViewThemeData], which describes the actual configuration of a carousel
 ///    theme.
 ///  * [Theme], which controls the overall theme inheritance.
-class CarouselViewTheme extends InheritedTheme<CarouselViewThemeData, Object?> {
+class CarouselViewTheme extends InheritedTheme<CarouselViewThemeData> {
   /// Creates a carousel theme that configures all descendant [CarouselView] widgets.
   const CarouselViewTheme({super.key, required this.data, required super.child});
 

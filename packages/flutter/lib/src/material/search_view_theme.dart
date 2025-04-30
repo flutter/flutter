@@ -245,7 +245,7 @@ class SearchViewThemeData with Diagnosticable {
 ///
 ///  * [SearchViewThemeData], which describes the actual configuration of a search view
 ///    theme.
-class SearchViewTheme extends InheritedTheme<SearchViewThemeData, Object?> {
+class SearchViewTheme extends InheritedTheme<SearchViewThemeData> {
   /// Creates a const theme that controls the configurations for the search view
   /// created by the [SearchAnchor] widget.
   const SearchViewTheme({super.key, required this.data, required super.child});

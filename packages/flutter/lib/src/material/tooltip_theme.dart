@@ -330,7 +330,7 @@ class TooltipThemeData with Diagnosticable {
 ///  * [TooltipThemeData], which describes the actual configuration of a
 ///    tooltip theme.
 ///  * [TooltipVisibility], which can be used to visually disable descendant [Tooltip]s.
-class TooltipTheme extends InheritedTheme<TooltipThemeData, Object?> {
+class TooltipTheme extends InheritedTheme<TooltipThemeData> {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
   const TooltipTheme({super.key, required this.data, required super.child});

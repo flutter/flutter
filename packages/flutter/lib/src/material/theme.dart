@@ -233,7 +233,7 @@ class Theme extends StatelessWidget {
   }
 }
 
-class _InheritedTheme extends InheritedTheme<ThemeData, Object?> {
+class _InheritedTheme extends InheritedTheme<ThemeData> {
   const _InheritedTheme({required this.theme, required super.child});
 
   final Theme theme;

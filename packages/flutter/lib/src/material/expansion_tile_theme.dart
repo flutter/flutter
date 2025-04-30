@@ -254,7 +254,7 @@ class ExpansionTileThemeData with Diagnosticable {
 ///  * [ExpansionTileThemeData], which is used to configure this theme.
 ///  * [ThemeData.expansionTileTheme], which can be used to override the default
 ///    [ExpansionTileTheme] for [ExpansionTile]s below the overall [Theme].
-class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData, Object?> {
+class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData> {
   /// Applies the given theme [data] to [child].
   const ExpansionTileTheme({super.key, required this.data, required super.child});
 

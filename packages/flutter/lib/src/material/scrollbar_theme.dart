@@ -302,7 +302,7 @@ bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
 ///
 ///  * [ScrollbarThemeData], which describes the configuration of a
 ///    scrollbar theme.
-class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData, Object?> {
+class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData> {
   /// Constructs a scrollbar theme that configures all descendant [Scrollbar]
   /// widgets.
   const ScrollbarTheme({super.key, required this.data, required super.child});

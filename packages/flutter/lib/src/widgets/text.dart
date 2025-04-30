@@ -48,7 +48,7 @@ import 'selection_container.dart';
 ///    smoothly over a given duration.
 ///  * [DefaultTextStyleTransition], which takes a provided [Animation] to
 ///    animate changes in text style smoothly over time.
-class DefaultTextStyle extends InheritedTheme<DefaultTextStyle, Object?> {
+class DefaultTextStyle extends InheritedTheme<DefaultTextStyle> {
   /// Creates a default text style for the given subtree.
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
@@ -306,7 +306,7 @@ class _NullWidget extends StatelessWidget {
 ///
 ///  * [DefaultTextStyle], which defines a [TextStyle] to apply to descendant
 ///    [Text] widgets.
-class DefaultTextHeightBehavior extends InheritedTheme<TextHeightBehavior, TextHeightBehavior> {
+class DefaultTextHeightBehavior extends InheritedTheme<TextHeightBehavior> {
   /// Creates a default text height behavior for the given subtree.
   const DefaultTextHeightBehavior({
     super.key,
@@ -405,7 +405,7 @@ class DefaultTextHeightBehavior extends InheritedTheme<TextHeightBehavior, TextH
   @override
   bool updateShouldNotifyDependent(
     DefaultTextHeightBehavior oldWidget,
-    Set<ThemeSelector<ui.TextHeightBehavior, ui.TextHeightBehavior>> dependencies,
+    Set<ThemeSelector<ui.TextHeightBehavior, Object?>> dependencies,
   ) {
     return textHeightBehavior != oldWidget.textHeightBehavior;
   }

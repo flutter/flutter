@@ -109,7 +109,7 @@ class MenuThemeData with Diagnosticable {
 /// * [MenuItemButton], a widget that is a selectable item in a menu bar menu.
 /// * [SubmenuButton], a widget that specifies an item with a cascading submenu
 ///   in a [MenuBar] menu.
-class MenuTheme extends InheritedTheme<MenuThemeData, Object?> {
+class MenuTheme extends InheritedTheme<MenuThemeData> {
   /// Creates a const theme that controls the configurations for the menus
   /// created by the [SubmenuButton] or [MenuAnchor] widgets.
   const MenuTheme({super.key, required this.data, required super.child});

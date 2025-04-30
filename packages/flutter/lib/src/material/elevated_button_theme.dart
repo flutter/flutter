@@ -94,7 +94,7 @@ class ElevatedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [ElevatedButton]'s defaults.
 ///  * [ThemeData.elevatedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [ElevatedButton]s below the overall [Theme].
-class ElevatedButtonTheme extends InheritedTheme<ElevatedButtonThemeData, Object?> {
+class ElevatedButtonTheme extends InheritedTheme<ElevatedButtonThemeData> {
   /// Create a [ElevatedButtonTheme].
   const ElevatedButtonTheme({super.key, required this.data, required super.child});
 

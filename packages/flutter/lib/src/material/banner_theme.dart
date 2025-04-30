@@ -171,7 +171,7 @@ class MaterialBannerThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [MaterialBanner] properties that are not
 /// given an explicit non-null value.
-class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData, Object?> {
+class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData> {
   /// Creates a banner theme that controls the configurations for
   /// [MaterialBanner]s in its widget subtree.
   const MaterialBannerTheme({super.key, this.data, required super.child});

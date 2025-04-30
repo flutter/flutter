@@ -179,7 +179,7 @@ class DrawerThemeData with Diagnosticable {
 /// given an explicit non-null value.
 ///
 /// Using this would allow you to override the [ThemeData.drawerTheme].
-class DrawerTheme extends InheritedTheme<DrawerThemeData, Object?> {
+class DrawerTheme extends InheritedTheme<DrawerThemeData> {
   /// Creates a theme that defines the [DrawerThemeData] properties for a
   /// [Drawer].
   const DrawerTheme({super.key, required this.data, required super.child});

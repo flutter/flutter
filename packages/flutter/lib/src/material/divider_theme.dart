@@ -128,7 +128,7 @@ class DividerThemeData with Diagnosticable {
 /// An inherited widget that defines the configuration for
 /// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
 /// between rows in [DataTable]s in this widget's subtree.
-class DividerTheme extends InheritedTheme<DividerThemeData, Object?> {
+class DividerTheme extends InheritedTheme<DividerThemeData> {
   /// Creates a divider theme that controls the configurations for
   /// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
   /// between rows in [DataTable]s in its widget subtree.

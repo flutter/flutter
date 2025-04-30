@@ -49,7 +49,7 @@ import 'theme.dart';
 ///    theme.
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-class ChipTheme extends InheritedTheme<ChipThemeData, Object?> {
+class ChipTheme extends InheritedTheme<ChipThemeData> {
   /// Applies the given theme [data] to [child].
   const ChipTheme({super.key, required this.data, required super.child});
 

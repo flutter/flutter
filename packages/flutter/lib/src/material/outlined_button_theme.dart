@@ -94,7 +94,7 @@ class OutlinedButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [OutlinedButton]'s defaults.
 ///  * [ThemeData.outlinedButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [OutlinedButton]s below the overall [Theme].
-class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData, Object?> {
+class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData> {
   /// Create a [OutlinedButtonTheme].
   const OutlinedButtonTheme({super.key, required this.data, required super.child});
 

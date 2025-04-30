@@ -28,7 +28,7 @@ import 'theme.dart';
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
 @immutable
-class DialogTheme extends InheritedTheme<DialogThemeData, Object?> with Diagnosticable {
+class DialogTheme extends InheritedTheme<DialogThemeData> with Diagnosticable {
   /// Creates a dialog theme that can be used for [ThemeData.dialogTheme].
   const DialogTheme({
     super.key,

@@ -20,7 +20,7 @@ import 'theme.dart';
 ///  * [TabBarThemeData], which describes the actual configuration of a switch
 ///    theme.
 @immutable
-class TabBarTheme extends InheritedTheme<TabBarThemeData, Object?> with Diagnosticable {
+class TabBarTheme extends InheritedTheme<TabBarThemeData> with Diagnosticable {
   /// Creates a tab bar theme that can be used with [ThemeData.tabBarTheme].
   const TabBarTheme({
     super.key,

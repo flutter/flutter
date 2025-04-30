@@ -308,7 +308,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
 /// )
 /// ```
 /// {@end-tool}
-class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData, Object?> {
+class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData> {
   /// Creates a theme that controls the configurations for [ProgressIndicator]
   /// widgets.
   const ProgressIndicatorTheme({super.key, required this.data, required super.child});

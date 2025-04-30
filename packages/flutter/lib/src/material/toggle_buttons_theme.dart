@@ -255,7 +255,7 @@ class ToggleButtonsThemeData with Diagnosticable {
 ///
 /// Values specified here are used for [ToggleButtons] properties that are not
 /// given an explicit non-null value.
-class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData, Object?> {
+class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData> {
   /// Creates a toggle buttons theme that controls the color and border
   /// parameters for [ToggleButtons].
   const ToggleButtonsTheme({super.key, required this.data, required super.child});

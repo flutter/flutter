@@ -65,7 +65,7 @@ class _FunctionThemeSelector<T, V> implements ThemeSelector<T, V> {
 ///
 /// ** See code in examples/api/lib/widgets/inherited_theme/inherited_theme.0.dart **
 /// {@end-tool}
-abstract class InheritedTheme<T, V> extends InheritedModel<ThemeSelector<T, V>> {
+abstract class InheritedTheme<T> extends InheritedModel<ThemeSelector<T, Object?>> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
 
@@ -119,10 +119,10 @@ abstract class InheritedTheme<T, V> extends InheritedModel<ThemeSelector<T, V>> 
   static CapturedThemes capture({required BuildContext from, required BuildContext? to}) {
     if (from == to) {
       // Nothing to capture.
-      return CapturedThemes._(const <InheritedTheme<Object?, Object?>>[]);
+      return CapturedThemes._(const <InheritedTheme<Object?>>[]);
     }
 
-    final List<InheritedTheme<Object?, Object?>> themes = <InheritedTheme<Object?, Object?>>[];
+    final List<InheritedTheme<Object?>> themes = <InheritedTheme<Object?>>[];
     final Set<Type> themeTypes = <Type>{};
     late bool debugDidFindAncestor;
     assert(() {
@@ -137,7 +137,7 @@ abstract class InheritedTheme<T, V> extends InheritedModel<ThemeSelector<T, V>> 
         }());
         return false;
       }
-      if (ancestor case InheritedElement(widget: final InheritedTheme<Object?, Object?> theme)) {
+      if (ancestor case InheritedElement(widget: final InheritedTheme<Object?> theme)) {
         final Type themeType = theme.runtimeType;
         // Only remember the first theme of any type. This assumes
         // that inherited themes completely shadow ancestors of the
@@ -165,7 +165,7 @@ abstract class InheritedTheme<T, V> extends InheritedModel<ThemeSelector<T, V>> 
 class CapturedThemes {
   CapturedThemes._(this._themes);
 
-  final List<InheritedTheme<Object?, Object?>> _themes;
+  final List<InheritedTheme<Object?>> _themes;
 
   /// Wraps a `child` [Widget] in the [InheritedTheme]s captured in this object.
   Widget wrap(Widget child) {
@@ -176,13 +176,13 @@ class CapturedThemes {
 class _CaptureAll extends StatelessWidget {
   const _CaptureAll({required this.themes, required this.child});
 
-  final List<InheritedTheme<Object?, Object?>> themes;
+  final List<InheritedTheme<Object?>> themes;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     Widget wrappedChild = child;
-    for (final InheritedTheme<Object?, Object?> theme in themes) {
+    for (final InheritedTheme<Object?> theme in themes) {
       wrappedChild = theme.wrap(context, wrappedChild);
     }
     return wrappedChild;

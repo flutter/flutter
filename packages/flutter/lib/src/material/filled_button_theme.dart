@@ -90,7 +90,7 @@ class FilledButtonThemeData with Diagnosticable {
 ///    [ButtonStyle] that's consistent with [FilledButton]'s defaults.
 ///  * [ThemeData.filledButtonTheme], which can be used to override the default
 ///    [ButtonStyle] for [FilledButton]s below the overall [Theme].
-class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData, Object?> {
+class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData> {
   /// Create a [FilledButtonTheme].
   const FilledButtonTheme({super.key, required this.data, required super.child});
 
