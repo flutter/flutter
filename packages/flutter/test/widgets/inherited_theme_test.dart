@@ -245,7 +245,7 @@ void main() {
     expect(getTextStyle('World').color, textColor);
   });
 
-  test('ThemeSelector', () {
+  test('ThemeSelector selects from theme data', () {
     const double size = 32;
     final ThemeSelector<IconThemeData, double> selector = ThemeSelector<IconThemeData, double>.from(
       (IconThemeData data) => data.size!,
@@ -320,7 +320,7 @@ void main() {
 }
 
 class _TestInheritedTheme extends InheritedTheme<IconThemeData> {
-  const _TestInheritedTheme({required this.themeData, super.key, super.child = const SizedBox()});
+  const _TestInheritedTheme({required this.themeData, super.child = const SizedBox()});
 
   @override
   final IconThemeData themeData;
@@ -328,10 +328,5 @@ class _TestInheritedTheme extends InheritedTheme<IconThemeData> {
   @override
   Widget wrap(BuildContext context, Widget child) {
     return _TestInheritedTheme(themeData: themeData, child: child);
-  }
-
-  @override
-  bool updateShouldNotify(_TestInheritedTheme oldWidget) {
-    return themeData != oldWidget.themeData;
   }
 }
