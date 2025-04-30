@@ -83,7 +83,6 @@ user_pref("browser.aboutwelcome.enabled", false);
         temporaryProfileDirectory.createSync(recursive: true);
         File(path.join(temporaryProfileDirectory.path, 'prefs.js')).writeAsStringSync(profile);
 
-        final bool isMac = Platform.isMacOS;
         final List<String> args = <String>[
           url.toString(),
           '--profile',
