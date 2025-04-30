@@ -3017,7 +3017,7 @@ class _WidgetInspectorState extends State<WidgetInspector> with WidgetsBindingOb
         ),
         _InspectorOverlay(selection: selection),
         if (isSelectMode && widget.exitWidgetSelectionButtonBuilder != null)
-          _ExitWidgetSelectionButtonGroup(
+          _WidgetInspectorButtonGroup(
             tapBehaviorButtonBuilder: widget.tapBehaviorButtonBuilder,
             exitWidgetSelectionButtonBuilder: widget.exitWidgetSelectionButtonBuilder!,
             moveExitWidgetSelectionButtonBuilder: widget.moveExitWidgetSelectionButtonBuilder,
@@ -3494,8 +3494,8 @@ const double _kOffScreenMargin = 1.0;
 
 const TextStyle _messageStyle = TextStyle(color: Color(0xFFFFFFFF), fontSize: 10.0, height: 1.2);
 
-class _ExitWidgetSelectionButtonGroup extends StatefulWidget {
-  const _ExitWidgetSelectionButtonGroup({
+class _WidgetInspectorButtonGroup extends StatefulWidget {
+  const _WidgetInspectorButtonGroup({
     required this.exitWidgetSelectionButtonBuilder,
     required this.moveExitWidgetSelectionButtonBuilder,
     required this.tapBehaviorButtonBuilder,
@@ -3506,10 +3506,10 @@ class _ExitWidgetSelectionButtonGroup extends StatefulWidget {
   final TapBehaviorButtonBuilder? tapBehaviorButtonBuilder;
 
   @override
-  State<_ExitWidgetSelectionButtonGroup> createState() => _ExitWidgetSelectionButtonGroupState();
+  State<_WidgetInspectorButtonGroup> createState() => _WidgetInspectorButtonGroupState();
 }
 
-class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionButtonGroup> {
+class _WidgetInspectorButtonGroupState extends State<_WidgetInspectorButtonGroup> {
   static const double _kExitWidgetSelectionButtonMargin = 10.0;
 
   final GlobalKey _exitWidgetSelectionButtonKey = GlobalKey(
@@ -3519,6 +3519,10 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
   String? _tooltipMessage;
 
   bool _leftAligned = true;
+
+  ValueNotifier<bool> get _selectionOnTapEnabledNotifier =>
+      WidgetsBinding.instance.debugWidgetInspectorSelectionOnTapEnabledNotifier;
+  bool get _selectionOnTapEnabled => _selectionOnTapEnabledNotifier.value;
 
   Widget? get _moveExitWidgetSelectionButton {
     final MoveExitWidgetSelectionButtonBuilder? buttonBuilder =
@@ -3573,20 +3577,13 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
       button: buttonBuilder(
         context,
         onPressed: () {
-          final bool selectionOnTapEnabled = selectionOnTapEnabledNotifier.value;
-          selectionOnTapEnabledNotifier.value = !selectionOnTapEnabled;
-          WidgetInspectorService.instance.selection.clear();
+          _changeSelectionOnTapMode();
         },
         semanticLabel: 'Change widget selection mode for taps',
         defaultTapBehaviorEnabled: selectionOnTapEnabledNotifier.value,
       ),
       onTooltipVisible: () {
-        final bool selectionOnTapEnabled = selectionOnTapEnabledNotifier.value;
-        _changeTooltipMessage(
-          selectionOnTapEnabled
-              ? 'Disable widget selection for taps'
-              : 'Enable widget selection for taps',
-        );
+        _changeSelectionOnTapTooltip();
       },
       onTooltipHidden: _onTooltipHidden,
     );
@@ -3633,6 +3630,23 @@ class _ExitWidgetSelectionButtonGroupState extends State<_ExitWidgetSelectionBut
 
   void _exitWidgetSelectionMode() {
     WidgetInspectorService.instance._changeWidgetSelectionMode(false);
+    // Reset to default selection on tap behavior on exit.
+    _changeSelectionOnTapMode(selectionOnTapEnabled: true);
+  }
+
+  void _changeSelectionOnTapMode({bool? selectionOnTapEnabled}) {
+    final bool newValue = selectionOnTapEnabled ?? !_selectionOnTapEnabled;
+    _selectionOnTapEnabledNotifier.value = newValue;
+    WidgetInspectorService.instance.selection.clear();
+    _changeSelectionOnTapTooltip();
+  }
+
+  void _changeSelectionOnTapTooltip() {
+    _changeTooltipMessage(
+      _selectionOnTapEnabled
+          ? 'Disable widget selection for taps'
+          : 'Enable widget selection for taps',
+    );
   }
 
   void _changeButtonGroupAlignment() {
