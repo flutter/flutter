@@ -330,8 +330,6 @@ class _PredictiveBackSharedElementPageTransitionState
   late final Listenable _mergedAnimations;
   late final Animation<double> _opacityAnimation;
 
-  late Animation<double> _xAnimation;
-  late Animation<Offset> _positionCommitAnimation;
   late Animation<Offset> _positionAnimation;
 
   final Tween<double> _scaleTween = Tween<double>(begin: _kMinScale, end: 1.0);
@@ -359,13 +357,6 @@ class _PredictiveBackSharedElementPageTransitionState
     return clampDouble(easedYShift, -yShiftMax, yShiftMax);
   }
 
-  Animation<Offset> _getCommitPositionAnimation(double screenWidth) {
-    return Tween<Offset>(
-      begin: Offset(_lastXDrag, _lastYDrag),
-      end: Offset(screenWidth * _kYPositionFactor, 0.0),
-    ).animate(_commitAnimation);
-  }
-
   void _updateAnimations(Size screenSize) {
     _scaleCommitTween.begin = _lastScale;
     _scaleAnimation = _proxyAnimation.drive(switch (widget.phase) {
@@ -374,17 +365,6 @@ class _PredictiveBackSharedElementPageTransitionState
     });
 
     final double xShift = (screenSize.width / _kDivisionFactor) - _kMargin;
-    _xAnimation = _proxyAnimation.drive(
-      Tween<double>(
-        begin: switch (widget.currentBackEvent?.swipeEdge) {
-          SwipeEdge.left => xShift,
-          SwipeEdge.right => -xShift,
-          null => xShift,
-        },
-        end: 0.0,
-      ),
-    );
-    _positionCommitAnimation = _getCommitPositionAnimation(screenSize.width);
     _positionAnimation = _proxyAnimation.drive(switch (widget.phase) {
       _PredictiveBackPhase.commit => Tween<Offset>(
         begin: Offset(_lastXDrag, _lastYDrag),
@@ -396,7 +376,9 @@ class _PredictiveBackSharedElementPageTransitionState
           SwipeEdge.right => Offset(-xShift, _getYPosition(screenSize.height)),
           null => Offset(xShift, _getYPosition(screenSize.height)),
         },
-        end: Offset(0.0, _getYPosition(screenSize.height)),
+        // The y position before commit is given by the vertical drag, not by an
+        // animation.
+        end: Offset.zero,
       ),
     });
   }
@@ -441,20 +423,6 @@ class _PredictiveBackSharedElementPageTransitionState
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateAnimations(MediaQuery.sizeOf(context));
-
-    /*
-    final double xShift = (screenWidth / _kDivisionFactor) - _kMargin;
-    _xAnimation = Tween<double>(
-      begin: switch (widget.currentBackEvent?.swipeEdge) {
-        SwipeEdge.left => xShift,
-        SwipeEdge.right => -xShift,
-        null => xShift,
-      },
-      end: 0.0,
-    ).animate(widget.animation);
-    */
-
-    //_positionCommitAnimation = _getCommitPositionAnimation(screenWidth);
   }
 
   @override
@@ -474,16 +442,13 @@ class _PredictiveBackSharedElementPageTransitionState
         return Transform.scale(
           scale: _lastScale = _scaleAnimation.value,
           child: Transform.translate(
-          /*
             offset: switch (widget.phase) {
-              _PredictiveBackPhase.commit => _positionCommitAnimation.value,
+              _PredictiveBackPhase.commit => _positionAnimation.value,
               _ => Offset(
-                _lastXDrag = _xAnimation.value,
+                _lastXDrag = _positionAnimation.value.dx,
                 _lastYDrag = _getYPosition(MediaQuery.sizeOf(context).height),
               ),
             },
-            */
-            offset: _positionAnimation.value,
             child: Opacity(
               opacity: _opacityAnimation.value,
               child: Padding(
