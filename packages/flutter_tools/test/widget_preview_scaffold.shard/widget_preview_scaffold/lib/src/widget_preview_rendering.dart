@@ -250,9 +250,14 @@ class WidgetPreviewWidgetState extends State<WidgetPreviewWidget> {
       },
     );
 
+    final Size? size = widget.preview.size;
     preview = _WidgetPreviewWrapper(
       previewerConstraints: maxSizeConstraints,
-      child: SizedBox.fromSize(size: widget.preview.size, child: preview),
+      child: SizedBox(
+        width: size?.width == double.infinity ? null : size?.width,
+        height: size?.height == double.infinity ? null : size?.height,
+        child: preview,
+      ),
     );
 
     preview = WidgetPreviewMediaQueryOverride(
