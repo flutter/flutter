@@ -4174,6 +4174,7 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 5,
+                          inputType: SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
                             SemanticsFlag.hasEnabledState,
@@ -4182,6 +4183,7 @@ void main() {
                           ],
                           actions: <SemanticsAction>[SemanticsAction.focus],
                           textDirection: TextDirection.ltr,
+                          currentValueLength: 0,
                           children: <TestSemantics>[
                             TestSemantics(
                               id: 6,
