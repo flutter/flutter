@@ -8,7 +8,7 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color, SemanticsInputType;
+import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle, Color;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -566,7 +566,6 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
                               SemanticsFlag.hasEnabledState,
@@ -9758,7 +9757,6 @@ void main() {
                       children: <TestSemantics>[
                         TestSemantics(
                           id: 4,
-                          inputType: ui.SemanticsInputType.text,
                           flags: <SemanticsFlag>[
                             SemanticsFlag.isTextField,
                             SemanticsFlag.hasEnabledState,
@@ -9825,7 +9823,6 @@ void main() {
                         children: <TestSemantics>[
                           TestSemantics(
                             id: 4,
-                            inputType: ui.SemanticsInputType.text,
                             flags: <SemanticsFlag>[
                               SemanticsFlag.isTextField,
                               SemanticsFlag.hasEnabledState,

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:convert' show jsonDecode;
-import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -4711,7 +4710,6 @@ void main() {
                             SemanticsFlag.isObscured,
                           ],
                           value: expectedValue,
-                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -4768,7 +4766,6 @@ void main() {
                         TestSemantics(
                           flags: <SemanticsFlag>[SemanticsFlag.isTextField],
                           value: originalText,
-                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                         ),
                       ],
@@ -4828,7 +4825,6 @@ void main() {
                             SemanticsAction.moveCursorBackwardByWord,
                           ],
                           value: expectedValue,
-                          inputType: SemanticsInputType.text,
                           textDirection: TextDirection.ltr,
                           // Focusing a single-line field on web selects it.
                           textSelection:
@@ -5084,7 +5080,6 @@ void main() {
                               SemanticsAction.paste,
                             ],
                             value: 'test',
-                            inputType: SemanticsInputType.text,
                             textSelection: TextSelection.collapsed(offset: controller.text.length),
                             textDirection: TextDirection.ltr,
                           ),
@@ -5205,7 +5200,6 @@ void main() {
                             SemanticsAction.setSelection,
                             SemanticsAction.setText,
                           ],
-                          inputType: SemanticsInputType.text,
                           textSelection: TextSelection.collapsed(offset: controller.text.length),
                           textDirection: TextDirection.ltr,
                         ),
