@@ -4923,7 +4923,6 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 ))!
                 as Map<String, Object?>;
 
-        // These should now truly be absent.
         expect(result.containsKey('flexFactor'), isFalse);
         expect(result.containsKey('flexFit'), isFalse);
 
@@ -4931,6 +4930,7 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
         if (parentData != null) {
           expect(parentData.containsKey('flexFactor'), isFalse);
         }
+        expect(tester.takeException(), isNull);
       });
 
       testWidgets('ext.flutter.inspector.getLayoutExplorerNode for RenderBox with FlexParentData', (
