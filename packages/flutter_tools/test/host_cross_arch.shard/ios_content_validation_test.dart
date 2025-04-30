@@ -296,9 +296,25 @@ void main() {
             expect(grepResult.exitCode, 1);
           });
         });
+      }
 
+      for (final BuildMode buildMode in <BuildMode>[
+        BuildMode.debug,
+        BuildMode.profile,
+        BuildMode.release,
+      ]) {
         for (final String arch in <String>['ios-arm64', 'ios-arm64_x86_64-simulator']) {
           test('verify ${buildMode.cliName} $arch Flutter.framework Info.plist', () {
+            final String artifactDir;
+            switch (buildMode) {
+              case BuildMode.debug:
+              case BuildMode.jitRelease:
+                artifactDir = 'ios';
+              case BuildMode.profile:
+                artifactDir = 'ios-profile';
+              case BuildMode.release:
+                artifactDir = 'ios-release';
+            }
             final Directory xcframeworkArtifact = fileSystem.directory(
               fileSystem.path.join(
                 flutterRoot,
@@ -306,7 +322,7 @@ void main() {
                 'cache',
                 'artifacts',
                 'engine',
-                'ios',
+                artifactDir,
                 'Flutter.xcframework',
               ),
             );
