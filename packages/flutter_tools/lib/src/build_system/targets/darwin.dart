@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:meta/meta.dart';
 
+import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
+import '../../plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
@@ -150,5 +154,98 @@ abstract class CheckDevDependencies extends Target {
 
   void _printXcodeError(String message) {
     globals.stdio.stderrWrite('error: $message');
+  }
+}
+
+abstract class UnpackDarwin extends Target {
+  const UnpackDarwin();
+
+  Future<void> copyFramework(
+    Environment environment, {
+    EnvironmentType? environmentType,
+    TargetPlatform? targetPlatform,
+    required Artifact framework,
+    required BuildMode buildMode,
+  }) async {
+    final String basePath = environment.artifacts.getArtifactPath(
+      framework,
+      platform: targetPlatform,
+      mode: buildMode,
+      environmentType: environmentType,
+    );
+
+    final ProcessResult result = await environment.processManager.run(<String>[
+      'rsync',
+      '-av',
+      '--delete',
+      '--filter',
+      '- .DS_Store/',
+      '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
+      basePath,
+      environment.outputDir.path,
+    ]);
+    if (result.exitCode != 0) {
+      throw Exception(
+        'Failed to copy framework (exit ${result.exitCode}:\n'
+        '${result.stdout}\n---\n${result.stderr}',
+      );
+    }
+  }
+
+  /// Destructively thin Flutter.framework to include only the specified architectures.
+  Future<void> thinFramework(
+    Environment environment,
+    String frameworkBinaryPath,
+    String archs,
+  ) async {
+    final List<String> archList = archs.split(' ').toList();
+    final ProcessResult infoResult = await environment.processManager.run(<String>[
+      'lipo',
+      '-info',
+      frameworkBinaryPath,
+    ]);
+    final String lipoInfo = infoResult.stdout as String;
+
+    final ProcessResult verifyResult = await environment.processManager.run(<String>[
+      'lipo',
+      frameworkBinaryPath,
+      '-verify_arch',
+      ...archList,
+    ]);
+
+    if (verifyResult.exitCode != 0) {
+      throw Exception(
+        'Binary $frameworkBinaryPath does not contain architectures "$archs".\n'
+        '\n'
+        'lipo -info:\n'
+        '$lipoInfo',
+      );
+    }
+
+    // Skip thinning for non-fat executables.
+    if (lipoInfo.startsWith('Non-fat file:')) {
+      environment.logger.printTrace('Skipping lipo for non-fat file $frameworkBinaryPath');
+      return;
+    }
+
+    // Thin in-place.
+    final ProcessResult extractResult = await environment.processManager.run(<String>[
+      'lipo',
+      '-output',
+      frameworkBinaryPath,
+      for (final String arch in archList) ...<String>['-extract', arch],
+      ...<String>[frameworkBinaryPath],
+    ]);
+
+    if (extractResult.exitCode != 0) {
+      throw Exception(
+        'Failed to extract architectures "$archs" for $frameworkBinaryPath.\n'
+        '\n'
+        'stderr:\n'
+        '${extractResult.stderr}\n\n'
+        'lipo -info:\n'
+        '$lipoInfo',
+      );
+    }
   }
 }
