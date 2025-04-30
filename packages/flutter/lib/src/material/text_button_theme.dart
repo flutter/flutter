@@ -102,7 +102,7 @@ class TextButtonTheme extends InheritedTheme<TextButtonThemeData, Object?> {
   /// If there is no enclosing [TextButtonTheme] widget, then
   /// [ThemeData.textButtonTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final ButtonStyle? style = TextButtonTheme.select(
@@ -127,7 +127,7 @@ class TextButtonTheme extends InheritedTheme<TextButtonThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(TextButtonThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(TextButtonThemeData) selector) {
     final ThemeSelector<TextButtonThemeData, T> themeSelector =
         ThemeSelector<TextButtonThemeData, T>.from(selector);
     final TextButtonThemeData theme =

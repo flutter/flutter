@@ -1555,7 +1555,7 @@ void main() {
     final Widget singletonThemeSubtree = Builder(
       builder: (BuildContext context) {
         buildCount++;
-        height = TooltipTheme.select(context, (TooltipThemeData theme) => theme.height!);
+        height = TooltipTheme.selectOf(context, (TooltipThemeData theme) => theme.height!);
         return const Placeholder();
       },
     );

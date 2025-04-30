@@ -234,7 +234,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        style = MenuBarTheme.select(context, (MenuBarThemeData theme) => theme.style);
+        style = MenuBarTheme.selectOf(context, (MenuBarThemeData theme) => theme.style);
         return const Placeholder();
       },
     );

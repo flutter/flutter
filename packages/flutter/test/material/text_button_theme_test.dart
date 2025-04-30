@@ -495,7 +495,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property
-        style = TextButtonTheme.select(context, (TextButtonThemeData theme) => theme.style);
+        style = TextButtonTheme.selectOf(context, (TextButtonThemeData theme) => theme.style);
         return const Placeholder();
       },
     );

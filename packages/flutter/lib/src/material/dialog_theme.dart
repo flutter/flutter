@@ -194,7 +194,7 @@ class DialogTheme extends InheritedTheme<DialogThemeData, Object?> with Diagnost
 
   /// The [ThemeData.dialogTheme] property of the ambient [Theme].
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes.
   static DialogThemeData of(BuildContext context) {
     final DialogTheme? dialogTheme = context.dependOnInheritedWidgetOfExactType<DialogTheme>();
@@ -206,7 +206,7 @@ class DialogTheme extends InheritedTheme<DialogThemeData, Object?> with Diagnost
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(DialogThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(DialogThemeData) selector) {
     final ThemeSelector<DialogThemeData, T> themeSelector = ThemeSelector<DialogThemeData, T>.from(
       selector,
     );

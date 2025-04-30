@@ -284,7 +284,7 @@ class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData, Object?>
   /// If there is no enclosing [NavigationBarTheme] widget, then
   /// [ThemeData.navigationBarTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = NavigationBarTheme.select(
@@ -309,7 +309,7 @@ class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData, Object?>
   ///
   /// If there is no [NavigationBarTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.navigationBarTheme] is used.
-  static T select<T>(BuildContext context, T Function(NavigationBarThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(NavigationBarThemeData) selector) {
     final ThemeSelector<NavigationBarThemeData, T> themeSelector =
         ThemeSelector<NavigationBarThemeData, T>.from(selector);
     final NavigationBarThemeData theme =

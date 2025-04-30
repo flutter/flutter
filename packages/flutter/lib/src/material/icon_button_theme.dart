@@ -100,7 +100,7 @@ class IconButtonTheme extends InheritedTheme<IconButtonThemeData, Object?> {
   /// If there is no enclosing [IconButtonTheme] widget, then
   /// [ThemeData.iconButtonTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final ButtonStyle? style = IconButtonTheme.select(
@@ -125,7 +125,7 @@ class IconButtonTheme extends InheritedTheme<IconButtonThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(IconButtonThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(IconButtonThemeData) selector) {
     final ThemeSelector<IconButtonThemeData, T> themeSelector =
         ThemeSelector<IconButtonThemeData, T>.from(selector);
     final IconButtonThemeData theme =

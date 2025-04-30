@@ -176,7 +176,7 @@ class CarouselViewTheme extends InheritedTheme<CarouselViewThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(CarouselViewThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(CarouselViewThemeData) selector) {
     final ThemeSelector<CarouselViewThemeData, T> themeSelector =
         ThemeSelector<CarouselViewThemeData, T>.from(selector);
     final CarouselViewThemeData theme =

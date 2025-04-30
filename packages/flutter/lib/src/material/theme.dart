@@ -71,7 +71,7 @@ class Theme extends StatelessWidget {
   /// Defaults to [ThemeData.fallback] if there is no [Theme] in the given
   /// build context.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes.
   ///
   /// Typical usage is as follows:
@@ -147,7 +147,7 @@ class Theme extends StatelessWidget {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(ThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ThemeData) selector) {
     final ThemeSelector<ThemeData, T> themeSelector = ThemeSelector<ThemeData, T>.from(selector);
     final ThemeData theme =
         InheritedModel.inheritFrom<_InheritedTheme>(context, aspect: themeSelector)!.theme.data;

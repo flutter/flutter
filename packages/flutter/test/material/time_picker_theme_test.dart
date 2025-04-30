@@ -1006,7 +1006,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property
-        backgroundColor = TimePickerTheme.select(
+        backgroundColor = TimePickerTheme.selectOf(
           context,
           (TimePickerThemeData theme) => theme.backgroundColor,
         );

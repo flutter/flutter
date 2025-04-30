@@ -63,7 +63,7 @@ class ChipTheme extends InheritedTheme<ChipThemeData, Object?> {
   /// Defaults to the ambient [ThemeData.chipTheme] if there is no
   /// [ChipTheme] in the given build context.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes.
   ///
   /// {@tool snippet}
@@ -100,7 +100,7 @@ class ChipTheme extends InheritedTheme<ChipThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(ChipThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ChipThemeData) selector) {
     final ThemeSelector<ChipThemeData, T> themeSelector = ThemeSelector<ChipThemeData, T>.from(
       selector,
     );

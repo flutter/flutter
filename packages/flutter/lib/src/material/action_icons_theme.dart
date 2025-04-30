@@ -166,7 +166,7 @@ class ActionIconTheme extends InheritedTheme<ActionIconThemeData, Object?> {
   /// If there is no enclosing [ActionIconTheme] widget, then
   /// [ThemeData.actionIconTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Widget Function(BuildContext)? closeButtonIconBuilder = ActionIconTheme.select(
@@ -191,7 +191,7 @@ class ActionIconTheme extends InheritedTheme<ActionIconThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(ActionIconThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ActionIconThemeData) selector) {
     final ThemeSelector<ActionIconThemeData, T> themeSelector =
         ThemeSelector<ActionIconThemeData, T>.from(selector);
     final ActionIconThemeData theme =

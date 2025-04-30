@@ -548,7 +548,7 @@ class ListTileTheme extends InheritedTheme<ListTileThemeData, Object?> {
   /// If there is no enclosing [ListTileTheme] widget, then
   /// [ThemeData.listTileTheme] is used (see [Theme.of]).
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? tileColor = ListTileTheme.select(
@@ -572,7 +572,7 @@ class ListTileTheme extends InheritedTheme<ListTileThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(ListTileThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ListTileThemeData) selector) {
     final ThemeSelector<ListTileThemeData, T> themeSelector =
         ThemeSelector<ListTileThemeData, T>.from(selector);
     final ListTileThemeData theme =

@@ -102,7 +102,7 @@ class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle, Object
   /// If no such instance exists, returns an instance created by
   /// [DefaultSelectionStyle.fallback], which contains fallback values.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? cursorColor = DefaultSelectionStyle.select(
@@ -126,7 +126,7 @@ class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle, Object
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(DefaultSelectionStyle) selector) {
+  static T selectOf<T>(BuildContext context, T Function(DefaultSelectionStyle) selector) {
     final ThemeSelector<DefaultSelectionStyle, T> themeSelector =
         ThemeSelector<DefaultSelectionStyle, T>.from(selector);
     final DefaultSelectionStyle theme =

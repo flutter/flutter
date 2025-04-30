@@ -576,7 +576,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = MaterialBannerTheme.select(
+        backgroundColor = MaterialBannerTheme.selectOf(
           context,
           (MaterialBannerThemeData theme) => theme.backgroundColor!,
         );

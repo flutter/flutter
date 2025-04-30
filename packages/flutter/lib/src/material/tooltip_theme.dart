@@ -346,7 +346,7 @@ class TooltipTheme extends InheritedTheme<TooltipThemeData, Object?> {
   /// When a widget uses this method, it is automatically rebuilt if the
   /// tooltip theme later changes, so that the changes can be applied.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final double? height = TooltipTheme.select(
@@ -370,7 +370,7 @@ class TooltipTheme extends InheritedTheme<TooltipThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(TooltipThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(TooltipThemeData) selector) {
     final ThemeSelector<TooltipThemeData, T> themeSelector =
         ThemeSelector<TooltipThemeData, T>.from(selector);
     final TooltipThemeData theme =

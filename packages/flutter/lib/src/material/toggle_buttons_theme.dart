@@ -268,7 +268,7 @@ class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData, Object?>
   /// If there is no enclosing [ToggleButtonsTheme] widget, then
   /// [ThemeData.toggleButtonsTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? color = ToggleButtonsTheme.select(
@@ -293,7 +293,7 @@ class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData, Object?>
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(ToggleButtonsThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ToggleButtonsThemeData) selector) {
     final ThemeSelector<ToggleButtonsThemeData, T> themeSelector =
         ThemeSelector<ToggleButtonsThemeData, T>.from(selector);
     final ToggleButtonsThemeData theme =

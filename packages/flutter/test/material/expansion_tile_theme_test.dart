@@ -462,7 +462,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = ExpansionTileTheme.select(
+        backgroundColor = ExpansionTileTheme.selectOf(
           context,
           (ExpansionTileThemeData theme) => theme.backgroundColor,
         );

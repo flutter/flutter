@@ -1757,7 +1757,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the theme property
-        theme = TabBarTheme.select(context, (TabBarThemeData theme) => theme.labelColor);
+        theme = TabBarTheme.selectOf(context, (TabBarThemeData theme) => theme.labelColor);
         return const Placeholder();
       },
     );

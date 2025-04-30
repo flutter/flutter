@@ -302,7 +302,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = SearchViewTheme.select(
+        backgroundColor = SearchViewTheme.selectOf(
           context,
           (SearchViewThemeData theme) => theme.backgroundColor,
         );

@@ -67,7 +67,7 @@ class CupertinoTheme extends StatelessWidget {
   /// Resolves all the colors defined in that [CupertinoThemeData] against the
   /// given [BuildContext] on a best-effort basis.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes.
   static CupertinoThemeData of(BuildContext context) {
     final InheritedCupertinoTheme? inheritedTheme =
@@ -122,7 +122,7 @@ class CupertinoTheme extends StatelessWidget {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(CupertinoThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(CupertinoThemeData) selector) {
     final ThemeSelector<CupertinoThemeData, T> themeSelector =
         ThemeSelector<CupertinoThemeData, T>.from(selector);
     final InheritedCupertinoTheme? inheritedTheme =

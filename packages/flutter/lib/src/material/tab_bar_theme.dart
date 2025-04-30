@@ -315,7 +315,7 @@ class TabBarTheme extends InheritedTheme<TabBarThemeData, Object?> with Diagnost
   ///
   /// If there is no [TabBarTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.tabBarTheme] is used.
-  static T select<T>(BuildContext context, T Function(TabBarThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(TabBarThemeData) selector) {
     final ThemeSelector<TabBarThemeData, T> themeSelector = ThemeSelector<TabBarThemeData, T>.from(
       selector,
     );

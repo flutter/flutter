@@ -256,7 +256,7 @@ class SearchViewTheme extends InheritedTheme<SearchViewThemeData, Object?> {
   /// Returns the configuration [data] from the closest [SearchViewTheme] ancestor.
   /// If there is no ancestor, it returns [ThemeData.searchViewTheme].
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = SearchViewTheme.select(
@@ -281,7 +281,7 @@ class SearchViewTheme extends InheritedTheme<SearchViewThemeData, Object?> {
   ///
   /// If there is no [SearchViewTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.searchViewTheme] is used.
-  static T select<T>(BuildContext context, T Function(SearchViewThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(SearchViewThemeData) selector) {
     final ThemeSelector<SearchViewThemeData, T> themeSelector =
         ThemeSelector<SearchViewThemeData, T>.from(selector);
     final SearchViewThemeData theme =

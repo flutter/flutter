@@ -1536,7 +1536,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        themeData = ChipTheme.select(context, (ChipThemeData theme) => theme);
+        themeData = ChipTheme.selectOf(context, (ChipThemeData theme) => theme);
         return const Placeholder();
       },
     );

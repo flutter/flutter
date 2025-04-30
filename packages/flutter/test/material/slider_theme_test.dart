@@ -3487,7 +3487,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the activeTrackColor property.
-        activeTrackColor = SliderTheme.select(
+        activeTrackColor = SliderTheme.selectOf(
           context,
           (SliderThemeData theme) => theme.activeTrackColor,
         );

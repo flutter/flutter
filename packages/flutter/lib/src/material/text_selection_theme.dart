@@ -171,7 +171,7 @@ class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData, Object?>
   /// there is no ancestor, it returns [ThemeData.textSelectionTheme].
   /// Applications can assume that the returned value will not be null.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? cursorColor = TextSelectionTheme.select(
@@ -196,7 +196,7 @@ class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData, Object?>
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(TextSelectionThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(TextSelectionThemeData) selector) {
     final ThemeSelector<TextSelectionThemeData, T> themeSelector =
         ThemeSelector<TextSelectionThemeData, T>.from(selector);
     final TextSelectionThemeData theme =

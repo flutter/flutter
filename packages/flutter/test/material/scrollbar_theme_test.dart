@@ -781,7 +781,10 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the thumbColor property.
-        thumbColor = ScrollbarTheme.select(context, (ScrollbarThemeData theme) => theme.thumbColor);
+        thumbColor = ScrollbarTheme.selectOf(
+          context,
+          (ScrollbarThemeData theme) => theme.thumbColor,
+        );
         return const Placeholder();
       },
     );

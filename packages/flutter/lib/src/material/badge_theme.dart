@@ -176,7 +176,7 @@ class BadgeTheme extends InheritedTheme<BadgeThemeData, Object?> {
   /// If there is no enclosing [BadgeTheme] widget, then
   /// [ThemeData.badgeTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = BadgeTheme.select(
@@ -200,7 +200,7 @@ class BadgeTheme extends InheritedTheme<BadgeThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(BadgeThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(BadgeThemeData) selector) {
     final ThemeSelector<BadgeThemeData, T> themeSelector = ThemeSelector<BadgeThemeData, T>.from(
       selector,
     );

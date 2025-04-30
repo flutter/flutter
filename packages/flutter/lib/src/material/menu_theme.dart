@@ -122,7 +122,7 @@ class MenuTheme extends InheritedTheme<MenuThemeData, Object?> {
   /// the given context. If there is no ancestor, it returns
   /// [ThemeData.menuTheme].
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes.
   ///
   /// Typical usage is as follows:
@@ -149,7 +149,7 @@ class MenuTheme extends InheritedTheme<MenuThemeData, Object?> {
   ///
   /// If there is no [MenuTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.menuTheme] is used.
-  static T select<T>(BuildContext context, T Function(MenuThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(MenuThemeData) selector) {
     final ThemeSelector<MenuThemeData, T> themeSelector = ThemeSelector<MenuThemeData, T>.from(
       selector,
     );

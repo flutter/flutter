@@ -366,7 +366,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the cursorColor property
-        cursorColor = TextSelectionTheme.select(
+        cursorColor = TextSelectionTheme.selectOf(
           context,
           (TextSelectionThemeData theme) => theme.cursorColor,
         );

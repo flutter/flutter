@@ -875,7 +875,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = DialogTheme.select(
+        backgroundColor = DialogTheme.selectOf(
           context,
           (DialogThemeData theme) => theme.backgroundColor,
         );

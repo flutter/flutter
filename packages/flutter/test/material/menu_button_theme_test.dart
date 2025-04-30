@@ -26,7 +26,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        style = MenuButtonTheme.select(context, (MenuButtonThemeData theme) => theme.style);
+        style = MenuButtonTheme.selectOf(context, (MenuButtonThemeData theme) => theme.style);
         return const Placeholder();
       },
     );

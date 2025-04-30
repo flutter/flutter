@@ -115,7 +115,7 @@ class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData, Object?> {
   /// If there is no enclosing [MenuButtonTheme] widget, then
   /// [ThemeData.menuButtonTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final WidgetStateProperty<Color?>? backgroundColor = MenuButtonTheme.select(
@@ -140,7 +140,7 @@ class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData, Object?> {
   ///
   /// If there is no [MenuButtonTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.menuButtonTheme] is used.
-  static T select<T>(BuildContext context, T Function(MenuButtonThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(MenuButtonThemeData) selector) {
     final ThemeSelector<MenuButtonThemeData, T> themeSelector =
         ThemeSelector<MenuButtonThemeData, T>.from(selector);
     final MenuButtonThemeData theme =

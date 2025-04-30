@@ -346,7 +346,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        style = IconButtonTheme.select(context, (IconButtonThemeData theme) => theme.style);
+        style = IconButtonTheme.selectOf(context, (IconButtonThemeData theme) => theme.style);
         return const Placeholder();
       },
     );

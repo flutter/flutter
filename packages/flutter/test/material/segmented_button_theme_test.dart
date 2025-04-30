@@ -590,7 +590,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        style = SegmentedButtonTheme.select(
+        style = SegmentedButtonTheme.selectOf(
           context,
           (SegmentedButtonThemeData theme) => theme.style,
         );

@@ -981,7 +981,7 @@ class DatePickerTheme extends InheritedTheme<DatePickerThemeData, Object?> {
   /// If there is no [DatePickerTheme] in scope, this will return
   /// [ThemeData.datePickerTheme] from the ambient [Theme].
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = DatePickerTheme.select(
@@ -1058,7 +1058,7 @@ class DatePickerTheme extends InheritedTheme<DatePickerThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(DatePickerThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(DatePickerThemeData) selector) {
     final ThemeSelector<DatePickerThemeData, T> themeSelector =
         ThemeSelector<DatePickerThemeData, T>.from(selector);
     final DatePickerThemeData theme =

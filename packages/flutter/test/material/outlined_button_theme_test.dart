@@ -494,7 +494,10 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        style = OutlinedButtonTheme.select(context, (OutlinedButtonThemeData theme) => theme.style);
+        style = OutlinedButtonTheme.selectOf(
+          context,
+          (OutlinedButtonThemeData theme) => theme.style,
+        );
         return const Placeholder();
       },
     );

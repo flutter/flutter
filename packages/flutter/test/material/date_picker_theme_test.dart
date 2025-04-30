@@ -1404,7 +1404,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = DatePickerTheme.select(
+        backgroundColor = DatePickerTheme.selectOf(
           context,
           (DatePickerThemeData theme) => theme.backgroundColor,
         );

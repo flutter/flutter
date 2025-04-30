@@ -283,7 +283,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = NavigationDrawerTheme.select(
+        backgroundColor = NavigationDrawerTheme.selectOf(
           context,
           (NavigationDrawerThemeData theme) => theme.backgroundColor,
         );

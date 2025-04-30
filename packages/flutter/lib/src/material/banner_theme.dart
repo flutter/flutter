@@ -185,7 +185,7 @@ class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData, Object
   /// If there is no ancestor, it returns [ThemeData.bannerTheme]. Applications
   /// can assume that the returned value will not be null.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = MaterialBannerTheme.select(
@@ -210,7 +210,7 @@ class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData, Object
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T? select<T>(BuildContext context, T Function(MaterialBannerThemeData) selector) {
+  static T? selectOf<T>(BuildContext context, T Function(MaterialBannerThemeData) selector) {
     final ThemeSelector<MaterialBannerThemeData, T> themeSelector =
         ThemeSelector<MaterialBannerThemeData, T>.from(selector);
     final MaterialBannerThemeData? theme =

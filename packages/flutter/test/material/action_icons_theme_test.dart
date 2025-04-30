@@ -243,7 +243,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backButtonIconBuilder property.
-        backButtonIconBuilder = ActionIconTheme.select(
+        backButtonIconBuilder = ActionIconTheme.selectOf(
           context,
           (ActionIconThemeData theme) => theme.backButtonIconBuilder,
         );

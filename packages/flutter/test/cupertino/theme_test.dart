@@ -305,7 +305,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the primaryColor property.
-        primaryColor = CupertinoTheme.select(
+        primaryColor = CupertinoTheme.selectOf(
           context,
           (CupertinoThemeData theme) => theme.primaryColor,
         );

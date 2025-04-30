@@ -170,7 +170,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = BadgeTheme.select(
+        backgroundColor = BadgeTheme.selectOf(
           context,
           (BadgeThemeData theme) => theme.backgroundColor,
         );

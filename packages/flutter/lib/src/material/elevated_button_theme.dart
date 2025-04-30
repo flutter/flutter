@@ -106,7 +106,7 @@ class ElevatedButtonTheme extends InheritedTheme<ElevatedButtonThemeData, Object
   /// If there is no enclosing [ElevatedButtonTheme] widget, then
   /// [ThemeData.elevatedButtonTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final WidgetStateProperty<Color?>? backgroundColor = ElevatedButtonTheme.select(
@@ -131,7 +131,7 @@ class ElevatedButtonTheme extends InheritedTheme<ElevatedButtonThemeData, Object
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(ElevatedButtonThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ElevatedButtonThemeData) selector) {
     final ThemeSelector<ElevatedButtonThemeData, T> themeSelector =
         ThemeSelector<ElevatedButtonThemeData, T>.from(selector);
     final ElevatedButtonThemeData theme =

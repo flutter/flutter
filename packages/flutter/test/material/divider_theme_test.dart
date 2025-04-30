@@ -335,7 +335,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the color property.
-        color = DividerTheme.select(context, (DividerThemeData theme) => theme.color);
+        color = DividerTheme.selectOf(context, (DividerThemeData theme) => theme.color);
         return const Placeholder();
       },
     );

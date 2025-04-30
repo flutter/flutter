@@ -125,7 +125,7 @@ class ButtonTheme extends InheritedTheme<ButtonThemeData, Object?> {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final double height = ButtonTheme.select(
@@ -161,7 +161,7 @@ class ButtonTheme extends InheritedTheme<ButtonThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(ButtonThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ButtonThemeData) selector) {
     final ThemeSelector<ButtonThemeData, T> themeSelector = ThemeSelector<ButtonThemeData, T>.from(
       selector,
     );

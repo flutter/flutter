@@ -102,7 +102,7 @@ class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData, Object?> {
   /// If there is no enclosing [FilledButtonTheme] widget, then
   /// [ThemeData.filledButtonTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final WidgetStateProperty<Color?>? backgroundColor = FilledButtonTheme.select(
@@ -127,7 +127,7 @@ class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(FilledButtonThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(FilledButtonThemeData) selector) {
     final ThemeSelector<FilledButtonThemeData, T> themeSelector =
         ThemeSelector<FilledButtonThemeData, T>.from(selector);
     final FilledButtonThemeData theme =

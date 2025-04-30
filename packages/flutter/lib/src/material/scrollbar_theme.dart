@@ -313,7 +313,7 @@ class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData, Object?> {
   /// Returns the configuration [data] from the closest [ScrollbarTheme]
   /// ancestor. If there is no ancestor, it returns [ThemeData.scrollbarTheme].
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Radius? radius = ScrollbarTheme.select(
@@ -338,7 +338,7 @@ class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData, Object?> {
   ///
   /// If there is no [ScrollbarTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.scrollbarTheme] is used.
-  static T select<T>(BuildContext context, T Function(ScrollbarThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ScrollbarThemeData) selector) {
     final ThemeSelector<ScrollbarThemeData, T> themeSelector =
         ThemeSelector<ScrollbarThemeData, T>.from(selector);
     final ScrollbarThemeData theme =

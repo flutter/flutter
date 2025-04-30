@@ -140,7 +140,7 @@ class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData, Obje
   /// If there is no [SegmentedButtonTheme] in scope, then this function will
   /// return null.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Widget? selectedIcon = SegmentedButtonTheme.select(
@@ -171,7 +171,7 @@ class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData, Obje
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(SegmentedButtonThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(SegmentedButtonThemeData) selector) {
     final ThemeSelector<SegmentedButtonThemeData, T> themeSelector =
         ThemeSelector<SegmentedButtonThemeData, T>.from(selector);
     final SegmentedButtonThemeData theme =

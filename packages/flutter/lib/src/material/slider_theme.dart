@@ -67,7 +67,7 @@ class SliderTheme extends InheritedTheme<SliderThemeData, Object?> {
   /// Defaults to the ambient [ThemeData.sliderTheme] if there is no
   /// [SliderTheme] in the given build context.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes.
   ///
   /// {@tool snippet}
@@ -111,7 +111,7 @@ class SliderTheme extends InheritedTheme<SliderThemeData, Object?> {
   ///
   /// If there is no [SliderTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.sliderTheme] is used.
-  static T select<T>(BuildContext context, T Function(SliderThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(SliderThemeData) selector) {
     final ThemeSelector<SliderThemeData, T> themeSelector = ThemeSelector<SliderThemeData, T>.from(
       selector,
     );

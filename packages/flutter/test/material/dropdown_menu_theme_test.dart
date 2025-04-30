@@ -428,7 +428,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the textStyle property.
-        textStyle = DropdownMenuTheme.select(
+        textStyle = DropdownMenuTheme.selectOf(
           context,
           (DropdownMenuThemeData theme) => theme.textStyle,
         );

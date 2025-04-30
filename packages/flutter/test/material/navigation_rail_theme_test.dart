@@ -316,7 +316,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = NavigationRailTheme.select(
+        backgroundColor = NavigationRailTheme.selectOf(
           context,
           (NavigationRailThemeData theme) => theme.backgroundColor,
         );

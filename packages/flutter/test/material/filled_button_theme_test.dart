@@ -421,7 +421,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        style = FilledButtonTheme.select(context, (FilledButtonThemeData theme) => theme.style);
+        style = FilledButtonTheme.selectOf(context, (FilledButtonThemeData theme) => theme.style);
         return const Placeholder();
       },
     );

@@ -353,7 +353,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = NavigationBarTheme.select(
+        backgroundColor = NavigationBarTheme.selectOf(
           context,
           (NavigationBarThemeData theme) => theme.backgroundColor,
         );

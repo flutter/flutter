@@ -336,7 +336,7 @@ class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData, 
   /// If there is no [ProgressIndicatorTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.progressIndicatorTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? color = ProgressIndicatorTheme.select(
@@ -344,7 +344,7 @@ class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData, 
   ///   (ProgressIndicatorThemeData data) => data.color,
   /// );
   /// ```
-  static T select<T>(BuildContext context, T Function(ProgressIndicatorThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ProgressIndicatorThemeData) selector) {
     final ThemeSelector<ProgressIndicatorThemeData, T> themeSelector =
         ThemeSelector<ProgressIndicatorThemeData, T>.from(selector);
     final ProgressIndicatorThemeData theme =

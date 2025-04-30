@@ -316,7 +316,7 @@ class NavigationRailTheme extends InheritedTheme<NavigationRailThemeData, Object
   /// If there is no enclosing [NavigationRailTheme] widget, then
   /// [ThemeData.navigationRailTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = NavigationRailTheme.select(
@@ -341,7 +341,7 @@ class NavigationRailTheme extends InheritedTheme<NavigationRailThemeData, Object
   ///
   /// If there is no [NavigationRailTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.navigationRailTheme] is used.
-  static T select<T>(BuildContext context, T Function(NavigationRailThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(NavigationRailThemeData) selector) {
     final ThemeSelector<NavigationRailThemeData, T> themeSelector =
         ThemeSelector<NavigationRailThemeData, T>.from(selector);
     final NavigationRailThemeData theme =

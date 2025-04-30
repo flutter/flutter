@@ -268,7 +268,7 @@ class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData, Object?>
   /// [ThemeData.expansionTileTheme] is used.
   ///
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = ExpansionTileTheme.select(
@@ -293,7 +293,7 @@ class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData, Object?>
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(ExpansionTileThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(ExpansionTileThemeData) selector) {
     final ThemeSelector<ExpansionTileThemeData, T> themeSelector =
         ThemeSelector<ExpansionTileThemeData, T>.from(selector);
     final ExpansionTileThemeData theme =

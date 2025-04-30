@@ -368,7 +368,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        style = MenuTheme.select(context, (MenuThemeData theme) => theme.style);
+        style = MenuTheme.selectOf(context, (MenuThemeData theme) => theme.style);
         return const Placeholder();
       },
     );

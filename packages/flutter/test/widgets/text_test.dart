@@ -1711,7 +1711,7 @@ void main() {
     final Widget singletonThemeSubtree = Builder(
       builder: (BuildContext context) {
         buildCount++;
-        fontSize = DefaultTextStyle.select(
+        fontSize = DefaultTextStyle.selectOf(
           context,
           (DefaultTextStyle theme) => theme.style.fontSize!,
         );

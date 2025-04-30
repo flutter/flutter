@@ -106,7 +106,7 @@ class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData, Object
   /// If there is no enclosing [OutlinedButtonTheme] widget, then
   /// [ThemeData.outlinedButtonTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final ButtonStyle? style = OutlinedButtonTheme.select(
@@ -131,7 +131,7 @@ class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData, Object
   ///
   /// If there is no [OutlinedButtonTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.outlinedButtonTheme] is used.
-  static T select<T>(BuildContext context, T Function(OutlinedButtonThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(OutlinedButtonThemeData) selector) {
     final ThemeSelector<OutlinedButtonThemeData, T> themeSelector =
         ThemeSelector<OutlinedButtonThemeData, T>.from(selector);
     final OutlinedButtonThemeData theme =

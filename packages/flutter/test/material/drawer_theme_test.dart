@@ -333,7 +333,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the backgroundColor property.
-        backgroundColor = DrawerTheme.select(
+        backgroundColor = DrawerTheme.selectOf(
           context,
           (DrawerThemeData theme) => theme.backgroundColor,
         );

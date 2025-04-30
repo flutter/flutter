@@ -269,7 +269,7 @@ class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData, Object?> {
   /// context. If there is no ancestor, it returns [ThemeData.popupMenuTheme].
   /// Applications can assume that the returned value will not be null.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? color = PopupMenuTheme.select(
@@ -294,7 +294,7 @@ class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData, Object?> {
   ///
   /// If there is no [PopupMenuTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.popupMenuTheme] is used.
-  static T select<T>(BuildContext context, T Function(PopupMenuThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(PopupMenuThemeData) selector) {
     final ThemeSelector<PopupMenuThemeData, T> themeSelector =
         ThemeSelector<PopupMenuThemeData, T>.from(selector);
     final PopupMenuThemeData theme =

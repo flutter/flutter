@@ -248,7 +248,7 @@ class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData, Ob
   /// If there is no enclosing [NavigationDrawerTheme] widget, then
   /// [ThemeData.navigationDrawerTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = NavigationDrawerTheme.select(
@@ -267,7 +267,7 @@ class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData, Ob
   ///
   /// If there is no [NavigationDrawerTheme] ancestor, or the theme data has no value for
   /// the specified field, then the value from [ThemeData.navigationDrawerTheme] is used.
-  static T select<T>(BuildContext context, T Function(NavigationDrawerThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(NavigationDrawerThemeData) selector) {
     final ThemeSelector<NavigationDrawerThemeData, T> themeSelector =
         ThemeSelector<NavigationDrawerThemeData, T>.from(selector);
     final NavigationDrawerThemeData theme =

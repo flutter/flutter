@@ -490,7 +490,10 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the style property.
-        style = ElevatedButtonTheme.select(context, (ElevatedButtonThemeData theme) => theme.style);
+        style = ElevatedButtonTheme.selectOf(
+          context,
+          (ElevatedButtonThemeData theme) => theme.style,
+        );
         return const Placeholder();
       },
     );

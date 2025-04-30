@@ -57,7 +57,7 @@ class IconTheme extends InheritedTheme<IconThemeData, Object?> {
   /// application, this will typically default to the icon theme from the
   /// ambient [Theme].
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? color = IconTheme.select(
@@ -102,7 +102,7 @@ class IconTheme extends InheritedTheme<IconThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(IconThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(IconThemeData) selector) {
     final ThemeSelector<IconThemeData, T> themeSelector = ThemeSelector<IconThemeData, T>.from(
       selector,
     );

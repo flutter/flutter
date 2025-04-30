@@ -85,7 +85,7 @@ class MenuBarTheme extends InheritedTheme<MenuBarThemeData, Object?> {
   /// the given context. If there is no ancestor, it returns
   /// [ThemeData.menuBarTheme].
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes.
   ///
   /// Typical usage is as follows:
@@ -112,7 +112,7 @@ class MenuBarTheme extends InheritedTheme<MenuBarThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(MenuBarThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(MenuBarThemeData) selector) {
     final ThemeSelector<MenuBarThemeData, T> themeSelector =
         ThemeSelector<MenuBarThemeData, T>.from(selector);
     final MenuBarThemeData theme =

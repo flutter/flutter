@@ -573,7 +573,7 @@ void main() {
       builder: (BuildContext context) {
         buildCount++;
         // Select the color property.
-        color = ProgressIndicatorTheme.select(
+        color = ProgressIndicatorTheme.selectOf(
           context,
           (ProgressIndicatorThemeData theme) => theme.color,
         );

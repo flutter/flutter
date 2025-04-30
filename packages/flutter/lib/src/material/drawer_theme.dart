@@ -193,7 +193,7 @@ class DrawerTheme extends InheritedTheme<DrawerThemeData, Object?> {
   /// If there is no enclosing [DrawerTheme] widget, then
   /// [ThemeData.drawerTheme] is used.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final Color? backgroundColor = DrawerTheme.select(
@@ -217,7 +217,7 @@ class DrawerTheme extends InheritedTheme<DrawerThemeData, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(DrawerThemeData) selector) {
+  static T selectOf<T>(BuildContext context, T Function(DrawerThemeData) selector) {
     final ThemeSelector<DrawerThemeData, T> themeSelector = ThemeSelector<DrawerThemeData, T>.from(
       selector,
     );

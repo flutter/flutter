@@ -177,7 +177,7 @@ class DefaultTextStyle extends InheritedTheme<DefaultTextStyle, Object?> {
   /// If no such instance exists, returns an instance created by
   /// [DefaultTextStyle.fallback], which contains fallback values.
   ///
-  /// For specific theme properties, consider using [select],
+  /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
   /// final TextStyle? style = DefaultTextStyle.select(
@@ -201,7 +201,7 @@ class DefaultTextStyle extends InheritedTheme<DefaultTextStyle, Object?> {
   ///
   /// When this value changes, a notification is sent to the [context]
   /// to trigger an update.
-  static T select<T>(BuildContext context, T Function(DefaultTextStyle) selector) {
+  static T selectOf<T>(BuildContext context, T Function(DefaultTextStyle) selector) {
     final ThemeSelector<DefaultTextStyle, T> themeSelector =
         ThemeSelector<DefaultTextStyle, T>.from(selector);
     final DefaultTextStyle theme =
