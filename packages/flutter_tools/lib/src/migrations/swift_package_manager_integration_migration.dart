@@ -183,7 +183,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
         '  ${_platform.name}/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme '
         '(or the scheme for the flavor used)\n\n'
         'To add Swift Package Manager integration manually, please use the following instructions:\n'
-        'https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-flutter-app-manually.\n\n'
+        'https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers#add-to-a-flutter-app-manually\n\n'
         'Alternatively, to avoid this failure, disable Flutter Swift Package Manager integration for the project\n'
         'by adding the following in the project\'s pubspec.yaml under the "flutter" section:\n'
         '  "disable-swift-package-manager: true"\n'
