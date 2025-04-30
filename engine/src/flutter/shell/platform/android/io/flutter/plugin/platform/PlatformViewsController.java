@@ -499,10 +499,12 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
               + request.viewId
               + ")");
     }
-    if (request.displayMode == PlatformViewsChannel.PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY
-            && flutterJNI.IsSurfaceControlEnabled()) {
-        // HC mode does not work if HC++ is enabled, so we must reply with error.
-        throw new IllegalStateException("Trying to create a Hybrid Composition view with HC++ enabled.");
+    if (request.displayMode
+            == PlatformViewsChannel.PlatformViewCreationRequest.RequestedDisplayMode.HYBRID_ONLY
+        && flutterJNI.IsSurfaceControlEnabled()) {
+      // HC mode does not work if HC++ is enabled, so we must reply with error.
+      throw new IllegalStateException(
+          "Trying to create a Hybrid Composition view with HC++ enabled.");
     }
   }
 
