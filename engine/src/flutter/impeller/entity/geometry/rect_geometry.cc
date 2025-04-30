@@ -51,7 +51,7 @@ StrokeRectGeometry::StrokeRectGeometry(Rect rect,
                                        Join stroke_join,
                                        Scalar miter_limit)
     : rect_(rect),
-      half_stroke_width_(stroke_width * 0.5f),
+      stroke_width_(stroke_width),
       stroke_join_(AdjustStrokeJoin(stroke_join, miter_limit)) {}
 
 StrokeRectGeometry::~StrokeRectGeometry() = default;
@@ -60,6 +60,17 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) const {
+  if (stroke_width_ < 0.0) {
+    return {};
+  }
+  Scalar max_basis = entity.GetTransform().GetMaxBasisLengthXY();
+  if (max_basis == 0) {
+    return {};
+  }
+
+  Scalar min_size = kMinStrokeSize / max_basis;
+  Scalar half_stroke_width = std::max(stroke_width_, min_size) * 0.5f;
+
   auto& host_buffer = renderer.GetTransientsBuffer();
   Scalar left = rect_.GetLeft();
   Scalar top = rect_.GetTop();
@@ -68,10 +79,9 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
 
   switch (stroke_join_) {
     case Join::kRound: {
-      Scalar radius = half_stroke_width_;
-      Scalar scale = entity.GetTransform().GetMaxBasisLengthXY();
+      Scalar radius = half_stroke_width;
       Tessellator::Trigs trigs =
-          renderer.GetTessellator().GetTrigsForDeviceRadius(radius * scale);
+          renderer.GetTessellator().GetTrigsForDeviceRadius(radius * max_basis);
 
       FML_DCHECK(trigs.size() >= 2u);
 
@@ -135,23 +145,23 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
 
     case Join::kBevel: {
       std::array<Point, 17> points{
-          Point(left, top - half_stroke_width_),
-          Point(left, top + half_stroke_width_),
-          Point(right, top - half_stroke_width_),
-          Point(right, top + half_stroke_width_),
-          Point(right + half_stroke_width_, top),
-          Point(right - half_stroke_width_, top),
-          Point(right + half_stroke_width_, bottom),
-          Point(right - half_stroke_width_, bottom),
-          Point(right, bottom + half_stroke_width_),
-          Point(right, bottom - half_stroke_width_),
-          Point(left, bottom + half_stroke_width_),
-          Point(left, bottom - half_stroke_width_),
-          Point(left - half_stroke_width_, bottom),
-          Point(left + half_stroke_width_, bottom),
-          Point(left - half_stroke_width_, top),
-          Point(left + half_stroke_width_, top),
-          Point(left, top - half_stroke_width_),
+          Point(left, top - half_stroke_width),
+          Point(left, top + half_stroke_width),
+          Point(right, top - half_stroke_width),
+          Point(right, top + half_stroke_width),
+          Point(right + half_stroke_width, top),
+          Point(right - half_stroke_width, top),
+          Point(right + half_stroke_width, bottom),
+          Point(right - half_stroke_width, bottom),
+          Point(right, bottom + half_stroke_width),
+          Point(right, bottom - half_stroke_width),
+          Point(left, bottom + half_stroke_width),
+          Point(left, bottom - half_stroke_width),
+          Point(left - half_stroke_width, bottom),
+          Point(left + half_stroke_width, bottom),
+          Point(left - half_stroke_width, top),
+          Point(left + half_stroke_width, top),
+          Point(left, top - half_stroke_width),
       };
       return GeometryResult{
           .type = PrimitiveType::kTriangleStrip,
@@ -169,16 +179,16 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
 
     case Join::kMiter: {
       std::array<Point, 10> points{
-          Point(left - half_stroke_width_, top - half_stroke_width_),
-          Point(left + half_stroke_width_, top + half_stroke_width_),
-          Point(right + half_stroke_width_, top - half_stroke_width_),
-          Point(right - half_stroke_width_, top + half_stroke_width_),
-          Point(right + half_stroke_width_, bottom + half_stroke_width_),
-          Point(right - half_stroke_width_, bottom - half_stroke_width_),
-          Point(left - half_stroke_width_, bottom + half_stroke_width_),
-          Point(left + half_stroke_width_, bottom - half_stroke_width_),
-          Point(left - half_stroke_width_, top - half_stroke_width_),
-          Point(left + half_stroke_width_, top + half_stroke_width_),
+          Point(left - half_stroke_width, top - half_stroke_width),
+          Point(left + half_stroke_width, top + half_stroke_width),
+          Point(right + half_stroke_width, top - half_stroke_width),
+          Point(right - half_stroke_width, top + half_stroke_width),
+          Point(right + half_stroke_width, bottom + half_stroke_width),
+          Point(right - half_stroke_width, bottom - half_stroke_width),
+          Point(left - half_stroke_width, bottom + half_stroke_width),
+          Point(left + half_stroke_width, bottom - half_stroke_width),
+          Point(left - half_stroke_width, top - half_stroke_width),
+          Point(left + half_stroke_width, top + half_stroke_width),
       };
       return GeometryResult{
           .type = PrimitiveType::kTriangleStrip,

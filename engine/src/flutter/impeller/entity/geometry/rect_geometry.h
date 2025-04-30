@@ -52,7 +52,7 @@ class StrokeRectGeometry final : public Geometry {
 
  private:
   const Rect rect_;
-  const Scalar half_stroke_width_;
+  const Scalar stroke_width_;
   const Join stroke_join_;
 
   static Join AdjustStrokeJoin(Join join, Scalar miter_limit);

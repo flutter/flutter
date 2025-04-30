@@ -435,27 +435,45 @@ TEST_P(AiksTest, StrokedRectsRenderCorrectly) {
 
   DlPaint thin_paint = paint;
   thin_paint.setColor(DlColor::kYellow());
-  thin_paint.setStrokeWidth(1.0f);
+  thin_paint.setStrokeWidth(0.0f);
 
   DlRect rect = DlRect::MakeLTRB(10, 10, 90, 90);
+  DlRect thin_tall_rect = DlRect::MakeLTRB(120, 10, 120, 90);
+  DlRect thin_wide_rect = DlRect::MakeLTRB(10, 120, 90, 120);
 
   paint.setStrokeJoin(DlStrokeJoin::kBevel);
   builder.DrawRect(rect.Shift({100, 100}), paint);
   builder.DrawRect(rect.Shift({100, 100}), thin_paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 100}), paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 100}), thin_paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 100}), paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 100}), thin_paint);
 
   paint.setStrokeJoin(DlStrokeJoin::kRound);
   builder.DrawRect(rect.Shift({100, 300}), paint);
   builder.DrawRect(rect.Shift({100, 300}), thin_paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 300}), paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 300}), thin_paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 300}), paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 300}), thin_paint);
 
   paint.setStrokeJoin(DlStrokeJoin::kMiter);
   paint.setStrokeMiter(kSqrt2 + flutter::kEhCloseEnough);
   builder.DrawRect(rect.Shift({100, 500}), paint);
   builder.DrawRect(rect.Shift({100, 500}), thin_paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 500}), paint);
+  builder.DrawRect(thin_tall_rect.Shift({100, 500}), thin_paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 500}), paint);
+  builder.DrawRect(thin_wide_rect.Shift({100, 500}), thin_paint);
 
   paint.setStrokeJoin(DlStrokeJoin::kMiter);
   paint.setStrokeMiter(kSqrt2 - flutter::kEhCloseEnough);
   builder.DrawRect(rect.Shift({300, 500}), paint);
   builder.DrawRect(rect.Shift({300, 500}), thin_paint);
+  builder.DrawRect(thin_tall_rect.Shift({300, 500}), paint);
+  builder.DrawRect(thin_tall_rect.Shift({300, 500}), thin_paint);
+  builder.DrawRect(thin_wide_rect.Shift({300, 500}), paint);
+  builder.DrawRect(thin_wide_rect.Shift({300, 500}), thin_paint);
 
   paint.setStrokeWidth(120.0f);
   paint.setColor(DlColor::kBlue());
@@ -485,12 +503,12 @@ TEST_P(AiksTest, StrokedRectsRenderCorrectly) {
 
   Scalar x = 900;
   Scalar y = 50;
-  for (int i = 1; i < 15; i++) {
+  for (int i = 0; i < 15; i++) {
     paint.setStrokeWidth(i);
     paint.setColor(DlColor::kOrange());
     paint.setStrokeJoin(DlStrokeJoin::kRound);
-    builder.DrawRect(DlRect::MakeXYWH(x, y, 40, 40), paint);
-    y += 42 + i;
+    builder.DrawRect(DlRect::MakeXYWH(x, y, 30, 30), paint);
+    y += 32 + i;
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
