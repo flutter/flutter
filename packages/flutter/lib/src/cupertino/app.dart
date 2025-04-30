@@ -552,13 +552,10 @@ class _CupertinoAppState extends State<CupertinoApp> {
     required String semanticLabel,
     bool isLeftAligned = true,
   }) {
-    return _CupertinoInspectorButton(
+    return _CupertinoInspectorButton.iconOnly(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
       icon: isLeftAligned ? CupertinoIcons.arrow_right : CupertinoIcons.arrow_left,
-      iconSize: _CupertinoInspectorButton._selectionButtonsSize,
-      backgroundColor: const Color(0x00000000),
-      foregroundColor: _CupertinoInspectorButton._backgroundColor(context),
     );
   }
 
@@ -568,14 +565,11 @@ class _CupertinoAppState extends State<CupertinoApp> {
     required String semanticLabel,
     required bool defaultTapBehaviorEnabled,
   }) {
-    return _CupertinoInspectorButton(
+    return _CupertinoInspectorButton.toggle(
       onPressed: onPressed,
       semanticLabel: semanticLabel,
       icon: CupertinoIcons.cursor_rays,
-      backgroundColor:
-          defaultTapBehaviorEnabled
-              ? _CupertinoInspectorButton._backgroundColor(context)
-              : _CupertinoInspectorButton._alternateBackgroundColor(context),
+      toggledOn: defaultTapBehaviorEnabled,
     );
   }
 
@@ -686,61 +680,97 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 }
 
+enum _CupertinoInspectorButtonVariant { filled, toggle, iconOnly }
+
 class _CupertinoInspectorButton extends StatelessWidget {
   const _CupertinoInspectorButton({
     required this.onPressed,
     required this.semanticLabel,
     required this.icon,
-    this.iconSize,
     this.buttonKey,
-    this.backgroundColor,
-    this.foregroundColor,
-  });
+  }) : _variant = _CupertinoInspectorButtonVariant.filled,
+       _toggledOn = null;
+
+  const _CupertinoInspectorButton.toggle({
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+    bool toggledOn = true,
+  }) : buttonKey = null,
+       _variant = _CupertinoInspectorButtonVariant.toggle,
+       _toggledOn = toggledOn;
+
+  const _CupertinoInspectorButton.iconOnly({
+    required this.onPressed,
+    required this.semanticLabel,
+    required this.icon,
+  }) : buttonKey = null,
+       _variant = _CupertinoInspectorButtonVariant.iconOnly,
+       _toggledOn = null;
 
   final VoidCallback onPressed;
   final String semanticLabel;
   final IconData icon;
-  final double? iconSize;
   final GlobalKey? buttonKey;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
+  final _CupertinoInspectorButtonVariant _variant;
+  final bool? _toggledOn;
 
-  static Color _foregroundColor(BuildContext context) {
-    return CupertinoTheme.of(context).primaryContrastingColor;
-  }
-
-  static Color _backgroundColor(BuildContext context) {
-    return CupertinoTheme.of(context).primaryColor;
-  }
-
-  static Color _alternateBackgroundColor(BuildContext context) {
-    final Color backgroundColor = _backgroundColor(context);
-    final Color foregroundColor = _foregroundColor(context);
-    return Color.lerp(backgroundColor, foregroundColor, 0.5) ?? backgroundColor;
-  }
-
-  static const double _selectionButtonsSize = 32.0;
-  static const double _selectionButtonsIconSize = 18.0;
+  static const double _buttonSize = 32.0;
+  static const double _buttonIconSize = 18.0;
 
   @override
   Widget build(BuildContext context) {
+    final Icon buttonIcon = Icon(
+      icon,
+      semanticLabel: semanticLabel,
+      size: _variant == _CupertinoInspectorButtonVariant.iconOnly ? _buttonSize : _buttonIconSize,
+      color: _foregroundColor(context),
+    );
+
     return Padding(
       key: buttonKey,
-      padding: const EdgeInsets.all(
-        (kMinInteractiveDimensionCupertino - _selectionButtonsSize) / 2,
-      ),
-      child: CupertinoButton(
-        minSize: _selectionButtonsSize,
-        onPressed: onPressed,
-        padding: EdgeInsets.zero,
-        color: backgroundColor ?? _backgroundColor(context),
-        child: Icon(
-          icon,
-          semanticLabel: semanticLabel,
-          size: iconSize ?? _selectionButtonsIconSize,
-          color: foregroundColor ?? _foregroundColor(context),
-        ),
-      ),
+      padding: const EdgeInsets.all((kMinInteractiveDimensionCupertino - _buttonSize) / 2),
+
+      child:
+          _variant == _CupertinoInspectorButtonVariant.toggle && !_toggledOn!
+              ? CupertinoButton.tinted(
+                minSize: _buttonSize,
+                onPressed: onPressed,
+                padding: EdgeInsets.zero,
+                child: buttonIcon,
+              )
+              : CupertinoButton(
+                minSize: _buttonSize,
+                onPressed: onPressed,
+                padding: EdgeInsets.zero,
+                color: _backgroundColor(context),
+                child: buttonIcon,
+              ),
     );
+  }
+
+  Color _foregroundColor(BuildContext context) {
+    final Color primaryColor = CupertinoTheme.of(context).primaryColor;
+    final Color secondaryColor = CupertinoTheme.of(context).primaryContrastingColor;
+    switch (_variant) {
+      case _CupertinoInspectorButtonVariant.filled:
+        return primaryColor;
+      case _CupertinoInspectorButtonVariant.iconOnly:
+        return secondaryColor;
+      case _CupertinoInspectorButtonVariant.toggle:
+        return !_toggledOn! ? secondaryColor : primaryColor;
+    }
+  }
+
+  Color _backgroundColor(BuildContext context) {
+    final Color secondaryColor = CupertinoTheme.of(context).primaryContrastingColor;
+    switch (_variant) {
+      case _CupertinoInspectorButtonVariant.filled:
+        return secondaryColor;
+      case _CupertinoInspectorButtonVariant.iconOnly:
+        return const Color(0x00000000);
+      case _CupertinoInspectorButtonVariant.toggle:
+        return !_toggledOn! ? const Color(0x00000000) : secondaryColor;
+    }
   }
 }
