@@ -2288,9 +2288,7 @@ mixin WidgetInspectorService {
 
               final ParentData? parentData = renderObject.parentData;
               if (parentData is FlexParentData) {
-                if(parentData.flex != null) {
-                  additionalJson['flexFactor'] = parentData.flex!;
-                }
+                additionalJson['flexFactor'] = parentData.flex ?? 0;
                 additionalJson['flexFit'] = (parentData.fit ?? FlexFit.tight).name;
               } else if (parentData is BoxParentData) {
                 final Offset offset = parentData.offset;
