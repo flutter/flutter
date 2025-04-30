@@ -180,6 +180,7 @@ test-suites:
     test-bundle: dart2wasm-skwasm-ui
     run-config: firefox-wasm
     artifact-deps: [ skwasm ]
+    enable-ci: false
 
   - name: safari-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine

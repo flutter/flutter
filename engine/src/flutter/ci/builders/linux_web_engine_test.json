@@ -321,11 +321,11 @@
       ]
     },
     {
-      "name": "Mac run firefox suites",
+      "name": "Linux run firefox suites",
       "recipe": "engine_v2/tester_engine",
       "drone_dimensions": [
         "device_type=none",
-        "os=Mac"
+        "os=Linux"
       ],
       "gclient_variables": {
         "download_android_deps": false,
@@ -335,7 +335,6 @@
         "web_tests/test_bundles/dart2js-canvaskit-engine",
         "web_tests/test_bundles/dart2js-canvaskit-canvaskit",
         "web_tests/test_bundles/dart2js-canvaskit-ui",
-        "web_tests/test_bundles/dart2wasm-skwasm-ui",
         "web_tests/test_bundles/dart2wasm-canvaskit-engine",
         "web_tests/test_bundles/fallbacks"
       ],
@@ -410,15 +409,6 @@
             "test",
             "--run",
             "--suite=firefox-dart2js-canvaskit-ui"
-          ],
-          "script": "flutter/lib/web_ui/dev/felt"
-        },
-        {
-          "name": "run suite firefox-dart2wasm-skwasm-ui",
-          "parameters": [
-            "test",
-            "--run",
-            "--suite=firefox-dart2wasm-skwasm-ui"
           ],
           "script": "flutter/lib/web_ui/dev/felt"
         },

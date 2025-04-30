@@ -200,6 +200,7 @@ class _PackageRoller {
     }
     final io.ProcessResult copyResult = await io.Process.run('cp', <String>[
       '-r',
+      '-p',
       '${mountDirectory.path}/Firefox.app',
       '${destination.path}/Firefox.app',
     ]);
