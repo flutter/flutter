@@ -389,7 +389,7 @@ void main() {
         terminal: terminal,
         outputPreferences: outputPreferences,
         signals: Signals.test(),
-        flutterDriverFactory: NeverEndingFlutterDriverFactory(() {}),
+        flutterDriverFactory: FakeFlutterDriverFactory(),
       );
 
       fileSystem.file('lib/main.dart').createSync(recursive: true);
@@ -456,9 +456,12 @@ void main() {
         terminal: terminal,
         outputPreferences: outputPreferences,
         signals: Signals.test(),
-        flutterDriverFactory: NeverEndingFlutterDriverFactory(() {
-          signal.controller.add(signal);
-        }),
+        flutterDriverFactory: FakeFlutterDriverFactory(
+          onStartTest: () {
+            signal.controller.add(signal);
+            return Completer<int>().future;
+          },
+        ),
         signalsToHandle: <ProcessSignal>{signalUnderTest},
       );
 
@@ -711,6 +714,123 @@ void main() {
   );
 
   testUsingContext(
+    '--use-existing-app keeps the app running',
+    () async {
+      bool wasStopped = false;
+
+      final FakeProcessSignal signal = FakeProcessSignal();
+      final ProcessSignal signalUnderTest = ProcessSignal(signal);
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: Signals.test(),
+        flutterDriverFactory: FakeFlutterDriverFactory(
+          onStartTest: () async {
+            signal.controller.add(signal);
+            return 0;
+          },
+          onStop: () {
+            wasStopped = true;
+          },
+        ),
+        signalsToHandle: <ProcessSignal>{signalUnderTest},
+      );
+
+      final Device screenshotDevice = ThrowingScreenshotDevice();
+      fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      final Future<void> runningCommand = createTestCommandRunner(command).run(<String>[
+        'drive',
+        '-d',
+        screenshotDevice.id,
+        '--no-pub',
+        '--use-existing-app',
+        'http://localhost:8181',
+      ]);
+
+      signal.controller.add(io.ProcessSignal.sigint);
+      await runningCommand;
+      expect(
+        wasStopped,
+        false,
+        reason: 'Using --use-existing-app without --no-keep-app-running does not stop the app',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
+
+  testUsingContext(
+    '--no-keep-app-running always stops the app running',
+    () async {
+      bool wasStopped = false;
+
+      final FakeProcessSignal signal = FakeProcessSignal();
+      final ProcessSignal signalUnderTest = ProcessSignal(signal);
+      final DriveCommand command = DriveCommand(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        terminal: terminal,
+        outputPreferences: outputPreferences,
+        signals: Signals.test(),
+        flutterDriverFactory: FakeFlutterDriverFactory(
+          onStartTest: () async {
+            signal.controller.add(signal);
+            return 0;
+          },
+          onStop: () {
+            wasStopped = true;
+          },
+        ),
+        signalsToHandle: <ProcessSignal>{signalUnderTest},
+      );
+
+      final Device screenshotDevice = ThrowingScreenshotDevice();
+      fakeDeviceManager.attachedDevices = <Device>[screenshotDevice];
+
+      fileSystem.file('lib/main.dart').createSync(recursive: true);
+      fileSystem.file('test_driver/main_test.dart').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+
+      final Future<void> runningCommand = createTestCommandRunner(command).run(<String>[
+        'drive',
+        '-d',
+        screenshotDevice.id,
+        '--no-pub',
+        '--no-keep-app-running',
+        '--use-existing-app',
+        'http://localhost:8181',
+      ]);
+
+      signal.controller.add(io.ProcessSignal.sigint);
+      await runningCommand;
+      expect(
+        wasStopped,
+        true,
+        reason: 'Using --use-existing-app with --no-keep-app-running stops the app',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      Pub: () => FakePub(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
+
+  testUsingContext(
     'flutter drive --help explains how to use the command',
     () async {
       final DriveCommand command = DriveCommand(
@@ -816,24 +936,29 @@ class FakePub extends Fake implements Pub {
   }) async {}
 }
 
-/// A [FlutterDriverFactory] that creates a [NeverEndingDriverService].
-class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFactory {
-  NeverEndingFlutterDriverFactory(this.callback);
+/// A [FlutterDriverFactory] that creates a [FakeDriverService].
+class FakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
+  FakeFlutterDriverFactory({this.onStartTest, this.onStop});
 
-  final void Function() callback;
+  final Future<int> Function()? onStartTest;
+  final void Function()? onStop;
 
   @override
-  DriverService createDriverService(bool web) => NeverEndingDriverService(callback);
+  DriverService createDriverService(bool web) {
+    return FakeDriverService(onStartTest: onStartTest, onStop: onStop);
+  }
 }
 
 /// A [DriverService] that will return a Future from [startTest] that will never complete.
 ///
 /// This is to simulate when the test will take a long time, but a signal is
 /// expected to interrupt the process.
-class NeverEndingDriverService extends Fake implements DriverService {
-  NeverEndingDriverService(this.callback);
+class FakeDriverService extends Fake implements DriverService {
+  FakeDriverService({this.onStartTest, this.onStop});
 
-  final void Function() callback;
+  final Future<int> Function()? onStartTest;
+  final void Function()? onStop;
+
   @override
   Future<void> reuseApplication(
     Uri vmServiceUri,
@@ -855,9 +980,13 @@ class NeverEndingDriverService extends Fake implements DriverService {
     List<String>? browserDimension,
     String? profileMemory,
   }) async {
-    callback();
-    // return a Future that will never complete.
-    return Completer<int>().future;
+    final Future<int> result = onStartTest?.call() ?? Completer<int>().future;
+    return result;
+  }
+
+  @override
+  Future<void> stop({String? userIdentifier}) async {
+    return onStop?.call();
   }
 }
 
