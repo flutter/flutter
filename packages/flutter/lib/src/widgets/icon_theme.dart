@@ -94,9 +94,6 @@ class IconTheme extends InheritedTheme<IconThemeData> {
     return iconTheme?.data ?? const IconThemeData.fallback();
   }
 
-  @override
-  bool updateShouldNotify(IconTheme oldWidget) => data != oldWidget.data;
-
   /// Evaluates [ThemeSelector.selectFrom] using [data] provided by the
   /// nearest ancestor [IconTheme] widget, and returns the result.
   ///
@@ -123,17 +120,5 @@ class IconTheme extends InheritedTheme<IconThemeData> {
   }
 
   @override
-  bool updateShouldNotifyDependent(
-    IconTheme oldWidget,
-    Set<ThemeSelector<IconThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<IconThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  IconThemeData get themeData => data;
 }

@@ -295,20 +295,5 @@ class SearchViewTheme extends InheritedTheme<SearchViewThemeData> {
   }
 
   @override
-  bool updateShouldNotify(SearchViewTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    SearchViewTheme oldWidget,
-    Set<ThemeSelector<SearchViewThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<SearchViewThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  SearchViewThemeData get themeData => data;
 }

@@ -307,20 +307,5 @@ class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData> {
   }
 
   @override
-  bool updateShouldNotify(ToggleButtonsTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    ToggleButtonsTheme oldWidget,
-    Set<ThemeSelector<ToggleButtonsThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ToggleButtonsThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ToggleButtonsThemeData get themeData => data;
 }

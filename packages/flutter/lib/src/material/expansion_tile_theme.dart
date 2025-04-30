@@ -307,20 +307,5 @@ class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData> {
   }
 
   @override
-  bool updateShouldNotify(ExpansionTileTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    ExpansionTileTheme oldWidget,
-    Set<ThemeSelector<ExpansionTileThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ExpansionTileThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ExpansionTileThemeData get themeData => data;
 }

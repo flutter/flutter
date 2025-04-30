@@ -355,20 +355,5 @@ class NavigationRailTheme extends InheritedTheme<NavigationRailThemeData> {
   }
 
   @override
-  bool updateShouldNotify(NavigationRailTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    NavigationRailTheme oldWidget,
-    Set<ThemeSelector<NavigationRailThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<NavigationRailThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  NavigationRailThemeData get themeData => data;
 }

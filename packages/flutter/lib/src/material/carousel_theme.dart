@@ -190,22 +190,6 @@ class CarouselViewTheme extends InheritedTheme<CarouselViewThemeData> {
     return CarouselViewTheme(data: data, child: child);
   }
 
-  /// Returns true if the [data] fields of the two themes are different.
   @override
-  bool updateShouldNotify(CarouselViewTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    CarouselViewTheme oldWidget,
-    Set<ThemeSelector<CarouselViewThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<CarouselViewThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  CarouselViewThemeData get themeData => data;
 }

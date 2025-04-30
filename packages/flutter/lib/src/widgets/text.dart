@@ -267,19 +267,7 @@ class DefaultTextStyle extends InheritedTheme<DefaultTextStyle> {
   }
 
   @override
-  bool updateShouldNotifyDependent(
-    DefaultTextStyle oldWidget,
-    Set<ThemeSelector<DefaultTextStyle, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<DefaultTextStyle, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget);
-      final Object? newValue = selector.selectFrom(this);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  DefaultTextStyle get themeData => this;
 }
 
 class _NullWidget extends StatelessWidget {
@@ -381,11 +369,6 @@ class DefaultTextHeightBehavior extends InheritedTheme<TextHeightBehavior> {
   }
 
   @override
-  bool updateShouldNotify(DefaultTextHeightBehavior oldWidget) {
-    return textHeightBehavior != oldWidget.textHeightBehavior;
-  }
-
-  @override
   Widget wrap(BuildContext context, Widget child) {
     return DefaultTextHeightBehavior(textHeightBehavior: textHeightBehavior, child: child);
   }
@@ -403,12 +386,7 @@ class DefaultTextHeightBehavior extends InheritedTheme<TextHeightBehavior> {
   }
 
   @override
-  bool updateShouldNotifyDependent(
-    DefaultTextHeightBehavior oldWidget,
-    Set<ThemeSelector<ui.TextHeightBehavior, Object?>> dependencies,
-  ) {
-    return textHeightBehavior != oldWidget.textHeightBehavior;
-  }
+  ui.TextHeightBehavior get themeData => textHeightBehavior;
 }
 
 /// A run of text with a single style.

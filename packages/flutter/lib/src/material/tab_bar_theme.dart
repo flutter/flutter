@@ -343,6 +343,9 @@ class TabBarTheme extends InheritedTheme<TabBarThemeData> with Diagnosticable {
     }
     return false;
   }
+
+  @override
+  TabBarThemeData get themeData => data;
 }
 
 /// Defines default property values for descendant [TabBar] widgets.

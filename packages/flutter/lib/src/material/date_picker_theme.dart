@@ -1072,22 +1072,7 @@ class DatePickerTheme extends InheritedTheme<DatePickerThemeData> {
   }
 
   @override
-  bool updateShouldNotify(DatePickerTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    DatePickerTheme oldWidget,
-    Set<ThemeSelector<DatePickerThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<DatePickerThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  DatePickerThemeData get themeData => data;
 }
 
 // Hand coded defaults based on Material Design 2.

@@ -358,20 +358,5 @@ class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData> 
   }
 
   @override
-  bool updateShouldNotify(ProgressIndicatorTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    ProgressIndicatorTheme oldWidget,
-    Set<ThemeSelector<ProgressIndicatorThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ProgressIndicatorThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ProgressIndicatorThemeData get themeData => data;
 }

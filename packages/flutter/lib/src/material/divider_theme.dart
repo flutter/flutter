@@ -182,20 +182,5 @@ class DividerTheme extends InheritedTheme<DividerThemeData> {
   }
 
   @override
-  bool updateShouldNotify(DividerTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    DividerTheme oldWidget,
-    Set<ThemeSelector<DividerThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<DividerThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  DividerThemeData get themeData => data;
 }

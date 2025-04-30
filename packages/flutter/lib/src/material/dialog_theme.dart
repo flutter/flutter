@@ -220,9 +220,6 @@ class DialogTheme extends InheritedTheme<DialogThemeData> with Diagnosticable {
     return DialogTheme(data: data, child: child);
   }
 
-  @override
-  bool updateShouldNotify(DialogTheme oldWidget) => data != oldWidget.data;
-
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ///
@@ -316,19 +313,7 @@ class DialogTheme extends InheritedTheme<DialogThemeData> with Diagnosticable {
   }
 
   @override
-  bool updateShouldNotifyDependent(
-    DialogTheme oldWidget,
-    Set<ThemeSelector<DialogThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<DialogThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  DialogThemeData get themeData => data;
 }
 
 /// Defines default property values for descendant [Dialog] widgets.

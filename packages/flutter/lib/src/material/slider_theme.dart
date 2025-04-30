@@ -126,22 +126,7 @@ class SliderTheme extends InheritedTheme<SliderThemeData> {
   }
 
   @override
-  bool updateShouldNotify(SliderTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    SliderTheme oldWidget,
-    Set<ThemeSelector<SliderThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<SliderThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  SliderThemeData get themeData => data;
 }
 
 /// Describes the conditions under which the value indicator on a [Slider]

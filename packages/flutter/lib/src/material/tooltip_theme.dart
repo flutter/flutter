@@ -384,22 +384,7 @@ class TooltipTheme extends InheritedTheme<TooltipThemeData> {
   }
 
   @override
-  bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    TooltipTheme oldWidget,
-    Set<ThemeSelector<TooltipThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<TooltipThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  TooltipThemeData get themeData => data;
 }
 
 /// The method of interaction that will trigger a tooltip.

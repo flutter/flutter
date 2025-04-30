@@ -145,20 +145,5 @@ class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData> {
   }
 
   @override
-  bool updateShouldNotify(OutlinedButtonTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    OutlinedButtonTheme oldWidget,
-    Set<ThemeSelector<OutlinedButtonThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<OutlinedButtonThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  OutlinedButtonThemeData get themeData => data;
 }

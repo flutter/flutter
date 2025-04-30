@@ -232,20 +232,5 @@ class DrawerTheme extends InheritedTheme<DrawerThemeData> {
   }
 
   @override
-  bool updateShouldNotify(DrawerTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    DrawerTheme oldWidget,
-    Set<ThemeSelector<DrawerThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<DrawerThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  DrawerThemeData get themeData => data;
 }

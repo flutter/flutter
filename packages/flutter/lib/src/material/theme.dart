@@ -244,22 +244,7 @@ class _InheritedTheme extends InheritedTheme<ThemeData> {
   }
 
   @override
-  bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    _InheritedTheme oldWidget,
-    Set<ThemeSelector<ThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.theme.data);
-      final Object? newValue = selector.selectFrom(theme.data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ThemeData get themeData => theme.data;
 }
 
 /// An interpolation between two [ThemeData]s.

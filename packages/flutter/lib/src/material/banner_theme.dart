@@ -240,4 +240,7 @@ class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData> {
     }
     return false;
   }
+
+  @override
+  MaterialBannerThemeData get themeData => data!;
 }

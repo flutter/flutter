@@ -308,20 +308,5 @@ class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData> {
   }
 
   @override
-  bool updateShouldNotify(PopupMenuTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    PopupMenuTheme oldWidget,
-    Set<ThemeSelector<PopupMenuThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<PopupMenuThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  PopupMenuThemeData get themeData => data;
 }

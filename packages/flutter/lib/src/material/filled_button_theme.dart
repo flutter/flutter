@@ -141,20 +141,5 @@ class FilledButtonTheme extends InheritedTheme<FilledButtonThemeData> {
   }
 
   @override
-  bool updateShouldNotify(FilledButtonTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    FilledButtonTheme oldWidget,
-    Set<ThemeSelector<FilledButtonThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<FilledButtonThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  FilledButtonThemeData get themeData => data;
 }

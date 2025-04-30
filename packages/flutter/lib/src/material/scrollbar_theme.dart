@@ -352,20 +352,5 @@ class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData> {
   }
 
   @override
-  bool updateShouldNotify(ScrollbarTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    ScrollbarTheme oldWidget,
-    Set<ThemeSelector<ScrollbarThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ScrollbarThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ScrollbarThemeData get themeData => data;
 }

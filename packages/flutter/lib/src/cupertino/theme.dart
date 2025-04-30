@@ -165,22 +165,7 @@ class InheritedCupertinoTheme extends InheritedTheme<CupertinoThemeData> {
   }
 
   @override
-  bool updateShouldNotify(InheritedCupertinoTheme oldWidget) => theme.data != oldWidget.theme.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    InheritedCupertinoTheme oldWidget,
-    Set<ThemeSelector<CupertinoThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<CupertinoThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.theme.data);
-      final Object? newValue = selector.selectFrom(theme.data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  CupertinoThemeData get themeData => theme.data;
 }
 
 /// Styling specifications for a [CupertinoTheme].

@@ -164,20 +164,5 @@ class MenuTheme extends InheritedTheme<MenuThemeData> {
   }
 
   @override
-  bool updateShouldNotify(MenuTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    MenuTheme oldWidget,
-    Set<ThemeSelector<MenuThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<MenuThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  MenuThemeData get themeData => data;
 }

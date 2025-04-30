@@ -154,20 +154,5 @@ class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData> {
   }
 
   @override
-  bool updateShouldNotify(MenuButtonTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    MenuButtonTheme oldWidget,
-    Set<ThemeSelector<MenuButtonThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<MenuButtonThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  MenuButtonThemeData get themeData => data;
 }

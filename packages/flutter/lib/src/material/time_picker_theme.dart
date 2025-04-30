@@ -610,20 +610,5 @@ class TimePickerTheme extends InheritedTheme<TimePickerThemeData> {
   }
 
   @override
-  bool updateShouldNotify(TimePickerTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    TimePickerTheme oldWidget,
-    Set<ThemeSelector<TimePickerThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<TimePickerThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  TimePickerThemeData get themeData => data;
 }

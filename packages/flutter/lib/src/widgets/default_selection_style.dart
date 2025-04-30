@@ -165,6 +165,9 @@ class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle> {
     }
     return false;
   }
+
+  @override
+  DefaultSelectionStyle get themeData => this;
 }
 
 class _NullWidget extends StatelessWidget {

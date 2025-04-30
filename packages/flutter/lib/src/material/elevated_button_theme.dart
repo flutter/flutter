@@ -145,20 +145,5 @@ class ElevatedButtonTheme extends InheritedTheme<ElevatedButtonThemeData> {
   }
 
   @override
-  bool updateShouldNotify(ElevatedButtonTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    ElevatedButtonTheme oldWidget,
-    Set<ThemeSelector<ElevatedButtonThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ElevatedButtonThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ElevatedButtonThemeData get themeData => data;
 }

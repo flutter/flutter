@@ -176,22 +176,7 @@ class ButtonTheme extends InheritedTheme<ButtonThemeData> {
   }
 
   @override
-  bool updateShouldNotify(ButtonTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    ButtonTheme oldWidget,
-    Set<ThemeSelector<ButtonThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ButtonThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ButtonThemeData get themeData => data;
 }
 
 /// Used with [ButtonTheme] to configure the color and geometry of buttons.

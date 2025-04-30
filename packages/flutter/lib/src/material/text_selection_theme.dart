@@ -210,22 +210,7 @@ class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData> {
   }
 
   @override
-  bool updateShouldNotify(TextSelectionTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    TextSelectionTheme oldWidget,
-    Set<ThemeSelector<TextSelectionThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<TextSelectionThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  TextSelectionThemeData get themeData => data;
 }
 
 class _NullWidget extends Widget {

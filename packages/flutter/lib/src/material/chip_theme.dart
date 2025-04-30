@@ -115,22 +115,7 @@ class ChipTheme extends InheritedTheme<ChipThemeData> {
   }
 
   @override
-  bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    ChipTheme oldWidget,
-    Set<ThemeSelector<ChipThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ChipThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ChipThemeData get themeData => data;
 }
 
 /// Holds the color, shape, and text styles for a Material Design chip theme.

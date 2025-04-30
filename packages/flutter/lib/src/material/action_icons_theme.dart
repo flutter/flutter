@@ -205,20 +205,5 @@ class ActionIconTheme extends InheritedTheme<ActionIconThemeData> {
   }
 
   @override
-  bool updateShouldNotify(ActionIconTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    ActionIconTheme oldWidget,
-    Set<ThemeSelector<ActionIconThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<ActionIconThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  ActionIconThemeData get themeData => data;
 }

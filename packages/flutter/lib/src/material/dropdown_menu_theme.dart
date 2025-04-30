@@ -194,20 +194,5 @@ class DropdownMenuTheme extends InheritedTheme<DropdownMenuThemeData> {
   }
 
   @override
-  bool updateShouldNotify(DropdownMenuTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    DropdownMenuTheme oldWidget,
-    Set<ThemeSelector<DropdownMenuThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<DropdownMenuThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  DropdownMenuThemeData get themeData => data;
 }

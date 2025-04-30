@@ -139,20 +139,5 @@ class IconButtonTheme extends InheritedTheme<IconButtonThemeData> {
   }
 
   @override
-  bool updateShouldNotify(IconButtonTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    IconButtonTheme oldWidget,
-    Set<ThemeSelector<IconButtonThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<IconButtonThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  IconButtonThemeData get themeData => data;
 }

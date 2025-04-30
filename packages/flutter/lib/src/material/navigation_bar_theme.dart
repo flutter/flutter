@@ -323,20 +323,5 @@ class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData> {
   }
 
   @override
-  bool updateShouldNotify(NavigationBarTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    NavigationBarTheme oldWidget,
-    Set<ThemeSelector<NavigationBarThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<NavigationBarThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  NavigationBarThemeData get themeData => data;
 }

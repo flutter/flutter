@@ -185,20 +185,5 @@ class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData> {
   }
 
   @override
-  bool updateShouldNotify(SegmentedButtonTheme oldWidget) => data != oldWidget.data;
-
-  @override
-  bool updateShouldNotifyDependent(
-    SegmentedButtonTheme oldWidget,
-    Set<ThemeSelector<SegmentedButtonThemeData, Object?>> dependencies,
-  ) {
-    for (final ThemeSelector<SegmentedButtonThemeData, Object?> selector in dependencies) {
-      final Object? oldValue = selector.selectFrom(oldWidget.data);
-      final Object? newValue = selector.selectFrom(data);
-      if (oldValue != newValue) {
-        return true;
-      }
-    }
-    return false;
-  }
+  SegmentedButtonThemeData get themeData => data;
 }
