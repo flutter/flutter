@@ -53,7 +53,7 @@ const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, v
 ///     child: Column(
 ///     mainAxisSize: MainAxisSize.min,
 ///     mainAxisAlignment: MainAxisAlignment.center,
-///     children: <Widget>[],
+///     children: [],
 ///    ),
 ///  );
 /// ```
