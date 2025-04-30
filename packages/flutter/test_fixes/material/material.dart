@@ -342,4 +342,8 @@ void main() {
       MaterialStateUnderlineInputBorder.resolveWith(
         (states) => const UnderlineInputBorder(),
       );
+
+  // Changes made in https://github.com/flutter/flutter/pull/166382
+  Switch(activeColor: Colors.red, value: false, onChanged: null);
+  SwitchListTile(activeColor: Colors.red, value: false, onChanged: null);
 }
