@@ -16,10 +16,11 @@ void main() {
     addTearDown(node.dispose);
     int? actualValue;
     ToggleableStateMixin? actualState;
-    await tester.pumpWidget(
-      RawRadio<int>(
+
+    Widget _buildWidget() {
+      return RawRadio<int>(
         value: 0,
-        groupValue: 1,
+        groupValue: actualValue,
         onChanged: (int? value) {
           actualValue = value;
         },
@@ -31,13 +32,16 @@ void main() {
           actualState = state;
           return CustomPaint(size: const Size(40, 40), painter: TestPainter());
         },
-      ),
-    );
+      );
+    }
+
+    await tester.pumpWidget(_buildWidget());
     expect(actualState!.tristate, isTrue);
     expect(actualState!.value, isFalse);
 
     await tester.tap(find.byType(RawRadio<int>));
-    await tester.pump();
+    // Rebuilds with new group value
+    await tester.pumpWidget(_buildWidget());
 
     expect(actualValue, 0);
     expect(actualState!.value, isTrue);
