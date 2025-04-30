@@ -4276,8 +4276,22 @@ class SemanticsOwner extends ChangeNotifier {
     return result!._actions[action];
   }
 
+  /// Get a semantics node by id.
   SemanticsUpdate getSemanticsNode(int id) {
     final SemanticsUpdateBuilder builder = SemanticsBinding.instance.createSemanticsUpdateBuilder();
+    final SemanticsNode node = _nodes[id]!;
+    final Set<int> customSemanticsActionIds = <int>{};
+    node._addToUpdate(builder, customSemanticsActionIds);
+    for (final int actionId in customSemanticsActionIds) {
+      final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId)!;
+      builder.updateCustomAction(
+        id: actionId,
+        label: action.label,
+        hint: action.hint,
+        overrideId: action.action?.index ?? -1,
+      );
+    }
+    return builder.build();
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.

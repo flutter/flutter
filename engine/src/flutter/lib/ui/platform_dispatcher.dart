@@ -1366,7 +1366,7 @@ class PlatformDispatcher {
       _onGetSemanticsNodeZone,
       viewId,
       nodeId,
-    );
+    )!;
   }
 
   ErrorCallback? _onError;

@@ -402,6 +402,17 @@ bool RuntimeController::DispatchSemanticsAction(int64_t view_id,
   return false;
 }
 
+SemanticsUpdate* RuntimeController::GetSemanticsNode(int64_t view_id,
+                                                     int32_t node_id) {
+  TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
+               "basic");
+  if (auto* platform_configuration = GetPlatformConfigurationIfAvailable()) {
+    return platform_configuration->GetSemanticsNode(view_id, node_id);
+  }
+
+  return nullptr;
+}
+
 PlatformConfiguration*
 RuntimeController::GetPlatformConfigurationIfAvailable() {
   std::shared_ptr<DartIsolate> root_isolate = root_isolate_.lock();

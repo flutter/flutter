@@ -80,6 +80,9 @@ void PlatformConfiguration::DidCreateIsolate() {
   dispatch_semantics_action_.Set(
       tonic::DartState::Current(),
       Dart_GetField(library, tonic::ToDart("_dispatchSemanticsAction")));
+  get_semantics_node_.Set(
+      tonic::DartState::Current(),
+      Dart_GetField(library, tonic::ToDart("_getSemanticsNode")));
   begin_frame_.Set(tonic::DartState::Current(),
                    Dart_GetField(library, tonic::ToDart("_beginFrame")));
   draw_frame_.Set(tonic::DartState::Current(),
@@ -402,6 +405,20 @@ void PlatformConfiguration::DispatchSemanticsAction(int64_t view_id,
       dispatch_semantics_action_.Get(),
       {tonic::ToDart(view_id), tonic::ToDart(node_id),
        tonic::ToDart(static_cast<int32_t>(action)), args_handle}));
+}
+
+SemanticsUpdate* PlatformConfiguration::GetSemanticsNode(int64_t view_id,
+                                                         int32_t node_id) {
+  std::shared_ptr<tonic::DartState> dart_state =
+      get_semantics_node_.dart_state().lock();
+  if (!dart_state) {
+    return;
+  }
+  tonic::DartState::Scope scope(dart_state);
+
+  return tonic::DartInvoke(
+          get_semantics_node_.Get(),
+          {tonic::ToDart(view_id), tonic::ToDart(node_id)}));
 }
 
 void PlatformConfiguration::BeginFrame(fml::TimePoint frameTime,

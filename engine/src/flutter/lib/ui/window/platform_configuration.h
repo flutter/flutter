@@ -464,6 +464,14 @@ class PlatformConfiguration final {
                                fml::MallocMapping args);
 
   //----------------------------------------------------------------------------
+  /// @brief      Get semantics node
+  ///
+  /// @param[in]  view_id The identifier of the view.
+  /// @param[in]  node_id The identifier of the accessibility node.
+  SemanticsUpdate* PlatformConfiguration::GetSemanticsNode(int64_t view_id,
+                                                           int32_t node_id);
+
+  //----------------------------------------------------------------------------
   /// @brief      Notifies the framework that it is time to begin working on a
   ///             new frame previously scheduled via a call to
   ///             `PlatformConfigurationClient::ScheduleFrame`. This call
@@ -570,6 +578,7 @@ class PlatformConfiguration final {
   tonic::DartPersistentValue dispatch_platform_message_;
   tonic::DartPersistentValue dispatch_pointer_data_packet_;
   tonic::DartPersistentValue dispatch_semantics_action_;
+  tonic::DartPersistentValue get_semantics_node_;
   tonic::DartPersistentValue begin_frame_;
   tonic::DartPersistentValue draw_frame_;
   tonic::DartPersistentValue report_timings_;

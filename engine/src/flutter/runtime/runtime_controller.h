@@ -505,13 +505,21 @@ class RuntimeController : public PlatformConfigurationClient,
                                SemanticsAction action,
                                fml::MallocMapping args);
 
-  //----------------------------------------------------------------------------
-  /// @brief      Gets the main port identifier of the root isolate.
+  /// @brief      Get semantics node
   ///
-  /// @return     The main port identifier. If no root isolate is running,
-  ///             returns `ILLEGAL_PORT`.
+  /// @param[in]  view_id The identifier of the view.
+  /// @param[in]  node_id The identifier of the accessibility node.
   ///
-  Dart_Port GetMainPort();
+  /// @return     semantics update
+  SemanticsUpdate* GetSemanticsNode(int64_t view_id, int32_t node_id)
+
+      //----------------------------------------------------------------------------
+      /// @brief      Gets the main port identifier of the root isolate.
+      ///
+      /// @return     The main port identifier. If no root isolate is running,
+      ///             returns `ILLEGAL_PORT`.
+      ///
+      Dart_Port GetMainPort();
 
   //----------------------------------------------------------------------------
   /// @brief      Gets the debug name of the root isolate. But default, the

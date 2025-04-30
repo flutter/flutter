@@ -288,6 +288,11 @@ void _dispatchSemanticsAction(int viewId, int nodeId, int action, ByteData? args
 }
 
 @pragma('vm:entry-point')
+SemanticsUpdate _getSemanticsNode(int viewId, int nodeId) {
+  PlatformDispatcher.instance._getSemanticsNode(viewId, nodeId);
+}
+
+@pragma('vm:entry-point')
 void _beginFrame(int microseconds, int frameNumber) {
   PlatformDispatcher.instance._beginFrame(microseconds);
   PlatformDispatcher.instance._updateFrameData(frameNumber);
@@ -400,9 +405,9 @@ void _invoke3<A1, A2, A3>(
 /// The 2 in the name refers to the number of arguments expected by
 /// the callback (and thus passed to this function, in addition to the
 /// callback itself and the zone in which the callback is executed).
-R _invokeAndReturn2<R, A1, A2>(R Function(A1 a1, A2 a2)? callback, Zone zone, A1 arg1, A2 arg2) {
+R? _invokeAndReturn2<R, A1, A2>(R Function(A1 a1, A2 a2)? callback, Zone zone, A1 arg1, A2 arg2) {
   if (callback == null) {
-    return;
+    return null;
   }
   if (identical(zone, Zone.current)) {
     return callback(arg1, arg2);
