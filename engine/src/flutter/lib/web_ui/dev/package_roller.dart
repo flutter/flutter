@@ -118,7 +118,7 @@ class _PackageRoller {
       await _rollChromium(platform);
       await _rollChromeDriver(platform);
       // For now, we only test Firefox on Linux.
-      if (platform.os == 'linux' || platform.os == 'mac') {
+      if (platform.os == 'linux') {
         await _rollFirefox(platform);
       }
       await _rollEsbuild(platform);
@@ -177,49 +177,6 @@ class _PackageRoller {
     }
     vprint('  Deleting [${tarFile.path}]');
     await tarFile.delete();
-  }
-
-  Future<void> _mountAndCopyFile(io.File dmgFile, io.Directory destination) async {
-    vprint('  Mounting [${dmgFile.path}] into [$destination]');
-    if (!(await destination.exists())) {
-      await destination.create();
-    }
-    final String filename = path.basename(dmgFile.path);
-    final io.Directory mountDirectory = io.Directory('/Volumes/${filename}');
-    final io.ProcessResult mountResult = await io.Process.run('hdiutil', <String>[
-      'attach',
-      dmgFile.path,
-      '-mountpoint',
-      mountDirectory.path,
-    ]);
-    if (mountResult.exitCode != 0) {
-      throw StateError(
-        'Failed to mount the downloaded package ${dmgFile.path}.\n'
-        'The hdiutil process exited with code ${mountResult.exitCode}.',
-      );
-    }
-    final io.ProcessResult copyResult = await io.Process.run('cp', <String>[
-      '-r',
-      '-p',
-      '${mountDirectory.path}/Firefox.app',
-      '${destination.path}/Firefox.app',
-    ]);
-    if (copyResult.exitCode != 0) {
-      throw StateError(
-        'Failed to copy files out of the downloaded package ${dmgFile.path}.\n'
-        'The cp process exited with code ${copyResult.exitCode}. Error: ${copyResult.stderr}',
-      );
-    }
-    final io.ProcessResult unmountResult = await io.Process.run('hdiutil', <String>[
-      'detach',
-      mountDirectory.path,
-    ]);
-    if (unmountResult.exitCode != 0) {
-      throw StateError(
-        'Failed to unmount the downloaded package ${dmgFile.path}.\n'
-        'The hdiutil process exited with code ${unmountResult.exitCode}. Error: ${unmountResult.stderr}',
-      );
-    }
   }
 
   // Locate the first subdirectory that contains more than one file under `root`.
@@ -366,16 +323,7 @@ class _PackageRoller {
 
     final io.File firefoxDownload = await _downloadTemporaryFile(url);
 
-    if (platform.os == 'linux') {
-      await _uncompressAndDeleteFile(firefoxDownload, platformDir);
-    } else if (platform.os == 'mac') {
-      await _mountAndCopyFile(
-        firefoxDownload,
-        io.Directory(path.join(platformDir.path, 'firefox')),
-      );
-    } else {
-      throw UnsupportedError('Firefox roller does not support platform: $platform');
-    }
+    await _uncompressAndDeleteFile(firefoxDownload, platformDir);
 
     final io.Directory? actualContentRoot = await _locateContentRoot(platformDir);
     assert(actualContentRoot != null);
