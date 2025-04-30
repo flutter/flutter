@@ -165,8 +165,7 @@ class FlutterWindowsEngine {
   }
 
   // Notifies the engine about a display update.
-  void UpdateDisplay(const FlutterEngineDisplay* displays,
-                     size_t displays_length);
+  void UpdateDisplay(const std::vector<FlutterEngineDisplay>& displays);
 
   TaskRunner* task_runner() { return task_runner_.get(); }
 

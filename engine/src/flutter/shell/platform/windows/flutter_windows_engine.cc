@@ -707,12 +707,12 @@ void FlutterWindowsEngine::AddPluginRegistrarDestructionCallback(
   plugin_registrar_destruction_callbacks_[callback] = registrar;
 }
 
-void FlutterWindowsEngine::UpdateDisplay(const FlutterEngineDisplay* displays,
-                                         size_t displays_length) {
+void FlutterWindowsEngine::UpdateDisplay(
+    const std::vector<FlutterEngineDisplay>& displays) {
   if (engine_) {
     embedder_api_.NotifyDisplayUpdate(engine_,
                                       kFlutterEngineDisplaysUpdateTypeStartup,
-                                      displays, displays_length);
+                                      displays.data(), displays.size());
   }
 }
 

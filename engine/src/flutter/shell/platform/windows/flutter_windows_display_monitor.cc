@@ -1,3 +1,7 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #include "flutter_windows_display_monitor.h"
 
 #include <utility>
@@ -75,11 +79,13 @@ void FlutterWindowsDisplayMonitor::UpdateDisplays() {
       display.device_pixel_ratio = static_cast<double>(dpi) / kDefaultDpi;
 
       displays.push_back(display);
+    } else {
+      continue;
     }
   }
 
   if (!displays.empty()) {
-    engine_->UpdateDisplay(displays.data(), displays.size());
+    engine_->UpdateDisplay(displays);
   }
 }
 
