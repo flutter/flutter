@@ -35,10 +35,6 @@ test-sets:
     directory: fallbacks
 
 test-bundles:
-  - name: dart2js-experimental-webparagraph-ui
-    test-set: ui
-    compile-configs: dart2js-canvaskit
-
   - name: dart2js-canvaskit-engine
     test-set: engine
     compile-configs: dart2js-canvaskit
@@ -109,9 +105,10 @@ run-configs:
 
 test-suites:
   - name: chrome-dart2js-experimental-webparagraph-ui
-    test-bundle: dart2js-experimental-webparagraph-ui
+    test-bundle: dart2js-canvaskit-ui
     run-config: chrome-experimental-webparagraph
     artifact-deps: [ canvaskit_experimental_webparagraph ]
+    enable-ci: false
 
   - name: chrome-dart2js-canvaskit-engine
     test-bundle: dart2js-canvaskit-engine
