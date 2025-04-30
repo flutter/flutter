@@ -38,8 +38,6 @@ impeller_component("compiler_lib") {
     "compiler_backend.h",
     "constants.cc",
     "constants.h",
-    "filesystem.cc",
-    "filesystem.h",
     "include_dir.h",
     "includer.cc",
     "includer.h",
