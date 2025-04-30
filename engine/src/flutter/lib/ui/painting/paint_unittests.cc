@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/display_list/dl_op_flags.h"
 #include "flutter/lib/ui/painting/paint.h"
 #include "flutter/shell/common/shell_test.h"
 #include "flutter/shell/common/thread_host.h"
@@ -21,7 +22,9 @@ TEST_F(ShellTest, ConvertPaintToDlPaint) {
         Dart_GetField(dart_paint, tonic::ToDart("_objects"));
     Dart_Handle paint_data = Dart_GetField(dart_paint, tonic::ToDart("_data"));
     Paint ui_paint(paint_objects, paint_data);
-    ui_paint.toDlPaint(dl_paint, DlTileMode::kClamp);
+
+    ui_paint.paint(dl_paint, DisplayListOpFlags::kDrawPaintFlags,
+                   DlTileMode::kClamp);
     message_latch->Signal();
   };
 
