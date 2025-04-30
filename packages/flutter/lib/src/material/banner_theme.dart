@@ -188,7 +188,7 @@ class MaterialBannerTheme extends InheritedTheme<MaterialBannerThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = MaterialBannerTheme.select(
+  /// final Color? backgroundColor = MaterialBannerTheme.selectOf(
   ///   context,
   ///   (MaterialBannerThemeData data) => data.backgroundColor!,
   /// );

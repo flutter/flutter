@@ -60,7 +60,7 @@ class IconTheme extends InheritedTheme<IconThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? color = IconTheme.select(
+  /// final Color? color = IconTheme.selectOf(
   ///   context,
   ///   (IconThemeData data) => data.color,
   /// );

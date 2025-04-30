@@ -251,7 +251,7 @@ class NavigationDrawerTheme extends InheritedTheme<NavigationDrawerThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = NavigationDrawerTheme.select(
+  /// final Color? backgroundColor = NavigationDrawerTheme.selectOf(
   ///   context,
   ///   (NavigationDrawerThemeData data) => data.backgroundColor,
   /// );

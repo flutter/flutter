@@ -143,7 +143,7 @@ class SegmentedButtonTheme extends InheritedTheme<SegmentedButtonThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Widget? selectedIcon = SegmentedButtonTheme.select(
+  /// final Widget? selectedIcon = SegmentedButtonTheme.selectOf(
   ///   context,
   ///   (SegmentedButtonThemeData data) => data.selectedIcon,
   /// );

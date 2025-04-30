@@ -272,7 +272,7 @@ class PopupMenuTheme extends InheritedTheme<PopupMenuThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? color = PopupMenuTheme.select(
+  /// final Color? color = PopupMenuTheme.selectOf(
   ///   context,
   ///   (PopupMenuThemeData data) => data.color,
   /// );

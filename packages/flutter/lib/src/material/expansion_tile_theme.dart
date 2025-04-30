@@ -271,7 +271,7 @@ class ExpansionTileTheme extends InheritedTheme<ExpansionTileThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = ExpansionTileTheme.select(
+  /// final Color? backgroundColor = ExpansionTileTheme.selectOf(
   ///   context,
   ///   (ExpansionTileThemeData data) => data.backgroundColor,
   /// );

@@ -287,7 +287,7 @@ class NavigationBarTheme extends InheritedTheme<NavigationBarThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = NavigationBarTheme.select(
+  /// final Color? backgroundColor = NavigationBarTheme.selectOf(
   ///   context,
   ///   (NavigationBarThemeData data) => data.backgroundColor,
   /// );

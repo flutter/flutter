@@ -174,7 +174,7 @@ class TextSelectionTheme extends InheritedTheme<TextSelectionThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? cursorColor = TextSelectionTheme.select(
+  /// final Color? cursorColor = TextSelectionTheme.selectOf(
   ///   context,
   ///   (TextSelectionThemeData data) => data.cursorColor,
   /// );

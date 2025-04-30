@@ -180,7 +180,7 @@ class DefaultTextStyle extends InheritedTheme<DefaultTextStyle> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final TextStyle? style = DefaultTextStyle.select(
+  /// final TextStyle? style = DefaultTextStyle.selectOf(
   ///   context,
   ///   (DefaultTextStyle data) => data.style,
   /// );

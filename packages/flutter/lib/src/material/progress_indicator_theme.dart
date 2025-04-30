@@ -339,7 +339,7 @@ class ProgressIndicatorTheme extends InheritedTheme<ProgressIndicatorThemeData> 
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? color = ProgressIndicatorTheme.select(
+  /// final Color? color = ProgressIndicatorTheme.selectOf(
   ///   context,
   ///   (ProgressIndicatorThemeData data) => data.color,
   /// );

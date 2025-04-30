@@ -984,7 +984,7 @@ class DatePickerTheme extends InheritedTheme<DatePickerThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = DatePickerTheme.select(
+  /// final Color? backgroundColor = DatePickerTheme.selectOf(
   ///   context,
   ///   (DatePickerThemeData data) => data.backgroundColor,
   /// );

@@ -271,7 +271,7 @@ class ToggleButtonsTheme extends InheritedTheme<ToggleButtonsThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? color = ToggleButtonsTheme.select(
+  /// final Color? color = ToggleButtonsTheme.selectOf(
   ///   context,
   ///   (ToggleButtonsThemeData data) => data.color,
   /// );

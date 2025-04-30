@@ -349,7 +349,7 @@ class TooltipTheme extends InheritedTheme<TooltipThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final double? height = TooltipTheme.select(
+  /// final double? height = TooltipTheme.selectOf(
   ///   context,
   ///   (TooltipThemeData data) => data.height,
   /// );

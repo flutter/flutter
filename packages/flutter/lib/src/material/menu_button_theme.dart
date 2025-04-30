@@ -118,7 +118,7 @@ class MenuButtonTheme extends InheritedTheme<MenuButtonThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final WidgetStateProperty<Color?>? backgroundColor = MenuButtonTheme.select(
+  /// final WidgetStateProperty<Color?>? backgroundColor = MenuButtonTheme.selectOf(
   ///   context,
   ///   (MenuButtonThemeData data) => data.style?.backgroundColor,
   /// );

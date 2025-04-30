@@ -574,7 +574,7 @@ class TimePickerTheme extends InheritedTheme<TimePickerThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = TimePickerTheme.select(
+  /// final Color? backgroundColor = TimePickerTheme.selectOf(
   ///   context,
   ///   (TimePickerThemeData data) => data.backgroundColor,
   /// );

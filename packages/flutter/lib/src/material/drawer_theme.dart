@@ -196,7 +196,7 @@ class DrawerTheme extends InheritedTheme<DrawerThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = DrawerTheme.select(
+  /// final Color? backgroundColor = DrawerTheme.selectOf(
   ///   context,
   ///   (DrawerThemeData data) => data.backgroundColor,
   /// );

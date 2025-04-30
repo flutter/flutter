@@ -316,7 +316,7 @@ class ScrollbarTheme extends InheritedTheme<ScrollbarThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Radius? radius = ScrollbarTheme.select(
+  /// final Radius? radius = ScrollbarTheme.selectOf(
   ///   context,
   ///   (ScrollbarThemeData data) => data.radius,
   /// );

@@ -147,7 +147,7 @@ class DividerTheme extends InheritedTheme<DividerThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? color = DividerTheme.select(
+  /// final Color? color = DividerTheme.selectOf(
   ///   context,
   ///   (DividerThemeData data) => data.color,
   /// );

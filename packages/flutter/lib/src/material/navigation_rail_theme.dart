@@ -319,7 +319,7 @@ class NavigationRailTheme extends InheritedTheme<NavigationRailThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = NavigationRailTheme.select(
+  /// final Color? backgroundColor = NavigationRailTheme.selectOf(
   ///   context,
   ///   (NavigationRailThemeData data) => data.backgroundColor,
   /// );

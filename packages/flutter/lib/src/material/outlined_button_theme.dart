@@ -109,7 +109,7 @@ class OutlinedButtonTheme extends InheritedTheme<OutlinedButtonThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final ButtonStyle? style = OutlinedButtonTheme.select(
+  /// final ButtonStyle? style = OutlinedButtonTheme.selectOf(
   ///   context,
   ///   (OutlinedButtonThemeData data) => data.style,
   /// );

@@ -128,7 +128,7 @@ class ButtonTheme extends InheritedTheme<ButtonThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final double height = ButtonTheme.select(
+  /// final double height = ButtonTheme.selectOf(
   ///   context, (ButtonThemeData data) => data.height,
   /// );
   /// ```

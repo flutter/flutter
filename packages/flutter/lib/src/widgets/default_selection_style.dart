@@ -105,7 +105,7 @@ class DefaultSelectionStyle extends InheritedTheme<DefaultSelectionStyle> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? cursorColor = DefaultSelectionStyle.select(
+  /// final Color? cursorColor = DefaultSelectionStyle.selectOf(
   ///   context,
   ///   (DefaultSelectionStyle data) => data.cursorColor,
   /// );

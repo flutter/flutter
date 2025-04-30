@@ -179,7 +179,7 @@ class BadgeTheme extends InheritedTheme<BadgeThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = BadgeTheme.select(
+  /// final Color? backgroundColor = BadgeTheme.selectOf(
   ///   context,
   ///   (BadgeThemeData data) => data.backgroundColor,
   /// );

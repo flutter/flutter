@@ -259,7 +259,7 @@ class SearchViewTheme extends InheritedTheme<SearchViewThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final Color? backgroundColor = SearchViewTheme.select(
+  /// final Color? backgroundColor = SearchViewTheme.selectOf(
   ///   context,
   ///   (SearchViewThemeData data) => data.backgroundColor,
   /// );

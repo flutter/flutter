@@ -127,7 +127,7 @@ class DropdownMenuTheme extends InheritedTheme<DropdownMenuThemeData> {
   /// For specific theme properties, consider using [selectOf],
   /// which will only rebuild widget when the selected property changes:
   /// ```dart
-  /// final TextStyle? textStyle = DropdownMenuTheme.select(
+  /// final TextStyle? textStyle = DropdownMenuTheme.selectOf(
   ///   context,
   ///   (DropdownMenuThemeData data) => data.textStyle,
   /// );
