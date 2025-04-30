@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:meta/meta.dart';
 
 import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
+import '../../base/io.dart';
 import '../../build_info.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
-import '../../plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
