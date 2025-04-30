@@ -25,6 +25,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -37,6 +38,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.plugin.platform.PlatformPlugin;
+import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,9 +48,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.android.controller.ActivityController;
-import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class FlutterAndroidComponentTest {
   private final Context ctx = ApplicationProvider.getApplicationContext();
@@ -68,43 +68,49 @@ public class FlutterAndroidComponentTest {
     cachedEngine.getPlugins().add(mockPlugin);
 
     // Create a fake Host, which is required by the delegate.
-    FakeHost fakeHost = new FakeHost(cachedEngine);
-    fakeHost.shouldDestroyEngineWithHost = true;
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            FakeHost fakeHost = new FakeHost(cachedEngine, activity);
+            fakeHost.shouldDestroyEngineWithHost = true;
 
-    // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(fakeHost);
+            // Create the real object that we're testing.
+            FlutterActivityAndFragmentDelegate delegate =
+                new FlutterActivityAndFragmentDelegate(fakeHost);
 
-    // --- Execute the behavior under test ---
-    // Push the delegate through all lifecycle methods all the way to destruction.
-    delegate.onAttach(ctx);
+            // --- Execute the behavior under test ---
+            // Push the delegate through all lifecycle methods all the way to destruction.
+            delegate.onAttach(ctx);
 
-    // Verify that the plugin is attached to the FlutterEngine.
-    ArgumentCaptor<FlutterPlugin.FlutterPluginBinding> pluginBindingCaptor =
-        ArgumentCaptor.forClass(FlutterPlugin.FlutterPluginBinding.class);
-    verify(mockPlugin, times(1)).onAttachedToEngine(pluginBindingCaptor.capture());
-    FlutterPlugin.FlutterPluginBinding binding = pluginBindingCaptor.getValue();
-    assertNotNull(binding.getApplicationContext());
-    assertNotNull(binding.getBinaryMessenger());
-    assertNotNull(binding.getTextureRegistry());
-    assertNotNull(binding.getPlatformViewRegistry());
+            // Verify that the plugin is attached to the FlutterEngine.
+            ArgumentCaptor<FlutterPlugin.FlutterPluginBinding> pluginBindingCaptor =
+                ArgumentCaptor.forClass(FlutterPlugin.FlutterPluginBinding.class);
+            verify(mockPlugin, times(1)).onAttachedToEngine(pluginBindingCaptor.capture());
+            FlutterPlugin.FlutterPluginBinding binding = pluginBindingCaptor.getValue();
+            assertNotNull(binding.getApplicationContext());
+            assertNotNull(binding.getBinaryMessenger());
+            assertNotNull(binding.getTextureRegistry());
+            assertNotNull(binding.getPlatformViewRegistry());
 
-    delegate.onRestoreInstanceState(null);
-    delegate.onCreateView(null, null, null, 0, true);
-    delegate.onStart();
-    delegate.onResume();
-    delegate.onPause();
-    delegate.onStop();
-    delegate.onDestroyView();
-    delegate.onDetach();
+            delegate.onRestoreInstanceState(null);
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onDestroyView();
+            delegate.onDetach();
 
-    // Verify the plugin was detached from the FlutterEngine.
-    pluginBindingCaptor = ArgumentCaptor.forClass(FlutterPlugin.FlutterPluginBinding.class);
-    verify(mockPlugin, times(1)).onDetachedFromEngine(pluginBindingCaptor.capture());
-    binding = pluginBindingCaptor.getValue();
-    assertNotNull(binding.getApplicationContext());
-    assertNotNull(binding.getBinaryMessenger());
-    assertNotNull(binding.getTextureRegistry());
-    assertNotNull(binding.getPlatformViewRegistry());
+            // Verify the plugin was detached from the FlutterEngine.
+            pluginBindingCaptor = ArgumentCaptor.forClass(FlutterPlugin.FlutterPluginBinding.class);
+            verify(mockPlugin, times(1)).onDetachedFromEngine(pluginBindingCaptor.capture());
+            binding = pluginBindingCaptor.getValue();
+            assertNotNull(binding.getApplicationContext());
+            assertNotNull(binding.getBinaryMessenger());
+            assertNotNull(binding.getTextureRegistry());
+            assertNotNull(binding.getPlatformViewRegistry());
+          });
+    }
   }
 
   @Test
@@ -141,42 +147,49 @@ public class FlutterAndroidComponentTest {
     cachedEngine.getPlugins().add(mockPlugin);
 
     // Create a fake Host, which is required by the delegate.
-    FlutterActivityAndFragmentDelegate.Host fakeHost = new FakeHost(cachedEngine);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            FlutterActivityAndFragmentDelegate.Host fakeHost = new FakeHost(cachedEngine, activity);
 
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(fakeHost);
+            FlutterActivityAndFragmentDelegate delegate =
+                new FlutterActivityAndFragmentDelegate(fakeHost);
 
-    // --- Execute the behavior under test ---
-    // Push the delegate through all lifecycle methods all the way to destruction.
-    delegate.onAttach(ctx);
+            // --- Execute the behavior under test ---
+            // Push the delegate through all lifecycle methods all the way to destruction.
+            delegate.onAttach(ctx);
 
-    // Verify plugin was given an ActivityPluginBinding.
-    ArgumentCaptor<ActivityPluginBinding> pluginBindingCaptor =
-        ArgumentCaptor.forClass(ActivityPluginBinding.class);
-    verify(activityAwarePlugin, times(1)).onAttachedToActivity(pluginBindingCaptor.capture());
-    ActivityPluginBinding binding = pluginBindingCaptor.getValue();
-    assertNotNull(binding.getActivity());
-    assertNotNull(binding.getLifecycle());
+            // Verify plugin was given an ActivityPluginBinding.
+            ArgumentCaptor<ActivityPluginBinding> pluginBindingCaptor =
+                ArgumentCaptor.forClass(ActivityPluginBinding.class);
+            verify(activityAwarePlugin, times(1))
+                .onAttachedToActivity(pluginBindingCaptor.capture());
+            ActivityPluginBinding binding = pluginBindingCaptor.getValue();
+            assertNotNull(binding.getActivity());
+            assertNotNull(binding.getLifecycle());
 
-    delegate.onRestoreInstanceState(null);
+            delegate.onRestoreInstanceState(null);
 
-    // Verify that after Activity creation, the plugin was allowed to restore state.
-    verify(mockSaveStateListener, times(1)).onRestoreInstanceState(isNull());
+            // Verify that after Activity creation, the plugin was allowed to restore state.
+            verify(mockSaveStateListener, times(1)).onRestoreInstanceState(isNull());
 
-    delegate.onCreateView(null, null, null, 0, true);
-    delegate.onStart();
-    delegate.onResume();
-    delegate.onPause();
-    delegate.onStop();
-    delegate.onSaveInstanceState(mock(Bundle.class));
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onSaveInstanceState(mock(Bundle.class));
 
-    // Verify that the plugin was allowed to save state.
-    verify(mockSaveStateListener, times(1)).onSaveInstanceState(any(Bundle.class));
+            // Verify that the plugin was allowed to save state.
+            verify(mockSaveStateListener, times(1)).onSaveInstanceState(any(Bundle.class));
 
-    delegate.onDestroyView();
-    delegate.onDetach();
+            delegate.onDestroyView();
+            delegate.onDetach();
 
-    // Verify that the plugin was detached from the Activity.
-    verify(activityAwarePlugin, times(1)).onDetachedFromActivity();
+            // Verify that the plugin was detached from the Activity.
+            verify(activityAwarePlugin, times(1)).onDetachedFromActivity();
+          });
+    }
   }
 
   @Test
@@ -190,25 +203,30 @@ public class FlutterAndroidComponentTest {
     FlutterEngineCache.getInstance().put("my_flutter_engine", cachedEngine);
 
     // Create a fake Host, which is required by the delegate.
-    FakeHost fakeHost = new FakeHost(cachedEngine);
+    try (ActivityScenario<Activity> scenario = ActivityScenario.launch(Activity.class)) {
+      scenario.onActivity(
+          activity -> {
+            FakeHost fakeHost = new FakeHost(cachedEngine, activity);
 
-    // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate =
-        spy(new FlutterActivityAndFragmentDelegate(fakeHost));
+            // Create the real object that we're testing.
+            FlutterActivityAndFragmentDelegate delegate =
+                spy(new FlutterActivityAndFragmentDelegate(fakeHost));
 
-    // --- Execute the behavior under test ---
-    // Push the delegate through all lifecycle methods all the way to destruction.
-    delegate.onAttach(ctx);
-    delegate.onRestoreInstanceState(null);
-    delegate.onCreateView(null, null, null, 0, true);
-    delegate.onStart();
-    delegate.onResume();
-    delegate.onPause();
-    delegate.onStop();
-    delegate.onDestroyView();
-    delegate.onDetach();
+            // --- Execute the behavior under test ---
+            // Push the delegate through all lifecycle methods all the way to destruction.
+            delegate.onAttach(ctx);
+            delegate.onRestoreInstanceState(null);
+            delegate.onCreateView(null, null, null, 0, true);
+            delegate.onStart();
+            delegate.onResume();
+            delegate.onPause();
+            delegate.onStop();
+            delegate.onDestroyView();
+            delegate.onDetach();
 
-    verify(delegate, never()).detachFromFlutterEngine();
+            verify(delegate, never()).detachFromFlutterEngine();
+          });
+    }
   }
 
   @Test
@@ -255,12 +273,13 @@ public class FlutterAndroidComponentTest {
 
   private static class FakeHost implements FlutterActivityAndFragmentDelegate.Host {
     final FlutterEngine cachedEngine;
-    Activity activity;
+    Activity cachedActivity;
     boolean shouldDestroyEngineWithHost = false;
     Lifecycle lifecycle = mock(Lifecycle.class);
 
-    private FakeHost(@NonNull FlutterEngine flutterEngine) {
+    private FakeHost(@NonNull FlutterEngine flutterEngine, @NonNull Activity activity) {
       cachedEngine = flutterEngine;
+      cachedActivity = activity;
     }
 
     @NonNull
@@ -269,16 +288,10 @@ public class FlutterAndroidComponentTest {
       return ApplicationProvider.getApplicationContext();
     }
 
-    @SuppressWarnings("deprecation")
-    // Robolectric.setupActivity
-    // TODO(reidbaker): https://github.com/flutter/flutter/issues/133151
-    @Nullable
+    @NonNull
     @Override
     public Activity getActivity() {
-      if (activity == null) {
-        activity = Robolectric.setupActivity(Activity.class);
-      }
-      return activity;
+      return cachedActivity;
     }
 
     @NonNull
@@ -366,6 +379,13 @@ public class FlutterAndroidComponentTest {
     @Nullable
     @Override
     public PlatformPlugin providePlatformPlugin(
+        @Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
+      return null;
+    }
+
+    @Nullable
+    @Override
+    public SensitiveContentPlugin provideSensitiveContentPlugin(
         @Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
       return null;
     }
