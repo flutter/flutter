@@ -124,7 +124,7 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
                         *vertices++ = rect.GetLeftTop() + Vector2(hsw, 0);
 
                         // Make sure our estimate is always up to date.
-                        FML_CHECK(vertices == vertices_end);
+                        FML_DCHECK(vertices == vertices_end);
                       }),
                   .vertex_count = vertex_count,
                   .index_type = IndexType::kNone,
