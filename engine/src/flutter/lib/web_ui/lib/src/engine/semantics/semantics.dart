@@ -1953,7 +1953,6 @@ class SemanticsObject {
         return EngineSemanticsRole.listItem;
       // TODO(chunhtai): implement these roles.
       // https://github.com/flutter/flutter/issues/159741.
-      case ui.SemanticsRole.searchBox:
       case ui.SemanticsRole.dragHandle:
       case ui.SemanticsRole.spinButton:
       case ui.SemanticsRole.comboBox:

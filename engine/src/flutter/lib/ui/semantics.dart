@@ -399,9 +399,6 @@ enum SemanticsRole {
   /// * [table] ,[cell], [row] for table related roles.
   columnHeader,
 
-  /// An input field for users to enter search terms.
-  searchBox,
-
   /// A control used for dragging across content.
   ///
   /// For example, the drag handle of [ReorderableList].

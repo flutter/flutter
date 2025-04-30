@@ -524,7 +524,6 @@ enum SemanticsRole {
   cell,
   row,
   columnHeader,
-  searchBox,
   dragHandle,
   spinButton,
   comboBox,
