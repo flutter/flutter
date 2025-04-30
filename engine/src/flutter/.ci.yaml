@@ -166,8 +166,6 @@ targets:
     # Scheduler will fail to get the platform
     drone_dimensions:
       - os=Linux
-    dimensions:
-      kvm: "1"
 
   - name: Linux linux_clang_tidy
     recipe: engine_v2/engine_v2
