@@ -907,6 +907,7 @@ class EditableText extends StatefulWidget {
     this.spellCheckConfiguration,
     this.magnifierConfiguration = TextMagnifierConfiguration.disabled,
     this.undoController,
+    this.hintLocales,
   }) : assert(obscuringCharacter.length == 1),
        autocorrect = autocorrect ?? _inferAutocorrect(autofillHints: autofillHints),
        smartDashesType =
@@ -2033,6 +2034,9 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.magnifier.intro}
   final TextMagnifierConfiguration magnifierConfiguration;
 
+  /// {@macro flutter.services.TextInputConfiguration.hintLocales}
+  final List<Locale>? hintLocales;
+
   /// The default value for [stylusHandwritingEnabled].
   static const bool defaultStylusHandwritingEnabled = true;
 
@@ -2390,6 +2394,9 @@ class EditableText extends StatefulWidget {
                 ? const <String>[]
                 : kDefaultContentInsertionMimeTypes,
       ),
+    );
+    properties.add(
+      DiagnosticsProperty<List<Locale>?>('hintLocales', hintLocales, defaultValue: null),
     );
   }
 }
@@ -5097,6 +5104,7 @@ class EditableTextState extends State<EditableText>
           widget.contentInsertionConfiguration == null
               ? const <String>[]
               : widget.contentInsertionConfiguration!.allowedMimeTypes,
+      hintLocales: widget.hintLocales,
     );
   }
 
@@ -5683,7 +5691,12 @@ class EditableTextState extends State<EditableText>
                         excludeFromSemantics: true,
                         axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
                         controller: _scrollController,
-                        physics: widget.scrollPhysics,
+                        // On iOS a single-line TextField should not scroll.
+                        physics:
+                            widget.scrollPhysics ??
+                            (!_isMultiline && defaultTargetPlatform == TargetPlatform.iOS
+                                ? const _NeverUserScrollableScrollPhysics()
+                                : null),
                         dragStartBehavior: widget.dragStartBehavior,
                         restorationId: widget.restorationId,
                         // If a ScrollBehavior is not provided, only apply scrollbars when
@@ -6021,6 +6034,20 @@ class _Editable extends MultiChildRenderObjectWidget {
       ..clipBehavior = clipBehavior
       ..setPromptRectRange(promptRectRange);
   }
+}
+
+class _NeverUserScrollableScrollPhysics extends ScrollPhysics {
+  /// Creates a scroll physics that prevents scrolling with user input, for example
+  /// by dragging, but still allows for programmatic scrolling.
+  const _NeverUserScrollableScrollPhysics({super.parent});
+
+  @override
+  _NeverUserScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _NeverUserScrollableScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool get allowUserScrolling => false;
 }
 
 @immutable

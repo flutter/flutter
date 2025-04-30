@@ -1433,6 +1433,264 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Regression test for https://github.com/flutter/flutter/issues/166067.
+  testWidgets('CarouselView should not crash when using PageStorageKey', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return const <Widget>[SliverAppBar()];
+            },
+            body: CustomScrollView(
+              key: const PageStorageKey<String>('key1'),
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 50),
+                    child: CarouselView.weighted(
+                      flexWeights: const <int>[1, 2],
+                      consumeMaxWeight: false,
+                      children: List<Widget>.generate(20, (int index) {
+                        return ColoredBox(
+                          color: Colors.primaries[index % Colors.primaries.length].withValues(
+                            alpha: 0.8,
+                          ),
+                          child: const SizedBox.expand(),
+                        );
+                      }),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/160679.
+  testWidgets('Does not crash when parent size is zero', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 0,
+            child: CarouselView(itemExtent: 40.0, children: <Widget>[FlutterLogo()]),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('itemExtent can be set to double.infinity', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: CarouselView(itemExtent: double.infinity, children: <Widget>[FlutterLogo()]),
+        ),
+      ),
+    );
+
+    // Item extent is clamped to screen size.
+    final Size logoSize = tester.getSize(find.byType(FlutterLogo));
+    const double itemHorizontalPadding = 8.0; // Default padding.
+    expect(logoSize.width, 800.0 - itemHorizontalPadding);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/163436.
+  testWidgets('Does not crash when initial viewport dimension is zero and itemExtent is fixed', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(Size.zero);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    const double fixedItemExtent = 60.0;
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: CarouselView(itemExtent: fixedItemExtent, children: <Widget>[FlutterLogo()]),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/163436.
+  testWidgets('Does not crash when initial viewport dimension is zero and itemExtent is infinite', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(Size.zero);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: CarouselView(itemExtent: double.infinity, children: <Widget>[FlutterLogo()]),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/163436.
+  testWidgets('itemExtent is applied when viewport dimension is updated', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    const double itemExtent = 60.0;
+    bool showScrollbars = false;
+
+    Future<void> updateSurfaceSizeAndPump(Size size) async {
+      await tester.binding.setSurfaceSize(size);
+
+      // At startup, a warm-up frame can be produced before the Flutter engine has reported the
+      // initial view metrics. As a result, the first frame can be produced with a size of zero.
+      // This leads to several instances of _CarouselPosition being created and
+      // _CarouselPosition.absorb to be called.
+      // To correctly simulate this behavior in the test environment, one solution is to
+      // update the ScrollConfiguration. For instance by changing the ScrollBehavior.scrollbars
+      // value on each build.
+      showScrollbars = !showScrollbars;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ScrollConfiguration(
+                behavior: const ScrollBehavior().copyWith(scrollbars: showScrollbars),
+                child: const CarouselView(
+                  itemExtent: itemExtent,
+                  children: <Widget>[FlutterLogo()],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Simulate an initial zero viewport dimension.
+    await updateSurfaceSizeAndPump(Size.zero);
+    await updateSurfaceSizeAndPump(const Size(500, 400));
+
+    final Size logoSize = tester.getSize(find.byType(FlutterLogo));
+    const double itemHorizontalPadding = 8.0; // Default padding.
+    expect(logoSize.width, itemExtent - itemHorizontalPadding);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/167621.
+  testWidgets('CarouselView.weighted does not crash when parent size is zero', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 0,
+            child: CarouselView.weighted(
+              flexWeights: <int>[1, 2],
+              children: <Widget>[FlutterLogo(), FlutterLogo()],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/167621.
+  testWidgets('CarouselView.weighted does not crash when initial viewport dimension is zero', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(Size.zero);
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: CarouselView.weighted(
+            flexWeights: <int>[1, 2],
+            children: <Widget>[FlutterLogo(), FlutterLogo()],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/167621.
+  testWidgets('CarouselView.weigted weigths are applied when viewport dimension is updated', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final CarouselController controller = CarouselController(initialItem: 1);
+    addTearDown(controller.dispose);
+
+    const int firstWeight = 2;
+    const int secondWeight = 3;
+    bool showScrollbars = false;
+
+    Future<void> updateSurfaceSizeAndPump(Size size) async {
+      await tester.binding.setSurfaceSize(size);
+
+      // At startup, a warm-up frame can be produced before the Flutter engine has reported the
+      // initial view metrics. As a result, the first frame can be produced with a size of zero.
+      // This leads to several instances of _CarouselPosition being created and
+      // _CarouselPosition.absorb to be called.
+      // To correctly simulate this behavior in the test environment, one solution is to
+      // update the ScrollConfiguration. For instance by changing the ScrollBehavior.scrollbars
+      // value on each build.
+      showScrollbars = !showScrollbars;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: ScrollConfiguration(
+                behavior: const ScrollBehavior().copyWith(scrollbars: showScrollbars),
+                child: CarouselView.weighted(
+                  controller: controller,
+                  flexWeights: const <int>[firstWeight, secondWeight],
+                  children: List<Widget>.generate(20, (int index) {
+                    return Center(child: Text('Item $index'));
+                  }),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Simulate an initial zero viewport dimension.
+    await updateSurfaceSizeAndPump(Size.zero);
+    const double surfaceWidth = 500;
+    await updateSurfaceSizeAndPump(const Size(surfaceWidth, 400));
+
+    const int totalWeight = firstWeight + secondWeight;
+
+    expect(find.text('Item 0'), findsOne);
+    expect(find.text('Item 1'), findsOne);
+
+    final double firstItemWidth = tester.getRect(getItem(0)).width;
+    expect(firstItemWidth, surfaceWidth * firstWeight / totalWeight);
+    final double secondItemWidth = tester.getRect(getItem(1)).width;
+    expect(secondItemWidth, surfaceWidth * secondWeight / totalWeight);
+  });
+
   group('CarouselController.animateToItem', () {
     testWidgets('CarouselView.weighted horizontal, not reversed, flexWeights [7,1]', (
       WidgetTester tester,
