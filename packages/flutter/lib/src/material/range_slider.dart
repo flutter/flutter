@@ -1492,8 +1492,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
       sliderTheme: _sliderTheme,
       isDiscrete: isDiscrete,
     );
-    final double padding =
-        isDiscrete || _sliderTheme.rangeTrackShape!.isRounded ? trackRect.height : 0.0;
+    final double padding = _sliderTheme.rangeTrackShape!.isRounded ? trackRect.height : 0.0;
     final double thumbYOffset = trackRect.center.dy;
     final double startThumbPosition =
         isDiscrete
@@ -1586,8 +1585,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           _sliderTheme.rangeTickMarkShape!
               .getPreferredSize(isEnabled: isEnabled, sliderTheme: _sliderTheme)
               .width;
-      final double padding = trackRect.height;
-      final double adjustedTrackWidth = trackRect.width - padding;
+      final double discreteTrackPadding = trackRect.height;
+      final double adjustedTrackWidth = trackRect.width - discreteTrackPadding;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions! >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1595,7 +1594,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           final double value = i / divisions!;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + padding / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + discreteTrackPadding / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.rangeTickMarkShape!.paint(
             context,
