@@ -72,71 +72,61 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
   Scalar half_stroke_width = std::max(stroke_width_, min_size) * 0.5f;
 
   auto& host_buffer = renderer.GetTransientsBuffer();
-  Scalar left = rect_.GetLeft();
-  Scalar top = rect_.GetTop();
-  Scalar right = rect_.GetRight();
-  Scalar bottom = rect_.GetBottom();
+  const Rect& rect = rect_;
 
   switch (stroke_join_) {
     case Join::kRound: {
-      Scalar radius = half_stroke_width;
       Tessellator::Trigs trigs =
-          renderer.GetTessellator().GetTrigsForDeviceRadius(radius * max_basis);
+          renderer.GetTessellator().GetTrigsForDeviceRadius(half_stroke_width *
+                                                            max_basis);
 
       FML_DCHECK(trigs.size() >= 2u);
 
       // We use all but the first entry in trigs for each corner.
-      auto needed = trigs.size() - 1;
+      auto vertex_count = trigs.size() - 1;
       // Every other point has a center vertex added.
-      needed = needed + (needed >> 1);
+      vertex_count = vertex_count + (vertex_count >> 1);
       // The loop also adds 3 points of its own.
-      needed += 3;
+      vertex_count += 3;
       // We do that for each of the 4 corners.
-      needed = needed * 4;
+      vertex_count = vertex_count * 4;
       // We then add 2 more points at the end to close the last edge.
-      needed += 2;
-      std::vector<Point> points;
-      points.reserve(needed);
-
-      auto draw_corner = [&points, &trigs](Point corner, Vector2 offset) {
-        // Close the edge box set up by the end of the last corner and
-        // set up the first wedge of this corner.
-        points.push_back(corner + offset);
-        points.push_back(corner - offset);
-        bool do_center = false;
-        auto trig = trigs.begin();
-        auto end = trigs.end();
-        while (++trig < end) {
-          if (do_center) {
-            points.push_back(corner);
-          }
-          do_center = !do_center;
-          points.push_back(corner + *trig * offset);
-        }
-        // Together with the last point pushed by the loop we set up to
-        // initiate the edge box connecting to the next corner.
-        points.push_back(corner - end[-1] * offset);
-      };
-
-      draw_corner(Point(left, top), Vector2(-radius, 0));
-      draw_corner(Point(right, top), Vector2(0, -radius));
-      draw_corner(Point(right, bottom), Vector2(radius, 0));
-      draw_corner(Point(left, bottom), Vector2(0, radius));
-
-      // Repeat the first 2 points from the first corner to close the
-      // last edge.
-      points.push_back(Point(left - radius, top));
-      points.push_back(Point(left + radius, top));
-      FML_DCHECK(points.size() == needed);
+      vertex_count += 2;
 
       return GeometryResult{
           .type = PrimitiveType::kTriangleStrip,
           .vertex_buffer =
               {
                   .vertex_buffer = host_buffer.Emplace(
-                      points.data(), points.size() * sizeof(Point),
-                      alignof(float)),
-                  .vertex_count = points.size(),
+                      vertex_count * sizeof(Point), alignof(Point),
+                      [hsw = half_stroke_width, &rect, vertex_count,
+                       &trigs](uint8_t* buffer) {
+                        auto vertices = reinterpret_cast<Point*>(buffer);
+                        [[maybe_unused]]
+                        auto vertices_end = vertices + vertex_count;
+
+                        vertices =
+                            AppendRoundCornerJoin(vertices, rect.GetLeftTop(),
+                                                  Vector2(-hsw, 0), trigs);
+                        vertices =
+                            AppendRoundCornerJoin(vertices, rect.GetRightTop(),
+                                                  Vector2(0, -hsw), trigs);
+                        vertices = AppendRoundCornerJoin(
+                            vertices, rect.GetRightBottom(), Vector2(hsw, 0),
+                            trigs);
+                        vertices = AppendRoundCornerJoin(
+                            vertices, rect.GetLeftBottom(), Vector2(0, hsw),
+                            trigs);
+
+                        // Repeat the first 2 points from the first corner to
+                        // close the last edge.
+                        *vertices++ = rect.GetLeftTop() - Vector2(hsw, 0);
+                        *vertices++ = rect.GetLeftTop() + Vector2(hsw, 0);
+
+                        // Make sure our estimate is always up to date.
+                        FML_CHECK(vertices == vertices_end);
+                      }),
+                  .vertex_count = vertex_count,
                   .index_type = IndexType::kNone,
               },
           .transform = entity.GetShaderTransform(pass),
@@ -144,33 +134,37 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
     }
 
     case Join::kBevel: {
-      std::array<Point, 17> points{
-          Point(left, top - half_stroke_width),
-          Point(left, top + half_stroke_width),
-          Point(right, top - half_stroke_width),
-          Point(right, top + half_stroke_width),
-          Point(right + half_stroke_width, top),
-          Point(right - half_stroke_width, top),
-          Point(right + half_stroke_width, bottom),
-          Point(right - half_stroke_width, bottom),
-          Point(right, bottom + half_stroke_width),
-          Point(right, bottom - half_stroke_width),
-          Point(left, bottom + half_stroke_width),
-          Point(left, bottom - half_stroke_width),
-          Point(left - half_stroke_width, bottom),
-          Point(left + half_stroke_width, bottom),
-          Point(left - half_stroke_width, top),
-          Point(left + half_stroke_width, top),
-          Point(left, top - half_stroke_width),
-      };
       return GeometryResult{
           .type = PrimitiveType::kTriangleStrip,
           .vertex_buffer =
               {
                   .vertex_buffer = host_buffer.Emplace(
-                      points.data(), points.size() * sizeof(Point),
-                      alignof(float)),
-                  .vertex_count = points.size(),
+                      17 * sizeof(Point), alignof(Point),
+                      [hsw = half_stroke_width, &rect](uint8_t* buffer) {
+                        Scalar left = rect.GetLeft();
+                        Scalar top = rect.GetTop();
+                        Scalar right = rect.GetRight();
+                        Scalar bottom = rect.GetBottom();
+                        auto vertices = reinterpret_cast<Point*>(buffer);
+                        vertices[0] = Point(left, top - hsw);
+                        vertices[1] = Point(left, top + hsw);
+                        vertices[2] = Point(right, top - hsw);
+                        vertices[3] = Point(right, top + hsw);
+                        vertices[4] = Point(right + hsw, top);
+                        vertices[5] = Point(right - hsw, top);
+                        vertices[6] = Point(right + hsw, bottom);
+                        vertices[7] = Point(right - hsw, bottom);
+                        vertices[8] = Point(right, bottom + hsw);
+                        vertices[9] = Point(right, bottom - hsw);
+                        vertices[10] = Point(left, bottom + hsw);
+                        vertices[11] = Point(left, bottom - hsw);
+                        vertices[12] = Point(left - hsw, bottom);
+                        vertices[13] = Point(left + hsw, bottom);
+                        vertices[14] = Point(left - hsw, top);
+                        vertices[15] = Point(left + hsw, top);
+                        vertices[16] = Point(left, top - hsw);
+                      }),
+                  .vertex_count = 17u,
                   .index_type = IndexType::kNone,
               },
           .transform = entity.GetShaderTransform(pass),
@@ -178,26 +172,30 @@ GeometryResult StrokeRectGeometry::GetPositionBuffer(
     }
 
     case Join::kMiter: {
-      std::array<Point, 10> points{
-          Point(left - half_stroke_width, top - half_stroke_width),
-          Point(left + half_stroke_width, top + half_stroke_width),
-          Point(right + half_stroke_width, top - half_stroke_width),
-          Point(right - half_stroke_width, top + half_stroke_width),
-          Point(right + half_stroke_width, bottom + half_stroke_width),
-          Point(right - half_stroke_width, bottom - half_stroke_width),
-          Point(left - half_stroke_width, bottom + half_stroke_width),
-          Point(left + half_stroke_width, bottom - half_stroke_width),
-          Point(left - half_stroke_width, top - half_stroke_width),
-          Point(left + half_stroke_width, top + half_stroke_width),
-      };
       return GeometryResult{
           .type = PrimitiveType::kTriangleStrip,
           .vertex_buffer =
               {
                   .vertex_buffer = host_buffer.Emplace(
-                      points.data(), points.size() * sizeof(Point),
-                      alignof(float)),
-                  .vertex_count = points.size(),
+                      10 * sizeof(Point), alignof(Point),
+                      [hsw = half_stroke_width, &rect](uint8_t* buffer) {
+                        Scalar left = rect.GetLeft();
+                        Scalar top = rect.GetTop();
+                        Scalar right = rect.GetRight();
+                        Scalar bottom = rect.GetBottom();
+                        auto vertices = reinterpret_cast<Point*>(buffer);
+                        vertices[0] = Point(left - hsw, top - hsw);
+                        vertices[1] = Point(left + hsw, top + hsw);
+                        vertices[2] = Point(right + hsw, top - hsw);
+                        vertices[3] = Point(right - hsw, top + hsw);
+                        vertices[4] = Point(right + hsw, bottom + hsw);
+                        vertices[5] = Point(right - hsw, bottom - hsw);
+                        vertices[6] = Point(left - hsw, bottom + hsw);
+                        vertices[7] = Point(left + hsw, bottom - hsw);
+                        vertices[8] = Point(left - hsw, top - hsw);
+                        vertices[9] = Point(left + hsw, top + hsw);
+                      }),
+                  .vertex_count = 10u,
                   .index_type = IndexType::kNone,
               },
           .transform = entity.GetShaderTransform(pass),
@@ -213,6 +211,31 @@ std::optional<Rect> StrokeRectGeometry::GetCoverage(
 
 Join StrokeRectGeometry::AdjustStrokeJoin(Join join, Scalar miter_limit) {
   return (join == Join::kMiter && miter_limit < kSqrt2) ? Join::kBevel : join;
+}
+
+Point* StrokeRectGeometry::AppendRoundCornerJoin(
+    Point* buffer,
+    Point corner,
+    Vector2 offset,
+    const Tessellator::Trigs& trigs) {
+  // Close the edge box set up by the end of the last corner and
+  // set up the first wedge of this corner.
+  *buffer++ = corner + offset;
+  *buffer++ = corner - offset;
+  bool do_center = false;
+  auto trig = trigs.begin();
+  auto end = trigs.end();
+  while (++trig < end) {
+    if (do_center) {
+      *buffer++ = corner;
+    }
+    do_center = !do_center;
+    *buffer++ = corner + *trig * offset;
+  }
+  // Together with the last point pushed by the loop we set up to
+  // initiate the edge box connecting to the next corner.
+  *buffer++ = corner - end[-1] * offset;
+  return buffer;
 }
 
 }  // namespace impeller
