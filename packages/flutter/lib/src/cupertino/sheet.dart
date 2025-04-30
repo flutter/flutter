@@ -492,6 +492,8 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
 
   @override
   Widget buildContent(BuildContext context) {
+    final double viewPaddingBottom = MediaQuery.viewPaddingOf(context).bottom;
+    final double paddingBottom = MediaQuery.paddingOf(context).bottom;
     final double topPadding = MediaQuery.sizeOf(context).height * _kTopGapRatio;
     return MediaQuery.removePadding(
       context: context,
@@ -499,11 +501,17 @@ class CupertinoSheetRoute<T> extends PageRoute<T> with _CupertinoSheetRouteTrans
       removeBottom: true,
       child: Padding(
         padding: EdgeInsets.only(top: topPadding),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          child: CupertinoUserInterfaceLevel(
-            data: CupertinoUserInterfaceLevelData.elevated,
-            child: _CupertinoSheetScope(child: builder(context)),
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            viewPadding: EdgeInsets.only(bottom: viewPaddingBottom),
+            padding: EdgeInsets.only(bottom: paddingBottom),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: CupertinoUserInterfaceLevel(
+              data: CupertinoUserInterfaceLevelData.elevated,
+              child: _CupertinoSheetScope(child: builder(context)),
+            ),
           ),
         ),
       ),
