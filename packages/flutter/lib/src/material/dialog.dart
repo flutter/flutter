@@ -48,14 +48,7 @@ const EdgeInsets _defaultInsetPadding = EdgeInsets.symmetric(horizontal: 40.0, v
 /// This sample shows a [Dialog] using [BoxConstraints].
 ///
 /// ```dart
-/// const Dialog(
-///     constraints: BoxConstraints(maxWidth: 500, minHeight: 300),
-///     child: Column(
-///     mainAxisSize: MainAxisSize.min,
-///     mainAxisAlignment: MainAxisAlignment.center,
-///     children: [],
-///    ),
-///  );
+/// const Dialog(constraints: BoxConstraints(maxWidth: 500, minHeight: 300));
 /// ```
 /// {@end-tool}
 ///

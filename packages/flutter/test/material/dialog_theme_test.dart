@@ -845,11 +845,7 @@ void main() {
       constraints: themeConstraints,
     );
 
-    final Dialog dialog = Dialog(
-      child: SizedBox.expand(
-        child: Container(color: Colors.amber),
-      ),
-    );
+    final Dialog dialog = Dialog(child: SizedBox.expand(child: Container(color: Colors.amber)));
 
     await tester.pumpWidget(
       _appWithDialog(tester, dialog, theme: ThemeData(dialogTheme: dialogTheme)),
