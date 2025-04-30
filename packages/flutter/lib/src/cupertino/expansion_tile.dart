@@ -189,20 +189,16 @@ class _CupertinoExpansionTileState extends State<CupertinoExpansionTile> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         header,
-        Opacity(
-          opacity:
-              animation.isAnimating && widget.transitionMode == ExpansionTileTransitionMode.fade
-                  ? 0.0
-                  : 1.0,
-          child: body,
-        ),
+        if (animation.isAnimating && widget.transitionMode == ExpansionTileTransitionMode.fade)
+          Opacity(opacity: 0.0, child: body)
+        else
+          body,
       ],
     );
-
     if (widget.transitionMode == ExpansionTileTransitionMode.scroll) {
       return child;
     }
-
+    assert(widget.transitionMode == ExpansionTileTransitionMode.fade);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return OverlayPortal(
