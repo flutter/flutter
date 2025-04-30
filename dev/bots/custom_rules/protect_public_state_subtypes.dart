@@ -73,7 +73,7 @@ class _StateSubclassVisitor extends SimpleAstVisitor<void> {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    if (isPublicStateSubtype(node.declaredElement!)) {
+    if (isPublicStateSubtype(node.declaredElement)) {
       node.visitChildren(this);
     }
   }

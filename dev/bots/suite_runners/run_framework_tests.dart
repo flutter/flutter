@@ -133,7 +133,7 @@ Future<void> frameworkTestsRunner() async {
           ).readAsBytesSync(),
         );
         final ArchiveFile libapp = archive.findFile('base/lib/arm64-v8a/libapp.so')!;
-        final Uint8List libappBytes = libapp.content as Uint8List; // bytes decompressed here
+        final Uint8List libappBytes = libapp.content; // bytes decompressed here
         final String libappStrings = utf8.decode(libappBytes, allowMalformed: true);
         await runCommand(flutter, <String>['clean'], workingDirectory: tracingDirectory);
         final List<String> results = <String>[];
