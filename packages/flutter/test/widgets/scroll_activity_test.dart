@@ -61,6 +61,61 @@ void main() {
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
+  testWidgets('DrivenScrollActivity allows overriding applyMoveTo', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    addTearDown(controller.dispose);
+    final List<ScrollNotification> notifications = <ScrollNotification>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification notif) {
+            if (notif is OverscrollNotification) {
+              notifications.add(notif);
+            }
+            return false;
+          },
+          child: ListView(controller: controller, children: children(10)),
+        ),
+      ),
+    );
+    final ScrollPositionWithSingleContext position =
+        controller.position as ScrollPositionWithSingleContext;
+    final double end = position.maxScrollExtent;
+
+    position.beginActivity(
+      DrivenScrollActivity(
+        position,
+        from: 0,
+        to: end + 10,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+        vsync: position.context.vsync,
+      ),
+    );
+    await tester.pumpAndSettle();
+    // The base DrivenScrollActivity caused overscroll.
+    expect(notifications, hasLength(1));
+
+    notifications.clear();
+    controller.jumpTo(0);
+    await tester.pump();
+
+    position.beginActivity(
+      _NoOverscrollDrivenScrollActivity(
+        position,
+        from: 0,
+        to: end + 10,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.linear,
+        vsync: position.context.vsync,
+      ),
+    );
+    await tester.pumpAndSettle();
+    // The _NoOverscrollDrivenScrollActivity avoided overscroll.
+    expect(notifications, isEmpty);
+  });
+
   testWidgets('Ability to keep a PageView at the end manually (issue 62209)', (
     WidgetTester tester,
   ) async {
@@ -437,6 +492,35 @@ class _Carousel62209State extends State<Carousel62209> {
         },
       ),
     );
+  }
+}
+
+class _NoOverscrollDrivenScrollActivity extends DrivenScrollActivity {
+  _NoOverscrollDrivenScrollActivity(
+    ScrollPositionWithSingleContext super.delegate, {
+    required super.from,
+    required super.to,
+    required super.duration,
+    required super.curve,
+    required super.vsync,
+  });
+
+  ScrollPosition get _position => delegate as ScrollPosition;
+
+  @override
+  bool applyMoveTo(double value) {
+    bool done = false;
+    if (velocity >= 0.0 && value > _position.maxScrollExtent) {
+      value = _position.maxScrollExtent;
+      done = true;
+    } else if (velocity <= 0.0 && value < _position.minScrollExtent) {
+      value = _position.minScrollExtent;
+      done = true;
+    }
+    if (!super.applyMoveTo(value)) {
+      return false;
+    }
+    return !done;
   }
 }
 
